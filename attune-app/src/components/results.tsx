@@ -228,7 +228,6 @@ export default function Results({
         ref={topNav}
         gap={Spacing.sm}
         contentContainerStyle={{ paddingBottom: Spacing.md }}>
-        {/* block: what-comes-next/groups */}
         {groups.map((g) => {
           const on = g.id === activeGroup?.id;
           return (
@@ -474,63 +473,170 @@ function ExpectationsOverview({
       rows: summary.life,
     }] : []),
   ];
-  const conversations = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
+  const conversations = categories.filter((cat) => cat.rows.some((r) => !r.aligned));
+  const gaps = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>{you} & {them}</Text>
+    /* Dark, like the website's Expectations landing page. The app drew it on
+       cream, which is why it did not look like the same section. */
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#2E2A6B', '#4C56C0', '#1B8FA8']}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <Text style={{ ...Type.hero, color: Palette.white }}>{you} & {them}</Text>
 
-        <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
-          <Text style={{ ...Type.body, color: c.textMuted }}>
-            Already aligned: <Text style={{ fontWeight: '700', color: c.text }}>{summary.aligned}</Text>
-          </Text>
-          <Text style={{ ...Type.body, color: c.textMuted }}>
-            Worth discussing: <Text style={{ fontWeight: '700', color: c.text }}>{summary.differences}</Text>
-          </Text>
-        </View>
+          <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
+            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)' }}>
+              Already aligned: <Text style={{ fontWeight: '700', color: Palette.white }}>{summary.aligned}</Text>
+            </Text>
+            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)' }}>
+              Worth discussing: <Text style={{ fontWeight: '700', color: Palette.white }}>{summary.differences}</Text>
+            </Text>
+          </View>
 
-          {/* block: exp-overview/by-category */}
-        <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
-          Alignment by category
-        </Text>
-        <View style={{ gap: Spacing.md }}>
-          {categories.map((cat) => (
+          {/* ── ALIGNMENT BY CATEGORY: ONE TILE ──────────────────────────
+              The website puts every category in a single panel as a row of
+              label, bar and percentage. The app drew a bordered card each, so
+              six categories read as six findings. */}
+          <View
+            style={{
+              marginTop: Spacing.xl,
+              backgroundColor: 'rgba(255,255,255,0.10)',
+              borderColor: 'rgba(255,255,255,0.16)', borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg,
+            }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+              {/* block: exp-overview/by-category */}
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)' }}>Alignment by category</Text>
+              <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>% aligned</Text>
+            </View>
+            <View style={{ gap: Spacing.sm }}>
+              {categories.map((cat) => {
+                const pct = cat.answered ? Math.round((cat.aligned / cat.answered) * 100) : 0;
+                const bar = pct >= 80 ? '#10b981' : pct >= 50 ? '#F5B841' : '#E8673A';
+                return (
+                  <View key={cat.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                    <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 104 }}>
+                      {cat.label}
+                    </Text>
+                    <View style={{ flex: 1, height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                      <View style={{ width: `${pct}%`, height: 6, backgroundColor: bar, borderRadius: 999 }} />
+                    </View>
+                    <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: bar, width: 34, textAlign: 'right' }}>
+                      {pct}%
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* ── CONVERSATIONS TO HAVE ────────────────────────────────────
+              One line of summary, then a dropdown per category, which is what
+              the website does. The app listed every differing row flat, and
+              carried a paragraph of its own about each one that the website
+              does not print anywhere. */}
+          {conversations.length ? (
+            <View style={{ marginTop: Spacing.xxl }}>
+              {/* block: exp-overview/conversations */}
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.sm }}>
+                Conversations to have
+              </Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.62)', marginBottom: Spacing.md, lineHeight: 19 }}>
+                {`${gaps.length} topic${gaps.length !== 1 ? 's' : ''} where your assumptions differ, across ${conversations.length} area${conversations.length !== 1 ? 's' : ''}. Open an area to see its full list.`}
+              </Text>
+              <View style={{ gap: Spacing.md }}>
+                {conversations.map((cat) => (
+                  <CategoryDrawer
+                    key={cat.section}
+                    label={cat.label}
+                    items={cat.rows.filter((r) => !r.aligned).map((r) => r.item)}
+                    color={SectionColor.expectations}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : (
             <View
-              key={cat.section}
               style={{
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg,
+                marginTop: Spacing.xxl, borderRadius: Radius.lg, padding: Spacing.xl,
+                backgroundColor: 'rgba(16,185,129,0.16)',
+                borderColor: 'rgba(16,185,129,0.35)', borderWidth: 1,
               }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{cat.label}</Text>
-                <Text style={{ ...Type.small, color: c.textMuted }}>{cat.aligned} of {cat.answered}</Text>
-              </View>
-              <View style={{ height: 4, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.md, overflow: 'hidden' }}>
-                <View
-                  style={{
-                    width: `${cat.answered ? (cat.aligned / cat.answered) * 100 : 0}%`,
-                    height: 4, backgroundColor: c.accentQuiet,
-                  }}
-                />
-              </View>
+              <Text style={{ ...Type.cardTitle, color: Palette.white, textAlign: 'center' }}>
+                Aligned across every area.
+              </Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', textAlign: 'center', marginTop: Spacing.xs }}>
+                Nothing to work through. Keep staying current with each other.
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+/**
+ * One category, collapsed, with its differing topics inside.
+ *
+ * The website's `<details>`: a summary row carrying the label, the count, the
+ * word "Show" and a chevron so it reads as openable, then a checkbox line per
+ * topic. Collapsed by default so the page stays scannable.
+ */
+function CategoryDrawer({ label, items, color }: { label: string; items: string[]; color: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View
+      style={{
+        borderRadius: Radius.lg, overflow: 'hidden',
+        backgroundColor: 'rgba(255,255,255,0.13)',
+        borderColor: 'rgba(255,255,255,0.22)', borderWidth: 1,
+        borderLeftColor: color, borderLeftWidth: 4,
+      }}>
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          gap: Spacing.sm, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+          backgroundColor: 'rgba(255,255,255,0.09)',
+        }}>
+        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.95)', flex: 1 }}>{label}</Text>
+        <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.75)' }}>
+          {`${items.length} topic${items.length !== 1 ? 's' : ''}`}
+        </Text>
+        <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Show</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+      </Pressable>
+      {open ? (
+        <View style={{ borderTopColor: 'rgba(255,255,255,0.16)', borderTopWidth: 1 }}>
+          {items.map((it) => (
+            <View
+              key={it}
+              style={{
+                flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
+                paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                borderBottomColor: 'rgba(255,255,255,0.1)', borderBottomWidth: 1,
+              }}>
+              <View
+                style={{
+                  width: 17, height: 17, borderRadius: 4, marginTop: 1,
+                  borderColor: 'rgba(255,255,255,0.55)', borderWidth: 1.5,
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                }}
+              />
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.88)', flex: 1, lineHeight: 19 }}>{it}</Text>
             </View>
           ))}
         </View>
-
-        {conversations.length ? (
-          <>
-              {/* block: exp-overview/conversations */}
-            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
-              Conversations to have
-            </Text>
-            {conversations.map((row) => (
-              <ExpectationRowView key={row.key} row={row} you={you} them={them} />
-            ))}
-          </>
-        ) : null}
-      </View>
-    </ScrollView>
+      ) : null}
+    </View>
   );
 }
 
@@ -1186,50 +1292,107 @@ function WhatComesNext({
     );
   }
   return (
+    /* Cream, which is what the website uses here, and one collapsed group per
+       source rather than every item of every group laid out flat. The app
+       listed them all open with a paragraph under each title, which is three
+       screens of scrolling for a page whose job is to gather things up. */
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Eyebrow>What comes next</Eyebrow>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.lg, lineHeight: 20 }}>
+          Each part of your results ends in something to do. They are gathered here,
+          grouped by where they came from. Open one to see its items and the words to
+          start with.
+        </Text>
 
-        {data.groups.map((group) => (
-          <View key={group.id} style={{ marginTop: Spacing.xl }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Eyebrow>{group.label}</Eyebrow>
-              <Pressable onPress={() => onGoToSection(group.section)} hitSlop={8}>
-                <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>
-                  Back to it
-                </Text>
-              </Pressable>
-            </View>
-
-            {group.items.map((item, i) => (
-              <View
-                key={`${group.id}-${i}`}
-                style={{
-                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-                }}>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.title}</Text>
-                {item.body ? (
-                  <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{item.body}</Text>
-                ) : null}
-                {item.say ? (
-                  <View
-                    style={{
-                      marginTop: Spacing.md, paddingLeft: Spacing.md,
-                      borderLeftColor: c.accentQuiet, borderLeftWidth: 2,
-                    }}>
-                    <Text style={{ ...Type.body, color: c.text, fontStyle: 'italic' }}>
-                      {item.say}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            ))}
-          </View>
-        ))}
+        <View style={{ gap: Spacing.sm }}>
+          {/* block: what-comes-next/groups */}
+          {data.groups.map((group) => (
+            <NextGroup
+              key={group.id}
+              label={group.label}
+              color={group.color || c.accent}
+              items={group.items}
+              onOpen={() => onGoToSection(group.section)}
+            />
+          ))}
+        </View>
       </View>
     </ScrollView>
+  );
+}
+
+/**
+ * One source of next steps, collapsed.
+ *
+ * The website's `<details>`: a white card with the group's colour down its
+ * left edge, a summary carrying the label, the item count, "Show" and a
+ * chevron, and inside, one row per item with its title and the phrase to try
+ * under a small "Try".
+ */
+function NextGroup({
+  label, color, items, onOpen,
+}: {
+  label: string; color: string;
+  items: { title: string; body?: string | null; say?: string | null }[];
+  onOpen: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderLeftColor: color, borderLeftWidth: 4,
+        borderRadius: Radius.lg, overflow: 'hidden',
+      }}>
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          gap: Spacing.sm, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+        }}>
+        <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{label}</Text>
+        <Text style={{ ...Type.small, color: c.textMuted }}>
+          {`${items.length} item${items.length !== 1 ? 's' : ''}`}
+        </Text>
+        <Text style={{ ...Type.small, color, fontWeight: '700' }}>Show</Text>
+        <Text style={{ color, fontSize: 13 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+      </Pressable>
+
+      {open ? (
+        <View style={{ borderTopColor: c.border, borderTopWidth: 1 }}>
+          {items.map((item, i) => (
+            <View
+              key={`${label}-${i}`}
+              style={{
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                borderBottomColor: c.border,
+                borderBottomWidth: i < items.length - 1 ? 1 : 0,
+              }}>
+              {/* Title and phrase. No description paragraph: the website prints
+                  none here either. */}
+              <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong, lineHeight: 19 }}>
+                {item.title}
+              </Text>
+              {item.say ? (
+                <View style={{ flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.xs }}>
+                  <Text style={{ ...Type.eyebrow, fontSize: 9, color, marginTop: 3 }}>Try</Text>
+                  <Text style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', flex: 1, lineHeight: 19 }}>
+                    {item.say}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          ))}
+          <Pressable onPress={onOpen} style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+            <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
+              {`Open ${label} \u2192`}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
+    </View>
   );
 }
 

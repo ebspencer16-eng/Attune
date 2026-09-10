@@ -29,6 +29,7 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
   if (type?.tips?.length) {
     groups.push({
       id: 'couple-type',
+      color: '#9B5DE5',
       label: 'Your type',
       section: 'couple-type',
       items: type.tips.slice(0, 3).map((t) => ({
@@ -50,6 +51,7 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
   if (expCats.length) {
     groups.push({
       id: 'expectations',
+      color: '#1B5FE8',
       label: 'Expectations',
       section: 'exp-overview',
       items: expCats.map((cat) => ({
@@ -65,6 +67,7 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
   if (convos.length) {
     groups.push({
       id: 'intimacy',
+      color: '#C2185B',
       label: 'Physical Intimacy',
       section: 'intimacy-plan',
       items: convos.map((d) => ({ title: d.label, body: null, say: d.prompt })),
@@ -77,6 +80,7 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
   if (commitment) {
     groups.push({
       id: 'reflection',
+      color: '#10B981',
       label: 'What you each said',
       section: 'reflection-plan',
       items: [

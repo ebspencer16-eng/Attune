@@ -367,6 +367,8 @@ export type NextStepGroup = {
   id: string;
   label: string;
   section: string;
+  /** The section's own colour, for the card's left edge. */
+  color?: string;
   items: { title: string; body: string | null; say: string | null }[];
 };
 
