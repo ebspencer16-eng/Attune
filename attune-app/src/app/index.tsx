@@ -51,7 +51,11 @@ export default function HomeScreen() {
   // Where the tile starts. Just over half the screen, so the reading has the
   // top of the page and the tile sits in the lower half without being pinned
   // to the bottom, which would leave a band of blue under it on a tall phone.
-  const topHeight = useWindowDimensions().height * 0.52;
+  // A floor, not a fixed height. The blue block grows to fill whatever the tile
+  // leaves, so the tile always sits just above the tab bar whether it has two
+  // rows or three, and the reading gets the rest. A fixed height put the third
+  // row underneath the tab bar on the day a third row first existed.
+  const topHeight = useWindowDimensions().height * 0.38;
   const [data, setData] = useState<HomeResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,7 +176,11 @@ export default function HomeScreen() {
               starts around half way down on a normal phone and is pushed
               further only by a long finding. A fixed height would either crop
               the reading or leave a hole above the tile on a small screen. */}
-          <View style={{ minHeight: topHeight, paddingHorizontal: Spacing.xl, justifyContent: 'space-between' }}>
+          <View
+            style={{
+              flexGrow: 1, minHeight: topHeight,
+              paddingHorizontal: Spacing.xl, justifyContent: 'space-between',
+            }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.sm }}>
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)' }}>Attune</Text>
               {/* Settings is where account deletion lives, which App Review has
