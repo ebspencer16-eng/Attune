@@ -346,7 +346,11 @@ export type ReflectionResults = {
   ratings: ReflectionRating[];
   admired: { you: string | null; them: string | null };
   priorities: { you: string[] | null; them: string[] | null };
-  written: { key: string; question: string; category: string; you: string; them: string }[];
+  written: {
+    key: string; question: string; category: string; you: string; them: string;
+    /** The question to sit with, under the pair. */
+    prompt?: string | null;
+  }[];
   widest: ReflectionRating | null;
   writtenCount: number;
 };

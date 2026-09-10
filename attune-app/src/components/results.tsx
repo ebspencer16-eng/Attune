@@ -1228,8 +1228,11 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
 
 /** Two people's words on the same question, stacked and attributed. */
 function WrittenPair({
-  you, them, yourWords, theirWords,
-}: { you: string; them: string; yourWords: string; theirWords: string }) {
+  you, them, yourWords, theirWords, prompt,
+}: {
+  you: string; them: string; yourWords: string; theirWords: string;
+  prompt?: string | null;
+}) {
   return (
     <>
       <View
@@ -1248,6 +1251,17 @@ function WrittenPair({
         <Eyebrow color={c.textMuted}>{them}</Eyebrow>
         <Text style={{ ...Type.body, color: c.text }}>{theirWords}</Text>
       </View>
+
+      {/* ── THE QUESTION UNDER THE PAIR ────────────────────────────────
+          Two answers side by side do not need a verdict, they need something
+          to do with having read them. The website has printed one under every
+          pair since this page existed; the app printed the two answers and
+          stopped, which is the half that does the work. */}
+      {prompt ? (
+        <Text style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: Spacing.sm, lineHeight: 19 }}>
+          {prompt}
+        </Text>
+      ) : null}
     </>
   );
 }
@@ -1311,6 +1325,19 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
             </Text>
           </View>
         ))}
+
+        {/* ── WHAT MATTERS MOST THIS YEAR ──────────────────────────────
+            The website puts the two ranked lists on this page, under this
+            heading. The app had them on the Action Plan under one it made up. */}
+        {data.priorities?.you?.length && data.priorities?.them?.length ? (
+          <View style={{ marginTop: Spacing.xxl }}>
+            <Eyebrow>What matters most this year</Eyebrow>
+            <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.sm }}>
+              <PriorityList name={data.names.you} items={data.priorities.you} />
+              <PriorityList name={data.names.them} items={data.priorities.them} />
+            </View>
+          </View>
+        ) : null}
       </View>
     </ScrollView>
     </View>
@@ -1370,6 +1397,18 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
               <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
               <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.them}</Text>
             </View>
+
+            {/* ── THE QUESTION UNDER THE PAIR ──────────────────────────
+                Two answers side by side do not need a verdict, they need
+                something to do with having read them. The website has printed
+                one under every pair since this page existed; the app printed
+                the answers and stopped, which is the half that does the work.
+                From api/_lib/reflection-prompts.js. */}
+            {w.prompt ? (
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', marginTop: Spacing.md, lineHeight: 19 }}>
+                {w.prompt}
+              </Text>
+            ) : null}
           </View>
         ))}
       </View>
@@ -1453,27 +1492,17 @@ function ReflectionPlan({
           </View>
         ) : null}
 
-        {bothRanked ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Eyebrow>What you each put first this year</Eyebrow>
-            <View style={{ flexDirection: 'row', gap: Spacing.lg }}>
-              <PriorityList name={data.names.you} items={data.priorities.you!} />
-              <PriorityList name={data.names.them} items={data.priorities.them!} />
-            </View>
-          </View>
-        ) : null}
+        {/* ── NOT HERE ─────────────────────────────────────────────────
+            The priorities lived on this page under "What you each put first
+            this year", and what each of you wants more of under "More of this,
+            next year". Neither heading is anywhere in the product, and the
+            website puts the priorities on How You Each Rated, as "What matters
+            most this year". The a4 answer is a written question and already
+            appears on Side by Side with the rest of them.
 
-        {together ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Eyebrow>More of this, next year</Eyebrow>
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{data.names.you}: {together.you}</Text>
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>
-              {data.names.them}: {together.them}
-            </Text>
-          </View>
-        ) : null}
-
-        {!commitment && !bothRanked && !together ? (
+            Moved rather than restyled: a block on the wrong page is the same
+            problem as a block with the wrong words. */}
+        {!commitment && !insights?.length ? (
           <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg }}>
             This fills in from the last few questions of the exercise, which you
             have not both answered yet.

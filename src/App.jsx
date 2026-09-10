@@ -86,6 +86,7 @@ import { AXES } from "../api/_axes.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
+import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension } from "../api/_lib/intimacy-results.js";
 import { COMM_DOMAINS } from "../api/_lib/comm-domains.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE } from "../api/_lib/storycard-style.js";
@@ -7353,15 +7354,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       // claim "you both pointed to..." on two answers that matched nothing at
       // all. Two answers side by side do not need a verdict. They need a
       // question, so each pair carries a fixed prompt tied to that question.
-      const PROMPTS = {
-        a1: "Read each other's answer, then say why that moment and not another one.",
-        a2: "Ask what it was like from the inside. You were both there, but not in the same way.",
-        a6: "Ask what would help. The person working on it rarely wants to be fixed, they want to be noticed trying.",
-        a7: "Talk about the pattern, not the incident. What does each of you need in the first hour when it gets hard?",
-        a5: "Find the overlap first. Then get concrete about the parts that differ: numbers, places, timelines.",
-        a3: "Say it out loud to each other. Gratitude that stays unspoken does none of the work.",
-        a4: "Pick one small version of each answer and try both this month.",
-      };
+      const PROMPTS = REFLECTION_PROMPTS;
 
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>

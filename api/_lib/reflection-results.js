@@ -16,6 +16,7 @@
 import {
   ANNIVERSARY_QUESTIONS, admiredNoun, isNonAnswer,
 } from '../_anniversary-questions.js';
+import { promptFor } from './reflection-prompts.js';
 
 /** Scale answers are stored as the option index. */
 const scaleValue = (v) => (typeof v === 'number' && v >= 0 ? v : null);
@@ -76,7 +77,14 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
       const a = mine[q.id];
       const b = theirs[q.id];
       if (isNonAnswer(a) || isNonAnswer(b)) return null;
-      return { key: q.id, question: q.text, category: q.category, you: String(a).trim(), them: String(b).trim() };
+      return {
+        key: q.id, question: q.text, category: q.category,
+        you: String(a).trim(), them: String(b).trim(),
+        // The question to sit with, which is the half of Side by Side that
+        // does the work. The app showed the two answers and nothing else,
+        // because this was inline in src/App.jsx.
+        prompt: promptFor(q.id),
+      };
     })
     .filter(Boolean);
 
