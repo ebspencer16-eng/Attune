@@ -19,16 +19,23 @@ const TOKEN_KEY = 'attune.session.token';
 let cached: string | null | undefined;
 
 export async function getToken(): Promise<string | null> {
-  // Cached in memory after the first read: SecureStore hits the keychain,
-  // which is fast but not free, and the client asks on every request.
+  // Cached in memory after the first SUCCESSFUL read: SecureStore hits the
+  // keychain, which is fast but not free, and the client asks on every request.
   if (cached !== undefined) return cached;
   try {
     cached = await SecureStore.getItemAsync(TOKEN_KEY);
   } catch {
-    // A keychain read can fail on a locked device. Treated as signed out
-    // rather than crashing: the screen then shows the sign-in state, which is
-    // the honest thing to show when we cannot prove who this is.
-    cached = null;
+    // A keychain read can fail while the device is locked, which is a moment
+    // in time rather than a fact about the session. This used to write null
+    // into the cache, and the cache is only consulted for `undefined`, so one
+    // failed read signed the person out for the entire life of the process:
+    // every screen, every retry, every pull to refresh, until the app was
+    // killed. Signing in again fixed it, which is exactly why it looked like
+    // the session had expired rather than like a bug.
+    //
+    // Return signed-out for this call, because we cannot prove who this is
+    // right now, and leave the cache untouched so the next call asks again.
+    return null;
   }
   return cached;
 }

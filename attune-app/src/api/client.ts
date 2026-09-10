@@ -601,7 +601,20 @@ export function configureApi(opts: {
 }
 
 async function request<T>(path: string, init: RequestInit = {}, retrying = false): Promise<ApiResult<T>> {
-  const token = await getToken();
+  let token = await getToken();
+  if (!token && !retrying) {
+    // No access token is not the same as no session. The refresh token lives
+    // in its own keychain entry, and SecureStore writes can fail
+    // independently: setToken swallows a failed write and keeps the access
+    // token in memory only, so killing the app can leave a valid refresh
+    // token beside no access token at all.
+    //
+    // This returned unauthorized without ever trying, so the person was sent
+    // to sign in while holding everything needed to continue. The 401 path
+    // below has always refreshed; the empty path never did, which is the
+    // harder case to notice because it needs no server round trip to fail.
+    if (await refreshOnce()) token = await getToken();
+  }
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
 
   let res: Response;
