@@ -1108,6 +1108,7 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: Palette.white }}>Conversations Worth Having</Text>
+        {/* block: intimacy-plan/conversations */}
         <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
           {data.conversations.map((d) => (
             <View
@@ -1307,6 +1308,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: Palette.white }}>How You Each Rated</Text>
+        {/* block: reflection-ratings/scales */}
 
         <View style={{ marginTop: Spacing.md }}>
           <Legend you={data.names.you} them={data.names.them} />
@@ -1391,7 +1393,34 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: Palette.white }}>Side by Side</Text>
 
-        {data.written.map((w) => (
+        {/* ── GROUPED, AS THE WEBSITE GROUPS IT ────────────────────────────
+            The website prints these under four headings: Milestones, How
+            We're Doing, Looking Forward, What Matters. The app listed every
+            answer flat, so ten pairs arrived as one undifferentiated scroll
+            with nothing saying what any of them was about.
+
+            The headings were typed inside src/App.jsx, which is why: the
+            grouping lived somewhere the app could not read. They arrive as
+            data.storyCategories now, in the website's order.
+
+            A category with no answered pairs is skipped rather than printed
+            empty. A question neither of them answered is already absent from
+            `written`, so an empty heading would be a heading over nothing. */}
+        {/* block: reflection-story/groups */}
+        {(data.storyCategories || []).map((cat) => {
+          const inCat = data.written.filter((w) => w.category === cat);
+          if (!inCat.length) return null;
+          return (
+            <View key={cat}>
+              <Text
+                style={{
+                  ...Type.eyebrow, color: 'rgba(255,255,255,0.65)',
+                  marginTop: Spacing.xl, marginBottom: Spacing.md,
+                }}>
+                {cat}
+              </Text>
+              {/* block: reflection-story/pairs */}
+              {inCat.map((w) => (
           <View key={w.key} style={{ marginBottom: Spacing.xl }}>
             <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md }}>
               {w.question}
@@ -1427,7 +1456,10 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
               </Text>
             ) : null}
           </View>
-        ))}
+              ))}
+            </View>
+          );
+        })}
       </View>
     </ScrollView>
     </View>
@@ -1462,6 +1494,7 @@ function ReflectionPlan({
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         {/* block: reflection-overview/action-plan */}
         <Text style={{ ...Type.title, color: Palette.white }}>Action Plan</Text>
+        {/* block: reflection-plan/items */}
 
         {/* The derived plan, under REFLECTION_ACTION_TITLES. The app could not
             reach that copy until now, so this page showed only the couple's

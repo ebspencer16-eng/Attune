@@ -21,6 +21,27 @@ import { promptFor } from './reflection-prompts.js';
 /** Scale answers are stored as the option index. */
 const scaleValue = (v) => (typeof v === 'number' && v >= 0 ? v : null);
 
+/**
+ * The categories Side by Side groups its answers under, in order.
+ *
+ * ── WHY THIS IS A LIST AND NOT THE QUESTIONS' OWN ORDER ───────────────────
+ * The questions carry five categories. This shows four. "Getting Started",
+ * which is the opening memory question, has never appeared here: the list was
+ * three categories, then four in 1736324, and Getting Started was in neither.
+ *
+ * So a_memory is an answer this product asks two people to write and then
+ * displays nowhere. That may be deliberate and it is not mine to decide, so
+ * the list keeps exactly what the website shows today and the omission is
+ * written down rather than quietly fixed by deriving the order.
+ *
+ * It was typed inside src/App.jsx, twice, which is why the app's Side by Side
+ * had no grouping at all: it listed every answer flat because the grouping
+ * lived somewhere it could not read.
+ */
+export const STORY_CATEGORIES = [
+  'Milestones', "How We're Doing", 'Looking Forward', 'What Matters',
+];
+
 export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Your partner' }) {
   if (!mine || !theirs) return null;
   const you = youName || 'You';
@@ -102,5 +123,7 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
     widest: widest && widest.gapSteps > 0 ? widest : null,
     /** How many of the written questions both people answered. */
     writtenCount: written.length,
+    /** The headings Side by Side groups under, in order. */
+    storyCategories: STORY_CATEGORIES,
   };
 }

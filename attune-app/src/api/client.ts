@@ -357,6 +357,8 @@ export type ReflectionResults = {
     prompt?: string | null;
   }[];
   widest: ReflectionRating | null;
+  /** The headings Side by Side groups under, in the website'''s order. */
+  storyCategories?: string[];
   writtenCount: number;
 };
 

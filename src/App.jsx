@@ -88,6 +88,7 @@ import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
 import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
 import { WROTE_ROWS } from "../api/_conflict-results-prose.js";
+import { STORY_CATEGORIES } from "../api/_lib/reflection-results.js";
 import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP } from "../api/_lib/track-marks.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
@@ -7251,6 +7252,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {ratedScales.filter(q => q.id !== "a0").length > 0 && (
               <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>How things feel right now</div>
+                {/* block: reflection-ratings/scales */}
                 {ratedScales.filter(q => q.id !== "a0").map(q => <ScaleRow key={q.id} q={q} />)}
               </div>
             )}
@@ -7367,11 +7369,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Relationship Reflection</div></div>
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Side by Side</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>Everything you each wrote, unedited, next to each other. Read them together.</p>
-            {["Milestones", "How We're Doing", "Looking Forward", "What Matters"].map(cat => {
+            {/* block: reflection-story/groups */}
+          {STORY_CATEGORIES.map(cat => {
               const catQs = textQs.filter(q => q.category === cat);
               return (
                 <div key={cat} style={{ marginBottom: "1.75rem" }}>
                   <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cat}</div>
+                  {/* block: reflection-story/pairs */}
                   {catQs.map(q => {
                     const prompt = PROMPTS[q.id];
                     const answered = mine[q.id] && theirs[q.id];
@@ -7419,6 +7423,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 ? `${actionItems.length} area${actionItems.length !== 1 ? "s" : ""} where your reflections point to a real conversation.`
                 : "You're well-aligned across your reflections. Keep building on this foundation."}
             </p>
+            {/* block: reflection-plan/items */}
             {actionItems.length === 0 ? (
               <div style={{ background: "#EEF2FF", border: "1.5px solid rgba(27,95,232,0.25)", borderRadius: 16, padding: "1.5rem", textAlign: "center", marginBottom: "1.5rem" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1B5FE8", margin: "0 auto 0.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -7645,6 +7650,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               {misaligned.length ? "" : "You line up across the board. These are still worth saying out loud."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+              {/* block: intimacy-plan/conversations */}
               {list.map(d => (
                 <div key={d.id} style={{ borderLeft: `3px solid ${ROSE}`, background: `${ROSE}0d`, borderRadius: "0 12px 12px 0", padding: "1rem 1.25rem" }}>
                   <div style={{ fontSize: "0.7rem", fontWeight: 700, color: ROSE, fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>{d.label}</div>

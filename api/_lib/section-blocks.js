@@ -146,6 +146,30 @@ export const SECTION_BLOCKS = {
     { id: 'conversations', note: 'The categories worth talking about.' },
   ],
 
+  /**
+   * The three Reflection detail pages and the intimacy plan.
+   *
+   * These were the last four results pages with no spec, which is why the
+   * app's Side by Side listed ten answers flat where the website groups them
+   * under four headings. Nothing was checking.
+   */
+  'reflection-ratings': [
+    { id: 'scales', note: 'Every rating question, both marks on one track.' },
+  ],
+
+  'reflection-story': [
+    { id: 'groups', note: 'The written answers, grouped under their categories.' },
+    { id: 'pairs', note: 'Each question, both answers, and the prompt under them.' },
+  ],
+
+  'reflection-plan': [
+    { id: 'items', note: 'What each of you said you would work on.' },
+  ],
+
+  'intimacy-plan': [
+    { id: 'conversations', note: 'Each dimension worth talking about, with its prompt.' },
+  ],
+
   'reflection-overview': [
     { id: 'admired', optional: true, note: 'What you each admire, and whether it matched.' },
     { id: 'ratings', note: 'How you each feel right now.' },
