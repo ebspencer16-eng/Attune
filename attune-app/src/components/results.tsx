@@ -1191,10 +1191,10 @@ function IntimacyDimensionView({
                 <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.md }}>
                   <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
                   {q.you != null ? (
-                    <Marker left={q.you * 100} color={YOU_COLOR} label={initial(you)} />
+                    <Marker pct={q.you * 100} color={YOU_COLOR} label={initial(you)} />
                   ) : null}
                   {q.them != null ? (
-                    <Marker left={q.them * 100} color={THEM_COLOR} label={initial(them)} />
+                    <Marker pct={q.them * 100} color={THEM_COLOR} label={initial(them)} />
                   ) : null}
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
@@ -1304,8 +1304,8 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
             <Text style={{ ...Type.cardTitle, color: Palette.white }}>{r.question}</Text>
             <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
               <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-              <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
-              <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
+              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
               <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{r.low}</Text>
@@ -1485,8 +1485,8 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
                 reader who has come this far already knows how to read it. */}
             <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
               <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-              <Marker left={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
-              <Marker left={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
+              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
@@ -2717,10 +2717,10 @@ function SbsQuestion({
           <View style={{ height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)', marginVertical: 16 }}>
             {/* readOfYou is the partner's answer ABOUT the reader, so it takes
                 the reader's colour and sits by the reader's own dot. */}
-            <SbsDot p={pct(row.readOfYou)} dy={dyReadOfYou} color={U} small />
-            <SbsDot p={pct(row.readOfThem)} dy={dyReadOfThem} color={P} small />
-            <SbsDot p={pYou} dy={dyYou} color={U} label={uInit} />
-            <SbsDot p={pThem} dy={dyThem} color={P} label={pInit} />
+            <SbsDot pct={pct(row.readOfYou)} dy={dyReadOfYou} color={U} small />
+            <SbsDot pct={pct(row.readOfThem)} dy={dyReadOfThem} color={P} small />
+            <SbsDot pct={pYou} dy={dyYou} color={U} label={uInit} />
+            <SbsDot pct={pThem} dy={dyThem} color={P} label={pInit} />
           </View>
         </View>
         <Text style={pole}>{row.right}</Text>
@@ -2729,15 +2729,23 @@ function SbsQuestion({
   );
 }
 
+/**
+ * One dot on a side-by-side track.
+ *
+ * `pct`, not `p`. It was correct either way, because every caller passes the
+ * output of the local pct() helper, but the name said nothing about the unit.
+ * That is the shape that broke Marker: a prop named for its CSS property
+ * rather than for what it holds, scaled by a factor nobody could check.
+ */
 function SbsDot({
-  p, dy, color, label, small,
-}: { p: number | null; dy: number; color: string; label?: string; small?: boolean }) {
-  if (p == null) return null;
+  pct, dy, color, label, small,
+}: { pct: number | null; dy: number; color: string; label?: string; small?: boolean }) {
+  if (pct == null) return null;
   const size = small ? 10 : 20;
   return (
     <View
       style={{
-        position: 'absolute', left: `${p}%`, marginLeft: -size / 2,
+        position: 'absolute', left: `${pct}%`, marginLeft: -size / 2,
         top: (6 - size) / 2 + dy,
         width: size, height: size, borderRadius: size / 2,
         backgroundColor: color, opacity: small ? 0.9 : 1,
@@ -2873,11 +2881,29 @@ function SliderRow({
   );
 }
 
-function Marker({ left, color, label }: { left: number; color: string; label: string }) {
+/**
+ * One person's position on a track.
+ *
+ * ── THE UNIT IS A PERCENTAGE ──────────────────────────────────────────────
+ * The prop was called `left` and the style multiplied it by 100, so it wanted
+ * a 0-to-1 fraction. Every one of the six call sites passed a percentage:
+ * reflection ratings and Side by Side pass `pct`, which the server computes as
+ * 0 to 100, and the intimacy rows pass `q.you * 100`, having already converted.
+ *
+ * So every marker in the app rendered at up to 10000% and sat far off the
+ * right-hand side. Three screens with invisible placement dots, which is what
+ * Ellie saw: "I can see the relationship reflection page but the dots showing
+ * our placements are missing."
+ *
+ * Nothing errored, because 10000% is a valid style value. The name is `pct`
+ * now and the multiply is gone, so the prop says its own unit and the callers
+ * were right all along.
+ */
+function Marker({ pct, color, label }: { pct: number; color: string; label: string }) {
   return (
     <View
       style={{
-        position: 'absolute', top: -8, left: `${left * 100}%`,
+        position: 'absolute', top: -8, left: `${pct}%`,
         marginLeft: -10,
         width: 20, height: 20, borderRadius: Radius.pill,
         backgroundColor: color, alignItems: 'center', justifyContent: 'center',
