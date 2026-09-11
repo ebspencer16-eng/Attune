@@ -248,6 +248,39 @@ survives: name the promise, and say what it deliberately does not cover.
 Physical Intimacy is out of scope, so nobody reads it as "partner data is
 private" and either widens it into a feature or quietly loosens it.
 
+**Plant the indirect form, not just the literal one.** Four of the
+highest-stakes gates here were planted against in one sitting. All four
+caught the shape the bug originally took and missed the shape a refactor
+would produce:
+
+| Gate | Caught | Missed |
+|---|---|---|
+| `check-partner-privacy` | `conflict_data` in a response | a loop over `EXERCISE_COLUMNS` into a response |
+| `check-intimacy-privacy` | `intimacy_data` in a response | that, and `...partner` spread into a response |
+| `check-entitlement-inputs` | `body.pkg` | `const { pkg } = body`, an aliased body, a loop over add-on names |
+| `check-ownership-rule` | `pkg === 'premium'` | `BUNDLES[me.pkg]`, `['premium'].includes(pkg)` |
+| `check-entitlement-bypass` | the read inline on the capability line | the same read hoisted one line up |
+
+None of those misses is exotic. Hoisting a long expression out of an object
+literal, destructuring a body, looping over a list instead of naming five
+columns: they are what the code becomes when someone tidies it. The gate
+was written against the bug as found, and the bug as found is the least
+likely form for it to come back in.
+
+So when you write a gate, write down the other ways to say the same thing
+and plant each of them. If the rule is "X must not reach Y", the four to try
+every time are: X named outright, X destructured, X reached through a list
+or a lookup, and X assigned to a name one line earlier.
+
+Two things went wrong while fixing these, and both are the same mistake
+pointed in different directions. Widening a matcher flagged real code
+(`p` is an arrow parameter in half a dozen scopes; `acct` is the session
+cache, not a toggle), and a sloppy body-extraction swallowed unrelated code
+containing the exact word the guard looked for, so an unguarded grant read
+as guarded. **A gate that matches too much is not the safe direction.** It
+either gets loosened until it matches nothing, or it manufactures the
+evidence it was meant to look for.
+
 ---
 
 ## Verification, non-negotiable
