@@ -137,29 +137,43 @@ export default function Annotatable({
 
   const clear = () => { setAnchor(null); setHead(null); };
 
+  const body = (
+    <Text style={style}>
+      {tokens.map((tok, i) => {
+        const inSelection = lo != null && i >= lo && i <= (hi as number);
+        return (
+          <Text
+            key={i}
+            suppressHighlighting
+            // Long press starts a selection. A later tap sets the other end,
+            // so the order a reader works in does not matter.
+            onLongPress={() => { setAnchor(i); setHead(i); }}
+            onPress={anchor == null ? undefined : () => setHead(i)}
+            style={[
+              markStyle(marked.get(i)),
+              inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)' } : null,
+            ]}>
+            {tok}
+          </Text>
+        );
+      })}
+    </Text>
+  );
+
+  /**
+   * At rest this is a Text and nothing else.
+   *
+   * The wrapping View exists only to hold the selection bar under the words,
+   * so it appears when a selection does. That matters because <Prose> is meant
+   * to be a drop-in for <Text>: a View that was always there would change the
+   * layout of every paragraph it replaced, and the paragraphs it replaces are
+   * spread over thirty sections that cannot all be looked at.
+   */
+  if (lo == null) return body;
+
   return (
     <View>
-      <Text style={style}>
-        {tokens.map((tok, i) => {
-          const inSelection = lo != null && i >= lo && i <= (hi as number);
-          return (
-            <Text
-              key={i}
-              suppressHighlighting
-              // Long press starts a selection. A later tap sets the other end,
-              // so the order a reader works in does not matter.
-              onLongPress={() => { setAnchor(i); setHead(i); }}
-              onPress={anchor == null ? undefined : () => setHead(i)}
-              style={[
-                markStyle(marked.get(i)),
-                inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)' } : null,
-              ]}>
-              {tok}
-            </Text>
-          );
-        })}
-      </Text>
-
+      {body}
       {/* ── THE SELECTION BAR ──────────────────────────────────────────────
           Appears only while something is selected. It says what will be
           marked, because a word range picked by tapping is easy to get wrong by
@@ -167,34 +181,32 @@ export default function Annotatable({
 
           "Tap another word" is the only instruction in the flow, and it is
           shown at the moment it applies rather than as a hint nobody reads. */}
-      {lo != null ? (
-        <View
-          style={{
-            marginTop: Spacing.sm, padding: Spacing.md, borderRadius: Radius.md,
-            backgroundColor: c.surface, borderColor: c.accent, borderWidth: 1,
-          }}>
-          <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
-            {lo === hi ? 'Tap another word to extend' : `${(hi as number) - lo + 1} words`}
+      <View
+        style={{
+          marginTop: Spacing.sm, padding: Spacing.md, borderRadius: Radius.md,
+          backgroundColor: c.surface, borderColor: c.accent, borderWidth: 1,
+        }}>
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
+          {lo === hi ? 'Tap another word to extend' : `${(hi as number) - lo + 1} words`}
+        </Text>
+        <Text numberOfLines={2} style={{ ...Type.small, color: c.text, marginTop: 2 }}>
+          {fragment}
+        </Text>
+        <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.sm }}>
+          <Text
+            accessibilityRole="button"
+            onPress={() => { onSelect(fragment); clear(); }}
+            style={{ ...Type.small, fontWeight: '700', color: c.accent }}>
+            Mark this
           </Text>
-          <Text numberOfLines={2} style={{ ...Type.small, color: c.text, marginTop: 2 }}>
-            {fragment}
+          <Text
+            accessibilityRole="button"
+            onPress={clear}
+            style={{ ...Type.small, color: c.textMuted }}>
+            Cancel
           </Text>
-          <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.sm }}>
-            <Text
-              accessibilityRole="button"
-              onPress={() => { onSelect(fragment); clear(); }}
-              style={{ ...Type.small, fontWeight: '700', color: c.accent }}>
-              Mark this
-            </Text>
-            <Text
-              accessibilityRole="button"
-              onPress={clear}
-              style={{ ...Type.small, color: c.textMuted }}>
-              Cancel
-            </Text>
-          </View>
         </View>
-      ) : null}
+      </View>
     </View>
   );
 }

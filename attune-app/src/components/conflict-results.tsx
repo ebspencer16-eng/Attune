@@ -26,6 +26,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import type { ConflictOpenings, ConflictResults, ConflictSummary } from '@/api/client';
+import { Prose } from '@/components/annotation-context';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -193,7 +194,7 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
                   <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{titleFor(p.key)}</Text>
                 </View>
                 <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.sm }}>{action.title}</Text>
-                <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{action.body}</Text>
+                <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{action.body}</Prose>
               </View>
             );
           })}
@@ -205,9 +206,9 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
               {content.noActionNeeded.title}
             </Text>
           ) : null}
-          <Text style={{ ...Type.body, color: c.text }}>
+          <Prose style={{ ...Type.body, color: c.text }}>
             {content.noActionNeeded?.body || content.copy.allClear || ''}
-          </Text>
+          </Prose>
         </View>
       )}
     </ScrollView>
@@ -369,9 +370,9 @@ function Patterns({
       </View>
 
       {content.copy.patternsIntro ? (
-        <Text style={{ ...Type.body, color: c.textMuted, marginBottom: Spacing.lg }}>
+        <Prose style={{ ...Type.body, color: c.textMuted, marginBottom: Spacing.lg }}>
           {content.copy.patternsIntro}
-        </Text>
+        </Prose>
       ) : null}
 
       {/* block: conflict-patterns/rows */}
@@ -399,7 +400,7 @@ function Patterns({
             </View>
 
             {note ? (
-              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>{note}</Text>
+              <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>{note}</Prose>
             ) : null}
 
             {action ? (
@@ -408,7 +409,7 @@ function Patterns({
                   One thing to try
                 </Text>
                 <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{action.title}</Text>
-                <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{action.body}</Text>
+                <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{action.body}</Prose>
               </View>
             ) : null}
           </View>
@@ -506,7 +507,7 @@ function Written({ name, text, color }: { name: string; text: string | null; col
   return (
     <View style={{ borderLeftWidth: 2, borderLeftColor: color, paddingLeft: Spacing.md, marginBottom: Spacing.md }}>
       <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.xs }}>{name}</Text>
-      <Text style={{ ...Type.body, color: c.text }}>{text}</Text>
+      <Prose style={{ ...Type.body, color: c.text }}>{text}</Prose>
     </View>
   );
 }

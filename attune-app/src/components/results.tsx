@@ -825,9 +825,9 @@ function ExpectationsConversation({
                   ? `How ${you} & ${them} need to approach these conversations`
                   : 'How to approach these conversations'}
               </Text>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', lineHeight: 24 }}>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', lineHeight: 24 }}>
                 {bucket.intro}
-              </Text>
+              </Prose>
             </View>
           ) : null}
 
@@ -947,11 +947,11 @@ function ExpectationRowView({
       <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
         <View style={{ flex: 1 }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{you}</Text>
-          <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.you}</Text>
+          <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.you}</Prose>
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{them}</Text>
-          <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.them}</Text>
+          <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.them}</Prose>
         </View>
       </View>
 
@@ -1013,9 +1013,9 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
             nothing to put there. */}
         <Text style={{ ...Type.hero, color: Palette.white }}>{you} & {them}</Text>
         {data.lead ? (
-          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>
             {data.lead}
-          </Text>
+          </Prose>
         ) : null}
 
           {/* One panel, a row per dimension, each partner on the track. The app
@@ -1072,7 +1072,7 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
                   borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
                 }}>
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{d.label}</Text>
-                <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{d.prompt}</Text>
+                <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{d.prompt}</Prose>
               </View>
             ))}
         </View>
@@ -1099,7 +1099,7 @@ function IntimacyDimensionView({
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: Palette.white }}>{dim.label}</Text>
         {dim.intro ? (
-          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Text>
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Prose>
         ) : null}
 
         {/* ── WHERE YOU EACH LAND ─────────────────────────────────────────
@@ -1159,9 +1159,9 @@ function IntimacyDimensionView({
               {promptLabel}
             </Text>
             {/* block: intimacy-dimension/prompt */}
-            <Text style={{ ...Type.body, color: Palette.white, lineHeight: 26 }}>
+            <Prose style={{ ...Type.body, color: Palette.white, lineHeight: 26 }}>
               {dim.prompt}
-            </Text>
+            </Prose>
           </View>
         ) : null}
 
@@ -1187,7 +1187,7 @@ function IntimacyDimensionView({
                   backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                   borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
                 }}>
-                <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{q.text}</Text>
+                <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{q.text}</Prose>
                 <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.md }}>
                   <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
                   {q.you != null ? (
@@ -1239,9 +1239,9 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
             this all along; it was a string inside src/App.jsx, so the app
             showed the list and left the reader to work out why. */}
         {data.allAlignedNote ? (
-          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.8)', marginTop: Spacing.sm }}>
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.8)', marginTop: Spacing.sm }}>
             {data.allAlignedNote}
-          </Text>
+          </Prose>
         ) : null}
         {/* block: intimacy-plan/conversations */}
         <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
@@ -1668,10 +1668,10 @@ function ReflectionPlan({
                 }}>
                 <Text style={{ ...Type.cardTitle, color: Palette.white }}>{ins.title}</Text>
                 {ins.body ? (
-                  <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>{ins.body}</Text>
+                  <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>{ins.body}</Prose>
                 ) : null}
                 {ins.action ? (
-                  <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.md }}>{ins.action}</Text>
+                  <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.md }}>{ins.action}</Prose>
                 ) : null}
               </View>
             ))}
@@ -1687,7 +1687,7 @@ function ReflectionPlan({
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
               }}>
               <Eyebrow>{data.names.you}</Eyebrow>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.you}</Text>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.you}</Prose>
             </View>
             <View
               style={{
@@ -1695,7 +1695,7 @@ function ReflectionPlan({
                 borderRadius: Radius.lg, padding: Spacing.lg,
               }}>
               <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.them}</Text>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.them}</Prose>
             </View>
           </View>
         ) : null}
@@ -1865,6 +1865,9 @@ function Waiting({ title, body }: { title: string; body: string }) {
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
+        {/* not markable: the app saying a section is not ready, not a finding.
+            It is gone the moment the partner answers, so a mark anchored to it
+            would outlive the words it was made on. */}
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
       </View>
     </ScrollView>
@@ -2014,9 +2017,9 @@ function Glance({
             {type?.name || 'Your results'}
           </Text>
           {type?.tagline ? (
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.md }}>
+            <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.md }}>
               {interp(type.tagline, you, them)}
-            </Text>
+            </Prose>
           ) : null}
 
           {dims.length ? (
@@ -2202,7 +2205,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             <View key={p.name} style={{ ...card(), marginBottom: Spacing.sm, borderTopColor: p.color, borderTopWidth: 4 }}>
               <Text style={{ ...Type.eyebrow, color: p.color }}>{p.name}</Text>
               <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>{p.typeName}</Text>
-              <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Text>
+              <Prose style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Prose>
               <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
                 {p.rows.map((r) => (
                   <View key={r.axis}>
@@ -2260,9 +2263,9 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           <Text style={{ ...Type.hero, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }}>
             {type.name}
           </Text>
-          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.9)', fontWeight: '500', marginTop: Spacing.sm }}>
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.9)', fontWeight: '500', marginTop: Spacing.sm }}>
             {interp(type.tagline, you, them)}
-          </Text>
+          </Prose>
         </LinearGradient>
 
         {/* block: couple-type/description */}
@@ -2367,9 +2370,9 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: tipColor, marginBottom: Spacing.xs }}>
                         Phrase to try
                       </Text>
-                      <Text style={{ ...Type.body, fontStyle: 'italic', color: c.text }}>
+                      <Prose style={{ ...Type.body, fontStyle: 'italic', color: c.text }}>
                         {`\u201C${interp(tip.phraseTry, you, them)}\u201D`}
-                      </Text>
+                      </Prose>
                     </View>
                   ) : null}
                 </View>
@@ -2426,9 +2429,9 @@ function Domain({
               never been anywhere it could read them. */}
           {/* block: comm-domain/intro */}
           {domain?.prose ? (
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.75)', lineHeight: 25, marginBottom: Spacing.xl }}>
+            <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.75)', lineHeight: 25, marginBottom: Spacing.xl }}>
               {domain.prose}
-            </Text>
+            </Prose>
           ) : null}
 
           {/* ── ONE PANEL, ONE ROW PER DIMENSION ───────────────────────
@@ -2476,9 +2479,9 @@ function Domain({
               }}>
               {/* block: comm-domain/action-tile */}
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.9)' }}>One thing to try</Text>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.88)', marginTop: Spacing.sm, lineHeight: 24 }}>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.88)', marginTop: Spacing.sm, lineHeight: 24 }}>
                 {tile.body}
-              </Text>
+              </Prose>
             </View>
           ) : null}
 

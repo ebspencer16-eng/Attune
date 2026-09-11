@@ -1,3 +1,9 @@
+// not markable, whole file: the cards are a horizontally swiping deck, and the
+// long-press that starts a word range fights the pan responder that moves
+// them. A reader who meant to swipe would select a word instead, on the one
+// screen in the results built to be swiped. The same copy is markable on the
+// section pages the cards summarise.
+
 /**
  * The highlight storycards.
  *
