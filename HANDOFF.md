@@ -1109,3 +1109,54 @@ visible in the text; a note is not, which is the point of it and the problem.
 - The web has no marking UI at all. Everything above is app-only, and the
   anchors are shared, so a mark made in the app is readable by the site
   whenever it grows the UI.
+
+
+## 2026-09-10, sixth pass — the storycards, finally
+
+**The storycards were never in the brand typeface.** The app's type scale named
+`ui-serif` and `system-ui`, which on iOS are New York and San Francisco. The
+website sets Playfair Display and DM Sans. Every screen in the app has been in
+a different face from the same screen on the website since the app existed.
+
+It survived four rounds of storycard fixes because a generic family name is not
+a mismatch anything can detect. `ui-serif` is a valid font. It renders. It is
+simply not the one. Both families are bundled in `attune-app/assets/fonts` and
+loaded before first render; no new dependency, because expo-font was already
+installed. `check-fonts.mjs` reads the website's own BFONT and HFONT and holds
+the app to them.
+
+**Physical Intimacy was an entitlement bypass, not an app bug.** The website
+granted it from a localStorage key, `attune_dev_intimacy`, on any host
+including production. The app asks the server. The app was right. The toggle is
+scoped to non-production now, so **if Ellie has that key set, Physical Intimacy
+will disappear from the website too.**
+
+**The dimension order** on the glance page differed because the website had the
+domain order as a literal and the app used DIM_KEYS, the scoring order. Writing
+the gate found five more hand-written dimension lists in src/App.jsx, including
+two full copies of COMM_DOMAINS. All derive now.
+
+**A refresh that could not run is no longer a sign-out.** Third instance of the
+same idea. refreshSession reports three outcomes; only a 400 or 401 from the
+token endpoint means signed out.
+
+**Settings now shows what the server sees**: owned, mine, theirs, per exercise,
+straight from /api/home. Every "why is this section missing" question is
+answerable in five seconds now instead of by me reading code.
+
+### Relationship Reflection: not reproduced
+
+Ruled out: question ids match between exercise and results on both surfaces;
+both store a scale answer as a number, which the summary requires; the nav
+condition and the payload condition are the same expression; a remembered
+section that is no longer available already falls back; the empty state is a
+sentence, not a blank page. It is account state, and the Settings panel is how
+to see it.
+
+### Fragment selection: built without a native module
+
+Word ranges, long-press the first word and tap the last. The native module
+would have meant leaving Expo Go for a development build, Xcode, and
+`expo run:ios` — a permanent change to how the app is run daily. It still
+cannot split a word; if that matters, the module is the honest answer and that
+is its cost.
