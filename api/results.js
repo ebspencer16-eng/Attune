@@ -34,7 +34,7 @@ import { intimacyResults } from './_lib/intimacy-results.js';
 import { reflectionResults } from './_lib/reflection-results.js';
 import { whatComesNext } from './_lib/what-comes-next.js';
 import { highlightCards } from './_lib/highlight-cards.js';
-import { commDomains } from './_lib/comm-domains.js';
+import { commDomains, DIMENSION_DISPLAY_ORDER } from './_lib/comm-domains.js';
 import { sideBySide } from './_lib/side-by-side.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { personalityFeedback, commsProtocols, commsActionPlan } from './_lib/comms-plan.js';
@@ -141,7 +141,30 @@ function withContent(results, viewer, contentVersion, pronouns = {}) {
   // Per-dimension display: what it is called, what each end of it means, and
   // where both partners landed. Built from the live dimension list so a new
   // dimension appears here without anyone remembering to add it.
-  const dimensions = Object.keys(DIM_KEYS).map((dim) => {
+  /**
+   * In the order a reader sees them, not the order they are scored in.
+   *
+   * DIM_KEYS is the scoring order. The website has never used it for display:
+   * it lists these ten in the order the three Communication domains put them,
+   * so the glance page and the three detail pages agree. That order was a
+   * literal in src/App.jsx, twice, which the app cannot read, so the app sent
+   * and drew the scoring order and the same ten rows appeared in a different
+   * sequence on the two products. Ellie found it by looking, and nothing could
+   * have caught it: one order was a literal in a file the app cannot see, the
+   * other an implicit consequence of an object's key order.
+   *
+   * Sorted here rather than in each renderer, so neither has to know.
+   *
+   * A dimension that is scored but belongs to no domain would otherwise
+   * vanish, so anything the order does not name is appended rather than
+   * dropped. There are none today and this is not the place to find out.
+   */
+  const displayOrder = [
+    ...DIMENSION_DISPLAY_ORDER.filter((d) => d in DIM_KEYS),
+    ...Object.keys(DIM_KEYS).filter((d) => !DIMENSION_DISPLAY_ORDER.includes(d)),
+  ];
+
+  const dimensions = displayOrder.map((dim) => {
     const meta = DIM_META[dim] || {};
     const axis = AXIS_CONFIG[dim] || {};
     return {

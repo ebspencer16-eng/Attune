@@ -1906,6 +1906,16 @@ const GLANCE_THEM = '#6C7FFF';
  * is a list you scroll rather than a shape you see. Here the whole point is
  * reading all ten at once, so it is one line each.
  */
+/**
+ * How wide the label column is on the glance page.
+ *
+ * Sized to the longest dimension name at 11pt rather than guessed: at this
+ * size a character averages a little over half the point size, so twenty
+ * characters need about 118 points. 124 leaves a little slack without taking
+ * more from the bar than it has to.
+ */
+const GLANCE_LABEL_W = 124;
+
 function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' }) {
   const mine = (viewer === 'a' ? dim.a : dim.b) ?? 3;
   const theirs = (viewer === 'a' ? dim.b : dim.a) ?? 3;
@@ -1916,10 +1926,29 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
   const mineLeft = pct(mine) <= pct(theirs);
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.sm }}>
+    /**
+     * One line per dimension, every row the same height.
+     *
+     * The label column was 96 points with two lines allowed, so the longer
+     * names wrapped and those rows were twice as tall as the rest. Ten rows of
+     * two different heights read as a list that has been interfered with
+     * rather than one that was laid out. Ellie: "can we shorten the sliding
+     * bars so that none of the row labels wrap... I want bars evenly
+     * vertically distributed."
+     *
+     * So the column is wide enough for the longest name at this size and the
+     * bar gives up the difference. One line, and a fixed row height so the
+     * spacing cannot depend on the text.
+     *
+     * The longest is "Emotional Expression" at twenty characters. If a
+     * dimension is ever renamed to something longer this truncates rather than
+     * wraps, which keeps the layout and loses the end of a word: the wrong
+     * trade to leave silent, so check-dimension-order.mjs measures it.
+     */
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26 }}>
       <Text
-        numberOfLines={2}
-        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: 96 }}>
+        numberOfLines={1}
+        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: GLANCE_LABEL_W }}>
         {dim.label}
       </Text>
       <View style={{ flex: 1, height: 6, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.10)' }}>

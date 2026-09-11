@@ -98,7 +98,8 @@ import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
 import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension } from "../api/_lib/intimacy-results.js";
-import { COMM_DOMAINS } from "../api/_lib/comm-domains.js";
+import { COMM_DOMAINS, DIMENSION_DISPLAY_ORDER } from "../api/_lib/comm-domains.js";
+import { DIM_META as SHARED_DIM_META } from "../api/_workbook-content.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT, RING_COLORS as SC_RING, statColor as scStatColor } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
@@ -466,10 +467,30 @@ const DIM_META = {
   // HARD MOMENTS — blue
   conflict:    { label: "Conflict Style",                 emoji: "", ends: ["Engage","Withdraw"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
   repair:      { label: "Repairing",                 emoji: "", ends: ["Formal","Informal"],           color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
-  feedback:    { label: "Giving and Receiving Feedback",    emoji: "", ends: ["Guarded","Open"],              color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
+  feedback:    { label: "Feedback",    emoji: "", ends: ["Guarded","Open"],              color: "#1B5FE8", bg: "#EEF3FF", dark: "#1E3A8A", domain: "hard" },
 };
 
-const DIMS = ["energy","expression","reassurance","needs","bids","listening","conflict","repair","love","feedback"];
+/**
+ * Labels come from api/_workbook-content.js, which is the copy the results
+ * payload sends, so the two products can never name a dimension differently.
+ *
+ * The rest of each entry stays here: the ends, the background tints and the
+ * dark variant are how this surface paints a dimension, and the app paints it
+ * differently. Only the name is shared, because only the name is read aloud.
+ *
+ * Ellie renamed "Giving and Receiving Feedback" to "Feedback" because the long
+ * one wrapped on the glance page. Without this loop that rename would have
+ * landed on one product.
+ */
+for (const _k of Object.keys(DIM_META)) {
+  const _shared = SHARED_DIM_META[_k];
+  if (_shared?.label) DIM_META[_k].label = _shared.label;
+}
+
+// The ten dimensions, from the display order rather than typed again. Order
+// does not matter to the scan below; the set does, and a hand-written set goes
+// stale the day an eleventh dimension exists.
+const DIMS = DIMENSION_DISPLAY_ORDER;
 
 
 
@@ -1699,7 +1720,10 @@ function computeIndividualType(scores) {
   // flag as low-confidence so the UI can surface a methodology note.
   // Threshold of 0.3 on stdDev = the user mostly answered 3s.
   // Methodology TODO: LMFT to tune the threshold + the surface text.
-  const dimValues = ['energy','expression','reassurance','love','bids','needs','conflict','repair','feedback','listening']
+  // The set, not an order: this is a standard deviation across all of them and
+  // the sequence is irrelevant. It was written out anyway, which is a set that
+  // silently stops covering everything the day an eleventh dimension exists.
+  const dimValues = DIMENSION_DISPLAY_ORDER
     .map(k => s[k]).filter(v => v != null && !isNaN(v));
   let stdDev = 0;
   if (dimValues.length >= 3) {
@@ -2866,7 +2890,10 @@ function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
 // Produces one feedback object per dimension comparing two score objects.
 function generatePersonalityFeedback(myS, partS, userName, partnerName, content) {
-  const dims = ["energy","expression","reassurance","needs","bids","conflict","repair","listening","love","feedback"];
+  // Was a third hand-written list, in a third order. Everything downstream
+  // re-sorts for display, so the order here never mattered and the set always
+  // did.
+  const dims = DIMENSION_DISPLAY_ORDER;
   return dims.map(dim => {
     const myScore   = myS[dim]   ?? 3;
     const partScore = partS[dim] ?? 3;
@@ -3390,8 +3417,11 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // Ordered dims follow sorted order for step navigation (item 1)
   // Domain order drives navigation — keeps dims in a consistent,
   // logical reading sequence matching the sidebar.
-  const DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","repair","feedback"];
-  const orderedDims = DOMAIN_ORDER.filter(d => feedback.some(f => f.dim === d));
+  // DIMENSION_DISPLAY_ORDER, from api/_lib/comm-domains.js: the three domains
+  // flattened. Written out here and again below as UR_DOMAIN_ORDER, in a file
+  // the app cannot read, which is why the app showed these ten rows in the
+  // scoring order instead and nothing noticed.
+  const orderedDims = DIMENSION_DISPLAY_ORDER.filter(d => feedback.some(f => f.dim === d));
   // Detailed results are 3 grouped domain pages, not one page per dimension.
   // domainGroups is the source of truth for both the pages and the sidebar.
   const domainGroups = COMM_DOMAINS;
@@ -3416,7 +3446,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // dimension weighted more heavily in the axis scoring, since that is the one
   // doing more to shape their type. Every dimension has its own item, so two
   // cards can no longer show the same text.
-  const _DOMAIN_DIMS = { inner: ["energy","expression","reassurance"], connection: ["love","needs","bids","listening"], hard: ["conflict","repair","feedback"] };
+  // COMM_DOMAINS, as a lookup. This was the same three lists written out again.
+  const _DOMAIN_DIMS = Object.fromEntries(COMM_DOMAINS.map(d => [d.id, d.dims]));
   const _DOMAIN_LABELS = { inner: "Internal processing", connection: "How you connect", hard: "When things get hard" };
   // Widest-gap dimension in a domain, ties broken toward the dimension weighted
   // more heavily in the axis scoring. Used by both the glance card and the
@@ -5934,15 +5965,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const personalityFeedback = generatePersonalityFeedback(mySelf, partSelf, userName, partnerName, _content);
   const sortedFeedback = [...personalityFeedback].sort((a, b) => a.gap - b.gap);
   // Domain order — matches PersonalityResults navigation
-  const UR_DOMAIN_ORDER = ["energy","expression","reassurance","love","needs","bids","listening","conflict","repair","feedback"];
-  const orderedDims = UR_DOMAIN_ORDER.filter(d => personalityFeedback.some(f => f.dim === d));
+  // The same one list. This was the second hand-written copy.
+  const orderedDims = DIMENSION_DISPLAY_ORDER.filter(d => personalityFeedback.some(f => f.dim === d));
   // Comms detailed results are three grouped domain pages, not one per dimension.
-  // Must stay in step with detailDomains inside PersonalityResults.
-  const UR_DOMAINS = [
-    { id: "inner",      label: "Internal Processing",  color: "#9B5DE5", dims: ["energy","expression","reassurance"] },
-    { id: "connection", label: "How You Connect",      color: "#E8673A", dims: ["love","needs","bids","listening"] },
-    { id: "hard",       label: "When Things Get Hard", color: "#1B5FE8", dims: ["conflict","repair","feedback"] },
-  ].filter(g => orderedDims.some(d => g.dims.includes(d)));
+  // COMM_DOMAINS. This was a full copy of it, ids, labels, colours and all,
+  // under a comment saying it "must stay in step with detailDomains inside
+  // PersonalityResults". It cannot drift now because there is nothing to drift
+  // from: both read the one module the app reads too.
+  const UR_DOMAINS = COMM_DOMAINS
+    .filter(g => orderedDims.some(d => g.dims.includes(d)));
   const nUR = UR_DOMAINS.length;
   const byDim = Object.fromEntries(personalityFeedback.map(f => [f.dim, f]));
   const avgGap = personalityFeedback.reduce((s, f) => s + f.gap, 0) / personalityFeedback.length;

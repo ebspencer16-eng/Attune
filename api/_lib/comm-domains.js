@@ -54,3 +54,29 @@ export const COMM_DOMAINS = [
 export function commDomains() {
   return COMM_DOMAINS.map((d) => ({ ...d, ground: groundFor(d.id) }));
 }
+
+/**
+ * The order Communication dimensions are shown in, everywhere.
+ *
+ * ── WHY IT IS THE DOMAINS FLATTENED ───────────────────────────────────────
+ * The results present these as three domains: what happens inside you, how you
+ * connect, and what happens when things get hard. A glance page that lists all
+ * ten has to pick an order, and the only one that will not fight the rest of
+ * the section is the order the domains themselves put them in. Read the glance
+ * top to bottom and then the three detail pages, and nothing moves.
+ *
+ * ── WHY IT IS DERIVED AND NOT WRITTEN ─────────────────────────────────────
+ * It was written out by hand in src/App.jsx, twice, as DOMAIN_ORDER and
+ * UR_DOMAIN_ORDER. The app had neither, so it used the order the dimensions
+ * arrive in, which is DIM_KEYS: the scoring order. Those differ. `needs` and
+ * `bids` are swapped and `listening` sits four places apart.
+ *
+ * So the same ten rows read in a different order on the two products, and
+ * Ellie found it by looking. Nothing could have caught it: one order was a
+ * literal in a file the app cannot read and the other was an implicit
+ * consequence of an object's key order.
+ *
+ * Derived from COMM_DOMAINS, so moving a dimension between domains moves it
+ * here too and cannot leave the glance disagreeing with the pages.
+ */
+export const DIMENSION_DISPLAY_ORDER = COMM_DOMAINS.flatMap((d) => d.dims);

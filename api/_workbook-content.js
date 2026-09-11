@@ -14,7 +14,7 @@ export const DIM_META = {
   repair:      { label: 'Repairing',                      left: 'Formal',     right: 'Informal',   color: '1B5FE8' },
   listening:   { label: 'Listening',                      left: 'Reflective', right: 'Responsive', color: 'E8673A' },
   love:        { label: 'Emotional Intimacy',             left: 'Words',      right: 'Actions',    color: 'E8673A' },
-  feedback:    { label: 'Giving and Receiving Feedback',  left: 'Guarded',    right: 'Open',       color: '1B5FE8' },
+  feedback:    { label: 'Feedback',  left: 'Guarded',    right: 'Open',       color: '1B5FE8' },
 };
 
 // Returns dimension-level close/gap text and a weekly practice.
