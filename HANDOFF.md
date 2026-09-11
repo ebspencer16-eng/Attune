@@ -1160,3 +1160,36 @@ would have meant leaving Expo Go for a development build, Xcode, and
 `expo run:ios` — a permanent change to how the app is run daily. It still
 cannot split a word; if that matters, the module is the honest answer and that
 is its cost.
+
+
+## 2026-09-11 — the missing dots, and the pages nothing had rendered
+
+**Every placement dot in the app was at 10000%.** `Marker` took a prop called
+`left` and multiplied it by 100, so it wanted a fraction; all six call sites
+passed a percentage. Three screens with invisible dots: reflection ratings,
+reflection Side by Side, and the intimacy question rows. Nothing errored,
+because 10000% is a valid style value.
+
+That is the third unit bug here, after `chipText` comparing a stored 'A' to the
+number 0, and `openings` typed as number when the data is a letter.
+`check-position-units.mjs` now requires anything reaching a `%` style to be
+named for a percentage or converted inline. It immediately found `SbsDot`,
+correct but named `p`, one rename from the same bug.
+
+**The four Conflict pages had never been rendered by anything**, because the
+smoke test excluded them by name: the demo cannot stand up
+/api/conflict-results. It reported 26 of 26 the whole time, over a set that
+deliberately left out the risky part. When the website moved to that endpoint,
+all four sat on "Loading. One moment." in demo mode and nobody saw it.
+
+They are covered now, by stubbing the endpoint with a fixture built from the
+question registry. **30 of 30.** The fixture is not demo data on purpose: demo
+answers show in the showcase tour, two conflict questions are free text, and
+that is Ellie's copy. If she wants Conflict in the showcase tour, it needs two
+written answers per partner from her.
+
+### Still open
+
+- Whether the Settings "What the server sees" panel explains the Relationship
+  Reflection pages. Everything the code can tell me is ruled out.
+- Demo answers for Conflict Patterns, if the showcase tour should include it.
