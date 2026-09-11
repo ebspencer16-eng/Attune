@@ -12107,6 +12107,60 @@ export default function App() {
                 }
               }
               if (cancelled) return;
+
+              /**
+               * ── EXERCISE ANSWERS, FILL-ONLY ────────────────────────────
+               * Ellie, twice: "My dashboard, again, showed that ex1 was
+               * incomplete. I signed out then signed back in and it fixed
+               * itself."
+               *
+               * Signing out fixed it because that path rebuilds the account
+               * from the profile and rewrites every answer cache from the
+               * server. This path, the one a returning customer actually takes
+               * on every load, re-synced entitlements and nothing else. So the
+               * exercise state was whatever localStorage happened to hold,
+               * with no reconciliation, forever.
+               *
+               * Lose the local copy by any route, a cleared cache, a browser
+               * purge, a private window, a discard that fired when it should
+               * not have, and the site told the customer they had not done an
+               * exercise the server has answers for. Indefinitely, because
+               * nothing was ever going to look again.
+               *
+               * Fill-only, deliberately, and the same rule the entitlement
+               * resync above states for itself: this can add what is missing
+               * and can never remove anything. Clearing belongs to the paths
+               * that know an answer was genuinely reset, and those are guarded
+               * by check-answer-clears.mjs.
+               *
+               * The reload is the sibling branch's, for the same reason: the
+               * state initializers only read localStorage at mount. It cannot
+               * loop, because the next load finds the cache populated and
+               * fills nothing.
+               */
+              if (prof) {
+                let filled = false;
+                for (const ex of EXERCISES) {
+                  const fromServer = prof[ex.column];
+                  if (!fromServer) continue;
+                  try {
+                    const raw = localStorage.getItem(ex.localKey);
+                    const parsed = raw ? JSON.parse(raw) : null;
+                    const hasLocal = ex.shape === 'record'
+                      ? !!parsed?.completedAt
+                      : !!parsed && Object.keys(parsed).length > 0;
+                    if (hasLocal) continue;
+                    localStorage.setItem(ex.localKey, JSON.stringify(fromServer));
+                    filled = true;
+                  } catch { /* a cache we cannot read is one we can rewrite */ }
+                }
+                if (filled) {
+                  console.warn('[Attune] restored exercise answers the server had and this device did not.');
+                  window.location.reload();
+                  return;
+                }
+              }
+
               const ent = await resolveEntitlements(sb, session, prof);
               if (cancelled) return;
               // Union with BOTH the local account and the stored order. The
@@ -12238,15 +12292,32 @@ export default function App() {
               // a browser still held pre-restructure answers, signing in
               // pushed them straight back, and the reset looked like it had
               // failed when it had actually been reversed.
-              const isCurrentEx1 = (a) => {
-                const keys = Object.keys(a || {});
+              /**
+               * Positively OLD format, rather than "not perfectly current".
+               *
+               * ── WHY THE TEST CHANGED ────────────────────────────────────
+               * This was `hasAllSelf && pvAreQuestions`: every one of the
+               * current self questions answered, and at least one pv key. Then
+               * anything failing it had its local copy DELETED.
+               *
+               * Two problems with deciding a delete that way. A current answer
+               * set missing a single id, for any reason, was destroyed. And the
+               * day a question is added to PERSONALITY_QUESTIONS, hasAllSelf
+               * goes false for every customer alive and the next sign-in
+               * discards all of their local Communication answers at once.
+               *
+               * The thing actually worth detecting is the pre-two-part format,
+               * and it has a positive signature: pv keys that name DIMENSIONS
+               * instead of question ids. Missing a question is not that.
+               *
+               * So this answers "is this definitely the old shape", and
+               * anything else is left alone.
+               */
+              const isObsoleteEx1 = (a) => {
                 const selfIds = PERSONALITY_QUESTIONS.map(q => q.id);
-                const hasAllSelf = selfIds.every(id => a[id] != null);
-                const pvKeys = keys.filter(k => k.startsWith('pv_'));
-                // Every pv key must name a current question, not a dimension.
-                const pvAreQuestions = pvKeys.length > 0
-                  && pvKeys.every(k => selfIds.includes(k.slice(3)));
-                return hasAllSelf && pvAreQuestions;
+                const pvKeys = Object.keys(a || {}).filter(k => k.startsWith('pv_'));
+                if (!pvKeys.length) return false;
+                return pvKeys.every(k => !selfIds.includes(k.slice(3)));
               };
               const tryResync = async (exNum, key) => {
                 try {
@@ -12254,13 +12325,14 @@ export default function App() {
                   if (!raw) return;
                   const answers = JSON.parse(raw);
                   if (!answers || typeof answers !== 'object') return;
-                  if (exNum === 1 && !isCurrentEx1(answers)) {
-                    // safe-clear: not a read result. This local copy predates
-                    // the two-part exercise, so it is discarded rather than
-                    // pushed. Nothing was read to decide it, and nothing on the
-                    // server is lost.
+                  if (exNum === 1 && isObsoleteEx1(answers)) {
+                    // safe-clear: not a read result. These answers are in the
+                    // pre-two-part shape, positively identified by pv keys that
+                    // name dimensions rather than questions. Discarded rather
+                    // than pushed, because pushing them is what undid the beta
+                    // reset. Nothing on the server is lost.
                     try { localStorage.removeItem('attune_ex1'); localStorage.removeItem('attune_ex1_progress'); } catch {}
-                    console.warn('[Attune] local Ex1 answers predate the two-part exercise. Discarded rather than resynced.');
+                    console.warn('[Attune] local Ex1 answers are in the pre-two-part shape. Discarded rather than resynced.');
                     return;
                   }
                   // Check if the server already has answers for this exercise.
