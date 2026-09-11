@@ -8,6 +8,9 @@
  * ACTIONS
  *   GET  ?action=list          own notes plus notes shared with you
  *   GET  ?action=tags          your tags, seeded on first call
+ *   POST { action: 'createTag' } a tag of your own. No standard_key: that is a
+ *                              promise the name follows a list, and this one
+ *                              follows a person.
  *   POST { action: 'create' }  a note or annotation
  *   POST { action: 'update' }  edit your own; a shared note stays editable only by its author
  *   POST { action: 'open' }    mark a note your PARTNER shared as seen. The one
@@ -166,6 +169,48 @@ export default async function handler(req) {
     if (req.method !== 'POST') return json({ ok: false, error: 'unsupported action' }, 400);
 
     // ── Write ──────────────────────────────────────────────────────────────
+    /**
+     * A tag the person makes themselves.
+     *
+     * ── WHY IT HAS NO standard_key ────────────────────────────────────────
+     * The seeded tags carry one, `dim:conflict` and so on, which is how an
+     * annotation's anchor gets a label without the app holding a copy of the
+     * dimension list. A tag someone types is not any of those and must not
+     * claim to be: a standard_key is a promise that the name follows a list,
+     * and this name follows a person.
+     *
+     * ── ON DUPLICATES ─────────────────────────────────────────────────────
+     * There is a unique index on (owner_id, lower(name)). Adding a tag that
+     * already exists returns the existing one rather than an error, because
+     * from the reader's side "I want a tag called Money" is satisfied either
+     * way, and an error here would be the product arguing about bookkeeping.
+     */
+    if (action === 'createTag') {
+      const name = String(body.name || '').trim();
+      if (!name) return json({ ok: false, error: 'a tag needs a name' }, 400);
+      if (name.length > 40) return json({ ok: false, error: 'that name is too long' }, 400);
+
+      const r = await rest('tags', {
+        method: 'POST',
+        headers: { ...jsonHeaders, Prefer: 'return=representation,resolution=merge-duplicates' },
+        body: JSON.stringify({ owner_id: me, name, color: body.color || null, standard_key: null }),
+      });
+      let tag = (await r.json().catch(() => []))?.[0] || null;
+      if (!tag) {
+        // merge-duplicates needs a matching unique constraint to resolve
+        // against; the index here is on lower(name), which it cannot use. So
+        // the insert can come back empty on a name that already exists, and
+        // the existing row is the right answer.
+        const ex = await rest(
+          `tags?owner_id=eq.${me}&name=ilike.${encodeURIComponent(name)}&select=*&limit=1`,
+          { headers: svc },
+        );
+        tag = (await ex.json().catch(() => []))?.[0] || null;
+      }
+      if (!tag) return json({ ok: false, error: 'create failed' }, 500);
+      return json({ ok: true, tag });
+    }
+
     if (action === 'create') {
       const { anchorType = null, anchorKey = null } = body;
       if (!isValidAnchor(anchorType, anchorKey)) {

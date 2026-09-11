@@ -781,6 +781,16 @@ export type Note = {
   anchor_version: number | null;
   /** Tag ids on this note. Empty when it has none. */
   tagIds?: string[];
+  /**
+   * What kind of mark this is. A highlight and an underline carry a colour and
+   * usually no body; a note carries words. All three anchor the same way, which
+   * is why they are one table and not three.
+   */
+  kind?: 'note' | 'highlight' | 'underline';
+  /** The palette key, from api/_lib/annotations.js. Null on a plain note. */
+  color?: string | null;
+  /** When the partner this was shared with first opened it. Null means unread. */
+  opened_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -845,6 +855,14 @@ export function createNote(input: {
   anchorType?: string; anchorKey?: string; anchorContext?: string; anchorVersion?: number;
   /** Tags to attach. The server accepted these all along; nothing sent them. */
   tagIds?: string[];
+  /**
+   * What is being left on the text. The server validates kind and colour
+   * together: a plain note takes no colour, a highlight or underline requires
+   * one, and a colour the product does not offer is refused rather than
+   * quietly becoming the default.
+   */
+  kind?: 'note' | 'highlight' | 'underline';
+  color?: string | null;
 }) {
   return request<{ ok: true; note: Note }>('/api/notes', {
     method: 'POST',
@@ -861,6 +879,11 @@ export function updateNote(input: {
   id: string; title?: string | null; body?: string;
   /** The full set of tags the note should end up with. Omit to leave them. */
   tagIds?: string[];
+  /** Recolour a mark, or turn a highlight into an underline. Send both or
+   *  neither: the server refuses one without the other, because a highlight
+   *  with no colour cannot be drawn. */
+  kind?: 'note' | 'highlight' | 'underline';
+  color?: string | null;
 }) {
   return request<{ ok: true; note: Note }>('/api/notes', {
     method: 'POST',
@@ -881,6 +904,36 @@ export function shareNote(id: string, visibility: 'private' | 'shared') {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'share', id, visibility }),
+  });
+}
+
+/**
+ * Mark a note your PARTNER shared with you as seen.
+ *
+ * The one write on this endpoint that touches a row you do not own, which is
+ * the point: the reader is not the author. The server allows exactly one
+ * column through, and check-note-open.mjs keeps the filter narrow.
+ */
+/**
+ * A tag of the reader's own.
+ *
+ * Returns the existing tag when the name is already taken, rather than an
+ * error: "I want a tag called Money" is satisfied either way, and arguing
+ * about bookkeeping is not the product's job.
+ */
+export function createTag(name: string, color?: string | null) {
+  return request<{ ok: true; tag: Tag }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'createTag', name, color: color ?? null }),
+  });
+}
+
+export function openSharedNote(id: string) {
+  return request<{ ok: true; opened: number }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'open', id }),
   });
 }
 
