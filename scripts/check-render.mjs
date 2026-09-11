@@ -20,6 +20,7 @@
 
 import { launch } from './_lib/browser.mjs';
 import { RESULTS_SECTIONS } from '../api/_lib/results-sections.js';
+import { conflictFixture } from './_lib/conflict-fixture.mjs';
 
 const BASE = process.env.BASE || 'http://localhost:4173';
 const TYPE = process.env.TYPE || 'WX';
@@ -32,10 +33,19 @@ const PKG = process.env.PKG || 'premium';
 // conversations are 0 to 4. A phantom section reports as skipped, which reads
 // like missing demo data rather than a list that stopped matching the product.
 //
-// Conflict is excluded because its results come from /api/conflict-results,
-// which the demo does not stand up. Excluded by name, from the same registry,
-// so it stays correct if the conflict section list changes.
-const SECTIONS = RESULTS_SECTIONS.filter((id) => !id.startsWith('conflict-'));
+// Conflict is included now. It used to be excluded, because its results come
+// from /api/conflict-results and the demo cannot stand that up, so the four
+// Conflict pages were the only results pages nothing had ever rendered.
+//
+// That is precisely where a break hid: the website moved to reading that
+// endpoint, the demo path never fetched, and all four sat on "Loading. One
+// moment." forever. The smoke test reported 26 of 26 the whole time, which is
+// a green tick for a set that deliberately left out the risky part.
+//
+// They are covered by stubbing the endpoint with a fixture. See
+// scripts/_lib/conflict-fixture.mjs for why that is a fixture and not demo
+// data.
+const SECTIONS = RESULTS_SECTIONS;
 
 // Anything in braces that survived to the screen, plus the two words that mean
 // a value was missing rather than absent.
@@ -54,6 +64,30 @@ let failed = 0;
 const skipped = [];
 await page.goto(BASE + '/');
 
+/**
+ * Stub /api/conflict-results in every document, before the app's own scripts.
+ *
+ * It has to be before: the app fetches this in an effect on mount, so a stub
+ * installed after the navigation settles answers nothing and the four Conflict
+ * pages report as having no data. Which is what they did on the first attempt.
+ */
+const CONFLICT_BODY = JSON.stringify(conflictFixture());
+await page.onNewDocument(`
+  (() => {
+    const body = ${JSON.stringify(CONFLICT_BODY)};
+    const real = window.fetch.bind(window);
+    window.fetch = (url, opts) => {
+      const u = typeof url === 'string' ? url : (url && url.url) || '';
+      if (u.includes('/api/conflict-results')) {
+        return Promise.resolve(new Response(body, {
+          status: 200, headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+      return real(url, opts);
+    };
+  })();
+`);
+
 for (const section of SECTIONS) {
   errors.length = 0;
   await page.evaluate(
@@ -63,7 +97,8 @@ for (const section of SECTIONS) {
   // intimacy=1 because Premium no longer bundles Physical Intimacy; it is an
   // add-on now, and without this flag the eight intimacy sections have no demo
   // data and the run silently covers 18 of 26 instead of 26.
-  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&view=results`);
+  // conflict=1 makes the demo path actually fetch, which the stub then answers.
+  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&conflict=1&view=results`);
   await page.wait(900);
 
   // Read the results column, not the whole document: a section the demo has no

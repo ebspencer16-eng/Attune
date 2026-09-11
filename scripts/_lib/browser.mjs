@@ -157,6 +157,18 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
     },
 
     /** Run a function in the page. `arg` is passed through as JSON. */
+    /**
+     * Run a script in every document this page loads, before its own scripts.
+     *
+     * Needed for stubbing an endpoint: `evaluate` after `goto` runs once the
+     * app has already mounted and fired its requests, so a stub installed
+     * there answers nothing. The render check's four Conflict pages were
+     * reported as skipped for exactly that reason.
+     */
+    async onNewDocument(source) {
+      await send('Page.addScriptToEvaluateOnNewDocument', { source });
+    },
+
     async evaluate(fn, arg) {
       const expression = `(${fn.toString()})(${JSON.stringify(arg ?? null)})`;
       const res = await send('Runtime.evaluate', {

@@ -11490,16 +11490,64 @@ export default function App() {
     // them in the dependency array evaluates during render and hits the
     // temporal dead zone. Inside the body they are safe, because effects run
     // after the body has finished.
-    if (_demoParam || view !== 'results') return;
+    if (view !== 'results') return;
+    /**
+     * Demo mode has no session, so there is nothing to fetch.
+     *
+     * This returned early and left conflictResults null, which the page reads
+     * as "still loading" and shows forever. The showcase tour is the one place
+     * a stranger sees these pages, and it sat on "Loading. One moment."
+     *
+     * Recorded as a real not-ready answer instead, which is true: a demo
+     * couple has not filled in Conflict Patterns.
+     */
+    /**
+     * Demo mode has no session, so there is normally nothing to fetch.
+     *
+     * `?demo=1&conflict=1` is the exception, and it exists for the render
+     * smoke test. That test drives the real results experience in a browser
+     * and skipped all four Conflict pages, because the demo cannot stand up
+     * /api/conflict-results. Four pages nobody had ever rendered, which is how
+     * they sat on "Loading" forever without anyone noticing.
+     *
+     * With the flag the fetch runs and the test stubs the endpoint. Without a
+     * stub it simply fails and the page shows the waiting state, which is the
+     * same thing plain demo mode shows.
+     */
+    const _wantConflictFetch = (() => {
+      try { return new URLSearchParams(window.location.search).get('conflict') === '1'; } catch { return false; }
+    })();
+    if (_demoParam && !_wantConflictFetch) {
+      setConflictResults({ ok: true, ready: false, reason: 'demo' });
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
-        const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (!hasSupabase()) return;
-        const { data } = await sb.auth.getSession();
-        const tok = data?.session?.access_token;
-        if (!tok) return;
-        const r = await fetch('/api/conflict-results', { headers: { Authorization: `Bearer ${tok}` } });
+        /**
+         * The token if there is one, and no token is not a reason to stop.
+         *
+         * This returned early when Supabase was unconfigured or the session
+         * was missing, which reads as caution and is really a second guess at
+         * something the endpoint decides for itself: it answers 401 without a
+         * valid token, and the waiting state is what the page shows either
+         * way.
+         *
+         * It also meant the request was unreachable in any build without
+         * Supabase env vars, which is every preview build, which is why the
+         * render check could not exercise these four pages at all.
+         */
+        let tok = null;
+        try {
+          const { supabase: sb, hasSupabase } = await import('./supabase.js');
+          if (hasSupabase()) {
+            const { data } = await sb.auth.getSession();
+            tok = data?.session?.access_token || null;
+          }
+        } catch { /* no client; the endpoint still decides */ }
+
+        const r = await fetch('/api/conflict-results',
+          tok ? { headers: { Authorization: `Bearer ${tok}` } } : {});
         if (!r.ok) return;
         const body = await r.json();
         // Not-ready is a real answer, not a failure: one of them has not
