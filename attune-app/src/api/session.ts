@@ -60,7 +60,9 @@ export function isSignedIn(): boolean {
  * baseUrl points at production because there is no staging environment. When
  * one exists this is the single place that changes.
  */
-export function initSession(opts: { refresh?: () => Promise<boolean> } = {}) {
+export function initSession(
+  opts: { refresh?: () => Promise<'renewed' | 'signed-out' | 'unavailable'> } = {},
+) {
   configureApi({
     // Passed in by the root layout rather than imported here: auth.ts already
     // imports from this file, so importing it back would close a cycle.

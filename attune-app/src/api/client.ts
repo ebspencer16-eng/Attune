@@ -584,7 +584,14 @@ export type HomeResponse = {
 
 let baseUrl = 'https://www.attune-relationships.com';
 let getToken: () => Promise<string | null> = async () => null;
-let refresh: (() => Promise<boolean>) | null = null;
+/**
+ * What a refresh attempt concluded. Three answers, not two: see
+ * refreshSession in api/auth.ts. 'unavailable' means we could not find out,
+ * which must not be reported to a screen as being signed out.
+ */
+type RefreshOutcome = 'renewed' | 'signed-out' | 'unavailable';
+
+let refresh: (() => Promise<RefreshOutcome>) | null = null;
 
 /**
  * The refresh currently in flight, if any.
@@ -601,10 +608,10 @@ let refresh: (() => Promise<boolean>) | null = null;
  *
  * One refresh at a time. Everyone waiting on it gets the same answer.
  */
-let refreshInFlight: Promise<boolean> | null = null;
+let refreshInFlight: Promise<RefreshOutcome> | null = null;
 
-function refreshOnce(): Promise<boolean> {
-  if (!refresh) return Promise.resolve(false);
+function refreshOnce(): Promise<RefreshOutcome> {
+  if (!refresh) return Promise.resolve('signed-out');
   if (!refreshInFlight) {
     refreshInFlight = refresh().finally(() => { refreshInFlight = null; });
   }
@@ -622,7 +629,7 @@ function refreshOnce(): Promise<boolean> {
 export function configureApi(opts: {
   baseUrl?: string;
   getToken: () => Promise<string | null>;
-  refresh?: () => Promise<boolean>;
+  refresh?: () => Promise<RefreshOutcome>;
 }) {
   if (opts.baseUrl) baseUrl = opts.baseUrl.replace(/\/$/, '');
   getToken = opts.getToken;
@@ -643,7 +650,7 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
     // to sign in while holding everything needed to continue. The 401 path
     // below has always refreshed; the empty path never did, which is the
     // harder case to notice because it needs no server round trip to fail.
-    if (await refreshOnce()) token = await getToken();
+    if (await refreshOnce() === 'renewed') token = await getToken();
   }
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
 
@@ -672,8 +679,19 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
     if (!retrying && refresh) {
       // Shared, so several requests failing together cause one refresh rather
       // than a race where all but the first spend an already-used token.
-      const renewed = await refreshOnce();
-      if (renewed) return request<T>(path, init, true);
+      const outcome = await refreshOnce();
+      if (outcome === 'renewed') return request<T>(path, init, true);
+      /**
+       * The refresh could not be carried out, which is not the same as the
+       * session being over: a locked keychain, no connection, or Supabase
+       * having a bad minute all land here.
+       *
+       * Reported as offline, because that is what every screen already does
+       * the right thing with: keep the last good payload and say so. Reporting
+       * it as unauthorized is what put a sign-in screen in front of Ellie on a
+       * session that was fine, twice.
+       */
+      if (outcome === 'unavailable') return { ok: false, error: { kind: 'offline' } };
     }
     // Read the body: the endpoint distinguishes a missing token from an
     // invalid one, and those need different fixes.

@@ -81,6 +81,71 @@ if (!requestBody) {
   }
 }
 
+// ── 3. A refresh that could not be carried out is not a sign-out ───────────
+//
+// refreshSession returned a boolean, and every failure was false: no refresh
+// token, a keychain that would not open, Supabase returning a 500, the phone
+// being offline. The client turned false into unauthorized and the screen
+// showed sign-in.
+//
+// Only one of those is being signed out. Ellie hit the others twice: "When I
+// first clicked into this, I was prompted to sign in again. I clicked out then
+// back in and it went away." It went away because the next attempt worked.
+// Nothing about her session had ended; one call had failed to find out.
+const authFile = readFileSync(ROOT + 'attune-app/src/api/auth.ts', 'utf8');
+
+/**
+ * refreshSession's body, not the whole file.
+ *
+ * The first version of this grepped the file, and a plant that removed the
+ * 400/401 check from refreshSession still passed: signInWithPassword makes the
+ * same check thirty lines further up, so the pattern was found somewhere it
+ * proved nothing about. A gate that finds the right string in the wrong
+ * function is a gate that passes for the wrong reason.
+ */
+const auth = (() => {
+  const at = authFile.indexOf('export async function refreshSession');
+  if (at === -1) return '';
+  const end = authFile.indexOf('\n}', at);
+  return authFile.slice(at, end === -1 ? authFile.length : end);
+})();
+
+if (!auth) {
+  problems.push('attune-app/src/api/auth.ts has no refreshSession to check.');
+}
+
+if (!/Promise<RefreshOutcome>/.test(auth)) {
+  problems.push(
+    "attune-app/src/api/auth.ts: refreshSession no longer reports three outcomes.\n"
+    + '      A boolean cannot tell "there is no session" from "we could not find out",\n'
+    + '      and the caller turns the second into a sign-in screen.');
+} else {
+  // The server's answer decides. 400 and 401 mean the refresh token is done;
+  // anything else is the server having a bad minute, and throwing someone back
+  // to a password prompt over a 503 is the product losing its nerve.
+  if (!/res\.status === 400 \|\| res\.status === 401/.test(auth)) {
+    problems.push(
+      'refreshSession no longer distinguishes a refused token from a failed request.\n'
+      + '      Only 400 and 401 mean signed out; every other status is unavailable.');
+  }
+  for (const [what, re] of [
+    ['the keychain read', /catch \{[\s\S]{0,200}?return 'unavailable'/],
+    ['the network call', /catch \{\s*\n?\s*return 'unavailable';\s*\/\/ no connection/],
+  ]) {
+    if (!re.test(auth)) {
+      problems.push(`refreshSession no longer treats a failure of ${what} as unavailable.`);
+    }
+  }
+}
+
+if (!/outcome === 'unavailable'[\s\S]{0,400}?kind: 'offline'/.test(client)) {
+  problems.push(
+    "attune-app/src/api/client.ts: an undetermined refresh is not reported as offline.\n"
+    + '      Every screen already keeps its last good payload for offline and says so.\n'
+    + '      Reporting it as unauthorized is what puts a sign-in screen in front of\n'
+    + '      someone whose session is fine.');
+}
+
 if (problems.length) {
   console.error('[check-session-recovery] the app can sign someone out on bad evidence:');
   for (const p of problems) console.error(`  ${p}`);
@@ -90,4 +155,6 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log('[check-session-recovery] a failed keychain read is not remembered, and an empty token tries the refresh.');
+console.log(
+  '[check-session-recovery] a failed keychain read is not remembered, an empty token '
+  + 'tries the refresh, and a refresh that could not run is not a sign-out.');

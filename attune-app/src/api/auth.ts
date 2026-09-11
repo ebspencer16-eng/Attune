@@ -179,28 +179,67 @@ async function setRefresh(token: string | null) {
 /**
  * Exchange the refresh token for a new access token.
  *
- * Returns false when there is nothing to refresh or the refresh itself failed,
- * which the caller should treat as genuinely signed out.
+ * ── THREE OUTCOMES, NOT TWO ───────────────────────────────────────────────
+ * This returned a boolean, and every failure was false: no refresh token, a
+ * keychain that would not open, Supabase returning a 500, the phone being
+ * offline. The caller turns false into "you are signed out" and shows the
+ * sign-in screen.
+ *
+ * Only one of those is being signed out. The rest are not knowing, and the
+ * difference is the whole of what Ellie kept hitting: "When I first clicked
+ * into this, I was prompted to sign in again. I clicked out then back in and
+ * it went away." It went away because the next attempt worked. Nothing about
+ * her session had ended; a single call had failed to find out.
+ *
+ * Same distinction getToken now makes for the access token. Not knowing who
+ * someone is right now is not the same as knowing they are nobody, and only
+ * the second one is worth interrupting someone for.
+ *
+ *   renewed      a new access token is stored
+ *   signed-out   there is genuinely no session: no refresh token, or the
+ *                server refused the one we have
+ *   unavailable  we could not find out. Try again; change nothing.
  */
-export async function refreshSession(): Promise<boolean> {
-  if (!isAuthConfigured()) return false;
-  let refresh: string | null = null;
-  try { refresh = await SecureStore.getItemAsync(REFRESH_KEY); } catch { return false; }
-  if (!refresh) return false;
+export type RefreshOutcome = 'renewed' | 'signed-out' | 'unavailable';
 
+export async function refreshSession(): Promise<RefreshOutcome> {
+  if (!isAuthConfigured()) return 'signed-out';
+
+  let refresh: string | null = null;
   try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    refresh = await SecureStore.getItemAsync(REFRESH_KEY);
+  } catch {
+    // A keychain read can fail while the device is locked. That is a moment,
+    // not a fact about the session.
+    return 'unavailable';
+  }
+  if (!refresh) return 'signed-out';
+
+  let res: Response;
+  try {
+    res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
       method: 'POST',
       headers: { apikey: ANON_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refresh }),
     });
-    if (!res.ok) return false;
+  } catch {
+    return 'unavailable';   // no connection
+  }
+
+  // 400 and 401 are the server saying this refresh token is no longer good,
+  // which is the one answer that means signed out. Anything else is the server
+  // having a bad moment, and throwing someone back to a password prompt over a
+  // 503 is the product losing its nerve.
+  if (res.status === 400 || res.status === 401) return 'signed-out';
+  if (!res.ok) return 'unavailable';
+
+  try {
     const body = await res.json();
-    if (!body.access_token) return false;
+    if (!body.access_token) return 'unavailable';
     await setToken(body.access_token);
     if (body.refresh_token) await setRefresh(body.refresh_token);
-    return true;
+    return 'renewed';
   } catch {
-    return false;
+    return 'unavailable';
   }
 }
