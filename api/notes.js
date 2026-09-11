@@ -250,11 +250,42 @@ export default async function handler(req) {
         anchor_context: body.anchorContext || null,
         anchor_version: body.anchorVersion ?? null,
       };
-      const r = await rest('notes', {
+      /**
+       * Tolerant of migration 057 not having been run yet.
+       *
+       * kind, color and opened_at arrive in that migration. Until it is run,
+       * PostgREST rejects the whole insert for naming a column that does not
+       * exist, which would break writing a plain note as well: an existing
+       * feature, for every customer, because of a column only the new one
+       * needs.
+       *
+       * So the write is attempted whole and retried without the new fields if
+       * the schema has not caught up. A highlight cannot survive that retry
+       * and says so; a note loses nothing, because kind 'note' with no colour
+       * is exactly what a row without these columns already means.
+       *
+       * The same tolerance the entitlement resync keeps for is_comp and
+       * migration 028. It comes out when 057 has been run everywhere.
+       */
+      const insert = (body_) => rest('notes', {
         method: 'POST', headers: { ...jsonHeaders, Prefer: 'return=representation' },
-        body: JSON.stringify(row),
+        body: JSON.stringify(body_),
       });
-      if (!r.ok) return json({ ok: false, error: 'create failed' }, 500);
+      let r = await insert(row);
+      if (!r.ok) {
+        const detail = await r.text().catch(() => '');
+        const schemaBehind = /kind|color|opened_at/.test(detail) && /column|schema/i.test(detail);
+        if (!schemaBehind) return json({ ok: false, error: 'create failed' }, 500);
+        if (kind !== 'note') {
+          return json({
+            ok: false,
+            error: 'highlights and underlines need migration 057. Run it in the SQL editor.',
+          }, 503);
+        }
+        const { kind: _k, color: _c, ...withoutNewColumns } = row;
+        r = await insert(withoutNewColumns);
+        if (!r.ok) return json({ ok: false, error: 'create failed' }, 500);
+      }
       const created = (await r.json().catch(() => []))?.[0] || null;
 
       if (created && Array.isArray(body.tagIds) && body.tagIds.length) {

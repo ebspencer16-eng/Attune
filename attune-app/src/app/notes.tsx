@@ -1,22 +1,33 @@
 /**
  * Notes.
  *
- * One list, newest first: notes you wrote, annotations you left on something,
- * and what your partner shared with you, in the order they last changed.
+ * Three sections, in the order Ellie asked for them:
  *
- * It was three lists behind a pill row. That shape asked you to know which of
- * three places a note was in before you could look for it, which is a question
- * about how the data is stored rather than about the note. A single stream
- * answers "what did we write" without making anyone choose a lane first.
+ *   Pick up where you left off   the three most recent things you left
+ *                                anywhere, notes and highlights alike
+ *   From your partner            what they sent you, unread ones marked
+ *   Tags                         every tag, with a sort
+ *
+ * ── WHY NOT ONE STREAM ────────────────────────────────────────────────────
+ * It was one, and before that three lists behind a pill row. The pill row was
+ * wrong because it asked you to know which of three places a note was in
+ * before you could look for it, which is a question about storage.
+ *
+ * The single stream fixed that and lost something else: what you left
+ * somewhere and what your partner sent you are different things to come back
+ * to. Only one of them can be unread, only one is addressed to you, and mixing
+ * them meant a note from your partner could scroll past between two of your
+ * own highlights. Sorted by date, the most personal thing on the screen was
+ * the easiest to miss.
  *
  * The three still arrive separately from /api/notes, because they are separate
- * questions server-side, and shared notes have to stay distinguishable: only
- * the author edits one, so the card has to know whose it is.
+ * questions server-side, and shared notes stay distinguishable: only the
+ * author edits one, so the card has to know whose it is.
  *
- * Filtering by tag, source, author, and highlight against commentary is
- * deliberately not built yet. Every one of those filters cuts on something the
- * Results and In Practice screens have not defined, so building the controls
- * now means guessing at anchors and reworking them. See HANDOFF.md.
+ * ── WHAT IS STILL NOT BUILT ───────────────────────────────────────────────
+ * Filtering the notes themselves by source or author. The tag list has its
+ * sort, which is what was asked for; a general filter bar still cuts on things
+ * the Results and In Practice screens have not defined.
  *
  * Nothing here decides what an anchor means. That resolution lives in
  * constants/anchors.ts and derives from the standard tags the server seeds, so
@@ -33,7 +44,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   createNote, deleteNote, fetchHome, fetchNotes, fetchPosts, fetchResults, fetchTags,
-  shareNote, updateNote,
+  openSharedNote, shareNote, updateNote,
 } from '@/api/client';
 import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -64,6 +75,12 @@ export default function NotesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [editing, setEditing] = useState<Note | 'new' | null>(null);
+  // Each section shows its most recent few and opens to the rest. Two flags
+  // rather than one, because expanding what you wrote and expanding what your
+  // partner sent are unrelated decisions.
+  const [showAllMine, setShowAllMine] = useState(false);
+  const [showAllShared, setShowAllShared] = useState(false);
+  const [tagSort, setTagSort] = useState<TagSort>('az');
 
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
@@ -155,13 +172,47 @@ export default function NotesScreen() {
    * would usually sort lexicographically, but that quietly stops being true the
    * moment two rows come back with different timezone offsets.
    */
-  const rows: Row[] = useMemo(() => {
-    const mine = [...notes, ...annotations].map((note) => ({ note, readOnly: false }));
-    const theirs = shared.map((note) => ({ note, readOnly: true }));
-    return [...mine, ...theirs].sort(
-      (a, b) => Date.parse(b.note.updated_at) - Date.parse(a.note.updated_at),
-    );
-  }, [notes, annotations, shared]);
+  /**
+   * The reader's own, newest first.
+   *
+   * Notes and annotations arrive on separate keys because they are separate
+   * questions server-side, and both are things this person left somewhere. A
+   * highlight is not a lesser note; it is a note with a colour instead of
+   * words.
+   *
+   * This used to be merged with the partner's shared notes into one stream.
+   * Ellie asked for them apart: what you left and what was sent to you are
+   * different things to come back to, and only one of them can be unread.
+   */
+  const mineRecent = useMemo(() => [...notes, ...annotations].sort(
+    (a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at),
+  ), [notes, annotations]);
+
+  const sharedRecent = useMemo(() => [...shared].sort(
+    (a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at),
+  ), [shared]);
+
+  /** How many of the partner's notes this reader has not opened. */
+  const unopenedCount = useMemo(
+    () => sharedRecent.filter((n) => !n.opened_at).length,
+    [sharedRecent],
+  );
+
+  /**
+   * Mark one of the partner's notes as opened.
+   *
+   * Optimistic, and deliberately not awaited: the receipt is bookkeeping and
+   * must never stand between someone and the thing they tapped. A failed write
+   * means it reads unread again on the next load, which is the harmless
+   * direction to fail in.
+   */
+  const markOpened = useCallback((note: Note) => {
+    if (note.opened_at) return;
+    setShared((prev) => prev.map(
+      (n) => (n.id === note.id ? { ...n, opened_at: new Date().toISOString() } : n),
+    ));
+    openSharedNote(note.id);
+  }, []);
 
   if (loading) return <Shell><ScreenLoading label="Getting your notes" /></Shell>;
 
@@ -209,28 +260,102 @@ export default function NotesScreen() {
         </View>
 
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          {rows.length ? (
-            rows.map(({ note, readOnly }) => (
-              <NoteCard
-                key={note.id}
-                note={note}
-                tags={tags}
-                source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
-                moved={hasMoved(note, resultsVersion)}
-                author={readOnly ? partner : undefined}
-                readOnly={readOnly}
-                // A note the partner shared is theirs. The server refuses an
-                // edit from anyone but the author, so the row does not open an
-                // editor that could only ever fail to save.
-                onPress={readOnly ? undefined : () => setEditing(note)}
-              />
-            ))
+          {/* ── 1. PICK UP WHERE YOU LEFT OFF ──────────────────────────────
+              Ellie: "the top tile to be 'pick up where you left off' with 3
+              rows each with a sneak peek of recent notes/highlights/tags,
+              organized from most recent to least recent."
+
+              Three, from everything of the reader's own: a note, a highlight
+              and an underline are all things they left somewhere, and a stream
+              that showed only one kind would be a stream about storage rather
+              than about them. */}
+          {mineRecent.length ? (
+            <Section title="Pick up where you left off">
+              {mineRecent.slice(0, 3).map((note) => (
+                <NoteCard
+                  key={note.id}
+                  note={note}
+                  tags={tags}
+                  source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                  moved={hasMoved(note, resultsVersion)}
+                  onPress={() => setEditing(note)}
+                />
+              ))}
+              {mineRecent.length > 3 ? (
+                <More
+                  label={showAllMine ? 'Show fewer' : `All ${mineRecent.length}`}
+                  onPress={() => setShowAllMine((v) => !v)}
+                />
+              ) : null}
+              {showAllMine
+                ? mineRecent.slice(3).map((note) => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    tags={tags}
+                    source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                    moved={hasMoved(note, resultsVersion)}
+                    onPress={() => setEditing(note)}
+                  />
+                ))
+                : null}
+            </Section>
           ) : (
             <Blank
               title="No notes yet"
               body="Anything you write here stays private until you choose to share it."
             />
           )}
+
+          {/* ── 2. WHAT YOUR PARTNER SENT ──────────────────────────────────
+              Ellie: "2 or 3 most recent show, but then there's an arrow to see
+              all the ones your partner has sent you... Would like something
+              designating which of these are unread or unopened."
+
+              Unread is a real fact now rather than a guess: opened_at on the
+              row, set the first time this reader opens one. Before migration
+              057 that column does not exist and every note reads as unread,
+              which is the safe direction: it draws attention to something that
+              is there rather than hiding something that is. */}
+          {sharedRecent.length ? (
+            <Section
+              title={partner ? `From ${partner}` : 'Shared with you'}
+              badge={unopenedCount || undefined}>
+              {(showAllShared ? sharedRecent : sharedRecent.slice(0, 3)).map((note) => (
+                <NoteCard
+                  key={note.id}
+                  note={note}
+                  tags={tags}
+                  source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                  moved={hasMoved(note, resultsVersion)}
+                  author={partner}
+                  readOnly
+                  unread={!note.opened_at}
+                  // Opening marks it read. Fired without awaiting: the mark is
+                  // bookkeeping and must never stand between someone and the
+                  // thing they tapped.
+                  onPress={() => { markOpened(note); }}
+                />
+              ))}
+              {sharedRecent.length > 3 ? (
+                <More
+                  label={showAllShared ? 'Show fewer' : `All ${sharedRecent.length}`}
+                  onPress={() => setShowAllShared((v) => !v)}
+                />
+              ) : null}
+            </Section>
+          ) : null}
+
+          {/* ── 3. TAGS ────────────────────────────────────────────────────
+              Every tag, in rows, with the sort Ellie asked for. */}
+          {tags.length ? (
+            <TagList
+              tags={tags}
+              notes={[...mineRecent, ...sharedRecent]}
+              sort={tagSort}
+              onChangeSort={setTagSort}
+            />
+          ) : null}
         </View>
       </ScrollView>
 
@@ -290,6 +415,203 @@ function leadLine(body: string): string {
   return line.trim().slice(0, 80);
 }
 
+/**
+ * A titled group on the Notes screen, with an optional count of what is unread.
+ *
+ * The screen is three of these now rather than one stream. Ellie asked for
+ * that split, and it answers a question the stream could not: what you left
+ * somewhere and what your partner sent you are different things to come back
+ * to, and only one of them can be unread.
+ */
+function Section({
+  title, badge, children,
+}: { title: string; badge?: number; children: React.ReactNode }) {
+  return (
+    <View style={{ marginBottom: Spacing.xxl }}>
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+          marginBottom: Spacing.md,
+        }}>
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{title}</Text>
+        {badge ? (
+          <View
+            style={{
+              minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 5,
+              alignItems: 'center', justifyContent: 'center', backgroundColor: c.accent,
+            }}>
+            <Text style={{ fontSize: 11, lineHeight: 14, fontWeight: '700', color: Palette.white }}>
+              {badge}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+      {children}
+    </View>
+  );
+}
+
+/** Open a section to everything it holds, or close it back to the few. */
+function More({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={{ paddingVertical: Spacing.md, alignItems: 'center' }}>
+      <Text style={{ ...Type.small, fontWeight: '700', color: c.accent }}>{label}  {'\u2192'}</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * How the tag list is ordered.
+ *
+ * Ellie's four: "A-Z, Z-A, most recent - least recent (based on how recently
+ * something has been added to that folder), most - least and vice versa in
+ * terms of # of tags in that category."
+ *
+ * "Most recent" is about the tag's CONTENTS, not the tag itself. A tag made
+ * last year that something was filed under this morning is the most recent
+ * one, and sorting by the tag's own created_at would put it last. That is the
+ * whole difference between a list of folders and a list of what is in them.
+ */
+export type TagSort = 'az' | 'za' | 'recent' | 'oldest' | 'most' | 'fewest';
+
+const TAG_SORTS: { key: TagSort; label: string }[] = [
+  { key: 'az', label: 'A to Z' },
+  { key: 'za', label: 'Z to A' },
+  { key: 'recent', label: 'Recently added to' },
+  { key: 'oldest', label: 'Least recently added to' },
+  { key: 'most', label: 'Most notes' },
+  { key: 'fewest', label: 'Fewest notes' },
+];
+
+function TagList({
+  tags, notes, sort, onChangeSort,
+}: {
+  tags: Tag[];
+  notes: Note[];
+  sort: TagSort;
+  onChangeSort: (s: TagSort) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  // Count and freshness per tag, from the notes already on screen.
+  const stats = useMemo(() => {
+    const m = new Map<string, { count: number; latest: number }>();
+    for (const t of tags) m.set(t.id, { count: 0, latest: 0 });
+    for (const n of notes) {
+      for (const id of n.tagIds || []) {
+        const row = m.get(id);
+        if (!row) continue;
+        row.count += 1;
+        row.latest = Math.max(row.latest, Date.parse(n.updated_at) || 0);
+      }
+    }
+    return m;
+  }, [tags, notes]);
+
+  const ordered = useMemo(() => {
+    const st = (t: Tag) => stats.get(t.id) || { count: 0, latest: 0 };
+    const byName = (a: Tag, b: Tag) => a.name.localeCompare(b.name);
+    const list = [...tags];
+    switch (sort) {
+      case 'za': return list.sort((a, b) => byName(b, a));
+      // Ties fall back to A to Z rather than to whatever order the server
+      // returned, so the list is stable between renders and between sorts.
+      case 'recent': return list.sort((a, b) => (st(b).latest - st(a).latest) || byName(a, b));
+      case 'oldest': return list.sort((a, b) => (st(a).latest - st(b).latest) || byName(a, b));
+      case 'most': return list.sort((a, b) => (st(b).count - st(a).count) || byName(a, b));
+      case 'fewest': return list.sort((a, b) => (st(a).count - st(b).count) || byName(a, b));
+      default: return list.sort(byName);
+    }
+  }, [tags, stats, sort]);
+
+  return (
+    <View style={{ marginBottom: Spacing.xxl }}>
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: Spacing.md,
+        }}>
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Tags</Text>
+        <Pressable
+          onPress={() => setOpen((v) => !v)}
+          accessibilityRole="button"
+          accessibilityLabel="Change how tags are sorted"
+          style={{
+            flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+            paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
+            borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
+            backgroundColor: c.surface,
+          }}>
+          <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
+            {TAG_SORTS.find((x) => x.key === sort)?.label}
+          </Text>
+          <Text style={{ color: c.textMuted, fontSize: 10 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+        </Pressable>
+      </View>
+
+      {open ? (
+        <View
+          style={{
+            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+            borderRadius: Radius.md, marginBottom: Spacing.md, overflow: 'hidden',
+          }}>
+          {TAG_SORTS.map((o) => (
+            <Pressable
+              key={o.key}
+              accessibilityRole="button"
+              onPress={() => { onChangeSort(o.key); setOpen(false); }}
+              style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+              <Text
+                style={{
+                  ...Type.small,
+                  color: o.key === sort ? c.textStrong : c.textMuted,
+                  fontWeight: o.key === sort ? '700' : '400',
+                }}>
+                {o.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      <View
+        style={{
+          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          borderRadius: Radius.lg, overflow: 'hidden',
+        }}>
+        {ordered.map((t, i) => {
+          const st = stats.get(t.id) || { count: 0, latest: 0 };
+          return (
+            <View
+              key={t.id}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+              }}>
+              <View
+                style={{
+                  width: 8, height: 8, borderRadius: 4,
+                  backgroundColor: t.color || c.accentQuiet,
+                }}
+              />
+              <Text style={{ ...Type.body, color: c.text, flex: 1 }} numberOfLines={1}>{t.name}</Text>
+              {/* The count, and nothing when a tag is empty. A "0" on every
+                  unused tag turns a list of places into a scorecard. */}
+              {st.count ? (
+                <Text style={{ ...Type.small, color: c.textMuted }}>{st.count}</Text>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function Blank({ title, body }: { title: string; body: string }) {
   return (
     <View style={{ paddingVertical: Spacing.xxl }}>
@@ -313,7 +635,7 @@ function Blank({ title, body }: { title: string; body: string }) {
  * with no name on it.
  */
 function NoteCard({
-  note, tags, source, moved, author, readOnly, onPress,
+  note, tags, source, moved, author, readOnly, unread, onPress,
 }: {
   note: Note;
   tags: Tag[];
@@ -321,6 +643,8 @@ function NoteCard({
   moved?: boolean;
   author?: string;
   readOnly?: boolean;
+  /** A note the partner shared that this reader has not opened. */
+  unread?: boolean;
   onPress?: () => void;
 }) {
   const heading = note.title?.trim() || leadLine(note.body);
@@ -333,9 +657,20 @@ function NoteCard({
       onPress={onPress}
       disabled={!onPress}
       style={{
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        backgroundColor: c.surface,
+        // Unread is carried by the border rather than by a dot in a corner.
+        // The whole card is the thing that is new, and a card that looks
+        // different is findable while scrolling, which is when someone is
+        // looking for it.
+        borderColor: unread ? c.accent : c.border,
+        borderWidth: unread ? 1.5 : 1,
         borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
       }}>
+      {unread ? (
+        <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.accent, marginBottom: Spacing.sm }}>
+          New
+        </Text>
+      ) : null}
       {source ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md }}>
           <View
