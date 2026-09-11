@@ -248,3 +248,50 @@ export function substName(s, userName, partnerName) {
     .replace(/\{P\}/g, partnerName || "");
 }
 
+
+/**
+ * What the life questions are called, everywhere.
+ *
+ * The website has always shown them as this. The app invented "The bigger
+ * questions" for the same set, so the two products named a category of a
+ * customer's own results differently. One string, read by both.
+ */
+export const LIFE_CATEGORY_LABEL = 'Life & Values';
+
+/**
+ * The Expectations categories a reader actually sees, in order.
+ *
+ * ── WHY THIS IS NOT RESPONSIBILITY_CATEGORIES ─────────────────────────────
+ * There are six. Five are responsibilities and the sixth is Life & Values,
+ * which wraps the life questions. RESPONSIBILITY_CATEGORIES is the five, and
+ * it is the right input for scoring, because a life question is answered
+ * differently and compared differently.
+ *
+ * It is the wrong input for navigation, and it was being used for it. The
+ * website built its sidebar from its own six-entry list and produced
+ * exp-convo-5 for Life & Values; api/_lib/results-sections.js built the
+ * section registry from the five and produced exp-convo-0 through 4. So the
+ * website offered a link to a section that did not exist, and clicking it fell
+ * through to the storycards.
+ *
+ * Ellie: "Expectations life and values page link is broken. Left nav tap and
+ * bottom right nav button on previous page just send you to the highlights
+ * clickthrough."
+ *
+ * The app was worse off and nobody had noticed: its nav comes from the server,
+ * so it was never offered the page at all. The life answers were on the
+ * payload the whole time with nowhere to read them.
+ *
+ * `kind` says which half of the exercise a category is, so anything that needs
+ * the five can filter rather than keeping a second list.
+ */
+export const EXPECTATIONS_CATEGORIES = [
+  ...RESPONSIBILITY_CATEGORIES.map((cat) => ({ ...cat, kind: 'responsibility' })),
+  {
+    id: 'life',
+    label: LIFE_CATEGORY_LABEL,
+    kind: 'life',
+    items: LIFE_QUESTIONS.map((q) => q.text),
+    color: '#9B5DE5',
+  },
+];

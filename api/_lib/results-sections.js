@@ -22,7 +22,7 @@
  * import across packages, so neither is converted yet. See HANDOFF.md.
  */
 
-import { RESPONSIBILITY_CATEGORIES } from '../_questions.js';
+import { EXPECTATIONS_CATEGORIES } from '../_questions.js';
 import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
 import { COMM_DOMAINS } from './tags.js';
 
@@ -34,7 +34,10 @@ export const RESULTS_SECTIONS = [
 
   // Conversations are numbered by position, matching how App.jsx builds them.
   'exp-overview',
-  ...RESPONSIBILITY_CATEGORIES.map((_, i) => `exp-convo-${i}`),
+  // Six, not five: Life & Values is a category a reader navigates to, and
+  // building this from the responsibility list alone is what made the
+  // website's link to it fall through to the storycards.
+  ...EXPECTATIONS_CATEGORIES.map((_, i) => `exp-convo-${i}`),
 
   'reflection-overview', 'reflection-ratings', 'reflection-story', 'reflection-plan',
 
@@ -71,7 +74,7 @@ export const RESULTS_SECTION_LABELS = {
   'comm-connection': 'How You Connect',
   'comm-hard': 'When Things Get Hard',
   'exp-overview': 'Expectations',
-  ...Object.fromEntries(RESPONSIBILITY_CATEGORIES.map((cat, i) => [`exp-convo-${i}`, cat.label])),
+  ...Object.fromEntries(EXPECTATIONS_CATEGORIES.map((cat, i) => [`exp-convo-${i}`, cat.label])),
   'reflection-overview': 'Relationship Reflection',
   'reflection-ratings': 'How You Each Rated',
   'reflection-story': 'Side by Side',
@@ -156,7 +159,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
       id: 'exp', label: 'Expectations', color: '#1B5FE8',
       children: [
         { id: 'exp-overview', label: AT_A_GLANCE },
-        ...RESPONSIBILITY_CATEGORIES.map((cat, i) => ({
+        ...EXPECTATIONS_CATEGORIES.map((cat, i) => ({
           id: `exp-convo-${i}`, label: cat.label, color: '#10B981',
         })),
       ],

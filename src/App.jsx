@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
@@ -2704,17 +2704,14 @@ const EXP_CAT_STARTERS = EXP_CAT_STARTERS_SHARED;
 // LIFE_QUESTIONS now lives in api/_questions.js (single source of truth).
 
 
-// FIXED_CATS: the 5 display categories for Expectations results
-// (includes Life & Values as a 5th category wrapping the life questions)
-const FIXED_CATS = [
-  ...RESPONSIBILITY_CATEGORIES,
-  {
-    id: "life",
-    label: LIFE_CATEGORY_LABEL,
-    items: LIFE_QUESTIONS.map(q => q.text),
-    color: "#9B5DE5",
-  },
-];
+// The six display categories for Expectations results, from api/_questions.js.
+//
+// This was built here, and api/_lib/results-sections.js built the section
+// registry from RESPONSIBILITY_CATEGORIES, which is five. So this nav offered
+// exp-convo-5 for Life & Values and that section did not exist, which is why
+// the link fell through to the storycards. One list now, and the app gets the
+// page it never had.
+const FIXED_CATS = EXPECTATIONS_CATEGORIES;
 
 // Revisited version (same questions — could be extended later)
 const LIFE_QUESTIONS_REVISITED = LIFE_QUESTIONS;

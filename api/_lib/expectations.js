@@ -20,7 +20,10 @@
  * belongs in one file with one test rather than in four.
  */
 
-import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, substName } from '../_questions.js';
+import {
+  RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, substName,
+  LIFE_CATEGORY_LABEL,
+} from '../_questions.js';
 import { introFor } from './category-intros.js';
 import { starterFor } from './expectation-starters.js';
 
@@ -171,13 +174,11 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
 }
 
 /**
- * What the life questions are called, everywhere.
- *
- * The website has always shown them as this. The app invented "The bigger
- * questions" for the same set, so the two products named a category of a
- * customer's own results differently. One string, read by both.
+ * Re-exported from api/_questions.js, where it sits beside the category list
+ * that uses it. Kept here because both surfaces already import it from this
+ * module.
  */
-export const LIFE_CATEGORY_LABEL = 'Life & Values';
+export { LIFE_CATEGORY_LABEL };
 
 
 /** The overview numbers, and one bucket per conversation screen. */
@@ -186,8 +187,21 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
   const answered = rows.length;
   const aligned = rows.filter((r) => r.aligned).length;
 
-  const categories = RESPONSIBILITY_CATEGORIES.map((cat, i) => {
-    const inCat = rows.filter((r) => r.categoryIndex === i);
+  /**
+   * All six, in nav order, including Life & Values.
+   *
+   * This mapped RESPONSIBILITY_CATEGORIES, so the payload carried five
+   * categories while the website's nav offered six. The app, whose nav is this
+   * payload, was never offered Life & Values at all: the answers were on the
+   * response as `life` with no page to read them on.
+   *
+   * A life row has no categoryIndex, because it is not in a responsibility
+   * category. It is selected by kind instead.
+   */
+  const categories = EXPECTATIONS_CATEGORIES.map((cat, i) => {
+    const inCat = cat.kind === 'life'
+      ? rows.filter((r) => r.kind === 'life')
+      : rows.filter((r) => r.categoryIndex === i);
     return {
       // The id the app navigates to and notes anchor against.
       section: 'exp-convo-' + i,

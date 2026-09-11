@@ -7,8 +7,9 @@
 //
 // This is the test the three previous copies of the comparison never had.
 
+import { isResultsSection } from '../api/_lib/results-sections.js';
 import { mirrorRespKey, mirrorLifeId, agrees, normRespValue, expectationsSummary } from '../api/_lib/expectations.js';
-import { RESPONSIBILITY_CATEGORIES } from '../api/_questions.js';
+import { RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES } from '../api/_questions.js';
 
 let pass = 0, fail = 0;
 const ok = (name, cond) => { if (cond) { pass++; console.log(`  ok    ${name}`); } else { fail++; console.error(`  FAIL  ${name}`); } };
@@ -81,7 +82,22 @@ const summary = expectationsSummary({
 ok('two rows compared', summary.answered === 2);
 ok('one agreement, one difference', summary.aligned === 1 && summary.differences === 1);
 ok('alignment is a percentage', summary.alignedPct === 50);
-ok('one bucket per conversation screen', summary.categories.length === RESPONSIBILITY_CATEGORIES.length);
+// One bucket per NAVIGABLE screen, which is six: the five responsibility
+// categories and Life & Values. This asserted RESPONSIBILITY_CATEGORIES.length,
+// which is the input to scoring rather than the list a reader navigates, and
+// that is exactly the confusion that broke the link: the website's sidebar
+// offered exp-convo-5 and the section registry stopped at 4, so tapping Life &
+// Values fell through to the storycards, and the app was never offered the
+// page at all.
+ok('one bucket per conversation screen', summary.categories.length === EXPECTATIONS_CATEGORIES.length);
+ok('the last bucket is Life & Values', summary.categories.at(-1)?.label === 'Life & Values');
+ok('Life & Values navigates to a section that exists',
+  isResultsSection(summary.categories.at(-1)?.section));
+ok('Life & Values carries the life rows, not an empty bucket',
+  summary.categories.at(-1)?.rows.length === summary.life.length
+  && summary.categories.at(-1)?.rows.every((r) => r.kind === 'life'));
+ok('a responsibility bucket carries no life rows',
+  summary.categories[0].rows.every((r) => r.kind === 'responsibility'));
 ok('buckets carry the section id the app navigates to',
   summary.categories[0].section === 'exp-convo-0');
 ok('the disagreement names two different people',
