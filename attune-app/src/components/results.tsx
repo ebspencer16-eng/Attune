@@ -481,7 +481,14 @@ function SectionBody({
   if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
   if (section.startsWith('intimacy-')) {
     const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
-    return <IntimacyDimensionView dim={dim} you={you} them={them} />;
+    return (
+      <IntimacyDimensionView
+        dim={dim}
+        you={you}
+        them={them}
+        promptLabel={intimacy?.promptLabel || 'Talk about it'}
+      />
+    );
   }
 
   if (section.startsWith('conflict-')) {
@@ -1019,8 +1026,8 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
 }
 
 function IntimacyDimensionView({
-  dim, you, them,
-}: { dim: IntimacyDimension | null; you: string; them: string }) {
+  dim, you, them, promptLabel,
+}: { dim: IntimacyDimension | null; you: string; them: string; promptLabel: string }) {
   if (!dim) {
     return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
   }
@@ -1039,8 +1046,34 @@ function IntimacyDimensionView({
           <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Text>
         ) : null}
 
-        {/* block: intimacy-dimension/state */}
-        <DistanceBar pct={dim.distancePct} state={dim.state} />
+        {/* ── WHERE YOU EACH LAND ─────────────────────────────────────────
+            block: intimacy-dimension/state
+
+            Both partners on one track between the two poles, which is what the
+            website draws here and what the overview page of this same section
+            already drew. This page had a single bar of the DISTANCE between
+            them with a word under it, so the one screen devoted to a dimension
+            showed less than the summary of all six did, and a distance with no
+            ends reads as a score rather than as two people.
+
+            The poles come from the payload now; they were only in the
+            question registry, which the app cannot import. */}
+        <View style={{ marginTop: Spacing.lg }}>
+          {dim.poles?.length === 2 ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.xs }}>
+              <Text style={{ ...Type.small, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>{dim.poles[0]}</Text>
+              <Text style={{ ...Type.small, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>{dim.poles[1]}</Text>
+            </View>
+          ) : null}
+          <Slider
+            you={dim.positions?.you ?? null}
+            them={dim.positions?.them ?? null}
+            youName={you}
+            themName={them}
+            onDark
+          />
+          <DistanceBar pct={dim.distancePct} state={dim.state} />
+        </View>
 
         {dim.body ? (
           <View
@@ -1052,11 +1085,28 @@ function IntimacyDimensionView({
           </View>
         ) : null}
 
+        {/* ── THE QUESTION TO ASK ─────────────────────────────────────────
+            In a tile with its label above it, which is what the website does.
+            The app printed the prompt as a bare heading, so the one sentence
+            on the page that is a question to ask each other arrived looking
+            like another statement about them.
+
+            The label comes from the payload: it was typed inline in
+            src/App.jsx and nowhere the app could read it. */}
         {dim.prompt ? (
-          <Text style={{ ...Type.title, color: Palette.white, marginTop: Spacing.xl }}>
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.18)',
+              borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
+            }}>
+            <Text style={{ ...Type.eyebrow, color: '#E08DA6', marginBottom: Spacing.sm }}>
+              {promptLabel}
+            </Text>
             {/* block: intimacy-dimension/prompt */}
-            {dim.prompt}
-          </Text>
+            <Text style={{ ...Type.body, color: Palette.white, lineHeight: 26 }}>
+              {dim.prompt}
+            </Text>
+          </View>
         ) : null}
 
         {/* The side-by-side comparison, which is what the exercise is sold as:

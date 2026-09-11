@@ -62,7 +62,11 @@ const both = intimacyResults({ mine: { answers }, theirs: { answers }, variant: 
 if (!both) {
   problems.push('no payload was produced when both partners had finished');
 } else {
-  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations'];
+  // `promptLabel` is the two words the website prints above every prompt,
+  // "Talk about it". It was typed inline in src/App.jsx, so the app printed
+  // each prompt as a bare heading with nothing saying it was a question to
+  // ask. Copy, not an answer, and the same for every couple.
+  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations', 'promptLabel'];
   // `positions` is the two partners' averages over the questions in this
   // dimension. It is an aggregate of `questions`, which is already listed
   // below and is the whole point of the screen, so it exposes nothing new: it
@@ -70,7 +74,11 @@ if (!both) {
   // the app only had the distance between them. Listed deliberately, because
   // this allowlist is the promise and a field nobody declared is a field
   // nobody thought about.
-  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'state', 'distancePct', 'positions', 'ground', 'ground',
+  // `poles` is the two ends of the dimension's scale, from the question
+  // registry. It is the same pair for every couple and says nothing about
+  // either person: it is the axis the positions are plotted on. Without it the
+  // app drew a track with no ends, which is a mark on an unlabelled line.
+  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'poles', 'state', 'distancePct', 'positions', 'ground',
     'body', 'reason', 'prompt', 'questions'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
 

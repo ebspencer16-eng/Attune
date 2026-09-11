@@ -37,7 +37,7 @@ import {
   summarizeIntimacy,
   intimacyDimensionSkips,
 } from '../_intimacy-questions.js';
-import { INTIMACY_RESULTS_PROSE } from '../_intimacy-results-prose.js';
+import { INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT } from '../_intimacy-results-prose.js';
 
 /**
  * The ground each dimension's page is painted with.
@@ -140,6 +140,15 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       // stops drawing all six on cream while the website tints each one.
       ground: groundForDimension(d.id),
       intro: copy.intro || null,
+      /**
+       * The two ends of this dimension's scale.
+       *
+       * The website prints them either side of the track on the dimension
+       * page. The app had no access to them, so it drew a bar with no ends: a
+       * position on an unlabelled line, which tells a reader nothing about
+       * which direction is which.
+       */
+      poles: d.poles || null,
       state,
       // Rounded to a percentage of the scale. The raw average is a distance
       // between 0 and 1 and means nothing to a reader.
@@ -171,6 +180,13 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
   return {
     overallState: summary.overallState,
     overallDistancePct: summary.overall == null ? null : Math.round(summary.overall * 100),
+    /**
+     * The label the website puts above every prompt. Sent because it was typed
+     * inline in src/App.jsx and nowhere the app could read it, so the app
+     * printed each prompt as a bare heading with nothing saying it was a
+     * question to ask each other.
+     */
+    promptLabel: TALK_ABOUT_IT,
     dimensions,
     // Ordered for the Conversations screen: furthest apart first, because that
     // is where a conversation is most worth having. Dimensions nobody answered

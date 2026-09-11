@@ -283,6 +283,8 @@ export type ExpectationRow = {
  * stops being true, so the app has nothing private to mishandle.
  */
 export type IntimacyDimension = {
+  /** The two ends of the scale, for the track on the dimension page. */
+  poles?: [string, string] | string[] | null;
   /** The section id this belongs to, e.g. intimacy-comfort. */
   section: string;
   id: string;
@@ -321,6 +323,8 @@ export type IntimacyDimension = {
 };
 
 export type IntimacyResults = {
+  /** The label above every dimension prompt, from api/_intimacy-results-prose.js. */
+  promptLabel?: string;
   overallState: 'aligned' | 'discuss' | 'different' | 'unspoken';
   overallDistancePct: number | null;
   dimensions: IntimacyDimension[];

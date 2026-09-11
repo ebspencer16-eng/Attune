@@ -18,6 +18,16 @@
 // {U} = current user's name, {P} = partner's name. Neither end of any
 // dimension is better; the difference is what's worth talking through.
 
+/**
+ * The label above a dimension's prompt.
+ *
+ * Typed inline in src/App.jsx, three times, and nowhere the app could read it.
+ * So the website wrapped each prompt in a tile headed "Talk about it" and the
+ * app printed the same sentence as a bare heading with nothing naming it: the
+ * reader was given a question with no indication it was a question to ask.
+ */
+export const TALK_ABOUT_IT = 'Talk about it';
+
 export const INTIMACY_RESULTS_PROSE = {
   frequency: {
     intro: "How often each of you wants physical intimacy.",

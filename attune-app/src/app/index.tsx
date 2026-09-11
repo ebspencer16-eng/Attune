@@ -178,10 +178,23 @@ export default function HomeScreen() {
               starts around half way down on a normal phone and is pushed
               further only by a long finding. A fixed height would either crop
               the reading or leave a hole above the tile on a small screen. */}
+          {/* ── HOW THIS IS DISTRIBUTED ──────────────────────────────────
+              The profile control sits on its own line at the top, where a nav
+              control belongs. The greeting and the finding are one centred
+              group below it.
+
+              This was justifyContent: 'space-between' over two children, which
+              pinned the greeting to the top of the blue and the finding to the
+              bottom, as far apart as the block is tall. Ellie asked for the
+              greeting lower and the finding higher, and neither could move:
+              a marginTop on a top-pinned child and a paddingTop on a
+              bottom-pinned one are both pushing against the thing holding
+              them. Centring the pair is the change that actually moves them,
+              and it moves them toward each other, which is what was asked. */}
           <View
             style={{
               flexGrow: 1, minHeight: topHeight,
-              paddingHorizontal: Spacing.xl, justifyContent: 'space-between',
+              paddingHorizontal: Spacing.xl,
             }}>
             {/* The wordmark is gone. It named the app to someone already
                 inside it, on the one screen where the whole ground is the
@@ -201,16 +214,9 @@ export default function HomeScreen() {
             <View
               style={{
                 flexDirection: 'row', alignItems: 'center',
-                justifyContent: 'space-between', gap: Spacing.md,
-                // Ellie asked for the greeting a little lower than the very
-                // top edge. The profile control rides with it: they are one
-                // line, and splitting them puts a lone button back above the
-                // hello, which is what this layout moved away from.
-                marginTop: Spacing.xl,
+                justifyContent: 'flex-end',
+                marginTop: Spacing.xs,
               }}>
-              <Text style={{ ...Type.hero, color: Palette.white, flex: 1 }}>
-                {data.greeting}
-              </Text>
               <Pressable
                 onPress={() => setSettingsOpen(true)}
                 hitSlop={12}
@@ -233,11 +239,16 @@ export default function HomeScreen() {
               </Pressable>
             </View>
 
-            {/* Closer to the greeting than it was: Ellie asked for the
-                finding to move up. The space below stays, so the tile beneath
-                does not crowd it. */}
-            <View style={{ paddingTop: Spacing.md, paddingBottom: Spacing.xxl }}>
-              {data.research ? <ResearchNote finding={data.research} /> : null}
+            {/* The greeting and the finding, as one group, centred in what the
+                profile row leaves. They read as one thought: hello, and here
+                is the thing worth reading today. */}
+            <View style={{ flex: 1, justifyContent: 'center', paddingBottom: Spacing.xl }}>
+              <Text style={{ ...Type.hero, color: Palette.white }}>
+                {data.greeting}
+              </Text>
+              <View style={{ marginTop: Spacing.xxl }}>
+                {data.research ? <ResearchNote finding={data.research} /> : null}
+              </View>
             </View>
           </View>
 
@@ -385,6 +396,17 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
  * { title, body, source } in api/_research.js, and check-research.mjs holds
  * each of them identical to the website's Our Purpose page.
  */
+/**
+ * The glow behind the research finding.
+ *
+ * GLOW_ALPHA is per ring and deliberately tiny: the whole point is that no
+ * single ring has a findable edge. Cumulative opacity at the centre is
+ * 1 - (1 - GLOW_ALPHA) ** GLOW_RINGS, which at these values is about 0.21.
+ */
+const GLOW_RINGS = 26;
+const GLOW_DIAMETER = 300;
+const GLOW_ALPHA = 0.009;
+
 function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research']> }) {
   return (
     /* ── WHY INDENTED AND CENTRED ─────────────────────────────────────
@@ -400,43 +422,46 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
     <View style={{ paddingHorizontal: Spacing.xl }}>
       {/* ── THE GLOW ─────────────────────────────────────────────────────
           A circular light behind the finding, brightest in the middle and
-          falling off to nothing, which is what the website paints behind each
-          dot on the couple map: a radialGradient from the dot's colour at 0.5
-          opacity to the same colour at 0.
+          falling off to nothing: the same thing the website paints behind each
+          dot on the couple map, which is an SVG radialGradient from the dot's
+          colour at 0.5 opacity out to the same colour at 0.
 
-          React Native has no radial gradient and no SVG here, and the first
-          version of this was three concentric circles at falling opacity. It
-          had visible edges, which is the one thing a glow must not have.
-          Ellie: "I don't like the concentric circles behind the text."
+          React Native has no radial gradient, and this app has no SVG library.
+          Two attempts failed before this one and both failed the same way:
+          three big circles at falling opacity, then two circles casting wide
+          shadows. Ellie, twice: "still looks like concentric circles."
 
-          A shadow is a real radial falloff and needs nothing installed. A
-          white circle casting a wide white shadow with no offset gives a
-          bright core fading smoothly out, which is the same curve the SVG
-          draws. Two of them, a tight one for the core and a wide one for the
-          spill, so the middle carries more light than a single radius can.
+          She was right both times. A translucent circle has a hard edge
+          wherever its fill starts, and a shadow does not hide that edge, it
+          sits outside it. Three or four of anything with an edge reads as
+          rings, because it is rings.
 
-          Behind the text and not around it: absolutely positioned and not
-          hit-testable, so a long finding cannot be pushed around by it and no
-          touch is swallowed. */}
+          What removes the banding is step size, not cleverness. Many rings,
+          each so faint that its own edge is below the threshold where an eye
+          can find it, stacked so the alpha accumulates toward the middle. With
+          linear radii and a constant per-ring alpha the cumulative opacity
+          falls off linearly from the centre, which is a radial gradient.
+
+          RINGS steps across RADIUS points is about four points per edge at
+          just under one per cent each. Raising RINGS makes it smoother and
+          costs nothing but plain Views that never re-render. */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          {[
-            { size: 210, opacity: 0.30, radius: 90 },
-            { size: 110, opacity: 0.22, radius: 45 },
-          ].map((glow) => (
-            <View
-              key={glow.size}
-              style={{
-                position: 'absolute',
-                width: glow.size, height: glow.size, borderRadius: glow.size / 2,
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                shadowColor: '#FFFFFF',
-                shadowOpacity: glow.opacity,
-                shadowRadius: glow.radius,
-                shadowOffset: { width: 0, height: 0 },
-              }}
-            />
-          ))}
+          {Array.from({ length: GLOW_RINGS }, (_, i) => {
+            // Largest first, so each smaller ring paints on top and the alpha
+            // builds toward the centre.
+            const size = GLOW_DIAMETER * (1 - i / GLOW_RINGS);
+            return (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: size, height: size, borderRadius: size / 2,
+                  backgroundColor: `rgba(255,255,255,${GLOW_ALPHA})`,
+                }}
+              />
+            );
+          })}
         </View>
       </View>
 

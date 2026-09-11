@@ -70,7 +70,7 @@ const APP_STORE_URL = 'https://apps.apple.com/app/attune-relationships/idPENDING
 function typingDimScores(selfAnswers, partnerAnswers) {
   return PARTNER_VIEW_ENABLED ? blendedDimScores(selfAnswers, partnerAnswers) : calcDimScores(selfAnswers);
 }
-import { INTIMACY_RESULTS_PROSE } from "../api/_intimacy-results-prose.js";
+import { INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
 import { resultsGate } from "../api/_lib/results-gate.js";
@@ -7430,7 +7430,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         </div>
                         {prompt && answered && (
                           <div style={{ padding: "0.7rem 1.1rem", background: "#FBF8F3", borderTop: `1px solid ${C.stone}30`, display: "flex", alignItems: "flex-start", gap: "0.55rem" }}>
-                            <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", marginTop: "0.15rem" }}>Talk about it</span>
+                            <span style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", marginTop: "0.15rem" }}>{TALK_ABOUT_IT}</span>
                             <span style={{ fontSize: "0.77rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6 }}>{prompt}</span>
                           </div>
                         )}
@@ -7634,12 +7634,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {skipper && osk ? (
               <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.18)" }}>
                 <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.75, margin: "0 0 1rem", fontFamily: BFONT, fontWeight: 300 }}>{osk.lead.replace(/\{SKIPPER\}/g, skipper)}</p>
-                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#E08DA6", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#E08DA6", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{TALK_ABOUT_IT}</div>
                 <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(osk.question)}</p>
               </div>
             ) : (
               <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 14, padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.18)" }}>
-                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#E08DA6", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Talk about it</div>
+                <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#E08DA6", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>{TALK_ABOUT_IT}</div>
                 <p style={{ fontSize: "0.9rem", color: "white", lineHeight: 1.75, margin: 0, fontFamily: BFONT, fontWeight: 400 }}>{sub(INTIMACY_RESULTS_PROSE[dimMatch]?.prompt)}</p>
               </div>
             )}
@@ -7691,7 +7691,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div key={d.id} style={{ borderLeft: `3px solid ${ROSE}`, background: `${ROSE}0d`, borderRadius: "0 12px 12px 0", padding: "1rem 1.25rem" }}>
                   <div style={{ fontSize: "0.7rem", fontWeight: 700, color: ROSE, fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>{d.label}</div>
                   <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                    <span style={{ fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, paddingTop: "0.2rem" }}>Talk about it</span>
+                    <span style={{ fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, paddingTop: "0.2rem" }}>{TALK_ABOUT_IT}</span>
                     <p style={{ fontSize: "0.85rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.65, margin: 0 }}>{sub(INTIMACY_RESULTS_PROSE[d.id]?.prompt)}</p>
                   </div>
                 </div>
