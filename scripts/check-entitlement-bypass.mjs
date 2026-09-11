@@ -63,11 +63,92 @@ if (CAPS.length < 3) {
   problems.push(`only found ${CAPS.length} capability flags on the website, which is too few to be right.`);
 }
 
+/**
+ * What a name on the capability line actually stands for.
+ *
+ * ── WHY THE EXPRESSION IS NOT ENOUGH ──────────────────────────────────────
+ * The test reads the one line that decides a capability. Move the storage read
+ * up one line and there is nothing left on it to find:
+ *
+ *   const _unlock = localStorage.getItem('attune_dev_intimacy') === '1';
+ *   const pkg = { hasIntimacy: _unlock, ... };
+ *
+ * That is the bug this gate exists for, hoisted into a variable, and it passed.
+ * Not an exotic shape: it is what anyone does to a long line in an object
+ * literal.
+ *
+ * So every name a capability line references is resolved to its declaration,
+ * and a declaration that itself reads storage or the query is folded into what
+ * gets tested. One level deep, which covers the refactor above; a chain of
+ * three would need a real parser and has never been how this was written.
+ *
+ * Only suspicious declarations are folded in. Pulling in every referenced name
+ * would eventually drag in some unrelated body containing the word `hostname`
+ * and make a genuine bypass look guarded.
+ */
+const DECLS = new Map();
+for (const m of src.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([^\n]*)/g)) {
+  if (!DECLS.has(m[1])) DECLS.set(m[1], m[2]);
+}
+for (const m of src.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/g)) {
+  if (!DECLS.has(m[1])) DECLS.set(m[1], functionBody(m.index));
+}
+
+/**
+ * A function's body, by counting braces.
+ *
+ * The first version sliced to the next `\n}`, which for a one-line helper
+ *
+ *   function unlockIntimacy() { return localStorage.getItem(KEY) === '1'; }
+ *
+ * runs on to the end of whatever comes after it. That body contained the word
+ * `hostname` from unrelated code, so the helper read as guarded and an
+ * unguarded grant passed. A body that is too big does not merely dilute the
+ * test; it fabricates the thing the test is looking for.
+ */
+function functionBody(from) {
+  const open = src.indexOf('{', from);
+  if (open === -1) return '';
+  let depth = 0;
+  for (let i = open; i < src.length && i < open + 20000; i += 1) {
+    if (src[i] === '{') depth += 1;
+    else if (src[i] === '}') { depth -= 1; if (!depth) return src.slice(from, i + 1); }
+  }
+  return src.slice(from, open + 2000);
+}
+
+const TOUCHES = /localStorage\.getItem|URLSearchParams|location\.search/;
+
+/**
+ * The cached account is not a toggle, and is out of scope.
+ *
+ * `acct` is the signed-in account parsed back out of localStorage, and it
+ * carries pkg, so folding it in flagged hasBudget and hasChecklist. Editing
+ * that blob by hand would change what the UI offers, which is worth knowing
+ * and is a different question from this one: it is the session cache, it
+ * exists so the site knows who you are before the server answers, and the
+ * server remains the authority for every piece of data behind the capability.
+ *
+ * This gate's promise is narrow and stays narrow: no developer FLAG grants a
+ * paid capability on production. A record parsed out of storage is not a flag.
+ */
+const RECORD = /JSON\.parse/;
+
+/** The capability expression plus any name in it that reads storage or query. */
+function resolved(expr) {
+  let out = expr;
+  for (const m of expr.matchAll(/\b([A-Za-z_$][\w$]*)\b/g)) {
+    const decl = DECLS.get(m[1]);
+    if (decl && TOUCHES.test(decl) && !RECORD.test(decl)) out += `\n/* ${m[1]} */ ${decl}`;
+  }
+  return out;
+}
+
 for (const cap of CAPS) {
   // The line that decides this capability on the website.
   const re = new RegExp(`^\\s*${cap}:\\s*(.+)$`, 'gm');
   for (const m of src.matchAll(re)) {
-    const expr = m[1];
+    const expr = resolved(m[1]);
     const line = src.slice(0, m.index).split('\n').length;
 
     const readsStorage = /localStorage\.getItem/.test(expr);
