@@ -69,22 +69,23 @@ if (!app.includes(`'${DEFAULT_ANNOTATION_COLOR}'`)) {
   problems.push(`the app's fallback colour is not ${DEFAULT_ANNOTATION_COLOR}, so an unknown key resolves differently on each surface.`);
 }
 
-// ── The splitter must not alter the text ───────────────────────────────────
-// A mark is matched to its sentence by exact text. Lose a space and every mark
-// on that block is orphaned: stored, counted, and invisible.
+// ── The tokeniser must not alter the text ──────────────────────────────────
+// A mark is stored as the text it covers and found again by matching that text
+// inside the paragraph. Gain or lose a character and every mark on that block
+// is orphaned: stored, counted, and invisible.
 const src = readFileSync(ROOT + 'attune-app/src/components/annotatable.tsx', 'utf8');
-const fnSrc = src.slice(src.indexOf('export function toSentences'));
+const fnSrc = src.slice(src.indexOf('export function tokenize'));
 const bodyStart = fnSrc.indexOf('{');
 const body = fnSrc.slice(bodyStart + 1, fnSrc.indexOf('\n}'));
-let toSentences;
+let tokenize;
 try {
   // eslint-disable-next-line no-new-func
-  toSentences = new Function('text', body.replace(/: string\[\]/g, '').replace(/const parts[^=]*=/, 'const parts ='));
+  tokenize = new Function('text', body.replace(/: string\[\]/g, ''));
 } catch (e) {
-  problems.push(`cannot evaluate toSentences to check it: ${e.message}`);
+  problems.push(`cannot evaluate tokenize to check it: ${e.message}`);
 }
 
-if (toSentences) {
+if (tokenize) {
   const cases = [
     'One thing. Another thing that is long enough to stand on its own. A third one here.',
     'She said e.g. this and that, which runs on for a while without stopping anywhere.',
@@ -96,15 +97,21 @@ if (toSentences) {
   ];
   for (const c of cases) {
     let out;
-    try { out = toSentences(c); } catch (e) {
-      problems.push(`toSentences threw on ${JSON.stringify(c.slice(0, 40))}: ${e.message}`);
+    try { out = tokenize(c); } catch (e) {
+      problems.push(`tokenize threw on ${JSON.stringify(c.slice(0, 40))}: ${e.message}`);
       continue;
     }
     if (out.join('') !== c) {
       problems.push(
-        `toSentences is not lossless on ${JSON.stringify(c.slice(0, 40))}.\n`
-        + '      A mark finds its sentence by exact text, so a character gained or lost\n'
-        + '      orphans every mark on that block: stored, counted, and invisible.');
+        `tokenize is not lossless on ${JSON.stringify(c.slice(0, 40))}.\n`
+        + '      A mark is found again by matching its text inside the paragraph, so a\n'
+        + '      character gained or lost orphans every mark on that block: stored,\n'
+        + '      counted, and invisible.');
+    }
+    // And a token must never be empty: an empty span is an untappable word,
+    // which is a word a reader cannot select.
+    if (out.some((t) => t === '')) {
+      problems.push(`tokenize produced an empty token on ${JSON.stringify(c.slice(0, 40))}.`);
     }
   }
 }
@@ -117,4 +124,4 @@ if (problems.length) {
 
 console.log(
   `[check-annotation-palette] ${ANNOTATION_COLORS.length} colours and `
-  + `${ANNOTATION_KINDS.length} kinds agree; the sentence split is lossless.`);
+  + `${ANNOTATION_KINDS.length} kinds agree; the word split is lossless.`);

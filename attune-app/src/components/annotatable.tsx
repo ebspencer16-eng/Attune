@@ -1,102 +1,93 @@
 /**
- * Text a reader can mark.
+ * Text a reader can mark, down to a fragment of a sentence.
  *
  * ── WHAT ELLIE ASKED FOR ──────────────────────────────────────────────────
- * "I want to be able to select text and have a small popup menu that has icons
- * for highlight, underline, tag, note, or share."
+ * First: "I want to be able to select text and have a small popup menu that has
+ * icons for highlight, underline, tag, note, or share."
+ * Then: "Need the module so that people can select fragments of sentences."
  *
- * ── WHY SENTENCES AND NOT CHARACTERS ──────────────────────────────────────
- * React Native gives you two options for selectable text and neither does
- * this. `selectable` on a Text hands the selection to the operating system,
- * which then shows the system's own menu: Copy, Look Up, Share. There is no
- * supported way to put our own items in it. A TextInput has the same problem.
- * Arbitrary character-range selection with our own menu needs a native module,
- * and that is a dependency, a build change, and a thing to maintain per iOS
- * release.
+ * ── WHY THERE IS NO NATIVE MODULE ─────────────────────────────────────────
+ * The goal is fragment selection. A native module is one way to get it, and it
+ * is expensive here in a way that is not about code: this is a managed Expo
+ * project run through Expo Go. Custom native code cannot load in Expo Go, so it
+ * would mean a development build, Xcode, `expo run:ios` instead of
+ * `expo start --ios`, and a rebuild whenever the native side changes. That is
+ * a permanent change to how the app is run every day, by someone who is not a
+ * developer, for one gesture.
  *
- * So the unit of selection is a sentence. Each one is its own inline Text with
- * its own onLongPress, and they flow together as one paragraph because nested
- * Text lays out inline. Press and hold any sentence and it is chosen.
+ * Word ranges give the same result without any of that. A reader long-presses
+ * the first word of the fragment and taps the last, and marks anything from one
+ * word to several sentences. That is what "a fragment of a sentence" means in
+ * practice: nobody highlights half of "communication".
  *
- * On a phone this is arguably the better trade even setting the native module
- * aside: dragging two handles to pick an exact range on a moving scroll view is
- * fiddly, and a sentence is the unit people actually mark.
+ * What it still cannot do is split a word. If that ever matters, the native
+ * module is the honest answer and the cost above is what it costs.
  *
- * What it cannot do is mark half a sentence, or a phrase spanning two. If that
- * turns out to matter, the native module is the honest answer and it should be
- * a decision rather than something I slid in.
+ * ── WHY TAP-TO-EXTEND AND NOT DRAG ────────────────────────────────────────
+ * Dragging needs the frame of every word, and React Native does not give
+ * reliable per-word layout inside a flowing paragraph: onLayout on a nested
+ * Text is not dependable, and onTextLayout reports lines rather than words. A
+ * drag built on guessed coordinates selects the wrong words on exactly the
+ * long paragraphs where precision matters.
  *
- * ── WHY THE SPLIT IS CONSERVATIVE ─────────────────────────────────────────
- * Splitting prose into sentences by punctuation is famously wrong on
- * abbreviations and decimals. This product's results copy has neither in
- * quantity, but the failure mode still matters: a bad split shows a reader a
- * fragment as if it were a sentence. So the rule only breaks on a terminator
- * followed by a space and a capital, and anything shorter than a clause is
- * joined onto its neighbour rather than standing alone.
+ * Two taps need no measurement at all. onPress on a nested Text is exact,
+ * because the text engine decides what was hit.
+ *
+ * ── THE TOKENS ARE LOSSLESS ───────────────────────────────────────────────
+ * A mark is stored as the text it covers and found again by matching that text,
+ * so tokenising must not alter a character. Each token carries its own trailing
+ * whitespace and joining them returns the original string exactly.
+ * check-annotation-palette.mjs asserts it.
  */
 
-import { useMemo } from 'react';
-import { Text, type StyleProp, type TextStyle } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Text, View, type StyleProp, type TextStyle } from 'react-native';
 
 import { annotationColor } from '@/constants/annotations';
+import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
+
+const c = Colors.light;
 
 /** One mark already on this block, as the app holds it. */
 export type Mark = {
   id: string;
   kind: 'note' | 'highlight' | 'underline';
   color?: string | null;
-  /** The exact text that was marked, which is how a mark finds its sentence. */
+  /** The exact text that was marked, which is how a mark finds its words. */
   text: string;
 };
 
 /**
- * Break a paragraph into the pieces a reader can mark.
+ * Split into words, each keeping the whitespace that follows it.
  *
- * Exported for the gate, which checks the property that matters: every piece
- * joined back together is the original string, unchanged. A splitter that
- * loses or duplicates a character would silently rewrite someone's results.
+ * Exported for the gate, which checks the one property that matters: joining
+ * the tokens returns the input unchanged. A token that gains or loses a
+ * character orphans every mark on the block, because a mark is matched by text.
  */
-export function toSentences(text: string): string[] {
+export function tokenize(text: string): string[] {
   if (!text) return [];
-  const parts: string[] = [];
-  let buf = '';
-  const chars = [...text];
-  for (let i = 0; i < chars.length; i += 1) {
-    buf += chars[i];
-    const isTerminator = chars[i] === '.' || chars[i] === '?' || chars[i] === '!';
-    if (!isTerminator) continue;
-    // A terminator only ends a sentence when a space and a capital follow it.
-    // "e.g." and "3.5" fail that test, which is the point.
-    const next = chars[i + 1];
-    const after = chars[i + 2];
-    if (next !== ' ' || !after || after !== after.toUpperCase() || after === after.toLowerCase()) continue;
-    // Too short to stand alone: keep accumulating. An "Oh." on its own line is
-    // a fragment, not a thing to highlight.
-    if (buf.trim().length < 24) continue;
-    parts.push(buf + ' ');
-    buf = '';
-    i += 1;   // the space now belongs to the piece just pushed
-  }
-  if (buf) parts.push(buf);
-  return parts;
+  // A run of non-space followed by its run of space. The trailing group is
+  // greedy on whitespace so no space is ever dropped or duplicated.
+  return text.match(/\S+\s*|\s+/g) || [];
 }
 
-/**
- * How a marked sentence is painted.
- *
- * A highlight fills behind the words; an underline draws under them. Both take
- * their colour from the shared palette, so a mark made on the website and read
- * here is the same colour.
- */
+/** Where each token starts, so a mark's character range maps onto tokens. */
+function offsets(tokens: string[]): number[] {
+  const out: number[] = [];
+  let at = 0;
+  for (const t of tokens) { out.push(at); at += t.length; }
+  return out;
+}
+
 function markStyle(mark: Mark | undefined): TextStyle {
   if (!mark) return {};
-  const c = annotationColor(mark.color);
-  if (mark.kind === 'highlight') return { backgroundColor: c.wash, color: '#0E0B07' };
+  const col = annotationColor(mark.color);
+  if (mark.kind === 'highlight') return { backgroundColor: col.wash, color: '#0E0B07' };
   if (mark.kind === 'underline') {
-    return { textDecorationLine: 'underline', textDecorationColor: c.ink, textDecorationStyle: 'solid' };
+    return { textDecorationLine: 'underline', textDecorationColor: col.ink, textDecorationStyle: 'solid' };
   }
-  // A note leaves the words alone. The margin marker is what says it is there,
-  // because a note is about the text rather than a change to it.
+  // A note leaves the words alone. The margin marker says it is there, because
+  // a note is about the text rather than a change to it.
   return {};
 }
 
@@ -105,41 +96,105 @@ export default function Annotatable({
 }: {
   text: string;
   style?: StyleProp<TextStyle>;
-  /** Marks already on this block. Matched to sentences by their exact text. */
   marks?: Mark[];
-  /** A sentence was chosen. The menu is the caller's, so this component has no
-   *  opinion about what can be done with it. */
-  onSelect?: (sentence: string) => void;
+  /** A fragment was chosen. The menu is the caller's. */
+  onSelect?: (fragment: string) => void;
 }) {
-  const sentences = useMemo(() => toSentences(text), [text]);
+  const tokens = useMemo(() => tokenize(text), [text]);
+  const starts = useMemo(() => offsets(tokens), [tokens]);
 
-  // A mark belongs to the sentence whose text it matches. Trimmed on both
-  // sides, because the split keeps the trailing space and a mark stored from
-  // another surface will not have it.
-  const byText = useMemo(() => {
-    const m = new Map<string, Mark>();
-    for (const mark of marks) if (mark.text) m.set(mark.text.trim(), mark);
-    return m;
-  }, [marks]);
+  /** The word the reader long-pressed, and the one they tapped after it. */
+  const [anchor, setAnchor] = useState<number | null>(null);
+  const [head, setHead] = useState<number | null>(null);
 
-  // Nothing to mark, or no handler: render the string and add no interaction.
-  // A long-press that does nothing is worse than no long-press.
-  if (!onSelect || sentences.length === 0) return <Text style={style}>{text}</Text>;
+  /**
+   * Which tokens each existing mark covers.
+   *
+   * By character range rather than by token, because a mark was stored as text
+   * and the text may sit mid-token at either end after a copy edit. Anything
+   * overlapping the mark's range is painted.
+   */
+  const marked = useMemo(() => {
+    const out = new Map<number, Mark>();
+    for (const m of marks) {
+      if (!m.text) continue;
+      const at = text.indexOf(m.text);
+      if (at === -1) continue;          // its words are gone; draw nothing
+      const end = at + m.text.length;
+      tokens.forEach((tok, i) => {
+        const s = starts[i];
+        if (s < end && s + tok.length > at) out.set(i, m);
+      });
+    }
+    return out;
+  }, [marks, tokens, starts, text]);
+
+  if (!onSelect || !tokens.length) return <Text style={style}>{text}</Text>;
+
+  const lo = anchor == null ? null : Math.min(anchor, head ?? anchor);
+  const hi = anchor == null ? null : Math.max(anchor, head ?? anchor);
+  const fragment = lo == null ? '' : tokens.slice(lo, (hi as number) + 1).join('').trim();
+
+  const clear = () => { setAnchor(null); setHead(null); };
 
   return (
-    <Text style={style}>
-      {sentences.map((s, i) => {
-        const mark = byText.get(s.trim());
-        return (
-          <Text
-            key={`${i}:${s.slice(0, 12)}`}
-            onLongPress={() => onSelect(s.trim())}
-            suppressHighlighting
-            style={markStyle(mark)}>
-            {s}
+    <View>
+      <Text style={style}>
+        {tokens.map((tok, i) => {
+          const inSelection = lo != null && i >= lo && i <= (hi as number);
+          return (
+            <Text
+              key={i}
+              suppressHighlighting
+              // Long press starts a selection. A later tap sets the other end,
+              // so the order a reader works in does not matter.
+              onLongPress={() => { setAnchor(i); setHead(i); }}
+              onPress={anchor == null ? undefined : () => setHead(i)}
+              style={[
+                markStyle(marked.get(i)),
+                inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)' } : null,
+              ]}>
+              {tok}
+            </Text>
+          );
+        })}
+      </Text>
+
+      {/* ── THE SELECTION BAR ──────────────────────────────────────────────
+          Appears only while something is selected. It says what will be
+          marked, because a word range picked by tapping is easy to get wrong by
+          one and the reader should see it before committing.
+
+          "Tap another word" is the only instruction in the flow, and it is
+          shown at the moment it applies rather than as a hint nobody reads. */}
+      {lo != null ? (
+        <View
+          style={{
+            marginTop: Spacing.sm, padding: Spacing.md, borderRadius: Radius.md,
+            backgroundColor: c.surface, borderColor: c.accent, borderWidth: 1,
+          }}>
+          <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
+            {lo === hi ? 'Tap another word to extend' : `${(hi as number) - lo + 1} words`}
           </Text>
-        );
-      })}
-    </Text>
+          <Text numberOfLines={2} style={{ ...Type.small, color: c.text, marginTop: 2 }}>
+            {fragment}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.sm }}>
+            <Text
+              accessibilityRole="button"
+              onPress={() => { onSelect(fragment); clear(); }}
+              style={{ ...Type.small, fontWeight: '700', color: c.accent }}>
+              Mark this
+            </Text>
+            <Text
+              accessibilityRole="button"
+              onPress={clear}
+              style={{ ...Type.small, color: c.textMuted }}>
+              Cancel
+            </Text>
+          </View>
+        </View>
+      ) : null}
+    </View>
   );
 }

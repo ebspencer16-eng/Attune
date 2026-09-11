@@ -33,7 +33,7 @@ import type { Note, Tag } from '@/api/client';
 type Ctx = {
   /** Marks on the section currently on screen, by the text they sit on. */
   marks: Mark[];
-  /** A sentence was long-pressed. Opens the sheet. */
+  /** A fragment was chosen. Opens the sheet. */
   select: (sentence: string) => void;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
