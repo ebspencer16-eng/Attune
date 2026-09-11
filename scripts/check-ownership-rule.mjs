@@ -12,6 +12,7 @@
 // api/_lib/ownership.js is the rule. Everything else asks it.
 
 import { readFileSync, readdirSync } from 'fs';
+import { PKG_CAPS } from '../api/_lib/entitlements.js';
 
 const apiDir = new URL('../api/', import.meta.url);
 const OWNER = '_lib/ownership.js';
@@ -19,6 +20,39 @@ const OWNER = '_lib/ownership.js';
 // A package name tested against a package field is the fingerprint of a copy.
 // Matching on the add-on columns alone would flag every honest select list.
 const COPY = /(?:pkg|package|pkg_key)\s*===?\s*['"](?:premium|newlywed|anniversary)['"]/;
+
+/**
+ * ── THE OTHER TWO WAYS TO WRITE THE SAME COPY ──────────────────────────────
+ * COPY above is one shape: a package field compared to a package name. Both of
+ * these say the same thing and passed:
+ *
+ *   const BUNDLES = { premium: ['intimacy'] };  ownsIntimacy = BUNDLES[me.pkg]
+ *   const hasIntimacy = ['premium', 'anniversary'].includes(me.pkg);
+ *
+ * The second is arguably the more natural way to write it, which is the worst
+ * thing that can be true of a shape a gate does not see.
+ *
+ * The fingerprint that covers all three is a package name and a capability
+ * name in the same place. Deciding a capability is what this gate is about;
+ * a package name next to a price or a label is not this bug, and tables like
+ * DIGITAL_PRICES[pkgKey] must stay quiet.
+ *
+ * The capability names come from PKG_CAPS, so adding one to a package extends
+ * this automatically.
+ */
+const CAPS = [...new Set(Object.values(PKG_CAPS).flatMap((c) => Object.keys(c)))]
+  .filter((k) => k !== 'rank');
+
+// hasIntimacy cannot come from PKG_CAPS: no package bundles Physical Intimacy,
+// it is add-on only, so the key is structurally absent from every entry. It is
+// still the capability most likely to be granted by a hand-written package
+// rule, because it is the one people assume Premium includes. It does not.
+CAPS.push('hasIntimacy');
+
+const CAP_NAME = new RegExp(`\\b(?:${CAPS.join('|')})\\b`);
+// Quoted as a value, or bare as an object key. A bundle table writes the
+// package as a key and never quotes it:  { premium: { hasIntimacy: true } }.
+const PKG_NAME = /['"](?:premium|newlywed|anniversary)['"]|\b(?:premium|newlywed|anniversary)\s*:/;
 
 const problems = [];
 
@@ -37,7 +71,9 @@ function scan(dir, prefix = '') {
     for (let i = 0; i < lines.length; i++) {
       // A line of prose about packages is not a rule about packages.
       if (/^\s*(\/\/|\*|\/\*)/.test(lines[i])) continue;
-      if (COPY.test(lines[i])) problems.push({ file: rel, line: i + 1, text: lines[i].trim().slice(0, 90) });
+      if (COPY.test(lines[i]) || (CAP_NAME.test(lines[i]) && PKG_NAME.test(lines[i]))) {
+        problems.push({ file: rel, line: i + 1, text: lines[i].trim().slice(0, 90) });
+      }
     }
   }
 }
