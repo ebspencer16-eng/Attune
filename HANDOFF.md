@@ -1193,3 +1193,26 @@ written answers per partner from her.
 - Whether the Settings "What the server sees" panel explains the Relationship
   Reflection pages. Everything the code can tell me is ruled out.
 - Demo answers for Conflict Patterns, if the showcase tour should include it.
+
+
+### Copy that reaches nobody (found in the 2026-09-11 scan, needs Ellie)
+
+Two pieces of written, approved copy that neither product renders. Both are
+decisions rather than bugs, so nothing was changed:
+
+- **`SNAPSHOT_PROSE`** in `api/_conflict-results-prose.js`. Three paragraphs
+  explaining what a PAIRING of opening styles means: "Neither style is the
+  right one. This pairing means {a} may want to talk sooner than {b} is...",
+  plus a both-immediate and a both-delayed variant. It is sent on the conflict
+  payload and imported by `src/App.jsx`, and rendered by neither. Your Conflict
+  Snapshot shows the three opening chips side by side with nothing saying what
+  the combination means, which is what this was written for.
+
+- **`repairTitle`** in the same file, "What helps each of you reset". Both
+  surfaces hardcode the word "Repair" above that block instead.
+
+A third candidate, the per-dimension `different` and `unspoken` intimacy prose,
+was a false positive in my scan: both are reached through `copy[state]`, a
+registry lookup a literal search cannot see. Worth recording because that is
+the second time a scan of mine has been blind to exactly the indirection
+CLAUDE.md warns about.
