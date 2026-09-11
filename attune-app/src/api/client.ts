@@ -363,6 +363,8 @@ export type ReflectionResults = {
   widest: ReflectionRating | null;
   /** The headings Side by Side groups under, in the website'''s order. */
   storyCategories?: string[];
+  /** Each Reflection page's heading and the line under it, from the server. */
+  pages?: Record<string, { title: string; sub?: string; eyebrowOwn?: string; aligned?: string }>;
   writtenCount: number;
 };
 
@@ -463,7 +465,20 @@ export type ResultsResponse =
       /** The closing page, assembled from the sections above. */
       whatComesNext?: { groups: NextStepGroup[] } | null;
     }
-  | { ready: false; reason: string; self: PersonResults | null; partnerName?: string | null };
+  | {
+      ready: false;
+      reason: string;
+      self: PersonResults | null;
+      partnerName?: string | null;
+      /**
+       * Which owned exercises are still outstanding, and whose they are.
+       *
+       * From api/_lib/results-gate.js, the one rule that decides this. Sent
+       * because this response carries no per-exercise state of its own, so a
+       * waiting screen here has nothing else to read.
+       */
+      waitingOn?: { key: string; label: string; who: 'you' | 'partner' | 'both' }[];
+    };
 
 export type HomeCard = {
   id: string;

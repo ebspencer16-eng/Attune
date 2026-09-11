@@ -355,12 +355,32 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
     );
   }
   if (!results.ready) {
-    // The server disagrees with /api/home about readiness. Say so plainly
-    // rather than showing an empty results screen.
+    /**
+     * The server disagrees with /api/home about readiness.
+     *
+     * Rare, and worth naming rather than shrugging at: both answers come from
+     * api/_lib/results-gate.js, so a disagreement means one of the two calls
+     * saw older data. The endpoint says what it is waiting on, so this says it
+     * too instead of "still being prepared", which tells a reader nothing they
+     * can act on.
+     *
+     * The labels are the exercise registry's own, from the server.
+     */
+    const waiting = results.waitingOn || [];
     return (
-      <Text style={{ ...Type.body, color: c.textMuted }}>
-        Your results are still being prepared.
-      </Text>
+      <View>
+        <Text style={{ ...Type.body, color: c.textMuted }}>
+          Your results are still being prepared.
+        </Text>
+        {waiting.map((w) => (
+          <Text key={w.key} style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
+            {w.label}
+            {w.who === 'both' ? ': neither of you has finished this yet.'
+              : w.who === 'you' ? ': you have not finished this yet.'
+              : ': your partner has not finished this yet.'}
+          </Text>
+        ))}
+      </View>
     );
   }
   return (

@@ -1362,6 +1362,29 @@ function WrittenPair({
  * read it. No colour runs from bad to good: two steps apart on how connected
  * someone feels is the most useful thing on the page, not a failure.
  */
+/**
+ * The heading and the line under it on a Reflection page.
+ *
+ * Both come from the payload, from api/_lib/reflection-results.js. They were
+ * typed inside src/App.jsx, so the app could not read them: it showed a bare
+ * heading and went straight into the content, and on the ratings page it
+ * showed a heading of its own invention, "How You Each Rated", because the
+ * real one was somewhere it could not reach.
+ */
+function ReflectionHead({ page }: { page?: { title: string; sub?: string } | null }) {
+  if (!page?.title) return null;
+  return (
+    <View style={{ marginBottom: Spacing.lg }}>
+      <Text style={{ ...Type.title, color: Palette.white }}>{page.title}</Text>
+      {page.sub ? (
+        <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm, lineHeight: 19 }}>
+          {page.sub}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
   if (!data) return <ReflectionWaiting />;
   if (!data.ratings.length) {
@@ -1377,7 +1400,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
       />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: Palette.white }}>How You Each Rated</Text>
+        <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
 
         <View style={{ marginTop: Spacing.md }}>
@@ -1461,7 +1484,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
       />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: Palette.white }}>Side by Side</Text>
+        <ReflectionHead page={data.pages?.story} />
 
         {/* ── GROUPED, AS THE WEBSITE GROUPS IT ────────────────────────────
             The website prints these under four headings: Milestones, How
@@ -1563,7 +1586,7 @@ function ReflectionPlan({
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         {/* block: reflection-overview/action-plan */}
-        <Text style={{ ...Type.title, color: Palette.white }}>Action Plan</Text>
+        <ReflectionHead page={data.pages?.plan} />
         {/* block: reflection-plan/items */}
 
         {/* The derived plan, under REFLECTION_ACTION_TITLES. The app could not

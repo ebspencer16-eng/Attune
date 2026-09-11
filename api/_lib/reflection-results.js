@@ -38,6 +38,41 @@ const scaleValue = (v) => (typeof v === 'number' && v >= 0 ? v : null);
  * Derived from the questions rather than typed, so the day a category is added
  * this follows instead of quietly dropping it the way it dropped this one.
  */
+/**
+ * The heading and the line under it, for each Reflection page.
+ *
+ * ── WHY THESE ARE HERE ────────────────────────────────────────────────────
+ * They were typed inside src/App.jsx, so the app could not read them and did
+ * not show them. Two consequences, both visible to a reader holding both:
+ *
+ * The ratings page is called "What you view the relationship as a whole" on
+ * the website and was called "How You Each Rated" in the app. Not a shortened
+ * version of the same heading, a different one, invented in the app because
+ * the real one was somewhere it could not reach.
+ *
+ * And every one of these pages opens with a line saying what it is. The app
+ * showed a bare heading and went straight into the content, so a reader
+ * arrived at a page of dots with nothing telling them what the dots are.
+ *
+ * `eyebrow` is the section name above the heading, which all three share.
+ */
+export const REFLECTION_PAGES = {
+  eyebrow: 'Relationship Reflection',
+  ratings: {
+    title: 'What you view the relationship as a whole',
+    sub: 'Every question with a fixed answer, shown together. The distance between the two dots is the whole point.',
+  },
+  story: {
+    title: 'Side by Side',
+    sub: 'Everything you each wrote, unedited, next to each other. Read them together.',
+  },
+  plan: {
+    title: 'Conversations worth having.',
+    eyebrowOwn: 'Reflection Action Plan',
+    aligned: "You're well-aligned across your reflections. Keep building on this foundation.",
+  },
+};
+
 export const STORY_CATEGORIES = (() => {
   const seen = [];
   for (const q of ANNIVERSARY_QUESTIONS) {
@@ -130,5 +165,7 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
     writtenCount: written.length,
     /** The headings Side by Side groups under, in order. */
     storyCategories: STORY_CATEGORIES,
+    /** Each page's heading and the line under it, so the app shows both. */
+    pages: REFLECTION_PAGES,
   };
 }
