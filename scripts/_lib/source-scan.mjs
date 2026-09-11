@@ -72,3 +72,144 @@ export function holdsColumn(text, column, registryColumns = []) {
 export function isComment(line) {
   return /^\s*(\/\/|\*|\/\*)/.test(line);
 }
+
+/** Row variables: the ones that hold a whole profile or answers record. */
+const ROW_VAR = /^(me|partner|profile|row|data|self|rec|record|them|other)$/;
+
+/** A property read whose key is computed, so the column name is not written. */
+const COMPUTED_READ = /\b([A-Za-z_$][\w$]*)\s*\??\.?\s*\[\s*[A-Za-z_$][^\]]*\]/g;
+
+/**
+ * Is this line reading a column off a row without naming it?
+ *
+ * `partner?.[col]` inside a loop over EXERCISE_COLUMNS reads conflict_data and
+ * contains no string a search can find. That is the whole point of deriving the
+ * column list, and it is also how a leak becomes invisible to a scanner.
+ *
+ * Returns the row variable being indexed, or null.
+ */
+export function computedColumnRead(line) {
+  if (isComment(line)) return null;
+  for (const m of line.matchAll(COMPUTED_READ)) {
+    if (ROW_VAR.test(m[1])) return m[1];
+  }
+  return null;
+}
+
+/**
+ * Names that were filled from a computed read off a row.
+ *
+ * `for (const col of EXERCISE_COLUMNS) theirAnswers[col] = partner?.[col]`
+ * builds `theirAnswers` out of every answer column including conflict_data.
+ * The name of the column appears nowhere, so putting `theirAnswers` in a
+ * response leaks it past any check looking for the literal.
+ *
+ * Two shapes, both of them declarations:
+ *
+ *   const x = <anything indexing a row by computed key>
+ *   const x = {} ... x[k] = row[k]          (the accumulator)
+ *
+ * ── WHY ONLY DECLARATIONS ─────────────────────────────────────────────────
+ * The first version tracked any assignment, and flagged five lines of
+ * api/admin-data.js. `p` there is an arrow-function parameter, bound half a
+ * dozen times in unrelated scopes, and one of those did index a row. Matching
+ * on the bare name across a whole file cannot tell those apart.
+ *
+ * Requiring a declaration is what makes the name mean one thing. A leak still
+ * has to declare its accumulator somewhere, so nothing real is given up.
+ */
+export function namesBuiltFromRow(lines) {
+  const built = new Map();
+  const empties = new Map();     // name -> line, declared as {} or []
+
+  lines.forEach((line, i) => {
+    if (isComment(line)) return;
+
+    const decl = line.match(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(.*)$/);
+    if (decl) {
+      const [, name, rhs] = decl;
+      if (/^\s*(\{\s*\}|\[\s*\])\s*;?\s*$/.test(rhs)) { empties.set(name, i + 1); return; }
+      if (computedColumnRead(rhs) && !built.has(name)) built.set(name, i + 1);
+      return;
+    }
+
+    // The accumulator being filled: x[k] = row[k], or x.push(row[k]).
+    const fill = line.match(/\b([A-Za-z_$][\w$]*)\s*(?:\[[^\]]*\]\s*=|\.push\()/);
+    if (fill && empties.has(fill[1]) && computedColumnRead(line) && !built.has(fill[1])) {
+      built.set(fill[1], empties.get(fill[1]));
+    }
+  });
+  return built;
+}
+
+/** A whole row spread into an object, which names no column at all. */
+const ROW_SPREAD = /^\s*\.\.\.(?:data|profile|row|me|partner|self|them|other|rec|record)\b/;
+
+/**
+ * Every way `column` can reach a response from this file.
+ *
+ * ── WHY BOTH PRIVACY GATES CALL THIS ──────────────────────────────────────
+ * They ask the same question about two different columns, and they had drifted
+ * into asking it differently. check-partner-privacy knew about a spread of the
+ * whole row; check-intimacy-privacy did not, and a `...partner` in a response
+ * passed it. Neither knew about a column reached through EXERCISE_COLUMNS,
+ * which is how both of them are reached everywhere else in this codebase.
+ *
+ * That last one is the failure CLAUDE.md describes and records as closed. It
+ * was closed for deciding which FILES to scan: holdsColumn resolves the
+ * registry, so api/home.js is no longer skipped. It was never closed for
+ * deciding what counts as putting the column in a response. Planting this in
+ * api/home.js
+ *
+ *   const theirAnswers = {};
+ *   for (const col of EXERCISE_COLUMNS) theirAnswers[col] = partner?.[col];
+ *   return json({ theirAnswers, ... });
+ *
+ * sent one partner every answer the other had given, conflict patterns
+ * included, past all six privacy and response gates.
+ *
+ * So there is one implementation and both gates call it. Two gates asking one
+ * question two ways is how the weaker one ends up being the one that still
+ * passes.
+ *
+ * Returns `{ line, why, text }` for each leak, or an empty array.
+ */
+export function responseLeaks(lines, column) {
+  const built = namesBuiltFromRow(lines);
+  const out = [];
+
+  lines.forEach((line, i) => {
+    if (isComment(line)) return;
+    if (!insideResponse(lines, i)) return;
+    const text = line.trim().slice(0, 90);
+
+    if (line.includes(column)) {
+      out.push({ line: i + 1, why: `${column} put into a response`, text });
+      return;
+    }
+    if (ROW_SPREAD.test(line)) {
+      out.push({ line: i + 1, why: `a row spread into a response carries ${column}`, text });
+      return;
+    }
+    const rowVar = computedColumnRead(line);
+    if (rowVar) {
+      out.push({
+        line: i + 1,
+        why: `a column read off \`${rowVar}\` by computed key, in a response; the name is never written`,
+        text,
+      });
+      return;
+    }
+    for (const [name, at] of built) {
+      if (!new RegExp(`\\b${name}\\b`).test(line)) continue;
+      out.push({
+        line: i + 1,
+        why: `\`${name}\` was filled from a row by computed key at line ${at}, and reaches a response`,
+        text,
+      });
+      return;
+    }
+  });
+
+  return out;
+}

@@ -39,7 +39,7 @@
 import { readFileSync, readdirSync } from 'fs';
 import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
 import { intimacyResults } from '../api/_lib/intimacy-results.js';
-import { insideResponse, isComment, holdsColumn } from './_lib/source-scan.mjs';
+import { holdsColumn, responseLeaks } from './_lib/source-scan.mjs';
 import { EXERCISE_COLUMNS } from '../api/_exercises.js';
 
 const problems = [];
@@ -140,17 +140,15 @@ function scan(dir, prefix = '') {
     checked++;
     if (ALLOWED_ENDPOINTS.has(rel)) continue;
 
-    // Whether the column is inside a response is decided by
+    // Every way the column can reach a response is decided by
     // scripts/_lib/source-scan.mjs, shared with check-partner-privacy.mjs.
-    // Both gates got this wrong the same two ways before it was shared.
+    // Both gates got this wrong the same two ways before it was shared, and
+    // then drifted again: this one only ever looked for the literal, so a
+    // `...partner` spread and a loop over EXERCISE_COLUMNS both passed it.
     const lines = text.split('\n');
-    lines.forEach((line, i) => {
-      if (isComment(line)) return;
-      if (!line.includes('intimacy_data')) return;
-      if (insideResponse(lines, i)) {
-        problems.push(`api/${rel}:${i + 1} returns intimacy_data, and is not one of the endpoints allowed to`);
-      }
-    });
+    for (const leak of responseLeaks(lines, 'intimacy_data')) {
+      problems.push(`api/${rel}:${leak.line} ${leak.why}, and is not one of the endpoints allowed to`);
+    }
   }
 }
 scan(apiDir);

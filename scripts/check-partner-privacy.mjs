@@ -32,7 +32,7 @@
 // watched, one open. This one checks every file under api/.
 
 import { readFileSync, readdirSync } from 'fs';
-import { insideResponse, isComment, holdsColumn } from './_lib/source-scan.mjs';
+import { holdsColumn, responseLeaks } from './_lib/source-scan.mjs';
 import { EXERCISE_COLUMNS } from '../api/_exercises.js';
 
 const apiDir = new URL('../api/', import.meta.url);
@@ -60,19 +60,14 @@ function scan(dir, prefix = '') {
     readers++;
 
     const lines = text.split('\n');
-    lines.forEach((line, i) => {
-      if (isComment(line)) return;
-
-      // Named directly in a response.
-      if (line.includes('conflict_data') && insideResponse(lines, i)) {
-        problems.push({ where: `api/${rel}:${i + 1}`, why: 'conflict_data put into a response', line: line.trim().slice(0, 90) });
-      }
-
-      // Or carried by a spread of the whole profile row, which names nothing.
-      if (/^\s*\.\.\.(?:data|profile|row|me|partner|self)\b/.test(line) && insideResponse(lines, i)) {
-        problems.push({ where: `api/${rel}:${i + 1}`, why: 'a profile row spread into a response carries conflict_data', line: line.trim().slice(0, 90) });
-      }
-    });
+    // Every way the column can reach a response is decided by
+    // scripts/_lib/source-scan.mjs, shared with check-intimacy-privacy.mjs.
+    // The two gates ask one question about two columns, and they had drifted
+    // into asking it differently: this one knew about a spread of the whole
+    // row and that one did not, and neither knew about the registry.
+    for (const leak of responseLeaks(lines, 'conflict_data')) {
+      problems.push({ where: `api/${rel}:${leak.line}`, why: leak.why, line: leak.text });
+    }
   }
 }
 scan(apiDir);
