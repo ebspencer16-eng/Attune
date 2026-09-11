@@ -45,6 +45,10 @@ export default function ConflictExercise({
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [saving, setSaving] = useState(false);
+  // Three of the five exercises told someone when an answer had not saved and
+  // two did not, so the same dropped request either warned you or said nothing
+  // depending on which exercise you were in. Same state, same sentence.
+  const [saveFailed, setSaveFailed] = useState(false);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -74,6 +78,7 @@ export default function ConflictExercise({
       exercise: 'conflict', answers: next, completed, shape: set?.exercise.shape,
     });
     setSaving(false);
+    setSaveFailed(!res.ok);
     return res.ok;
   }, [set]);
 
@@ -179,6 +184,12 @@ export default function ConflictExercise({
             setIdx(idx + 1);
           }}
         />
+        {saveFailed ? (
+          <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
+            That answer has not saved yet. It will try again on the next one.
+          </Text>
+        ) : null}
+
         {idx > 0 ? <Secondary label="Back" onPress={() => setIdx(idx - 1)} /> : null}
       </ScrollView>
     </Shell>

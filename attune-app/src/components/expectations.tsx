@@ -64,6 +64,10 @@ export default function Expectations({
   const [catIdx, setCatIdx] = useState(0);
   const [lifeIdx, setLifeIdx] = useState(0);
   const [saving, setSaving] = useState(false);
+  // As the other exercises do. A dropped save was silent here, so someone who
+  // lost their connection mid-exercise had no way to know their last answers
+  // were only in memory.
+  const [saveFailed, setSaveFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,6 +114,7 @@ export default function Expectations({
     setSaving(true);
     const res = await saveExercise({ exercise: 'ex2', answers: next, completed, shape: set?.exercise.shape });
     setSaving(false);
+    setSaveFailed(!res.ok);
     return res.ok;
   }, [set]);
 
@@ -312,7 +317,13 @@ export default function Expectations({
               else setStage('life');
             }}
           />
-          {catIdx > 0 ? <Secondary label="Back" onPress={() => setCatIdx(catIdx - 1)} /> : null}
+          {saveFailed ? (
+          <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
+            That answer has not saved yet. It will try again on the next one.
+          </Text>
+        ) : null}
+
+        {catIdx > 0 ? <Secondary label="Back" onPress={() => setCatIdx(catIdx - 1)} /> : null}
         </ScrollView>
       </Shell>
     );
