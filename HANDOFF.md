@@ -1067,3 +1067,45 @@ These are on CLAUDE.md's own list, not things that slipped:
 - Greeting placeholders in `ANYTIME` (`api/_lib/next-action.js`).
 - `repairTitle` in the conflict prose, used by neither surface.
 - The research findings list is still the original three.
+
+
+## 2026-09-10, fifth pass — text selection, and a migration waiting on Ellie
+
+### RUN THIS FIRST
+
+`supabase/migrations/057_annotation_kinds.sql` adds `kind`, `color` and
+`opened_at` to `notes`. **Highlights and underlines do not work until it is
+run.** Plain notes and sharing do work: the insert is attempted whole and
+retried without the new fields when the schema has not caught up, so an
+existing feature does not break while the migration waits. A highlight refuses
+rather than saving something that is not a highlight, and says why.
+
+### What was built
+
+**Text selection.** React Native cannot put custom items in the system's text
+selection menu; that needs a native module. So the unit of selection is a
+SENTENCE: each is its own inline Text with its own long-press, flowing together
+as one paragraph. Press and hold any sentence and it is chosen. What it cannot
+do is mark half a sentence or a phrase spanning two. If that matters, the
+native module is the honest answer and it should be Ellie's call.
+
+The menu has Ellie's five: highlight, underline, tag, note, share. Colour
+pickers preview the actual mark. Tag creation did not exist at all, server or
+client, and does now.
+
+**Notes tab**, three sections: pick up where you left off, from your partner
+with unread marks, and every tag with six sorts. "Recently added to" sorts on
+the tag's contents, not on the tag.
+
+**Margin markers** for notes only. Highlights and underlines are already
+visible in the text; a note is not, which is the point of it and the problem.
+
+### Still not built
+
+- Marking anything outside the results. In Practice posts have an anchor type
+  (`post`, `post_block`) and no UI.
+- A general filter bar on the notes themselves. The tag sort is built; filtering
+  by source or author still cuts on things In Practice has not defined.
+- The web has no marking UI at all. Everything above is app-only, and the
+  anchors are shared, so a mark made in the app is readable by the site
+  whenever it grows the UI.
