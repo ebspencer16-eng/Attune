@@ -14,18 +14,103 @@
  * they press the button rather than after.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator, Linking, Modal, Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { deleteAccount } from '@/api/client';
+import { deleteAccount, fetchHome } from '@/api/client';
+import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
+
+/**
+ * What the server says about each exercise.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * "Rel Relf - still no data on these pages." "Physical Intimacy is still
+ * missing from the top nav. Am I viewing an old version of the simulator?"
+ *
+ * Both of those are one question: what does the server think we own, and what
+ * does it think we have finished. The answer decides what the app draws, and
+ * until now there was no way to see it. So a missing section could be an app
+ * bug, a stale bundle, an ownership problem, or a partner who has not finished,
+ * and telling them apart meant me reading code and guessing.
+ *
+ * Physical Intimacy turned out to be ownership: the website was granting it
+ * from a localStorage key and the app was asking the server, so the two
+ * disagreed and the app was right. That took a long time to establish and this
+ * panel would have answered it immediately.
+ *
+ * It reads /api/home, which every screen already calls, and shows exactly what
+ * that says. No interpretation: if this panel and a screen disagree, the screen
+ * is wrong, and that is worth being able to see.
+ */
+function ExerciseStatus() {
+  const [home, setHome] = useState<HomeResponse | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetchHome();
+      if (cancelled) return;
+      if (res.ok) setHome(res.data); else setFailed(true);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const exercises = Object.values(home?.exercises ?? {})
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  return (
+    <View style={{ ...card(), marginTop: Spacing.lg }}>
+      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>
+        What the server sees
+      </Text>
+
+      {failed ? (
+        <Text style={{ ...Type.small, color: c.textMuted }}>
+          Could not reach the server just now.
+        </Text>
+      ) : !home ? (
+        <ActivityIndicator color={c.accentQuiet} />
+      ) : (
+        <View>
+          {exercises.map((ex) => (
+            <View
+              key={ex.key}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                paddingVertical: Spacing.xs,
+              }}>
+              <Text style={{ ...Type.small, color: c.text, flex: 1 }} numberOfLines={1}>
+                {ex.label}
+              </Text>
+              {/* Owned first, because nothing else matters if the answer is no.
+                  Then each person, because "waiting on my partner" and "waiting
+                  on me" are different problems with different fixes. */}
+              <Text style={{ ...Type.small, fontSize: 11, color: ex.owned ? c.text : c.textMuted }}>
+                {ex.owned
+                  ? `${ex.mine ? 'you' : '—'} / ${ex.theirs ? 'partner' : '—'}`
+                  : 'not owned'}
+              </Text>
+            </View>
+          ))}
+          <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: Spacing.sm }}>
+            {home.resultsReady
+              ? 'Results are open.'
+              : 'Results open when both of you finish everything owned.'}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function Settings({
   onClose, onSignedOut,
@@ -91,6 +176,8 @@ export default function Settings({
         <Row label="Privacy policy and terms" onPress={() => Linking.openURL(`${SITE}/legal`)} />
         <Row label="Your privacy choices" onPress={() => Linking.openURL(`${SITE}/privacy-choices`)} last />
       </View>
+
+      <ExerciseStatus />
 
       {/* ── Delete account ──────────────────────────────────────────────────
           Quiet, and last on the screen. The first version was a bordered card
