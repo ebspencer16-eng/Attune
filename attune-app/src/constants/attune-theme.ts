@@ -139,9 +139,33 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 // Display is Playfair on the web. Until the font file is bundled the app uses
 // the system serif, which is close enough in weight not to look wrong and
 // avoids shipping a font before anyone has seen a screen.
+/**
+ * The two families the website uses, loaded from assets/fonts in the root
+ * layout.
+ *
+ * ── WHY EACH WEIGHT IS ITS OWN FAMILY ─────────────────────────────────────
+ * React Native on iOS does not synthesise weights from a single registered
+ * face. Setting fontWeight '700' on a family that only has a regular face
+ * either does nothing or fakes a bold badly, and which of those you get varies
+ * by iOS version. So each weight is registered under its own name and the type
+ * scale names the one it wants.
+ *
+ * fontWeight is still set alongside, because it is what a screen reader and a
+ * text-only fallback read, and because it is correct.
+ *
+ * ── WHAT THIS REPLACED ────────────────────────────────────────────────────
+ * `ui-serif` and `system-ui`: New York and San Francisco on iOS. Every screen
+ * in the app was in a different typeface from the same screen on the website,
+ * which is why the storycards never matched however many times their colours,
+ * ratio, grounds and layout were corrected.
+ */
 export const Fonts = {
-  display: 'ui-serif',
-  body: 'system-ui',
+  display: 'PlayfairDisplay',
+  body: 'DMSans',
+  bodyLight: 'DMSansLight',
+  bodyMedium: 'DMSansMedium',
+  bodySemiBold: 'DMSansSemiBold',
+  bodyBold: 'DMSansBold',
 } as const;
 
 /**
@@ -168,12 +192,12 @@ export function inputType(t: {
 export const Type = {
   hero: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 34, fontWeight: '700' },
   title: { fontFamily: Fonts.display, fontSize: 22, lineHeight: 27, fontWeight: '700' },
-  cardTitle: { fontFamily: Fonts.body, fontSize: 16, lineHeight: 21, fontWeight: '700' },
+  cardTitle: { fontFamily: Fonts.bodyBold, fontSize: 16, lineHeight: 21, fontWeight: '700' },
   body: { fontFamily: Fonts.body, fontSize: 15, lineHeight: 24, fontWeight: '400' },
   small: { fontFamily: Fonts.body, fontSize: 13, lineHeight: 19, fontWeight: '400' },
   /** Section labels: uppercase, tracked, small. */
   eyebrow: {
-    fontFamily: Fonts.body, fontSize: 10, lineHeight: 14,
+    fontFamily: Fonts.bodyBold, fontSize: 10, lineHeight: 14,
     fontWeight: '700', letterSpacing: 1.6, textTransform: 'uppercase',
   },
 } as const;
