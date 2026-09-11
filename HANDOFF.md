@@ -1020,3 +1020,50 @@ the label, so no new customer copy was written.
 
 **Still Ellie's:** the greeting placeholders in `ANYTIME`, and `repairTitle` in
 the conflict prose, which neither surface uses.
+
+
+## 2026-09-10, fourth pass — why the home screen had not moved
+
+**The home changes were real in source and did nothing on screen, and that was
+my fault, not a stale bundle.** The blue block was `justifyContent:
+'space-between'` over two children, which pins the greeting to the top and the
+finding to the bottom, as far apart as the block is tall. A `marginTop` on a
+top-pinned child and a `paddingTop` on a bottom-pinned one both push against
+the thing holding them. The profile control has its own line now and the
+greeting and finding are one centred group: greeting down about 66pt, finding
+up about 150pt on a 852pt phone.
+
+**The glow is 26 rings at 0.9% each, not 2 or 3 at 5-30%.** A translucent
+circle has a hard edge wherever its fill starts and a shadow sits outside that
+edge rather than hiding it. Ellie called it twice and was right twice. What
+removes banding is step size.
+
+**Intimacy dimension pages** drew one bar of the distance between two people
+where the website plots both on a track between the poles. `positions` was
+already on the payload, added when the overview had the identical bug. Poles
+and the "Talk about it" label are on the payload now too.
+
+**Reflection page headers.** All three pages open with a heading and a line
+saying what the page is; the app showed neither, and on the ratings page had
+invented its own heading because the real one was in `src/App.jsx`.
+
+### Still genuinely not built, and all of it deliberate
+
+These are on CLAUDE.md's own list, not things that slipped:
+
+- **Text selection: highlight, underline, tag, note, share.** Ellie's spec is
+  in the 2026-09-05 conversation. She deferred it herself and it is the
+  largest outstanding piece.
+- **Notes tab reorganisation**, same message, same deferral.
+- **The post reader.** Tapping an In Practice row opens the website. Deliberate
+  and commented in `resources.tsx`.
+- **Notifications.** `fetchNotifications` exists in `client.ts`; no screen.
+- **Tab-bar badges.** `/api/home` computes `badges` and `client.ts` declares
+  them; nothing renders them. The data is there whenever this is wanted.
+- **Notes filtering**, deliberately not built and commented.
+
+### Still Ellie's
+
+- Greeting placeholders in `ANYTIME` (`api/_lib/next-action.js`).
+- `repairTitle` in the conflict prose, used by neither surface.
+- The research findings list is still the original three.
