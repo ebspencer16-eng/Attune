@@ -10,6 +10,9 @@
  *   GET  ?action=tags          your tags, seeded on first call
  *   POST { action: 'create' }  a note or annotation
  *   POST { action: 'update' }  edit your own; a shared note stays editable only by its author
+ *   POST { action: 'open' }    mark a note your PARTNER shared as seen. The one
+ *                              write here that touches a row you do not own, and
+ *                              the only column it can set is opened_at.
  *   POST { action: 'delete' }  your own only
  *   POST { action: 'share' }   flip visibility
  *
@@ -27,6 +30,7 @@
 export const config = { runtime: 'edge' };
 
 import { isValidAnchor, standardTags } from './_lib/tags.js';
+import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
@@ -167,6 +171,21 @@ export default async function handler(req) {
       if (!isValidAnchor(anchorType, anchorKey)) {
         return json({ ok: false, error: 'invalid anchor' }, 400);
       }
+      /**
+       * What kind of mark this is, and what colour.
+       *
+       * Validated together, because they constrain each other: a plain note
+       * takes no colour and a highlight cannot be drawn without one. Rejected
+       * rather than coerced, so a client sending a colour this product does not
+       * offer hears about it, instead of it silently becoming amber on one
+       * surface and nothing on the other.
+       */
+      const kind = body.kind || 'note';
+      const color = body.color ?? null;
+      if (!isValidAnnotation(kind, color)) {
+        return json({ ok: false, error: 'invalid annotation kind or colour' }, 400);
+      }
+
       const shared = body.visibility === 'shared';
       if (shared && !coupleKey) {
         // Sharing with nobody is a silent no-op that looks like success.
@@ -179,6 +198,8 @@ export default async function handler(req) {
         couple_key: shared ? coupleKey : null,
         title: body.title || null,
         body: body.body || '',
+        kind,
+        color,
         anchor_type: anchorType,
         anchor_key: anchorKey,
         anchor_context: body.anchorContext || null,
@@ -229,6 +250,26 @@ export default async function handler(req) {
         if (body.title !== undefined) patch.title = body.title;
         if (body.body !== undefined) patch.body = body.body;
         if (body.folderId !== undefined) patch.folder_id = body.folderId || null;
+        /**
+         * Recolouring a mark, or changing your mind about whether it is a
+         * highlight or an underline.
+         *
+         * Both must be sent together. The two constrain each other, so
+         * validating one against a value read from the row would mean reading
+         * the row first, and accepting one without the other would let a
+         * highlight end up with no colour, which cannot be drawn.
+         */
+        if (body.kind !== undefined || body.color !== undefined) {
+          if (body.kind === undefined) {
+            return json({ ok: false, error: 'kind and color must be sent together' }, 400);
+          }
+          const nextColor = body.color ?? null;
+          if (!isValidAnnotation(body.kind, nextColor)) {
+            return json({ ok: false, error: 'invalid annotation kind or colour' }, 400);
+          }
+          patch.kind = body.kind;
+          patch.color = nextColor;
+        }
       }
       const r = await rest(scope, {
         method: 'PATCH', headers: { ...jsonHeaders, Prefer: 'return=representation' },
@@ -253,6 +294,43 @@ export default async function handler(req) {
         }
       }
       return json({ ok: true, note: { ...rows[0], tagIds: body.tagIds ?? undefined } });
+    }
+
+    /**
+     * Mark a note your partner shared with you as opened.
+     *
+     * ── WHY THIS IS ITS OWN ACTION ────────────────────────────────────────
+     * Every other write on this endpoint is scoped by `owner_id=eq.me`, which
+     * is what makes them safe: another person's note matches nothing. This one
+     * is the exact opposite. The whole point is to write to a row somebody else
+     * owns, so it cannot reuse that scope and must not be folded into `update`,
+     * where a future edit would inherit the wrong filter.
+     *
+     * It is safe for a different reason, stated here so it stays true: the
+     * filter is the couple key, the row must be shared, and the owner must NOT
+     * be the caller. So the only rows reachable are ones the caller's partner
+     * deliberately shared with the caller, and the only column written is a
+     * timestamp saying it was seen. Nothing about the note's content can be
+     * touched through this path.
+     */
+    if (action === 'open') {
+      if (!body.id || !UUID_RE.test(String(body.id))) {
+        return json({ ok: false, error: 'missing or invalid id' }, 400);
+      }
+      if (!coupleKey) return json({ ok: false, error: 'no partner linked' }, 400);
+      const r = await rest(
+        `notes?id=eq.${encodeURIComponent(String(body.id))}`
+        + `&couple_key=eq.${encodeURIComponent(coupleKey)}`
+        + `&visibility=eq.shared&owner_id=neq.${me}&opened_at=is.null`,
+        {
+          method: 'PATCH',
+          headers: { ...jsonHeaders, Prefer: 'return=representation' },
+          body: JSON.stringify({ opened_at: new Date().toISOString() }),
+        },
+      );
+      const rows = await r.json().catch(() => []);
+      // Nothing matched is the normal case on a second open, not a failure.
+      return json({ ok: true, opened: rows.length });
     }
 
     return json({ ok: false, error: 'unsupported action' }, 400);
