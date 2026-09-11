@@ -24,11 +24,13 @@ import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { fetchConflictResults } from '@/api/client';
+import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
+import { AnnotationProvider, Prose } from '@/components/annotation-context';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
   CommsPlan, HighlightCard, IntimacyDimension, IntimacyResults, NextStepGroup,
   ReflectionInsight, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
+  Note, Tag,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
@@ -205,6 +207,29 @@ export default function Results({
     return () => { cancelled = true; };
   }, []);
 
+  /**
+   * The reader's own marks, and their tags.
+   *
+   * Loaded once for the whole results experience rather than per section: a
+   * request per section would fire on every nav tap, and the payload is one
+   * person's annotations, which is small.
+   *
+   * Only their own. Notes the partner shared are not marks on this reader's
+   * text; they live on the Notes tab, where they are addressed to someone.
+   */
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [n, t] = await Promise.all([fetchNotes(), fetchTags()]);
+      if (cancelled) return;
+      if (n.ok) setNotes(n.data.notes);
+      if (t.ok) setTags(t.data.tags);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const content = results.content;
   const dims = content?.dimensions ?? [];
 
@@ -326,6 +351,14 @@ export default function Results({
       ) : null}
 
       <View style={{ flex: 1 }}>
+        {/* Everything inside can be marked. A <Prose> outside this provider is
+            a plain Text, so nothing breaks if a screen is rendered elsewhere. */}
+        <AnnotationProvider
+          section={section}
+          notes={notes}
+          tags={tags}
+          partnerName={them}
+          onCreated={(note) => setNotes((prev) => [note, ...prev])}>
         <SectionBody
           section={section}
           expectations={expectations}
@@ -348,6 +381,7 @@ export default function Results({
           viewer={viewer}
           wideGap={wideGap}
         />
+        </AnnotationProvider>
       </View>
       {/* No previous and next buttons.
           They ran across the bottom of every results page, taking a strip of
@@ -1093,7 +1127,7 @@ function IntimacyDimensionView({
               backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
             }}>
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{dim.body}</Text>
+            <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{dim.body}</Prose>
           </View>
         ) : null}
 
@@ -1350,7 +1384,7 @@ function WrittenPair({
           borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
         }}>
         <Eyebrow>{you}</Eyebrow>
-        <Text style={{ ...Type.body, color: c.text }}>{yourWords}</Text>
+        <Prose style={{ ...Type.body, color: c.text }}>{yourWords}</Prose>
       </View>
       <View
         style={{
@@ -1358,7 +1392,7 @@ function WrittenPair({
           borderRadius: Radius.lg, padding: Spacing.lg,
         }}>
         <Eyebrow color={c.textMuted}>{them}</Eyebrow>
-        <Text style={{ ...Type.body, color: c.text }}>{theirWords}</Text>
+        <Prose style={{ ...Type.body, color: c.text }}>{theirWords}</Prose>
       </View>
 
       {/* ── THE QUESTION UNDER THE PAIR ────────────────────────────────
@@ -1546,7 +1580,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
               }}>
               <Eyebrow>{data.names.you}</Eyebrow>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.you}</Text>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.you}</Prose>
             </View>
 
             <View
@@ -1555,7 +1589,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
                 borderRadius: Radius.lg, padding: Spacing.lg,
               }}>
               <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.them}</Text>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.them}</Prose>
             </View>
 
             {/* ── THE QUESTION UNDER THE PAIR ──────────────────────────
@@ -2205,9 +2239,9 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
           <Text style={{ ...Type.eyebrow, color: type.color || accent, marginBottom: Spacing.md }}>
             What this looks like in your relationship
           </Text>
-          <Text style={{ ...Type.body, color: c.text }}>
+          <Prose style={{ ...Type.body, color: c.text }}>
             {interp((type.patterns?.length ? type.patterns.join(' ') : type.description), you, them)}
-          </Text>
+          </Prose>
         </View>
 
         {/* The website's three blocks, in the website's order and with the
@@ -2221,7 +2255,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             </Text>
             {type.strengths.slice(0, 2).map((t) => (
               <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Text style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Text>
+                <Prose style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Prose>
               </View>
             ))}
           </View>
@@ -2235,7 +2269,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
             </Text>
             {type.stickingPoints.slice(0, 2).map((t) => (
               <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Text style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Text>
+                <Prose style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Prose>
               </View>
             ))}
           </View>
