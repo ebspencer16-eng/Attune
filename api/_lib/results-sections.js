@@ -85,7 +85,7 @@ export const RESULTS_SECTION_LABELS = {
   'conflict-overview': 'Conflict Patterns',
   'conflict-snapshot': 'Your Conflict Snapshot',
   'conflict-patterns': 'Your Patterns',
-  'conflict-wrote': 'What You Both Wrote',
+  'conflict-wrote': 'What You Each Wrote',
   'what-comes-next': 'What Comes Next',
 };
 
@@ -196,7 +196,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
         { id: 'conflict-overview', label: AT_A_GLANCE },
         { id: 'conflict-snapshot', label: 'Your Conflict Snapshot' },
         { id: 'conflict-patterns', label: 'Your Patterns' },
-        { id: 'conflict-wrote', label: 'What You Both Wrote' },
+        { id: 'conflict-wrote', label: 'What You Each Wrote' },
       ],
     });
   }

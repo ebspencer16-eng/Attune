@@ -37,7 +37,9 @@ import {
   summarizeIntimacy,
   intimacyDimensionSkips,
 } from '../_intimacy-questions.js';
-import { INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT } from '../_intimacy-results-prose.js';
+import {
+  INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT, INTIMACY_LEAD, INTIMACY_ALL_ALIGNED,
+} from '../_intimacy-results-prose.js';
 
 /**
  * The ground each dimension's page is painted with.
@@ -187,6 +189,15 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
      * question to ask each other.
      */
     promptLabel: TALK_ABOUT_IT,
+    /** The line under the two names on the glance page, by variant. */
+    lead: INTIMACY_LEAD[variant] || INTIMACY_LEAD.premarital,
+    /**
+     * Set only when nothing is misaligned, which is when the conversations
+     * page needs to say why it is still showing a list.
+     */
+    allAlignedNote: dimensions.some((d) => d.state === 'discuss' || d.state === 'different')
+      ? null
+      : INTIMACY_ALL_ALIGNED,
     dimensions,
     // Ordered for the Conversations screen: furthest apart first, because that
     // is where a conversation is most worth having. Dimensions nobody answered

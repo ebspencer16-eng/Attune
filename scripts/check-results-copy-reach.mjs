@@ -72,6 +72,9 @@ const WEBSITE_ONLY = [
   // The website's fallback when a couple type cannot be resolved. The app has
   // its own waiting states for this, from the server's own reasons.
   'Complete all exercises to see your couple type.',
+  // The website's download fallback for a browser that cannot save the card.
+  // The app shares through the system sheet and has no equivalent failure.
+  'Download not available. Take a screenshot instead.',
 ];
 
 const lines = site.split('\n');
@@ -85,8 +88,28 @@ if (start === -1) {
 const problems = [];
 lines.slice(start, end > start ? end : start + 4000).forEach((line, i) => {
   if (/^\s*(\/\/|\*)/.test(line)) return;
-  for (const m of line.matchAll(/>([A-Z][^<>{}]{34,220}?)</g)) {
-    const text = m[1].trim();
+
+  /**
+   * Two shapes, because the first version only knew one.
+   *
+   * A JSX text node, `>Some sentence.<`, and a quoted string inside an
+   * expression, which is how a conditional writes copy:
+   *
+   *   {variant === "married" ? "Based on how things are now." : "..."}
+   *
+   * That one sat in src/App.jsx for as long as the intimacy glance page has
+   * existed, and this gate walked past it twice while reporting all clear,
+   * because it is not a text node. The app had no line under the names as a
+   * result. A checker that knows one of the two ways to write a sentence
+   * certifies the other.
+   */
+  const candidates = [
+    ...[...line.matchAll(/>([A-Z][^<>{}]{34,220}?)</g)].map((m) => m[1]),
+    ...[...line.matchAll(/["']([A-Z][^"'<>{}]{34,220}?)["']/g)].map((m) => m[1]),
+  ];
+
+  for (const raw of candidates) {
+    const text = raw.trim();
     if (!/[a-z]{3}/.test(text)) continue;            // not prose
     if (WEBSITE_ONLY.includes(text)) continue;
     const alsoShared = api.includes(text.slice(0, 40).replace(/&amp;/g, '&'));

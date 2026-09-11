@@ -960,7 +960,19 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
       />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          <Text style={{ ...Type.hero, color: Palette.white }}>Physical Intimacy Expectations</Text>
+          {/* The two names, then the line that says which version of the
+            exercise this was. The app opened with "Physical Intimacy
+            Expectations" as its heading, which is the eyebrow the website used
+            to carry above the names; Ellie asked for that eyebrow to go, and
+            the names are what the website leads with on every glance page. The
+            line under them was a ternary inside src/App.jsx, so the app had
+            nothing to put there. */}
+        <Text style={{ ...Type.hero, color: Palette.white }}>{you} & {them}</Text>
+        {data.lead ? (
+          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>
+            {data.lead}
+          </Text>
+        ) : null}
 
           {/* One panel, a row per dimension, each partner on the track. The app
               drew a card per dimension carrying one distance bar, which is a
@@ -1178,6 +1190,15 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: Palette.white }}>Conversations Worth Having</Text>
+        {/* Why the list is still here when nothing is misaligned. Agreeing is
+            not the same as having said it out loud. The website has printed
+            this all along; it was a string inside src/App.jsx, so the app
+            showed the list and left the reader to work out why. */}
+        {data.allAlignedNote ? (
+          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.8)', marginTop: Spacing.sm }}>
+            {data.allAlignedNote}
+          </Text>
+        ) : null}
         {/* block: intimacy-plan/conversations */}
         <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
           {data.conversations.map((d) => (

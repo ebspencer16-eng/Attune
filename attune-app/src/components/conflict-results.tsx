@@ -134,13 +134,11 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
         colors={['#16305C', '#1B5FE8']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#6C9BFF' }} />
-          <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>
-            {content.copy.eyebrow || 'Conflict Patterns'}
-          </Text>
-        </View>
-        <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.sm }}>
+        {/* The names, and nothing above them. The eyebrow and its dot were
+            here, matching the website, and Ellie asked for both to go from
+            both products: the section is already named in the nav you arrived
+            through. */}
+        <Text style={{ ...Type.hero, color: Palette.white }}>
           {names.you} & {names.partner}
         </Text>
 
@@ -242,13 +240,14 @@ function PageHead({
 }) {
   return (
     <View style={{ marginBottom: Spacing.lg }}>
-      <Text style={{ ...Type.eyebrow, color: c.accent }}>
-        {copy.eyebrow || 'Conflict Patterns'}
-      </Text>
+      {/* The section eyebrow was here, above the title, matching the website.
+          Ellie asked for it to go from every Conflict detail page on both
+          products. The badge stays: it is the only thing saying whether the
+          partner can see this page, which is not decoration on this section. */}
       <View
         style={{
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-          gap: Spacing.md, marginTop: Spacing.sm,
+          gap: Spacing.md,
         }}>
         <Text style={{ ...Type.title, color: c.textStrong, flex: 1 }}>{title}</Text>
         <View

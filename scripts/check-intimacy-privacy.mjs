@@ -66,7 +66,7 @@ if (!both) {
   // "Talk about it". It was typed inline in src/App.jsx, so the app printed
   // each prompt as a bare heading with nothing saying it was a question to
   // ask. Copy, not an answer, and the same for every couple.
-  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations', 'promptLabel'];
+  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'conversations', 'promptLabel', 'lead', 'allAlignedNote'];
   // `positions` is the two partners' averages over the questions in this
   // dimension. It is an aggregate of `questions`, which is already listed
   // below and is the whole point of the screen, so it exposes nothing new: it

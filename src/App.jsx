@@ -70,7 +70,7 @@ const APP_STORE_URL = 'https://apps.apple.com/app/attune-relationships/idPENDING
 function typingDimScores(selfAnswers, partnerAnswers) {
   return PARTNER_VIEW_ENABLED ? blendedDimScores(selfAnswers, partnerAnswers) : calcDimScores(selfAnswers);
 }
-import { INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT } from "../api/_intimacy-results-prose.js";
+import { INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT, INTIMACY_LEAD, INTIMACY_ALL_ALIGNED } from "../api/_intimacy-results-prose.js";
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
 import { resultsGate } from "../api/_lib/results-gate.js";
@@ -3494,7 +3494,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           </div>
           <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
           
-          <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0.6rem 0 0" }}>Tap any dimension below to read the full picture.</p>
         </div>
 
         {/* ── COMPARISON BARS GRAPHIC ── */}
@@ -3869,9 +3868,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
           <div style={{ color: "white" }}>
             {/* Header */}
             <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>What You Expect</div>
-              </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
 
             </div>
@@ -6520,7 +6516,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "conflict-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
         { id: "conflict-snapshot", label: "Your Conflict Snapshot", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "conflict-patterns", label: "Your Patterns", isDeepChild: true, italic: true, color: "#1B5FE8" },
-        { id: "conflict-wrote", label: "What You Both Wrote", isDeepChild: true, italic: true, color: "#1B5FE8" },
+        { id: "conflict-wrote", label: "What You Each Wrote", isDeepChild: true, italic: true, color: "#1B5FE8" },
       ]
     }] : []),
     { id: "what-comes-next", label: "What Comes Next", icon: "→", color: "#E8673A" },
@@ -7506,12 +7502,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ color: "white" }}>
               {/* Header — same shape as the comms + expectations overviews */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", marginBottom: "0.5rem" }}>
-                <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700 }}>Physical Intimacy Expectations</div>
-              </div>
               <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
               <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>
-                {intimacyVariant === "married" ? "Based on how things are now." : "Based on what you each expect."}
+                {INTIMACY_LEAD[intimacyVariant] || INTIMACY_LEAD.premarital}
               </p>
               
               {/* Where you each land — label left, bar right, key top-right (9.1) */}
@@ -7678,7 +7671,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
             <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
             <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              {misaligned.length ? "" : "You line up across the board. These are still worth saying out loud."}
+              {misaligned.length ? "" : INTIMACY_ALL_ALIGNED}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
               {/* block: intimacy-plan/conversations */}
@@ -7834,7 +7827,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 760 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             {/* block: conflict-snapshot/head */}
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "1rem" }}>{cc.snapshotTitle}</div>
             {/* block: conflict-snapshot/openings */}
@@ -7919,7 +7911,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             {/* block: conflict-patterns/head */}
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.5rem" }}>{cc.patternsTitle}</div>
             {/* block: conflict-patterns/privacy */}
@@ -7961,7 +7952,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent={BLUE}>
           <div style={{ maxWidth: 720 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{cc.eyebrow}</div>
             {/* block: conflict-wrote/head */}
             <Head title={cc.wroteTitle} shared={true} />
             {/* block: conflict-wrote/rows */}
@@ -7997,12 +7987,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <ResultsSlide bg="linear-gradient(150deg, #1B2A5E, #2F55C4 55%, #1B8FB8)">
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.6rem", marginBottom: "0.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: BLUE, flexShrink: 0 }} />
-                <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700 }}>Conflict patterns</div>
-              </div>
-            </div>
             <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
             {/* Q1, the one shared number this exercise produces. Everything
                 else on the risk side is private to each reader. */}

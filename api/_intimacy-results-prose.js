@@ -28,6 +28,29 @@
  */
 export const TALK_ABOUT_IT = 'Talk about it';
 
+/**
+ * The line under the two names on Physical Intimacy at a glance.
+ *
+ * One of two, by which version of the exercise the couple answered. Typed as a
+ * ternary inside src/App.jsx, so the app had neither and opened the page with
+ * no line at all.
+ */
+/**
+ * The line under "Conversations worth having" when a couple lines up on every
+ * dimension.
+ *
+ * The list is still shown in that case, because agreeing is not the same as
+ * having said it out loud, and this is the sentence that explains why the page
+ * is not empty. It was typed inside src/App.jsx, so the app had no way to
+ * explain it and simply showed the list.
+ */
+export const INTIMACY_ALL_ALIGNED = 'You line up across the board. These are still worth saying out loud.';
+
+export const INTIMACY_LEAD = {
+  married: 'Based on how things are now.',
+  premarital: 'Based on what you each expect.',
+};
+
 export const INTIMACY_RESULTS_PROSE = {
   frequency: {
     intro: "How often each of you wants physical intimacy.",
