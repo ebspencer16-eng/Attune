@@ -71,17 +71,26 @@ silently in combination.
 So: **derive, do not restate.** Before adding a second copy of any rule, ask
 whether it can read the first. If it genuinely cannot, add a gate.
 
-**Known violation, in the app, mine.** I wrote three hardcoded lists in
-`attune-app/` two commits after writing this warning:
+**That violation is fixed, and the fix is gated.** Three hardcoded lists once
+lived in `attune-app/`: `EXERCISES` in `insights.tsx`, and `CATALOGUE` and
+`CATEGORIES` in `resources.tsx`. All three are gone; the endpoints return the
+lists and `check-app-derives.mjs` fails the build if an app-side copy comes
+back.
 
-- `EXERCISES` in `src/app/insights.tsx` duplicates `api/_exercises.js` exactly
-- `CATALOGUE` in `src/app/resources.tsx` restates the purchasable add-ons
-- `CATEGORIES` in `src/app/resources.tsx` restates the In Practice shelves
+The same shape keeps reappearing somewhere new, though, and it is now the most
+common bug in this codebase by a distance. In one week: the couple map's small
+print, the conflict overview's answer labels, the Side by Side headings, the
+What You Each Wrote headings, "Talk about it", the three Reflection page
+headers, the mark-placement numbers, the storycard grounds, and the
+question-id-to-field mapping for conflict openings. Every one was copy or a
+constant typed into `src/App.jsx`, which the app cannot import, so the app
+either showed nothing or invented its own.
 
-Add an exercise or a shelf and the site changes while the app silently does
-not. Fix by having the endpoints return these lists (`/api/home` already
-returns `owned`, so the pattern exists) and deleting the app-side copies.
-**Do not extend these lists. Replace them.**
+Two gates now cover it. `check-results-copy-reach.mjs` forbids a literal
+sentence inside the website's results renderer: it has to come through a
+variable, which means a module under `api/`. `check-storycard-fields.mjs` and
+`check-unshown-answers.mjs` cover the other direction, where the server sends
+something and a surface never reads it.
 
 Existing single sources of truth:
 
