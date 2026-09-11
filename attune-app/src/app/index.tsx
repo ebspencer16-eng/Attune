@@ -239,16 +239,22 @@ export default function HomeScreen() {
               </Pressable>
             </View>
 
-            {/* The greeting and the finding, as one group, centred in what the
-                profile row leaves. They read as one thought: hello, and here
-                is the thing worth reading today. */}
+            {/* ── HELLO, THEN THE FINDING ────────────────────────────────
+                The greeting sits under the profile row. The finding is centred
+                in everything below it, which is the space between the greeting
+                and the tile.
+
+                They were one centred group, which put the finding directly
+                under the greeting with the rest of the blue empty beneath.
+                Ellie: "move the insight of the day section (and associated
+                glow) further down to be centered between the greeting and the
+                tile below." The glow comes with it: it is drawn inside the
+                finding, not positioned against the screen. */}
+            <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.lg }}>
+              {data.greeting}
+            </Text>
             <View style={{ flex: 1, justifyContent: 'center', paddingBottom: Spacing.xl }}>
-              <Text style={{ ...Type.hero, color: Palette.white }}>
-                {data.greeting}
-              </Text>
-              <View style={{ marginTop: Spacing.xxl }}>
-                {data.research ? <ResearchNote finding={data.research} /> : null}
-              </View>
+              {data.research ? <ResearchNote finding={data.research} /> : null}
             </View>
           </View>
 

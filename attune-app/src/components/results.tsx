@@ -497,6 +497,10 @@ function SectionBody({
         bucket={bucket}
         you={you}
         them={them}
+        /* The website heads the opening paragraph in the couple type's own
+           colour, falling back to orange. Passed in rather than hardcoded:
+           the app was using expectations blue, on a violet ground. */
+        introColor={results.content?.coupleType?.color || '#E8673A'}
         position={at >= 0 ? { index: at + 1, total: all.length } : null}
       />
     );
@@ -749,12 +753,15 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
 
 /** One conversation: every item in that category, differences first. */
 function ExpectationsConversation({
-  bucket, you, them, position,
+  bucket, you, them, position, introColor,
 }: {
   bucket: ExpectationsSummary['categories'][number] | null;
   you: string;
   them: string;
   position?: { index: number; total: number } | null;
+  /** The couple type's colour, which is what the website heads the opening
+   *  paragraph in. Orange when there is no type. */
+  introColor?: string;
 }) {
   if (!bucket || bucket.answered === 0) {
     return (
@@ -793,11 +800,11 @@ function ExpectationsConversation({
             ) : null}
           </View>
 
-          {position ? (
-            <View style={{ height: 2, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.1)', marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
-              <View style={{ height: 2, borderRadius: 2, backgroundColor: accent, width: `${(position.index / position.total) * 100}%` }} />
-            </View>
-          ) : null}
+          {/* The progress bar was here, under "3 of 6". Ellie asked for it to
+              go from the app: the count already says where you are, and a bar
+              measuring how far through a set of conversations you have read
+              turns reading your own results into a task with a completion
+              percentage. */}
 
           {/* The paragraph the website opens this page with, from
               api/_lib/category-intros.js. The app opened straight into rows. */}
@@ -810,7 +817,10 @@ function ExpectationsConversation({
               }}>
               {/* The website names both people when the paragraph is the one
                   written for their pairing, and stays general when it is not. */}
-              <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
+              {/* The couple type's colour, as the website heads it. This was
+                  SectionColor.expectations, which is blue, on a violet ground:
+                  Ellie called it very hard to read and she is right. */}
+              <Text style={{ ...Type.eyebrow, color: introColor || '#E8673A', marginBottom: Spacing.sm }}>
                 {bucket.introIsForPair
                   ? `How ${you} & ${them} need to approach these conversations`
                   : 'How to approach these conversations'}
