@@ -248,8 +248,8 @@ survives: name the promise, and say what it deliberately does not cover.
 Physical Intimacy is out of scope, so nobody reads it as "partner data is
 private" and either widens it into a feature or quietly loosens it.
 
-**Plant the indirect form, not just the literal one.** Four of the
-highest-stakes gates here were planted against in one sitting. All four
+**Plant the indirect form, not just the literal one.** Five of the
+highest-stakes gates here were planted against in one sitting. All five
 caught the shape the bug originally took and missed the shape a refactor
 would produce:
 
@@ -260,6 +260,7 @@ would produce:
 | `check-entitlement-inputs` | `body.pkg` | `const { pkg } = body`, an aliased body, a loop over add-on names |
 | `check-ownership-rule` | `pkg === 'premium'` | `BUNDLES[me.pkg]`, `['premium'].includes(pkg)` |
 | `check-entitlement-bypass` | the read inline on the capability line | the same read hoisted one line up |
+| `check-auth-headers` | `headers.get('authorization')` | the same in double quotes, as a property, or anywhere under `api/_lib` |
 
 None of those misses is exotic. Hoisting a long expression out of an object
 literal, destructuring a body, looping over a list instead of naming five

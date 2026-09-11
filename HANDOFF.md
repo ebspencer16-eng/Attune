@@ -1272,3 +1272,34 @@ built.
 
 The same shape, smaller, sits under "session ended" (three phrasings) and "that
 did not save" (three). Same question, same answer needed.
+
+### The gates were audited by planting into them (2026-09-11)
+
+Every gate in this repo was written after a real bug, against the shape that
+bug took. Five of the highest-stakes ones were planted against in one sitting
+and all five had the same hole: they caught that shape and missed the shape a
+refactor produces. The table is in CLAUDE.md; the short version is that
+hoisting an expression out of an object literal, destructuring a body, or
+looping over a list instead of naming five columns all walked past gates
+written to stop exactly those things.
+
+The worst of them, and the reason this was worth a day:
+
+**A partner could have been sent the other's conflict patterns, past six
+gates.** Twelve lines in api/home.js that read every answer column through
+EXERCISE_COLUMNS and put the result in the response. No column named anywhere,
+so every privacy check saw nothing. The Conflict Patterns screen promises the
+customer that section stays private from their partner, always. Nothing was
+shipped like that; the gate simply would not have stopped it.
+
+Nothing found here was live. These are all "the regression could come back and
+nothing would say so", not "this is broken now". Five gates are stricter,
+CLAUDE.md says how to write the next one, and each fix was verified by planting
+the bug and watching it fail.
+
+One thing that came out of it and is worth knowing: three endpoints read
+`req.headers.authorization` as a property rather than through `Headers.get`.
+That is correct, because they declare `runtime: 'nodejs'` and Node lowercases
+every incoming header name. If one of them is ever converted to the edge
+runtime, the property read stops being safe. The gate now fails that
+conversion rather than staying silent through it.
