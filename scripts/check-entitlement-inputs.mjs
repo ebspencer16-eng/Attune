@@ -10,7 +10,17 @@
 // order, from a comp flag, or from a partner who has one. It can never be read
 // from the caller, because the caller is the person who benefits.
 //
-// This checks the fields that grant: the package and every add-on column.
+// This checks the fields that grant: the package and every add-on column, and
+// it checks four ways of reading one, because for a long time it checked one.
+//
+//   body.pkg                                  named outright
+//   const { pkg } = body                      destructured
+//   const b = await req.json(); b.pkg         the body under another name
+//   for (const f of ADDONS) row[f] = body[f]  through a list, naming none
+//
+// Only the first was implemented. The second was named in a comment here as
+// though it were covered and never was, which is worse than not mentioning it:
+// the comment is what anyone reads to decide the gate is thorough.
 
 import { readFileSync, readdirSync } from 'fs';
 
@@ -23,6 +33,21 @@ const GRANTING = ['pkg', 'pkg_key', 'is_comp', 'entitlements',
 
 // Where a request's own values live.
 const FROM_REQUEST = String.raw`(?:body|payload|params|searchParams|req\.body|url\.searchParams\.get)`;
+
+/**
+ * Names bound to the request body in this file.
+ *
+ * `body` is the convention here, but it is a convention and not a rule, and a
+ * gate that only knows the convention only catches code that followed it.
+ * `const b = await req.json()` then `b.pkg` read the same value.
+ */
+function requestNames(text) {
+  const names = new Set(['body', 'payload', 'params', 'searchParams']);
+  for (const m of text.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:await\s+)?(?:req|request)\.(?:json\(\)|body)/g)) {
+    names.add(m[1]);
+  }
+  return names;
+}
 
 const problems = [];
 
@@ -51,16 +76,54 @@ function scan(dir, prefix = '') {
     if (EXEMPT.has(rel)) continue;
 
     const text = readFileSync(new URL(entry.name, dir), 'utf8');
+    const names = [...requestNames(text)].join('|');
+    const FROM = `(?:${names}|req\\.body|url\\.searchParams\\.get)`;
+
+    /**
+     * Does this file keep a list of granting columns?
+     *
+     * `for (const f of ADDONS) row[f] = body[f]` grants every add-on in the
+     * list and writes none of their names down. The read is invisible to any
+     * pattern looking for `body.addon_intimacy`, which is the same blind spot
+     * the privacy gates had. What gives it away is the list: a file that names
+     * granting columns in an array literal and then indexes the request by a
+     * variable is doing exactly this.
+     *
+     * Scoped to files carrying such a list on purpose. api/send-email.js reads
+     * `body[f]` over a list of URL fields, which is fine and must stay quiet.
+     */
+    const listsGrants = GRANTING.some(
+      (f) => new RegExp(`\\[[^\\]]*['"]${f}['"]`).test(text) || new RegExp(`['"]${f}['"][^\\]]*\\]`).test(text),
+    );
+
     text.split('\n').forEach((line, i) => {
       if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;
+
+      // A granting column pulled out of the request by a computed key.
+      if (listsGrants && new RegExp(`\\b${FROM}\\s*\\??\\.?\\[\\s*[A-Za-z_$]`).test(line)) {
+        problems.push({
+          at: `api/${rel}:${i + 1}`,
+          field: 'a granting column, by computed key',
+          line: line.trim().slice(0, 90),
+        });
+        return;
+      }
+
       for (const field of GRANTING) {
-        // body.pkg, body['pkg'], destructured { pkg } = body, or a query param.
+        // body.pkg, body['pkg'], or a query param.
         const patterns = [
-          new RegExp(`${FROM_REQUEST}\\??\\.${field}\\b`),
-          new RegExp(`${FROM_REQUEST}\\[['"]${field}['"]\\]`),
+          new RegExp(`${FROM}\\??\\.${field}\\b`),
+          new RegExp(`${FROM}\\[['"]${field}['"]\\]`),
           new RegExp(`get\\(['"]${field}['"]\\)`),
         ];
-        if (patterns.some((re) => re.test(line))) {
+        // Destructured straight off it: const { pkg, ... } = body.
+        // The old rule named this case in a comment and implemented none of it,
+        // so `const { pkg } = body` granted a package past the gate written to
+        // stop exactly that.
+        const destructured = new RegExp(
+          `\\{[^}]*\\b${field}\\b[^}]*\\}\\s*=\\s*${FROM}\\b`,
+        );
+        if (patterns.some((re) => re.test(line)) || destructured.test(line)) {
           problems.push({ at: `api/${rel}:${i + 1}`, field, line: line.trim().slice(0, 90) });
         }
       }
