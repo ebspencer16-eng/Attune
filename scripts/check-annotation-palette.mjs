@@ -69,6 +69,26 @@ if (!app.includes(`'${DEFAULT_ANNOTATION_COLOR}'`)) {
   problems.push(`the app's fallback colour is not ${DEFAULT_ANNOTATION_COLOR}, so an unknown key resolves differently on each surface.`);
 }
 
+/**
+ * The fallback has to be a colour that exists.
+ *
+ * The check above proves the two surfaces agree on which key is the fallback.
+ * Agreeing on a key that was retired from the palette is the failure it cannot
+ * see, and it is the worse one: annotationColor() returns undefined on both,
+ * the app asserts non-null on it, and reading `tone.ink` throws. That is not a
+ * missing colour on one mark. It is the results screen going white for anyone
+ * who has ever marked a sentence, and only for them.
+ *
+ * Retiring a colour is the ordinary way to get here: five keys, one of them
+ * also named somewhere else as the default, and nothing connecting the two.
+ */
+if (!ANNOTATION_COLORS.some((c) => c.key === DEFAULT_ANNOTATION_COLOR)) {
+  problems.push(
+    `the fallback colour '${DEFAULT_ANNOTATION_COLOR}' is not in the palette, so\n`
+    + '      annotationColor() returns undefined for every unknown key and the\n'
+    + '      results screen throws for anyone who has marked a sentence.');
+}
+
 // ── The tokeniser must not alter the text ──────────────────────────────────
 // A mark is stored as the text it covers and found again by matching that text
 // inside the paragraph. Gain or lose a character and every mark on that block
