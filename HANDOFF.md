@@ -1216,3 +1216,59 @@ was a false positive in my scan: both are reached through `copy[state]`, a
 registry lookup a literal search cannot see. Worth recording because that is
 the second time a scan of mine has been blind to exactly the indirection
 CLAUDE.md warns about.
+
+### One message, twenty phrasings (2026-09-11 sweep, needs Ellie)
+
+The single most-read sentence in the product is "this opens when you have both
+finished," and it is written out by hand at every place it appears. A scan of
+`src/App.jsx` and every `.ts`/`.tsx` under `attune-app/src`, with comments
+stripped, found **23 distinct phrasings**; two or three of those are false
+positives (couple-type prose that happens to contain "open" and "both"), so
+call it **about twenty**.
+
+A sample, one line each:
+
+    Results unlock when both of you finish.
+    Once both of you complete your exercises, your results will unlock.
+    Unlocks once both of you finish.
+    Unlocks when both of you finish all exercises.
+    Your results open when both of you finish all exercises.
+    Results open once you have both finished.
+    Results open when both of you finish everything owned.
+    This opens when you have both finished Expectations.
+    This opens when you have both finished the exercise.
+    This opens when you have both finished writing.
+    This section opens once you have finished Conflict Patterns.
+    Your answers are saved. Results open once you have both finished.
+    Your answers are saved. These results open once you have both finished.
+    Your answers are saved. This section opens once you have both finished.
+    Finish the exercise to open this
+    Waiting on your partner
+
+This is the failure this file keeps describing, in copy instead of code: one
+rule kept by hand in twenty places, with nothing checking that they agree. A
+couple moving between the dashboard, an exercise footer, a locked results
+section and Settings is told the same thing four ways in four minutes, which
+reads as four different states rather than one.
+
+**Nothing has been changed, because unifying them means choosing the words.**
+That is yours. The shape of the decision is what is needed, and it is one
+question:
+
+> Does the product say one sentence everywhere, or does each place say its own?
+
+If one sentence: write it, and it goes in a module both products read, the way
+`api/_lib/results-sections.js` already works. A gate then fails the build on
+any new one typed inline.
+
+If each place says its own: that is a real choice too, and the module holds the
+set rather than the single line, keyed by situation. There are six situations,
+not twenty: the dashboard before anything is done, an exercise footer after you
+finish, a locked results section you own, a locked section your partner owns,
+Settings, and the marketing pages before purchase.
+
+Either way the words are yours and the wiring is mine. Say which and it gets
+built.
+
+The same shape, smaller, sits under "session ended" (three phrasings) and "that
+did not save" (three). Same question, same answer needed.
