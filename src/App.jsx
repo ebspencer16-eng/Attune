@@ -205,6 +205,25 @@ const USER_LOCALSTORAGE_KEYS = [
 // user data. Everything a person creates or that identifies them belongs in
 // this list, because this is what runs on sign-out and on account switch.
 // scripts/check-localstorage-keys.mjs fails the build if a key drifts out.
+/**
+ * Whether the Physical Intimacy developer toggle applies here.
+ *
+ * Never on the production host. A localStorage key that grants a paid add-on
+ * is a testing convenience off production and an entitlement bypass on it, and
+ * the difference is entirely which machine it runs on.
+ *
+ * The host list is the one the app is told to call, so a new production domain
+ * has to be added here deliberately rather than silently opening the toggle.
+ */
+const PRODUCTION_HOSTS = ['attune-relationships.com', 'www.attune-relationships.com'];
+
+function devIntimacyGrant() {
+  try {
+    if (PRODUCTION_HOSTS.includes(window.location.hostname)) return false;
+    return localStorage.getItem('attune_dev_intimacy') === '1';
+  } catch { return false; }
+}
+
 function clearAllUserLocalStorage() {
   for (const k of USER_LOCALSTORAGE_KEYS) {
     try { localStorage.removeItem(k); } catch {}
@@ -13277,7 +13296,27 @@ export default function App() {
     // only route to it.
     // Premium bundles Conflict Patterns. Physical Intimacy is add-on only.
     hasConflict:    !!(PKG_CAPS[_effectivePkgKey]?.hasConflict) || !!(order?.addonConflict),
-    hasIntimacy:    !!(order?.addonIntimacy) || (() => { try { return localStorage.getItem('attune_dev_intimacy') === '1'; } catch { return false; } })() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
+    /**
+     * Physical Intimacy is add-on only: no package bundles it, on either
+     * surface.
+     *
+     * ── THE DEVELOPER TOGGLE, AND WHY IT IS NOW SCOPED ────────────────────
+     * `attune_dev_intimacy` in localStorage used to grant this anywhere,
+     * including on the live site. One key, set by hand, unlocking a twenty
+     * dollar add-on: the exercise, the results, all of it. It is deliberately
+     * excluded from clearAllUserLocalStorage, so it also survived signing out
+     * and switching accounts.
+     *
+     * It is also why the app and the website disagreed about whether Ellie has
+     * Physical Intimacy. The app asks the server, which reads
+     * profiles.addon_intimacy and has never heard of this key, so the website
+     * showed the section and the app did not. She reported it as the app
+     * missing something; the app was right.
+     *
+     * Scoped to a non-production host now. It still does its job locally and
+     * on a preview deploy, and grants nothing on attune-relationships.com.
+     */
+    hasIntimacy:    !!(order?.addonIntimacy) || devIntimacyGrant() || (() => { try { const q = new URLSearchParams(window.location.search); return !!q.get('demo') && q.get('intimacy') === '1'; } catch { return false; } })(),
   };
 
   // Results open when both partners have finished every exercise the couple
