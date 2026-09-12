@@ -20,9 +20,10 @@ import {
 import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
+import { fetchHome, fetchPosts } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
 import Budget from '@/components/budget';
+import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
 import { fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -58,6 +59,7 @@ export default function ResourcesScreen() {
    * is one line in one place.
    */
   const [openTool_, setOpenTool] = useState<string | null>(null);
+  const [openPost, setOpenPost] = useState<string | null>(null);
   const [tools, setTools] = useState<ToolData | null>(null);
   const [workbookNote, setWorkbookNote] = useState<string | null>(null);
 
@@ -174,6 +176,11 @@ export default function ResourcesScreen() {
   if (openTool_ === 'checklist') {
     return <Checklist onClose={() => setOpenTool(null)} />;
   }
+  if (openPost) {
+    // Reloading on close so a post that has just been read stops showing as
+    // new without the reader having to know what the feed looks like.
+    return <PostReader id={openPost} onClose={() => { setOpenPost(null); load(); }} />;
+  }
   if (openTool_ === 'budget') {
     return (
       <Budget onClose={() => setOpenTool(null)} />
@@ -268,7 +275,7 @@ export default function ResourcesScreen() {
               <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
                 {visible.length ? (
                   <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
-                    {visible.map((p, i) => <PostRow key={p.id} post={p} first={i === 0} onRead={load} />)}
+                    {visible.map((p, i) => <PostRow key={p.id} post={p} first={i === 0} onOpenPost={setOpenPost} />)}
                   </View>
                 ) : (
                   <Text style={{ ...Type.body, color: c.textMuted }}>
@@ -411,20 +418,25 @@ function ExploreTile({ item }: { item: Item }) {
  * website. Marking it read is the app's job either way, or the badge and the
  * "new in In Practice" card keep raising something the person has read.
  */
-function PostRow({ post, first, onRead }: { post: PostSummary; first: boolean; onRead: () => void }) {
+function PostRow({ post, first, onOpenPost }: { post: PostSummary; first: boolean; onOpenPost: (id: string) => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={async () => {
-        // Opened first. Marking read is bookkeeping and should never stand
-        // between someone and the thing they tapped.
-        Linking.openURL(post.external || `${SITE}/practice/${post.id}`);
-        // An In Practice page is not a row in the posts table, so there is
-        // nothing to record a read against and the write would fail on a
-        // foreign key. See api/_in-practice.js.
-        if (post.external) return;
-        const res = await markPostRead(post.id);
-        if (res.ok) onRead();
+      onPress={() => {
+        /**
+         * A post from the posts table opens in the app. Ellie: "I want all of
+         * these to open in app if the user is in the app."
+         *
+         * An In Practice page is not a row in that table, it is a static page
+         * on the website, so there is no body to draw and nothing to record a
+         * read against; the write would fail on a foreign key. Those still
+         * open in the browser, which is where they live. See
+         * api/_in-practice.js.
+         *
+         * Reading is marked by the reader, on open, not here.
+         */
+        if (post.external) { Linking.openURL(post.external); return; }
+        onOpenPost(post.id);
       }}
       style={{
         paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
