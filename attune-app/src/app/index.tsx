@@ -293,7 +293,12 @@ export default function HomeScreen() {
                 Practice post when there is none. */}
             {data.pickUp ? (
               <TileRow
-                icon="square.and.pencil"
+                /* The row has two states and had one icon. A pencil over
+                   "Explore something new" said write, on a row offering
+                   something to read. The icon is the only thing carrying the
+                   label since the labels came off, so it has to follow the
+                   state the server chose. */
+                icon={data.pickUp.kind === 'discover' ? 'text.book.closed' : 'square.and.pencil'}
                 title={data.pickUp.title}
                 body={data.pickUp.preview}
                 onPress={() => open(data.pickUp as unknown as HomeCard)}

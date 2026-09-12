@@ -22,9 +22,7 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task |
 |--|--|
-| 94.7 | If no pick up where you left off, maybe ‘explore something new’ with a link to the most recent in practice post? |
 | 97.1 | Make the download option functional. |
-| 135.1 | Life and values on the site brings me to the storycard highlight page. On the app, it works, but on the resul... |
 | O5 | Account setup in the app, so users are pointed there rather than the website |
 | O6 | Order confirmation email: download the app, set up there |
 | O7 | Budget tool runs in the app |
@@ -35,7 +33,7 @@ moved past; it is listed so nothing is taken on trust.
 
 ## 3. Done, not verified
 
-182 asks. Grouped by the message they came in.
+184 asks. Grouped by the message they came in.
 
 **msg 8**
 
@@ -217,6 +215,7 @@ moved past; it is listed so nothing is taken on trust.
 | 94.4 | Next for you (this should pull from the prioritized list we’ve talked about) |
 | 94.5 | Also waiting (reference one other action item) |
 | 94.6 | Pick up where you left off (sneak peek and quick link to your most recent note/highlight/citation) |
+| 94.7 | If no pick up where you left off, maybe ‘explore something new’ with a link to the most recent in practice post? |
 | 94.8 | Above the tile, sitting on the bg, the focus of the page is a ‘welcome back’ message at the top then a Resear... |
 | 94.9 | We can build a huge list of these to pull from and rotate through |
 | 94.10 | I don’t want a hero/header, just the body text and citation |
@@ -366,6 +365,7 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task |
 |--|--|
+| 135.1 | Life and values on the site brings me to the storycard highlight page. On the app, it works, but on the resul... |
 | 135.2 | waiting copy: |
 | 135.3 | Create your account to get started. Results unlock when both of you complete exercises. |
 | 135.4 | Results unlock once both of you complete your exercises. |
@@ -381,6 +381,9 @@ moved past; it is listed so nothing is taken on trust.
 | — | Dashboard reloading itself | Ellie's screenshot: 75s, 0 renders and 0 fetches in the last 5s |
 | — | "Start shared budgeting" opened a 28-character blank page | `check-gated-views.mjs`; 1214 chars where there were 28 |
 | — | Five of six category tiles had no colour | `check-category-colors.mjs`, 2 plants |
+| — | Life & Values on the site | Ellie: "L&V working" (it was the reload loop) |
+| — | Expectations progress bar becomes a dividing line, site | `check-no-progress-bars.mjs`, 1 plant |
+| — | "Explore something new" row | Already built in `api/_lib/pick-up.js`; I had reported it missing in error |
 | 78.6 | For whatever reason the site just brought back the how it works and couple types pages, those were deleted lo... | the files are deleted |
 | 81.9 | Couple type page is STILL showing different content from what we do on the site. I’m frustrated by this at th... | check-results-copy-reach |
 | 96.11 | I’ve asked for this already, but please wire in the in-practice content so that I can see how this is built. | fetchPosts wired |
