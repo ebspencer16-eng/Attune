@@ -23,8 +23,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
-import { createProfile, fetchProfileSetupCopy, type ProfileSetupCopy } from '@/api/client';
-import { ScreenLoading } from '@/components/screen-states';
+import {
+  createProfile, fetchProfileSetupCopy, type ApiError, type ProfileSetupCopy,
+} from '@/api/client';
+import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -38,10 +40,23 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
   const [partnerEmail, setPartnerEmail] = useState('');
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState<ApiError | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
+  // A failed read used to be dropped on the floor. `copy` stayed null, the
+  // screen sat on "One moment" for as long as anyone was willing to wait, and
+  // there was nothing to tap. This is the first screen of the app for someone
+  // who bought on the website and came here to set up, so it is the worst
+  // place in the product for a spinner that never ends.
   useEffect(() => {
-    fetchProfileSetupCopy().then((r) => { if (r.ok) setCopy(r.data.copy); });
-  }, []);
+    let live = true;
+    fetchProfileSetupCopy().then((r) => {
+      if (!live) return;
+      if (r.ok) { setCopy(r.data.copy); setCopyError(null); }
+      else setCopyError(r.error);
+    });
+    return () => { live = false; };
+  }, [attempt]);
 
   const submit = useCallback(async () => {
     if (!name.trim() || !partnerName.trim() || saving) return;
@@ -61,6 +76,14 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
     );
   }, [name, partnerName, partnerEmail, saving, onDone]);
 
+  if (copyError) {
+    return (
+      <ScreenError
+        error={copyError}
+        onRetry={() => { setCopyError(null); setAttempt((n) => n + 1); }}
+      />
+    );
+  }
   if (!copy) return <ScreenLoading label="One moment" />;
 
   const ready = !!name.trim() && !!partnerName.trim();

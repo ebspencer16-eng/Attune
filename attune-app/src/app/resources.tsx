@@ -66,7 +66,11 @@ export default function ResourcesScreen() {
   // The workbook is a file, so the tab needs to know whether it exists before
   // a tap. Fetched alongside everything else rather than on press: a tap that
   // waits on a request reads as a tap that did nothing.
-  useEffect(() => { fetchToolData().then((r) => { if (r.ok) setTools(r.data); }); }, []);
+  //
+  // This ran once, on mount, and dropped a failure silently. Nothing here reads
+  // as broken when it fails, which is the problem: the Workbook tile stays on
+  // screen and does nothing at all when tapped. It loads with the rest now, so
+  // focusing the tab or pulling to refresh is a real retry.
 
   const IN_APP = ['checklist', 'budget'];
 
@@ -79,10 +83,17 @@ export default function ResourcesScreen() {
    * and CLAUDE.md is explicit that the app does not sell. Anything else still
    * hands off to the website.
    */
-  const openTool = (key: string) => {
+  const openTool = async (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
     if (key === 'workbook') {
-      const wb = tools?.workbook;
+      // If the load failed there is no url and no copy, and the old code
+      // answered a tap by setting the note to null, which renders nothing.
+      // Ask again on the tap instead.
+      let wb = tools?.workbook;
+      if (!wb) {
+        const r = await fetchToolData();
+        if (r.ok) { setTools(r.data); wb = r.data.workbook; }
+      }
       if (wb?.url) { Linking.openURL(wb.url); return; }
       setWorkbookNote(wb?.copy.generating || null);
       return;
@@ -96,9 +107,10 @@ export default function ResourcesScreen() {
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
     loadingRef.current = true;
-    const [h, p] = await Promise.all([fetchHome(), fetchPosts()]);
+    const [h, p, t] = await Promise.all([fetchHome(), fetchPosts(), fetchToolData()]);
     if (h.ok) { setHome(h.data); setError(null); }
     else setError(h.error);
+    if (t.ok) setTools(t.data);
     if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); setPostsFailed(false); }
     else setPostsFailed(true);
     setLoading(false);
