@@ -308,7 +308,8 @@ section under test could never appear. A day was lost to that.
 ## App development
 
 Everything the app calls is built and tested: `/api/home` (26-case priority
-engine), `/api/results`, `/api/notes`, `/api/posts`, `/api/notifications`.
+engine), `/api/results`, `/api/notes`, `/api/posts`, `/api/notifications`,
+`/api/tool-data` (the checklist, the budget and the workbook file).
 
 Specs: `app/SCREENS.md` (screen by screen), `app/ONBOARDING.md` (get started
 through first dashboard), `app/README.md` (stack decisions, bootstrap).
@@ -328,8 +329,25 @@ server (`resultsNav` in `api/_lib/results-sections.js`), matching the website's
 sidebar; all 29 sections render, and `check-results-coverage.mjs` fails the
 build if the server sends one the app cannot draw.
 
-Not built: Highlights beyond the storycards, the post reader, notifications,
-tab-bar badges, and Notes filtering.
+**The app does not hand off to the website any more.** Ellie: "Everything
+should run in the app. Ideally, a user purchases online then downloads the app
+and only uses the app from that point." So: the Starting Out checklist and the
+Shared Budget run in the app against `/api/tool-data`; the workbook is a
+generated .docx and the tile hands over the file, because its website page is
+the page that SELLS it; profile setup happens in the app, with
+`/api/create-profile` taking the id from a bearer token when one is present;
+and In Practice posts are read in the app, though static In Practice pages
+still open in the browser because they are not rows in the posts table.
+
+Two rules came out of that and are gated. `check-app-does-not-sell.mjs`: no app
+source may name a price, a checkout route, or the add-on purchase view.
+`check-budget-mirror.mjs`: the budget's arithmetic is the one thing repeated in
+the app, because its reveal updates as you type, so both copies are run over
+the same budgets and any difference fails the build.
+
+Not built: Highlights beyond the storycards, notifications, tab-bar badges, and
+Notes filtering by source, author, or highlight versus commentary. The tag list
+has its own sort, which is what was asked for.
 
 ---
 
