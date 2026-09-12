@@ -12,13 +12,13 @@ Anything only a person holding a phone can confirm stays in section 3.
 
 | # | Question |
 |--|--|
-| G11 | Conflict demo answers: drafted for the showcase. They are customer-visible in the tour, so they need your read before they ship. |
-| G12 | Greeting prompts when nothing is blocked: drafted from your "send a shared note" idea. Same, your read. |
+| G13 | `/app?diag=1` for ten seconds, then a screenshot. Renders climbing names a loop; fetches climbing names the request driving it; both flat means it is visual, not React. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
+| O0 | **Dashboard still blinking after the poller fix.** Three reproductions here were silent, each for a reason unrelated to her. `/app?diag=1` now counts renders and fetches; needs her screenshot. |
 | O1 | Site: Life & Values lands on the storycard highlights page. Left nav and the bottom-right arrow both. **Not reproducible here** — a browser click in demo lands on `exp-convo-5` at "6 of 6", and the live bundle carries today's pushes. See G8. |
 | O5 | "Start shared budgeting" opens a blank website page |
 | O6 | Expectations at a glance: colour every "conversations to have" tile |

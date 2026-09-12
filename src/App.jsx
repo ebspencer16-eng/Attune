@@ -11301,7 +11301,85 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
   );
 }
 
+/**
+ * A counter, shown only on /app?diag=1.
+ *
+ * ── WHY THIS EXISTS ────────────────────────────────────────────────────────
+ * Ellie: "the whole dashboard on the site is glitching and blinking", and
+ * after a fix and a hard refresh, "it's still blinking".
+ *
+ * Three attempts to reproduce it here found nothing, and each was silent for a
+ * reason that had nothing to do with her: the demo dashboard has no partner to
+ * sync with, and a hand-seeded account has no Supabase session, so every timer
+ * that could cause this returns early. The one thing none of them has is the
+ * thing she has, which is a real signed-in couple.
+ *
+ * So rather than guess again: this counts renders of the app shell and every
+ * fetch it makes, and prints them in the corner. She opens /app?diag=1, waits
+ * ten seconds, and screenshots it. A render count climbing on its own names
+ * the loop; a fetch list climbing names which request drives it; both flat
+ * means the blink is not React and is something visual.
+ *
+ * It renders nothing without the parameter, and it is not reachable by anyone
+ * who has not typed it.
+ */
+function useDiagnostics(enabled) {
+  const renders = useRef(0);
+  // The panel refreshes itself once a second, and those renders are not the
+  // app's. Counted separately and subtracted, so the number on screen is what
+  // the dashboard did on its own. Without this the panel reports its own
+  // heartbeat as a loop, which is exactly the false positive that would send
+  // the next person chasing nothing.
+  const mine = useRef(0);
+  const [, force] = useState(0);
+  renders.current += 1;
+
+  useEffect(() => {
+    if (!enabled) return undefined;
+    if (!window.__attuneDiag) {
+      window.__attuneDiag = { fetches: [], started: Date.now() };
+      const real = window.fetch.bind(window);
+      window.fetch = (u, o) => {
+        const url = String(typeof u === 'string' ? u : (u && u.url) || '');
+        window.__attuneDiag.fetches.push({ at: Date.now(), url: url.split('?')[0] });
+        return real(u, o);
+      };
+    }
+    const t = setInterval(() => { mine.current += 1; force((n) => n + 1); }, 1000);
+    return () => clearInterval(t);
+  }, [enabled]);
+
+  return Math.max(0, renders.current - mine.current);
+}
+
+function DiagPanel({ renders }) {
+  const d = (typeof window !== 'undefined' && window.__attuneDiag) || { fetches: [], started: Date.now() };
+  const secs = Math.max(1, Math.round((Date.now() - d.started) / 1000));
+  const byUrl = {};
+  for (const f of d.fetches) byUrl[f.url] = (byUrl[f.url] || 0) + 1;
+  const top = Object.entries(byUrl).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  return (
+    <div style={{
+      position: 'fixed', bottom: 12, right: 12, zIndex: 99999,
+      background: 'rgba(14,11,7,0.92)', color: '#fff', borderRadius: 10,
+      padding: '0.7rem 0.9rem', fontFamily: 'ui-monospace, Menlo, monospace',
+      fontSize: 11, lineHeight: 1.6, maxWidth: 320, pointerEvents: 'none',
+    }}>
+      <div style={{ opacity: 0.6 }}>attune diagnostics · {secs}s</div>
+      <div>renders: <strong>{renders}</strong> ({(renders / secs).toFixed(1)}/s)</div>
+      <div>fetches: <strong>{d.fetches.length}</strong> ({(d.fetches.length / secs).toFixed(1)}/s)</div>
+      {top.map(([u, n]) => (
+        <div key={u} style={{ opacity: 0.75 }}>{n}x {u.replace(/^https?:\/\/[^/]+/, '')}</div>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
+  const _diagOn = (() => {
+    try { return new URLSearchParams(window.location.search).get('diag') === '1'; } catch { return false; }
+  })();
+  const _renders = useDiagnostics(_diagOn);
   const [toastMsg, setToastMsg] = useState('');
   const [toastTimer, setToastTimer] = useState(null);
   const showToast = (msg) => {
@@ -13647,6 +13725,7 @@ export default function App() {
 
   return (
     <>
+    {_diagOn && <DiagPanel renders={_renders} />}
     <div data-main-scroll style={{ minHeight: "100vh", background: view === "home" ? "#FBF8F3" : C.warm, fontFamily: font.body }}>
       {toastMsg && (
         <div style={{position:'fixed',bottom:'1.5rem',left:'50%',transform:'translateX(-50%)',background:'#1E1610',color:'white',padding:'.75rem 1.5rem',borderRadius:'10px',fontSize:'.85rem',fontWeight:500,zIndex:9999,boxShadow:'0 8px 32px rgba(0,0,0,.25)',pointerEvents:'none',whiteSpace:'nowrap'}}>
