@@ -15,21 +15,15 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Question |
 |--|--|
-| G1 | Life & Values on the site: retest. The reload loop reset the section on every load, which is the most likely reason it landed on the storycards. |
-| G2 | Nothing outstanding. Everything opens in the app (your answer), and the gate migration needs nothing from you. |
+| G1 | Everything below is built and building clean, and none of it has been seen on a phone. That is the whole of what is left. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
-| 97.1 | Make the download option functional. |
-| O5 | Account setup in the app, so users are pointed there rather than the website |
-| O6 | Order confirmation email: download the app, set up there |
-| O7 | Budget tool runs in the app |
-| O8 | Checklist runs in the app |
-| O9 | Workbook runs in the app |
-| O10 | Migrate `check-exercise-flow.mjs` off its hardcoded sandbox path |
-| O12 | Every resource opens in the app when the user is in the app (your G2) |
+| O1 | Order email points at the app. **Built, gated off**: `APP_LIVE` is false and `APP_STORE_URL` ends in `idPENDING`. A flag flip and a real store id, not work. |
+| O2 | `check-exercise-flow.mjs` migrated and running, but a clean pass has not been watched to the end. Header carries the two commands. |
+
 
 ## 3. Done, not verified
 
@@ -381,6 +375,11 @@ moved past; it is listed so nothing is taken on trust.
 | — | Dashboard reloading itself | Ellie's screenshot: 75s, 0 renders and 0 fetches in the last 5s |
 | — | "Start shared budgeting" opened a 28-character blank page | `check-gated-views.mjs`; 1214 chars where there were 28 |
 | — | Five of six category tiles had no colour | `check-category-colors.mjs`, 2 plants |
+| — | Starting Out checklist runs in the app | `check-tool-content.mjs`, 3 plants |
+| — | Shared Budget runs in the app | `check-budget-mirror.mjs` (4 plants), `check-budget-names.mjs` |
+| — | Workbook opens as a file; the app cannot sell | `check-app-does-not-sell.mjs`, 1 plant |
+| — | Account setup happens in the app | Endpoint derives the id from a token |
+| — | In Practice posts read in the app | First renderer of post blocks on either surface |
 | — | Life & Values on the site | Ellie: "L&V working" (it was the reload loop) |
 | — | Expectations progress bar becomes a dividing line, site | `check-no-progress-bars.mjs`, 1 plant |
 | — | "Explore something new" row | Already built in `api/_lib/pick-up.js`; I had reported it missing in error |

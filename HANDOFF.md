@@ -1303,3 +1303,38 @@ That is correct, because they declare `runtime: 'nodejs'` and Node lowercases
 every incoming header name. If one of them is ever converted to the edge
 runtime, the property read stops being safe. The gate now fails that
 conversion rather than staying silent through it.
+
+### The app stops handing off to the website (2026-09-12)
+
+Ellie: "I want all of these to open in app if the user is in the app."
+"Everything should run in the app. Ideally, a user purchases online then
+downloads the app and only uses the app from that point."
+
+Done, and none of it has been seen on a phone:
+
+- **Starting Out checklist.** Its 211 lines of content were inside
+  `src/App.jsx`; they are `api/_checklist.js` now and both surfaces read
+  them. New endpoint `/api/tool-data`, because the website writes these
+  columns straight from the browser with a Supabase session and the app has
+  no Supabase client.
+- **Shared Budget.** Same move. The arithmetic is the one thing repeated, in
+  `attune-app/src/constants/budget.ts`, because the reveal updates as you
+  type; `check-budget-mirror.mjs` runs both copies over six budgets and
+  fails on any difference.
+- **Workbook.** Not a screen. `/app?view=workbook` is the page that sells
+  it; the workbook is a generated .docx, so the tile hands over the file.
+  `check-app-does-not-sell.mjs` keeps the app out of the selling business.
+- **Account setup.** `/api/create-profile` takes its id from a bearer token
+  when one is present, so the app never says who it is.
+- **In Practice posts.** Read in the app. Static pages still open in the
+  browser because they are not rows in the posts table.
+
+**The one real bug this nearly shipped.** A budget stores incomes as
+`{ [name]: amount }`, so the name is a key. The website writes the full
+profile name; `/api/home` sends the first word. Wiring the screen to what
+was already on hand would have split every couple's budget in two, with
+nothing thrown and both screens looking correct.
+
+**What is genuinely left:** the order email's app line is written and gated
+behind `APP_LIVE`, waiting on an App Store id, and `check-exercise-flow.mjs`
+now runs on a real machine but has not been watched through a clean pass.
