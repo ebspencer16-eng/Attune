@@ -12,30 +12,29 @@ Anything only a person holding a phone can confirm stays in section 3.
 
 | # | Question |
 |--|--|
-| G1 | Account setup in the app? You asked: should the order email say download the app, then set up there? Today setup is website-only (`screen-states.tsx:44`). It is a real build, not a copy change. |
-| G2 | Insight of the day needs a title. The words are yours. Layout is built and waiting on them. |
-| G3 | "Resources built in the app": which of Budget / Checklist / Workbook run *in* the app, vs open the site cleanly? Full in-app builds are large. |
-| G4 | Waiting copy group 5: your line is generic. The site currently names the section ("...finished Expectations") and the partner ("Preston has not completed it yet"). Drop both for your one line? |
-| G5 | `check-exercise-flow.mjs` has a sandbox path baked in and runs nowhere. Real coverage nothing else has. Migrate or delete? |
-| G6 | Conflict Patterns has no demo answers, so it is absent from the showcase tour. Needs two written answers per partner, your copy. |
-| G8 | Life & Values on the site: is it blank, wrong content, or the wrong page? Which nav did you use? It works here in demo and production is current, so I need the detail. |
-| G9 | Three app lines were lost to the shared copy: Insights named the partner and counted what was left, Settings said "everything owned" (meaning the exercises you bought, not all five). Want any back? |
-| G10 | Conflict's exercise footer says "Your answers are saved. Your patterns stay private to you, always." A different message, left alone. Should it use your group 3 line plus the privacy line? |
-| G7 | Greeting rotation phrases ("welcome back" etc.) were generated as placeholders and never reviewed. In `ANYTIME`, `api/_lib/next-action.js`. |
-
----
+| G11 | Conflict demo answers: drafted for the showcase. They are customer-visible in the tour, so they need your read before they ship. |
+| G12 | Greeting prompts when nothing is blocked: drafted from your "send a shared note" idea. Same, your read. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
-| O1 | Site: Life & Values lands on the storycard highlights page. **Not reproducible here** — a browser click in demo lands on `exp-convo-5` at "6 of 6", and the live bundle carries today's pushes. See G8. |
-| O2 | Home: title above the insight, left-aligned |
+| O1 | Site: Life & Values lands on the storycard highlights page. Left nav and the bottom-right arrow both. **Not reproducible here** — a browser click in demo lands on `exp-convo-5` at "6 of 6", and the live bundle carries today's pushes. See G8. |
+| O2 | Home: "Insight of the day" title above, left-aligned |
 | O3 | Home: citation below, right-aligned (currently centred) |
 | O4 | Home: glow more visible |
 | O5 | "Start shared budgeting" opens a blank website page |
 | O6 | Expectations at a glance: colour every "conversations to have" tile |
 | O7 | Same, mirrored in the app |
+| O8 | **Site dashboard glitching and blinking** (new, and the likely cause of O1) |
+| O9 | Account setup in the app, so users are pointed there rather than the website |
+| O10 | Order confirmation email: download the app, set up there |
+| O11 | Budget tool runs in the app |
+| O12 | Checklist runs in the app |
+| O13 | Workbook runs in the app |
+| O14 | Migrate `check-exercise-flow.mjs` off its hardcoded sandbox path |
+| O15 | Greeting: cycle engagement prompts when nothing is blocked, rather than "all caught up" |
+| O16 | Conflict demo answers, so the showcase tour covers that exercise |
 
 ---
 
