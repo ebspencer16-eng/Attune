@@ -32,6 +32,18 @@ const has = (o) => !!(o && Object.keys(o).length);
 export default async function handler(req) {
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
 
+  /**
+   * Minutes to add to the reader's local time to reach UTC, exactly as
+   * Date.prototype.getTimezoneOffset() reports it. Sent by the caller
+   * because this runs on the edge, where the server's clock is UTC and
+   * knows nothing about where the reader is.
+   *
+   * Clamped to a real range so a junk value cannot move the greeting by a
+   * day; anything out of range is treated as absent.
+   */
+  const rawTz = Number(new URL(req.url).searchParams.get('tzOffset'));
+  const tzOffset = Number.isFinite(rawTz) && Math.abs(rawTz) <= 900 ? rawTz : 0;
+
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY
                   || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -218,7 +230,13 @@ export default async function handler(req) {
 
     return json({
       ok: true,
-      greeting: greeting({ now: state.now, firstName: state.firstName, returning: !!me.results_last_opened_at }),
+      greeting: greeting({
+        now: state.now,
+        firstName: state.firstName,
+        returning: !!me.results_last_opened_at,
+        // The reader's clock, not this server's. See greeting() for why.
+        tzOffsetMinutes: tzOffset,
+      }),
       primary,
       secondary,
       owned,

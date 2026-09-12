@@ -3538,10 +3538,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
         {/* Header */}
         <div style={{ marginBottom: "1.25rem" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-            {/* block: comm-overview/couple-type-lead */}
-            <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT }}>How You Communicate</div>
-          </div>
+          {/* block: comm-overview/couple-type-lead */}
+          {/* No page eyebrow. Ellie: "I want no page eyebrows throughout the
+              results experience." The row that held it had no other child, so
+              it went too rather than leaving an empty flex row's margin. */}
           <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
           
         </div>
@@ -4031,9 +4031,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
         <ResultsSlide bg={fc.bg || EXP_BG}>
           <link href={FONT_URL} rel="stylesheet" />
 
-          {/* Exercise eyebrow — matches comms / reflection / intimacy */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
-          </div>
+          {/* The exercise eyebrow was removed from here earlier and left an
+              empty flex row behind, which still contributed its bottom margin.
+              No page eyebrows anywhere in results. */}
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "clamp(1.5rem,5vw,2rem)", fontFamily: HFONT, fontWeight: 700, letterSpacing: "-0.02em", color: "white", lineHeight: 1.1 }}>
@@ -7493,7 +7493,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 560 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.plan.eyebrowOwn}</div>
+            {/* No page eyebrow. Ellie: "I want no page eyebrows throughout the
+                results experience." The nav you arrived through already names
+                the section, so the eyebrow repeated it directly above the
+                page's own title. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.plan.title}</h2>
             <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, marginBottom: "1.5rem" }}>
               {actionItems.length > 0
@@ -7718,7 +7721,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent={ROSE} noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ROSE, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Physical Intimacy</div>
+            {/* No page eyebrow. Ellie: "I want no page eyebrows throughout the
+                results experience." The nav you arrived through already names
+                the section, so the eyebrow repeated it directly above the
+                page's own title. */}
             <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
             <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
               {misaligned.length ? "" : INTIMACY_ALL_ALIGNED}
@@ -10891,7 +10897,7 @@ function PartnerBCompletionScreen({ partnerAName, partnerBName, partnerADone, pa
         {partnerADone ? (
           <>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.6rem' }}>✓</div>
-            <div style={{ fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#10b981', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, marginBottom: '0.85rem' }}>Both exercises complete</div>
+            <div style={{ fontSize: '0.62rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#10b981', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, marginBottom: '0.85rem' }}>All exercises complete</div>
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 700, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem' }}>
               Your results are ready.
             </div>
@@ -14301,7 +14307,7 @@ export default function App() {
                 {bothDone && (
                   <div style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", borderRadius: 16, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
                     <div>
-                      <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.2rem" }}>Both exercises complete.</div>
+                      <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.2rem" }}>All exercises complete.</div>
                       <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.7)", fontFamily: BFONT }}>Your joint results are ready to view.</div>
                     </div>
                     <button onClick={() => setView("results")} style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", cursor: "pointer" }}>View Results →</button>

@@ -247,7 +247,7 @@ const ANYTIME = [
   'There you are',
 ];
 
-export function greeting({ now, firstName, returning }) {
+export function greeting({ now, firstName, returning, tzOffsetMinutes = 0 }) {
   // An unusable `now` falls back to the real clock rather than propagating.
   // Indexing by the hour turns an invalid date into NaN, and options[NaN] is
   // undefined, so the screen's first line rendered as nothing at all. The
@@ -259,7 +259,33 @@ export function greeting({ now, firstName, returning }) {
   const ms = new Date(now ?? Date.now()).getTime();
   const at = new Date(Number.isFinite(ms) ? ms : Date.now());
 
-  const h = at.getHours();
+  /**
+   * ── WHOSE MORNING ─────────────────────────────────────────────────────
+   * Ellie, at noon: "it's noon right now and showing me 'good evening'."
+   *
+   * /api/home runs on the edge runtime, where the server's clock is UTC, and
+   * getHours() reads that clock. Noon in Mountain Time is 18:00 UTC, which is
+   * the first hour of "Good evening". The greeting was correct for a server
+   * nobody lives on.
+   *
+   * The same shape as every unit bug in this codebase: a number crossing a
+   * boundary whose name does not say what it is measured against. `now` is an
+   * instant, and an instant has no hour until you say whose.
+   *
+   * So the caller sends its offset and the server does the arithmetic.
+   * getTimezoneOffset() is minutes to ADD to local to reach UTC: +360 in
+   * Mountain, so local is UTC minus 360. Shifting and then reading UTC hours
+   * gives the reader's own hour without the server needing a timezone
+   * database.
+   *
+   * Zero is the default, which is the old behaviour, so a caller that sends
+   * nothing is no worse off than before. check-greeting-clock.mjs fails the
+   * build if a caller stops sending it.
+   */
+  const off = Number.isFinite(Number(tzOffsetMinutes)) ? Number(tzOffsetMinutes) : 0;
+  const local = new Date(at.getTime() - off * 60000);
+
+  const h = local.getUTCHours();
   const timeOfDay = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 
   let part = timeOfDay;

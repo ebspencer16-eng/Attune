@@ -194,9 +194,23 @@ ok('every greeting is a whole phrase, never a fragment',
 
 // The time-of-day forms must still be honest about the clock: a greeting is
 // the one piece of copy a reader can immediately check against their own day.
+//
+// Stated in UTC on both sides. This used to compare greeting() against
+// new Date(t).getHours(), the hour of whichever machine ran the test, which
+// agreed with greeting() only because greeting() had the same bug: it read the
+// server's clock. Now that the reader's offset is explicit, the test has to be
+// explicit too, and it is deterministic wherever it runs rather than passing in
+// UTC and failing in Denver.
 ok('a morning greeting never appears in the evening',
-  HOURS.filter((t) => new Date(t).getHours() >= 18)
-    .every((t) => !/morning|afternoon/.test(greeting({ now: t, returning: true }))));
+  HOURS.filter((t) => new Date(t).getUTCHours() >= 18)
+    .every((t) => !/morning|afternoon/.test(
+      greeting({ now: t, returning: true, tzOffsetMinutes: 0 }))));
+
+// And the reader's own zone decides, not the server's.
+ok('noon in Denver is the afternoon, not the evening',
+  greeting({ now: '2026-09-12T18:00:00Z', tzOffsetMinutes: 360 }) === 'Good afternoon');
+ok('the same instant is the evening for a reader in UTC',
+  greeting({ now: '2026-09-12T18:00:00Z', tzOffsetMinutes: 0 }) === 'Good evening');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

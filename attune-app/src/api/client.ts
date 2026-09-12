@@ -729,7 +729,17 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
 
 /** The landing screen, in one call. */
 export function fetchHome() {
-  return request<HomeResponse & { ok: true }>('/api/home');
+  /**
+   * The reader's clock goes with the request.
+   *
+   * /api/home runs on the edge, where the server's clock is UTC, so the
+   * greeting was picking the hour of a machine nobody lives on: noon in
+   * Mountain Time is 18:00 UTC, which reads as "Good evening". The device
+   * is the only thing that knows what time it is where the reader is, so it
+   * says so. getTimezoneOffset() is minutes to add to local to reach UTC.
+   */
+  const tzOffset = new Date().getTimezoneOffset();
+  return request<HomeResponse & { ok: true }>(`/api/home?tzOffset=${tzOffset}`);
 }
 
 /**

@@ -25,13 +25,13 @@ Status vocabulary:
 
 | # | Ask | Status | Notes |
 |---|---|---|---|
-| 1 | No page eyebrows anywhere in results, site and app | **PARTIAL** | Removed from the Conflict detail pages and the Expectations/Intimacy/Conflict headers in 84e8df4. **Still present on the glance pages**: "How You Communicate" at `src/App.jsx:3543`, above `comm-overview/couple-type-lead`. Ellie found this. Full sweep of both surfaces not done. |
+| 1 | No page eyebrows anywhere in results, site and app | **DONE** | Four more removed from the site: "How You Communicate" on the comms glance, "Physical Intimacy", "Conflict patterns", and an empty eyebrow row still holding its margin on the Expectations detail pages. The app had none. `check-page-eyebrows.mjs` now fails the build on any uppercase label matching a section name from the server's own nav; verified by planting one on each surface, and by confirming a block label that is not a section name stays quiet. |
 | 2 | Life & Values detailed page not working | **CANNOT REPRODUCE** | Registry fixed in d5e2669: the nav offers `exp-convo-5` and the section exists. In demo the page renders 1991 characters, more than its neighbour. Clicking through from the glance did not move `activeResult` in my harness, which may be my harness or may be the bug. **Need: is it blank, wrong content, or does the link go nowhere? Site or app?** |
-| 3 | "Both exercises" prose → "all exercises" | **PARTIAL** | `src/App.jsx:10894` still renders "Both exercises complete". Everything else changed. |
+| 3 | "Both exercises" prose → "all exercises" | **DONE** | Two left, not one: "Both exercises complete" and "Both exercises complete." with a full stop, which the first search missed. Both changed. |
 | 4 | Expectations glance: colour every "conversations to have" tile, not just Life & Values. App mirrors. | **OPEN** | New 2026-09-12. |
 | 5 | Home: title the insight of the day section; title above left, citation below right | **OPEN** | New 2026-09-12. The title text is copy, so it is Ellie's unless an existing server label fits. |
 | 6 | Home: make the glow more visible | **OPEN** | New 2026-09-12. |
-| 7 | Home: greeting says "good evening" at noon | **OPEN** | New 2026-09-12. Almost certainly the server computing the hour in UTC rather than the reader's zone. |
+| 7 | Home: greeting says "good evening" at noon | **DONE** | `/api/home` runs on the edge, where the clock is UTC, and `getHours()` read it. Noon Mountain is 18:00 UTC. The device now sends its offset and the server does the arithmetic. `check-greeting-clock.mjs` checks all three parts and six times of day in two zones; verified by planting each part of the fix being undone. |
 | 8 | "Start shared budgeting" opens a blank page; build the resources into the app | **OPEN** | New 2026-09-12. Two things: the broken link, and the larger question of the tools living in the app at all. |
 | 9 | The twenty phrasings of "this opens when you have both finished" | **ELLIE** | List pulled for review 2026-09-12. One sentence everywhere, or six keyed by situation. |
 | 10 | Placeholder greeting phrases | **ELLIE** | Generated, in `ANYTIME` in `api/_lib/next-action.js`. Never reviewed. |
