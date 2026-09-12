@@ -16,6 +16,10 @@ moved past; it is listed so nothing is taken on trust.
 | # | Question |
 |--|--|
 | G1 | Everything below is built and building clean, and none of it has been seen on a phone. That is the whole of what is left. |
+| G2 | **Deletion. The published policy and the code disagree, and one of the gaps loses a paying customer's results.** Full evidence in `DELETION.md`. Three things needed from you: |
+| G2a | Delete account asks for no password. The policy says it does. Add the step, or amend the policy. |
+| G2b | The words for the partner's notification. Policy: "Your partner is notified that you have deleted your account." Nothing notifies them. |
+| G2c | The words for the deletion confirmation email. Policy promises one twice. None is sent. |
 
 ## 2. Open
 
@@ -23,6 +27,7 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | O1 | Order email points at the app. **Built, gated off**: `APP_LIVE` is false and `APP_STORE_URL` ends in `idPENDING`. A flag flip and a real store id, not work. |
 | O2 | `check-exercise-flow.mjs` migrated and running, but a clean pass has not been watched to the end. Header carries the two commands. |
+| O3 | When one partner deletes, the other loses **all** results, including the parts from their own answers. The policy says they keep those. Migration, a `resultsGate` state, a one-person results view on both surfaces, and copy. Scoped in `DELETION.md`; not started. |
 
 
 ## 3. Done, not verified
@@ -372,6 +377,7 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task | Verified by |
 |--|--|--|
+| — | Profile setup could spin forever on a failed read | `check-read-failures.mjs`, 3 plants |
 | — | Scheduled email carried no unsubscribe link | `check-unsubscribe.mjs`, 4 plants (2 of which it missed until fixed) |
 | — | Dashboard reloading itself | Ellie's screenshot: 75s, 0 renders and 0 fetches in the last 5s |
 | — | "Start shared budgeting" opened a 28-character blank page | `check-gated-views.mjs`; 1214 chars where there were 28 |
