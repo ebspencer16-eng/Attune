@@ -1338,3 +1338,24 @@ nothing thrown and both screens looking correct.
 **What is genuinely left:** the order email's app line is written and gated
 behind `APP_LIVE`, waiting on an App Store id, and `check-exercise-flow.mjs`
 now runs on a real machine but has not been watched through a clean pass.
+
+### Copy the app wrote for the new screens (needs Ellie)
+
+Eleven words of it, in four places, all in states the website has no
+equivalent of because a browser tab does not go offline mid-tap. Listed so
+they are visible rather than buried in a file header:
+
+    checklist.tsx   "That tick has not saved yet. It will try again on the next one."
+                    "Getting your checklist"           (loading)
+    budget.tsx      "That has not saved yet. It will try again when you leave the next field."
+                    "Getting your budget"              (loading)
+                    "What for"                         (placeholder on a savings goal)
+    profile-setup   "One moment"                       (loading)
+                    "No connection. Your answers are still here; try again in a moment."
+                    "That did not save. Try again in a moment."
+    post-reader     nothing; every word is the post's
+
+Plus three button labels: "Done", "Continue", "Add a goal", "Remove".
+
+The last two failure lines are copied verbatim from the app's existing
+notes screen, so they are already in the product. The rest are new.
