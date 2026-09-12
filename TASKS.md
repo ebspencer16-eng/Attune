@@ -299,14 +299,15 @@ moved past; it is listed so nothing is taken on trust.
 | 105.7 | Couple type page - couple type section on web view has a colored tile, the app doesn’t. Once again, go throug... |
 | 105.8 | On side by side response drop downs in the app (in comms and intimacy sections) can we shrink the margins for... |
 | 105.9 | Intimacy results on web shows side by side responses on the detailed pages automatically, but I want them in ... |
+| 105.12 | I clicked to open resources and saw it for a second then was prompted to sign in again. That shouldn’t happen |
 | 105.13 | How can I select text then add a note? Not seeing that functionality on the simulator. We can do this after i... |
-| 105.14 | I want to be able to select text and have a small popup menu that has icons for highlight, underline, tag, no... |
 | 105.15 | If a user clicks highlight, they see a popup with the color options. |
+| 105.16 | If they click underline, same thing. |
 | 105.17 | If they click tag, they see a list of their tags (which should be the default list unless they’ve edited in t... |
 | 105.18 | If they click note, they should have a little text box to write a note. |
 | 105.19 | If they click share, they should get a popup include commentary? message with a textbox, then they should be ... |
-| 105.20 | Notes tab organization: |
 | 105.21 | I’d like for the top tile to be ‘pick up where you left off’ with 3 rows each with a sneak peek of recent not... |
+| 105.22 | Next, a section for shared notes that’s the same setup as the above, 2 or 3 most recent show, but then there’... |
 | 105.23 | Would like something designating which of these are unread or unopened. |
 | 105.24 | Then the bottom section should be a list of all tags, organized in rows |
 | 105.25 | Rows should default to sorting by A-Z, but there should be a dropdown filter button to select A-Z, Z-A, most ... |
@@ -320,13 +321,12 @@ moved past; it is listed so nothing is taken on trust.
 | 108.1 | Move the good evening line down a bit |
 | 108.2 | Move the research highlight up slightly |
 | 108.3 | I don’t like the concentric circles behind the text, I’d like a glow like what we do on the site’s couple map... |
-| 108.4 | No info filled in on our app’s relationship reflection pages |
+| 108.5 | Our scorecard 4 says our comms styles are 100% aligned. That’s incorrect, right? |
 | 108.6 | Storycard 5 ’80%’ text is cut off on top |
-| 108.7 | On the detailed pages’ sliding bars, when the dots offset they’re slightly too far apart. Can we bring them t... |
 | 108.8 | Side by side margin change made the sliding bars narrower. I should’ve specified, but I don’t want the bars a... |
+| 108.9 | Intimacy results missing from app insights tab |
 | 108.10 | Conflict pages on app need to match site and currently don’t |
 | 108.11 | Looks like rel relf, intimacy, and conflict need rebuilds in the app. Don’t make more work for yourself than ... |
-| 108.12 | Conflict exercises working on app but not on web |
 
 **msg 113 · Eyebrow removals**
 
@@ -340,13 +340,13 @@ moved past; it is listed so nothing is taken on trust.
 | # | Task |
 |--|--|
 | 116.1 | Glow looks great, move the insight of the day section (and associated glow) further down to be centered betwe... |
+| 116.2 | Insights tab |
 | 116.3 | When I first clicked into this, I was prompted to sign in again. I clicked out then back in and it went away,... |
 | 116.5 | Comms results at a glance - can we shorten the sliding bars so that none of the row labels wrap (giving and r... |
-| 116.6 | Issue that I just noticed - the dimensions on the comms results at a glance page are in the wrong order. Make... |
 | 116.7 | Expectations detailed pages - remove the progress bar up top in the app view |
 | 116.8 | Expectations detailed pages - ‘How ellie and preston should approach these conversations’ text is very hard t... |
+| 116.9 | Larger prose change, implement to both site and app: The prose for the ‘how you two should approach these con... |
 | 116.10 | Rel Relf - still no data on these pages. |
-| 116.11 | Physical Intimacy is still missing from the top nav. Am I viewing an old version of the simulator? |
 
 **msg 132 · App home**
 
@@ -354,7 +354,7 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | 132.1 | Please title the insight of the day section. |
 | 132.2 | Maybe title is above and left-aligned, and citation is below and right-aligned (currently citation is centered) |
-| 132.4 | We need to make sure the app pipes in the welcome back, good morning, etc. messages appropriately - it’s noon... |
+| 132.3 | Can we make the glow a little more visible? Currently it’s slightly too subtle. |
 
 **msg 134 · App home + site**
 
@@ -380,28 +380,28 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task | Verified by |
 |--|--|--|
-| 78.6 | For whatever reason the site just brought back the how it works and couple types pages, those were deleted lo... | files deleted |
+| 78.6 | For whatever reason the site just brought back the how it works and couple types pages, those were deleted lo... | the files are deleted |
 | 81.9 | Couple type page is STILL showing different content from what we do on the site. I’m frustrated by this at th... | check-results-copy-reach |
 | 96.11 | I’ve asked for this already, but please wire in the in-practice content so that I can see how this is built. | fetchPosts wired |
 | 99.2 | A concern - my results on the site look different from my results in the app (looking at expectations, we wer... | check-scoring-mirror |
 | 105.4 | Scorecard 2 is very different on the app than it is on the website. Do a thorough scan of code and renderings... | check-storycard-fields |
-| 105.10 | Now our dashboard says Preston’s conflict exercise is pending. He’s completed it. Make sure this bug is fixed | check-results-coverage |
+| 105.10 | Now our dashboard says Preston’s conflict exercise is pending. He’s completed it. Make sure this bug is fixed | check-results-gate |
 | 105.11 | Even though his conflict is missing, we can access our results, only conflict results are gated. That’s an is... | check-results-gate |
-| 105.12 | I clicked to open resources and saw it for a second then was prompted to sign in again. That shouldn’t happen | check-results-gate |
-| 105.16 | If they click underline, same thing. | Ellie: "word range selection is fine" |
-| 105.22 | Next, a section for shared notes that’s the same setup as the above, 2 or 3 most recent show, but then there’... | notes tab built to spec |
-| 108.5 | Our scorecard 4 says our comms styles are 100% aligned. That’s incorrect, right? | check-position-units |
-| 108.9 | Intimacy results missing from app insights tab | check-stripped-fields |
+| 105.14 | I want to be able to select text and have a small popup menu that has icons for highlight, underline, tag, no... | Ellie: "word range selection is fine" |
+| 105.20 | Notes tab organization: | built to the spec in this message |
+| 108.4 | No info filled in on our app’s relationship reflection pages | check-results-coverage |
+| 108.7 | On the detailed pages’ sliding bars, when the dots offset they’re slightly too far apart. Can we bring them t... | check-position-units |
+| 108.12 | Conflict exercises working on app but not on web | check-stripped-fields |
 | 113.1 | My dashboard, again, showed that ex1 was incomplete. I signed out then signed back in and it fixed itself, bu... | check-results-gate |
 | 113.4 | Remove ‘what you expect’ eyebrow from expectations results at a glance page | check-page-eyebrows |
 | 113.5 | Remove ‘Physical intimacy expectations’ eyebrow from intimacy results at a glance page | check-page-eyebrows |
 | 113.6 | Remove ‘conflict patterns’ eyebrow and dot from top left of conflict results at a glance page | check-page-eyebrows |
 | 113.7 | Remove eyebrow text in top left of each conflict detailed page | check-page-eyebrows |
-| 113.8 | Left nav calls it ‘what you both wrote’ and page hero is ‘what you each wrote’ . I assume the app uses the sa... | check-page-eyebrows |
-| 116.2 | Insights tab | check-fonts |
-| 116.4 | Storycards still look different than the ones online. Killing me. Check font, coloring, all visuals, etc. Am ... | check-dimension-order |
-| 116.9 | Larger prose change, implement to both site and app: The prose for the ‘how you two should approach these con... | nav comes from the server |
-| 132.3 | Can we make the glow a little more visible? Currently it’s slightly too subtle. | check-greeting-clock |
+| 113.8 | Left nav calls it ‘what you both wrote’ and page hero is ‘what you each wrote’ . I assume the app uses the sa... | one title in nav and hero, grep clean |
+| 116.4 | Storycards still look different than the ones online. Killing me. Check font, coloring, all visuals, etc. Am ... | check-fonts |
+| 116.6 | Issue that I just noticed - the dimensions on the comms results at a glance page are in the wrong order. Make... | check-dimension-order |
+| 116.11 | Physical Intimacy is still missing from the top nav. Am I viewing an old version of the simulator? | nav comes from the server |
+| 132.4 | We need to make sure the app pipes in the welcome back, good morning, etc. messages appropriately - it’s noon... | check-greeting-clock |
 
 ---
 
