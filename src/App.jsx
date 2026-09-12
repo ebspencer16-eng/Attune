@@ -11332,13 +11332,29 @@ function useDiagnostics(enabled) {
   // heartbeat as a loop, which is exactly the false positive that would send
   // the next person chasing nothing.
   const mine = useRef(0);
+  // Set by the panel's own once-a-second refresh, cleared by the render it
+  // causes. Without it the panel counts its own heartbeat and reports six
+  // renders in five seconds on a page that did nothing, which is the number
+  // that would send the next person hunting a loop that is not there.
+  const selfTick = useRef(false);
   const [, force] = useState(0);
   renders.current += 1;
+
+  if (selfTick.current) {
+    selfTick.current = false;
+    mine.current += 1;
+  } else if (enabled && typeof window !== 'undefined' && window.__attuneDiag) {
+    // Stamped during render, not in an effect: an effect runs after the render
+    // it belongs to and would miss the ones that matter, which are the renders
+    // arriving faster than effects flush.
+    window.__attuneDiag.renders.push(Date.now());
+    if (window.__attuneDiag.renders.length > 400) window.__attuneDiag.renders.shift();
+  }
 
   useEffect(() => {
     if (!enabled) return undefined;
     if (!window.__attuneDiag) {
-      window.__attuneDiag = { fetches: [], started: Date.now() };
+      window.__attuneDiag = { fetches: [], renders: [], started: Date.now() };
       const real = window.fetch.bind(window);
       window.fetch = (u, o) => {
         const url = String(typeof u === 'string' ? u : (u && u.url) || '');
@@ -11346,7 +11362,7 @@ function useDiagnostics(enabled) {
         return real(u, o);
       };
     }
-    const t = setInterval(() => { mine.current += 1; force((n) => n + 1); }, 1000);
+    const t = setInterval(() => { selfTick.current = true; force((n) => n + 1); }, 1000);
     return () => clearInterval(t);
   }, [enabled]);
 
@@ -11354,24 +11370,50 @@ function useDiagnostics(enabled) {
 }
 
 function DiagPanel({ renders }) {
-  const d = (typeof window !== 'undefined' && window.__attuneDiag) || { fetches: [], started: Date.now() };
-  const secs = Math.max(1, Math.round((Date.now() - d.started) / 1000));
+  const d = (typeof window !== 'undefined' && window.__attuneDiag) || { fetches: [], renders: [], started: Date.now() };
+  const now = Date.now();
+  const secs = Math.max(1, Math.round((now - d.started) / 1000));
+
+  /**
+   * The last five seconds, not the whole session.
+   *
+   * Ellie screenshotted this one second after load, when four renders and four
+   * fetches are just the page starting up. A rate averaged over the whole
+   * session says nothing at second one and hides a loop that begins at second
+   * thirty. A rolling window is true whenever she happens to look.
+   */
+  const WINDOW = 5000;
+  const recentF = d.fetches.filter((f) => now - f.at < WINDOW);
+  const recentR = (d.renders || []).filter((t) => now - t < WINDOW);
+  const span = Math.min(WINDOW, now - d.started) / 1000 || 1;
+
   const byUrl = {};
-  for (const f of d.fetches) byUrl[f.url] = (byUrl[f.url] || 0) + 1;
+  for (const f of recentF) byUrl[f.url] = (byUrl[f.url] || 0) + 1;
   const top = Object.entries(byUrl).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+  const looping = recentR.length / span > 1 || recentF.length / span > 0.5;
+  const settling = secs < 4;
+
   return (
     <div style={{
       position: 'fixed', bottom: 12, right: 12, zIndex: 99999,
-      background: 'rgba(14,11,7,0.92)', color: '#fff', borderRadius: 10,
+      background: 'rgba(14,11,7,0.93)', color: '#fff', borderRadius: 10,
       padding: '0.7rem 0.9rem', fontFamily: 'ui-monospace, Menlo, monospace',
-      fontSize: 11, lineHeight: 1.6, maxWidth: 320, pointerEvents: 'none',
+      fontSize: 11, lineHeight: 1.6, maxWidth: 330, pointerEvents: 'none',
     }}>
       <div style={{ opacity: 0.6 }}>attune diagnostics · {secs}s</div>
-      <div>renders: <strong>{renders}</strong> ({(renders / secs).toFixed(1)}/s)</div>
-      <div>fetches: <strong>{d.fetches.length}</strong> ({(d.fetches.length / secs).toFixed(1)}/s)</div>
+      <div>total: {renders} renders, {d.fetches.length} fetches</div>
+      <div style={{ marginTop: 4, opacity: 0.6 }}>last 5 seconds</div>
+      <div>renders: <strong>{recentR.length}</strong> &nbsp; fetches: <strong>{recentF.length}</strong></div>
       {top.map(([u, n]) => (
         <div key={u} style={{ opacity: 0.75 }}>{n}x {u.replace(/^https?:\/\/[^/]+/, '')}</div>
       ))}
+      <div style={{
+        marginTop: 6, fontWeight: 700,
+        color: settling ? '#C8B08A' : (looping ? '#FF8A6B' : '#6FD08C'),
+      }}>
+        {settling ? 'still starting up, wait 10s' : (looping ? 'LOOPING' : 'quiet')}
+      </div>
     </div>
   );
 }

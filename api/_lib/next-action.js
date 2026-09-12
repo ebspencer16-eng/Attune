@@ -211,8 +211,7 @@ export function nextActions(state = {}) {
    * Rotates by day so a person opening twice in an afternoon sees the same
    * one, rather than the app appearing to change its mind.
    *
-   * DRAFTED, awaiting Ellie's review. Her idea, her rules: short, declarative,
-   * no hedging, nothing that congratulates someone for opening an app.
+   * Ellie's words, edited by her on 2026-09-12.
    */
   if (!cards.length) {
     // state.now is an ISO string, not a number: api/home.js sends
@@ -279,6 +278,8 @@ const ANYTIME = [
  *
  * One per day, rotating. Each names a thing that already exists, because a
  * prompt for a feature we do not have is a broken promise on the home screen.
+ *
+ * Ellie's words. Three of the five bodies are her edits to the drafts.
  */
 const IDLE_PROMPTS = [
   {
@@ -288,7 +289,7 @@ const IDLE_PROMPTS = [
   },
   {
     title: 'Reread what you each wrote',
-    body: 'The written answers are the part worth going back to.',
+    body: 'Written answers are worth revisiting and discussing.',
     cta: 'Open results', deepLink: '/?view=results',
   },
   {
@@ -298,12 +299,12 @@ const IDLE_PROMPTS = [
   },
   {
     title: 'Read something from In Practice',
-    body: 'Short pieces on the things couples get stuck on.',
+    body: 'Short pieces on the things that impact relationships.',
     cta: 'Open In Practice', deepLink: '/practice',
   },
   {
     title: 'Look back at your tags',
-    body: 'What you marked is a record of what mattered at the time.',
+    body: 'What you marked is a record of what mattered to you.',
     cta: 'Open notes', deepLink: '/?view=notes',
   },
 ];
