@@ -18,6 +18,9 @@ Anything only a person holding a phone can confirm stays in section 3.
 | G4 | Waiting copy group 5: your line is generic. The site currently names the section ("...finished Expectations") and the partner ("Preston has not completed it yet"). Drop both for your one line? |
 | G5 | `check-exercise-flow.mjs` has a sandbox path baked in and runs nowhere. Real coverage nothing else has. Migrate or delete? |
 | G6 | Conflict Patterns has no demo answers, so it is absent from the showcase tour. Needs two written answers per partner, your copy. |
+| G8 | Life & Values on the site: is it blank, wrong content, or the wrong page? Which nav did you use? It works here in demo and production is current, so I need the detail. |
+| G9 | Three app lines were lost to the shared copy: Insights named the partner and counted what was left, Settings said "everything owned" (meaning the exercises you bought, not all five). Want any back? |
+| G10 | Conflict's exercise footer says "Your answers are saved. Your patterns stay private to you, always." A different message, left alone. Should it use your group 3 line plus the privacy line? |
 | G7 | Greeting rotation phrases ("welcome back" etc.) were generated as placeholders and never reviewed. In `ANYTIME`, `api/_lib/next-action.js`. |
 
 ---
@@ -26,15 +29,13 @@ Anything only a person holding a phone can confirm stays in section 3.
 
 | # | Task |
 |--|--|
-| O1 | Site: Life & Values lands on the storycard highlights page instead of its own |
-| O2 | App: two Life & Values dropdowns on Expectations at a glance |
-| O3 | Waiting copy: your 6 lines into one shared module, both surfaces, plus a gate |
-| O4 | Home: title above the insight, left-aligned |
-| O5 | Home: citation below, right-aligned (currently centred) |
-| O6 | Home: glow more visible |
-| O7 | "Start shared budgeting" opens a blank website page |
-| O8 | Expectations at a glance: coloured left border on every "conversations to have" tile, not just Life & Values |
-| O9 | Same, mirrored in the app |
+| O1 | Site: Life & Values lands on the storycard highlights page. **Not reproducible here** — a browser click in demo lands on `exp-convo-5` at "6 of 6", and the live bundle carries today's pushes. See G8. |
+| O2 | Home: title above the insight, left-aligned |
+| O3 | Home: citation below, right-aligned (currently centred) |
+| O4 | Home: glow more visible |
+| O5 | "Start shared budgeting" opens a blank website page |
+| O6 | Expectations at a glance: colour every "conversations to have" tile |
+| O7 | Same, mirrored in the app |
 
 ---
 
@@ -69,11 +70,14 @@ Changed and building clean. Nobody has looked at it on a phone or in a browser.
 
 ## 4. Done and verified
 
-Newest first. Evidence named.
+Newest first. Evidence named. (Numbers are labels, not an order.)
 
 | # | Task | Verified by |
 |--|--|--|
-| V1 | Greeting said "good evening" at noon | `check-greeting-clock.mjs`, 6 times of day in 2 zones; 3 plants |
+| V1 | 22 waiting sentences became your 6, one module both surfaces read | `check-waiting-copy.mjs`, 4 plants incl. a revert |
+| V2 | Two Life & Values dropdowns in the app | `check-nav-targets` counts buckets; 2 plants |
+| V3 | A test named "not an empty bucket" passed on an empty bucket | Fixture now answers life questions |
+| V4 | Greeting said "good evening" at noon | `check-greeting-clock.mjs`, 6 times of day in 2 zones; 3 plants |
 | V2 | No page eyebrows anywhere in results | `check-page-eyebrows.mjs` vs the server's nav; 3 plants |
 | V3 | "Both exercises" → "all exercises" | Two survivors found and fixed; grep clean |
 | V4 | QR printouts, root SQL, stale reviews deleted | 12 files; build + gates clean |
