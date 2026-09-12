@@ -17,6 +17,8 @@
  *   https://api.sendgrid.com/v3/mail/send  with Authorization: Bearer SENDGRID_API_KEY
  */
 
+import { unsubscribeUrl } from './_lib/email-footer.js';
+
 export const config = { runtime: 'edge' };
 
 // Off until the app is in the App Store, matching APP_BANNER_ENABLED in
@@ -159,10 +161,9 @@ function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, cta
        </td></tr>`
     : '';
 
-  // Unsubscribe link — uses encoded userId when available, else a mailto
-  const unsubUrl = userId
-    ? `https://www.attune-relationships.com/api/unsubscribe?token=${btoa(userId)}`
-    : 'mailto:hello@attune-relationships.com?subject=Unsubscribe';
+  // One implementation, in api/_lib/email-footer.js. It was here alone, and
+  // the two crons that email customers on a schedule had no unsubscribe at all.
+  const unsubUrl = unsubscribeUrl(userId);
 
   return `<!DOCTYPE html>
 <html>

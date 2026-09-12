@@ -13,6 +13,8 @@
  */
 import { capabilitiesFor } from './_lib/ownership.js';
 
+import { unsubscribeLink } from './_lib/email-footer.js';
+
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
@@ -114,7 +116,7 @@ export default async function handler(req) {
       const ok = await sendEmail(
         user.email,
         `How are you and ${user.partner_name || 'your partner'} doing?`,
-        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
+        checkinHtml({ userId: user.id, toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
       );
       if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; sentSoFar.sent6mo = sent6mo; }
       else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; sentSoFar.failed = failed; }
@@ -129,7 +131,7 @@ export default async function handler(req) {
       const ok = await sendEmail(
         user.email,
         `A year with ${user.partner_name || 'your partner'}, and how things look now`,
-        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
+        checkinHtml({ userId: user.id, toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
       );
       if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
       else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; sentSoFar.failed = failed; }
@@ -148,7 +150,7 @@ export default async function handler(req) {
 }
 
 // ── Email template ────────────────────────────────────────────────────────────
-function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl }) {
+function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl, userId }) {
   const is6mo = months === 6;
   const reflBlock = !hasReflection ? `
     <div style="margin:24px 0;background:#EEF2FF;border:1.5px solid rgba(27,95,232,0.2);border-radius:14px;padding:20px 22px">
@@ -205,7 +207,8 @@ function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl }) 
 </div>
 <div class="footer">
   Attune · <a href="https://www.attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
-  Questions? Reply to this email or write to hello@attune-relationships.com
+  Questions? Reply to this email or write to hello@attune-relationships.com<br/>
+  ${unsubscribeLink(userId)}
 </div>
 </div>
 </body>

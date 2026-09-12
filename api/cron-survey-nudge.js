@@ -6,21 +6,25 @@
  * Skips anyone who already responded (post_results OR beta_survey) and skips
  * beta testers entirely (they were asked to do the beta survey directly).
  */
+import { unsubscribeLink } from './_lib/email-footer.js';
+
 export const config = { runtime: 'edge' };
 function json(o, s = 200) { return new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json' } }); }
-function nudgeHtml(name) {
+function nudgeHtml(name, userId) {
   return `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#1a1a1a;">
   <p style="font-size:1rem;">Hi ${name},</p>
   <p style="font-size:.95rem;line-height:1.6;">Congratulations on finishing Attune together. When you're done reviewing your results and workbook, we'd love to hear what you think. It takes about two minutes and genuinely shapes what we build next.</p>
   <p style="text-align:center;margin:1.8rem 0;"><a href="https://www.attune-relationships.com/app?signin=1" style="background:#E8673A;color:#fff;text-decoration:none;padding:.8rem 1.6rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700;">Share your experience</a></p>
   <p style="font-size:.8rem;color:#666;line-height:1.5;">The short survey sits at the top of your dashboard whenever you're ready.</p>
+  <p style="font-size:.75rem;color:#999;margin-top:1.6rem;">${unsubscribeLink(userId)}</p>
 </div>`;
 }
-function nudge2Html(name) {
+function nudge2Html(name, userId) {
   return `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#1a1a1a;">
   <p style="font-size:1rem;">Hi ${name},</p>
   <p style="font-size:.95rem;line-height:1.6;">No rush at all. But whenever you've had a chance to sit with your results and workbook, we'd still love to hear how the experience landed for you. Two minutes, and it really does shape what comes next.</p>
   <p style="text-align:center;margin:1.8rem 0;"><a href="https://www.attune-relationships.com/app?signin=1" style="background:#E8673A;color:#fff;text-decoration:none;padding:.8rem 1.6rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700;">Share your experience</a></p>
+  <p style="font-size:.75rem;color:#999;margin-top:1.6rem;">${unsubscribeLink(userId)}</p>
 </div>`;
 }
 export default async function handler(req) {
@@ -65,7 +69,7 @@ export default async function handler(req) {
     for (const u of users) {
       if (!u.email) continue;
       if (submitted.has(u.id) || isBeta(u)) { skipped++; await mark(u.id, field); continue; }
-      const ok = await sendEmail(u.email, subject, htmlFn(u.name || 'there'));
+      const ok = await sendEmail(u.email, subject, htmlFn(u.name || 'there', u.id));
       if (ok) { await mark(u.id, field); sent++; } else failed++;
     }
     return { eligible: users.length, sent, skipped, failed };
