@@ -12,6 +12,7 @@ Anything only a person holding a phone can confirm stays in section 3.
 
 | # | Question |
 |--|--|
+| G11 | Greeting prompts live in `ANYTIME` (rotation) and `IDLE_PROMPTS` (nothing blocked), both in `api/_lib/next-action.js`. Five drafted from your idea. Change any. |
 | G13 | `/app?diag=1` for ten seconds, then a screenshot. Renders climbing names a loop; fetches climbing names the request driving it; both flat means it is visual, not React. |
 
 ## 2. Open
@@ -29,8 +30,6 @@ Anything only a person holding a phone can confirm stays in section 3.
 | O12 | Checklist runs in the app |
 | O13 | Workbook runs in the app |
 | O14 | Migrate `check-exercise-flow.mjs` off its hardcoded sandbox path |
-| O15 | Greeting: cycle engagement prompts when nothing is blocked, rather than "all caught up" |
-| O16 | Conflict demo answers, so the showcase tour covers that exercise |
 
 ---
 
@@ -69,7 +68,9 @@ Newest first. Evidence named. (Numbers are labels, not an order.)
 
 | # | Task | Verified by |
 |--|--|--|
-| V1 | Dashboard re-rendered itself every 15s, forever | `check-poll-writes.mjs`, 3 plants |
+| V1 | Conflict in the showcase, with written answers | Rendered in a browser on the plain demo path |
+| V1a | Idle greeting cycles 5 prompts instead of "all caught up" | 4 assertions incl. rotation and stability |
+| V1b | Dashboard re-rendered itself every 15s, forever | `check-poll-writes.mjs`, 3 plants |
 | V1b | Home: title, citation alignment, brighter glow | tsc + bundle; **needs your eyes** |
 | V1c | 22 waiting sentences became your 6, one module both surfaces read | `check-waiting-copy.mjs`, 4 plants incl. a revert |
 | V2 | Two Life & Values dropdowns in the app | `check-nav-targets` counts buckets; 2 plants |

@@ -12,6 +12,7 @@ import { EXERCISES } from '../api/_exercises.js';
 
 let pass = 0, fail = 0;
 const NOW = '2026-08-29T10:00:00.000Z';
+const NOW_MS = Date.parse(NOW);
 const ok = (name, cond, detail = '') => {
   if (cond) { pass++; console.log(`  PASS  ${name}`); }
   else { fail++; console.error(`  FAIL  ${name}${detail ? '  ::  ' + detail : ''}`); }
@@ -132,7 +133,18 @@ ok('no feedback ask once given',
   primary({ opens30d: 9, feedbackGivenAt: NOW }).kind !== 'feedback');
 
 // ── Nothing outstanding ─────────────────────────────────────────────────────
-ok('all caught up rather than an invented task', primary({}).kind === 'idle');
+ok('an idle card rather than an invented task', primary({}).kind === 'idle');
+// Ellie asked for a rotation here rather than one line, so check it rotates
+// and that every entry is a whole card. A prompt with no destination is a
+// heading, and a heading on the home screen is the thing this branch replaced.
+{
+  const days = Array.from({ length: 8 }, (_, i) => primary({ now: NOW_MS + i * 86400000 }));
+  ok('the idle prompt changes from day to day', new Set(days.map((c) => c.title)).size >= 3);
+  ok('the same day gives the same prompt',
+    primary({ now: NOW_MS }).title === primary({ now: NOW_MS + 1000 }).title);
+  ok('every idle prompt has a destination and a label',
+    days.every((c) => c.title && c.body && c.cta && c.deepLink));
+}
 
 // ── Shape ───────────────────────────────────────────────────────────────────
 const full = nextActions(base({ profileComplete: false, resultsLastOpenedAt: null, opens30d: 9 }));

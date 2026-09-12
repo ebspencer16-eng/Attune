@@ -23,7 +23,7 @@ import { readFileSync } from 'fs';
 
 import { launch } from './_lib/browser.mjs';
 import { RESULTS_SECTIONS } from '../api/_lib/results-sections.js';
-import { conflictFixture } from './_lib/conflict-fixture.mjs';
+import { conflictDemo } from '../api/_lib/conflict-demo.js';
 
 const BASE = process.env.BASE || 'http://localhost:4173';
 const TYPE = process.env.TYPE || 'WX';
@@ -45,9 +45,11 @@ const PKG = process.env.PKG || 'premium';
 // moment." forever. The smoke test reported 26 of 26 the whole time, which is
 // a green tick for a set that deliberately left out the risky part.
 //
-// They are covered by stubbing the endpoint with a fixture. See
-// scripts/_lib/conflict-fixture.mjs for why that is a fixture and not demo
-// data.
+// They are covered by stubbing the endpoint with the demo couple, which now
+// lives in api/_lib/conflict-demo.js and is the same couple the showcase
+// serves. It used to be a fixture here, kept separate because the written
+// answers were customer copy; Ellie has since said the showcase is admin-only,
+// so there is one demo couple rather than two drifting apart.
 const SECTIONS = RESULTS_SECTIONS;
 
 /**
@@ -101,7 +103,7 @@ await page.goto(BASE + '/');
  * installed after the navigation settles answers nothing and the four Conflict
  * pages report as having no data. Which is what they did on the first attempt.
  */
-const CONFLICT_BODY = JSON.stringify(conflictFixture());
+const CONFLICT_BODY = JSON.stringify(conflictDemo());
 await page.onNewDocument(`
   (() => {
     const body = ${JSON.stringify(CONFLICT_BODY)};

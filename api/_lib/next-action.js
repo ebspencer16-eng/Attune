@@ -195,12 +195,39 @@ export function nextActions(state = {}) {
       cta: 'Leave feedback', deepLink: '/?view=feedback' });
   }
 
-  // Nothing outstanding: say so plainly rather than inventing a task.
+  /**
+   * Nothing outstanding.
+   *
+   * This used to say "You are all caught up" and stop. Ellie: "I'd rather, in
+   * that case, cycle through a list of prompts to drive engagement - one idea
+   * is to send a shared note to your partner."
+   *
+   * So it is a rotation rather than a single line, and every entry points at
+   * something the product can actually do today. The rule the engine is
+   * written to still holds everywhere else: when something is blocked, say
+   * what is blocked. This is the one branch where nothing is, and inventing a
+   * task there is the difference between a prompt and a nag.
+   *
+   * Rotates by day so a person opening twice in an afternoon sees the same
+   * one, rather than the app appearing to change its mind.
+   *
+   * DRAFTED, awaiting Ellie's review. Her idea, her rules: short, declarative,
+   * no hedging, nothing that congratulates someone for opening an app.
+   */
   if (!cards.length) {
-    add({ id: 'all-clear', kind: 'idle', priority: 0,
-      title: `You are all caught up`,
-      body: 'Your results are here whenever you want them.',
-      cta: 'Open results', deepLink: '/?view=results' });
+    // state.now is an ISO string, not a number: api/home.js sends
+    // new Date().toISOString(). Dividing a string gives NaN, and
+    // IDLE_PROMPTS[NaN] is undefined, which would have spread into a card with
+    // no title, no body and no destination. Parsed, with a fallback so an
+    // unusable date still produces a real prompt rather than an empty one.
+    // new Date() rather than Date.parse(), because `now` arrives as an ISO
+    // string from api/home.js and as a number from anything holding a
+    // timestamp. Date.parse returns NaN for the number, which would have made
+    // the rotation constant while looking like it worked.
+    const ms = new Date(state.now).getTime();
+    const day = Number.isFinite(ms) ? Math.floor(ms / 86400000) : 0;
+    const idle = IDLE_PROMPTS[day % IDLE_PROMPTS.length];
+    add({ id: 'all-clear', kind: 'idle', priority: 0, ...idle });
   }
 
   cards.sort((a, b) => b.priority - a.priority);
@@ -245,6 +272,40 @@ const ANYTIME = [
   'Good to see you',
   'Hello again',
   'There you are',
+];
+
+/**
+ * What to offer when nothing is waiting.
+ *
+ * One per day, rotating. Each names a thing that already exists, because a
+ * prompt for a feature we do not have is a broken promise on the home screen.
+ */
+const IDLE_PROMPTS = [
+  {
+    title: 'Send a note to your partner',
+    body: 'Mark a line in your results and share it with them.',
+    cta: 'Open results', deepLink: '/?view=results',
+  },
+  {
+    title: 'Reread what you each wrote',
+    body: 'The written answers are the part worth going back to.',
+    cta: 'Open results', deepLink: '/?view=results',
+  },
+  {
+    title: 'Pick one conversation to have this week',
+    body: 'Every section ends with something to try.',
+    cta: 'What comes next', deepLink: '/?view=results',
+  },
+  {
+    title: 'Read something from In Practice',
+    body: 'Short pieces on the things couples get stuck on.',
+    cta: 'Open In Practice', deepLink: '/practice',
+  },
+  {
+    title: 'Look back at your tags',
+    body: 'What you marked is a record of what mattered at the time.',
+    cta: 'Open notes', deepLink: '/?view=notes',
+  },
 ];
 
 export function greeting({ now, firstName, returning, tzOffsetMinutes = 0 }) {

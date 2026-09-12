@@ -87,6 +87,7 @@ import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
 // The six waiting sentences, Ellie's, one place. See api/_lib/waiting-copy.js.
 import { WAITING } from "../api/_lib/waiting-copy.js";
+import { conflictDemo } from "../api/_lib/conflict-demo.js";
 import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
 // The c8 question, verbatim, labelling each person's reset answer on Your
 // Conflict Snapshot. From the question itself, so it cannot drift from what
@@ -11608,7 +11609,23 @@ export default function App() {
       try { return new URLSearchParams(window.location.search).get('conflict') === '1'; } catch { return false; }
     })();
     if (_demoParam && !_wantConflictFetch) {
-      setConflictResults({ ok: true, ready: false, reason: 'demo' });
+      /**
+       * The demo couple's conflict results, served locally.
+       *
+       * This used to set ready:false, so Conflict was the one exercise the
+       * showcase could not show: four pages that said "not open yet" to
+       * anyone walking through the product in admin. There was a reason at the
+       * time, that two of the questions are free text and demo answers would
+       * be customer copy, and Ellie has since said the showcase is admin-only.
+       *
+       * Same couple the render smoke test drives, from one module, so the
+       * showcase and the test cannot disagree about what Conflict looks like.
+       */
+      try {
+        setConflictResults(conflictDemo());
+      } catch {
+        setConflictResults({ ok: true, ready: false, reason: 'demo' });
+      }
       return;
     }
     let cancelled = false;
