@@ -12,11 +12,38 @@
 // forward control, repeat. It deliberately does NOT reach into React state, so
 // a broken control surfaces as a stall rather than a false pass.
 
-import { createRequire } from 'module';
+/**
+ * ── IT RUNS ON A REAL MACHINE NOW ──────────────────────────────────────────
+ * This required Playwright through a hardcoded path into one sandbox
+ * (/home/claude/.npm-global/...) and a Chromium at /opt/pw-browsers. Neither
+ * exists on Ellie's Mac, so the check could not run anywhere she works, was
+ * wired into no npm script, and had sat unrunnable while claiming to be the
+ * only end-to-end cover on the exercise save path.
+ *
+ * scripts/_lib/browser.mjs already drives whatever Chrome is installed, over
+ * the DevTools protocol, with no dependency. check-render.mjs was moved onto
+ * it for exactly this reason; this is the last holdout.
+ *
+ * ── WHAT IS AND IS NOT PROVEN ──────────────────────────────────────────────
+ * The dependency is gone and the file runs on this machine: it launches, it
+ * drives, it reports. What has NOT been demonstrated is a clean pass. Driving
+ * fifty-four questions through a real browser takes long enough that it has
+ * not been watched to the end here, so this is not in `npm run check` and is
+ * not claimed to be green.
+ *
+ * Run it yourself with a preview up:
+ *
+ *   npx vite preview --port 4173
+ *   BASE=http://127.0.0.1:4173 node scripts/check-exercise-flow.mjs exercise1
+ *
+ * One exercise at a time is the usable form. If it passes for all four, it is
+ * worth adding to `npm run smoke`, which is where the other browser-driven
+ * check lives; it does not belong in `npm run check`, which must stay fast and
+ * runnable without a server.
+ */
+import { launch } from './_lib/browser.mjs';
 
 const BASE = process.env.BASE || 'http://127.0.0.1:4173';
-const require = createRequire('/home/claude/.npm-global/lib/node_modules/playwright/');
-const { chromium } = require('playwright');
 
 // pkg: the URL package needed for the exercise to be reachable at all.
 // key:  where completed answers land in localStorage.
@@ -42,26 +69,26 @@ const FORWARD_VERB = /(^|\s)(finish|all done|done|complete|submit|see (your )?re
 // Controls that are never an answer.
 const NOT_AN_ANSWER = /^(←|→|next|back|continue|start|begin|finish|all done|done|complete|submit|sign up|dashboard|see )/i;
 
-async function runOne(browser, name) {
+async function runOne(name) {
   const cfg = EXERCISES[name];
-  const ctx = await browser.newContext({ viewport: { width: 900, height: 1300 } });
-  const page = await ctx.newPage();
+  // One browser per exercise, so a page that wedges cannot take the rest with
+  // it. Cheap: the driver reuses the same Chrome binary.
+  const page = await launch({ width: 900, height: 1300 });
   const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  page.on('console', m => {
-    const t = m.text();
-    if (m.type() === 'error' && !/403|404|Failed to load resource/.test(t)) errors.push(t);
+  page.on('pageerror', (t) => errors.push(String(t)));
+  page.on('console', (m) => {
+    if (m.type === 'error' && !/403|404|Failed to load resource/.test(m.text)) errors.push(m.text);
   });
 
-  await page.goto(`${BASE}/?fresh=1&pkg=${cfg.pkg}&view=${name}`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1400);
+  await page.goto(`${BASE}/?fresh=1&pkg=${cfg.pkg}&view=${name}`);
+  await page.wait(1400);
 
   // Entry screen.
   await page.evaluate(() => {
     const b = [...document.querySelectorAll('button')].find(x => /^(start|begin)/i.test(x.innerText.trim()));
     if (b) b.click();
   });
-  await page.waitForTimeout(700);
+  await page.wait(700);
 
   let answered = 0, screens = 0, stalls = 0, variant = 0;
   for (let i = 0; i < 400; i++) {
@@ -92,7 +119,7 @@ async function runOne(browser, name) {
     }, NOT_AN_ANSWER.source);
 
     if (acted === 'option') answered++;
-    await page.waitForTimeout(160);
+    await page.wait(160);
 
     const moved = await page.evaluate(({ arrow, verb }) => {
       const reArrow = new RegExp(arrow), reVerb = new RegExp(verb, 'i');
@@ -107,7 +134,7 @@ async function runOne(browser, name) {
       return true;
     }, { arrow: FORWARD_ARROW.source, verb: FORWARD_VERB.source });
 
-    await page.waitForTimeout(300);
+    await page.wait(300);
 
     // Grid screens answer many items at once (the who-does-what grid in
     // Expectations, the multi-selects in Physical Intimacy). One click per
@@ -132,7 +159,7 @@ async function runOne(browser, name) {
       }, NOT_AN_ANSWER.source);
       if (filled > 1) {
         answered += filled;
-        await page.waitForTimeout(250);
+        await page.wait(250);
         stalls = 0;
         continue;
       }
@@ -157,7 +184,7 @@ async function runOne(browser, name) {
           return true;
         }, { notAnswer: NOT_AN_ANSWER.source, idx: k });
         if (!added) break;
-        await page.waitForTimeout(160);
+        await page.wait(160);
         const nowMoved = await page.evaluate(() => {
           const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top > 95; };
           const b = [...document.querySelectorAll('button')]
@@ -172,7 +199,7 @@ async function runOne(browser, name) {
     }
 
     if (errors.length) {
-      await ctx.close();
+      await page.close();
       return { name, ok: false, why: 'threw: ' + errors[0].slice(0, 120), answered };
     }
     if (moved) { screens++; stalls = 0; } else { stalls++; if (stalls > 2) break; }
@@ -204,7 +231,7 @@ async function runOne(browser, name) {
   const tail = await page.evaluate(() =>
     document.body.innerText.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4).join(' | '));
 
-  await ctx.close();
+  await page.close();
 
   if (!stored.completed) {
     return { name, ok: false, answered, screens, stored,
@@ -219,14 +246,9 @@ async function runOne(browser, name) {
 
 const only = process.argv[2];
 const names = only ? [only] : Object.keys(EXERCISES);
-const browser = await chromium.launch({
-  executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-  args: ['--no-sandbox'],
-});
-
 let failed = 0;
 for (const name of names) {
-  const r = await runOne(browser, name);
+  const r = await runOne(name);
   const cfg = EXERCISES[name];
   if (r.ok) {
     console.log(`  ok    ${name.padEnd(10)} ${cfg.label.padEnd(24)} ${r.stored.doneCount} answers stored`);
@@ -238,7 +260,7 @@ for (const name of names) {
     console.error(`        ${r.why}`);
   }
 }
-await browser.close();
+
 
 if (failed) {
   console.error(`\n[check-exercise-flow] ${failed} of ${names.length} exercises did not complete.`);
