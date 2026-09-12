@@ -273,6 +273,29 @@ and plant each of them. If the rule is "X must not reach Y", the four to try
 every time are: X named outright, X destructured, X reached through a list
 or a lookup, and X assigned to a name one line earlier.
 
+**A plant that changed nothing proves nothing.** Nine more gates were planted
+against afterwards and all nine held, but three of those runs reported a
+clean pass on the first try because the string being replaced was not in the
+file. `s.replace(needle, ...)` with a needle that does not match silently
+returns the original, the gate passes on unmodified code, and the reading is
+"this gate is blind" when the truth is "nothing was planted".
+
+Two other bad plants pointed at the wrong thing entirely: changing a weight in
+`api/_type-engine.js` did not break `check-scoring-mirror`, because both
+surfaces import that file and therefore still agreed. The plant for an
+agreement gate is a second copy, not a different value.
+
+So assert the edit landed. `assert needle in s` before writing, and if a gate
+passes under a plant, check the file changed before concluding anything about
+the gate.
+
+**Where the holes actually were.** Of the gates audited so far, the ones with
+holes all matched on a literal name or a single shape. The ones that run the
+code and compare the answers, `check-alignment-rule` over 81 answer pairs,
+`check-conflict-privacy` building a real partnerView, `check-scoring-mirror`
+against the engine, held under every plant. That is an argument for behavioural
+gates wherever a rule can be executed rather than described.
+
 Two things went wrong while fixing these, and both are the same mistake
 pointed in different directions. Widening a matcher flagged real code
 (`p` is an arrow parameter in half a dozen scopes; `acct` is the session
