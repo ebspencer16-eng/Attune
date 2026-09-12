@@ -30,6 +30,10 @@ import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 // than a copy of them. Sent with the state because the app has one call here
 // and a second round trip for a static list would be worse than the bytes.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from './_checklist.js';
+// The budget's categories, models and words. The arithmetic is mirrored in the
+// app rather than sent, because the reveal updates as you type; see
+// check-budget-mirror.mjs.
+import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY } from './_budget.js';
 
 export const config = { runtime: 'edge' };
 
@@ -74,7 +78,10 @@ export default async function handler(req) {
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
     const rest = (path, init) => fetch(`${supabaseUrl}/rest/v1/${path}`, init);
 
-    const cols = ['checklist_data', 'budget_data', ...OWNERSHIP_COLUMNS].join(',');
+    // `name` and the partner's, because the budget keys its income and
+    // personal-spending entries BY NAME. See budgetNames below.
+    const cols = ['name', 'partner_name', 'partner_profile_id',
+      'checklist_data', 'budget_data', ...OWNERSHIP_COLUMNS].join(',');
     const pRes = await rest(`profiles?id=eq.${me}&select=${cols}`, { headers: svc });
     const profile = (await pRes.json().catch(() => []))?.[0] || null;
     if (!profile) return json({ ok: false, error: 'profile not found' }, 404);
@@ -86,13 +93,44 @@ export default async function handler(req) {
     // than absent, so the app can tell "nothing saved" from "not yours" by
     // asking `owned` rather than by guessing from a missing key.
     if (req.method === 'GET') {
+      /**
+       * ── THE NAMES THE BUDGET IS KEYED BY ────────────────────────────────
+       * A budget stores incomes and personal spending as
+       * { [name]: amount }, so the name is a key and not a label.
+       *
+       * The website uses account.name, which is profiles.name in full. The
+       * app's home payload sends firstName, which is the first word of it. A
+       * couple called "Ellie Bowman" would have written their income under
+       * "Ellie Bowman" on a laptop and read "Ellie" on a phone, so each
+       * surface would show the other's figures as empty and overwrite them on
+       * the next save.
+       *
+       * So the names come from here, in the form the website already wrote
+       * them in. The partner's own row is preferred over partner_name, which
+       * is what the buyer typed at setup and can differ from what the partner
+       * later called themselves.
+       */
+      let partnerName = profile.partner_name || null;
+      if (profile.partner_profile_id) {
+        const bRes = await rest(`profiles?id=eq.${profile.partner_profile_id}&select=name`, { headers: svc });
+        const b = (await bRes.json().catch(() => []))?.[0];
+        if (b?.name) partnerName = b.name;
+      }
+
       return json({
         ok: true,
         owned: caps.owned || [],
+        budgetNames: {
+          you: profile.name || 'You',
+          them: partnerName || 'Your partner',
+        },
         // The list itself, for whoever owns it. Not sent otherwise: it is a
         // product someone can buy.
         areas: caps.ownsChecklist ? CHECKLIST_AREAS : null,
         copy: caps.ownsChecklist ? CHECKLIST_COPY : null,
+        budgetCategories: caps.ownsBudget ? BUDGET_CATEGORIES : null,
+        poolingModels: caps.ownsBudget ? POOLING_MODELS : null,
+        budgetCopy: caps.ownsBudget ? BUDGET_COPY : null,
         checklist: caps.ownsChecklist ? (profile.checklist_data || null) : null,
         budget: caps.ownsBudget ? (profile.budget_data || null) : null,
       });

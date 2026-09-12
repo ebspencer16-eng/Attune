@@ -22,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
+import Budget from '@/components/budget';
 import Checklist from '@/components/checklist';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import EdgeFadedRow from '@/components/edge-faded-row';
@@ -56,7 +57,7 @@ export default function ResourcesScreen() {
    * is one line in one place.
    */
   const [openTool_, setOpenTool] = useState<string | null>(null);
-  const IN_APP = ['checklist'];
+  const IN_APP = ['checklist', 'budget'];
   const openTool = (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
     Linking.openURL(`${SITE}/app?view=${key}`);
@@ -147,6 +148,11 @@ export default function ResourcesScreen() {
 
   if (openTool_ === 'checklist') {
     return <Checklist onClose={() => setOpenTool(null)} />;
+  }
+  if (openTool_ === 'budget') {
+    return (
+      <Budget onClose={() => setOpenTool(null)} />
+    );
   }
 
   return (

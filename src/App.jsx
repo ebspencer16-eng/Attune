@@ -88,6 +88,8 @@ import { EXERCISES } from "../api/_exercises.js";
 import { CATALOGUE } from "../api/_catalogue.js";
 // The Starting Out checklist, moved out so the app can read it too.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
+// The budget tool, moved out so the app can read it too.
+import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY, bNum, bFmt, computeReveal } from "../api/_budget.js";
 // The six waiting sentences, Ellie's, one place. See api/_lib/waiting-copy.js.
 import { WAITING } from "../api/_lib/waiting-copy.js";
 import { conflictDemo } from "../api/_lib/conflict-demo.js";
@@ -4557,119 +4559,6 @@ function StartingOutChecklist({ userName, partnerName, onBack, checklistState, s
 //   }
 // ──────────────────────────────────────────────────────────────────────────
 
-const BUDGET_CATEGORIES = [
-  { id: "housing",   label: "Housing",                      icon: "🏠", group: "essentials",
-    items: ["Rent / Mortgage", "Utilities (electric, gas, water)", "Internet & phone", "Home insurance / renters insurance", "Home maintenance / repairs"] },
-  { id: "transport", label: "Transportation",               icon: "🚗", group: "essentials",
-    items: ["Car payment(s)", "Car insurance", "Gas", "Parking & tolls", "Public transit / rideshare"] },
-  { id: "food",      label: "Food & Dining",                icon: "🍽", group: "essentials",
-    items: ["Groceries", "Dining out", "Coffee & snacks", "Meal delivery services"] },
-  { id: "health",    label: "Health & Wellness",            icon: "💊", group: "essentials",
-    items: ["Health insurance premiums", "Gym / fitness", "Medical copays", "Prescriptions", "Mental health / therapy"] },
-  { id: "debt",      label: "Debt Payments",                icon: "📊", group: "essentials",
-    items: ["Student loans", "Credit card minimums", "Personal loans"] },
-  { id: "savings",   label: "Regular savings & retirement", icon: "💰", group: "essentials",
-    items: ["401(k) / employer retirement", "IRA contribution", "Emergency fund contribution", "Joint savings", "Individual savings"] },
-  { id: "lifestyle", label: "Lifestyle & Fun",              icon: "✨", group: "discretionary",
-    items: ["Streaming & subscriptions", "Hobbies & activities", "Vacations / travel fund", "Gifts & celebrations"] },
-  { id: "giving",    label: "Giving & Charity",             icon: "🤲", group: "discretionary",
-    items: ["Regular charitable donations", "Religious / tithing contributions", "One-time causes or fundraisers", "Community or family support"] },
-];
-
-// Pooling-model cards shown in the Orient section. Label + description read
-// as plain statements; the math logic lives in the computeReveal function.
-const POOLING_MODELS = [
-  { id: "combined",     label: "Fully combined",         desc: "All income into one pool. All expenses come from the pool." },
-  { id: "proportional", label: "Proportional to income", desc: "Each of you contributes to shared expenses in proportion to your income." },
-  { id: "fifty_fifty",  label: "50 / 50 split",          desc: "Each of you covers half of shared expenses regardless of income." },
-  { id: "separate",     label: "Fully separate",         desc: "You each cover your own expenses. No shared calculation." },
-];
-
-// Parse a currency-like string to a number. Tolerates "1,500", "$1500", "1500.50".
-function bNum(v) { return parseFloat(String(v || "").replace(/[^0-9.-]/g, '')) || 0; }
-
-// Format a number as currency for display.
-function bFmt(n) {
-  const num = Math.round(Math.abs(n));
-  return '$' + num.toLocaleString();
-}
-
-// Compute the reveal numbers from a budget state. Returns a flat object
-// with all the facts needed — no commentary, no interpretation.
-function computeReveal(state, userName, partnerName) {
-  const uIncome = bNum(state.incomes?.[userName]);
-  const pIncome = bNum(state.incomes?.[partnerName]);
-  const totalIncome = uIncome + pIncome;
-
-  // Sum shared category expenses (everything except personal spending)
-  const catSums = {};
-  BUDGET_CATEGORIES.forEach(cat => {
-    catSums[cat.id] = cat.items.reduce((s, item) =>
-      s + bNum(state.expenses?.[cat.id + '__' + item]), 0);
-  });
-  const sharedExpenses = Object.values(catSums).reduce((s, n) => s + n, 0);
-
-  // Personal spending is per-partner, not shared
-  const uPersonal = bNum(state.personal?.[userName]);
-  const pPersonal = bNum(state.personal?.[partnerName]);
-
-  // Goals are treated as shared savings commitments
-  const goalsMonthly = (state.goals || []).reduce((s, g) => {
-    const t = bNum(g.target), m = bNum(g.months);
-    return s + (m > 0 ? t / m : 0);
-  }, 0);
-
-  const totalAllocated = sharedExpenses + uPersonal + pPersonal + goalsMonthly;
-  const surplus = totalIncome - totalAllocated;
-
-  // Savings rate: regular savings contributions + goal contributions over income
-  const savingsSpend = catSums.savings + goalsMonthly;
-  const savingsRate = totalIncome > 0 ? (savingsSpend / totalIncome) * 100 : 0;
-
-  // Top 3 categories by spend
-  const topCats = Object.entries(catSums)
-    .filter(([, v]) => v > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([id, v]) => {
-      const cat = BUDGET_CATEGORIES.find(c => c.id === id);
-      return { label: cat?.label || id, amount: v, pct: totalIncome > 0 ? (v / totalIncome) * 100 : 0 };
-    });
-
-  // Contribution math under each pooling model
-  const pooling = state.pooling || 'proportional';
-  let uContribution = 0, pContribution = 0, uLeftover = 0, pLeftover = 0;
-  const sharedPlusGoals = sharedExpenses + goalsMonthly;
-  if (pooling === 'combined') {
-    // No separate contributions; report pool math instead.
-    uContribution = uIncome; pContribution = pIncome;
-    uLeftover = 0; pLeftover = 0;  // Not meaningful under this model
-  } else if (pooling === 'proportional') {
-    if (totalIncome > 0) {
-      uContribution = (uIncome / totalIncome) * sharedPlusGoals;
-      pContribution = sharedPlusGoals - uContribution;
-    }
-    uLeftover = uIncome - uContribution - uPersonal;
-    pLeftover = pIncome - pContribution - pPersonal;
-  } else if (pooling === 'fifty_fifty') {
-    uContribution = sharedPlusGoals / 2;
-    pContribution = sharedPlusGoals / 2;
-    uLeftover = uIncome - uContribution - uPersonal;
-    pLeftover = pIncome - pContribution - pPersonal;
-  }
-  // 'separate' — no contribution math
-
-  return {
-    uIncome, pIncome, totalIncome,
-    sharedExpenses, uPersonal, pPersonal, goalsMonthly,
-    totalAllocated, surplus,
-    savingsRate, savingsSpend,
-    topCats,
-    pooling,
-    uContribution, pContribution, uLeftover, pLeftover,
-    catSums,
-  };
-}
 
 function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState,
                      ex2Answers, partnerEx2, accountId }) {
@@ -4734,12 +4623,12 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", paddingBottom: "6rem" }}>
       {/* ── Title ───────────────────────────────────────────── */}
-      <h1 style={{ fontFamily: font.display, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Shared Budget Tool</h1>
+      <h1 style={{ fontFamily: font.display, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{BUDGET_COPY.title}</h1>
       <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.4rem" }}>
-        Build your real shared budget together. Your numbers stay yours, Attune is a calculator, not a financial advisor.
+        {BUDGET_COPY.intro}
       </p>
       <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem", fontStyle: "italic" }}>
-        Both of you can access and edit this tool from your dashboard. Use <strong>Save changes</strong> to sync across devices.
+        Both of you can access and edit this tool from your dashboard. Use <strong>{BUDGET_COPY.save}</strong> to sync across devices.
       </p>
 
       {/* ── Sticky summary bar ─────────────────────────────────────── */}
@@ -4768,14 +4657,14 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
       {/* ── Section: ORIENT ─────────────────────────────────────────── */}
       <section style={{ marginBottom: "2.25rem" }}>
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 1</div>
-        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Start with where you stand</h2>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>{BUDGET_COPY.step1}</h2>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
-          Each of you enters your post-tax monthly take-home. Then pick the model that matches how you want to handle shared expenses.
+          {BUDGET_COPY.step1Intro}
         </p>
 
         {/* Incomes */}
         <div style={{ background: "white", border: "1.5px solid " + C.stone, borderRadius: 14, padding: "1.15rem 1.25rem", marginBottom: "1.25rem" }}>
-          <div style={{ fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: font.body, marginBottom: "0.9rem" }}>Post-tax monthly income</div>
+          <div style={{ fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: font.body, marginBottom: "0.9rem" }}>{BUDGET_COPY.incomeLabel}</div>
           {[userName, partnerName].map((name, i) => (
             <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0", borderTop: i === 0 ? "none" : "1px solid " + C.stone + "40" }}>
               <span style={{ fontSize: "0.9rem", color: C.ink, fontFamily: font.body, fontWeight: 500 }}>{name}</span>
@@ -4785,7 +4674,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
         </div>
 
         {/* Pooling model */}
-        <div style={{ fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: font.body, marginBottom: "0.7rem" }}>How you'll split shared expenses</div>
+        <div style={{ fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 700, fontFamily: font.body, marginBottom: "0.7rem" }}>{BUDGET_COPY.poolingLabel}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "0.65rem" }}>
           {POOLING_MODELS.map(m => {
             const sel = pooling === m.id;
@@ -4803,9 +4692,9 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
       {/* ── Section: ESSENTIALS ─────────────────────────────────────── */}
       <section style={{ marginBottom: "2.25rem" }}>
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 2</div>
-        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Essentials</h2>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>{BUDGET_COPY.essentials}</h2>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
-          The things you pay every month to keep life running. Include regular savings and retirement contributions here.
+          {BUDGET_COPY.essentialsIntro}
         </p>
         {BUDGET_CATEGORIES.filter(c => c.group === "essentials").map(cat =>
           <BudgetCategoryBlock key={cat.id} cat={cat} expenses={expenses} setExpense={setExpense} numInput={numInput} font={font} />)}
@@ -4814,9 +4703,9 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
       {/* ── Section: DISCRETIONARY ──────────────────────────────────── */}
       <section style={{ marginBottom: "2.25rem" }}>
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 3</div>
-        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Discretionary</h2>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>{BUDGET_COPY.discretionary}</h2>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
-          Everything else. Personal spending at the bottom is split per partner. Your walking-around money.
+          {BUDGET_COPY.discretionaryIntro}
         </p>
         {BUDGET_CATEGORIES.filter(c => c.group === "discretionary").map(cat =>
           <BudgetCategoryBlock key={cat.id} cat={cat} expenses={expenses} setExpense={setExpense} numInput={numInput} font={font} />)}
@@ -4826,7 +4715,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.55rem 0 0.85rem", borderBottom: "1px solid " + C.stone + "60" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <BudgetIcon id="personal" color="#E8673A" />
-              <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: font.display }}>Personal spending</span>
+              <span style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: font.display }}>{BUDGET_COPY.personalLabel}</span>
             </div>
           </div>
           {[userName, partnerName].map(name => (
@@ -4841,9 +4730,9 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
       {/* ── Section: GOALS ──────────────────────────────────────────── */}
       <section style={{ marginBottom: "2.25rem" }}>
         <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#F59E0B", fontFamily: font.body, fontWeight: 700, marginBottom: "0.35rem" }}>Step 4</div>
-        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>Savings goals</h2>
+        <h2 style={{ fontFamily: font.display, fontSize: "1.35rem", fontWeight: 700, color: C.ink, margin: "0 0 0.4rem" }}>{BUDGET_COPY.goals}</h2>
         <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, marginBottom: "1.25rem" }}>
-          Add a goal and Attune will show the monthly contribution needed. Compare it against your surplus above to see what's realistic.
+          {BUDGET_COPY.goalsIntro}
         </p>
 
         {goals.map(g => {

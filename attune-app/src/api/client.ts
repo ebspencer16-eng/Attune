@@ -964,6 +964,26 @@ export function createTag(name: string, color?: string | null) {
  * own Supabase session. The app has no Supabase client, so it goes through an
  * endpoint like everything else it saves.
  */
+export type BudgetState = {
+  incomes?: Record<string, string>;
+  pooling?: string;
+  expenses?: Record<string, string>;
+  personal?: Record<string, string>;
+  goals?: { id?: string; name?: string; target?: string; months?: string }[];
+};
+
+export type BudgetCategoryPayload = {
+  id: string; label: string; icon?: string; group: string; items: string[];
+};
+
+export type BudgetCopy = {
+  title: string; intro: string; step1: string; step1Intro: string;
+  incomeLabel: string; poolingLabel: string;
+  essentials: string; essentialsIntro: string;
+  discretionary: string; discretionaryIntro: string;
+  personalLabel: string; goals: string; goalsIntro: string; save: string;
+};
+
 export type ChecklistCopy = {
   title: string; intro: string; howItWorks: string;
   progress: string; notApplicable: string; areaDone: string;
@@ -983,7 +1003,17 @@ export type ToolData = {
   copy: ChecklistCopy | null;
   /** Each key is `${area.id}__${item.text}`. Absent means not started. */
   checklist: Record<string, true | 'na'> | null;
-  budget: Record<string, unknown> | null;
+  budget: BudgetState | null;
+  /**
+   * The names the budget is keyed by, in the form the website wrote them.
+   * Not firstName: a budget stores { [name]: amount }, so a shortened name
+   * reads as a different person's column.
+   */
+  budgetNames: { you: string; them: string };
+  /** The budget's content and words. Null when unowned. */
+  budgetCategories: BudgetCategoryPayload[] | null;
+  poolingModels: { id: string; label: string; desc: string }[] | null;
+  budgetCopy: BudgetCopy | null;
 };
 
 export function fetchToolData() {
