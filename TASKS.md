@@ -24,7 +24,6 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | 94.7 | If no pick up where you left off, maybe ‘explore something new’ with a link to the most recent in practice post? |
 | 97.1 | Make the download option functional. |
-| 132.5 | I clicked the ‘start shared budgeting’ and it took me to the website but a blank page. We need to make sure t... |
 | 135.1 | Life and values on the site brings me to the storycard highlight page. On the app, it works, but on the resul... |
 | O5 | Account setup in the app, so users are pointed there rather than the website |
 | O6 | Order confirmation email: download the app, set up there |
@@ -32,12 +31,11 @@ moved past; it is listed so nothing is taken on trust.
 | O8 | Checklist runs in the app |
 | O9 | Workbook runs in the app |
 | O10 | Migrate `check-exercise-flow.mjs` off its hardcoded sandbox path |
-| O11 | Expectations at a glance: colour every "conversations to have" tile, both surfaces |
 | O12 | Every resource opens in the app when the user is in the app (your G2) |
 
 ## 3. Done, not verified
 
-181 asks. Grouped by the message they came in.
+182 asks. Grouped by the message they came in.
 
 **msg 8**
 
@@ -354,6 +352,7 @@ moved past; it is listed so nothing is taken on trust.
 | 132.1 | Please title the insight of the day section. |
 | 132.2 | Maybe title is above and left-aligned, and citation is below and right-aligned (currently citation is centered) |
 | 132.3 | Can we make the glow a little more visible? Currently it’s slightly too subtle. |
+| 132.5 | I clicked the ‘start shared budgeting’ and it took me to the website but a blank page. We need to make sure t... |
 
 **msg 134 · App home + site**
 
@@ -379,7 +378,9 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task | Verified by |
 |--|--|--|
-| — | Dashboard reloading itself, 75s quiet after the fix | Ellie's screenshot: 0 renders, 0 fetches in the last 5s |
+| — | Dashboard reloading itself | Ellie's screenshot: 75s, 0 renders and 0 fetches in the last 5s |
+| — | "Start shared budgeting" opened a 28-character blank page | `check-gated-views.mjs`; 1214 chars where there were 28 |
+| — | Five of six category tiles had no colour | `check-category-colors.mjs`, 2 plants |
 | 78.6 | For whatever reason the site just brought back the how it works and couple types pages, those were deleted lo... | the files are deleted |
 | 81.9 | Couple type page is STILL showing different content from what we do on the site. I’m frustrated by this at th... | check-results-copy-reach |
 | 96.11 | I’ve asked for this already, but please wire in the in-practice content so that I can see how this is built. | fetchPosts wired |
