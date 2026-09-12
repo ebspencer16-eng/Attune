@@ -206,6 +206,9 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
       // The id the app navigates to and notes anchor against.
       section: 'exp-convo-' + i,
       label: cat.label,
+      // The category's own colour, so the app draws the same tile the website
+      // does rather than painting all six in one section colour.
+      color: cat.color || null,
       // The category's own id, and the paragraph the website opens its page
       // with. The app had neither, so its category pages opened straight into
       // a list of rows.

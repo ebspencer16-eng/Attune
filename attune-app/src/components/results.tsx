@@ -678,7 +678,11 @@ function ExpectationsOverview({
                     key={cat.section}
                     label={cat.label}
                     items={cat.rows.filter((r) => !r.aligned).map((r) => r.item)}
-                    color={SectionColor.expectations}
+                    /* The category's own colour, from the server. All six were
+                       painted in one section colour here, so the app said the
+                       six tiles were the same kind of thing and the website
+                       said they were six. */
+                    color={cat.color || SectionColor.expectations}
                   />
                 ))}
               </View>

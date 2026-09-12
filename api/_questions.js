@@ -285,13 +285,42 @@ export const LIFE_CATEGORY_LABEL = 'Life & Values';
  * `kind` says which half of the exercise a category is, so anything that needs
  * the five can filter rather than keeping a second list.
  */
+/**
+ * ── EVERY CATEGORY CARRIES A COLOUR ───────────────────────────────────────
+ * Ellie: "Life and values is the only tile in 'conversations to have' that has
+ * a colored left border of the tile. Can you add a color to each of the
+ * section tiles?"
+ *
+ * She was seeing the website do borderLeft: `4px solid ${fc.color}`. Only
+ * `life` had a colour, so the other five rendered `4px solid undefined`, which
+ * the browser drops entirely: one tile with a border and five without, and
+ * nothing anywhere saying the field was required.
+ *
+ * Set here rather than on RESPONSIBILITY_CATEGORIES, which is the exercise's
+ * own list and has no business carrying a results colour.
+ *
+ * The five are from the palette the product already uses: the three
+ * communication domains, the expectations green, and the intimacy rose. A
+ * starting point to react to rather than a considered scheme.
+ */
+const EXPECTATION_CATEGORY_COLORS = {
+  household: '#10B981',
+  financial: '#1B5FE8',
+  career: '#E8673A',
+  emotional: '#B5546E',
+  extended_family: '#C8703E',
+  life: '#9B5DE5',
+};
+
 export const EXPECTATIONS_CATEGORIES = [
-  ...RESPONSIBILITY_CATEGORIES.map((cat) => ({ ...cat, kind: 'responsibility' })),
+  ...RESPONSIBILITY_CATEGORIES.map((cat) => ({
+    ...cat, kind: 'responsibility', color: EXPECTATION_CATEGORY_COLORS[cat.id],
+  })),
   {
     id: 'life',
     label: LIFE_CATEGORY_LABEL,
     kind: 'life',
     items: LIFE_QUESTIONS.map((q) => q.text),
-    color: '#9B5DE5',
+    color: EXPECTATION_CATEGORY_COLORS.life,
   },
 ];

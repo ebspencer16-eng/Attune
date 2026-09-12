@@ -397,6 +397,8 @@ export type ExpectationsSummary = {
   categories: {
     /** The section id this bucket belongs to, e.g. exp-convo-2. */
     section: string;
+    /** The category's own colour, for the tile's left edge. */
+    color?: string | null;
     label: string;
     /** The category's own id, and the paragraph the page opens with. */
     categoryId?: string;
