@@ -92,6 +92,8 @@ import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
 import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY, bNum, bFmt, computeReveal } from "../api/_budget.js";
 // What both surfaces say about the workbook, and what the file is called.
 import { WORKBOOK_COPY, workbookFileName } from "../api/_lib/workbook-copy.js";
+// Profile setup's labels, shared with the app's own setup screen.
+import { PROFILE_SETUP_COPY } from "../api/_lib/profile-setup-copy.js";
 // The six waiting sentences, Ellie's, one place. See api/_lib/waiting-copy.js.
 import { WAITING } from "../api/_lib/waiting-copy.js";
 import { conflictDemo } from "../api/_lib/conflict-demo.js";
@@ -15502,21 +15504,21 @@ export default function App() {
           onClick={e => e.target === e.currentTarget && setShowProfileSetup(false)}>
           <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
             <button onClick={() => setShowProfileSetup(false)} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68" }}>✕</button>
-            <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.5rem" }}>Your profile</div>
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your name</div>
-            <input type="text" placeholder="Your first name" defaultValue={account?.name || ""} id="profile_name"
+            <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.5rem" }}>{PROFILE_SETUP_COPY.title}</div>
+            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.yourName}</div>
+            <input type="text" placeholder={PROFILE_SETUP_COPY.yourNamePlaceholder} defaultValue={account?.name || ""} id="profile_name"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
             <PronounPicker label="Your pronouns" fieldKey="pronouns" accentColor="#E8673A" bgColor="#FFF0EB" />
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.85rem" }} />
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Partner's name</div>
-            <input type="text" placeholder="Partner's first name" defaultValue={account?.partnerName || ""} id="profile_partnerName"
+            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.partnerName}</div>
+            <input type="text" placeholder={PROFILE_SETUP_COPY.partnerNamePlaceholder} defaultValue={account?.partnerName || ""} id="profile_partnerName"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
             <PronounPicker label="Partner's pronouns" fieldKey="partnerPronouns" accentColor="#1B5FE8" bgColor="#EEF0FF" />
-            <input type="email" placeholder="Partner's email (for invite)" defaultValue={account?.partnerEmail || ""} id="profile_partnerEmail"
+            <input type="email" placeholder={PROFILE_SETUP_COPY.partnerEmailPlaceholder} defaultValue={account?.partnerEmail || ""} id="profile_partnerEmail"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "1.25rem", boxSizing: "border-box" }} />
             <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.65rem 0.9rem", marginBottom: "1rem", display: "flex", gap: "0.55rem", alignItems: "flex-start" }}>
               <span style={{ fontSize: "0.78rem", flexShrink: 0 }}>✦</span>
-              <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, margin: 0 }}>Attune uses names and pronouns to personalize your results, making insights feel specific to you two.</p>
+              <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, margin: 0 }}>{PROFILE_SETUP_COPY.why}</p>
             </div>
             <button onClick={() => {
               const name = document.getElementById("profile_name")?.value.trim();

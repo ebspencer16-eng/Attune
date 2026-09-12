@@ -17,6 +17,7 @@
  * on card kind, so a new kind ships server-side without an app release.
  */
 
+import ProfileSetup from '@/components/profile-setup';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
@@ -27,7 +28,7 @@ import { SymbolView } from 'expo-symbols';
 
 import { fetchHome } from '@/api/client';
 import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
-import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Settings from '@/components/settings';
 import { forgetLastSection } from '@/components/results';
@@ -135,6 +136,16 @@ export default function HomeScreen() {
         <SignIn onSignedIn={() => { setLoading(true); load(); }} rejectedReason={error.detail} />
       </Shell>
     );
+  }
+  /**
+   * Signed in, no profile row. Every endpoint answers 404 for this, so home is
+   * where it surfaces and home is where it gets answered.
+   *
+   * It used to render "Finish setting up on the website and this will fill
+   * in", which is a dead end inside an app someone has just downloaded.
+   */
+  if (needsProfileSetup(error)) {
+    return <Shell><ProfileSetup onDone={() => { setLoading(true); load(); }} /></Shell>;
   }
   if (error && !data) {
     return <Shell><ScreenError error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;

@@ -16,6 +16,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { isOAuthProvider } from './_lib/auth-providers.js';
+import { PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
 import { PKG_CAPS } from './_lib/entitlements.js';
 
 export const config = { runtime: 'edge' };
@@ -26,6 +27,17 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
 export default async function handler(req) {
+  /**
+   * The screen's own words, for the app.
+   *
+   * The app reaches profile setup exactly when /api/home has answered 404, so
+   * it has no payload to carry them on. Four field labels and a sentence
+   * about why names are asked for; nothing here is anyone's data.
+   */
+  if (req.method === 'GET') {
+    return new Response(JSON.stringify({ ok: true, copy: PROFILE_SETUP_COPY }), { status: 200, headers: CORS });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: CORS });
   }
@@ -39,7 +51,40 @@ export default async function handler(req) {
   let body;
   try { body = await req.json(); } catch { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: CORS }); }
 
-  const { userId } = body || {};
+  /**
+   * ── WHOSE PROFILE ───────────────────────────────────────────────────────
+   * The id comes from the body, because this endpoint exists for the one
+   * moment when there is no session to take it from: with email confirmation
+   * on, auth.signUp returns a user and no session, and RLS will not let the
+   * client insert its own row.
+   *
+   * The app is not in that moment. It arrives signed in, having been told it
+   * has no profile, so it sends a token and the id is taken from that
+   * instead. A caller who can prove who they are does not get to say.
+   *
+   * The existing-row check below is what keeps the unauthenticated path safe
+   * either way: this can create a profile that is missing, never change one
+   * that is there.
+   */
+  const bearer = (req.headers.get('authorization') || req.headers.get('Authorization') || '')
+    .replace(/^Bearer\s+/i, '').trim();
+
+  let userId = (body || {}).userId;
+  if (bearer) {
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
+    const uRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { apikey: anonKey, Authorization: `Bearer ${bearer}` },
+    });
+    if (!uRes.ok) {
+      return new Response(JSON.stringify({ error: 'invalid auth token' }), { status: 401, headers: CORS });
+    }
+    const who = await uRes.json().catch(() => null);
+    if (!who?.id) {
+      return new Response(JSON.stringify({ error: 'invalid auth token' }), { status: 401, headers: CORS });
+    }
+    userId = who.id;
+  }
+
   if (!userId || !UUID_RE.test(userId)) {
     return new Response(JSON.stringify({ error: 'Invalid userId' }), { status: 400, headers: CORS });
   }

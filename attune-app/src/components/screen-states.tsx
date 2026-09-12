@@ -46,6 +46,17 @@ export function ScreenLoading({ label = 'Loading' }: { label?: string }) {
  * sign in, and those are the only three things they can do. Each case gets a
  * title, an explanation, and a button that does the thing that case needs.
  */
+/**
+ * A signed-in person with no profile row. Every endpoint answers 404 for them.
+ *
+ * Exported so a screen can render profile setup rather than this, which is
+ * what the app does now. Ellie: "Users should be encouraged to set up their
+ * account in the app."
+ */
+export function needsProfileSetup(error: ApiError | null): boolean {
+  return !!error && error.kind === 'not_found' && /profile/i.test(error.detail || '');
+}
+
 export function ScreenError({
   error, onRetry, onSignIn,
 }: { error: ApiError; onRetry?: () => void; onSignIn?: () => void }) {
@@ -58,6 +69,9 @@ export function ScreenError({
       // A signed-in person with no profile row. Every endpoint answers 404 for
       // this, and it used to render as "That page has moved", which describes
       // nothing that happened and offers nothing to do about it.
+      // Kept as a fallback. The tabs render ProfileSetup for this case, so it
+      // only shows where a screen has not been taught to, and the website is
+      // still a real answer there.
       ? { title: 'Your account is not set up yet',
           body: 'Finish setting up on the website and this will fill in.',
           action: 'Open the website' }

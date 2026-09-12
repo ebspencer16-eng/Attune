@@ -1025,6 +1025,41 @@ export type ToolData = {
   budgetCopy: BudgetCopy | null;
 };
 
+export type ProfileSetupCopy = {
+  title: string; why: string;
+  yourName: string; yourNamePlaceholder: string;
+  partnerName: string; partnerNamePlaceholder: string;
+  partnerEmailPlaceholder: string;
+};
+
+/**
+ * Profile setup's labels.
+ *
+ * Unauthenticated on purpose: the app asks for these exactly when it has been
+ * told it has no profile, so nothing else it can call will answer.
+ */
+export function fetchProfileSetupCopy() {
+  return request<{ ok: true; copy: ProfileSetupCopy }>('/api/create-profile', { method: 'GET' });
+}
+
+/**
+ * Create this account's profile.
+ *
+ * No userId: the request carries a token and the server takes the id from it.
+ * Creating a profile is not the same as editing one; the server refuses if a
+ * row already exists.
+ */
+export function createProfile(input: {
+  name: string; partnerName: string; partnerEmail?: string;
+  pronouns?: string; partnerPronouns?: string;
+}) {
+  return request<{ ok: true; created?: boolean; existed?: boolean }>('/api/create-profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
 export function fetchToolData() {
   return request<ToolData>('/api/tool-data');
 }
