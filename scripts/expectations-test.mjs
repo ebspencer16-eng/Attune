@@ -9,7 +9,7 @@
 
 import { isResultsSection } from '../api/_lib/results-sections.js';
 import { mirrorRespKey, mirrorLifeId, agrees, normRespValue, expectationsSummary } from '../api/_lib/expectations.js';
-import { RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES } from '../api/_questions.js';
+import { RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS } from '../api/_questions.js';
 
 let pass = 0, fail = 0;
 const ok = (name, cond) => { if (cond) { pass++; console.log(`  ok    ${name}`); } else { fail++; console.error(`  FAIL  ${name}`); } };
@@ -71,17 +71,48 @@ console.log('\n— A whole summary —');
 const cat = RESPONSIBILITY_CATEGORIES[0];
 const k0 = cat.id + '__' + cat.items[0];
 const k1 = cat.id + '__' + cat.items[1];
+/**
+ * Both partners answer two life questions, so the Life & Values bucket has
+ * something in it.
+ *
+ * It did not before. The assertion below read
+ * `rows.length === summary.life.length`, and with no life answers anywhere
+ * that is 0 === 0, so a test named "not an empty bucket" passed on an empty
+ * bucket for as long as it has existed.
+ */
+const lq0 = LIFE_QUESTIONS[0];
+const lq1 = LIFE_QUESTIONS[1];
+
 const summary = expectationsSummary({
-  mine: { responsibilities: { [k0]: 'Primarily mine', [k1]: 'Primarily mine' } },
-  theirs: { responsibilities: {
-    [mirrorRespKey(k0)]: 'Primarily mine',
-    [mirrorRespKey(k1)]: "Primarily my partner's",
-  } },
+  mine: {
+    responsibilities: { [k0]: 'Primarily mine', [k1]: 'Primarily mine' },
+    life: { [lq0.id]: lq0.options[0], [lq1.id]: lq1.options[0] },
+  },
+  theirs: {
+    responsibilities: {
+      [mirrorRespKey(k0)]: 'Primarily mine',
+      [mirrorRespKey(k1)]: "Primarily my partner's",
+    },
+    life: {
+      [mirrorLifeId(lq0.id)]: lq0.options[0],
+      [mirrorLifeId(lq1.id)]: lq1.options[lq1.options.length - 1],
+    },
+  },
   youName: 'Ellie', themName: 'Preston',
 });
-ok('two rows compared', summary.answered === 2);
-ok('one agreement, one difference', summary.aligned === 1 && summary.differences === 1);
+// Four rows now, not two: the fixture answers two life questions as well as
+// two responsibilities, because without life answers the Life & Values bucket
+// was empty and the assertion about it passed on nothing.
+//
+// One agreement and one difference on each side, so the halves are still
+// distinguishable in the totals.
+ok('four rows compared', summary.answered === 4);
+ok('two agreements, two differences', summary.aligned === 2 && summary.differences === 2);
 ok('alignment is a percentage', summary.alignedPct === 50);
+ok('the responsibility half is one and one',
+  summary.categories.slice(0, 5).flatMap((c) => c.rows).filter((r) => r.aligned).length === 1);
+ok('the life half is one and one',
+  summary.categories.at(-1).rows.filter((r) => r.aligned).length === 1);
 // One bucket per NAVIGABLE screen, which is six: the five responsibility
 // categories and Life & Values. This asserted RESPONSIBILITY_CATEGORIES.length,
 // which is the input to scoring rather than the list a reader navigates, and
@@ -93,9 +124,14 @@ ok('one bucket per conversation screen', summary.categories.length === EXPECTATI
 ok('the last bucket is Life & Values', summary.categories.at(-1)?.label === 'Life & Values');
 ok('Life & Values navigates to a section that exists',
   isResultsSection(summary.categories.at(-1)?.section));
+// Against LIFE_QUESTIONS rather than a `life` array on the payload. That array
+// was removed: it held the same rows as this bucket, and sending both is what
+// put two Life & Values dropdowns on the app's Expectations page.
 ok('Life & Values carries the life rows, not an empty bucket',
-  summary.categories.at(-1)?.rows.length === summary.life.length
+  summary.categories.at(-1)?.rows.length > 0
   && summary.categories.at(-1)?.rows.every((r) => r.kind === 'life'));
+ok('the payload no longer carries a second copy of the life rows',
+  !('life' in summary));
 ok('a responsibility bucket carries no life rows',
   summary.categories[0].rows.every((r) => r.kind === 'responsibility'));
 ok('buckets carry the section id the app navigates to',

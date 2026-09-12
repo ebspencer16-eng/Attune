@@ -83,13 +83,39 @@ for (const cat of summary.categories) {
   }
 }
 
-// And that the life answers landed in a bucket rather than only in `life`,
-// which is the state this gate exists for: data present, page absent.
-const lifeBucket = summary.categories.find((c) => c.rows.every((r) => r.kind === 'life') && c.rows.length);
-if (summary.life.length && !lifeBucket) {
+/**
+ * The life answers land in exactly one bucket.
+ *
+ * ── ONE, NOT ZERO ─────────────────────────────────────────────────────────
+ * Zero is the state this gate was written for: the category list was built
+ * from the five responsibility categories, so the life answers rode along on
+ * the response as `life` with no page to read them on.
+ *
+ * ── ONE, NOT TWO ──────────────────────────────────────────────────────────
+ * Two is what happened next. The payload started carrying all six categories
+ * and kept sending `life` as well, and the app rendered both, so Ellie saw two
+ * Life & Values dropdowns on Expectations at a glance. The duplicate was also
+ * the broken one: it carried section 'life', which is not a results section.
+ *
+ * The field is gone now, and this counts buckets so neither state can return.
+ */
+const lifeBuckets = summary.categories.filter(
+  (c) => c.rows.length && c.rows.every((r) => r.kind === 'life'));
+if (lifeBuckets.length === 0) {
   problems.push(
-    'the payload carries life rows but no category bucket holds them, so they\n'
-    + '      are on the response with nowhere to read them.');
+    'no category bucket holds the life answers, so they are on the response\n'
+    + '      with nowhere to read them.');
+} else if (lifeBuckets.length > 1) {
+  problems.push(
+    `${lifeBuckets.length} category buckets hold the life answers `
+    + `(${lifeBuckets.map((c) => c.section).join(', ')}),\n`
+    + '      so the page lists Life & Values more than once.');
+}
+if ('life' in summary) {
+  problems.push(
+    'the expectations payload still carries a separate `life` array. Those rows\n'
+    + '      are categories[5].rows now, and sending them twice is what put two\n'
+    + '      Life & Values dropdowns on the app.');
 }
 
 if (problems.length) {

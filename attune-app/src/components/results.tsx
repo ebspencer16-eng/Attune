@@ -580,19 +580,20 @@ function ExpectationsOverview({
   // category, then the conversations. It carries no framing prose and neither
   // does this. What was here was written for the app and appears nowhere in
   // the product.
-  const categories = [
-    ...summary.categories.filter((cat) => cat.answered > 0),
-    ...(summary.life.length ? [{
-      section: 'life',
-      // The website's name for this category, from the server. The app used
-      // to call it "The bigger questions", which is nowhere in the product.
-      label: summary.lifeLabel || 'Life & Values',
-      answered: summary.life.length,
-      aligned: summary.life.filter((r) => r.aligned).length,
-      differences: summary.life.filter((r) => !r.aligned).length,
-      rows: summary.life,
-    }] : []),
-  ];
+  /**
+   * The server's six, and nothing added.
+   *
+   * Life & Values used to be appended here by hand, because the payload's
+   * category list was built from the five responsibility categories and did
+   * not include it. That list now comes from EXPECTATIONS_CATEGORIES and has
+   * all six, so the hand-built entry became a second copy: Ellie saw two Life
+   * & Values dropdowns on this page.
+   *
+   * The copy was also the broken one. Its `section` was 'life', which is not a
+   * results section id, so tapping it went nowhere; the server's entry carries
+   * 'exp-convo-5', which is the id the nav and notes both use.
+   */
+  const categories = summary.categories.filter((cat) => cat.answered > 0);
   const conversations = categories.filter((cat) => cat.rows.some((r) => !r.aligned));
   const gaps = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
 

@@ -228,14 +228,15 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
   });
 
   return {
-    // What the life questions are called, sent so the app stops naming a
-    // category of someone's own results differently from the website.
-    lifeLabel: LIFE_CATEGORY_LABEL,
     answered,
     aligned,
     differences: answered - aligned,
     alignedPct: answered ? Math.round((aligned / answered) * 100) : null,
     categories,
-    life: rows.filter((r) => r.kind === 'life'),
+    // `life` used to be sent here as its own array, from the days when the
+    // category list was the five responsibility categories and Life & Values
+    // had nowhere to go. The list is all six now, so those same rows are
+    // categories[5].rows, and sending them twice is what put two Life & Values
+    // dropdowns on the app's Expectations page.
   };
 }
