@@ -116,6 +116,21 @@ import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
 import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
 
+/**
+ * Every view this file can draw.
+ *
+ * Kept beside the views rather than derived from them, because the branches
+ * that draw them are spread over ten thousand lines and a scan of this file by
+ * this file is not a derivation. check-app-views.mjs reads both and fails the
+ * build when they disagree, which is the same arrangement scripts/check-render
+ * already relies on to know what to render.
+ */
+const RENDERABLE_VIEWS = new Set([
+  "account", "budget", "checklist", "conflict", "exercise1", "exercise2",
+  "exercise3", "exercises", "home", "intimacy", "notes", "resources",
+  "results", "workbook",
+]);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // LAUNCH FLAGS — flip these to change what the product offers. Nothing below is
 // deleted, so re-enabling is a one-line change per flag.
@@ -11160,7 +11175,36 @@ export default function App() {
   // The dashboard renders only for a logged-in account. Demo mode has none, so
   // defaulting a demo link to "home" produced a blank page. Send demo straight
   // to results instead.
-  const initialView = params.get("view") || (params.get("demo") ? "results" : "home");
+  /**
+   * Which view the URL asks for, once it has been checked against the views
+   * that exist.
+   *
+   * An unrecognised value used to render the header and nothing else. Sixteen
+   * characters, no content, no error: the same blank page that "start shared
+   * budgeting" produced, from a different direction.
+   *
+   * Two things reach here with a name the app does not have. `?view=practice`
+   * is emitted by api/_lib/pick-up.js and api/_lib/notifications.js, where it
+   * is the In Practice reading; the app routes it to the Resources tab and the
+   * website had no matching view, so the same link worked in one place and
+   * showed nothing in the other. And anything mistyped, linked from an old
+   * email, or left over from a retired view lands here too.
+   *
+   * VIEW_ALIASES carries names that mean a view under another name. Anything
+   * still unknown falls back to home, which is where someone who followed a
+   * dead link should end up.
+   */
+  const VIEW_ALIASES = { practice: "resources", profile: "account" };
+  const initialView = (() => {
+    // The default, which demo mode has its own answer for: the dashboard needs
+    // a logged-in account and demo has none, so sending a demo link to home is
+    // its own blank page.
+    const fallback = params.get("demo") ? "results" : "home";
+    const asked = params.get("view");
+    if (!asked) return fallback;
+    const named = VIEW_ALIASES[asked] || asked;
+    return RENDERABLE_VIEWS.has(named) ? named : fallback;
+  })();
   // Prefer the real purchase package from localStorage order over URL ?pkg= param
   const _urlPkg = params.get("pkg") || "core";
   const _demoParam = params.get("demo"); // ?demo=anniversary bypasses localStorage
@@ -12842,7 +12886,26 @@ export default function App() {
     const exercises = EXERCISES.filter((e) => e.capability).map((e) => e.view);
     return tools.includes(v) || exercises.includes(v);
   })();
-  const [showAuth, setShowAuth] = useState(!isLoggedIn && (_urlSignup || _urlSignin || _urlGatedView)); // Auth modal
+  /**
+   * The dashboard, followed while signed out.
+   *
+   * The same twenty-eight-character page as the budget link, reached by the
+   * plainest route there is: https://www.attune-relationships.com/app, no
+   * parameters. The dashboard draws from an account, there is no account, and
+   * nothing above it asked for a sign-in, so the page renders four kilobytes
+   * of markup with no readable text in it.
+   *
+   * That is the front door. Anyone who taps a link to the portal without a
+   * live session lands on it, and it is the one page where "looks broken" and
+   * "is broken" cannot be told apart.
+   *
+   * home is the only view that needs an account and is not on either list
+   * above: the tools and exercises are owned, and everything else renders for
+   * anyone.
+   */
+  const _urlDashboard = initialView === 'home';
+  const [showAuth, setShowAuth] = useState(
+    !isLoggedIn && (_urlSignup || _urlSignin || _urlGatedView || _urlDashboard)); // Auth modal
 
   // Reopen the auth modal if the session goes away while we are sitting on the
   // sign-in URL.

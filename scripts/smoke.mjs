@@ -1,4 +1,5 @@
-// `npm run smoke`: build, serve, render every results section, stop.
+// `npm run smoke`: build, serve, render every results section, drive every
+// exercise to the end, stop.
 //
 // It used to be `node scripts/check-render.mjs` and assumed someone had
 // already run a preview server on port 4173. If they had not, the run failed
@@ -48,6 +49,19 @@ for (;;) {
 let code = 0;
 try {
   await run(process.execPath, ['scripts/check-render.mjs'], { env: { ...process.env, BASE } });
+} catch {
+  code = 1;
+}
+
+// Rendering proves a page draws. It does not prove an exercise can be
+// finished: that one accepts answers, stores them under the right key, and
+// reaches its completion screen. check-exercise-flow drives all of that in the
+// browser, and its own header says this is where it belongs once it passes.
+// It does, as of today, for every exercise that can be driven without a
+// pointer. It adds several minutes; that is the whole reason it is here and
+// not in `npm run check`.
+try {
+  await run(process.execPath, ['scripts/check-exercise-flow.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }

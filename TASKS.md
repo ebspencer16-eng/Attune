@@ -31,8 +31,8 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O2 | `check-exercise-flow.mjs` migrated and running, but a clean pass has not been watched to the end. Header carries the two commands. |
-| O4 | The React app shows no privacy notice: `index.html` does not load `_flags.js`, which nine static pages do. Careful, that file also injects the app-download bar. |
 | O3 | When one partner deletes, the other loses **all** results, including the parts from their own answers. The policy says they keep those. Migration, a `resultsGate` state, a one-person results view on both surfaces, and copy. Scoped in `DELETION.md`; not started. |
+| O4 | The React app shows no privacy notice: `index.html` does not load `_flags.js`, which nine static pages do. Careful, that file also injects the app-download bar. |
 
 
 ## 3. Done, not verified

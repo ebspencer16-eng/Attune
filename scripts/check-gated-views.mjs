@@ -51,7 +51,10 @@ if (!/_urlGatedView/.test(src)) {
     + '      own, so a signed-out visitor to one renders whatever the gate leaves\n'
     + '      behind, which was nothing.');
 } else {
-  const init = src.match(/useState\(!isLoggedIn && \(([^)]*)\)\)/);
+  // Whitespace-tolerant: the initialiser grew a fourth condition and wrapped
+  // onto its own line, and a gate that fails on a line break is reporting
+  // formatting while claiming to report a blank page.
+  const init = src.match(/useState\(\s*!isLoggedIn\s*&&\s*\(([^)]*)\)\)/);
   if (!init || !/_urlGatedView/.test(init[1])) {
     problems.push(
       'the auth form does not open for a gated view. _urlGatedView is computed and\n'

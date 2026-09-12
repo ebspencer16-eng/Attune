@@ -58,6 +58,19 @@ import { EXERCISES } from '../_exercises.js';
  */
 const SITE = 'https://www.attune-relationships.com';
 
+/**
+ * The website address for a deepLink.
+ *
+ * Two shapes reach here. `/?view=budget` is a view inside the portal and
+ * belongs under /app. `/feedback` is a page of its own. The one builder did
+ * `${SITE}/app${deepLink.replace(/^\//, '')}`, which turns the second into
+ * https://www.attune-relationships.com/appfeedback.
+ */
+function websiteUrl(deepLink) {
+  const link = deepLink || '/';
+  return link.startsWith('/?') ? `${SITE}/app${link.slice(1)}` : `${SITE}${link}`;
+}
+
 function appTargetFor(deepLink) {
   const view = /[?&]view=([^&]+)/.exec(deepLink || '')?.[1] || '';
 
@@ -73,11 +86,11 @@ function appTargetFor(deepLink) {
   if (exercise) {
     return exercise.inApp
       ? { route: '/insights', exercise: exercise.key }
-      : { external: `${SITE}/app${deepLink.replace(/^\//, '')}` };
+      : { external: websiteUrl(deepLink) };
   }
 
   // Profile setup, feedback, budget, checklist: all still on the website.
-  return { external: `${SITE}/app${deepLink.replace(/^\//, '')}` };
+  return { external: websiteUrl(deepLink) };
 }
 
 export function nextActions(state = {}) {
@@ -192,7 +205,8 @@ export function nextActions(state = {}) {
     add({ id: 'feedback', kind: 'feedback', priority: 2,
       title: 'How is Attune working for you?',
       body: 'Two questions. It shapes what we build next.',
-      cta: 'Leave feedback', deepLink: '/?view=feedback' });
+      // A page, not a view. /?view=feedback drew the header and nothing else.
+      cta: 'Leave feedback', deepLink: '/feedback' });
   }
 
   /**

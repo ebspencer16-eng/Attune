@@ -42,8 +42,32 @@
  * runnable without a server.
  */
 import { launch } from './_lib/browser.mjs';
+import { PERSONALITY_QUESTIONS } from '../api/_questions.js';
+import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
 
-const BASE = process.env.BASE || 'http://127.0.0.1:4173';
+// `vite preview` binds to localhost, which resolves to ::1 first on macOS, so
+// a default of 127.0.0.1 was refused on the only machine this has to run on.
+// Every exercise then failed with "never wrote ...; last screen: This site
+// can't be reached", which reads exactly like a broken exercise. That is why a
+// clean pass had never been watched to the end.
+const BASE = process.env.BASE || 'http://localhost:4173';
+
+/**
+ * How many answers a finished run stores, derived rather than typed.
+ *
+ * Communication had a floor of fifty-four beside it and the exercise stores
+ * fifty: twenty-five questions, each in two parts. The questions were reworked
+ * (migration 042 resets ex1 for exactly that reason) and the number beside the
+ * check was not, so it reported a failing exercise that works. A number typed
+ * next to the thing it describes is the defect this repo keeps finding, in a
+ * file whose job is to find it.
+ *
+ * Expectations and Reflection keep a floor rather than a count: both branch on
+ * what someone answers, so there is no single number to derive. A floor that
+ * cannot drift is better than a total that can.
+ */
+const EX1_ANSWERS = PERSONALITY_QUESTIONS.length * 2;
+const INTIMACY_ANSWERS = INTIMACY_QUESTIONS.length;
 
 // pkg: the URL package needed for the exercise to be reachable at all.
 // key:  where completed answers land in localStorage.
@@ -54,10 +78,10 @@ const BASE = process.env.BASE || 'http://127.0.0.1:4173';
 // screens work by hand; this is a harness gap, not a product bug, and it is
 // flagged rather than silently skipped so nobody reads a pass as coverage.
 const EXERCISES = {
-  exercise1: { pkg: 'core',    key: 'attune_ex1',      progress: 'attune_ex1_progress',      min: 54, label: 'Communication' },
+  exercise1: { pkg: 'core',    key: 'attune_ex1',      progress: 'attune_ex1_progress',      min: EX1_ANSWERS, label: 'Communication' },
   exercise2: { pkg: 'core',    key: 'attune_ex2',      progress: 'attune_ex2_progress',      min: 12, label: 'Expectations' },
   exercise3: { pkg: 'premium', key: 'attune_ex3',      progress: 'attune_ex3_progress',      min: 8,  label: 'Relationship Reflection' },
-  intimacy:  { pkg: 'premium', key: 'attune_intimacy', progress: 'attune_intimacy_progress', min: 18, label: 'Physical Intimacy', known: 'multi-select screens need a real pointer; stalls at Q7' },
+  intimacy:  { pkg: 'premium', key: 'attune_intimacy', progress: 'attune_intimacy_progress', min: INTIMACY_ANSWERS, label: 'Physical Intimacy', known: 'multi-select screens need a real pointer; stalls at Q7' },
 };
 
 // Controls that move forward. Matching on the verb alone was not enough: the
@@ -67,7 +91,10 @@ const EXERCISES = {
 const FORWARD_ARROW = /→\s*$/;
 const FORWARD_VERB = /(^|\s)(finish|all done|done|complete|submit|see (your )?results|continue|next|start|begin)/i;
 // Controls that are never an answer.
-const NOT_AN_ANSWER = /^(←|→|next|back|continue|start|begin|finish|all done|done|complete|submit|sign up|dashboard|see )/i;
+// Reflection opens an account sheet over its intro, so these are on screen
+// before the first question. Clicking one takes the run out of the exercise
+// entirely, which is how it used to end on a sign-up form.
+const NOT_AN_ANSWER = /^(←|→|next|back|continue|start|begin|finish|all done|done|complete|submit|sign up|sign in|create account|continue with|dashboard|see )/i;
 
 async function runOne(name) {
   const cfg = EXERCISES[name];
@@ -82,6 +109,21 @@ async function runOne(name) {
 
   await page.goto(`${BASE}/?fresh=1&pkg=${cfg.pkg}&view=${name}`);
   await page.wait(1400);
+
+  // Close the sign-in modal if one opened.
+  //
+  // The exercises that need owning (Reflection, Physical Intimacy, Conflict
+  // Patterns) are gated views, so arriving signed out opens the auth form over
+  // the intro. That is right, and it is why a person sees it. The driver could
+  // not tell the modal's buttons from the exercise's and answered "she/her" to
+  // question one, forever. Communication and Expectations are in every package
+  // and never showed it, which is why only Reflection failed.
+  await page.evaluate(() => {
+    const x = [...document.querySelectorAll('button')]
+      .find((b) => b.innerText.trim() === '\u2715' || b.getAttribute('aria-label') === 'Close');
+    if (x) x.click();
+  });
+  await page.wait(500);
 
   // Entry screen.
   await page.evaluate(() => {
@@ -99,7 +141,21 @@ async function runOne(name) {
       // Below the site header, and long enough to be a real label. Without
       // this the grid/menu glyph in the header counts as an answer option and
       // clicking it derails the run.
-      const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top > 95; };
+      const visible = e => { const r = e.getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0 && r.top > 95)) return false;
+        // Not inside a fixed overlay that is parked off screen. The account
+        // sheet is in the DOM from first paint with laid-out buttons on it:
+        // "she/her", "he/him", "they/them". The driver picked one of those as
+        // Reflection's first answer, clicked into nothing and stalled at
+        // question one on every run. Bounding on the viewport instead was
+        // worse: it excluded real options below the fold and broke a run that
+        // had been passing.
+        for (let n = e; n && n !== document.body; n = n.parentElement) {
+          if (getComputedStyle(n).position !== 'fixed') continue;
+          const q = n.getBoundingClientRect();
+          if (q.top >= window.innerHeight || q.bottom <= 0) return false;
+        }
+        return true; };
       // Free-text screens: fill every field, then let the forward pass run.
       const fields = [...document.querySelectorAll('textarea, input[type=text]')].filter(visible);
       if (fields.length) {
@@ -123,7 +179,21 @@ async function runOne(name) {
 
     const moved = await page.evaluate(({ arrow, verb }) => {
       const reArrow = new RegExp(arrow), reVerb = new RegExp(verb, 'i');
-      const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top > 95; };
+      const visible = e => { const r = e.getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0 && r.top > 95)) return false;
+        // Not inside a fixed overlay that is parked off screen. The account
+        // sheet is in the DOM from first paint with laid-out buttons on it:
+        // "she/her", "he/him", "they/them". The driver picked one of those as
+        // Reflection's first answer, clicked into nothing and stalled at
+        // question one on every run. Bounding on the viewport instead was
+        // worse: it excluded real options below the fold and broke a run that
+        // had been passing.
+        for (let n = e; n && n !== document.body; n = n.parentElement) {
+          if (getComputedStyle(n).position !== 'fixed') continue;
+          const q = n.getBoundingClientRect();
+          if (q.top >= window.innerHeight || q.bottom <= 0) return false;
+        }
+        return true; };
       const btns = [...document.querySelectorAll('button')]
         .filter(b => visible(b) && !b.disabled && !/^←/.test(b.innerText.trim()));
       // A finishing control wins over a plain Next.
@@ -143,7 +213,21 @@ async function runOne(name) {
     if (!moved) {
       const filled = await page.evaluate((notAnswer) => {
         const re = new RegExp(notAnswer, 'i');
-        const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top > 95; };
+        const visible = e => { const r = e.getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0 && r.top > 95)) return false;
+        // Not inside a fixed overlay that is parked off screen. The account
+        // sheet is in the DOM from first paint with laid-out buttons on it:
+        // "she/her", "he/him", "they/them". The driver picked one of those as
+        // Reflection's first answer, clicked into nothing and stalled at
+        // question one on every run. Bounding on the viewport instead was
+        // worse: it excluded real options below the fold and broke a run that
+        // had been passing.
+        for (let n = e; n && n !== document.body; n = n.parentElement) {
+          if (getComputedStyle(n).position !== 'fixed') continue;
+          const q = n.getBoundingClientRect();
+          if (q.top >= window.innerHeight || q.bottom <= 0) return false;
+        }
+        return true; };
         const opts = [...document.querySelectorAll('button')]
           .filter(b => visible(b) && b.innerText.trim().length > 2 && !re.test(b.innerText.trim()) && !b.disabled);
         // Group by parent: each row of a grid is its own set of choices.
@@ -171,7 +255,21 @@ async function runOne(name) {
       for (let k = 0; k < 6; k++) {
         const added = await page.evaluate(({ notAnswer, idx }) => {
           const re = new RegExp(notAnswer, 'i');
-          const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top > 95; };
+          const visible = e => { const r = e.getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0 && r.top > 95)) return false;
+        // Not inside a fixed overlay that is parked off screen. The account
+        // sheet is in the DOM from first paint with laid-out buttons on it:
+        // "she/her", "he/him", "they/them". The driver picked one of those as
+        // Reflection's first answer, clicked into nothing and stalled at
+        // question one on every run. Bounding on the viewport instead was
+        // worse: it excluded real options below the fold and broke a run that
+        // had been passing.
+        for (let n = e; n && n !== document.body; n = n.parentElement) {
+          if (getComputedStyle(n).position !== 'fixed') continue;
+          const q = n.getBoundingClientRect();
+          if (q.top >= window.innerHeight || q.bottom <= 0) return false;
+        }
+        return true; };
           const chip = [...document.querySelectorAll('button')].filter(b =>
             visible(b) && !b.disabled && /^\+/.test(b.innerText.trim()));
           if (chip.length) { chip[0].click(); return true; }
@@ -186,7 +284,21 @@ async function runOne(name) {
         if (!added) break;
         await page.wait(160);
         const nowMoved = await page.evaluate(() => {
-          const visible = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top > 95; };
+          const visible = e => { const r = e.getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0 && r.top > 95)) return false;
+        // Not inside a fixed overlay that is parked off screen. The account
+        // sheet is in the DOM from first paint with laid-out buttons on it:
+        // "she/her", "he/him", "they/them". The driver picked one of those as
+        // Reflection's first answer, clicked into nothing and stalled at
+        // question one on every run. Bounding on the viewport instead was
+        // worse: it excluded real options below the fold and broke a run that
+        // had been passing.
+        for (let n = e; n && n !== document.body; n = n.parentElement) {
+          if (getComputedStyle(n).position !== 'fixed') continue;
+          const q = n.getBoundingClientRect();
+          if (q.top >= window.innerHeight || q.bottom <= 0) return false;
+        }
+        return true; };
           const b = [...document.querySelectorAll('button')]
             .filter(x => visible(x) && !x.disabled && !/^←/.test(x.innerText.trim()))
             .find(x => /→\s*$/.test(x.innerText.trim()) || /(next|all done|continue|finish)/i.test(x.innerText.trim()));
