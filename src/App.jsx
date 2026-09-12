@@ -85,6 +85,7 @@ import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
+import { CATALOGUE } from "../api/_catalogue.js";
 // The six waiting sentences, Ellie's, one place. See api/_lib/waiting-copy.js.
 import { WAITING } from "../api/_lib/waiting-copy.js";
 import { conflictDemo } from "../api/_lib/conflict-demo.js";
@@ -13125,7 +13126,35 @@ export default function App() {
   // Auto-open auth if ?signup=1 in URL (comes from checkout success redirect)
   const _urlSignup = params.get('signup') === '1';
   const _urlSignin = params.get('signin') === '1';
-  const [showAuth, setShowAuth] = useState(!isLoggedIn && (_urlSignup || _urlSignin)); // Auth modal
+
+  /**
+   * A link straight to something you have to own, followed while signed out.
+   *
+   * Ellie, from the app: "I clicked the 'start shared budgeting' and it took
+   * me to the website but a blank page."
+   *
+   * It was blank, exactly. /app?view=budget renders
+   * `{view === "budget" && pkg.hasBudget && (...)}`, and with no session there
+   * is no pkg, so the condition is false and the page is a header and a back
+   * link and nothing else. Twenty-eight characters. The gate effect does not
+   * catch it either: it redirects when `need && pkg && !pkg[need]`, and a
+   * missing pkg fails that test rather than tripping it.
+   *
+   * So a signed-out visitor to any owned view gets the sign-in form, which is
+   * what they need and what the page already knows how to show.
+   *
+   * Both lists are derived. Tool views are the catalogue's own keys, and
+   * exercise views come from the registry with their capability, so a seventh
+   * thing to own is covered the day it is added.
+   */
+  const _urlGatedView = (() => {
+    const v = params.get('view');
+    if (!v) return false;
+    const tools = CATALOGUE.filter((c) => c.kind === 'tool').map((c) => c.key);
+    const exercises = EXERCISES.filter((e) => e.capability).map((e) => e.view);
+    return tools.includes(v) || exercises.includes(v);
+  })();
+  const [showAuth, setShowAuth] = useState(!isLoggedIn && (_urlSignup || _urlSignin || _urlGatedView)); // Auth modal
 
   // Reopen the auth modal if the session goes away while we are sitting on the
   // sign-in URL.

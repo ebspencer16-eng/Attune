@@ -15,14 +15,13 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Question |
 |--|--|
-| G1 | Retest the dashboard. If it still reloads, `/app?diag=1` and screenshot; the panel survives now that the page does. |
+| G1 | Life & Values on the site: retest. The reload loop reset the section on every load, which is the most likely reason it landed on the storycards. |
 | G2 | Nothing outstanding. Everything opens in the app (your answer), and the gate migration needs nothing from you. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
-| O1 | Dashboard blinking. **Cause found and fixed**: a load-path reload whose "already have it" test could never become true for intimacy/conflict records. Needs her retest. |
 | 94.7 | If no pick up where you left off, maybe ‘explore something new’ with a link to the most recent in practice post? |
 | 97.1 | Make the download option functional. |
 | 132.5 | I clicked the ‘start shared budgeting’ and it took me to the website but a blank page. We need to make sure t... |
@@ -380,6 +379,7 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task | Verified by |
 |--|--|--|
+| — | Dashboard reloading itself, 75s quiet after the fix | Ellie's screenshot: 0 renders, 0 fetches in the last 5s |
 | 78.6 | For whatever reason the site just brought back the how it works and couple types pages, those were deleted lo... | the files are deleted |
 | 81.9 | Couple type page is STILL showing different content from what we do on the site. I’m frustrated by this at th... | check-results-copy-reach |
 | 96.11 | I’ve asked for this already, but please wire in the in-practice content so that I can see how this is built. | fetchPosts wired |
