@@ -46,12 +46,21 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+import { EXERCISES } from './_exercises.js';
+
 export const config = { runtime: 'edge' };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-// 'intimacy' writes the whole record to profiles.intimacy_data (no _answers /
-// _completed columns exist for it), so it is handled separately below.
-const VALID_EXERCISES = new Set(['ex1', 'ex2', 'ex3', 'intimacy', 'conflict']);
+// What may be saved, and where it lands, from the registry.
+//
+// This was a Set of five keys typed out here, with the two record-shaped
+// exercises branched on by name below. CLAUDE.md names api/_exercises.js as
+// the single source of what exercises exist, and it already carries both
+// facts this file needs: `column` for where the write goes, and `shape` for
+// whether the payload is a bag of answers or a whole record. A sixth exercise
+// would have been rejected here with "Invalid exercise" and the app would
+// have reported a save that never happened.
+const BY_KEY = new Map(EXERCISES.map((e) => [e.key, e]));
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
 const err = (status, message) => new Response(JSON.stringify({ ok: false, error: message }), { status, headers: HEADERS });
@@ -74,7 +83,7 @@ export default async function handler(req) {
   const email = (body?.email || '').toLowerCase().trim();
 
   if (!userId || !UUID_RE.test(userId)) return err(400, 'Invalid userId');
-  if (!exercise || !VALID_EXERCISES.has(exercise)) return err(400, 'Invalid exercise');
+  if (!exercise || !BY_KEY.has(exercise)) return err(400, 'Invalid exercise');
   if (!answers || typeof answers !== 'object') return err(400, 'Missing answers');
 
   const admin = createClient(supabaseUrl, serviceKey);
@@ -129,20 +138,21 @@ export default async function handler(req) {
   const isProgress = !!progress;
   const updates = {};
 
-  if (exercise === 'intimacy') {
-    // The client sends the full intimacy record (answers + variant +
-    // completedAt) as `answers`; it lands verbatim in profiles.intimacy_data.
-    updates.intimacy_data = answers;
-  } else if (exercise === 'conflict') {
-    // Same shape as intimacy: the whole record lands in one column. Without
-    // this branch the generic path below would write conflict_answers, a
-    // column that does not exist, so the fallback would fail exactly when it
-    // was needed most: after the direct write had already been blocked.
-    updates.conflict_data = answers;
+  const spec = BY_KEY.get(exercise);
+
+  if (spec.shape === 'record') {
+    // Physical Intimacy and Conflict Patterns: the client sends the whole
+    // record (answers + variant + completedAt) as `answers` and it lands
+    // verbatim in one column. Naming those two here is what the registry's
+    // `shape` field is for. The generic path below would write
+    // conflict_answers, a column that does not exist, so this fallback would
+    // have failed exactly when it was needed most: after the direct write had
+    // already been blocked.
+    updates[spec.column] = answers;
   } else if (isProgress) {
     updates[`${exercise}_progress`] = answers;
   } else {
-    updates[`${exercise}_answers`] = answers;
+    updates[spec.column] = answers;
     updates[`${exercise}_completed`] = true;
     updates[`${exercise}_completed_at`] = completedAt || new Date().toISOString();
     // Clear the progress slot now that the exercise is complete
