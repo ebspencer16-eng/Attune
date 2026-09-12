@@ -99,7 +99,6 @@ const INTERNAL = new Set([
   'public/admin.html',
   'public/workbook-render.html',
   'public/qr-cards-print.html',
-  'public/qr-card-v2.html',
   'public/portal.html',
   // A developer preview of the email templates. The real copy lives in
   // api/cron-*.js and is checked there; this page restates it, which is its
