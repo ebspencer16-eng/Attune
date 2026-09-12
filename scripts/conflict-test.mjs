@@ -81,7 +81,7 @@ ok('the four pattern labels are present',
 // Every pattern needs a line for every frequency. A missing band renders an
 // empty tip under a bar, which reads as the product having nothing to say
 // about the answer someone just gave honestly.
-const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, interpConflict,
+const { PATTERN_COPY, CONFLICT_RESULTS_COPY, interpConflict,
   SNAPSHOT_ROWS, OPENING_CHIPS } =
   await import('../api/_conflict-results-prose.js');
 const { RISK_QUESTIONS } = await import('../api/_conflict-questions.js');
@@ -93,7 +93,7 @@ ok('copy labels match the question labels',
 ok('a Never band says something rather than nothing',
   RISK_QUESTIONS.every(q => PATTERN_COPY[q.riskKey][0].note.length > 30));
 
-const allCopy = JSON.stringify({ PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY });
+const allCopy = JSON.stringify({ PATTERN_COPY, CONFLICT_RESULTS_COPY });
 ok('no em dashes in results copy', !allCopy.includes('\u2014'));
 ok('no branded terminology in results copy', !/gottman|four horse(man|men)/i.test(allCopy));
 ok('no hedging in results copy', !/\b(perhaps|might|possibly|it seems|somewhat)\b/i.test(allCopy));

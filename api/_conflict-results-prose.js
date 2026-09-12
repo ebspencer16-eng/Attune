@@ -63,18 +63,6 @@ export const PATTERN_COPY = {
 };
 
 /**
- * The snapshot line, from the two forced-choice openers.
- *
- * Keyed by whether the two partners differ. Both answers are legitimate, so
- * this is the one part of the exercise that keeps the usual gap framing.
- */
-export const SNAPSHOT_PROSE = {
-  differ: 'Neither style is the right one. This pairing means {a} may want to talk sooner than {b} is ready to. Naming that gap out loud tends to help more than pushing through it.',
-  bothImmediate: 'You both want it addressed straight away. Nothing festers, which is a real advantage. The watch-out is that neither of you is the one who slows it down, so a hard conversation can escalate before either of you meant it to.',
-  bothDelayed: 'You both need time before engaging. That keeps things from boiling over. The watch-out is that a conversation neither of you starts can go unhad for a long time. Agree who raises it, or when.',
-};
-
-/**
  * Action items, one per pattern, shown when that pattern is worth attention.
  *
  * The other sections build an action plan from the widest gap. This one cannot
@@ -180,7 +168,6 @@ export const CONFLICT_RESULTS_COPY = {
   patternsTitle: 'Your patterns',
   patternsPrivacy: 'Not visible to your partner. This is the one section that stays private, always.',
   patternsIntro: 'An in-depth look at pain points in your conflict management. Being aware of these areas is the first step toward growth in your communication under pressure.',
-  repairTitle: 'What helps each of you reset',
   repairIntro: '',
   wroteTitle: 'What you each wrote',
   sharedBadge: 'Shared',

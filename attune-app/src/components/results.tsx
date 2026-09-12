@@ -361,6 +361,10 @@ export default function Results({
           onCreated={(note) => setNotes((prev) => [note, ...prev])}>
         <SectionBody
           section={section}
+          /* The active nav group's colour, which the server sends. Sections
+             that need their own accent take it from here rather than writing
+             a second hex next to the website's. */
+          accent={activeGroup?.color || undefined}
           expectations={expectations}
           highlights={highlights}
           commsPlan={commsPlan}
@@ -401,11 +405,13 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, accent, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection,
 }: {
   section: string;
+  /** The section's colour, from the results nav the server builds. */
+  accent?: string;
   expectations: ExpectationsSummary | null;
   highlights: HighlightCard[];
   commsPlan: CommsPlan | null;
@@ -545,7 +551,10 @@ function SectionBody({
     if (section !== 'conflict-patterns' && !conflict.partnerFinished) {
       return <Waiting title="Conflict Patterns" body={lockReason('partner_has_not_finished')} />;
     }
-    return <ConflictResultsView data={conflict} section={section} />;
+    // The accent is the nav group's own colour, which the server already
+    // sends. It is the website's conflict BLUE, so threading it here means
+    // the two products cannot drift on it the way a second hex would.
+    return <ConflictResultsView data={conflict} section={section} accent={accent} />;
   }
 
   // A section the website renders and the app does not yet. Named rather than

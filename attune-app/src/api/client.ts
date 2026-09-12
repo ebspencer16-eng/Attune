@@ -1275,7 +1275,6 @@ export type ConflictResults =
         /** The five c0 answers in order, derived from the question itself. */
         overallLabels: string[];
         snapshotRows: { id: string; field: string; label: string }[];
-        snapshotProse: Record<string, string>;
         openingChips: Record<string, { A: string; B: string }>;
         noActionNeeded: Record<string, string>;
         copy: Record<string, string>;

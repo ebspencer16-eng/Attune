@@ -47,9 +47,15 @@ type Screen = 'overview' | 'snapshot' | 'patterns' | 'wrote';
 const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
 
 export default function ConflictResultsView({
-  data, section,
+  data, section, accent,
 }: {
   data: Extract<ConflictResults, { ready: true }>;
+  /**
+   * The section's colour, from the results nav the server builds. It is the
+   * website's conflict BLUE. Passed rather than written here so the two
+   * products cannot end up with two different blues.
+   */
+  accent?: string;
   /**
    * Which of the four Conflict screens to show. The website splits this into
    * conflict-overview, -snapshot, -patterns and -wrote, and notes anchor to
@@ -83,7 +89,7 @@ export default function ConflictResultsView({
   return (
     <View style={{ flex: 1 }}>
       {screen === 'overview' ? <Glance data={data} /> : null}
-      {screen === 'snapshot' ? <Snapshot data={data} /> : null}
+      {screen === 'snapshot' ? <Snapshot data={data} accent={accent} /> : null}
       {screen === 'patterns' ? <Patterns you={you} content={content} /> : null}
       {screen === 'wrote' ? <Wrote data={data} /> : null}
     </View>
@@ -130,11 +136,24 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
   ].filter((r) => r.value != null);
 
   return (
-    <ScrollView contentContainerStyle={pad}>
+    /* ── ONE GROUND FOR THE WHOLE PAGE ───────────────────────────────────
+       The website puts Results at a glance on a single dark slide: the names,
+       the shared number and the action plan all sit on it. The app painted the
+       gradient as a rounded panel around the first two and let the action plan
+       fall off the bottom of it onto cream, so the page a reader arrives at
+       was two different pages stacked.
+
+       Full-bleed behind the scroll, which is what every other glance screen in
+       the app already does, and the website's own three colours rather than
+       the two this file had invented. */
+    <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={['#16305C', '#1B5FE8']}
-        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-        style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
+        colors={['#1B2A5E', '#2F55C4', '#1B8FB8']}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={pad}>
         {/* The names, and nothing above them. The eyebrow and its dot were
             here, matching the website, and Ellie asked for both to go from
             both products: the section is already named in the nav you arrived
@@ -147,10 +166,10 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
         {overalls.length ? (
           <View
             style={{
-              backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.12)',
+              backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)',
               borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.lg,
             }}>
-            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.45)', marginBottom: Spacing.md }}>
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.35)', marginBottom: Spacing.md }}>
               How you each describe conflict resolution in your relationship
             </Text>
             {overalls.map((r) => (
@@ -174,44 +193,51 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
             ))}
           </View>
         ) : null}
-      </LinearGradient>
 
-      {/* block: conflict-overview/action-plan */}
-      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
-        Your action plan
-      </Text>
-      {worth.length ? (
-        <View>
-          {worth.map((p) => {
-            const action = content.patternActions[p.key];
-            if (!action) return null;
-            return (
-              <View key={p.key} style={{ ...card, marginBottom: Spacing.md }}>
-                {/* The pattern named opposite the label, as the website does,
-                    so a card can be tied back to the bar it came from. */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: Spacing.md }}>
-                  <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>One thing to try</Text>
-                  <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{titleFor(p.key)}</Text>
+        {/* block: conflict-overview/action-plan */}
+        <Text
+          style={{
+            ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.45)',
+            marginTop: Spacing.xl, marginBottom: Spacing.md,
+          }}>
+          Your action plan
+        </Text>
+        {worth.length ? (
+          <View style={{ gap: Spacing.md }}>
+            {worth.map((p) => {
+              const action = content.patternActions[p.key];
+              if (!action) return null;
+              return (
+                <View key={p.key} style={darkCard}>
+                  {/* The pattern named, so a card can be tied back to the bar it
+                      came from. No eyebrow: on Results at a glance the cards ARE
+                      the actions, three in a row under a heading that already says
+                      so, and a label over each one said it three more times. It
+                      stays on the Patterns detail page, where a card sits alone
+                      under its own bar. */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'baseline', gap: Spacing.md }}>
+                    <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{titleFor(p.key)}</Text>
+                  </View>
+                  <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xs }}>{action.title}</Text>
+                  <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{action.body}</Prose>
                 </View>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong, marginTop: Spacing.sm }}>{action.title}</Text>
-                <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>{action.body}</Prose>
-              </View>
-            );
-          })}
-        </View>
-      ) : (
-        <View style={{ ...card }}>
-          {content.noActionNeeded?.title ? (
-            <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.sm }}>
-              {content.noActionNeeded.title}
-            </Text>
-          ) : null}
-          <Prose style={{ ...Type.body, color: c.text }}>
-            {content.noActionNeeded?.body || content.copy.allClear || ''}
-          </Prose>
-        </View>
-      )}
-    </ScrollView>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={darkCard}>
+            {content.noActionNeeded?.title ? (
+              <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.xs }}>
+                {content.noActionNeeded.title}
+              </Text>
+            ) : null}
+            <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>
+              {content.noActionNeeded?.body || content.copy.allClear || ''}
+            </Prose>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -266,7 +292,9 @@ function PageHead({
 }
 
 /** Snapshot. The three shared questions, and what each of you helps with. */
-function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
+function Snapshot({ data, accent }: {
+  data: Extract<ConflictResults, { ready: true }>; accent?: string;
+}) {
   const { you, partner, names, content } = data;
 
   return (
@@ -308,10 +336,21 @@ function Snapshot({ data }: { data: Extract<ConflictResults, { ready: true }> })
             app, which is the thing Ellie asked not to happen. */}
         {/* block: conflict-snapshot/repair */}
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Repair</Text>
+        {/* The website's own heading for these two columns. The app said
+            "What Ellie wants", which drops who it is wanted from and that the
+            list is in order, both of which are the point of a ranking. */}
         <View style={{ flexDirection: 'row', gap: Spacing.lg }}>
-          <RepairColumn title={`What ${names.you} wants`} items={you.repairRanking} />
+          <RepairColumn
+            title={`What ${names.you} wants from ${names.partner}, in order`}
+            items={you.repairRanking}
+            accent={accent}
+          />
           {partner ? (
-            <RepairColumn title={`What ${names.partner} wants`} items={partner.repairRanking} />
+            <RepairColumn
+              title={`What ${names.partner} wants from ${names.you}, in order`}
+              items={partner.repairRanking}
+              accent={accent}
+            />
           ) : null}
         </View>
 
@@ -359,15 +398,17 @@ function Patterns({
           reading their own worst pattern should know it is private before they
           read it rather than after. */}
       {/* block: conflict-patterns/privacy */}
-      <View
+      {/* A line, not a panel. The app boxed it in pink and set it italic, which
+          is a heavier treatment than the website gives the single most
+          important sentence on the page, and made the two products look least
+          alike exactly where they most need to agree. */}
+      <Text
         style={{
-          backgroundColor: '#FDF2F6', borderColor: '#F0C9DA', borderWidth: 1,
-          borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.lg,
+          ...Type.small, fontSize: 13, fontWeight: '600', color: '#B5546E',
+          lineHeight: 20, marginBottom: Spacing.lg,
         }}>
-        <Text style={{ ...Type.small, color: '#8E3A5D', fontStyle: 'italic' }}>
-          {content.copy.patternsPrivacy}
-        </Text>
-      </View>
+        * {content.copy.patternsPrivacy}
+      </Text>
 
       {content.copy.patternsIntro ? (
         <Prose style={{ ...Type.body, color: c.textMuted, marginBottom: Spacing.lg }}>
@@ -468,8 +509,8 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
       {rows.map((r) => (
         <View key={r.label} style={{ ...card, marginBottom: Spacing.md }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>{r.label}</Text>
-          <Written name={names.you} text={r.mine} color={Palette.orange} />
-          <Written name={names.partner} text={r.theirs} color={Palette.ink} />
+          <Written name={names.you} text={r.mine} />
+          <Written name={names.partner} text={r.theirs} />
         </View>
       ))}
     </ScrollView>
@@ -488,26 +529,61 @@ function Chip({ name, text, color }: { name: string; text: string; color: string
   );
 }
 
-function RepairColumn({ title, items }: { title: string; items: string[] }) {
+function RepairColumn({ title, items, accent }: {
+  title: string; items: string[]; accent?: string;
+}) {
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.sm }}>{title}</Text>
+      <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, marginBottom: Spacing.sm }}>
+        {title}
+      </Text>
+      {/* The rank in the section's colour, hanging beside the item rather than
+          run into it as "1. ". That is how the website draws it, and it is what
+          makes the column read as an order rather than a list. */}
       {(items || []).slice(0, 3).map((item, i) => (
-        <Text key={item} style={{ ...Type.small, color: c.text, marginBottom: Spacing.xs }}>
-          {i + 1}. {item}
-        </Text>
+        <View key={item} style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm }}>
+          <Text style={{ ...Type.small, fontWeight: '700', color: accent || c.textStrong }}>{i + 1}</Text>
+          <Text style={{ ...Type.small, color: c.text, flex: 1 }}>{item}</Text>
+        </View>
       ))}
       {!items?.length ? <Text style={{ ...Type.small, color: c.textMuted }}>Not answered.</Text> : null}
     </View>
   );
 }
 
-function Written({ name, text, color }: { name: string; text: string | null; color: string }) {
-  if (!text) return null;
+/**
+ * One person's written answer, as the website's quote card.
+ *
+ * It was a coloured left rule with the text beside it in the body face. The
+ * website draws a cream card with the name in small amber caps and the answer
+ * in italics inside quotation marks, which is what makes it read as something
+ * a person wrote rather than something the product is saying.
+ *
+ * It also renders when there is no answer, with the website's own line, so a
+ * pair reads as a pair. The app returned null, so a question one of you had
+ * skipped showed a single card with nothing saying the other half was empty.
+ */
+function Written({ name, text }: { name: string; text: string | null }) {
   return (
-    <View style={{ borderLeftWidth: 2, borderLeftColor: color, paddingLeft: Spacing.md, marginBottom: Spacing.md }}>
-      <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.xs }}>{name}</Text>
-      <Prose style={{ ...Type.body, color: c.text }}>{text}</Prose>
+    <View
+      style={{
+        backgroundColor: '#FDF6EC', borderColor: '#EBD9BE', borderWidth: 1,
+        borderRadius: Radius.md, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md,
+        marginBottom: Spacing.md,
+      }}>
+      <Text
+        style={{
+          ...Type.eyebrow, fontSize: 9, color: '#9A6B2F', marginBottom: Spacing.xs,
+        }}>
+        {name}
+      </Text>
+      <Prose
+        style={{
+          ...Type.body, color: c.textStrong, lineHeight: 24,
+          fontStyle: text ? 'italic' : 'normal',
+        }}>
+        {text ? `“${text}”` : 'No answer given.'}
+      </Prose>
     </View>
   );
 }
@@ -561,4 +637,10 @@ const pad = {
 const card = {
   backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
   borderRadius: Radius.lg, padding: Spacing.lg,
+} as const;
+
+/** The same card on the glance screen's dark ground, as the website draws it. */
+const darkCard = {
+  backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.14)',
+  borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg,
 } as const;

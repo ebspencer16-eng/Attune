@@ -25,7 +25,7 @@ import { summarizeConflict } from '../../api/_lib/conflict-results.js';
 import { partnerView } from '../../api/_lib/conflict-partner-view.js';
 import {
   PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, FREQUENCY_LABELS,
-  SNAPSHOT_ROWS, SNAPSHOT_PROSE, OPENING_CHIPS, CONFLICT_RESULTS_COPY,
+  SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY,
   NO_ACTION_NEEDED, WROTE_ROWS,
 } from '../../api/_conflict-results-prose.js';
 
@@ -88,7 +88,6 @@ export function conflictFixture() {
       resetQuestion: CONFLICT_QUESTIONS.find((q) => q.id === 'c8')?.text || '',
       overallLabels: CONFLICT_QUESTIONS.find((q) => q.id === 'c0')?.options.map((o) => o.label) || [],
       snapshotRows: SNAPSHOT_ROWS,
-      snapshotProse: SNAPSHOT_PROSE,
       openingChips: OPENING_CHIPS,
       noActionNeeded: NO_ACTION_NEEDED,
       copy: CONFLICT_RESULTS_COPY,

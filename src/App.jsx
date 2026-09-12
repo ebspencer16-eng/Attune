@@ -2,7 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
-import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_PROSE, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
+import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
@@ -8061,8 +8061,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
               {flagged.length > 0 ? flagged.map(p => (
                 <div key={p.key} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "1rem 1.2rem" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.35rem", gap: "0.75rem" }}>
-                    <span style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontWeight: 700, fontFamily: BFONT }}>One thing to try</span>
+                  {/* No eyebrow. On Results at a glance the cards ARE the
+                      actions, three of them in a row under a heading that
+                      already says so, and a label over each one repeated the
+                      heading three times. It stays on the Patterns detail
+                      page, where a card sits alone under its own bar. */}
+                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "baseline", marginBottom: "0.35rem", gap: "0.75rem" }}>
                     <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, flexShrink: 0 }}>{PATTERN_COPY[p.key].label}</span>
                   </div>
                   <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "white", fontFamily: BFONT, marginBottom: "0.25rem" }}>{PATTERN_ACTIONS[p.key]?.title}</div>

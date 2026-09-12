@@ -246,7 +246,7 @@ children.push(...bigSection('10', 'Reassurance when aligned', 'When both partner
 // makes the tone worth reading closely rather than skimming.
 const { CONFLICT_QUESTIONS, CONFLICT_SECTIONS, CONFLICT_INTRO } =
   await import('../api/_conflict-questions.js');
-const { PATTERN_COPY, SNAPSHOT_PROSE, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS } =
+const { PATTERN_COPY, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS } =
   await import('../api/_conflict-results-prose.js');
 
 children.push(...bigSection('11', 'Conflict Patterns (Exercise 5)',
@@ -274,16 +274,11 @@ for (const key of ['criticism', 'contempt', 'defensiveness', 'stonewalling']) {
   [0, 1, 2, 3].forEach(v => children.push(prose(`      ${FREQUENCY_LABELS[v]}: ${c[v].note.replace(/\{partner\}/g, 'David')}`)));
 }
 
-children.push(midSection('11.4', 'Results: the snapshot line', BLUE,
-  { extras: 'from the two forced-choice openers. The one part of this exercise where both answers are equally valid.' }));
-[['They differ', SNAPSHOT_PROSE.differ], ['Both address it immediately', SNAPSHOT_PROSE.bothImmediate],
- ['Both need time first', SNAPSHOT_PROSE.bothDelayed]].forEach(([label, text]) => {
-  children.push(prose(`${label}: ${text.replace(/\{a\}/g, 'Maya').replace(/\{b\}/g, 'David')}`));
-});
-
-children.push(midSection('11.5', 'Results: headings and framing', BLUE));
+children.push(midSection('11.4', 'Results: headings and framing', BLUE));
 [['Privacy banner', CONFLICT_RESULTS_COPY.patternsPrivacy],
  ['Patterns intro', CONFLICT_RESULTS_COPY.patternsIntro],
+ // Empty in the source. It stays listed so the blank is visible here,
+ // which is the point of this document.
  ['Repair intro', CONFLICT_RESULTS_COPY.repairIntro],
  ['When no pattern is flagged', CONFLICT_RESULTS_COPY.allClear.replace(/\{partner\}/g, 'David')]]
   .forEach(([label, text]) => children.push(prose(`${label}: ${text}`)));
