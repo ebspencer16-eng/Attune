@@ -35,6 +35,7 @@ import type {
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import { Eyebrow } from '@/components/screen-states';
+import { WAITING } from '@/constants/waiting';
 import {
   BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -82,9 +83,9 @@ const COMMS_PROTOCOL_LIMIT = 3;
  * saying it is not ready, which is true of every case.
  */
 function lockReason(reason: string): string {
-  if (reason === 'you_have_not_finished') return 'Finish the exercise to open this';
-  if (reason === 'partner_has_not_finished') return 'Waiting on your partner';
-  return 'Not ready yet';
+  if (reason === 'you_have_not_finished') return WAITING.LOCKED_BY_YOU;
+  if (reason === 'partner_has_not_finished') return WAITING.LOCKED_BY_THEM;
+  return WAITING.LOCKED_BY_THEM;
 }
 
 /** Replace {U} and {P} with the two names, from this reader's point of view. */
@@ -571,7 +572,7 @@ function ExpectationsOverview({
     return (
       <Waiting
         title="Expectations"
-        body="This opens when you have both finished Expectations."
+        body={WAITING.LOCKED_BY_THEM}
       />
     );
   }
@@ -997,7 +998,7 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
 
 function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; you: string; them: string }) {
   if (!data) {
-    return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
+    return <Waiting title="Physical Intimacy" body={WAITING.LOCKED_BY_THEM} />;
   }
   // The website's page: where you each land, then the action plan. It has no
   // framing paragraph, so neither does this. One written here would be the app
@@ -1095,7 +1096,7 @@ function IntimacyDimensionView({
   dim, you, them, promptLabel,
 }: { dim: IntimacyDimension | null; you: string; them: string; promptLabel: string }) {
   if (!dim) {
-    return <Waiting title="Physical Intimacy" body="This opens when you have both finished the exercise." />;
+    return <Waiting title="Physical Intimacy" body={WAITING.LOCKED_BY_THEM} />;
   }
   return (
     <View style={{ flex: 1 }}>
@@ -1223,7 +1224,7 @@ function IntimacyDimensionView({
 
 function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
   if (!data) {
-    return <Waiting title="Conversations Worth Having" body="This opens when you have both finished the exercise." />;
+    return <Waiting title="Conversations Worth Having" body={WAITING.LOCKED_BY_THEM} />;
   }
   if (!data.conversations.length) {
     return (
@@ -1277,7 +1278,7 @@ function ReflectionWaiting() {
   return (
     <Waiting
       title="Relationship Reflection"
-      body="This opens when you have both finished writing."
+      body={WAITING.LOCKED_BY_THEM}
     />
   );
 }
@@ -1760,7 +1761,7 @@ function WhatComesNext({
     return (
       <Waiting
         title="What Comes Next"
-        body="This fills in as you finish the exercises in your package."
+        body={WAITING.LOCKED_BY_YOU}
       />
     );
   }

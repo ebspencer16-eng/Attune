@@ -85,6 +85,8 @@ import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
+// The six waiting sentences, Ellie's, one place. See api/_lib/waiting-copy.js.
+import { WAITING } from "../api/_lib/waiting-copy.js";
 import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
 // The c8 question, verbatim, labelling each person's reset answer on Your
 // Conflict Snapshot. From the question itself, so it cannot drift from what
@@ -1527,7 +1529,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
       <link href={FONT_LINK} rel="stylesheet" />
       <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Done.</h2>
       <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
-        Your answers are saved. Your results open when you have both finished everything, and what you said about your own patterns stays private to you.
+        {WAITING.EXERCISE_FOOTER}
       </p>
       <button onClick={() => onComplete?.({ answers })}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
@@ -7780,8 +7782,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const body = conflictLoading
         ? 'One moment.'
         : !conflictYoursReady
-          ? 'This section opens once you have finished Conflict Patterns.'
-          : `This section opens when you have both finished Conflict Patterns. ${partnerName} has not completed it yet.`;
+          ? WAITING.LOCKED_BY_YOU
+          : WAITING.LOCKED_BY_THEM;
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 560 }}>
@@ -10596,7 +10598,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         <p style={{ fontSize: '0.8rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7, marginBottom: '1.5rem' }}>
           {existing
             ? `You already have an Attune account with this email. Sign in to join ${inviteFrom}. Your answers stay private until you're both done, then your results unlock together.`
-            : 'Create your account to get started. Your answers stay private until both of you are done, then your results unlock together.'}
+            : WAITING.BEFORE_PURCHASE}
         </p>
 
         {!existing && inp('Your first name', 'name', 'text', { autoComplete: 'given-name' })}
@@ -13959,7 +13961,7 @@ export default function App() {
                     <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1rem" }}>✓</div>
                     <div>
                       <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>{account.partnerName || "Your partner"} has joined.</div>
-                      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Once both of you complete your exercises, your results will unlock.</div>
+                      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>{WAITING.DASHBOARD}</div>
                     </div>
                   </div>
                 )}
@@ -14019,7 +14021,7 @@ export default function App() {
 
                 {/* ════ STEP 1 · COMPLETE YOUR EXERCISES ════ */}
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <DashStepHeader num="1" title="Complete your exercises" sub="Answer on your own. Results unlock when both of you finish." isMobile={isMobile} />
+                  <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {(() => {
                       // Exercises are numbered in sequence, so the intimacy
@@ -14084,7 +14086,7 @@ export default function App() {
                     style={{ width: "100%", marginBottom: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
                     {bothDone ? "Review results →" : "Review results"}
                   </button>
-                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0 0 0.85rem", fontFamily: BFONT }}>Unlocks when both of you finish all exercises.</p>}
+                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0 0 0.85rem", fontFamily: BFONT }}>{WAITING.DASHBOARD}</p>}
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {[
                       { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
@@ -14132,7 +14134,7 @@ export default function App() {
                     {hasWorkbookOrder && (
                       <GrowSquare color="#9B5DE5" icon={GrowIcons.workbook(workbookReady ? "#9B5DE5" : "#B3A693")}
                         title={workbookReady ? "Your workbook is ready" : "Your personalized workbook"}
-                        sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : "Unlocks once both of you finish.")}
+                        sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : WAITING.DASHBOARD)}
                         cta={workbookBuilding ? "Preparing…" : (workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked"))}
                         onClick={workbookReady ? downloadWorkbook : undefined}
                         disabled={!workbookReady} />
@@ -14316,7 +14318,7 @@ export default function App() {
 
                 {!bothDone && (
                   <div style={{ background: "#F7F4EE", border: "1px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.25rem", fontSize: "0.8rem", color: "#8C7A68", fontFamily: BFONT, lineHeight: 1.6 }}>
-                    <strong style={{ color: "#5A5750" }}>Waiting on {partnerName || "your partner"}?</strong> Share your Attune link so they can complete their side. Results unlock when both of you are done.
+                    <strong style={{ color: "#5A5750" }}>Waiting on {partnerName || "your partner"}?</strong>  Share your Attune link so they can complete their side. {WAITING.DASHBOARD}
                   </div>
                 )}
               </div>
@@ -15184,7 +15186,7 @@ export default function App() {
         <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.4rem", fontSize: "1.4rem", color: "white" }}>◴</div>
           <h2 style={{ fontFamily: font.display, fontSize: "1.6rem", fontWeight: 700, color: C.ink, margin: "0 0 0.5rem" }}>Results pending</h2>
-          <p style={{ fontSize: "0.9rem", color: C.muted, lineHeight: 1.65, margin: "0 0 1.5rem" }}>Your results open when both of you finish all exercises. You'll both see everything at the same time.</p>
+          <p style={{ fontSize: "0.9rem", color: C.muted, lineHeight: 1.65, margin: "0 0 1.5rem" }}>{WAITING.DASHBOARD} You'll both see everything at the same time.</p>
           <div style={{ background: "white", border: ("1.5px solid " + C.stone), borderRadius: 14, overflow: "hidden", textAlign: "left", marginBottom: "1.25rem" }}>
             {(() => {
               // Numbered by what this couple actually owns, so a core package

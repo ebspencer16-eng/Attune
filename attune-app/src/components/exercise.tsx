@@ -27,6 +27,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
+import { WAITING } from '@/constants/waiting';
 
 const c = Colors.light;
 
@@ -114,8 +115,7 @@ export default function Exercise({
         <View style={{ padding: Spacing.xl }}>
           <Text style={{ ...Type.hero, color: c.textStrong }}>That is everything</Text>
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-            Your answers are saved. Results open once you have both finished.
-          </Text>
+            {WAITING.EXERCISE_FOOTER}</Text>
           <Pressable
       accessibilityRole="button"
             onPress={onFinished}

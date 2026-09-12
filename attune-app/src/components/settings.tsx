@@ -24,6 +24,7 @@ import { deleteAccount, fetchHome } from '@/api/client';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
+import { WAITING_SETTINGS } from '@/constants/waiting';
 
 const c = Colors.light;
 const SITE = 'https://www.attune-relationships.com';
@@ -104,7 +105,7 @@ function ExerciseStatus() {
           <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: Spacing.sm }}>
             {home.resultsReady
               ? 'Results are open.'
-              : 'Results open when both of you finish everything owned.'}
+              : WAITING_SETTINGS}
           </Text>
         </View>
       )}

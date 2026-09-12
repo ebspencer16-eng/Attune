@@ -34,6 +34,7 @@ import SignIn from '@/components/sign-in';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
+import { WAITING } from '@/constants/waiting';
 
 const c = Colors.light;
 
@@ -199,9 +200,10 @@ export default function InsightsScreen() {
         }>
         <Text style={{ ...Type.hero, color: c.textStrong }}>Your exercises</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
-          {mineLeft === 0 && theirsLeft > 0
-            ? `You're done. Results open once ${partner} finishes.`
-            : `Results open once you have both finished. ${mineLeft} left for you.`}
+          {/* Both branches were written in the app. The first named the partner,
+              the second counted what was left, and neither is in Ellie's
+              lines. Two of hers, from the shared module. */}
+          {mineLeft === 0 && theirsLeft > 0 ? WAITING.LOCKED_BY_THEM : WAITING.DASHBOARD}
         </Text>
 
         <StatusTable exercises={exercises} you={you} partner={partner} onOpen={setOpenExercise} />
