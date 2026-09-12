@@ -131,7 +131,18 @@ for (const m of src.matchAll(/\buseEffect\s*\(/g)) {
   const at = `src/App.jsx:${lineAt(m.index)}`;
 
   // 1. A client-minted timestamp inside something that gets stored.
-  if (/Date\.now\(\)/.test(body) && /\bset[A-Z]\w*\(|localStorage\.setItem/.test(body)) {
+  /**
+   * `\bset[A-Z]\w*\(` matches setInterval, which every polling effect has by
+   * definition, so the first version's "and it stores something" condition was
+   * always true. It flagged the diagnostics hook, which uses Date.now() to
+   * measure elapsed seconds and stores nothing.
+   *
+   * A React state setter or localStorage, and the timer functions excluded by
+   * name.
+   */
+  const stores = /\bset(?!Interval\b|Timeout\b|Attribute\b)[A-Z]\w*\(/.test(body)
+    || /localStorage\.setItem/.test(body);
+  if (/Date\.now\(\)/.test(body) && stores) {
     const off = body.indexOf('Date.now()');
     problems.push(
       `${at} polls and stores a value built with Date.now() (line ${lineAt(range[0] + off)}).\n`
