@@ -4046,10 +4046,14 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, paddingBottom: "0.1rem" }}>{catIdx + 1} of {FIXED_CATS.length}</span>
           </div>
 
-          {/* Progress */}
-          <div style={{ height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 2, marginBottom: "1.25rem" }}>
-            <div style={{ height: "100%", background: fc.color, borderRadius: 2, width: `${((catIdx + 1) / FIXED_CATS.length) * 100}%`, transition: "width 0.3s" }} />
-          </div>
+          {/* A dividing line, not a progress bar.
+              Ellie asked for this on the app first and then here: the count
+              beside the heading already says where you are, and a bar
+              measuring how far through a set of conversations you have read
+              turns reading your own results into a task with a completion
+              percentage. The category's colour stays, because it is what ties
+              this page to its tile on Results at a glance. */}
+          <div style={{ height: 2, background: fc.color, opacity: 0.5, borderRadius: 2, marginBottom: "1.25rem" }} />
 
           {/* ── FOCAL POINT: Couple-type starter ── */}
           <div style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.13)", borderRadius: 14, padding: "1.1rem 1.3rem", marginBottom: "1.4rem" }}>
