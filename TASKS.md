@@ -20,13 +20,18 @@ moved past; it is listed so nothing is taken on trust.
 | G2a | Delete account asks for no password. The policy says it does. Add the step, or amend the policy. |
 | G2b | The words for the partner's notification. Policy: "Your partner is notified that you have deleted your account." Nothing notifies them. |
 | G2c | The words for the deletion confirmation email. Policy promises one twice. None is sent. |
+| G3 | **Three more published promises the code does not keep.** Evidence in `LEGAL-VS-CODE.md`. |
+| G3a | Policy keeps consent records 7 years. Nothing records an acceptance, and the EULA says buying is the agreement. Record the event, or amend the paragraph. |
+| G3b | Policy keeps payment records 7 years. Deletion removes the order row. Stripe holds the real record, so amending is the smaller and better fix. |
+| G3c | Policy promises EU/UK a consent banner. What exists is a US notice with no Accept, not geo-aware. Amend, or build a real gate. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
-| O1 | Order email points at the app. **Built, gated off**: `APP_LIVE` is false and `APP_STORE_URL` ends in `idPENDING`. A flag flip and a real store id, not work. |
+| O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O2 | `check-exercise-flow.mjs` migrated and running, but a clean pass has not been watched to the end. Header carries the two commands. |
+| O4 | The React app shows no privacy notice: `index.html` does not load `_flags.js`, which nine static pages do. Careful, that file also injects the app-download bar. |
 | O3 | When one partner deletes, the other loses **all** results, including the parts from their own answers. The policy says they keep those. Migration, a `resultsGate` state, a one-person results view on both surfaces, and copy. Scoped in `DELETION.md`; not started. |
 
 
@@ -377,6 +382,7 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task | Verified by |
 |--|--|--|
+| — | Launch flags lived in four places by hand | `check-flags.mjs`, 4 plants |
 | — | Profile setup could spin forever on a failed read | `check-read-failures.mjs`, 3 plants |
 | — | Scheduled email carried no unsubscribe link | `check-unsubscribe.mjs`, 4 plants (2 of which it missed until fixed) |
 | — | Dashboard reloading itself | Ellie's screenshot: 75s, 0 renders and 0 fetches in the last 5s |
