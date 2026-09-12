@@ -1,100 +1,142 @@
-# Task ledger
+# Tasks
 
-Every request Ellie has made, with its status and how that status was
-checked. It exists because statuses were being reported from memory, and
-on 2026-09-12 she found two things reported done that were not.
+Every request, one line each. Built from all 135 messages in the transcript,
+not from memory. Updated when a list arrives, and again when the work lands.
 
-**The rule: a status is a claim, and a claim needs evidence.** "Done" here
-always says how it was checked. Anything checked only by reading code that
-looks right is marked *unverified*, because that is what it is.
-
-Status vocabulary:
-
-| | |
-|---|---|
-| **DONE** | Verified. The check is named. |
-| **DONE (unverified)** | Changed, but nothing has confirmed the result on screen. |
-| **OPEN** | Not done. |
-| **PARTIAL** | Done in one place, not another. The gap is named. |
-| **ELLIE** | Waiting on a decision or on copy. |
-| **CANNOT REPRODUCE** | Reported broken, not reproducible here. What is needed is named. |
+**A status is a claim and needs evidence.** "Verified" names the check.
+Anything only a person holding a phone can confirm stays in section 3.
 
 ---
 
-## Open right now
+## 1. Needs your guidance
 
-| # | Ask | Status | Notes |
-|---|---|---|---|
-| 1 | No page eyebrows anywhere in results, site and app | **DONE** | Four more removed from the site: "How You Communicate" on the comms glance, "Physical Intimacy", "Conflict patterns", and an empty eyebrow row still holding its margin on the Expectations detail pages. The app had none. `check-page-eyebrows.mjs` now fails the build on any uppercase label matching a section name from the server's own nav; verified by planting one on each surface, and by confirming a block label that is not a section name stays quiet. |
-| 2 | Life & Values detailed page not working | **CANNOT REPRODUCE** | Registry fixed in d5e2669: the nav offers `exp-convo-5` and the section exists. In demo the page renders 1991 characters, more than its neighbour. Clicking through from the glance did not move `activeResult` in my harness, which may be my harness or may be the bug. **Need: is it blank, wrong content, or does the link go nowhere? Site or app?** |
-| 3 | "Both exercises" prose → "all exercises" | **DONE** | Two left, not one: "Both exercises complete" and "Both exercises complete." with a full stop, which the first search missed. Both changed. |
-| 4 | Expectations glance: colour every "conversations to have" tile, not just Life & Values. App mirrors. | **OPEN** | New 2026-09-12. |
-| 5 | Home: title the insight of the day section; title above left, citation below right | **OPEN** | New 2026-09-12. The title text is copy, so it is Ellie's unless an existing server label fits. |
-| 6 | Home: make the glow more visible | **OPEN** | New 2026-09-12. |
-| 7 | Home: greeting says "good evening" at noon | **DONE** | `/api/home` runs on the edge, where the clock is UTC, and `getHours()` read it. Noon Mountain is 18:00 UTC. The device now sends its offset and the server does the arithmetic. `check-greeting-clock.mjs` checks all three parts and six times of day in two zones; verified by planting each part of the fix being undone. |
-| 8 | "Start shared budgeting" opens a blank page; build the resources into the app | **OPEN** | New 2026-09-12. Two things: the broken link, and the larger question of the tools living in the app at all. |
-| 9 | The twenty phrasings of "this opens when you have both finished" | **ELLIE** | List pulled for review 2026-09-12. One sentence everywhere, or six keyed by situation. |
-| 10 | Placeholder greeting phrases | **ELLIE** | Generated, in `ANYTIME` in `api/_lib/next-action.js`. Never reviewed. |
-| 11 | `check-exercise-flow.mjs` cannot run | **ELLIE** | Has a sandbox path hardcoded in it. Real coverage nothing else has. Migrate to the Chrome driver, or delete. |
-| 12 | Demo answers for Conflict Patterns | **ELLIE** | Needed if Conflict should appear in the showcase tour. Two written answers per partner, her copy. |
+| # | Question |
+|--|--|
+| G1 | Account setup in the app? You asked: should the order email say download the app, then set up there? Today setup is website-only (`screen-states.tsx:44`). It is a real build, not a copy change. |
+| G2 | Insight of the day needs a title. The words are yours. Layout is built and waiting on them. |
+| G3 | "Resources built in the app": which of Budget / Checklist / Workbook run *in* the app, vs open the site cleanly? Full in-app builds are large. |
+| G4 | Waiting copy group 5: your line is generic. The site currently names the section ("...finished Expectations") and the partner ("Preston has not completed it yet"). Drop both for your one line? |
+| G5 | `check-exercise-flow.mjs` has a sandbox path baked in and runs nowhere. Real coverage nothing else has. Migrate or delete? |
+| G6 | Conflict Patterns has no demo answers, so it is absent from the showcase tour. Needs two written answers per partner, your copy. |
+| G7 | Greeting rotation phrases ("welcome back" etc.) were generated as placeholders and never reviewed. In `ANYTIME`, `api/_lib/next-action.js`. |
 
 ---
 
-## Closed
+## 2. Open
 
-### Results and content
-
-| Ask | Status | Checked by |
-|---|---|---|
-| Conflict results in the app don't look like the site | DONE (unverified) | Four pages compared block by block against `src/App.jsx`; the glance ground, the privacy line, the written-answer cards and the repair columns changed. Not seen on a phone. |
-| Remove "One thing to try" from conflict Results at a glance, both surfaces | DONE | `grep` confirms it now appears only on the Patterns detail page and the comms domain pages. |
-| Delete `SNAPSHOT_PROSE` and `repairTitle` | DONE | No references remain anywhere, including the payload, the app's types, the fixture, the copy test and the approval doc. |
-| Display both answers that were never shown, app and site | DONE | `check-unshown-answers.mjs`: 6 shared conflict fields drawn by both, 8 written Reflection questions have headings. |
-| Conflict says "not open yet" when it is present | DONE | `check-conflict-source.mjs` passes; both surfaces read `/api/conflict-results`. |
-| Conflict exercises work on app but not web | DONE | 580fc21. The site read a deliberately stripped field. `check-stripped-fields.mjs` gates it. |
-| Dashboard showed Exercise 1 incomplete | DONE | `check-results-gate.mjs`: 3 deciders, one rule, 6 readiness cases. |
-| Reflection placement dots missing | DONE | Six `Marker pct=` sites; `check-position-units.mjs` gates the unit. |
-| Rel Reflection pages had no data | DONE | Renders in the smoke test; `check-results-coverage.mjs` covers all 29 sections. |
-| Physical Intimacy missing from the app nav | DONE | 20 references in `results.tsx`; nav comes from the server. |
-| Storycards look different from the site | DONE (unverified) | Cause was the app never being in the brand typeface (fd29adb). `check-fonts.mjs` and `check-storycard-fields.mjs` gate it. Not seen on a phone since. |
-| Comms dimensions in the wrong order | DONE | `check-dimension-order.mjs`; one `DIMENSION_DISPLAY_ORDER`. |
-| Rename "Giving and Receiving Feedback" to "Feedback" | DONE | The label is gone; the only remaining match is prose about feedback. |
-| Remove the progress bar from Expectations detail in the app | DONE | Removed; the note at `results.tsx:812` records it. |
-| Approach paragraphs hard to read, should be orange | DONE | `introColor` passed from the couple type. |
-| Remove the first sentence of the 50 approach paragraphs | DONE | All 50 rewritten in `expectation-starters.js`. |
-| Leave the pole labels as full question text | DONE | Honoured; nothing changed them. |
-| Six removals: "Tap any dimension below", "What you expect", "Physical intimacy expectations", "Conflict patterns" eyebrow and dot, conflict detail eyebrows, "what you both wrote" → "what you each wrote" | DONE | 84e8df4. Superseded by open item 1, which is wider. |
-| Text selection down to a fragment of a sentence | DONE | Confirmed by Ellie: "Word range selection is fine." |
-| Notes tab reorganisation | DONE | Three sections, unread marks, sorted tag list (e32792b). |
-| Marking reached only 9 of 43 paragraphs | DONE | Now 34; `check-markable-prose.mjs` gates it. |
-| Two exercises could drop an answer silently | DONE | `check-save-feedback.mjs`: all five report. |
-
-### Repo and infrastructure
-
-| Ask | Status | Checked by |
-|---|---|---|
-| Remove unreferenced files and code | DONE | 3,574 tracked files → 463. A fresh clone checks out 10MB instead of ~66MB. |
-| Delete the QR printouts | DONE | Five deleted; `qr-card-v5` (routed) and `qr-cards-print` (generated, linked from admin) kept. |
-| Delete the root-level SQL files | DONE | Two deleted. `supabase-password-reset-email.html` kept: an email template, not SQL. |
-| Delete review artifacts that are not current | DONE | Five, all last touched 2026-04-07, none current. |
+| # | Task |
+|--|--|
+| O1 | Site: Life & Values lands on the storycard highlights page instead of its own |
+| O2 | App: two Life & Values dropdowns on Expectations at a glance |
+| O3 | Waiting copy: your 6 lines into one shared module, both surfaces, plus a gate |
+| O4 | Home: title above the insight, left-aligned |
+| O5 | Home: citation below, right-aligned (currently centred) |
+| O6 | Home: glow more visible |
+| O7 | "Start shared budgeting" opens a blank website page |
+| O8 | Expectations at a glance: coloured left border on every "conversations to have" tile, not just Life & Values |
+| O9 | Same, mirrored in the app |
 
 ---
 
-## What went wrong with tracking, and what changes
+## 3. Done, not verified
 
-Requests arrived in batches of eight and nine. Each batch was worked
-through in order, and the ones that were genuinely done were reported
-accurately. What was missing was any record that survived the batch, so
-nothing ever went back and asked whether a removal had been applied
-everywhere it should have been. "Remove the eyebrows" was done on five
-pages and not on the glance pages, and there was nothing to catch that
-because there was no list.
+Changed and building clean. Nobody has looked at it on a phone or in a browser.
 
-Three things change:
+| # | Task |
+|--|--|
+| U1 | Conflict results app matches site: one dark ground, cards, privacy line, repair columns |
+| U2 | Splash overlay was the Expo logo on every launch; now `splash-icon.png` |
+| U3 | Marking extended from 9 to 34 prose sites |
+| U4 | Storycards in the brand typeface (cause of four rounds of "still different") |
+| U5 | Expectations detail: progress bar removed (app) |
+| U6 | Approach paragraph heading orange, from the couple type colour |
+| U7 | Approach paragraphs: first sentence removed, all 50 |
+| U8 | Comms glance: bars shortened, labels stop wrapping, evenly spaced |
+| U9 | "Giving and Receiving Feedback" renamed "Feedback" |
+| U10 | Storycard 5 "80%" no longer clipped |
+| U11 | Placement dots tightened when they offset |
+| U12 | Side-by-side bars widened back toward the tile edge |
+| U13 | Couple map: dot glow, axis labels, legend removed, small print restored |
+| U14 | Couple type: coloured tile, axes descriptions trimmed |
+| U15 | Intimacy side-by-side moved into dropdowns |
+| U16 | Rel Reflection, Intimacy, Conflict rebuilt to the site's pages |
+| U17 | Resources: circular icons, top line removed, In Practice wired in |
+| U18 | In Practice: narrow collections tile with arrows, Recent 2x3 |
+| U19 | Couple type action items: eyebrow, left border, nested shaded phrase |
+| U20 | Comms detail pages carry the site's intro paragraphs |
 
-1. This file. Every ask gets a row before work starts, not after.
-2. A status says how it was checked. "DONE (unverified)" is a real status
-   and is used for anything only a person looking at a phone can confirm.
-3. A removal asked for in general terms gets a search across both surfaces
-   and, where it is a rule worth keeping, a gate. Six named removals became
-   six edits when the ask was really "no page eyebrows anywhere".
+---
+
+## 4. Done and verified
+
+Newest first. Evidence named.
+
+| # | Task | Verified by |
+|--|--|--|
+| V1 | Greeting said "good evening" at noon | `check-greeting-clock.mjs`, 6 times of day in 2 zones; 3 plants |
+| V2 | No page eyebrows anywhere in results | `check-page-eyebrows.mjs` vs the server's nav; 3 plants |
+| V3 | "Both exercises" → "all exercises" | Two survivors found and fixed; grep clean |
+| V4 | QR printouts, root SQL, stale reviews deleted | 12 files; build + gates clean |
+| V5 | `node_modules` untracked: 3,083 files, 56MB | Tracked files 3,574 → 463 |
+| V6 | 16 Expo bootstrap leftovers deleted | App bundles; no references |
+| V7 | "One thing to try" off conflict at-a-glance, both surfaces | grep: only on detail pages now |
+| V8 | `SNAPSHOT_PROSE` and `repairTitle` deleted | No references anywhere |
+| V9 | Every website view renders, not just results | smoke: 30 sections + 13 views; plant |
+| V10 | Partner could be served the other's conflict patterns via the registry | `check-partner-privacy`, 5 plants |
+| V11 | Entitlements takeable from the request 4 ways | `check-entitlement-inputs`, 4 plants |
+| V12 | Ownership copied via lookup and list | `check-ownership-rule`, 5 plants |
+| V13 | Client-side grant hoisted one line escaped the gate | `check-entitlement-bypass`, 5 plants |
+| V14 | Auth header gate blind to property reads and `api/_lib` | `check-auth-headers`, 6 plants |
+| V15 | Annotation fallback colour never checked against the palette | `check-annotation-palette`, isolated plant |
+| V16 | 2 of 5 exercises dropped answers silently | `check-save-feedback`, 2 plants |
+| V17 | Reflection placement dots rendered at 10000% | `check-position-units` |
+| V18 | Four Conflict pages had never been rendered by anything | smoke 30/30 with a fixture |
+| V19 | Text selection down to a sentence fragment | Ellie: "Word range selection is fine" |
+| V20 | Notes tab: three sections, unread marks, sorted tags | Built to the spec in msg 105 |
+| V21 | Rel Reflection pages had no data | Renders in smoke; `check-results-coverage` |
+| V22 | Physical Intimacy missing from app nav | Nav comes from the server; 20 refs |
+| V23 | Comms dimensions in the wrong order | `check-dimension-order`, one list |
+| V24 | Both hidden answers now shown, app and site | `check-unshown-answers` |
+| V25 | Conflict said "not open yet" when present | `check-conflict-source` |
+| V26 | Conflict exercises worked on app, not web | Site read a stripped field; `check-stripped-fields` |
+| V27 | Dashboard showed Exercise 1 incomplete | `check-results-gate`, 6 cases |
+| V28 | Results opened before every owned exercise was done | Same gate |
+| V29 | Physical Intimacy unlockable free on production | `check-entitlement-bypass` |
+| V30 | Six named removals (dimension prose, 4 eyebrows, "what you each wrote") | Superseded by V2, wider |
+| V31 | Side-by-side dropdowns on every detail page | Ellie: "Side by side looks great" |
+| V32 | App results calculations matched the site | `check-scoring-mirror`, `check-alignment-rule` |
+| V33 | "The bigger questions" → "Life & Values" | grep: only a comment remains |
+| V34 | "Your next moves", "This week", "You two are" removed | grep clean |
+| V35 | App-invented prose removed from results pages | `check-results-copy-reach` |
+| V36 | Life & Values had no page on either product | Registry from one list; renders in smoke |
+| V37 | App home redesign: blue ground, cream tile, insight of the day | Ellie: "Glow looks great" |
+| V38 | Resources: exercises delisted, Explore more hidden when owned | Built per msg 81 |
+| V39 | Marketing site: 12 items (hero italics, banners, spacing, sections) | Ellie reviewed |
+| V40 | Portal: 8 items (banner line, eyebrows, pill, glance lines) | Ellie reviewed |
+| V41 | Em dashes out of all customer copy | `check-em-dashes` |
+| V42 | `/how-it-works` and `/couple-types` deleted, links removed | Files gone |
+| V43 | Security audit: 14 findings, CORS, headers, error leakage | SECURITY.md; gates |
+| V44 | `/api/create-profile` took `pkg` from the body | `check-entitlement-inputs` |
+| V45 | partner-sync leaked conflict and intimacy | `check-partner-privacy`, `check-intimacy-privacy` |
+| V46 | Sign-in enumeration | One message for all failures |
+| V47 | Legal page, deletion flow, privacy choices, cookie notice | Ellie reviewed |
+| V48 | Settings screen with in-app account deletion | Guideline 5.1.1(v) |
+| V49 | Social sign-in, Google and Apple, both surfaces | `check-oauth-providers` |
+| V50 | Reviewer test account | Ellie: "Dashboard fixed!" |
+| V51 | Exercises answerable in the app, all five | `check-exercise-registry` |
+| V52 | Results experience in the app, all 29 sections | `check-results-coverage` |
+| V53 | Notes tab built against `/api/notes` | Ellie reviewed screenshots |
+| V54 | Three hardcoded app-side lists deleted | `check-app-derives` |
+
+---
+
+## How this is kept
+
+1. A list arrives. This file is updated first, before any work.
+2. Work happens.
+3. This file is updated again, then handed back for review.
+4. A general ask ("remove all X") gets a search across both surfaces and a
+   gate, not the edits the message happened to name. That miss is what put
+   "How You Communicate" back in front of you after five eyebrows went.
+5. Every content change to one surface is mirrored on the other. Standing
+   instruction, msg 79.
