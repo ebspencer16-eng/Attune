@@ -372,6 +372,7 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Task | Verified by |
 |--|--|--|
+| — | Scheduled email carried no unsubscribe link | `check-unsubscribe.mjs`, 4 plants (2 of which it missed until fixed) |
 | — | Dashboard reloading itself | Ellie's screenshot: 75s, 0 renders and 0 fetches in the last 5s |
 | — | "Start shared budgeting" opened a 28-character blank page | `check-gated-views.mjs`; 1214 chars where there were 28 |
 | — | Five of six category tiles had no colour | `check-category-colors.mjs`, 2 plants |
