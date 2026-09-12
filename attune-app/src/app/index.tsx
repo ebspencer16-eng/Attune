@@ -409,9 +409,27 @@ function PrimaryCard({ card, onPress }: { card: HomeCard; onPress: () => void })
  * single ring has a findable edge. Cumulative opacity at the centre is
  * 1 - (1 - GLOW_ALPHA) ** GLOW_RINGS, which at these values is about 0.21.
  */
-const GLOW_RINGS = 26;
-const GLOW_DIAMETER = 300;
-const GLOW_ALPHA = 0.009;
+const GLOW_RINGS = 30;
+const GLOW_DIAMETER = 330;
+/**
+ * Ellie: "Can we make the glow a little more visible? Currently it's slightly
+ * too subtle."
+ *
+ * Raised per ring rather than by adding rings, because ring count controls
+ * smoothness and alpha controls brightness, and the thing she is asking for is
+ * brightness. Cumulative opacity at the centre is
+ * 1 - (1 - GLOW_ALPHA) ** GLOW_RINGS, so this moves it from about 0.21 to
+ * about 0.33. Still well under a half, which is where the couple map's dots
+ * sit, and no single ring is near the threshold where its own edge is
+ * findable, which is what made the first two attempts read as circles.
+ */
+const GLOW_ALPHA = 0.0133;
+
+/**
+ * Ellie: "Let's call it insight of the day for now, we can adjust later if we
+ * decide to." Her words, so they live in one place rather than inline.
+ */
+const INSIGHT_TITLE = 'Insight of the day';
 
 function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research']> }) {
   return (
@@ -471,6 +489,19 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
         </View>
       </View>
 
+      {/* ── THE SECTION HAS A NAME NOW ─────────────────────────────────
+          Ellie: "Please title the insight of the day section. Maybe title is
+          above and left-aligned, and citation is below and right-aligned."
+
+          So the block reads top-left to bottom-right: what this is, the
+          finding, who said it. The words are hers, from her own message. */}
+      <Text
+        style={{
+          ...Type.eyebrow, color: 'rgba(255,255,255,0.55)',
+          textAlign: 'left', marginBottom: Spacing.md,
+        }}>
+        {INSIGHT_TITLE}
+      </Text>
       <Text
         style={{
           ...Type.title, fontSize: 19, lineHeight: 29, fontWeight: '400',
@@ -481,7 +512,7 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
       <Text
         style={{
           ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic',
-          marginTop: Spacing.lg, textAlign: 'center',
+          marginTop: Spacing.lg, textAlign: 'right',
         }}>
         {finding.source}
       </Text>

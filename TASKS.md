@@ -20,13 +20,9 @@ Anything only a person holding a phone can confirm stays in section 3.
 | # | Task |
 |--|--|
 | O1 | Site: Life & Values lands on the storycard highlights page. Left nav and the bottom-right arrow both. **Not reproducible here** — a browser click in demo lands on `exp-convo-5` at "6 of 6", and the live bundle carries today's pushes. See G8. |
-| O2 | Home: "Insight of the day" title above, left-aligned |
-| O3 | Home: citation below, right-aligned (currently centred) |
-| O4 | Home: glow more visible |
 | O5 | "Start shared budgeting" opens a blank website page |
 | O6 | Expectations at a glance: colour every "conversations to have" tile |
 | O7 | Same, mirrored in the app |
-| O8 | **Site dashboard glitching and blinking** (new, and the likely cause of O1) |
 | O9 | Account setup in the app, so users are pointed there rather than the website |
 | O10 | Order confirmation email: download the app, set up there |
 | O11 | Budget tool runs in the app |
@@ -73,7 +69,9 @@ Newest first. Evidence named. (Numbers are labels, not an order.)
 
 | # | Task | Verified by |
 |--|--|--|
-| V1 | 22 waiting sentences became your 6, one module both surfaces read | `check-waiting-copy.mjs`, 4 plants incl. a revert |
+| V1 | Dashboard re-rendered itself every 15s, forever | `check-poll-writes.mjs`, 3 plants |
+| V1b | Home: title, citation alignment, brighter glow | tsc + bundle; **needs your eyes** |
+| V1c | 22 waiting sentences became your 6, one module both surfaces read | `check-waiting-copy.mjs`, 4 plants incl. a revert |
 | V2 | Two Life & Values dropdowns in the app | `check-nav-targets` counts buckets; 2 plants |
 | V3 | A test named "not an empty bucket" passed on an empty bucket | Fixture now answers life questions |
 | V4 | Greeting said "good evening" at noon | `check-greeting-clock.mjs`, 6 times of day in 2 zones; 3 plants |
