@@ -11528,8 +11528,28 @@ export default function App() {
   const loadAccount = () => {
     try { return JSON.parse(localStorage.getItem("attune_account") || "null"); } catch { return null; }
   };
+  /**
+   * Returns whether the write actually happened.
+   *
+   * It swallowed the failure and told nobody, which would be fine if nothing
+   * depended on it. The sign-in reconcile does: it writes the account, then
+   * reloads so the state initialisers re-read localStorage. If the write did
+   * not happen, the next load takes the same branch and reloads again, and
+   * the dashboard reloads for ever. Ellie: "I waited 2mins, it kept refreshing
+   * and never got past 1sec."
+   *
+   * localStorage throws when the origin is out of quota, and this app keeps
+   * twenty-one keys there including every exercise's answers and their prior
+   * snapshots, so a long-standing account is the one most likely to hit it.
+   */
   const saveAccount = (acct) => {
-    try { localStorage.setItem("attune_account", JSON.stringify(acct)); } catch {}
+    try {
+      localStorage.setItem("attune_account", JSON.stringify(acct));
+      return true;
+    } catch (e) {
+      console.error('[Attune] could not save the account locally:', e && e.name);
+      return false;
+    }
   };
   const [account, setAccount] = useState(loadAccount);
   // After clicking the email-confirmation link, Supabase redirects to /app with
@@ -12212,7 +12232,9 @@ export default function App() {
               createdAt: profile?.created_at ? new Date(profile.created_at).getTime() : Date.now(),
             };
             setAccount(rebuilt);
-            saveAccount(rebuilt);
+            // Whether the account reached localStorage. The reload below is
+            // only safe if it did; see the comment there.
+            let accountSaved = saveAccount(rebuilt);
 
             // Invitee inherits the buyer's relationship status (drives Ex2
             // variant). Resolve Partner A's status from the linked profile.
@@ -12222,7 +12244,7 @@ export default function App() {
                 if (aProf?.relationship_status) {
                   rebuilt.buyerRelationshipStatus = aProf.relationship_status;
                   setAccount({ ...rebuilt });
-                  saveAccount(rebuilt);
+                  accountSaved = saveAccount(rebuilt);
                 }
               } catch {}
             }
@@ -12307,10 +12329,40 @@ export default function App() {
             // and rendered stale until the next navigation. Combined with the
             // state initializers only reading localStorage at mount, that is
             // why a status could read Start on one load and Done on the next.
-            if (profile?.ex1_answers || profile?.ex2_answers || profile?.ex3_answers
-                || profile?.intimacy_data || profile?.conflict_data) {
+            /**
+             * ── AT MOST ONCE ────────────────────────────────────────────
+             * This reload had no guard. It exists so the state initialisers
+             * re-read localStorage, and it is correct exactly once: the branch
+             * it sits in only runs when the stored account does not match the
+             * session, and writing the account should make that false.
+             *
+             * Should. If the write failed, the branch runs again on the next
+             * load and reloads again, for ever, which is what Ellie was
+             * watching: a dashboard that never got past one second.
+             *
+             * Two guards. The account write has to have landed, and a marker
+             * survives the reload so a second one cannot follow. sessionStorage
+             * rather than localStorage on purpose: if the quota is what broke
+             * the write, localStorage is exactly the thing that cannot be
+             * relied on here.
+             */
+            const RELOADED = 'attune_reconcile_reloaded';
+            let alreadyReloaded = false;
+            try { alreadyReloaded = sessionStorage.getItem(RELOADED) === '1'; } catch {}
+
+            const hasAnswers = profile?.ex1_answers || profile?.ex2_answers
+              || profile?.ex3_answers || profile?.intimacy_data || profile?.conflict_data;
+
+            if (hasAnswers && accountSaved && !alreadyReloaded) {
+              try { sessionStorage.setItem(RELOADED, '1'); } catch {}
               window.location.reload();
               return;
+            }
+            if (hasAnswers && !accountSaved) {
+              // Nothing to gain from reloading into the same state. The screen
+              // renders from what is in memory, which is correct for this
+              // session even though it will not survive a refresh.
+              console.error('[Attune] account did not persist; skipping the reconcile reload.');
             }
           } else {
             // Session and local account both valid. Re-sync entitlements from
@@ -12365,9 +12417,29 @@ export default function App() {
                * by check-answer-clears.mjs.
                *
                * The reload is the sibling branch's, for the same reason: the
-               * state initializers only read localStorage at mount. It cannot
-               * loop, because the next load finds the cache populated and
-               * fills nothing.
+               * state initializers only read localStorage at mount.
+               *
+               * ── IT COULD LOOP, AND IT DID ────────────────────────────────
+               * This used to say it could not loop, "because the next load
+               * finds the cache populated and fills nothing". That is true for
+               * the three exercises whose cache is a plain answers object. It
+               * is false for the two whose shape is `record`.
+               *
+               * intimacy_data and conflict_data land in their column verbatim
+               * from whatever the client sent, so the server does not
+               * guarantee a completedAt inside them. The test for "already
+               * have it" was !!parsed?.completedAt. For a record without one,
+               * writing the server's copy does not make that true, so the next
+               * load fills again and reloads again, for ever.
+               *
+               * Ellie: "I waited 2mins, it kept refreshing and never got past
+               * 1sec." The URL kept its query string, which is what said this
+               * was a reload rather than a navigation.
+               *
+               * The fix is to stop asking about the shape at all: if the cache
+               * already holds exactly what the server holds, there is nothing
+               * to fill, whatever is or is not inside it. The completedAt test
+               * stays as the second question, for a cache that differs.
                */
               if (prof) {
                 let filled = false;
@@ -12376,19 +12448,35 @@ export default function App() {
                   if (!fromServer) continue;
                   try {
                     const raw = localStorage.getItem(ex.localKey);
+                    const serverJson = JSON.stringify(fromServer);
+                    // Already exactly what the server has. Shape irrelevant.
+                    if (raw === serverJson) continue;
                     const parsed = raw ? JSON.parse(raw) : null;
                     const hasLocal = ex.shape === 'record'
                       ? !!parsed?.completedAt
                       : !!parsed && Object.keys(parsed).length > 0;
                     if (hasLocal) continue;
-                    localStorage.setItem(ex.localKey, JSON.stringify(fromServer));
+                    localStorage.setItem(ex.localKey, serverJson);
                     filled = true;
                   } catch { /* a cache we cannot read is one we can rewrite */ }
                 }
-                if (filled) {
+                /**
+                 * And a backstop, because "this cannot loop" was said once
+                 * already and was wrong. One reload per tab, whatever the
+                 * reason, so the worst case is stale data for one load rather
+                 * than a dashboard nobody can use.
+                 */
+                const FILLED_ONCE = 'attune_fill_reloaded';
+                let filledBefore = false;
+                try { filledBefore = sessionStorage.getItem(FILLED_ONCE) === '1'; } catch {}
+                if (filled && !filledBefore) {
+                  try { sessionStorage.setItem(FILLED_ONCE, '1'); } catch {}
                   console.warn('[Attune] restored exercise answers the server had and this device did not.');
                   window.location.reload();
                   return;
+                }
+                if (filled) {
+                  console.error('[Attune] answers restored again on the same tab; not reloading a second time.');
                 }
               }
 
