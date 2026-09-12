@@ -13060,10 +13060,44 @@ export default function App() {
   });
   // True during the initial partner-sync fetch on mount — prevents flicker of stale "waiting" card
   const [partnerSyncing, setPartnerSyncing] = useState(false);
+  /**
+   * What in a partner session is actually news.
+   *
+   * `completedAt` is stamped with Date.now() every time the poller runs, so
+   * two sessions carrying identical answers are never equal. Everything else
+   * comes from the server and changes only when the partner does something.
+   */
+  const partnerSessionFingerprint = (s) => {
+    if (!s) return '';
+    const { completedAt: _ignored, ...rest } = s;
+    try { return JSON.stringify(rest); } catch { return String(Date.now()); }
+  };
+
   const savePartnerSession = (s) => {
+    /**
+     * ── WRITE ONLY WHEN SOMETHING CHANGED ─────────────────────────────────
+     * Ellie: "the whole dashboard on the site is glitching and blinking."
+     *
+     * This ran every 15 seconds from the partner poller and wrote three things
+     * unconditionally: a partner session carrying a fresh Date.now(), a fresh
+     * account object, and both to localStorage. So the dashboard re-rendered
+     * itself every 15 seconds for as long as it was open, for every couple
+     * whose partner has answered anything. Nothing had changed on any of those
+     * renders; the timestamp made them look like it had.
+     *
+     * It also drove the second poller, whose dependency array holds
+     * partnerSession itself: a new object identity every 15 seconds tore that
+     * effect down, rebuilt it, and fired an extra /api/partner-sync on the way
+     * through.
+     *
+     * Demo never sees it, which is why every check here was silent: there is
+     * no partner to sync with.
+     */
+    if (partnerSessionFingerprint(s) === partnerSessionFingerprint(partnerSession)) return;
+
     setPartnerSession(s);
     try { localStorage.setItem('attune_partner_session', JSON.stringify(s)); } catch {}
-    if (account) {
+    if (account && !account.partnerJoined) {
       const updated = { ...account, partnerJoined: true };
       setAccount(updated);
       try { localStorage.setItem('attune_account', JSON.stringify(updated)); } catch {}
@@ -13241,7 +13275,11 @@ export default function App() {
             ...(json.profile.conflictCompletedAt
               ? { conflict: { ...(json.profile.conflictPartnerView || {}), completedAt: json.profile.conflictCompletedAt } }
               : {}),
-            completedAt: Date.now(),
+            // No completedAt here. It was Date.now(), minted on this device
+            // every fifteen seconds, and nothing read it: the two timestamps
+            // that are read, intimacy.completedAt and conflict.completedAt,
+            // both come from the server nested inside those records. All this
+            // one did was make every poll look like news.
           };
           if (!cancelled) savePartnerSession(s);
         }
@@ -13493,7 +13531,10 @@ export default function App() {
     check();
     const iv = setInterval(check, 15000);
     return () => { cancelled = true; clearInterval(iv); };
-  }, [account?.joinedViaInvite, account?.id, partnerSession, hasRealPartner]);
+  // partnerSession was in this list as a whole object, so a new identity
+  // every 15 seconds re-ran the effect and fired an extra fetch. The two
+  // fields this check actually depends on are primitives.
+  }, [account?.joinedViaInvite, account?.id, partnerSession?.partnerProfileId, hasRealPartner]);
 
   // ── PASSWORD RESET ROUTING ────────────────────────────────────────────────
   // Supabase sends user back to /app?reset=1 with a token in the URL hash.
