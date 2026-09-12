@@ -12,7 +12,7 @@ function nudgeHtml(name) {
   return `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#1a1a1a;">
   <p style="font-size:1rem;">Hi ${name},</p>
   <p style="font-size:.95rem;line-height:1.6;">Congratulations on finishing Attune together. When you're done reviewing your results and workbook, we'd love to hear what you think. It takes about two minutes and genuinely shapes what we build next.</p>
-  <p style="text-align:center;margin:1.8rem 0;"><a href="https://attune-relationships.com/app?signin=1" style="background:#E8673A;color:#fff;text-decoration:none;padding:.8rem 1.6rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700;">Share your experience</a></p>
+  <p style="text-align:center;margin:1.8rem 0;"><a href="https://www.attune-relationships.com/app?signin=1" style="background:#E8673A;color:#fff;text-decoration:none;padding:.8rem 1.6rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700;">Share your experience</a></p>
   <p style="font-size:.8rem;color:#666;line-height:1.5;">The short survey sits at the top of your dashboard whenever you're ready.</p>
 </div>`;
 }
@@ -20,7 +20,7 @@ function nudge2Html(name) {
   return `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#1a1a1a;">
   <p style="font-size:1rem;">Hi ${name},</p>
   <p style="font-size:.95rem;line-height:1.6;">No rush at all. But whenever you've had a chance to sit with your results and workbook, we'd still love to hear how the experience landed for you. Two minutes, and it really does shape what comes next.</p>
-  <p style="text-align:center;margin:1.8rem 0;"><a href="https://attune-relationships.com/app?signin=1" style="background:#E8673A;color:#fff;text-decoration:none;padding:.8rem 1.6rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700;">Share your experience</a></p>
+  <p style="text-align:center;margin:1.8rem 0;"><a href="https://www.attune-relationships.com/app?signin=1" style="background:#E8673A;color:#fff;text-decoration:none;padding:.8rem 1.6rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;font-weight:700;">Share your experience</a></p>
 </div>`;
 }
 export default async function handler(req) {

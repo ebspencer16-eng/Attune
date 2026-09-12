@@ -114,7 +114,7 @@ export default async function handler(req) {
       const ok = await sendEmail(
         user.email,
         `How are you and ${user.partner_name || 'your partner'} doing?`,
-        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
+        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
       );
       if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; sentSoFar.sent6mo = sent6mo; }
       else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; sentSoFar.failed = failed; }
@@ -129,7 +129,7 @@ export default async function handler(req) {
       const ok = await sendEmail(
         user.email,
         `A year with ${user.partner_name || 'your partner'}, and how things look now`,
-        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://attune-relationships.com/app?signin=1' })
+        checkinHtml({ toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
       );
       if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
       else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; sentSoFar.failed = failed; }
@@ -204,7 +204,7 @@ function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl }) 
   <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still in your dashboard. Retaking creates a new session. You'll be able to compare the two.</p>
 </div>
 <div class="footer">
-  Attune · <a href="https://attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
+  Attune · <a href="https://www.attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
   Questions? Reply to this email or write to hello@attune-relationships.com
 </div>
 </div>

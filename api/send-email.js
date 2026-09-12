@@ -71,9 +71,9 @@ function layout(bodyHtml, userId = null) {
 ${bodyHtml}
 </div>
 <div class="footer">
-  Attune · <a href="https://attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
+  Attune · <a href="https://www.attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
   Questions? Reply to this email or write to hello@attune-relationships.com<br/>
-  ${userId ? `<a href="https://attune-relationships.com/api/unsubscribe?token=${btoa(userId)}" style="color:#C17F47">Unsubscribe</a>` : '<a href="mailto:hello@attune-relationships.com?subject=Unsubscribe" style="color:#C17F47">Unsubscribe</a>'}
+  ${userId ? `<a href="https://www.attune-relationships.com/api/unsubscribe?token=${btoa(userId)}" style="color:#C17F47">Unsubscribe</a>` : '<a href="mailto:hello@attune-relationships.com?subject=Unsubscribe" style="color:#C17F47">Unsubscribe</a>'}
 </div>
 </div>
 </body>
@@ -119,7 +119,7 @@ function workbookPromoEmail({ toName, partnerName, code, checkoutUrl, discountPe
   const who = partnerName ? `${toName} &amp; ${partnerName}` : toName;
   const partner = partnerName || 'your partner';
   const pct = discountPercent || 30;
-  const url = checkoutUrl || 'https://attune-relationships.com/app';
+  const url = checkoutUrl || 'https://www.attune-relationships.com/app';
   return {
     subject: `${pct}% off your Attune workbook`,
     html: layout(`
@@ -209,7 +209,7 @@ function checkin6moEmail({ toName, partnerName, retakeUrl }) {
 function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasWorkbook, hasIntimacy, hasChecklist }) {
   const name = toName || "there";
   const partner = partnerName || "your partner";
-  const appUrl = portalUrl || "https://attune-relationships.com/app";
+  const appUrl = portalUrl || "https://www.attune-relationships.com/app";
 
   // Full add-on catalog. owned -> listed under "what's included"; not owned ->
   // shown as a "go deeper" upsell. Order matches the offering.
@@ -278,9 +278,9 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
       <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px">In Practice</p>
       <p style="font-size:0.8rem;color:#8C7A68;margin-bottom:14px">A few things worth reading while your results are fresh:</p>
       ${[
-        { title: "How to review your results together", url: "https://attune-relationships.com/practice/how-to-review-your-results-together", tag: "Guide" },
-        { title: "Why couples fight about the same things", url: "https://attune-relationships.com/practice/why-couples-fight-about-the-same-things", tag: "Read" },
-        { title: "How to start a hard conversation", url: "https://attune-relationships.com/practice/how-to-start-a-hard-conversation", tag: "Guide" },
+        { title: "How to review your results together", url: "https://www.attune-relationships.com/practice/how-to-review-your-results-together", tag: "Guide" },
+        { title: "Why couples fight about the same things", url: "https://www.attune-relationships.com/practice/why-couples-fight-about-the-same-things", tag: "Read" },
+        { title: "How to start a hard conversation", url: "https://www.attune-relationships.com/practice/how-to-start-a-hard-conversation", tag: "Guide" },
       ].map(r => `<p style="margin:0 0 10px"><a href="${r.url}" style="color:#E8673A;font-weight:600;font-size:0.82rem;text-decoration:none">${r.tag}: ${r.title} →</a></p>`).join('')}
     `),
   };
@@ -290,7 +290,7 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
 // ── welcome_account email ────────────────────────────────────────────────────
 function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName, hasReflection, hasIntimacy }) {
   const name = toName || "there";
-  const url = portalUrl || "https://attune-relationships.com/app";
+  const url = portalUrl || "https://www.attune-relationships.com/app";
   // List the exercises this order actually includes, so the email matches what
   // the person sees on their dashboard.
   const exercises = [
@@ -325,7 +325,7 @@ function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName, hasRefle
 // ── partner_joined_notification email ────────────────────────────────────────
 function partnerJoinedNotificationEmail({ toName, partnerName, portalUrl }) {
   const name = toName || "there";
-  const url = portalUrl || "https://attune-relationships.com/app";
+  const url = portalUrl || "https://www.attune-relationships.com/app";
   return {
     subject: `${partnerName} just joined Attune`,
     html: layout(`
@@ -344,7 +344,7 @@ function partnerJoinedNotificationEmail({ toName, partnerName, portalUrl }) {
 
 function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
   const name = toName || "there";
-  const url = retakeUrl || portalUrl || "https://attune-relationships.com/app";
+  const url = retakeUrl || portalUrl || "https://www.attune-relationships.com/app";
   return {
     subject: "One year with Attune. Your results are worth revisiting.",
     html: layout(`

@@ -61,7 +61,7 @@ export default async function handler(req) {
   const safeSetupPath = (typeof setupPath === 'string' && setupPath.startsWith('/app?') && !setupPath.includes('//'))
     ? setupPath
     : '/app?signup=1';
-  const setupUrl = `https://attune-relationships.com${safeSetupPath}`;
+  const setupUrl = `https://www.attune-relationships.com${safeSetupPath}`;
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return new Response('Email service not configured', { status: 503 });
@@ -99,7 +99,7 @@ export default async function handler(req) {
 
   // ── 3. Gift digital: email to recipient ────────────────────────────────────
   if (isGift && !isPhysical && recipientEmail) {
-    const giftUrl = `https://attune-relationships.com/app?signup=1&pkg=${pkgKey}&gift=1`;
+    const giftUrl = `https://www.attune-relationships.com/app?signup=1&pkg=${pkgKey}&gift=1`;
     emails.push({
       from: `Attune <${FROM}>`,
       to: [recipientEmail],
@@ -161,7 +161,7 @@ function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, cta
 
   // Unsubscribe link — uses encoded userId when available, else a mailto
   const unsubUrl = userId
-    ? `https://attune-relationships.com/api/unsubscribe?token=${btoa(userId)}`
+    ? `https://www.attune-relationships.com/api/unsubscribe?token=${btoa(userId)}`
     : 'mailto:hello@attune-relationships.com?subject=Unsubscribe';
 
   return `<!DOCTYPE html>
@@ -182,7 +182,7 @@ function brandedEmail({ preheader = '', title, subtitle, bodyHtml, ctaLabel, cta
   <tr><td style="background:#162040;padding:28px 40px 26px" align="left">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%"><tr>
       <td width="50" valign="middle" style="vertical-align:middle;padding-right:16px">
-        <img src="https://attune-relationships.com/attune-mark-navy.png" width="44" height="32" alt="Attune" style="display:block;border:0;outline:none">
+        <img src="https://www.attune-relationships.com/attune-mark-navy.png" width="44" height="32" alt="Attune" style="display:block;border:0;outline:none">
       </td>
       <td valign="middle" style="vertical-align:middle;border-left:1px solid rgba(255,255,255,.3);padding-left:16px">
         <div style="font-family:Georgia,'Playfair Display',serif;font-style:italic;font-size:18px;font-weight:400;color:#ffffff;line-height:1.2">Understanding takes intention.</div>
