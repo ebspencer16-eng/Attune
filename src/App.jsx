@@ -57,14 +57,12 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDim
 // Flip to true only after the full partner-view flow is verified end-to-end.
 const PARTNER_VIEW_ENABLED = true;
 
-// The "get the app" banner on the portal. OFF until the app is actually in the
-// App Store: a banner promising an app that does not exist is worse than no
-// banner, and an App Store link that 404s reads as a broken product.
+// The "get the app" banner on the portal. Both values come from
+// api/_lib/flags.js, imported at the top of this file.
 //
-// When it ships: set APP_BANNER_ENABLED to true and APP_STORE_URL to the real
-// listing. Nothing else needs changing.
-const APP_BANNER_ENABLED = false;
-const APP_STORE_URL = 'https://apps.apple.com/app/attune-relationships/idPENDING';
+// They used to be declared here, under the note "Nothing else needs changing",
+// with three other copies of the same two facts in the tree: public/_flags.js,
+// api/send-order-email.js and api/create-payment-intent.js.
 // Dimension scores for TYPE derivation: blended with the partner's view when the
 // feature is on, self-only otherwise. Self-report displays keep calcDimScores.
 function typingDimScores(selfAnswers, partnerAnswers) {
@@ -116,6 +114,7 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
+import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LAUNCH FLAGS — flip these to change what the product offers. Nothing below is
@@ -124,10 +123,11 @@ import { commsProtocols } from "../api/_lib/comms-plan.js";
 //   PHYSICAL_ENABLED — physical (printed/shipped) package variants. Phase 1
 //                     launches digital-only. Off hides the digital/physical
 //                     toggle, shipping, and physical pricing everywhere, and
-//                     forces every order to the digital variant. Phase 2:
-//                     set true (and the matching flag in public/_flags.js).
+//                     forces every order to the digital variant.
+//
+// The flags themselves live in api/_lib/flags.js and are imported at the top
+// of this file. Phase 2 is one line there, not one line per surface.
 // ═══════════════════════════════════════════════════════════════════════════
-const PHYSICAL_ENABLED = false;
 
 // ── Demo couple-type archetypes ───────────────────────────────────────────────
 // Ex1 answer sets that reliably place a partner in each quadrant of the type
@@ -13728,8 +13728,8 @@ export default function App() {
 
       <div data-main-scroll style={{ maxWidth: view === "home" ? "unset" : 860, margin: view === "home" ? 0 : "0 auto", padding: view === "home" ? 0 : (view === "results" ? 0 : (isMobile ? "1rem 1.25rem" : "3rem 2rem")) }}>
         {/* Get the app. Phones only, signed in, not already installed, and not
-            dismissed. Off entirely until APP_BANNER_ENABLED. */}
-        {APP_BANNER_ENABLED && view === "home" && isLoggedIn && isMobile && !_isStandalone && !appBannerDismissed && (
+            dismissed. Off entirely until APP_LIVE. */}
+        {APP_LIVE && view === "home" && isLoggedIn && isMobile && !_isStandalone && !appBannerDismissed && (
           <div style={{ display: "flex", alignItems: "center", gap: "0.9rem", background: "white",
             border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.9rem 1rem",
             margin: "0 0 1rem", boxShadow: "0 6px 18px rgba(14,11,7,0.06)" }}>

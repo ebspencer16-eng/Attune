@@ -18,13 +18,13 @@
  */
 
 import { unsubscribeUrl } from './_lib/email-footer.js';
+import { APP_LIVE } from './_lib/flags.js';
 
 export const config = { runtime: 'edge' };
 
-// Off until the app is in the App Store, matching APP_BANNER_ENABLED in
-// public/_flags.js and src/App.jsx. Telling buyers to download an app that
-// does not exist yet is worse than saying nothing.
-const APP_LIVE = false;
+// Off until the app is in the App Store. Telling buyers to download an app
+// that does not exist yet is worse than saying nothing. This was a fourth hand
+// -maintained copy of that fact; it reads the one source now.
 
 const FROM = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
 

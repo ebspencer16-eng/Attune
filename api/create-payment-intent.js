@@ -14,6 +14,7 @@
  */
 
 import { reportToSentry } from './_lib/sentry-edge.js';
+import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES } from './_catalogue.js';
 
@@ -24,8 +25,12 @@ const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 1
 const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 233 };
 
 // Launch flags — server-side enforcement so a crafted or stale request can
-// never bill for a disabled offering. Keep in sync with /_flags.js + App.jsx.
-const PHYSICAL_ENABLED = process.env.ATTUNE_PHYSICAL_ENABLED === '1';
+// never bill for a disabled offering. The flag itself comes from
+// api/_lib/flags.js, which every other surface reads too; the environment
+// variable stays as an override that can turn physical on without a deploy.
+// It can only turn it on, so a stale env cannot re-enable something the code
+// has disabled.
+const PHYSICAL_ENABLED = process.env.ATTUNE_PHYSICAL_ENABLED === '1' || FLAG_PHYSICAL_ENABLED;
 
 
 
