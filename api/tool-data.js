@@ -34,6 +34,8 @@ import { CHECKLIST_AREAS, CHECKLIST_COPY } from './_checklist.js';
 // app rather than sent, because the reveal updates as you type; see
 // check-budget-mirror.mjs.
 import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY } from './_budget.js';
+// What a surface says about the workbook, and what the file is called.
+import { WORKBOOK_COPY, workbookFileName } from './_lib/workbook-copy.js';
 
 export const config = { runtime: 'edge' };
 
@@ -117,9 +119,35 @@ export default async function handler(req) {
         if (b?.name) partnerName = b.name;
       }
 
+      /**
+       * ── THE WORKBOOK IS A FILE, NOT A SCREEN ────────────────────────────
+       * /app?view=workbook on the website is the page that sells it. The
+       * workbook itself is a generated .docx behind orders.workbook_url, so
+       * the app's job is to hand the reader the file, not to draw one. It is
+       * also why this does not become an app screen: CLAUDE.md says the app
+       * does not sell, and a page describing something you can buy is the
+       * thing that rule is about.
+       *
+       * Null until it exists. The two states a surface can be in, ready and
+       * generating, have one wording between them in _lib/workbook-copy.js.
+       */
+      let workbook = null;
+      if (caps.ownsWorkbook) {
+        const oRes = await rest(
+          `orders?user_id=eq.${me}&workbook_url=not.is.null&select=workbook_url&order=created_at.desc&limit=1`,
+          { headers: svc });
+        const row = (await oRes.json().catch(() => []))?.[0];
+        workbook = {
+          url: row?.workbook_url || null,
+          fileName: workbookFileName(profile.name, partnerName),
+          copy: WORKBOOK_COPY,
+        };
+      }
+
       return json({
         ok: true,
         owned: caps.owned || [],
+        workbook,
         budgetNames: {
           you: profile.name || 'You',
           them: partnerName || 'Your partner',

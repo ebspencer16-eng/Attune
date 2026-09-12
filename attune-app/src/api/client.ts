@@ -1010,6 +1010,15 @@ export type ToolData = {
    * reads as a different person's column.
    */
   budgetNames: { you: string; them: string };
+  /**
+   * The workbook is a generated file, not a screen. Null when unowned; url is
+   * null while it is still being made.
+   */
+  workbook: {
+    url: string | null;
+    fileName: string;
+    copy: { ready: string; generating: string };
+  } | null;
   /** The budget's content and words. Null when unowned. */
   budgetCategories: BudgetCategoryPayload[] | null;
   poolingModels: { id: string; label: string; desc: string }[] | null;

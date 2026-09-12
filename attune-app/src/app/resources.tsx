@@ -24,6 +24,7 @@ import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
 import Budget from '@/components/budget';
 import Checklist from '@/components/checklist';
+import { fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import SignIn from '@/components/sign-in';
@@ -57,9 +58,33 @@ export default function ResourcesScreen() {
    * is one line in one place.
    */
   const [openTool_, setOpenTool] = useState<string | null>(null);
+  const [tools, setTools] = useState<ToolData | null>(null);
+  const [workbookNote, setWorkbookNote] = useState<string | null>(null);
+
+  // The workbook is a file, so the tab needs to know whether it exists before
+  // a tap. Fetched alongside everything else rather than on press: a tap that
+  // waits on a request reads as a tap that did nothing.
+  useEffect(() => { fetchToolData().then((r) => { if (r.ok) setTools(r.data); }); }, []);
+
   const IN_APP = ['checklist', 'budget'];
+
+  /**
+   * What a tile does.
+   *
+   * The two tools the app has open in the app. The workbook is a generated
+   * .docx and is handed to the system, which is what a phone does with a
+   * document; `/app?view=workbook` on the website is the page that sells it,
+   * and CLAUDE.md is explicit that the app does not sell. Anything else still
+   * hands off to the website.
+   */
   const openTool = (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
+    if (key === 'workbook') {
+      const wb = tools?.workbook;
+      if (wb?.url) { Linking.openURL(wb.url); return; }
+      setWorkbookNote(wb?.copy.generating || null);
+      return;
+    }
     Linking.openURL(`${SITE}/app?view=${key}`);
   };
   // Tracked separately from the catalogue: In Practice failing is not the same
@@ -171,9 +196,18 @@ export default function ResourcesScreen() {
                 Yours to explore
               </Text>
               {/* A row of circles, wrapping only if someone owns more than four. */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg, marginBottom: Spacing.xxl }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
                 {owned.map((r) => <OwnedTile key={r.key} item={r} onOpen={openTool} />)}
               </View>
+              {/* The workbook is the one tile that can be tapped and have
+                  nothing to give yet. Saying so here, under the tiles, rather
+                  than in an alert: it is information, not an interruption. */}
+              {workbookNote ? (
+                <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+                  {workbookNote}
+                </Text>
+              ) : null}
+              <View style={{ height: Spacing.xxl }} />
             </>
           ) : null}
         </View>

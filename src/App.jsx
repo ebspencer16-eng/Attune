@@ -90,6 +90,8 @@ import { CATALOGUE } from "../api/_catalogue.js";
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
 // The budget tool, moved out so the app can read it too.
 import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY, bNum, bFmt, computeReveal } from "../api/_budget.js";
+// What both surfaces say about the workbook, and what the file is called.
+import { WORKBOOK_COPY, workbookFileName } from "../api/_lib/workbook-copy.js";
 // The six waiting sentences, Ellie's, one place. See api/_lib/waiting-copy.js.
 import { WAITING } from "../api/_lib/waiting-copy.js";
 import { conflictDemo } from "../api/_lib/conflict-demo.js";
@@ -7976,7 +7978,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 if (ord?.workbookUrl) {
                   const a = document.createElement('a');
                   a.href = ord.workbookUrl;
-                  a.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
+                  a.download = workbookFileName(userName, partnerName);
                   a.target = '_blank';
                   document.body.appendChild(a); a.click(); document.body.removeChild(a);
                   return;
@@ -14114,7 +14116,7 @@ export default function App() {
                     {hasWorkbookOrder && (
                       <GrowSquare color="#9B5DE5" icon={GrowIcons.workbook(workbookReady ? "#9B5DE5" : "#B3A693")}
                         title={workbookReady ? "Your workbook is ready" : "Your personalized workbook"}
-                        sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? "Generating now. We'll email you when it's ready." : WAITING.DASHBOARD)}
+                        sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? WORKBOOK_COPY.generating : WAITING.DASHBOARD)}
                         cta={workbookBuilding ? "Preparing…" : (workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked"))}
                         onClick={workbookReady ? downloadWorkbook : undefined}
                         disabled={!workbookReady} />
