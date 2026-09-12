@@ -15,15 +15,14 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Question |
 |--|--|
-| G1 | `/app?diag=1`, wait for it to say 10s or more, then screenshot. The 1s capture was startup. |
-| G2 | Budget / Checklist / Workbook in the app: which run *in* the app vs open the site cleanly? Full in-app builds are large. |
-| G3 | `check-exercise-flow.mjs`: migrating it, as instructed. Flagging only that it is a day of work, not an hour. |
+| G1 | Retest the dashboard. If it still reloads, `/app?diag=1` and screenshot; the panel survives now that the page does. |
+| G2 | Nothing outstanding. Everything opens in the app (your answer), and the gate migration needs nothing from you. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
-| O1 | **Dashboard still blinking.** Three reproductions here were silent, each for a reason unrelated to her. |
+| O1 | Dashboard blinking. **Cause found and fixed**: a load-path reload whose "already have it" test could never become true for intimacy/conflict records. Needs her retest. |
 | 94.7 | If no pick up where you left off, maybe ‘explore something new’ with a link to the most recent in practice post? |
 | 97.1 | Make the download option functional. |
 | 132.5 | I clicked the ‘start shared budgeting’ and it took me to the website but a blank page. We need to make sure t... |
@@ -35,6 +34,7 @@ moved past; it is listed so nothing is taken on trust.
 | O9 | Workbook runs in the app |
 | O10 | Migrate `check-exercise-flow.mjs` off its hardcoded sandbox path |
 | O11 | Expectations at a glance: colour every "conversations to have" tile, both surfaces |
+| O12 | Every resource opens in the app when the user is in the app (your G2) |
 
 ## 3. Done, not verified
 
