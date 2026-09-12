@@ -308,6 +308,10 @@
     {
       "source": "/api/conflict-results",
       "destination": "/api/conflict-results.js"
+    },
+    {
+      "source": "/api/tool-data",
+      "destination": "/api/tool-data.js"
     }
   ],
   "headers": [

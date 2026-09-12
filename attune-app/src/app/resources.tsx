@@ -22,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchHome, fetchPosts, markPostRead } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
+import Checklist from '@/components/checklist';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import SignIn from '@/components/sign-in';
@@ -46,6 +47,20 @@ export default function ResourcesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>(ALL);
   const [error, setError] = useState<ApiError | null>(null);
+
+  /**
+   * Which tool is open in the app, if any.
+   *
+   * Only the ones the app has. Everything else still hands off to the website,
+   * and the list is here rather than inside the handler so adding the budget
+   * is one line in one place.
+   */
+  const [openTool_, setOpenTool] = useState<string | null>(null);
+  const IN_APP = ['checklist'];
+  const openTool = (key: string) => {
+    if (IN_APP.includes(key)) { setOpenTool(key); return; }
+    Linking.openURL(`${SITE}/app?view=${key}`);
+  };
   // Tracked separately from the catalogue: In Practice failing is not the same
   // as In Practice being empty, and the screen said the same thing for both.
   const [postsFailed, setPostsFailed] = useState(false);
@@ -130,6 +145,10 @@ export default function ResourcesScreen() {
   // All, then whatever shelves the server says exist.
   const shelves = [ALL, ...categories];
 
+  if (openTool_ === 'checklist') {
+    return <Checklist onClose={() => setOpenTool(null)} />;
+  }
+
   return (
     <Shell>
       <ScrollView
@@ -147,7 +166,7 @@ export default function ResourcesScreen() {
               </Text>
               {/* A row of circles, wrapping only if someone owns more than four. */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg, marginBottom: Spacing.xxl }}>
-                {owned.map((r) => <OwnedTile key={r.key} item={r} />)}
+                {owned.map((r) => <OwnedTile key={r.key} item={r} onOpen={openTool} />)}
               </View>
             </>
           ) : null}
@@ -276,16 +295,24 @@ const ICON: Record<string, string> = {
  * The blurb is gone rather than shortened. A sentence explaining a thing you
  * already own is the least useful sentence on the page.
  */
-function OwnedTile({ item }: { item: Item }) {
+function OwnedTile({ item, onOpen }: { item: Item; onOpen: (key: string) => void }) {
   const color = AccentFor[item.key] ?? AccentFallback;
-  // It opens the thing. This was a Pressable with no handler: a circle that
-  // looks tappable, is announced as a control, and does nothing. The tools all
-  // live on the website, and `/app?view=<key>` is the same link the priority
-  // engine sends people to from the home screen.
+  /**
+   * It opens the thing, in the app where the app has it.
+   *
+   * This was a Pressable with no handler, then a link to the website. Ellie:
+   * "I want all of these to open in app if the user is in the app", and:
+   * "I clicked the 'start shared budgeting' and it took me to the website but
+   * a blank page."
+   *
+   * What is built in the app opens in the app. What is not still hands off to
+   * `/app?view=<key>`, the same link the priority engine uses, which now shows
+   * a sign-in form rather than an empty page when the browser has no session.
+   */
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => Linking.openURL(`${SITE}/app?view=${item.key}`)}
+      onPress={() => onOpen(item.key)}
       style={{ alignItems: 'center', width: 84 }}>
       <View
         style={{

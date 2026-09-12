@@ -957,6 +957,53 @@ export function createTag(name: string, color?: string | null) {
   });
 }
 
+/**
+ * The two tools' saved state, from /api/tool-data.
+ *
+ * The website writes these columns straight from the browser with the user's
+ * own Supabase session. The app has no Supabase client, so it goes through an
+ * endpoint like everything else it saves.
+ */
+export type ChecklistCopy = {
+  title: string; intro: string; howItWorks: string;
+  progress: string; notApplicable: string; areaDone: string;
+};
+
+export type ChecklistItem = { text: string; description?: string; links?: { label: string; href: string }[] };
+export type ChecklistArea = {
+  id: string; label: string; icon?: string; color: string; items: ChecklistItem[];
+};
+
+export type ToolData = {
+  ok: true;
+  owned: string[];
+  /** The checklist's own content, from api/_checklist.js. Null when unowned. */
+  areas: ChecklistArea[] | null;
+  /** The page's own words, from api/_checklist.js. Null when unowned. */
+  copy: ChecklistCopy | null;
+  /** Each key is `${area.id}__${item.text}`. Absent means not started. */
+  checklist: Record<string, true | 'na'> | null;
+  budget: Record<string, unknown> | null;
+};
+
+export function fetchToolData() {
+  return request<ToolData>('/api/tool-data');
+}
+
+/**
+ * Last write wins, which is what the website has always done.
+ *
+ * Returns the result rather than a boolean so a screen can tell a refused
+ * write (not in your package) from a failed one, and say the right thing.
+ */
+export function saveToolData(tool: 'checklist' | 'budget', data: unknown) {
+  return request<{ ok: true }>('/api/tool-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tool, data }),
+  });
+}
+
 export function openSharedNote(id: string) {
   return request<{ ok: true; opened: number }>('/api/notes', {
     method: 'POST',
