@@ -1408,3 +1408,53 @@ and none of them was an exercise: it defaulted to an address the preview
 server does not answer on, Communication's expected answer count had been
 typed as 54 when the exercise stores 50, and the driver could not tell the
 sign-in modal from the exercise. It runs in `npm run smoke` now.
+
+---
+
+## 12 September 2026, later — your six answers, built
+
+All six are pushed and live. `npm run check` is green and `npm run smoke`
+passes all three passes. Nothing has been seen on a phone.
+
+**G2a, the password step.** Both surfaces ask; the server checks before it
+deletes anything, and only for accounts that have a password, since Google and
+Apple sign-ins have none. Wrong password answers 403 rather than 401, so the
+app does not try to refresh a token to fix it.
+
+**G2b and G2c, the two messages.** A notification row and an email to the
+partner, a confirmation email to the person. The addresses are read in step 0
+and the messages sent in step 7, because deleting the auth user takes the only
+copy of the address and a confirmation sent before the deletion is a lie if
+the deletion fails. **The wording is mine and yours to edit**, all of it in
+`api/_lib/deletion-emails.js` and one case in `api/_lib/notifications.js`.
+
+**G3a, the consent event.** Recorded at both moments that count: a purchase
+and creating an account. **Migration 058 is written and not run** — until you
+run it in the SQL Editor, nothing is stored and the endpoint logs one line
+saying which migration is missing. The version recorded is a hash of the
+Privacy Policy and Terms text rather than a date, because two of those
+documents are published reading "Effective date: TODO before publishing".
+That TODO is G6 in TASKS.md and only you can set those dates.
+
+**G3b, the payment paragraph.** Amended to say what is true: Stripe holds the
+transaction record, we keep an order row while the account exists, deleting
+removes it, and we never store card numbers.
+
+**G3c, the banner.** `/api/region` reads the country; the EU, the UK, the EEA
+and Switzerland get Accept and Decline, everyone else the notice as before. A
+decline stops Sentry, which is the only thing here that is not strictly
+necessary and which records a replay when an error fires. A banner whose
+Decline changes nothing would be theatre.
+
+**Analytics.** An Engagement tab sits between Explore and Demographics. Four
+of your nine measures are live. Five need collection that does not exist and
+say so on the tab, one line each on what it would take; starting any of them
+is a decision about customer data, so it is G8 for you rather than something I
+began.
+
+**"Data missing from most visuals"** was not a break. Every fallback array in
+the admin is zeros, so a chart with no data draws axes and labels and no bars,
+which looks the same as real zeros and the same as a failed load. Every tile
+now says which of those it is, from one change inside `mkChart`.
+
+Six new gates, each verified by planting the bug it exists for.
