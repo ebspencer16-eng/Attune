@@ -12,6 +12,31 @@ export default async function handler(req) {
   let body;
   try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
 
+  // A submission has to carry an answer. POSTing {} here used to store a row
+  // and email the admin, from anywhere, with no auth and no origin check, so
+  // the survey counts the admin reads could be inflated by anyone who found
+  // the URL. The keys below are the ones that say who and which survey rather
+  // than what was answered, and a body made only of those has nothing in it.
+  // Neither sender can produce one: the static page requires every question
+  // and the dashboard survey only sends on a non-empty answers object.
+  const SURVEY_META = new Set([
+    'respondentId', 'surveyType', 'coupleType', 'coupleId', 'userName',
+    'completed', 'email', 'submitted', 'survey_version',
+  ]);
+  const filled = (v) => {
+    if (v == null || v === '') return false;
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === 'object') return Object.keys(v).length > 0;
+    return true;
+  };
+  const hasAnswer = body && typeof body === 'object' && !Array.isArray(body) &&
+    Object.entries(body).some(([k, v]) => !SURVEY_META.has(k) && filled(v));
+  if (!hasAnswer) {
+    return new Response(JSON.stringify({ error: 'Nothing to record.' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Store in Supabase
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;

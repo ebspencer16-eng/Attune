@@ -98,6 +98,19 @@ export default async function handler(req) {
     questionAnswers,
   } = body;
 
+  // Same rule as /api/submit-beta-survey: a rating, a message or an answer,
+  // or there is nothing to record. This endpoint is deliberately open, because
+  // feedback from someone who is not signed in is still feedback, so the only
+  // thing standing between it and a junk row is this.
+  const answered = questionAnswers && typeof questionAnswers === 'object' &&
+    Object.keys(questionAnswers).length > 0;
+  const wrote = typeof message === 'string' && message.trim() !== '';
+  if (rating == null && !wrote && !answered) {
+    return new Response(JSON.stringify({ error: 'Nothing to record.' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const ts = new Date().toISOString();
 
   // Store in Vercel KV for analytics
