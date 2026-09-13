@@ -15,29 +15,33 @@ moved past; it is listed so nothing is taken on trust.
 
 | # | Question |
 |--|--|
-| G1 | Everything below is built and building clean, and none of it has been seen on a phone. That is the whole of what is left. |
-| G2 | **Deletion. The published policy and the code disagree, and one of the gaps loses a paying customer's results.** Full evidence in `DELETION.md`. Three things needed from you: |
-| G2a | Delete account asks for no password. The policy says it does. Add the step, or amend the policy. |
-| G2b | The words for the partner's notification. Policy: "Your partner is notified that you have deleted your account." Nothing notifies them. |
-| G2c | The words for the deletion confirmation email. Policy promises one twice. None is sent. |
-| G3 | **Three more published promises the code does not keep.** Evidence in `LEGAL-VS-CODE.md`. |
-| G3a | Policy keeps consent records 7 years. Nothing records an acceptance, and the EULA says buying is the agreement. Record the event, or amend the paragraph. |
-| G3b | Policy keeps payment records 7 years. Deletion removes the order row. Stripe holds the real record, so amending is the smaller and better fix. |
-| G3c | Policy promises EU/UK a consent banner. What exists is a US notice with no Accept, not geo-aware. Amend, or build a real gate. |
+| G1 | Everything built is building clean, and none of it has been seen on a phone. |
+| G4 | **141 prose strings in `scripts/build_workbook.py` appear nowhere in the product.** Method: parsed the file with Python's own parser, substring-matched all 808 string constants against 4.4MB of api/, src/, app and public/ source; 197 read as prose, 141 of those match nothing. Some is Maya-and-David sample text and always was. Some looks like finished workbook copy that has never shipped. Port it or delete it, but it should not sit there looking finished. |
+| G5 | **Six In Practice excerpts.** Twelve articles are on the site; the app's shelf carries six, because six is how many have a card on `practice.html` and a card is the only place an excerpt was ever written. One sentence each, in the voice of the six that exist. The six are listed as `PENDING_EXCERPT` in `api/_in-practice.js`: how-to-use-your-results, why-couples-fight-about-the-same-things, what-your-communication-style-reveals, what-your-couple-type-tells-you, for-the-bridge-the-conversation-you-need, why-naming-the-pattern-changes-everything. |
+
+Answered 12 Sep and moved to Open: G2a add the password step, G2b build the
+partner notification, G2c build the confirmation email (you approve or edit the
+language once it is pushed), G3a record the consent event, G3b amend the
+payment-records paragraph, G3c make the banner geo-aware.
 
 ## 2. Open
 
 | # | Task |
 |--|--|
+| O8 | **Delete account asks for a password.** Your call on G2a. Both surfaces: the app's confirm sheet and the website's. |
+| O9 | **The partner is notified when someone deletes their account.** A notification row and an email. Draft language from me, yours to edit. |
+| O10 | **A deletion confirmation email.** Promised twice in the policy. The address has to be read before the auth user is deleted, which is the last step. Draft language from me, yours to edit. |
+| O11 | **Record the consent event.** A table, a write at purchase and at account creation, and a decision about everyone who bought before it existed. Migration for you to run. |
+| O12 | **Amend the payment-records paragraph** to say the transaction record lives with Stripe, since deletion removes our order row. |
+| O13 | **Make the privacy notice geo-aware**: a real consent gate for EU and UK visitors, the US notice everywhere else. Needs geolocation, a stored preference, and something that honours a refusal. |
+| O14 | **Analytics: an Engagement tab**, between Explore and Demographics. Site visits, app downloads, completion funnel, average time per marketing page, per exercise and per dashboard page, In Practice hit rates, average notes per results page and per article, and most-used tags including custom ones. |
+| O15 | **Analytics page is broken**: data missing from most visuals. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | When one partner deletes, the other loses **all** results, including the parts from their own answers. The policy says they keep those. Migration, a `resultsGate` state, a one-person results view on both surfaces, and copy. Scoped in `DELETION.md`; not started. |
 | O4 | The React app shows no privacy notice: `index.html` does not load `_flags.js`, which nine static pages do. Careful, that file also injects the app-download bar. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
 | O6 | "Finish setting up your profile" and "Leave feedback" leave the app for the browser. Your direction is that everything runs in the app. Settings cannot edit a name or pronouns yet, so this needs a profile editor first. |
 | O7 | Every static page's `canonical`, `og:url` and JSON-LD tags name the **apex**, which 307s to www. Search engines are being told to index a URL that redirects. Thirty-odd tags; an SEO call, so left for you. |
-| G4 | **141 prose strings in `scripts/build_workbook.py` appear nowhere in the product.** Method: parsed the file with Python's own parser, substring-matched all 808 string constants against 4.4MB of api/, src/, app and public/ source; 197 read as prose, 141 of those match nothing. Some is Maya-and-David sample text and always was. Some looks like finished workbook copy that has never shipped. Port it or delete it, but it should not sit there looking finished. |
-| G5 | **Six In Practice excerpts.** Twelve articles are on the site; the app's shelf carries six, because six is how many have a card on `practice.html` and a card is the only place an excerpt was ever written. One sentence each, in the voice of the six that exist. The six are listed as `PENDING_EXCERPT` in `api/_in-practice.js`: how-to-use-your-results, why-couples-fight-about-the-same-things, what-your-communication-style-reveals, what-your-couple-type-tells-you, for-the-bridge-the-conversation-you-need, why-naming-the-pattern-changes-everything. |
-
 
 ## 3. Done, not verified
 
