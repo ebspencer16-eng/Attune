@@ -1,42 +1,22 @@
 // Build the Starting Out Checklist internal-records doc.
-// Parses CHECKLIST_AREAS from src/App.jsx (source of truth) and renders
-// as a portrait docx with one section per area, items with descriptions
-// and links, color-coded by section.
+//
+// Reads CHECKLIST_AREAS from api/_checklist.js, which is where it lives, and
+// renders a portrait docx with one section per area, items with descriptions
+// and links, colour-coded by section.
+//
+// It used to scrape the array out of src/App.jsx by counting brackets and
+// calling eval. When the checklist moved server-side, so the app and the
+// website could share one copy, this kept reading a file that no longer had
+// it and threw on every run. Importing is the fix and the rule.
 
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { CHECKLIST_AREAS } from '../api/_checklist.js';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType,
   Footer, PageNumber, ExternalHyperlink,
 } from 'docx';
-
-// ── Extract CHECKLIST_AREAS from App.jsx ─────────────────────────────────
-// The array is a JS literal — we locate it, capture the matching brackets
-// by counting, then eval with a tiny wrapper to pull it out. Safer than
-// regex because the strings contain quotes + escapes.
-const appSrc = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-const startMatch = appSrc.match(/const CHECKLIST_AREAS = \[/);
-if (!startMatch) throw new Error('CHECKLIST_AREAS not found');
-const arrStart = startMatch.index + 'const CHECKLIST_AREAS = '.length;
-
-// Walk characters, counting [] depth while respecting string/template boundaries.
-let depth = 0, i = arrStart, inStr = false, strCh = null, esc = false;
-while (i < appSrc.length) {
-  const ch = appSrc[i];
-  if (esc) { esc = false; i++; continue; }
-  if (inStr) {
-    if (ch === '\\') esc = true;
-    else if (ch === strCh) inStr = false;
-  } else {
-    if (ch === '"' || ch === "'" || ch === '`') { inStr = true; strCh = ch; }
-    else if (ch === '[') depth++;
-    else if (ch === ']') { depth--; if (depth === 0) { i++; break; } }
-  }
-  i++;
-}
-const literal = appSrc.slice(arrStart, i);
-const CHECKLIST_AREAS = eval(literal);
 
 // ── Design tokens ────────────────────────────────────────────────────────
 const INK = '0E0B07', MUTED = '8C7A68', STONE = 'E8DDD0';

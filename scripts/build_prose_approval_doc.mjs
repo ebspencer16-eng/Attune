@@ -18,10 +18,13 @@ import {
   buildCover, renderDoc, evalConst, INDENT_PROSE_UNDER_SMALL,
 } from './_review_format.mjs';
 
-const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-
-// Domain prose lives in the PersonalityResults domainGroups literal.
-const domainGroups = evalConst(app, 'domainGroups');
+// Domain prose lives in api/_lib/comm-domains.js. src/App.jsx reads it from
+// there too, under the local name domainGroups, and this used to scrape that
+// name out of the file with a brace matcher and an eval. Once it became an
+// assignment from an import rather than a literal, the matcher walked into the
+// next thing with braces in it, the eval hit a regex, and the whole document
+// failed with "g is not defined".
+import { COMM_DOMAINS as domainGroups } from '../api/_lib/comm-domains.js';
 // Results copy now lives in versioned snapshots. Read it from the current
 // version rather than from App.jsx, which no longer holds it.
 const content = readFileSync(new URL('../api/_content/v1.js', import.meta.url), 'utf8');
@@ -41,11 +44,15 @@ const ALIGNED_ADVICE = evalConst(content, 'ALIGNED_ADVICE');
 const BAND = { 1: 'strongly Voiced', 2: 'leans Voiced', 3: 'flexible', 4: 'leans Assumed', 5: 'strongly Assumed' };
 
 // The bids gap prose, pulled from the per-cell block so the doc shows exactly
-// what ships rather than a paraphrase.
+// what ships rather than a paraphrase. It moved to api/_content/v1.js with the
+// rest of the results copy; this was still looking for it in src/App.jsx while
+// measuring the end of the block in the content file, so it read one file's
+// offsets into another and came back with nothing.
 const bidsBlock = (() => {
-  const i = app.indexOf("    bids: {", app.indexOf('RESPONDING TO BIDS'));
+  const i = content.indexOf('bids: {', content.indexOf('RESPONDING TO BIDS'));
+  if (i < 0) throw new Error('the bids block is not in api/_content/v1.js any more');
   const j = content.indexOf('\n  },', i);
-  const raw = app.slice(i, j);
+  const raw = content.slice(i, j);
   return [...raw.matchAll(/'(\d_\d)':\s*`([^`]*)`/g)].map(m => [m[1], m[2]]);
 })();
 

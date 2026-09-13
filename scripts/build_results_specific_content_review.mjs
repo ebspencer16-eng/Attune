@@ -11,6 +11,11 @@
 // cataloged verbatim. Dynamic slots (couple type, dimension blurbs, their own
 // answers) are marked in brackets and point to their source.
 
+import { individualBlurb } from '../api/_lib/individual-profile.js';
+import { PROTOCOLS } from '../api/_lib/comms-plan.js';
+import { AXES } from '../api/_axes.js';
+import { NEAR_AXIS_PROSE } from '../api/_lib/near-axis.js';
+import { COUPLE_TYPES } from '../api/_couple-types.js';
 import { readFileSync } from 'fs';
 import { docOut } from './_lib/doc-out.mjs';
 import {
@@ -24,32 +29,48 @@ const ph = (s) => String(s ?? '')
   .replace(/\$\{name\}/g, '[partner]').replace(/\$\{Sub\}/g, '[They]').replace(/\$\{sub\}/g, '[they]')
   .replace(/\$\{pos\}/g, '[their]').replace(/\$\{[^}]*\}/g, '[…]');
 
-// ── live: individual profiles (blurbFor) ─────────────────────────────────────
-function backticks(block) {
-  const out = []; let i = 0;
-  while (i < block.length) {
-    if (block[i] === '`') { let s = ''; i++; while (i < block.length && block[i] !== '`') { if (block[i] === '\\') { s += block[i + 1]; i += 2; continue; } s += block[i++]; } out.push(s); i++; }
-    else i++;
-  }
-  return out;
-}
-const blurbsStart = src.indexOf('const blurbs = {', src.indexOf('const blurbFor ='));
-const allBlurbs = backticks(src.slice(blurbsStart, matchBrace(src, src.indexOf('{', blurbsStart)) + 1));
+// ── live: individual profiles ────────────────────────────────────────────────
+// Rendered by calling the function the product calls, rather than pulling the
+// template strings out of src/App.jsx with a backtick scanner. The profile
+// builder moved to api/_lib/individual-profile.js so the app could use it, and
+// the scanner had been reading a file that no longer had it: this document
+// printed "profiles=0" and a page of "(not found)".
 const PROFILE_TYPES = [
   ['W', 'The Initiator'], ['X', 'The Anchor'], ['Y', 'The Feeler'], ['Z', 'The Protector'],
 ];
 const PLACEMENTS = ['toward an end', 'near center (engage)', 'near center (open)', 'balanced'];
+// The blurb is built from two coordinates, not from a type letter: the letter
+// is what those coordinates mean. api/_type-engine.js defines it as
+// W = engage + open, X = engage + guarded, Y = withdraw + open,
+// Z = withdraw + guarded, so each type is one corner of the map and each
+// placement is how far into that corner a person sits.
+const CORNER = { W: [1, 1], X: [1, 0], Y: [0, 1], Z: [0, 0] };
+const far = (toward) => (toward ? 0.95 : 0.05);
+const near = (toward) => (toward ? 0.58 : 0.42);
+const allBlurbs = PROFILE_TYPES.flatMap(([code]) => {
+  const [e, o] = CORNER[code];
+  return [
+    [far(e), far(o)],    // toward an end
+    [near(e), far(o)],   // near center on engage
+    [far(e), near(o)],   // near center on open
+    [near(e), near(o)],  // balanced
+  ].map(([ec, oc]) => individualBlurb('[partner]', 'they/them', ec, oc));
+});
 
 // ── live: communication action plan protocols ────────────────────────────────
-const PROTO_RE = /protocols\.push\(\{\s*title:\s*"([^"]*)",\s*body:\s*byDim\.(\w+)\.adviceText,\s*thisWeek:\s*"([^"]*)"/g;
-const protocols = [...src.matchAll(PROTO_RE)].map(m => ({ title: m[1], dim: m[2], thisWeek: m[3] }));
+// PROTOCOLS is the list the plan is built from. This used to match the shape
+// of a protocols.push() call in src/App.jsx, which moved into
+// api/_lib/comms-plan.js as data.
+const protocols = PROTOCOLS.map(([dim, title, thisWeek]) => ({ dim, title, thisWeek }));
 const DIMN = { love: 'Love', expression: 'Expression', energy: 'Energy', bids: 'Bids', needs: 'Needs', stress: 'Stress', conflict: 'Conflict', listening: 'Listening', repair: 'Repair', feedback: 'Feedback' };
 
 // ── live: couple-map axes ────────────────────────────────────────────────────
-const grab = (q) => (src.match(new RegExp('"(' + q + '[^"]*)"'))?.[1]) || '';
+// The axis copy moved to api/_axes.js, for the reason that file gives: it was
+// inline in src/App.jsx and the app had nowhere to read it from.
+const _axis = (id) => AXES.find((a) => a.id === id) || {};
 const AXIS = {
-  eq: grab('How you respond when something is hard'), ea: grab('Engage: moves toward'), eb: grab('Withdraw: needs space'),
-  oq: grab('How freely you express'), oa: grab('Open: partner usually knows'), ob: grab('Guarded: processes internally'),
+  eq: _axis('engage').desc, ea: _axis('engage').label.split(' / ')[0], eb: _axis('engage').label.split(' / ')[1],
+  oq: _axis('open').desc, oa: _axis('open').label.split(' / ')[0], ob: _axis('open').label.split(' / ')[1],
 };
 console.log(`profiles=${allBlurbs.length}, protocols=${protocols.length}, axes=${!!AXIS.eq}`);
 
@@ -57,11 +78,7 @@ console.log(`profiles=${allBlurbs.length}, protocols=${protocols.length}, axes=$
 // The object is pure data (template-literal strings, no interpolation), so we
 // slice it from source and eval it. Every token in the strings is a balanced
 // {...} pair, so matchBrace lands on the correct closing brace.
-const _napStart = src.indexOf('const NEAR_AXIS_PROSE = {');
-const _napObj = src.indexOf('{', _napStart);
-const NEAR_AXIS_PROSE = eval('(' + src.slice(_napObj, matchBrace(src, _napObj) + 1) + ')');
-const NAMES = {};
-for (const m of src.matchAll(/id:\s*"([WXYZ]{2})",[\s\S]{0,160}?name:\s*"([^"]+)"/g)) NAMES[m[1]] = m[2];
+const NAMES = Object.fromEntries(COUPLE_TYPES.map((t) => [t.id, t.name]));
 // Render couple-type tokens readably. Suffix forms first (bare {EXP} won't match
 // {EXP_sub} because it needs the brace right after, but order it safely anyway).
 const tok = (s) => String(s ?? '')

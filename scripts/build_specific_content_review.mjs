@@ -9,6 +9,7 @@
 //   6.  Reference Card phrase per type        (6.1 WW … 6.10 YZ)
 //   7.  Part epigraph options                 (7.1 Part 1 … 7.4 Part 4)
 
+import { COUPLE_TYPES } from '../api/_couple-types.js';
 import { writeFileSync, readFileSync } from 'fs';
 import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
@@ -19,46 +20,20 @@ import {
 } from 'docx';
 
 const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf-8');
-const m = appSource.match(/const NEW_COUPLE_TYPES = (\[[\s\S]+?\n\]);/);
-if (!m) throw new Error("Can't find NEW_COUPLE_TYPES in App.jsx");
-const NEW_COUPLE_TYPES = (new Function('return ' + m[1]))();
+// The couple types moved to api/_couple-types.js, which src/App.jsx imports
+// under this name. This used to match a literal in App.jsx that is now an
+// import, so the document has been failing to build ever since.
+const NEW_COUPLE_TYPES = COUPLE_TYPES;
 console.log(`Loaded ${NEW_COUPLE_TYPES.length} couple types`);
 
-const contentSource = readFileSync(new URL('../api/_workbook-content.js', import.meta.url), 'utf-8');
 
-function evalExport(source, name) {
-  const startRe = new RegExp('export\\s+const\\s+' + name + '\\s*=\\s*');
-  const startMatch = source.match(startRe);
-  if (!startMatch) throw new Error(`Can't find ${name} in _workbook-content.js`);
-  const startIdx = startMatch.index + startMatch[0].length;
-  const rest = source.slice(startIdx);
-  const firstChar = rest[0];
-  const openChar = firstChar;
-  const closeChar = firstChar === '{' ? '}' : ']';
-  let depth = 0, i = 0, inStr = false, strCh = '', end = -1;
-  while (i < rest.length) {
-    const c = rest[i];
-    if (inStr) {
-      if (c === '\\' && i + 1 < rest.length) { i += 2; continue; }
-      if (c === strCh) inStr = false;
-      i++; continue;
-    }
-    if (c === '"' || c === "'" || c === '`') { inStr = true; strCh = c; i++; continue; }
-    if (c === openChar) depth++;
-    else if (c === closeChar) { depth--; if (depth === 0) { end = i; break; } }
-    i++;
-  }
-  if (end === -1) throw new Error(`Can't find end of ${name}`);
-  return (new Function('return ' + rest.slice(0, end + 1)))();
-}
-
-const DIM_META = evalExport(contentSource, 'DIM_META');
-const DIM_CONTENT = evalExport(contentSource, 'DIM_CONTENT');
-const DIMS = evalExport(contentSource, 'DIMS');
-const WHEN_THIS_SHOWS_UP = evalExport(contentSource, 'WHEN_THIS_SHOWS_UP');
-const GAP_BLURBS = evalExport(contentSource, 'GAP_BLURBS');
-
+// These are imported rather than scraped out of the file. They used to be
+// pulled with a brace matcher and an eval against api/_workbook-content.js;
+// DIM_CONTENT then moved to api/_workbook-prose.js, which _workbook-content
+// re-exports, and the scraper could not follow a re-export. The document has
+// been failing to build since.
 import { SCENE_DRAFTS, PROMPT_DRAFTS } from './_shared_drafts.mjs';
+import { DIM_META, DIM_CONTENT, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS } from '../api/_workbook-content.js';
 
 const MOMENTS_SRC = [
   { n: 1, key: 'hard_workday',      title: 'After a hard workday' },

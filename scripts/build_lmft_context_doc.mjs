@@ -10,6 +10,8 @@
 //   5. How workbook content is generated
 //   6. What we want flagged
 
+import { COUPLE_TYPES } from '../api/_couple-types.js';
+import { DIM_META, DIM_CONTENT, DIMS } from '../api/_workbook-content.js';
 import { writeFileSync, readFileSync } from 'fs';
 import { docOut } from './_lib/doc-out.mjs';
 import { execSync } from 'child_process';
@@ -20,40 +22,16 @@ import {
 } from 'docx';
 
 // ── Source data ──────────────────────────────────────────────────────────
-const contentSource = readFileSync(new URL('../api/_workbook-content.js', import.meta.url), 'utf-8');
 const appSource     = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf-8');
 const builderSource = readFileSync(new URL('./build_workbook.py', import.meta.url), 'utf-8');
 
-function evalExport(source, name) {
-  const startRe = new RegExp('export\\s+const\\s+' + name + '\\s*=\\s*');
-  const startMatch = source.match(startRe);
-  if (!startMatch) throw new Error(`Can't find ${name} in source`);
-  const startIdx = startMatch.index + startMatch[0].length;
-  const rest = source.slice(startIdx);
-  const firstChar = rest[0];
-  const closeChar = firstChar === '{' ? '}' : ']';
-  let depth = 0, i = 0, inStr = false, strCh = '', end = -1;
-  while (i < rest.length) {
-    const c = rest[i];
-    if (inStr) {
-      if (c === '\\' && i + 1 < rest.length) { i += 2; continue; }
-      if (c === strCh) inStr = false;
-      i++; continue;
-    }
-    if (c === '"' || c === "'" || c === '`') { inStr = true; strCh = c; i++; continue; }
-    if (c === firstChar) depth++;
-    else if (c === closeChar) { depth--; if (depth === 0) { end = i; break; } }
-    i++;
-  }
-  if (end === -1) throw new Error(`Can't find end of ${name}`);
-  return (new Function('return ' + rest.slice(0, end + 1)))();
-}
 
-const m = appSource.match(/const NEW_COUPLE_TYPES = (\[[\s\S]+?\n\]);/);
-const NEW_COUPLE_TYPES = (new Function('return ' + m[1]))();
-const DIM_META    = evalExport(contentSource, 'DIM_META');
-const DIM_CONTENT = evalExport(contentSource, 'DIM_CONTENT');
-const DIMS        = evalExport(contentSource, 'DIMS');
+// The couple types moved to api/_couple-types.js; src/App.jsx imports them
+// under this name. Matching a literal that is now an import is why this
+// document stopped building.
+const NEW_COUPLE_TYPES = COUPLE_TYPES;
+// DIM_CONTENT moved to api/_workbook-prose.js, which _workbook-content
+// re-exports. A scraper cannot follow a re-export; an import can.
 
 // ── Design tokens ────────────────────────────────────────────────────────
 const ORANGE = 'E8673A', BLUE = '1B5FE8', PURPLE = '9B5DE5', GREEN = '10B981', PLUM = '6B2C5A';

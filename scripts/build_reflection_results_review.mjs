@@ -2,6 +2,7 @@
 // results insight blurbs, in the same format as the specific content review.
 // Reads live from src/App.jsx (ANNIVERSARY_QUESTIONS + deriveAnniversaryInsights).
 
+import { ANNIVERSARY_QUESTIONS } from '../api/_anniversary-questions.js';
 import { readFileSync } from 'fs';
 import { docOut } from './_lib/doc-out.mjs';
 import {
@@ -10,7 +11,12 @@ import {
   buildCover, renderDoc, evalConst, INDENT_PROSE_UNDER_SMALL, INDENT_SMALL,
 } from './_review_format.mjs';
 
-const src = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf-8');
+// The reflection insights moved to api/_lib/reflection-insights.js when the
+// app needed them too. This still read src/App.jsx, where the function no
+// longer is, so the document built with nothing in it: zero insight blurbs and
+// ten empty keyword lists, silently, because the lookups were wrapped in a
+// try that defaulted to empty.
+const src = readFileSync(new URL('../api/_lib/reflection-insights.js', import.meta.url), 'utf-8');
 
 // ── extract helpers (string-aware) ──────────────────────────────────────────
 function matchBrace(s, open) {
@@ -26,13 +32,9 @@ function matchBrace(s, open) {
   }
   return -1;
 }
-function objLiteral(name) {
-  const d = new RegExp('const ' + name + '\\s*=\\s*').exec(src);
-  let i = d.index + d[0].length;
-  while (src[i] !== '{' && src[i] !== '[') i++;
-  return src.slice(i, matchBrace(src, i) + 1);
-}
-const ANNIVERSARY_QUESTIONS = (new Function('return ' + objLiteral('ANNIVERSARY_QUESTIONS')))();
+// The reflection question set moved to api/_anniversary-questions.js so the
+// app could reach it too. This was still matching a literal in src/App.jsx,
+// which now only imports it, and the document has not built since.
 
 function readString(s, idx) {
   const q = s[idx]; let out = '';
@@ -79,9 +81,9 @@ const fn = src.slice(fnStart, fnEnd);
 const insights = [];
 let pos = 0;
 while (true) {
-  const idx = fn.indexOf('insights.push({', pos);
+  const idx = fn.indexOf('push({', pos);
   if (idx < 0) break;
-  const braceOpen = fn.indexOf('{', idx + 'insights.push('.length);
+  const braceOpen = fn.indexOf('{', idx + 'push('.length);
   const braceClose = matchBrace(fn, braceOpen);
   const obj = fn.slice(braceOpen, braceClose + 1);
   // nearest preceding comment line

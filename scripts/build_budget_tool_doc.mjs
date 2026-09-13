@@ -1,45 +1,29 @@
 // Build the Shared Budget Tool internal records doc.
-// Parses BUDGET_CATEGORIES + POOLING_MODELS from src/App.jsx (source of
-// truth) and renders a portrait docx describing the full tool.
+//
+// Reads BUDGET_CATEGORIES and POOLING_MODELS from api/_budget.js, which is
+// where they live, and renders a portrait docx describing the full tool.
+//
+// It used to scrape them out of src/App.jsx with a bracket-counting regex and
+// an eval. When the budget moved server-side, so the app and the website could
+// share one copy, this generator kept reading a file that no longer had them
+// and threw on every run. The document it makes is what content review reads,
+// so it was quietly out of date rather than obviously broken.
+//
+// Importing is the fix and the rule: derive, do not restate. A rename now
+// fails here loudly instead of silently.
 //
 // Text sizing: body is 22 (11pt) throughout — noticeably larger than the
 // 12pt-or-smaller body used in earlier internal docs. Section headers
 // 26-36. Eyebrows 16.
 
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { BUDGET_CATEGORIES, POOLING_MODELS } from '../api/_budget.js';
 import { execSync } from 'child_process';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType,
   Footer, PageNumber,
 } from 'docx';
-
-// ── Extract the two arrays from App.jsx via bracket-count eval ───────────
-function extractArray(src, name) {
-  const m = src.match(new RegExp('const ' + name + ' = \\['));
-  if (!m) throw new Error(name + ' not found');
-  let i = m.index + ('const ' + name + ' = ').length;
-  let depth = 0, inStr = false, strCh = null, esc = false;
-  const start = i;
-  while (i < src.length) {
-    const ch = src[i];
-    if (esc) { esc = false; i++; continue; }
-    if (inStr) {
-      if (ch === '\\') esc = true;
-      else if (ch === strCh) inStr = false;
-    } else {
-      if (ch === '"' || ch === "'" || ch === '`') { inStr = true; strCh = ch; }
-      else if (ch === '[') depth++;
-      else if (ch === ']') { depth--; if (depth === 0) { i++; break; } }
-    }
-    i++;
-  }
-  return eval(src.slice(start, i));
-}
-
-const appSrc = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-const BUDGET_CATEGORIES = extractArray(appSrc, 'BUDGET_CATEGORIES');
-const POOLING_MODELS    = extractArray(appSrc, 'POOLING_MODELS');
 
 // ── Tokens ───────────────────────────────────────────────────────────────
 const INK = '0E0B07', MUTED = '8C7A68', STONE = 'E8DDD0';
