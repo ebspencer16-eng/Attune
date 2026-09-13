@@ -28,6 +28,8 @@ have proved instead.
 
 | # | Question |
 |--|--|
+| G18 | **Five emails exist that nothing sends.** `workbook_ready`, `beta_survey` and `partner_joined_notification` were retired at their triggers in August; `checkin_1yr` is sent by the cron from a different template; `welcome_account` appears never to have had a trigger. The templates are all still there. /email-preview now shows each one and says nothing sends it. Bring the trigger back, or take the template out? |
+| G19 | **There are two different six-month check-in emails.** One is sent from the browser when an account turns six months old, subject "Six months with Attune. Worth a look." The other is sent by the cron, subject "How are you and [partner] doing?" Different words, same moment, and a couple could get both. Which one do you want? |
 | G17 | **Have any gift cards been printed?** Four card templates said "visit attune.com", front and back, and attune.com is a live site belonging to someone else. It is corrected in the code now, but the fix only reaches cards printed from here on. If a batch went to a printer, they point the recipient at a stranger. The same address was on a published In Practice article as a contact email, so anyone who wrote to hello@attune.com reached nobody. |
 | G16 | **"Unique visitors" cannot be answered by what is collected, on purpose.** An engagement event carries no cookie, no device id and no session id, so two visits by one person cannot be told from one visit by two. That is what the privacy policy says and what makes the collection defensible without a consent gate in the US. Counting unique visitors means storing something that follows a person between page loads, which changes the paragraph in the policy and what the EU banner has to cover. Three options: leave it as visits and label it that way, add a per-day rotating identifier that cannot link across days, or add a durable one. My preference is the first, then the second. |
 
@@ -56,6 +58,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R27 | **The nineteen emails on /email-preview.** Every one is now rendered by the code that sends it, so what you read there is what goes out. Five are marked as sent from nowhere; those are G18 and not worth reading for copy until you decide. |
 | R1 | **App home page.** The blue ground, the cream tile, the welcome-back line, the insight of the day and its glow, the pick-up row. Built to the Oura-adjacent direction you gave. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 | R3 | **App notes tab.** Pick up where you left off, shared notes, unread markers, the tag list with its A-Z default and the sort dropdown. |
@@ -108,6 +111,11 @@ build.
 
 | Verified | By |
 |--|--|
+| Every email the product sends is rendered by the code that sends it, on one page | `check-email-preview.mjs`, 19 emails, planted four ways |
+| The preview page holds no email copy of its own | same gate: an object with a subject and a body in that file fails the build |
+| The record of which emails are actually triggered is current | `build-email-triggers.mjs` generates it, `check-email-triggers.mjs` fails if it drifts |
+| Every scheduled email carries an unsubscribe link with the recipient's own id | `check-unsubscribe.mjs`, now rendered end to end from a profile row rather than read statically |
+| The ten endpoint emails and the four order cases are unchanged by the refactor | snapshotted before and after, byte for byte identical |
 | Every route in vercel.json lands on a file that exists | `check-route-targets.mjs`, 80 routes, planted four ways |
 | /lmft-booking and /api/lmft-request no longer answer 200 with an empty shell | both pointed at files deleted in 97cacb6; the routes are gone |
 | Clicking Reviews lands on the reviews, not the top of the FAQ | faq.html scrolls to the section it already had an id for |
