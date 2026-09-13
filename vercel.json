@@ -302,6 +302,10 @@
       "destination": "/api/region.js"
     },
     {
+      "source": "/api/admin-engagement",
+      "destination": "/api/admin-engagement.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     },

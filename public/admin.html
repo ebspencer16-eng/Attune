@@ -295,6 +295,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
       Explore
     </a>
+    <a class="sb-item" onclick="showPage('engagement')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Engagement
+    </a>
     <a class="sb-item" onclick="showPage('demographics')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Demographics
@@ -620,6 +624,54 @@
   </div>
 
   <!-- ══ DEMOGRAPHICS ══ -->
+  <!-- ── Engagement ─────────────────────────────────────────────────────────
+       Four measures computed from what the product stores, and five that
+       would need collection that does not exist. The five are drawn as an
+       explicit "not measured" rather than as zero: a chart cannot tell those
+       apart, and a dashboard that cannot tell them apart is how somebody ends
+       up confident about a number nobody produced. -->
+  <div class="page" id="page-engagement">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Engagement</div>
+        <div class="topbar-sub">What people do once they are in. Four measures are live; five need collection that does not exist yet.</div>
+      </div>
+      <button class="btn" onclick="renderEngagementPage(true)">Refresh</button>
+    </div>
+
+    <div class="data-notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <p id="eng-notice">Loading.</p>
+    </div>
+
+    <div class="chart-grid two">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-funnel"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Most-used tags</div><div class="chart-subtitle" id="eng-tags-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-tags"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid two">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Notes per results section</div><div class="chart-subtitle" id="eng-notes-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-notes"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-reads-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-reads"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-top:1rem">
+      <div class="chart-head"><div><div class="chart-title">Not measured yet</div><div class="chart-subtitle">What each one would take, so the decision is a real one</div></div></div>
+      <div id="eng-missing" style="padding:.25rem 0 .5rem"></div>
+    </div>
+  </div>
+
   <div class="page" id="page-demographics">
     <div class="topbar">
       <div>
@@ -1858,6 +1910,123 @@ async function adminAction(payload) {
   return r.json().catch(() => ({ error: 'Bad response' }));
 }
 
+// ── ENGAGEMENT PAGE ───────────────────────────────────────────────────────────
+//
+// Four measures from /api/admin-engagement, and a list of the five that are
+// not collected. The five are printed as sentences rather than drawn as empty
+// charts: an empty chart and a chart of zeros look the same, and this page
+// exists to tell the truth about what is known.
+let __engCache = null;
+async function renderEngagementPage(force) {
+  const notice = document.getElementById('eng-notice');
+  if (!__engCache || force) {
+    if (notice) notice.textContent = 'Loading.';
+    try {
+      const res = await fetch('/api/admin-engagement', { headers: window.adminAuthHeaders() });
+      const j = await res.json();
+      __engCache = j && j.ok ? j : null;
+      if (!__engCache && notice) notice.textContent = (j && j.error) ? ('Could not load: ' + j.error) : 'Could not load.';
+    } catch (e) {
+      __engCache = null;
+      if (notice) notice.textContent = 'Could not load: ' + (e && e.message ? e.message : 'request failed');
+    }
+  }
+  const d = __engCache;
+  if (!d) return;
+
+  if (notice) {
+    notice.textContent = 'Computed from what the product stores, at '
+      + new Date(d.generatedAt).toLocaleString()
+      + '. Four measures are live. The five below the charts are not collected, and each says what it would take.';
+  }
+
+  // ── Funnel ──────────────────────────────────────────────────────────────
+  const f = d.funnel || [];
+  setTileText('eng-funnel-n', f.length ? ('n=' + f[0].n + ' people') : 'n=0');
+  mkChart(document.getElementById('chart-eng-funnel'), {
+    type: 'bar',
+    data: { labels: f.map(x => x.step), datasets: [{ label: 'People', data: f.map(x => x.n), backgroundColor: '#6C7FFF', borderRadius: 4 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+  });
+
+  // ── Tags ────────────────────────────────────────────────────────────────
+  //
+  // Standard and custom in one chart, coloured apart, which is what the ask
+  // asked for: "should start with default but include custom tags people add".
+  const tags = (d.tags && d.tags.used || []).slice(0, 15);
+  setTileText('eng-tags-n', 'n=' + (d.tags ? d.tags.total : 0) + ' tags, ' + tags.length + ' of them used'
+    + (d.tags && d.tags.seededUnused ? (' · ' + d.tags.seededUnused + ' never used on a note') : ''));
+  mkChart(document.getElementById('chart-eng-tags'), {
+    type: 'bar',
+    data: {
+      labels: tags.map(t => t.name + (t.standard ? '' : ' (custom)')),
+      datasets: [{ label: 'Notes tagged', data: tags.map(t => t.notes),
+        backgroundColor: tags.map(t => t.standard ? '#34D399' : '#E8673A'), borderRadius: 4 }],
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+  });
+
+  // ── Notes per section ───────────────────────────────────────────────────
+  const np = d.notesPer || { results: [], articles: [] };
+  setTileText('eng-notes-n', 'n=' + (np.total || 0) + ' notes from ' + (np.people || 0) + ' people'
+    + ' · ' + (np.perPerson || 0) + ' each · ' + (np.shared || 0) + ' shared'
+    + (np.standalone ? (' · ' + np.standalone + ' not anchored to anything') : ''));
+  const rows = (np.results || []).slice(0, 15);
+  mkChart(document.getElementById('chart-eng-notes'), {
+    type: 'bar',
+    data: { labels: rows.map(r => r.key), datasets: [{ label: 'Notes', data: rows.map(r => r.notes), backgroundColor: '#9B5DE5', borderRadius: 4 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+  });
+
+  // ── Article reads ───────────────────────────────────────────────────────
+  const ar = d.articleReads || { rows: [] };
+  setTileText('eng-reads-n', 'n=' + (ar.readers || 0) + ' readers of ' + (ar.audience || 0) + ' accounts'
+    + ' · posts in the table only, the twelve website articles record nothing');
+  const arows = (ar.rows || []).slice(0, 15);
+  const artNotes = {};
+  (np.articles || []).forEach(a => { artNotes[a.key] = a.notes; });
+  mkChart(document.getElementById('chart-eng-reads'), {
+    type: 'bar',
+    data: {
+      labels: arows.length ? arows.map(r => r.id) : ['Nothing read yet'],
+      datasets: arows.length ? [
+        { label: 'Reads', data: arows.map(r => r.reads), backgroundColor: '#22A5C4', borderRadius: 4 },
+        { label: 'Notes on it', data: arows.map(r => artNotes[r.id] || 0), backgroundColor: '#FBBF24', borderRadius: 4 },
+      ] : [{ label: 'Reads', data: [0], backgroundColor: '#E6ECF6' }],
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: arows.length > 0 } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+  });
+
+  // ── The five that are not collected ─────────────────────────────────────
+  const MISSING = [
+    ['Site visits', d.siteVisits],
+    ['App downloads', d.appDownloads],
+    ['Average time per page, marketing site', d.timePerMarketingPage],
+    ['Average time per exercise', d.timePerExercise],
+    ['Average time per page, dashboard', d.timePerDashboardPage],
+  ];
+  const host = document.getElementById('eng-missing');
+  if (host) {
+    host.innerHTML = MISSING.map(function (m) {
+      var label = m[0], v = m[1] || {};
+      return '<div style="display:flex;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--border)">'
+        + '<div style="flex:0 0 13rem;font-weight:600;font-size:.8rem">' + label + '</div>'
+        + '<div style="flex:1;font-size:.78rem;color:var(--dim);line-height:1.55">' + (v.needs || 'Not collected.') + '</div>'
+        + '</div>';
+    }).join('')
+      + '<p style="font-size:.75rem;color:var(--dim);margin:.9rem 0 0;line-height:1.6">'
+      + 'Collecting any of these is a decision about customer data, not only an engineering one. '
+      + 'Timing pages is behavioural data, it would have to appear in the privacy policy, and in the EU it would sit behind the consent banner.'
+      + '</p>';
+  }
+}
+
+/** Write a tile's subtitle, which is where the n and the caveat live. */
+function setTileText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
 // ── PROMO ANALYTICS PAGE ──────────────────────────────────────────────────────
 let __prDiscountChart = null, __prAddonChart = null;
 async function renderPromosPage(force) {
@@ -2496,6 +2665,7 @@ function showPage(id) {
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
   if (id==='promos') renderPromosPage();
+  if (id==='engagement') renderEngagementPage();
   if (id==='explore' && window.__initExplore) window.__initExplore();
   if (typeof initAllSlicers === 'function') initAllSlicers();
 }
@@ -2505,7 +2675,7 @@ function restorePageFromHash() {
   const id = (location.hash || '').replace(/^#/, '').trim();
   if (id && id !== 'overview' && document.getElementById('page-'+id)) showPage(id);
 }
-const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'promos':true};
+const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'promos':true,'engagement':true};
 // ── Feedback tab switcher ─────────────────────────────
 function setFeedbackTab(el, targetId) {
   const card = el.closest('.chart-card');
@@ -5242,7 +5412,58 @@ function mkChart(el, cfg) {
   o.hover = Object.assign({ animationDuration: 0 }, o.hover);
   o.plugins = o.plugins || {};
   o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
-  return new Chart(el, cfg);
+  const chart = new Chart(el, cfg);
+  markEmptyTile(el, cfg);
+  return chart;
+}
+
+/**
+ * Say when a tile has nothing in it, rather than drawing an empty one.
+ *
+ * Ellie: "Page seems broken, data missing from most visuals."
+ *
+ * Nothing was broken. Every fallback array on this page is zeros, so a chart
+ * with no data renders its axes, its labels and its legend, and no bars. That
+ * is indistinguishable from a chart of real zeros and from a chart that failed
+ * to load, and all three were being drawn the same way.
+ *
+ * This is in mkChart rather than in each page because mkChart is the one place
+ * every chart on every tab goes through. A tile whose numbers are all zero or
+ * absent gets a line over it saying so. The chart stays underneath, because
+ * the labels are still worth reading: they say what would be there.
+ */
+function markEmptyTile(el, cfg) {
+  try {
+    const sets = (cfg.data && cfg.data.datasets) || [];
+    let total = 0;
+    let points = 0;
+    sets.forEach(function (d) {
+      (d.data || []).forEach(function (v) {
+        const n = typeof v === 'object' && v !== null ? (v.y != null ? v.y : v.r) : v;
+        if (n == null || isNaN(Number(n))) return;
+        points += 1;
+        total += Math.abs(Number(n));
+      });
+    });
+
+    const card = el.closest ? el.closest('.chart-card') : null;
+    if (!card) return;
+    const existing = card.querySelector('[data-empty-note]');
+    if (existing) existing.remove();
+
+    if (points > 0 && total > 0) { card.classList.remove('is-empty'); return; }
+    card.classList.add('is-empty');
+
+    const note = document.createElement('div');
+    note.setAttribute('data-empty-note', '1');
+    note.style.cssText = 'font-size:.75rem;color:var(--dim);padding:.35rem 0 .1rem;line-height:1.5';
+    note.textContent = points === 0
+      ? 'No data yet. Nothing has been recorded for this.'
+      : 'No data yet. Every value is zero, which here means nobody has done this rather than that the tile is broken.';
+    const head = card.querySelector('.chart-head');
+    if (head && head.parentNode) head.parentNode.insertBefore(note, head.nextSibling);
+    else card.appendChild(note);
+  } catch (e) { /* a note is never worth breaking a chart for */ }
 }
 
 // ── Regrouped rates on the overview ────────────────────────────────────────

@@ -114,3 +114,34 @@ build, not a fix. It needs, at least:
 
 Until then the honest thing is that the sentence in the policy is not true,
 and a lawyer should see this page.
+
+---
+
+## What was built, 12 September 2026
+
+Ellie answered on all four questions. Three are done:
+
+**4, the password step.** Both surfaces ask for one, and
+`api/delete-account.js` verifies it before it touches anything, for accounts
+that have one. Google and Apple sign-ins have no password to confirm with, so
+the check is gated on the account having an email identity rather than on
+whether the field arrived. A wrong password answers 403, not 401: they are
+authenticated and the request is refused. `check-delete-reauth.mjs`.
+
+**2, the partner notification.** A row in `notifications` and an email. The
+email is what reaches them today, because no app screen reads the list yet.
+Their `email_opt_in` is honoured at the send.
+
+**3, the confirmation email.** Sent to the address read in step 0, before the
+auth user is deleted, and sent in step 7, after it. A confirmation sent first
+is a lie if the delete then fails. `check-deletion-notices.mjs` proves that
+ordering, because getting it wrong is silent: the mail simply goes to
+undefined.
+
+The wording of both emails is in `api/_lib/deletion-emails.js`, and the
+notification's is one case in `api/_lib/notifications.js`. It is mine, and
+Ellie's to edit.
+
+**1 is still open**, and it is the one that costs a customer: the remaining
+partner still loses every result rather than keeping the parts derived from
+their own answers. Scoped above. Not started.
