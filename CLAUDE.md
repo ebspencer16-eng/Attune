@@ -271,6 +271,31 @@ a blank shell. Reading found none of those.
 part worth keeping: when a surface is deployed, sweep it from outside before
 reasoning about it from inside.
 
+**A green build is not a claim that the names resolve.** `vite build` exits 0
+on a file that reads a name nothing declares: esbuild treats an unresolved
+identifier as a global and emits it. That was tested by planting one in
+`src/App.jsx` and watching the build pass. So the website's 15,000-line
+renderer had no cover at all for the most basic mistake in JavaScript, and it
+had one: `completeLogin` built the partner invite URL from `inviteCode`, which
+nothing in that scope declares, so a login with a partner email in the form
+threw before `setLoading(false)` and the spinner never stopped.
+
+Three more of the same shape were in `api/` and `public/`: a receipt template
+reading three add-on flags it was never passed, the combined CSV export reading
+`s` where the rest of the function says `p`, and a missing closing brace that
+put `wbVariant` inside `_defaultAddons`, so any cart holding a workbook threw
+on every price calculation. `node --check` passes all four, because none is a
+syntax error. `check-server-undefined.mjs` asks Babel to resolve scopes and
+fails on anything the program scope cannot bind.
+
+**A gate that disables the side effect cannot see where the guard sits.** The
+first version of `check-open-writes.mjs` ran the handlers with no Supabase
+credentials, so the write was skipped, so moving the guard below the write
+changed nothing and the plant passed. Giving the test env credentials that
+reach a stubbed `fetch`, and counting the calls, is what made the ordering
+visible. If a gate is about when something happens, the thing has to be able to
+happen.
+
 **A gate encodes a rule, not the current state.** Write it so the reason
 survives: name the promise, and say what it deliberately does not cover.
 `check-partner-privacy.mjs` is scoped to Conflict Patterns and says why
