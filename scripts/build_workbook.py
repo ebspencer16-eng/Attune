@@ -6,6 +6,25 @@ dimensions + expectations + Parts 2-5) as a single HTML file.
 Designed to mirror the page structure of api/generate-workbook.js so
 the design can be ported back to the real generator once approved.
 
+NOT A SOURCE OF TRUTH, FOR ANYTHING
+-----------------------------------
+Nothing a customer sees comes from this file. The workbook they receive is
+built by api/generate-workbook.js from api/_workbook-content.js. This is a
+design sample, and it holds its own copy of a lot of prose.
+
+Of 197 prose strings in here, 141 appear nowhere in the product: measured by
+parsing this file with ast and substring-matching every string constant
+against api/, src/, the app and public/. Some of that is sample text for Maya
+and David and always was. Some is workbook copy that was written, looks
+finished, and has never shipped, and nobody can tell which from in here.
+
+PHASE_5b_HANDOFF.md used to name EXP_DOMAINS below as the source of truth for
+the expectations prose. It is not, and has not been since the port; all twenty
+of those strings are in api/_workbook-content.js and agree with it word for
+word. That line has been corrected.
+
+So: edit the JS. If you edit prose here, expect it to reach nobody.
+
 Two modes:
 
   Local sample (default):

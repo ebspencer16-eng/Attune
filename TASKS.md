@@ -35,6 +35,7 @@ moved past; it is listed so nothing is taken on trust.
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
 | O6 | "Finish setting up your profile" and "Leave feedback" leave the app for the browser. Your direction is that everything runs in the app. Settings cannot edit a name or pronouns yet, so this needs a profile editor first. |
 | O7 | Every static page's `canonical`, `og:url` and JSON-LD tags name the **apex**, which 307s to www. Search engines are being told to index a URL that redirects. Thirty-odd tags; an SEO call, so left for you. |
+| G4 | **141 prose strings in `scripts/build_workbook.py` appear nowhere in the product.** Method: parsed the file with Python's own parser, substring-matched all 808 string constants against 4.4MB of api/, src/, app and public/ source; 197 read as prose, 141 of those match nothing. Some is Maya-and-David sample text and always was. Some looks like finished workbook copy that has never shipped. Port it or delete it, but it should not sit there looking finished. |
 
 
 ## 3. Done, not verified

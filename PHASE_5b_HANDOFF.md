@@ -164,7 +164,7 @@ Replace with the 6-domain Phase 3 list. The labels and color-keys are:
 5. life — Life Together (green) — replaces children + lifestyle
 6. operate — How We Operate (purple) — replaces values
 
-For each domain, three alignment-state texts plus a "Try this week" prompt. Source of truth for the prose lives in `scripts/build_workbook.py` → `EXP_DOMAINS` list, which is what the Phase 3 sample uses. Copy the prose from there and reformat for JS.
+For each domain, three alignment-state texts plus a "Try this week" prompt. Source of truth for the prose is `api/_workbook-content.js`. It used to be `scripts/build_workbook.py` → `EXP_DOMAINS`, and that line stood here long after the port; all twenty of those strings now live in the JS and agree with it word for word. Edit the JS. The Python is a design sample.
 
 This is the most content-heavy step. Budget ~30-45 minutes.
 
