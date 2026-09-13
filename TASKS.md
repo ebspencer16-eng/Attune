@@ -28,6 +28,7 @@ have proved instead.
 
 | # | Question |
 |--|--|
+| G21 | **Please open attune-relationships.com in your own browser and tell me it loads.** I verified every change today by requesting pages from this machine, and the volume tripped Vercel's bot challenge: every request from here now answers 403 with a "Vercel Security Checkpoint" page, including from a real browser. That is almost certainly scoped to this machine's address and wears off. What I cannot tell from here is whether it is only me. If the site does not load for you either, the setting is Vercel, Project, Firewall, Attack Challenge Mode. I have stopped making requests. |
 | G20 | **The `qr_token` column on `orders` is now written by nothing.** The gift cards are retired and so is the claim path, so the column sits there holding old values. Dropping it is a migration and it is irreversible, so I have not written one. Say the word and I will. |
 | G19 | **The two six-month emails, side by side.** They say the same thing in different words.
 **The browser one** (subject: "Six months with Attune. Worth a look.") opens "Six months is a good time to check in", then argues the case: a lot can move in half a year, some things get easier, new friction appears, the assessment is most useful as a check-in rather than a one-time snapshot. Button: Retake Attune.
