@@ -17,11 +17,6 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | G1 | Everything built is building clean, and none of it has been seen on a phone. |
 | G6 | **The Privacy Policy and the Terms of Service are published reading "Effective date: TODO before publishing".** The other three documents on /legal say May 15, 2026. An effective date is yours to set, not mine. Two edits in `public/legal.html`, lines 121 and 240. |
-| G7 | **Migration 058 is ready to run**: `supabase/migrations/058_consent_events.sql`. Until you run it, consent events are not stored and the endpoint logs one line saying so. The migration's header explains what the row holds and the one part a lawyer should see: whether a peppered hash of an email, kept after deletion, is the right way to keep a consent record. |
-| G9 | **Migration 059 is ready to run**: `supabase/migrations/059_results_survive_deletion.sql`. It is the one that stops a paying customer losing their results when their partner deletes. Run 058 and 059 together. |
-| G8 | **Five of the nine engagement measures need collection that does not exist**: site visits, app downloads, and time per page on the marketing site, in the exercises and in the dashboard. Each is listed on the tab with what it would take. Starting to collect any of them is customer behavioural data: it changes the privacy policy and sits behind the consent banner in the EU. Your call, and I have not started it. |
-| G4 | **141 prose strings in `scripts/build_workbook.py` appear nowhere in the product.** Method: parsed the file with Python's own parser, substring-matched all 808 string constants against 4.4MB of api/, src/, app and public/ source; 197 read as prose, 141 of those match nothing. Some is Maya-and-David sample text and always was. Some looks like finished workbook copy that has never shipped. Port it or delete it, but it should not sit there looking finished. |
-| G5 | **Six In Practice excerpts.** Twelve articles are on the site; the app's shelf carries six, because six is how many have a card on `practice.html` and a card is the only place an excerpt was ever written. One sentence each, in the voice of the six that exist. The six are listed as `PENDING_EXCERPT` in `api/_in-practice.js`: how-to-use-your-results, why-couples-fight-about-the-same-things, what-your-communication-style-reveals, what-your-couple-type-tells-you, for-the-bridge-the-conversation-you-need, why-naming-the-pattern-changes-everything. |
 
 Answered 12 Sep and moved to Open: G2a add the password step, G2b build the
 partner notification, G2c build the confirmation email (you approve or edit the
@@ -32,8 +27,11 @@ payment-records paragraph, G3c make the banner geo-aware.
 
 | # | Task |
 |--|--|
+| O16 | **Build the five engagement measures.** Site visits, app downloads, and time per page on the marketing site, in the exercises and in the dashboard. Behavioural data, so it has to sit behind the consent gate and be described in the privacy policy. |
+| O17 | **Remove the 141 prose strings** in `scripts/build_workbook.py` that appear nowhere in the product. |
+| O18 | **All 12 In Practice articles reach the app**, as placeholders, with no excerpt. You and Carolina will write more later. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
-| O3 | When one partner deletes, the other keeps their results with the departed person anonymised. **Built; needs migration 059 run.** Until then the row is still cascade-deleted, which is the behaviour 059 exists to change. Couples deleted before you run it have no row to recover, and get an honest answer rather than a waiting screen. |
+| O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
 | O6 | "Finish setting up your profile" and "Leave feedback" leave the app for the browser. Your direction is that everything runs in the app. Settings cannot edit a name or pronouns yet, so this needs a profile editor first. |
 | O7 | Every static page's `canonical`, `og:url` and JSON-LD tags name the **apex**, which 307s to www. Search engines are being told to index a URL that redirects. Thirty-odd tags; an SEO call, so left for you. |
