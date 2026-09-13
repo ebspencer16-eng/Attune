@@ -13,6 +13,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import {
   Linking, Pressable, RefreshControl, ScrollView, Text, View,
@@ -43,6 +45,7 @@ const SITE = SITE_URL;
 const ALL = 'All';
 
 export default function ResourcesScreen() {
+  useScreenTime('resources');
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [categories, setCategories] = useState<string[]>([]);

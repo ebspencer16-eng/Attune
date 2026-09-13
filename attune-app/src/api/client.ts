@@ -1164,6 +1164,36 @@ export async function deleteAccount(password?: string): Promise<ApiResult<{ ok: 
   });
 }
 
+/**
+ * How long a screen was open.
+ *
+ * The same measure the website sends from public/_track.js, under the same
+ * keys: 'app:<view>', where the view names come from api/_exercises.js. So
+ * "average time per exercise" is one calculation over both surfaces rather
+ * than two that can disagree.
+ *
+ * Nothing identifying is sent. The endpoint takes the profile id from the
+ * token, never from the body, and stores no device or session id, so two
+ * events from the same person cannot be joined to each other.
+ *
+ * Failures are ignored on purpose: a measurement that interrupts the thing it
+ * is measuring is worse than a gap in the measurement.
+ */
+export async function trackScreenTime(view: string, ms: number): Promise<void> {
+  if (!view || !Number.isFinite(ms) || ms < 1000) return;
+  try {
+    const token = await getToken();
+    await fetch(`${baseUrl}/api/track`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ kind: 'page_time', key: `app:${view}`, ms: Math.round(ms) }),
+    });
+  } catch { /* a missed measurement is not worth a word to anyone */ }
+}
+
 export function fetchNotifications() {
   return request<{ ok: true; notifications: Notification[]; unread: number }>('/api/notifications');
 }
@@ -1194,7 +1224,7 @@ export type QuestionItem = {
 
 export type ExpectationsSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
   names: { you: string; partner: string };
   childhoodStructures: { id: string; label: string; cols: string[] }[];
   /** `key` is the raw item text and is what the answer is stored under. `label`
@@ -1217,7 +1247,7 @@ export type SavedAnswers = {
 
 export type QuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
   scale: { val: number; label: string }[];
   items: QuestionItem[];
   /** Every key a finished set contains, so the app never counts items itself. */
@@ -1245,7 +1275,7 @@ export function fetchQuestions(exercise: string) {
  */
 export type ReflectionQuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
   version: number;
   items: {
     id: string;
@@ -1272,7 +1302,7 @@ export type ReflectionQuestionSet = {
  */
 export type IntimacyQuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
   variant: 'premarital' | 'married';
   dimensions: { id: string; label: string }[];
   items: {
@@ -1481,7 +1511,7 @@ export type ConflictQuestionSet = {
    * is what reads the answers back and calls them complete or not.
    */
   requiredIds: string[];
-  exercise: { key: string; label: string; shape: 'answers' | 'record' };
+  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
   intro: string | null;
   sections: { id: string; label: string; questions: string[] }[];
   frequencyOptions: { value: number; label: string }[];

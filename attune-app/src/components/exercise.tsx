@@ -18,6 +18,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -35,6 +37,10 @@ export default function Exercise({
   exerciseKey, onClose, onFinished,
 }: { exerciseKey: string; onClose: () => void; onFinished: () => void }) {
   const [set, setSet] = useState<QuestionSet | null>(null);
+  // Keyed by whichever exercise this is rendering, not by the file. The key
+  // is the registry's view, so the app and the website file their time under
+  // the same name.
+  useScreenTime(set?.exercise.view ?? null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
   // Bumped by the retry button. Without it the button set loading and nothing

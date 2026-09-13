@@ -18,6 +18,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import {
   ActivityIndicator, KeyboardAvoidingView, Platform, Pressable,
   ScrollView, Text, TextInput, View,
@@ -39,6 +41,7 @@ type Answers = Record<string, number | string | string[]>;
 export default function ReflectionExercise({
   onClose, onFinished,
 }: { onClose: () => void; onFinished: () => void }) {
+  useScreenTime('exercise3');
   const [set, setSet] = useState<ReflectionQuestionSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);

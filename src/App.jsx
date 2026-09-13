@@ -11312,6 +11312,27 @@ export default function App() {
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
+
+  /**
+   * How long each view is looked at.
+   *
+   * public/_track.js times the page, and in a single-page app the page is the
+   * whole session: one number covering the dashboard, the results and three
+   * exercises. This splits it by view, which is what the Engagement tab asks
+   * for.
+   *
+   * Consent is not decided here. _track.js owns that rule and this calls the
+   * same sender, so a decline stops these too.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.__attuneTrack) return;
+    const started = Date.now();
+    const opened = view;
+    return () => {
+      const ms = Date.now() - started;
+      if (ms >= 1000) window.__attuneTrack('page_time', 'app:' + opened, ms);
+    };
+  }, [view]);
   // Account deletion, on the account view. Kept as four small pieces of state
   // rather than one object so a half-finished confirmation cannot leave the
   // button enabled with the typed word cleared.

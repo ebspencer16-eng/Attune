@@ -22,6 +22,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -52,6 +54,7 @@ const EMPTY: Answers = {
 export default function Expectations({
   onClose, onFinished,
 }: { onClose: () => void; onFinished: () => void }) {
+  useScreenTime('exercise2');
   const [set, setSet] = useState<ExpectationsSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);

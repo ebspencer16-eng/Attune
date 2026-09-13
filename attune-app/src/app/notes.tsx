@@ -35,6 +35,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable,
@@ -61,6 +63,7 @@ const c = Colors.light;
 type Row = { note: Note; readOnly: boolean };
 
 export default function NotesScreen() {
+  useScreenTime('notes');
   const [notes, setNotes] = useState<Note[]>([]);
   const [annotations, setAnnotations] = useState<Note[]>([]);
   const [shared, setShared] = useState<Note[]>([]);

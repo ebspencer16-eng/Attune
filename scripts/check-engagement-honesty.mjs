@@ -36,13 +36,22 @@ const html = read('public/admin.html');
 
 const problems = [];
 
-// The measures the endpoint declares unavailable, by the name it returns them
-// under. Derived from the source so a sixth one is covered the day it is added.
-const UNAVAILABLE = [...api.matchAll(/^\s*(\w+):\s*unavailable\(/gm)].map((m) => m[1]);
+// Every measure that can come back unavailable, by the name it is returned
+// under. Two shapes, because four of them are measured when there is data and
+// unavailable when there is not:
+//
+//   siteVisits: unavailable('...')        always unavailable
+//   siteVisits: notYet,                   unavailable only while empty
+//
+// Derived from the source, so one added tomorrow is covered tomorrow.
+const UNAVAILABLE = [...new Set([
+  ...[...api.matchAll(/^\s*(\w+):\s*unavailable\(/gm)].map((m) => m[1]),
+  ...[...api.matchAll(/^\s*(\w+):\s*notYet,/gm)].map((m) => m[1]),
+])];
 
 if (UNAVAILABLE.length < 3) {
-  console.error(`[check-engagement-honesty] only found ${UNAVAILABLE.length} unavailable measures;`);
-  console.error('  the shape they are declared in has changed. Refusing to pass.');
+  console.error(`[check-engagement-honesty] only found ${UNAVAILABLE.length} measures that can be`);
+  console.error('  unavailable; the shape they are declared in has changed. Refusing to pass.');
   process.exit(1);
 }
 
@@ -51,28 +60,59 @@ for (const m of api.matchAll(/unavailable\(\s*'([^']*)'/g)) {
   if (m[1].trim().length >= 40) continue;
   problems.push(`an unavailable measure explains itself in ${m[1].length} characters: "${m[1]}"`);
 }
+// Every unavailable() call carries a sentence, which is what the tile shows.
 const explained = [...api.matchAll(/unavailable\(\s*'/g)].length;
-if (explained !== UNAVAILABLE.length) {
+const calls = [...api.matchAll(/unavailable\(/g)].length;
+if (explained !== calls) {
   problems.push(
-    `${UNAVAILABLE.length} measures are unavailable and ${explained} say why.\n`
+    `${calls} calls to unavailable() and ${explained} of them say why.\n`
     + '      A tile that says "not measured" and stops is a tile nobody can act on.');
 }
 
 // ── 2. The page lists every one of them ───────────────────────────────────
+// Two ways a measure may reach the page honestly: the MISSING list, which
+// prints the sentence, or drawTimeTile, which prints it when the measure says
+// it is unavailable and draws only when it does not.
 const missingBlock = (() => {
   const at = html.indexOf('const MISSING = [');
   if (at < 0) return null;
-  return html.slice(at, html.indexOf('];', at));
+  return html.slice(at, html.indexOf('].filter', at) + 1 || html.indexOf('];', at));
 })();
+const tiles = [...html.matchAll(/drawTimeTile\([^;]*?d\.(\w+)/g)].map((m) => m[1]);
+
 if (!missingBlock) {
   problems.push('public/admin.html has no MISSING list, so the unmeasured ones reach the page as nothing at all.');
 } else {
   for (const name of UNAVAILABLE) {
-    if (missingBlock.includes(`d.${name}`)) continue;
+    if (missingBlock.includes(`d.${name}`) || tiles.includes(name)) continue;
     problems.push(
-      `${name} is reported as not collected and the Engagement page never shows it.\n`
+      `${name} can come back not collected and the Engagement page never shows it.\n`
       + '      It disappears instead of saying what it would take.');
   }
+}
+
+// Every tile is wired to a measure, not to nothing.
+//
+// This is a narrower fault than the one above and it survived the first
+// version: a tile handed `null` draws the "not measured" sentence, so the page
+// never shows a blank as a number. It shows the opposite, a measure that
+// exists reported as missing, which is the same confusion pointed the other
+// way.
+for (const m of html.matchAll(/drawTimeTile\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*([^,]+),/g)) {
+  const [, canvas, , measure] = m;
+  if (/^d\.\w+$/.test(measure.trim())) continue;
+  problems.push(
+    `the tile on #${canvas} is passed ${measure.trim()} rather than a measure.\n`
+    + '      It will always say "not measured", whether or not it is.');
+}
+
+// drawTimeTile is the only thing allowed to decide; it has to be the thing
+// that checks. Without this the helper could draw a chart of nothing and every
+// name would still appear to be handled.
+if (!/measure\.available === false/.test(html)) {
+  problems.push(
+    'drawTimeTile does not check `available` before drawing.\n'
+    + '      A measure that is not collected would reach a chart as an empty one.');
 }
 
 // ── 3. None of them is drawn as a series ──────────────────────────────────
@@ -92,5 +132,5 @@ if (problems.length) {
 }
 
 console.log(
-  `[check-engagement-honesty] ${UNAVAILABLE.length} measures are not collected; every one says what it would take, `
-  + 'and none is drawn as a chart.');
+  `[check-engagement-honesty] ${UNAVAILABLE.length} measures can come back uncollected; `
+  + 'every one says what it would take, and none is drawn as a chart.');

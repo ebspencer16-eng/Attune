@@ -666,6 +666,28 @@
       </div>
     </div>
 
+    <div class="chart-grid two">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Site visits</div><div class="chart-subtitle" id="eng-visits-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-visits"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Time per page, marketing site</div><div class="chart-subtitle" id="eng-mktime-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-mktime"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid two">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Time per exercise</div><div class="chart-subtitle" id="eng-extime-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-extime"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Time per page, dashboard</div><div class="chart-subtitle" id="eng-dashtime-n">n=&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-dashtime"></canvas></div>
+      </div>
+    </div>
+
     <div class="chart-card" style="margin-top:1rem">
       <div class="chart-head"><div><div class="chart-title">Not measured yet</div><div class="chart-subtitle">What each one would take, so the decision is a real one</div></div></div>
       <div id="eng-missing" style="padding:.25rem 0 .5rem"></div>
@@ -1997,14 +2019,49 @@ async function renderEngagementPage(force) {
     options: { indexAxis: 'y', plugins: { legend: { display: arows.length > 0 } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
   });
 
-  // ── The five that are not collected ─────────────────────────────────────
+  // ── The four measured from page_events ──────────────────────────────────
+  //
+  // Each tile draws only when the endpoint says the measure is available.
+  // Where it is not, the tile says why, in the same words the endpoint used,
+  // rather than drawing a chart of nothing.
+  drawTimeTile('chart-eng-visits', 'eng-visits-n', d.siteVisits, 'visits', function (v) {
+    return {
+      subtitle: 'n=' + v.total + ' visits since ' + new Date(v.since).toLocaleDateString() + ' · ' + v.note,
+      labels: (v.rows || []).slice(0, 15).map(function (r) { return r.key; }),
+      data: (v.rows || []).slice(0, 15).map(function (r) { return r.visits; }),
+      colour: '#6C7FFF',
+      axis: 'visits',
+    };
+  });
+
+  [['chart-eng-mktime', 'eng-mktime-n', d.timePerMarketingPage, '#E8673A'],
+   ['chart-eng-extime', 'eng-extime-n', d.timePerExercise, '#9B5DE5'],
+   ['chart-eng-dashtime', 'eng-dashtime-n', d.timePerDashboardPage, '#22A5C4']]
+    .forEach(function (t) {
+      drawTimeTile(t[0], t[1], t[2], 'seconds', function (v) {
+        var rows = (v.rows || []).slice(0, 15);
+        return {
+          subtitle: rows.length
+            ? ('n=' + rows.reduce(function (a, r) { return a + r.n; }, 0) + ' timed visits · bars are the mean, the dot is the median')
+            : 'Nothing timed here yet.',
+          labels: rows.map(function (r) { return r.key; }),
+          data: rows.map(function (r) { return r.seconds; }),
+          median: rows.map(function (r) { return r.medianSeconds; }),
+          colour: t[3],
+          axis: 'seconds',
+        };
+      });
+    });
+
+  // ── What is still not collected ─────────────────────────────────────────
   const MISSING = [
-    ['Site visits', d.siteVisits],
     ['App downloads', d.appDownloads],
+  ].concat([
+    ['Site visits', d.siteVisits],
     ['Average time per page, marketing site', d.timePerMarketingPage],
     ['Average time per exercise', d.timePerExercise],
     ['Average time per page, dashboard', d.timePerDashboardPage],
-  ];
+  ].filter(function (m) { return m[1] && m[1].available === false; }));
   const host = document.getElementById('eng-missing');
   if (host) {
     host.innerHTML = MISSING.map(function (m) {
@@ -2019,6 +2076,53 @@ async function renderEngagementPage(force) {
       + 'Timing pages is behavioural data, it would have to appear in the privacy policy, and in the EU it would sit behind the consent banner.'
       + '</p>';
   }
+}
+
+/**
+ * One measured tile, or the reason there is not one.
+ *
+ * A measure that is not collected must never reach a chart: an empty chart and
+ * a chart of zeros look the same, and the whole point of this tab is that they
+ * are different facts. So this draws when `available` is true and writes the
+ * endpoint's own sentence when it is not.
+ */
+function drawTimeTile(canvasId, subId, measure, unit, shape) {
+  var el = document.getElementById(canvasId);
+  var card = el && el.closest ? el.closest('.chart-card') : null;
+  if (!card) return;
+
+  var old = card.querySelector('[data-not-measured]');
+  if (old) old.remove();
+
+  if (!measure || measure.available === false) {
+    if (el) { try { var ex = Chart.getChart(el); if (ex) ex.destroy(); } catch (e) {} }
+    setTileText(subId, 'Not measured');
+    var note = document.createElement('div');
+    note.setAttribute('data-not-measured', '1');
+    note.style.cssText = 'font-size:.78rem;color:var(--dim);line-height:1.6;padding:.4rem 0 .6rem';
+    note.textContent = (measure && measure.needs) || 'Not collected.';
+    card.insertBefore(note, card.querySelector('.chart-body'));
+    return;
+  }
+
+  var v = shape(measure);
+  setTileText(subId, v.subtitle);
+  var datasets = [{ label: v.axis, data: v.data, backgroundColor: v.colour, borderRadius: 4 }];
+  if (v.median) {
+    datasets.push({
+      label: 'median', data: v.median, type: 'line', showLine: false,
+      pointRadius: 4, pointBackgroundColor: '#0E0B07', borderColor: '#0E0B07',
+    });
+  }
+  mkChart(el, {
+    type: 'bar',
+    data: { labels: v.labels.length ? v.labels : ['Nothing yet'], datasets: v.labels.length ? datasets : [{ label: v.axis, data: [0], backgroundColor: '#E6ECF6' }] },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: !!v.median } },
+      scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } },
+    },
+  });
 }
 
 /** Write a tile's subtitle, which is where the n and the caveat live. */

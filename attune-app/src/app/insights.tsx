@@ -17,6 +17,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -40,6 +42,7 @@ const c = Colors.light;
 
 
 export default function InsightsScreen() {
+  useScreenTime('insights');
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [results, setResults] = useState<ResultsResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);

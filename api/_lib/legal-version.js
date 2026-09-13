@@ -9,7 +9,7 @@
  * do. A date could not do that, and two of those documents are published
  * today with no date at all.
  */
-export const LEGAL_VERSION = '41fccaf2564a';
+export const LEGAL_VERSION = '7aa16945d19b';
 
 /** The documents the version covers, in the order they are hashed. */
 export const LEGAL_DOCUMENTS = ["privacy","terms"];

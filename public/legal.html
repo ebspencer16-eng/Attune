@@ -138,6 +138,15 @@
   <p>Automatically, when you use the site or the app: your IP address, browser
   and device type, and which pages you opened. Our error monitoring records the
   technical details of a crash so we can fix it.</p>
+  <p>We also measure how the product is used, so we can see where it works and
+  where it does not. Each measurement is one row: which page or exercise, how
+  long it was open, the country it came from, and the time. Nothing identifies
+  you. There is no cookie, no advertising identifier, no device identifier and
+  no session identifier, so two measurements from you cannot be connected to
+  each other or to your account, except inside the product, where an exercise
+  is timed against your account so we can see how long an exercise takes. These
+  rows are deleted after ninety days. Where consent is required, none of this
+  is recorded unless you have given it, and declining stops it completely.</p>
   <p>We do not buy data about you. We do not collect biometric data or
   government identification.</p>
 
@@ -645,6 +654,7 @@ function toggleMenu(){var m=document.getElementById('mobile-menu');if(m)m.classL
 document.addEventListener('click',function(e){var menu=document.getElementById('mobile-menu');var burger=document.getElementById('hamburger');if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&!burger.contains(e.target)){menu.classList.remove('open');}});
 </script>
   <script src="/_flags.js"></script>
+  <script src="/_track.js"></script>
 <script src="/cart.js"></script>
 </body>
 </html>

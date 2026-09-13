@@ -17,6 +17,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,6 +36,7 @@ type Answer = number | string | string[];
 export default function ConflictExercise({
   onClose, onFinished,
 }: { onClose: () => void; onFinished: () => void }) {
+  useScreenTime('conflict');
   const [set, setSet] = useState<ConflictQuestionSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);

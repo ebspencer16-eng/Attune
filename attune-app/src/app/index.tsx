@@ -19,6 +19,8 @@
 
 import ProfileSetup from '@/components/profile-setup';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -50,6 +52,7 @@ const SITE = SITE_URL;
 const APP_ROUTES = new Set(['/', '/insights', '/resources', '/notes']);
 
 export default function HomeScreen() {
+  useScreenTime('home');
   const router = useRouter();
   // Where the tile starts. Just over half the screen, so the reading has the
   // top of the page and the tile sits in the lower half without being pinned

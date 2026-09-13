@@ -306,6 +306,14 @@
       "destination": "/api/admin-engagement.js"
     },
     {
+      "source": "/api/track",
+      "destination": "/api/track.js"
+    },
+    {
+      "source": "/api/cron-prune-events",
+      "destination": "/api/cron-prune-events.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     },
@@ -412,6 +420,10 @@
     {
       "path": "/api/cron-survey-nudge",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron-prune-events",
+      "schedule": "0 4 * * *"
     }
   ]
 }

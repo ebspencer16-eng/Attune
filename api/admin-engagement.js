@@ -62,6 +62,78 @@ async function all(url, key, path) {
   return out;
 }
 
+/**
+ * The four measures that come from page_events.
+ *
+ * ── ONE CALCULATION, THREE TILES ──────────────────────────────────────────
+ * Time per marketing page, time per exercise and time per dashboard page are
+ * the same arithmetic over different keys. A path is the marketing site. An
+ * 'app:<view>' key is inside the product, and whether it is an exercise is the
+ * registry's answer, not a list here.
+ *
+ * ── WHY THE MEDIAN AS WELL AS THE MEAN ────────────────────────────────────
+ * One person who left a tab open for two hours moves a mean over forty
+ * sessions by three minutes. The endpoint caps a single event at two hours,
+ * which stops the worst of it, and reporting both numbers says when they
+ * disagree, which is exactly when the mean should not be quoted.
+ */
+function engagementFromEvents(events) {
+  const measured = Array.isArray(events) && events.length > 0;
+  if (!measured) {
+    const notYet = unavailable('Nothing recorded yet. The collection is built and migration 060 creates the table it writes to; until that is run, and until somebody visits, this stays empty.');
+    return {
+      siteVisits: notYet,
+      timePerMarketingPage: notYet,
+      timePerExercise: notYet,
+      timePerDashboardPage: notYet,
+    };
+  }
+
+  const EXERCISE_VIEWS = new Set(EXERCISES.map((e) => `app:${e.view}`));
+  const stat = (list) => {
+    if (!list.length) return null;
+    const sorted = [...list].sort((a, b) => a - b);
+    const mean = sorted.reduce((s, v) => s + v, 0) / sorted.length;
+    const median = sorted[Math.floor(sorted.length / 2)];
+    return { seconds: Math.round(mean / 1000), medianSeconds: Math.round(median / 1000), n: sorted.length };
+  };
+
+  const byKey = {};
+  for (const e of events) {
+    if (e.kind !== 'page_time' || !Number.isFinite(Number(e.ms))) continue;
+    (byKey[e.key] = byKey[e.key] || []).push(Number(e.ms));
+  }
+  const rows = (predicate) => Object.entries(byKey)
+    .filter(([k]) => predicate(k))
+    .map(([k, list]) => ({ key: k, ...stat(list) }))
+    .sort((a, b) => b.n - a.n);
+
+  const visits = events.filter((e) => e.kind === 'visit');
+  const byPath = {};
+  for (const v of visits) byPath[v.key] = (byPath[v.key] || 0) + 1;
+
+  const since = events.reduce((oldest, e) => {
+    const t = new Date(e.created_at).getTime();
+    return Number.isFinite(t) && t < oldest ? t : oldest;
+  }, Date.now());
+
+  return {
+    siteVisits: {
+      available: true,
+      total: visits.length,
+      since: new Date(since).toISOString(),
+      rows: Object.entries(byPath).map(([k, n]) => ({ key: k, visits: n })).sort((a, b) => b.visits - a.visits),
+      note: 'Visits, not people. Nothing here can tell two visits by one person from one visit by two, which is deliberate.',
+    },
+    timePerMarketingPage: { available: true, rows: rows((k) => k.startsWith('/')) },
+    timePerExercise: { available: true, rows: rows((k) => EXERCISE_VIEWS.has(k)) },
+    timePerDashboardPage: {
+      available: true,
+      rows: rows((k) => k.startsWith('app:') && !EXERCISE_VIEWS.has(k)),
+    },
+  };
+}
+
 /** A measure we do not collect, said plainly rather than drawn as zero. */
 const unavailable = (needs) => ({ available: false, needs });
 
@@ -79,12 +151,15 @@ export default async function handler(req) {
 
   try {
     const columns = ['id', 'partner_profile_id', 'created_at', ...EXERCISES.map((e) => e.column)];
-    const [profiles, notes, tags, noteTags, reads] = await Promise.all([
+    const [profiles, notes, tags, noteTags, reads, events] = await Promise.all([
       all(url, key, `profiles?select=${columns.join(',')}`),
       all(url, key, 'notes?select=id,owner_id,anchor_type,anchor_key,body,visibility'),
       all(url, key, 'tags?select=id,owner_id,name,standard_key'),
       all(url, key, 'note_tags?select=note_id,tag_id'),
       all(url, key, 'post_reads?select=post_id,owner_id'),
+      // Empty until migration 060 is run, which reads as "nothing measured
+      // yet" rather than as an error, and the tiles say which.
+      all(url, key, 'page_events?select=kind,key,ms,owner_id,created_at'),
     ]);
 
     // ── 1. The completion funnel ─────────────────────────────────────────
@@ -190,13 +265,10 @@ export default async function handler(req) {
       tags: { used: tagUse, seededUnused: seeded, total: tags.length },
       articleReads,
 
-      // The five that need collection that does not exist. Each says what it
-      // would take, so the tab can say it too.
-      siteVisits: unavailable('No analytics runs on the site. Counting visits means recording them, which is new customer data, a change to the privacy policy, and something the EU consent banner would have to cover.'),
-      appDownloads: unavailable('Only App Store Connect knows this. It needs their API and a key, and the app is not in the store yet.'),
-      timePerMarketingPage: unavailable('Nothing times a page. It needs a beacon on every static page, which is behavioural data about customers.'),
-      timePerExercise: unavailable('Only the finish is stored, as ex{N}_completed_at. Timing an exercise needs a start time recorded when someone opens it, which is a migration and a write on every open.'),
-      timePerDashboardPage: unavailable('Same as the marketing pages, inside the app and the portal.'),
+      ...engagementFromEvents(events),
+
+      // The one that still needs something nobody here can supply.
+      appDownloads: unavailable('Only App Store Connect knows this. It needs an API key, an issuer id and a private key in the environment, and the app is not in the store yet. Everything else on this tab is measured now.'),
     });
   } catch (e) {
     return json({ error: String(e?.message || e) }, 500);

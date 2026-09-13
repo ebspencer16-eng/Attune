@@ -17,6 +17,8 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | G1 | Everything built is building clean, and none of it has been seen on a phone. |
 | G6 | **The Privacy Policy and the Terms of Service are published reading "Effective date: TODO before publishing".** The other three documents on /legal say May 15, 2026. An effective date is yours to set, not mine. Two edits in `public/legal.html`, lines 121 and 240. |
+| G11 | **Migration 060 is ready to run**: `supabase/migrations/060_page_events.sql`. Until then nothing is recorded and the Engagement tiles say so. |
+| G12 | **The privacy policy now describes the measurement** (section 1, the paragraph after the automatic collection). Those words are mine. Read them: they are the promise the ninety-day prune job and the consent check are holding up. |
 | G10 | **Two workbook generators, two copies of the prose.** `api/generate-workbook.js` builds the .docx from `api/_workbook-content.js`; `scripts/build_workbook.py` builds the PDF from its own copy. The twenty shared strings agree and `check-workbook-prose.mjs` now keeps them that way. The other 121 exist only in the PDF: the moments pages, the dimension content, the situation prompts. Whether the .docx should carry those too is a product question, and it is yours. |
 
 Answered 12 Sep and moved to Open: G2a add the password step, G2b build the
@@ -28,7 +30,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 
 | # | Task |
 |--|--|
-| O16 | **Build the five engagement measures.** Site visits, app downloads, and time per page on the marketing site, in the exercises and in the dashboard. Behavioural data, so it has to sit behind the consent gate and be described in the privacy policy. |
+| O16 | Four of the five are built and measuring. **Needs migration 060 run** (`supabase/migrations/060_page_events.sql`). App downloads still needs an App Store Connect key, an issuer id and a private key, and the app is not in the store. |
 | O17 | ~~Remove the 141 prose strings~~ **Do not.** I was wrong: `scripts/build_workbook.py` is the renderer behind the PDF workbook service (`Dockerfile.workbook` → `scripts/service.mjs`, called by `api/store-workbook-pdf.js`). My scan excluded that file's own output, so "appears nowhere in the product" was false. Nothing removed. See G10. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
@@ -391,6 +393,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | Four of the five engagement measures are collected and drawn | `check-tracking-consent.mjs` (5 plants), `check-engagement-honesty.mjs` (3 plants), aggregation tested over a sample |
 | — | All 12 In Practice articles reach the app, six as placeholders | `check-in-practice.mjs`, 3 plants; excerpt now optional |
 | — | 22 customer-facing pages showed no privacy notice, including the portal and every In Practice article | `check-notice-reach.mjs`, 2 plants; one notice on the portal, no duplicate app bar, checked in a browser |
 | — | The surviving partner's results survive, anonymised | `check-results-survive-deletion.mjs`, 4 plants, run over a real payload. **Needs migration 059.** |

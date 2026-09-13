@@ -26,6 +26,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -45,6 +47,7 @@ type Answers = Record<string, string | (string | null)[]>;
 export default function IntimacyExercise({
   onClose, onFinished,
 }: { onClose: () => void; onFinished: () => void }) {
+  useScreenTime('intimacy');
   const [set, setSet] = useState<IntimacyQuestionSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);

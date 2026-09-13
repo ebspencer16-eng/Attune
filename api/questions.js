@@ -127,7 +127,10 @@ export default async function handler(req) {
       const items = twoPartEx1();
       return json({
         ok: true,
-        exercise: { key: exercise.key, label: exercise.label, shape: exercise.shape },
+        // view rides along so the app can file screen time under the same key
+        // the website uses ('app:exercise1'), rather than inventing a second
+        // name for the same exercise.
+        exercise: { key: exercise.key, label: exercise.label, shape: exercise.shape, view: exercise.view },
         scale: EX1_SCALE,
         // The break between answering about yourself and answering about your
         // partner. Sent as an item rather than a count so the app does not have
