@@ -17,6 +17,7 @@ export const config = { runtime: 'edge' };
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements } from './_lib/entitlements.js';
 import { SITE_URL } from './_lib/site.js';
+import { recordConsent } from './_lib/consent.js';
 
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
@@ -128,6 +129,12 @@ async function handleWebhook(req) {
     // fire — the de-dup is purely an idempotency guard for retried webhooks.
     let orderCreated = !(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY));
 
+    // Country of the billing address, hoisted to the handler so the consent
+    // record below can read it. billingCountry itself is declared inside the
+    // Supabase block, and a reference to it from outside would throw, which in
+    // a payment webhook means a 500 on a payment that already succeeded.
+    let consentCountry = null;
+
     const supabaseUrl = process.env.SUPABASE_URL;
     const serviceKey  = process.env.SUPABASE_SERVICE_ROLE
                      || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -213,6 +220,7 @@ async function handleWebhook(req) {
         if (chargeAddr) {
           billingState   = chargeAddr.state   || null;
           billingCountry = chargeAddr.country || null;
+          consentCountry = billingCountry;
         }
       } catch (e) {
         console.warn('[webhook] billing address lookup failed:', e);
@@ -338,6 +346,27 @@ async function handleWebhook(req) {
       } catch(e) {
         console.error('[webhook] order creation failed:', e);
       }
+    }
+
+    // ── The consent event ───────────────────────────────────────────────
+    //
+    // The EULA on /legal takes the position that buying is the act of
+    // agreeing: "By purchasing or accessing Assessment Content, you agree to
+    // the terms of this EULA." The retention policy then promises a
+    // timestamped record of that, kept for seven years and surviving account
+    // deletion, and nothing recorded one.
+    //
+    // Written once per payment rather than once per line item: one purchase is
+    // one agreement, however many things were in the basket.
+    //
+    // Best-effort by design. A consent record that could not be written must
+    // not fail a payment that already went through.
+    if (orderCreated && intent.receipt_email) {
+      await recordConsent({
+        email: intent.receipt_email,
+        source: 'checkout',
+        country: consentCountry,
+      });
     }
 
     // Recompute stored entitlements for the buyer if they already have an

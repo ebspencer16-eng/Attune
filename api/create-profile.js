@@ -17,6 +17,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { isOAuthProvider } from './_lib/auth-providers.js';
 import { ABOUT_YOU, PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
+import { recordConsent } from './_lib/consent.js';
 import { PKG_CAPS } from './_lib/entitlements.js';
 
 export const config = { runtime: 'edge' };
@@ -206,6 +207,18 @@ export default async function handler(req) {
     console.error('[create-profile] insert error:', error);
     return new Response(JSON.stringify({ error: safeError('create-profile', error, 'Could not create your profile.') }), { status: 500, headers: CORS });
   }
+
+  // ── The consent event ───────────────────────────────────────────────────
+  //
+  // Creating an account is the second moment the product treats as agreement,
+  // and for a partner who joins by invite it is the only one: they never
+  // bought anything. The retention policy promises a timestamped record of it,
+  // kept for seven years, and nothing recorded one.
+  //
+  // After the insert, so a profile that failed to save records no agreement.
+  // Best-effort: a consent row that cannot be written must not stop somebody
+  // setting up an account they have paid for.
+  await recordConsent({ email: authEmail, userId, source: 'account_creation' });
 
   return new Response(JSON.stringify({ ok: true, created: true }), { status: 200, headers: CORS });
 }

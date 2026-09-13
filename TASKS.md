@@ -16,6 +16,8 @@ moved past; it is listed so nothing is taken on trust.
 | # | Question |
 |--|--|
 | G1 | Everything built is building clean, and none of it has been seen on a phone. |
+| G6 | **The Privacy Policy and the Terms of Service are published reading "Effective date: TODO before publishing".** The other three documents on /legal say May 15, 2026. An effective date is yours to set, not mine. Two edits in `public/legal.html`, lines 121 and 240. |
+| G7 | **Migration 058 is ready to run**: `supabase/migrations/058_consent_events.sql`. Until you run it, consent events are not stored and the endpoint logs one line saying so. The migration's header explains what the row holds and the one part a lawyer should see: whether a peppered hash of an email, kept after deletion, is the right way to keep a consent record. |
 | G4 | **141 prose strings in `scripts/build_workbook.py` appear nowhere in the product.** Method: parsed the file with Python's own parser, substring-matched all 808 string constants against 4.4MB of api/, src/, app and public/ source; 197 read as prose, 141 of those match nothing. Some is Maya-and-David sample text and always was. Some looks like finished workbook copy that has never shipped. Port it or delete it, but it should not sit there looking finished. |
 | G5 | **Six In Practice excerpts.** Twelve articles are on the site; the app's shelf carries six, because six is how many have a card on `practice.html` and a card is the only place an excerpt was ever written. One sentence each, in the voice of the six that exist. The six are listed as `PENDING_EXCERPT` in `api/_in-practice.js`: how-to-use-your-results, why-couples-fight-about-the-same-things, what-your-communication-style-reveals, what-your-couple-type-tells-you, for-the-bridge-the-conversation-you-need, why-naming-the-pattern-changes-everything. |
 
@@ -28,11 +30,6 @@ payment-records paragraph, G3c make the banner geo-aware.
 
 | # | Task |
 |--|--|
-| O8 | **Delete account asks for a password.** Your call on G2a. Both surfaces: the app's confirm sheet and the website's. |
-| O9 | **The partner is notified when someone deletes their account.** A notification row and an email. Draft language from me, yours to edit. |
-| O10 | **A deletion confirmation email.** Promised twice in the policy. The address has to be read before the auth user is deleted, which is the last step. Draft language from me, yours to edit. |
-| O11 | **Record the consent event.** A table, a write at purchase and at account creation, and a decision about everyone who bought before it existed. Migration for you to run. |
-| O12 | **Amend the payment-records paragraph** to say the transaction record lives with Stripe, since deletion removes our order row. |
 | O13 | **Make the privacy notice geo-aware**: a real consent gate for EU and UK visitors, the US notice everywhere else. Needs geolocation, a stored preference, and something that honours a refusal. |
 | O14 | **Analytics: an Engagement tab**, between Explore and Demographics. Site visits, app downloads, completion funnel, average time per marketing page, per exercise and per dashboard page, In Practice hit rates, average notes per results page and per article, and most-used tags including custom ones. |
 | O15 | **Analytics page is broken**: data missing from most visuals. |
@@ -398,6 +395,11 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | Deleting an account asked for no password | `check-delete-reauth.mjs`, 3 plants |
+| — | Deletion told neither the person nor their partner | `check-deletion-notices.mjs`, 3 plants |
+| — | Nothing recorded a consent event | `check-consent-record.mjs`, 2 plants. **Needs migration 058 run.** |
+| — | The payment-records paragraph described retention we do not do | Amended; `check-em-dashes` and `check-copy-tokens` clean |
+| — | The app's profile setup asked none of the five demographic questions | `check-demographics-capture.mjs`, 3 plants |
 | — | Launch flags lived in four places by hand | `check-flags.mjs`, 4 plants |
 | — | Profile setup could spin forever on a failed read | `check-read-failures.mjs`, 3 plants |
 | — | Scheduled email carried no unsubscribe link | `check-unsubscribe.mjs`, 4 plants (2 of which it missed until fixed) |
