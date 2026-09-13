@@ -37,6 +37,8 @@ The mechanism differs too, and it matters more than the words. The browser one o
 
 | # | Task |
 |--|--|
+| O37 | **The Engagement page shows no data where there should be some.** Likely cause: the events query selects the `surface` column, which migration 061 adds and which has not been run, so PostgREST rejects the whole select and every chart reads zero. Make the page work before and after that migration. |
+| O38 | **A slicer on every tile, top right**, the way the rest of the admin does it, rather than one for the page. |
 | O34 | **G18: take out the five email templates nothing sends.** workbook_ready, beta_survey, welcome_account, partner_joined_notification and checkin_1yr. |
 | O35 | **G17: retire the gift cards.** The designer page, the two card templates, the print sheet, the generator script and the endpoint that builds a card URL. |
 | O36 | **G16: the Engagement page says visits, not unique visitors.** Nothing follows a person between page loads and nothing is going to, so the label has to match. |

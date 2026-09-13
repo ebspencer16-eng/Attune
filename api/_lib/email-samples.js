@@ -33,17 +33,9 @@ export const EMAIL_SAMPLES = {
     toEmail: 'alex@example.com', toName: 'Alex', fromName: 'Maya',
     inviteUrl: `${U}/app?invite=ABC123`,
   },
-  workbook_ready: {
-    toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
-    downloadUrl: `${U}/app?view=workbook`, orderNum: 'ATT-20260401',
-  },
   workbook_promo: {
     toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
     code: 'WB20', checkoutUrl: `${U}/checkout?addon_workbook=1`, discountPercent: 20,
-  },
-  beta_survey: {
-    toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
-    coupleType: 'The Orbit', surveyUrl: `${U}/feedback`,
   },
   checkin_6mo: {
     toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
@@ -54,18 +46,6 @@ export const EMAIL_SAMPLES = {
     coupleType: 'The Orbit', portalUrl: `${U}/app`,
     hasReflection: true, hasBudget: true, hasWorkbook: true,
     hasIntimacy: true, hasChecklist: true,
-  },
-  welcome_account: {
-    toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
-    portalUrl: `${U}/app`, hasReflection: true, hasIntimacy: true,
-  },
-  partner_joined_notification: {
-    toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
-    portalUrl: `${U}/app`,
-  },
-  checkin_1yr: {
-    toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
-    retakeUrl: `${U}/app?view=exercises`, portalUrl: `${U}/app`,
   },
   shipping_notification: {
     toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',

@@ -6,13 +6,8 @@
  *
  * Types:
  *   partner_invite  — { fromName, toEmail, toName, inviteUrl }
- *   workbook_ready  — { toEmail, toName, partnerName, downloadUrl, orderNum }
- *   beta_survey     — { toEmail, toName, partnerName, coupleType, surveyUrl }
  *   checkin_6mo     — { toEmail, toName, partnerName, retakeUrl }
  *   results_viewed  — { toEmail, toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasWorkbook, hasIntimacy, hasChecklist }
- *   welcome_account — { toEmail, toName, partnerName, portalUrl }
- *   partner_joined_notification — { toEmail, toName, partnerName, portalUrl }
- *   checkin_1yr     — { toEmail, toName, partnerName, retakeUrl, portalUrl }
  *   shipping_notification — { toEmail, toName, partnerName, orderNum, trackingUrl?, trackingNumber?, carrier? }
  *
  * Required env vars (Vercel dashboard):
@@ -101,23 +96,6 @@ function partnerInviteEmail({ fromName, toName, inviteUrl }, userId = null) {
   };
 }
 
-function workbookReadyEmail({ toName, partnerName, downloadUrl, orderNum }) {
-  return {
-    subject: "Your Attune workbook is ready",
-    html: layout(`
-      <span class="badge badge-green">Workbook ready</span>
-      <h1 style="margin-top:14px;">Your personalized workbook is ready.</h1>
-      <p>Hi ${toName},</p>
-      <p>Your workbook for ${toName} &amp; ${partnerName} has been generated from your actual results. It covers your top growth areas, the dimensions where you're most aligned, and practices built for how you two specifically are wired.</p>
-      <div class="btn-wrap"><a href="${downloadUrl}" class="btn">Download workbook</a></div>
-      <div class="divider"></div>
-      <div class="detail-row"><span>Order</span><strong>#${orderNum}</strong></div>
-      <div class="detail-row"><span>Format</span><strong>.docx, opens in Word, Pages, or Google Docs</strong></div>
-      <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">The download link is active for 30 days. Reply to this email if you have trouble accessing your file.</p>
-    `),
-  };
-}
-
 function workbookPromoEmail({ toName, partnerName, code, checkoutUrl, discountPercent }) {
   const who = partnerName ? `${toName} &amp; ${partnerName}` : toName;
   const partner = partnerName || 'your partner';
@@ -173,22 +151,6 @@ function shippingNotificationEmail({ toName, partnerName, orderNum, trackingUrl,
       <div class="divider"></div>
       <div class="detail-row"><span>Order</span><strong>#${orderNum}</strong></div>
       <p style="font-size:0.78rem;color:#8C7A68;margin-top:16px;">Most shipments arrive within 5–7 business days. Reply to this email if you have any questions.</p>
-    `),
-  };
-}
-
-function betaSurveyEmail({ toName, partnerName, coupleType, surveyUrl }) {
-  return {
-    subject: "A quick question about your Attune experience",
-    html: layout(`
-      <span class="badge badge-orange">Beta feedback</span>
-      <h1 style="margin-top:14px;">How did it land?</h1>
-      <p>Hi ${toName},</p>
-      <p>You and ${partnerName} completed Attune${coupleType ? `. Your couple type is <strong>${coupleType}</strong>` : ""}. We'd love to know what was useful and what wasn't.</p>
-      <p>It's four questions and takes under two minutes.</p>
-      <div class="btn-wrap"><a href="${surveyUrl}" class="btn">Share feedback →</a></div>
-      <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">This is a beta product. Your feedback shapes what we build next.</p>
     `),
   };
 }
@@ -290,78 +252,6 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
 }
 
 
-// ── welcome_account email ────────────────────────────────────────────────────
-function welcomeAccountEmail({ toName, toEmail, portalUrl, partnerName, hasReflection, hasIntimacy }) {
-  const name = toName || "there";
-  const url = portalUrl || "https://www.attune-relationships.com/app";
-  // List the exercises this order actually includes, so the email matches what
-  // the person sees on their dashboard.
-  const exercises = [
-    "Exercise 01: Communication (about 10 minutes).",
-    "Exercise 02: Expectations (about 15 minutes).",
-    ...(hasReflection ? ["Exercise 03: Relationship Reflection (about 10 minutes)."] : []),
-    ...(hasIntimacy ? ["Physical Intimacy: a private set of questions (about 10 minutes)."] : []),
-  ];
-  const steps = [
-    ...exercises,
-    "Invite your partner, or they'll receive a link if you already added their email.",
-    "Once both of you are done, your joint results unlock.",
-  ];
-  const stepsHtml = steps.map((s, i) => `${i + 1}. ${s}`).join("<br/>");
-  const exerciseWord = exercises.length === 1 ? "exercise" : "exercises";
-  return {
-    subject: "Welcome to Attune. Let's get started.",
-    html: layout(`
-      <h1>You're in. Let's get started.</h1>
-      <p>Hi ${name},</p>
-      <p>Your Attune account is set up. You have ${exercises.length} ${exerciseWord} to complete. Both you and ${partnerName ? `<strong>${partnerName}</strong>` : "your partner"} answer independently. Your answers stay private until both of you are done.</p>
-      <div class="btn-wrap"><a href="${url}" class="btn">Go to my dashboard →</a></div>
-      <div class="divider"></div>
-      <p style="font-size:0.82rem;font-weight:700;color:#0E0B07;margin-bottom:6px;">What happens next</p>
-      <p style="font-size:0.8rem;">${stepsHtml}</p>
-      <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Your answers are never visible to your partner while you're in progress. Results unlock the moment you both finish.</p>
-    `),
-  };
-}
-
-// ── partner_joined_notification email ────────────────────────────────────────
-function partnerJoinedNotificationEmail({ toName, partnerName, portalUrl }) {
-  const name = toName || "there";
-  const url = portalUrl || "https://www.attune-relationships.com/app";
-  return {
-    subject: `${partnerName} just joined Attune`,
-    html: layout(`
-      <span class="badge badge-green">Partner joined</span>
-      <h1 style="margin-top:14px;">${partnerName} just created their account.</h1>
-      <p>Hi ${name},</p>
-      <p>${partnerName} has joined Attune. Once both of you have completed your exercises, your joint results will unlock. Your answers stay private until then.</p>
-      <div class="btn-wrap"><a href="${url}" class="btn">Go to my dashboard →</a></div>
-      <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Results unlock automatically when both partners have finished. You'll receive another email when they're ready.</p>
-    `),
-  };
-}
-
-
-
-function checkin1yrEmail({ toName, partnerName, retakeUrl, portalUrl }) {
-  const name = toName || "there";
-  const url = retakeUrl || portalUrl || "https://www.attune-relationships.com/app";
-  return {
-    subject: "One year with Attune. Your results are worth revisiting.",
-    html: layout(`
-      <h1>A year is a meaningful unit of time.</h1>
-      <p>Hi ${name},</p>
-      <p>You and ${partnerName} took Attune a year ago. In that time, you've navigated seasons, decisions, and the ordinary accumulation of a shared life. The patterns that showed up in your results look different now.</p>
-      <p>Couples who retake the assessment after a year see some dimensions shift significantly, often in ways they can trace to specific experiences. The comparison is more useful than either session on its own.</p>
-      <div class="btn-wrap"><a href="${url}" class="btn">Retake Attune →</a></div>
-      <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Your original results are still in your dashboard. Retaking creates a new session. You'll be able to see both side by side.</p>
-    `),
-  };
-}
-
 // ── Handler ──────────────────────────────────────────────────────────────────
 
 // URL fields that get interpolated into email templates. Any value that goes
@@ -398,14 +288,9 @@ const URL_ALLOWED_HOSTS = [
  */
 export const SEND_EMAILS = {
   partner_invite:              (body, userId) => partnerInviteEmail(body, userId),
-  workbook_ready:              (body) => workbookReadyEmail(body),
   workbook_promo:              (body) => workbookPromoEmail(body),
-  beta_survey:                 (body) => betaSurveyEmail(body),
   checkin_6mo:                 (body) => checkin6moEmail(body),
   results_viewed:              (body) => resultsViewedEmail(body),
-  welcome_account:             (body) => welcomeAccountEmail(body),
-  partner_joined_notification: (body) => partnerJoinedNotificationEmail(body),
-  checkin_1yr:                 (body) => checkin1yrEmail(body),
   shipping_notification:       (body) => shippingNotificationEmail(body),
 };
 
@@ -536,15 +421,7 @@ export default async function handler(req) {
     if (!body.toEmail || !body.fromName) return new Response('Missing toEmail or fromName', { status: 400 });
     email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
-  } else if (type === 'workbook_ready') {
-    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = SEND_EMAILS[type](body, userId);
-    email.to = body.toEmail;
   } else if (type === 'workbook_promo') {
-    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = SEND_EMAILS[type](body, userId);
-    email.to = body.toEmail;
-  } else if (type === 'beta_survey') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
@@ -586,47 +463,6 @@ export default async function handler(req) {
         // Fall through and send. Better to occasionally double-send than block on transient DB errors.
       }
     }
-    email = SEND_EMAILS[type](body, userId);
-    email.to = body.toEmail;
-  } else if (type === 'welcome_account') {
-    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    // Server-side dedup so first-dashboard-view triggering doesn't double-fire
-    // on rapid re-renders or refreshes. Same pattern as results_viewed.
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceKey  = process.env.SUPABASE_SERVICE_KEY;
-    if (supabaseUrl && serviceKey && userId) {
-      try {
-        const r = await fetch(
-          `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&welcome_email_sent_at=is.null`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': serviceKey,
-              'Authorization': `Bearer ${serviceKey}`,
-              'Prefer': 'return=representation',
-            },
-            body: JSON.stringify({ welcome_email_sent_at: new Date().toISOString() }),
-          }
-        );
-        const rows = await r.json().catch(() => []);
-        if (!Array.isArray(rows) || rows.length === 0) {
-          // Already sent. Skip silently.
-          return new Response(JSON.stringify({ ok: true, deduped: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        }
-      } catch (e) {
-        console.warn('[send-email] welcome_account dedup check failed:', e);
-        // Fall through and send.
-      }
-    }
-    email = SEND_EMAILS[type](body, userId);
-    email.to = body.toEmail;
-  } else if (type === 'partner_joined_notification') {
-    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = SEND_EMAILS[type](body, userId);
-    email.to = body.toEmail;
-  } else if (type === 'checkin_1yr') {
-    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'shipping_notification') {
