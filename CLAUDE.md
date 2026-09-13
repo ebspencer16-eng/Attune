@@ -343,6 +343,20 @@ screenshot.
 
 Two habits learned the hard way on this project:
 
+**`git checkout --` has now destroyed uncommitted work five times.** Four
+were noted before; the fifth was today, undoing a planted bug in
+`attune-app/src/api/client.ts` and taking an hour of unrelated edits in the
+same file with it.
+
+The fix is not to be more careful. It is to copy the file first and restore
+from the copy:
+
+    cp path/to/file /tmp/f.bak     # before planting
+    ...plant, run the gate...
+    cp /tmp/f.bak path/to/file     # restore
+
+Every plant in this session used that pattern except the one that went wrong.
+
 **Verify the result, not the intent.** Edits by string-match have silently
 matched nothing more than once while being reported as applied. Read the file
 back.
