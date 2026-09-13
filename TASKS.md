@@ -28,15 +28,18 @@ have proved instead.
 
 | # | Question |
 |--|--|
-| G18 | **Five emails exist that nothing sends.** `workbook_ready`, `beta_survey` and `partner_joined_notification` were retired at their triggers in August; `checkin_1yr` is sent by the cron from a different template; `welcome_account` appears never to have had a trigger. The templates are all still there. /email-preview now shows each one and says nothing sends it. Bring the trigger back, or take the template out? |
-| G19 | **There are two different six-month check-in emails.** One is sent from the browser when an account turns six months old, subject "Six months with Attune. Worth a look." The other is sent by the cron, subject "How are you and [partner] doing?" Different words, same moment, and a couple could get both. Which one do you want? |
-| G17 | **Have any gift cards been printed?** Four card templates said "visit attune.com", front and back, and attune.com is a live site belonging to someone else. It is corrected in the code now, but the fix only reaches cards printed from here on. If a batch went to a printer, they point the recipient at a stranger. The same address was on a published In Practice article as a contact email, so anyone who wrote to hello@attune.com reached nobody. |
-| G16 | **"Unique visitors" cannot be answered by what is collected, on purpose.** An engagement event carries no cookie, no device id and no session id, so two visits by one person cannot be told from one visit by two. That is what the privacy policy says and what makes the collection defensible without a consent gate in the US. Counting unique visitors means storing something that follows a person between page loads, which changes the paragraph in the policy and what the EU banner has to cover. Three options: leave it as visits and label it that way, add a per-day rotating identifier that cannot link across days, or add a durable one. My preference is the first, then the second. |
+| G19 | **The two six-month emails, side by side.** They say the same thing in different words.
+**The browser one** (subject: "Six months with Attune. Worth a look.") opens "Six months is a good time to check in", then argues the case: a lot can move in half a year, some things get easier, new friction appears, the assessment is most useful as a check-in rather than a one-time snapshot. Button: Retake Attune.
+**The cron one** (subject: "How are you and [partner] doing?") opens "Six months in", then explains the mechanics: the retake is the same exercises answered independently, and the new results sit alongside the original ones. Button: Return to Attune.
+The mechanism differs too, and it matters more than the words. The browser one only fires if they open the app on the day it turns six months old, which a couple who has drifted will not do. The cron one goes out on a schedule and honours the email preference. **My recommendation: keep the cron one and delete the browser one.** Your call on the wording either way. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
+| O34 | **G18: take out the five email templates nothing sends.** workbook_ready, beta_survey, welcome_account, partner_joined_notification and checkin_1yr. |
+| O35 | **G17: retire the gift cards.** The designer page, the two card templates, the print sheet, the generator script and the endpoint that builds a card URL. |
+| O36 | **G16: the Engagement page says visits, not unique visitors.** Nothing follows a person between page loads and nothing is going to, so the label has to match. |
 | O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
