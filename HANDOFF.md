@@ -1458,3 +1458,13 @@ which looks the same as real zeros and the same as a failed load. Every tile
 now says which of those it is, from one change inside `mkChart`.
 
 Six new gates, each verified by planting the bug it exists for.
+
+**Two migrations are waiting for you**, and they are the two that matter most:
+
+    supabase/migrations/058_consent_events.sql
+    supabase/migrations/059_results_survive_deletion.sql
+
+059 is the one that stops a paying customer losing their results when their
+partner deletes an account. Until it is run, the couple's frozen row is still
+deleted with the account, which is the behaviour it exists to change. Run them
+together in the SQL Editor.
