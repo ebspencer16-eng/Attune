@@ -18,6 +18,8 @@
 
 export const config = { runtime: 'nodejs' };
 
+import { SITE_URL } from './_lib/site.js';
+
 import { safeError } from './_lib/http.js';
 
 export default async function handler(req, res) {
@@ -87,7 +89,7 @@ export default async function handler(req, res) {
   // is bypassed for this server-to-server call (the user's payment was
   // already verified before reaching this endpoint).
   let docxBuffer;
-  const siteUrl = process.env.SITE_URL || 'https://attune-relationships.com';
+  const siteUrl = SITE_URL;
   try {
     const genHeaders = { 'Content-Type': 'application/json' };
     if (process.env.ADMIN_API_KEY) genHeaders['X-Admin-Key'] = process.env.ADMIN_API_KEY;

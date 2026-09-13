@@ -56,7 +56,7 @@ import { EXERCISES } from '../_exercises.js';
  * A view the app has no screen for opens the website in the browser instead of
  * doing nothing. That is honest: the thing genuinely lives there.
  */
-const SITE = 'https://www.attune-relationships.com';
+import { SITE_URL as SITE } from './site.js';
 
 /**
  * The website address for a deepLink.

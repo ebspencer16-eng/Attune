@@ -444,7 +444,7 @@
 
   <h3>The link to paste</h3>
   <div class="copy-block">
-    <div class="copy-url" id="registryUrl">https://attune-relationships.com/offerings?source=registry&amp;pkg=newlywed</div>
+    <div class="copy-url" id="registryUrl">https://www.attune-relationships.com/offerings?source=registry&amp;pkg=newlywed</div>
     <button class="copy-btn" id="copyBtn" onclick="copyRegistryUrl()" aria-label="Copy link">Copy</button>
   </div>
 
@@ -564,7 +564,9 @@
     a.addEventListener('click',()=>document.getElementById('mobile-menu').classList.remove('open'));
   });
 
-  const REGISTRY_URL = 'https://attune-relationships.com/offerings?source=registry&pkg=newlywed';
+  // Must match the URL printed above, which a reader may type instead of
+  // copying. It said the apex while the printed one said www.
+  const REGISTRY_URL = 'https://www.attune-relationships.com/offerings?source=registry&pkg=newlywed';
 
   function copyRegistryUrl() {
     navigator.clipboard.writeText(REGISTRY_URL).then(() => {

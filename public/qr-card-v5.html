@@ -83,7 +83,11 @@ const token   = p.get('token') || '';
 const note    = p.get('note') ? decodeURIComponent(p.get('note')) : '';
 const version = p.get('version') || 'standard';
 const pkgName = (PKGS[pkg]||PKGS.core).name;
-const qrUrl   = token ? `https://attune-relationships.com/app?token=${token}` : 'https://attune-relationships.com';
+// www, not the apex. The apex 307s, and this URL is encoded into a QR code
+// printed on a card that goes in a box. A redirect a browser follows silently
+// is still a redirect, and a printed one cannot be corrected later.
+const SITE    = 'https://www.attune-relationships.com';
+const qrUrl   = token ? `${SITE}/app?token=${token}` : SITE;
 
 const nameLen = names.length;
 const nameFontSize = nameLen > 24 ? '13px' : nameLen > 18 ? '15px' : '18px';

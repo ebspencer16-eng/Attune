@@ -9,7 +9,7 @@
  *
  * Required env vars:
  *   BROWSERLESS_TOKEN  — from app.browserless.io
- *   SITE_URL           — https://attune-relationships.com
+ *   SITE_URL           — overrides the default in api/_lib/site.js
  *
  * Optional:
  *   SUPABASE_URL + SUPABASE_SERVICE_KEY — if set, uploads PDF to storage
@@ -17,6 +17,8 @@
  */
 
 export const config = { runtime: 'nodejs' };
+
+import { SITE_URL } from './_lib/site.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
   catch { return res.status(400).json({ error: 'Invalid JSON' }); }
 
   const token = process.env.BROWSERLESS_TOKEN;
-  const siteUrl = process.env.SITE_URL || 'https://attune-relationships.com';
+  const siteUrl = SITE_URL;
 
   if (!token) {
     // No renderer configured — tell the client to fall back to docx

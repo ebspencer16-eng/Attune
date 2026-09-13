@@ -20,7 +20,7 @@ import {
 import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchHome, fetchPosts } from '@/api/client';
+import { fetchHome, fetchPosts, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
@@ -34,7 +34,7 @@ import {
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
-const SITE = 'https://www.attune-relationships.com';
+const SITE = SITE_URL;
 
 /**
  * The shelf shown before any filtering. Not a category: it is the absence of

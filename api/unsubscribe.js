@@ -9,6 +9,7 @@
  */
 
 export const config = { runtime: 'edge' };
+import { SITE_URL } from './_lib/site.js';
 
 export default async function handler(req) {
   const url = new URL(req.url);
@@ -22,7 +23,7 @@ export default async function handler(req) {
 h2{font-size:1.25rem;color:#0E0B07;margin:0 0 .75rem}p{font-size:.9rem;color:#8C7A68;line-height:1.7;margin:0 0 1.25rem}
 a{display:inline-block;padding:.65rem 1.5rem;border-radius:10px;background:${success?'#059669':'#E8673A'};color:white;text-decoration:none;font-size:.82rem;font-weight:700}</style>
 </head><body><div class="card"><h2>${success?'You\'re unsubscribed.':'Something went wrong.'}</h2>
-<p>${msg}</p><a href="https://attune-relationships.com/home">Back to Attune</a></div></body></html>`,
+<p>${msg}</p><a href="${SITE_URL}/home">Back to Attune</a></div></body></html>`,
     { status: 200, headers: { 'Content-Type': 'text/html' } }
   );
 

@@ -12,7 +12,7 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
-import { configureApi } from '@/api/client';
+import { configureApi, SITE_URL } from '@/api/client';
 
 const TOKEN_KEY = 'attune.session.token';
 
@@ -72,7 +72,7 @@ export function initSession(
     // every request arrived with no credentials and the API correctly
     // answered "missing auth token". Browsers follow the redirect and resend
     // the header, which is why the website never showed this.
-    baseUrl: 'https://www.attune-relationships.com',
+    baseUrl: SITE_URL,
     getToken,
   });
 }

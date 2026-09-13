@@ -16,6 +16,7 @@ export const config = { runtime: 'edge' };
 
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements } from './_lib/entitlements.js';
+import { SITE_URL } from './_lib/site.js';
 
 async function verifyStripeSignature(body, signature, secret) {
   // Stripe webhook signature format: t=timestamp,v1=hash
@@ -364,7 +365,7 @@ async function handleWebhook(req) {
     // delivery — and the customer was emailed on the first delivery).
     const apiKey    = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
-    const baseUrl   = process.env.SITE_URL || 'https://www.attune-relationships.com';
+    const baseUrl   = SITE_URL;
 
     if (apiKey && intent.receipt_email && orderCreated) {
       // Order confirmation

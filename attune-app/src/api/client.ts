@@ -582,7 +582,21 @@ export type HomeResponse = {
 
 // ── Client ─────────────────────────────────────────────────────────────────
 
-let baseUrl = 'https://www.attune-relationships.com';
+/**
+ * Where the product lives, for the app.
+ *
+ * www, not the apex. The apex 307-redirects, and React Native's fetch does not
+ * carry the Authorization header across a redirect, so every request arrived
+ * with no credentials. api/session.ts carries the longer version of that
+ * story.
+ *
+ * Exported because five files in this app had their own copy of this string:
+ * this one, session.ts, and the SITE constant in index, resources and
+ * settings. They agreed, which is the only reason nothing broke.
+ */
+export const SITE_URL = 'https://www.attune-relationships.com';
+
+let baseUrl = SITE_URL;
 let getToken: () => Promise<string | null> = async () => null;
 /**
  * What a refresh attempt concluded. Three answers, not two: see

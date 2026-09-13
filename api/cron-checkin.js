@@ -14,6 +14,7 @@
 import { capabilitiesFor } from './_lib/ownership.js';
 
 import { unsubscribeLink } from './_lib/email-footer.js';
+import { SITE_URL } from './_lib/site.js';
 
 export const config = { runtime: 'edge' };
 
@@ -206,7 +207,7 @@ function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl, us
   <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still in your dashboard. Retaking creates a new session. You'll be able to compare the two.</p>
 </div>
 <div class="footer">
-  Attune · <a href="https://www.attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
+  Attune · <a href="${SITE_URL}" style="color:#C17F47">attune-relationships.com</a><br/>
   Questions? Reply to this email or write to hello@attune-relationships.com<br/>
   ${unsubscribeLink(userId)}
 </div>

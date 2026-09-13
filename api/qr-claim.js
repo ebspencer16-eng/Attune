@@ -14,7 +14,7 @@
  *   are rejected with { error: 'already-claimed' }.
  *
  * The QR card on each physical order encodes:
- *   https://attune-relationships.com/app?qr=<token>
+ *   https://www.attune-relationships.com/app?qr=<token>
  * When the buyer lands on /app with that param, AuthModal calls GET to
  * pre-fill the signup form with the order info, then calls POST after
  * successful signup to stamp the claim.

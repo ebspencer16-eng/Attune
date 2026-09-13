@@ -19,7 +19,7 @@
  * The wording is Ellie's, from the order email, unchanged.
  */
 
-const BASE = 'https://www.attune-relationships.com';
+import { SITE_URL as BASE } from './site.js';
 
 /** Where the link goes. A mailto when there is no id to encode. */
 export function unsubscribeUrl(userId) {

@@ -16,6 +16,7 @@
  */
 
 export const config = { runtime: 'edge' };
+import { SITE_URL } from './_lib/site.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const ANON = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -41,7 +42,7 @@ export default async function handler(req) {
 
   // Confirm-email redirect: match the requesting origin so it stays on the
   // domain the buyer is using (and stays inside the project's allow-list).
-  const origin = req.headers.get('origin') || 'https://www.attune-relationships.com';
+  const origin = req.headers.get('origin') || SITE_URL;
   const redirectTo = `${origin}/app`;
 
   try {

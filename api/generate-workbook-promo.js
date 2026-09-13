@@ -12,6 +12,7 @@
 import { capabilitiesFor } from './_lib/ownership.js';
 
 export const config = { runtime: 'edge' };
+import { SITE_URL } from './_lib/site.js';
 
 const DISCOUNT_PERCENT = 30;
 const VALID_DAYS = 30;
@@ -155,9 +156,9 @@ export default async function handler(req) {
   }
 
   // ── Email both partners ──
-  let origin = 'https://attune-relationships.com';
+  let origin = SITE_URL;
   try { origin = new URL(req.url).origin; } catch (e) {}
-  const checkoutUrl = 'https://attune-relationships.com/app';
+  const checkoutUrl = `${SITE_URL}/app`;
 
   async function sendTo(toEmail, name, otherName) {
     if (!toEmail || !toEmail.includes('@')) return;

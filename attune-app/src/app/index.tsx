@@ -26,7 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
-import { fetchHome } from '@/api/client';
+import { fetchHome, SITE_URL } from '@/api/client';
 import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
@@ -38,7 +38,7 @@ import {
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
-const SITE = 'https://www.attune-relationships.com';
+const SITE = SITE_URL;
 
 /**
  * The routes this app actually has, matching the tab triggers in app-tabs.tsx.

@@ -20,14 +20,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { deleteAccount, fetchHome } from '@/api/client';
+import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 import { WAITING_SETTINGS } from '@/constants/waiting';
 
 const c = Colors.light;
-const SITE = 'https://www.attune-relationships.com';
+const SITE = SITE_URL;
 
 /**
  * What the server says about each exercise.

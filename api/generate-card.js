@@ -11,6 +11,7 @@
 export const config = { runtime: 'edge' };
 
 import { safeError } from './_lib/http.js';
+import { SITE_URL } from './_lib/site.js';
 
 const VALID_PKGS = new Set(['core', 'newlywed', 'anniversary', 'premium']);
 const VALID_VERSIONS = new Set(['standard', 'gift_printed', 'gift_blank']);
@@ -68,7 +69,7 @@ export default async function handler(req) {
     if (!VALID_PKGS.has(pkg)) return new Response('Invalid pkg', { status: 400 });
     if (!p1) return new Response('Missing p1', { status: 400 });
 
-    const base = process.env.SITE_URL || 'https://attune-relationships.com';
+    const base = SITE_URL;
     const names = p2 ? `${p1} & ${p2}` : p1;
     const appUrl = version.startsWith('gift')
       ? `${base}/app?gift=1&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}&order=${encodeURIComponent(orderId)}`

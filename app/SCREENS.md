@@ -20,7 +20,7 @@ No app screen exists. Everything a screen would call does.
 | `/api/posts` | In Practice feed, single post, read marking | stubbed-DB suite |
 | `api/_lib/next-action.js` | the priority ladder | 26 cases |
 | `api/_lib/notifications.js` | push eligibility, rate limits | rules only |
-| `app/src/api/client.ts` | typed client, discriminated `ApiResult<T>` | shapes verified |
+| `attune-app/src/api/client.ts` | typed client, discriminated `ApiResult<T>` | shapes verified |
 
 **No scoring in the app.** Ever. Results come from `/api/results` already
 computed. Two scorers drifting apart is the single most likely way this product

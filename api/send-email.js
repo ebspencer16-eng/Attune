@@ -21,6 +21,8 @@
  */
 
 export const config = { runtime: 'edge' };
+import { SITE_URL } from './_lib/site.js';
+import { unsubscribeUrl } from './_lib/email-footer.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -71,9 +73,9 @@ function layout(bodyHtml, userId = null) {
 ${bodyHtml}
 </div>
 <div class="footer">
-  Attune · <a href="https://www.attune-relationships.com" style="color:#C17F47">attune-relationships.com</a><br/>
+  Attune · <a href="${SITE_URL}" style="color:#C17F47">attune-relationships.com</a><br/>
   Questions? Reply to this email or write to hello@attune-relationships.com<br/>
-  ${userId ? `<a href="https://www.attune-relationships.com/api/unsubscribe?token=${btoa(userId)}" style="color:#C17F47">Unsubscribe</a>` : '<a href="mailto:hello@attune-relationships.com?subject=Unsubscribe" style="color:#C17F47">Unsubscribe</a>'}
+  <a href="${unsubscribeUrl(userId)}" style="color:#C17F47">Unsubscribe</a>
 </div>
 </div>
 </body>

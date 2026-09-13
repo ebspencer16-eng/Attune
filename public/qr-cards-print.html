@@ -731,8 +731,9 @@ function generateQR(){
     imgs.forEach(img => {
       const token = img.dataset.token;
       const url = token
-        ? `https://attune-relationships.com/welcome?qr=${encodeURIComponent(token)}`
-        : 'https://attune-relationships.com/app';
+        // www, not the apex: the apex 307s and this goes into a printed QR.
+        ? `https://www.attune-relationships.com/welcome?qr=${encodeURIComponent(token)}`
+        : 'https://www.attune-relationships.com/app';
       QRCode.toDataURL(url, {
         width: 320,
         margin: 1,

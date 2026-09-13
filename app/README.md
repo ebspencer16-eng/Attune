@@ -211,7 +211,7 @@ rejects for. See `ONBOARDING.md`.
 `/api/results` with frozen results and content pinning, `/api/notes` with
 annotations and sharing, `/api/posts` with an admin authoring surface,
 `/api/notifications`, notification rules, and the typed client in
-`app/src/api/client.ts`.
+`attune-app/src/api/client.ts`.
 
 **Specs written:** `ONBOARDING.md` for get-started through first dashboard,
 `SCREENS.md` for all four tabs screen by screen.
