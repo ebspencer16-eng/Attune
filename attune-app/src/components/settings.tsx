@@ -118,6 +118,10 @@ export default function Settings({
 }: { onClose: () => void; onSignedOut: () => void }) {
   const [confirming, setConfirming] = useState(false);
   const [typed, setTyped] = useState('');
+  // Empty for a Google or Apple account, which has no password. The server
+  // asks for one only when the account has a password identity, so sending
+  // nothing is the right thing there rather than an error here.
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -127,11 +131,15 @@ export default function Settings({
   const remove = async () => {
     setBusy(true);
     setError(null);
-    const res = await deleteAccount();
+    const res = await deleteAccount(password || undefined);
     if (!res.ok) {
       setBusy(false);
       setError(
-        res.error.kind === 'unauthorized'
+        (res.error.kind === 'server' && res.error.status === 403)
+          ? 'That password is not right.'
+        : (res.error.kind === 'server' && res.error.status === 400)
+          ? 'Enter your password to confirm.'
+        : res.error.kind === 'unauthorized'
           ? 'Your session has ended. Sign in again, then try once more.'
           : res.error.kind === 'offline'
             ? 'You are offline. This needs a connection.'
@@ -190,7 +198,7 @@ export default function Settings({
         {!confirming ? (
           <Pressable
       accessibilityRole="button"
-            onPress={() => { setConfirming(true); setTyped(''); setError(null); }}
+            onPress={() => { setConfirming(true); setTyped(''); setPassword(''); setError(null); }}
             hitSlop={8}
             style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md }}>
             <Text style={{ ...Type.small, color: c.textMuted, textDecorationLine: 'underline' }}>
@@ -209,8 +217,24 @@ export default function Settings({
               .
             </Text>
             <Text style={{ ...Type.small, color: c.text, marginTop: Spacing.sm }}>
-              Type DELETE to confirm.
+              Enter your password, then type DELETE to confirm.
             </Text>
+            <TextInput
+              value={password}
+              onChangeText={(t) => { setPassword(t); setError(null); }}
+              placeholder="Your password"
+              placeholderTextColor={c.textMuted}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
+              accessibilityLabel="Your password"
+              style={{
+                ...inputType(Type.body), color: c.textStrong, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
+                marginTop: Spacing.sm,
+              }}
+            />
             <TextInput
               value={typed}
               onChangeText={(t) => { setTyped(t); setError(null); }}

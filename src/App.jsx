@@ -11317,6 +11317,7 @@ export default function App() {
   // button enabled with the typed word cleared.
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteErr, setDeleteErr] = useState("");
   // Which copy version this couple's results render from. Comes from
@@ -15007,7 +15008,7 @@ export default function App() {
                   <div style={{ marginTop: "3.5rem", paddingTop: "1.25rem", borderTop: "1px solid #EFE7DD", textAlign: "center" }}>
                     {!deleteOpen ? (
                       <button
-                        onClick={() => { setDeleteOpen(true); setDeleteErr(""); setDeleteConfirm(""); }}
+                        onClick={() => { setDeleteOpen(true); setDeleteErr(""); setDeleteConfirm(""); setDeletePassword(""); }}
                         style={{ fontSize: "0.72rem", fontWeight: 500, color: "#A8997F", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.35rem", textDecoration: "underline", textUnderlineOffset: 3 }}>
                         Delete account
                       </button>
@@ -15018,8 +15019,20 @@ export default function App() {
                           <a href="/legal#privacy" style={{ color: "#C17F47" }}>What is deleted</a>.
                         </p>
                         <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
-                          Type DELETE to confirm.
+                          Enter your password, then type DELETE to confirm.
                         </p>
+                        {/* Left empty for a Google or Apple account, which has no
+                            password. The server asks for one only when the account
+                            has a password identity. */}
+                        <input
+                          type="password"
+                          value={deletePassword}
+                          onChange={(e) => { setDeletePassword(e.target.value); setDeleteErr(""); }}
+                          placeholder="Your password"
+                          autoComplete="current-password"
+                          aria-label="Your password"
+                          style={{ width: "100%", padding: "0.55rem 0.7rem", border: "1.5px solid #E8DDD0", borderRadius: 10, fontSize: "0.85rem", fontFamily: font.body, marginBottom: "0.6rem" }}
+                        />
                         <input
                           value={deleteConfirm}
                           onChange={(e) => { setDeleteConfirm(e.target.value); setDeleteErr(""); }}
@@ -15045,9 +15058,14 @@ export default function App() {
                                 const res = await fetch('/api/delete-account', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
-                                  body: JSON.stringify({ userId: uid }),
+                                  body: JSON.stringify(deletePassword ? { userId: uid, password: deletePassword } : { userId: uid }),
                                 });
                                 const body = await res.json().catch(() => ({}));
+                                // 403 is a refused password, 400 a missing one. Both are
+                                // the person's to fix, and neither is "that did not go
+                                // through", which is what every failure used to say.
+                                if (res.status === 403) throw new Error('bad-password');
+                                if (res.status === 400 && /password/i.test(body.error || '')) throw new Error('need-password');
                                 if (!res.ok || !body.ok) throw new Error(body.error || 'failed');
                                 try { await sb.auth.signOut(); } catch {}
                                 setAccount(null);
@@ -15059,6 +15077,10 @@ export default function App() {
                                 setDeleteErr(
                                   String(err.message) === 'no-session'
                                     ? 'Your session has expired. Sign in again and retry.'
+                                  : String(err.message) === 'bad-password'
+                                    ? 'That password is not right.'
+                                  : String(err.message) === 'need-password'
+                                    ? 'Enter your password to confirm.'
                                     : 'That did not go through. Try again, or email hello@attune-relationships.com.'
                                 );
                               }

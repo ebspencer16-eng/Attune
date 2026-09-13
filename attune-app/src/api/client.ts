@@ -1137,7 +1137,7 @@ export function deleteNote(id: string) {
  * letting a caller hand in an id: a screen that can name the account it deletes
  * is a screen that can be made to name the wrong one.
  */
-export async function deleteAccount(): Promise<ApiResult<{ ok: true }>> {
+export async function deleteAccount(password?: string): Promise<ApiResult<{ ok: true }>> {
   const token = await getToken();
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
 
@@ -1157,7 +1157,10 @@ export async function deleteAccount(): Promise<ApiResult<{ ok: true }>> {
   return request<{ ok: true }>('/api/delete-account', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId }),
+    // The password is only sent when one was typed. An account created with
+    // Google or Apple has none, and the server asks for one only when the
+    // account has a password identity.
+    body: JSON.stringify(password ? { userId, password } : { userId }),
   });
 }
 

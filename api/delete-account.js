@@ -1,8 +1,10 @@
 /**
  * /api/delete-account
  *
- * POST { userId }   (Authorization: Bearer <user access token>)
- *   → Verifies the token belongs to userId, then:
+ * POST { userId, password }   (Authorization: Bearer <user access token>)
+ *   → Verifies the token belongs to userId, and for an account that has a
+ *     password, that the password is right. Social sign-ins have none, so the
+ *     token is the whole of the proof for them. Then:
  *     1. Archives de-identified research data to deleted_user_archive, unless
  *        the person has opted out of research use on /privacy-choices or by
  *        sending Global Privacy Control. An unreadable preference is treated
@@ -47,9 +49,40 @@ export default async function handler(req) {
   let body;
   try { body = await req.json(); } catch { return err(400, 'Invalid JSON'); }
 
-  const { userId } = body || {};
+  const { userId, password } = body || {};
   if (!userId || typeof userId !== 'string') return err(400, 'Missing userId');
   if (userId !== caller.id) return err(403, 'You can only delete your own account');
+
+  // ── Re-authenticate before destroying anything ──────────────────────────
+  //
+  // The published policy says "Confirm deletion with your password" and
+  // neither surface asked for one. A live session was the whole of it, so a
+  // borrowed unlocked phone could delete someone's account and their partner's
+  // joint results with two taps.
+  //
+  // Only for accounts that have a password. Google and Apple sign-ins have no
+  // password to confirm with, and refusing them would be locking people out of
+  // a thing they are entitled to do. For those, the bearer token verified
+  // above is the whole of the proof, which is the same standard Supabase
+  // itself applies to them.
+  const hasPassword = (caller.identities || []).some((i) => i.provider === 'email');
+  if (hasPassword) {
+    if (!password || typeof password !== 'string') {
+      return err(400, 'password required');
+    }
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    if (!anonKey) return err(500, 'Cannot verify the password: no anon key configured');
+    // A plain sign-in, not an admin call: the point is to prove they know it.
+    const check = createClient(process.env.SUPABASE_URL, anonKey);
+    const { error: pwErr } = await check.auth.signInWithPassword({
+      email: caller.email,
+      password,
+    });
+    // 403, not 401: they are authenticated, the token is fine, and the
+    // request is refused. A 401 would send the app into a token refresh and
+    // a retry for something no refresh can fix.
+    if (pwErr) return err(403, 'That password is not right');
+  }
 
   const summary = { archived: false, workbooksRemoved: 0, storageRemoved: 0, ordersRemoved: 0, partnerSessionsAnonymized: 0, feedbackNulled: 0 };
 
