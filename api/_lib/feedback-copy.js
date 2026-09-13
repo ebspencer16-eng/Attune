@@ -23,14 +23,34 @@
 
 export const FEEDBACK_COPY = {
   title: 'How was your experience?',
+  // The longer invitation, from the card that opened the questionnaire on the
+  // website. The app shows `reassurance` instead, because a phone screen has
+  // no room for both.
+  invitation: 'Tell us how it went, it takes 2 minutes and helps us make Attune better for every couple after you.',
   cta: 'Tell us how it was',
+  skip: 'Skip rating and give detailed feedback',
   reassurance: 'Anonymous · 2 minutes · helps us improve Attune for everyone',
   scaleHeading: 'Rate each statement',
   submit: 'Submit feedback',
   submitting: 'Sending',
   privacy: 'Your feedback is anonymous and never linked to your name or email.',
-  thanks: 'Thank you. This goes straight to the people building Attune.',
+  thanksTitle: 'Thank you',
+  thanks: 'Your feedback goes directly to the people building Attune. It genuinely matters.',
 };
+
+/**
+ * The first question, which is the whole question for most people.
+ *
+ * Four buttons on the card, and the index is the `rating` the endpoint stores:
+ * 0 to 3, low to high. api/send-feedback.js has read it that way since before
+ * any of this was deleted, so the order is not cosmetic.
+ */
+export const FEEDBACK_RATINGS = [
+  '😕 Not great',
+  '😐 It was okay',
+  '🙂 Pretty good',
+  '😍 Loved it',
+];
 
 /** The five-point scale, low to high. */
 export const FEEDBACK_SCALE = [

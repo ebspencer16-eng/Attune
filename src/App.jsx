@@ -116,6 +116,7 @@ import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
 import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
 import { ABOUT_YOU } from "../api/_lib/profile-setup-copy.js";
+import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_RATINGS, FEEDBACK_SCALE } from "../api/_lib/feedback-copy.js";
 
 /**
  * Every view this file can draw.
@@ -5677,6 +5678,132 @@ function UnifiedResultsRoot(props) {
   );
 }
 
+/**
+ * "How was your experience?", at the end of the results.
+ *
+ * ── WHY IT IS BACK ────────────────────────────────────────────────────────
+ * It was a component here once, already disconnected from anything that
+ * rendered it, and d54d7c2 deleted it as unreferenced. Nothing has asked for
+ * feedback since. /api/send-feedback, /api/get-feedback and two tiles on the
+ * admin kept reporting on it, all showing nothing.
+ *
+ * Every sentence and every question comes from api/_lib/feedback-copy.js,
+ * which the app's screen reads too, so the two surfaces cannot ask different
+ * questions. The wording is Ellie's, recovered from the deleted component
+ * rather than rewritten.
+ *
+ * ── WHERE IT SITS ─────────────────────────────────────────────────────────
+ * The end of What Comes Next, which is the last page of the whole results
+ * experience. Asking before somebody has read their results is asking about
+ * something they have not seen.
+ */
+function ExperienceFeedback({ userName }) {
+  const [phase, setPhase] = useState("idle");   // idle | form | thanks
+  const [rating, setRating] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [sending, setSending] = useState(false);
+
+  const scaleQuestions = FEEDBACK_QUESTIONS.filter(q => q.type === "scale");
+  const allScaleAnswered = scaleQuestions.every(q => answers[q.id] != null);
+
+  function submit() {
+    setSending(true);
+    fetch('/api/send-feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'app_experience',
+        rating,
+        questionAnswers: answers,
+        stage: answers.q_stage || null,
+        howHeard: answers.q_source || null,
+        message: answers.q_open || null,
+      }),
+    }).catch(() => {});   // non-blocking: a thank you is owed either way
+    setTimeout(() => { setPhase("thanks"); setSending(false); }, 400);
+  }
+
+  if (phase === "thanks") {
+    return (
+      <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg,#0e2a18,#154428)", borderRadius: 18, padding: "2rem", textAlign: "center" }}>
+        <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "white", marginBottom: "0.4rem" }}>
+          {FEEDBACK_COPY.thanksTitle}{userName ? `, ${userName}` : ""}.
+        </div>
+        <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,.55)", lineHeight: 1.65, margin: 0 }}>{FEEDBACK_COPY.thanks}</p>
+      </div>
+    );
+  }
+
+  if (phase === "idle") {
+    return (
+      <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg,#0f0c29,#1d1a4e)", borderRadius: 18, padding: "2rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} />
+        <div style={{ fontFamily: HFONT, fontSize: "1.1rem", fontWeight: 700, color: "white", marginBottom: "0.4rem" }}>{FEEDBACK_COPY.title}</div>
+        <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,.75)", lineHeight: 1.65, maxWidth: 400, margin: "0 auto 1.25rem" }}>{FEEDBACK_COPY.invitation}</p>
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1rem" }}>
+          {FEEDBACK_RATINGS.map((label, i) => (
+            <button key={label} onClick={() => { setRating(i); setPhase("form"); }}
+              style={{ background: "rgba(255,255,255,.08)", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.8rem", color: "rgba(255,255,255,.75)", cursor: "pointer", fontFamily: BFONT, fontWeight: 500 }}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setPhase("form")}
+          style={{ fontSize: "0.7rem", color: "rgba(255,255,255,.4)", background: "transparent", border: "none", cursor: "pointer", fontFamily: BFONT, textDecoration: "underline" }}>
+          {FEEDBACK_COPY.skip}
+        </button>
+      </div>
+    );
+  }
+
+  const chip = (id, value, label) => {
+    const on = answers[id] === value;
+    return (
+      <button key={String(value)} onClick={() => setAnswers(a => ({ ...a, [id]: on ? undefined : value }))}
+        style={{ background: on ? "#1B5FE8" : "white", color: on ? "white" : C.muted, border: `1.5px solid ${on ? "#1B5FE8" : C.stone}`, borderRadius: 999, padding: "0.4rem 0.85rem", fontSize: "0.75rem", fontFamily: BFONT, cursor: "pointer" }}>
+        {label}
+      </button>
+    );
+  };
+
+  return (
+    <div style={{ marginTop: "2.5rem", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem" }}>
+      <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: C.ink }}>{FEEDBACK_COPY.cta}</div>
+      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: "0.3rem 0 1.25rem" }}>{FEEDBACK_COPY.reassurance}</p>
+
+      <div style={{ fontSize: "0.62rem", letterSpacing: ".16em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{FEEDBACK_COPY.scaleHeading}</div>
+
+      {FEEDBACK_QUESTIONS.map(q => (
+        <div key={q.id} style={{ marginBottom: "1.1rem" }}>
+          <div style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, marginBottom: "0.45rem" }}>{q.label}</div>
+          {q.type === "scale" && (
+            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+              {FEEDBACK_SCALE.map((label, i) => chip(q.id, i + 1, label))}
+            </div>
+          )}
+          {q.type === "choice" && (
+            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+              {(q.options || []).map(opt => chip(q.id, opt, opt))}
+            </div>
+          )}
+          {q.type === "text" && (
+            <textarea value={answers[q.id] || ""} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+              rows={3}
+              style={{ width: "100%", padding: "0.6rem 0.75rem", border: `1.5px solid ${C.stone}`, borderRadius: 10, fontSize: "0.82rem", fontFamily: BFONT, color: C.ink, resize: "vertical" }} />
+          )}
+        </div>
+      ))}
+
+      <button onClick={submit} disabled={!allScaleAnswered || sending}
+        style={{ marginTop: "0.5rem", background: allScaleAnswered && !sending ? "linear-gradient(135deg,#E8673A,#1B5FE8)" : C.stone, color: allScaleAnswered && !sending ? "white" : C.muted, border: "none", borderRadius: 10, padding: "0.7rem 1.5rem", fontSize: "0.8rem", fontWeight: 700, fontFamily: BFONT, cursor: allScaleAnswered && !sending ? "pointer" : "default" }}>
+        {sending ? FEEDBACK_COPY.submitting : FEEDBACK_COPY.submit}
+      </button>
+
+      <p style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, marginTop: "0.9rem", marginBottom: 0 }}>{FEEDBACK_COPY.privacy}</p>
+    </div>
+  );
+}
+
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
   // Compute all the data we need up front
@@ -7797,6 +7924,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         </ResultsSlide>
       </Layout>
     );
+
+
   }
 
   if (section === "what-comes-next") {
@@ -8240,6 +8369,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </button>
           </div>
           {showSurvey && <BetaSurveyModal userName={userName} coupleType={coupleType} onClose={() => setShowSurvey(false)} />}
+
+          {/* The end of the whole experience is where to ask how it went. */}
+          <ExperienceFeedback userName={userName} />
 
           {/* Back out of the last page. Everything before this has a Back;
               without one here the final page of the whole experience could

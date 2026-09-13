@@ -30,7 +30,6 @@ payment-records paragraph, G3c make the banner geo-aware.
 |--|--|
 | O16 | Four of the five are built and measuring. **Needs migration 060 run** (`supabase/migrations/060_page_events.sql`). App downloads still needs an App Store Connect key, an issuer id and a private key, and the app is not in the store. |
 | O17 | ~~Remove the 141 prose strings~~ **Do not.** I was wrong: `scripts/build_workbook.py` is the renderer behind the PDF workbook service (`Dockerfile.workbook` → `scripts/service.mjs`, called by `api/store-workbook-pdf.js`). My scan excluded that file's own output, so "appears nowhere in the product" was false. Nothing removed. See G10. |
-| O19 | **Put the feedback questionnaire back on the website.** The copy is already in `api/_lib/feedback-copy.js`; the component was deleted in d54d7c2. |
 | O20 | **Everything in both the .docx and the PDF.** 121 prose strings exist only in `scripts/build_workbook.py`, which renders the PDF. They have to reach `api/generate-workbook.js` too, and neither builder should hold the only copy of anything. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
@@ -392,6 +391,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | The questionnaire is back on the website, at the end of What Comes Next | Rendered in a browser: four rating buttons, all seven questions, submit and the privacy line |
 | — | Nothing in the product asked for feedback; three surfaces reported on it | `check-feedback-reachable.mjs`, 3 plants; the app asks now |
 | — | The app can edit a profile | `check-profile-editable.mjs`, 4 plants; `check-profile-columns.mjs` widened to see columns named through a map |
 | — | Four of the five engagement measures are collected and drawn | `check-tracking-consent.mjs` (5 plants), `check-engagement-honesty.mjs` (3 plants), aggregation tested over a sample |
