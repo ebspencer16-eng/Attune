@@ -730,42 +730,8 @@ async function sendEmailWithRetry(body, opts = {}) {
   return { ok: false, error: lastErr };
 }
 
-// ─── QR claim retry (Issue 2.7) ──────────────────────────────────────────────
-// QR-token claim happens at signup. If the network drops at that exact
-// moment, the token stays unclaimed and could be reused by anyone who has
-// the physical card. Retry is mandatory here — same pattern as sendEmail.
-async function claimQrTokenWithRetry(token, email, opts = {}) {
-  if (!token || !email) return { ok: false, error: 'missing args' };
-  const maxAttempts = opts.maxAttempts ?? 3;
-  const backoffMs = opts.backoffMs ?? [0, 1500, 5000];
-  let lastErr = null;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    if (backoffMs[attempt]) await new Promise(r => setTimeout(r, backoffMs[attempt]));
-    try {
-      const res = await fetch('/api/qr-claim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, email }),
-      });
-      if (res.ok) return { ok: true, attempts: attempt + 1 };
-      // 4xx (except 429) likely won't fix on retry — token already claimed
-      // by someone else, etc. Don't burn retries.
-      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-        const txt = await res.text().catch(() => '');
-        console.warn('[Attune] qr-claim 4xx — not retrying:', txt);
-        return { ok: false, status: res.status };
-      }
-      lastErr = new Error(`HTTP ${res.status}`);
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  console.warn(`[Attune] qr-claim failed after ${maxAttempts} attempts:`, lastErr);
-  if (typeof window !== 'undefined' && window.Sentry?.captureMessage) {
-    try { window.Sentry.captureMessage(`qr-claim failed: ${lastErr?.message}`, 'warning'); } catch {}
-  }
-  return { ok: false, error: lastErr };
-}
+// The QR claim retry lived here. The physical card that carried the code
+// is retired, so nothing can produce a token to claim.
 
 /**
  * Write a patch to the caller's own profile row, and notice when it wrote
@@ -8971,10 +8937,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const _p1 = _authParams.get('p1') || '';
   const _p2 = _authParams.get('p2') || '';
   const _partnerAEmail = (_authParams.get('pae') || '').toLowerCase(); // for uniqueness check on Partner B signup
-  const _qrToken = _authParams.get('qr') || '';
   const [form, setForm] = useState({ name: _p1, pronouns: "", partnerName: _p2, partnerPronouns: "", partnerEmail: "", email: ((mode || "signup") === "login" ? (() => { try { return (JSON.parse(localStorage.getItem('attune_account') || 'null') || {}).email || ''; } catch { return ''; } })() : ""), password: "", emailOptIn: true, ageRange: "", gender: "", relationshipStatus: "", relationshipLength: "", children: "", signupSource: "" });
-  const [qrOrder, setQrOrder] = useState(null);     // populated if a qr token resolves to a real order
-  const [qrStatus, setQrStatus] = useState(_qrToken ? 'loading' : 'none'); // 'none' | 'loading' | 'ok' | 'claimed' | 'invalid'
   const _authIsGift = _authParams.get('gift') === '1';
   const [welcomeAck, setWelcomeAck] = useState(false); // gift/QR celebratory landing acknowledged
   const [err, setErr] = useState("");
@@ -9066,7 +9029,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
         // the honest answer is to say so. Making them a blank account instead
         // is worse than refusing: they would land on an empty dashboard with
         // nothing they paid for, and now hold two accounts.
-        const expectsNewAccount = !!(_authParams.get('orderNum') || _authParams.get('invite') || _qrToken);
+        const expectsNewAccount = !!(_authParams.get('orderNum') || _authParams.get('invite'));
         if (!expectsNewAccount) {
           await sb.auth.signOut().catch(() => {});
           setTab('login');
@@ -9112,38 +9075,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
       setLoading(false);
     }
   };
-
-  // When we arrive via a QR-code scan, look up the order it was issued to and
-  // prefill the signup form with the partner names. This makes the first step
-  // feel personal ("Welcome Sarah and James") instead of starting from blank.
-  React.useEffect(() => {
-    if (!_qrToken) return;
-    let cancelled = false;
-    fetch(`/api/qr-claim?token=${encodeURIComponent(_qrToken)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (cancelled) return;
-        if (data?.error === 'not-found' || data?.error === 'Missing token') {
-          setQrStatus('invalid');
-          return;
-        }
-        if (!data?.order) { setQrStatus('invalid'); return; }
-        setQrOrder(data.order);
-        setQrStatus(data.order.claimed ? 'claimed' : 'ok');
-        // Only prefill for unclaimed orders — if already claimed, user is
-        // probably signing in or the second partner (who should use the
-        // invite link, not the QR).
-        if (!data.order.claimed) {
-          setForm(f => ({
-            ...f,
-            name: f.name || data.order.partner1Name || data.order.buyerName || '',
-            partnerName: f.partnerName || data.order.partner2Name || '',
-          }));
-        }
-      })
-      .catch(() => { if (!cancelled) setQrStatus('invalid'); });
-    return () => { cancelled = true; };
-  }, [_qrToken]);
 
   // Trigger shake + clear after animation (0.45s)
   const triggerShake = () => {
@@ -9289,9 +9220,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
     // can't be reused. Uses retry helper (Issue 2.7) — without retry, a
     // transient network failure here means the QR token stays unclaimed
     // and anyone with the physical card could re-claim it.
-    if (_qrToken && qrStatus === 'ok') {
-      claimQrTokenWithRetry(_qrToken, signedInEmail);
-    }
 
     onSuccess(account);
   };
@@ -9381,9 +9309,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
     }
 
     // Claim the QR token if we arrived from a physical card scan (Issue 2.7)
-    if (_qrToken && qrStatus === 'ok') {
-      claimQrTokenWithRetry(_qrToken, form.email.trim().toLowerCase());
-    }
 
     onSuccess(account);
 
@@ -9838,8 +9763,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
   // Celebratory welcome landing for gift recipients and physical-card (QR) arrivals.
   // Shown once before the signup form. Gift-aware copy. Normal sign-in/up is unaffected.
-  const _isGiftContext = _authIsGift || !!qrOrder?.isGift;
-  const _showWelcome = !welcomeAck && (_authIsGift || (_qrToken && (qrStatus === 'loading' || qrStatus === 'ok')));
+  const _isGiftContext = _authIsGift;
+  const _showWelcome = !welcomeAck && _authIsGift;
   if (_showWelcome) {
     return (
       <div style={{ position: "fixed", inset: 0, background: "#1e1a35", zIndex: 500, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
@@ -9872,28 +9797,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="am1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#am1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#am1)" strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#am1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07" }}>Attune</span>
         </div>
-
-        {/* QR-scan welcome banner — shown when user arrived via physical card scan */}
-        {qrStatus === 'ok' && qrOrder && (
-          <div style={{ background: "#FFF4EC", border: "1px solid #FFD4BF", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem", display: "flex", alignItems: "flex-start", gap: "0.65rem" }}>
-            <div style={{ color: "#E8673A", fontSize: "1rem", lineHeight: 1, marginTop: "0.1rem" }}>✦</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.04em", color: "#C45C2A", textTransform: "uppercase", marginBottom: "0.15rem" }}>Welcome</div>
-              <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "0.95rem", color: "#2B2218", lineHeight: 1.35 }}>Let's set up your account.</div>
-            </div>
-          </div>
-        )}
-        {qrStatus === 'claimed' && qrOrder && (
-          <div style={{ background: "#FDF4E7", border: "1px solid #E8DDB8", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem" }}>
-            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.04em", color: "#8B6F1F", textTransform: "uppercase", marginBottom: "0.2rem" }}>Card already claimed</div>
-            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.78rem", color: "#5C4A38", lineHeight: 1.45 }}>This card was already linked to an account. If that's you, sign in below. If your partner set it up, you'll get a separate invite by email.</div>
-          </div>
-        )}
-        {qrStatus === 'invalid' && (
-          <div style={{ background: "#FDF2F2", border: "1px solid #F3C7C7", borderRadius: 10, padding: "0.7rem 0.85rem", marginBottom: "1rem" }}>
-            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.78rem", color: "#8B2F2F", lineHeight: 1.45 }}>This QR code isn't recognized. You can still create an account below.</div>
-          </div>
-        )}
 
         {/* Tab switcher */}
         <div style={{ display: "flex", background: "#F3EDE6", borderRadius: 10, padding: "0.22rem", marginBottom: "1.5rem" }}>

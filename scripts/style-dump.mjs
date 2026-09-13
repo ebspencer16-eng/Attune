@@ -4,7 +4,7 @@
  * ── WHAT IT IS FOR ────────────────────────────────────────────────────────
  * Proving a refactor moved nothing on pages that cannot be compared by
  * screenshot. Three pages render a random one-time code or shuffle content,
- * so two screenshots of the same unchanged page differ: gift-cards, qr-card
+ * so two screenshots of the same unchanged page differ: the QR cards
  * and feedback. Computed styles are deterministic where the pixels are not.
  *
  * Screenshots stay the primary check. This is the fallback, and it is only
@@ -13,7 +13,7 @@
  * change blind, so it now captures colour and font as well. If you use it to
  * verify something these properties cannot express, extend it first.
  *
- *   node scripts/style-dump.mjs /gift-cards.html out.json
+ *   node scripts/style-dump.mjs /offerings.html out.json
  */
 
 import { writeFileSync } from 'fs';

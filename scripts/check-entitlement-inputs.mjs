@@ -65,7 +65,6 @@ const EXEMPT = new Set([
   // Renders a QR card's redirect URL and writes nothing. The pkg it reads
   // decides what the printed card says, not what anyone owns. Verified: the
   // file contains no database call at all.
-  'generate-card.js',
 ]);
 
 function scan(dir, prefix = '') {

@@ -5,7 +5,7 @@
  * legacy single-item payload and the new multi-item payload (body.items[]).
  *
  * For promo-code free checkouts, skips Stripe and writes orders directly
- * to Supabase (one row per cart item, each with its own qr_token).
+ * to Supabase, one row per cart item.
  *
  * Required env vars:
  *   STRIPE_SECRET_KEY        — sk_live_... or sk_test_...
@@ -221,11 +221,6 @@ function itemsTotalCents(items, promoCovered) {
   }, 0);
 }
 
-function newQrToken() {
-  // ATQR-<12 hex chars>, unguessable per-order token for physical QR card.
-  return 'ATQR-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
-    .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-}
 
 function itemBasePrice(item) {
   return item.isPhysical
@@ -603,7 +598,6 @@ export default async function handler(req) {
               gift_note:         item.giftNote || null,
               stripe_payment_intent_id: `promo_${normalizedCode}_${Date.now()}_${i}`,
               promo_code:        normalizedCode,
-              qr_token:          newQrToken(),
               shipping_name:     item.shipping?.name || null,
               shipping_address:  item.shipping?.address || null,
               shipping_city:     item.shipping?.city || null,

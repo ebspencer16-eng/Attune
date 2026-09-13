@@ -34,8 +34,6 @@ const read = (f) => readFileSync(join(ROOT, f), 'utf8');
 
 const EXEMPT = new Set([
   'admin.html',            // behind a password, not a customer surface
-  'qr-card-v5.html',       // print template, rendered to PDF
-  'qr-cards-print.html',   // print template
   'email-preview.html',    // a preview of an email
   '404.html',              // an error page is not the place to ask
   'workbook-render.html',  // print template, rendered to PDF by api/generate-pdf.js

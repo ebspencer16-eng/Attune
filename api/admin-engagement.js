@@ -243,7 +243,14 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
   const annotatorsPrev = new Set(notes.filter((n) => inWindow(n, sincePrev, since)).map((n) => n.owner_id)).size;
 
   const headlines = {
-    siteVisits: measured ? headline(visitsIn(w.current), visitsIn(w.previous)) : notYet,
+    // Visits, deliberately. Ellie's call on G16: nothing stored follows a
+    // person between page loads, so two visits by one person cannot be told
+    // from one visit by two, and counting unique visitors would mean storing
+    // something that does. The label says what the number is.
+    siteVisits: measured
+      ? { ...headline(visitsIn(w.current), visitsIn(w.previous)),
+          note: 'Visits, not unique visitors. Nothing stored can tell two visits by one person from one visit by two.' }
+      : notYet,
     appDownloads: unavailable('Only App Store Connect knows this. It needs an API key, an issuer id and a private key, and the app is not in the store yet.'),
     articleReaders: {
       ...headline(readersNow, readersPrev),

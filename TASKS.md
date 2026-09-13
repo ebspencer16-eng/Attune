@@ -28,6 +28,7 @@ have proved instead.
 
 | # | Question |
 |--|--|
+| G20 | **The `qr_token` column on `orders` is now written by nothing.** The gift cards are retired and so is the claim path, so the column sits there holding old values. Dropping it is a migration and it is irreversible, so I have not written one. Say the word and I will. |
 | G19 | **The two six-month emails, side by side.** They say the same thing in different words.
 **The browser one** (subject: "Six months with Attune. Worth a look.") opens "Six months is a good time to check in", then argues the case: a lot can move in half a year, some things get easier, new friction appears, the assessment is most useful as a check-in rather than a one-time snapshot. Button: Retake Attune.
 **The cron one** (subject: "How are you and [partner] doing?") opens "Six months in", then explains the mechanics: the retake is the same exercises answered independently, and the new results sit alongside the original ones. Button: Return to Attune.
@@ -37,11 +38,6 @@ The mechanism differs too, and it matters more than the words. The browser one o
 
 | # | Task |
 |--|--|
-| O37 | **The Engagement page shows no data where there should be some.** Likely cause: the events query selects the `surface` column, which migration 061 adds and which has not been run, so PostgREST rejects the whole select and every chart reads zero. Make the page work before and after that migration. |
-| O38 | **A slicer on every tile, top right**, the way the rest of the admin does it, rather than one for the page. |
-| O34 | **G18: take out the five email templates nothing sends.** workbook_ready, beta_survey, welcome_account, partner_joined_notification and checkin_1yr. |
-| O35 | **G17: retire the gift cards.** The designer page, the two card templates, the print sheet, the generator script and the endpoint that builds a card URL. |
-| O36 | **G16: the Engagement page says visits, not unique visitors.** Nothing follows a person between page loads and nothing is going to, so the label has to match. |
 | O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
@@ -116,6 +112,11 @@ build.
 
 | Verified | By |
 |--|--|
+| The five emails nothing sends are gone | `check-email-preview.mjs`: 14 emails, every one with a trigger |
+| The gift cards are retired | the designer, both card templates, the print sheet, the generator, the card endpoint, the claim endpoint and the claim path through signup. All five signup screens render character for character as before |
+| A rejected database query is reported rather than drawn as a zero | `check-query-failures.mjs`, planted four ways; this is why the Engagement page read empty |
+| Every tile on the Engagement page has its own slicer | 12 of them, rendered in a browser; payloads cached per cut |
+| The visit numbers say they are visits, not unique visitors | on the headline tile and on the chart beside it |
 | One set of package prices everywhere | `check-package-prices.mjs`, 9 tables, planted four ways; the tax endpoint was quoting premium at $295 against a $198 charge |
 | The admin no longer prices anniversary at 159 or premium at 299 | corrected to the catalogue, and the gate above holds it there |
 | Every email the product sends is rendered by the code that sends it, on one page | `check-email-preview.mjs`, 19 emails, planted four ways |

@@ -35,9 +35,9 @@
 // with consequences someone should choose on purpose, so it is written up in
 // TASKS.md instead of enforced here.
 //
-// Also not covered: public/qr-card-v5.html, which is a static page and cannot
-// import anything, so it carries its own www constant with a comment saying
-// why. It is checked for the apex like everything else.
+// The printed cards used to be listed here as exceptions. They are gone:
+// Ellie retired that workstream, and with them went the only static pages that
+// had a reason to write the origin out for themselves.
 
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
@@ -81,10 +81,6 @@ const SEO = /rel=["']canonical|og:url|og:image|twitter:image|twitter:url|"url":|
  *                           where `process` does not exist, and the whole site
  *                           would fail to boot. It keeps a literal and it is
  *                           still checked for the apex.
- * public/qr-card-v5.html    static, no modules, same reasoning.
- * public/gift-cards.html   the other printed card, same reasoning. Its four
- *                           templates said attune.com until this gate learned
- *                           to look for a domain that is not ours at all.
  * attune-app/src/api/client.ts  a separate package that cannot import api/,
  *                           so the app keeps one of its own and every other
  *                           file in it imports that. Its comment carries why
@@ -97,8 +93,6 @@ const EXEMPT = new Set([
   SOURCE,
   'api/_lib/http.js',
   'src/App.jsx',
-  'public/qr-card-v5.html',
-  'public/gift-cards.html',
   'attune-app/src/api/client.ts',
 ]);
 

@@ -1,6 +1,6 @@
 /**
  * Shared admin authorization for every /api/admin-* endpoint (and orders,
- * generate-card, get-feedback).
+ * get-feedback).
  *
  * Prefers the Authorization: Bearer <ADMIN_SECRET> header. Still accepts the
  * legacy ?secret= query param, because a couple of call sites (CSV download,

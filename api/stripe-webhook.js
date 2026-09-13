@@ -141,8 +141,6 @@ async function handleWebhook(req) {
                      || process.env.SUPABASE_SERVICE_KEY;
     if (supabaseUrl && serviceKey) {
       // Helper: unique QR token
-      const newQrToken = () => 'ATQR-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
-        .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 
       // Try to parse items metadata
       let items = null;
@@ -239,7 +237,6 @@ async function handleWebhook(req) {
             const shipState = splitStateZip(shipStateRaw).state;
             const suffix = items.length > 1 ? `-${i+1}` : '';
             const orderNum = `${baseOrderNum}${suffix}`;
-            const qrToken = newQrToken();
             const insertRes = await fetch(`${supabaseUrl}/rest/v1/orders`, {
               method: 'POST',
               headers: {
@@ -267,7 +264,6 @@ async function handleWebhook(req) {
                 gift_note:               it.gn || null,
                 stripe_payment_intent_id: items.length > 1 ? `${intent.id}_${i}` : intent.id,
                 workbook_status:         'pending',
-                qr_token:                qrToken,
                 shipping_name:           shipName || null,
                 shipping_address:        shipAddr || null,
                 shipping_city:           shipCity || null,
@@ -284,7 +280,7 @@ async function handleWebhook(req) {
             });
             if (insertRes.ok) {
               orderCreated = true;
-              console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum} (qr ${qrToken})`);
+              console.log(`[webhook] order ${i+1}/${items.length} created: ${orderNum}`);
             } else if (insertRes.status === 409) {
               // UNIQUE constraint hit — webhook retry of an order we already
               // wrote. Idempotent skip; don't re-send confirmation email.
@@ -296,7 +292,6 @@ async function handleWebhook(req) {
           }
         } else {
           // Legacy single-item path
-          const qrToken = newQrToken();
           const insertRes = await fetch(`${supabaseUrl}/rest/v1/orders`, {
             method: 'POST',
             headers: {
@@ -324,7 +319,6 @@ async function handleWebhook(req) {
               gift_note:               meta.giftNote || null,
               stripe_payment_intent_id: intent.id,
               workbook_status:         'pending',
-              qr_token:                qrToken,
               billing_state:           billingState || null,
               billing_country:         billingCountry || null,
               tax_amount:              taxAmount || null,
@@ -335,7 +329,7 @@ async function handleWebhook(req) {
           });
           if (insertRes.ok) {
             orderCreated = true;
-            console.log(`[webhook] order created: ${baseOrderNum} (qr ${qrToken})`);
+            console.log(`[webhook] order created: ${baseOrderNum}`);
           } else if (insertRes.status === 409) {
             console.log(`[webhook] order duplicate (webhook retry): ${baseOrderNum}`);
           } else {
@@ -445,36 +439,11 @@ async function handleWebhook(req) {
       }).catch(err => console.warn('Confirmation email failed:', err));
 
 
-      // Auto-generate QR card for physical orders — stores URL in order record
-      if (meta.isPhysical === '1') {
-        const p1raw = meta.partner1Name || meta.buyerName || '';
-        const p2raw = meta.partner2Name || '';
-        const namesStr = p2raw ? `${p1raw} & ${p2raw}` : p1raw;
-        const pkg = encodeURIComponent(meta.pkgKey || 'core');
-        const orderId = encodeURIComponent(meta.orderNum || intent.id);
-        const isGift = meta.isGift === '1';
-        const version = isGift ? (meta.giftNote ? 'gift_printed' : 'gift_blank') : 'standard';
-        // Build app URL with gift params for QR code
-        const appUrl = isGift
-          ? `${baseUrl}/app?gift=1&p1=${encodeURIComponent(p1raw)}&p2=${encodeURIComponent(p2raw)}&pkg=${encodeURIComponent(meta.pkgKey||'core')}&order=${orderId}`
-          : `${baseUrl}/app`;
-        const cardUrl = `${baseUrl}/qr-card-v5?pkg=${pkg}&names=${encodeURIComponent(namesStr)}&token=${encodeURIComponent(appUrl)}&orderId=${orderId}&version=${encodeURIComponent(version)}`;
-        // Store card URL in order record for admin fulfillment
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-        if (supabaseUrl && serviceKey && (meta.orderNum || intent.id)) {
-          await fetch(`${supabaseUrl}/rest/v1/orders?order_num=eq.${encodeURIComponent(meta.orderNum || intent.id)}`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': serviceKey,
-              'Authorization': `Bearer ${serviceKey}`,
-              'Prefer': 'return=minimal',
-            },
-            body: JSON.stringify({ card_url: cardUrl, card_status: 'generated' }),
-          }).catch(err => console.warn('[webhook] card URL save failed:', err));
-        }
-      }
+      // The QR card that shipped in a physical box is retired. Ellie: "No gift
+      // cards were printed, and all should be retired from the code, we
+      // abandoned that workstream." The block here built a card URL and stored
+      // it on the order for the admin to print.
+
     }
   }
 

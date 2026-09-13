@@ -218,16 +218,8 @@
       "destination": "/api/unsubscribe.js"
     },
     {
-      "source": "/api/generate-card",
-      "destination": "/api/generate-card.js"
-    },
-    {
       "source": "/start",
       "destination": "/start.html"
-    },
-    {
-      "source": "/gift-cards",
-      "destination": "/gift-cards.html"
     },
     {
       "source": "/api/submit-beta-survey",
@@ -260,10 +252,6 @@
     {
       "source": "/api/cron-checkin",
       "destination": "/api/cron-checkin.js"
-    },
-    {
-      "source": "/qr-card-v5",
-      "destination": "/qr-card-v5.html"
     },
     {
       "source": "/api/admin-data",

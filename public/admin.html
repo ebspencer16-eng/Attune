@@ -3962,7 +3962,6 @@ async function loadRealData() {
             dbId: o.id,
             cardStatus: o.card_status || 'pending',
             cardUrl: o.card_url || null,
-            token: o.qr_token || null,
             state: normStateCode(o.shipping_state || o.billing_state),
             country: o.shipping_country || o.billing_country || ((o.shipping_state || o.billing_state) ? 'US' : null),
             _raw: o,
@@ -5613,7 +5612,6 @@ function renderFulfillmentTable() {
       <td><span class="pill ${o.shipSpeed==='express'?'rose':'indigo'}" style="white-space:nowrap">${o.shipSpeed==='express'?'⚡ Express':'Standard'}</span></td>
       <td>${statusPill[o.fulfillStatus]}</td>
       <td>${daysElapsed}</td>
-      <td><button onclick="printQRCard('${o.id}','${o.pkg}','${encodeURIComponent(o.coupleNames||o.shipTo||'Couple')}','${o.token||''}','${encodeURIComponent(o.giftMsg||'')}')" style="background:rgba(232,103,58,.12);color:#E8673A;border:1px solid rgba(232,103,58,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap;display:flex;align-items:center;gap:.3rem;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 18h.01M18 14h.01M18 18h.01"/></svg> QR card</button></td>
       <td>${(() => {
         if (!o.hasWorkbook) return '<span style="color:var(--dim);font-size:.68rem">-</span>';
         const wbStatus = o.workbookStatus || 'pending_exercises';
@@ -5763,32 +5761,6 @@ async function generateWorkbookForOrder(orderId) {
     }
     alert('Workbook generation failed. Check that the server is running and try again.');
   }
-}
-
-// ── Print QR card ─────────────────────────────────────
-// Opens a print-ready welcome card for this order, with names, package,
-// gift note (if any), and the QR code linking to the per-order welcome URL.
-// The new qr-cards-print.html template handles all variants.
-function printQRCard(orderId, pkg, coupleNames, token, giftMsg) {
-  // Map both the digital and -box variants to the same template package key
-  const pkgKeyMap = {
-    'core': 'core',
-    'newlywed': 'newlywed', 'newlywed-box': 'newlywed',
-    'anniversary': 'anniversary', 'anniversary-box': 'anniversary',
-    'premium': 'premium', 'premium-box': 'premium',
-  };
-  const qrPkgKey = pkgKeyMap[pkg] || 'newlywed';
-
-  // Build URL — qr-cards-print.html reads these params to render the card
-  const params = new URLSearchParams({
-    pkg: qrPkgKey,
-    names: decodeURIComponent(coupleNames || ''),
-    orderId,
-  });
-  if (token) params.set('token', token);
-  if (giftMsg) params.set('note', decodeURIComponent(giftMsg));
-
-  window.open(`/qr-cards-print.html?${params}`, '_blank', 'width=900,height=900,toolbar=0,scrollbars=1');
 }
 
 // ── Fulfillment CSV export ────────────────────────────
