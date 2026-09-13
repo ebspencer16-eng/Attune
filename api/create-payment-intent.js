@@ -16,13 +16,11 @@
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
-import { ADDON_PRICES } from './_catalogue.js';
+import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 
 export const config = { runtime: 'edge' };
 
 // Canonical pricing — kept in sync with checkout.html PACKAGES.
-const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 198 };
-const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 233 };
 
 // Launch flags — server-side enforcement so a crafted or stale request can
 // never bill for a disabled offering. The flag itself comes from

@@ -39,6 +39,24 @@ export const ADDON_PRICES = {
 };
 
 /**
+ * Package prices in whole dollars, digital and in a box.
+ *
+ * Canonical. Two endpoints had their own copies and they did not agree:
+ * api/create-payment-intent.js priced premium at 198 digital and 233 physical,
+ * which is what the cart shows and what the customer is charged, while
+ * api/calculate-tax.js priced the same package at 295 and 330. The checkout
+ * page reads only the tax figure back from that endpoint, so a premium buyer
+ * was quoted sales tax on 295 and then charged tax on 198. Two numbers for the
+ * same order, neither of them visibly wrong on its own.
+ *
+ * public/cart.js, public/checkout.html and public/admin.html still carry their
+ * own tables, because a static page cannot import this. check-package-prices
+ * .mjs fails the build if any of them stops agreeing with this one.
+ */
+export const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 198 };
+export const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 233 };
+
+/**
  * Everything purchasable, in the order it should be offered.
  *
  * Price is read from ADDON_PRICES rather than written twice, so a price change

@@ -19,13 +19,12 @@
  * the amount and tax ID stay consistent on the actual charge.
  */
 
+import { DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 
 export const config = { runtime: 'edge' };
 
 // Mirrors create-payment-intent.js — keep in sync.
-const DIGITAL_PRICES  = { core: 89,  newlywed: 139, anniversary: 139, premium: 295 };
-const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, premium: 330 };
 const ADDON_PRICES = {
   workbookDigital: 19, workbookPrint: 39,
   reflection: 40, budget: 20, checklist: 20, intimacy: 20, conflict: 40,

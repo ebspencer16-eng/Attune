@@ -4459,7 +4459,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ORDERS.unshift({
         id: 'LIVE-' + String(Math.abs(s.savedAt||Date.now())%100000).padStart(5,'0'),
         date: d, dateStr: d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
-        pkg: s.pkg||'core', price: ({core:89,newlywed:139,anniversary:159,premium:299})[s.pkg]||89,
+        pkg: s.pkg||'core', price: ({core:89,newlywed:139,anniversary:139,premium:198})[s.pkg]||89,
         promo:false, physical:false, shipSpeed:'digital',
         shipTo:null, address:null, giftMsg:null,
         fulfillStatus:null, shippedDate:null, daysToShip:null,
