@@ -24,9 +24,25 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+import { deletionConfirmationEmail, partnerDeletedEmail } from './_lib/deletion-emails.js';
+import { notificationFor } from './_lib/notifications.js';
+
 export const config = { runtime: 'edge' };
 
 const JSON_HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
+/** One send, through Resend, the way every other sender here does it. */
+async function sendMail(to, subject, html) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || !to) return false;
+  const from = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: `Attune <${from}>`, to: [to], subject, html }),
+  });
+  return r.ok;
+}
+
 const err = (status, message) => new Response(JSON.stringify({ ok: false, error: message }), { status, headers: JSON_HEADERS });
 const ok  = (body)            => new Response(JSON.stringify({ ok: true, ...body }),         { status: 200, headers: JSON_HEADERS });
 
@@ -85,6 +101,34 @@ export default async function handler(req) {
   }
 
   const summary = { archived: false, workbooksRemoved: 0, storageRemoved: 0, ordersRemoved: 0, partnerSessionsAnonymized: 0, feedbackNulled: 0 };
+
+  // ── 0. Read everything the two emails need, before anything is destroyed ──
+  //
+  // The policy promises a confirmation to the person and a notice to their
+  // partner. Both need an address and a name, and step 6 deletes the auth user
+  // and their profile row, which are the only copies. Read once, here, and
+  // keep it in memory for the sends at the end.
+  const notify = { self: null, partner: null };
+  try {
+    const { data: me } = await admin.from('profiles')
+      .select('name, email, partner_profile_id')
+      .eq('id', userId)
+      .maybeSingle();
+    notify.self = { name: me?.name || null, email: me?.email || caller.email || null };
+    if (me?.partner_profile_id) {
+      const { data: them } = await admin.from('profiles')
+        .select('id, name, email, email_opt_in')
+        .eq('id', me.partner_profile_id)
+        .maybeSingle();
+      if (them?.id) {
+        notify.partner = {
+          id: them.id, name: them.name || null, email: them.email || null,
+          optedIn: them.email_opt_in !== false,
+          theirName: me?.name || null,
+        };
+      }
+    }
+  } catch (e) { console.warn('[delete-account] could not read the addresses:', e?.message); }
 
   // ── 1. Gather non-PII research data to archive ────────────────────────────
   // Pull from profiles (unified model — exercise answers live here directly,
@@ -237,6 +281,55 @@ export default async function handler(req) {
   // (FK on delete cascade). Everything else was already handled above.
   const { error: delErr } = await admin.auth.admin.deleteUser(userId);
   if (delErr) return err(500, 'Failed to delete auth user: ' + delErr.message);
+
+  // ── 7. Tell the two people the policy says we will tell ──────────────────
+  //
+  // After the deletion, not before: an email saying an account is gone, sent
+  // before it is, is a lie if step 6 fails. Neither send can fail the request.
+  // The account is already deleted at this point and reporting a 500 would
+  // tell the person the opposite of what happened.
+  //
+  // The partner's notification row is written even though no app screen reads
+  // the list yet. The email is what reaches them today; the row is what the
+  // screen will show when it exists, and writing it now means that screen has
+  // a history rather than starting empty.
+  summary.confirmationSent = false;
+  summary.partnerNotified = false;
+  try {
+    if (notify.self?.email) {
+      summary.confirmationSent = await sendMail(
+        notify.self.email,
+        'Your Attune account is deleted',
+        deletionConfirmationEmail({ name: notify.self.name, researchKept: summary.archived }),
+      );
+    }
+  } catch (e) { console.warn('[delete-account] confirmation email failed:', e?.message); }
+
+  try {
+    if (notify.partner) {
+      const alert = notificationFor('partner_deleted', { partnerName: notify.partner.theirName });
+      await admin.from('notifications').insert({
+        owner_id: notify.partner.id,
+        kind: alert.kind, title: alert.title, body: alert.body, deep_link: alert.deepLink,
+      });
+      // email_opt_in is honoured here the way the crons honour it. Someone who
+      // asked us to stop emailing them has asked for that, and this is not an
+      // exception: the notification row still carries it.
+      if (notify.partner.email && notify.partner.optedIn) {
+        summary.partnerNotified = await sendMail(
+          notify.partner.email,
+          `${notify.partner.theirName || 'Your partner'} deleted their Attune account`,
+          partnerDeletedEmail({
+            toName: notify.partner.name,
+            theirName: notify.partner.theirName,
+            userId: notify.partner.id,
+          }),
+        );
+      } else {
+        summary.partnerNotified = true;   // the row is written; the email was not wanted
+      }
+    }
+  } catch (e) { console.warn('[delete-account] partner notification failed:', e?.message); }
 
   return ok({ summary });
 }

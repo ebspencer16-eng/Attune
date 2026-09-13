@@ -35,6 +35,10 @@ const PUSHABLE = {
   partner_shared:    { urgency: 8,  quiet: false },
   // Genuinely new content, at most monthly, and only if they read the last one.
   new_post:          { urgency: 3,  quiet: true },
+  // Something changed that they cannot find out any other way, and that
+  // changes what is in the product for them. Quiet: it is not good news and it
+  // does not need to arrive with a sound.
+  partner_deleted:   { urgency: 9,  quiet: true },
 };
 
 /**
@@ -98,6 +102,26 @@ export function notificationFor(kind, { partnerName, postTitle, dimensionLabel }
       return { kind, title: `${them} shared something with you`, body: dimensionLabel ? `A note on ${dimensionLabel}.` : 'A note from your results.', deepLink: '/?view=notes' };
     case 'new_post':
       return { kind, title: 'New in In Practice', body: postTitle || 'Something new to read.', deepLink: '/?view=practice' };
+    /**
+     * Their partner deleted their account.
+     *
+     * Promised in the retention policy: "Your partner is notified that you
+     * have deleted your account." Nothing did.
+     *
+     * It names no reason, because we do not know one, and it does not ask them
+     * to do anything. What it has to carry is what changed for them, which is
+     * that the joint parts of their results are gone. Everything they answered
+     * themselves is still theirs.
+     *
+     * Wording is mine. Ellie's to edit.
+     */
+    case 'partner_deleted':
+      return {
+        kind,
+        title: `${them} deleted their Attune account`,
+        body: 'Your own answers are still here. The parts of your results that came from both of you are not.',
+        deepLink: '/?view=home',
+      };
     default:
       return null;
   }
