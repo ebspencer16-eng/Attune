@@ -349,13 +349,15 @@ nothing reaps it when a run is interrupted. Three hundred of them accumulated
 in one session, at which point `npm run smoke` stopped producing output for
 twenty minutes at a time and read exactly like a broken check.
 
-`pkill -f 'Google Chrome for Testing'` does not match them on this machine.
-This does, and leaves Ellie's own browser alone:
+Fixed: `browser.mjs` now registers teardown on the process, so an exit, a
+throw, a Ctrl-C or a `process.exit()` all kill Chrome and remove its temporary
+profile. Verified by removing the reaper and watching eight processes survive
+one script.
 
-    pkill -f 'remote-debugging-port'
-
-Worth running before any long browser check, and worth suspecting first when
-one stops producing output.
+If any do escape, `pkill -f 'remote-debugging-port'` matches them and leaves a
+real browser alone. `pkill -f 'Google Chrome for Testing'` does not match them
+on this machine. Worth suspecting first when a browser check stops producing
+output.
 
 **`git checkout --` has now destroyed uncommitted work five times.** Four
 were noted before; the fifth was today, undoing a planted bug in

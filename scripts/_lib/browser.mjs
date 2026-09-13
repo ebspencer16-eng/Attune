@@ -55,6 +55,45 @@ export function findChrome() {
 /** One in-flight CDP call. */
 let nextId = 1;
 
+/**
+ * Every browser this process started, so none of them outlives it.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * close() kills Chrome, and close() is only reached when a check finishes
+ * normally. A check that throws, a run interrupted, or a script that calls
+ * process.exit() when it is done all leave Chrome running with a temporary
+ * profile directory behind it.
+ *
+ * Three hundred of them accumulated in one session. Past a certain number the
+ * machine is saturated, every browser check crawls, and `npm run smoke` stops
+ * producing output for twenty minutes at a time, which reads exactly like a
+ * hung check rather than a full machine. That cost real time before anybody
+ * counted the processes.
+ *
+ * So teardown is registered on the process, not only on the caller
+ * remembering. Everything here is synchronous, because an exit handler cannot
+ * await.
+ */
+const live = new Set();
+let reaperInstalled = false;
+
+function reapAll() {
+  for (const instance of live) {
+    try { instance.proc.kill('SIGKILL'); } catch { /* already gone */ }
+    try { rmSync(instance.profile, { recursive: true, force: true }); } catch { /* best effort */ }
+  }
+  live.clear();
+}
+
+function installReaper() {
+  if (reaperInstalled) return;
+  reaperInstalled = true;
+  process.on('exit', reapAll);
+  for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    process.on(signal, () => { reapAll(); process.exit(signal === 'SIGINT' ? 130 : 143); });
+  }
+}
+
 export async function launch({ width = 1280, height = 1200 } = {}) {
   const chrome = findChrome();
   if (!chrome) {
@@ -79,6 +118,12 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
     '--disable-dev-shm-usage',
     'about:blank',
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
+
+  // Registered before anything can throw: a Chrome that fails to report its
+  // port still has to be killed, and that path used to leave one behind.
+  const instance = { proc, profile };
+  live.add(instance);
+  installReaper();
 
   // Chrome prints the port it actually chose on stderr.
   const wsUrl = await new Promise((resolve, reject) => {
@@ -207,6 +252,7 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
     },
 
     async close() {
+      live.delete(instance);
       try { socket.close(); } catch { /* already gone */ }
       try { proc.kill(); } catch { /* already gone */ }
       try { rmSync(profile, { recursive: true, force: true }); } catch { /* best effort */ }
