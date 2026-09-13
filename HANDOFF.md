@@ -1553,3 +1553,27 @@ on exit now, and smoke runs end to end leaving nothing behind.
 **The open list is down to things only you can do**: the App Store id, the
 `vercel.json` catch-all, the canonical tags, App Store Connect credentials, and
 the two copy decisions above.
+
+---
+
+## 13 September 2026, third batch
+
+**G14, with a correction.** I told you the dimension pages were "two entirely
+different drafts". They were not: 26 of 40 fields were already identical and
+14 differed. The moment cards were the ones where all 96 fields differed. Your
+call took the PDF's wording for every field; the prompt lists were merged, so
+forty prompts survive and none was dropped. The .docx moment card gains the
+scene line it never had and now names both people.
+
+**G15.** XX, YY and ZZ are written: eighteen moments, ninety lines, built on
+what the type letters mean. Both builders pick the block for the couple's own
+type, and a missing block now fails the build instead of falling back to W.
+The words are mine, as R17.
+
+**The task file.** Section 3 is your list now: 25 review items with stable ids,
+in three groups, because design, copy and behaviour need different things from
+you. Twenty-two of the old rows went to section 4 instead, each naming the
+check that proves it. Section 1 is empty for the first time.
+
+Say "R7 verified" and it moves to section 4. Say what is wrong with it and it
+becomes an O item.
