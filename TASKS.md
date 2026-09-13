@@ -34,7 +34,6 @@ payment-records paragraph, G3c make the banner geo-aware.
 |--|--|
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | When one partner deletes, the other keeps their results with the departed person anonymised. **Built; needs migration 059 run.** Until then the row is still cascade-deleted, which is the behaviour 059 exists to change. Couples deleted before you run it have no row to recover, and get an honest answer rather than a waiting screen. |
-| O4 | The React app shows no privacy notice: `index.html` does not load `_flags.js`, which nine static pages do. Careful, that file also injects the app-download bar. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
 | O6 | "Finish setting up your profile" and "Leave feedback" leave the app for the browser. Your direction is that everything runs in the app. Settings cannot edit a name or pronouns yet, so this needs a profile editor first. |
 | O7 | Every static page's `canonical`, `og:url` and JSON-LD tags name the **apex**, which 307s to www. Search engines are being told to index a URL that redirects. Thirty-odd tags; an SEO call, so left for you. |
@@ -394,6 +393,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | 22 customer-facing pages showed no privacy notice, including the portal and every In Practice article | `check-notice-reach.mjs`, 2 plants; one notice on the portal, no duplicate app bar, checked in a browser |
 | — | The surviving partner's results survive, anonymised | `check-results-survive-deletion.mjs`, 4 plants, run over a real payload. **Needs migration 059.** |
 | — | Engagement tab, between Explore and Demographics | Renders in a browser; 4 of your 9 measures are live, 5 say what collecting them would take. `check-engagement-honesty.mjs`, 3 plants |
 | — | Analytics tiles drew empty charts instead of saying they were empty | One change in `mkChart`, so it covers every chart on every tab |

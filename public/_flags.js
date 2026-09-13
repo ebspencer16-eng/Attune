@@ -34,6 +34,10 @@ window.ATTUNE_FLAGS = {
 (function () {
   var F = window.ATTUNE_FLAGS || {};
   if (!F.APP_BANNER_ENABLED) return;
+  // Not inside the React app, which draws its own version of this bar. This
+  // file is loaded there now, for the privacy notice below, and without this
+  // the portal would carry two identical bars.
+  if (document.getElementById('root')) return;
   try {
     if (localStorage.getItem('attune_app_banner_dismissed') === '1') return;
     var standalone = window.matchMedia('(display-mode: standalone)').matches
