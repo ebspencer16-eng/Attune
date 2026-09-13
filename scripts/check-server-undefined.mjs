@@ -3,7 +3,7 @@
  * A name read in a server file has to be a name something declares.
  *
  * ── THE PROMISE ───────────────────────────────────────────────────────────
- * No file under api/ or public/ reads an identifier that nothing in the file
+ * No file under api/, public/ or src/ reads an identifier that nothing in the file
  * declares, imports, or receives as a parameter, and that is not a runtime
  * global. Every module here is strict, so reading an undeclared name is a
  * ReferenceError at the moment that line runs, not a warning.
@@ -30,9 +30,23 @@
  * scope analysis, not a grep: a name declared in an inner block is bound, a
  * name shadowed is bound, a name only ever assigned is not.
  *
+ * ── WHY src/ IS IN SCOPE TOO ──────────────────────────────────────────────
+ * The first version of this file excluded src/ on the reasoning that Vite
+ * would fail the build on the same mistake. It does not. A probe returning a
+ * name nothing declares was planted in src/App.jsx and `vite build` exited 0:
+ * esbuild treats an unresolved name as a global and emits it. So the website's
+ * 15,000-line renderer had no cover for this at all, and it is scanned here.
+ *
+ * `typeof x` is the one way to name something undeclared without throwing, so
+ * a reference that is only ever a typeof operand is not reported. src/App.jsx
+ * has one, `typeof setView === 'function'`, and the branch behind it can never
+ * be taken because nothing in that scope declares setView. It falls through to
+ * window.history.back(), which is what the button should do anyway. Left as
+ * written: it is dead, not broken, and this gate is about what throws.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * Not src/. That is JSX compiled by Vite, which fails the build on the same
- * mistake, so it is already gated by something louder.
+ * Not attune-app/. That is TypeScript, and `tsc --noEmit` reports an unbound
+ * name as TS2304, which is the same question asked by a better tool.
  *
  * Not the temporal dead zone, not shadowing, not a name that exists but holds
  * the wrong thing. A declared name is accepted here whatever it holds.
@@ -89,7 +103,7 @@ function jsFiles(dir, out = []) {
     if (name === 'node_modules' || name.startsWith('.')) continue;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) jsFiles(full, out);
-    else if (name.endsWith('.js') || name.endsWith('.mjs')) out.push(full);
+    else if (/\.(js|mjs|jsx)$/.test(name)) out.push(full);
   }
   return out;
 }
@@ -97,6 +111,7 @@ function jsFiles(dir, out = []) {
 const files = [
   ...jsFiles(join(ROOT, 'api')),
   ...jsFiles(join(ROOT, 'public')),
+  ...jsFiles(join(ROOT, 'src')),
 ];
 
 const problems = [];
@@ -110,7 +125,7 @@ for (const file of files) {
       sourceType: 'unambiguous',
       allowReturnOutsideFunction: true,
       errorRecovery: false,
-      plugins: ['topLevelAwait'],
+      plugins: ['topLevelAwait', 'jsx'],
     });
   } catch (err) {
     problems.push(`${file.replace(ROOT, '')}: will not parse. ${err.message}`);
@@ -118,10 +133,27 @@ for (const file of files) {
   }
   scanned++;
 
+  // `typeof name` is the one way to name something undeclared without
+  // throwing, and the idiom it belongs to is
+  // `typeof f === 'function' && f()`, where the second mention would throw if
+  // it were ever reached and the first is what stops it being reached. So a
+  // name is exempt if it appears under a typeof anywhere in the file. That is
+  // deliberately a whole-file rule and it is the loosest thing here: it takes
+  // an explicit typeof to earn, which nobody writes by accident.
+  const featureDetected = new Set();
+  traverse(ast, {
+    UnaryExpression(path) {
+      if (path.node.operator === 'typeof' && path.node.argument.type === 'Identifier') {
+        featureDetected.add(path.node.argument.name);
+      }
+    },
+  });
+
   traverse(ast, {
     Program(path) {
       for (const [name, node] of Object.entries(path.scope.globals)) {
         if (GLOBALS.has(name)) continue;
+        if (featureDetected.has(name)) continue;
         const line = node.loc ? node.loc.start.line : '?';
         problems.push(
           `${file.replace(ROOT, '')}:${line}: reads \`${name}\`, which nothing declares. ` +
@@ -141,4 +173,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-server-undefined] ${scanned} files under api/ and public/ read no undeclared names.`);
+console.log(`[check-server-undefined] ${scanned} files under api/, public/ and src/ read no undeclared names.`);

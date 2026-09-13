@@ -9650,7 +9650,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       } catch {}
     }
     if (form.partnerEmail.trim()) {
-      const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
+      const inviteUrl = `${window.location.origin}/app?invite=${encodeURIComponent(account.inviteCode)}&from=${encodeURIComponent(form.name.trim())}&pae=${encodeURIComponent(form.email.trim().toLowerCase())}${form.partnerEmail?.trim() ? `&iie=${encodeURIComponent(form.partnerEmail.trim().toLowerCase())}` : ''}`;
       sendEmailWithRetry({
         type: 'partner_invite',
         fromName: form.name.trim(),
