@@ -593,7 +593,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
               <div>
                 <div class="front-qr-label">Scan to begin</div>
                 <div class="front-code fd-code">SPK ·, · -</div>
-                <div class="front-note">One-time access · attune.com</div>
+                <div class="front-note">One-time access · attune-relationships.com</div>
               </div>
               <svg id="fd-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
             </div>
@@ -632,8 +632,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
             </ul>
           </div>
           <div class="back-redeem">
-            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
-            <div class="back-url">attune.com</div>
+            <div class="back-redeem-step">To begin, visit attune-relationships.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune-relationships.com</div>
             <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
           </div>
         </div>
@@ -711,7 +711,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
               <div>
                 <div class="front-qr-label">Scan to begin</div>
                 <div class="front-code nw-code">SPK ·, · -</div>
-                <div class="front-note">One-time access · attune.com</div>
+                <div class="front-note">One-time access · attune-relationships.com</div>
               </div>
               <svg id="nw-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
             </div>
@@ -748,8 +748,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
             </ul>
           </div>
           <div class="back-redeem">
-            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
-            <div class="back-url">attune.com</div>
+            <div class="back-redeem-step">To begin, visit attune-relationships.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune-relationships.com</div>
             <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
           </div>
         </div>
@@ -837,7 +837,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
               <div>
                 <div class="front-qr-label">Scan to begin</div>
                 <div class="front-code an-code">SPK ·, · -</div>
-                <div class="front-note">One-time access · attune.com</div>
+                <div class="front-note">One-time access · attune-relationships.com</div>
               </div>
               <svg id="an-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
             </div>
@@ -875,8 +875,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
             </ul>
           </div>
           <div class="back-redeem">
-            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
-            <div class="back-url">attune.com</div>
+            <div class="back-redeem-step">To begin, visit attune-relationships.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune-relationships.com</div>
             <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
           </div>
         </div>
@@ -942,7 +942,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
               <div>
                 <div class="front-qr-label">Scan to begin</div>
                 <div class="front-code pr-code">SPK ·, · -</div>
-                <div class="front-note">One-time access · attune.com</div>
+                <div class="front-note">One-time access · attune-relationships.com</div>
               </div>
               <svg id="pr-qr-frame" viewBox="0 0 90 90" style="width:.88in;height:.88in;flex-shrink:0"></svg>
             </div>
@@ -984,8 +984,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
             </ul>
           </div>
           <div class="back-redeem">
-            <div class="back-redeem-step">To begin, visit attune.com and enter your access code,<br>or scan the QR on the front of this card.</div>
-            <div class="back-url">attune.com</div>
+            <div class="back-redeem-step">To begin, visit attune-relationships.com and enter your access code,<br>or scan the QR on the front of this card.</div>
+            <div class="back-url">attune-relationships.com</div>
             <div class="back-footer">© 2025 Attune · Attune, because understanding takes intention.</div>
           </div>
         </div>
@@ -1038,7 +1038,10 @@ const SHORT_CODES = {
   anniversary:'SPK·' + randStr(3) + '·' + randStr(3),
   premium:    'SPK·' + randStr(3) + '·' + randStr(3),
 };
-const BASE = window.location.origin || 'https://attune.com';
+// A static page cannot import api/_lib/site.js, so the fallback is written
+// here with the www, for the reason CLAUDE.md gives: the apex answers 307
+// and a QR code printed on a card is that bet made permanent.
+const BASE = window.location.origin || 'https://www.attune-relationships.com';
 
 // ── Card switching ──────────────────────────────────────
 let currentPkg = 'newlywed';

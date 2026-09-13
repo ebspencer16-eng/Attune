@@ -168,7 +168,7 @@ const section3 = [
   midSection('3.3', 'Per-partner placement', GREEN),
   prose('One blurb per partner, generated from type and placement. Cataloged in full in Section 4.', { indent: INDENT_PROSE_UNDER_SMALL }),
   midSection('3.4', 'Share text', GREEN),
-  prose('"We\u2019re \u2018[type name]\u2019, [tagline] Find yours at attune.com"', { italics: true, indent: INDENT_PROSE_UNDER_SMALL }),
+  prose('"We\u2019re \u2018[type name]\u2019, [tagline] Find yours at attune-relationships.com"', { italics: true, indent: INDENT_PROSE_UNDER_SMALL }),
 ];
 
 // ── SECTION 4 — Individual profiles ─────────────────────────────────────────

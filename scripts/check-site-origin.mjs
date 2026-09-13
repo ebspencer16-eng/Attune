@@ -82,6 +82,9 @@ const SEO = /rel=["']canonical|og:url|og:image|twitter:image|twitter:url|"url":|
  *                           would fail to boot. It keeps a literal and it is
  *                           still checked for the apex.
  * public/qr-card-v5.html    static, no modules, same reasoning.
+ * public/gift-cards.html   the other printed card, same reasoning. Its four
+ *                           templates said attune.com until this gate learned
+ *                           to look for a domain that is not ours at all.
  * attune-app/src/api/client.ts  a separate package that cannot import api/,
  *                           so the app keeps one of its own and every other
  *                           file in it imports that. Its comment carries why
@@ -95,15 +98,40 @@ const EXEMPT = new Set([
   'api/_lib/http.js',
   'src/App.jsx',
   'public/qr-card-v5.html',
+  'public/gift-cards.html',
   'attune-app/src/api/client.ts',
 ]);
 
 const apex = [];
 const copies = [];
+const wrong = [];
+
+/**
+ * A hostname that is not ours.
+ *
+ * The apex rule above assumes the domain is right and only the host is wrong.
+ * Four gift-card templates told the recipient of a printed card to "visit
+ * attune.com", which answers 200 and belongs to somebody else, and one In
+ * Practice article published a contact address at hello@attune.com. Both were
+ * invisible to every check here, because neither contains the string this file
+ * was looking for.
+ *
+ * `attune.com` is the one that happened. `attunerelationships.com` is the same
+ * mistake with the hyphen dropped, which is what a hand-typed URL looks like.
+ */
+const NOT_OURS = /(?<![-\w])(attune\.com|attunerelationships\.com|attune\.app|attune\.io)\b/i;
 
 for (const rel of files) {
   const src = readFileSync(join(ROOT, rel), 'utf8');
   const lines = src.split('\n');
+
+  // This file names the domain it forbids, in its own comment and its own
+  // pattern. Nowhere else has that excuse.
+  if (rel !== 'scripts/check-site-origin.mjs') {
+    lines.forEach((line, i) => {
+      if (NOT_OURS.test(line)) wrong.push(`${rel}:${i + 1}`);
+    });
+  }
 
   lines.forEach((line, i) => {
     if (/https:\/\/attune-relationships\.com/.test(line)) {
@@ -123,6 +151,13 @@ for (const rel of files) {
 }
 
 const problems = [];
+if (wrong.length) {
+  problems.push(
+    `${wrong.length} reference${wrong.length === 1 ? '' : 's'} to a domain that is not ours: `
+    + `${wrong.slice(0, 6).join(', ')}${wrong.length > 6 ? ', …' : ''}\n`
+    + '      The site is attune-relationships.com. attune.com is a live site\n'
+    + '      belonging to someone else, and it was printed on the gift cards.');
+}
 if (apex.length) {
   problems.push(
     `${apex.length} apex URL${apex.length === 1 ? '' : 's'}: ${apex.slice(0, 6).join(', ')}${apex.length > 6 ? ', …' : ''}\n`
