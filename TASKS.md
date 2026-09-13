@@ -35,7 +35,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
-| O6 | "Finish setting up your profile" and "Leave feedback" leave the app for the browser. Your direction is that everything runs in the app. Settings cannot edit a name or pronouns yet, so this needs a profile editor first. |
+| O6 | "Finish setting up your profile" stays in the app: Settings edits the two names, both pronouns and the five questions, through `/api/update-profile`. "Leave feedback" still opens `/feedback` on the website, which is a real page; an in-app feedback form is a separate build. |
 | O7 | Every static page's `canonical`, `og:url` and JSON-LD tags name the **apex**, which 307s to www. Search engines are being told to index a URL that redirects. Thirty-odd tags; an SEO call, so left for you. |
 
 ## 3. Done, not verified
@@ -393,6 +393,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | The app can edit a profile | `check-profile-editable.mjs`, 4 plants; `check-profile-columns.mjs` widened to see columns named through a map |
 | — | Four of the five engagement measures are collected and drawn | `check-tracking-consent.mjs` (5 plants), `check-engagement-honesty.mjs` (3 plants), aggregation tested over a sample |
 | — | All 12 In Practice articles reach the app, six as placeholders | `check-in-practice.mjs`, 3 plants; excerpt now optional |
 | — | 22 customer-facing pages showed no privacy notice, including the portal and every In Practice article | `check-notice-reach.mjs`, 2 plants; one notice on the portal, no duplicate app bar, checked in a browser |

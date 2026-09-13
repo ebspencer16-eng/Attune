@@ -314,6 +314,10 @@
       "destination": "/api/cron-prune-events.js"
     },
     {
+      "source": "/api/update-profile",
+      "destination": "/api/update-profile.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     },

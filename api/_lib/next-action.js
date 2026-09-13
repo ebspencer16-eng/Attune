@@ -79,6 +79,10 @@ function appTargetFor(deepLink) {
   if (view === 'home' || view === '') return { route: '/' };
   if (view === 'practice') return { route: '/resources' };
   if (view === 'notes') return { route: '/notes' };
+  // Profile setup lives in the app now: Settings can edit a name, pronouns and
+  // the five questions, through api/update-profile.js. The card used to open
+  // the website, which was the honest answer while the app could not do it.
+  if (view === 'profile') return { route: '/', settings: true };
 
   // An exercise. Routed to Insights, carrying which one, so the app can open it
   // directly when it can ask it and show its row when it cannot.

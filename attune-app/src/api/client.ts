@@ -500,7 +500,10 @@ export type HomeCard = {
    * deepLink directly, which is a web route the app has no concept of, so every
    * card did nothing at all.
    */
-  app?: { route?: string; exercise?: string; external?: string };
+  // `settings` means the card lands on a tab and opens something on it.
+  // "Finish setting up your profile" is home plus Settings, because the
+  // editor lives there rather than on a route of its own.
+  app?: { route?: string; exercise?: string; external?: string; settings?: boolean };
   disabled?: boolean;
 };
 
@@ -1089,6 +1092,42 @@ export function createProfile(input: {
   children?: string; signupSource?: string;
 }) {
   return request<{ ok: true; created?: boolean; existed?: boolean }>('/api/create-profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+/**
+ * Edit the parts of a profile a person owns.
+ *
+ * The website writes to profiles directly through row-level security. The app
+ * has no Supabase client and should not have one, so this is its only way, and
+ * api/update-profile.js holds the whitelist of what may change.
+ *
+ * Send only what changed. A field absent from the body is left alone, which is
+ * what lets one screen save a name without touching five demographic answers
+ * it happens to be displaying.
+ */
+/** The editable fields as they stand, with the five questions to draw. */
+export type EditableProfile = {
+  name: string | null; pronouns: string | null;
+  partnerName: string | null; partnerPronouns: string | null;
+  ageRange: string | null; relationshipStatus: string | null;
+  relationshipLength: string | null; children: string | null; signupSource: string | null;
+};
+
+export function fetchEditableProfile() {
+  return request<{ ok: true; profile: EditableProfile; aboutYou: AboutYou }>('/api/update-profile');
+}
+
+export function updateProfile(input: {
+  name?: string; pronouns?: string;
+  partnerName?: string; partnerPronouns?: string;
+  ageRange?: string; relationshipStatus?: string; relationshipLength?: string;
+  children?: string; signupSource?: string;
+}) {
+  return request<{ ok: true; updated: Record<string, string | null> }>('/api/update-profile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),

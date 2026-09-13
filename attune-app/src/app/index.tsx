@@ -122,13 +122,23 @@ export default function HomeScreen() {
       // nowhere. Validating first means an unknown route falls through to the
       // website rather than doing nothing at all.
       if (APP_ROUTES.has(target.route)) {
+        // Some cards land on a tab and open something on it. "Finish setting
+        // up your profile" is home plus Settings, because the editor lives
+        // there rather than on a route of its own.
+        if (target.settings) { setSettingsOpen(true); return; }
         router.push(target.route as never);
         return;
       }
     }
     // No app target at all means an older payload. Opening the website is the
     // honest fallback: the thing exists, just not here.
-    if (card.deepLink) Linking.openURL(`${SITE}/app${card.deepLink.replace(/^\//, '')}`);
+    // A path-shaped deepLink is a page of its own; a query-shaped one is a view
+    // inside the portal. The one builder turned '/feedback' into '/appfeedback'.
+    if (card.deepLink) {
+      Linking.openURL(card.deepLink.startsWith('/?')
+        ? `${SITE}/app${card.deepLink.slice(1)}`
+        : `${SITE}${card.deepLink}`);
+    }
   };
 
   if (loading) return <Shell><ScreenLoading label="Getting your dashboard" /></Shell>;

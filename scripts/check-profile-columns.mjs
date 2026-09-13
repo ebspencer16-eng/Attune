@@ -11,6 +11,7 @@
 // up. This is the same class as every other bug on this project: two things
 // that must agree, maintained separately, with nothing checking.
 
+import { ABOUT_YOU } from '../api/_lib/profile-setup-copy.js';
 import { readFileSync, readdirSync } from 'fs';
 
 const apiDir = new URL('../api/', import.meta.url);
@@ -115,8 +116,48 @@ for (const file of readdirSync(apiDir).filter((f) => f.endsWith('.js'))) {
   for (const m of text.matchAll(/profiles\?[^`'"]*`,\s*\{[\s\S]{0,400}?method:\s*'PATCH'/g)) {
     const at = text.indexOf('JSON.stringify(', m.index);
     if (at === -1) continue;
+    // Only an object literal can be read this way. `JSON.stringify(patch)`,
+    // where the body is built above, has no keys here, and reading the next
+    // brace instead finds the error handler below it: api/update-profile.js
+    // was reported as writing a column called "failed", out of the words
+    // "patch failed:" in a console.error.
+    const arg = text.slice(at + 'JSON.stringify('.length).trimStart();
+    if (!arg.startsWith('{')) continue;
     const missing = objectKeysAfter(text, at).filter((c) => !known.has(c));
     if (missing.length) problems.push({ file, missing, how: 'writes' });
+  }
+}
+
+// ── Columns named through a map rather than in a body ─────────────────────
+//
+// An endpoint that builds its patch dynamically hides its column names from
+// the scan above. api/update-profile.js holds them in a whitelist, which is
+// the safer shape and the less visible one, so the names are read from there
+// as well: `column: 'partner_name'` in any api file has to be a real column.
+for (const file of readdirSync(apiDir).filter((f) => f.endsWith('.js'))) {
+  const text = readFileSync(new URL(file, apiDir), 'utf8');
+  for (const m of text.matchAll(/\bcolumn:\s*'(\w+)'/g)) {
+    if (known.has(m[1])) continue;
+    problems.push({ file, missing: [m[1]], how: 'writes through a map' });
+  }
+}
+
+// ── And the five that are derived from the question keys ──────────────────
+//
+// api/update-profile.js turns each ABOUT_YOU key into a column by
+// snake-casing it. Nothing in the text names those columns, so a question
+// renamed in the copy module would write to a column that does not exist and
+// the answer would vanish. The rule is executed here rather than described.
+{
+  const snake = (k) => k.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
+  for (const f of ABOUT_YOU.fields) {
+    const column = snake(f.key);
+    if (known.has(column)) continue;
+    problems.push({
+      file: '_lib/profile-setup-copy.js',
+      missing: [`${f.key} -> ${column}`],
+      how: 'asks a question whose column',
+    });
   }
 }
 

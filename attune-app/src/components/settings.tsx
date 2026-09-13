@@ -24,6 +24,7 @@ import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
+import ProfileEditor from '@/components/profile-editor';
 import { WAITING_SETTINGS } from '@/constants/waiting';
 
 const c = Colors.light;
@@ -179,6 +180,13 @@ export default function Settings({
   return (
     <Sheet onClose={onClose} closeLabel="Close">
       <Text style={{ ...Type.hero, color: c.textStrong }}>Settings</Text>
+
+      {/* Your profile, first, because it is the only thing on this screen
+          somebody opens it to change. It used to open the website. */}
+      <View style={{ ...card(), marginTop: Spacing.xl }}>
+        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Your profile</Text>
+        <ProfileEditor />
+      </View>
 
       <View style={{ ...card(), marginTop: Spacing.xl }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Privacy</Text>
