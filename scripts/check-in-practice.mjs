@@ -19,7 +19,7 @@
 // than the facts.
 
 import { readFileSync } from 'fs';
-import { IN_PRACTICE } from '../api/_in-practice.js';
+import { IN_PRACTICE, PENDING_EXCERPT } from '../api/_in-practice.js';
 
 const page = readFileSync(new URL('../public/practice.html', import.meta.url), 'utf8');
 
@@ -78,6 +78,41 @@ for (const card of onPage) {
   }
 }
 
+/**
+ * Every article the site routes reaches one of the two lists.
+ *
+ * The gate used to hold IN_PRACTICE against the cards on practice.html and
+ * pass at six. Twelve articles exist: all.html indexes twelve and vercel.json
+ * routes twelve. The other six had no card, so they had no excerpt, so they
+ * were never added, so the app's shelf carried half the writing on the site
+ * and nothing said so.
+ *
+ * A missing excerpt is a copy gap and copy is Ellie's, so this does not fail
+ * for one. It fails when an article is in neither list, which is the case
+ * nobody has decided about yet.
+ */
+const routes = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+const CATEGORY_PAGES = new Set(['all', 'getting-started', 'when-its-difficult',
+  'understanding-each-other', 'couple-types']);
+const articles = routes.rewrites
+  .map((r) => r.source)
+  .filter((x) => x.startsWith('/practice/'))
+  .map((x) => x.slice('/practice/'.length))
+  .filter((slug) => !CATEGORY_PAGES.has(slug));
+
+const known = new Set([...IN_PRACTICE.map((a) => a.slug), ...PENDING_EXCERPT]);
+for (const slug of articles) {
+  if (known.has(slug)) continue;
+  problems.push(
+    `/practice/${slug} is routed on the site and is in neither IN_PRACTICE nor\n`
+    + '      PENDING_EXCERPT in api/_in-practice.js, so the app will never show it\n'
+    + '      and nothing says that on purpose. Add it to one of the two.');
+}
+for (const slug of PENDING_EXCERPT) {
+  if (articles.includes(slug)) continue;
+  problems.push(`PENDING_EXCERPT names ${slug}, which the site does not route.`);
+}
+
 if (problems.length) {
   console.error('[check-in-practice] the In Practice index has drifted:');
   for (const p of problems) console.error(`  ${p}`);
@@ -87,4 +122,7 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-in-practice] ${IN_PRACTICE.length} articles, identical on the page and in the module.`);
+console.log(
+  `[check-in-practice] ${articles.length} articles on the site; `
+  + `${IN_PRACTICE.length} in the app and identical on the page and in the module, `
+  + `${PENDING_EXCERPT.length} waiting on an excerpt.`);

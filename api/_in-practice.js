@@ -4,9 +4,12 @@
  * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
  * The app's Resources tab has an In Practice shelf and it has always been
  * empty, because the app reads the `posts` table and nothing has ever been
- * published to it. The six pieces that actually exist are pages on the
- * website, written as routes in src/App.jsx and indexed by hand in
- * public/practice.html.
+ * published to it. The pieces that actually exist are pages on the website,
+ * routed in vercel.json and indexed by hand in public/practice.html and
+ * public/practice/all.html.
+ *
+ * Twelve exist. Six are here. See PENDING_EXCERPT below for the other six and
+ * what they are waiting on.
  *
  * So the app was not missing a feature. It was reading a different source from
  * the one the content lives in.
@@ -46,6 +49,35 @@ const SHELF = {
 export function shelfFor(a) {
   return SHELF[a.category] || POST_CATEGORIES[0];
 }
+
+/**
+ * The six pieces on the website that the app's shelf does not carry, and why.
+ *
+ * Twelve articles exist. public/practice/all.html indexes all twelve and
+ * vercel.json routes all twelve. IN_PRACTICE below carries six, because six is
+ * how many have a card on public/practice.html, and a card is the only place
+ * an excerpt was ever written.
+ *
+ * So the gap is one sentence per piece, in Ellie's voice, of the kind already
+ * below: what the piece is about, in the tone of the article. Nothing else is
+ * missing; the titles, categories and read times are on all.html already.
+ *
+ * Listing them here rather than leaving them absent is the point. An article
+ * that is neither here nor in IN_PRACTICE fails check-in-practice.mjs, so a
+ * thirteenth piece cannot be added and quietly reach only half the product,
+ * which is exactly what happened to these six.
+ *
+ * Ellie writes all customer-facing copy, so these stay listed until she writes
+ * the six lines. The build does not fail for a copy gap.
+ */
+export const PENDING_EXCERPT = [
+  'how-to-use-your-results',
+  'why-couples-fight-about-the-same-things',
+  'what-your-communication-style-reveals',
+  'what-your-couple-type-tells-you',
+  'for-the-bridge-the-conversation-you-need',
+  'why-naming-the-pattern-changes-everything',
+];
 
 export const IN_PRACTICE = [
   {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "getting-started", "categoryLabel": "Getting Started", "title": "How to review your results together", "excerpt": "Some couples open their results immediately; others wait for a quiet moment. Either approach works. What matters is how you do it.", "readMinutes": 6},

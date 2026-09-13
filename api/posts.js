@@ -15,6 +15,8 @@
 
 export const config = { runtime: 'edge' };
 
+import { SITE_URL } from './_lib/site.js';
+
 import { POST_CATEGORIES } from './_lib/post-categories.js';
 import { IN_PRACTICE, shelfFor } from './_in-practice.js';
 
@@ -62,21 +64,25 @@ export default async function handler(req) {
       const readBy = new Map(reads.map(r => [r.post_id, r]));
 
       /**
-       * Nothing published yet, so serve the website's index.
+       * The shelf is both sources, not one or the other.
        *
-       * The six In Practice pieces are pages on the site, written as routes in
-       * src/App.jsx and indexed in public/practice.html. Nothing has ever been
-       * written to the posts table, so the app's In Practice shelf has always
-       * said "Nothing published yet" while six pieces existed.
+       * The In Practice pieces are pages on the site, indexed in
+       * api/_in-practice.js. Nothing had ever been written to the posts table,
+       * so the app's shelf said "Nothing published yet" while a dozen pieces
+       * existed, and this served the website's index when the table was empty.
+       * These carry `external`, so the app opens them on the website rather
+       * than pretending it has a reader for them.
        *
-       * The app was not missing a feature. It was reading a different source
-       * from the one the content lives in. These carry `external`, so the app
-       * opens them on the website rather than pretending it has a reader.
-       *
-       * A real published post takes precedence: this is the empty-table case
-       * only. See api/_in-practice.js.
+       * It used to be `published.length ? published : website`, which meant
+       * publishing one post would drop the shelf from twelve items to one.
+       * Nobody could reach that, because /api/admin-posts answered 500 to
+       * every request from the day it shipped and publishing was impossible.
+       * Fixing that endpoint made this reachable, so the two sources are
+       * merged instead: published posts first, newest first, then every
+       * website piece whose slug is not already among them.
        */
-      const posts = published.length ? published : IN_PRACTICE.map((a) => ({
+      const publishedIds = new Set(published.map((p) => p.id));
+      const fromSite = IN_PRACTICE.filter((a) => !publishedIds.has(a.slug)).map((a) => ({
         id: a.slug,
         title: a.title,
         subtitle: a.excerpt,
@@ -86,8 +92,9 @@ export default async function handler(req) {
         hero_color: null,
         published_at: null,
         revision: 1,
-        external: `https://www.attune-relationships.com${a.path}`,
+        external: `${SITE_URL}${a.path}`,
       }));
+      const posts = [...published, ...fromSite];
 
       return json({
         ok: true,
