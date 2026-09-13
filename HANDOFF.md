@@ -1507,3 +1507,20 @@ questions in the app now, so that card stays in the app.
 
 **Three things are yours:** the two TODO effective dates (G6), the privacy
 paragraph I wrote about measurement (G12), and migration 060 (G11).
+
+**Where the open list stands.** Everything I can do alone is done. What is
+left needs you:
+
+- **O1** the App Store id, and `APP_LIVE = true`. Two lines in
+  `api/_lib/flags.js`.
+- **O5** the catch-all in `vercel.json`. I started to remove it so unmatched
+  URLs get `public/404.html` instead of a blank app shell, and stopped: it
+  changes routing on the live site while you are away, and every internal link
+  is already explicitly routed, so the only URLs affected are ones that show a
+  blank page today. Your call, and a one-line change either way.
+- **O7** the canonical tags naming the apex. An SEO decision.
+- **App downloads** needs App Store Connect credentials.
+
+**Three migrations are waiting**: 058, 059 and 060. You ran 058 and 059
+already; 060 is the one that creates the table the engagement measures write
+to, and until it is run those four tiles say so rather than showing zero.
