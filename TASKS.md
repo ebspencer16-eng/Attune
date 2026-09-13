@@ -28,6 +28,7 @@ have proved instead.
 
 | # | Question |
 |--|--|
+| G17 | **Have any gift cards been printed?** Four card templates said "visit attune.com", front and back, and attune.com is a live site belonging to someone else. It is corrected in the code now, but the fix only reaches cards printed from here on. If a batch went to a printer, they point the recipient at a stranger. The same address was on a published In Practice article as a contact email, so anyone who wrote to hello@attune.com reached nobody. |
 | G16 | **"Unique visitors" cannot be answered by what is collected, on purpose.** An engagement event carries no cookie, no device id and no session id, so two visits by one person cannot be told from one visit by two. That is what the privacy policy says and what makes the collection defensible without a consent gate in the US. Counting unique visitors means storing something that follows a person between page loads, which changes the paragraph in the policy and what the EU banner has to cover. Three options: leave it as visits and label it that way, add a per-day rotating identifier that cannot link across days, or add a durable one. My preference is the first, then the second. |
 
 ## 2. Open
@@ -107,6 +108,10 @@ build.
 
 | Verified | By |
 |--|--|
+| Every route in vercel.json lands on a file that exists | `check-route-targets.mjs`, 80 routes, planted four ways |
+| /lmft-booking and /api/lmft-request no longer answer 200 with an empty shell | both pointed at files deleted in 97cacb6; the routes are gone |
+| Clicking Reviews lands on the reviews, not the top of the FAQ | faq.html scrolls to the section it already had an id for |
+| Nothing in the tree names a domain that is not ours | `check-site-origin.mjs`, 383 files, planted four ways |
 | The cart can price a workbook add-on again | in a browser: threw ReferenceError before, returns 108 after, which is the 89 package plus the 19 digital workbook |
 | The combined CSV export can build a row | `s` was an undeclared name in four lines of it; `check-server-undefined.mjs` |
 | An order arriving without line items still sends its receipt and setup link | three add-on flags were read and never passed; `check-server-undefined.mjs` |
