@@ -25,7 +25,12 @@
  * substantive: true when the change is worth telling readers about.
  */
 
-export const config = { runtime: 'nodejs' };
+// Edge, like every other admin endpoint, because this handler takes (req)
+// and returns a Response. Declared nodejs, it answered
+// FUNCTION_INVOCATION_FAILED to every request, from the commit that
+// created it. Nothing here needs Node: the only globals used are fetch
+// and process.env.
+export const config = { runtime: 'edge' };
 
 import { checkAdminAuth } from './_lib/admin-auth.js';
 

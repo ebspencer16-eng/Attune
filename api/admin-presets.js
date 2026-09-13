@@ -4,6 +4,13 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { safeError } from './_lib/http.js';
 
+// Edge, like every other admin endpoint. This handler takes (req) and
+// returns a Response, and with no runtime declared it defaulted to Node and
+// answered FUNCTION_INVOCATION_FAILED to every request. Its own commit
+// message promised it would "degrade gracefully" until migration 036 ran;
+// it degraded to a 500.
+export const config = { runtime: 'edge' };
+
 const HEADERS = { 'Content-Type': 'application/json' };
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: HEADERS });
 
