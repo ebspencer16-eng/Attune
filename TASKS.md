@@ -17,10 +17,7 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | G1 | Everything built is building clean, and none of it has been seen on a phone. |
 | G6 | **The Privacy Policy and the Terms of Service are published reading "Effective date: TODO before publishing".** The other three documents on /legal say May 15, 2026. An effective date is yours to set, not mine. Two edits in `public/legal.html`, lines 121 and 240. |
-| G13 | **The website stopped asking for feedback and nothing noticed.** The questionnaire was deleted in d54d7c2 as unreferenced dead code, and the footer reaction strip went at some point too, while `/api/get-feedback` and two admin tiles kept reporting on them. The app asks now, using your words recovered from git. Putting the questionnaire back on the website is a design decision and yours; the copy is in `api/_lib/feedback-copy.js` ready for it. |
-| G11 | **Migration 060 is ready to run**: `supabase/migrations/060_page_events.sql`. Until then nothing is recorded and the Engagement tiles say so. |
 | G12 | **The privacy policy now describes the measurement** (section 1, the paragraph after the automatic collection). Those words are mine. Read them: they are the promise the ninety-day prune job and the consent check are holding up. |
-| G10 | **Two workbook generators, two copies of the prose.** `api/generate-workbook.js` builds the .docx from `api/_workbook-content.js`; `scripts/build_workbook.py` builds the PDF from its own copy. The twenty shared strings agree and `check-workbook-prose.mjs` now keeps them that way. The other 121 exist only in the PDF: the moments pages, the dimension content, the situation prompts. Whether the .docx should carry those too is a product question, and it is yours. |
 
 Answered 12 Sep and moved to Open: G2a add the password step, G2b build the
 partner notification, G2c build the confirmation email (you approve or edit the
@@ -33,6 +30,8 @@ payment-records paragraph, G3c make the banner geo-aware.
 |--|--|
 | O16 | Four of the five are built and measuring. **Needs migration 060 run** (`supabase/migrations/060_page_events.sql`). App downloads still needs an App Store Connect key, an issuer id and a private key, and the app is not in the store. |
 | O17 | ~~Remove the 141 prose strings~~ **Do not.** I was wrong: `scripts/build_workbook.py` is the renderer behind the PDF workbook service (`Dockerfile.workbook` → `scripts/service.mjs`, called by `api/store-workbook-pdf.js`). My scan excluded that file's own output, so "appears nowhere in the product" was false. Nothing removed. See G10. |
+| O19 | **Put the feedback questionnaire back on the website.** The copy is already in `api/_lib/feedback-copy.js`; the component was deleted in d54d7c2. |
+| O20 | **Everything in both the .docx and the PDF.** 121 prose strings exist only in `scripts/build_workbook.py`, which renders the PDF. They have to reach `api/generate-workbook.js` too, and neither builder should hold the only copy of anything. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
