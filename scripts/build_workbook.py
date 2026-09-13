@@ -2794,6 +2794,7 @@ def build_full_workbook(same_type=False, is_service=False):
         # while only W had one and every same-type couple saw W's words; all
         # four exist now.
         pages.append(build_working_knowledge_same_type_page(
+            pn, COUPLE['u'], COUPLE['p'],
             type_letter=u_type, moments_data=SHARED_MOMENTS.get(u_type, MOMENTS_SHARED_W),
         ))
         pn += 1
