@@ -503,7 +503,7 @@ export type HomeCard = {
   // `settings` means the card lands on a tab and opens something on it.
   // "Finish setting up your profile" is home plus Settings, because the
   // editor lives there rather than on a route of its own.
-  app?: { route?: string; exercise?: string; external?: string; settings?: boolean };
+  app?: { route?: string; exercise?: string; external?: string; settings?: boolean; feedback?: boolean };
   disabled?: boolean;
 };
 
@@ -1131,6 +1131,47 @@ export function updateProfile(input: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
+  });
+}
+
+/** The feedback questions, as the server sends them. */
+export type FeedbackForm = {
+  copy: {
+    title: string; cta: string; reassurance: string; scaleHeading: string;
+    submit: string; submitting: string; privacy: string; thanks: string;
+  };
+  scale: string[];
+  questions: { id: string; type: 'scale' | 'choice' | 'text'; label: string; options?: string[] }[];
+};
+
+/**
+ * The questions Attune asks about itself.
+ *
+ * Unauthenticated, like the profile setup copy: it is seven question labels,
+ * and the screen that asks them should not need a session to draw itself.
+ */
+export function fetchFeedbackForm() {
+  return request<{ ok: true } & FeedbackForm>('/api/send-feedback');
+}
+
+/**
+ * Send one set of answers.
+ *
+ * `source` is 'app_experience', which is what /api/get-feedback and the
+ * admin's Feedback Overview already filter on. Nothing identifying is sent:
+ * the endpoint has never taken a name or an email and this does not start.
+ */
+export function sendFeedback(input: {
+  rating?: number | null;
+  questionAnswers: Record<string, string | number>;
+  message?: string | null;
+  stage?: string | null;
+  howHeard?: string | null;
+}) {
+  return request<{ ok: true }>('/api/send-feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source: 'app_experience', ...input }),
   });
 }
 

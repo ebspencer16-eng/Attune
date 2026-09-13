@@ -17,6 +17,7 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | G1 | Everything built is building clean, and none of it has been seen on a phone. |
 | G6 | **The Privacy Policy and the Terms of Service are published reading "Effective date: TODO before publishing".** The other three documents on /legal say May 15, 2026. An effective date is yours to set, not mine. Two edits in `public/legal.html`, lines 121 and 240. |
+| G13 | **The website stopped asking for feedback and nothing noticed.** The questionnaire was deleted in d54d7c2 as unreferenced dead code, and the footer reaction strip went at some point too, while `/api/get-feedback` and two admin tiles kept reporting on them. The app asks now, using your words recovered from git. Putting the questionnaire back on the website is a design decision and yours; the copy is in `api/_lib/feedback-copy.js` ready for it. |
 | G11 | **Migration 060 is ready to run**: `supabase/migrations/060_page_events.sql`. Until then nothing is recorded and the Engagement tiles say so. |
 | G12 | **The privacy policy now describes the measurement** (section 1, the paragraph after the automatic collection). Those words are mine. Read them: they are the promise the ninety-day prune job and the consent check are holding up. |
 | G10 | **Two workbook generators, two copies of the prose.** `api/generate-workbook.js` builds the .docx from `api/_workbook-content.js`; `scripts/build_workbook.py` builds the PDF from its own copy. The twenty shared strings agree and `check-workbook-prose.mjs` now keeps them that way. The other 121 exist only in the PDF: the moments pages, the dimension content, the situation prompts. Whether the .docx should carry those too is a product question, and it is yours. |
@@ -35,7 +36,6 @@ payment-records paragraph, G3c make the banner geo-aware.
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
-| O6 | "Finish setting up your profile" stays in the app: Settings edits the two names, both pronouns and the five questions, through `/api/update-profile`. "Leave feedback" still opens `/feedback` on the website, which is a real page; an in-app feedback form is a separate build. |
 | O7 | Every static page's `canonical`, `og:url` and JSON-LD tags name the **apex**, which 307s to www. Search engines are being told to index a URL that redirects. Thirty-odd tags; an SEO call, so left for you. |
 
 ## 3. Done, not verified
@@ -393,6 +393,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | Nothing in the product asked for feedback; three surfaces reported on it | `check-feedback-reachable.mjs`, 3 plants; the app asks now |
 | — | The app can edit a profile | `check-profile-editable.mjs`, 4 plants; `check-profile-columns.mjs` widened to see columns named through a map |
 | — | Four of the five engagement measures are collected and drawn | `check-tracking-consent.mjs` (5 plants), `check-engagement-honesty.mjs` (3 plants), aggregation tested over a sample |
 | — | All 12 In Practice articles reach the app, six as placeholders | `check-in-practice.mjs`, 3 plants; excerpt now optional |

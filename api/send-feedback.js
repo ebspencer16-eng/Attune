@@ -17,6 +17,8 @@
  *   KV_REST_API_TOKEN — Vercel KV token
  */
 
+import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_SCALE } from './_lib/feedback-copy.js';
+
 export const config = { runtime: 'edge' };
 
 // Also write to Supabase for richer analytics
@@ -60,6 +62,21 @@ async function kvStore(key, value) {
 }
 
 export default async function handler(req) {
+  // GET returns the questions, so a surface that asks them does not carry its
+  // own copy. The app reaches this before it has anything else to go on, and
+  // there is nothing to protect: it is seven question labels.
+  if (req.method === 'GET') {
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        copy: FEEDBACK_COPY,
+        scale: FEEDBACK_SCALE,
+        questions: FEEDBACK_QUESTIONS,
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }

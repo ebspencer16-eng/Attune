@@ -32,6 +32,7 @@ import { fetchHome, SITE_URL } from '@/api/client';
 import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
+import Feedback from '@/components/feedback';
 import Settings from '@/components/settings';
 import { forgetLastSection } from '@/components/results';
 import {
@@ -67,6 +68,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
@@ -126,6 +128,7 @@ export default function HomeScreen() {
         // up your profile" is home plus Settings, because the editor lives
         // there rather than on a route of its own.
         if (target.settings) { setSettingsOpen(true); return; }
+        if (target.feedback) { setFeedbackOpen(true); return; }
         router.push(target.route as never);
         return;
       }
@@ -337,6 +340,10 @@ export default function HomeScreen() {
           ) : null}
         </ScrollView>
       </SafeAreaView>
+
+      {feedbackOpen ? (
+        <Feedback onDone={() => setFeedbackOpen(false)} />
+      ) : null}
 
       {settingsOpen ? (
         <Settings

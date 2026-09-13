@@ -72,6 +72,12 @@ function websiteUrl(deepLink) {
 }
 
 function appTargetFor(deepLink) {
+  // The feedback questionnaire runs in the app now. It is a page on the
+  // website rather than a view, so it is matched here rather than in the view
+  // list below. Nothing had asked these questions anywhere since the component
+  // was deleted as dead code.
+  if (deepLink === '/feedback') return { route: '/', feedback: true };
+
   const view = /[?&]view=([^&]+)/.exec(deepLink || '')?.[1] || '';
 
   // Tabs the app has.
