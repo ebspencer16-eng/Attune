@@ -650,7 +650,6 @@
         <div class="topbar-sub">What people do once they are in. Last 30 days against the 30 before, unless a tile says otherwise.</div>
       </div>
       <div style="display:flex;gap:.5rem;align-items:center">
-        <select class="tile-slicer" id="slz-engagement" title="Cut the whole page by a segment"><option value="">Everyone</option></select>
         <button class="btn" onclick="renderEngagementPage(true)">Refresh</button>
       </div>
     </div>
@@ -661,16 +660,20 @@
     </div>
 
     <!-- Headline tiles -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 .6rem">
+      <div class="section-label" style="margin:0">Last 30 days</div>
+      <select class="tile-slicer eng-slicer" id="slz-eng-head" data-tile="head" title="Cut these four by a segment"><option value="">Everyone</option></select>
+    </div>
     <div class="kpi-grid" id="eng-headlines"></div>
 
     <!-- Funnel over time, and acquisition beside it -->
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">&mdash;</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-funnel" data-tile="funnel" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-funnel"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Visits and downloads</div><div class="chart-subtitle" id="eng-acq-n">&mdash;</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Visits and downloads</div><div class="chart-subtitle" id="eng-acq-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-acq" data-tile="acq" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-acq"></canvas></div>
       </div>
     </div>
@@ -679,27 +682,28 @@
     <div class="section-label">Time per page</div>
     <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Marketing pages</div><div class="chart-subtitle" id="eng-mk-n">&mdash;</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Marketing pages</div><div class="chart-subtitle" id="eng-mk-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-mk" data-tile="mk" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-mk"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">app against site</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-ex" data-tile="ex" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-ex"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">app against site</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-res" data-tile="res" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-res"></canvas></div>
       </div>
     </div>
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">app against site</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-rs" data-tile="rs" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-rs"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-head">
           <div><div class="chart-title">Detailed results pages</div><div class="chart-subtitle" id="eng-det-n">&mdash;</div></div>
           <select class="tile-slicer" id="eng-det-pick" title="Which section"></select>
+          <select class="tile-slicer eng-slicer" id="slz-eng-det" data-tile="det" title="Cut this tile by a segment"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-eng-det"></canvas></div>
       </div>
@@ -709,11 +713,11 @@
     <div class="section-label">Learning</div>
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-art-n">&mdash;</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-art-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-art" data-tile="art" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div id="eng-articles"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Tags</div><div class="chart-subtitle" id="eng-tag-n">&mdash;</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Tags</div><div class="chart-subtitle" id="eng-tag-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-tags" data-tile="tags" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
         <div id="eng-tags"></div>
       </div>
     </div>
@@ -721,10 +725,13 @@
       <div class="chart-card">
         <div class="chart-head">
           <div><div class="chart-title">Notes by section</div><div class="chart-subtitle" id="eng-ns-n">&mdash;</div></div>
-          <select class="tile-slicer" id="eng-ns-mode" title="How to count">
-            <option value="total">Total engagement</option>
-            <option value="detail">Detailed engagement</option>
-          </select>
+          <div style="display:flex;gap:.4rem">
+            <select class="tile-slicer" id="eng-ns-mode" title="How to count">
+              <option value="total">Total engagement</option>
+              <option value="detail">Detailed engagement</option>
+            </select>
+            <select class="tile-slicer eng-slicer" id="slz-eng-ns" data-tile="ns" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+          </div>
         </div>
         <div class="chart-body"><canvas id="chart-eng-ns"></canvas></div>
       </div>
@@ -737,6 +744,7 @@
               <option value="detail">Detailed engagement</option>
             </select>
             <select class="tile-slicer" id="eng-nd-pick" title="Which section"></select>
+            <select class="tile-slicer eng-slicer" id="slz-eng-nd" data-tile="nd" title="Cut this tile by a segment"><option value="">Everyone</option></select>
           </div>
         </div>
         <div class="chart-body"><canvas id="chart-eng-nd"></canvas></div>
@@ -745,6 +753,8 @@
 
     <div class="chart-card" style="margin-top:1rem">
       <div class="chart-head"><div><div class="chart-title">Not measured yet</div><div class="chart-subtitle">What each one would take, so the decision is a real one</div></div></div>
+      <div id="eng-errors"></div>
+      <div id="eng-counts" style="font-size:.75rem;color:var(--dim);padding:0 0 .75rem"></div>
       <div id="eng-missing" style="padding:.25rem 0 .5rem"></div>
     </div>
   </div>
@@ -1996,60 +2006,111 @@ async function adminAction(payload) {
 //
 // The slicer cuts server-side, so changing it re-fetches rather than filtering
 // what is already drawn.
-let __engCache = null;
-let __engSlice = '';
+/**
+ * The Engagement tab keeps one payload per slice, not one for the page.
+ *
+ * Ellie: "Each tile should have the dropdown slicer in the top right." The
+ * slicing happens on the server, before anything is counted, so a tile on a
+ * different cut needs a different payload. They are cached by slice, so two
+ * tiles on the same cut cost one request and switching back costs none.
+ */
+let __engBySlice = {};
+let __engTileSlice = {};
+
+async function engFetch(slice, force) {
+  if (__engBySlice[slice] && !force) return __engBySlice[slice];
+  const url = '/api/admin-engagement' + (slice ? ('?slice=' + encodeURIComponent(slice)) : '');
+  const res = await fetch(url, { headers: window.adminAuthHeaders() });
+  const j = await res.json();
+  if (!j || !j.ok) throw new Error((j && j.error) || ('request failed with ' + res.status));
+  __engBySlice[slice] = j;
+  return j;
+}
+
+/** The payload a given tile is showing, which is the page default until cut. */
+function engFor(tile) {
+  return __engBySlice[__engTileSlice[tile] || ''] || __engBySlice[''] || null;
+}
 
 async function renderEngagementPage(force) {
   const notice = document.getElementById('eng-notice');
-  const url = '/api/admin-engagement' + (__engSlice ? ('?slice=' + encodeURIComponent(__engSlice)) : '');
-  if (!__engCache || force) {
+  if (force) { __engBySlice = {}; __engTileSlice = {}; }
+  if (!__engBySlice['']) {
     if (notice) notice.textContent = 'Loading.';
-    try {
-      const res = await fetch(url, { headers: window.adminAuthHeaders() });
-      const j = await res.json();
-      __engCache = j && j.ok ? j : null;
-      if (!__engCache && notice) notice.textContent = (j && j.error) ? ('Could not load: ' + j.error) : 'Could not load.';
-    } catch (e) {
-      __engCache = null;
+    try { await engFetch('', !!force); }
+    catch (e) {
       if (notice) notice.textContent = 'Could not load: ' + (e && e.message ? e.message : 'request failed');
+      return;
     }
   }
-  const d = __engCache;
+  const d = __engBySlice[''];
   if (!d) return;
 
   if (notice) {
     notice.textContent = 'Computed at ' + new Date(d.generatedAt).toLocaleString()
-      + (d.slice ? (' · cut to ' + d.slice.value + ', ' + d.slice.people + ' people. Anonymous visits are left out of a cut, because nothing attributes them to anybody.') : '')
-      + ' · the tiles at the bottom are not collected yet and say what each would take.';
+      + ' · every tile can be cut on its own, and a cut leaves out anonymous visits because nothing attributes them to anybody.';
   }
 
-  wireEngagementSlicer();
-  drawHeadlines(d);
-  drawFunnel(d);
-  drawAcquisition(d);
-  drawTimePerPage(d);
-  drawLearning(d);
+  wireEngagementSlicers();
+  drawHeadlines();
+  drawFunnel();
+  drawAcquisition();
+  drawTimePerPage();
+  drawLearning();
   drawMissing(d);
 }
 
-/** The admin's own slicer, populated from the same cube as every other tile. */
-async function wireEngagementSlicer() {
-  const sel = document.getElementById('slz-engagement');
-  if (!sel || sel.dataset.wired) return;
-  sel.dataset.wired = '1';
-  try {
-    const cube = await ensureCube();
-    populateSlicer(sel, null, cube.rows || []);
-  } catch (e) { /* no cube: the slicer stays as Everyone, which is honest */ }
-  sel.onchange = () => {
-    __engSlice = sel.value;
-    sel.classList.toggle('on', !!sel.value);
-    renderEngagementPage(true);
-  };
+/** Which draw function owns each tile, so a slicer redraws only its own. */
+const ENG_TILE_DRAW = {
+  head: function () { drawHeadlines(); },
+  funnel: function () { drawFunnel(); },
+  acq: function () { drawAcquisition(); },
+  mk: function () { drawTimePerPage(); },
+  ex: function () { drawTimePerPage(); },
+  res: function () { drawTimePerPage(); },
+  rs: function () { drawTimePerPage(); },
+  det: function () { drawTimePerPage(); },
+  art: function () { drawLearning(); },
+  tags: function () { drawLearning(); },
+  ns: function () { drawLearning(); },
+  nd: function () { drawLearning(); },
+};
+
+async function wireEngagementSlicers() {
+  const sels = document.querySelectorAll('.eng-slicer');
+  if (!sels.length) return;
+  let rows = [];
+  try { rows = (await ensureCube()).rows || []; }
+  catch (e) { /* no cube: every slicer stays as Everyone, which is honest */ }
+  sels.forEach(function (sel) {
+    if (sel.dataset.wired) return;
+    sel.dataset.wired = '1';
+    try { populateSlicer(sel, null, rows); } catch (e) { /* leave it as Everyone */ }
+    sel.onchange = async function () {
+      const tile = sel.dataset.tile;
+      const want = sel.value;
+      sel.classList.toggle('on', !!want);
+      sel.disabled = true;
+      try {
+        await engFetch(want, false);
+        __engTileSlice[tile] = want;
+        (ENG_TILE_DRAW[tile] || function () {})();
+      } catch (e) {
+        sel.value = __engTileSlice[tile] || '';
+        sel.classList.toggle('on', !!sel.value);
+        const notice = document.getElementById('eng-notice');
+        if (notice) notice.textContent = 'That cut could not be loaded: ' + (e && e.message ? e.message : 'request failed');
+      } finally {
+        sel.disabled = false;
+      }
+    };
+  });
 }
 
 /** One headline tile: a number, and how it compares with the 30 days before. */
-function drawHeadlines(d) {
+function drawHeadlines() {
+  const d = engFor('head');
+  if (!d) return;
   const host = document.getElementById('eng-headlines');
   if (!host) return;
   const TILES = [
@@ -2078,7 +2139,9 @@ function drawHeadlines(d) {
   }).join('');
 }
 
-function drawFunnel(d) {
+function drawFunnel() {
+  const d = engFor('funnel');
+  if (!d) return;
   const f = d.funnel || {};
   setTileText('eng-funnel-n', f.available
     ? 'Over 12 months · sign-ups counted twice, because a sign-up is one half of a couple'
@@ -2101,7 +2164,9 @@ function drawFunnel(d) {
   });
 }
 
-function drawAcquisition(d) {
+function drawAcquisition() {
+  const d = engFor('acq');
+  if (!d) return;
   const a = d.acquisition || {};
   setTileText('eng-acq-n', a.available
     ? a.note
@@ -2138,18 +2203,26 @@ function drawAcquisition(d) {
  * column across all five and every chart is drawn to it. Without that the eye
  * reads three seconds on one chart as the same as three minutes on another.
  */
-function drawTimePerPage(d) {
-  const t = d.timePerPage || {};
+function drawTimePerPage() {
+  const base = engFor('mk');
+  if (!base) return;
+  const tp = function (tile) { return (engFor(tile) || {}).timePerPage || {}; };
   const detPick = document.getElementById('eng-det-pick');
-  const groups = (d.groups || []).filter(function (g) { return g.pages > 1; });
+  const groups = (base.groups || []).filter(function (g) { return g.pages > 1; });
   if (detPick && !detPick.dataset.pop) {
     detPick.innerHTML = groups.map(function (g) { return '<option value="' + g.id + '">' + QX_ESC(g.label) + '</option>'; }).join('');
     detPick.dataset.pop = '1';
-    detPick.onchange = function () { drawTimePerPage(__engCache); };
+    detPick.onchange = function () { drawTimePerPage(); };
   }
   const chosen = detPick && detPick.value ? detPick.value : (groups[0] && groups[0].id);
-  const detailed = (t.detailed || {})[chosen];
+  const detailed = (tp('det').detailed || {})[chosen];
 
+  // Each of the five may be on a different cut, and the shared ceiling is
+  // computed across whatever they are each showing right now. Ellie asked for
+  // one max height so the columns can be compared between tiles; cutting one
+  // tile must not silently rescale it against the others.
+  const t = { marketing: tp('mk').marketing, exercises: tp('ex').exercises,
+              resources: tp('res').resources, results: tp('rs').results };
   const all = [t.marketing, t.exercises, t.resources, t.results, detailed];
   let max = 0;
   all.forEach(function (c) {
@@ -2186,8 +2259,17 @@ function drawTimePerPage(d) {
 }
 
 /** The two tables and the two note charts. */
-function drawLearning(d) {
-  const L = d.learning || {};
+function drawLearning() {
+  const base = engFor('art');
+  if (!base) return;
+  const ln = function (tile) { return (engFor(tile) || {}).learning || {}; };
+  const d = base;
+  const L = {
+    articles: ln('art').articles,
+    tags: ln('tags').tags,
+    notesBySection: ln('ns').notesBySection,
+    notesByDetailed: ln('nd').notesByDetailed,
+  };
 
   const table = function (hostId, subId, rows, cols, subtitle) {
     const host = document.getElementById(hostId);
@@ -2237,7 +2319,7 @@ function drawLearning(d) {
 
   const noteChart = function (canvasId, subId, modeId, measure, subtitle) {
     const mode = document.getElementById(modeId);
-    if (mode && !mode.dataset.wired) { mode.dataset.wired = '1'; mode.onchange = function () { drawLearning(__engCache); }; }
+    if (mode && !mode.dataset.wired) { mode.dataset.wired = '1'; mode.onchange = function () { drawLearning(); }; }
     const detail = mode && mode.value === 'detail';
     if (!measure) { drawTimeTile(canvasId, subId, null, 'notes', function () { return {}; }); return; }
     drawTimeTile(canvasId, subId, measure, 'notes', function (v) {
@@ -2267,13 +2349,34 @@ function drawLearning(d) {
       return '<option value="' + k + '">' + QX_ESC(byDetailed[k].label) + '</option>';
     }).join('');
     ndPick.dataset.pop = '1';
-    ndPick.onchange = function () { drawLearning(__engCache); };
+    ndPick.onchange = function () { drawLearning(); };
   }
   const pick = ndPick && ndPick.value ? ndPick.value : Object.keys(byDetailed)[0];
   noteChart('chart-eng-nd', 'eng-nd-n', 'eng-nd-mode', byDetailed[pick], 'By page');
 }
 
 function drawMissing(d) {
+  // A query that was rejected is a different fact from a measure that is empty,
+  // and it goes first because it means the numbers above are wrong rather than
+  // absent. The events select asked for a column migration 061 adds; before it
+  // ran, every chart on this page read zero from a table that had rows in it.
+  const errs = (d.queryErrors || []);
+  const counts = d.rowsRead || {};
+  const errHost = document.getElementById('eng-errors');
+  if (errHost) {
+    errHost.innerHTML = errs.length
+      ? '<div style="border:1px solid var(--orange);border-radius:10px;padding:.9rem 1.1rem;margin:0 0 1rem">'
+        + '<div style="font-weight:700;font-size:.82rem;margin-bottom:.5rem">Some of this page could not be read</div>'
+        + errs.map(function (e) { return '<div style="font-size:.78rem;color:var(--dim);line-height:1.6">' + QX_ESC(e) + '</div>'; }).join('')
+        + '</div>'
+      : '';
+  }
+  const countHost = document.getElementById('eng-counts');
+  if (countHost) {
+    countHost.textContent = 'Read ' + (counts.events || 0) + ' engagement events, '
+      + (counts.profiles || 0) + ' people, ' + (counts.notes || 0) + ' notes, '
+      + (counts.tags || 0) + ' tags, ' + (counts.articleReads || 0) + ' article reads.';
+  }
   const MISSING = [['App downloads', d.headlines.appDownloads]]
     .concat([
       ['Site visits', d.headlines.siteVisits],

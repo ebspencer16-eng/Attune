@@ -86,8 +86,15 @@ for (const rel of files) {
   }
 }
 
-if (found < 15) {
-  problems.push(`only found ${found} email builders under api/; there were 19 when this was written, so the scan has gone blind.`);
+// The scan reads source text; the catalogue is built by importing the same
+// modules. So the two counts have to match, and a regex that stops matching
+// shows up here rather than as a quiet drop in coverage. A magic number was
+// wrong for this: five emails were deliberately removed and the floor fired.
+const catalogued = Object.keys(EMAIL_CATALOGUE).length;
+if (found !== catalogued) {
+  problems.push(
+    `the source scan found ${found} email builders under api/ and the catalogue holds ${catalogued}.\n`
+    + `      Either one is not previewable, or the scan has gone blind and is matching less than it did.`);
 }
 
 // ── 2. Every entry renders ───────────────────────────────────────────────────

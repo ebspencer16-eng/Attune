@@ -43,6 +43,19 @@ const json = (b, s = 200) => new Response(JSON.stringify(b), {
 });
 
 /** Every row of a table, paged past PostgREST's default limit. */
+/**
+ * Every row of a table, in pages.
+ *
+ * Returns the error as well as the rows, and that is the point. This used to
+ * stop on a bad response and return an empty array, so a select naming a
+ * column that does not exist looked exactly like a table with nothing in it.
+ * That is what happened: the events select asked for `surface`, migration 061
+ * had not been run, PostgREST rejected the whole select, and every chart on
+ * the page read zero while the data sat in the table.
+ *
+ * A tool that cannot tell "broken" from "nothing here yet" is a tool that
+ * reports the wrong thing confidently, which is worse than reporting nothing.
+ */
 async function all(url, key, path) {
   const out = [];
   const step = 1000;
@@ -55,13 +68,16 @@ async function all(url, key, path) {
         Prefer: 'count=none',
       },
     });
-    if (!res.ok) break;
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      return { rows: out, error: `${path.split('?')[0]}: ${res.status} ${detail.slice(0, 160)}` };
+    }
     const rows = await res.json().catch(() => []);
     if (!Array.isArray(rows) || rows.length === 0) break;
     out.push(...rows);
     if (rows.length < step) break;
   }
-  return out;
+  return { rows: out, error: null };
 }
 
 /**
@@ -477,17 +493,42 @@ export default async function handler(req) {
       'age_range', 'gender', 'relationship_status', 'relationship_length',
       'children', 'signup_source', 'pkg',
     ];
-    const [profiles, notes, tags, noteTags, reads, posts, events] = await Promise.all([
+    const EVENT_COLS = 'kind,key,ms,owner_id,created_at';
+    const results = await Promise.all([
       all(url, key, `profiles?select=${columns.join(',')}`),
       all(url, key, 'notes?select=id,owner_id,anchor_type,anchor_key,visibility,kind,created_at'),
       all(url, key, 'tags?select=id,owner_id,name,standard_key'),
       all(url, key, 'note_tags?select=note_id,tag_id'),
       all(url, key, 'post_reads?select=post_id,owner_id,read_at'),
       all(url, key, 'posts?select=id,title'),
-      // Empty until migrations 060 and 061 are run, which reads as "nothing
-      // measured yet" rather than as an error, and the tiles say which.
-      all(url, key, 'page_events?select=kind,key,ms,surface,owner_id,created_at'),
+      // With the surface first. Migration 061 adds that column, and asking for
+      // a column that does not exist fails the whole select, so the fallback
+      // below asks again without it rather than reporting an empty table.
+      all(url, key, `page_events?select=${EVENT_COLS},surface`),
     ]);
+
+    let [profilesR, notesR, tagsR, noteTagsR, readsR, postsR, eventsR] = results;
+    let surfaceKnown = true;
+    if (eventsR.error) {
+      surfaceKnown = false;
+      eventsR = await all(url, key, `page_events?select=${EVENT_COLS}`);
+    }
+
+    // A query that failed is not a measure that is empty, and the page says
+    // which is which rather than drawing zero.
+    const queryErrors = [
+      ...[profilesR, notesR, tagsR, noteTagsR, readsR, postsR, eventsR]
+        .map((r) => r.error).filter(Boolean),
+      ...(surfaceKnown ? [] : ['page_events has no `surface` column yet, so app and site cannot be told apart. Run migration 061.']),
+    ];
+
+    const profiles = profilesR.rows;
+    const notes = notesR.rows;
+    const tags = tagsR.rows;
+    const noteTags = noteTagsR.rows;
+    const reads = readsR.rows;
+    const posts = postsR.rows;
+    const events = eventsR.rows;
 
     // ── The slicer ──────────────────────────────────────────────────────
     //
@@ -557,6 +598,17 @@ export default async function handler(req) {
       // The groups the page draws its dropdowns from, so it never holds its
       // own copy of the results navigation.
       groups: core.groups.map((g) => ({ id: g.id, label: g.label, pages: g.sections.length })),
+      // Anything that failed rather than came back empty. The page prints
+      // these, because a chart of zeros drawn from a rejected query is the
+      // most misleading thing this tab could do.
+      queryErrors,
+      rowsRead: {
+        profiles: profiles.length,
+        notes: notes.length,
+        tags: tags.length,
+        articleReads: reads.length,
+        events: events.length,
+      },
     });
   } catch (e) {
     return json({ error: String(e?.message || e) }, 500);
