@@ -19,7 +19,7 @@
 // than the facts.
 
 import { readFileSync } from 'fs';
-import { IN_PRACTICE, PENDING_EXCERPT } from '../api/_in-practice.js';
+import { IN_PRACTICE } from '../api/_in-practice.js';
 
 const page = readFileSync(new URL('../public/practice.html', import.meta.url), 'utf8');
 
@@ -59,9 +59,15 @@ const onPage = [...page.matchAll(CARD)].map(([, path, title, excerpt]) => ({
   path, title: plain(title), excerpt: plain(excerpt),
 }));
 
-if (onPage.length !== IN_PRACTICE.length) {
+// A card is where an excerpt is written, and only six articles have one. So
+// the count is checked against the articles that carry an excerpt, not against
+// the whole index: the other six are placeholders on purpose, and the link
+// check above already proves the page reaches all twelve.
+const withExcerpt = IN_PRACTICE.filter((a) => a.excerpt);
+if (onPage.length !== withExcerpt.length) {
   problems.push(
-    `public/practice.html lists ${onPage.length} articles, api/_in-practice.js lists ${IN_PRACTICE.length}.`);
+    `public/practice.html has ${onPage.length} cards and api/_in-practice.js has `
+    + `${withExcerpt.length} articles with an excerpt. A card is where an excerpt comes from.`);
 }
 
 for (const card of onPage) {
@@ -73,13 +79,19 @@ for (const card of onPage) {
   if (plain(known.title) !== card.title) {
     problems.push(`${known.slug}.title differs:\n      page:   ${card.title}\n      module: ${plain(known.title)}`);
   }
+  if (!known.excerpt) {
+    problems.push(
+      `${known.slug} has a card on the page and no excerpt in the module.\n`
+      + '      The card is where the excerpt comes from; copy it across.');
+    continue;
+  }
   if (plain(known.excerpt) !== card.excerpt) {
     problems.push(`${known.slug}.excerpt differs:\n      page:   ${card.excerpt.slice(0, 90)}\n      module: ${plain(known.excerpt).slice(0, 90)}`);
   }
 }
 
 /**
- * Every article the site routes reaches one of the two lists.
+ * Every article the site routes is in the app's index, and nothing else is.
  *
  * The gate used to hold IN_PRACTICE against the cards on practice.html and
  * pass at six. Twelve articles exist: all.html indexes twelve and vercel.json
@@ -87,9 +99,11 @@ for (const card of onPage) {
  * were never added, so the app's shelf carried half the writing on the site
  * and nothing said so.
  *
- * A missing excerpt is a copy gap and copy is Ellie's, so this does not fail
- * for one. It fails when an article is in neither list, which is the case
- * nobody has decided about yet.
+ * An excerpt is optional. Six have one, from the card each has on
+ * practice.html; the other six are placeholders, which is what Ellie asked
+ * for: "we need the 12 articles written as placeholders ... but we don't need
+ * excerpts". This checks that every article reaches the app, not that every
+ * article has been written about twice.
  */
 const routes = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
 const CATEGORY_PAGES = new Set(['all', 'getting-started', 'when-its-difficult',
@@ -100,17 +114,16 @@ const articles = routes.rewrites
   .map((x) => x.slice('/practice/'.length))
   .filter((slug) => !CATEGORY_PAGES.has(slug));
 
-const known = new Set([...IN_PRACTICE.map((a) => a.slug), ...PENDING_EXCERPT]);
+const known = new Set(IN_PRACTICE.map((a) => a.slug));
 for (const slug of articles) {
   if (known.has(slug)) continue;
   problems.push(
-    `/practice/${slug} is routed on the site and is in neither IN_PRACTICE nor\n`
-    + '      PENDING_EXCERPT in api/_in-practice.js, so the app will never show it\n'
-    + '      and nothing says that on purpose. Add it to one of the two.');
+    `/practice/${slug} is routed on the site and is not in IN_PRACTICE, so the app\n`
+    + '      will never show it and nothing says that on purpose.');
 }
-for (const slug of PENDING_EXCERPT) {
-  if (articles.includes(slug)) continue;
-  problems.push(`PENDING_EXCERPT names ${slug}, which the site does not route.`);
+for (const a of IN_PRACTICE) {
+  if (articles.includes(a.slug)) continue;
+  problems.push(`IN_PRACTICE lists ${a.slug}, which the site does not route.`);
 }
 
 if (problems.length) {
@@ -124,5 +137,5 @@ if (problems.length) {
 
 console.log(
   `[check-in-practice] ${articles.length} articles on the site; `
-  + `${IN_PRACTICE.length} in the app and identical on the page and in the module, `
-  + `${PENDING_EXCERPT.length} waiting on an excerpt.`);
+  + `all ${IN_PRACTICE.length} in the app, `
+  + `${IN_PRACTICE.filter((a) => a.excerpt).length} of them with an excerpt.`);

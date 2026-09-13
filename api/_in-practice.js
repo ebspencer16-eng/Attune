@@ -8,8 +8,9 @@
  * routed in vercel.json and indexed by hand in public/practice.html and
  * public/practice/all.html.
  *
- * Twelve exist. Six are here. See PENDING_EXCERPT below for the other six and
- * what they are waiting on.
+ * All twelve are here. Six carry an excerpt, from the card each has on
+ * practice.html. The other six do not, because a card is the only place an
+ * excerpt was ever written and Ellie has said one is not needed.
  *
  * So the app was not missing a feature. It was reading a different source from
  * the one the content lives in.
@@ -43,6 +44,11 @@ const SHELF = {
   conflict: POST_CATEGORIES[1],
   understanding: POST_CATEGORIES[2],
   methodology: POST_CATEGORIES[3],
+  // A fifth name on the website for the fourth shelf here. practice.html files
+  // /practice/couple-types under Methodology in its own nav, and three
+  // articles carry cat:'couple-types' in all.html. Without this they fall back
+  // to Getting Started, which is the wrong shelf and a silent one.
+  'couple-types': POST_CATEGORIES[3],
 };
 
 /** The canonical shelf for an article, for the app's filter row. */
@@ -50,42 +56,28 @@ export function shelfFor(a) {
   return SHELF[a.category] || POST_CATEGORIES[0];
 }
 
-/**
- * The six pieces on the website that the app's shelf does not carry, and why.
- *
- * Twelve articles exist. public/practice/all.html indexes all twelve and
- * vercel.json routes all twelve. IN_PRACTICE below carries six, because six is
- * how many have a card on public/practice.html, and a card is the only place
- * an excerpt was ever written.
- *
- * So the gap is one sentence per piece, in Ellie's voice, of the kind already
- * below: what the piece is about, in the tone of the article. Nothing else is
- * missing; the titles, categories and read times are on all.html already.
- *
- * Listing them here rather than leaving them absent is the point. An article
- * that is neither here nor in IN_PRACTICE fails check-in-practice.mjs, so a
- * thirteenth piece cannot be added and quietly reach only half the product,
- * which is exactly what happened to these six.
- *
- * Ellie writes all customer-facing copy, so these stay listed until she writes
- * the six lines. The build does not fail for a copy gap.
- */
-export const PENDING_EXCERPT = [
-  'how-to-use-your-results',
-  'why-couples-fight-about-the-same-things',
-  'what-your-communication-style-reveals',
-  'what-your-couple-type-tells-you',
-  'for-the-bridge-the-conversation-you-need',
-  'why-naming-the-pattern-changes-everything',
-];
-
 export const IN_PRACTICE = [
   {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "getting-started", "categoryLabel": "Getting Started", "title": "How to review your results together", "excerpt": "Some couples open their results immediately; others wait for a quiet moment. Either approach works. What matters is how you do it.", "readMinutes": 6},
   {"slug": "how-to-start-a-hard-conversation", "path": "/practice/how-to-start-a-hard-conversation", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "How to start a hard conversation", "excerpt": "When you find a gap in your results that feels significant, here's a structure that opens things up rather than putting either person on the defensive.", "readMinutes": 7},
   {"slug": "conflict-vs-repair", "path": "/practice/conflict-vs-repair", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "The difference between conflict and repair", "excerpt": "Two people can have compatible conflict styles and completely incompatible repair needs. Most couples have never distinguished these.", "readMinutes": 5},
   {"slug": "when-a-conversation-turns-heated", "path": "/practice/when-a-conversation-turns-heated", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "When a conversation turns heated", "excerpt": "Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.", "readMinutes": 5},
   {"slug": "staying-current-with-each-other", "path": "/practice/staying-current-with-each-other", "category": "getting-started", "categoryLabel": "Getting Started", "title": "Staying current with each other over time", "excerpt": "People change. What you need, value, and envision shifts. The couples who stay genuinely close over decades check in.", "readMinutes": 5},
-  {"slug": "five-books-that-change-how-couples-think", "path": "/practice/five-books-that-change-how-couples-think", "category": "understanding", "categoryLabel": "Understanding", "title": "Five books that change how couples think", "excerpt": "Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other, curated because they earn their place.", "readMinutes": 4}
+  {"slug": "five-books-that-change-how-couples-think", "path": "/practice/five-books-that-change-how-couples-think", "category": "understanding", "categoryLabel": "Understanding", "title": "Five books that change how couples think", "excerpt": "Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other, curated because they earn their place.", "readMinutes": 4},
+
+  // The six the website has and the app did not. Added without an excerpt:
+  // Ellie, 12 Sep, "we need the 12 articles written as placeholders ... but we
+  // don't need excerpts". The app renders the subtitle only when there is one.
+  //
+  // categoryLabel is what all.html says. category is what it files them
+  // under, and shelfFor uses that, so why-couples-fight lands on "When It's
+  // Difficult" rather than the "Getting Started" its label claims. That
+  // mismatch is on the website, not here, and is worth a look.
+  {"slug": "how-to-use-your-results", "path": "/practice/how-to-use-your-results", "category": "getting-started", "categoryLabel": "Getting Started", "title": "How to use your results", "readMinutes": 8},
+  {"slug": "why-couples-fight-about-the-same-things", "path": "/practice/why-couples-fight-about-the-same-things", "category": "conflict", "categoryLabel": "Getting Started", "title": "Why couples fight about the same things", "readMinutes": 6},
+  {"slug": "what-your-communication-style-reveals", "path": "/practice/what-your-communication-style-reveals", "category": "understanding", "categoryLabel": "Understanding Each Other", "title": "What your communication style reveals", "readMinutes": 7},
+  {"slug": "what-your-couple-type-tells-you", "path": "/practice/what-your-couple-type-tells-you", "category": "couple-types", "categoryLabel": "Couple Types", "title": "What your couple type tells you", "readMinutes": 6},
+  {"slug": "for-the-bridge-the-conversation-you-need", "path": "/practice/for-the-bridge-the-conversation-you-need", "category": "couple-types", "categoryLabel": "Couple Types", "title": "For the Bridge: the conversation you need", "readMinutes": 5},
+  {"slug": "why-naming-the-pattern-changes-everything", "path": "/practice/why-naming-the-pattern-changes-everything", "category": "couple-types", "categoryLabel": "Couple Types", "title": "Why naming the pattern changes everything", "readMinutes": 4}
 ];
 
 /** Newest first is the order practice.html lists them in. */

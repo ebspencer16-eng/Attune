@@ -6,24 +6,37 @@ dimensions + expectations + Parts 2-5) as a single HTML file.
 Designed to mirror the page structure of api/generate-workbook.js so
 the design can be ported back to the real generator once approved.
 
-NOT A SOURCE OF TRUTH, FOR ANYTHING
+WHAT THIS IS, CORRECTED
+-----------------------
+An earlier version of this header said this file was not a source of truth for
+anything, and that nothing a customer sees comes from it. Both were wrong, and
+I wrote them.
+
+This file is the renderer behind the PDF workbook service. Dockerfile.workbook
+builds it into a container with scripts/service.mjs, and
+api/store-workbook-pdf.js posts to that service at WORKBOOK_SERVICE_URL. Where
+that variable is set, the workbook a customer receives as a PDF is rendered
+from the prose below.
+
+The mistake came from a scan. 141 of the 197 prose strings in here appear
+nowhere in api/, src/, the app or public/, and that was reported as "appears
+nowhere in the product". The scan did not include this file's own output, and
+this file is a product surface. A single-file scan is a lead, not a
+conclusion, which is a sentence this repo has now had to write twice.
+
+THE REAL PROBLEM, WHICH IS NOT THAT
 -----------------------------------
-Nothing a customer sees comes from this file. The workbook they receive is
-built by api/generate-workbook.js from api/_workbook-content.js. This is a
-design sample, and it holds its own copy of a lot of prose.
+There are two workbook generators. api/generate-workbook.js builds the .docx
+from api/_workbook-content.js, and this builds the PDF from its own copy. The
+prose that exists in both is the classic failure of this codebase: one rule in
+two places, with nothing checking that they agree.
 
-Of 197 prose strings in here, 141 appear nowhere in the product: measured by
-parsing this file with ast and substring-matching every string constant
-against api/, src/, the app and public/. Some of that is sample text for Maya
-and David and always was. Some is workbook copy that was written, looks
-finished, and has never shipped, and nobody can tell which from in here.
+They do agree today. All twenty EXP_DOMAINS strings here are word for word the
+same as the JS, and check-workbook-prose.mjs keeps it that way.
 
-PHASE_5b_HANDOFF.md used to name EXP_DOMAINS below as the source of truth for
-the expectations prose. It is not, and has not been since the port; all twenty
-of those strings are in api/_workbook-content.js and agree with it word for
-word. That line has been corrected.
-
-So: edit the JS. If you edit prose here, expect it to reach nobody.
+PHASE_5b_HANDOFF.md used to name EXP_DOMAINS below as canonical for the
+expectations prose. api/_workbook-content.js is, and the JS is the one to
+edit; this file should be changed to match, not the other way round.
 
 Two modes:
 
