@@ -7,7 +7,52 @@ import App from './App.jsx'
 // Initialize only in production builds so dev errors don't pollute issue
 // tracker and rate-limit the free tier. DSN is passed via Vite env var so
 // it can be rotated without a code change.
-if (import.meta.env.PROD) {
+/**
+ * Start error reporting only where it is allowed.
+ *
+ * Sentry is the one thing on this site that is not strictly necessary: it
+ * reports errors and records a replay when one fires, and a replay can contain
+ * what somebody typed into an exercise. Where consent is required, a Decline
+ * has to stop it, or the banner is theatre. Where it is not required, this
+ * behaves exactly as it did before.
+ *
+ * Which applies comes from /api/region, the same endpoint public/_flags.js
+ * asks, cached for the tab so this is one request rather than one per page.
+ * An unanswerable region is treated as consent-required, matching the rule in
+ * api/_lib/consent-region.js.
+ *
+ * The cost is that Sentry starts a few hundred milliseconds into the page, so
+ * an error thrown in that window is not reported. That is the price of not
+ * sending an EU visitor's replay before they have been asked.
+ */
+async function _consentAllowsErrorReporting() {
+  let answer = null;
+  try { answer = localStorage.getItem('attune_consent'); } catch { /* blocked */ }
+  if (answer === 'granted') return true;
+  if (answer === 'declined') return false;
+
+  let required = true;
+  try {
+    const cached = sessionStorage.getItem('attune_region_consent_required');
+    if (cached === '0' || cached === '1') {
+      required = cached === '1';
+    } else {
+      const res = await fetch('/api/region', { headers: { Accept: 'application/json' } });
+      required = res.ok ? !!(await res.json()).consentRequired : true;
+      try { sessionStorage.setItem('attune_region_consent_required', required ? '1' : '0'); } catch { /* blocked */ }
+    }
+  } catch { required = true; }
+
+  // Required and unanswered means not yet. "Upon first visit" is before the
+  // first answer, not after it.
+  return !required;
+}
+
+// Not top-level await: the build targets browsers that do not have it, and
+// vite refuses. The init runs when the answer arrives instead, which is what
+// it would have done anyway.
+if (import.meta.env.PROD) _consentAllowsErrorReporting().then((allowed) => {
+  if (!allowed) return;
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: 'production',
@@ -53,7 +98,7 @@ if (import.meta.env.PROD) {
       /Failed to fetch/,
     ],
   });
-}
+});
 
 // Record React render crashes to the same local log the index.html handler
 // uses, so they're diagnosable even before Sentry's DSN is configured. The

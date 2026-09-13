@@ -62,27 +62,44 @@ window.ATTUNE_FLAGS = {
 })();
 
 
-/* ── Privacy notice ─────────────────────────────────────────────────────────
+/* ── Privacy notice, and a consent gate where one is required ───────────────
  * A slim bar at the bottom of every static page, shown once.
  *
- * Notice, not a gate. US state privacy law is opt-out: consent is not required
- * before storing what the site already stores, so a wall that blocks the page
- * until someone clicks Accept would be asking permission we do not need and
- * cannot honour a refusal of. It also trains people to click Accept without
- * reading, which is worse for them than no banner.
+ * TWO JURISDICTIONS, TWO ANSWERS
  *
- * So this says what happens and points at the controls. It does not have an
- * Accept button, because there is nothing to accept.
+ * In the US this is notice, not a gate. State privacy law is opt-out: consent
+ * is not required before storing what the site already stores, so a wall that
+ * blocks the page until someone clicks Accept would be asking permission we do
+ * not need and cannot honour a refusal of. It also trains people to click
+ * Accept without reading, which is worse for them than no banner.
  *
- * It is careful about what it claims. This site sets no cookies and runs no
- * analytics or advertising trackers, so the banner says local storage rather
- * than borrowing cookie-banner language for something that is not a cookie.
+ * In the EU, the UK, the EEA and Switzerland it is a real choice, with Accept
+ * and Decline, because the privacy policy promises one: "If you are accessing
+ * the Service from the European Union or United Kingdom, a consent banner will
+ * be presented to you upon first visit." For a long time the notice above was
+ * the whole of that promise and it had no Accept button.
  *
- * Dismissal is remembered the same way the app banner above remembers it: a
- * notice that returns on every visit is the thing people resent about these.
+ * WHICH ONE IS DECIDED BY /api/region, which reads Vercel's country header. A
+ * country we cannot determine is treated as needing consent: unknown is not
+ * the same as the US. api/_lib/consent-region.js holds the list and the rule.
+ *
+ * WHAT A DECLINE ACTUALLY STOPS
+ *
+ * This site sets no cookies and runs no advertising or analytics trackers, so
+ * the banner says local storage rather than borrowing cookie language for
+ * something that is not a cookie. The one thing that is not strictly necessary
+ * is Sentry, which reports errors and records a replay when one fires, and a
+ * replay can contain what someone typed. src/main.jsx reads the answer stored
+ * here and does not start Sentry when consent is required and not given. A
+ * banner whose Decline changes nothing is worse than no banner.
+ *
+ * The answer is remembered, the same way the app banner above remembers its
+ * dismissal: a question that returns on every visit is the thing people resent
+ * about these.
  */
 (function () {
   var KEY = 'attune_privacy_notice_dismissed';
+  var CONSENT_KEY = 'attune_consent';   // 'granted' | 'declined', EU/UK only
   try {
     if (localStorage.getItem(KEY) === '1') return;
   } catch (e) { return; }   // storage blocked: no banner rather than every load
@@ -93,6 +110,19 @@ window.ATTUNE_FLAGS = {
     var here = (location.pathname || '').replace(/\/$/, '');
     if (here === '/privacy' || here === '/privacy-choices' || here === '/terms') return;
 
+    // Ask which rule applies before drawing anything. A failed request is
+    // treated as consent-required, for the same reason an unknown country is.
+    fetch('/api/region', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : { consentRequired: true }; })
+      .catch(function () { return { consentRequired: true }; })
+      .then(function (region) { draw(!!region.consentRequired); });
+  });
+
+  function draw(needsConsent) {
+    if (needsConsent) {
+      try { if (localStorage.getItem(CONSENT_KEY)) return; } catch (e) { return; }
+    }
+
     var bar = document.createElement('div');
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', 'Privacy notice');
@@ -100,22 +130,41 @@ window.ATTUNE_FLAGS = {
       + 'align-items:center;gap:.9rem;padding:.85rem 1.1rem;background:#1E1610;color:rgba(255,255,255,.82);'
       + 'font-family:"DM Sans",system-ui,sans-serif;font-size:.8rem;line-height:1.5;'
       + 'box-shadow:0 -2px 20px rgba(14,11,7,.18)';
-    bar.innerHTML =
-      '<span style="flex:1;min-width:0">Attune stores a little data in your browser to keep the site working. '
-      + 'We set no cookies and run no advertising or analytics trackers. '
-      + '<a href="/privacy" style="color:#E8A87A;text-decoration:underline">Privacy</a>'
-      + ' &middot; '
-      + '<a href="/privacy-choices" style="color:#E8A87A;text-decoration:underline">Your privacy choices</a>'
-      + '</span>'
-      + '<button type="button" style="flex-shrink:0;background:#E8673A;color:#fff;border:none;'
-      + 'border-radius:8px;padding:.45rem .9rem;font-weight:700;font-size:.78rem;cursor:pointer;'
-      + 'font-family:inherit">Got it</button>';
+    var btn = function (label, bg, color) {
+      return '<button type="button" data-a="' + label + '" style="flex-shrink:0;background:' + bg
+        + ';color:' + color + ';border:' + (bg === 'transparent' ? '1px solid rgba(255,255,255,.35)' : 'none')
+        + ';border-radius:8px;padding:.45rem .9rem;font-weight:700;font-size:.78rem;cursor:pointer;'
+        + 'font-family:inherit">' + label + '</button>';
+    };
 
-    bar.querySelector('button').addEventListener('click', function () {
-      try { localStorage.setItem(KEY, '1'); } catch (e) {}
-      bar.remove();
+    var links = '<a href="/privacy" style="color:#E8A87A;text-decoration:underline">Privacy</a>'
+      + ' &middot; '
+      + '<a href="/privacy-choices" style="color:#E8A87A;text-decoration:underline">Your privacy choices</a>';
+
+    bar.innerHTML = needsConsent
+      ? '<span style="flex:1;min-width:0">Attune stores a little data in your browser to keep the site working. '
+        + 'We set no cookies and run no advertising or analytics trackers. With your consent we also report '
+        + 'errors to help us fix them, which can include what was on screen when one happened. '
+        + links + '</span>'
+        + btn('Decline', 'transparent', '#fff')
+        + btn('Accept', '#E8673A', '#fff')
+      : '<span style="flex:1;min-width:0">Attune stores a little data in your browser to keep the site working. '
+        + 'We set no cookies and run no advertising or analytics trackers. '
+        + links + '</span>'
+        + btn('Got it', '#E8673A', '#fff');
+
+    [].forEach.call(bar.querySelectorAll('button'), function (b) {
+      b.addEventListener('click', function () {
+        try {
+          localStorage.setItem(KEY, '1');
+          if (needsConsent) {
+            localStorage.setItem(CONSENT_KEY, b.getAttribute('data-a') === 'Accept' ? 'granted' : 'declined');
+          }
+        } catch (e) {}
+        bar.remove();
+      });
     });
 
     document.body.appendChild(bar);
-  });
+  }
 })();

@@ -298,6 +298,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/api/region",
+      "destination": "/api/region.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     },

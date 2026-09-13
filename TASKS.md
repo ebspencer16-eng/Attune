@@ -30,7 +30,6 @@ payment-records paragraph, G3c make the banner geo-aware.
 
 | # | Task |
 |--|--|
-| O13 | **Make the privacy notice geo-aware**: a real consent gate for EU and UK visitors, the US notice everywhere else. Needs geolocation, a stored preference, and something that honours a refusal. |
 | O14 | **Analytics: an Engagement tab**, between Explore and Demographics. Site visits, app downloads, completion funnel, average time per marketing page, per exercise and per dashboard page, In Practice hit rates, average notes per results page and per article, and most-used tags including custom ones. |
 | O15 | **Analytics page is broken**: data missing from most visuals. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
@@ -395,6 +394,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | The EU/UK consent banner was a US notice with no Accept | `check-consent-gate.mjs`, 3 plants; a decline now stops Sentry |
 | — | Deleting an account asked for no password | `check-delete-reauth.mjs`, 3 plants |
 | — | Deletion told neither the person nor their partner | `check-deletion-notices.mjs`, 3 plants |
 | — | Nothing recorded a consent event | `check-consent-record.mjs`, 2 plants. **Needs migration 058 run.** |
