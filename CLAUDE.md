@@ -100,6 +100,10 @@ Existing single sources of truth:
 | What each package includes | `PKG_CAPS` in `api/_lib/entitlements.js` → generates `public/_pkg-rules.js` |
 | Alignment threshold | `ALIGNMENT_THRESHOLD` in `api/_lib/results.js` |
 | Dimensions, weights, scoring | `api/_type-engine.js` |
+| Launch flags: app live, store URL, physical | `api/_lib/flags.js` → generates `public/_flags.js` |
+| Where the site lives | `SITE_URL` in `api/_lib/site.js`; the app's own copy is `SITE_URL` in `attune-app/src/api/client.ts` |
+| Which views the website can draw | `RENDERABLE_VIEWS` in `src/App.jsx` |
+| The unsubscribe link | `api/_lib/email-footer.js` |
 
 ---
 
@@ -108,11 +112,15 @@ Existing single sources of truth:
 `npm run check` runs all of them, and `npm run build` runs them before
 building. They exist because each one caught a real bug that shipped.
 
-`npm run smoke` builds, serves, and renders every results section in whatever
-Chrome is installed. It reports 25 of 25. It was never 26: the old hardcoded
-list asked for `exp-convo-5`, and there have only ever been five expectations
-categories, so the conversations are 0 to 4. The list derives from
-`RESULTS_SECTIONS` now and cannot drift again.
+`npm run smoke` builds, serves, and then does three things in whatever Chrome
+is installed: renders every results section and every view of the app (30 and
+13), renders all 40 static pages including checkout, and drives every exercise
+to its completion screen. It takes several minutes, which is why it is not part
+of `npm run check`.
+
+The section list derives from `RESULTS_SECTIONS`. It was once a hardcoded list
+asking for `exp-convo-5`, and there have only ever been five expectations
+categories, so the conversations are 0 to 4.
 
 **A gate that passes for the wrong reason is worse than no gate.** When you add
 one, verify it by planting the bug it is meant to catch and watching it fail.
@@ -241,6 +249,27 @@ Ask, of every field you add to results: does this reach a couple whose row was
 written last year? If it is derived from something already in the row, put it
 in `withContent`. If it genuinely cannot be derived, it needs a migration, and
 that is a different and larger decision.
+
+**A 500 is not a rejection, and a probe tells them apart.** Vercel's two
+runtimes take different handlers: edge receives `(req)` and returns a
+`Response`, Node receives `(req, res)` and writes to `res`. Mix them and the
+function answers FUNCTION_INVOCATION_FAILED before any line in the file runs.
+
+`api/admin-posts.js` shipped declaring `nodejs` and returning a Response, so
+publishing an In Practice post from the admin has never once worked.
+`api/admin-presets.js` declared no runtime, which means the same thing, and its
+commit message promised it would "degrade gracefully" until its migration ran.
+It degraded to a 500.
+
+Neither was visible in the code, both were visible in one pass of curl over
+every admin endpoint expecting 401s. Ten gave one and two gave 500. The same
+afternoon, curl also showed that `/app` signed out returns four kilobytes of
+markup with no readable text in it, and that three retired URLs answer 200 with
+a blank shell. Reading found none of those.
+
+`check-runtime-shape.mjs` covers the runtime half of it now. The habit is the
+part worth keeping: when a surface is deployed, sweep it from outside before
+reasoning about it from inside.
 
 **A gate encodes a rule, not the current state.** Write it so the reason
 survives: name the promise, and say what it deliberately does not cover.
@@ -371,6 +400,13 @@ the same budgets and any difference fails the build.
 Not built: Highlights beyond the storycards, notifications, tab-bar badges, and
 Notes filtering by source, author, or highlight versus commentary. The tag list
 has its own sort, which is what was asked for.
+
+Also not built, and worth knowing because the server already offers them: the
+app has `fetchNotifications` and `markNotificationRead` in its client and no
+screen that calls either, so four server modules write notification rows nobody
+reads. And two Home cards, "Finish setting up your profile" and "How is Attune
+working for you?", still open the browser, because Settings cannot edit a name
+or pronouns yet.
 
 ---
 
