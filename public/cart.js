@@ -91,6 +91,7 @@ function _newItemId() { return 'i' + Date.now().toString(36) + Math.random().toS
 
 function _defaultAddons() {
   return { workbook:false, workbookVariant:'digital', conflict:false, reflection:false, budget:false, checklist:false, intimacy:false };
+}
 
 // A printed workbook is a shipped item. When physical is off, any stored
 // 'print' variant is treated as digital so nobody is charged $39 for
@@ -99,7 +100,6 @@ function wbVariant(item) {
   var v = (item && item.addons && item.addons.workbookVariant) || 'digital';
   var physical = !!(window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.PHYSICAL_ENABLED);
   return physical ? v : 'digital';
-}
 }
 
 function _itemPrice(item) {

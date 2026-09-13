@@ -77,7 +77,7 @@ export default async function handler(req) {
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
     subject: `Attune Order Confirmation`,
-    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget }),
+    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonConflict }),
   });
 
   // ── 2. "Set up your account" to buyer (digital, for-self) ──────────────────
@@ -148,7 +148,7 @@ export default async function handler(req) {
 // _esc and brandedEmail moved to api/_lib/branded-email.js, imported above.
 // Deletion has two emails to send and they should look like the rest.
 
-function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget }) {
+function orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonConflict }) {
   const deliveryLine = isPhysical
     ? 'Your gift box will arrive within 3–5 business days. Setup instructions are inside.'
     : isGift

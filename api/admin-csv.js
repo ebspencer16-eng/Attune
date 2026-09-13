@@ -140,7 +140,7 @@ async function buildCombinedData(admin) {
     { data: workbooks = [] },
     { data: orders = [] },
   ] = await Promise.all([
-    admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, gender, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed'),
+    admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, gender, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type'),
     admin.from('workbooks').select('user_id, storage_path'),
     admin.from('orders').select('*'),
   ]);
@@ -285,11 +285,11 @@ async function buildCombinedData(admin) {
       ex2b.childhoodStructure || '',
       aAxes.typeCode || '',
       bAxes.typeCode || '',
-      s?.couple_type?.id || '',
+      p.couple_type?.id || '',
 
-      s?.ex1_answers ? 'Y' : 'N',  ps?.ex1_answers ? 'Y' : 'N',
-      s?.ex2_answers ? 'Y' : 'N',  ps?.ex2_answers ? 'Y' : 'N',
-      s?.ex3_answers ? 'Y' : 'N',  ps?.ex3_answers ? 'Y' : 'N',
+      p.ex1_answers ? 'Y' : 'N',  ps?.ex1_answers ? 'Y' : 'N',
+      p.ex2_answers ? 'Y' : 'N',  ps?.ex2_answers ? 'Y' : 'N',
+      p.ex3_answers ? 'Y' : 'N',  ps?.ex3_answers ? 'Y' : 'N',
       budgetComplete ? 'Y' : 'N',
       w ? 'Y' : 'N',
       (o?.is_physical && o?.card_status === 'shipped') ? 'Y' : 'N',
