@@ -46,7 +46,11 @@ const problems = [];
 // Derived from the source, so one added tomorrow is covered tomorrow.
 const UNAVAILABLE = [...new Set([
   ...[...api.matchAll(/^\s*(\w+):\s*unavailable\(/gm)].map((m) => m[1]),
-  ...[...api.matchAll(/^\s*(\w+):\s*notYet,/gm)].map((m) => m[1]),
+  // `x: measured ? real : notYet` and `x: notYet,` are the same statement about
+  // the same measure. The first shape appeared when the page grew charts that
+  // are live once there is data and unavailable before it, and matching only
+  // the second found one measure where there are six.
+  ...[...api.matchAll(/^\s*(\w+):\s*(?:measured\s*\?[\s\S]*?:\s*)?notYet[,\n]/gm)].map((m) => m[1]),
 ])];
 
 if (UNAVAILABLE.length < 3) {
@@ -78,7 +82,14 @@ const missingBlock = (() => {
   if (at < 0) return null;
   return html.slice(at, html.indexOf('].filter', at) + 1 || html.indexOf('];', at));
 })();
-const tiles = [...html.matchAll(/drawTimeTile\([^;]*?d\.(\w+)/g)].map((m) => m[1]);
+const tiles = [
+  ...[...html.matchAll(/drawTimeTile\([^;]*?d\.(?:timePerPage\.)?(\w+)/g)].map((m) => m[1]),
+  // The headline tiles and the time charts read them off nested objects now,
+  // so the names appear as `d.headlines.siteVisits` and `t.exercises`.
+  ...[...html.matchAll(/d\.headlines\.(\w+)/g)].map((m) => m[1]),
+  ...[...html.matchAll(/\bt\.(\w+)/g)].map((m) => m[1]),
+  ...[...html.matchAll(/\bd\.(\w+)/g)].map((m) => m[1]),
+];
 
 if (!missingBlock) {
   problems.push('public/admin.html has no MISSING list, so the unmeasured ones reach the page as nothing at all.');
@@ -100,7 +111,10 @@ if (!missingBlock) {
 // way.
 for (const m of html.matchAll(/drawTimeTile\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*([^,]+),/g)) {
   const [, canvas, , measure] = m;
-  if (/^d\.\w+$/.test(measure.trim())) continue;
+  const arg = measure.trim();
+  // A measure, or a variable holding one. `null` is the thing this catches:
+  // a tile wired to nothing always says "not measured", whether or not it is.
+  if (/^(d\.[\w.]+|t\.\w+|measure|detailed|byDetailed\[[\w.]+\]|L\.[\w.]+)$/.test(arg)) continue;
   problems.push(
     `the tile on #${canvas} is passed ${measure.trim()} rather than a measure.\n`
     + '      It will always say "not measured", whether or not it is.');

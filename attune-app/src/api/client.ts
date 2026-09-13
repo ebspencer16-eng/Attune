@@ -1269,7 +1269,9 @@ export async function trackScreenTime(view: string, ms: number): Promise<void> {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ kind: 'page_time', key: `app:${view}`, ms: Math.round(ms) }),
+      // surface tells the Engagement page this came from iOS rather than the
+      // portal, which files the same keys. It says nothing about the person.
+      body: JSON.stringify({ kind: 'page_time', key: `app:${view}`, ms: Math.round(ms), surface: 'app' }),
     });
   } catch { /* a missed measurement is not worth a word to anyone */ }
 }

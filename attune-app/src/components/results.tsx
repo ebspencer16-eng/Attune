@@ -18,6 +18,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { useScreenTime } from '@/hooks/use-screen-time';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import CoupleMap from '@/components/couple-map';
@@ -156,6 +158,11 @@ export default function Results({
   // the process, and it must not be persisted, because a section a couple no
   // longer owns should not be restored on next launch.
   const [sectionId, setSectionId] = useState<string>(lastSection || sections[0]?.id || 'highlights');
+
+  // Time per results section, keyed the way the website keys it so the
+  // Engagement page can draw one against the other. useScreenTime owns the
+  // clock, including stopping it when the app goes to the background.
+  useScreenTime(sectionId ? `results:${sectionId}` : null);
   const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
 
   /**

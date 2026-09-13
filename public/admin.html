@@ -80,6 +80,9 @@
   .empty-state-sub{font-size:.7rem;color:var(--dim);margin-top:.4rem}
 
   /* KPI CARDS */
+  /* A heading between bands of tiles on a long page. The Engagement page has
+     three bands and without these it reads as one undifferentiated wall. */
+  .section-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .85rem}
   .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem;margin-bottom:1.75rem}
   .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.5rem 1.5rem;position:relative;overflow:hidden}
   .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
@@ -630,13 +633,26 @@
        explicit "not measured" rather than as zero: a chart cannot tell those
        apart, and a dashboard that cannot tell them apart is how somebody ends
        up confident about a number nobody produced. -->
+  <!-- ── Engagement ─────────────────────────────────────────────────────────
+       Laid out the way Ellie asked on 13 Sep: headline tiles, the funnel over
+       time beside acquisition, five time-per-page charts to one height, then
+       the learning section as two tables over two charts.
+
+       Every tile carries the admin's own slicer. The cut happens server-side,
+       before anything is counted, so there is one piece of arithmetic rather
+       than one on each side. A slice cannot cut an anonymous visit, and the
+       tiles that depend on those say so rather than dropping to zero without
+       explanation. -->
   <div class="page" id="page-engagement">
     <div class="topbar">
       <div>
         <div class="topbar-title">Engagement</div>
-        <div class="topbar-sub">What people do once they are in. Four measures are live; five need collection that does not exist yet.</div>
+        <div class="topbar-sub">What people do once they are in. Last 30 days against the 30 before, unless a tile says otherwise.</div>
       </div>
-      <button class="btn" onclick="renderEngagementPage(true)">Refresh</button>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <select class="tile-slicer" id="slz-engagement" title="Cut the whole page by a segment"><option value="">Everyone</option></select>
+        <button class="btn" onclick="renderEngagementPage(true)">Refresh</button>
+      </div>
     </div>
 
     <div class="data-notice">
@@ -644,47 +660,86 @@
       <p id="eng-notice">Loading.</p>
     </div>
 
+    <!-- Headline tiles -->
+    <div class="kpi-grid" id="eng-headlines"></div>
+
+    <!-- Funnel over time, and acquisition beside it -->
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">n=&mdash;</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">&mdash;</div></div></div>
         <div class="chart-body"><canvas id="chart-eng-funnel"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Most-used tags</div><div class="chart-subtitle" id="eng-tags-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-tags"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Visits and downloads</div><div class="chart-subtitle" id="eng-acq-n">&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-acq"></canvas></div>
       </div>
     </div>
 
-    <div class="chart-grid two">
+    <!-- Time per page: three, then two -->
+    <div class="section-label">Time per page</div>
+    <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Notes per results section</div><div class="chart-subtitle" id="eng-notes-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-notes"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Marketing pages</div><div class="chart-subtitle" id="eng-mk-n">&mdash;</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-mk"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-reads-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-reads"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">app against site</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-ex"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">app against site</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-res"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-grid two">
+      <div class="chart-card">
+        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">app against site</div></div></div>
+        <div class="chart-body"><canvas id="chart-eng-rs"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">Detailed results pages</div><div class="chart-subtitle" id="eng-det-n">&mdash;</div></div>
+          <select class="tile-slicer" id="eng-det-pick" title="Which section"></select>
+        </div>
+        <div class="chart-body"><canvas id="chart-eng-det"></canvas></div>
       </div>
     </div>
 
+    <!-- Learning: two tables, then two charts -->
+    <div class="section-label">Learning</div>
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Site visits</div><div class="chart-subtitle" id="eng-visits-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-visits"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-art-n">&mdash;</div></div></div>
+        <div id="eng-articles"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Time per page, marketing site</div><div class="chart-subtitle" id="eng-mktime-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-mktime"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Tags</div><div class="chart-subtitle" id="eng-tag-n">&mdash;</div></div></div>
+        <div id="eng-tags"></div>
       </div>
     </div>
-
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Time per exercise</div><div class="chart-subtitle" id="eng-extime-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-extime"></canvas></div>
+        <div class="chart-head">
+          <div><div class="chart-title">Notes by section</div><div class="chart-subtitle" id="eng-ns-n">&mdash;</div></div>
+          <select class="tile-slicer" id="eng-ns-mode" title="How to count">
+            <option value="total">Total engagement</option>
+            <option value="detail">Detailed engagement</option>
+          </select>
+        </div>
+        <div class="chart-body"><canvas id="chart-eng-ns"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Time per page, dashboard</div><div class="chart-subtitle" id="eng-dashtime-n">n=&mdash;</div></div></div>
-        <div class="chart-body"><canvas id="chart-eng-dashtime"></canvas></div>
+        <div class="chart-head">
+          <div><div class="chart-title">Notes by page</div><div class="chart-subtitle" id="eng-nd-n">&mdash;</div></div>
+          <div style="display:flex;gap:.4rem">
+            <select class="tile-slicer" id="eng-nd-mode" title="How to count">
+              <option value="total">Total engagement</option>
+              <option value="detail">Detailed engagement</option>
+            </select>
+            <select class="tile-slicer" id="eng-nd-pick" title="Which section"></select>
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="chart-eng-nd"></canvas></div>
       </div>
     </div>
 
@@ -1934,17 +1989,23 @@ async function adminAction(payload) {
 
 // ── ENGAGEMENT PAGE ───────────────────────────────────────────────────────────
 //
-// Four measures from /api/admin-engagement, and a list of the five that are
-// not collected. The five are printed as sentences rather than drawn as empty
-// charts: an empty chart and a chart of zeros look the same, and this page
-// exists to tell the truth about what is known.
+// Laid out as Ellie asked on 13 Sep. Everything is computed by
+// /api/admin-engagement: this file draws, and never counts. A page that counts
+// as well as the server is two implementations of one number, which is the
+// failure this codebase keeps having.
+//
+// The slicer cuts server-side, so changing it re-fetches rather than filtering
+// what is already drawn.
 let __engCache = null;
+let __engSlice = '';
+
 async function renderEngagementPage(force) {
   const notice = document.getElementById('eng-notice');
+  const url = '/api/admin-engagement' + (__engSlice ? ('?slice=' + encodeURIComponent(__engSlice)) : '');
   if (!__engCache || force) {
     if (notice) notice.textContent = 'Loading.';
     try {
-      const res = await fetch('/api/admin-engagement', { headers: window.adminAuthHeaders() });
+      const res = await fetch(url, { headers: window.adminAuthHeaders() });
       const j = await res.json();
       __engCache = j && j.ok ? j : null;
       if (!__engCache && notice) notice.textContent = (j && j.error) ? ('Could not load: ' + j.error) : 'Could not load.';
@@ -1957,125 +2018,279 @@ async function renderEngagementPage(force) {
   if (!d) return;
 
   if (notice) {
-    notice.textContent = 'Computed from what the product stores, at '
-      + new Date(d.generatedAt).toLocaleString()
-      + '. Four measures are live. The five below the charts are not collected, and each says what it would take.';
+    notice.textContent = 'Computed at ' + new Date(d.generatedAt).toLocaleString()
+      + (d.slice ? (' · cut to ' + d.slice.value + ', ' + d.slice.people + ' people. Anonymous visits are left out of a cut, because nothing attributes them to anybody.') : '')
+      + ' · the tiles at the bottom are not collected yet and say what each would take.';
   }
 
-  // ── Funnel ──────────────────────────────────────────────────────────────
-  const f = d.funnel || [];
-  setTileText('eng-funnel-n', f.length ? ('n=' + f[0].n + ' people') : 'n=0');
+  wireEngagementSlicer();
+  drawHeadlines(d);
+  drawFunnel(d);
+  drawAcquisition(d);
+  drawTimePerPage(d);
+  drawLearning(d);
+  drawMissing(d);
+}
+
+/** The admin's own slicer, populated from the same cube as every other tile. */
+async function wireEngagementSlicer() {
+  const sel = document.getElementById('slz-engagement');
+  if (!sel || sel.dataset.wired) return;
+  sel.dataset.wired = '1';
+  try {
+    const cube = await ensureCube();
+    populateSlicer(sel, null, cube.rows || []);
+  } catch (e) { /* no cube: the slicer stays as Everyone, which is honest */ }
+  sel.onchange = () => {
+    __engSlice = sel.value;
+    sel.classList.toggle('on', !!sel.value);
+    renderEngagementPage(true);
+  };
+}
+
+/** One headline tile: a number, and how it compares with the 30 days before. */
+function drawHeadlines(d) {
+  const host = document.getElementById('eng-headlines');
+  if (!host) return;
+  const TILES = [
+    ['Site visits', d.headlines.siteVisits, 'green'],
+    ['App downloads', d.headlines.appDownloads, 'indigo'],
+    ['Read an article', d.headlines.articleReaders, 'amber'],
+    ['Marked something up', d.headlines.annotators, 'rose'],
+  ];
+  host.innerHTML = TILES.map(function (t) {
+    const label = t[0], m = t[1] || {}, tone = t[2];
+    if (m.available === false) {
+      return '<div class="kpi-card ' + tone + '">'
+        + '<div class="kpi-label">' + label + '</div>'
+        + '<div class="kpi-val" style="font-size:1rem;color:var(--dim)">Not measured</div>'
+        + '<div class="kpi-sub">' + QX_ESC(m.needs || '') + '</div></div>';
+    }
+    const change = m.change == null
+      ? '<span style="color:var(--dim)">no earlier period to compare</span>'
+      : (m.change >= 0
+        ? '<span style="color:var(--green)">+' + m.change + '% on the previous 30 days</span>'
+        : '<span style="color:var(--rose)">' + m.change + '% on the previous 30 days</span>');
+    return '<div class="kpi-card ' + tone + '">'
+      + '<div class="kpi-label">' + label + '</div>'
+      + '<div class="kpi-val">' + m.value + '</div>'
+      + '<div class="kpi-sub">' + change + (m.note ? ('<br>' + QX_ESC(m.note)) : '') + '</div></div>';
+  }).join('');
+}
+
+function drawFunnel(d) {
+  const f = d.funnel || {};
+  setTileText('eng-funnel-n', f.available
+    ? 'Over 12 months · sign-ups counted twice, because a sign-up is one half of a couple'
+    : 'No accounts yet.');
+  const COLORS = ['#6C7FFF', '#E8673A', '#34D399', '#FBBF24', '#9B5DE5', '#22A5C4'];
   mkChart(document.getElementById('chart-eng-funnel'), {
-    type: 'bar',
-    data: { labels: f.map(x => x.step), datasets: [{ label: 'People', data: f.map(x => x.n), backgroundColor: '#6C7FFF', borderRadius: 4 }] },
-    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
-  });
-
-  // ── Tags ────────────────────────────────────────────────────────────────
-  //
-  // Standard and custom in one chart, coloured apart, which is what the ask
-  // asked for: "should start with default but include custom tags people add".
-  const tags = (d.tags && d.tags.used || []).slice(0, 15);
-  setTileText('eng-tags-n', 'n=' + (d.tags ? d.tags.total : 0) + ' tags, ' + tags.length + ' of them used'
-    + (d.tags && d.tags.seededUnused ? (' · ' + d.tags.seededUnused + ' never used on a note') : ''));
-  mkChart(document.getElementById('chart-eng-tags'), {
-    type: 'bar',
+    type: 'line',
     data: {
-      labels: tags.map(t => t.name + (t.standard ? '' : ' (custom)')),
-      datasets: [{ label: 'Notes tagged', data: tags.map(t => t.notes),
-        backgroundColor: tags.map(t => t.standard ? '#34D399' : '#E8673A'), borderRadius: 4 }],
+      labels: f.months || [],
+      datasets: (f.series || []).map(function (sr, i) {
+        return {
+          label: sr.step, data: sr.points,
+          borderColor: COLORS[i % COLORS.length], backgroundColor: 'transparent',
+          tension: .35, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
+        };
+      }),
     },
-    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
+      scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
+}
 
-  // ── Notes per section ───────────────────────────────────────────────────
-  const np = d.notesPer || { results: [], articles: [] };
-  setTileText('eng-notes-n', 'n=' + (np.total || 0) + ' notes from ' + (np.people || 0) + ' people'
-    + ' · ' + (np.perPerson || 0) + ' each · ' + (np.shared || 0) + ' shared'
-    + (np.standalone ? (' · ' + np.standalone + ' not anchored to anything') : ''));
-  const rows = (np.results || []).slice(0, 15);
-  mkChart(document.getElementById('chart-eng-notes'), {
-    type: 'bar',
-    data: { labels: rows.map(r => r.key), datasets: [{ label: 'Notes', data: rows.map(r => r.notes), backgroundColor: '#9B5DE5', borderRadius: 4 }] },
-    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+function drawAcquisition(d) {
+  const a = d.acquisition || {};
+  setTileText('eng-acq-n', a.available
+    ? a.note
+    : 'Nothing recorded yet.');
+  const sets = [{
+    label: 'Marketing site visits', data: a.visits || [],
+    borderColor: '#6C7FFF', backgroundColor: 'transparent', tension: .35, borderWidth: 2, pointRadius: 0,
+  }];
+  if (a.downloads) {
+    sets.push({ label: 'App downloads', data: a.downloads, borderColor: '#E8673A', backgroundColor: 'transparent', tension: .35, borderWidth: 2, pointRadius: 0 });
+  }
+  mkChart(document.getElementById('chart-eng-acq'), {
+    type: 'line',
+    data: { labels: a.months || [], datasets: sets },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
+      scales: { y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, x: { grid: { display: false } } } },
   });
+  if (!a.downloads) {
+    const card = document.getElementById('chart-eng-acq').closest('.chart-card');
+    if (card && !card.querySelector('[data-dl-note]')) {
+      const n = document.createElement('div');
+      n.setAttribute('data-dl-note', '1');
+      n.style.cssText = 'font-size:.72rem;color:var(--dim);padding:.3rem 0 .5rem;line-height:1.5';
+      n.textContent = 'Downloads: ' + (a.downloadsNeeds || 'not collected.');
+      card.insertBefore(n, card.querySelector('.chart-body'));
+    }
+  }
+}
 
-  // ── Article reads ───────────────────────────────────────────────────────
-  const ar = d.articleReads || { rows: [] };
-  setTileText('eng-reads-n', 'n=' + (ar.readers || 0) + ' readers of ' + (ar.audience || 0) + ' accounts'
-    + ' · posts in the table only, the twelve website articles record nothing');
-  const arows = (ar.rows || []).slice(0, 15);
-  const artNotes = {};
-  (np.articles || []).forEach(a => { artNotes[a.key] = a.notes; });
-  mkChart(document.getElementById('chart-eng-reads'), {
-    type: 'bar',
-    data: {
-      labels: arows.length ? arows.map(r => r.id) : ['Nothing read yet'],
-      datasets: arows.length ? [
-        { label: 'Reads', data: arows.map(r => r.reads), backgroundColor: '#22A5C4', borderRadius: 4 },
-        { label: 'Notes on it', data: arows.map(r => artNotes[r.id] || 0), backgroundColor: '#FBBF24', borderRadius: 4 },
-      ] : [{ label: 'Reads', data: [0], backgroundColor: '#E6ECF6' }],
-    },
-    options: { indexAxis: 'y', plugins: { legend: { display: arows.length > 0 } }, scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } } },
+/**
+ * The five time charts, to one height.
+ *
+ * Ellie asked for the same max on all of them, so one pass finds the tallest
+ * column across all five and every chart is drawn to it. Without that the eye
+ * reads three seconds on one chart as the same as three minutes on another.
+ */
+function drawTimePerPage(d) {
+  const t = d.timePerPage || {};
+  const detPick = document.getElementById('eng-det-pick');
+  const groups = (d.groups || []).filter(function (g) { return g.pages > 1; });
+  if (detPick && !detPick.dataset.pop) {
+    detPick.innerHTML = groups.map(function (g) { return '<option value="' + g.id + '">' + QX_ESC(g.label) + '</option>'; }).join('');
+    detPick.dataset.pop = '1';
+    detPick.onchange = function () { drawTimePerPage(__engCache); };
+  }
+  const chosen = detPick && detPick.value ? detPick.value : (groups[0] && groups[0].id);
+  const detailed = (t.detailed || {})[chosen];
+
+  const all = [t.marketing, t.exercises, t.resources, t.results, detailed];
+  let max = 0;
+  all.forEach(function (c) {
+    if (!c || c.available === false) return;
+    (c.site || []).concat(c.app || []).forEach(function (v) { if (v > max) max = v; });
   });
+  const ceiling = max > 0 ? Math.ceil(max * 1.1) : undefined;
 
-  // ── The four measured from page_events ──────────────────────────────────
-  //
-  // Each tile draws only when the endpoint says the measure is available.
-  // Where it is not, the tile says why, in the same words the endpoint used,
-  // rather than drawing a chart of nothing.
-  drawTimeTile('chart-eng-visits', 'eng-visits-n', d.siteVisits, 'visits', function (v) {
+  const clustered = function (canvasId, subId, measure, subtitle) {
+    drawTimeTile(canvasId, subId, measure, 'seconds', function (v) {
+      return {
+        subtitle: subtitle + (v.n ? (' · n=' + v.n) : ' · nothing timed yet'),
+        labels: v.labels,
+        data: v.site,
+        second: { label: 'App', data: v.app, colour: '#E8673A' },
+        colour: '#6C7FFF',
+        axis: 'seconds',
+        max: ceiling,
+      };
+    });
+  };
+
+  drawTimeTile('chart-eng-mk', 'eng-mk-n', t.marketing, 'seconds', function (v) {
     return {
-      subtitle: 'n=' + v.total + ' visits since ' + new Date(v.since).toLocaleDateString() + ' · ' + v.note,
-      labels: (v.rows || []).slice(0, 15).map(function (r) { return r.key; }),
-      data: (v.rows || []).slice(0, 15).map(function (r) { return r.visits; }),
-      colour: '#6C7FFF',
-      axis: 'visits',
+      subtitle: 'Mean seconds' + (v.n ? (' · n=' + v.n) : ' · nothing timed yet'),
+      labels: v.labels, data: v.site.map(function (s, i) { return s || v.app[i]; }),
+      colour: '#34D399', axis: 'seconds', max: ceiling,
     };
   });
+  clustered('chart-eng-ex', 'eng-ex-n', t.exercises, 'Site against app');
+  clustered('chart-eng-res', 'eng-res-n', t.resources, 'Site against app');
+  clustered('chart-eng-rs', 'eng-rs-n', t.results, 'Site against app');
+  clustered('chart-eng-det', 'eng-det-n', detailed, 'Site against app');
+}
 
-  [['chart-eng-mktime', 'eng-mktime-n', d.timePerMarketingPage, '#E8673A'],
-   ['chart-eng-extime', 'eng-extime-n', d.timePerExercise, '#9B5DE5'],
-   ['chart-eng-dashtime', 'eng-dashtime-n', d.timePerDashboardPage, '#22A5C4']]
-    .forEach(function (t) {
-      drawTimeTile(t[0], t[1], t[2], 'seconds', function (v) {
-        var rows = (v.rows || []).slice(0, 15);
-        return {
-          subtitle: rows.length
-            ? ('n=' + rows.reduce(function (a, r) { return a + r.n; }, 0) + ' timed visits · bars are the mean, the dot is the median')
-            : 'Nothing timed here yet.',
-          labels: rows.map(function (r) { return r.key; }),
-          data: rows.map(function (r) { return r.seconds; }),
-          median: rows.map(function (r) { return r.medianSeconds; }),
-          colour: t[3],
-          axis: 'seconds',
-        };
-      });
+/** The two tables and the two note charts. */
+function drawLearning(d) {
+  const L = d.learning || {};
+
+  const table = function (hostId, subId, rows, cols, subtitle) {
+    const host = document.getElementById(hostId);
+    if (!host) return;
+    setTileText(subId, subtitle);
+    if (!rows.length) {
+      host.innerHTML = '<p style="font-size:.78rem;color:var(--dim);padding:.5rem 0">Nothing yet.</p>';
+      return;
+    }
+    const head = '<tr>' + cols.map(function (c) { return '<th style="text-align:' + (c.num ? 'right' : 'left') + ';font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:.4rem .5rem">' + c.label + '</th>'; }).join('') + '</tr>';
+    const body = function (list) {
+      return list.map(function (r) {
+        return '<tr>' + cols.map(function (c) {
+          return '<td style="text-align:' + (c.num ? 'right' : 'left') + ';font-size:.78rem;padding:.42rem .5rem;border-top:1px solid var(--border)">' + QX_ESC(String(c.get(r))) + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+    };
+    const first = rows.slice(0, 10), rest = rows.slice(10);
+    host.innerHTML = '<table style="width:100%;border-collapse:collapse">' + head + body(first)
+      + (rest.length ? '<tbody data-rest hidden>' + body(rest) + '</tbody>' : '') + '</table>'
+      + (rest.length ? '<button class="btn" data-expand style="margin-top:.6rem">Show all ' + rows.length + '</button>' : '');
+    const btn = host.querySelector('[data-expand]');
+    if (btn) {
+      btn.onclick = function () {
+        const rest2 = host.querySelector('[data-rest]');
+        const open = rest2.hidden;
+        rest2.hidden = !open;
+        btn.textContent = open ? 'Show fewer' : ('Show all ' + rows.length);
+      };
+    }
+  };
+
+  const arts = (L.articles && L.articles.rows) || [];
+  table('eng-articles', 'eng-art-n', arts, [
+    { label: 'Article', get: function (r) { return r.title; } },
+    { label: 'In app', num: true, get: function (r) { return r.inApp; } },
+    { label: 'On site', num: true, get: function (r) { return r.onSite; } },
+    { label: 'Reads', num: true, get: function (r) { return r.reads; } },
+  ], arts.length ? (arts.length + ' articles read') : 'Nothing read yet');
+
+  const tagRows = (L.tags && L.tags.rows) || [];
+  table('eng-tags', 'eng-tag-n', tagRows, [
+    { label: 'Tag', get: function (r) { return r.name + (r.standard ? '' : ' (custom)'); } },
+    { label: 'Uses', num: true, get: function (r) { return r.uses; } },
+    { label: 'People', num: true, get: function (r) { return r.people; } },
+  ], tagRows.length ? (tagRows.length + ' tags used of ' + (L.tags.total || 0)) : 'No tags used yet');
+
+  const noteChart = function (canvasId, subId, modeId, measure, subtitle) {
+    const mode = document.getElementById(modeId);
+    if (mode && !mode.dataset.wired) { mode.dataset.wired = '1'; mode.onchange = function () { drawLearning(__engCache); }; }
+    const detail = mode && mode.value === 'detail';
+    if (!measure) { drawTimeTile(canvasId, subId, null, 'notes', function () { return {}; }); return; }
+    drawTimeTile(canvasId, subId, measure, 'notes', function (v) {
+      const total = (v.total || []).reduce(function (a, b) { return a + b; }, 0);
+      return {
+        subtitle: subtitle + ' · ' + total + ' in all',
+        labels: v.labels,
+        data: detail ? v.breakdown.highlights : v.total,
+        colour: detail ? '#E8673A' : '#9B5DE5',
+        axis: 'notes',
+        stacked: detail ? [
+          { label: 'Tags', data: v.breakdown.tags, colour: '#FBBF24' },
+          { label: 'Personal notes', data: v.breakdown.personal, colour: '#6C7FFF' },
+          { label: 'Shared notes', data: v.breakdown.shared, colour: '#34D399' },
+        ] : null,
+        firstLabel: detail ? 'Highlights' : 'Notes',
+      };
     });
+  };
 
-  // ── What is still not collected ─────────────────────────────────────────
-  const MISSING = [
-    ['App downloads', d.appDownloads],
-  ].concat([
-    ['Site visits', d.siteVisits],
-    ['Average time per page, marketing site', d.timePerMarketingPage],
-    ['Average time per exercise', d.timePerExercise],
-    ['Average time per page, dashboard', d.timePerDashboardPage],
-  ].filter(function (m) { return m[1] && m[1].available === false; }));
-  const host = document.getElementById('eng-missing');
-  if (host) {
-    host.innerHTML = MISSING.map(function (m) {
-      var label = m[0], v = m[1] || {};
-      return '<div style="display:flex;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--border)">'
-        + '<div style="flex:0 0 13rem;font-weight:600;font-size:.8rem">' + label + '</div>'
-        + '<div style="flex:1;font-size:.78rem;color:var(--dim);line-height:1.55">' + (v.needs || 'Not collected.') + '</div>'
-        + '</div>';
-    }).join('')
-      + '<p style="font-size:.75rem;color:var(--dim);margin:.9rem 0 0;line-height:1.6">'
-      + 'Collecting any of these is a decision about customer data, not only an engineering one. '
-      + 'Timing pages is behavioural data, it would have to appear in the privacy policy, and in the EU it would sit behind the consent banner.'
-      + '</p>';
+  noteChart('chart-eng-ns', 'eng-ns-n', 'eng-ns-mode', L.notesBySection, 'By section');
+
+  const ndPick = document.getElementById('eng-nd-pick');
+  const byDetailed = L.notesByDetailed || {};
+  if (ndPick && !ndPick.dataset.pop) {
+    ndPick.innerHTML = Object.keys(byDetailed).map(function (k) {
+      return '<option value="' + k + '">' + QX_ESC(byDetailed[k].label) + '</option>';
+    }).join('');
+    ndPick.dataset.pop = '1';
+    ndPick.onchange = function () { drawLearning(__engCache); };
   }
+  const pick = ndPick && ndPick.value ? ndPick.value : Object.keys(byDetailed)[0];
+  noteChart('chart-eng-nd', 'eng-nd-n', 'eng-nd-mode', byDetailed[pick], 'By page');
+}
+
+function drawMissing(d) {
+  const MISSING = [['App downloads', d.headlines.appDownloads]]
+    .concat([
+      ['Site visits', d.headlines.siteVisits],
+      ['Time per page', d.timePerPage.marketing],
+    ].filter(function (m) { return m[1] && m[1].available === false; }));
+  const host = document.getElementById('eng-missing');
+  if (!host) return;
+  host.innerHTML = MISSING.map(function (m) {
+    return '<div style="display:flex;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--border)">'
+      + '<div style="flex:0 0 13rem;font-weight:600;font-size:.8rem">' + m[0] + '</div>'
+      + '<div style="flex:1;font-size:.78rem;color:var(--dim);line-height:1.55">' + QX_ESC((m[1] && m[1].needs) || 'Not collected.') + '</div>'
+      + '</div>';
+  }).join('')
+    + '<p style="font-size:.75rem;color:var(--dim);margin:.9rem 0 0;line-height:1.6">'
+    + 'Collecting anything new here is a decision about customer data, not only an engineering one. '
+    + 'It would have to appear in the privacy policy, and in the EU it would sit behind the consent banner.'
+    + '</p>';
 }
 
 /**
@@ -2100,27 +2315,31 @@ function drawTimeTile(canvasId, subId, measure, unit, shape) {
     var note = document.createElement('div');
     note.setAttribute('data-not-measured', '1');
     note.style.cssText = 'font-size:.78rem;color:var(--dim);line-height:1.6;padding:.4rem 0 .6rem';
-    note.textContent = (measure && measure.needs) || 'Not collected.';
+    note.textContent = (measure && measure.needs) || 'Nothing recorded for this yet.';
     card.insertBefore(note, card.querySelector('.chart-body'));
     return;
   }
 
   var v = shape(measure);
   setTileText(subId, v.subtitle);
-  var datasets = [{ label: v.axis, data: v.data, backgroundColor: v.colour, borderRadius: 4 }];
-  if (v.median) {
-    datasets.push({
-      label: 'median', data: v.median, type: 'line', showLine: false,
-      pointRadius: 4, pointBackgroundColor: '#0E0B07', borderColor: '#0E0B07',
-    });
-  }
+  var datasets = [{ label: v.firstLabel || v.axis, data: v.data, backgroundColor: v.colour, borderRadius: 4 }];
+  if (v.second) datasets.push({ label: v.second.label, data: v.second.data, backgroundColor: v.second.colour, borderRadius: 4 });
+  (v.stacked || []).forEach(function (sd) {
+    datasets.push({ label: sd.label, data: sd.data, backgroundColor: sd.colour, borderRadius: 4 });
+  });
+
   mkChart(el, {
     type: 'bar',
-    data: { labels: v.labels.length ? v.labels : ['Nothing yet'], datasets: v.labels.length ? datasets : [{ label: v.axis, data: [0], backgroundColor: '#E6ECF6' }] },
+    data: {
+      labels: v.labels && v.labels.length ? v.labels : ['Nothing yet'],
+      datasets: v.labels && v.labels.length ? datasets : [{ label: v.axis, data: [0], backgroundColor: '#E6ECF6' }],
+    },
     options: {
-      indexAxis: 'y',
-      plugins: { legend: { display: !!v.median } },
-      scales: { x: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 } }, y: { grid: { display: false } } },
+      plugins: { legend: { display: datasets.length > 1, position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
+      scales: {
+        x: { grid: { display: false }, stacked: !!v.stacked },
+        y: { grid: { color: '#E6ECF6' }, ticks: { precision: 0 }, beginAtZero: true, max: v.max, stacked: !!v.stacked },
+      },
     },
   });
 }

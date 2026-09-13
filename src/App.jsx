@@ -5938,6 +5938,25 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     return availableSections().includes(m) ? m : "highlights";
   };
   const [section, setSection] = useState(getInitialSection());
+
+  /**
+   * How long each results section is read for.
+   *
+   * The view timer above files the whole results experience under one key,
+   * 'app:results', which answers "how long do results take" and not "which
+   * page do people stay on". Ellie asked the Engagement page for the second.
+   *
+   * Same sender, so the consent rule in public/_track.js covers this too.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.__attuneTrack || !section) return;
+    const started = Date.now();
+    const opened = section;
+    return () => {
+      const ms = Date.now() - started;
+      if (ms >= 1000) window.__attuneTrack('page_time', 'app:results:' + opened, ms);
+    };
+  }, [section]);
   const [commExpanded, setCommExpanded] = useState(section.startsWith("comm"));
   const [expExpanded, setExpExpanded] = useState(section.startsWith("exp"));
   const [reflExpanded, setReflExpanded] = useState(section.startsWith("reflection"));

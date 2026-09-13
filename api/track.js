@@ -4,7 +4,7 @@
  * One engagement event. The whole of the collection side of the Engagement
  * tab.
  *
- *   { kind: 'visit' | 'page_time', key: string, ms?: number }
+ *   { kind: 'visit' | 'page_time', key: string, ms?: number, surface?: 'site' | 'app' }
  *
  * ── WHAT IT REFUSES ───────────────────────────────────────────────────────
  * Anything that would make a row identify a person. It reads no cookie, no
@@ -60,6 +60,12 @@ export default async function handler(req) {
     ms = Math.min(Math.round(n), MAX_MS);
   }
 
+  // Which software this came from. 'site' covers the marketing pages and the
+  // portal; 'app' is iOS. A fact about the software, not the person: everybody
+  // on the app sends the same value, so it identifies nobody and the privacy
+  // paragraph is unaffected.
+  const surface = body?.surface === 'app' ? 'app' : body?.surface === 'site' ? 'site' : null;
+
   const country = req.headers.get('x-vercel-ip-country')
     || req.headers.get('X-Vercel-IP-Country')
     || null;
@@ -110,7 +116,7 @@ export default async function handler(req) {
         'Content-Type': 'application/json',
         Prefer: 'return=minimal',
       },
-      body: JSON.stringify({ kind, key, ms, owner_id: ownerId, country }),
+      body: JSON.stringify({ kind, key, ms, surface, owner_id: ownerId, country }),
     });
     if (!res.ok) {
       console.warn(`[track] not recorded (${res.status}). Migration 060 may not have been run.`);

@@ -60,7 +60,10 @@
   function send(kind, key, ms) {
     permission().then(function (consent) {
       if (!consent) return;
-      var body = JSON.stringify({ kind: kind, key: key, ms: ms });
+      // 'site' covers the marketing pages and the portal. The app sends 'app'
+      // from attune-app/src/api/client.ts, and the Engagement page needs to be
+      // able to tell them apart to draw one against the other.
+      var body = JSON.stringify({ kind: kind, key: key, ms: ms, surface: 'site' });
       // sendBeacon cannot set a header, so the consent answer rides in the
       // body for beacons and the server reads either. A fetch on a page that
       // is not unloading can set it properly.
