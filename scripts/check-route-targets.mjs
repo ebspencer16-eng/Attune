@@ -20,6 +20,12 @@
  * every stale route into a silent success, so the routes have to be checked
  * against the files rather than against what the server answers.
  *
+ * Removing the rewrite does not make /lmft-booking a 404: the catch-all still
+ * answers it with the app shell. What it fixes is the table, so the next
+ * person reading vercel.json is not told a page exists that does not. The 404
+ * is O5 in TASKS.md and it is Ellie's call, because it changes routing on the
+ * live site.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Not whether a route should exist, and not the catch-all itself, which is
  * Ellie's call and is open on the task list.

@@ -119,7 +119,7 @@ build.
 | Every scheduled email carries an unsubscribe link with the recipient's own id | `check-unsubscribe.mjs`, now rendered end to end from a profile row rather than read statically |
 | The ten endpoint emails and the four order cases are unchanged by the refactor | snapshotted before and after, byte for byte identical |
 | Every route in vercel.json lands on a file that exists | `check-route-targets.mjs`, 80 routes, planted four ways |
-| /lmft-booking and /api/lmft-request no longer answer 200 with an empty shell | both pointed at files deleted in 97cacb6; the routes are gone |
+| Two routes pointing at files deleted in 97cacb6 are gone from vercel.json | `check-route-targets.mjs`; note /lmft-booking still answers 200 with the app shell, because the catch-all takes anything left, which is O5 and yours |
 | Clicking Reviews lands on the reviews, not the top of the FAQ | faq.html scrolls to the section it already had an id for |
 | Nothing in the tree names a domain that is not ours | `check-site-origin.mjs`, 383 files, planted four ways |
 | The cart can price a workbook add-on again | in a browser: threw ReferenceError before, returns 108 after, which is the 89 package plus the 19 digital workbook |
