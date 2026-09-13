@@ -1524,3 +1524,32 @@ left needs you:
 **Three migrations are waiting**: 058, 059 and 060. You ran 058 and 059
 already; 060 is the one that creates the table the engagement measures write
 to, and until it is run those four tiles say so rather than showing zero.
+
+---
+
+## 13 September 2026, later
+
+**G13.** The questionnaire is back, at the end of What Comes Next, from your
+words out of git. Checked in a browser.
+
+**G10.** It was not a gap, it was a live defect. `api/generate-workbook.js`
+printed "[PLACEHOLDER: ...]" into the .docx in seven places: all twenty-five
+Conversation Library questions, and the entire body of every same-type moment
+card, which is four of the ten couple types. All of that content existed, in
+the PDF builder or in DIM_CONTENT. The prose both builders need is one module
+now, and the Python reads it as generated JSON because it cannot import
+JavaScript.
+
+Two things are left of G10 and both are copy, so both are yours: **G14**, the
+dimension pages and mixed-type moment cards exist as two different drafts (the
+PDF's personalised, the .docx's generic), and **G15**, the same-type blocks for
+XX, YY and ZZ were never written.
+
+**Tooling.** `npm run smoke` was stalling for twenty minutes at a time. It was
+not the checks: `scripts/_lib/browser.mjs` leaked a Chrome process every time a
+run was interrupted, and three hundred of them saturated the machine. It reaps
+on exit now, and smoke runs end to end leaving nothing behind.
+
+**The open list is down to things only you can do**: the App Store id, the
+`vercel.json` catch-all, the canonical tags, App Store Connect credentials, and
+the two copy decisions above.

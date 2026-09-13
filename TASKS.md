@@ -31,7 +31,6 @@ payment-records paragraph, G3c make the banner geo-aware.
 | # | Task |
 |--|--|
 | O16 | Four of the five are built and measuring. **Needs migration 060 run** (`supabase/migrations/060_page_events.sql`). App downloads still needs an App Store Connect key, an issuer id and a private key, and the app is not in the store. |
-| O17 | ~~Remove the 141 prose strings~~ **Do not.** I was wrong: `scripts/build_workbook.py` is the renderer behind the PDF workbook service (`Dockerfile.workbook` → `scripts/service.mjs`, called by `api/store-workbook-pdf.js`). My scan excluded that file's own output, so "appears nowhere in the product" was false. Nothing removed. See G10. |
 | O20 | The .docx no longer prints placeholders and both builders read one prose module. **What is left is a copy decision**: the dimension pages and the mixed-type moment cards exist in both, in two different drafts. See G14. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
@@ -393,6 +392,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | The browser checks leaked Chrome until the machine stalled | `scripts/_lib/browser.mjs` reaps on exit; verified both ways, and `npm run smoke` now runs end to end leaking nothing |
 | — | The .docx printed "[PLACEHOLDER: ...]" in 7 places, including all 25 Conversation Library questions | `check-workbook-prose.mjs`, 3 plants; every key verified to resolve |
 | — | The questionnaire is back on the website, at the end of What Comes Next | Rendered in a browser: four rating buttons, all seven questions, submit and the privacy line |
 | — | Nothing in the product asked for feedback; three surfaces reported on it | `check-feedback-reachable.mjs`, 3 plants; the app asks now |
