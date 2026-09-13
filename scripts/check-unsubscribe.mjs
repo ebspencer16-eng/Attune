@@ -26,10 +26,20 @@
 // is green, and the thing it points at is not the thing anyone meant. So the
 // id has to be selected from profiles and it has to reach the template.
 //
-// The template builders are called through a variable in one file
-// (runPass(..., nudgeHtml) binds it to htmlFn), so this resolves one hop of
-// that indirection. Two hops would not be caught; nothing in the tree does
-// two hops today, and this comment is where to start if one ever does.
+// ── WHY IT RENDERS RATHER THAN READS ───────────────────────────────────────
+// This used to trace the id statically: find the function holding the helper
+// call, then check every call site passes the id, resolving one hop of
+// indirection. It worked until both crons started building their mail through
+// an exported map, where the context is spread into the template rather than
+// named at the call. The arguments were still there and still correct, and the
+// gate reported both as broken.
+//
+// That is the failure CLAUDE.md names: a gate matching on a literal shape is
+// blind to the same thing reached through a registry. The answer here is not a
+// cleverer matcher. Every lifecycle email is now built by a named function
+// with a sample body, so the gate renders each one and looks for the actual
+// link, with the actual id encoded in it. A spread cannot fool that, and
+// neither can a rename.
 
 import { readFileSync, readdirSync } from 'fs';
 
@@ -89,34 +99,6 @@ for (const f of SENDERS) {
     }
   }
 
-  // 4. The id reaches the template. Find the function whose body holds the
-  //    helper call, then check every call of that function supplies the id.
-  for (const h of usesHelper) {
-    const argName = (src.match(new RegExp(`\\b${h}\\s*\\(\\s*([A-Za-z_$][\\w$]*)`)) || [])[1];
-    if (!argName) continue;
-
-    for (const m of src.matchAll(/function\s+(\w+)\s*\(([^)]*)\)\s*\{/g)) {
-      const [, name, params] = m;
-      const bodyAt = src.indexOf('{', m.index + m[0].length - 1);
-      const body = src.slice(m.index, matchingClose(src, bodyAt));
-      if (!new RegExp(`\\b${h}\\s*\\(`).test(body)) continue;
-
-      const destructured = params.trim().startsWith('{');
-      const names = aliasesOf(src, name);
-      for (const callee of names) {
-        for (const call of callSites(src, callee, m.index)) {
-          const ok = destructured
-            ? new RegExp(`\\b${argName}\\s*:`).test(call) || new RegExp(`\\b${argName}\\b\\s*[,}]`).test(call)
-            : call.split(',').length >= params.split(',').length;
-          if (!ok) {
-            problems.push(
-              `${where}: ${callee}(...) does not pass ${argName}, so ${h}() gets undefined\n`
-              + `      and the email goes out with a mailto where the link should be.`);
-          }
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -138,45 +120,56 @@ function matchingClose(s, open) {
   return s.length;
 }
 
-/** The name itself, plus one hop: a parameter it is passed to as a bare value. */
-function aliasesOf(src, name) {
-  const out = new Set([name]);
-  for (const m of src.matchAll(new RegExp(`(\\w+)\\s*\\(([^()]*\\b${name}\\b[^()]*)\\)`, 'g'))) {
-    const [, callee, args] = m;
-    if (callee === name) continue;
-    const idx = splitArgs(args).findIndex((a) => a.trim() === name);
-    if (idx < 0) continue;
-    const decl = src.match(new RegExp(`function\\s+${callee}\\s*\\(([^)]*)\\)`));
-    if (decl) {
-      const p = splitArgs(decl[1])[idx];
-      if (p) out.add(p.trim());
+
+
+// ── 5. Render every lifecycle email and look for the link ──────────────────
+// Derived rather than listed: each lifecycle sender has to export a map of
+// email builders, and every entry in it has to have a sample to render with.
+// A new scheduled email that skips either is a build failure, which is the
+// point: the way this bug happens is someone adding a sender and not thinking
+// about the footer.
+const { CRON_SAMPLES, SAMPLE_USER_ID } = await import(`${ROOT}api/_lib/email-samples.js`);
+const { unsubscribeUrl } = await import(`${ROOT}api/_lib/email-footer.js`);
+const expected = unsubscribeUrl(SAMPLE_USER_ID);
+
+/** One profile row, shaped the way both crons select them. */
+const ROW = { id: SAMPLE_USER_ID, email: 'maya@example.com', name: 'Maya', partner_name: 'Alex' };
+
+let rendered = 0;
+for (const f of SENDERS) {
+  const mod = await import(`${ROOT}api/${f}`);
+  const maps = Object.entries(mod).filter(([k, v]) =>
+    k.endsWith('_EMAILS') && v && typeof v === 'object');
+  if (typeof mod.EMAIL_CONTEXT !== 'function') {
+    problems.push(
+      `api/${f} sends on a schedule and exports no EMAIL_CONTEXT, so nothing here can\n`
+      + `      turn a profile row into the email it would receive.`);
+    continue;
+  }
+  if (!maps.length) {
+    problems.push(
+      `api/${f} sends on a schedule and exports no map of email builders, so nothing\n`
+      + `      here can render what it sends. Export one, the way cron-checkin.js does.`);
+    continue;
+  }
+  for (const [mapName, map] of maps) {
+    for (const [key, build] of Object.entries(map)) {
+      if (!CRON_SAMPLES[key]) {
+        problems.push(`api/${f}: ${mapName}.${key} has no sample in CRON_SAMPLES, so it cannot be previewed.`);
+      }
+      // Rendered from the sender's own context builder, not from the sample,
+      // so this covers the whole path: a profile row goes in and the link that
+      // comes out has to carry that row's id.
+      const html = String(build(mod.EMAIL_CONTEXT(ROW, true)).html || '');
+      rendered++;
+      if (!html.includes(expected)) {
+        problems.push(
+          `api/${f}: ${mapName}.${key} renders without ${expected}.\n`
+          + `      Either the link is missing or the id never reached it, which is the\n`
+          + `      same thing to the person reading the email.`);
+      }
     }
   }
-  return [...out];
-}
-
-/** Argument text of each call to `callee`, skipping the declaration at `declAt`. */
-function callSites(src, callee, declAt) {
-  const out = [];
-  for (const m of src.matchAll(new RegExp(`\\b${callee}\\s*\\(`, 'g'))) {
-    if (m.index === declAt || src.slice(Math.max(0, m.index - 10), m.index).includes('function ')) continue;
-    const open = m.index + m[0].length - 1;
-    out.push(src.slice(open + 1, matchingClose(src, open) - 1));
-  }
-  return out;
-}
-
-function splitArgs(s) {
-  const out = [];
-  let d = 0, cur = '';
-  for (const c of s) {
-    if ('([{'.includes(c)) d++;
-    if (')]}'.includes(c)) d--;
-    if (c === ',' && d === 0) { out.push(cur); cur = ''; continue; }
-    cur += c;
-  }
-  if (cur.trim()) out.push(cur);
-  return out;
 }
 
 if (problems.length) {
@@ -185,4 +178,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-unsubscribe] ${SENDERS.length} lifecycle senders; every one carries an unsubscribe link with a real id.`);
+console.log(`[check-unsubscribe] ${SENDERS.length} lifecycle senders, ${rendered} emails rendered; every one carries an unsubscribe link with a real id.`);

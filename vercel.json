@@ -58,6 +58,10 @@
       "destination": "/api/send-order-email.js"
     },
     {
+      "source": "/api/email-preview",
+      "destination": "/api/email-preview.js"
+    },
+    {
       "source": "/api/send-email",
       "destination": "/api/send-email.js"
     },

@@ -20,6 +20,7 @@
  *   FROM_EMAIL       — verified sender, e.g. hello@attune-relationships.com
  */
 
+
 export const config = { runtime: 'edge' };
 import { SITE_URL } from './_lib/site.js';
 import { unsubscribeUrl } from './_lib/email-footer.js';
@@ -386,6 +387,28 @@ const URL_ALLOWED_HOSTS = [
   'meet.jit.si',
   'app.calendly.com',
 ];
+/**
+ * Every email this endpoint can send, by the type the caller asks for.
+ *
+ * The dispatch below reads this rather than naming a function per branch, and
+ * so does the preview at ?preview=. Before that, /email-preview held six
+ * hand-written mock-ups of ten real emails and nothing kept the two in step:
+ * five had no preview, one previewed an email this module has never sent, and
+ * the copy in the six was a second draft of the copy in the ten.
+ */
+export const SEND_EMAILS = {
+  partner_invite:              (body, userId) => partnerInviteEmail(body, userId),
+  workbook_ready:              (body) => workbookReadyEmail(body),
+  workbook_promo:              (body) => workbookPromoEmail(body),
+  beta_survey:                 (body) => betaSurveyEmail(body),
+  checkin_6mo:                 (body) => checkin6moEmail(body),
+  results_viewed:              (body) => resultsViewedEmail(body),
+  welcome_account:             (body) => welcomeAccountEmail(body),
+  partner_joined_notification: (body) => partnerJoinedNotificationEmail(body),
+  checkin_1yr:                 (body) => checkin1yrEmail(body),
+  shipping_notification:       (body) => shippingNotificationEmail(body),
+};
+
 function isAllowedUrl(u) {
   if (!u || typeof u !== 'string') return true; // null/empty is fine, template will skip it
   try {
@@ -511,23 +534,23 @@ export default async function handler(req) {
   const userId = (rawUserId && UUID_RE.test(String(rawUserId))) ? String(rawUserId) : null;
   if (type === 'partner_invite') {
     if (!body.toEmail || !body.fromName) return new Response('Missing toEmail or fromName', { status: 400 });
-    email = partnerInviteEmail(body, userId);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'workbook_ready') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = workbookReadyEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'workbook_promo') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = workbookPromoEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'beta_survey') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = betaSurveyEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'checkin_6mo') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = checkin6moEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'results_viewed') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
@@ -563,7 +586,7 @@ export default async function handler(req) {
         // Fall through and send. Better to occasionally double-send than block on transient DB errors.
       }
     }
-    email = resultsViewedEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'welcome_account') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
@@ -596,19 +619,19 @@ export default async function handler(req) {
         // Fall through and send.
       }
     }
-    email = welcomeAccountEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'partner_joined_notification') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = partnerJoinedNotificationEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'checkin_1yr') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = checkin1yrEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'shipping_notification') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = shippingNotificationEmail(body);
+    email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else {
     return new Response(`Unknown type: ${type}`, { status: 400 });

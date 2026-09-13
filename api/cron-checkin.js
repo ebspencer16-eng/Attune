@@ -114,11 +114,8 @@ export default async function handler(req) {
     for (const user of users6mo) {
       if (!user.email) continue;
       const hasRefl = hasReflectionAccess(user);
-      const ok = await sendEmail(
-        user.email,
-        `How are you and ${user.partner_name || 'your partner'} doing?`,
-        checkinHtml({ userId: user.id, toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 6, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
-      );
+      const mail = CHECKIN_EMAILS.cron_checkin_6mo(EMAIL_CONTEXT(user, hasRefl));
+      const ok = await sendEmail(user.email, mail.subject, mail.html);
       if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; sentSoFar.sent6mo = sent6mo; }
       else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; sentSoFar.failed = failed; }
     }
@@ -129,11 +126,8 @@ export default async function handler(req) {
     for (const user of users1yr) {
       if (!user.email) continue;
       const hasRefl = hasReflectionAccess(user);
-      const ok = await sendEmail(
-        user.email,
-        `A year with ${user.partner_name || 'your partner'}, and how things look now`,
-        checkinHtml({ userId: user.id, toName: user.name || 'there', partnerName: user.partner_name || 'your partner', months: 12, hasReflection: hasRefl, retakeUrl: 'https://www.attune-relationships.com/app?signin=1' })
-      );
+      const mail = CHECKIN_EMAILS.cron_checkin_12mo(EMAIL_CONTEXT(user, hasRefl));
+      const ok = await sendEmail(user.email, mail.subject, mail.html);
       if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
       else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; sentSoFar.failed = failed; }
     }
@@ -151,6 +145,49 @@ export default async function handler(req) {
 }
 
 // ── Email template ────────────────────────────────────────────────────────────
+/**
+ * What both check-in emails read, from one profile row.
+ *
+ * Exported because check-unsubscribe.mjs renders the whole path with it: a
+ * profile row goes in, an email comes out, and the unsubscribe link in that
+ * email has to carry this row's id. Checking the template alone proved the
+ * link exists; it could not prove the id ever reached it.
+ */
+export function EMAIL_CONTEXT(user, hasReflection) {
+  return {
+    userId: user.id,
+    toName: user.name || 'there',
+    partnerName: user.partner_name || 'your partner',
+    hasReflection,
+    retakeUrl: `${SITE_URL}/app?signin=1`,
+  };
+}
+
+/**
+ * The two check-in emails this cron sends, subject and body together.
+ *
+ * The subjects used to sit at the two send sites, which meant /email-preview
+ * could only show them by writing them out again. Both are built from here
+ * now, and the preview calls the same functions.
+ *
+ * Note for whoever reads this next: api/send-email.js also carries templates
+ * called checkin_6mo and checkin_1yr, and they are not these. The 6-month one
+ * there is triggered from the browser when an account turns six months old;
+ * this one is triggered by the cron. Two different six-month emails exist and
+ * a couple could get both. That is written up in TASKS.md as a decision for
+ * Ellie, not something to quietly fix by deleting one.
+ */
+export const CHECKIN_EMAILS = {
+  cron_checkin_6mo: (ctx) => ({
+    subject: `How are you and ${ctx.partnerName} doing?`,
+    html: checkinHtml({ ...ctx, months: 6 }),
+  }),
+  cron_checkin_12mo: (ctx) => ({
+    subject: `A year with ${ctx.partnerName}, and how things look now`,
+    html: checkinHtml({ ...ctx, months: 12 }),
+  }),
+};
+
 function checkinHtml({ toName, partnerName, months, hasReflection, retakeUrl, userId }) {
   const is6mo = months === 6;
   const reflBlock = !hasReflection ? `

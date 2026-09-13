@@ -34,11 +34,12 @@ import { SITE_URL } from './site.js';
 
 /** To the person who deleted. No call to action: there is nothing to open. */
 export function deletionConfirmationEmail({ name, researchKept }) {
+  const subject = 'Your Attune account is deleted';
   const kept = researchKept
     ? `<li style="margin:0 0 8px">A de-identified copy of your exercise answers, with no name, email or invite code attached. You can ask us to remove it at any time.</li>`
     : `<li style="margin:0 0 8px">Nothing was kept for research. You had opted out before you deleted, so that copy was never made.</li>`;
 
-  return brandedEmail({
+  return { subject, html: brandedEmail({
     preheader: 'Your Attune account has been deleted.',
     title: 'Your account is deleted',
     subtitle: `${_esc(name || 'Hello')}, this is the confirmation we promised.`,
@@ -56,13 +57,14 @@ export function deletionConfirmationEmail({ name, researchKept }) {
     // No id: the account is gone, so there is no preference left to manage.
     // unsubscribeUrl falls back to a mailto, which is the honest link here.
     userId: null,
-  });
+  }) };
 }
 
 /** To the partner. Says what changed for them, and asks nothing of them. */
 export function partnerDeletedEmail({ toName, theirName, userId }) {
   const them = _esc(theirName || 'Your partner');
-  return brandedEmail({
+  const subject = `${theirName || 'Your partner'} deleted their Attune account`;
+  return { subject, html: brandedEmail({
     preheader: `${them} deleted their Attune account.`,
     title: `${them} deleted their Attune account`,
     subtitle: `${_esc(toName || 'Hello')}, this changes part of what you can see.`,
@@ -74,5 +76,5 @@ export function partnerDeletedEmail({ toName, theirName, userId }) {
     ctaLabel: 'Open Attune',
     ctaUrl: `${SITE_URL}/app`,
     userId,
-  });
+  }) };
 }

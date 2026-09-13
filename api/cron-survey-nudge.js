@@ -27,6 +27,32 @@ function nudge2Html(name, userId) {
   <p style="font-size:.75rem;color:#999;margin-top:1.6rem;">${unsubscribeLink(userId)}</p>
 </div>`;
 }
+/**
+ * The two survey nudges, subject and body together. The subjects used to be
+ * arguments at the two runPass calls, which is the only place they existed,
+ * so /email-preview had to write them out again to show them. Both are built
+ * from here now.
+ */
+/**
+ * What both nudges read, from one profile row. Exported for the same reason
+ * cron-checkin.js exports its own: check-unsubscribe.mjs renders the path from
+ * a profile row to the link, not just the template.
+ */
+export function EMAIL_CONTEXT(u) {
+  return { name: u.name || 'there', userId: u.id };
+}
+
+export const NUDGE_EMAILS = {
+  survey_nudge_1: (ctx) => ({
+    subject: 'How was your Attune experience?',
+    html: nudgeHtml(ctx.name, ctx.userId),
+  }),
+  survey_nudge_2: (ctx) => ({
+    subject: "No rush, but we'd still love your thoughts",
+    html: nudge2Html(ctx.name, ctx.userId),
+  }),
+};
+
 export default async function handler(req) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return new Response('Cron not configured', { status: 500 });
@@ -61,7 +87,7 @@ export default async function handler(req) {
   const sendEmail = (to, subject, html) => fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }) }).then(r => r.ok);
   const isBeta = (u) => u.email && betaEmails.has(String(u.email).toLowerCase());
 
-  async function runPass(field, startD, endD, subject, htmlFn) {
+  async function runPass(field, startD, endD, build) {
     let users = [];
     try { const res = await fetch(`${url}/rest/v1/profiles?select=id,email,name&email_opt_in=eq.true&${field}=is.null&ex2_completed_at=gte.${daysAgo(endD)}&ex2_completed_at=lte.${daysAgo(startD)}`, { headers: H }); users = await res.json(); } catch {}
     if (!Array.isArray(users)) users = [];
@@ -69,13 +95,14 @@ export default async function handler(req) {
     for (const u of users) {
       if (!u.email) continue;
       if (submitted.has(u.id) || isBeta(u)) { skipped++; await mark(u.id, field); continue; }
-      const ok = await sendEmail(u.email, subject, htmlFn(u.name || 'there', u.id));
+      const mail = build(EMAIL_CONTEXT(u));
+      const ok = await sendEmail(u.email, mail.subject, mail.html);
       if (ok) { await mark(u.id, field); sent++; } else failed++;
     }
     return { eligible: users.length, sent, skipped, failed };
   }
 
-  const nudge1 = await runPass('survey_nudge_sent_at', 1, 3, 'How was your Attune experience?', nudgeHtml);
-  const nudge2 = await runPass('survey_nudge2_sent_at', 5, 8, "No rush, but we'd still love your thoughts", nudge2Html);
+  const nudge1 = await runPass('survey_nudge_sent_at', 1, 3, NUDGE_EMAILS.survey_nudge_1);
+  const nudge2 = await runPass('survey_nudge2_sent_at', 5, 8, NUDGE_EMAILS.survey_nudge_2);
   return json({ ok: true, nudge1, nudge2 });
 }

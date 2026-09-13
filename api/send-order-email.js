@@ -19,6 +19,7 @@
 
 import { brandedEmail, _esc } from './_lib/branded-email.js';
 import { APP_LIVE } from './_lib/flags.js';
+import { SITE_URL } from './_lib/site.js';
 
 export const config = { runtime: 'edge' };
 
@@ -63,7 +64,7 @@ export default async function handler(req) {
   const safeSetupPath = (typeof setupPath === 'string' && setupPath.startsWith('/app?') && !setupPath.includes('//'))
     ? setupPath
     : '/app?signup=1';
-  const setupUrl = `https://www.attune-relationships.com${safeSetupPath}`;
+  const setupUrl = `${SITE_URL}${safeSetupPath}`;
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return new Response('Email service not configured', { status: 503 });
@@ -73,11 +74,15 @@ export default async function handler(req) {
   // ── 1. Order confirmation to buyer ─────────────────────────────────────────
   // Pushed first; sent sequentially below so this email always arrives before
   // the setup email.
+  // What every order template reads: the body as sent, plus the two URLs
+  // derived above. One object so a template can be previewed with a sample of
+  // the same shape.
+  const ctx = { ...body, setupUrl, giftUrl: `${SITE_URL}/app?signup=1&pkg=${pkgKey}&gift=1` };
+
   emails.push({
     from: `Attune <${FROM}>`,
     to: [buyerEmail],
-    subject: `Attune Order Confirmation`,
-    html: orderConfirmationHtml({ buyerName, pkgName, orderNum, total, lineItems, isGift, isPhysical, recipientName, addonWorkbook, addonReflection, addonBudget, addonChecklist, addonIntimacy, addonConflict }),
+    ...ORDER_EMAILS.order_confirmation(ctx),
   });
 
   // ── 2. "Set up your account" to buyer (digital, for-self) ──────────────────
@@ -93,20 +98,17 @@ export default async function handler(req) {
     emails.push({
       from: `Attune <${FROM}>`,
       to: [buyerEmail],
-      subject: `Set up your Attune account, ${buyerName}`,
-      html: getStartedBuyerHtml({ name: buyerName, partnerName, setupUrl, partnerEmail, hasReflection: addonReflection, hasConflict: addonConflict, hasIntimacy: addonIntimacy }),
+      ...ORDER_EMAILS.order_get_started(ctx),
       scheduled_at: new Date(Date.now() + 10_000).toISOString(),
     });
   }
 
   // ── 3. Gift digital: email to recipient ────────────────────────────────────
   if (isGift && !isPhysical && recipientEmail) {
-    const giftUrl = `https://www.attune-relationships.com/app?signup=1&pkg=${pkgKey}&gift=1`;
     emails.push({
       from: `Attune <${FROM}>`,
       to: [recipientEmail],
-      subject: `You've received an Attune gift from ${buyerName}`,
-      html: giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }),
+      ...ORDER_EMAILS.order_gift_recipient(ctx),
     });
   }
 
@@ -142,6 +144,45 @@ export default async function handler(req) {
     headers: { 'Content-Type': 'application/json' },
   });
 }
+
+/**
+ * Every email an order sends, by name, each taking the same context object.
+ *
+ * The subjects used to sit inline at the three push sites, which meant the
+ * only way to read them was to read the handler, and the only way to preview
+ * one was to write it out a second time. /email-preview did exactly that and
+ * its version had drifted. Both the handler and the preview build from here
+ * now, so there is one copy of each subject line.
+ *
+ * `ctx` is the request body plus the two URLs the handler derives from it.
+ */
+export const ORDER_EMAILS = {
+  order_confirmation: (ctx) => ({
+    subject: `Attune Order Confirmation`,
+    html: orderConfirmationHtml(ctx),
+  }),
+  order_get_started: (ctx) => ({
+    subject: `Set up your Attune account, ${ctx.buyerName}`,
+    html: getStartedBuyerHtml({
+      name: ctx.buyerName,
+      partnerName: ctx.partnerName,
+      setupUrl: ctx.setupUrl,
+      partnerEmail: ctx.partnerEmail,
+      hasReflection: ctx.addonReflection,
+      hasConflict: ctx.addonConflict,
+      hasIntimacy: ctx.addonIntimacy,
+    }),
+  }),
+  order_gift_recipient: (ctx) => ({
+    subject: `You've received an Attune gift from ${ctx.buyerName}`,
+    html: giftRecipientHtml({
+      recipientName: ctx.recipientName,
+      buyerName: ctx.buyerName,
+      pkgName: ctx.pkgName,
+      giftUrl: ctx.giftUrl,
+    }),
+  }),
+};
 
 // ── Email HTML templates ────────────────────────────────────────────────────
 
@@ -255,23 +296,12 @@ function getStartedBuyerHtml({ name, partnerName, setupUrl, partnerEmail, hasRef
   });
 }
 
-function partnerInviteHtml({ partnerName, buyerName, inviteUrl }) {
-  const body = `
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;color:#5C4A38;line-height:1.75;margin:0 0 6px">${_esc(buyerName)} set up Attune for the two of you. Two short exercises mapping how you each communicate and what you each expect. Your answers stay private until you're both done.</p>
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;color:#5C4A38;line-height:1.7;margin:16px 0 0">Plan on about 25 minutes. Find a quiet moment and answer honestly. That's where the value is.</p>
-    <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:13px;color:#8C7A68;line-height:1.6;margin:20px 0 0"><strong style="color:#1E1610">Heads up:</strong> this link is unique to you and works only once. Don't share it.</p>
-  `;
-
-  return brandedEmail({
-    preheader: `${_esc(buyerName)} invited you to Attune`,
-    title: `${_esc(buyerName)} invited you.`,
-    subtitle: `Hi ${_esc(partnerName)}, here's how to get started.`,
-    bodyHtml: body,
-    ctaLabel: 'Set up my profile →',
-    ctaUrl: inviteUrl,
-    ctaColor: '#1B5FE8',
-  });
-}
+// The buyer-side partner invite template lived here and was never called.
+// The comment at the push site says why: AuthModal sends the real partner
+// invite, through /api/send-email, once the buyer has a profile and an invite
+// code. So this was a second draft of an email that ships from somewhere
+// else, which is the thing that made /email-preview wrong. Removed rather
+// than previewed.
 
 function giftRecipientHtml({ recipientName, buyerName, pkgName, giftUrl }) {
   const body = `

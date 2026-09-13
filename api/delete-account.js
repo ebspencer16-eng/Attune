@@ -321,11 +321,8 @@ export default async function handler(req) {
   summary.partnerNotified = false;
   try {
     if (notify.self?.email) {
-      summary.confirmationSent = await sendMail(
-        notify.self.email,
-        'Your Attune account is deleted',
-        deletionConfirmationEmail({ name: notify.self.name, researchKept: summary.archived }),
-      );
+      const mail = deletionConfirmationEmail({ name: notify.self.name, researchKept: summary.archived });
+      summary.confirmationSent = await sendMail(notify.self.email, mail.subject, mail.html);
     }
   } catch (e) { console.warn('[delete-account] confirmation email failed:', e?.message); }
 
@@ -340,15 +337,12 @@ export default async function handler(req) {
       // asked us to stop emailing them has asked for that, and this is not an
       // exception: the notification row still carries it.
       if (notify.partner.email && notify.partner.optedIn) {
-        summary.partnerNotified = await sendMail(
-          notify.partner.email,
-          `${notify.partner.theirName || 'Your partner'} deleted their Attune account`,
-          partnerDeletedEmail({
-            toName: notify.partner.name,
-            theirName: notify.partner.theirName,
-            userId: notify.partner.id,
-          }),
-        );
+        const mail = partnerDeletedEmail({
+          toName: notify.partner.name,
+          theirName: notify.partner.theirName,
+          userId: notify.partner.id,
+        });
+        summary.partnerNotified = await sendMail(notify.partner.email, mail.subject, mail.html);
       } else {
         summary.partnerNotified = true;   // the row is written; the email was not wanted
       }
