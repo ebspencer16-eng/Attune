@@ -1359,3 +1359,52 @@ Plus three button labels: "Done", "Continue", "Add a goal", "Remove".
 
 The last two failure lines are copied verbatim from the app's existing
 notes screen, so they are already in the product. The rest are new.
+
+---
+
+## 12 September 2026 — a sweep, and what it found
+
+Ellie was away; the standing instruction was to keep sweeping. Everything
+below is pushed, `npm run check` is green and `npm run smoke` passes all
+three of its passes. Nothing here has been seen on a phone.
+
+**Live bugs found and fixed**
+
+- `/api/admin-posts` and `/api/admin-presets` answered 500 to every request,
+  each since the commit that created it. Both declared the wrong Vercel
+  runtime for the way they answer. Publishing an In Practice post from the
+  admin had never worked. Confirmed fixed against production: both return 401
+  now.
+- `/app` signed out drew a blank page. So did any unknown `?view=`, and so did
+  `?view=practice` and `?view=profile`, which the server hands out on Home
+  cards. All confirmed live before and after.
+- Twelve In Practice articles linked to `/how-it-works`, retired twice. The
+  catch-all in `vercel.json` turns that into a 200 with a blank shell rather
+  than a 404.
+- Profile setup could spin on "One moment" forever if its copy failed to load.
+  It is the first screen after buying, and it now offers a retry.
+- The two scheduled emails went out with no unsubscribe link.
+- Five copies of the site's address disagreed with each other; two printed QR
+  templates encoded the apex, which redirects.
+
+**Found, not fixed, waiting on you**
+
+`DELETION.md` and `LEGAL-VS-CODE.md`, both new. Eight published promises in
+`public/legal.html` that the code does not keep. The one that matters most:
+when one partner deletes their account, the other loses every result,
+including the parts derived from their own answers, which the policy says they
+keep. That is a build, not a fix, and it is scoped in `DELETION.md`.
+
+Questions for you are in `TASKS.md` section 1. Two need your words and one is
+a choice between adding friction and amending a policy.
+
+**New gates**, each verified by planting the bug it exists for:
+`check-unsubscribe`, `check-read-failures`, `check-flags`, `check-app-views`,
+`check-internal-links`, `check-site-origin`, `check-runtime-shape`,
+`check-static-render`.
+
+**`check-exercise-flow` passes for the first time.** Three things were wrong
+and none of them was an exercise: it defaulted to an address the preview
+server does not answer on, Communication's expected answer count had been
+typed as 54 when the exercise stores 50, and the driver could not tell the
+sign-in modal from the exercise. It runs in `npm run smoke` now.
