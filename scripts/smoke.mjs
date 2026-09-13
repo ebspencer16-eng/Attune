@@ -1,5 +1,5 @@
-// `npm run smoke`: build, serve, render every results section, drive every
-// exercise to the end, stop.
+// `npm run smoke`: build, serve, render every results section and every
+// static page, drive every exercise to the end, stop.
 //
 // It used to be `node scripts/check-render.mjs` and assumed someone had
 // already run a preview server on port 4173. If they had not, the run failed
@@ -49,6 +49,14 @@ for (;;) {
 let code = 0;
 try {
   await run(process.execPath, ['scripts/check-render.mjs'], { env: { ...process.env, BASE } });
+} catch {
+  code = 1;
+}
+
+// The other half of the site: forty hand-written pages, including checkout,
+// that nothing else draws. See that file's header for what it is and is not.
+try {
+  await run(process.execPath, ['scripts/check-static-render.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }
