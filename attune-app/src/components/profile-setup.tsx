@@ -24,7 +24,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import {
-  createProfile, fetchProfileSetupCopy, type ApiError, type ProfileSetupCopy,
+  createProfile, fetchProfileSetupCopy,
+  type AboutYou, type ApiError, type ProfileSetupCopy,
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
@@ -35,6 +36,11 @@ const c = Colors.light;
 
 export default function ProfileSetup({ onDone }: { onDone: () => void }) {
   const [copy, setCopy] = useState<ProfileSetupCopy | null>(null);
+  const [about, setAbout] = useState<AboutYou | null>(null);
+  // Answers to the five demographic questions, keyed the way the endpoint
+  // wants them. Unanswered means "prefer not to say", which is a real answer
+  // and is stored as null rather than pestering anyone for it.
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [name, setName] = useState('');
   const [partnerName, setPartnerName] = useState('');
   const [partnerEmail, setPartnerEmail] = useState('');
@@ -52,7 +58,7 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
     let live = true;
     fetchProfileSetupCopy().then((r) => {
       if (!live) return;
-      if (r.ok) { setCopy(r.data.copy); setCopyError(null); }
+      if (r.ok) { setCopy(r.data.copy); setAbout(r.data.aboutYou ?? null); setCopyError(null); }
       else setCopyError(r.error);
     });
     return () => { live = false; };
@@ -66,6 +72,9 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
       name: name.trim(),
       partnerName: partnerName.trim(),
       partnerEmail: partnerEmail.trim() || undefined,
+      // Only what was actually chosen. An empty value is "prefer not to say"
+      // and the column stays null, which is what the website does too.
+      ...Object.fromEntries(Object.entries(answers).filter(([, v]) => v)),
     });
     setSaving(false);
     if (r.ok) { onDone(); return; }
@@ -74,7 +83,7 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
         ? 'No connection. Your answers are still here; try again in a moment.'
         : 'That did not save. Try again in a moment.',
     );
-  }, [name, partnerName, partnerEmail, saving, onDone]);
+  }, [name, partnerName, partnerEmail, answers, saving, onDone]);
 
   if (copyError) {
     return (
@@ -114,6 +123,40 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
     </View>
   );
 
+  /**
+   * One question, as a label and a row of chips.
+   *
+   * A phone has no select. The exercises already ask this shape of question
+   * with tappable options, so this reads as the rest of the app rather than as
+   * a form. Tapping a chosen chip clears it, which is how someone takes an
+   * answer back without a "prefer not to say" chip sitting in every row.
+   */
+  const question = (key: string, label: string, options: [string, string][]) => (
+    <View key={key} style={{ marginTop: Spacing.lg }}>
+      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.xs }}>{label}</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs }}>
+        {options.filter(([v]) => v).map(([value, optLabel]) => {
+          const on = answers[key] === value;
+          return (
+            <Pressable
+              key={value}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              onPress={() => setAnswers((a) => ({ ...a, [key]: on ? '' : value }))}
+              style={{
+                paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
+                borderRadius: Radius.sm, borderWidth: 1,
+                borderColor: on ? c.accent : c.border,
+                backgroundColor: on ? c.accent : c.surface,
+              }}>
+              <Text style={{ ...Type.small, color: on ? Palette.white : c.textMuted }}>{optLabel}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
@@ -131,6 +174,16 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
       {field(copy.yourName, copy.yourNamePlaceholder, name, setName)}
       {field(copy.partnerName, copy.partnerNamePlaceholder, partnerName, setPartnerName)}
       {field(null, copy.partnerEmailPlaceholder, partnerEmail, setPartnerEmail, 'email-address')}
+
+      {about ? (
+        <View style={{ marginTop: Spacing.xxl }}>
+          <Text style={{ ...Type.title, color: c.textStrong }}>{about.title}</Text>
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>
+            {about.why}
+          </Text>
+          {about.fields.map((f) => question(f.key, f.label, f.options))}
+        </View>
+      ) : null}
 
       {failed ? (
         <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.lg }}>{failed}</Text>

@@ -1047,13 +1047,30 @@ export type ProfileSetupCopy = {
 };
 
 /**
+ * The five demographic questions, as the server sends them.
+ *
+ * Asked at signup on the website and, until now, nowhere in the app. Every
+ * person who buys online and sets up in the app answered none of them, and
+ * the admin's Demographics page is built on exactly these columns.
+ *
+ * `options` is [value, label]; the first is always the empty "Prefer not to
+ * say", which is the answer someone gives by not choosing.
+ */
+export type AboutYou = {
+  title: string;
+  why: string;
+  fields: { key: string; label: string; options: [string, string][] }[];
+};
+
+/**
  * Profile setup's labels.
  *
  * Unauthenticated on purpose: the app asks for these exactly when it has been
  * told it has no profile, so nothing else it can call will answer.
  */
 export function fetchProfileSetupCopy() {
-  return request<{ ok: true; copy: ProfileSetupCopy }>('/api/create-profile', { method: 'GET' });
+  return request<{ ok: true; copy: ProfileSetupCopy; aboutYou: AboutYou }>(
+    '/api/create-profile', { method: 'GET' });
 }
 
 /**
@@ -1066,6 +1083,10 @@ export function fetchProfileSetupCopy() {
 export function createProfile(input: {
   name: string; partnerName: string; partnerEmail?: string;
   pronouns?: string; partnerPronouns?: string;
+  // The five from AboutYou. Keys match what /api/create-profile already
+  // accepted long before anything sent them.
+  ageRange?: string; relationshipStatus?: string; relationshipLength?: string;
+  children?: string; signupSource?: string;
 }) {
   return request<{ ok: true; created?: boolean; existed?: boolean }>('/api/create-profile', {
     method: 'POST',

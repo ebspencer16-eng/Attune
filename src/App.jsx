@@ -115,6 +115,7 @@ import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-prof
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
 import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
+import { ABOUT_YOU } from "../api/_lib/profile-setup-copy.js";
 
 /**
  * Every view this file can draw.
@@ -9814,18 +9815,16 @@ function AuthModal({ mode, onClose, onSuccess }) {
                 different couple profiles better. All fields optional. */}
             <div style={{ marginBottom: "1rem" }}>
               <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
-                Tell us about yourselves
+                {ABOUT_YOU.title}
               </div>
               <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
-                Helps us understand who Attune serves. Responses are kept separately from names and emails, and only ever used in aggregate.
+                {ABOUT_YOU.why}
               </p>
-              {[
-                { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
-                { k: "relationshipStatus", label: "Relationship status", opts: [["", "Prefer not to say"], ["dating", "Dating / together"], ["engaged", "Engaged"], ["married", "Married"], ["remarried", "Remarried"], ["partnership", "Domestic partnership"]] },
-                { k: "relationshipLength", label: "How long together", opts: [["", "Prefer not to say"], ["<1", "Less than 1 year"], ["1-2", "1–2 years"], ["3-5", "3–5 years"], ["6-10", "6–10 years"], ["11-20", "11–20 years"], ["20+", "20+ years"]] },
-                { k: "children", label: "Children", opts: [["", "Prefer not to say"], ["none", "None"], ["1", "1"], ["2", "2"], ["3+", "3 or more"], ["expecting", "Expecting"]] },
-                { k: "signupSource", label: "How did you hear about Attune?", opts: [["", "Prefer not to say"], ["friend", "Friend or family"], ["social", "Social media"], ["search", "Search"], ["gift", "Received as a gift"], ["therapist", "Therapist or counselor"], ["other", "Other"]] },
-              ].map(({ k, label, opts }) => (
+              {/* The five questions come from api/_lib/profile-setup-copy.js, which
+                  the app's profile setup reads too. They were typed here and
+                  nowhere else, so the website asked them and the app did not,
+                  and the Demographics page is built on these columns. */}
+              {ABOUT_YOU.fields.map(({ key: k, label, options: opts }) => (
                 <div key={k} style={{ marginBottom: "0.65rem" }}>
                   <label style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
                   <select value={form[k]} onChange={e => upd(k, e.target.value)}

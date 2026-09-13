@@ -16,7 +16,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { isOAuthProvider } from './_lib/auth-providers.js';
-import { PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
+import { ABOUT_YOU, PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
 import { PKG_CAPS } from './_lib/entitlements.js';
 
 export const config = { runtime: 'edge' };
@@ -35,7 +35,9 @@ export default async function handler(req) {
    * about why names are asked for; nothing here is anyone's data.
    */
   if (req.method === 'GET') {
-    return new Response(JSON.stringify({ ok: true, copy: PROFILE_SETUP_COPY }), { status: 200, headers: CORS });
+    // aboutYou rides along so the app can ask the five demographic questions
+    // the website's signup asks. Nothing here is a secret: it is field labels.
+    return new Response(JSON.stringify({ ok: true, copy: PROFILE_SETUP_COPY, aboutYou: ABOUT_YOU }), { status: 200, headers: CORS });
   }
 
   if (req.method !== 'POST') {
