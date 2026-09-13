@@ -343,6 +343,20 @@ screenshot.
 
 Two habits learned the hard way on this project:
 
+**The browser checks leak Chrome, and a saturated machine looks like a hang.**
+`scripts/_lib/browser.mjs` spawns Chrome with `--remote-debugging-port` and
+nothing reaps it when a run is interrupted. Three hundred of them accumulated
+in one session, at which point `npm run smoke` stopped producing output for
+twenty minutes at a time and read exactly like a broken check.
+
+`pkill -f 'Google Chrome for Testing'` does not match them on this machine.
+This does, and leaves Ellie's own browser alone:
+
+    pkill -f 'remote-debugging-port'
+
+Worth running before any long browser check, and worth suspecting first when
+one stops producing output.
+
 **`git checkout --` has now destroyed uncommitted work five times.** Four
 were noted before; the fifth was today, undoing a planted bug in
 `attune-app/src/api/client.ts` and taking an hour of unrelated edits in the
