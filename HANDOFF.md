@@ -1468,3 +1468,42 @@ Six new gates, each verified by planting the bug it exists for.
 partner deletes an account. Until it is run, the couple's frozen row is still
 deleted with the account, which is the behaviour it exists to change. Run them
 together in the SQL Editor.
+
+---
+
+## 13 September 2026 — your answers, and the open list
+
+Pushed and green: `npm run check`, both builds, and all three smoke passes
+(30 results sections, 13 app views, 40 static pages, every driveable
+exercise). Nothing has been seen on a phone.
+
+**G5, the 12 articles.** All twelve reach the app now, six of them as
+placeholders with no excerpt, which is what you asked for. One thing to look
+at on the website: `all.html` files *Why couples fight about the same things*
+under `cat: 'conflict'` and labels it "Getting Started". The app shelves it by
+the cat, so it lands under When It's Difficult, which is right. The label looks
+like a slip.
+
+**G4, and a correction you should read.** Do not remove those 141 strings, and
+I was wrong to tell you they reached nobody. `scripts/build_workbook.py` is the
+renderer behind the PDF workbook service: `Dockerfile.workbook` packages it,
+`api/store-workbook-pdf.js` posts to it. My scan searched api/, src/, the app
+and public/, and not the Python's own output, which is a product surface.
+Nothing was removed. The real problem is that two workbook generators hold two
+copies of the prose; they agree today and `check-workbook-prose.mjs` keeps them
+that way.
+
+**G8, the engagement measures.** Four of the five are built and measuring.
+Every event is one row with no cookie, no device or session identifier, no
+referrer and no user agent, so two measurements from one person cannot be
+joined. Consent is enforced in the browser and again on the server. The
+privacy policy now describes it, including the ninety days, and a nightly job
+deletes past that. **Migration 060 creates the table**; until you run it
+nothing is recorded and every tile says so. App downloads still needs App
+Store Connect credentials.
+
+**O6, the profile card.** Settings edits names, pronouns and the five
+questions in the app now, so that card stays in the app.
+
+**Three things are yours:** the two TODO effective dates (G6), the privacy
+paragraph I wrote about measurement (G12), and migration 060 (G11).
