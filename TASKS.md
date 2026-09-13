@@ -32,27 +32,9 @@ have proved instead.
 
 ## 2. Open
 
-### The Engagement page
-
 | # | Task |
 |--|--|
-| O23 | **Margins.** Boxes on the page look wrong, at least around the "no data yet" messages. |
-| O24 | **One slicer.** Every view on this page uses the same slicer the rest of the admin uses. |
-| O25 | **Collection: which surface.** The app and the portal both file time under `app:<view>`, so nothing can tell them apart, and half the charts below need to. Add a surface to every event. |
-| O26 | **Collection: results sections.** The portal files the whole results experience as one key, so time per detailed page cannot be answered. Key it by section. |
-| O27 | **Highlight boxes**, top of the page: site visits, app downloads, users who read at least one In Practice article, users who placed at least one highlight, tag or note. Last 30 days each, with the change against the previous 30 at the bottom of the tile. |
-| O28 | **Completion funnel as a line over time**, each category its own line, with sign-ups counted twice so a couple reads as two people. |
-| O29 | **Beside it**, a line chart with two series: marketing site visits and app downloads, over time. |
-| O30 | **Time per page**, five column charts to one height. Row of three: marketing pages, exercises (clustered app against site), resources (clustered). Row of two: results by section (clustered), and a detailed-pages chart with a dropdown to pick the exercise. |
-| O31 | **Learning, top row**: two tables side by side. Most-read In Practice articles with their volume, ten rows and an expand. The same tile again for most-used tags. |
-| O32 | **Learning, bottom row**: notes by section as a column chart, with In Practice as an extra category; and notes by detailed page, with a dropdown for the exercise or In Practice, which shows the top eight articles. |
-| O33 | **Both notes charts get a second dropdown**, left of the slicer: total engagement by default, or split into highlights, tags, personal notes and shared notes as separate columns. |
-
-### Everything else
-
-| # | Task |
-|--|--|
-| O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. Two of the charts above want this number. |
+| O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
 | O7 | **The canonical tags name the apex**, which redirects to www, so search engines are being pointed at a URL that 307s. Thirty-odd tags. An SEO decision. |
@@ -81,7 +63,8 @@ any order; work through them however suits.
 | R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
 | R7 | **Highlight storycards**, both surfaces: the front and back arrows, and that nothing is clipped at the top. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
-| R9 | **The Engagement tab** in the admin, once migration 060 has been running long enough to have numbers in it. |
+| R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
+| R26 | **Run migration `061_page_events_surface.sql`** in the SQL editor. Until it runs, the app column and the site column on every clustered chart stay empty, because nothing is telling the two apart yet. Events already filed keep counting, they just sit in neither column. |
 
 ### Copy, and whether the words are yours
 
@@ -124,6 +107,11 @@ build.
 
 | Verified | By |
 |--|--|
+| The Engagement page is the layout you asked for: headline tiles, funnel and acquisition, five time charts, two Learning tables, two notes charts | rendered in Chrome: 9 canvases, 2 tables, 5 slicers, no console errors |
+| Every view on the page reads one slicer, the same one the rest of the admin uses | the slice is applied server-side in `api/admin-engagement.js` before anything aggregates |
+| No tile on the page draws a chart without first checking the measure was collected, and every gap says why | `check-engagement-honesty.mjs`, planted against three ways and caught all three |
+| App time and site time can be told apart | `surface` on every event, sent by `public/_track.js` as `site` and by the app client as `app` |
+| Results time is filed per section on both surfaces | `app:results:<section>` from the website, `useScreenTime(results:<id>)` from the app |
 | Privacy policy, terms, data policy and EULA exist and are linked from every footer | `check-internal-links.mjs`, 908 links |
 | "Your privacy choices" exists and Global Privacy Control is read server-side | `Sec-GPC` in `api/privacy-choices.js`; `check-consent-gate.mjs` |
 | The privacy notice reaches every customer-facing page | `check-notice-reach.mjs`, 34 pages |
