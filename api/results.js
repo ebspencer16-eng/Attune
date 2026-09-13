@@ -84,6 +84,63 @@ function withLabels(results) {
  * `content` is additive. Nothing that already existed in the payload changes
  * shape, so the website keeps reading exactly what it read before.
  */
+/**
+ * Replace a departed partner's name everywhere it appears in a payload.
+ *
+ * ── WHY ON THE WAY OUT ────────────────────────────────────────────────────
+ * Results are frozen: a row written last year is served back as it was
+ * written. So this cannot be done when the row is stored, and it cannot be
+ * done by editing the row, which would change results the survivor has already
+ * read. It is derived at read time, the same argument the map coordinates and
+ * the labels are derived by.
+ *
+ * ── WHAT IT REPLACES ──────────────────────────────────────────────────────
+ * The name only. The scores stay, because the policy says anonymize rather
+ * than remove, and removing them would take every joint section with them,
+ * which is the outcome this exists to prevent.
+ *
+ * The word used in place of a name is deliberately not a name. "Your partner"
+ * reads as a person who is still there. This says what is true.
+ */
+const DEPARTED = 'Someone who has left Attune';
+
+function anonymizePartner(payload, viewerSide) {
+  if (!payload || typeof payload !== 'object') return payload;
+  const theirSide = viewerSide === 'a' ? 'b' : 'a';
+
+  // The names carried alongside the scores, which is what every heading and
+  // every line of prose is built from.
+  const clone = JSON.parse(JSON.stringify(payload));
+  const names = clone.names || clone.people || null;
+  const gone = names && (names[theirSide] || names[theirSide === 'a' ? 'partnerA' : 'partnerB']);
+
+  if (names) {
+    if (names[theirSide] != null) names[theirSide] = DEPARTED;
+    if (names[theirSide === 'a' ? 'partnerA' : 'partnerB'] != null) {
+      names[theirSide === 'a' ? 'partnerA' : 'partnerB'] = DEPARTED;
+    }
+  }
+  if (clone.partnerName) clone.partnerName = DEPARTED;
+
+  // Their name is also written into prose that was rendered when the results
+  // were computed. A frozen payload cannot be re-rendered, so the name is
+  // replaced in the text as it stands.
+  if (gone && typeof gone === 'string' && gone.trim().length > 1) {
+    const re = new RegExp(gone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    const walk = (node) => {
+      if (typeof node === 'string') return node.replace(re, DEPARTED);
+      if (Array.isArray(node)) return node.map(walk);
+      if (node && typeof node === 'object') {
+        for (const k of Object.keys(node)) node[k] = walk(node[k]);
+        return node;
+      }
+      return node;
+    };
+    return walk(clone);
+  }
+  return clone;
+}
+
 function withContent(results, viewer, contentVersion, pronouns = {}) {
   if (!results) return results;
 
@@ -397,6 +454,63 @@ export default async function handler(req) {
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
     const mine = me.ex1_answers && Object.keys(me.ex1_answers).length ? me.ex1_answers : null;
+
+    // ── Their partner deleted their account ──────────────────────────────
+    //
+    // Not the same state as never having linked with anyone, and the product
+    // showed the second: a waiting screen naming a person who no longer has an
+    // account. The published policy says this person keeps their results with
+    // the other person anonymized, and they were losing all of it.
+    //
+    // The stored row survives the deletion from migration 059 onward. It is
+    // served as it was written, because results are frozen, with the departed
+    // person's name replaced on the way out. Nothing is recomputed: there is
+    // nothing left to recompute from.
+    //
+    // Couples who were deleted before 059 was run have no row to find, and
+    // they get the honest answer rather than a waiting screen.
+    // Read separately, and tolerantly. Adding partner_deleted_at to the select
+    // above would make every results request fail with a 400 until migration
+    // 059 is run, which would break results for everyone to fix them for one
+    // person. This runs only on the path where there is no partner, which is
+    // rare, and a failure means the column is not there yet.
+    let partnerDeletedAt = null;
+    if (!me.partner_profile_id) {
+      try {
+        const r = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${me.id}&select=partner_deleted_at`, { headers: svc });
+        if (r.ok) partnerDeletedAt = (await r.json().catch(() => []))?.[0]?.partner_deleted_at || null;
+      } catch { /* migration 059 not run */ }
+    }
+
+    if (!me.partner_profile_id && partnerDeletedAt) {
+      const orphan = await fetch(
+        `${supabaseUrl}/rest/v1/couple_results?or=(partner_a.eq.${me.id},partner_b.eq.${me.id})&select=*&limit=1`,
+        { headers: svc },
+      ).then((r) => (r.ok ? r.json().catch(() => []) : [])).then((rows) => rows?.[0] || null);
+
+      if (!orphan) {
+        return json({
+          ok: true, ready: false, reason: 'partner_deleted',
+          partnerDeletedAt,
+          self: mine ? personResults(mine, null) : null,
+        });
+      }
+
+      const viewerSide = orphan.partner_a === me.id ? 'a' : 'b';
+      const displayed = withContent(
+        withLabels(orphan.results), viewerSide, orphan.content_version ?? null,
+        { a: viewerSide === 'a' ? me.pronouns : null, b: viewerSide === 'a' ? null : me.pronouns },
+      );
+      return json({
+        ok: true, ready: true,
+        reason: 'partner_deleted',
+        partnerDeletedAt,
+        results: anonymizePartner(displayed, viewerSide),
+        owned: capabilitiesFor(me).ownership?.owned ?? undefined,
+        frozenAt: orphan.frozen_at || orphan.computed_at || null,
+      });
+    }
 
     // No partner linked yet: report self-report scoring rather than nothing, so
     // the app can show an interim read while waiting.

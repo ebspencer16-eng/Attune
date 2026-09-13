@@ -258,11 +258,35 @@ export default async function handler(req) {
   // The other partner's answers stay — they're part of that partner's own
   // data, and they didn't request deletion.
   try {
+    // partner_deleted_at is what lets the survivor be told the truth. Without
+    // it, "my partner deleted their account" and "I never linked with anyone"
+    // are the same state, and the product shows the second: a waiting screen
+    // naming a person who no longer exists.
     const { count } = await admin.from('profiles')
-      .update({ partner_profile_id: null, partner_joined: false }, { count: 'exact' })
+      .update(
+        { partner_profile_id: null, partner_joined: false, partner_deleted_at: new Date().toISOString() },
+        { count: 'exact' },
+      )
       .eq('partner_profile_id', userId);
     summary.partnerUnlinked = count || 0;
   } catch (e) { console.warn('[delete-account] partner unlink failed:', e?.message); }
+
+  // ── 4b. Mark the couple's frozen results as half orphaned ────────────────
+  //
+  // Migration 059 makes the row survive this deletion; this marks it, so
+  // nothing tries to recompute a result for a couple that is now one person,
+  // and so the read path knows to anonymize rather than to serve a name that
+  // has been deleted.
+  //
+  // Before 059 is run the column does not exist and this fails, which is
+  // harmless: the row is being cascade-deleted anyway, which is the behaviour
+  // 059 exists to change. Said out loud rather than swallowed.
+  try {
+    const { error: markErr } = await admin.from('couple_results')
+      .update({ deleted_partner_at: new Date().toISOString() })
+      .or(`partner_a.eq.${userId},partner_b.eq.${userId}`);
+    if (markErr) console.warn('[delete-account] results not marked (migration 059 may not be run):', markErr.message);
+  } catch (e) { console.warn('[delete-account] results not marked:', e?.message); }
 
   // ── 5. Null out feedback attribution ──────────────────────────────────────
   // The table is feedback_submissions (an earlier version of this code
