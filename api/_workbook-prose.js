@@ -39,7 +39,8 @@ export const DIM_CONTENT = {
     "prompts": [
       "After a big social event, what does each of you need in the next 24 hours?",
       "When does one of you feel most energized, and when does the other feel most depleted?",
-      "Is your current daily rhythm giving each person the kind of recovery they need?"
+      "Is your current daily rhythm giving each person the kind of recovery they need?",
+      "Is there anything either of you has been asking of the other that runs against their recharge style?"
     ],
     "thisWeek": "Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, name what you'll each need afterward. Then check in."
   },
@@ -50,7 +51,8 @@ export const DIM_CONTENT = {
     "prompts": [
       "When something bothers you, at what point do you typically share it, immediately, after processing, or only when asked?",
       "When one of you is struggling, does the other know? Or is it usually carried privately?",
-      "Is there a version of your emotional experience you share, and a version you hold back?"
+      "Is there a version of your emotional experience you share, and a version you hold back?",
+      "What would feel different if either of you shared more, or less?"
     ],
     "thisWeek": "Each of you shares one thing you'd normally hold back or let pass, not something big, just something that's been sitting there. Notice what happens."
   },
@@ -61,6 +63,7 @@ export const DIM_CONTENT = {
     "prompts": [
       "When was the last time either of you wanted to hear you were okay and did not say so?",
       "What does a long quiet stretch mean to each of you?",
+      "Which words land as reassurance, and which ones feel automatic?",
       "If each of you set the number, how often would it get said?"
     ],
     "thisWeek": "Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands."
@@ -72,7 +75,8 @@ export const DIM_CONTENT = {
     "prompts": [
       "Think of the last time you needed something and didn't get it. Did you ask directly, or did you signal?",
       "Is there something you've needed for a while that you haven't said clearly? What's the barrier?",
-      "Do you each know what the other needs right now? Has it been said, or are you guessing?"
+      "Do you each know what the other needs right now? Has it been said, or are you guessing?",
+      "What would make it easier for each of you to ask more directly?"
     ],
     "thisWeek": "Each of you names one thing you need from the other this week, specifically, without softening. \"I need you to ___.\" Notice what it feels like to ask that clearly."
   },
@@ -83,7 +87,8 @@ export const DIM_CONTENT = {
     "prompts": [
       "Can you think of a recent moment when one of you reached for connection and the other wasn't available?",
       "Are there ways either of you reaches for the other that get regularly missed, not out of rejection, but out of being absorbed?",
-      "What's the smallest thing each of you does that signals you want the other's attention?"
+      "What's the smallest thing each of you does that signals you want the other's attention?",
+      "What would it look like to be slightly more tuned in, without it feeling performative?"
     ],
     "thisWeek": "Once a day this week, when one of you makes a small bid, says something minor, reaches out physically, checks in, the other stops what they're doing and acknowledges it specifically."
   },
@@ -94,6 +99,7 @@ export const DIM_CONTENT = {
     "prompts": [
       "When something is bothering you, what does your ideal next few hours look like?",
       "When one of you is clearly upset and pulls back, what does that feel like for the other? What does the other do?",
+      "Is there a version of \"I need space\" that lands differently than open-ended silence?",
       "What agreement would make the next hard moment go better than the last?"
     ],
     "thisWeek": "When things are calm, not during conflict, tell each other: \"When I'm upset, what I need first is ___.\" Write it down. Refer to it next time."
@@ -104,6 +110,7 @@ export const DIM_CONTENT = {
     "gapText": "One of you considers things resolved when warmth returns. The other isn't repaired until there's been an explicit conversation. The informal partner often considers things over before the formal partner is ready.",
     "prompts": [
       "After a hard argument, what does \"okay again\" actually feel like for you? How do you know when you're there?",
+      "Is there a version of your last unresolved argument where one of you thought it was resolved and the other didn't?",
       "What would a repair conversation look like that actually works for both of you?",
       "Is there a past disagreement that never fully closed? What would it take to finish it?"
     ],
@@ -114,9 +121,10 @@ export const DIM_CONTENT = {
     "closeText": "{U} and {P} listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it.",
     "gapText": "One of you listens by going quiet. The other listens by engaging and drawing it out. The quiet can read as absence. The questions can read as pressure. Neither is what is happening.",
     "prompts": [
-      "When you are upset, do you want to be heard quietly or drawn out with questions?",
-      "Has one of you ever read the other's quiet as checking out? What was actually going on?",
-      "What is a small signal you could give that says 'I'm still with you' without breaking the silence?"
+      "When you bring something to each other, do you want to be heard, or do you want a response?",
+      "Has either of you ever read the other's quiet as not caring, or the other's questions as pushing?",
+      "In a hard moment, which do you need first: room to be heard, or active engagement?",
+      "How can each of you signal which kind of listening you need in the moment?"
     ],
     "thisWeek": "Before the next hard conversation, say which one you want: presence or engagement. One sentence, before you start."
   },
@@ -127,6 +135,7 @@ export const DIM_CONTENT = {
     "prompts": [
       "When did each of you last feel genuinely loved by the other? What was happening?",
       "What does each of you do that makes the other feel most cared for, even if it's something small?",
+      "Is there something you'd like more of that you haven't said clearly?",
       "Do you each know specifically how to make the other feel appreciated?"
     ],
     "thisWeek": "Each of you asks the other: \"What's one thing I do that makes you feel really loved that I might not realize has that effect?\" Then do more of it."
@@ -138,6 +147,7 @@ export const DIM_CONTENT = {
     "prompts": [
       "Is there something either of you does regularly that bothers the other that hasn't been said clearly? What's the barrier?",
       "When one of you offers a critical observation, what's the other's first instinct?",
+      "Can each of you tell the other when something isn't working without it becoming a bigger thing than it needs to be?",
       "What would make honest feedback easier in both directions?"
     ],
     "thisWeek": "Identify one small thing that bothered you recently that you let go without saying anything. Bring it up briefly, specifically: \"Hey, this thing last week, can I mention it?\" Notice what happens."
@@ -328,6 +338,25 @@ export const MOMENTS_Z = {
   }
 };
 
+/**
+ * The same six moments for two partners of the same type.
+ *
+ * ── W WAS THE ONLY ONE ────────────────────────────────────────────────────
+ * MOMENTS_SHARED_W existed and XX, YY and ZZ did not. The PDF showed W's
+ * words to all four, and its own comment said three more needed writing.
+ * Ellie, 13 Sep: "Write them for the others."
+ *
+ * ── WHAT EACH TYPE IS ─────────────────────────────────────────────────────
+ * From api/_type-engine.js: W engages and is open, X engages and is guarded,
+ * Y withdraws and is open, Z withdraws and is guarded. A same-type pair does
+ * not balance, it doubles, and that is what these are about: what two people
+ * with the same wiring do to each other in a moment, and the one move that
+ * breaks it.
+ *
+ * ── THE WORDS ARE MINE ────────────────────────────────────────────────────
+ * Written to match the W set's register and length. Ellie's to edit; it is
+ * R17 on her list.
+ */
 /** The six moments when both partners are W, where the advice differs from a mixed pair. */
 export const MOMENTS_SHARED_W = {
   "hard_workday": {
@@ -371,6 +400,144 @@ export const MOMENTS_SHARED_W = {
     "not": "Trading stress stories. Both venting at the same time, neither actually landing. You leave the conversation more wound up than you started.",
     "works": "When you're both in it, one takes the anchoring role for an hour. Listen to the other's stress fully, hold it, then switch. Sequential, not parallel.",
     "phrase": "Yours first tonight. I want to hear it before I bring mine in."
+  }
+};
+
+/** The six moments for two Xs. See the note above MOMENTS_SHARED_W. */
+export const MOMENTS_SHARED_X = {
+  "hard_workday": {
+    "moment": "Both of you are home. Both of you had a day. The kitchen gets tidied, the mail gets opened, and neither of you says what the day was like.",
+    "happening": "Xs come toward each other and hold the inside back. Two of you together means two people who want the company and do not volunteer the content. Being in the same room reads as connection, so the day goes unsaid and nobody notices it has.",
+    "not": "Waiting for the other person to open first. Both of you are doing it, so nobody does.",
+    "works": "One direct question with a specific answer in it. Not 'how was your day' but 'what was the worst part of today'. Xs answer a question readily. What you do not do is start.",
+    "phrase": "What was the worst ten minutes of your day?"
+  },
+  "quiet_worry": {
+    "moment": "One of you is carrying something. The routine is normal. Dinner happens. Nothing looks wrong, and something is.",
+    "happening": "An X under strain gets busier and more available, not quieter. Two Xs can both be managing something privately while being perfectly pleasant to each other, for weeks.",
+    "not": "Reading the normal behaviour as proof that nothing is wrong. For an X it is not evidence either way.",
+    "works": "Ask about the thing rather than the mood. 'How is the thing with your sister' gets an answer. 'Are you okay' gets a yes.",
+    "phrase": "I'm not asking how you are. I'm asking what's on your mind."
+  },
+  "during_conflict": {
+    "moment": "You are both in it, and you are both being reasonable. The voices stay level. The point keeps not landing.",
+    "happening": "Xs engage with a disagreement and keep the feeling out of it. Two of you can argue the facts for an hour without either of you saying what actually hurt, which is why it does not resolve.",
+    "not": "Winning the logic. You can both be right about the facts and neither of you has said the true thing yet.",
+    "works": "One of you names the feeling first, out loud, without justifying it. It will feel disproportionate to say. It is the part the other one cannot guess.",
+    "phrase": "Before we go further: this one landed harder than it should have, and I want to say why."
+  },
+  "after_conflict": {
+    "moment": "It is finished. You are both being kind. Neither of you has mentioned it since.",
+    "happening": "Xs repair through behaviour. Coffee gets made, the plan gets kept, the tone is warm. Two Xs can both feel repaired without either of you knowing the other does.",
+    "not": "Assuming the warmth means it is closed for both of you. It might be closed for one.",
+    "works": "Say the sentence anyway, even though it feels redundant. Behaviour is how you repair; words are how you check.",
+    "phrase": "Are we actually done with that, or just being nice about it?"
+  },
+  "wanting_closeness": {
+    "moment": "One of you keeps ending up in the same room. Sitting nearby. Suggesting something to do together.",
+    "happening": "An X asks for closeness by doing rather than saying. Two Xs get a lot of shared activity and not much stated wanting, and either of you can end up unsure whether you were chosen or just nearby.",
+    "not": "Adding another activity. More proximity does not answer the question that is actually being asked.",
+    "works": "Name the wanting once, plainly. It is the thing neither of you does by default, and it is the only thing that answers it.",
+    "phrase": "I don't want to do anything. I just want to be with you."
+  },
+  "external_stress": {
+    "moment": "Something outside the relationship is pressing on one of you. A deadline, a diagnosis, a family thing. Life at home carries on looking ordinary.",
+    "happening": "Under pressure an X takes on more, tightens up and stays present. Two Xs both do it, so the household runs beautifully and nobody has said they are struggling.",
+    "not": "Matching their competence with your own. Two people coping well is two people alone.",
+    "works": "Drop one thing deliberately and say you are dropping it. It gives the other person permission they will not ask for.",
+    "phrase": "I'm not doing dinner tonight. I'm at capacity, and I wanted you to know rather than guess."
+  }
+};
+
+/** The six moments for two Ys. See the note above MOMENTS_SHARED_W. */
+export const MOMENTS_SHARED_Y = {
+  "hard_workday": {
+    "moment": "You both come in and go quiet. Separate rooms, or the same room with a wall up. Neither of you has said a word about the day.",
+    "happening": "Ys need to come down before they can talk, and then they talk honestly. Two of you means two people decompressing at once, and the honest conversation keeps getting postponed because neither of you is ready at the same time.",
+    "not": "Reading the other person's retreat as being shut out. It is recovery, and it ends.",
+    "works": "Agree the time rather than the topic. 'After dinner' beats waiting for the moment to arrive, because for two Ys it often does not.",
+    "phrase": "I'm not ready yet. Nine o'clock, and I'll tell you the whole thing."
+  },
+  "quiet_worry": {
+    "moment": "One of you is somewhere else. Present in the room, not in the conversation. It has been a few days.",
+    "happening": "A Y goes inward first and says it fully later. Two Ys can both be inward at once, and the silence stops registering as unusual because it is what the house normally sounds like.",
+    "not": "Waiting for it to surface on its own. In a Y-Y pair the normal amount of quiet hides a lot.",
+    "works": "Ask once, directly, and then leave it with them. A Y will not answer on demand and will almost always come back to it.",
+    "phrase": "Something's been sitting with you. I'm not asking now. I'm telling you I noticed."
+  },
+  "during_conflict": {
+    "moment": "It got sharp. One of you has stopped talking. Then the other one does too.",
+    "happening": "Ys pull back to think rather than to punish. When you both do it, the conversation ends without ending, and two people sit in separate rooms rehearsing the honest version they would say if the other one asked.",
+    "not": "Treating the withdrawal as the end of the conversation. Neither of you means it that way, and both of you can read it that way.",
+    "works": "Name the pause as a pause and put a time on it. Ys keep their word about coming back, and the promise is what stops the silence turning into distance.",
+    "phrase": "I'm stopping, not leaving. Give me an hour and I'll come find you."
+  },
+  "after_conflict": {
+    "moment": "The heat is gone. You have both been quiet for a while. It is not clear to either of you whether it is over.",
+    "happening": "A Y needs the space first and the conversation second. Two Ys get the space right and skip the conversation, so the thing looks resolved and is only paused.",
+    "not": "Letting the calm stand in for the repair. Quiet is where a Y recovers, not where a Y closes things.",
+    "works": "Come back to it once, briefly, when you are both level. It does not need to be long. It needs to happen.",
+    "phrase": "I'm past it now. Can we say the last bit out loud so it's actually finished?"
+  },
+  "wanting_closeness": {
+    "moment": "One of you has come looking. Not for a conversation. For the other person to be there.",
+    "happening": "A Y reaching is a bigger move than it looks, because the default is inward. Two Ys can both want closeness at the same time and both wait, each reading the other's quiet as not now.",
+    "not": "Deciding from their stillness that they want to be left alone. Sometimes it is the opposite and neither of you will say so first.",
+    "works": "Make the small move without explaining it. Sit down next to them. Ys respond to presence faster than to a question.",
+    "phrase": "Not doing anything. Just sitting here with you."
+  },
+  "external_stress": {
+    "moment": "One of you is under real pressure from outside. The house has gone very quiet.",
+    "happening": "Ys handle strain by going in and then telling you the truth about it afterwards. When you are both under it, both of you go in, and the telling can be a long time coming.",
+    "not": "Protecting each other with silence. It is well meant and it leaves two people carrying things alone in the same house.",
+    "works": "Say the headline now and the detail later. A Y does not need to explain to say something is heavy.",
+    "phrase": "Short version: this week is bad. I'll tell you properly on Sunday."
+  }
+};
+
+/** The six moments for two Zs. See the note above MOMENTS_SHARED_W. */
+export const MOMENTS_SHARED_Z = {
+  "hard_workday": {
+    "moment": "Both of you are home, both of you had a day, and the evening passes without either of you saying anything about it.",
+    "happening": "Zs take space and keep the inside in. Two of you means a calm house and very little information. It works for years, and then something has been unsaid long enough that neither of you knows how to start.",
+    "not": "Taking the peace as proof that you are fine. It is proof that you are both doing what you do.",
+    "works": "Build a small habit that does not depend on either of you initiating. Same time, same question, short answer allowed. A structure carries what neither of you will start.",
+    "phrase": "One thing from today. You first."
+  },
+  "quiet_worry": {
+    "moment": "Something is wrong with one of you. There is no visible sign of it. There rarely is.",
+    "happening": "A Z absorbs and keeps going. With two Zs, nothing about the surface changes when something is badly wrong, so the other person has no signal to read even if they are looking.",
+    "not": "Waiting for a sign. In a Z-Z pair the sign does not come, and its absence means nothing.",
+    "works": "Ask on a schedule rather than on instinct. It feels mechanical and it is the only reliable way in, because neither of you volunteers and neither of you shows it.",
+    "phrase": "Checking in because it's Sunday, not because I think something's wrong. Anything I should know about?"
+  },
+  "during_conflict": {
+    "moment": "It sharpened, and then it stopped. Nobody left the room. Nobody said anything either.",
+    "happening": "Zs disengage to protect the relationship, not to punish. Two Zs shut it down almost instantly, which means the disagreement never actually happens and never actually ends.",
+    "not": "Calling it resolved because it stopped. It did not resolve. It went underground, and it will come back attached to something small.",
+    "works": "Put it in writing if saying it is too much. Zs will often write what they will not speak, and written is a great deal better than nothing.",
+    "phrase": "I can't do this out loud right now. I'm going to write it down and give it to you tonight."
+  },
+  "after_conflict": {
+    "moment": "A day has passed. Things are normal again. Neither of you has mentioned it.",
+    "happening": "Zs repair by letting time do it. Two Zs get very good at moving on and never confirming, so the same argument can recur for years without either of you knowing it was never closed.",
+    "not": "Letting normal stand in for repaired. For two Zs it always will, and it is the thing that accumulates.",
+    "works": "One sentence, once, even days later. It does not have to reopen anything. It has to acknowledge that something happened.",
+    "phrase": "About Tuesday. I'm not bringing it back. I just didn't want it to go unsaid."
+  },
+  "wanting_closeness": {
+    "moment": "One of you wants to be close and has not said so. The evening looks exactly like every other evening.",
+    "happening": "A Z asks for closeness in very small ways, or not at all. When both of you are Zs, the signals are small enough on both sides that they can pass each other completely.",
+    "not": "Expecting to be read. Neither of you is going to catch a signal that quiet, and neither of you is failing when you miss it.",
+    "works": "Make it explicit and make it easy to say yes to. A Z will accept an invitation far more readily than they will issue one.",
+    "phrase": "Come sit with me for ten minutes."
+  },
+  "external_stress": {
+    "moment": "Something hard is happening to one of you. The routine holds. Everything gets done.",
+    "happening": "Under pressure a Z contracts and carries on. Two Zs under pressure produce a household that looks completely fine and two people managing alone, in the same rooms, at the same time.",
+    "not": "Admiring the competence. Both of you are good at this, and being good at it is what keeps it invisible.",
+    "works": "Say the fact without the feeling, which is a Z's easiest route in. 'This is happening' asks for nothing and tells the other person everything they need.",
+    "phrase": "Something's going on. I don't want to talk about it yet. I wanted you to know it's there."
   }
 };
 

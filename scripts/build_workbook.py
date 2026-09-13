@@ -450,6 +450,13 @@ MOMENTS_FOR_X_DAVID = MOMENTS_X
 # This block covers same-type W pairings (Initiator + Initiator). Three more
 # blocks (XX, YY, ZZ) need to be written for the other same-type pairings.
 MOMENTS_SHARED_W = _PROSE['MOMENTS_SHARED_W']
+MOMENTS_SHARED_X = _PROSE['MOMENTS_SHARED_X']
+MOMENTS_SHARED_Y = _PROSE['MOMENTS_SHARED_Y']
+MOMENTS_SHARED_Z = _PROSE['MOMENTS_SHARED_Z']
+SHARED_MOMENTS = {
+    'W': MOMENTS_SHARED_W, 'X': MOMENTS_SHARED_X,
+    'Y': MOMENTS_SHARED_Y, 'Z': MOMENTS_SHARED_Z,
+}
 
 SITUATIONS = [
     {'key': 'quiet_night',       'title': 'At dinner on a quiet night',                 'blurb': 'Low-stakes depth.'},
@@ -2783,13 +2790,11 @@ def build_full_workbook(same_type=False, is_service=False):
     u_type = type_id[0]
     p_type = type_id[1]
     if same_type:
-        # Same-type: one shared section. We only have content for shared W
-        # right now (MOMENTS_SHARED_W). If/when MOMENTS_SHARED_X/Y/Z are
-        # written, look them up by u_type the same way as TYPE_MOMENTS.
+        # Same-type: one shared section, from that type's own block. For a
+        # while only W had one and every same-type couple saw W's words; all
+        # four exist now.
         pages.append(build_working_knowledge_same_type_page(
-            pn,
-            u=COUPLE['u'], p=COUPLE['p'],
-            type_letter=u_type, moments_data=MOMENTS_SHARED_W,
+            type_letter=u_type, moments_data=SHARED_MOMENTS.get(u_type, MOMENTS_SHARED_W),
         ))
         pn += 1
     else:

@@ -1,3 +1,5 @@
+import { MOMENTS_W, MOMENTS_X, MOMENTS_Y, MOMENTS_Z } from './_workbook-prose.js';
+
 // api/_workbook-content.js
 // Shared content for the personalized workbook generator.
 // Underscore prefix = not an API route (Vercel ignores it).
@@ -21,128 +23,20 @@ export const DIM_META = {
 // All strings support {U} and {P} substitution (caller handles).
 // NOTE: the reassurance entries below are a first draft pending Carolina's
 // clinical pass. Everything else here has been through review.
-export const DIM_CONTENT = {
-  energy: {
-    measures: 'How each of you recovers, socially, emotionally, physically. Inward: solitude recharges. Outward: connection recharges. This shapes your weekend default, how you decompress, and what a good evening looks like.',
-    closeText: '{U} and {P} recover in similar ways. This quietly removes friction, you\'re rarely on opposite ends after a hard week.',
-    gapText: 'One of you recharges through solitude; the other through connection. After a long week, you\'re in very different places. Without a framework, the inward partner\'s need for quiet can read as withdrawal, and the outward partner\'s reach for people can feel exhausting.',
-    prompts: [
-      'After a big social event, what does each of you need in the next 24 hours?',
-      'When does one of you feel most energized, and when does the other feel most depleted?',
-      'Is your current daily rhythm giving each person the kind of recovery they need?',
-      'Is there anything either of you has been asking of the other that runs against their recharge style?',
-    ],
-    thisWeek: 'Pick one upcoming situation likely to produce different energy states, a party, a family visit, a busy week. Before it happens, name what you\'ll each need afterward. Then check in.',
-  },
-  expression: {
-    measures: 'How freely each of you shares what\'s going on internally, not the content of feelings, but how naturally they surface. Expressive partners wear their emotional state; guarded partners process privately and share selectively.',
-    closeText: '{U} and {P} are operating in the same register. Neither tends to feel overwhelmed by too much sharing or starved by too little.',
-    gapText: 'One of you shares as feelings arise; the other waits until they\'ve processed. The expressive partner may experience the guarded one\'s silence as emotional unavailability. The guarded partner may experience the expressive one\'s openness as pressure.',
-    prompts: [
-      'When something bothers you, at what point do you typically share it, immediately, after processing, or only when asked?',
-      'When one of you is struggling, does the other know? Or is it usually carried privately?',
-      'Is there a version of your emotional experience you share, and a version you hold back?',
-      'What would feel different if either of you shared more, or less?',
-    ],
-    thisWeek: 'Each of you shares one thing you\'d normally hold back or let pass, not something big, just something that\'s been sitting there. Notice what happens.',
-  },
-  reassurance: {
-    measures: 'How each of you stays sure of where you stand. Voiced: hearing it said keeps you close. Assumed: security is the baseline and does not need confirming. This shapes what a long quiet stretch means to each of you.',
-    closeText: '{U} and {P} need reassurance in similar amounts. Neither of you is left waiting for a signal the other never thought to send.',
-    gapText: 'One of you needs where you stand said out loud. The other treats it as settled and does not think to say it. The voiced partner can read the quiet as distance. The assumed partner can read the asking as doubt. Neither reading is accurate, and both feel true in the moment.',
-    prompts: [
-      'When was the last time either of you wanted to hear you were okay and did not say so?',
-      'What does a long quiet stretch mean to each of you?',
-      'Which words land as reassurance, and which ones feel automatic?',
-      'If each of you set the number, how often would it get said?',
-    ],
-    thisWeek: 'Once this week, say where you stand out loud without being asked for it. One sentence. Notice how it lands.',
-  },
-  needs: {
-    measures: 'How directly each partner communicates needs, whether they ask outright or signal indirectly. Direct communicators state needs explicitly. Indirect communicators hint, hope to be noticed, or pull back.',
-    closeText: '{U} and {P} communicate needs with similar directness. There are fewer unspoken expectations, and less of the resentment that builds when needs go unnamed.',
-    gapText: 'One of you asks directly; the other signals. The direct partner may feel set up to fail, they can\'t respond to what they can\'t see. The indirect partner may feel chronically unseen. This is one of the most common sources of quiet resentment in long-term relationships.',
-    prompts: [
-      'Think of the last time you needed something and didn\'t get it. Did you ask directly, or did you signal?',
-      'Is there something you\'ve needed for a while that you haven\'t said clearly? What\'s the barrier?',
-      'Do you each know what the other needs right now? Has it been said, or are you guessing?',
-      'What would make it easier for each of you to ask more directly?',
-    ],
-    thisWeek: 'Each of you names one thing you need from the other this week, specifically, without softening. "I need you to ___." Notice what it feels like to ask that clearly.',
-  },
-  bids: {
-    measures: 'How reliably each partner notices and responds to small, everyday bids for connection, a comment, a gesture, a look. These micro-moments are the primary currency of sustained intimacy in long-term relationships.',
-    closeText: '{U} and {P} both notice and respond naturally to each other\'s small bids. This is one of the strongest predictors of relationship satisfaction over time.',
-    gapText: 'One partner tends to miss bids, absorbed in tasks, not naturally tracking the relational current. The other tracks them instinctively. Repeated missed bids can feel like dismissal even when none is intended.',
-    prompts: [
-      'Can you think of a recent moment when one of you reached for connection and the other wasn\'t available?',
-      'Are there ways either of you reaches for the other that get regularly missed, not out of rejection, but out of being absorbed?',
-      'What\'s the smallest thing each of you does that signals you want the other\'s attention?',
-      'What would it look like to be slightly more tuned in, without it feeling performative?',
-    ],
-    thisWeek: 'Once a day this week, when one of you makes a small bid, says something minor, reaches out physically, checks in, the other stops what they\'re doing and acknowledges it specifically. Actually engage for 30 seconds.',
-  },
-  conflict: {
-    measures: 'How each partner responds when something feels wrong, whether the instinct is to engage immediately or need space first. This is about timing, not care. Both instincts are legitimate; misread, they create one of the most persistent loops in relationships.',
-    closeText: '{U} and {P} move toward resolution with similar timing. This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic.',
-    gapText: 'One of you needs to address things immediately; the other needs space first. Without a framework, the person who needs resolution reads the other\'s silence as avoidance. The person who needs space reads the other\'s urgency as pressure. Both are behaving in ways that feel self-evidently correct, which is why this pattern is so persistent without an explicit agreement.',
-    prompts: [
-      'When something is bothering you, what does your ideal next few hours look like?',
-      'When one of you is clearly upset and pulls back, what does that feel like for the other? What does the other do?',
-      'Is there a version of "I need space" that lands differently than open-ended silence?',
-      'What agreement would make the next hard moment go better than the last?',
-    ],
-    thisWeek: 'When things are calm, not during conflict, tell each other: "When I\'m upset, what I need first is ___." Write it down. Refer to it next time.',
-  },
-  repair: {
-    measures: 'What each partner needs to feel genuinely repaired after conflict. One end needs explicit verbal acknowledgment, the words, the conversation, the closure. The other can move forward once the warmth is back, without needing the formal exchange.',
-    closeText: '{U} and {P} both know what "okay again" feels like and reach it in similar ways. This shortens the distance between conflict and repair.',
-    gapText: 'One of you considers things resolved when warmth returns. The other isn\'t repaired until there\'s been an explicit conversation. The informal partner often considers things over before the formal partner is ready, which means the formal partner is repeatedly left unrepaired, while the informal one is confused by what still feels open.',
-    prompts: [
-      'After a hard argument, what does "okay again" actually feel like for you? How do you know when you\'re there?',
-      'Is there a version of your last unresolved argument where one of you thought it was resolved and the other didn\'t?',
-      'What would a repair conversation look like that actually works for both of you?',
-      'Is there a past disagreement that never fully closed? What would it take to finish it?',
-    ],
-    thisWeek: 'After the next friction moment, however small, check in explicitly: "Are we actually okay, or are we both just ready to be done?" Name the difference out loud.',
-  },
-  listening: {
-    measures: "How each partner shows they're listening when the other brings something up. One end receives quietly and sits with it. The other engages actively, reflecting back, asking, responding. Both are real listening. They land differently.",
-    closeText: "{U} and {P} listen in compatible ways. When you bring something to each other, the response tends to match what the speaker wanted, so neither has to translate being heard.",
-    gapText: "One of you listens by going quiet and staying with it. The other listens by responding, asking, reflecting back. The quiet listener can read questions as pressure. The active listener can read silence as distance. You're both listening, just showing it in different languages.",
-    prompts: [
-      "When you bring something to each other, do you want to be heard, or do you want a response?",
-      "Has either of you ever read the other's quiet as not caring, or the other's questions as pushing?",
-      "In a hard moment, which do you need first: room to be heard, or active engagement?",
-      "How can each of you signal which kind of listening you need in the moment?",
-    ],
-    thisWeek: "This week, before responding when your partner brings something up, ask once: 'do you want me to just listen, or do you want me to weigh in?' Then do that.",
-  },
-  love: {
-    measures: 'How each partner most naturally gives and receives affection. Specifically: does verbal expression land most deeply, or does love register more through presence, action, and shared experience?',
-    closeText: '{U} and {P} express and receive love through compatible channels. When care is expressed in a language the other naturally receives, the signal lands without translation.',
-    gapText: 'One of you feels most loved through verbal affirmation; the other through presence, touch, or shared activity. Both may be genuinely expressing love, but in a language the other doesn\'t fully receive. Care is being offered but not landing, and both people can feel quietly undersatisfied without knowing why.',
-    prompts: [
-      'When did each of you last feel genuinely loved by the other? What was happening?',
-      'What does each of you do that makes the other feel most cared for, even if it\'s something small?',
-      'Is there something you\'d like more of that you haven\'t said clearly?',
-      'Do you each know specifically how to make the other feel appreciated?',
-    ],
-    thisWeek: 'Each of you asks the other: "What\'s one thing I do that makes you feel really loved that I might not realize has that effect?" Then do more of it.',
-  },
-  feedback: {
-    measures: 'How comfortably each partner gives and receives direct, honest feedback. Guarded partners tend toward defensiveness. Open partners can engage with critical input without feeling attacked, and tend to surface concerns more readily.',
-    closeText: '{U} and {P} are in a similar place on feedback. This creates a low-friction environment for honest conversations, things that need to be said, get said.',
-    gapText: 'One of you avoids direct feedback; the other can engage with it. The open partner may feel like things go unsaid for too long. The guarded partner may feel like honest observations come as attacks, even when not intended that way. Important things compound in silence.',
-    prompts: [
-      'Is there something either of you does regularly that bothers the other that hasn\'t been said clearly? What\'s the barrier?',
-      'When one of you offers a critical observation, what\'s the other\'s first instinct?',
-      'Can each of you tell the other when something isn\'t working without it becoming a bigger thing than it needs to be?',
-      'What would make honest feedback easier in both directions?',
-    ],
-    thisWeek: 'Identify one small thing that bothered you recently that you let go without saying anything. Bring it up briefly, specifically: "Hey, this thing last week, can I mention it?" Notice what happens.',
-  },
-};
+/**
+ * What each dimension measures, and what to do about a gap in it.
+ *
+ * ── IT LIVES IN api/_workbook-prose.js NOW ────────────────────────────────
+ * There were two versions of this: one here for the .docx and one in the PDF
+ * builder, identical in 26 of 40 fields and different in the other 14. Ellie,
+ * 13 Sep: "Use the PDF's personalized text."
+ *
+ * So the PDF's wording won every field, and the prompt lists were merged
+ * rather than replaced: the .docx list already contained every prompt the PDF
+ * had, sometimes one more, so taking the longer one keeps the PDF's questions
+ * and loses none. Forty prompts kept, none dropped.
+ */
+export { DIM_CONTENT } from './_workbook-prose.js';
 
 // Expectations domain definitions — 6-domain Phase 3 model.
 // Each domain has three alignment-state texts (compatible/discuss/different),
@@ -642,164 +536,31 @@ export const WHEN_THIS_SHOWS_UP = {
 // ── Six Moments Library scenes ──────────────────────────────────────────
 // 6 moments × 4 individual types = 24 scenes. Each scene has 4 blocks.
 // The subject partner is referred to as "they" throughout.
-export const SCENE_DRAFTS = {
-  // ── Type W — Open + Engages quickly ────────────────────────────────────
-  W: {
-    hard_workday: {
-      happening: 'A hard day shows on them. They want it out, to vent, to process aloud, to hear that someone gets it. Holding it alone feels heavier than the day itself.',
-      notTo: 'Don\'t jump straight to fixing. They\'re not asking for an immediate solution, they\'re asking to be listened to.',
-      works: 'Sit down, ask what kind of day it was, and let them talk with no interruption. The work is being a listening ear, not a fixer.',
-      phrase: '"Tell me the whole story. I\'ve got time."',
-    },
-    quiet_worry: {
-      happening: 'They usually say what\'s on their mind, so unspoken quiet is often information. The worry has probably grown from small to medium because they haven\'t gotten to externalize it yet.',
-      notTo: 'Don\'t ignore the quiet. For them, silence for more than a day usually means something\'s there.',
-      works: 'Name what you\'re noticing. Make it easy for them to start talking: a short walk, a casual moment, no big setup.',
-      phrase: '"You\'ve been quieter than usual. What\'s sitting with you?"',
-    },
-    during_conflict: {
-      happening: 'They\'re in it. Feelings online, words coming fast. They want to solve it now, in this conversation, while the heat is useful.',
-      notTo: 'Don\'t shut down or withdraw. Withdrawal can read as \'you don\'t care\' and may make them press harder.',
-      works: 'Stay in the room. Slow the pace. The goal is to add air, not match the speed. Name what you\'re hearing before you respond.',
-      phrase: '"I\'m here. Say more before I respond."',
-    },
-    after_conflict: {
-      happening: 'They want the closing to happen cleanly. Unresolved residue sits badly with them. If they sense the conversation was swept rather than closed, they\'ll often loop back to it.',
-      notTo: 'Don\'t leave it implicit. They tend to read \'we moved on\' as \'we haven\'t actually handled this.\'',
-      works: 'Say out loud that you\'re good. Name what you understood and what you\'re taking from it. Physical reconnection helps: a hug, touch, sitting close.',
-      phrase: '"I heard you. I\'m sorry for my part. We\'re good."',
-    },
-    wanting_closeness: {
-      happening: 'They\'re reaching, warm, wanting attention, wanting to be seen. The bid is often obvious: a hand, a story, a little mischief. It\'s a bid, not a demand.',
-      notTo: 'Don\'t brush past it because you\'re mid-task. Missed bids accumulate and can create the \'you don\'t want me\' story.',
-      works: 'Stop what you\'re doing for thirty seconds. Turn toward them. The energy you give often matters more than the duration.',
-      phrase: '"Hi. I see you. Come here."',
-    },
-    external_stress: {
-      happening: 'Something outside the relationship (work, family, health) is pressing on them. The stress usually surfaces in them: irritable, more physical, wanting to talk it through.',
-      notTo: 'Don\'t take the irritability personally. It\'s rarely about you, even when it lands on you.',
-      works: 'Name that you see the load. Ask what would actually help: a vent session, a quiet night, a plan. Don\'t assume.',
-      phrase: '"You\'re carrying a lot right now. What do you need from me this week?"',
-    },
-  },
-
-  // ── Type X — Guarded + Engages quickly ─────────────────────────────────
-  X: {
-    hard_workday: {
-      happening: 'They turn inward after a rough day. Once they\'ve processed internally they could bring feelings to the surface but may not want to relive the feelings aloud. They probably want to move past it.',
-      notTo: 'Don\'t push them to talk about feelings while they\'re still sorting. It may feel like prodding and shut them down further.',
-      works: 'Ease. Hand them some water, start dinner, make the environment low-demand. They\'ll come up for air when they\'re ready.',
-      phrase: '"No need to talk. I\'ll start something for dinner."',
-    },
-    quiet_worry: {
-      happening: 'They don\'t always surface worry voluntarily. They tend to process internally and bring only what\'s resolved, so if it shows, it\'s likely been there for a while.',
-      notTo: 'Don\'t press for a feelings-first conversation. Start from facts and intent.',
-      works: 'Ask what they\'re thinking about, not how they\'re feeling. Let them lead into the emotional layer if they want to.',
-      phrase: '"What\'s been on your mind lately?"',
-    },
-    during_conflict: {
-      happening: 'They want to resolve it, but calmly. The emotional heat of a conversation can feel counterproductive to them, even when it\'s productive to you.',
-      notTo: 'Don\'t read their composure as \'not caring.\' And don\'t push for a big emotional moment during the conflict itself.',
-      works: 'Match their register. Use specific, concrete language. The resolution you\'re both after is often more available in the logic than the intensity.',
-      phrase: '"Let\'s find the thing we actually disagree on and stay there."',
-    },
-    after_conflict: {
-      happening: 'Once it\'s logically resolved, they tend to move on. They\'re usually not looking for a long reconciliation debrief. The hug is nice, but the repair was in the agreement.',
-      notTo: 'Don\'t relitigate what you already settled. Don\'t require emotional processing beyond what they volunteer.',
-      works: 'Confirm the agreement plainly, then move forward. Warmth matters, but it doesn\'t need a long performance.',
-      phrase: '"Good talk. We\'re aligned. Onward."',
-    },
-    wanting_closeness: {
-      happening: 'Their bid is often practical rather than verbal: being physically nearby, watching something together, doing a shared task. Closeness can come through proximity and parallel activity.',
-      notTo: 'Don\'t demand more emotional articulation than they\'re offering. \'Why are you being weird\' is the wrong framing.',
-      works: 'Join the activity. Sit on the same couch. Let closeness build through presence, not through a conversation about it.',
-      phrase: '"Come sit over here while I do this."',
-    },
-    external_stress: {
-      happening: 'External stress tends to get compartmentalized. They may seem fine until they\'re not, and they usually don\'t broadcast the load.',
-      notTo: 'Don\'t wait for them to name it. They often won\'t.',
-      works: 'Take something off their plate without asking permission. Small, specific, practical. Logistics before emotions.',
-      phrase: '"I\'ve got dinner and the kids tonight. Go do what you need to do."',
-    },
-  },
-
-  // ── Type Y — Open + Needs space ────────────────────────────────────────
-  Y: {
-    hard_workday: {
-      happening: 'They\'re fried. They\'ll process feelings eventually, but first they probably need decompression time alone to reset.',
-      notTo: 'Don\'t meet them at the door with questions. Arrival is the worst time to talk about it.',
-      works: 'A soft landing. A quiet welcome, maybe a drink or a shower, and the clear signal that they can take a beat. The conversation will be more productive later.',
-      phrase: '"Take a bit. I\'m here when you\'re ready."',
-    },
-    quiet_worry: {
-      happening: 'They will usually share worries, but only after they\'ve had enough space to sit with them privately first. Prolonged quiet often means the sitting-with hasn\'t finished yet.',
-      notTo: 'Don\'t push for the conversation before they\'ve had time with it alone. You\'ll likely get a surface version and they may resent the interruption.',
-      works: 'Make a window later in the day. A shared activity that invites talking without requiring it, like a walk or a drive. They\'ll talk when the moment feels right.',
-      phrase: '"Want to go on a walk after dinner?"',
-    },
-    during_conflict: {
-      happening: 'They\'re expressive but can get overwhelmed mid-conflict. When the overwhelm hits, their ability to form words drops, even though they have plenty to say.',
-      notTo: 'Don\'t flood them with more input when they\'re at capacity. \'Answer me\' is exactly wrong.',
-      works: 'Offer a pause. Not an escape, a pause with a return time. Say when you\'ll come back to it, and mean it.',
-      phrase: '"Let\'s take twenty minutes and come back. I\'m not dropping this."',
-    },
-    after_conflict: {
-      happening: 'They need time to feel settled before they know if things are actually okay. They\'ll often come back to it, maybe hours later, maybe the next morning, with the final piece to add.',
-      notTo: 'Don\'t declare it done before they\'re ready. And don\'t be surprised when they bring it back up after it seemed closed.',
-      works: 'Leave the door open. Check in the next day with no agenda. Let them finish processing in their own rhythm.',
-      phrase: '"Still thinking about yesterday? Anything else you wanted to say?"',
-    },
-    wanting_closeness: {
-      happening: 'Their bid for closeness is often tentative, a little shy, a little soft. They want to be met, but they likely won\'t chase if you miss the first one or two.',
-      notTo: 'Don\'t miss the quiet version. Their bid is gentle by design.',
-      works: 'Match their energy with warmth but not intensity. Soft attention. A slow turning toward rather than a big dramatic response.',
-      phrase: '"I was just thinking about you. Come here."',
-    },
-    external_stress: {
-      happening: 'External stress often shows up as withdrawal: less energy for the relationship, earlier bedtimes, a kind of muted version of them.',
-      notTo: 'Don\'t interpret the withdrawal as being about you. And don\'t try to jolly them out of it.',
-      works: 'Protect their rest. Lower the relational demand for the week. Trust that they\'ll come back when the load lifts.',
-      phrase: '"This week can be low-key. I\'ve got the logistics."',
-    },
-  },
-
-  // ── Type Z — Guarded + Needs space ─────────────────────────────────────
-  Z: {
-    hard_workday: {
-      happening: 'They come home and go quiet. Hard days don\'t spill, they get shelved. Setting the feelings aside is the recovery.',
-      notTo: 'Don\'t ask how their day was and expect a real answer right away. Don\'t read the silence as distance from you.',
-      works: 'Give them an hour or two and don\'t hover. Your partner processes best in solitude, and you\'ll get more of them later if you give space now.',
-      phrase: '"I\'ll be in the living room whenever."',
-    },
-    quiet_worry: {
-      happening: 'Their worry rarely surfaces on its own. They hold it, sort it, and may decide it\'s not worth bringing up. By the time you notice, it\'s often been there a while.',
-      notTo: 'Don\'t corner them about it. A direct \'what\'s wrong\' almost always gets a \'nothing.\'',
-      works: 'Mention a specific, concrete observation. Then give them room to respond in their own time, even a day later. The window stays open longer than you think.',
-      phrase: '"You seemed off at dinner. I\'m here if you want to talk."',
-    },
-    during_conflict: {
-      happening: 'They may go quiet or flat mid-conflict. It\'s not stonewalling. Their internal processor is struggling to keep up with the input while also managing the feelings.',
-      notTo: 'Don\'t keep talking at them when they\'ve gone quiet. More words is the opposite of what helps.',
-      works: 'Say you\'re willing to pick this up later. Give them a clear return time and then honor it. They\'ll likely come back with more to say than they had in the moment.',
-      phrase: '"I want to hear you. Let\'s come back to this tomorrow."',
-    },
-    after_conflict: {
-      happening: 'They often go even quieter after conflict than during. They\'re rebuilding the relationship internally and it can take time. They\'re not holding a grudge.',
-      notTo: 'Don\'t require them to perform repair on your timeline. Don\'t read their quiet as punishment.',
-      works: 'Low-maintenance presence. Don\'t pretend nothing happened, but don\'t require processing either. Normal kindness, normal routines, and patience.',
-      phrase: '"No pressure to talk about it. Just glad you\'re here."',
-    },
-    wanting_closeness: {
-      happening: 'Their closeness bids may be the subtlest you\'ll see: a touch on the arm, sitting closer than usual, a small act of care. If you miss it, they often won\'t try again that day.',
-      notTo: 'Don\'t be skeptical of the bid because it\'s quiet. Don\'t need them to explain or repeat it.',
-      works: 'Receive it. Match the register. A hand back, a leaning in, a small acknowledgement that you noticed. Nothing big.',
-      phrase: '"I like when you do that."',
-    },
-    external_stress: {
-      happening: 'External stress can make them even more internal. They\'ll handle it alone unless explicitly invited not to, and even then the invitation may take time to sink in.',
-      notTo: 'Don\'t wait for a crisis signal. You\'ll often miss the chance if you do.',
-      works: 'Name what you\'re seeing. Offer specific help, not a general \'let me know.\' Then let them choose when to take you up on it.',
-      phrase: '"I\'m taking dinner off your list this week. Whatever else is helpful, tell me."',
-    },
-  },
-};
+/**
+ * The six moments, per individual type, as the .docx has always named them.
+ *
+ * ── THE WORDS ARE THE PDF'S NOW ───────────────────────────────────────────
+ * Every one of the 96 fields here differed from the PDF builder's version of
+ * the same six moments, and the PDF's is written with {U} and {P} so it names
+ * the two people. Ellie chose that one.
+ *
+ * Derived from MOMENTS_W/X/Y/Z rather than copied, so there is one place to
+ * edit. The field names are kept as they were, because scripts/_shared_drafts
+ * and the review-document generator read them: `notTo` is the PDF's `not`.
+ *
+ * `moment`, the line that sets the scene, has no counterpart in the old .docx
+ * version. It is carried through, and the moment card draws it.
+ */
+export const SCENE_DRAFTS = Object.fromEntries(
+  Object.entries({ W: MOMENTS_W, X: MOMENTS_X, Y: MOMENTS_Y, Z: MOMENTS_Z })
+    .map(([letter, moments]) => [
+      letter,
+      Object.fromEntries(Object.entries(moments).map(([key, m]) => [key, {
+        moment: m.moment,
+        happening: m.happening,
+        notTo: m.not,
+        works: m.works,
+        phrase: m.phrase,
+      }])),
+    ]),
+);

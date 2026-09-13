@@ -14,7 +14,13 @@ import {
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
   TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
-import { MOMENTS_SHARED_W, SITUATION_PROMPTS } from './_workbook-prose.js';
+import {
+  MOMENTS_SHARED_W, MOMENTS_SHARED_X, MOMENTS_SHARED_Y, MOMENTS_SHARED_Z,
+  SITUATION_PROMPTS,
+} from './_workbook-prose.js';
+
+/** The same-type moment set for each individual type. */
+const SHARED_MOMENTS = { W: MOMENTS_SHARED_W, X: MOMENTS_SHARED_X, Y: MOMENTS_SHARED_Y, Z: MOMENTS_SHARED_Z };
 import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText, scoreResponsibilityPair, scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS, computeIndividualTypeCode, perDimensionCoupleType } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
@@ -2039,10 +2045,15 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
   // Substitute the names. Scene bodies use "they" / "them" for the subject,
   // so we only need name substitution in the few cases the source uses them
   // explicitly. Phrases are direct quotes the other partner can say.
-  const happeningText = scene.happening || `(scene missing for type ${typeLetter}, moment ${moment.key})`;
-  const notToText     = scene.notTo     || '';
-  const worksText     = scene.works     || '';
-  const phraseText    = scene.phrase    || '';
+  // {U} is the person this card is about and {P} is the other one, so the
+  // substitution follows the card rather than the reader. The old .docx text
+  // said "they" and needed no names; the chosen text names both people.
+  const sub = (t) => fill(t || '', subjectName, otherName);
+  const sceneText     = sub(scene.moment);
+  const happeningText = sub(scene.happening) || `(scene missing for type ${typeLetter}, moment ${moment.key})`;
+  const notToText     = sub(scene.notTo);
+  const worksText     = sub(scene.works);
+  const phraseText    = sub(scene.phrase);
 
   return [
     // Moment header: big numeral + title on one line
@@ -2057,6 +2068,10 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
     new Paragraph({ spacing: { before: 0, after: 180 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: PURPLE, space: 4 } },
       children: [new TextRun('')] }),
+
+    // The scene, which the .docx had no counterpart for until the two versions
+    // of these cards became one. It sets up the moment before explaining it.
+    ...(sceneText ? [rowLabel('The moment', MUTED), rowBody(sceneText)] : []),
 
     rowLabel(`What's happening for ${subjectName}`, PURPLE),
     rowBody(happeningText),
@@ -2092,17 +2107,12 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
  * notes to ourselves. The content existed the whole time, in the PDF builder.
  *
  * ── WHICH CONTENT ─────────────────────────────────────────────────────────
- * MOMENTS_SHARED_W is written for two Ws. There is no shared block for XX, YY
- * or ZZ; the Python's own comment says three more need writing, and it shows
- * the W text to everybody in the meantime. That is not repeated here: an XX
- * couple reading advice written about Ws is worse than reading the per-type
- * card, which is at least about them. So same-type W gets the shared card and
- * the others fall back to their own type's card.
- *
- * The three missing blocks are a copy gap, and they are in TASKS.md.
+ * The set for that type, from api/_workbook-prose.js. For a while only W had
+ * one, and an XX couple was shown their per-type cards instead of somebody
+ * else's words. All four exist now.
  */
 function buildMomentCardShared(moment, u, p, typeLetter) {
-  const shared = MOMENTS_SHARED_W[moment.key] || {};
+  const shared = SHARED_MOMENTS[typeLetter]?.[moment.key] || {};
   const rowLabel = (label, color) => new Paragraph({
     spacing: { before: 200, after: 80 },
     children: [run(label, { size: 16, bold: true, color: color || MUTED, allCaps: true })],
@@ -2149,13 +2159,7 @@ function buildWorkingKnowledge(u, p, coupleType) {
   const [typeU, typeP] = partnerTypes(coupleType);
   const sameType = typeU === typeP;
 
-  // The shared card is written for two Ws and only for two Ws. An XX, YY or ZZ
-  // couple gets the per-type cards instead, which are at least about them; the
-  // three missing shared blocks are a copy gap and are in TASKS.md. Showing W's
-  // words to an XX couple is what the PDF builder does today, and doing it in
-  // a second format would double the number of people reading advice written
-  // about somebody else.
-  if (sameType && typeU === 'W') {
+  if (sameType) {
     return [
       pb(),
       new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`How you two should approach specific situations`, { color: PURPLE })] }),

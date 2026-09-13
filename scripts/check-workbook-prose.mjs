@@ -113,6 +113,29 @@ if (missing.length) {
   }
 }
 
+// ── 3b. Every type has its own same-type block ────────────────────────────
+//
+// Only W had one. Both builders fell back to W's words for XX, YY and ZZ, so
+// three couples in ten read advice written about somebody else and nothing
+// said so. A missing block now fails rather than falling back quietly.
+{
+  const prose = await import('../api/_workbook-prose.js');
+  const missing = ['W', 'X', 'Y', 'Z'].filter((t) => {
+    const block = prose[`MOMENTS_SHARED_${t}`];
+    if (!block) return true;
+    const moments = Object.values(block);
+    if (moments.length !== 6) return true;
+    return !moments.every((m) => ['moment', 'happening', 'not', 'works', 'phrase']
+      .every((f) => typeof m[f] === 'string' && m[f].trim().length > 20));
+  });
+  if (missing.length) {
+    console.error(`[check-workbook-prose] no same-type block for: ${missing.join(', ')}.`);
+    console.error('  Both builders would fall back to W, and those couples would read');
+    console.error('  advice written about a different pairing.');
+    process.exit(1);
+  }
+}
+
 // ── 4. No placeholder reaches a customer ──────────────────────────────────
 {
   const docx = readFileSync(`${ROOT}api/generate-workbook.js`, 'utf8')

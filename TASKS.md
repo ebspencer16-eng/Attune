@@ -39,8 +39,6 @@ O21 and O22.
 
 | # | Task |
 |--|--|
-| O21 | **The workbook uses the personalised text.** Your call on G14: the dimension pages and the mixed-type moment cards take the PDF's wording, with `{U}` and `{P}`, in both builders. |
-| O22 | **Write the same-type moment blocks for XX, YY and ZZ.** Six moments each, in the shape of the WW ones. My words, for you to edit as R17. |
 | O16 | **App downloads**, the last of the nine engagement measures. Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
@@ -83,7 +81,8 @@ any order; work through them however suits.
 | R14 | **The partner-deleted notification line**, in `api/_lib/notifications.js`. Mine. |
 | R15 | **The EU consent banner sentence.** Mine. The US notice is unchanged and yours. |
 | R16 | **The delete-account password prompt**: "Enter your password, then type DELETE to confirm." Mine. |
-| R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Mine, written to match the WW ones. |
+| R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
+| R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
 | R18 | **The waiting copy**, six lines, in place on both surfaces. Yours already; worth seeing in situ. |
 | R19 | **The founders note rewrite** you sent, as it reads on the page. |
 
