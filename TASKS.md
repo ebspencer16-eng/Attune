@@ -26,20 +26,33 @@ have proved instead.
 
 ## 1. Needs your guidance
 
-Nothing open. Everything I was waiting on has been answered.
-
-The ones you answered, and where they went: the password step, the partner
-notification, the confirmation email, the consent record, the payment
-paragraph and the geo-aware banner were all built. The two TODO effective
-dates and the privacy paragraph I wrote are yours to read, as R12 and R10
-below. The workbook drafts and the missing same-type blocks became work, as
-O21 and O22.
+| # | Question |
+|--|--|
+| G16 | **"Unique visitors" cannot be answered by what is collected, on purpose.** An engagement event carries no cookie, no device id and no session id, so two visits by one person cannot be told from one visit by two. That is what the privacy policy says and what makes the collection defensible without a consent gate in the US. Counting unique visitors means storing something that follows a person between page loads, which changes the paragraph in the policy and what the EU banner has to cover. Three options: leave it as visits and label it that way, add a per-day rotating identifier that cannot link across days, or add a durable one. My preference is the first, then the second. |
 
 ## 2. Open
 
+### The Engagement page
+
 | # | Task |
 |--|--|
-| O16 | **App downloads**, the last of the nine engagement measures. Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. |
+| O23 | **Margins.** Boxes on the page look wrong, at least around the "no data yet" messages. |
+| O24 | **One slicer.** Every view on this page uses the same slicer the rest of the admin uses. |
+| O25 | **Collection: which surface.** The app and the portal both file time under `app:<view>`, so nothing can tell them apart, and half the charts below need to. Add a surface to every event. |
+| O26 | **Collection: results sections.** The portal files the whole results experience as one key, so time per detailed page cannot be answered. Key it by section. |
+| O27 | **Highlight boxes**, top of the page: site visits, app downloads, users who read at least one In Practice article, users who placed at least one highlight, tag or note. Last 30 days each, with the change against the previous 30 at the bottom of the tile. |
+| O28 | **Completion funnel as a line over time**, each category its own line, with sign-ups counted twice so a couple reads as two people. |
+| O29 | **Beside it**, a line chart with two series: marketing site visits and app downloads, over time. |
+| O30 | **Time per page**, five column charts to one height. Row of three: marketing pages, exercises (clustered app against site), resources (clustered). Row of two: results by section (clustered), and a detailed-pages chart with a dropdown to pick the exercise. |
+| O31 | **Learning, top row**: two tables side by side. Most-read In Practice articles with their volume, ten rows and an expand. The same tile again for most-used tags. |
+| O32 | **Learning, bottom row**: notes by section as a column chart, with In Practice as an extra category; and notes by detailed page, with a dropdown for the exercise or In Practice, which shows the top eight articles. |
+| O33 | **Both notes charts get a second dropdown**, left of the slicer: total engagement by default, or split into highlights, tags, personal notes and shared notes as separate columns. |
+
+### Everything else
+
+| # | Task |
+|--|--|
+| O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. Two of the charts above want this number. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
 | O7 | **The canonical tags name the apex**, which redirects to www, so search engines are being pointed at a URL that 307s. Thirty-odd tags. An SEO decision. |
@@ -78,26 +91,30 @@ any order; work through them however suits.
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
 | R13 | **The deletion emails**: the confirmation to the person, and the notice to their partner. My words, in `api/_lib/deletion-emails.js`. |
-| R14 | **The partner-deleted notification line**, in `api/_lib/notifications.js`. Mine. |
-| R15 | **The EU consent banner sentence.** Mine. The US notice is unchanged and yours. |
-| R16 | **The delete-account password prompt**: "Enter your password, then type DELETE to confirm." Mine. |
 | R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
 | R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
-| R18 | **The waiting copy**, six lines, in place on both surfaces. Yours already; worth seeing in situ. |
-| R19 | **The founders note rewrite** you sent, as it reads on the page. |
 
 ### Behaviour, which needs a real device
 
 | # | Review |
 |--|--|
 | R20 | **Sign-in holds.** Switch tabs, close the app, come back tomorrow. It should not ask again. |
-| R21 | **Scrolling** on the insights and results pages, top to bottom, on a phone rather than a simulator window. |
 | R22 | **Select text, then highlight, underline, tag, note or share.** The whole annotation path. |
 | R23 | **The five exercises end to end in the app**, including Physical Intimacy, whose multi-select screens the automated driver cannot work. |
 | R24 | **The workbook**, opened as a file from the app, and the PDF if you have `WORKBOOK_SERVICE_URL` set. |
 
 
 ## 4. Done and verified
+
+| Verified by you | What |
+|--|--|
+| R14 | The partner-deleted notification line |
+| R15 | The EU consent banner sentence |
+| R16 | The delete-account password prompt |
+| R18 | The waiting copy, in situ on both surfaces |
+| R19 | The founders note, as it reads on the page |
+| R21 | Scrolling on insights and results, on a device |
+
 
 ### Verified in code rather than by eye
 
