@@ -14,6 +14,7 @@ import {
   Header, Footer, PageNumber, TableOfContents, StyleLevel, HeightRule,
   TabStopType, TabStopPosition, LeaderType, Tab, VerticalAlign,
 } from 'docx';
+import { MOMENTS_SHARED_W, SITUATION_PROMPTS } from './_workbook-prose.js';
 import { DIM_META, DIM_CONTENT, EXP_DOMAINS, DIMS, WHEN_THIS_SHOWS_UP, GAP_BLURBS, SCENE_DRAFTS, DOMAIN_ROWS, alignmentState, alignmentText, scoreResponsibilityPair, scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS, computeIndividualTypeCode, perDimensionCoupleType } from './_workbook-content.js';
 
 export const config = { runtime: 'nodejs' };
@@ -2081,7 +2082,27 @@ function buildMomentCard(moment, subjectName, otherName, typeLetter) {
 // for both. We use a single set of cards keyed to that type, with rows that
 // address the dynamic between two same-type partners rather than one-directional
 // guidance.
+/**
+ * A moment card for two partners of the same type.
+ *
+ * ── IT USED TO BE FIVE PLACEHOLDERS ───────────────────────────────────────
+ * Every row of this card printed "[PLACEHOLDER: 1 sentence: concrete setup
+ * for ...]" into the .docx. Four of the ten couple types are same-type, so
+ * one reader in ten received a Working Knowledge section made entirely of
+ * notes to ourselves. The content existed the whole time, in the PDF builder.
+ *
+ * ── WHICH CONTENT ─────────────────────────────────────────────────────────
+ * MOMENTS_SHARED_W is written for two Ws. There is no shared block for XX, YY
+ * or ZZ; the Python's own comment says three more need writing, and it shows
+ * the W text to everybody in the meantime. That is not repeated here: an XX
+ * couple reading advice written about Ws is worse than reading the per-type
+ * card, which is at least about them. So same-type W gets the shared card and
+ * the others fall back to their own type's card.
+ *
+ * The three missing blocks are a copy gap, and they are in TASKS.md.
+ */
 function buildMomentCardShared(moment, u, p, typeLetter) {
+  const shared = MOMENTS_SHARED_W[moment.key] || {};
   const rowLabel = (label, color) => new Paragraph({
     spacing: { before: 200, after: 80 },
     children: [run(label, { size: 16, bold: true, color: color || MUTED, allCaps: true })],
@@ -2104,19 +2125,19 @@ function buildMomentCardShared(moment, u, p, typeLetter) {
       children: [new TextRun('')] }),
 
     rowLabel('The moment', MUTED),
-    rowBody(PH(`1 sentence: concrete setup for "${moment.title.toLowerCase()}", framed so it could be either of you in the central role.`)),
+    rowBody(fill(shared.moment, u, p)),
 
     rowLabel(`What's happening for both of you`, PURPLE),
-    rowBody(PH(`2–3 sentences keyed to Type ${typeLetter}: what's actually going on internally. Both of you tend to operate this way, so this part feels familiar to both.`)),
+    rowBody(fill(shared.happening, u, p)),
 
     rowLabel('Where two same-type partners get stuck', 'C8402A'),
-    rowBody(PH(`1–2 sentences: the trap two ${typeLetter}s fall into in this moment, the way the shared wiring can mirror and amplify rather than balance.`)),
+    rowBody(fill(shared.not, u, p)),
 
     rowLabel('What works', GREEN),
-    rowBody(PH(`1–2 sentences: how to break the pattern. Often this means one of you stepping out of the shared default to give the other a different angle.`)),
+    rowBody(fill(shared.works, u, p)),
 
     rowLabel('A cue either of you can use', BLUE),
-    rowBody(PH(`literal line either ${u} or ${p} can say to break the loop in this moment`), { italics: true, color: BLUE }),
+    rowBody(fill(shared.phrase, u, p), { italics: true, color: BLUE }),
 
     new Paragraph({ spacing: { before: 160, after: 200 },
       border: { bottom: { style: BorderStyle.DOTTED, size: 6, color: STONE, space: 4 } },
@@ -2128,7 +2149,13 @@ function buildWorkingKnowledge(u, p, coupleType) {
   const [typeU, typeP] = partnerTypes(coupleType);
   const sameType = typeU === typeP;
 
-  if (sameType) {
+  // The shared card is written for two Ws and only for two Ws. An XX, YY or ZZ
+  // couple gets the per-type cards instead, which are at least about them; the
+  // three missing shared blocks are a copy gap and are in TASKS.md. Showing W's
+  // words to an XX couple is what the PDF builder does today, and doing it in
+  // a second format would double the number of people reading advice written
+  // about somebody else.
+  if (sameType && typeU === 'W') {
     return [
       pb(),
       new Paragraph({ heading: HeadingLevel.HEADING_2, children: [run(`How you two should approach specific situations`, { color: PURPLE })] }),
@@ -2207,12 +2234,15 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
   const situationBlock = (s) => [
     new Paragraph({ spacing: { before: 280, after: 60 }, children: [run(s.title, { size: 24, bold: true, color: INK })] }),
     new Paragraph({ spacing: { after: 160 }, children: [run(s.blurb, { size: 18, italics: true, color: MUTED })] }),
-    ...[1, 2, 3, 4, 5].map(n => new Paragraph({
+    // Five real questions, from api/_workbook-prose.js. These were five
+    // placeholders per situation, twenty-five in every .docx that has ever
+    // been generated, while the PDF builder had the questions written.
+    ...(SITUATION_PROMPTS[s.key] || []).map(prompt => new Paragraph({
       spacing: { after: 120 },
       indent: { left: 280 },
       children: [
         run('• ', { size: 22, color: BLUE, bold: true }),
-        run(PH(`prompt ${n} curated for ${typeName}, matched to "${s.title.toLowerCase()}"`), { size: 22, italics: true, color: INK }),
+        run(fill(prompt, u, p), { size: 22, italics: true, color: INK }),
       ],
     })),
     hr(STONE, 2),
@@ -2236,8 +2266,22 @@ function buildConversationLibrary(u, p, coupleType, priorities) {
       const meta = DIM_META[dim];
       return new Paragraph({ spacing: { before: 240, after: 80 },
         children: [run(`Phase ${i + 1}: ${meta.label} (20 min)`, { size: 22, bold: true, color: ORANGE })] });
-    }).flatMap(p => [p,
-      para(PH(`3–4 guiding questions for this phase, tailored to the specific dimension.`), { size: 20, color: MUTED, after: 160 }),
+    // `phase`, not `p`: the partner's name is `p` in this function and the old
+    // parameter name shadowed it, which is how a reference to the partner in
+    // these questions would have printed a paragraph object.
+    }).flatMap((phase, i) => [phase,
+      // The questions for this phase are the dimension's own, from
+      // DIM_CONTENT. This was a placeholder asking for "3–4 guiding questions
+      // tailored to the specific dimension" while four of them sat in the
+      // module this file already imports.
+      ...((DIM_CONTENT[priorities[i]]?.prompts) || []).map(q => new Paragraph({
+        spacing: { after: 100 },
+        indent: { left: 280 },
+        children: [
+          run('• ', { size: 20, color: ORANGE, bold: true }),
+          run(fill(q, u, p), { size: 20, color: MUTED }),
+        ],
+      })),
       hr(STONE, 2),
     ]),
   ];

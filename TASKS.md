@@ -17,6 +17,8 @@ moved past; it is listed so nothing is taken on trust.
 |--|--|
 | G1 | Everything built is building clean, and none of it has been seen on a phone. |
 | G6 | **The Privacy Policy and the Terms of Service are published reading "Effective date: TODO before publishing".** The other three documents on /legal say May 15, 2026. An effective date is yours to set, not mine. Two edits in `public/legal.html`, lines 121 and 240. |
+| G14 | **Two drafts of the same workbook pages.** The dimension content and the six mixed-type moment cards exist in both builders with entirely different wording: the PDF's is personalised (`{U}` and `{P}`), the .docx's is generic. Both read well. Choosing which ships is a copy decision and yours; once you pick, it becomes one module like the rest. |
+| G15 | **Three same-type moment blocks were never written**: XX, YY and ZZ. Only WW has them. The PDF shows W's words to those couples; the .docx now shows them their own per-type cards instead, which is at least about them. Six moments each, in the shape of `MOMENTS_SHARED_W`. |
 | G12 | **The privacy policy now describes the measurement** (section 1, the paragraph after the automatic collection). Those words are mine. Read them: they are the promise the ninety-day prune job and the consent check are holding up. |
 
 Answered 12 Sep and moved to Open: G2a add the password step, G2b build the
@@ -30,7 +32,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 |--|--|
 | O16 | Four of the five are built and measuring. **Needs migration 060 run** (`supabase/migrations/060_page_events.sql`). App downloads still needs an App Store Connect key, an issuer id and a private key, and the app is not in the store. |
 | O17 | ~~Remove the 141 prose strings~~ **Do not.** I was wrong: `scripts/build_workbook.py` is the renderer behind the PDF workbook service (`Dockerfile.workbook` → `scripts/service.mjs`, called by `api/store-workbook-pdf.js`). My scan excluded that file's own output, so "appears nowhere in the product" was false. Nothing removed. See G10. |
-| O20 | **Everything in both the .docx and the PDF.** 121 prose strings exist only in `scripts/build_workbook.py`, which renders the PDF. They have to reach `api/generate-workbook.js` too, and neither builder should hold the only copy of anything. |
+| O20 | The .docx no longer prints placeholders and both builders read one prose module. **What is left is a copy decision**: the dimension pages and the mixed-type moment cards exist in both, in two different drafts. See G14. |
 | O1 | App Store launch. **Two lines in `api/_lib/flags.js`**: `APP_LIVE = true` and the real `APP_STORE_URL`. It was four files and an env var until today. |
 | O3 | Migrations 058 and 059 are run. The surviving partner keeps their results; consent events are stored. Verify against production once a real deletion happens. |
 | O5 | `vercel.json` ends with a catch-all to the app, so any unmatched URL (a bookmark, a search result for a retired page) answers 200 with a blank shell. `public/404.html` exists and cannot be reached. Routing decision, not a stale link. |
@@ -391,6 +393,7 @@ payment-records paragraph, G3c make the banner geo-aware.
 | — | `/app` signed out, and any unknown `?view=`, rendered a blank page | Confirmed live at 28 and 0 chars; now the sign-in form. `check-app-views.mjs`, 4 plants |
 | — | In Practice, profile and feedback cards opened blank pages | Same gate; verified in a browser before and after |
 | — | `check-exercise-flow` had never passed | Passes 3 of 3 driveable exercises; wired into `npm run smoke` |
+| — | The .docx printed "[PLACEHOLDER: ...]" in 7 places, including all 25 Conversation Library questions | `check-workbook-prose.mjs`, 3 plants; every key verified to resolve |
 | — | The questionnaire is back on the website, at the end of What Comes Next | Rendered in a browser: four rating buttons, all seven questions, submit and the privacy line |
 | — | Nothing in the product asked for feedback; three surfaces reported on it | `check-feedback-reachable.mjs`, 3 plants; the app asks now |
 | — | The app can edit a profile | `check-profile-editable.mjs`, 4 plants; `check-profile-columns.mjs` widened to see columns named through a map |

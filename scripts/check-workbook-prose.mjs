@@ -22,10 +22,19 @@
 // Python says which one to edit: the JS.
 //
 // ── WHAT THIS CHECKS ───────────────────────────────────────────────────────
-// Every expectations-domain string in build_workbook.py EXP_DOMAINS appears
-// verbatim in api/_workbook-content.js. That is the block both files carry,
-// and it is the block PHASE_5b_HANDOFF.md used to call canonical in the wrong
-// one of the two.
+// 1. Every expectations-domain string in build_workbook.py EXP_DOMAINS appears
+//    verbatim in api/_workbook-content.js. That is a block both files carry,
+//    and it is the one PHASE_5b_HANDOFF.md used to call canonical in the wrong
+//    one of the two.
+// 2. scripts/workbook_prose.json is current with api/_workbook-prose.js. The
+//    Python reads the JSON, because it cannot import JavaScript, and a stale
+//    JSON means the PDF quietly prints last week's words.
+// 3. The Python holds no prose of its own for those blocks: it reads them.
+// 4. Neither builder prints a placeholder. The .docx printed seven of them,
+//    twenty-five of which were the questions in the Conversation Library and
+//    five of which were the whole body of every same-type moment card. One
+//    reader in ten received a Working Knowledge section made entirely of notes
+//    to ourselves.
 //
 // ── WHAT IT DOES NOT COVER ─────────────────────────────────────────────────
 // The rest of the Python's prose, which has no counterpart in the JS: the
@@ -76,6 +85,52 @@ if (missing.length) {
   process.exit(1);
 }
 
+// ── 2. The generated JSON is current ──────────────────────────────────────
+{
+  const generated = readFileSync(`${ROOT}scripts/workbook_prose.json`, 'utf8');
+  const prose = await import('../api/_workbook-prose.js');
+  const expected = JSON.stringify(
+    Object.fromEntries(Object.keys(prose).sort().map((k) => [k, prose[k]])),
+    null, 1,
+  ) + '\n';
+  if (generated !== expected) {
+    console.error('[check-workbook-prose] scripts/workbook_prose.json has drifted from api/_workbook-prose.js.');
+    console.error('  The PDF builder reads the JSON, so it is printing different words from the .docx.');
+    console.error('  Run node scripts/build-workbook-prose.mjs.');
+    process.exit(1);
+  }
+}
+
+// ── 3. The Python reads, rather than holding its own ──────────────────────
+{
+  const blocks = ['DIM_CONTENT', 'MOMENTS_W', 'MOMENTS_X', 'MOMENTS_Y', 'MOMENTS_Z',
+    'MOMENTS_SHARED_W', 'SITUATION_PROMPTS'];
+  const wrong = blocks.filter((b) => !new RegExp(`^${b} = _PROSE\\['${b}'\\]$`, 'm').test(py));
+  if (wrong.length) {
+    console.error('[check-workbook-prose] the PDF builder holds its own copy of:', wrong.join(', '));
+    console.error('  Both builders have to read api/_workbook-prose.js, or they drift the moment one is edited.');
+    process.exit(1);
+  }
+}
+
+// ── 4. No placeholder reaches a customer ──────────────────────────────────
+{
+  const docx = readFileSync(`${ROOT}api/generate-workbook.js`, 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|\s)\/\/[^\n]*/g, ' ');
+  const left = [...docx.matchAll(/PH\(/g)].length;
+  if (left) {
+    console.error(`[check-workbook-prose] api/generate-workbook.js still prints ${left} placeholder${left === 1 ? '' : 's'}.`);
+    console.error('  "[PLACEHOLDER: ...]" is a note to ourselves, and it was going out in the .docx.');
+    process.exit(1);
+  }
+  const pdfLeft = [...py.matchAll(/PLACEHOLDER/g)].length;
+  if (pdfLeft) {
+    console.error(`[check-workbook-prose] scripts/build_workbook.py mentions PLACEHOLDER ${pdfLeft} times.`);
+    process.exit(1);
+  }
+}
+
 console.log(
   `[check-workbook-prose] ${strings.length} expectations strings, identical in the .docx builder `
-  + 'and the PDF builder.');
+  + `and the PDF builder; ${Object.keys(JSON.parse(readFileSync(`${ROOT}scripts/workbook_prose.json`, 'utf8'))).length} shared blocks, no placeholders in either.`);
