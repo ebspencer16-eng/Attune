@@ -667,6 +667,14 @@ function toggle(btn) {
 function toggleMenu() {
   document.getElementById('mobile-menu').classList.toggle('open');
 }
+// The reviews page was folded into this one, and /reviews is a rewrite rather
+// than a redirect, so the URL stays /reviews and the browser has no fragment
+// to act on. Every nav in the site still says Reviews, and it was landing
+// people at the top of the FAQ.
+if (location.pathname.replace(/\/$/, '') === '/reviews') {
+  var _rv = document.getElementById('reviews');
+  if (_rv) _rv.scrollIntoView();
+}
 // Close mobile menu on outside tap
   document.addEventListener('click', function(e) {
   var menu = document.getElementById('mobile-menu');
