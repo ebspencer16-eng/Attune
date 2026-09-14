@@ -59,8 +59,6 @@ Nothing outstanding. When I have a question it appears here.
 
 | # | Question |
 |--|--|
-| G23 | **Six values the server computes and neither surface shows.** dimLabel, writtenCount, alignedPct, categoryId, overallState and overallDistancePct. They are not content the app is cutting, because the website does not print them either. If one of them should be on screen it should be on both, which is a design call rather than a bug. Otherwise I can stop sending them. |
-| G22 | **A storycard is bigger on a laptop than on a phone, and always has been.** The website sizes the card's text against the browser window, so the same 390-wide card shows the names at 60.8px on a laptop and 41.6px on a phone. The app has no window to size against, so it uses the card, which gives it the phone number. That means the app matches the website as seen on a phone, exactly, and is smaller than the website on a laptop. I left it because changing it moves what the website looks like today, which is yours. My recommendation: size against the card on both, so a card looks the same everywhere and the downloaded image matches what was on screen. Say the word and it is one line. |
 
 ## 2. Open
 
@@ -70,6 +68,8 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O73 | **G23: stop sending the six values neither surface draws.** dimLabel, writtenCount, alignedPct, categoryId, overallState, overallDistancePct. |
+| O74 | **G22: size storycard text against the card, not the browser window.** A card then looks the same on a laptop, on a phone and in the downloaded image, and the app matches it everywhere rather than only at phone width. |
 | O47 | **Insights, couple type page: fit the title on three lines.** Her suggestion: "[Partner] and [Partner]'s unique relationship dynamic". |
 | O48 | **Insights, comms at a glance: make the placement dots on the overview slightly larger.** |
 | O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
