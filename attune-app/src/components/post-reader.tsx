@@ -9,6 +9,13 @@
  * endpoint has served the body since posts existed and nothing had drawn it:
  * fetchPost was declared in the client and called from nowhere.
  *
+ * The twelve pieces that actually exist are pages on the website rather than
+ * rows in the table, and they were the ones still opening in the browser.
+ * Their bodies are generated from the pages into api/_in-practice-bodies.js
+ * and served through the same endpoint, so this draws them too. Two block
+ * fields only they carry: `label`, the line above a callout or a numbered
+ * step, and `source`, the work a research claim cites.
+ *
  * ── THE BLOCKS ────────────────────────────────────────────────────────────
  * A post is an ordered array of { id, type, text }, with five types. They are
  * the migration's own list, and an unknown type renders as a paragraph rather
@@ -72,7 +79,19 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
           backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
           borderLeftColor: accent, borderLeftWidth: 4,
         }}>
+        {/* A callout's label, or a step's number and title. The website draws
+            it above the tile's sentence and so does this. */}
+        {block.label ? (
+          <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>{block.label}</Text>
+        ) : null}
         <Text style={{ ...Type.body, color: c.textStrong, lineHeight: 25 }}>{t}</Text>
+        {/* A research claim cites its work. An article that cites its sources
+            on the website and not here is two different articles. */}
+        {block.source ? (
+          <Text style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: Spacing.sm }}>
+            {block.source}
+          </Text>
+        ) : null}
       </View>
     );
   }
@@ -139,8 +158,8 @@ export default function PostReader({ id, onClose }: { id: string; onClose: () =>
       ) : null}
 
       {post.read_minutes ? (
-        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: Spacing.sm }}>
-          {`${post.read_minutes} min`}
+        <Text style={{ ...Type.small, fontSize: 11, color: c.accent, marginTop: Spacing.sm }}>
+          {`${post.read_minutes} min read`}
         </Text>
       ) : null}
 

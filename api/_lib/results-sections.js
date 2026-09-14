@@ -104,6 +104,15 @@ export const PAGE_COPY = {
   commPlacements: 'Communication style overview',
   /** The tip tiles on an expectations conversation page. Takes both names. */
   expectationsTip: (you, them) => `A tip for ${you} and ${them}`,
+  /**
+   * The couple type page's heading.
+   *
+   * Ellie: "any way to make this title fit on 3 lines? Maybe just [Partner
+   * name] and [Partner name]'s unique relationship dynamic". Her wording. The
+   * old line, "What your responses uncover about your unique relationship
+   * dynamic", ran to five on a phone and said the same thing.
+   */
+  coupleTypeTitle: (you, them) => `${you} and ${them}'s unique relationship dynamic`,
 };
 
 export const RESULTS_SECTION_LABELS = {

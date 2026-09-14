@@ -6734,7 +6734,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* block: couple-type/lead */}
           <div style={{ marginBottom: "1.25rem" }}>
             <div style={{ fontFamily: HFONT, fontSize: "clamp(1.7rem,4vw,2.3rem)", fontWeight: 700, color: C.ink, lineHeight: 1.08, letterSpacing: "-0.02em" }}>
-              What your responses uncover about your unique relationship dynamic
+              {SC_COPY.coupleTypeTitle(userName, partnerName)}
             </div>
           </div>
 

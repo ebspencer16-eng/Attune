@@ -116,6 +116,25 @@ export function forgetLastSection() {
   lastSection = null;
 }
 
+/**
+ * The mounted results screen's way back to the top, if one is mounted.
+ *
+ * Tapping the Insights tab while already on it should land on Highlights, and
+ * the tab bar is three components away from the section state. A module-level
+ * handle is the smallest thing that joins them: one screen can be showing
+ * results at a time, so one slot is enough, and it is cleared on unmount so a
+ * tap can never reach a component that has gone.
+ */
+let jumpToTop: (() => void) | null = null;
+
+/** Send the open results screen back to its first section. */
+export function showFirstSection() {
+  // Cleared as well as called, so a tap that arrives while nothing is mounted
+  // still decides where the next mount opens.
+  lastSection = null;
+  jumpToTop?.();
+}
+
 export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
@@ -154,15 +173,15 @@ export default function Results({
     ? fromServer
     : [{ id: 'highlights', label: 'Highlights' }, { id: 'couple-type', label: 'Couple Type' }];
 
-  // ── WHY THIS IS NOT PLAIN STATE ──────────────────────────────────────────
-  // All four tabs mount at startup and the Insights screen remounts every time
-  // you come back to it, so plain state put the reader back on Highlights on
-  // every tab switch. Reaching Communication and then checking something on
   /** A page's own heading, from the server, with the website's wording as the
       fallback for a payload written before these existed. */
   const pageTitle = (id: string, fallback: string) => pageTitles?.[id] || fallback;
   const pageCopy = (key: string, fallback: string) => serverCopy?.[key] || fallback;
 
+  // ── WHY THIS IS NOT PLAIN STATE ──────────────────────────────────────────
+  // All four tabs mount at startup and the Insights screen remounts every time
+  // you come back to it, so plain state put the reader back on Highlights on
+  // every tab switch. Reaching Communication and then checking something on
   // Home meant finding Communication again, which undoes the point of a nav
   // you can jump around in.
   //
@@ -176,6 +195,14 @@ export default function Results({
   // clock, including stopping it when the app goes to the background.
   useScreenTime(sectionId ? `results:${sectionId}` : null);
   const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
+
+  // Register this screen as the one a repeat tap on the Insights tab returns
+  // to the top of. See showFirstSection.
+  const firstSectionId = sections[0]?.id || 'highlights';
+  useEffect(() => {
+    jumpToTop = () => rememberSection(firstSectionId);
+    return () => { jumpToTop = null; };
+  }, [rememberSection, firstSectionId]);
 
   /**
    * The nav, two levels, from the server.
@@ -490,7 +517,14 @@ function SectionBody({
       />
     );
   }
-  if (section === 'couple-type') return <CoupleType results={results} you={you} them={them} />;
+  if (section === 'couple-type') {
+    return (
+      <CoupleType
+        results={results} you={you} them={them}
+        title={pageCopy('coupleTypeTitle', `${you} and ${them}'s unique relationship dynamic`)}
+      />
+    );
+  }
 
   if (section === 'comm-overview') {
     return (
@@ -869,11 +903,20 @@ function ExpectationsConversation({
             ) : null}
           </View>
 
-          {/* The progress bar was here, under "3 of 6". Ellie asked for it to
-              go from the app: the count already says where you are, and a bar
-              measuring how far through a set of conversations you have read
-              turns reading your own results into a task with a completion
-              percentage. */}
+          {/* The dividing line under the heading, which the website has and the
+              app had lost.
+
+              Ellie asked for it to go, then changed her mind: "They can stay on
+              the site, and can you add them back in to the app?" It is not a
+              progress bar and never was on the website: a fixed line in the
+              category's colour, which is what ties this page to its tile on
+              Results at a glance. */}
+          <View
+            style={{
+              height: 2, borderRadius: 2, opacity: 0.5, marginTop: Spacing.md,
+              backgroundColor: introColor || '#E8673A',
+            }}
+          />
 
           {/* The paragraph the website opens this page with, from
               api/_lib/category-intros.js. The app opened straight into rows. */}
@@ -882,7 +925,12 @@ function ExpectationsConversation({
               style={{
                 backgroundColor: 'rgba(255,255,255,0.07)',
                 borderColor: 'rgba(255,255,255,0.13)', borderWidth: 1.5,
-                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.lg,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+                // Ellie: the tile was "way too close to the page title". The
+                // website leaves 1.25rem between the dividing line and this
+                // tile; the app had nothing at all above it, so the heading and
+                // the tile ran together.
+                marginTop: Spacing.xl, marginBottom: Spacing.lg,
               }}>
               {/* The website names both people when the paragraph is the one
                   written for their pairing, and stays general when it is not. */}
@@ -1956,8 +2004,11 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
           <View
             key={i}
             style={{
-              position: 'absolute', left: `${pct(p.v)}%`, top: -2 + p.dy,
-              width: 10, height: 10, borderRadius: 5, marginLeft: -5,
+              // Ellie: "can we make the placement dots on the overview section
+              // slightly larger?" Ten to thirteen, which is the size they read
+              // at on a phone without crowding the six-pixel track they sit on.
+              position: 'absolute', left: `${pct(p.v)}%`, top: -3.5 + p.dy,
+              width: 13, height: 13, borderRadius: 6.5, marginLeft: -6.5,
               backgroundColor: p.col, borderColor: '#1B2A5E', borderWidth: 1.5,
             }}
           />
@@ -2080,7 +2131,9 @@ function Glance({
 }
 
 /** The couple type in full. Detail screen, so it stays on the warm ground. */
-function CoupleType({ results, you, them }: { results: CoupleResults; you: string; them: string }) {
+function CoupleType({ results, you, them, title }: {
+  /** The page's heading, from the server, with both names in it. */
+  title: string; results: CoupleResults; you: string; them: string }) {
   const type = results.content?.coupleType;
   // Not null. This section is in the nav, so returning nothing gives a blank
   // page with no explanation, which reads as the app being broken. The website
@@ -2114,7 +2167,7 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
 
             The line is the website's, word for word. */}
         <Text style={{ ...Type.hero, color: c.textStrong }}>
-          What your responses uncover about your unique relationship dynamic
+          {title}
         </Text>
 
         <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xl, marginBottom: Spacing.xs }}>

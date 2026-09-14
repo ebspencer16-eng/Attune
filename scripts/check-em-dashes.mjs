@@ -151,6 +151,13 @@ function isPlaceholder(line) {
  * a new article is covered without editing this gate.
  */
 function isCitation(line) {
+  // The same citations, as data rather than as markup. api/_in-practice-bodies.js
+  // is generated from those same italic lines so the app can draw the articles
+  // instead of sending people to the browser, and the citation does not stop
+  // being a citation on the way. Narrow on purpose: the "source" key, an em
+  // dash, and a year in parentheses. A sentence in a "text" field is not
+  // exempt and is not meant to be.
+  if (/"source":\s*"[^"]*—[^"]*\(\d{4}\)/.test(line)) return true;
   return /font-style:\s*italic/.test(line)
     && /—/.test(line)
     && /\(\d{4}\)/.test(line);

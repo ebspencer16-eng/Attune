@@ -20,6 +20,7 @@ import { SITE_URL } from './_lib/site.js';
 
 import { POST_CATEGORIES } from './_lib/post-categories.js';
 import { IN_PRACTICE, shelfFor } from './_in-practice.js';
+import { IN_PRACTICE_BODIES } from './_in-practice-bodies.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
@@ -98,7 +99,16 @@ export default async function handler(req) {
         hero_color: null,
         published_at: null,
         revision: 1,
-        external: `${SITE_URL}${a.path}`,
+        /**
+         * The browser is the fallback, not the destination.
+         *
+         * These twelve are pages on the website and the app used to hand every
+         * one of them to the system browser. Their bodies are now generated
+         * into api/_in-practice-bodies.js, so the app draws them itself and
+         * this is only set for an article whose body did not come through,
+         * which is the one case where the website is still the better answer.
+         */
+        external: IN_PRACTICE_BODIES[a.slug]?.blocks?.length ? null : `${SITE_URL}${a.path}`,
       }));
       const posts = [...published, ...fromSite];
 
@@ -127,8 +137,40 @@ export default async function handler(req) {
       // enough to read a draft.
       const r = await rest(`posts?id=eq.${encodeURIComponent(id)}&${publishedFilter}&select=*`, { headers: svc });
       const post = (await r.json().catch(() => []))?.[0];
-      if (!post) return json({ ok: false, error: 'not found' }, 404);
-      return json({ ok: true, post });
+      if (post) return json({ ok: true, post });
+
+      /**
+       * A website article, read in the app.
+       *
+       * The table takes precedence: a slug published there is the one that is
+       * served, so an article that moves into the table is not shadowed by the
+       * page it came from. The blocks are generated from the page itself by
+       * scripts/build-in-practice-bodies.mjs, and check-in-practice-bodies.mjs
+       * fails the build when the two stop matching word for word.
+       *
+       * The standfirst is the subtitle rather than the index's excerpt. They
+       * are different sentences written for different places, and the one
+       * under the title on the page is the one that belongs under the title
+       * here.
+       */
+      const article = IN_PRACTICE.find((a) => a.slug === id);
+      const body = article && IN_PRACTICE_BODIES[article.slug];
+      if (!article || !body?.blocks?.length) return json({ ok: false, error: 'not found' }, 404);
+      return json({
+        ok: true,
+        post: {
+          id: article.slug,
+          title: article.title,
+          subtitle: body.intro || article.excerpt || null,
+          category: shelfFor(article),
+          dimension_keys: [],
+          read_minutes: article.readMinutes,
+          hero_color: null,
+          published_at: null,
+          revision: 1,
+          blocks: body.blocks,
+        },
+      });
     }
 
     if (req.method === 'POST' && action === 'read') {

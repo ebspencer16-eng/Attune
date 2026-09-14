@@ -24,9 +24,9 @@
  * end up different.
  */
 
-import { forwardRef } from 'react';
+import { forwardRef, useRef, useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent, StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Colors, Spacing } from '@/constants/attune-theme';
@@ -63,6 +63,31 @@ const EdgeFadedRow = forwardRef<ScrollView, Props>(function EdgeFadedRow(
   const fade = Math.min(28, width * 0.08);
   const clear = transparentGround(ground);
 
+  // ── WHY EACH FADE IS CONDITIONAL ──────────────────────────────────────────
+  // A fade means there is more that way. Drawn unconditionally it says so at
+  // both ends of a row that fits on the screen, and again on the right when
+  // the reader is already at the last tile, which is a promise the row cannot
+  // keep. Each side is drawn only when something is actually past it.
+  const [more, setMore] = useState({ left: false, right: false });
+  // The three numbers the answer is made of, each arriving from a different
+  // event: the row is laid out, the contents measure, and then it scrolls.
+  const seen = useRef({ offset: 0, row: 0, content: 0 });
+  const measure = (next: Partial<{ offset: number; row: number; content: number }>) => {
+    const now = Object.assign(seen.current, next);
+    // A point of slack either side: a scroll that has landed on the end can
+    // report a fractional offset, and half a pixel is not more to see. Nothing
+    // is faded until the row has been measured, or an unmeasured row claims
+    // there is more to its left.
+    const measured = now.row > 0 && now.content > 0;
+    const left = measured && now.offset > 1;
+    const right = measured && now.offset + now.row < now.content - 1;
+    setMore((was) => (was.left === left && was.right === right ? was : { left, right }));
+  };
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    measure({ offset: contentOffset.x, content: contentSize.width, row: layoutMeasurement.width });
+  };
+
   return (
     <View style={style}>
       <ScrollView
@@ -70,6 +95,12 @@ const EdgeFadedRow = forwardRef<ScrollView, Props>(function EdgeFadedRow(
         horizontal
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        // The row can be laid out before its contents measure, and the
+        // contents can change without a scroll, so both are asked as well.
+        onLayout={(e) => measure({ row: e.nativeEvent.layout.width })}
+        onContentSizeChange={(w) => measure({ content: w })}
         style={{ flexGrow: 0, flexShrink: 0 }}
         contentContainerStyle={[
           // paddingRight is deliberately short of the left inset so the last
@@ -79,18 +110,22 @@ const EdgeFadedRow = forwardRef<ScrollView, Props>(function EdgeFadedRow(
         ]}>
         {children}
       </ScrollView>
-      <LinearGradient
-        pointerEvents="none"
-        colors={[ground, clear]}
-        start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
-        style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: fade }}
-      />
-      <LinearGradient
-        pointerEvents="none"
-        colors={[clear, ground]}
-        start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
-        style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: fade }}
-      />
+      {more.left ? (
+        <LinearGradient
+          pointerEvents="none"
+          colors={[ground, clear]}
+          start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
+          style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: fade }}
+        />
+      ) : null}
+      {more.right ? (
+        <LinearGradient
+          pointerEvents="none"
+          colors={[clear, ground]}
+          start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }}
+          style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: fade }}
+        />
+      ) : null}
     </View>
   );
 });

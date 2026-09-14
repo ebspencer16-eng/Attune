@@ -236,15 +236,13 @@ export default function ResourcesScreen() {
 
         {more.length ? (
           <>
-            <View
-              style={{
-                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                paddingHorizontal: Spacing.xl, marginBottom: Spacing.md,
-              }}>
+            {/* The row said "Swipe >" beside this heading. It said it whether
+                or not there was anything to swipe to, which is the version of
+                this that reads as noise. The fade at the right edge carries
+                it instead, and EdgeFadedRow only draws that fade when there
+                is something past it. */}
+            <View style={{ paddingHorizontal: Spacing.xl, marginBottom: Spacing.md }}>
               <Text style={{ ...Type.eyebrow, color: c.textMuted }}>Explore more resources</Text>
-              {/* Says it outright. The fade alone is a hint people miss, and a
-                  row nobody realises is scrollable is a row half seen. */}
-              <Text style={{ ...Type.small, color: c.textMuted }}>Swipe {'\u203A'}</Text>
             </View>
             <EdgeFadedRow>
               {more.map((r) => <ExploreTile key={r.key} item={r} />)}
@@ -443,10 +441,13 @@ function PostRow({ post, first, onOpenPost }: { post: PostSummary; first: boolea
          * these to open in app if the user is in the app."
          *
          * An In Practice page is not a row in that table, it is a static page
-         * on the website, so there is no body to draw and nothing to record a
-         * read against; the write would fail on a foreign key. Those still
-         * open in the browser, which is where they live. See
-         * api/_in-practice.js.
+         * on the website. Its body is generated from the page into
+         * api/_in-practice-bodies.js and served by /api/posts, so those open
+         * here too. `external` is now only set when a body did not come
+         * through, which is the one case where the website is the better
+         * answer. Nothing records a read against them: the write would fail on
+         * a foreign key, so the endpoint answers 404 and the reader ignores
+         * it. See api/_in-practice.js.
          *
          * Reading is marked by the reader, on open, not here.
          */
@@ -464,7 +465,12 @@ function PostRow({ post, first, onOpenPost }: { post: PostSummary; first: boolea
         </Text>
       ) : null}
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
-        {post.read_minutes ? `${post.read_minutes} min` : ''}
+        {/* The reading time is the one thing on this line that helps someone
+            decide, so it carries the accent. Updated and Read are state, and
+            stay quiet. */}
+        {post.read_minutes ? (
+          <Text style={{ color: c.accent }}>{`${post.read_minutes} min read`}</Text>
+        ) : null}
         {post.revised ? '  ·  Updated' : post.read ? '  ·  Read' : ''}
       </Text>
     </Pressable>

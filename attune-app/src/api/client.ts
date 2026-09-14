@@ -811,7 +811,19 @@ export type PostSummary = {
   external?: string | null;
 };
 
-export type PostBlock = { id: string; type: 'paragraph' | 'heading' | 'quote' | 'list' | 'prompt'; text: string };
+export type PostBlock = {
+  id: string;
+  type: 'paragraph' | 'heading' | 'quote' | 'list' | 'prompt';
+  text: string;
+  /**
+   * The line above a tile: a callout's own label, or a numbered step's number
+   * and title. Only the website's In Practice articles carry one, because only
+   * their pages draw the shape.
+   */
+  label?: string | null;
+  /** The work a research claim comes from, cited as the page cites it. */
+  source?: string | null;
+};
 
 export type Post = PostSummary & { blocks: PostBlock[] };
 

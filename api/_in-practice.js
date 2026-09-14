@@ -16,10 +16,11 @@
  * the one the content lives in.
  *
  * This is the index, and only the index: slug, title, excerpt, category, read
- * time. The article bodies stay on the website and the app opens them there,
- * the same way every other thing the app cannot yet render is handled. When
- * posts are genuinely published to the table, that takes precedence and this
- * becomes the fallback for an empty table rather than the only source.
+ * time. The bodies are generated from the pages themselves into
+ * api/_in-practice-bodies.js, so the app draws the articles rather than
+ * handing the reader to the browser. When posts are genuinely published to the
+ * table, that takes precedence and this becomes the fallback for an empty
+ * table rather than the only source.
  *
  * ── HOW IT IS KEPT HONEST ─────────────────────────────────────────────────
  * public/practice.html is static with no build step, so it cannot import this.

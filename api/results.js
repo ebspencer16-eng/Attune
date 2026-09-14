@@ -876,6 +876,7 @@ export default async function handler(req) {
       pageCopy: {
         commPlacements: PAGE_COPY.commPlacements,
         expectationsTip: PAGE_COPY.expectationsTip(me.name || 'You', partner?.name || 'your partner'),
+        coupleTypeTitle: PAGE_COPY.coupleTypeTitle(me.name || 'You', partner?.name || 'your partner'),
       },
     });
   } catch (e) {
