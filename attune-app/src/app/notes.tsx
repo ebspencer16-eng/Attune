@@ -30,7 +30,7 @@
  * the Results and In Practice screens have not defined.
  *
  * Nothing here decides what an anchor means. That resolution lives in
- * constants/anchors.ts and derives from the standard tags the server seeds, so
+ * constants/anchors.ts and derives from the standard names the server sends, so
  * a renamed dimension relabels itself instead of going stale.
  */
 
@@ -45,8 +45,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
-  createNote, deleteNote, fetchHome, fetchNotes, fetchPosts, fetchResults, fetchTags,
-  openSharedNote, shareNote, updateNote,
+  createNote, createTag, deleteNote, fetchHome, fetchNotes, fetchPosts, fetchResults,
+  fetchTags, openSharedNote, shareNote, updateNote,
 } from '@/api/client';
 import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -68,6 +68,13 @@ export default function NotesScreen() {
   const [annotations, setAnnotations] = useState<Note[]>([]);
   const [shared, setShared] = useState<Note[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  /**
+   * The product's own names for the things a note can attach to, from the
+   * server. Not the person's tags: they used to be the same rows, and that is
+   * what made every new account arrive with twenty-one tags in it.
+   */
+  const [standard, setStandard] = useState<{ standard_key: string; name: string; color: string | null }[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [sectionLabels, setSectionLabels] = useState<Record<string, string>>({});
   const [postTitles, setPostTitles] = useState<Record<string, string>>({});
   const [resultsVersion, setResultsVersion] = useState<number | null>(null);
@@ -88,8 +95,9 @@ export default function NotesScreen() {
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
     loadingRef.current = true;
-    // Three calls that are always needed. Tags are fetched for their labels,
-    // and fetching them is also what seeds them on a first open.
+    // Three calls that are always needed. Tags are fetched for the person's own
+    // list and for the labels an annotation is read through, which arrive on
+    // the same response.
     const [n, t, h] = await Promise.all([fetchNotes(), fetchTags(), fetchHome()]);
 
     if (!n.ok) {
@@ -106,7 +114,12 @@ export default function NotesScreen() {
     setNotes(n.data.notes);
     setAnnotations(n.data.annotations);
     setShared(n.data.sharedWithMe);
-    if (t.ok) { setTags(t.data.tags); setSectionLabels(t.data.sections ?? {}); }
+    if (t.ok) {
+      setTags(t.data.tags);
+      setSectionLabels(t.data.sections ?? {});
+      setStandard(t.data.standard ?? []);
+      setSuggestions(t.data.suggestions ?? []);
+    }
     if (h.ok) {
       setPartnerName(h.data.partnerName ?? null);
       setPartnerLinked(!!h.data.state?.partnerLinked);
@@ -152,8 +165,30 @@ export default function NotesScreen() {
   );
 
 
+  /**
+   * A tag this person types, or one they tap from the suggestions.
+   *
+   * The new tag goes straight into the list rather than waiting for a reload:
+   * the server answers with the row, and a name that already exists comes back
+   * as the existing row, so tapping a suggestion twice is not an error and is
+   * not a duplicate either.
+   */
+  const addTag = useCallback(async (name: string) => {
+    const r = await createTag(name);
+    // The same sentence the note editor uses when a save does not land. One
+    // wording for one kind of failure, rather than a second one written here.
+    if (!r.ok) return 'That did not save. Try again in a moment.';
+    setTags((was) => (was.some((t) => t.id === r.data.tag.id) ? was : [...was, r.data.tag]));
+    return null;
+  }, []);
+
   const anchorCtx: AnchorContext = useMemo(() => {
-    const byKey = new Map(tags.filter((t) => t.standard_key).map((t) => [t.standard_key as string, t]));
+    // The server's dictionary first, then any standard tag still sitting in
+    // this person's own list from before the seeding stopped. The two say the
+    // same thing; the row is the one that can be out of date, so it loses.
+    const byKey = new Map<string, { name: string; color: string | null }>();
+    for (const t of tags) if (t.standard_key) byKey.set(t.standard_key, t);
+    for (const t of standard) byKey.set(t.standard_key, t);
     return {
       tag: (key) => {
         const found = byKey.get(key);
@@ -162,7 +197,7 @@ export default function NotesScreen() {
       postTitle: (id) => postTitles[id],
       sectionLabel: (id) => sectionLabels[id],
     };
-  }, [tags, postTitles, sectionLabels]);
+  }, [tags, standard, postTitles, sectionLabels]);
 
   /**
    * Everything, newest first.
@@ -350,15 +385,17 @@ export default function NotesScreen() {
           ) : null}
 
           {/* ── 3. TAGS ────────────────────────────────────────────────────
-              Every tag, in rows, with the sort Ellie asked for. */}
-          {tags.length ? (
-            <TagList
-              tags={tags}
-              notes={[...mineRecent, ...sharedRecent]}
-              sort={tagSort}
-              onChangeSort={setTagSort}
-            />
-          ) : null}
+              The add field, then this person's own tags, in rows, with the
+              sort Ellie asked for. Drawn even when the list is empty, because
+              the list starting empty is the point: the field is how it fills. */}
+          <TagList
+            tags={tags}
+            notes={[...mineRecent, ...sharedRecent]}
+            sort={tagSort}
+            onChangeSort={setTagSort}
+            suggestions={suggestions}
+            onAdd={addTag}
+          />
         </View>
       </ScrollView>
 
@@ -490,14 +527,36 @@ const TAG_SORTS: { key: TagSort; label: string }[] = [
 ];
 
 function TagList({
-  tags, notes, sort, onChangeSort,
+  tags, notes, sort, onChangeSort, suggestions, onAdd,
 }: {
   tags: Tag[];
   notes: Note[];
   sort: TagSort;
   onChangeSort: (s: TagSort) => void;
+  /** The line under the field. Ellie's words, from the server. */
+  suggestions: string[];
+  /** Returns an error to show, or null when the tag was added. */
+  onAdd: (name: string) => Promise<string | null>;
 }) {
   const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
+
+  const add = async (name: string) => {
+    const clean = name.trim();
+    if (!clean || adding) return;
+    setAdding(true);
+    const err = await onAdd(clean);
+    setAdding(false);
+    setFailed(err);
+    if (!err) setDraft('');
+  };
+
+  // A suggestion already in the list is not a suggestion. Compared without
+  // case, which is how the server decides a tag already exists.
+  const have = new Set(tags.map((t) => t.name.trim().toLowerCase()));
+  const offered = suggestions.filter((sg) => !have.has(sg.trim().toLowerCase()));
 
   // Count and freshness per tag, from the notes already on screen.
   const stats = useMemo(() => {
@@ -538,6 +597,8 @@ function TagList({
           marginBottom: Spacing.md,
         }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Tags</Text>
+        {/* Nothing to sort until there is something in the list. */}
+        {tags.length ? (
         <Pressable
           onPress={() => setOpen((v) => !v)}
           accessibilityRole="button"
@@ -553,6 +614,7 @@ function TagList({
           </Text>
           <Text style={{ color: c.textMuted, fontSize: 10 }}>{open ? '\u25B4' : '\u25BE'}</Text>
         </Pressable>
+        ) : null}
       </View>
 
       {open ? (
@@ -580,6 +642,65 @@ function TagList({
         </View>
       ) : null}
 
+      {/* ── ADD A TAG ──────────────────────────────────────────────────────
+          Ellie: "Just have a spot for people to 'add a tag' then they see
+          their own list. Maybe we could have a line with some suggestions."
+
+          The field is above the list rather than below it because the list
+          starts empty, and a field under nothing reads as the end of a thing
+          that has not started. */}
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          borderRadius: Radius.lg, paddingHorizontal: Spacing.lg,
+          marginBottom: offered.length ? Spacing.sm : Spacing.md,
+        }}>
+        <TextInput
+          value={draft}
+          onChangeText={(v) => { setDraft(v); setFailed(null); }}
+          placeholder="Add a tag"
+          placeholderTextColor={c.textMuted}
+          autoCapitalize="none"
+          returnKeyType="done"
+          onSubmitEditing={() => add(draft)}
+          maxLength={40}
+          style={{ ...inputType(Type.body), color: c.text, flex: 1, paddingVertical: Spacing.md }}
+        />
+        {draft.trim() ? (
+          <Pressable accessibilityRole="button" onPress={() => add(draft)} disabled={adding} hitSlop={8}>
+            <Text style={{ ...Type.small, fontWeight: '700', color: adding ? c.accentQuiet : c.accent }}>
+              Add
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {/* Suggestions, and only the ones this person does not already have. */}
+      {offered.length ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md }}>
+          {offered.map((sg) => (
+            <Pressable
+              accessibilityRole="button"
+              key={sg}
+              onPress={() => add(sg)}
+              disabled={adding}
+              style={{
+                paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+                borderRadius: Radius.pill, borderWidth: 1,
+                borderColor: c.border, backgroundColor: c.surface,
+              }}>
+              <Text style={{ ...Type.small, fontSize: 12, color: c.textMuted }}>{sg}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      {failed ? (
+        <Text style={{ ...Type.small, color: c.accent, marginBottom: Spacing.md }}>{failed}</Text>
+      ) : null}
+
+      {ordered.length ? (
       <View
         style={{
           backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
@@ -611,6 +732,7 @@ function TagList({
           );
         })}
       </View>
+      ) : null}
     </View>
   );
 }
@@ -897,9 +1019,9 @@ function Editor({
               style={{ ...inputType(Type.body), color: c.text, minHeight: 180, paddingVertical: Spacing.sm }}
             />
 
-            {/* Tags. The list is seeded server-side from the live dimension and
-                category lists, so these are the same names a person sees on
-                their results rather than free text that drifts from them. */}
+            {/* Tags this person has made. Nothing is seeded any more, so this
+                is empty until they add one on the Notes screen, and a note
+                written before then simply carries no tag. */}
             {tags.length ? (
               <View style={{ marginTop: Spacing.xl }}>
                 <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>

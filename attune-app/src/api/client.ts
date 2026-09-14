@@ -902,15 +902,28 @@ export type Tag = {
 /**
  * Tags, and the reference data the notes screen needs alongside them.
  *
+ * `tags` is the person's own list and starts empty. It used to arrive with
+ * twenty-one seeded into it, which is what Ellie asked to be rid of.
+ *
+ * `standard` is what those seeded rows were actually for: the product's names
+ * for the things a note can be attached to, so an annotation anchored to
+ * `dim:conflict` can be read as "Conflict Style". Reference data, not tags.
+ *
  * `sections` maps a results section id to its heading. It comes from the server
  * because five of those ids are generated from the expectations categories and
  * six from the intimacy dimensions, so a copy in the app goes stale the moment
- * either list changes. Seeded on the first call, so this is also what creates
- * the tags.
+ * either list changes.
+ *
+ * `suggestions` is the line under the add field.
  */
 export function fetchTags() {
-  return request<{ ok: true; tags: Tag[]; sections?: Record<string, string> }>(
-    '/api/notes?action=tags');
+  return request<{
+    ok: true;
+    tags: Tag[];
+    standard?: { standard_key: string; name: string; color: string | null }[];
+    suggestions?: string[];
+    sections?: Record<string, string>;
+  }>('/api/notes?action=tags');
 }
 
 export function createNote(input: {

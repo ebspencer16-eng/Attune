@@ -33,7 +33,7 @@
 export const config = { runtime: 'edge' };
 
 import { jsonBody } from './_lib/http.js';
-import { isValidAnchor, standardTags } from './_lib/tags.js';
+import { isValidAnchor, standardTags, TAG_SUGGESTIONS } from './_lib/tags.js';
 import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
@@ -134,29 +134,37 @@ export default async function handler(req) {
 
     if (req.method === 'GET' && action === 'tags') {
       const tRes = await rest(`tags?owner_id=eq.${me}&select=*&order=created_at.asc`, { headers: svc });
-      let tags = await tRes.json().catch(() => []);
+      const tags = await tRes.json().catch(() => []);
 
-      // Seed on first use rather than at signup, so a person who never opens
-      // Notes never gets rows, and the seed always reflects current dimensions.
-      if (!tags.length) {
-        // Premium bundles Conflict Patterns, not Physical Intimacy. This line
-        // said otherwise, so a premium buyer who had never bought intimacy got
-        // seeded the six intimacy tags, permanently, on first opening Notes.
-        const { ownsIntimacy } = capabilitiesFor(profile);
-        const rows = standardTags({ ownsIntimacy }).map(t => ({
-          owner_id: me, name: t.name, color: t.color, standard_key: t.standard_key,
-        }));
-        await rest('tags', {
-          method: 'POST',
-          headers: { ...jsonHeaders, Prefer: 'return=minimal,resolution=ignore-duplicates' },
-          body: JSON.stringify(rows),
-        });
-        const again = await rest(`tags?owner_id=eq.${me}&select=*&order=created_at.asc`, { headers: svc });
-        tags = await again.json().catch(() => []);
-      }
+      /**
+       * Nothing is seeded any more.
+       *
+       * Opening Notes for the first time used to write twenty-one tags into
+       * this person's list, one per dimension, expectations category and
+       * intimacy dimension. Ellie: "I don't like our default tags. Just have a
+       * spot for people to 'add a tag' then they see their own list."
+       *
+       * Those rows were doing two jobs. One was being a tag, which is the job
+       * nobody asked for. The other was being the dictionary an annotation is
+       * read through: a note anchored to `dim:conflict` needs something to
+       * call it "Conflict Style" and give it a colour. That job is real, so
+       * the list is still sent, as reference data rather than as rows, and it
+       * is better for it: the label is derived from the live dimension list on
+       * every request instead of being frozen into a row on the day someone
+       * first opened a screen.
+       */
+      const { ownsIntimacy } = capabilitiesFor(profile);
+
       return json({
         ok: true,
         tags,
+        /**
+         * The product's own names for the things a note can be attached to.
+         * Not the person's tags, and not written to their account.
+         */
+        standard: standardTags({ ownsIntimacy }),
+        /** The line under the add field. Ellie's words, in api/_lib/tags.js. */
+        suggestions: TAG_SUGGESTIONS,
         /**
          * What each results section is called.
          *

@@ -1,8 +1,21 @@
 /**
- * The standard tags each person starts with.
+ * The names the product knows, and the tags a person is offered.
+ *
+ * ── WHAT CHANGED, AND WHY ─────────────────────────────────────────────────
+ * These used to be written into every person's tag list the first time they
+ * opened Notes: twenty-one rows they never asked for. Ellie: "I don't like our
+ * default tags." They are no longer rows. They are sent as reference data
+ * beside the person's own tags, because they were always doing two jobs and
+ * only one of them was being a tag.
+ *
+ * The other job is the dictionary. An annotation stores `dim:conflict` and
+ * nothing else, and something has to turn that into "Conflict Style" with the
+ * right colour. That is what this is now, and it is better for the change:
+ * the label is derived at request time from the live lists instead of frozen
+ * into a row on the day someone first opened a screen.
  *
  * Derived from the live dimension and category lists rather than typed out, so
- * a renamed dimension or a new expectations category cannot leave the tag list
+ * a renamed dimension or a new expectations category cannot leave the labels
  * stale. That drift is not hypothetical: admin-data carried a dimension map
  * that was wrong for weeks because it restated the list instead of reading it.
  *
@@ -62,6 +75,23 @@ export const COMM_DOMAINS = ['inner', 'connection', 'hard'].map((id) => ({
   color: DOMAIN_COLOR[id],
   dims: Object.keys(DOMAIN_OF).filter((d) => DOMAIN_OF[d] === id),
 }));
+
+/**
+ * The tags offered under the "add a tag" field.
+ *
+ * Ellie: "Just have a spot for people to 'add a tag' then they see their own
+ * list. Maybe we could have a line with some suggestions ie. communicating
+ * needs, love, etc." These two are hers, quoted from that line.
+ *
+ * COPY GAP, and it is hers to fill: how many suggestions the line should hold
+ * and what the rest of them say. Two is what she named, so two is what ships,
+ * rather than my inventing eight to fill a row. A suggestion is one or two
+ * words, lower case, the sort of thing a person would file a note under.
+ *
+ * Here rather than in the app so both surfaces offer the same words, and so
+ * changing them is one edit.
+ */
+export const TAG_SUGGESTIONS = ['communicating needs', 'love'];
 
 export function standardTags({ ownsIntimacy = false } = {}) {
   const tags = [];

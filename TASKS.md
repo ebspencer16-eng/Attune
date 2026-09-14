@@ -37,13 +37,14 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
-**Nothing waiting.** 061, 062 and 063 are all run.
+**One waiting: 064.** 061, 062 and 063 are all run.
 
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
+| M64 | **Run `supabase/migrations/064_drop_seeded_tags.sql`.** It clears the default tags out of accounts that already have them. The app and the endpoint have stopped creating them, so a new account opens an empty list either way; this is for the ones opened before today. It leaves alone any default tag somebody has actually filed a note under, because deleting it would take the tag off their note. It prints how many it is about to remove, then how many are left. |
 
 ### Decide these
 
@@ -55,10 +56,9 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-Nothing outstanding. When I have a question it appears here.
-
 | # | Question |
 |--|--|
+| Q1 | **The suggestions line under "add a tag" needs your words.** You wrote "maybe we could have a line with some suggestions ie. communicating needs, love, etc." Those two are in and shipping. The "etc." is the part I will not write: they are words a customer reads. Send me the full line and I will put it in. Shape: one or two words each, lower case, the sort of thing a person would file a note under, and however many you want, though four or five is about what fits a phone across one row. |
 
 ## 2. Open
 
@@ -68,18 +68,9 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O47 | **Insights, couple type page: fit the title on three lines.** Her suggestion: "[Partner] and [Partner]'s unique relationship dynamic". |
-| O48 | **Insights, comms at a glance: make the placement dots on the overview slightly larger.** |
 | O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
-| O51 | **Insights, expectations detailed pages: put the progress lines back under the title in the app.** They stay on the site. She has changed her mind about removing them. |
-| O52 | **Insights, expectations detailed pages: the tip tiles sit too close to the page title.** Too much padding inside, or too little above. |
 | O54 | **Insights, relationship reflection: the whole section has to look exactly like the site.** Title, tiles, format, colouring. |
 | O55 | **Insights, conflict: the same, exactly like the site.** |
-| O58 | **Insights: double-tapping the tab icon returns to the highlights page.** |
-| O59 | **Resources: the "6 min" on each article row should read "6 min read" and be orange.** |
-| O60 | **Resources, explore more: drop the "swipe" label.** When there is nothing further, say nothing; fade the tiles at the right edge instead so it reads as more to see. |
-| O61 | **Resources: In Practice articles open in the app, not the website.** |
-| O62 | **Notes: drop the default tags.** An "add a tag" field, the reader's own list under it, and a line of suggestions like "communicating needs", "love". |
 
 ## 3. For you to review
 
@@ -173,6 +164,15 @@ build.
 | The 404 page renders and offers six ways back | loaded it in a browser on the live site |
 | Every one of the nine storycards is sized from the shared scale on both surfaces | `check-storycard-type.mjs`: 30 roles, no type written anywhere in the website's card region, and no role either surface leaves undrawn |
 | Converting the website changed nothing on screen | 135 text nodes captured from all ten cards in a browser before and after, identical three times |
+| The couple type page is titled "[name] and [name]'s unique relationship dynamic" | your wording, in `PAGE_COPY.coupleTypeTitle`, read by both surfaces |
+| The placement dots on the overview pages are bigger | 10px to 13px in the app, which is the size the site draws |
+| The dividing line is back under the expectations page heading in the app | it stayed on the site throughout |
+| The expectations intro tile has room above it | a full step of spacing between the page title and the tile |
+| Tapping Insights while already on Insights returns to Highlights | iOS reports a repeat tap as an ordinary tab selection, so what separates the two is whether the screen was focused when the press arrived |
+| The reading time reads "6 min read", in orange | in the article row and at the top of the article |
+| The "Swipe >" label is gone and the fade carries it | `EdgeFadedRow` draws each fade only when there is something past that edge, which covers the results nav too |
+| In Practice articles are read in the app | all twelve were pages on the website that the app handed to the browser. Their bodies are generated from those pages into `api/_in-practice-bodies.js`; `check-in-practice-bodies.mjs` proves every word of every article reaches the app and nothing else does, planted three ways |
+| The tag list starts empty, with an add field and your two suggestions | opening Notes used to write twenty-one tags into the account. It writes nothing now, and the names an annotation is read through are sent as reference data instead, derived from the live lists on every request. `check-no-seeded-tags.mjs` runs the endpoint and proves all three, planted three ways |
 | Unmatched URLs answer 404 rather than 200 with an empty shell | the catch-all is gone from `vercel.json`; `check-route-targets.mjs` fails if it or anything as wide comes back, planted twice |
 | The app and the website size a storycard from the same numbers | `check-storycard-type.mjs`, 17 roles, planted seven ways |
 | The app home tile draws its icons in orange | one line, and a disabled row keeps the muted brown |
