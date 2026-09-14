@@ -47,8 +47,10 @@ type Screen = 'overview' | 'snapshot' | 'patterns' | 'wrote';
 const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
 
 export default function ConflictResultsView({
-  data, section, accent,
+  data, section, accent, title = 'Conflict Styles',
 }: {
+  /** The heading this page prints, from the server's pageTitles. */
+  title?: string;
   data: Extract<ConflictResults, { ready: true }>;
   /**
    * The section's colour, from the results nav the server builds. It is the
@@ -88,7 +90,7 @@ export default function ConflictResultsView({
 
   return (
     <View style={{ flex: 1 }}>
-      {screen === 'overview' ? <Glance data={data} /> : null}
+      {screen === 'overview' ? <Glance data={data} title={title} /> : null}
       {screen === 'snapshot' ? <Snapshot data={data} accent={accent} /> : null}
       {screen === 'patterns' ? <Patterns you={you} content={content} /> : null}
       {screen === 'wrote' ? <Wrote data={data} /> : null}
@@ -122,7 +124,11 @@ export default function ConflictResultsView({
  * which is where the website puts it, next to the partner's answer to the same
  * question rather than alone.
  */
-function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
+function Glance({ data, title }: {
+  data: Extract<ConflictResults, { ready: true }>;
+  /** The page's heading, from the server's pageTitles. */
+  title: string;
+}) {
   const { you, partner, content, names } = data;
   const worth = you.ranked.filter((p) => p.band === 'worth_watching' || p.band === 'worth_attention');
   const labels = content.overallLabels || [];
@@ -158,8 +164,11 @@ function Glance({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
             here, matching the website, and Ellie asked for both to go from
             both products: the section is already named in the nav you arrived
             through. */}
+        {/* Ellie: "Conflict: should be titled 'Conflict Styles'". The page led
+            with the couple's names on both surfaces, which does not say what
+            the page is. From the server, so neither can drift. */}
         <Text style={{ ...Type.hero, color: Palette.white }}>
-          {names.you} & {names.partner}
+          {title}
         </Text>
 
         {/* block: conflict-overview/overall */}

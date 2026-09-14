@@ -22,7 +22,7 @@
 
 export const config = { runtime: 'edge' };
 
-import { sectionsWithLabels, resultsNav } from './_lib/results-sections.js';
+import { sectionsWithLabels, resultsNav, PAGE_TITLES, PAGE_COPY } from './_lib/results-sections.js';
 import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
 import { AXES, MAP_CAPTION } from './_axes.js';
@@ -848,6 +848,18 @@ export default async function handler(req) {
        */
       nav: resultsNav(sectionContents),
       sections: sectionsWithLabels(sectionContents),
+      /**
+       * The heading a page prints at the top of itself, and the few strings
+       * inside a page both surfaces print. Neither is the nav label: the nav
+       * says "Results at a glance" under a section heading, which reads
+       * correctly there and says nothing at the top of a page. Each surface
+       * had written its own, and they had drifted.
+       */
+      pageTitles: PAGE_TITLES,
+      pageCopy: {
+        commPlacements: PAGE_COPY.commPlacements,
+        expectationsTip: PAGE_COPY.expectationsTip(me.name || 'You', partner?.name || 'your partner'),
+      },
     });
   } catch (e) {
     console.error('[results] failed:', e);

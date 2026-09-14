@@ -404,6 +404,8 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       intimacy={results.intimacy}
       reflection={results.reflection}
       whatComesNext={results.whatComesNext}
+      pageTitles={results.pageTitles ?? null}
+      pageCopy={results.pageCopy ?? null}
     />
   );
 }

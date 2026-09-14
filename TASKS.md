@@ -86,12 +86,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O61 | **Resources: In Practice articles open in the app, not the website.** |
 | O62 | **Notes: drop the default tags.** An "add a tag" field, the reader's own list under it, and a line of suggestions like "communicating needs", "love". |
 | O63 | **Both: simplify the couple type "phrases to try" section.** Remove the outer white tiles and the bold mode label; keep three shaded tiles, each with only its phrase, and drop the "phrase to try" eyebrow. |
-| O64 | **Both: rename "where you each land" to "Communication style overview".** On the app, move the legend down so a long pair of names still fits. |
 | O65 | **Both: rename the expectations tip tiles to "A tip for [name] and [name]".** |
-| O66 | **Both: comms at a glance is titled "Communication Styles"**, and the couple type header and the description line under it come off that page: the couple type page has just covered it. |
-| O67 | **Both: expectations at a glance is titled "Expectations"**, not the couple's names. |
-| O68 | **Both: conflict at a glance is titled "Conflict Styles".** |
-| O69 | **Both: the reflection "how you each rated" page is titled "How you each view the relationship".** |
 | O70 | **Site: two detailed reflection pages still show a page dot and an eyebrow.** They should be gone from every results page on both surfaces. |
 | O71 | **Site: the reflection at a glance action plan should use each person's own answer**, the way the app does. The site's list is the less useful one. |
 | O72 | **Both: remove the reflection "action plan" detailed page.** |
@@ -165,6 +160,9 @@ build.
 
 | Verified | By |
 |--|--|
+| The four at-a-glance titles you named are the same on both surfaces | `PAGE_TITLES` in api/_lib/results-sections.js, sent on the results payload; neither surface writes a page heading of its own for these four |
+| "Where you each land" is "Communication style overview" on both | `PAGE_COPY.commPlacements`, read by both |
+| The reflection ratings page is "How you each view the relationship" | one string in api/_lib/reflection-results.js, which both surfaces already read |
 | The storycard rule is the same orange-to-indigo gradient on both | it was solid orange in the app; the gradient and its size come from the payload now |
 | The mark sits beside the wordmark on both | the app had the word alone; it uses the PNG the rest of the app already ships |
 | Both surfaces draw each person in the same colour | the partner dot was a lighter blue in the app; `PERSON_COLORS` is shared and both read it |

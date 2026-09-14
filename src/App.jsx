@@ -73,7 +73,7 @@ import { INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT, INTIMACY_LEAD, INTIMACY_ALL_ALIG
 import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly, sameEntitlements } from "../api/_lib/entitlements.js";
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
 import { resultsGate } from "../api/_lib/results-gate.js";
-import { availableSections as availableResultsSections } from "../api/_lib/results-sections.js";
+import { availableSections as availableResultsSections, PAGE_TITLES as SC_TITLES, PAGE_COPY as SC_COPY } from "../api/_lib/results-sections.js";
 // The reflection question set, moved out of this file so the app can reach
 // it too. See api/_anniversary-questions.js.
 import {
@@ -3541,7 +3541,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           {/* No page eyebrow. Ellie: "I want no page eyebrows throughout the
               results experience." The row that held it had no other child, so
               it went too rather than leaving an empty flex row's margin. */}
-          <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
+          <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{SC_TITLES["comm-overview"]}</div>
           
         </div>
 
@@ -3549,7 +3549,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
         <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
             {/* block: comm-overview/where-you-each-land */}
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
+            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.commPlacements}</div>
             <div style={{ display: "flex", gap: "0.85rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#E8673A" }} />
@@ -3917,7 +3917,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
           <div style={{ color: "white" }}>
             {/* Header */}
             <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{userName} & {partnerName}</div>
+              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.0, marginBottom: "0.6rem" }}>{SC_TITLES["exp-overview"]}</div>
 
             </div>
 
@@ -7387,11 +7387,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 {INTIMACY_LEAD[intimacyVariant] || INTIMACY_LEAD.premarital}
               </p>
               
-              {/* Where you each land — label left, bar right, key top-right (9.1) */}
+              {/* The placement bars: label left, bar right, key top-right (9.1). The
+                  label is shared copy now, from api/_lib/results-sections.js. */}
               <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
                   {/* block: intimacy-overview/where-you-each-land */}
-                  <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>Where you each land</div>
+                  <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.commPlacements}</div>
                   <div style={{ display: "flex", gap: "0.85rem" }}>
                     <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
                     <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
@@ -7870,7 +7871,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <ResultsSlide bg="linear-gradient(150deg, #1B2A5E, #2F55C4 55%, #1B8FB8)">
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
-            <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
+            <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{SC_TITLES["conflict-overview"]}</div>
             {/* Q1, the one shared number this exercise produces. Everything
                 else on the risk side is private to each reader. */}
             {/* block: conflict-overview/overall */}

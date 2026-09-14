@@ -468,6 +468,15 @@ export type ResultsResponse =
       reflection?: ReflectionResults | null;
       /** The closing page, assembled from the sections above. */
       whatComesNext?: { groups: NextStepGroup[] } | null;
+      /**
+       * The heading each page prints at the top of itself, and the strings
+       * inside a page both surfaces print. Not the nav's label: the nav says
+       * "Results at a glance" under a section heading, which reads correctly
+       * there and says nothing at the top of a page. Both surfaces wrote their
+       * own and they drifted, so the server sends one.
+       */
+      pageTitles?: Record<string, string> | null;
+      pageCopy?: Record<string, string> | null;
     }
   | {
       ready: false;

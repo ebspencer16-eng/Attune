@@ -39,27 +39,22 @@ const scaleValue = (v) => (typeof v === 'number' && v >= 0 ? v : null);
  * this follows instead of quietly dropping it the way it dropped this one.
  */
 /**
- * The heading and the line under it, for each Reflection page.
+ * What each reflection page is called, and the line under it.
  *
- * ── WHY THESE ARE HERE ────────────────────────────────────────────────────
- * They were typed inside src/App.jsx, so the app could not read them and did
- * not show them. Two consequences, both visible to a reader holding both:
+ * Both surfaces read these. The app used to invent its own heading for the
+ * ratings page, "How You Each Rated", so someone arriving there was told a
+ * different thing depending on the screen.
  *
- * The ratings page is called "What you view the relationship as a whole" on
- * the website and was called "How You Each Rated" in the app. Not a shortened
- * version of the same heading, a different one, invented in the app because
- * the real one was somewhere it could not reach.
- *
- * And every one of these pages opens with a line saying what it is. The app
- * showed a bare heading and went straight into the content, so a reader
- * arrived at a page of dots with nothing telling them what the dots are.
+ * Ellie renamed the ratings page: "how you each rated" was the nav's word for
+ * it and did not say what the page shows, which is each person's view of the
+ * relationship as a whole, side by side.
  *
  * `eyebrow` is the section name above the heading, which all three share.
  */
 export const REFLECTION_PAGES = {
   eyebrow: 'Relationship Reflection',
   ratings: {
-    title: 'What you view the relationship as a whole',
+    title: 'How you each view the relationship',
     sub: 'Every question with a fixed answer, shown together. The distance between the two dots is the whole point.',
   },
   story: {

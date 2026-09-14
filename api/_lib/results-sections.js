@@ -66,6 +66,43 @@ export const RESULTS_SECTIONS = [
  * "Results at a glance" reads correctly. That is the one place the two sets
  * differ, and they differ on purpose.
  */
+/**
+ * The heading a results page prints at the top of itself.
+ *
+ * ── WHY THIS IS NOT THE NAV LABEL ─────────────────────────────────────────
+ * The nav says "Results at a glance" under a section heading, which reads
+ * correctly there and says nothing on its own at the top of a page. So the two
+ * surfaces each wrote their own page heading, and they wrote different ones:
+ * the communication overview led with the couple's names on the website and
+ * with the couple type's name and tagline in the app.
+ *
+ * Ellie, naming the four she wants and why: the couple type page has just
+ * covered the type, so the communication page should not repeat it, and a page
+ * titled with two names does not say what the page is.
+ *
+ * A section missing from here keeps whatever heading its surface already draws.
+ * These are the four that had to agree.
+ */
+export const PAGE_TITLES = {
+  'comm-overview': 'Communication Styles',
+  'exp-overview': 'Expectations',
+  'conflict-overview': 'Conflict Styles',
+  'reflection-ratings': 'How you each view the relationship',
+};
+
+/**
+ * Copy inside a page that both surfaces print.
+ *
+ * Small enough to feel like it does not need sharing, which is exactly how
+ * "Where you each land" came to be written twice and renamed once.
+ */
+export const PAGE_COPY = {
+  /** Over the placement bars on the communication overview. */
+  commPlacements: 'Communication style overview',
+  /** The tip tiles on an expectations conversation page. Takes both names. */
+  expectationsTip: (you, them) => `A tip for ${you} and ${them}`,
+};
+
 export const RESULTS_SECTION_LABELS = {
   'highlights': 'Highlights',
   'couple-type': 'Couple Type',

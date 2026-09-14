@@ -120,7 +120,7 @@ export default function Results({
   results, owned = [], sections: fromServer, nav = [], highlights = [],
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
   commsPlan = null, commDomains = [], commResponses = [], storycardStyle = null,
-  reflectionPlan = null,
+  reflectionPlan = null, pageTitles = null, pageCopy: serverCopy = null,
 }: {
   results: CoupleResults;
   owned?: string[];
@@ -132,6 +132,13 @@ export default function Results({
   commResponses?: SbsRow[];
   storycardStyle?: StorycardStyle | null;
   reflectionPlan?: ReflectionInsight[] | null;
+  /**
+   * The heading a page prints at the top of itself, and the strings inside a
+   * page both surfaces print. From the server, so a rename lands on both
+   * products at once instead of on whichever one was edited.
+   */
+  pageTitles?: Record<string, string> | null;
+  pageCopy?: Record<string, string> | null;
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
   reflection?: ReflectionResults | null;
@@ -151,6 +158,11 @@ export default function Results({
   // All four tabs mount at startup and the Insights screen remounts every time
   // you come back to it, so plain state put the reader back on Highlights on
   // every tab switch. Reaching Communication and then checking something on
+  /** A page's own heading, from the server, with the website's wording as the
+      fallback for a payload written before these existed. */
+  const pageTitle = (id: string, fallback: string) => pageTitles?.[id] || fallback;
+  const pageCopy = (key: string, fallback: string) => serverCopy?.[key] || fallback;
+
   // Home meant finding Communication again, which undoes the point of a nav
   // you can jump around in.
   //
@@ -384,6 +396,8 @@ export default function Results({
           reflection={reflection}
           whatComesNext={whatComesNext}
           onGoToSection={rememberSection}
+          pageTitle={pageTitle}
+          pageCopy={pageCopy}
           results={results}
           conflict={conflict}
           conflictWaiting={conflictWaiting}
@@ -415,9 +429,14 @@ export default function Results({
 function SectionBody({
   section, accent, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
-  intimacy, reflection, whatComesNext, onGoToSection,
+  intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
 }: {
   section: string;
+  /** The server's heading for a page, and the strings inside it that both
+      surfaces print. Passed down rather than reached for, so a page that does
+      not take a title cannot quietly invent one. */
+  pageTitle: (id: string, fallback: string) => string;
+  pageCopy: (key: string, fallback: string) => string;
   /** The section's colour, from the results nav the server builds. */
   accent?: string;
   expectations: ExpectationsSummary | null;
@@ -463,7 +482,13 @@ function SectionBody({
         />
       );
     }
-    return <Glance results={results} you={you} them={them} viewer={viewer} wideGap={wideGap} />;
+    return (
+      <Glance
+        results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
+        title={pageTitle('comm-overview', 'Communication Styles')}
+        placementsLabel={pageCopy('commPlacements', 'Communication style overview')}
+      />
+    );
   }
   if (section === 'couple-type') return <CoupleType results={results} you={you} them={them} />;
 
@@ -472,6 +497,8 @@ function SectionBody({
       <Glance
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         plan={commsPlan}
+        title={pageTitle('comm-overview', 'Communication Styles')}
+        placementsLabel={pageCopy('commPlacements', 'Communication style overview')}
       />
     );
   }
@@ -500,7 +527,12 @@ function SectionBody({
   }
 
   if (section === 'exp-overview') {
-    return <ExpectationsOverview summary={expectations} you={you} them={them} />;
+    return (
+      <ExpectationsOverview
+        summary={expectations} you={you} them={them}
+        title={pageTitle('exp-overview', 'Expectations')}
+      />
+    );
   }
   if (section.startsWith('exp-convo-')) {
     const all = expectations?.categories ?? [];
@@ -562,7 +594,12 @@ function SectionBody({
     // The accent is the nav group's own colour, which the server already
     // sends. It is the website's conflict BLUE, so threading it here means
     // the two products cannot drift on it the way a second hex would.
-    return <ConflictResultsView data={conflict} section={section} accent={accent} />;
+    return (
+      <ConflictResultsView
+        data={conflict} section={section} accent={accent}
+        title={pageTitle('conflict-overview', 'Conflict Styles')}
+      />
+    );
   }
 
   // A section the website renders and the app does not yet. Named rather than
@@ -573,8 +610,13 @@ function SectionBody({
 }
 
 function ExpectationsOverview({
-  summary, you, them,
-}: { summary: ExpectationsSummary | null; you: string; them: string }) {
+  summary, you, them, title = 'Expectations',
+}: {
+  summary: ExpectationsSummary | null; you: string; them: string;
+  /** Ellie: the page led with the couple's names, which does not say what the
+      page is. From the server, so both surfaces cannot title it differently. */
+  title?: string;
+}) {
   if (!summary) {
     return (
       <Waiting
@@ -617,7 +659,7 @@ function ExpectationsOverview({
       />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          <Text style={{ ...Type.hero, color: Palette.white }}>{you} & {them}</Text>
+          <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
           <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
             <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)' }}>
@@ -2007,9 +2049,12 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
 
 function Glance({
   results, you, them, viewer, wideGap, plan = null,
+  title = 'Communication Styles', placementsLabel = 'Communication style overview',
 }: {
   results: CoupleResults; you: string; them: string; viewer: 'a' | 'b';
   wideGap: number | null; plan?: CommsPlan | null;
+  /** From the server, so the two surfaces cannot title the page differently. */
+  title?: string; placementsLabel?: string;
 }) {
   const type = results.content?.coupleType;
   const dims = results.content?.dimensions ?? [];
@@ -2033,23 +2078,20 @@ function Glance({
           end={{ x: 1, y: 1 }}
           style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
           {/* block: comm-overview/couple-type-lead */}
-          {/* No "You two are" over the type name. The name is a noun phrase
-              and reads as the answer on its own. */}
+          {/* Ellie: "Title should be 'Communication Styles'. Remove the couple
+              type header and description line below, that info was just
+              covered on the couple type page." The title comes from the
+              server's pageTitles, so the website cannot say something else. */}
           <Text style={{ ...Type.hero, color: Palette.white }}>
-            {type?.name || 'Your results'}
+            {title}
           </Text>
-          {type?.tagline ? (
-            <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.md }}>
-              {interp(type.tagline, you, them)}
-            </Prose>
-          ) : null}
 
           {dims.length ? (
             <View style={{ marginTop: Spacing.xl }}>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: Spacing.md }}>
                 {/* block: comm-overview/where-you-each-land */}
                 <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)' }}>
-                  Where you each land
+                  {placementsLabel}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: Spacing.md }}>
                   {[{ n: you, col: GLANCE_YOU }, { n: them, col: GLANCE_THEM }].map((x) => (
