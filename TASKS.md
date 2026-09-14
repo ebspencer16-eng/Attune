@@ -59,6 +59,7 @@ Nothing outstanding. When I have a question it appears here.
 
 | # | Question |
 |--|--|
+| G23 | **Six values the server computes and neither surface shows.** dimLabel, writtenCount, alignedPct, categoryId, overallState and overallDistancePct. They are not content the app is cutting, because the website does not print them either. If one of them should be on screen it should be on both, which is a design call rather than a bug. Otherwise I can stop sending them. |
 | G22 | **A storycard is bigger on a laptop than on a phone, and always has been.** The website sizes the card's text against the browser window, so the same 390-wide card shows the names at 60.8px on a laptop and 41.6px on a phone. The app has no window to size against, so it uses the card, which gives it the phone number. That means the app matches the website as seen on a phone, exactly, and is smaller than the website on a laptop. I left it because changing it moves what the website looks like today, which is yours. My recommendation: size against the card on both, so a card looks the same everywhere and the downloaded image matches what was on screen. Say the word and it is one line. |
 
 ## 2. Open
@@ -71,7 +72,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 |--|--|
 | O47 | **Insights, couple type page: fit the title on three lines.** Her suggestion: "[Partner] and [Partner]'s unique relationship dynamic". |
 | O48 | **Insights, comms at a glance: make the placement dots on the overview slightly larger.** |
-| O49 | **Insights, comms at a glance: the third action plan item has a note on the site the app leaves out.** Everything on the site has to be on the app; find anything else cut the same way. |
 | O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
 | O51 | **Insights, expectations detailed pages: put the progress lines back under the title in the app.** They stay on the site. She has changed her mind about removing them. |
 | O52 | **Insights, expectations detailed pages: the tip tiles sit too close to the page title.** Too much padding inside, or too little above. |
@@ -153,6 +153,7 @@ build.
 
 | Verified | By |
 |--|--|
+| The app draws the action plan note the site shows | `tile.reflect` arrived on the payload and nothing drew it; `check-app-draws-payload.mjs` now fails on any results field the app never names, planted three ways |
 | Both people's placement dots are visible when they gave the same rating | the app drew them at the same point at the same size, so the second covered the first; `check-overlapping-marks.mjs`, planted twice |
 | The phone's pill nav offers every section the sidebar does | it had five of eight and no Conflict Patterns at all; rendered at 420px it now shows Type & Map, Comms, Expectations, Refl., Intimacy, Conflict, What's Next. `check-mobile-nav.mjs` |
 | Phrases to try is three shaded tiles with a phrase in each, on both | rendered on the site: the section heading then three quoted phrases, no outer tiles, no mode labels, no eyebrows |

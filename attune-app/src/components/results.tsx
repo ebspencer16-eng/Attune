@@ -2059,6 +2059,15 @@ function Glance({
                       {tile.body}
                     </Text>
                   ) : null}
+                  {/* Ellie: "our third action plan item has an additional note on
+                      the site that isn't included on the app." It arrives on the
+                      payload and nothing drew it, so the hardest domain's tile was
+                      missing the one line that says what to do with it. */}
+                  {tile.reflect ? (
+                    <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.72)', marginTop: Spacing.sm, lineHeight: 20 }}>
+                      {tile.reflect}
+                    </Text>
+                  ) : null}
                 </View>
               ))}
             </View>
