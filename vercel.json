@@ -302,10 +302,6 @@
       "destination": "/api/update-profile.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    },
-    {
       "source": "/api/questions",
       "destination": "/api/questions.js"
     },

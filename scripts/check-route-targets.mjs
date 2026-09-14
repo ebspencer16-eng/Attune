@@ -26,9 +26,22 @@
  * is O5 in TASKS.md and it is Ellie's call, because it changes routing on the
  * live site.
  *
+ * ── AND NO CATCH-ALL ──────────────────────────────────────────────────────
+ * The rewrites used to end with /(.*) pointing at the app shell, so every
+ * unmatched URL answered 200 with four kilobytes of markup and no readable
+ * text: retired pages, typos, stale links from search engines, all of them a
+ * blank page with a successful status code. Ellie's call was a real 404, so
+ * that entry is gone and Vercel serves 404.html with a 404 status.
+ *
+ * This fails if it comes back. The app's own /app and /app/(.*) are the two
+ * that legitimately point at the shell, because the app really does own every
+ * path under them. Anything wider swallows the 404 again.
+ *
+ * The headers block keeps its own /(.*) and must: that is how the security
+ * headers reach every path. A pattern there is not a route.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * Not whether a route should exist, and not the catch-all itself, which is
- * Ellie's call and is open on the task list.
+ * Not whether a route should exist.
  *
  * Not the app's own routes. /app/(.*) is handled inside the bundle, and
  * check-app-routes.mjs is the one that reads those.
@@ -82,6 +95,18 @@ for (const r of routes) {
   }
 }
 
+// The catch-all, which is the thing that made every stale route look alive.
+const SHELL_OK = new Set(['/app', '/app/(.*)']);
+for (const r of config.rewrites || []) {
+  if (!/\(\.\*\)|\(\[\^/.test(r.source)) continue;
+  if (SHELL_OK.has(r.source)) continue;
+  dead.push(
+    `rewrite ${r.source} -> ${r.destination} catches everything under it.\n`
+    + `      A pattern this wide sends unmatched URLs to a page instead of a 404, which is\n`
+    + `      what made retired pages answer 200 with an empty shell. Only /app and\n`
+    + `      /app/(.*) may do that, because the app owns every path under them.`);
+}
+
 if (dead.length) {
   console.error('[check-route-targets] a route in vercel.json lands on nothing:\n');
   for (const d of dead) console.error('  ' + d);
@@ -91,4 +116,4 @@ if (dead.length) {
   process.exit(1);
 }
 
-console.log(`[check-route-targets] ${routes.length} routes in vercel.json, every destination lands on a file.`);
+console.log(`[check-route-targets] ${routes.length} routes in vercel.json: every destination lands on a file, and nothing but /app catches unmatched paths.`);
