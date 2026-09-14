@@ -39,7 +39,10 @@ export const RESULTS_SECTIONS = [
   // website's link to it fall through to the storycards.
   ...EXPECTATIONS_CATEGORIES.map((_, i) => `exp-convo-${i}`),
 
-  'reflection-overview', 'reflection-ratings', 'reflection-story', 'reflection-plan',
+  // Ellie: "App and site both show a detailed page for rel relf called action
+  // plan. Remove that page from both web and app." The action plan itself stays;
+  // it is on the at-a-glance page, where a reader sees it without a detour.
+  'reflection-overview', 'reflection-ratings', 'reflection-story',
 
   'intimacy-overview',
   ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`),
@@ -115,7 +118,6 @@ export const RESULTS_SECTION_LABELS = {
   'reflection-overview': 'Relationship Reflection',
   'reflection-ratings': 'How You Each Rated',
   'reflection-story': 'Side by Side',
-  'reflection-plan': 'Action Plan',
   'intimacy-overview': 'Physical Intimacy',
   ...Object.fromEntries(INTIMACY_DIMENSIONS.map(d => [`intimacy-${d.id}`, d.label])),
   'intimacy-plan': 'Conversations Worth Having',
@@ -210,7 +212,6 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
         { id: 'reflection-overview', label: AT_A_GLANCE },
         { id: 'reflection-ratings', label: 'How You Each Rated' },
         { id: 'reflection-story', label: 'Side by Side' },
-        { id: 'reflection-plan', label: 'Action Plan' },
       ],
     });
   }

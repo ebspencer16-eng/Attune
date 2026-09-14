@@ -162,9 +162,9 @@ export const SECTION_BLOCKS = {
     { id: 'pairs', note: 'Each question, both answers, and the prompt under them.' },
   ],
 
-  'reflection-plan': [
-    { id: 'items', note: 'What each of you said you would work on.' },
-  ],
+  // reflection-plan had a page of its own on both surfaces and Ellie removed
+  // it: the action plan sits on the at-a-glance page, where a reader meets it
+  // without a detour.
 
   'intimacy-plan': [
     { id: 'conversations', note: 'Each dimension worth talking about, with its prompt.' },

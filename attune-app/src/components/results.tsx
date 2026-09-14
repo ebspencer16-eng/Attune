@@ -560,7 +560,9 @@ function SectionBody({
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} />;
   if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} />;
   if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
-  if (section === 'reflection-plan') return <ReflectionPlan data={reflection} insights={reflectionPlan} />;
+  // The reflection action plan had a page of its own on both surfaces. Ellie
+  // asked for it to go: the plan is on the at-a-glance page, where a reader
+  // meets it without a detour.
 
   if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} />;
   if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
@@ -1429,6 +1431,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
 
         {commitment ? (
           <>
+            {/* block: reflection-overview/action-plan */}
             <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
               Your action plan
             </Text>
@@ -1691,104 +1694,12 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
   );
 }
 
-/**
- * The action plan: what each of you said you would work on, and what you each
- * put first.
- *
- * Their own words rather than advice generated about them. Two people who have
- * each written down one thing they want to change have already done the
- * difficult part.
+/*
+ * ReflectionPlan drew the action plan as a page of its own. Ellie asked for
+ * that page to go from both surfaces: the plan is on the at-a-glance page,
+ * which is where a reader meets it without a detour. The data it drew,
+ * reflectionPlan, still arrives on the payload and still feeds that page.
  */
-function ReflectionPlan({
-  data, insights,
-}: { data: ReflectionResults | null; insights: ReflectionInsight[] | null }) {
-  if (!data) return <ReflectionWaiting />;
-  const commitment = data.written.find((w) => w.key === 'a6');
-  const together = data.written.find((w) => w.key === 'a4');
-  const bothRanked = data.priorities.you && data.priorities.them;
-
-  return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        {/* block: reflection-overview/action-plan */}
-        <ReflectionHead page={data.pages?.plan} />
-        {/* block: reflection-plan/items */}
-
-        {/* The derived plan, under REFLECTION_ACTION_TITLES. The app could not
-            reach that copy until now, so this page showed only the couple's
-            own words and none of the plan the website builds from them. */}
-        {insights?.length ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            {insights.map((ins, i) => (
-              <View
-                key={`${ins.title}-${i}`}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-                }}>
-                <Text style={{ ...Type.cardTitle, color: Palette.white }}>{ins.title}</Text>
-                {ins.body ? (
-                  <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>{ins.body}</Prose>
-                ) : null}
-                {ins.action ? (
-                  <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.md }}>{ins.action}</Prose>
-                ) : null}
-              </View>
-            ))}
-          </View>
-        ) : null}
-
-        {commitment ? (
-          <View style={{ marginTop: Spacing.xl }}>
-            <Eyebrow>What you each said you would work on</Eyebrow>
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
-              }}>
-              <Eyebrow>{data.names.you}</Eyebrow>
-              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.you}</Prose>
-            </View>
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg,
-              }}>
-              <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
-              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{commitment.them}</Prose>
-            </View>
-          </View>
-        ) : null}
-
-        {/* ── NOT HERE ─────────────────────────────────────────────────
-            The priorities lived on this page under "What you each put first
-            this year", and what each of you wants more of under "More of this,
-            next year". Neither heading is anywhere in the product, and the
-            website puts the priorities on How You Each Rated, as "What matters
-            most this year". The a4 answer is a written question and already
-            appears on Side by Side with the rest of them.
-
-            Moved rather than restyled: a block on the wrong page is the same
-            problem as a block with the wrong words. */}
-        {!commitment && !insights?.length ? (
-          <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg }}>
-            This fills in from the last few questions of the exercise, which you
-            have not both answered yet.
-          </Text>
-        ) : null}
-      </View>
-    </ScrollView>
-    </View>
-  );
-}
-
 function PriorityList({ name, items }: { name: string; items: string[] }) {
   return (
     <View style={{ flex: 1 }}>

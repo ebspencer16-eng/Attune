@@ -6373,7 +6373,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "reflection-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
         { id: "reflection-ratings", label: "How You Each Rated", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "reflection-story", label: "Side by Side", isDeepChild: true, italic: true, color: "#1B5FE8" },
-        { id: "reflection-plan", label: "Action Plan", isDeepChild: true, italic: true, color: "#1B5FE8" },
       ]
     }] : []),
     ...(intimacyBothDone ? [{
@@ -6473,7 +6472,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...UR_DOMAINS.map(g => `comm-${g.id}`),
     "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
-    ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story", "reflection-plan"] : []),
+    ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
     ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
     "what-comes-next",
@@ -6504,7 +6503,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "reflection-overview") return "Reflection Overview";
     if (id === "reflection-ratings") return "How You Each Rated";
     if (id === "reflection-story") return "Side by Side";
-    if (id === "reflection-plan") return "Reflection Action Plan";
     if (id === "intimacy-overview") return "Physical Intimacy";
     if (id.startsWith("intimacy-")) { const dd = INTIMACY_DIMENSIONS.find(x => `intimacy-${x.id}` === id); if (dd) return dd.label; }
     if (id === "intimacy-plan") return "Conversations Worth Having";
@@ -7058,19 +7056,34 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
 
 
-              {/* ── ACTION PLAN — the conversations this reflection surfaced ── */}
+              {/* ── ACTION PLAN ──────────────────────────────────────────────
+                  Ellie: "App rel relf results at a glance page lists the action
+                  plan as the things you each said you're going to work on. The
+                  site uses a different, less helpful list. Make the site also
+                  use the self-answer for the action plan on this page."
+
+                  The old list was derived insights, which are the product's
+                  reading of the answers. What each person actually wrote when
+                  asked what they want to work on is better: it is theirs, and
+                  it is the thing they will recognise. */}
               {(() => {
-                const items = insights.filter(i => i.type === "explore").slice(0, 4);
-                if (!items.length) return null;
+                // The answers themselves, which this page already has: mine
+                // and theirs are the two people's raw reflection answers, and
+                // a6 is "one thing I want to work on in how I show up for you".
+                const yourWords = String(mine?.a6 || '').trim();
+                const theirWords = String(theirs?.a6 || '').trim();
+                if (!yourWords && !theirWords) return null;
+                const commitment = { you: yourWords, them: theirWords };
                 return (
                   <div style={{ marginBottom: "1rem" }}>
                     {/* block: reflection-overview/action-plan */}
                     <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                      {items.map((it, i) => (
-                        <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", borderLeft: "4px solid #1B5FE8", borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
-                          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>{reflectionActionTitle(it.title, _content)}</div>
-                          {it.action && <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.55, marginTop: "0.3rem" }}>{it.action}</div>}
+                      {[{ name: userName, words: commitment.you, color: SC_PEOPLE.you },
+                        { name: partnerName, words: commitment.them, color: SC_PEOPLE.them }].map((p, i) => (
+                        <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${p.color}`, borderRadius: 12, padding: "0.8rem 1rem" }}>
+                          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>{p.name}</div>
+                          <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.55, marginTop: "0.25rem" }}>{p.words}</div>
                         </div>
                       ))}
                     </div>
@@ -7316,36 +7329,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     }
 
     // ── REFLECTION ACTION PLAN ────────────────────────────────────────────────
-    if (section === "reflection-plan") {
-      return (
-        <Layout accent="#1B5FE8" noPrevNext={true}>
-          <div style={{ maxWidth: 560 }}>
-            {/* No page eyebrow. Ellie: "I want no page eyebrows throughout the
-                results experience." The nav you arrived through already names
-                the section, so the eyebrow repeated it directly above the
-                page's own title. */}
-            <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.plan.title}</h2>
-            <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, marginBottom: "1.5rem" }}>
-              {actionItems.length > 0
-                ? `${actionItems.length} area${actionItems.length !== 1 ? "s" : ""} where your reflections point to a real conversation.`
-                : REFLECTION_PAGES.plan.aligned}
-            </p>
-            {/* block: reflection-plan/items */}
-            {actionItems.length === 0 ? (
-              <div style={{ background: "#EEF2FF", border: "1.5px solid rgba(27,95,232,0.25)", borderRadius: 16, padding: "1.5rem", textAlign: "center", marginBottom: "1.5rem" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1B5FE8", margin: "0 auto 0.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ color: "white", fontSize: "0.85rem" }}>♡</span>
-                </div>
-                <div style={{ fontSize: "0.9rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>Strong alignment across the board.</div>
-              </div>
-            ) : (
-              <ActionPlanList explores={insights.filter(i => i.type === "explore")} />
-            )}
-            <PrevNext />
-          </div>
-        </Layout>
-      );
-    }
+    // The reflection action plan had a page of its own. Ellie: "App and site
+    // both show a detailed page for rel relf called action plan. Remove that
+    // page from both web and app." The plan itself is on the at-a-glance page,
+    // where a reader meets it without a detour.
 
     return null;
   }
@@ -15412,8 +15399,7 @@ export default function App() {
                   { label: "Results at a glance", id: "reflection-overview" },
                   { label: "How You Each Rated", id: "reflection-ratings" },
                   { label: "Side by Side", id: "reflection-story" },
-                  { label: "Action Plan", id: "reflection-plan" },
-                ];
+                              ];
               } else if (inComm) {
                 // Ids must be real section ids. These were personality /
                 // comm-detail / comm-action, none of which resolve, so every
