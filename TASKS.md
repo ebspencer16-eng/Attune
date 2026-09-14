@@ -50,6 +50,10 @@ name of the check that proves them.
 subtle" and I move it to section 4 or open it in section 2. They are not in
 any order; work through them however suits.
 
+**Three migrations are waiting**, and they are the only items here that are not
+just looking at something. R28 first: it closes a policy that lets anyone
+holding the publishable key read order rows. Then R29 and R26, in any order.
+
 ### Design, and whether it looks right
 
 | # | Review |
