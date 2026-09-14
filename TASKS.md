@@ -64,13 +64,13 @@ CLAUDE.md, so anything new sits here until you do.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Every item on the list you sent on 13 September is built
+and in section 3 or 4.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
-| O54 | **Insights, relationship reflection: the whole section has to look exactly like the site.** Title, tiles, format, colouring. |
-| O55 | **Insights, conflict: the same, exactly like the site.** |
 
 ## 3. For you to review
 
@@ -95,6 +95,10 @@ any order; work through them however suits.
 | R5 | **Website marketing pages.** The hero without orange italics, no subpage titles in banners, tighter vertical spacing, the founders note redesign, the FAQ and packages changes, In Practice. |
 | R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
+| R30 | **The Relationship Reflection section in the app, against the site.** At a glance should open with both your names and a line saying how you each described things overall, then the four ratings as blocks, then your action plan. How you each view the relationship and Side by Side are now light, in white cards, like the site. What you each admire has moved off at a glance and onto How you each view the relationship, which is where the site has it. |
+| R31 | **The tile, on every at a glance page.** Comms, Expectations, Relationship Reflection, Physical Intimacy and Conflict all sit in the rounded tile you liked. Detail pages are full width. Worth looking at the five together to see whether the tile still reads as a tile when the page inside it is long. |
+| R32 | **In Practice articles, read in the app.** Tap any of the twelve on the Resources tab. They open in the app now instead of the browser: the same words as the website, the callouts and numbered steps as tiles, the research citations at the bottom. The Get started panel at the end of each article is deliberately not there, because the app does not sell. |
+| R33 | **The Notes tag list.** It starts empty, with an add field at the top and your two suggestions under it. Adding a tag, tapping a suggestion, and the sort control only appearing once there is something to sort. |
 | R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
 
 ### Copy, and whether the words are yours
@@ -112,6 +116,8 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R34 | **Tap Insights while you are already on Insights.** It should go back to Highlights from wherever you were. Coming to Insights from another tab should land where you left off, as it does now. |
+| R35 | **Explore more resources, swiped to the end.** The fade on the right should be there while there is more to see and gone when there is not. Same on the results nav rows. |
 | R20 | **Sign-in holds.** Switch tabs, close the app, come back tomorrow. It should not ask again. |
 | R22 | **Select text, then highlight, underline, tag, note or share.** The whole annotation path. |
 | R23 | **The five exercises end to end in the app**, including Physical Intimacy, whose multi-select screens the automated driver cannot work. |
@@ -173,6 +179,9 @@ build.
 | The "Swipe >" label is gone and the fade carries it | `EdgeFadedRow` draws each fade only when there is something past that edge, which covers the results nav too |
 | In Practice articles are read in the app | all twelve were pages on the website that the app handed to the browser. Their bodies are generated from those pages into `api/_in-practice-bodies.js`; `check-in-practice-bodies.mjs` proves every word of every article reaches the app and nothing else does, planted three ways |
 | The tag list starts empty, with an add field and your two suggestions | opening Notes used to write twenty-one tags into the account. It writes nothing now, and the names an annotation is read through are sent as reference data instead, derived from the live lists on every request. `check-no-seeded-tags.mjs` runs the endpoint and proves all three, planted three ways |
+| Every results at a glance page is a rounded tile, detail pages are full width | your call, and my view is that it is the right one: a tile has edges, and edges claim that what is inside is the whole of something, which is true of an overview and false of a three-screen scroll. One component, `glance-tile.tsx`, so the five cannot drift |
+| Relationship Reflection looks like the site, page for page | the at-a-glance heading and its line were built inside src/App.jsx and are now built once for both; the two detail pages were dark in the app and light on the site, and are light; What you each admire moved to the page the site puts it on; the ranking shows every item |
+| Conflict's at a glance page is in the same tile | the detail pages already matched, bar a white card wrapped round two cream quote cards |
 | Unmatched URLs answer 404 rather than 200 with an empty shell | the catch-all is gone from `vercel.json`; `check-route-targets.mjs` fails if it or anything as wide comes back, planted twice |
 | The app and the website size a storycard from the same numbers | `check-storycard-type.mjs`, 17 roles, planted seven ways |
 | The app home tile draws its icons in orange | one line, and a disabled row keeps the muted brown |

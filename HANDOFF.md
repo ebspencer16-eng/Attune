@@ -1577,3 +1577,48 @@ check that proves it. Section 1 is empty for the first time.
 
 Say "R7 verified" and it moves to section 4. Say what is wrong with it and it
 becomes an O item.
+
+---
+
+## 14 September 2026
+
+Your 13 September list, all twenty-nine items, is built. Section 2 of
+`TASKS.md` is empty for the first time.
+
+**One thing needs you: migration 064.** It clears the default tags out of
+accounts that already have them. It is in section 1 with the rest.
+
+**One question needs you: Q1**, the suggestions line under "add a tag". Your
+two are in and shipping. The "etc." is words a customer reads, so it is yours.
+
+**What changed that is worth knowing about.**
+
+*In Practice reads in the app.* All twelve pieces were pages on the website
+that the app handed to the browser. Their bodies are generated from those
+pages into `api/_in-practice-bodies.js` by
+`scripts/build-in-practice-bodies.mjs`, so the copy is edited in one place,
+the page, and the app draws what the page says.
+`check-in-practice-bodies.mjs` proves every word of every article reaches
+the app and that nothing else does, including the Get started panel, which
+is deliberately left behind.
+
+*The default tags are gone.* Opening Notes used to write twenty-one tags into
+the account. The subtle half: those rows were also the dictionary an
+annotation is read through, so deleting them without replacing that would
+have quietly relabelled every existing annotation as "Dim conflict". The
+names are sent as reference data now, derived from the live lists on every
+request, which is better than the frozen rows were.
+
+*Reflection matches the site.* Its at-a-glance heading and the line under it
+were built inside `src/App.jsx`, which the app cannot import, so the app
+opened the same page with a different heading and no line. Both surfaces read
+`reflectionOverview()` now. The two detail pages were dark in the app and
+light on the site, and are light.
+
+*The tile.* You asked whether every results page should be the rounded tile.
+My answer is in the commit and in TASKS: overviews yes, detail pages no,
+because a tile's edges claim that what is inside is the whole of something,
+and a three-screen scroll is not. One component, `glance-tile.tsx`.
+
+**Where to pick up.** Section 3 has five new review items, R30 to R35. Nothing
+is half-done and nothing is waiting on me.
