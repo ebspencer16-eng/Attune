@@ -28,17 +28,12 @@ have proved instead.
 
 | # | Question |
 |--|--|
-| G21 | **Please open attune-relationships.com in your own browser and tell me it loads.** I verified every change today by requesting pages from this machine, and the volume tripped Vercel's bot challenge: every request from here now answers 403 with a "Vercel Security Checkpoint" page, including from a real browser. That is almost certainly scoped to this machine's address and wears off. What I cannot tell from here is whether it is only me. If the site does not load for you either, the setting is Vercel, Project, Firewall, Attack Challenge Mode. I have stopped making requests. |
-| G20 | **The `qr_token` column on `orders` is now written by nothing.** The gift cards are retired and so is the claim path, so the column sits there holding old values. Dropping it is a migration and it is irreversible, so I have not written one. Say the word and I will. |
-| G19 | **The two six-month emails, side by side.** They say the same thing in different words.
-**The browser one** (subject: "Six months with Attune. Worth a look.") opens "Six months is a good time to check in", then argues the case: a lot can move in half a year, some things get easier, new friction appears, the assessment is most useful as a check-in rather than a one-time snapshot. Button: Retake Attune.
-**The cron one** (subject: "How are you and [partner] doing?") opens "Six months in", then explains the mechanics: the retake is the same exercises answered independently, and the new results sit alongside the original ones. Button: Return to Attune.
-The mechanism differs too, and it matters more than the words. The browser one only fires if they open the app on the day it turns six months old, which a couple who has drifted will not do. The cron one goes out on a schedule and honours the email preference. **My recommendation: keep the cron one and delete the browser one.** Your call on the wording either way. |
 
 ## 2. Open
 
 | # | Task |
 |--|--|
+| O39 | **G19: delete the browser-triggered six-month email**, keeping the cron one. |
 | O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
@@ -70,6 +65,7 @@ any order; work through them however suits.
 | R7 | **Highlight storycards**, both surfaces: the front and back arrows, and that nothing is clipped at the top. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
 | R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
+| R28 | **Run migration `062_drop_qr_card_columns.sql`.** It drops the three qr columns and `card_url`, which nothing writes any more. It also drops an RLS policy from April that let anyone holding the publishable key read order rows: `using (qr_token is not null)`, and every order was backfilled with a token. That is the half worth running promptly. The migration prints the policies left on `orders` when it finishes. |
 | R26 | **Run migration `061_page_events_surface.sql`** in the SQL editor. Until it runs, the app column and the site column on every clustered chart stay empty, because nothing is telling the two apart yet. Events already filed keep counting, they just sit in neither column. |
 
 ### Copy, and whether the words are yours

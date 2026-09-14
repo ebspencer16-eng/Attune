@@ -3961,7 +3961,6 @@ async function loadRealData() {
             workbookStatus: o.workbook_status,
             dbId: o.id,
             cardStatus: o.card_status || 'pending',
-            cardUrl: o.card_url || null,
             state: normStateCode(o.shipping_state || o.billing_state),
             country: o.shipping_country || o.billing_country || ((o.shipping_state || o.billing_state) ? 'US' : null),
             _raw: o,
