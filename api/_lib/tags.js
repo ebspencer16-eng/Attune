@@ -83,15 +83,34 @@ export const COMM_DOMAINS = ['inner', 'connection', 'hard'].map((id) => ({
  * list. Maybe we could have a line with some suggestions ie. communicating
  * needs, love, etc." These two are hers, quoted from that line.
  *
- * COPY GAP, and it is hers to fill: how many suggestions the line should hold
- * and what the rest of them say. Two is what she named, so two is what ships,
- * rather than my inventing eight to fill a row. A suggestion is one or two
- * words, lower case, the sort of thing a person would file a note under.
+ * The other three are mine. Ellie: "you write and I'll review once live",
+ * which is the same order Carolina reads copy in, so they ship and she edits
+ * this line rather than the line waiting on her.
+ *
+ * ── WHY THESE THREE ───────────────────────────────────────────────────────
+ * A suggestion has one job: to show what size of thing a tag is, so the next
+ * one a person types is theirs rather than a guess at the product's
+ * vocabulary. So they are short, lower case, and about a life rather than
+ * about results. Money, family and time together are the three subjects that
+ * come up in every section of this product: they are what the expectations
+ * categories, the reflection answers and half the conflict openings are
+ * actually about, said the way a person would say them.
+ *
+ * Deliberately not the names of dimensions, categories or couple types. Those
+ * are exactly the twenty-one tags that were seeded and that Ellie asked to be
+ * rid of, and offering them back as suggestions would be the same list with a
+ * tap in front of it.
  *
  * Here rather than in the app so both surfaces offer the same words, and so
  * changing them is one edit.
  */
-export const TAG_SUGGESTIONS = ['communicating needs', 'love'];
+export const TAG_SUGGESTIONS = [
+  'communicating needs',
+  'love',
+  'money',
+  'family',
+  'time together',
+];
 
 export function standardTags({ ownsIntimacy = false } = {}) {
   const tags = [];

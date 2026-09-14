@@ -56,9 +56,10 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+Nothing outstanding. When I have a question it appears here.
+
 | # | Question |
 |--|--|
-| Q1 | **The suggestions line under "add a tag" needs your words.** You wrote "maybe we could have a line with some suggestions ie. communicating needs, love, etc." Those two are in and shipping. The "etc." is the part I will not write: they are words a customer reads. Send me the full line and I will put it in. Shape: one or two words each, lower case, the sort of thing a person would file a note under, and however many you want, though four or five is about what fits a phone across one row. |
 
 ## 2. Open
 
@@ -110,6 +111,7 @@ any order; work through them however suits.
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
 | R13 | **The deletion emails**: the confirmation to the person, and the notice to their partner. My words, in `api/_lib/deletion-emails.js`. |
 | R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
+| R36 | **The five tag suggestions.** Yours are communicating needs and love. Mine are money, family and time together: short, lower case, about a life rather than about results, and deliberately not the names of dimensions or categories, which are the tags you asked to be rid of. In `TAG_SUGGESTIONS` in `api/_lib/tags.js`. Change any of them and both surfaces follow. |
 | R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
 
 ### Behaviour, which needs a real device
@@ -178,7 +180,7 @@ build.
 | The reading time reads "6 min read", in orange | in the article row and at the top of the article |
 | The "Swipe >" label is gone and the fade carries it | `EdgeFadedRow` draws each fade only when there is something past that edge, which covers the results nav too |
 | In Practice articles are read in the app | all twelve were pages on the website that the app handed to the browser. Their bodies are generated from those pages into `api/_in-practice-bodies.js`; `check-in-practice-bodies.mjs` proves every word of every article reaches the app and nothing else does, planted three ways |
-| The tag list starts empty, with an add field and your two suggestions | opening Notes used to write twenty-one tags into the account. It writes nothing now, and the names an annotation is read through are sent as reference data instead, derived from the live lists on every request. `check-no-seeded-tags.mjs` runs the endpoint and proves all three, planted three ways |
+| The tag list starts empty, with an add field and five suggestions | opening Notes used to write twenty-one tags into the account. It writes nothing now, and the names an annotation is read through are sent as reference data instead, derived from the live lists on every request. `check-no-seeded-tags.mjs` runs the endpoint and proves all three, planted three ways |
 | Every results at a glance page is a rounded tile, detail pages are full width | your call, and my view is that it is the right one: a tile has edges, and edges claim that what is inside is the whole of something, which is true of an overview and false of a three-screen scroll. One component, `glance-tile.tsx`, so the five cannot drift |
 | Relationship Reflection looks like the site, page for page | the at-a-glance heading and its line were built inside src/App.jsx and are now built once for both; the two detail pages were dark in the app and light on the site, and are light; What you each admire moved to the page the site puts it on; the ranking shows every item |
 | Conflict's at a glance page is in the same tile | the detail pages already matched, bar a white card wrapped round two cream quote cards |
