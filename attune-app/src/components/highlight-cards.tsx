@@ -135,7 +135,8 @@ let SC = {
 type TypeSpec = {
   size: number | [number, number, number];
   family: 'display' | 'body';
-  weight: number; track?: number; lh?: number; alpha: number; upper?: boolean;
+  weight: number; track?: number; lh?: number; alpha: number;
+  upper?: boolean; lower?: boolean;
 };
 
 /**
@@ -145,9 +146,10 @@ type TypeSpec = {
  * card's width, because on these cards that is what vw always meant: a fixed
  * 9:16 box whose text should size to the box, not to the screen around it.
  */
-function t(role: string, cardWidth: number): Record<string, unknown> {
-  const spec = SC.type?.[role];
-  if (!spec) return {};
+function t(role: string, cardWidth: number, over?: Partial<TypeSpec>): Record<string, unknown> {
+  const base = SC.type?.[role];
+  if (!base) return {};
+  const spec = over ? { ...base, ...over } : base;
   const px = Array.isArray(spec.size)
     ? Math.min(Math.max(spec.size[0] * 16, (spec.size[1] / 100) * cardWidth), spec.size[2] * 16)
     : spec.size * 16;
@@ -163,6 +165,7 @@ function t(role: string, cardWidth: number): Record<string, unknown> {
     ...(spec.track != null ? { letterSpacing: Math.round(spec.track * fontSize * 10) / 10 } : {}),
     ...(spec.lh != null ? { lineHeight: Math.ceil(fontSize * spec.lh) } : {}),
     ...(spec.upper ? { textTransform: 'uppercase' as const } : {}),
+    ...(spec.lower ? { textTransform: 'lowercase' as const } : {}),
     color: spec.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${spec.alpha})`,
   };
 }
@@ -535,7 +538,7 @@ function Card({
             {SC.wordmark}
           </Text>
           {/* block: highlights/watermark */}
-          <Text style={[t('siteLabel', w), { textTransform: 'lowercase' }]}>
+          <Text style={t('siteLabel', w)}>
             {SC.siteLabel}
           </Text>
         </View>
@@ -580,7 +583,7 @@ function Body({ card, onDone, map, w }: {
        */
       return (
         <View style={{ alignItems: 'center' }}>
-          <Text style={[S.title, { textAlign: 'center', maxWidth: 320 }]}>{card.title}</Text>
+          <Text style={[S.titleSm, { textAlign: 'center', maxWidth: 320 }]}>{card.title}</Text>
           {map ? (
             <View style={{ marginTop: Spacing.md, marginBottom: Spacing.sm }}>
               <CoupleMap
@@ -595,14 +598,14 @@ function Body({ card, onDone, map, w }: {
           ) : null}
           {/* "Your couple type: The Orbit" on one line, the way the website
               writes it, rather than a label under a headline. */}
-          <Text style={[S.body, { textAlign: 'center', marginTop: map ? Spacing.sm : Spacing.xl, color: `${WHITE}0.85)` }]}>
+          <Text style={[S.lead, { textAlign: 'center', marginTop: map ? Spacing.sm : Spacing.xl }]}>
             {card.typeLabel}
             {card.typeName ? ': ' : ''}
             {card.typeName ? (
               <Text style={{ fontWeight: '700', color: Palette.white }}>{card.typeName}</Text>
             ) : null}
           </Text>
-          <Text style={[S.body, { textAlign: 'center', marginTop: Spacing.sm, maxWidth: 260 }]}>{card.body}</Text>
+          <Text style={[S.bodySm, { textAlign: 'center', marginTop: Spacing.sm, maxWidth: 260 }]}>{card.body}</Text>
         </View>
       );
 
@@ -630,9 +633,9 @@ function Body({ card, onDone, map, w }: {
     case 'stat-pair':
       return (
         <View>
-          <Text style={[S.body, { textAlign: 'center' }]}>{card.lead}</Text>
+          <Text style={[S.leadLg, { textAlign: 'center' }]}>{card.lead}</Text>
           <Text style={[S.stat, { textAlign: 'center' }]}>{card.stat}</Text>
-          <Text style={[S.body, { textAlign: 'center', marginBottom: Spacing.xl }]}>{card.statLabel}</Text>
+          <Text style={[S.statLabel, { textAlign: 'center', marginBottom: Spacing.xl }]}>{card.statLabel}</Text>
           {/* Green for closest, orange for furthest, from the server. Both
               tiles were the same grey here, so the card named two dimensions
               and left the reader to guess which was the one they agree on. */}
@@ -648,7 +651,7 @@ function Body({ card, onDone, map, w }: {
               <Text style={[S.value, { marginTop: Spacing.xs }]}>{x.value}</Text>
             </View>
           ))}
-          <Text style={[S.body, { marginTop: Spacing.md }]}>{card.body}</Text>
+          <Text style={[S.bodySmDim, { marginTop: Spacing.md }]}>{card.body}</Text>
         </View>
       );
 
@@ -660,9 +663,9 @@ function Body({ card, onDone, map, w }: {
          the two rings read as one measurement drawn twice. */
       return (
         <View style={{ alignItems: 'center' }}>
-          <Eyebrow w={w}>{card.eyebrow}</Eyebrow>
+          <Eyebrow w={w} role="eyebrowMd">{card.eyebrow}</Eyebrow>
           <Text style={[S.statBig, card.statColor ? { color: card.statColor } : null]}>{card.stat}</Text>
-          <Text style={[S.body, { marginBottom: Spacing.xxl }]}>{card.statLabel}</Text>
+          <Text style={[S.statLabelSm, { marginBottom: Spacing.xxl }]}>{card.statLabel}</Text>
           <View style={{ flexDirection: 'row', gap: Spacing.xl }}>
             {(card.rings || []).map((r) => (
               <Donut key={r.label} pct={r.pct} label={r.label} color={r.color} />
@@ -682,8 +685,8 @@ function Body({ card, onDone, map, w }: {
                 backgroundColor: `${WHITE}0.06)`, borderColor: `${WHITE}0.12)`, borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
               }}>
-              <Text style={S.small}>{r.name} is most admired for</Text>
-              <Text style={[S.stat, { marginTop: Spacing.xs }]}>
+              <Text style={S.caption}>{r.name} is most admired for</Text>
+              <Text style={[S.titleMd, { marginTop: Spacing.xs }]}>
                 {(r.admired || '').toLowerCase()}
               </Text>
             </View>
@@ -694,11 +697,11 @@ function Body({ card, onDone, map, w }: {
     case 'named-dimension':
       return (
         <View style={{ alignItems: 'center' }}>
-          <Eyebrow w={w}>{card.eyebrow}</Eyebrow>
-          <Text style={[S.body, { marginTop: Spacing.md }]}>{card.title}</Text>
-          <Text style={[S.hero, { textAlign: 'center', marginTop: Spacing.sm }]}>{card.value}</Text>
+          <Eyebrow w={w} role="eyebrowTint">{card.eyebrow}</Eyebrow>
+          <Text style={[S.bodyMd, { marginTop: Spacing.md }]}>{card.title}</Text>
+          <Text style={[S.statMid, { textAlign: 'center', marginTop: Spacing.sm }]}>{card.value}</Text>
           {card.body ? (
-            <Text style={[S.body, { textAlign: 'center', marginTop: Spacing.xl, fontStyle: 'italic', maxWidth: 280 }]}>
+            <Text style={[S.bodyMd, { textAlign: 'center', marginTop: Spacing.xl, fontStyle: 'italic', maxWidth: 280 }]}>
               {card.body}
             </Text>
           ) : null}
@@ -708,14 +711,14 @@ function Body({ card, onDone, map, w }: {
     case 'quote':
       return (
         <View style={{ alignItems: 'center' }}>
-          <Text style={[S.body, { textAlign: 'center', maxWidth: 300 }]}>{card.lead}</Text>
-          <Text style={[S.label, { textAlign: 'center', marginTop: Spacing.xl }]}>{card.eyebrow}</Text>
+          <Text style={[S.bodyLg, { textAlign: 'center', maxWidth: 300 }]}>{card.lead}</Text>
+          <Text style={[S.listLabel, { textAlign: 'center', marginTop: Spacing.xl }]}>{card.eyebrow}</Text>
           <View
             style={{
               backgroundColor: `${WHITE}0.1)`, borderColor: `${WHITE}0.22)`, borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.xl, marginTop: Spacing.md,
             }}>
-            <Text style={[S.title, { fontStyle: 'italic', textAlign: 'center' }]}>
+            <Text style={[S.quote, { fontStyle: 'italic', textAlign: 'center' }]}>
               {card.quote}
             </Text>
           </View>
@@ -726,8 +729,8 @@ function Body({ card, onDone, map, w }: {
       return (
         <View style={{ alignItems: 'center' }}>
           <Rule />
-          <Text style={[S.title, { textAlign: 'center' }]}>{card.title}</Text>
-          <Text style={[S.body, { textAlign: 'center', marginTop: Spacing.md, marginBottom: Spacing.xxl }]}>
+          <Text style={[S.titleLg, { textAlign: 'center' }]}>{card.title}</Text>
+          <Text style={[S.bodyLg, { textAlign: 'center', marginTop: Spacing.md, marginBottom: Spacing.xxl }]}>
             {card.body}
           </Text>
           <Pressable
@@ -853,9 +856,9 @@ function Rule() {
   );
 }
 
-function Eyebrow({ children, w }: { children?: string; w: number }) {
+function Eyebrow({ children, w, role = 'eyebrow' }: { children?: string; w: number; role?: string }) {
   if (!children) return null;
-  return <Text style={t('eyebrow', w)}>{children}</Text>;
+  return <Text style={t(role, w)}>{children}</Text>;
 }
 
 /**
@@ -871,16 +874,31 @@ function cardStyles(w: number) {
     amp: t('amp', w),
     title: t('title', w),
     titleSm: t('titleSm', w),
+    titleMd: t('titleMd', w),
+    titleLg: t('titleLg', w),
     body: t('body', w),
     bodySm: t('bodySm', w),
+    // The same role a shade quieter, the way the website writes it on the card
+    // that closes with a sentence under two call-outs.
+    bodySmDim: t('bodySm', w, { alpha: 0.5 }),
+    bodyMd: t('bodyMd', w),
+    bodyLg: t('bodyLg', w),
     lead: t('lead', w),
+    leadLg: t('leadLg', w),
     small: t('bodySm', w),
+    caption: t('caption', w),
+    ctaAlt: t('ctaAlt', w),
     label: t('calloutLabel', w),
+    listLabel: t('listLabel', w),
     value: t('calloutValue', w),
+    quote: t('quote', w),
     eyebrow: t('eyebrow', w),
     footer: t('footer', w),
     stat: t('stat', w),
+    statMid: t('statMid', w),
     statBig: t('statBig', w),
+    statLabel: t('statLabel', w),
+    statLabelSm: t('statLabelSm', w),
   };
 }
 /*

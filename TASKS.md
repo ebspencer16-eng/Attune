@@ -59,6 +59,7 @@ Nothing outstanding. When I have a question it appears here.
 
 | # | Question |
 |--|--|
+| G22 | **A storycard is bigger on a laptop than on a phone, and always has been.** The website sizes the card's text against the browser window, so the same 390-wide card shows the names at 60.8px on a laptop and 41.6px on a phone. The app has no window to size against, so it uses the card, which gives it the phone number. That means the app matches the website as seen on a phone, exactly, and is smaller than the website on a laptop. I left it because changing it moves what the website looks like today, which is yours. My recommendation: size against the card on both, so a card looks the same everywhere and the downloaded image matches what was on screen. Say the word and it is one line. |
 
 ## 2. Open
 
@@ -68,7 +69,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O43 | **Eight of the nine storycards on the website still carry their type inline.** The opener reads the shared scale; the rest hold the values the scale was copied from, so the two surfaces match today and a gate says so, but an edit to one of those eight would move the website and not the app. Convert them. |
 
 ## 3. For you to review
 
@@ -139,6 +139,8 @@ build.
 
 | Verified | By |
 |--|--|
+| Every one of the nine storycards is sized from the shared scale on both surfaces | `check-storycard-type.mjs`: 30 roles, no type written anywhere in the website's card region, and no role either surface leaves undrawn |
+| Converting the website changed nothing on screen | 135 text nodes captured from all ten cards in a browser before and after, identical three times |
 | Unmatched URLs answer 404 rather than 200 with an empty shell | the catch-all is gone from `vercel.json`; `check-route-targets.mjs` fails if it or anything as wide comes back, planted twice |
 | The app and the website size a storycard from the same numbers | `check-storycard-type.mjs`, 17 roles, planted seven ways |
 | The app home tile draws its icons in orange | one line, and a disabled row keeps the muted brown |

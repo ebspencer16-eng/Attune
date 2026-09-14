@@ -116,28 +116,47 @@ for (const line of cards.slice(Math.max(faceAt, 0)).split('\n')) {
   }
 }
 
-// ── 4. The website's inline cards still hold the values the scale copied ─────
-// Not sharing, but not silence either: if one of the eight unconverted cards
-// is edited, the size it used to have disappears from the file and this says
-// which role has drifted.
+// ── 4. The website's storycards write no type of their own ──────────────────
+// Every one of the thirty styles in that region goes through scType now, and
+// so does the wordmark and the address on every card. What is left inline is
+// layout: margins, animations, widths, and two colours a card computes.
+//
+// The earlier version of this checked that each role's size still appeared
+// somewhere in src/App.jsx, which was right while the scale was a transcript
+// and wrong the moment it became the source.
 const site = read('src/App.jsx');
-const storyStart = site.indexOf('<WrappedCard key={0}');
-const storyEnd = site.indexOf('  ];', storyStart);
-const story = storyStart > 0 ? site.slice(storyStart, storyEnd) : '';
-if (!story) {
+const lines = site.split('\n');
+const first = lines.findIndex((l) => l.includes('<WrappedCard key={0}'));
+const last = lines.findIndex((l, i) => i > first && l.trim() === '];');
+if (first < 0 || last < 0) {
   problems.push('cannot find the storycards in src/App.jsx, so nothing here is checking the website.');
 }
-const TRANSCRIBED = ['titleSm', 'stat', 'statBig', 'bodySm', 'lead', 'calloutLabel', 'calloutValue', 'eyebrowSm', 'cta'];
-for (const role of TRANSCRIBED) {
-  const spec = style.CARD_TYPE[role];
-  const want = Array.isArray(spec.size)
-    ? `clamp(${spec.size[0]}rem,${spec.size[1]}vw,${spec.size[2]}rem)`
-    : `${spec.size}rem`;
-  if (story && !story.replace(/\s+/g, '').includes(want.replace(/\s+/g, ''))) {
-    problems.push(
-      `${role} is ${want} in the shared scale and that size is nowhere in the website's storycards.\n`
-      + `      Either the card it came from was edited, or the role no longer matches what ships.`);
-  }
+const region = first >= 0 ? lines.slice(first, last).join('\n') : '';
+const TYPE_PROPS = /\b(fontSize|fontWeight|letterSpacing|fontFamily)\s*:/g;
+for (const m of region.matchAll(TYPE_PROPS)) {
+  const at = region.slice(0, m.index).split('\n').length + first;
+  const line = lines[at - 1] || '';
+  // Emphasis inside a line that already has a role is not a second type
+  // system: the website bolds the couple type's name inside its sentence and
+  // the app does the same. A line with no scType on it has no such excuse.
+  if (line.includes('scType(') && m[1] === 'fontWeight') continue;
+  problems.push(`src/App.jsx:${at} writes ${m[1]} on a storycard: ${line.trim().slice(0, 60)}`);
+}
+if (region && !region.includes('scType(')) {
+  problems.push('the storycards do not call scType at all, so the scale is not reaching the website.');
+}
+
+// ── 5. Every role is used by both surfaces ───────────────────────────────────
+// A role only one side draws is a value that can drift without anyone seeing
+// it, which is how eyebrowSm came to exist and be rendered by neither.
+const appSrc = read('attune-app/src/components/highlight-cards.tsx');
+for (const role of roles) {
+  const onSite = site.includes(`scType("${role}"`);
+  // The app reaches a role either through t() or by naming it on a component
+  // that calls t() itself, like <Eyebrow role="eyebrowMd">.
+  const inApp = appSrc.includes(`t('${role}'`) || appSrc.includes(`role="${role}"`);
+  if (!onSite) problems.push(`role ${role} is in the scale and the website draws nothing with it.`);
+  if (!inApp) problems.push(`role ${role} is in the scale and the app draws nothing with it.`);
 }
 
 if (problems.length) {

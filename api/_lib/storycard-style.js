@@ -53,8 +53,6 @@
 export const CARD_TYPE = {
   /** The label above everything: YOUR RESULTS, THE NUMBER, and so on. */
   eyebrow:   { size: 0.55, family: 'body', weight: 700, track: 0.32, alpha: 0.40, upper: true },
-  /** A second eyebrow the later cards use, tracked a little tighter. */
-  eyebrowSm: { size: 0.50, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
   /** The couple's names on the opener. The biggest thing on any card. */
   names:     { size: [2.6, 7, 3.8], family: 'display', weight: 700, track: -0.03, lh: 0.92, alpha: 1 },
   /** The ampersand between them. */
@@ -78,11 +76,45 @@ export const CARD_TYPE = {
   /** A call-out tile's value. */
   calloutValue: { size: 1.25, family: 'display', weight: 700, alpha: 1 },
   /** The wordmark, bottom left. */
-  wordmark:  { size: 0.875, family: 'display', weight: 700, alpha: 0.55 },
+  /* Measured off the website, not guessed from the app: 0.75rem, white, and
+     the app had it at 0.875rem in a 0.55 white. A wordmark is the one thing on
+     a screenshot that says where it came from, so a difference here is the
+     difference between two products. */
+  wordmark:  { size: 0.75, family: 'display', weight: 700, alpha: 1 },
   /** The address, bottom right. */
-  siteLabel: { size: 0.5, family: 'body', weight: 700, track: 0.075, alpha: 0.35 },
+  /* Also measured: 0.52rem, regular weight, tracked 0.12em, lowercase. The
+     app had it bold at 0.5 tracked 0.075. */
+  siteLabel: { size: 0.52, family: 'body', weight: 400, track: 0.12, alpha: 0.35, lower: true },
   /** The button at the end of the last card. */
   cta:       { size: 0.85, family: 'body', weight: 700, track: 0.05, alpha: 1 },
+  /** A sentence that introduces a figure. Card 3. */
+  leadLg:    { size: 0.92, family: 'body', weight: 400, lh: 1.45, alpha: 0.72 },
+  /** What a figure means, under it. Card 3. */
+  statLabel: { size: 1.05, family: 'body', weight: 500, alpha: 0.72 },
+  /** The same, one step down, on the cards that are only a figure. */
+  statLabelSm: { size: 1, family: 'body', weight: 500, alpha: 0.8 },
+  /** The eyebrow on the figure cards, a size up from the call-out label. */
+  eyebrowMd: { size: 0.55, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
+  /** The intimacy card's eyebrow, which takes that card's own colour. */
+  eyebrowTint: { size: 0.52, family: 'body', weight: 700, track: 0.28, alpha: 0.85, upper: true },
+  /** The middle figure size, used by the intimacy card. */
+  statMid:   { size: [3.5, 12, 5.5], family: 'display', weight: 700, track: -0.04, lh: 1, alpha: 1 },
+  /** Body copy on the cards that carry a paragraph. */
+  bodyMd:    { size: 0.82, family: 'body', weight: 300, lh: 1.65, alpha: 0.6 },
+  /** Body copy where the card is already busy. */
+  bodyLg:    { size: 0.85, family: 'body', weight: 300, lh: 1.65, alpha: 0.55 },
+  /** A label above a list, tracked wider than the call-out's. */
+  listLabel: { size: 0.55, family: 'body', weight: 700, track: 0.16, lh: 1.6, alpha: 0.5, upper: true },
+  /** A quoted line, set in the display face at reading size. */
+  quote:     { size: [1.1, 3.2, 1.3], family: 'display', weight: 400, lh: 1.55, alpha: 1 },
+  /** The largest headline, on the last card. */
+  titleLg:   { size: [1.6, 4.4, 2.15], family: 'display', weight: 700, lh: 1.2, alpha: 1 },
+  /** The headline on the two-up cards. */
+  titleMd:   { size: [1.5, 5, 2], family: 'display', weight: 700, lh: 1.15, alpha: 1 },
+  /** A small caption under a headline. */
+  caption:   { size: 0.72, family: 'body', weight: 400, alpha: 0.6 },
+  /** The second line on the sendoff, quieter than the button. */
+  ctaAlt:    { size: 0.78, family: 'body', weight: 600, track: 0.04, alpha: 0.75 },
   /** Tap to begin, and the like. */
   footer:    { size: 0.52, family: 'body', weight: 700, track: 0.22, alpha: 0.28, upper: true },
 };
@@ -114,13 +146,20 @@ export function nativeFont(t) {
 }
 
 /**
+ * A second argument on either function shifts one value without restating the
+ * rest: `cardTypeCss('bodySm', { alpha: 0.5 })` is the same role a shade
+ * quieter. Two cards differ from their role by a hair, and writing the whole
+ * style again to change an alpha is how the drift started.
+ */
+
+/**
  * One role as CSS, for the website.
  *
  * Returns the same clamp() and the same rgba the cards were written with, so
  * adopting this changes nothing on screen.
  */
-export function cardTypeCss(role) {
-  const t = CARD_TYPE[role];
+export function cardTypeCss(role, over) {
+  const t = over ? { ...CARD_TYPE[role], ...over } : CARD_TYPE[role];
   if (!t) return {};
   const size = Array.isArray(t.size)
     ? `clamp(${t.size[0]}rem, ${t.size[1]}vw, ${t.size[2]}rem)`
@@ -132,6 +171,7 @@ export function cardTypeCss(role) {
     ...(t.track != null ? { letterSpacing: `${t.track}em` } : {}),
     ...(t.lh != null ? { lineHeight: t.lh } : {}),
     ...(t.upper ? { textTransform: 'uppercase' } : {}),
+    ...(t.lower ? { textTransform: 'lowercase' } : {}),
     color: t.alpha >= 1 ? 'white' : `rgba(255,255,255,${t.alpha})`,
   };
 }
@@ -143,8 +183,8 @@ export function cardTypeCss(role) {
  * did: the text is sized against the box it sits in, not against the screen
  * around it.
  */
-export function cardTypeNative(role, cardWidth = CARD_REF_WIDTH) {
-  const t = CARD_TYPE[role];
+export function cardTypeNative(role, cardWidth = CARD_REF_WIDTH, over) {
+  const t = over ? { ...CARD_TYPE[role], ...over } : CARD_TYPE[role];
   if (!t) return {};
   const px = Array.isArray(t.size)
     ? Math.min(Math.max(t.size[0] * 16, (t.size[1] / 100) * cardWidth), t.size[2] * 16)
@@ -157,6 +197,7 @@ export function cardTypeNative(role, cardWidth = CARD_REF_WIDTH) {
     ...(t.track != null ? { letterSpacing: Math.round(t.track * fontSize * 10) / 10 } : {}),
     ...(t.lh != null ? { lineHeight: Math.ceil(fontSize * t.lh) } : {}),
     ...(t.upper ? { textTransform: 'uppercase' } : {}),
+    ...(t.lower ? { textTransform: 'lowercase' } : {}),
     color: t.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${t.alpha})`,
   };
 }

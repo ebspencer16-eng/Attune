@@ -8476,7 +8476,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
         {/* Attune watermark */}
         <div style={{ position: "absolute", bottom: 16, left: 20, display: "flex", alignItems: "center", gap: 6, opacity: 0.45 }}>
           <svg width="22" height="16" viewBox="0 0 103 76" fill="none"><defs><linearGradient id={"wg"+cardIndex} x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill={"url(#wg"+cardIndex+")"}/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke={"url(#wg"+cardIndex+")"} strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill={"url(#wg"+cardIndex+")"} transform="translate(58.16,21.3) scale(0.72)"/></svg>
-          <span style={{ fontFamily: HFONT, fontSize: "0.75rem", fontWeight: 700, color: "white" }}>Attune</span>
+          <span style={{ ...scType("wordmark") }}>Attune</span>
         </div>
         {/* Portrait corner bubble */}
         {portraitCorner && (
@@ -8605,13 +8605,13 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
 
   // Shared watermark style
   const watermark = (
-    <div style={{ position: "absolute", bottom: 16, right: 18, fontSize: "0.52rem", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, letterSpacing: "0.12em", textTransform: "lowercase" }}>
+    <div style={{ ...scType("siteLabel"), position: "absolute", bottom: 16, right: 18 }}>
       {/* block: highlights/watermark */}
       {SC_SITE}
     </div>
   );
   const watermarkDark = (
-    <div style={{ position: "absolute", bottom: 16, right: 18, fontSize: "0.52rem", color: "rgba(14,11,7,0.3)", fontFamily: BFONT, letterSpacing: "0.12em", textTransform: "lowercase" }}>
+    <div style={{ ...scType("siteLabel"), color: "rgba(14,11,7,0.3)", position: "absolute", bottom: 16, right: 18 }}>
       {SC_SITE}
     </div>
   );
@@ -8709,7 +8709,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           )}
           <div style={{ ...scType("eyebrow"), marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.15s both" }}>Your results</div>
           <div style={{ ...scType("names"), marginBottom: "1.5rem", animation: "fadeUp 0.5s 0.2s cubic-bezier(0.22,1,0.36,1) both" }}>
-            {userName}<br/><span style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7em" }}>&amp;</span><br/>{partnerName}
+            {userName}<br/><span style={{ ...scType("amp") }}>&amp;</span><br/>{partnerName}
           </div>
           <div style={{ width: 40, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.5rem", animation: "popIn 0.4s 0.35s both" }} />
           <p style={{ ...scType("body"), maxWidth: 260, margin: 0, animation: "fadeUp 0.4s 0.4s both" }}>
@@ -8726,12 +8726,12 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem 1.75rem 3.5rem", textAlign: "center" }}>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.3rem,4.4vw,1.65rem)", fontWeight: 700, color: "white", lineHeight: 1.15, letterSpacing: "-0.015em", marginBottom: "0.7rem", maxWidth: 320, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
+          <div style={{ ...scType("titleSm"), marginBottom: "0.7rem", maxWidth: 320, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
           <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "0.6rem", width: 224, maxWidth: "84%" }}>
             <CoupleMapSVG myS={myB} partS={partB} userName={userName} partnerName={partnerName} size={184} hideCaption axisLabelColor="rgba(255,255,255,0.62)" />
           </div>
-          <div style={{ fontSize: "0.94rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, marginBottom: "0.55rem", animation: "fadeUp 0.4s 0.4s both" }}>Your couple type: <span style={{ fontWeight: 700, color: "white" }}>{coupleType?.name || "The orbit"}</span></div>
-          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what this looks like for the two of you.</p>
+          <div style={{ ...scType("lead"), marginBottom: "0.55rem", animation: "fadeUp 0.4s 0.4s both" }}>Your couple type: <span style={{ fontWeight: 700, color: "white" }}>{coupleType?.name || "The orbit"}</span></div>
+          <p style={{ ...scType("bodySm"), maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what this looks like for the two of you.</p>
         </div>
       </div>
     </WrappedCard>,
@@ -8742,7 +8742,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden" }}>
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2.5rem 2.25rem 2rem" }}>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.45rem,4.8vw,1.9rem)", fontWeight: 700, color: "white", lineHeight: 1.12, letterSpacing: "-0.02em", marginBottom: "1.7rem", animation: "fadeUp 0.5s 0.08s both" }}>How you each show up in the relationship</div>
+          <div style={{ ...scType("title"), marginBottom: "1.7rem", animation: "fadeUp 0.5s 0.08s both" }}>How you each show up in the relationship</div>
           {commPeekDims.filter(Boolean).map(f => <DimSlider key={f.dim} dim={f.dim} meta={DIM_META[f.dim]} />)}
         </div>
       </div>
@@ -8755,21 +8755,21 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "3rem 2.25rem 2.5rem" }}>
           <div style={{ textAlign: "center", marginBottom: "2.25rem" }}>
-            <div style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.45, marginBottom: "0.45rem", animation: "fadeUp 0.4s 0.05s both" }}>{userName} and {partnerName}'s communication styles are</div>
-            <div style={{ fontFamily: HFONT, fontSize: "clamp(3.75rem,13vw,5.25rem)", fontWeight: 700, color: "white", lineHeight: 0.9, letterSpacing: "-0.04em", animation: "numCount 0.6s 0.12s cubic-bezier(0.34,1.56,0.64,1) both" }}>{commAlignPct}%</div>
-            <div style={{ fontSize: "1.05rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontWeight: 500, marginTop: "0.25rem", animation: "fadeUp 0.4s 0.22s both" }}>aligned</div>
+            <div style={{ ...scType("leadLg"), marginBottom: "0.45rem", animation: "fadeUp 0.4s 0.05s both" }}>{userName} and {partnerName}'s communication styles are</div>
+            <div style={{ ...scType("stat"), animation: "numCount 0.6s 0.12s cubic-bezier(0.34,1.56,0.64,1) both" }}>{commAlignPct}%</div>
+            <div style={{ ...scType("statLabel"), marginTop: "0.25rem", animation: "fadeUp 0.4s 0.22s both" }}>aligned</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", marginBottom: "1.75rem" }}>
             <div style={{ background: SC_CALLOUT.tune.tint, border: `1px solid ${SC_CALLOUT.tune.border}`, borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.25s both" }}>
-              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: SC_CALLOUT.tune.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you're most in tune</div>
-              <div style={{ fontFamily: HFONT, fontSize: "1.25rem", fontWeight: 700, color: "white" }}>{strengthMeta?.label || "Emotional Expression"}</div>
+              <div style={{ ...scType("calloutLabel"), color: SC_CALLOUT.tune.color, marginBottom: "0.3rem" }}>Where you're most in tune</div>
+              <div style={{ ...scType("calloutValue") }}>{strengthMeta?.label || "Emotional Expression"}</div>
             </div>
             <div style={{ background: SC_CALLOUT.diverge.tint, border: `1px solid ${SC_CALLOUT.diverge.border}`, borderRadius: 12, padding: "0.9rem 1.1rem", animation: "slideRight 0.4s 0.34s both" }}>
-              <div style={{ fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: SC_CALLOUT.diverge.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.3rem" }}>Where you diverge most</div>
-              <div style={{ fontFamily: HFONT, fontSize: "1.25rem", fontWeight: 700, color: "white" }}>{gapMeta?.label || "Conflict Style"}</div>
+              <div style={{ ...scType("calloutLabel"), color: SC_CALLOUT.diverge.color, marginBottom: "0.3rem" }}>Where you diverge most</div>
+              <div style={{ ...scType("calloutValue") }}>{gapMeta?.label || "Conflict Style"}</div>
             </div>
           </div>
-          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: 0, animation: "fadeUp 0.4s 0.42s both" }}>Explore your results to see what each of these means, with guidance built for the two of you.</p>
+          <p style={{ ...scType("bodySm", { alpha: 0.5 }), margin: 0, animation: "fadeUp 0.4s 0.42s both" }}>Explore your results to see what each of these means, with guidance built for the two of you.</p>
         </div>
       </div>
     </WrappedCard>,
@@ -8779,9 +8779,9 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", alignItems: "center", justifyContent: "center", padding: "2.75rem 2.25rem 2.75rem", textAlign: "center" }}>
         {watermark}
-        <div style={{ fontSize: "0.55rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.05s both" }}>Expectations</div>
-        <div style={{ fontFamily: HFONT, fontSize: "clamp(4.5rem,14vw,7rem)", fontWeight: 700, color: scStatColor(alignPct), lineHeight: 0.85, letterSpacing: "-0.05em", marginBottom: "0.3rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>{alignPct}%</div>
-        <div style={{ fontSize: "1rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, fontWeight: 500, marginBottom: "2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>aligned overall</div>
+        <div style={{ ...scType("eyebrowMd"), marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.05s both" }}>Expectations</div>
+        <div style={{ ...scType("statBig"), color: scStatColor(alignPct), marginBottom: "0.3rem", animation: "numCount 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both" }}>{alignPct}%</div>
+        <div style={{ ...scType("statLabelSm"), marginBottom: "2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>aligned overall</div>
         <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", animation: "fadeUp 0.4s 0.35s both" }}>
           <Donut pct={lifeAlignPct} color={SC_RING.life} label="Life & values" />
           <Donut pct={respAlignPct} color={SC_RING.responsibilities} label="Responsibilities" />
@@ -8796,12 +8796,12 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", padding: "2.75rem 2.25rem 2.75rem" }}>
         {watermark}
-        <div style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: "white", lineHeight: 1.15, marginBottom: "1.75rem", animation: "fadeUp 0.5s 0.1s both" }}>What you admire in each other</div>
+        <div style={{ ...scType("titleMd"), marginBottom: "1.75rem", animation: "fadeUp 0.5s 0.1s both" }}>What you admire in each other</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {[[userName, uPos, reflTheirAdmire, "#E8673A", "0.24s"], [partnerName, pPos, reflMyAdmire, "#5B6DF8", "0.34s"]].map(([nm, pos, admire, col, delay]) => (
             <div key={nm} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "1.25rem 1.35rem", animation: "fadeUp 0.5s " + delay + " both" }}>
-              <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, marginBottom: "0.4rem" }}>{nm} is most admired for {pos}</div>
-              <div style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: col, lineHeight: 1.1 }}>{admiredNounLower(admire)}</div>
+              <div style={{ ...scType("caption"), marginBottom: "0.4rem" }}>{nm} is most admired for {pos}</div>
+              <div style={{ ...scType("titleMd", { lh: 1.1 }), color: col }}>{admiredNounLower(admire)}</div>
             </div>
           ))}
         </div>
@@ -8823,10 +8823,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
           <circle cx="29" cy="44" r="5.5" fill="#2a0f1a" />
           <rect x="26.5" y="46" width="5" height="11" rx="2.5" fill="#2a0f1a" />
         </svg>
-        <div style={{ fontSize: "0.52rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(224,141,166,0.85)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.15s both" }}>Physical Intimacy</div>
-        {intimacyAlignPct != null && (<div style={{ fontFamily: HFONT, fontSize: "clamp(3.5rem,12vw,5.5rem)", fontWeight: 700, color: "#E08DA6", lineHeight: 1, letterSpacing: "-0.04em", marginBottom: "0.7rem", animation: "numCount 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both" }}>{intimacyAlignPct}%</div>)}
-        <div style={{ fontSize: "1rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, fontWeight: 500, marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.3s both" }}>aligned</div>
-        <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.58)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 280, margin: 0, animation: "fadeUp 0.4s 0.38s both" }}>Explore what you each expect out of this part of your relationship.</p>
+        <div style={{ ...scType("eyebrowTint"), color: "rgba(224,141,166,0.85)", marginBottom: "0.9rem", animation: "fadeUp 0.4s 0.15s both" }}>Physical Intimacy</div>
+        {intimacyAlignPct != null && (<div style={{ ...scType("statMid"), color: "#E08DA6", marginBottom: "0.7rem", animation: "numCount 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both" }}>{intimacyAlignPct}%</div>)}
+        <div style={{ ...scType("statLabelSm"), marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.3s both" }}>aligned</div>
+        <p style={{ ...scType("bodyMd", { alpha: 0.58 }), maxWidth: 280, margin: 0, animation: "fadeUp 0.4s 0.38s both" }}>Explore what you each expect out of this part of your relationship.</p>
       </div>
     </WrappedCard>
     
@@ -8837,10 +8837,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <style>{cardAnim}</style>
       <div onClick={advance} style={{ flex: 1, display: "flex", flexDirection: "column", cursor: "pointer", position: "relative", overflow: "hidden", justifyContent: "center", alignItems: "center", padding: "2.5rem 2.25rem", textAlign: "center" }}>
         {watermark}
-        <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 300, margin: "0 auto 1.75rem", animation: "fadeUp 0.4s 0.05s both" }}>As you explore your results, you'll learn more about your unique dynamic and unlock guidance tailored to the two of you.</p>
-        <div style={{ fontSize: "0.55rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", fontFamily: BFONT, fontWeight: 700, lineHeight: 1.6, marginBottom: "1rem", animation: "fadeUp 0.4s 0.12s both" }}>One conversation worth having for {userName} &amp; {partnerName}</div>
+        <p style={{ ...scType("bodyMd"), maxWidth: 300, margin: "0 auto 1.75rem", animation: "fadeUp 0.4s 0.05s both" }}>As you explore your results, you'll learn more about your unique dynamic and unlock guidance tailored to the two of you.</p>
+        <div style={{ ...scType("listLabel"), marginBottom: "1rem", animation: "fadeUp 0.4s 0.12s both" }}>One conversation worth having for {userName} &amp; {partnerName}</div>
         <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 20, padding: "1.75rem 1.6rem", maxWidth: 320, width: "100%", boxSizing: "border-box", margin: "0 auto", animation: "popIn 0.55s 0.2s cubic-bezier(0.34,1.56,0.64,1) both", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
-          <p style={{ fontFamily: HFONT, fontSize: "clamp(1.1rem,3.2vw,1.3rem)", fontWeight: 400, color: "white", lineHeight: 1.55, fontStyle: "italic", margin: 0 }}>{convoPrompt}</p>
+          <p style={{ ...scType("quote"), fontStyle: "italic", margin: 0 }}>{convoPrompt}</p>
         </div>
       </div>
     </WrappedCard>,
@@ -8853,10 +8853,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         <div style={{ height: 5, background: `linear-gradient(90deg, ${SC_STRIPE.join(", ")})`, flexShrink: 0 }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem 2.5rem", textAlign: "center", animation: "cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
           <div style={{ width: 44, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.75rem", animation: "popIn 0.4s 0.1s both" }} />
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,4.4vw,2.15rem)", fontWeight: 700, color: "white", lineHeight: 1.2, marginBottom: "1rem", maxWidth: 320, animation: "fadeUp 0.5s 0.15s both" }}>We hope you continue to grow together throughout your Attune experience.</div>
-          <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, maxWidth: 280, margin: "0 0 2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>Your full results are ready whenever you are.</p>
-          <button onClick={onDone} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", borderRadius: 14, padding: "1rem 2.25rem", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.05em", marginBottom: "0.85rem", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>Explore your full results →</button>
-          <button onClick={handleDl} style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "0.85rem 2.25rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.4s cubic-bezier(0.34,1.56,0.64,1) both" }}>Download this preview ↓</button>
+          <div style={{ ...scType("titleLg"), marginBottom: "1rem", maxWidth: 320, animation: "fadeUp 0.5s 0.15s both" }}>We hope you continue to grow together throughout your Attune experience.</div>
+          <p style={{ ...scType("bodyLg"), maxWidth: 280, margin: "0 0 2.25rem", animation: "fadeUp 0.4s 0.25s both" }}>Your full results are ready whenever you are.</p>
+          <button onClick={onDone} style={{ ...scType("cta"), background: "linear-gradient(135deg, #E8673A, #1B5FE8)", border: "none", borderRadius: 14, padding: "1rem 2.25rem", cursor: "pointer", marginBottom: "0.85rem", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>Explore your full results →</button>
+          <button onClick={handleDl} style={{ ...scType("ctaAlt"), background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "0.85rem 2.25rem", cursor: "pointer", width: "100%", maxWidth: 300, animation: "popIn 0.5s 0.4s cubic-bezier(0.34,1.56,0.64,1) both" }}>Download this preview ↓</button>
         </div>
       </div>
     </WrappedCard>,
