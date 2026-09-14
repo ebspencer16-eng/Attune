@@ -8,16 +8,16 @@
 
 export const EMAIL_TRIGGERS = {
   "partner_invite": [
-    "src/App.jsx:14979",
-    "src/App.jsx:15721",
+    "src/App.jsx:14976",
+    "src/App.jsx:15718",
     "src/App.jsx:2592",
-    "src/App.jsx:9206",
-    "src/App.jsx:9308",
-    "src/App.jsx:9580"
+    "src/App.jsx:9203",
+    "src/App.jsx:9305",
+    "src/App.jsx:9577"
   ],
   "results_viewed": [
-    "src/App.jsx:10613",
-    "src/App.jsx:12513"
+    "src/App.jsx:10610",
+    "src/App.jsx:12510"
   ],
   "shipping_notification": [
     "public/admin.html:5680"

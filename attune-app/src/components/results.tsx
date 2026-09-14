@@ -2317,42 +2317,30 @@ function CoupleType({ results, you, them }: { results: CoupleResults; you: strin
 
             The three colours cycle the way the website cycles them: the
             couple's own colour, then indigo, then green. */}
-        {type.tips?.length ? (
+        {/* Ellie: "Remove the larger, white tiles and keep only the interior
+            tiles with the phrase to try. Delete the bold label entirely, and
+            only use the shaded tiles. From those tiles, remove the 'phrase to
+            try' eyebrow since that's what the section is titled. There should
+            just be 3, colored tiles with a phrase in each." */}
+        {type.tips?.some((t) => t.phraseTry) ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
               {/* block: couple-type/tips */}
               Phrases to try
             </Text>
-            {type.tips.map((tip, i) => {
+            {type.tips.filter((t) => t.phraseTry).map((tip, i) => {
               const tipColor = [accent, Palette.indigo, '#10b981'][i % 3];
               return (
                 <View
                   key={tip.title}
                   style={{
-                    ...card(), marginBottom: Spacing.sm,
-                    borderLeftColor: tipColor, borderLeftWidth: 4,
+                    marginBottom: Spacing.sm, borderRadius: Radius.md,
+                    backgroundColor: `${tipColor}14`, borderColor: `${tipColor}3D`, borderWidth: 1,
+                    paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
                   }}>
-                  {/* Title and phrase only. The paragraph between them was
-                      the part nobody needed: the title says what to do and the
-                      phrase shows how. Gone from both surfaces. */}
-                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>
-                    {interp(tip.title, you, them)}
-                  </Text>
-                  {tip.phraseTry ? (
-                    <View
-                      style={{
-                        marginTop: Spacing.md, borderRadius: Radius.sm,
-                        backgroundColor: `${tipColor}0D`, borderColor: `${tipColor}30`, borderWidth: 1,
-                        paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
-                      }}>
-                      <Text style={{ ...Type.eyebrow, fontSize: 9, color: tipColor, marginBottom: Spacing.xs }}>
-                        Phrase to try
-                      </Text>
-                      <Prose style={{ ...Type.body, fontStyle: 'italic', color: c.text }}>
-                        {`\u201C${interp(tip.phraseTry, you, them)}\u201D`}
-                      </Prose>
-                    </View>
-                  ) : null}
+                  <Prose style={{ ...Type.body, fontStyle: 'italic', color: c.text }}>
+                    {`\u201C${interp(tip.phraseTry, you, them)}\u201D`}
+                  </Prose>
                 </View>
               );
             })}

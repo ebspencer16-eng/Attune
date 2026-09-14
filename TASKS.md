@@ -85,7 +85,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O60 | **Resources, explore more: drop the "swipe" label.** When there is nothing further, say nothing; fade the tiles at the right edge instead so it reads as more to see. |
 | O61 | **Resources: In Practice articles open in the app, not the website.** |
 | O62 | **Notes: drop the default tags.** An "add a tag" field, the reader's own list under it, and a line of suggestions like "communicating needs", "love". |
-| O63 | **Both: simplify the couple type "phrases to try" section.** Remove the outer white tiles and the bold mode label; keep three shaded tiles, each with only its phrase, and drop the "phrase to try" eyebrow. |
 
 ## 3. For you to review
 
@@ -156,6 +155,7 @@ build.
 
 | Verified | By |
 |--|--|
+| Phrases to try is three shaded tiles with a phrase in each, on both | rendered on the site: the section heading then three quoted phrases, no outer tiles, no mode labels, no eyebrows |
 | The reflection action plan page is gone from both surfaces | one removal in api/_lib/results-sections.js took it out of the nav on both; 29 sections render clean |
 | The site's at-a-glance action plan is what each of you wrote | it was a derived list; it is now the answer to "one thing I want to work on", the same question the app uses |
 | The expectations tip tiles read "A tip for [name] and [name]" on both | one string in `PAGE_COPY`, sent on the payload and passed into the page |

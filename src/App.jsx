@@ -6857,28 +6857,25 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             )}
           </div>
 
-          {/* 9. WHAT TO DO WITH THIS INFORMATION */}
+          {/* 9. PHRASES TO TRY ───────────────────────────────────────────
+              Ellie: "Remove the larger, white tiles and keep only the interior
+              tiles with the phrase to try. Delete the bold label entirely, and
+              only use the shaded tiles. From those tiles, remove the 'phrase to
+              try' eyebrow since that's what the section is titled. There should
+              just be 3, colored tiles with a phrase in each." */}
           <div style={{ marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>
               Phrases to try
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {ct.tips?.map((tip, i) => {
-                const tipColors = [ct.color, "#1B5FE8", "#10b981"];
-                const tipColor = tipColors[i % 3];
-                return (<div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.25rem 1.4rem", borderLeft: `4px solid ${tipColor}` }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.75rem" }}>{interp(tip.title)}</div>
-                  {/* No description paragraph. The title says what to do and
-                      the phrase shows how; the paragraph in between was the
-                      part nobody needed. Removed from both surfaces. */}
-                  {tip.phraseTry && (
-                    <div style={{ background: `${tipColor}0d`, border: `1px solid ${tipColor}30`, borderRadius: 8, padding: "0.55rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                      {/* block: couple-type/tips */}
-                      <span style={{ fontSize: "0.58rem", letterSpacing: "0.16em", textTransform: "uppercase", color: tipColor, fontFamily: BFONT, fontWeight: 700, whiteSpace: "nowrap", marginTop: "0.1rem" }}>Phrase to try</span>
-                      <span style={{ fontSize: "0.78rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>"{interp(tip.phraseTry)}"</span>
-                    </div>
-                  )}
-                </div>);
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              {ct.tips?.filter(t => t.phraseTry).map((tip, i) => {
+                const tipColor = [ct.color, "#1B5FE8", "#10b981"][i % 3];
+                return (
+                  <div key={i} style={{ background: `${tipColor}14`, border: `1px solid ${tipColor}3d`, borderRadius: 12, padding: "0.9rem 1.1rem" }}>
+                    {/* block: couple-type/tips */}
+                    <span style={{ fontSize: "0.85rem", color: C.ink, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.6 }}>"{interp(tip.phraseTry)}"</span>
+                  </div>
+                );
               })}
             </div>
           </div>
