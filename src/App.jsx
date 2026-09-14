@@ -77,7 +77,7 @@ import { availableSections as availableResultsSections, PAGE_TITLES as SC_TITLES
 // The reflection question set, moved out of this file so the app can reach
 // it too. See api/_anniversary-questions.js.
 import {
-  ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION, ADMIRED_NOUN, admiredNoun, NON_ANSWER,
+  ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION, ADMIRED_NOUN, admiredNoun, NON_ANSWER, GLANCE_TEXT,
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
@@ -102,7 +102,7 @@ import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
 // was asked.
 const RESET_QUESTION = CONFLICT_QUESTIONS.find(q => q.id === 'c8')?.text || '';
 import { WROTE_ROWS } from "../api/_conflict-results-prose.js";
-import { STORY_CATEGORIES, REFLECTION_PAGES } from "../api/_lib/reflection-results.js";
+import { STORY_CATEGORIES, REFLECTION_PAGES, reflectionOverview } from "../api/_lib/reflection-results.js";
 import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP } from "../api/_lib/track-marks.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
@@ -6997,12 +6997,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── REFLECTION OVERVIEW ───────────────────────────────────────────────────
     if (section === "reflection-overview" || section === "reflection") {
       const explores = insights.filter(i => i.type === "explore").length;
-      const overallQ = ANNIVERSARY_QUESTIONS.find(q => q.id === "a0");
-      const myOverall = mine.a0 ?? 3;
-      const theirOverall = theirs.a0 ?? 3;
-      const avgOverall = (myOverall + theirOverall) / 2;
-      const overallLabel = overallQ ? overallQ.scaleLabels[Math.round(avgOverall)] : "really good";
-      const overallAligned = Math.abs(myOverall - theirOverall) <= 1;
+      // The heading and the line under it. Both were written here, where the
+      // app cannot read them, so the app opened this page with the section's
+      // name and no line at all. One builder now, in api/_lib.
+      const ov = reflectionOverview({ mine, theirs, you: userName, them: partnerName });
       const myAdmire = mine.a8;
       const theirAdmire = theirs.a8;
       return (
@@ -7017,23 +7015,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 </div>
               </div>
-              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
+              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{ov.headline}</div>
               <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>
-                {overallAligned
-                  ? `You're both feeling ${overallLabel.toLowerCase()}. A shared read on where you are.`
-                  : `${userName} says ${(overallQ?.scaleLabels[myOverall] || "really good").toLowerCase()}. ${partnerName} says ${(overallQ?.scaleLabels[theirOverall] || "better than ever").toLowerCase()}. Both worth understanding.`}
+                {ov.line}
               </p>
 
               {/* How you feel right now — scale questions (8.2) */}
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1rem" }}>
                 {/* block: reflection-overview/ratings */}
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>How you feel right now</div>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>{ov.ratingsLabel}</div>
                 {scaleQs.filter(q => q.id !== "a0").map(q => {
                   const myVal = mine[q.id] ?? 2;
                   const theirVal = theirs[q.id] ?? 2;
                   const endLow = q.scaleLabels[0];
                   const endHigh = q.scaleLabels[q.scaleLabels.length - 1];
-                  const short = { a_sat_conn: "Day-to-day connection", a_sat_comm: "Communication", a_sat_fun: "Fun & lightness" }[q.id] || q.text.split("?")[0];
+                  // The shorter name, from the questions file. Typed here, it
+                  // was three strings the app could not read, so the app
+                  // printed the whole question where this printed two words.
+                  const short = GLANCE_TEXT[q.id] || q.text.split("?")[0];
                   return (
                     <div key={q.id} style={{ marginBottom: "0.9rem" }}>
                       <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.7)", fontWeight: 500, fontFamily: BFONT, marginBottom: "0.4rem" }}>{short}</div>
@@ -7085,7 +7084,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 return (
                   <div style={{ marginBottom: "1rem" }}>
                     {/* block: reflection-overview/action-plan */}
-                    <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
+                    <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>{ov.planLabel}</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                       {[{ name: userName, words: commitment.you, color: SC_PEOPLE.you },
                         { name: partnerName, words: commitment.them, color: SC_PEOPLE.them }].map((p, i) => (

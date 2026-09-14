@@ -24,6 +24,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
+import GlanceTile from '@/components/glance-tile';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
@@ -31,7 +32,7 @@ import { AnnotationProvider, Prose } from '@/components/annotation-context';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
   CommsPlan, HighlightCard, IntimacyDimension, IntimacyResults, NextStepGroup,
-  ReflectionInsight, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
+  ReflectionInsight, ReflectionRating, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
   Note, Tag,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
@@ -685,17 +686,10 @@ function ExpectationsOverview({
   const gaps = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
 
   return (
-    /* Dark, like the website's Expectations landing page. The app drew it on
-       cream, which is why it did not look like the same section. */
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#2E2A6B', '#4C56C0', '#1B8FA8']}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    /* Dark, like the website's Expectations landing page, and in a tile,
+       because it is a page you take in at once. See GlanceTile. */
+    <GlanceTile ground={['#2E2A6B', '#4C56C0', '#1B8FA8']}>
+      <>
           <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
           <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
@@ -788,9 +782,8 @@ function ExpectationsOverview({
               </Text>
             </View>
           )}
-        </View>
-      </ScrollView>
-    </View>
+      </>
+    </GlanceTile>
   );
 }
 
@@ -1110,17 +1103,10 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
   // framing paragraph, so neither does this. One written here would be the app
   // telling a couple something the product never told them.
   return (
-    /* Dark rose, which is the website's ground for this section. The app drew
-       it on cream. */
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#4A1B33', '#A34468', '#C8703E']}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    /* Dark rose, which is the website's ground for this section, in the tile
+       every at-a-glance page takes. */
+    <GlanceTile ground={['#4A1B33', '#A34468', '#C8703E']}>
+      <>
           {/* The two names, then the line that says which version of the
             exercise this was. The app opened with "Physical Intimacy
             Expectations" as its heading, which is the eyebrow the website used
@@ -1192,9 +1178,8 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
                 <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{d.prompt}</Prose>
               </View>
             ))}
-        </View>
-      </ScrollView>
-    </View>
+      </>
+    </GlanceTile>
   );
 }
 
@@ -1397,97 +1382,99 @@ function ReflectionWaiting() {
 
 function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   if (!data) return <ReflectionWaiting />;
-  // The website's page: how you feel right now, then the action plan. No
-  // opening line of its own, so none here either.
+  /**
+   * The website's page, in the website's order: the two names, the line about
+   * how you each described the relationship overall, the four ratings in one
+   * panel, then the action plan.
+   *
+   * Three things were different here and all three came from copy that lived
+   * inside src/App.jsx. The heading was the section's name rather than the two
+   * names; there was no line under it; and What you each admire was drawn on
+   * this page, when the website puts it on How you each view the relationship.
+   */
+  const ov = data.overview;
   const commitment = data.written.find((w) => w.key === 'a6');
-  return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.hero, color: Palette.white }}>Relationship Reflection</Text>
+  // a0 is the overall rating, which the line above says in words. The website
+  // leaves it out of the panel rather than drawing it twice.
+  const rows = data.ratings.filter((r) => r.key !== 'a0');
 
-          {/* block: reflection-overview/ratings */}
-        <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xl, marginBottom: Spacing.md }}>
-          How you feel right now
+  return (
+    <GlanceTile ground={['#22285E', '#3E63C8', '#10A5B8']}>
+      <>
+        <Text style={{ ...Type.hero, color: Palette.white }}>
+          {ov?.headline || `${data.names.you} & ${data.names.them}`}
         </Text>
-        <Legend you={data.names.you} them={data.names.them} />
-        {data.ratings.map((r) => (
+        {ov?.line ? (
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm, lineHeight: 23 }}>
+            {ov.line}
+          </Prose>
+        ) : null}
+
+        {/* block: reflection-overview/ratings */}
+        {rows.length ? (
           <View
-            key={r.key}
             style={{
-              backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+              marginTop: Spacing.lg,
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+              borderRadius: Radius.lg, padding: Spacing.lg,
             }}>
-            <Text style={{ ...Type.cardTitle, color: Palette.white }}>{r.question}</Text>
-            <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
-              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} dy={markerNudge(r.you.pct, r.them.pct)[0]} />
-              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} dy={markerNudge(r.you.pct, r.them.pct)[1]} />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{r.low}</Text>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1, textAlign: 'right' }}>{r.high}</Text>
-            </View>
-          </View>
-        ))}
-        {/* What you each admire. On the website this sits on the Reflection
-            page as well as inside a storycard. The app had it only in the card,
-            so the page itself never showed it. */}
-        {data.admired?.you || data.admired?.them ? (
-          <View style={{ marginTop: Spacing.xl }}>
-              {/* block: reflection-overview/admired */}
-            <Text style={{ ...Type.eyebrow, color: Palette.indigo, marginBottom: Spacing.sm }}>
-              What you each admire
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.35)', marginBottom: Spacing.lg }}>
+              {ov?.ratingsLabel || 'How you feel right now'}
             </Text>
-            <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
-              {[
-                { from: data.names.you, about: data.names.them, val: data.admired.you, col: Palette.orange },
-                { from: data.names.them, about: data.names.you, val: data.admired.them, col: Palette.indigo },
-              ].map((x) => (
-                <View
-                  key={x.from}
-                  style={{
-                    flex: 1, backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                    borderTopColor: x.col, borderTopWidth: 3,
-                    borderRadius: Radius.lg, padding: Spacing.lg,
-                  }}>
-                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: x.col, marginBottom: Spacing.xs }}>
-                    {x.from}
+            {rows.map((r) => (
+              <View key={r.key} style={{ marginBottom: Spacing.md }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontWeight: '500', marginBottom: Spacing.xs }}>
+                  {r.short || r.question}
+                </Text>
+                {/* Two rows of filled steps rather than two marks on a track.
+                    It is the website's drawing of the same numbers, and it
+                    reads at a glance, which is the name of the page. */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  <Text
+                    numberOfLines={2}
+                    style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.32)', width: 62, textAlign: 'right', lineHeight: 12 }}>
+                    {r.low}
                   </Text>
-                  <Text style={{ ...Type.cardTitle, color: Palette.white }}>{x.val || 'Not answered'}</Text>
-                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.xs }}>
-                    in {x.about}
+                  <View style={{ flex: 1, gap: 4 }}>
+                    {[{ v: r.you.index, col: YOU_COLOR }, { v: r.them.index, col: THEM_COLOR }].map((x, i) => (
+                      <View key={i} style={{ flexDirection: 'row', gap: 3 }}>
+                        {Array.from({ length: r.steps ?? 5 }, (_, step) => (
+                          <View
+                            key={step}
+                            style={{
+                              flex: 1, height: 7, borderRadius: 2,
+                              backgroundColor: step <= x.v ? x.col : 'rgba(255,255,255,0.1)',
+                            }}
+                          />
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                  <Text
+                    numberOfLines={2}
+                    style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.32)', width: 62, lineHeight: 12 }}>
+                    {r.high}
                   </Text>
+                </View>
+              </View>
+            ))}
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: Spacing.lg, paddingTop: Spacing.xs }}>
+              {[{ n: data.names.you, col: YOU_COLOR }, { n: data.names.them, col: THEM_COLOR }].map((x) => (
+                <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: x.col }} />
+                  <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{x.n}</Text>
                 </View>
               ))}
             </View>
-            {data.admired.you && data.admired.you === data.admired.them ? (
-              <View
-                style={{
-                  marginTop: Spacing.sm, backgroundColor: '#EDFAF5',
-                  borderColor: '#10b98130', borderWidth: 1,
-                  borderRadius: Radius.md, padding: Spacing.md,
-                }}>
-                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.85)' }}>
-                  You picked the same quality, without conferring.
-                </Text>
-              </View>
-            ) : null}
           </View>
         ) : null}
 
-
         {commitment ? (
-          <>
+          <View style={{ marginTop: Spacing.lg }}>
             {/* block: reflection-overview/action-plan */}
-            <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
-              Your action plan
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.md }}>
+              {ov?.planLabel || 'Your action plan'}
             </Text>
             <WrittenPair
               you={data.names.you}
@@ -1495,11 +1482,10 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
               yourWords={commitment.you}
               theirWords={commitment.them}
             />
-          </>
+          </View>
         ) : null}
-      </View>
-    </ScrollView>
-    </View>
+      </>
+    </GlanceTile>
   );
 }
 
@@ -1560,13 +1546,20 @@ function WrittenPair({
  * showed a heading of its own invention, "How You Each Rated", because the
  * real one was somewhere it could not reach.
  */
+/**
+ * The heading and standfirst on a Reflection detail page.
+ *
+ * Ink on cream, because both pages that use it are light, the way the website
+ * draws them. It was white, from when all three Reflection pages in the app
+ * were on the dark slide.
+ */
 function ReflectionHead({ page }: { page?: { title: string; sub?: string } | null }) {
   if (!page?.title) return null;
   return (
     <View style={{ marginBottom: Spacing.lg }}>
-      <Text style={{ ...Type.title, color: Palette.white }}>{page.title}</Text>
+      <Text style={{ ...Type.title, color: c.textStrong }}>{page.title}</Text>
       {page.sub ? (
-        <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm, lineHeight: 19 }}>
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 19 }}>
           {page.sub}
         </Text>
       ) : null}
@@ -1577,74 +1570,157 @@ function ReflectionHead({ page }: { page?: { title: string; sub?: string } | nul
 function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
   if (!data) return <ReflectionWaiting />;
   if (!data.ratings.length) {
-    return <Waiting title="How You Each Rated" body="Neither of you answered the rating questions." />;
+    return <Waiting title="How you each view the relationship" body="Neither of you answered the rating questions." />;
   }
+  /**
+   * ── WHY THIS PAGE IS LIGHT ────────────────────────────────────────────────
+   * The website draws the two Reflection detail pages on the ordinary cream
+   * ground, in white cards, and only the at-a-glance page on the dark slide.
+   * The app had all three dark, so arriving here from the nav looked like
+   * staying on the same page, and it did not look like the section the reader
+   * had seen on a laptop. Ellie: "Rel relf results section doesn't match the
+   * site's. Match the title, tiles, format, coloring, etc. I want them to look
+   * exactly the same."
+   */
+  const overall = data.ratings.find((r) => r.key === 'a0');
+  const rest = data.ratings.filter((r) => r.key !== 'a0');
+
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
 
-        <View style={{ marginTop: Spacing.md }}>
-          <Legend you={data.names.you} them={data.names.them} />
-        </View>
-
-        {data.ratings.map((r) => (
-          <View
-            key={r.key}
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-            }}>
-            <Text style={{ ...Type.cardTitle, color: Palette.white }}>{r.question}</Text>
-
-            {/* The same track and markers the dimension scales use, so a
-                reader who has come this far already knows how to read it. */}
-            <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
-              <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} dy={markerNudge(r.you.pct, r.them.pct)[0]} />
-              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} dy={markerNudge(r.you.pct, r.them.pct)[1]} />
-            </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{r.low}</Text>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1, textAlign: 'right' }}>{r.high}</Text>
-            </View>
-
-            {/* Both answers, always, in their own words. This used to say
-                "You rated this the same" when the two matched, which is the
-                app drawing a conclusion the website leaves to the reader. */}
-            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.md }}>
-              {data.names.you}: {r.you.label}. {data.names.them}: {r.them.label}.
-            </Text>
+        {overall ? (
+          <View style={{ marginBottom: Spacing.xl }}>
+            <Eyebrow color={SectionColor.reflection}>Overall</Eyebrow>
+            <ScaleCard r={overall} names={data.names} />
           </View>
-        ))}
+        ) : null}
+
+        {rest.length ? (
+          <View style={{ marginBottom: Spacing.xl }}>
+            <Eyebrow color={SectionColor.reflection}>How things feel right now</Eyebrow>
+            {rest.map((r) => <ScaleCard key={r.key} r={r} names={data.names} />)}
+          </View>
+        ) : null}
+
+        {/* ── WHAT YOU EACH ADMIRE ──────────────────────────────────────
+            The website puts this here, not on the at-a-glance page. The app
+            had it the other way round, so both pages were wrong about where
+            it belongs. */}
+        {data.admired?.you && data.admired?.them ? (
+          <View style={{ marginBottom: Spacing.xl }}>
+            {/* block: reflection-overview/admired */}
+            <Eyebrow color={SectionColor.reflection}>What you each admire</Eyebrow>
+            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+              {[
+                { from: data.names.you, about: data.names.them, val: data.admired.you, col: YOU_COLOR },
+                { from: data.names.them, about: data.names.you, val: data.admired.them, col: THEM_COLOR },
+              ].map((x) => (
+                <View
+                  key={x.from}
+                  style={{
+                    flex: 1, backgroundColor: c.surface,
+                    borderColor: c.border, borderWidth: 1,
+                    borderTopColor: x.col, borderTopWidth: 3,
+                    borderRadius: Radius.lg, padding: Spacing.lg,
+                  }}>
+                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: x.col, marginBottom: Spacing.xs }}>
+                    {x.from} admires
+                  </Text>
+                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{x.val}</Text>
+                  <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>in {x.about}</Text>
+                </View>
+              ))}
+            </View>
+            {data.admired.you === data.admired.them ? (
+              <View
+                style={{
+                  marginTop: Spacing.sm, backgroundColor: '#EDFAF5',
+                  borderColor: '#10b98130', borderWidth: 1,
+                  borderRadius: Radius.md, padding: Spacing.md,
+                }}>
+                <Text style={{ ...Type.small, fontWeight: '600', color: '#047857' }}>
+                  You picked the same quality, without conferring.
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
 
         {/* ── WHAT MATTERS MOST THIS YEAR ──────────────────────────────
             The website puts the two ranked lists on this page, under this
             heading. The app had them on the Action Plan under one it made up. */}
         {data.priorities?.you?.length && data.priorities?.them?.length ? (
-          <View style={{ marginTop: Spacing.xxl }}>
-            <Eyebrow>What matters most this year</Eyebrow>
-            <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.sm }}>
-              <PriorityList name={data.names.you} items={data.priorities.you} />
-              <PriorityList name={data.names.them} items={data.priorities.them} />
+          <View style={{ marginBottom: Spacing.xl }}>
+            <Eyebrow color={SectionColor.reflection}>What matters most this year</Eyebrow>
+            {/* Both lists in one card, which is how the website draws them:
+                the point is the two orders against each other, and two cards
+                read as two separate answers. */}
+            <View
+              style={{
+                flexDirection: 'row', gap: Spacing.lg,
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <PriorityList name={data.names.you} items={data.priorities.you} color={YOU_COLOR} />
+              <PriorityList name={data.names.them} items={data.priorities.them} color={THEM_COLOR} />
             </View>
           </View>
         ) : null}
       </View>
     </ScrollView>
-    </View>
   );
 }
 
+/**
+ * One rating, both people on it.
+ *
+ * The website's card: the question, the two ends of the scale, a track with
+ * the distance between the two marks shaded, and each person's answer in
+ * words underneath. The shading is the point of the page, so it is drawn and
+ * not described.
+ */
+function ScaleCard({ r, names }: { r: ReflectionRating; names: { you: string; them: string } }) {
+  // Named for their unit: both are already percentages, from the server.
+  const [loPct, hiPct] = [Math.min(r.you.pct, r.them.pct), Math.max(r.you.pct, r.them.pct)];
+  // Green when they answered the same, blue at one step, orange beyond. The
+  // website's three, and it is a distance rather than a grade.
+  const tone = r.gapSteps === 0 ? '#10b981' : r.gapSteps === 1 ? SectionColor.reflection : YOU_COLOR;
+  const [dyYou, dyThem] = markerNudge(r.you.pct, r.them.pct);
+  return (
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+      }}>
+      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.md }}>
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, flex: 1 }}>{r.low}</Text>
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
+      </View>
+      <View style={{ height: 24, justifyContent: 'center', marginTop: Spacing.xs }}>
+        <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border }}>
+          {r.gapSteps > 0 ? (
+            <View
+              style={{
+                position: 'absolute', top: 0, bottom: 0,
+                left: `${loPct}%`, width: `${hiPct - loPct}%`,
+                backgroundColor: tone, opacity: 0.22, borderRadius: Radius.pill,
+              }}
+            />
+          ) : null}
+        </View>
+        <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(names.you)} dy={dyYou} />
+        <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(names.them)} dy={dyThem} />
+      </View>
+      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+        {names.you}: {r.you.label}. {names.them}: {r.them.label}.
+      </Text>
+    </View>
+  );
+}
 
 /**
  * Side by side: what you each wrote.
@@ -1663,15 +1739,19 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
       />
     );
   }
+  /**
+   * Light, in white cards, like the website. See the note on ReflectionRatings:
+   * only the at-a-glance page is on the dark slide.
+   *
+   * The one thing not copied is the website's two columns. Two columns of
+   * paragraphs on a phone is four words to a line, so each answer takes the
+   * full width and is stacked. Everything else is the website's: the card, the
+   * question in its own bar at the top, each name in that person's colour, the
+   * answers in quotes, and the question to talk about along the bottom.
+   */
+  const label = data.promptLabel || 'Talk about it';
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#22285E', '#3E63C8', '#10A5B8'] as [string, string, string]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <ReflectionHead page={data.pages?.story} />
 
@@ -1693,58 +1773,67 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
           const inCat = data.written.filter((w) => w.category === cat);
           if (!inCat.length) return null;
           return (
-            <View key={cat}>
-              <Text
-                style={{
-                  ...Type.eyebrow, color: 'rgba(255,255,255,0.65)',
-                  marginTop: Spacing.xl, marginBottom: Spacing.md,
-                }}>
-                {cat}
-              </Text>
+            <View key={cat} style={{ marginBottom: Spacing.lg }}>
+              <Eyebrow color={SectionColor.reflection}>{cat}</Eyebrow>
               {/* block: reflection-story/pairs */}
               {inCat.map((w) => (
-          <View key={w.key} style={{ marginBottom: Spacing.xl }}>
-            <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md }}>
-              {w.question}
-            </Text>
+                <View
+                  key={w.key}
+                  style={{
+                    backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                    borderRadius: Radius.lg, marginBottom: Spacing.md, overflow: 'hidden',
+                  }}>
+                  <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: Palette.warm, borderBottomColor: c.border, borderBottomWidth: 1 }}>
+                    <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{w.question}</Text>
+                  </View>
 
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
-              }}>
-              <Eyebrow>{data.names.you}</Eyebrow>
-              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.you}</Prose>
-            </View>
+                  {[
+                    { name: data.names.you, words: w.you, col: YOU_COLOR },
+                    { name: data.names.them, words: w.them, col: THEM_COLOR },
+                  ].map((side, i) => (
+                    <View
+                      key={side.name}
+                      style={{
+                        paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                        borderBottomColor: c.border, borderBottomWidth: i === 0 ? 1 : 0,
+                      }}>
+                      <Text style={{ ...Type.eyebrow, fontSize: 9, color: side.col, marginBottom: Spacing.xs }}>
+                        {side.name}
+                      </Text>
+                      <Prose style={{ ...Type.body, color: c.text, fontStyle: 'italic', lineHeight: 24 }}>
+                        {`"${side.words}"`}
+                      </Prose>
+                    </View>
+                  ))}
 
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg,
-              }}>
-              <Eyebrow color={c.textMuted}>{data.names.them}</Eyebrow>
-              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{w.them}</Prose>
-            </View>
-
-            {/* ── THE QUESTION UNDER THE PAIR ──────────────────────────
-                Two answers side by side do not need a verdict, they need
-                something to do with having read them. The website has printed
-                one under every pair since this page existed; the app printed
-                the answers and stopped, which is the half that does the work.
-                From api/_lib/reflection-prompts.js. */}
-            {w.prompt ? (
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', marginTop: Spacing.md, lineHeight: 19 }}>
-                {w.prompt}
-              </Text>
-            ) : null}
-          </View>
+                  {/* ── THE QUESTION UNDER THE PAIR ──────────────────────
+                      Two answers side by side do not need a verdict, they need
+                      something to do with having read them. The website has
+                      printed one under every pair since this page existed; the
+                      app printed the answers and stopped, which is the half
+                      that does the work. From api/_lib/reflection-prompts.js. */}
+                  {w.prompt ? (
+                    <View
+                      style={{
+                        flexDirection: 'row', gap: Spacing.sm,
+                        paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                        backgroundColor: Palette.warm, borderTopColor: c.border, borderTopWidth: 1,
+                      }}>
+                      <Text style={{ ...Type.eyebrow, fontSize: 9, color: YOU_COLOR, marginTop: 2 }}>
+                        {label}
+                      </Text>
+                      <Text style={{ ...Type.small, color: c.text, flex: 1, lineHeight: 20 }}>
+                        {w.prompt}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
               ))}
             </View>
           );
         })}
       </View>
     </ScrollView>
-    </View>
   );
 }
 
@@ -1754,12 +1843,19 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
  * which is where a reader meets it without a detour. The data it drew,
  * reflectionPlan, still arrives on the payload and still feeds that page.
  */
-function PriorityList({ name, items }: { name: string; items: string[] }) {
+/**
+ * One person's ranking, in their order.
+ *
+ * Every item, not the first three. The website prints the whole list, and the
+ * bottom of a ranking is as much of an answer as the top: a thing ranked last
+ * by one person and first by the other is the finding on this page.
+ */
+function PriorityList({ name, items, color }: { name: string; items: string[]; color?: string }) {
   return (
     <View style={{ flex: 1 }}>
-      <Eyebrow color={c.textMuted}>{name}</Eyebrow>
-      {items.slice(0, 3).map((item, i) => (
-        <Text key={item} style={{ ...Type.small, color: c.text, marginTop: Spacing.xs }}>
+      <Eyebrow color={color || c.textMuted}>{name}</Eyebrow>
+      {items.map((item, i) => (
+        <Text key={item} style={{ ...Type.small, color: c.text, marginTop: Spacing.xs, lineHeight: 18 }}>
           {i + 1}. {item}
         </Text>
       ))}

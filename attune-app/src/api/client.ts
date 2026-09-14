@@ -347,6 +347,10 @@ export type IntimacyResults = {
 export type ReflectionRating = {
   key: string;
   question: string;
+  /** The shorter name the at-a-glance page prints, from the questions file. */
+  short?: string;
+  /** How many points the scale has, for the blocks the glance page draws. */
+  steps?: number;
   low: string;
   high: string;
   you: { index: number; label: string; pct: number };
@@ -357,6 +361,18 @@ export type ReflectionRating = {
 
 export type ReflectionResults = {
   names: { you: string; them: string };
+  /**
+   * The at-a-glance page's heading, the line under it, and the names of its
+   * two parts. Built by the server, because the website built them inside
+   * src/App.jsx and the app opened the same page with a different heading and
+   * no line at all.
+   */
+  overview?: {
+    headline: string;
+    line: string;
+    ratingsLabel: string;
+    planLabel: string;
+  };
   ratings: ReflectionRating[];
   admired: { you: string | null; them: string | null };
   priorities: { you: string[] | null; them: string[] | null };
@@ -365,8 +381,10 @@ export type ReflectionResults = {
     /** The question to sit with, under the pair. */
     prompt?: string | null;
   }[];
-  /** The headings Side by Side groups under, in the website'''s order. */
+  /** The headings Side by Side groups under, in the website's order. */
   storyCategories?: string[];
+  /** The label over the question under each pair on Side by Side. */
+  promptLabel?: string;
   /** Each Reflection page's heading and the line under it, from the server. */
   pages?: Record<string, { title: string; sub?: string; eyebrowOwn?: string; aligned?: string }>;
 };

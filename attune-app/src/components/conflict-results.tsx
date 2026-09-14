@@ -26,6 +26,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import type { ConflictOpenings, ConflictResults, ConflictSummary } from '@/api/client';
+import GlanceTile from '@/components/glance-tile';
 import { Prose } from '@/components/annotation-context';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
@@ -144,22 +145,16 @@ function Glance({ data, title }: {
   return (
     /* ── ONE GROUND FOR THE WHOLE PAGE ───────────────────────────────────
        The website puts Results at a glance on a single dark slide: the names,
-       the shared number and the action plan all sit on it. The app painted the
-       gradient as a rounded panel around the first two and let the action plan
-       fall off the bottom of it onto cream, so the page a reader arrives at
-       was two different pages stacked.
+       the shared number and the action plan all sit on it. This file used to
+       paint the gradient as a rounded panel around the first two and let the
+       action plan fall off the bottom of it onto cream, so the page a reader
+       arrived at was two different pages stacked.
 
-       Full-bleed behind the scroll, which is what every other glance screen in
-       the app already does, and the website's own three colours rather than
-       the two this file had invented. */
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#1B2A5E', '#2F55C4', '#1B8FB8']}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={pad}>
+       One ground for all of it, in the tile every at-a-glance page in the app
+       takes, and the website's own three colours rather than the two this file
+       had invented. */
+    <GlanceTile ground={['#1B2A5E', '#2F55C4', '#1B8FB8']}>
+      <>
         {/* The names, and nothing above them. The eyebrow and its dot were
             here, matching the website, and Ellie asked for both to go from
             both products: the section is already named in the nav you arrived
@@ -245,8 +240,8 @@ function Glance({ data, title }: {
             </Prose>
           </View>
         )}
-      </ScrollView>
-    </View>
+      </>
+    </GlanceTile>
   );
 }
 
@@ -515,9 +510,12 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
       {/* block: conflict-wrote/head */}
       <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
       {/* block: conflict-wrote/rows */}
+      {/* The label, then the two quote cards. No outer card: the website has
+          the pair sitting on the page under its heading, and a white card
+          around two cream ones is a box in a box. */}
       {rows.map((r) => (
-        <View key={r.label} style={{ ...card, marginBottom: Spacing.md }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>{r.label}</Text>
+        <View key={r.label} style={{ marginBottom: Spacing.xl }}>
+          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>{r.label}</Text>
           <Written name={names.you} text={r.mine} />
           <Written name={names.partner} text={r.theirs} />
         </View>

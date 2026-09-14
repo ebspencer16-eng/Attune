@@ -93,6 +93,24 @@ const ANALYTICS_TEXT = {
   a8: 'Quality most admired in partner',
 };
 
+/**
+ * The name a rating goes by on the Reflection at a glance page.
+ *
+ * Shorter than ANALYTICS_TEXT, which is written for a chart axis, and shorter
+ * again than the question itself, because the glance prints four of these in a
+ * column and the question is a sentence.
+ *
+ * These three were typed inside src/App.jsx, where the app could not read
+ * them, so the app printed the whole question and the website printed this. A
+ * question with no entry here keeps its own text up to the question mark,
+ * which is what the website fell back to.
+ */
+export const GLANCE_TEXT = {
+  a_sat_conn: 'Day-to-day connection',
+  a_sat_comm: 'Communication',
+  a_sat_fun: 'Fun & lightness',
+};
+
 export const REFLECTION_QUESTIONS = Object.keys(ANALYTICS_TEXT)
   // Ordered by this map rather than by the exercise, because the charts read
   // in a different order from the one people answer in and always have.

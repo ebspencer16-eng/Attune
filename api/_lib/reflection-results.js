@@ -14,9 +14,14 @@
  */
 
 import {
-  ANNIVERSARY_QUESTIONS, admiredNoun, isNonAnswer,
+  ANNIVERSARY_QUESTIONS, GLANCE_TEXT, admiredNoun, isNonAnswer,
 } from '../_anniversary-questions.js';
 import { promptFor } from './reflection-prompts.js';
+// The label over the question under each pair. It is the same two words the
+// intimacy pages print, and it is defined once, there. Importing it across
+// sections is deliberate: two constants reading 'Talk about it' is two things
+// to rename.
+import { TALK_ABOUT_IT } from '../_intimacy-results-prose.js';
 
 /** Scale answers are stored as the option index. */
 const scaleValue = (v) => (typeof v === 'number' && v >= 0 ? v : null);
@@ -77,6 +82,38 @@ export const STORY_CATEGORIES = (() => {
   return seen;
 })();
 
+/**
+ * The at-a-glance page: what it is called, and the line under it.
+ *
+ * ── WHY THIS IS HERE AND NOT ON EITHER SURFACE ────────────────────────────
+ * It was inside src/App.jsx, which the app cannot import, so the app wrote its
+ * own opening: the section's name and no line at all. Two products introducing
+ * the same page differently, which is the shape this repo's worst bugs take.
+ *
+ * a0 is "the overall feel of the relationship right now", and it is the one
+ * rating this line is about. It is deliberately not drawn in the panel below
+ * it: it is said here, in words, rather than drawn again as a fourth bar.
+ *
+ * Exported as well as used below, because the website has the raw answers and
+ * builds this page without going through the payload.
+ */
+export function reflectionOverview({ mine, theirs, you = 'You', them = 'Your partner' }) {
+  const labels = ANNIVERSARY_QUESTIONS.find((q) => q.id === 'a0')?.scaleLabels || [];
+  const a = scaleValue(mine?.a0);
+  const b = scaleValue(theirs?.a0);
+  const base = {
+    headline: `${you} & ${them}`,
+    ratingsLabel: 'How you feel right now',
+    planLabel: 'Your action plan',
+  };
+  if (a == null || b == null || !labels.length) return { ...base, line: '' };
+  const shared = String(labels[Math.round((a + b) / 2)] || '').toLowerCase();
+  const line = Math.abs(a - b) <= 1
+    ? `You're both feeling ${shared}. A shared read on where you are.`
+    : `${you} says ${String(labels[a] || '').toLowerCase()}. ${them} says ${String(labels[b] || '').toLowerCase()}. Both worth understanding.`;
+  return { ...base, line };
+}
+
 export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Your partner' }) {
   if (!mine || !theirs) return null;
   const you = youName || 'You';
@@ -99,6 +136,22 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
       return {
         key: q.id,
         question: q.text,
+        /**
+         * The name this rating goes by on the at-a-glance page, which prints
+         * four of them in a column and cannot carry a sentence each. The
+         * website had these three typed inline, so the app printed the whole
+         * question where the website printed two words.
+         */
+        short: GLANCE_TEXT[q.id] || q.text.split('?')[0],
+        /**
+         * How many points this scale has.
+         *
+         * The at-a-glance page draws one block per point rather than a mark on
+         * a track, and it cannot count them from a percentage. Every scale has
+         * five today; sending the number rather than assuming it means a
+         * six-point question does not silently lose a block.
+         */
+        steps: q.scaleLabels.length,
         low: q.scaleLabels[0],
         high: q.scaleLabels[steps],
         you: { index: a, label: q.scaleLabels[a], pct: steps ? (a / steps) * 100 : 0 },
@@ -107,6 +160,21 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
       };
     })
     .filter(Boolean);
+
+  /**
+   * The at-a-glance page: what it is called, and the line under it.
+   *
+   * ── WHY THIS IS HERE AND NOT ON EITHER SURFACE ────────────────────────
+   * It was inside src/App.jsx, which the app cannot import, so the app wrote
+   * its own opening: the section's name and no line at all. Two products
+   * introducing the same page differently, which is the exact shape this
+   * repo's worst bugs take.
+   *
+   * a0 is "the overall feel of the relationship right now", and it is the one
+   * rating this line is about. It is deliberately not in the panel below:
+   * it is said here, in words, rather than drawn again as a fourth bar.
+   */
+  const overview = reflectionOverview({ mine, theirs, you, them });
 
   /** The one pick question, as a quality rather than an adjective. */
   const admired = {
@@ -146,6 +214,8 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
 
   return {
     names: { you, them },
+    /** The at-a-glance page's heading, its line, and its two section labels. */
+    overview,
     ratings,
     admired,
     priorities,
@@ -159,6 +229,8 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
     /** How many of the written questions both people answered. */
     /** The headings Side by Side groups under, in order. */
     storyCategories: STORY_CATEGORIES,
+    /** The label above the question under each pair on Side by Side. */
+    promptLabel: TALK_ABOUT_IT,
     /** Each page's heading and the line under it, so the app shows both. */
     pages: REFLECTION_PAGES,
   };
