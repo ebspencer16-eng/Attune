@@ -269,9 +269,6 @@ export const CALLOUT_TONES = {
  */
 export const PERSON_COLORS = { you: '#E8673A', them: '#1B5FE8' };
 
-/** The pink the intimacy card is set in, on both surfaces. */
-export const INTIMACY_ACCENT = '#E08DA6';
-
 export const RING_COLORS = { life: '#9B5DE5', responsibilities: '#1B5FE8' };
 
 /**
@@ -304,6 +301,5 @@ export const STORYCARD_STYLE = {
   typeRefWidth: CARD_REF_WIDTH,
   rule: { gradient: RULE_GRADIENT, ...RULE_SIZE },
   people: PERSON_COLORS,
-  intimacyAccent: INTIMACY_ACCENT,
   padding: CARD_PADDING,
 };
