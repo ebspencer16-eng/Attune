@@ -69,6 +69,35 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O44 | **Storycard: the rule under the names is the wrong colour in the app.** The website draws it as an orange-to-indigo gradient; the app draws it solid orange. |
+| O45 | **Storycard: the app's bottom-left wordmark has no mark.** The website puts the two-hearts logo beside "Attune"; the app has the word alone. |
+| O46 | **Sweep the storycards for every other difference that is not type.** Marks, rules, gradients, spacing, structure. The type is shared now; nothing else is. |
+| O47 | **Insights, couple type page: fit the title on three lines.** Her suggestion: "[Partner] and [Partner]'s unique relationship dynamic". |
+| O48 | **Insights, comms at a glance: make the placement dots on the overview slightly larger.** |
+| O49 | **Insights, comms at a glance: the third action plan item has a note on the site the app leaves out.** Everything on the site has to be on the app; find anything else cut the same way. |
+| O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
+| O51 | **Insights, expectations detailed pages: put the progress lines back under the title in the app.** They stay on the site. She has changed her mind about removing them. |
+| O52 | **Insights, expectations detailed pages: the tip tiles sit too close to the page title.** Too much padding inside, or too little above. |
+| O53 | **Insights, relationship reflection at a glance: her own placement dots are missing.** Preston's show, hers do not. |
+| O54 | **Insights, relationship reflection: the whole section has to look exactly like the site.** Title, tiles, format, colouring. |
+| O55 | **Insights, conflict: the same, exactly like the site.** |
+| O56 | **Insights, what comes next: the app has four sections and the site has more.** Mirror the site. |
+| O57 | **Physical intimacy is missing from the pill nav on the website.** Her web view does not list it. |
+| O58 | **Insights: double-tapping the tab icon returns to the highlights page.** |
+| O59 | **Resources: the "6 min" on each article row should read "6 min read" and be orange.** |
+| O60 | **Resources, explore more: drop the "swipe" label.** When there is nothing further, say nothing; fade the tiles at the right edge instead so it reads as more to see. |
+| O61 | **Resources: In Practice articles open in the app, not the website.** |
+| O62 | **Notes: drop the default tags.** An "add a tag" field, the reader's own list under it, and a line of suggestions like "communicating needs", "love". |
+| O63 | **Both: simplify the couple type "phrases to try" section.** Remove the outer white tiles and the bold mode label; keep three shaded tiles, each with only its phrase, and drop the "phrase to try" eyebrow. |
+| O64 | **Both: rename "where you each land" to "Communication style overview".** On the app, move the legend down so a long pair of names still fits. |
+| O65 | **Both: rename the expectations tip tiles to "A tip for [name] and [name]".** |
+| O66 | **Both: comms at a glance is titled "Communication Styles"**, and the couple type header and the description line under it come off that page: the couple type page has just covered it. |
+| O67 | **Both: expectations at a glance is titled "Expectations"**, not the couple's names. |
+| O68 | **Both: conflict at a glance is titled "Conflict Styles".** |
+| O69 | **Both: the reflection "how you each rated" page is titled "How you each view the relationship".** |
+| O70 | **Site: two detailed reflection pages still show a page dot and an eyebrow.** They should be gone from every results page on both surfaces. |
+| O71 | **Site: the reflection at a glance action plan should use each person's own answer**, the way the app does. The site's list is the less useful one. |
+| O72 | **Both: remove the reflection "action plan" detailed page.** |
 
 ## 3. For you to review
 
