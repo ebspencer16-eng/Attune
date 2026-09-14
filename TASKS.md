@@ -139,6 +139,9 @@ build.
 
 | Verified | By |
 |--|--|
+| No endpoint answers 500 to a body it should refuse | `check-body-parsing.mjs`, 343 calls across 53 endpoints, planted three ways |
+| Unmatched URLs answer a real 404 on the live site | checked from outside: /gift-cards, /lmft-booking and a nonsense path all 404, the real pages still 200 |
+| The 404 page renders and offers six ways back | loaded it in a browser on the live site |
 | Every one of the nine storycards is sized from the shared scale on both surfaces | `check-storycard-type.mjs`: 30 roles, no type written anywhere in the website's card region, and no role either surface leaves undrawn |
 | Converting the website changed nothing on screen | 135 text nodes captured from all ten cards in a browser before and after, identical three times |
 | Unmatched URLs answer 404 rather than 200 with an empty shell | the catch-all is gone from `vercel.json`; `check-route-targets.mjs` fails if it or anything as wide comes back, planted twice |
