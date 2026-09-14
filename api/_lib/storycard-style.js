@@ -161,8 +161,21 @@ export function nativeFont(t) {
 export function cardTypeCss(role, over) {
   const t = over ? { ...CARD_TYPE[role], ...over } : CARD_TYPE[role];
   if (!t) return {};
+  /**
+   * Sized against the card, not the browser window.
+   *
+   * These were clamp(min, Nvw, max), and vw is a share of the viewport. A card
+   * is a fixed 9:16 box, so the same card came out at 60.8px on a laptop and
+   * 41.6px on a phone, and the downloaded image did not match what was on
+   * screen. The app had no window to measure and used the card, which is why
+   * it matched the website only at phone width.
+   *
+   * `cqw` is a share of the container, which is the card. Ellie's call: "size
+   * against the card on both, so a card looks the same everywhere." The
+   * container is named on the card element itself.
+   */
   const size = Array.isArray(t.size)
-    ? `clamp(${t.size[0]}rem, ${t.size[1]}vw, ${t.size[2]}rem)`
+    ? `clamp(${t.size[0]}rem, ${t.size[1]}cqw, ${t.size[2]}rem)`
     : `${t.size}rem`;
   return {
     fontFamily: t.family === 'display' ? DISPLAY_FONT : BODY_FONT,

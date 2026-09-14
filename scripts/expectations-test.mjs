@@ -108,7 +108,10 @@ const summary = expectationsSummary({
 // distinguishable in the totals.
 ok('four rows compared', summary.answered === 4);
 ok('two agreements, two differences', summary.aligned === 2 && summary.differences === 2);
-ok('alignment is a percentage', summary.alignedPct === 50);
+// The alignment percentage is gone: the server computed it and neither
+// surface drew it, so Ellie asked for it to stop being sent. The two counts
+// it was derived from are checked on the line above, and they are what the
+// surfaces actually use.
 ok('the responsibility half is one and one',
   summary.categories.slice(0, 5).flatMap((c) => c.rows).filter((r) => r.aligned).length === 1);
 ok('the life half is one and one',

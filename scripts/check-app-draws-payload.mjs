@@ -79,24 +79,11 @@ const app = screens('attune-app/src').map(stripComments).join('\n');
 const IGNORED = new Set([
   'ok', 'ready', 'cached', 'pct', 'index', 'key', 'id', 'kind', 'type', 'color', 'colour',
   /**
-   * Six the SERVER computes and NEITHER surface draws. Checked one by one
-   * against src/App.jsx: the website does not print any of them either, so
-   * they are not content the app is cutting, they are payload nobody reads.
-   *
-   * dimLabel           set on the website's own tile object and never printed.
-   * writtenCount       a count of the Side by Side rows.
-   * alignedPct         a percentage the expectations summary carries.
-   * categoryId         an id, used server-side to look up an intro.
-   * overallState       the intimacy summary's own word for the overall gap.
-   * overallDistancePct the number behind it.
-   *
-   * They belong in a different conversation from Ellie's, which was about the
-   * app cutting something the website shows. If one of these should be on
-   * screen, it should be on both, and that is a design decision rather than a
-   * bug. Noted in TASKS.md.
+   * Six values the server used to compute and neither surface drew: dimLabel,
+   * writtenCount, alignedPct, categoryId, overallState and overallDistancePct.
+   * Ellie: "stop sending all". They are gone from the payload and from the
+   * app's types, so there is nothing left here to exempt.
    */
-  'dimLabel', 'writtenCount', 'alignedPct', 'categoryId',
-  'overallState', 'overallDistancePct',
 ]);
 
 /**

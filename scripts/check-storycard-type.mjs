@@ -71,7 +71,9 @@ if (!style.STORYCARD_STYLE?.type) {
 for (const role of roles) {
   const css = style.cardTypeCss(role);
   const nat = style.cardTypeNative(role, style.CARD_REF_WIDTH);
-  const cssPx = /clamp\(([\d.]+)rem,\s*([\d.]+)vw,\s*([\d.]+)rem\)/.exec(css.fontSize);
+  // cqw, not vw: a card sizes its text against itself, so the same card reads
+  // the same on a laptop, on a phone and in the downloaded image. Ellie's call.
+  const cssPx = /clamp\(([\d.]+)rem,\s*([\d.]+)cqw,\s*([\d.]+)rem\)/.exec(css.fontSize);
   const want = cssPx
     ? Math.min(Math.max(Number(cssPx[1]) * 16, (Number(cssPx[2]) / 100) * style.CARD_REF_WIDTH), Number(cssPx[3]) * 16)
     : Number(/([\d.]+)rem/.exec(css.fontSize)?.[1]) * 16;
@@ -141,6 +143,9 @@ for (const m of region.matchAll(TYPE_PROPS)) {
   // the app does the same. A line with no scType on it has no such excuse.
   if (line.includes('scType(') && m[1] === 'fontWeight') continue;
   problems.push(`src/App.jsx:${at} writes ${m[1]} on a storycard: ${line.trim().slice(0, 60)}`);
+}
+if (region && !/containerType:\s*"inline-size"/.test(site)) {
+  problems.push('no card element declares containerType, so cqw in the shared scale has nothing to measure and every size falls back to its minimum.');
 }
 if (region && !region.includes('scType(')) {
   problems.push('the storycards do not call scType at all, so the scale is not reaching the website.');

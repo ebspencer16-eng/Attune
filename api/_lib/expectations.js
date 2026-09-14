@@ -141,7 +141,6 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
         key,
         kind: 'responsibility',
         category: cat.label,
-        categoryId: cat.id,
         categoryIndex,
         item: substName(item, you, them),
         you: normRespValue(rawYours, true, you, them),
@@ -234,7 +233,6 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
     answered,
     aligned,
     differences: answered - aligned,
-    alignedPct: answered ? Math.round((aligned / answered) * 100) : null,
     categories,
     // `life` used to be sent here as its own array, from the days when the
     // category list was the five responsibility categories and Life & Values

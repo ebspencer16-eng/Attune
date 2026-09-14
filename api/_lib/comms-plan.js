@@ -152,8 +152,8 @@ export function commsActionPlan({ feedback, copy }) {
     // sentence about this couple rather than a label.
     const aligned = copy.DOMAIN_ALIGNED?.[domain.id];
     const base = advice
-      ? { title: null, body: advice, dimLabel: lead.label }
-      : { title: aligned?.title || null, body: aligned?.body || null, dimLabel: null };
+      ? { title: null, body: advice }
+      : { title: aligned?.title || null, body: aligned?.body || null };
 
     return {
       domain: domain.id,

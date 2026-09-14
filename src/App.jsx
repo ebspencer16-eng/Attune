@@ -8430,7 +8430,7 @@ function CoupleTypeShareCard({ ct, userName, partnerName, tagline }) {
   return (
     // Solid base under the gradient: the mid stop is translucent, and without an
     // opaque layer beneath it the exported PNG washes out.
-    <div style={{ width: CARD_W, height: CARD_H, background: "#120d2e", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <div style={{ width: CARD_W, height: CARD_H, background: "#120d2e", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box", containerType: "inline-size" }}>
       <div style={{ position: "absolute", inset: 0, background: `linear-gradient(160deg, #120d2e 0%, ${color}55 45%, #120d2e 100%)`, pointerEvents: "none" }} />
       <div style={{ height: 5, background: `linear-gradient(90deg, #E8673A, ${color}, #1B5FE8)`, flexShrink: 0, position: "relative" }} />
       {/* Oversized ghost word, same treatment as the type reveal tile */}
@@ -8467,7 +8467,13 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
   return (
     <div style={{ position: "relative", userSelect: "none", width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W }}>
       <div ref={cardRef}
-        style={{ width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W, height: inline ? "min(72vw, 560px)" : isMobile ? "min(660px, calc(100vh - 130px))" : `min(${CARD_H}px, calc(100vh - 150px))`, background: bg || "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+        style={{ width: inline ? "100%" : isMobile ? "min(390px, calc(100vw - 1rem))" : CARD_W, height: inline ? "min(72vw, 560px)" : isMobile ? "min(660px, calc(100vh - 130px))" : `min(${CARD_H}px, calc(100vh - 150px))`, background: bg || "#2d2250", borderRadius: 20, overflow: "hidden", position: "relative", flexShrink: 0, display: "flex", flexDirection: "column",
+          /* The card is the container its text is sized against. Ellie's call:
+             a storycard should look the same on a laptop, on a phone and in the
+             downloaded image, and the app has always sized against the card
+             because it has no window to measure. cqw in the shared scale reads
+             this. */
+          containerType: "inline-size" }}>
         {/* Attune watermark */}
         <div style={{ position: "absolute", bottom: 16, left: 20, display: "flex", alignItems: "center", gap: 6, opacity: 0.45 }}>
           <svg width="22" height="16" viewBox="0 0 103 76" fill="none"><defs><linearGradient id={"wg"+cardIndex} x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill={"url(#wg"+cardIndex+")"}/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke={"url(#wg"+cardIndex+")"} strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill={"url(#wg"+cardIndex+")"} transform="translate(58.16,21.3) scale(0.72)"/></svg>

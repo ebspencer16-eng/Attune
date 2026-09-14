@@ -68,8 +68,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O73 | **G23: stop sending the six values neither surface draws.** dimLabel, writtenCount, alignedPct, categoryId, overallState, overallDistancePct. |
-| O74 | **G22: size storycard text against the card, not the browser window.** A card then looks the same on a laptop, on a phone and in the downloaded image, and the app matches it everywhere rather than only at phone width. |
 | O47 | **Insights, couple type page: fit the title on three lines.** Her suggestion: "[Partner] and [Partner]'s unique relationship dynamic". |
 | O48 | **Insights, comms at a glance: make the placement dots on the overview slightly larger.** |
 | O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
@@ -153,6 +151,8 @@ build.
 
 | Verified | By |
 |--|--|
+| The six values neither surface drew are no longer computed or sent | gone from the payload, the app's types and the one test that asserted on one |
+| A storycard is the same size on a laptop, a phone and in the download | the text sizes against the card rather than the browser window; 16 of 135 nodes moved, all of them to the size the app already used |
 | The app draws the action plan note the site shows | `tile.reflect` arrived on the payload and nothing drew it; `check-app-draws-payload.mjs` now fails on any results field the app never names, planted three ways |
 | Both people's placement dots are visible when they gave the same rating | the app drew them at the same point at the same size, so the second covered the first; `check-overlapping-marks.mjs`, planted twice |
 | The phone's pill nav offers every section the sidebar does | it had five of eight and no Conflict Patterns at all; rendered at 420px it now shows Type & Map, Comms, Expectations, Refl., Intimacy, Conflict, What's Next. `check-mobile-nav.mjs` |

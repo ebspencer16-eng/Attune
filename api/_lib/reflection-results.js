@@ -157,7 +157,6 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
     /** The rating they are furthest apart on, for the overview and the plan. */
     widest: widest && widest.gapSteps > 0 ? widest : null,
     /** How many of the written questions both people answered. */
-    writtenCount: written.length,
     /** The headings Side by Side groups under, in order. */
     storyCategories: STORY_CATEGORIES,
     /** Each page's heading and the line under it, so the app shows both. */

@@ -222,7 +222,6 @@ export type CommsPlan = {
     dim: string;
     title: string | null;
     body: string | null;
-    dimLabel?: string | null;
     /** Only on the hardest domain, matching the website. */
     reflect?: string;
   }[];
@@ -329,8 +328,6 @@ export type IntimacyResults = {
   lead?: string;
   /** Why the conversations list is still shown when nothing is misaligned. */
   allAlignedNote?: string | null;
-  overallState: 'aligned' | 'discuss' | 'different' | 'unspoken';
-  overallDistancePct: number | null;
   dimensions: IntimacyDimension[];
   /** Furthest apart first: where a conversation is most worth having. */
   conversations: IntimacyDimension[];
@@ -369,7 +366,6 @@ export type ReflectionResults = {
   storyCategories?: string[];
   /** Each Reflection page's heading and the line under it, from the server. */
   pages?: Record<string, { title: string; sub?: string; eyebrowOwn?: string; aligned?: string }>;
-  writtenCount: number;
 };
 
 /**
@@ -393,7 +389,6 @@ export type ExpectationsSummary = {
   answered: number;
   aligned: number;
   differences: number;
-  alignedPct: number | null;
   categories: {
     /** The section id this bucket belongs to, e.g. exp-convo-2. */
     section: string;
@@ -401,7 +396,6 @@ export type ExpectationsSummary = {
     color?: string | null;
     label: string;
     /** The category's own id, and the paragraph the page opens with. */
-    categoryId?: string;
     intro?: string | null;
     /** True when the paragraph is written for this pairing rather than general. */
     introIsForPair?: boolean;

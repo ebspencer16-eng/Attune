@@ -180,8 +180,6 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
   });
 
   return {
-    overallState: summary.overallState,
-    overallDistancePct: summary.overall == null ? null : Math.round(summary.overall * 100),
     /**
      * The label the website puts above every prompt. Sent because it was typed
      * inline in src/App.jsx and nowhere the app could read it, so the app
