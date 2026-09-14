@@ -6349,9 +6349,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Sidebar items
   const sidebarSections = [
     { id: "highlights", label: "Highlights", icon: "✦", color: coupleType?.color || "#E8673A" },
-    { id: "couple-type", label: "Couple Type", icon: "◈", color: coupleType?.color || "#E8673A" },
+    { id: "couple-type", label: "Couple Type", shortLabel: "Type & Map", icon: "◈", color: coupleType?.color || "#E8673A" },
     {
-      id: "comm", label: "Communication", icon: "◉", color: "#9B5DE5",
+      id: "comm", label: "Communication", shortLabel: "Comms", icon: "◉", color: "#9B5DE5",
       children: [
         { id: "comm-overview", label: "Results at a glance" },
         { id: "comm-detail-header", label: "Detailed results", isDomainHeader: true, color: "#9B5DE5" },
@@ -6395,7 +6395,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "conflict-wrote", label: "What You Each Wrote", isDeepChild: true, italic: true, color: "#1B5FE8" },
       ]
     }] : []),
-    { id: "what-comes-next", label: "What Comes Next", icon: "→", color: "#E8673A" },
+    { id: "what-comes-next", label: "What Comes Next", shortLabel: "What's Next", icon: "→", color: "#E8673A" },
   ];
 
   // Sidebar render
@@ -6448,13 +6448,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   // Mobile top tab bar (compact, no children)
   const MobileTabBar = () => (
     <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto", paddingBottom: "0.5rem", marginBottom: "1.25rem", borderBottom: `1px solid ${C.stone}` }}>
-      {[
-        { id: "couple-type", label: "Type & Map", color: "#9B5DE5" },
-        { id: "comm-overview", label: "Comms", color: "#9B5DE5" },
-        { id: "exp-overview", label: "Expectations", color: "#1B5FE8" },
-        ...(hasAnniversary ? [{ id: "reflection", label: "Refl.", color: "#1B5FE8" }] : []),
-        ...(intimacyBothDone ? [{ id: "intimacy", label: "Intimacy", color: "#B5546E" }] : []),
-      ].map(t => (
+      {/* Built from the same sidebarSections the sidebar is built from.
+          Ellie: "Physical intimacy results section is still missing from my web
+          view, it's not listed in the pill shaped nav buttons up top."
+
+          It was a hand-written list of five beside a sidebar of eight, so it
+          had no Conflict Patterns at all and its Intimacy entry was guarded by
+          a second reading of the same condition. Two lists, one of them shorter,
+          which is how a whole section can be missing on a phone and present on
+          a laptop. */}
+      {sidebarSections
+        .filter(sec => sec.id !== "highlights")
+        .map(sec => ({
+          id: sec.children ? sec.children[0].id : sec.id,
+          label: sec.shortLabel || sec.label,
+          color: sec.color,
+        }))
+        .map(t => (
         <button key={t.id} onClick={() => go(t.id)} style={{ background: section.startsWith(t.id.replace("-overview","")) ? t.color + "15" : "transparent", border: `1.5px solid ${section.startsWith(t.id.replace("-overview","")) ? t.color : C.stone}`, borderRadius: 999, padding: "0.3rem 0.75rem", fontSize: "0.7rem", fontWeight: 600, color: section.startsWith(t.id.replace("-overview","")) ? t.color : C.muted, cursor: "pointer", fontFamily: BFONT, whiteSpace: "nowrap", flexShrink: 0 }}>
           {t.label}
         </button>

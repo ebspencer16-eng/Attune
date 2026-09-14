@@ -79,7 +79,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O54 | **Insights, relationship reflection: the whole section has to look exactly like the site.** Title, tiles, format, colouring. |
 | O55 | **Insights, conflict: the same, exactly like the site.** |
 | O56 | **Insights, what comes next: the app has four sections and the site has more.** Mirror the site. |
-| O57 | **Physical intimacy is missing from the pill nav on the website.** Her web view does not list it. |
 | O58 | **Insights: double-tapping the tab icon returns to the highlights page.** |
 | O59 | **Resources: the "6 min" on each article row should read "6 min read" and be orange.** |
 | O60 | **Resources, explore more: drop the "swipe" label.** When there is nothing further, say nothing; fade the tiles at the right edge instead so it reads as more to see. |
@@ -155,6 +154,7 @@ build.
 
 | Verified | By |
 |--|--|
+| The phone's pill nav offers every section the sidebar does | it had five of eight and no Conflict Patterns at all; rendered at 420px it now shows Type & Map, Comms, Expectations, Refl., Intimacy, Conflict, What's Next. `check-mobile-nav.mjs` |
 | Phrases to try is three shaded tiles with a phrase in each, on both | rendered on the site: the section heading then three quoted phrases, no outer tiles, no mode labels, no eyebrows |
 | The reflection action plan page is gone from both surfaces | one removal in api/_lib/results-sections.js took it out of the nav on both; 29 sections render clean |
 | The site's at-a-glance action plan is what each of you wrote | it was a derived list; it is now the answer to "one thing I want to work on", the same question the app uses |
