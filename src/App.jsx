@@ -4053,7 +4053,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
           {/* ── FOCAL POINT: Couple-type starter ── */}
           <div style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.13)", borderRadius: 14, padding: "1.1rem 1.3rem", marginBottom: "1.4rem" }}>
             <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: coupleTypeColor || "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.55rem", opacity: 0.9 }}>
-              {coupleTypeName ? `How ${userName} & ${partnerName} need to approach these conversations` : "How to approach these conversations"}
+              {coupleTypeName ? SC_COPY.expectationsTip(userName, partnerName) : "A tip for you both"}
             </div>
             <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>
               {(coupleTypeName && EXP_CAT_STARTERS[fc.id]?.[pairKey])
@@ -7142,7 +7142,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Relationship Reflection</div></div>
+            {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.ratings.title}</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>{REFLECTION_PAGES.ratings.sub}</p>
 
@@ -7270,7 +7270,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}><div style={{ width: 10, height: 10, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} /><div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT }}>Relationship Reflection</div></div>
+            {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.story.title}</h2>
             <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>{REFLECTION_PAGES.story.sub}</p>
             {/* block: reflection-story/groups */}

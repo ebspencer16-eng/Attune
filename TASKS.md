@@ -86,8 +86,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O61 | **Resources: In Practice articles open in the app, not the website.** |
 | O62 | **Notes: drop the default tags.** An "add a tag" field, the reader's own list under it, and a line of suggestions like "communicating needs", "love". |
 | O63 | **Both: simplify the couple type "phrases to try" section.** Remove the outer white tiles and the bold mode label; keep three shaded tiles, each with only its phrase, and drop the "phrase to try" eyebrow. |
-| O65 | **Both: rename the expectations tip tiles to "A tip for [name] and [name]".** |
-| O70 | **Site: two detailed reflection pages still show a page dot and an eyebrow.** They should be gone from every results page on both surfaces. |
 | O71 | **Site: the reflection at a glance action plan should use each person's own answer**, the way the app does. The site's list is the less useful one. |
 | O72 | **Both: remove the reflection "action plan" detailed page.** |
 
@@ -160,6 +158,8 @@ build.
 
 | Verified | By |
 |--|--|
+| The expectations tip tiles read "A tip for [name] and [name]" on both | one string in `PAGE_COPY`, sent on the payload and passed into the page |
+| No results page anywhere carries a page dot and eyebrow | the last two were reflection pages; `check-page-eyebrows.mjs` was blind to them because the name came through a constant, and now matches the shape as well. Planted both ways |
 | The four at-a-glance titles you named are the same on both surfaces | `PAGE_TITLES` in api/_lib/results-sections.js, sent on the results payload; neither surface writes a page heading of its own for these four |
 | "Where you each land" is "Communication style overview" on both | `PAGE_COPY.commPlacements`, read by both |
 | The reflection ratings page is "How you each view the relationship" | one string in api/_lib/reflection-results.js, which both surfaces already read |

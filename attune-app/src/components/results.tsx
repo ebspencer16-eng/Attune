@@ -548,6 +548,7 @@ function SectionBody({
            the app was using expectations blue, on a violet ground. */
         introColor={results.content?.coupleType?.color || '#E8673A'}
         position={at >= 0 ? { index: at + 1, total: all.length } : null}
+              tipLabel={pageCopy('expectationsTip', `A tip for ${you} and ${them}`)}
       />
     );
   }
@@ -817,11 +818,13 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
 
 /** One conversation: every item in that category, differences first. */
 function ExpectationsConversation({
-  bucket, you, them, position, introColor,
+  bucket, you, them, position, introColor, tipLabel,
 }: {
   bucket: ExpectationsSummary['categories'][number] | null;
   you: string;
   them: string;
+  /** The tip tile's label, from the server, so it reads the same on the site. */
+  tipLabel: string;
   position?: { index: number; total: number } | null;
   /** The couple type's colour, which is what the website heads the opening
    *  paragraph in. Orange when there is no type. */
@@ -885,9 +888,9 @@ function ExpectationsConversation({
                   SectionColor.expectations, which is blue, on a violet ground:
                   Ellie called it very hard to read and she is right. */}
               <Text style={{ ...Type.eyebrow, color: introColor || '#E8673A', marginBottom: Spacing.sm }}>
-                {bucket.introIsForPair
-                  ? `How ${you} & ${them} need to approach these conversations`
-                  : 'How to approach these conversations'}
+                {/* Ellie renamed these: the old label was a sentence where a
+                    label belongs, and it was the longest line on the page. */}
+                {bucket.introIsForPair ? tipLabel : 'A tip for you both'}
               </Text>
               <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', lineHeight: 24 }}>
                 {bucket.intro}
