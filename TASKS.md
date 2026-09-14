@@ -37,23 +37,21 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
+**Nothing waiting.** 061, 062 and 063 are all run.
+
 I deliver migrations and you run them. That is deliberate and it is in
-CLAUDE.md, so these will sit here until you do.
+CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| R28 | **Run migration `062_drop_qr_card_columns.sql`.** It drops the three qr columns and `card_url`, which nothing writes any more. It also drops an RLS policy from April that let anyone holding the publishable key read order rows: `using (qr_token is not null)`, and every order was backfilled with a token. That is the half worth running promptly. The migration prints the policies left on `orders` when it finishes. |
-| R29 | **Run migration `063_admin_presets_rls.sql`.** `admin_presets` is the one table in the schema without row level security, so anyone with the publishable key could read, change or delete your saved Explore views. The rows hold no personal data, only the saved view. The endpoint uses the service key, which bypasses row security, so nothing breaks. |
-| R26 | **Run migration `061_page_events_surface.sql`** in the SQL editor. Until it runs, the app column and the site column on every clustered chart stay empty, because nothing is telling the two apart yet. Events already filed keep counting, they just sit in neither column. |
 
 ### Decide these
 
 | # | Decision |
 |--|--|
-| O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
-| O7 | **The canonical tags name the apex**, which redirects to www, so search engines are being pointed at a URL that 307s. Thirty-odd tags. An SEO decision. |
-| O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
-| O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
+| O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
+| O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
+| O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
 
 ### Answer these
 
@@ -66,15 +64,13 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Empty.** Everything I could do without you is done and pushed. The four items
-that used to sit here, the App Store launch and its credentials, the catch-all
-and the canonical tags, were never mine: they are decisions, and they have
-moved to section 1 where they belong.
-
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O40 | **O5, decided: a real 404.** Unmatched URLs answer 200 with a blank app shell today. Make them answer 404 with `public/404.html`, without breaking the app's own routes. |
+| O41 | **R1: the app home page needs colour.** The icons in the bottom tile, the star and the checklist and the rest, should be orange. |
+| O42 | **R7: the app's highlight storycards still do not match the website's.** Fonts, sizes, spacing, colours. Compare them properly this time rather than checking one file. |
 
 ## 3. For you to review
 
@@ -92,14 +88,12 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R27 | **The nineteen emails on /email-preview.** Every one is now rendered by the code that sends it, so what you read there is what goes out. Five are marked as sent from nowhere; those are G18 and not worth reading for copy until you decide. |
-| R1 | **App home page.** The blue ground, the cream tile, the welcome-back line, the insight of the day and its glow, the pick-up row. Built to the Oura-adjacent direction you gave. |
+| R27 | **The emails are at attune-relationships.com/email-preview.** Thirteen tabs across the top, one per email. Click a tab and the email renders below it exactly as it sends, because the page asks the code that sends it rather than holding its own copy. Under the tabs it says the subject line, who it goes to, which file builds it, and where in the code it is triggered from. The first tab, partner invite, is the one customers see most. No sign-in needed. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 | R3 | **App notes tab.** Pick up where you left off, shared notes, unread markers, the tag list with its A-Z default and the sort dropdown. |
 | R4 | **App resources tab.** The narrower collections tile with arrows, the circular "yours to explore" shapes, the In Practice grid, and the tiles for budget, workbook and checklist. |
 | R5 | **Website marketing pages.** The hero without orange italics, no subpage titles in banners, tighter vertical spacing, the founders note redesign, the FAQ and packages changes, In Practice. |
 | R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
-| R7 | **Highlight storycards**, both surfaces: the front and back arrows, and that nothing is clipped at the top. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
 | R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
 
@@ -128,6 +122,9 @@ any order; work through them however suits.
 
 | Verified by you | What |
 |--|--|
+| R28 | Migration 062: the qr columns and the policy that let anyone read order rows |
+| R29 | Migration 063: row level security on admin_presets |
+| R26 | Migration 061: the surface column, so app and site can be told apart |
 | R14 | The partner-deleted notification line |
 | R15 | The EU consent banner sentence |
 | R16 | The delete-account password prompt |
