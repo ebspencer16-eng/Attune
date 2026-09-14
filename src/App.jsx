@@ -3456,7 +3456,8 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
   const go = s => { setStep(s); if (onExternalGo) onExternalGo(s); const sc = document.querySelector("[data-results-scroll]"); if (sc) sc.scrollTop = 0; else window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  const protocols = buildCommsProtocols(byDim, userName, partnerName);
+  // The protocols are collected on What Comes Next, which builds them where
+  // it uses them. This const was computed here and read by nothing.
 
   // Results-at-a-glance action plan: one item per domain. The item is chosen by
   // the WIDEST GAP in that domain, not by protocol order, so the three cards

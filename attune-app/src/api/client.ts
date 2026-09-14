@@ -225,7 +225,11 @@ export type CommsPlan = {
     /** Only on the hardest domain, matching the website. */
     reflect?: string;
   }[];
-  protocols: { dim: string | null; title: string; body: string | null; thisWeek?: string }[];
+  /**
+   * The "this week" protocols are not here any more. The app draws them where
+   * the website draws them, on What Comes Next, which arrives already grouped.
+   * Declaring them here meant the app expected a field it never read.
+   */
 };
 
 /** One item on the Reflection action plan, with the evidence tier behind it. */
@@ -361,7 +365,6 @@ export type ReflectionResults = {
     /** The question to sit with, under the pair. */
     prompt?: string | null;
   }[];
-  widest: ReflectionRating | null;
   /** The headings Side by Side groups under, in the website'''s order. */
   storyCategories?: string[];
   /** Each Reflection page's heading and the line under it, from the server. */

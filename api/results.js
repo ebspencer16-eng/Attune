@@ -689,6 +689,35 @@ export default async function handler(req) {
       b: swapped ? me.pronouns : partner.pronouns,
     });
 
+    /**
+     * The communication action plan: the tiles the overview draws and the
+     * protocols under "This week".
+     *
+     * Built here rather than inline in the response because What Comes Next
+     * collects the same protocols. It used to be an expression inside the
+     * payload, so the page that gathers every action could not see them and
+     * the app's version of that page had one section fewer than the website's.
+     */
+    const commsPlan = (() => {
+      const copy = contentFor(contentVersion ?? null);
+      const feedback = personalityFeedback({
+        dimensions: displayed.content?.dimensions || [],
+        viewer: viewerSide,
+        youName: me.name || 'You',
+        themName: partner?.name || 'Your partner',
+        copy,
+      });
+      return {
+        tiles: commsActionPlan({ feedback, copy }),
+        // Read by What Comes Next, which is built on this server. The app does
+        // not draw protocols anywhere else, so they are not in what it is sent:
+        // the page that uses them arrives already grouped.
+        protocols: commsProtocols(
+          Object.fromEntries(feedback.map((f) => [f.dim, f])),
+          me.name || 'You', partner?.name || 'Your partner'),
+      };
+    })();
+
     return json({
       ok: true, ready: true, cached, recomputed: reason,
       // Labels are applied on the way out, not baked into the stored blob.
@@ -762,22 +791,7 @@ export default async function handler(req) {
        * See api/_lib/side-by-side.js.
        */
       commResponses: sideBySide(mine, theirs),
-      commsPlan: (() => {
-        const copy = contentFor(contentVersion ?? null);
-        const feedback = personalityFeedback({
-          dimensions: displayed.content?.dimensions || [],
-          viewer: viewerSide,
-          youName: me.name || 'You',
-          themName: partner?.name || 'Your partner',
-          copy,
-        });
-        return {
-          tiles: commsActionPlan({ feedback, copy }),
-          protocols: commsProtocols(
-            Object.fromEntries(feedback.map((f) => [f.dim, f])),
-            me.name || 'You', partner?.name || 'Your partner'),
-        };
-      })(),
+      commsPlan: { tiles: commsPlan.tiles },
 
       /**
        * The Reflection action plan.
@@ -832,6 +846,9 @@ export default async function handler(req) {
        */
       whatComesNext: whatComesNext({
         coupleTypeId: results.coupleType,
+        // The same plan the communication page draws, so this page can collect
+        // its protocols the way the website's does.
+        commsPlan: { tiles: commsPlan.tiles },
         expectations,
         intimacy,
         reflection,

@@ -75,7 +75,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O52 | **Insights, expectations detailed pages: the tip tiles sit too close to the page title.** Too much padding inside, or too little above. |
 | O54 | **Insights, relationship reflection: the whole section has to look exactly like the site.** Title, tiles, format, colouring. |
 | O55 | **Insights, conflict: the same, exactly like the site.** |
-| O56 | **Insights, what comes next: the app has four sections and the site has more.** Mirror the site. |
 | O58 | **Insights: double-tapping the tab icon returns to the highlights page.** |
 | O59 | **Resources: the "6 min" on each article row should read "6 min read" and be orange.** |
 | O60 | **Resources, explore more: drop the "swipe" label.** When there is nothing further, say nothing; fade the tiles at the right edge instead so it reads as more to see. |
@@ -151,6 +150,8 @@ build.
 
 | Verified | By |
 |--|--|
+| What Comes Next collects the same six sections on both surfaces | the server had five and not the same five: Conflict but no Communication, while the website had Communication and no Conflict. `check-what-comes-next.mjs`, planted |
+| The payload carries nothing either surface leaves undrawn | protocols and widest were the last two; both are consumed where they are used now, and `check-app-draws-payload.mjs` has an empty exemption list |
 | The six values neither surface drew are no longer computed or sent | gone from the payload, the app's types and the one test that asserted on one |
 | A storycard is the same size on a laptop, a phone and in the download | the text sizes against the card rather than the browser window; 16 of 135 nodes moved, all of them to the size the app already used |
 | The app draws the action plan note the site shows | `tile.reflect` arrived on the payload and nothing drew it; `check-app-draws-payload.mjs` now fails on any results field the app never names, planted three ways |

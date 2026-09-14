@@ -144,18 +144,18 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
     })
     .filter(Boolean);
 
-  const widest = ratings.length
-    ? ratings.reduce((m, r) => (r.gapSteps > m.gapSteps ? r : m), ratings[0])
-    : null;
-
   return {
     names: { you, them },
     ratings,
     admired,
     priorities,
     written,
-    /** The rating they are furthest apart on, for the overview and the plan. */
-    widest: widest && widest.gapSteps > 0 ? widest : null,
+    /*
+     * The rating they are furthest apart on was sent here and drawn by
+     * neither surface: the overview shows every rating with both marks on it,
+     * which says the same thing without singling one out. Computed above and
+     * no longer sent, the way Ellie asked for the other six.
+     */
     /** How many of the written questions both people answered. */
     /** The headings Side by Side groups under, in order. */
     storyCategories: STORY_CATEGORIES,

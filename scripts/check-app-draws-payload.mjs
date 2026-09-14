@@ -89,22 +89,15 @@ const IGNORED = new Set([
 /**
  * Fields the app really is cutting, with the work that will fix them.
  *
- * These are NOT exempt on their merits. They are here so this gate can run in
- * the build while the fix lands, and each names the task that removes it. A
- * third entry appearing here without a task number is this list being used as
- * a place to put problems.
+ * Empty. The two that were here, CommsPlan.protocols and
+ * ReflectionResults.widest, were the same bug as O56: the website built What
+ * Comes Next inline with a group the server's version did not have. The server
+ * builds that group now, so both fields are read.
  *
- *   protocols   CommsPlan's "this week" items. The website draws three of them
- *               on What Comes Next, built inline there; the server's
- *               whatComesNext builds a different, smaller set of groups and
- *               does not include them at all, which is why the app's page has
- *               four sections and the website's has five. O56.
- *   widest      ReflectionResults' widest gaps, same page, same cause. O56.
+ * An entry appearing here without a task number is this list being used as a
+ * place to put problems.
  */
-const KNOWN_GAPS = new Map([
-  ['protocols', 'O56: the app\'s What Comes Next does not mirror the website\'s'],
-  ['widest', 'O56: the app\'s What Comes Next does not mirror the website\'s'],
-]);
+const KNOWN_GAPS = new Map();
 
 /** The result types the payload is described by. */
 const TYPES = ['CommsPlan', 'ReflectionResults', 'ExpectationsSummary', 'IntimacyResults'];

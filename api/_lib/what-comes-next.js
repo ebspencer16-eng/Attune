@@ -18,7 +18,7 @@
 
 import { COUPLE_TYPES } from '../_couple-types.js';
 
-export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection, conflictReady, names }) {
+export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, conflictReady, names }) {
   const groups = [];
   const you = names?.you || 'You';
   const them = names?.them || 'your partner';
@@ -30,7 +30,7 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
     groups.push({
       id: 'couple-type',
       color: '#9B5DE5',
-      label: 'Your type',
+      label: 'Couple type',
       section: 'couple-type',
       items: type.tips.slice(0, 3).map((t) => ({
         title: t.title,
@@ -38,6 +38,27 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
         // The sentence to actually say. On a page of advice this is the only
         // part that survives contact with a real evening.
         say: t.phraseTry || null,
+      })),
+    });
+  }
+
+  // 2. Communication. The website has drawn these protocols on this page since
+  //    it existed; this function did not build them at all, which is why the
+  //    app's What Comes Next had one section fewer than the website's. Ellie:
+  //    "It needs to mirror the what comes next on the site."
+  //
+  //    Three of them, the website's own limit, from the same commsProtocols
+  //    both surfaces already share.
+  if (commsPlan?.protocols?.length) {
+    groups.push({
+      id: 'comm',
+      color: '#E8673A',
+      label: 'Communication',
+      section: 'comm-overview',
+      items: commsPlan.protocols.slice(0, 3).map((pr) => ({
+        title: pr.title,
+        body: null,
+        say: pr.thisWeek || pr.body || null,
       })),
     });
   }
@@ -50,7 +71,7 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
     .slice(0, 3);
   if (expCats.length) {
     groups.push({
-      id: 'expectations',
+      id: 'exp',
       color: '#1B5FE8',
       label: 'Expectations',
       section: 'exp-overview',
@@ -81,8 +102,8 @@ export function whatComesNext({ coupleTypeId, expectations, intimacy, reflection
     groups.push({
       id: 'reflection',
       color: '#10B981',
-      label: 'What you each said',
-      section: 'reflection-plan',
+      label: 'Relationship Reflection',
+      section: 'reflection-overview',
       items: [
         { title: `${you} wrote`, body: commitment.you, say: null },
         { title: `${them} wrote`, body: commitment.them, say: null },
