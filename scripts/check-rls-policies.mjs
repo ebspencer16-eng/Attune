@@ -31,6 +31,17 @@
  * matters: the answer is not "does this string appear anywhere", it is "what
  * is on the table after everything has run".
  *
+ * ── THE OTHER HALF ────────────────────────────────────────────────────────
+ * A policy only matters on a table that has row level security switched on. A
+ * table in the public schema without it is open to anyone holding the
+ * publishable key, and not only to read: the anonymous role is granted insert,
+ * update and delete on public tables by default. admin_presets was created in
+ * migration 036 without it, so a stranger could have deleted every saved
+ * Explore view. Migration 063 turns it on.
+ *
+ * So this checks both: every table created here has row level security, and
+ * every policy that survives ties its rows to the caller.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * The live database, which this cannot reach. It checks what the repo says
  * should be there. If a policy was ever created by hand in the SQL editor, no
@@ -91,8 +102,19 @@ if (files.length < 10) {
 const live = new Map();
 let created = 0;
 
+/** Tables this SQL creates, and the ones it switches row security on for. */
+const tables = new Map();
+const secured = new Set();
+
 for (const rel of files) {
   const sql = readFileSync(join(ROOT, rel), 'utf8').replace(/--[^\n]*/g, '');
+
+  for (const m of sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?(\w+)/gi)) {
+    if (!tables.has(m[1])) tables.set(m[1], rel);
+  }
+  for (const m of sql.matchAll(/alter\s+table\s+(?:public\.)?(\w+)\s+enable\s+row\s+level\s+security/gi)) {
+    secured.add(m[1]);
+  }
 
   for (const m of sql.matchAll(/drop\s+policy\s+(?:if\s+exists\s+)?"?([\w ]+)"?\s+on\s+(?:public\.)?(\w+)/gi)) {
     live.delete(`${m[2]}.${m[1].trim()}`);
@@ -122,6 +144,15 @@ if (created < 15) {
 }
 
 const problems = [];
+
+for (const [table, rel] of tables) {
+  if (secured.has(table)) continue;
+  problems.push(
+    `${rel}: table ${table} is created without row level security.\n`
+    + `      Anyone with the publishable key can read it, and the anonymous role is\n`
+    + `      granted insert, update and delete on public tables by default.`);
+}
+
 for (const p of live.values()) {
   if (!PERSONAL.has(p.table)) {
     if (!WORLD_READABLE.has(p.table)) {
@@ -148,4 +179,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-rls-policies] ${created} policies across ${files.length} SQL files; ${live.size} still standing, and every read of personal data checks the caller.`);
+console.log(`[check-rls-policies] ${tables.size} tables, all with row level security; ${created} policies, ${live.size} still standing, and every read of personal data checks the caller.`);

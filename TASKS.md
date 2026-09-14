@@ -65,6 +65,7 @@ any order; work through them however suits.
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
 | R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
 | R28 | **Run migration `062_drop_qr_card_columns.sql`.** It drops the three qr columns and `card_url`, which nothing writes any more. It also drops an RLS policy from April that let anyone holding the publishable key read order rows: `using (qr_token is not null)`, and every order was backfilled with a token. That is the half worth running promptly. The migration prints the policies left on `orders` when it finishes. |
+| R29 | **Run migration `063_admin_presets_rls.sql`.** `admin_presets` is the one table in the schema without row level security, so anyone with the publishable key could read, change or delete your saved Explore views. The rows hold no personal data, only the saved view. The endpoint uses the service key, which bypasses row security, so nothing breaks. |
 | R26 | **Run migration `061_page_events_surface.sql`** in the SQL editor. Until it runs, the app column and the site column on every clustered chart stay empty, because nothing is telling the two apart yet. Events already filed keep counting, they just sit in neither column. |
 
 ### Copy, and whether the words are yours
@@ -108,6 +109,7 @@ build.
 
 | Verified | By |
 |--|--|
+| Every table in the schema has row level security | `check-rls-policies.mjs`, both halves, planted six ways in total |
 | One six-month check-in email, the cron one | the browser-triggered copy is gone from the sender, the app and the trigger record; `check-email-preview.mjs` shows 13 emails, all triggered |
 | No surviving RLS policy lets a stranger read personal data | `check-rls-policies.mjs`, replayed in migration order, planted four ways |
 | Both workbook variants render, same type and different types | `check-workbook-renders.mjs`, planted three ways; the same-type one had been broken since this morning |
