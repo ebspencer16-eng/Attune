@@ -2,21 +2,23 @@
 
 Four sections, and they hand work back and forth.
 
-**1. Needs your guidance** is my questions for you: decisions I cannot make,
-and copy I should not write.
+**1. Needs you** is everything blocked on you: a migration to run, a credential
+to supply, a decision to make, a question to answer. Nothing here moves until
+you touch it, so it goes first.
 
-**2. Open** is my list. Things to build or fix.
+**2. Open** is my list. Things to build or fix, none of them waiting on you.
 
-**3. For you to review** is your list. Things that are built and working that
-I cannot confirm on my own, because they need an eye or a phone. Ids are
-stable: tell me "R7 verified" and it moves to section 4, or tell me what is
-wrong with it and it moves to section 2.
+**3. For you to review** is the softer half of your list: things built and
+working that I cannot confirm on my own, because they need an eye or a phone.
+Looking at them is the whole job.
 
 **4. Done and verified** is the record, with the evidence for each line.
 
-As you work through section 3 you will send me things for section 2. As I
-finish section 2 I will either ask you something in section 1 or put it in
-section 3 for you to confirm.
+The difference between 1 and 3 is whether anything is blocked. A migration that
+has not run means a column is missing and a chart is empty; an unreviewed
+design means nothing at all until you dislike it. Section 1 used to hold only
+my questions, which is why three migrations sat in section 3 where they read
+as optional. They were not.
 
 **A status is a claim and needs evidence.** Section 4 names the check, the
 browser run or your own word. Nothing sits in section 3 that a check could
@@ -24,19 +26,55 @@ have proved instead.
 
 ---
 
-## 1. Needs your guidance
+## 1. Needs you
+
+Everything here is blocked on something only you can do. A migration I am
+not allowed to run, a credential I do not have, a decision that is yours.
+Nothing in here is waiting on me.
+
+Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
+"O5 leave it" and I move it on.
+
+### Run these in the SQL editor
+
+I deliver migrations and you run them. That is deliberate and it is in
+CLAUDE.md, so these will sit here until you do.
+
+| # | Migration |
+|--|--|
+| R28 | **Run migration `062_drop_qr_card_columns.sql`.** It drops the three qr columns and `card_url`, which nothing writes any more. It also drops an RLS policy from April that let anyone holding the publishable key read order rows: `using (qr_token is not null)`, and every order was backfilled with a token. That is the half worth running promptly. The migration prints the policies left on `orders` when it finishes. |
+| R29 | **Run migration `063_admin_presets_rls.sql`.** `admin_presets` is the one table in the schema without row level security, so anyone with the publishable key could read, change or delete your saved Explore views. The rows hold no personal data, only the saved view. The endpoint uses the service key, which bypasses row security, so nothing breaks. |
+| R26 | **Run migration `061_page_events_surface.sql`** in the SQL editor. Until it runs, the app column and the site column on every clustered chart stay empty, because nothing is telling the two apart yet. Events already filed keep counting, they just sit in neither column. |
+
+### Decide these
+
+| # | Decision |
+|--|--|
+| O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
+| O7 | **The canonical tags name the apex**, which redirects to www, so search engines are being pointed at a URL that 307s. Thirty-odd tags. An SEO decision. |
+| O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
+| O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
+
+### Answer these
+
+Nothing outstanding. When I have a question it appears here.
 
 | # | Question |
 |--|--|
 
 ## 2. Open
 
+My list. Things to build or fix, none of them waiting on you.
+
+**Empty.** Everything I could do without you is done and pushed. The four items
+that used to sit here, the App Store launch and its credentials, the catch-all
+and the canonical tags, were never mine: they are decisions, and they have
+moved to section 1 where they belong.
+
+When you send me a list, or when a sweep turns something up, it appears here.
+
 | # | Task |
 |--|--|
-| O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
-| O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
-| O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
-| O7 | **The canonical tags name the apex**, which redirects to www, so search engines are being pointed at a URL that 307s. Thirty-odd tags. An SEO decision. |
 
 ## 3. For you to review
 
@@ -49,10 +87,6 @@ name of the check that proves them.
 **Ids are stable.** Tell me "R7 verified" or "R7, no, the glow is still too
 subtle" and I move it to section 4 or open it in section 2. They are not in
 any order; work through them however suits.
-
-**Three migrations are waiting**, and they are the only items here that are not
-just looking at something. R28 first: it closes a policy that lets anyone
-holding the publishable key read order rows. Then R29 and R26, in any order.
 
 ### Design, and whether it looks right
 
@@ -68,9 +102,6 @@ holding the publishable key read order rows. Then R29 and R26, in any order.
 | R7 | **Highlight storycards**, both surfaces: the front and back arrows, and that nothing is clipped at the top. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
 | R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
-| R28 | **Run migration `062_drop_qr_card_columns.sql`.** It drops the three qr columns and `card_url`, which nothing writes any more. It also drops an RLS policy from April that let anyone holding the publishable key read order rows: `using (qr_token is not null)`, and every order was backfilled with a token. That is the half worth running promptly. The migration prints the policies left on `orders` when it finishes. |
-| R29 | **Run migration `063_admin_presets_rls.sql`.** `admin_presets` is the one table in the schema without row level security, so anyone with the publishable key could read, change or delete your saved Explore views. The rows hold no personal data, only the saved view. The endpoint uses the service key, which bypasses row security, so nothing breaks. |
-| R26 | **Run migration `061_page_events_surface.sql`** in the SQL editor. Until it runs, the app column and the site column on every clustered chart stay empty, because nothing is telling the two apart yet. Events already filed keep counting, they just sit in neither column. |
 
 ### Copy, and whether the words are yours
 
@@ -245,6 +276,9 @@ build.
 4. A general ask ("remove all X") gets a search across both surfaces and a
    gate, not the edits the message happened to name.
 5. Every content change to one surface is mirrored on the other (msg 79).
+6. Anything blocked on Ellie goes in section 1, whatever kind of thing it is.
+   A migration is not a review item: until it runs, a column is missing and a
+   chart is empty. Three of them sat in section 3 reading as optional.
 
 ---
 
