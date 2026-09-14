@@ -25,6 +25,7 @@
  * different problem and is not this one.
  */
 
+import { freshWorkbookUrl, signedUrlIsLive } from './_lib/workbook-link.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 // The checklist's own content, so the app renders the website's words rather
 // than a copy of them. Sent with the state because the app has one call here
@@ -134,11 +135,19 @@ export default async function handler(req) {
       let workbook = null;
       if (caps.ownsWorkbook) {
         const oRes = await rest(
-          `orders?user_id=eq.${me}&workbook_url=not.is.null&select=workbook_url&order=created_at.desc&limit=1`,
+          `orders?user_id=eq.${me}&workbook_url=not.is.null&select=order_num,workbook_url&order=created_at.desc&limit=1`,
           { headers: svc });
         const row = (await oRes.json().catch(() => []))?.[0];
+        // The stored URL was signed for seven days when the file was made, so
+        // for most couples it is already dead by the time they ask for it. Mint
+        // a new signature over the same file; fall back to the stored one only
+        // if it is somehow still live, and to null rather than to a link that
+        // opens an error page.
+        const fresh = await freshWorkbookUrl({
+          supabaseUrl, serviceKey, orderNum: row?.order_num,
+        });
         workbook = {
-          url: row?.workbook_url || null,
+          url: fresh || (signedUrlIsLive(row?.workbook_url) ? row.workbook_url : null),
           fileName: workbookFileName(profile.name, partnerName),
           copy: WORKBOOK_COPY,
         };

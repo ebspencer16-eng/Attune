@@ -1,3 +1,4 @@
+import { signedUrlIsLive } from "../api/_lib/workbook-link.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
@@ -6133,6 +6134,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         const _ownsWorkbook = !!ord?.addonWorkbook || (ord?.pkgKey || ord?.pkg) === 'premium';
         if (!_ownsWorkbook) return;
         if (localStorage.getItem('attune_workbook_ready') === 'true') return; // already done
+        // A URL means the file exists. Whether its signature has expired is a
+        // different question, and not this one: it decides whether to generate,
+        // not whether to hand anyone a link.
         if (ord?.workbookUrl) return; // generated on another device
 
         // Require both partners to have completed both exercises. Without
@@ -8104,9 +8108,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   'Content-Type': 'application/json',
                   ...(_wbAuth ? { Authorization: `Bearer ${_wbAuth}` } : {}),
                 };
-                // Use pre-generated workbook URL if available (fastest)
+                // Use the pre-generated workbook URL if it is still live.
+                // It was signed for seven days when the file was made, so for
+                // most couples it has expired by the time they click, and the
+                // old code handed it over anyway: a new tab, an error page,
+                // and no way to tell that from a slow download. An expired one
+                // now falls through to generating a fresh file below.
                 const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
-                if (ord?.workbookUrl) {
+                if (ord?.workbookUrl && signedUrlIsLive(ord.workbookUrl)) {
                   const a = document.createElement('a');
                   a.href = ord.workbookUrl;
                   a.download = workbookFileName(userName, partnerName);

@@ -109,6 +109,7 @@ build.
 
 | Verified | By |
 |--|--|
+| The workbook download link is never handed over expired | `check-workbook-link.mjs`, 9 link shapes, planted four ways; the stored link was signed for 7 days and served forever |
 | Every table in the schema has row level security | `check-rls-policies.mjs`, both halves, planted six ways in total |
 | One six-month check-in email, the cron one | the browser-triggered copy is gone from the sender, the app and the trigger record; `check-email-preview.mjs` shows 13 emails, all triggered |
 | No surviving RLS policy lets a stranger read personal data | `check-rls-policies.mjs`, replayed in migration order, planted four ways |
