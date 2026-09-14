@@ -1260,10 +1260,16 @@ function IntimacyDimensionView({
                 <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.md }}>
                   <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
                   {q.you != null ? (
-                    <Marker pct={q.you * 100} color={YOU_COLOR} label={initial(you)} />
+                    <Marker
+                      pct={q.you * 100} color={YOU_COLOR} label={initial(you)}
+                      dy={q.them != null ? markerNudge(q.you * 100, q.them * 100)[0] : 0}
+                    />
                   ) : null}
                   {q.them != null ? (
-                    <Marker pct={q.them * 100} color={THEM_COLOR} label={initial(them)} />
+                    <Marker
+                      pct={q.them * 100} color={THEM_COLOR} label={initial(them)}
+                      dy={q.you != null ? markerNudge(q.you * 100, q.them * 100)[1] : 0}
+                    />
                   ) : null}
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
@@ -1373,8 +1379,8 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
             <Text style={{ ...Type.cardTitle, color: Palette.white }}>{r.question}</Text>
             <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
               <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
-              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} dy={markerNudge(r.you.pct, r.them.pct)[0]} />
+              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} dy={markerNudge(r.you.pct, r.them.pct)[1]} />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
               <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{r.low}</Text>
@@ -1555,8 +1561,8 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
                 reader who has come this far already knows how to read it. */}
             <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.lg }}>
               <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} />
-              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} />
+              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(data.names.you)} dy={markerNudge(r.you.pct, r.them.pct)[0]} />
+              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(data.names.them)} dy={markerNudge(r.you.pct, r.them.pct)[1]} />
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
@@ -2868,11 +2874,32 @@ function SliderRow({
  * now and the multiply is gone, so the prop says its own unit and the callers
  * were right all along.
  */
-function Marker({ pct, color, label }: { pct: number; color: string; label: string }) {
+/**
+ * One person's place on a scale.
+ *
+ * ── WHY IT TAKES A NUDGE ──────────────────────────────────────────────────
+ * Ellie: "Rel Relf at a glance page: I can see preston's placement dots but
+ * not my own."
+ *
+ * Both marks were drawn at the same spot with nothing separating them, so
+ * whenever two people gave a question the same rating the second one covered
+ * the first completely. Not partly: the same size, the same shape, drawn
+ * second. A couple who agrees is the common case on these questions, so the
+ * page was quietly hiding one person's answers on exactly the rows where they
+ * had answered the same.
+ *
+ * The website has always split them by five pixels, one up and one down, when
+ * the two scores match. This is that, so the two pages read alike.
+ */
+function Marker({ pct, color, label, dy = 0 }: {
+  pct: number; color: string; label: string;
+  /** Vertical offset, used only when two marks share a position. */
+  dy?: number;
+}) {
   return (
     <View
       style={{
-        position: 'absolute', top: -8, left: `${pct}%`,
+        position: 'absolute', top: -8 + dy, left: `${pct}%`,
         marginLeft: -10,
         width: 20, height: 20, borderRadius: Radius.pill,
         backgroundColor: color, alignItems: 'center', justifyContent: 'center',
@@ -2881,6 +2908,11 @@ function Marker({ pct, color, label }: { pct: number; color: string; label: stri
       <Text style={{ fontSize: 9, lineHeight: 11, fontWeight: '700', color: Palette.white }}>{label}</Text>
     </View>
   );
+}
+
+/** How far apart to draw two marks that land on the same point. */
+function markerNudge(a: number, b: number): [number, number] {
+  return Math.abs(a - b) < 1 ? [-5, 5] : [0, 0];
 }
 
 /** Who the two marks are. Without it the initials are a puzzle. */

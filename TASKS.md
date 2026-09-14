@@ -75,7 +75,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O50 | **Insights: make every "results at a glance" page a rounded tile, and leave the detailed pages full width.** Her call, with my view asked for: she likes the at-a-glance tile and is unsure about every page having it. |
 | O51 | **Insights, expectations detailed pages: put the progress lines back under the title in the app.** They stay on the site. She has changed her mind about removing them. |
 | O52 | **Insights, expectations detailed pages: the tip tiles sit too close to the page title.** Too much padding inside, or too little above. |
-| O53 | **Insights, relationship reflection at a glance: her own placement dots are missing.** Preston's show, hers do not. |
 | O54 | **Insights, relationship reflection: the whole section has to look exactly like the site.** Title, tiles, format, colouring. |
 | O55 | **Insights, conflict: the same, exactly like the site.** |
 | O56 | **Insights, what comes next: the app has four sections and the site has more.** Mirror the site. |
@@ -154,6 +153,7 @@ build.
 
 | Verified | By |
 |--|--|
+| Both people's placement dots are visible when they gave the same rating | the app drew them at the same point at the same size, so the second covered the first; `check-overlapping-marks.mjs`, planted twice |
 | The phone's pill nav offers every section the sidebar does | it had five of eight and no Conflict Patterns at all; rendered at 420px it now shows Type & Map, Comms, Expectations, Refl., Intimacy, Conflict, What's Next. `check-mobile-nav.mjs` |
 | Phrases to try is three shaded tiles with a phrase in each, on both | rendered on the site: the section heading then three quoted phrases, no outer tiles, no mode labels, no eyebrows |
 | The reflection action plan page is gone from both surfaces | one removal in api/_lib/results-sections.js took it out of the nav on both; 29 sections render clean |
