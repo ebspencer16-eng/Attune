@@ -6,7 +6,6 @@
  *
  * Types:
  *   partner_invite  — { fromName, toEmail, toName, inviteUrl }
- *   checkin_6mo     — { toEmail, toName, partnerName, retakeUrl }
  *   results_viewed  — { toEmail, toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasWorkbook, hasIntimacy, hasChecklist }
  *   shipping_notification — { toEmail, toName, partnerName, orderNum, trackingUrl?, trackingNumber?, carrier? }
  *
@@ -155,21 +154,6 @@ function shippingNotificationEmail({ toName, partnerName, orderNum, trackingUrl,
   };
 }
 
-function checkin6moEmail({ toName, partnerName, retakeUrl }) {
-  return {
-    subject: "Six months with Attune. Worth a look.",
-    html: layout(`
-      <h1>Six months is a good time to check in.</h1>
-      <p>Hi ${toName},</p>
-      <p>Six months ago, you and ${partnerName} took Attune together. Couples who retake it after 6–12 months see their results shift, usually in ways that reflect real changes in how they're relating.</p>
-      <p>A lot can move in half a year: how you handle stress, what you need, how you repair. Some things get easier. New friction appears. The assessment is most useful as a check-in, not a one-time snapshot.</p>
-      <div class="btn-wrap"><a href="${retakeUrl}" class="btn">Retake Attune →</a></div>
-      <div class="divider"></div>
-      <p style="font-size:0.78rem;color:#8C7A68;">Your previous results are still accessible in your dashboard. Retaking creates a new session. You'll be able to compare the two.</p>
-    `),
-  };
-}
-
 // ── results_viewed email ─────────────────────────────────────────────────────
 function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasReflection, hasBudget, hasWorkbook, hasIntimacy, hasChecklist }) {
   const name = toName || "there";
@@ -289,7 +273,6 @@ const URL_ALLOWED_HOSTS = [
 export const SEND_EMAILS = {
   partner_invite:              (body, userId) => partnerInviteEmail(body, userId),
   workbook_promo:              (body) => workbookPromoEmail(body),
-  checkin_6mo:                 (body) => checkin6moEmail(body),
   results_viewed:              (body) => resultsViewedEmail(body),
   shipping_notification:       (body) => shippingNotificationEmail(body),
 };
@@ -422,10 +405,6 @@ export default async function handler(req) {
     email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;
   } else if (type === 'workbook_promo') {
-    if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
-    email = SEND_EMAILS[type](body, userId);
-    email.to = body.toEmail;
-  } else if (type === 'checkin_6mo') {
     if (!body.toEmail) return new Response('Missing toEmail', { status: 400 });
     email = SEND_EMAILS[type](body, userId);
     email.to = body.toEmail;

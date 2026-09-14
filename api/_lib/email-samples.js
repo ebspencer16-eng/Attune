@@ -37,10 +37,6 @@ export const EMAIL_SAMPLES = {
     toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
     code: 'WB20', checkoutUrl: `${U}/checkout?addon_workbook=1`, discountPercent: 20,
   },
-  checkin_6mo: {
-    toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
-    retakeUrl: `${U}/app?view=exercises`,
-  },
   results_viewed: {
     toEmail: 'maya@example.com', toName: 'Maya', partnerName: 'Alex',
     coupleType: 'The Orbit', portalUrl: `${U}/app`,

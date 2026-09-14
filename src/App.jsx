@@ -225,7 +225,6 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_results_state', 'attune_couple_type_saved',
   'attune_post_survey_done', 'attune_survey_done',
   'attune_wb_promo_fired', 'attune_feedback_ctx',
-  'attune_6mo_sent',
   // An order number whose claim did not land. Kept so the next sign-in can try
   // again, and cleared on sign-out like everything else that names a purchase.
   'attune_pending_order',
@@ -13403,22 +13402,11 @@ export default function App() {
     return () => { cancelled = true; clearInterval(interval); };
   }, [account?.id, account?.joinedViaInvite, hasRealPartner, order?.addonIntimacy, partnerSession?.intimacy?.completedAt]);
 
-  // ── 6-month check-in email ───────────────────────────────────────────────
-  // Fires once, client-side, when the user returns 6+ months after signup.
-  useEffect(() => {
-    if (!account?.email || !account?.createdAt) return;
-    const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000;
-    const alreadySent = localStorage.getItem('attune_6mo_sent');
-    if (alreadySent) return;
-    const age = Date.now() - account.createdAt;
-    if (age < SIX_MONTHS_MS) return;
-    localStorage.setItem('attune_6mo_sent', '1');
-    fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'checkin_6mo', toEmail: account.email, toName: account.name || '', partnerName: account.partnerName || '', retakeUrl: window.location.origin + '/app?signin=1' }),
-    }).catch(() => {});
-  }, [account?.email]);
+  // The six-month check-in used to fire from here, once, when someone opened
+  // the app more than six months after signing up. api/cron-checkin.js sends
+  // the same email on a schedule and honours the email preference, and a
+  // couple who has drifted is exactly the one who will not open the app on the
+  // day it turns six months old. Ellie's call: keep the cron one.
 
   // In demo mode the picker drives both partners' Ex1 via type archetypes.
   const _demoMineEx1    = _demoParam ? demoWithPartnerView(ARCHETYPE_EX1[demoType[0]], ARCHETYPE_EX1[demoType[1]]) : null;

@@ -33,7 +33,6 @@ have proved instead.
 
 | # | Task |
 |--|--|
-| O39 | **G19: delete the browser-triggered six-month email**, keeping the cron one. |
 | O16 | **App downloads.** Needs an App Store Connect key, an issuer id and a private key, and the app is not in the store yet. The Engagement page has a headline tile and a line series waiting on it, both of which say so on the page. |
 | O1 | **App Store launch.** Two lines in `api/_lib/flags.js`: `APP_LIVE = true` and the real `APP_STORE_URL`. |
 | O5 | **The catch-all in `vercel.json`.** Any unmatched URL answers 200 with a blank app shell, and `public/404.html` cannot be reached. One line either way; it changes routing on the live site, so it is your call. |
@@ -109,6 +108,8 @@ build.
 
 | Verified | By |
 |--|--|
+| One six-month check-in email, the cron one | the browser-triggered copy is gone from the sender, the app and the trigger record; `check-email-preview.mjs` shows 13 emails, all triggered |
+| No surviving RLS policy lets a stranger read personal data | `check-rls-policies.mjs`, replayed in migration order, planted four ways |
 | Both workbook variants render, same type and different types | `check-workbook-renders.mjs`, planted three ways; the same-type one had been broken since this morning |
 | All 27 review-document generators build | `check-doc-generators.mjs`, now part of `npm run check`; seven were reading constants out of src/App.jsx that had moved into modules |
 | The reflection review shows its keyword lists, and says when one is gone | the names are read from the module rather than typed, so a missing list prints as missing instead of empty |
