@@ -68,9 +68,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O40 | **O5, decided: a real 404.** Unmatched URLs answer 200 with a blank app shell today. Make them answer 404 with `public/404.html`, without breaking the app's own routes. |
-| O41 | **R1: the app home page needs colour.** The icons in the bottom tile, the star and the checklist and the rest, should be orange. |
-| O42 | **R7: the app's highlight storycards still do not match the website's.** Fonts, sizes, spacing, colours. Compare them properly this time rather than checking one file. |
+| O43 | **Eight of the nine storycards on the website still carry their type inline.** The opener reads the shared scale; the rest hold the values the scale was copied from, so the two surfaces match today and a gate says so, but an edit to one of those eight would move the website and not the app. Convert them. |
 
 ## 3. For you to review
 
@@ -141,6 +139,9 @@ build.
 
 | Verified | By |
 |--|--|
+| Unmatched URLs answer 404 rather than 200 with an empty shell | the catch-all is gone from `vercel.json`; `check-route-targets.mjs` fails if it or anything as wide comes back, planted twice |
+| The app and the website size a storycard from the same numbers | `check-storycard-type.mjs`, 17 roles, planted seven ways |
+| The app home tile draws its icons in orange | one line, and a disabled row keeps the muted brown |
 | The workbook download link is never handed over expired | `check-workbook-link.mjs`, 9 link shapes, planted four ways; the stored link was signed for 7 days and served forever |
 | Every table in the schema has row level security | `check-rls-policies.mjs`, both halves, planted six ways in total |
 | One six-month check-in email, the cron one | the browser-triggered copy is gone from the sender, the app and the trigger record; `check-email-preview.mjs` shows 13 emails, all triggered |

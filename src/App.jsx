@@ -112,6 +112,10 @@ import { groundForDimension } from "../api/_lib/intimacy-results.js";
 import { COMM_DOMAINS, DIMENSION_DISPLAY_ORDER } from "../api/_lib/comm-domains.js";
 import { DIM_META as SHARED_DIM_META } from "../api/_workbook-content.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT, RING_COLORS as SC_RING, statColor as scStatColor } from "../api/_lib/storycard-style.js";
+// The storycard type scale. The opener is drawn from it; the other eight
+// cards still carry their values inline, and those values are what the scale
+// was transcribed from, which is why the app matches them today.
+import { cardTypeCss as scType } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
@@ -8703,16 +8707,16 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
               {mkCouple(portrait.p1, portrait.p2, true, "card0")}
             </div>
           )}
-          <div style={{ fontSize: "0.55rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.15s both" }}>Your results</div>
-          <div style={{ fontFamily: HFONT, fontSize: "clamp(2.6rem,7vw,3.8rem)", fontWeight: 700, color: "white", lineHeight: 0.92, letterSpacing: "-0.03em", marginBottom: "1.5rem", animation: "fadeUp 0.5s 0.2s cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div style={{ ...scType("eyebrow"), marginBottom: "1.25rem", animation: "fadeUp 0.4s 0.15s both" }}>Your results</div>
+          <div style={{ ...scType("names"), marginBottom: "1.5rem", animation: "fadeUp 0.5s 0.2s cubic-bezier(0.22,1,0.36,1) both" }}>
             {userName}<br/><span style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7em" }}>&amp;</span><br/>{partnerName}
           </div>
           <div style={{ width: 40, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.5rem", animation: "popIn 0.4s 0.35s both" }} />
-          <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, maxWidth: 260, margin: 0, animation: "fadeUp 0.4s 0.4s both" }}>
+          <p style={{ ...scType("body"), maxWidth: 260, margin: 0, animation: "fadeUp 0.4s 0.4s both" }}>
             Built from your independent answers. This is what you look like together.
           </p>
         </div>
-        <div style={{ textAlign: "center", padding: "0 0 1.75rem", fontSize: "0.52rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", fontFamily: BFONT, animation: "fadeUp 0.4s 0.55s both" }}>Tap to begin</div>
+        <div style={{ ...scType("footer"), textAlign: "center", padding: "0 0 1.75rem", animation: "fadeUp 0.4s 0.55s both" }}>Tap to begin</div>
       </div>
     </WrappedCard>,
 

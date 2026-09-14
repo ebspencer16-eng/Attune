@@ -19,6 +19,148 @@
  * api/_lib/section-blocks.js, checked by check-section-blocks.mjs.
  */
 
+/**
+ * The type scale, which is the thing the two surfaces kept disagreeing about.
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * Ellie, three times over three months, most recently: "Highlights storycards
+ * on app still don't match the ones on the website. Please match fonts, sizes,
+ * formatting, colors, etc."
+ *
+ * She was right every time, and the reason is that the website styled each
+ * card inline while the app had a six-token scale of its own. They were never
+ * going to line up: the opener's names were 30 points in the app against
+ * 41.6 to 60.8 pixels on the website, body copy was weight 400 against 300,
+ * and the eyebrow was tracked 1.6 against 0.32em. Nothing was wrong in either
+ * file; there were simply two of them.
+ *
+ * These numbers are the website's, unchanged. The website reads them now
+ * instead of writing them inline, so nothing there moves, and the app reads
+ * the same values so it finally matches.
+ *
+ * ── HOW A SIZE IS WRITTEN ─────────────────────────────────────────────────
+ * [min, vw, max] in rem, rem, rem, which is the clamp() the website already
+ * used. The website emits it as a clamp. The app evaluates it against the
+ * card's own width, which is what vw meant here anyway: these cards are a
+ * fixed 9:16 box, and sizing their text against the browser viewport was the
+ * reason the same card rendered differently on a phone and a laptop.
+ *
+ * A number instead of a triple is a fixed size at every width.
+ *
+ * `alpha` is the white the text is drawn in, so neither surface writes an
+ * rgba string of its own. `track` is em, `lh` is a multiplier.
+ */
+export const CARD_TYPE = {
+  /** The label above everything: YOUR RESULTS, THE NUMBER, and so on. */
+  eyebrow:   { size: 0.55, family: 'body', weight: 700, track: 0.32, alpha: 0.40, upper: true },
+  /** A second eyebrow the later cards use, tracked a little tighter. */
+  eyebrowSm: { size: 0.50, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
+  /** The couple's names on the opener. The biggest thing on any card. */
+  names:     { size: [2.6, 7, 3.8], family: 'display', weight: 700, track: -0.03, lh: 0.92, alpha: 1 },
+  /** The ampersand between them. */
+  amp:       { size: [1.82, 4.9, 2.66], family: 'display', weight: 700, lh: 0.92, alpha: 0.45 },
+  /** A card's headline. */
+  title:     { size: [1.45, 4.8, 1.9], family: 'display', weight: 700, track: -0.02, lh: 1.12, alpha: 1 },
+  /** The couple-type card's headline, which sits above a map and runs longer. */
+  titleSm:   { size: [1.3, 4.4, 1.65], family: 'display', weight: 700, track: -0.015, lh: 1.15, alpha: 1 },
+  /** The big figure on a stat card. */
+  stat:      { size: [3.75, 13, 5.25], family: 'display', weight: 700, track: -0.04, lh: 0.9, alpha: 1 },
+  /** The bigger figure, on the card that is only a figure. */
+  statBig:   { size: [4.5, 14, 7], family: 'display', weight: 700, track: -0.05, lh: 0.85, alpha: 1 },
+  /** The sentence under a headline. Light, and the app had it at regular. */
+  body:      { size: 0.88, family: 'body', weight: 300, lh: 1.7, alpha: 0.60 },
+  /** The same, one step down, where a card has more to say. */
+  bodySm:    { size: 0.78, family: 'body', weight: 300, lh: 1.6, alpha: 0.60 },
+  /** A line that names something rather than explaining it. */
+  lead:      { size: 0.94, family: 'body', weight: 400, alpha: 0.85 },
+  /** A call-out tile's label. */
+  calloutLabel: { size: 0.50, family: 'body', weight: 700, track: 0.18, alpha: 1, upper: true },
+  /** A call-out tile's value. */
+  calloutValue: { size: 1.25, family: 'display', weight: 700, alpha: 1 },
+  /** The wordmark, bottom left. */
+  wordmark:  { size: 0.875, family: 'display', weight: 700, alpha: 0.55 },
+  /** The address, bottom right. */
+  siteLabel: { size: 0.5, family: 'body', weight: 700, track: 0.075, alpha: 0.35 },
+  /** The button at the end of the last card. */
+  cta:       { size: 0.85, family: 'body', weight: 700, track: 0.05, alpha: 1 },
+  /** Tap to begin, and the like. */
+  footer:    { size: 0.52, family: 'body', weight: 700, track: 0.22, alpha: 0.28, upper: true },
+};
+
+/** The reference width these sizes were drawn at: the website's card. */
+export const CARD_REF_WIDTH = 390;
+
+/** The gradient rule under the opener's names. Orange to indigo, 40 by 2. */
+export const RULE_GRADIENT = ['#E8673A', '#1B5FE8'];
+export const RULE_SIZE = { width: 40, height: 2 };
+
+/** The padding inside a card, in rem, at the reference width. */
+export const CARD_PADDING = 2.5;
+
+/** The two faces, as each surface names them. */
+export const DISPLAY_FONT = "'Playfair Display', Georgia, serif";
+export const BODY_FONT = "'DM Sans', sans-serif";
+
+/**
+ * The app ships one file per weight rather than one variable face, so a weight
+ * is a different font name there. Getting this wrong is not subtle: DM Sans at
+ * weight 300 with no Light file loaded renders as regular, which is the body
+ * copy difference that made the cards look heavier than the website's.
+ */
+const NATIVE_FACES = { 300: 'DMSansLight', 400: 'DMSans', 500: 'DMSansMedium', 600: 'DMSansSemiBold', 700: 'DMSansBold' };
+export function nativeFont(t) {
+  if (t.family === 'display') return 'PlayfairDisplay';
+  return NATIVE_FACES[t.weight] || 'DMSans';
+}
+
+/**
+ * One role as CSS, for the website.
+ *
+ * Returns the same clamp() and the same rgba the cards were written with, so
+ * adopting this changes nothing on screen.
+ */
+export function cardTypeCss(role) {
+  const t = CARD_TYPE[role];
+  if (!t) return {};
+  const size = Array.isArray(t.size)
+    ? `clamp(${t.size[0]}rem, ${t.size[1]}vw, ${t.size[2]}rem)`
+    : `${t.size}rem`;
+  return {
+    fontFamily: t.family === 'display' ? DISPLAY_FONT : BODY_FONT,
+    fontSize: size,
+    fontWeight: t.weight,
+    ...(t.track != null ? { letterSpacing: `${t.track}em` } : {}),
+    ...(t.lh != null ? { lineHeight: t.lh } : {}),
+    ...(t.upper ? { textTransform: 'uppercase' } : {}),
+    color: t.alpha >= 1 ? 'white' : `rgba(255,255,255,${t.alpha})`,
+  };
+}
+
+/**
+ * One role as numbers, for the app.
+ *
+ * `cardWidth` stands in for the viewport, because on these cards it always
+ * did: the text is sized against the box it sits in, not against the screen
+ * around it.
+ */
+export function cardTypeNative(role, cardWidth = CARD_REF_WIDTH) {
+  const t = CARD_TYPE[role];
+  if (!t) return {};
+  const px = Array.isArray(t.size)
+    ? Math.min(Math.max(t.size[0] * 16, (t.size[1] / 100) * cardWidth), t.size[2] * 16)
+    : t.size * 16;
+  const fontSize = Math.round(px * 10) / 10;
+  return {
+    fontFamily: nativeFont(t),
+    fontSize,
+    fontWeight: String(t.weight),
+    ...(t.track != null ? { letterSpacing: Math.round(t.track * fontSize * 10) / 10 } : {}),
+    ...(t.lh != null ? { lineHeight: Math.ceil(fontSize * t.lh) } : {}),
+    ...(t.upper ? { textTransform: 'uppercase' } : {}),
+    color: t.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${t.alpha})`,
+  };
+}
+
 /** Portrait. A story is 9:16 and a card that is a different shape on every
  *  phone cannot be screenshotted into one. */
 export const CARD_RATIO = 9 / 16;
@@ -96,4 +238,12 @@ export const STORYCARD_STYLE = {
   wordmark: WORDMARK,
   siteLabel: SITE_LABEL,
   tones: TONES,
+  // The type scale goes over the wire like the colours do, so the app sizes
+  // its text from the same numbers the website is drawn with rather than from
+  // a scale of its own. That was the whole of what made the two look like
+  // different products.
+  type: CARD_TYPE,
+  typeRefWidth: CARD_REF_WIDTH,
+  rule: { gradient: RULE_GRADIENT, ...RULE_SIZE },
+  padding: CARD_PADDING,
 };

@@ -607,7 +607,15 @@ function TileRow({
       <SymbolView
         name={icon as never}
         size={20}
-        tintColor={c.textMuted}
+        /* Ellie: "This looks great, but needs a little color. Maybe the icons
+           in the bottom tile could be orange?" They were the muted brown, the
+           same colour as the body text under each title, so the one element in
+           the tile carrying meaning read as punctuation. Orange is the brand's
+           accent and already the colour of the chevron at the other end of the
+           row, which is what makes the two ends of a row look like a pair.
+           A disabled row keeps the muted brown: an orange icon on a row that
+           cannot be tapped is a promise the row does not keep. */
+        tintColor={disabled ? c.textMuted : Palette.orange}
         style={{ width: 22, height: 22 }}
       />
       <View style={{ flex: 1 }}>

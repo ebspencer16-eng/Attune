@@ -65,6 +65,7 @@ export type MapData = {
 };
 import {
   BottomTabInset, Colors, Palette, Radius, Spacing, Type,
+  Fonts,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -111,7 +112,60 @@ let SC = {
    * rendering before the style arrives.
    */
   tones: null as Record<string, unknown> | null,
+  /**
+   * The type scale, which is the thing Ellie has reported three times:
+   * "Highlights storycards on app still don't match the ones on the website."
+   *
+   * She was right each time. This file had a six-token scale of its own while
+   * the website styled each card inline, so the opener's names were 30 points
+   * here against 41.6 to 60.8 pixels there, body copy was weight 400 against
+   * 300, and the eyebrow was tracked 1.6 against 0.32em. Neither file was
+   * wrong; there were two of them.
+   *
+   * The website's numbers now live in api/_lib/storycard-style.js and arrive
+   * on the payload. Null until the first payload lands, and `t()` falls back
+   * to the old tokens for that one render.
+   */
+  type: null as Record<string, TypeSpec> | null,
+  typeRefWidth: 390,
+  rule: { gradient: ['#E8673A', '#1B5FE8'], width: 40, height: 2 },
+  padding: 2.5,
 };
+
+type TypeSpec = {
+  size: number | [number, number, number];
+  family: 'display' | 'body';
+  weight: number; track?: number; lh?: number; alpha: number; upper?: boolean;
+};
+
+/**
+ * One role of the shared scale, as React Native style.
+ *
+ * A triple is the website's clamp(min, vw, max) and is evaluated against the
+ * card's width, because on these cards that is what vw always meant: a fixed
+ * 9:16 box whose text should size to the box, not to the screen around it.
+ */
+function t(role: string, cardWidth: number): Record<string, unknown> {
+  const spec = SC.type?.[role];
+  if (!spec) return {};
+  const px = Array.isArray(spec.size)
+    ? Math.min(Math.max(spec.size[0] * 16, (spec.size[1] / 100) * cardWidth), spec.size[2] * 16)
+    : spec.size * 16;
+  const fontSize = Math.round(px * 10) / 10;
+  const FACES: Record<number, string> = {
+    300: Fonts.bodyLight, 400: Fonts.body, 500: Fonts.bodyMedium,
+    600: Fonts.bodySemiBold, 700: Fonts.bodyBold,
+  };
+  return {
+    fontFamily: spec.family === 'display' ? Fonts.display : (FACES[spec.weight] || Fonts.body),
+    fontSize,
+    fontWeight: String(spec.weight),
+    ...(spec.track != null ? { letterSpacing: Math.round(spec.track * fontSize * 10) / 10 } : {}),
+    ...(spec.lh != null ? { lineHeight: Math.ceil(fontSize * spec.lh) } : {}),
+    ...(spec.upper ? { textTransform: 'uppercase' as const } : {}),
+    color: spec.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${spec.alpha})`,
+  };
+}
 
 /**
  * The couple-type card's ground, from the couple's own colour.
@@ -460,8 +514,11 @@ function Card({
           />
         ) : null}
 
-        <View style={{ flex: 1, padding: Spacing.xl, justifyContent: 'center' }}>
-          <Body card={card} onDone={onDone} map={map} />
+        {/* The website pads a card 2.5rem; this was Spacing.xl, which is 24.
+            Forty against twenty-four is most of why the app's cards looked
+            tighter than the website's even where the type matched. */}
+        <View style={{ flex: 1, padding: SC.padding * 16, justifyContent: 'center' }}>
+          <Body card={card} onDone={onDone} map={map} w={w} />
         </View>
 
         {/* ── WHAT MAKES A SCREENSHOT STILL SAY WHERE IT CAME FROM ──────
@@ -474,11 +531,11 @@ function Card({
             position: 'absolute', left: Spacing.lg, right: Spacing.lg, bottom: Spacing.md,
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           }}>
-          <Text style={{ ...Type.cardTitle, fontFamily: Type.title.fontFamily, fontSize: 14, color: `${WHITE}0.55)` }}>
+          <Text style={t('wordmark', w)}>
             {SC.wordmark}
           </Text>
           {/* block: highlights/watermark */}
-          <Text style={{ ...Type.eyebrow, fontSize: 8, letterSpacing: 1.2, textTransform: 'lowercase', color: `${WHITE}0.35)` }}>
+          <Text style={[t('siteLabel', w), { textTransform: 'lowercase' }]}>
             {SC.siteLabel}
           </Text>
         </View>
@@ -487,20 +544,25 @@ function Card({
   );
 }
 
-function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; map?: MapData | null }) {
+function Body({ card, onDone, map, w }: {
+  card: HighlightCard; onDone: () => void; map?: MapData | null; w: number;
+}) {
+  // Every size on this card comes from the shared scale, evaluated against
+  // this card's width. Nothing below sets a font size of its own.
+  const S = cardStyles(w);
   switch (card.kind) {
     case 'opener':
       return (
         <View style={{ alignItems: 'center' }}>
-          <Eyebrow>{card.eyebrow}</Eyebrow>
-          <Text style={[hero, { textAlign: 'center', marginTop: Spacing.lg }]}>
+          <Eyebrow w={w}>{card.eyebrow}</Eyebrow>
+          <Text style={[S.hero, { textAlign: 'center', marginTop: Spacing.lg }]}>
             {card.names?.you}
           </Text>
-          <Text style={[hero, { color: `${WHITE}0.45)`, fontSize: 28, marginVertical: Spacing.xs }]}>&</Text>
-          <Text style={[hero, { textAlign: 'center' }]}>{card.names?.them}</Text>
+          <Text style={[S.amp, { marginVertical: Spacing.xs }]}>&</Text>
+          <Text style={[S.hero, { textAlign: 'center' }]}>{card.names?.them}</Text>
           <Rule />
-          <Text style={[body, { textAlign: 'center', maxWidth: 260 }]}>{card.body}</Text>
-          <Text style={[footer, { marginTop: Spacing.xxl }]}>{card.footer}</Text>
+          <Text style={[S.body, { textAlign: 'center', maxWidth: 260 }]}>{card.body}</Text>
+          <Text style={[S.footer, { marginTop: Spacing.xxl }]}>{card.footer}</Text>
         </View>
       );
 
@@ -518,7 +580,7 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
        */
       return (
         <View style={{ alignItems: 'center' }}>
-          <Text style={[title, { textAlign: 'center', maxWidth: 320 }]}>{card.title}</Text>
+          <Text style={[S.title, { textAlign: 'center', maxWidth: 320 }]}>{card.title}</Text>
           {map ? (
             <View style={{ marginTop: Spacing.md, marginBottom: Spacing.sm }}>
               <CoupleMap
@@ -533,32 +595,32 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
           ) : null}
           {/* "Your couple type: The Orbit" on one line, the way the website
               writes it, rather than a label under a headline. */}
-          <Text style={[body, { textAlign: 'center', marginTop: map ? Spacing.sm : Spacing.xl, color: `${WHITE}0.85)` }]}>
+          <Text style={[S.body, { textAlign: 'center', marginTop: map ? Spacing.sm : Spacing.xl, color: `${WHITE}0.85)` }]}>
             {card.typeLabel}
             {card.typeName ? ': ' : ''}
             {card.typeName ? (
               <Text style={{ fontWeight: '700', color: Palette.white }}>{card.typeName}</Text>
             ) : null}
           </Text>
-          <Text style={[body, { textAlign: 'center', marginTop: Spacing.sm, maxWidth: 260 }]}>{card.body}</Text>
+          <Text style={[S.body, { textAlign: 'center', marginTop: Spacing.sm, maxWidth: 260 }]}>{card.body}</Text>
         </View>
       );
 
     case 'dimensions':
       return (
         <View>
-          <Text style={[title, { marginBottom: Spacing.xl }]}>{card.title}</Text>
+          <Text style={[S.title, { marginBottom: Spacing.xl }]}>{card.title}</Text>
           {(card.dimensions || []).map((d) => (
             <View key={d.key} style={{ marginBottom: Spacing.lg }}>
-              <Text style={[label, { marginBottom: Spacing.xs }]}>{d.label}</Text>
+              <Text style={[S.label, { marginBottom: Spacing.xs }]}>{d.label}</Text>
               <View style={{ height: 20, justifyContent: 'center' }}>
                 <View style={{ height: 2, borderRadius: 2, backgroundColor: `${WHITE}0.18)` }} />
                 <Dot value={d.a} colour="#E8673A" />
                 <Dot value={d.b} colour="#7FB2FF" />
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
-                <Text style={small}>{d.left}</Text>
-                <Text style={small}>{d.right}</Text>
+                <Text style={S.small}>{d.left}</Text>
+                <Text style={S.small}>{d.right}</Text>
               </View>
             </View>
           ))}
@@ -568,9 +630,9 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
     case 'stat-pair':
       return (
         <View>
-          <Text style={[body, { textAlign: 'center' }]}>{card.lead}</Text>
-          <Text style={[stat, { textAlign: 'center' }]}>{card.stat}</Text>
-          <Text style={[body, { textAlign: 'center', marginBottom: Spacing.xl }]}>{card.statLabel}</Text>
+          <Text style={[S.body, { textAlign: 'center' }]}>{card.lead}</Text>
+          <Text style={[S.stat, { textAlign: 'center' }]}>{card.stat}</Text>
+          <Text style={[S.body, { textAlign: 'center', marginBottom: Spacing.xl }]}>{card.statLabel}</Text>
           {/* Green for closest, orange for furthest, from the server. Both
               tiles were the same grey here, so the card named two dimensions
               and left the reader to guess which was the one they agree on. */}
@@ -582,11 +644,11 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
                 borderColor: x.border || `${WHITE}0.18)`, borderWidth: 1,
                 borderRadius: Radius.md, padding: Spacing.lg, marginBottom: Spacing.md,
               }}>
-              <Text style={[label, x.color ? { color: x.color } : null]}>{x.label}</Text>
-              <Text style={[title, { fontSize: 20, marginTop: Spacing.xs }]}>{x.value}</Text>
+              <Text style={[S.label, x.color ? { color: x.color } : null]}>{x.label}</Text>
+              <Text style={[S.value, { marginTop: Spacing.xs }]}>{x.value}</Text>
             </View>
           ))}
-          <Text style={[body, { marginTop: Spacing.md }]}>{card.body}</Text>
+          <Text style={[S.body, { marginTop: Spacing.md }]}>{card.body}</Text>
         </View>
       );
 
@@ -598,9 +660,9 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
          the two rings read as one measurement drawn twice. */
       return (
         <View style={{ alignItems: 'center' }}>
-          <Eyebrow>{card.eyebrow}</Eyebrow>
-          <Text style={[statAt(72), { color: card.statColor || Palette.white }]}>{card.stat}</Text>
-          <Text style={[body, { marginBottom: Spacing.xxl }]}>{card.statLabel}</Text>
+          <Eyebrow w={w}>{card.eyebrow}</Eyebrow>
+          <Text style={[S.statBig, card.statColor ? { color: card.statColor } : null]}>{card.stat}</Text>
+          <Text style={[S.body, { marginBottom: Spacing.xxl }]}>{card.statLabel}</Text>
           <View style={{ flexDirection: 'row', gap: Spacing.xl }}>
             {(card.rings || []).map((r) => (
               <Donut key={r.label} pct={r.pct} label={r.label} color={r.color} />
@@ -612,7 +674,7 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
     case 'admired':
       return (
         <View>
-          <Text style={[title, { marginBottom: Spacing.xl }]}>{card.title}</Text>
+          <Text style={[S.title, { marginBottom: Spacing.xl }]}>{card.title}</Text>
           {(card.rows || []).map((r) => (
             <View
               key={r.name}
@@ -620,8 +682,8 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
                 backgroundColor: `${WHITE}0.06)`, borderColor: `${WHITE}0.12)`, borderWidth: 1,
                 borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
               }}>
-              <Text style={small}>{r.name} is most admired for</Text>
-              <Text style={[hero, { fontSize: 28, marginTop: Spacing.xs }]}>
+              <Text style={S.small}>{r.name} is most admired for</Text>
+              <Text style={[S.stat, { marginTop: Spacing.xs }]}>
                 {(r.admired || '').toLowerCase()}
               </Text>
             </View>
@@ -632,11 +694,11 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
     case 'named-dimension':
       return (
         <View style={{ alignItems: 'center' }}>
-          <Eyebrow>{card.eyebrow}</Eyebrow>
-          <Text style={[body, { marginTop: Spacing.md }]}>{card.title}</Text>
-          <Text style={[hero, { textAlign: 'center', marginTop: Spacing.sm }]}>{card.value}</Text>
+          <Eyebrow w={w}>{card.eyebrow}</Eyebrow>
+          <Text style={[S.body, { marginTop: Spacing.md }]}>{card.title}</Text>
+          <Text style={[S.hero, { textAlign: 'center', marginTop: Spacing.sm }]}>{card.value}</Text>
           {card.body ? (
-            <Text style={[body, { textAlign: 'center', marginTop: Spacing.xl, fontStyle: 'italic', maxWidth: 280 }]}>
+            <Text style={[S.body, { textAlign: 'center', marginTop: Spacing.xl, fontStyle: 'italic', maxWidth: 280 }]}>
               {card.body}
             </Text>
           ) : null}
@@ -646,14 +708,14 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
     case 'quote':
       return (
         <View style={{ alignItems: 'center' }}>
-          <Text style={[body, { textAlign: 'center', maxWidth: 300 }]}>{card.lead}</Text>
-          <Text style={[label, { textAlign: 'center', marginTop: Spacing.xl }]}>{card.eyebrow}</Text>
+          <Text style={[S.body, { textAlign: 'center', maxWidth: 300 }]}>{card.lead}</Text>
+          <Text style={[S.label, { textAlign: 'center', marginTop: Spacing.xl }]}>{card.eyebrow}</Text>
           <View
             style={{
               backgroundColor: `${WHITE}0.1)`, borderColor: `${WHITE}0.22)`, borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.xl, marginTop: Spacing.md,
             }}>
-            <Text style={[title, { fontSize: 20, fontStyle: 'italic', textAlign: 'center' }]}>
+            <Text style={[S.title, { fontStyle: 'italic', textAlign: 'center' }]}>
               {card.quote}
             </Text>
           </View>
@@ -664,8 +726,8 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
       return (
         <View style={{ alignItems: 'center' }}>
           <Rule />
-          <Text style={[title, { textAlign: 'center' }]}>{card.title}</Text>
-          <Text style={[body, { textAlign: 'center', marginTop: Spacing.md, marginBottom: Spacing.xxl }]}>
+          <Text style={[S.title, { textAlign: 'center' }]}>{card.title}</Text>
+          <Text style={[S.body, { textAlign: 'center', marginTop: Spacing.md, marginBottom: Spacing.xxl }]}>
             {card.body}
           </Text>
           <Pressable
@@ -676,7 +738,7 @@ function Body({ card, onDone, map }: { card: HighlightCard; onDone: () => void; 
               paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl, width: '100%',
               alignItems: 'center',
             }}>
-            <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>
+            <Text style={[t('cta', w), { color: Palette.white }]}>
               {card.cta}
             </Text>
           </Pressable>
@@ -759,9 +821,9 @@ function Donut({ pct, label, color }: { pct: number; label: string; color?: stri
             {arc(rLeft)}
           </View>
         ) : null}
-        <Text style={{ ...Type.title, fontSize: 20, color: Palette.white }}>{clamped}%</Text>
+        <Text style={t('calloutValue', SC.typeRefWidth)}>{clamped}%</Text>
       </View>
-      <Text style={[small, { marginTop: Spacing.sm, textAlign: 'center', maxWidth: 110 }]}>{label}</Text>
+      <Text style={[t('bodySm', SC.typeRefWidth), { marginTop: Spacing.sm, textAlign: 'center', maxWidth: 110 }]}>{label}</Text>
     </View>
   );
 }
@@ -791,42 +853,41 @@ function Rule() {
   );
 }
 
-function Eyebrow({ children }: { children?: string }) {
+function Eyebrow({ children, w }: { children?: string; w: number }) {
   if (!children) return null;
-  return <Text style={{ ...Type.eyebrow, color: `${WHITE}0.45)` }}>{children}</Text>;
+  return <Text style={t('eyebrow', w)}>{children}</Text>;
 }
 
-const hero = { ...Type.hero, color: Palette.white } as const;
-const title = { ...Type.title, color: Palette.white } as const;
-const body = { ...Type.body, color: `${WHITE}0.68)` } as const;
-const small = { ...Type.small, color: `${WHITE}0.55)` } as const;
-const label = { ...Type.eyebrow, color: `${WHITE}0.5)` } as const;
-const footer = { ...Type.eyebrow, color: `${WHITE}0.32)` } as const;
 /**
- * A big figure, with its line box.
+ * Every text role on a card, from the shared scale, at this card's width.
  *
- * ── WHY THIS IS A FUNCTION ────────────────────────────────────────────────
- * It was an object with fontSize 64 and lineHeight 66 on it, and the
- * expectations card overrode the size to 72 and left the line height alone. A
- * line box shorter than the glyph clips it, and React Native clips from the
- * top, so "80%" lost its upper edge. Ellie: "Storycard 5 '80%' text is cut off
- * on top."
- *
- * Nothing was wrong on the card that reported it either: card four sets no
- * size and reads correctly at 64 in a 66 box. The bug was only ever in the
- * override, which is the argument for not letting the two be set separately.
- *
- * The ratio is the original's, so the card that was already right does not
- * move.
+ * These were six constants built from the app's own Type tokens, which is how
+ * the two surfaces drifted: the tokens are right for the rest of the app and
+ * were never the website's storycard sizes.
  */
-const STAT_LINE_RATIO = 66 / 64;
-
-const statAt = (size: number) => ({
-  ...Type.hero,
-  color: Palette.white,
-  fontSize: size,
-  lineHeight: Math.ceil(size * STAT_LINE_RATIO),
-  marginTop: Spacing.sm,
-});
-
-const stat = statAt(64);
+function cardStyles(w: number) {
+  return {
+    hero: t('names', w),
+    amp: t('amp', w),
+    title: t('title', w),
+    titleSm: t('titleSm', w),
+    body: t('body', w),
+    bodySm: t('bodySm', w),
+    lead: t('lead', w),
+    small: t('bodySm', w),
+    label: t('calloutLabel', w),
+    value: t('calloutValue', w),
+    eyebrow: t('eyebrow', w),
+    footer: t('footer', w),
+    stat: t('stat', w),
+    statBig: t('statBig', w),
+  };
+}
+/*
+ * The stat figure and its line box were computed here, with a ratio kept so a
+ * card that was already right would not move. Both live in the shared scale
+ * now, as `stat` and `statBig`, with the line height derived from the size the
+ * same way on both surfaces. The bug the ratio was written for, a line box
+ * shorter than the glyph clipping "80%" from the top, cannot come back from an
+ * override, because there are no overrides left.
+ */
