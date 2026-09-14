@@ -44,6 +44,7 @@
  *   500 { error: '...' }
  */
 
+import { jsonBody } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 
 import { EXERCISES } from './_exercises.js';
@@ -75,12 +76,12 @@ export default async function handler(req) {
                    || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) return err(500, 'Server not configured');
 
-  let body;
-  try { body = await req.json(); }
-  catch { return err(400, 'Invalid JSON'); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  const body = _parsed.body;
 
   const { userId, exercise, answers, progress, completedAt } = body || {};
-  const email = (body?.email || '').toLowerCase().trim();
+  const email = String(body?.email ?? '').toLowerCase().trim();
 
   if (!userId || !UUID_RE.test(userId)) return err(400, 'Invalid userId');
   if (!exercise || !BY_KEY.has(exercise)) return err(400, 'Invalid exercise');

@@ -16,6 +16,7 @@
 
 
 export const config = { runtime: 'edge' };
+import { jsonBody } from './_lib/http.js';
 import { SITE_URL } from './_lib/site.js';
 import { unsubscribeUrl } from './_lib/email-footer.js';
 
@@ -374,9 +375,9 @@ export default async function handler(req) {
     if (!ok) return new Response('Forbidden', { status: 403 });
   }
 
-  let body;
-  try { body = await req.json(); }
-  catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  let body = _parsed.body;
 
   // Reject if any URL field points outside our trusted domains. This prevents
   // the endpoint from being used as a phishing-email relay.

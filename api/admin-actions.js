@@ -15,7 +15,7 @@
 
 export const config = { runtime: 'edge' };
 
-import { corsHeaders, safeError } from './_lib/http.js';
+import { corsHeaders, safeError, jsonBody } from './_lib/http.js';
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
@@ -51,7 +51,9 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let body;
-  try { body = await req.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   try {
     if (body.action === 'beta_toggle') {

@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * /api/privacy-choices
  *
@@ -90,7 +91,9 @@ export default async function handler(req) {
     let row = await readRow();
 
     if (req.method === 'POST') {
-      const body = await req.json().catch(() => ({}));
+      const _parsed = await jsonBody(req);
+      if (_parsed.error) return _parsed.error;
+      const body = _parsed.body;
       if (typeof body.optOutResearch !== 'boolean') {
         return json({ ok: false, error: 'optOutResearch must be true or false' }, 400);
       }

@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * POST /api/submit-beta-survey
  *
@@ -10,7 +11,9 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   let body;
-  try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   // A submission has to carry an answer. POSTing {} here used to store a row
   // and email the admin, from anywhere, with no auth and no origin check, so

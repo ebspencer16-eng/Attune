@@ -25,6 +25,7 @@
  * different problem and is not this one.
  */
 
+import { jsonBody } from './_lib/http.js';
 import { freshWorkbookUrl, signedUrlIsLive } from './_lib/workbook-link.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 // The checklist's own content, so the app renders the website's words rather
@@ -175,7 +176,9 @@ export default async function handler(req) {
 
     if (req.method !== 'POST') return json({ ok: false, error: 'GET or POST only' }, 405);
 
-    const body = await req.json().catch(() => ({}));
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    const body = _parsed.body;
     const tool = TOOLS[body?.tool];
     if (!tool) return json({ ok: false, error: 'unknown tool' }, 400);
     if (!caps[tool.capability]) return json({ ok: false, error: 'not included in your package' }, 403);

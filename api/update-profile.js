@@ -25,6 +25,7 @@
  * happen by way of one.
  */
 
+import { jsonBody } from './_lib/http.js';
 import { ABOUT_YOU } from './_lib/profile-setup-copy.js';
 
 export const config = { runtime: 'edge' };
@@ -99,7 +100,9 @@ export default async function handler(req) {
   }
 
   let body;
-  try { body = await req.json(); } catch { return json({ ok: false, error: 'Invalid JSON' }, 400); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   const patch = {};
   for (const [key, rule] of Object.entries(EDITABLE)) {

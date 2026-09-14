@@ -17,6 +17,7 @@
  *   KV_REST_API_TOKEN — Vercel KV token
  */
 
+import { jsonBody } from './_lib/http.js';
 import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_SCALE } from './_lib/feedback-copy.js';
 
 export const config = { runtime: 'edge' };
@@ -81,9 +82,9 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  let body;
-  try { body = await req.json(); }
-  catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  const body = _parsed.body;
 
   const {
     source,       // 'footer_quick' | 'app_experience'

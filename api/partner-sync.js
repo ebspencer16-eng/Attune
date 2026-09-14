@@ -34,7 +34,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export const config = { runtime: 'edge' };
 
-import { safeError } from './_lib/http.js';
+import { safeError, jsonBody } from './_lib/http.js';
 
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements, computeEntitlements, ORDER_SELECT, PKG_CAPS } from './_lib/entitlements.js';
@@ -70,7 +70,9 @@ export default async function handler(req) {
 async function handlePartnerSync(req) {
   if (req.method === 'POST') {
     let body;
-    try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    body = _parsed.body;
 
     const { action, inviteCode, partnerBId } = body;
 

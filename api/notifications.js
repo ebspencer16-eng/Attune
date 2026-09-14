@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * /api/notifications
  *
@@ -54,7 +55,9 @@ export default async function handler(req) {
 
     if (req.method !== 'POST') return json({ ok: false, error: 'unsupported method' }, 405);
 
-    const body = await req.json().catch(() => ({}));
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    const body = _parsed.body;
     if (body.action !== 'read') return json({ ok: false, error: 'unsupported action' }, 400);
 
     // owner_id in the filter is the authorisation: another person's

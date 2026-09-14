@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * POST /api/validate-promo
  *
@@ -35,9 +36,9 @@ const REUSABLE_CODES = new Set(['BETA-CORE-1']);
 export default async function handler(req) {
   if (req.method !== 'POST') return json({ valid: false, error: 'Method not allowed' }, 405);
 
-  let body;
-  try { body = await req.json(); }
-  catch { return json({ valid: false, error: 'Could not read request.' }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  const body = _parsed.body;
 
   const code = (body && body.code ? String(body.code) : '').toUpperCase().trim();
   if (!code) return json({ valid: false, error: 'Enter a code.' });

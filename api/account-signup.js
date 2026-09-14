@@ -16,6 +16,7 @@
  */
 
 export const config = { runtime: 'edge' };
+import { jsonBody } from './_lib/http.js';
 import { SITE_URL } from './_lib/site.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -33,7 +34,9 @@ export default async function handler(req) {
   if (!SUPABASE_URL || !ANON) return json({ error: 'Server not configured' }, 500);
 
   let body;
-  try { body = await req.json(); } catch { return json({ error: 'Invalid request.' }, 400); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');

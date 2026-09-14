@@ -11,7 +11,7 @@ import { checkAdminAuth } from './_lib/admin-auth.js';
 
 export const config = { runtime: 'edge' };
 
-import { safeError } from './_lib/http.js';
+import { safeError, jsonBody } from './_lib/http.js';
 
 const sb = () => createClient(
   process.env.SUPABASE_URL,
@@ -38,7 +38,9 @@ export default async function handler(req) {
 
   if (req.method === 'POST') {
     let body;
-    try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    body = _parsed.body;
 
     const { action, order } = body;
 

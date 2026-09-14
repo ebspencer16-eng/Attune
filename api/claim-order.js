@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * /api/claim-order
  *
@@ -55,7 +56,9 @@ export default async function handler(req) {
     const user = await uRes.json().catch(() => null);
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
-    const body = await req.json().catch(() => ({}));
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    const body = _parsed.body;
     const orderNum = String(body.orderNum || '').trim();
     if (!orderNum || !ORDER_RE.test(orderNum)) {
       return json({ ok: false, error: 'invalid order number' }, 400);

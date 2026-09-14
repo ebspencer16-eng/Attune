@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * POST /api/track-type
  *
@@ -43,9 +44,9 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  let body;
-  try { body = await req.json(); }
-  catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  const body = _parsed.body;
 
   const { coupleTypeId, codeA, codeB, gapTier, hasEx2 } = body;
 

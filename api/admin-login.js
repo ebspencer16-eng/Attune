@@ -1,3 +1,4 @@
+import { jsonBody } from './_lib/http.js';
 /**
  * /api/admin-login
  *
@@ -57,7 +58,9 @@ export default async function handler(req) {
   }
 
   let body;
-  try { body = await req.json(); } catch { return json({ error: 'Invalid request' }, 400); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');

@@ -29,6 +29,7 @@
  * body nobody reads. Failures are logged server side.
  */
 
+import { jsonBody } from './_lib/http.js';
 import { consentRequired } from './_lib/consent-region.js';
 
 export const config = { runtime: 'edge' };
@@ -41,7 +42,9 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   let body;
-  try { body = await req.json(); } catch { return noContent(); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   const kind = String(body?.kind || '');
   if (!KINDS.has(kind)) return noContent();

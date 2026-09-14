@@ -32,6 +32,7 @@
 
 export const config = { runtime: 'edge' };
 
+import { jsonBody } from './_lib/http.js';
 import { isValidAnchor, standardTags } from './_lib/tags.js';
 import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
@@ -80,7 +81,12 @@ export default async function handler(req) {
     // Read the body exactly once. Reading it, then cloning to read again, gives
     // an empty object on the second read because the stream is already
     // consumed, and every field silently arrives undefined.
-    const body = req.method === 'GET' ? {} : await req.json().catch(() => ({}));
+    let body = {};
+    if (req.method !== 'GET') {
+      const _parsed = await jsonBody(req);
+      if (_parsed.error) return _parsed.error;
+      body = _parsed.body;
+    }
     const action = req.method === 'GET'
       ? (url.searchParams.get('action') || 'list')
       : body.action;

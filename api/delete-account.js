@@ -22,6 +22,7 @@
  * only non-identifying fields. Re-identification is not possible.
  */
 
+import { jsonBody } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 
 import { deletionConfirmationEmail, partnerDeletedEmail } from './_lib/deletion-emails.js';
@@ -63,7 +64,9 @@ export default async function handler(req) {
   const caller = userData.user;
 
   let body;
-  try { body = await req.json(); } catch { return err(400, 'Invalid JSON'); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   const { userId, password } = body || {};
   if (!userId || typeof userId !== 'string') return err(400, 'Missing userId');

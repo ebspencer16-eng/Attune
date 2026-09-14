@@ -13,6 +13,7 @@
  *   SUPABASE_SERVICE_ROLE    — service-role secret for Supabase writes
  */
 
+import { jsonBody } from './_lib/http.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
@@ -314,9 +315,9 @@ export default async function handler(req) {
     });
   }
 
-  let body;
-  try { body = await req.json(); }
-  catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  const body = _parsed.body;
 
   // New payload shape: body.items = [{pkgKey, isPhysical, ...}, ...]
   // Legacy shape: top-level fields; wrap as [item].

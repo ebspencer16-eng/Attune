@@ -32,6 +32,7 @@
 // and process.env.
 export const config = { runtime: 'edge' };
 
+import { jsonBody } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 
 const json = (b, s = 200) => new Response(JSON.stringify(b), {
@@ -76,7 +77,12 @@ export default async function handler(req) {
 
   try {
     const url = new URL(req.url, 'https://x');
-    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    let body = {};
+    if (req.method === 'POST') {
+      const _parsed = await jsonBody(req);
+      if (_parsed.error) return _parsed.error;
+      body = _parsed.body;
+    }
     const action = req.method === 'POST' ? body.action : (url.searchParams.get('action') || 'list');
 
     if (action === 'list') {

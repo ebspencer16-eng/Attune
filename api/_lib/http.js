@@ -96,3 +96,44 @@ export function safeError(where, e, fallback = 'Something went wrong on our end.
   console.error(`[${where}]`, detail, e?.stack || '');
   return fallback;
 }
+
+/**
+ * The JSON body, as an object, or the Response to send instead.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * `JSON.parse('null')` is null, and `JSON.parse('"hello"')` is a string, and
+ * both are valid JSON. Almost every handler here did
+ *
+ *     let body; try { body = await req.json(); } catch { 400 }
+ *     const { thing } = body;
+ *
+ * which throws on either. A sweep of every endpoint with seven malformed
+ * bodies found twenty answering 500 to a body of `null` alone: account-signup,
+ * create-profile, send-email, send-order-email, notes, notifications, posts,
+ * privacy-choices, claim-order, track-type, update-profile and more. Some
+ * threw before reaching their own auth check.
+ *
+ * A 500 where a 400 belongs is not a hole, but it is noise in the logs that a
+ * real failure then hides inside, which is a thing that has already happened
+ * here twice.
+ *
+ * ── HOW TO USE IT ─────────────────────────────────────────────────────────
+ *     const parsed = await jsonBody(req);
+ *     if (parsed.error) return parsed.error;
+ *     const body = parsed.body;
+ *
+ * `body` is always a plain object. Arrays, strings, numbers, null and
+ * unparseable input all come back as a 400 with a sentence.
+ */
+export async function jsonBody(req, { headers } = {}) {
+  const reply = (msg) => new Response(JSON.stringify({ ok: false, error: msg }), {
+    status: 400, headers: { 'Content-Type': 'application/json', ...(headers || {}) },
+  });
+  let parsed;
+  try { parsed = await req.json(); }
+  catch { return { error: reply('Invalid JSON.') }; }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { error: reply('Expected a JSON object.') };
+  }
+  return { body: parsed };
+}

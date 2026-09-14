@@ -2,7 +2,7 @@
 // the Supabase service key. Backed by table public.admin_presets (migration 036).
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
-import { safeError } from './_lib/http.js';
+import { safeError, jsonBody } from './_lib/http.js';
 
 // Edge, like every other admin endpoint. This handler takes (req) and
 // returns a Response, and with no runtime declared it defaulted to Node and
@@ -35,7 +35,9 @@ export default async function handler(req) {
     }
 
     if (req.method === 'POST') {
-      const body = await req.json().catch(() => ({}));
+      const _parsed = await jsonBody(req);
+      if (_parsed.error) return _parsed.error;
+      const body = _parsed.body;
       const name = (body.name || '').toString().trim().slice(0, 80);
       const config = body.config;
       if (!name || !config || typeof config !== 'object') return json({ ok: false, error: 'name and config required' }, 400);

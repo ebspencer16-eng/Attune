@@ -22,7 +22,7 @@ import { PKG_CAPS } from './_lib/entitlements.js';
 
 export const config = { runtime: 'edge' };
 
-import { safeError } from './_lib/http.js';
+import { safeError, jsonBody } from './_lib/http.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -52,7 +52,9 @@ export default async function handler(req) {
   }
 
   let body;
-  try { body = await req.json(); } catch { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: CORS }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   /**
    * ── WHOSE PROFILE ───────────────────────────────────────────────────────

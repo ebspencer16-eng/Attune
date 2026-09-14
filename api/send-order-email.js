@@ -17,6 +17,7 @@
  *   https://api.sendgrid.com/v3/mail/send  with Authorization: Bearer SENDGRID_API_KEY
  */
 
+import { jsonBody } from './_lib/http.js';
 import { brandedEmail, _esc } from './_lib/branded-email.js';
 import { APP_LIVE } from './_lib/flags.js';
 import { SITE_URL } from './_lib/site.js';
@@ -40,9 +41,9 @@ export default async function handler(req) {
     return new Response('Forbidden', { status: 403 });
   }
 
-  let body;
-  try { body = await req.json(); }
-  catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  const body = _parsed.body;
 
   const {
     pkgKey, pkgName, isGift, isPhysical,

@@ -15,6 +15,7 @@
 
 export const config = { runtime: 'edge' };
 
+import { jsonBody } from './_lib/http.js';
 import { SITE_URL } from './_lib/site.js';
 
 import { POST_CATEGORIES } from './_lib/post-categories.js';
@@ -46,7 +47,12 @@ export default async function handler(req) {
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
     const rest = (p, init) => fetch(`${supabaseUrl}/rest/v1/${p}`, init);
     const url = new URL(req.url);
-    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    let body = {};
+    if (req.method === 'POST') {
+      const _parsed = await jsonBody(req);
+      if (_parsed.error) return _parsed.error;
+      body = _parsed.body;
+    }
     const action = req.method === 'POST' ? body.action : (url.searchParams.get('action') || 'feed');
 
     // Published means published_at is set AND in the past. Scheduling is a

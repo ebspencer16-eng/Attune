@@ -19,6 +19,7 @@
  * the amount and tax ID stay consistent on the actual charge.
  */
 
+import { jsonBody } from './_lib/http.js';
 import { DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 
@@ -99,7 +100,16 @@ export default async function handler(req) {
   }
 
   try {
-    const body = await req.json();
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    const body = _parsed.body;
+    // An items value that is not a list is a bad request, not a 500. The sweep
+    // sent { items: { a: 1 } } and this threw on .map.
+    if (body.items != null && !Array.isArray(body.items)) {
+      return new Response(JSON.stringify({ error: 'items must be a list.' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
     const items = (body.items || []).map(it => ({
       pkgKey:          it.pkgKey || it.pkg,
       isPhysical:      !!it.isPhysical || it.format === 'physical',

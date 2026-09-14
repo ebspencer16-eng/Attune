@@ -9,6 +9,7 @@
  * Idempotent: if a workbook flash code already exists for either email, it
  * returns that code and sends nothing.
  */
+import { jsonBody } from './_lib/http.js';
 import { capabilitiesFor } from './_lib/ownership.js';
 
 export const config = { runtime: 'edge' };
@@ -30,7 +31,9 @@ export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   let body;
-  try { body = await req.json(); } catch { return new Response('Invalid JSON', { status: 400 }); }
+  const _parsed = await jsonBody(req);
+  if (_parsed.error) return _parsed.error;
+  body = _parsed.body;
 
   const accountEmail = (body.accountEmail || '').toLowerCase().trim();
   const partnerEmail = (body.partnerEmail || '').toLowerCase().trim();
