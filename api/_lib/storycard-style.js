@@ -255,6 +255,23 @@ export const CALLOUT_TONES = {
 };
 
 /** The two expectations donuts. Life & values, then Responsibilities. */
+/**
+ * Which colour each person is, wherever two people are drawn together.
+ *
+ * Ellie, comparing two screenshots: the placement dots on the communication
+ * card were the brand indigo on the website and a lighter blue in the app, so
+ * the same partner was two different colours depending on which screen she was
+ * holding. The website has always used the orange and the indigo, the two ends
+ * of the mark; the app had picked a tint.
+ *
+ * `you` is whoever is reading. This is not about gender or about who signed up
+ * first; it is the reader and the other person, in that order.
+ */
+export const PERSON_COLORS = { you: '#E8673A', them: '#1B5FE8' };
+
+/** The pink the intimacy card is set in, on both surfaces. */
+export const INTIMACY_ACCENT = '#E08DA6';
+
 export const RING_COLORS = { life: '#9B5DE5', responsibilities: '#1B5FE8' };
 
 /**
@@ -286,5 +303,7 @@ export const STORYCARD_STYLE = {
   type: CARD_TYPE,
   typeRefWidth: CARD_REF_WIDTH,
   rule: { gradient: RULE_GRADIENT, ...RULE_SIZE },
+  people: PERSON_COLORS,
+  intimacyAccent: INTIMACY_ACCENT,
   padding: CARD_PADDING,
 };

@@ -46,6 +46,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, SafeAreaView,
   ScrollView, Text, View,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -129,6 +130,12 @@ let SC = {
   type: null as Record<string, TypeSpec> | null,
   typeRefWidth: 390,
   rule: { gradient: ['#E8673A', '#1B5FE8'], width: 40, height: 2 },
+  /**
+   * Which colour each person is. The app drew the partner's placement dot in a
+   * lighter blue than the website's, so the same person was two colours
+   * depending on the screen. Ellie spotted it from two screenshots.
+   */
+  people: { you: '#E8673A', them: '#1B5FE8' },
   padding: 2.5,
 };
 
@@ -534,9 +541,20 @@ function Card({
             position: 'absolute', left: Spacing.lg, right: Spacing.lg, bottom: Spacing.md,
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           }}>
-          <Text style={t('wordmark', w)}>
-            {SC.wordmark}
-          </Text>
+          {/* Ellie, from two screenshots: "the bottom left logo is different".
+              The website sets the mark beside the word, at 45 per cent, and the
+              app had the word on its own. A screenshot of a card is the thing
+              these exist to make, and half of them were carrying half a logo.
+              The mark is the PNG the rest of the app already uses, so this
+              needs no new dependency. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, opacity: 0.45 }}>
+            <Image
+              source={require('@/assets/images/attune-mark.png')}
+              style={{ width: 22, height: 16 }}
+              resizeMode="contain"
+            />
+            <Text style={t('wordmark', w)}>{SC.wordmark}</Text>
+          </View>
           {/* block: highlights/watermark */}
           <Text style={t('siteLabel', w)}>
             {SC.siteLabel}
@@ -618,8 +636,8 @@ function Body({ card, onDone, map, w }: {
               <Text style={[S.label, { marginBottom: Spacing.xs }]}>{d.label}</Text>
               <View style={{ height: 20, justifyContent: 'center' }}>
                 <View style={{ height: 2, borderRadius: 2, backgroundColor: `${WHITE}0.18)` }} />
-                <Dot value={d.a} colour="#E8673A" />
-                <Dot value={d.b} colour="#7FB2FF" />
+                <Dot value={d.a} colour={SC.people.you} />
+                <Dot value={d.b} colour={SC.people.them} />
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
                 <Text style={S.small}>{d.left}</Text>
@@ -845,11 +863,25 @@ function Dot({ value, colour }: { value: number | null; colour: string }) {
   );
 }
 
+/**
+ * The line under the couple's names.
+ *
+ * Ellie, from two screenshots side by side: "the line is colored differently".
+ * The website draws it as a gradient from the orange to the indigo, the two
+ * ends of the brand; this drew it in one flat accent, so the one element on
+ * the card that is pure brand was the wrong colour on half the product.
+ *
+ * Its colours and its size come from the payload with everything else.
+ */
 function Rule() {
+  const r = SC.rule || { gradient: ['#E8673A', '#1B5FE8'], width: 40, height: 2 };
   return (
-    <View
+    <LinearGradient
+      colors={r.gradient as [string, string]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
       style={{
-        width: 40, height: 2, borderRadius: 2, backgroundColor: c.accent,
+        width: r.width, height: r.height, borderRadius: r.height,
         marginVertical: Spacing.xl,
       }}
     />

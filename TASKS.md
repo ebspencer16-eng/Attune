@@ -69,9 +69,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O44 | **Storycard: the rule under the names is the wrong colour in the app.** The website draws it as an orange-to-indigo gradient; the app draws it solid orange. |
-| O45 | **Storycard: the app's bottom-left wordmark has no mark.** The website puts the two-hearts logo beside "Attune"; the app has the word alone. |
-| O46 | **Sweep the storycards for every other difference that is not type.** Marks, rules, gradients, spacing, structure. The type is shared now; nothing else is. |
 | O47 | **Insights, couple type page: fit the title on three lines.** Her suggestion: "[Partner] and [Partner]'s unique relationship dynamic". |
 | O48 | **Insights, comms at a glance: make the placement dots on the overview slightly larger.** |
 | O49 | **Insights, comms at a glance: the third action plan item has a note on the site the app leaves out.** Everything on the site has to be on the app; find anything else cut the same way. |
@@ -168,6 +165,9 @@ build.
 
 | Verified | By |
 |--|--|
+| The storycard rule is the same orange-to-indigo gradient on both | it was solid orange in the app; the gradient and its size come from the payload now |
+| The mark sits beside the wordmark on both | the app had the word alone; it uses the PNG the rest of the app already ships |
+| Both surfaces draw each person in the same colour | the partner dot was a lighter blue in the app; `PERSON_COLORS` is shared and both read it |
 | No endpoint answers 500 to a body it should refuse | `check-body-parsing.mjs`, 343 calls across 53 endpoints, planted three ways |
 | Unmatched URLs answer a real 404 on the live site | checked from outside: /gift-cards, /lmft-booking and a nonsense path all 404, the real pages still 200 |
 | The 404 page renders and offers six ways back | loaded it in a browser on the live site |

@@ -115,7 +115,7 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 // The storycard type scale. The opener is drawn from it; the other eight
 // cards still carry their values inline, and those values are what the scale
 // was transcribed from, which is why the app matches them today.
-import { cardTypeCss as scType } from "../api/_lib/storycard-style.js";
+import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
@@ -8662,8 +8662,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
     const myDy = overlap ? (myIsLeft ? -10 : 10) : 0;
     const theirDy = overlap ? (myIsLeft ? 10 : -10) : 0;
     const legend = myIsLeft
-      ? [{ name: userName, color: "#E8673A" }, { name: partnerName, color: "#1B5FE8" }]
-      : [{ name: partnerName, color: "#1B5FE8" }, { name: userName, color: "#E8673A" }];
+      ? [{ name: userName, color: SC_PEOPLE.you }, { name: partnerName, color: SC_PEOPLE.them }]
+      : [{ name: partnerName, color: SC_PEOPLE.them }, { name: userName, color: SC_PEOPLE.you }];
     return (
       <div style={{ marginBottom: "1.5rem", animation: "fadeUp 0.4s 0.24s both" }}>
         {/* Poles either side of the bar and centred on it, matching the
