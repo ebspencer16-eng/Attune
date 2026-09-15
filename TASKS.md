@@ -55,21 +55,25 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q2, the dot and eyebrow, cleared on your hard refresh.
+
 | # | Question |
 |--|--|
-| Q2 | **Where is the dot and eyebrow you can see on How you each rated and Side by Side?** I cannot find it. I rendered both pages in a browser and read what sits above the heading: nothing does, on either. The gate that forbids a page eyebrow passes, and it matches the shape as well as the words. Two things in the top left of the results view do carry a dot and a section name, and either could be what you mean: the sidebar's own row, which reads a dot then Relationship Reflection, and on a narrow window the pill bar above the page. Tell me which, or send a screenshot, and it goes. |
 
 ## 2. Open
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Everything I found is built and sitting in section 3 for your
-eye. Q2 in section 1 is the one thing I need from you.
+My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O132 | **The selection toolbar never appears.** You can select text in the simulator and no toolbar comes up, so nothing can be marked. The gesture is the half that works. Find out whether the toolbar is not rendering, rendering off screen, or rendering behind something, and fix it. |
+| O133 | **Ellie and Preston should be white on the reflection action plan tiles.** They are in their own colours against the ground and the colours are hard to read there. |
+| O134 | **A hard refresh showed the dashboard as though an exercise were unfinished.** Rows for each exercise with a tick at the left, and ex1 marked incomplete, on an account that had finished it. A second refresh cleared it and results opened. Nobody should see that: it tells a couple their results are not ready when they are. |
+| O135 | **The intro paragraph on the internal processing page has lost its spacing**, and it is not the only page. Find the shape of it rather than the one instance, fix every page it affects, and gate it if it can be gated. |
 
 ## 3. For you to review
 
@@ -87,20 +91,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R79 | **The sweep itself, and what it did not find.** All 57 endpoints hit from outside with no credentials: no 500s, and every one that should refuse refused. All 40 public pages fetched and measured for readable text: two looked wrong and neither was. `/reviews` serves the FAQ page because the reviews page was folded into it on purpose, and `/portal` is a near-empty page because it is a retired URL kept only to forward old bookmarks. I checked why before reporting either, which is the habit that stops a deliberate retirement being undone. One genuine thing: the privacy choices page had two Sign in links pointing at two different places, one of them at the retired `/portal`. Both point at the live page now. |
-| R78 | **Couples who own Conflict Patterns were never offered the reminder.** The home screen decides whether to show "Send them a reminder" from a list of exercises, and that list was written out by hand with four of the five. Conflict Patterns was missing, so if you had finished it and your partner had not, the card never appeared, and your results were waiting on the one exercise the screen would not mention. The same bug was in the block six lines above it, was found, and was fixed there only. It reads the registry now. The gate that exists to catch this had been skipping the file, because the file imports the registry somewhere else in it, and it no longer does. Nothing for you to do. |
-| R77 | **Anyone could make the site send order confirmation emails.** Found by sweeping every endpoint from outside with curl, which is the habit CLAUDE.md asks for and which has now turned something up twice. `/api/send-order-email` checked who was calling only when the request came from a browser. Anything that is not a browser, which is any script anywhere, skipped the check entirely and could hand us a name, an email address, a total and an order number and have us send that person a branded Attune order confirmation for a purchase that never happened. The same endpoint also accepted any domain that merely ended with ours, and any Vercel preview in the world. `/api/send-email` had exactly this hole, was fixed, and this file kept the old version: one rule, two copies, and nobody looked at the weaker one again. Both now read one guard, and `check-mail-origin.mjs` runs both endpoints against six ways of asking and fails the build if a refusal stops being a refusal. Nothing for you to do. It is here because you should know it existed. |
-| R73 | **Alerts reach you now.** Six kinds of alert have had copy since the notifications table went in, one was ever raised, and no screen in the app has ever read one. So the notice that a partner deleted their account, which the retention policy promises in writing, reached nobody. Four are raised now: your partner finished, your partner shared a note, your partner is waiting on you, and the account deletion. They arrive as rows at the top of the tile on Home, above what is next. Tapping one takes you to it and clears it. To see one: finish an exercise on one account when the other has finished theirs, or share a note from Notes. |
-| R74 | **The words in those alerts are mine, and they are yours to change.** Six short lines, two to ten words each, in `api/_lib/notifications.js`. They were written when the table was built and nothing has ever shown them to anyone, so nobody has read them yet. Tell me what you want them to say. |
-| R75 | **"Send them a reminder" now sends a reminder.** That card has been on the home screen since the card engine was written, pointing at the screen it was already on: it said it would send something and sent nothing. There is a cooldown of three days, and after you send one the card comes back as "Waiting on them", greyed out, which is the confirmation. No email goes with it. One person asking another to finish something should not arrive as a message from Attune, but say if you disagree. |
-| R76 | **Two alerts are deliberately switched off.** New in In Practice, and your own results being ready. In both cases the home screen already carries a card saying exactly that, and an alert directly above it is one prompt printed twice. I built the results one first and a screenshot of the home screen settled it: the same sentence, in two rows, touching. Your partner still hears that you finished, which is the half of it they could not have known. Both are recorded as unraised rather than left looking like an oversight. Say the word and either turns on. |
 | R66 | **Selecting text, the way you asked for it.** Press and hold a word, keep holding, drag across what you want, let go. The toolbar appears just above the selection with highlight, underline, tag, note and share, and choosing one opens straight on that step. In the simulator: click and hold for about half a second, keep the button down, drag, then release. The mouse is the finger. |
-| R67 | **The reflection action plan tiles are on the ground now**, not white, matching the other at a glance pages and the site. |
-| R68 | **The checklist opens with everything closed**, six headers and their counts. |
-| R69 | **Intimacy detail pages: the side by side rows are the communication rows**, poles either side and wrapped, and the legend only appears when your initials match. |
-| R70 | **Conflict at a glance says *private to you**, in red, level with Your action plan and out at the right margin. Both surfaces. |
-| R71 | **The tip tile's label is white** on every expectations detail page, and the pole labels on How you each rated wrap instead of clipping. |
-| R72 | **What Comes Next carries each section's own action plan.** Communication was built from a different list than the one its at a glance page draws, so the same couple was told two different things depending on which page they were on. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -110,9 +101,28 @@ any order; work through them however suits.
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
+| R74 | **The alert copy, listed just below this table.** Six short lines, mine, in `api/_lib/notifications.js`. Nothing has ever shown them to anyone, so nobody has read them yet. The list is generated from the alerts themselves rather than typed out, so it cannot drift from what the app shows. Tell me what you want them to say. |
 | R13 | **The deletion emails**: the confirmation to the person, and the notice to their partner. My words, in `api/_lib/deletion-emails.js`. |
 | R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
 | R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
+
+#### The alert copy, for R74
+
+<!-- notification-copy: generated by scripts/build-notification-copy-doc.mjs -->
+
+Generated from the alerts themselves, so it cannot drift from what the app
+shows. Preston stands in for a partner's first name. The 2 marked **Off** are written and deliberately not sent, because the home screen already carries a card saying the same thing.
+
+| | When it is sent | Title | Line under it |
+|--|--|--|--|
+| On | your partner finishes the last exercise, so your results open | Preston finished | Your results are ready to open together. |
+| **Off** | your own results open | Your results are ready | Everything you both answered, side by side. |
+| On | your partner taps Send a reminder | Preston is waiting on you | One exercise left before your results unlock. |
+| On | your partner shares a note with you | Preston shared something with you | A note on Conflict Patterns. |
+| **Off** | a new In Practice post is published | New in In Practice | the post title |
+| On | your partner deletes their account | Preston deleted their Attune account | Your own answers are still here. The parts of your results that came from both of you are not. |
+
+<!-- end notification-copy -->
 
 ### Behaviour, which has to be used rather than looked at
 
@@ -139,6 +149,19 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| Q2 | The dot and eyebrow. Gone after a hard refresh |
+| R79 | The endpoint and page sweep, and the two Sign in links |
+| R78 | The reminder card, for couples who own Conflict Patterns |
+| R77 | The order confirmation relay, closed and verified from outside |
+| R73 | Alerts, reaching the home screen at last |
+| R75 | "Send them a reminder", which now sends one |
+| R76 | In Practice and results ready: alerts deliberately off |
+| R68 | The checklist opening closed |
+| R69 | Intimacy side by side, as the communication rows |
+| R70 | Conflict at a glance saying private to you |
+| R71 | The white tip label, and pole titles that wrap |
+| R72 | What Comes Next carrying each section's own plan |
+| R67 | The reflection action plan tiles, on the ground |
 | R57 | Physical Intimacy at a glance, as percentages |
 | R58 | The back arrow, and the headings clear of the status bar |
 | R59 | The add a tag field, with its examples in it |
