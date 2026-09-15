@@ -64,30 +64,13 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Every item on the list you sent on 14 September is built
+and in section 3 or 4.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O63 | **Bug: /email-preview shows the tabs and no email.** Found it: the site sends `X-Frame-Options: DENY` on every path, which blocks a page from framing anything, including its own endpoint. The page loads each email into an iframe by URL, so the frame is refused and the panel stays blank. Confirmed in a headless browser: 13 tabs, the subject line, and an iframe with no document in it. Fix is to fetch the email and hand the markup to the frame rather than a URL, which is not a framed navigation and is not blocked. No header change. |
-| O64 | **Storycard 2: make the couple map larger.** |
-| O65 | **Storycard 3: the dots should carry each person's initial, as they do on the web.** When both initials are the same, keep the large dots, drop the letters, and put a legend under them instead. |
-| O66 | **Storycard 3: the two dots overlap and one is hidden.** The app is not offsetting them the way the results pages now do. |
-| O67 | **Storycard 4: the % sign is clipped along the top.** |
-| O68 | **Storycard 5: the 80% is clipped along the top.** |
-| O69 | **Storycard 5: the Life and Values figure is wrong.** It has been wrong before and been fixed before. So this is two jobs: fix it, and put a gate on the arithmetic so it cannot go back. Ellie: "confirm that these calculations are solid and won't revert." |
-| O70 | **At a glance pages: the tile ground should be the Attune navy, not near-black.** She likes the tiles; it is the colour inside them. |
-| O71 | **Expectations detailed pages: the app is missing columns the site has.** The site shows what each partner expects and what each has experienced. The app shows fewer. |
-| O72 | **Expectations detailed pages: the ground should be a gradient in the category's own colour.** |
-| O73 | **Relationship Reflection, how you each rated: What matters most this year needs the connecting lines.** Exactly as the site draws them, and the two columns need to sit further apart to give the lines room. |
-| O74 | **Relationship Reflection, Side by Side: some Talk about it prompts are missing in the app.** The site has one under every pair. |
-| O75 | **Conflict Styles at a glance needs colour**, like the other at a glance pages. |
-| O76 | **Conflict Styles detailed pages do not match the site.** Same treatment as Relationship Reflection got. |
-| O77 | **Physical Intimacy is still missing in the app.** Her third time reporting it, so the first thing to establish is what "missing" means here: which surface, signed in as whom, and what the payload says. |
-| O78 | **What Comes Next shows four groups and should show every one the site shows.** |
-| O79 | **Resources, In Practice: a Sort by dropdown** between the category pills and the article list. Defaults to Featured, which is most popular first and unread first within that, and offers newest to oldest, shortest to longest, and longest to shortest. |
-| O80 | **Notes: build the three sections with their empty states.** Pick up where you left off, three rows previewing your last three marks; Shared with you, three rows with unread buttons; then your tags with a count each, a search field above the list and a plus button top right. She wants to see the shape with nothing in it. I write the nothing-here-yet lines and she approves them live. |
-| O81 | **Comms at a glance: rename Communication style overview to Overview**, on both surfaces, now that the page heading says Communication Styles. |
-| O82 | **The site still has the Relationship Reflection action plan page.** The app removed it. Both were meant to. |
 
 ## 3. For you to review
 
@@ -111,6 +94,14 @@ any order; work through them however suits.
 | R5 | **Website marketing pages.** The hero without orange italics, no subpage titles in banners, tighter vertical spacing, the founders note redesign, the FAQ and packages changes, In Practice. |
 | R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
+| R38 | **The storycards, cards 2 to 5.** The map is larger and the same size on both surfaces. Card 3's marks carry your initials, step apart when they land close, and lose the letters for a legend when both initials match. The two clipped figures are whole. The Life & Values ring was reading 0% for everyone and is right now, with the arithmetic under a gate that runs it rather than describing it. |
+| R39 | **The at a glance tiles, in the Attune navy.** Four of the five started near black. Physical Intimacy keeps its deep rose, because starting it navy makes a three-hue gradient belonging to no section. Tell me if you want it to follow the others. Conflict's has colour in it now. |
+| R40 | **Expectations detailed pages.** Each is on its category's own colour, and each row shows what you each expect and what you each grew up with, which is the pair of columns the site has and the app did not. |
+| R41 | **What matters most this year, with the connecting lines.** Flat lines mean you ranked something alike. The app draws them straight where the site curves them; everything else is the same. |
+| R42 | **Your Patterns, in the site's shape.** One card with a row per pattern, each with its definition, the bar filled the way the site fills it, and the advice labelled "One thing to try" or "One thing to keep in mind" depending on how often the pattern shows up. |
+| R43 | **Sort by, on In Practice.** Featured is most read first, unread first among equals. Also newest to oldest, shortest to longest, longest to shortest. |
+| R44 | **The three Notes sections, with nothing in them.** Pick up where you left off, From your partner, and Tags, each with its heading and a line saying what will appear there. Plus a search field over the tag list once there are more than five, and a plus in the top right that opens the add field. The three lines are mine: "Notes, highlights and tags you leave anywhere in Attune land here, most recent first", "Anything [partner] shares with you appears here, with the unread ones marked", and "Tags you add appear here, with how many notes are filed under each". |
+| R45 | **Physical Intimacy in the app.** The rule the app asks now reads the same record the website reads, so an add-on bought at checkout is visible to both. If it is still missing, that is an answer too and I need to know. |
 | R30 | **The Relationship Reflection section in the app, against the site.** At a glance should open with both your names and a line saying how you each described things overall, then the four ratings as blocks, then your action plan. How you each view the relationship and Side by Side are now light, in white cards, like the site. What you each admire has moved off at a glance and onto How you each view the relationship, which is where the site has it. |
 | R37 | **Communication at a glance, in the app.** It is purple into orange now, which is what the site has always drawn. It was in Conflict's blue. Worth a look next to the site, and next to the other four at a glance pages. |
 | R31 | **The tile, on every at a glance page.** Comms, Expectations, Relationship Reflection, Physical Intimacy and Conflict all sit in the rounded tile you liked. Detail pages are full width. Worth looking at the five together to see whether the tile still reads as a tile when the page inside it is long. |

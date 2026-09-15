@@ -1622,3 +1622,48 @@ and a three-screen scroll is not. One component, `glance-tile.tsx`.
 
 **Where to pick up.** Section 3 has five new review items, R30 to R35. Nothing
 is half-done and nothing is waiting on me.
+
+---
+
+## 14 September 2026, second batch
+
+Your twenty-item list is built. Section 2 is empty again.
+
+**Two things behind three of these, and they are the same thing.**
+
+A rule written in two places, where one place changed. The Life & Values ring
+read `expectations.life`, a field the summary stopped sending when Life &
+Values became the sixth category, so it read 0% for everyone and
+Responsibilities quietly counted the life rows in with its own. That is why
+it keeps coming back: the fix was to the number, not to the arrangement that
+produced it. It reads each row's own `kind` now, and
+`check-expectations-rings.mjs` runs both figures against answers built so the
+halves cannot come out alike.
+
+A question asked more narrowly than it should be. `capabilitiesFor` read the
+profile's own columns, while `profiles.entitlements` is the record of what
+the account actually owns, computed from every order under it. The website
+read the record and the app read the columns, which is why Physical Intimacy
+was on one and not the other. Two more of the same shape came out of the gate
+that fix needed: `/api/conflict-results` selected two columns, and the
+six-month check-in email was showing a Relationship Reflection upsell to
+people who had bought it.
+
+**Two rules had a third copy each.** The storycard marks were placed by
+dividing a score by 5 on the website and by 4 after subtracting 1 in the app,
+so the same answer sat in two places on one card. And the six fixed page
+gradients were typed on both surfaces; five pairs agreed and Communication
+did not, so the app drew that section in Conflict's blue. Both are single
+copies now, `api/_lib/track-marks.js` and `api/_lib/section-grounds.js`, and
+both have gates that were planted against.
+
+**/email-preview** was not broken in the page or the endpoint. The site sends
+`X-Frame-Options: DENY` on every path, so the page could not frame its own
+endpoint and the panel stayed empty with nothing thrown. It fills the frame
+with srcdoc now. `check-framed-pages.mjs` holds the rule and watches the
+header it depends on.
+
+**Where to pick up.** Section 3 has R38 to R45. R45 is the one to check
+first: if Physical Intimacy is still missing from the app after this, the
+cause is in your account's data rather than in the code, and knowing that
+changes what I look at next.

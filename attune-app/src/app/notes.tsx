@@ -307,8 +307,15 @@ export default function NotesScreen() {
               and an underline are all things they left somewhere, and a stream
               that showed only one kind would be a stream about storage rather
               than about them. */}
+          {/* The heading stays when there is nothing under it. Ellie: "Even
+              though I don't have anything in those sections yet, I want to see
+              the formatting with a nothing here yet message in those
+              sections." A section that appears only once it has contents also
+              hides what the screen is for from the person who has not started
+              yet, which is exactly the person who needs telling. */}
+          <Section title="Pick up where you left off">
           {mineRecent.length ? (
-            <Section title="Pick up where you left off">
+            <>
               {mineRecent.slice(0, 3).map((note) => (
                 <NoteCard
                   key={note.id}
@@ -337,13 +344,14 @@ export default function NotesScreen() {
                   />
                 ))
                 : null}
-            </Section>
+            </>
           ) : (
             <Blank
-              title="No notes yet"
-              body="Anything you write here stays private until you choose to share it."
+              title="Nothing here yet"
+              body="Notes, highlights and tags you leave anywhere in Attune land here, most recent first."
             />
           )}
+          </Section>
 
           {/* ── 2. WHAT YOUR PARTNER SENT ──────────────────────────────────
               Ellie: "2 or 3 most recent show, but then there's an arrow to see
@@ -355,10 +363,11 @@ export default function NotesScreen() {
               057 that column does not exist and every note reads as unread,
               which is the safe direction: it draws attention to something that
               is there rather than hiding something that is. */}
+          <Section
+            title={partner ? `From ${partner}` : 'Shared with you'}
+            badge={unopenedCount || undefined}>
           {sharedRecent.length ? (
-            <Section
-              title={partner ? `From ${partner}` : 'Shared with you'}
-              badge={unopenedCount || undefined}>
+            <>
               {(showAllShared ? sharedRecent : sharedRecent.slice(0, 3)).map((note) => (
                 <NoteCard
                   key={note.id}
@@ -381,8 +390,16 @@ export default function NotesScreen() {
                   onPress={() => setShowAllShared((v) => !v)}
                 />
               ) : null}
-            </Section>
-          ) : null}
+            </>
+          ) : (
+            <Blank
+              title="Nothing here yet"
+              body={partner
+                ? `Anything ${partner} shares with you appears here, with the unread ones marked.`
+                : 'Anything your partner shares with you appears here, with the unread ones marked.'}
+            />
+          )}
+          </Section>
 
           {/* ── 3. TAGS ────────────────────────────────────────────────────
               The add field, then this person's own tags, in rows, with the
@@ -542,6 +559,9 @@ function TagList({
   const [draft, setDraft] = useState('');
   const [adding, setAdding] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+  /** The add field opens from the plus, which is where Ellie asked for it. */
+  const [addOpen, setAddOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
   const add = async (name: string) => {
     const clean = name.trim();
@@ -576,7 +596,8 @@ function TagList({
   const ordered = useMemo(() => {
     const st = (t: Tag) => stats.get(t.id) || { count: 0, latest: 0 };
     const byName = (a: Tag, b: Tag) => a.name.localeCompare(b.name);
-    const list = [...tags];
+    const q = query.trim().toLowerCase();
+    const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : [...tags];
     switch (sort) {
       case 'za': return list.sort((a, b) => byName(b, a));
       // Ties fall back to A to Z rather than to whatever order the server
@@ -587,7 +608,7 @@ function TagList({
       case 'fewest': return list.sort((a, b) => (st(a).count - st(b).count) || byName(a, b));
       default: return list.sort(byName);
     }
-  }, [tags, stats, sort]);
+  }, [tags, stats, sort, query]);
 
   return (
     <View style={{ marginBottom: Spacing.xxl }}>
@@ -597,6 +618,7 @@ function TagList({
           marginBottom: Spacing.md,
         }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Tags</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
         {/* Nothing to sort until there is something in the list. */}
         {tags.length ? (
         <Pressable
@@ -615,6 +637,23 @@ function TagList({
           <Text style={{ color: c.textMuted, fontSize: 10 }}>{open ? '\u25B4' : '\u25BE'}</Text>
         </Pressable>
         ) : null}
+        {/* Ellie: "a + button in the top right". It opens the add field
+            rather than a screen: a tag is one word, and a modal for one word
+            is three taps for something that should be one. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Add a tag"
+          onPress={() => { setAddOpen((v) => !v); setFailed(null); }}
+          hitSlop={8}
+          style={{
+            width: 26, height: 26, borderRadius: Radius.pill,
+            alignItems: 'center', justifyContent: 'center',
+            backgroundColor: addOpen ? c.accent : c.surface,
+            borderColor: addOpen ? c.accent : c.border, borderWidth: 1,
+          }}>
+          <Text style={{ fontSize: 16, lineHeight: 19, color: addOpen ? Palette.white : c.textMuted }}>+</Text>
+        </Pressable>
+        </View>
       </View>
 
       {open ? (
@@ -645,10 +684,10 @@ function TagList({
       {/* ── ADD A TAG ──────────────────────────────────────────────────────
           Ellie: "Just have a spot for people to 'add a tag' then they see
           their own list. Maybe we could have a line with some suggestions."
-
-          The field is above the list rather than below it because the list
-          starts empty, and a field under nothing reads as the end of a thing
-          that has not started. */}
+          Then: "a search bar above the tag list and a + button in the top
+          right." So the field is what the plus opens, and the search field is
+          the one that is always there. */}
+      {addOpen ? (
       <View
         style={{
           flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
@@ -675,6 +714,33 @@ function TagList({
           </Pressable>
         ) : null}
       </View>
+      ) : null}
+
+      {/* The search field. Above the list, and only once there is a list long
+          enough to be worth searching: a search box over three tags is a
+          control that makes the screen look busier than it is. */}
+      {tags.length > 5 ? (
+        <View
+          style={{
+            flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+            borderRadius: Radius.lg, paddingHorizontal: Spacing.lg, marginBottom: Spacing.md,
+          }}>
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search tags"
+            placeholderTextColor={c.textMuted}
+            autoCapitalize="none"
+            style={{ ...inputType(Type.body), color: c.text, flex: 1, paddingVertical: Spacing.md }}
+          />
+          {query ? (
+            <Pressable accessibilityRole="button" onPress={() => setQuery('')} hitSlop={8}>
+              <Text style={{ ...Type.small, color: c.accentQuiet }}>Clear</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
 
       {/* Suggestions, and only the ones this person does not already have. */}
       {offered.length ? (
@@ -732,7 +798,14 @@ function TagList({
           );
         })}
       </View>
-      ) : null}
+      ) : (
+        <Blank
+          title="Nothing here yet"
+          body={query
+            ? 'No tag by that name. Clear the search to see them all.'
+            : 'Tags you add appear here, with how many notes are filed under each.'}
+        />
+      )}
     </View>
   );
 }
