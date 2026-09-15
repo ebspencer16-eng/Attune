@@ -68,12 +68,20 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** All twelve from your list are built and sitting in section 3.
+My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O148 | **The underline is not working.** Reported after the change from a text decoration to a border on the word. Find out whether it is the drawing or the making of one, in the simulator, before changing anything. |
+| O149 | **The margin marker is not showing.** It draws only for a note that carries no visible mark, and it sits eighteen points outside the paragraph's own box, either of which could be it. Same: reproduce before changing. |
+| O150 | **Show all on Pick up where you left off stops at ten.** Your words: "keep the 'see all' list limited to the past 10 marks". |
+| O151 | **Less space between the Explore arrow and In Practice.** |
+| O152 | **A pick-up row opens the mark where it lives**, in the results or the article, rather than the note screen. |
+| O153 | **Deleting says it deleted.** Today it happens and nothing on screen says so, and the note screen has to be closed by hand. You said the note screen should stop existing; that is a bigger change than the confirmation, so the confirmation comes first and I will ask before removing the screen. |
+| O154 | **Deleting a tag, and a place deleted tags go.** A delete at the bottom left of the tag page with an are-you-sure. A deleted tag drops to a greyed row at the foot of the tag list; deleting it from there is permanent and says so: "are you sure? This action cannot be undone". Needs a column on the tags table, so it comes with a migration for you to run. |
+| O155 | **The workbook says it is generating and asks you to wait for an email.** You asked whether it should already exist once results are done. Find out what actually triggers generation and when, and report before changing anything: this is a question about the order of operations rather than a screen. |
 
 ## 3. For you to review
 
@@ -91,14 +99,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R84 | **Thicker underline.** Three points, drawn on the word itself. A text decoration has no thickness in React Native: it is whatever hairline the font declares and nothing about it can be set, which is why it looked thin. |
-| R85 | **The colours are Red, Orange, Yellow, Green, Blue, Purple and Pink.** Marks you made before this keep the colour you chose: the old keys map to the nearest new one rather than being rewritten, so nothing you have highlighted changes colour. |
-| R86 | **The toolbar is cream** with a hairline round it and the icons in ink. |
-| R87 | **A bin at the end of the toolbar**, grey until the selection is sitting on a mark. Selecting any part of a highlight reaches it, so you do not have to reproduce the exact words you marked. It comes off the screen at once and off the server behind that. |
 | R88 | **Notes: Pick up where you left off is one tile**, the home screen's shape, rows divided by hairlines. Icon at the left for highlight, underline, note or tag, the section as an eyebrow, the words under it, no dashes. |
-| R89 | **Tags: a tag icon in its own colour, a count on every row, and an arrow that opens everything under that tag.** A tag you typed has no colour of its own, so it takes one from the mark palette by its id: the same tag is the same colour every time and on every device. The count now shows zero as well, because with an arrow beside it the zero is what explains an empty list when you open one. |
-| R90 | **The margin marker is on the right and says which it is**, a note icon or a tag icon. It was a coloured bar on the left that only said something was there. |
-| R91 | **The line under the share toggle is gone.** |
 | R92 | **Resources is one section.** All your tools in Yours to Explore, nothing for what you do not own, and a grey "Explore more resources" arrow bottom right that opens the website in Safari. It shows whether or not you own everything: the physical copies and the gift are on that page too, and a control that appears on an invisible condition is one nobody trusts. **On the Apple risk:** this is the same shape as Get Started, which already opens the site. The app names no price and no checkout route, and the arrow opens /offerings in the system browser rather than a payment screen. Every price in the app went with the section that showed them. If you would rather it went nowhere until the app is approved, say so and I will take it out in one line. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
@@ -157,6 +158,11 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R85 | The seven colour names, with old marks keeping theirs |
+| R86 | The cream toolbar |
+| R87 | The bin, grey until the selection is on a mark |
+| R89 | Tag rows: icon, colour, count, arrow |
+| R91 | No line under the share toggle |
 | R82 | The dashboard reading an exercise as unfinished |
 | R83 | White names on the reflection action plan tiles |
 | R80 | Press, hold, drag, release, and the toolbar |
