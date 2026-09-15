@@ -320,6 +320,12 @@ export type IntimacyDimension = {
   /** How far apart, as a percentage of the scale. Null when unanswered. */
   distancePct: number | null;
   /**
+   * 0 to 100. How close the two of you are, which is the distance inverted.
+   * Null when one of you skipped the aspect: unanswered is not nought per
+   * cent aligned.
+   */
+  alignedPct?: number | null;
+  /**
    * The two averages, 0 to 1, for the overview row. The website plots each
    * partner on a track per dimension; the app only had the distance between
    * them, which reads as a score rather than as a comparison.

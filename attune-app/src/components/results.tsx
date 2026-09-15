@@ -61,6 +61,18 @@ import {
  * which the website reads directly, and check-aligned-panel.mjs keeps them
  * together.
  */
+/**
+ * The colour a percentage is drawn in: green when the two of you are close,
+ * amber in the middle, orange when you are far apart. The same three the
+ * expectations categories use on their own bars, so a percentage means the
+ * same thing wherever it appears.
+ */
+function alignedTone(pct: number): string {
+  if (pct >= 80) return '#10b981';
+  if (pct >= 50) return '#F5B841';
+  return Palette.orange;
+}
+
 const ALIGNED_FILL = '#EDF8F2';
 const ALIGNED_HEAD = '#DCF0E6';
 const ALIGNED_BORDER = 'rgba(16,185,129,0.45)';
@@ -647,7 +659,7 @@ function SectionBody({
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
 
-  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} ground={ground} groundStops={groundStops} />;
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} placementsLabel={pageCopy('commPlacements', 'Overview')} ground={ground} groundStops={groundStops} />;
   if (section.startsWith('intimacy-')) {
     const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
     return (
@@ -954,21 +966,11 @@ function ExpectationsConversation({
             ) : null}
           </View>
 
-          {/* The dividing line under the heading, which the website has and the
-              app had lost.
-
-              Ellie asked for it to go, then changed her mind: "They can stay on
-              the site, and can you add them back in to the app?" It is not a
-              progress bar and never was on the website: a fixed line in the
-              category's colour, which is what ties this page to its tile on
-              Results at a glance. */}
-          <View
-            style={{
-              height: 2, borderRadius: 2, opacity: 0.5, marginTop: Spacing.md,
-              backgroundColor: introColor || '#E8673A',
-            }}
-          />
-
+          {/* The rule under the title is gone. It went in as O51, when Ellie asked
+              for the website's line back, and out again here: "can we remove
+              the orange bar under the title and above 'a tip for you both' on
+              all expectations detailed pages". Removed from both surfaces, so
+              they still match. */}
           {/* The paragraph the website opens this page with, from
               api/_lib/category-intros.js. The app opened straight into rows. */}
           {bucket.intro ? (
@@ -1183,10 +1185,12 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
   );
 }
 
-function IntimacyOverview({ data, you, them, title, ground, groundStops }: {
+function IntimacyOverview({ data, you, them, title, placementsLabel, ground, groundStops }: {
   data: IntimacyResults | null; you: string; them: string;
   /** The page's heading, from the server's pageTitles. */
   title: string;
+  /** The eyebrow over the rows. The same string the comms page prints. */
+  placementsLabel: string;
   /** The page's gradient and its stops, from the results nav. */
   ground?: string[] | null;
   groundStops?: number[] | null;
@@ -1221,31 +1225,38 @@ function IntimacyOverview({ data, you, them, title, ground, groundStops }: {
             }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }}>
               {/* block: intimacy-overview/where-you-each-land */}
-              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.3)' }}>Where you each land</Text>
-              <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-                {[{ n: you, col: YOU_COLOR }, { n: them, col: GLANCE_THEM }].map((x) => (
-                  <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: x.col }} />
-                    <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{x.n}</Text>
-                  </View>
-                ))}
-              </View>
+              {/* Ellie: this "should be called overview not where you each
+                  land", the same rename the communication page got. One
+                  string, from the server, so the two pages cannot drift
+                  apart again. */}
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.3)' }}>{placementsLabel}</Text>
             </View>
-            <View style={{ gap: Spacing.xs }}>
+            {/* ── ONE BAR PER ASPECT, AS A PERCENTAGE ────────────────────
+                Ellie: "can we make the bars % aligned rather than the
+                placement dots?" Six two-person charts stacked is six things
+                to read; the question this page answers is how close the two
+                of you are on each aspect, and that is one number.
+
+                An aspect one of them skipped has no percentage and says so,
+                because unanswered is not nought per cent aligned. */}
+            <View style={{ gap: Spacing.sm }}>
               {data.dimensions.map((d) => (
                 <View key={d.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
                   <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 100, lineHeight: 15 }}>
                     {d.label}
                   </Text>
-                  <View style={{ flex: 1 }}>
-                    <Slider
-                      you={d.positions?.you ?? null}
-                      them={d.positions?.them ?? null}
-                      youName={you}
-                      themName={them}
-                      onDark
-                    />
+                  <View style={{ flex: 1, height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.12)', overflow: 'hidden' }}>
+                    {d.alignedPct != null ? (
+                      <View style={{ width: `${d.alignedPct}%`, height: 6, borderRadius: 999, backgroundColor: alignedTone(d.alignedPct) }} />
+                    ) : null}
                   </View>
+                  <Text
+                    style={{
+                      ...Type.small, fontSize: 11, fontWeight: '700', width: 46, textAlign: 'right',
+                      color: d.alignedPct != null ? alignedTone(d.alignedPct) : 'rgba(255,255,255,0.4)',
+                    }}>
+                    {d.alignedPct != null ? `${d.alignedPct}%` : '\u2014'}
+                  </Text>
                 </View>
               ))}
             </View>

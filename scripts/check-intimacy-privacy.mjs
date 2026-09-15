@@ -86,8 +86,11 @@ if (!both) {
   // registry. It is the same pair for every couple and says nothing about
   // either person: it is the axis the positions are plotted on. Without it the
   // app drew a track with no ends, which is a mark on an unlabelled line.
-  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'poles', 'state', 'distancePct', 'positions', 'ground',
-    'body', 'reason', 'prompt', 'questions'];
+  // `alignedPct` is `distancePct` inverted, which is already listed. The
+  // at-a-glance page draws it as one bar per aspect rather than two marks,
+  // which is the same comparison said as a number.
+  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'poles', 'state', 'distancePct', 'alignedPct',
+    'positions', 'ground', 'body', 'reason', 'prompt', 'questions'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
 
   const extraTop = Object.keys(both).filter((k) => !ALLOWED_TOP.includes(k));

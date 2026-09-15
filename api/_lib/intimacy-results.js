@@ -180,6 +180,20 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       // Rounded to a percentage of the scale. The raw average is a distance
       // between 0 and 1 and means nothing to a reader.
       distancePct: found?.avgGap == null ? null : Math.round(found.avgGap * 100),
+      /**
+       * How aligned the two of them are here, as a percentage.
+       *
+       * Ellie: "can we make the bars % aligned rather than the placement
+       * dots?" The at-a-glance page plotted two marks per aspect, which is
+       * six two-person charts stacked, and the question that page answers is
+       * how close the two of you are on each one.
+       *
+       * It is the distance inverted, so a couple who answered identically
+       * reads 100 and the widest possible gap reads 0. Null when one of them
+       * skipped the aspect: an unanswered aspect is not 0 per cent aligned,
+       * it is unanswered, and the row says so in words.
+       */
+      alignedPct: found?.avgGap == null ? null : Math.round((1 - found.avgGap) * 100),
       body: prose.body,
       reason: prose.reason,
       // The question to take away. This is the actual product of the section:

@@ -4058,7 +4058,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               turns reading your own results into a task with a completion
               percentage. The category's colour stays, because it is what ties
               this page to its tile on Results at a glance. */}
-          <div style={{ height: 2, background: fc.color, opacity: 0.5, borderRadius: 2, marginBottom: "1.25rem" }} />
+          {/* The rule under the title is gone, on both surfaces. Ellie: "can
+              we remove the orange bar under the title and above 'a tip for you
+              both' on all expectations detailed pages". */}
 
           {/* ── FOCAL POINT: Couple-type starter ── */}
           <div style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.13)", borderRadius: 14, padding: "1.1rem 1.3rem", marginBottom: "1.4rem" }}>
@@ -7374,35 +7376,35 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
                   {/* block: intimacy-overview/where-you-each-land */}
                   <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.commPlacements}</div>
-                  <div style={{ display: "flex", gap: "0.85rem" }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E8673A" }} />{userName}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", fontFamily: BFONT }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6C7FFF" }} />{partnerName}</span>
-                  </div>
                 </div>
+                {/* ── ONE BAR PER ASPECT, AS A PERCENTAGE ──────────────────
+                    Ellie: "can we make the bars % aligned rather than the
+                    placement dots?" Six two-person charts stacked is six
+                    things to read, and the question this page answers is how
+                    close the two of you are on each aspect, which is one
+                    number. The legend and the pole labels go with the dots:
+                    a percentage needs neither.
+
+                    An aspect one of them skipped has no percentage and says
+                    so, because unanswered is not nought per cent aligned. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                   {INTIMACY_DIMENSIONS.map(d => {
-                    const pos = positions[d.id] || {};
-                    const myPct = pos.mine == null ? null : Math.round(8 + pos.mine * 84);
-                    const partPct = pos.theirs == null ? null : Math.round(8 + pos.theirs * 84);
-                    const overlap = myPct != null && partPct != null && Math.abs(myPct - partPct) < 3;
-                    const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
-                    const myDy = overlap ? (myIsLeft ? -4 : 4) : 0;
-                    const partDy = overlap ? (myIsLeft ? 4 : -4) : 0;
+                    const found = (intimacySummary?.dimSummary || []).find(x => x.id === d.id);
+                    const pct = found?.avgGap == null ? null : Math.round((1 - found.avgGap) * 100);
+                    const tone = pct == null ? "rgba(255,255,255,0.4)" : pct >= 80 ? "#10b981" : pct >= 50 ? "#F5B841" : "#E8673A";
                     return (
                       <div key={d.id} onClick={() => go(`intimacy-${d.id}`)}
                         style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
                         <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(88px,30%,120px)", lineHeight: 1.25 }}>{d.label}</span>
-                        <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "visible" }}>
-                          {myPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 2 }} />}
-                          {partPct != null && <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 1 }} />}
+                        <div style={{ flex: 1, height: 6, background: "rgba(255,255,255,0.12)", borderRadius: 999, overflow: "hidden" }}>
+                          {pct != null && <div style={{ width: `${pct}%`, height: "100%", background: tone, borderRadius: 999 }} />}
                         </div>
+                        <span style={{ fontSize: "0.65rem", fontWeight: 700, color: tone, fontFamily: BFONT, width: 40, textAlign: "right", flexShrink: 0 }}>
+                          {pct == null ? "\u2014" : `${pct}%`}
+                        </span>
                       </div>
                     );
                   })}
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.6rem" }}>
-                  <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{INTIMACY_DIMENSIONS[0]?.poles?.[0]}</span>
-                  <span style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.2)", fontFamily: BFONT }}>{INTIMACY_DIMENSIONS[0]?.poles?.[1]}</span>
                 </div>
               </div>
 
