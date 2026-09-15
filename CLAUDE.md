@@ -433,6 +433,27 @@ from the copy:
 
 Every plant in this session used that pattern except the one that went wrong.
 
+**The simulator can be driven, and the mapping is the trap.** Synthetic mouse
+events through CGEvent (a twenty-line Swift binary) give press, hold, drag and
+release, which is the only way to test a gesture without a finger. What cost
+two hours was the coordinate mapping: the Simulator window's reported origin
+and a scale derived from its width put every click about thirty points high.
+Wide targets still worked, so taps on tabs and list rows succeeded and the
+toolbar under test never did, which reads exactly like "the toolbar is not
+tappable" and sent me through three rewrites of code that was already correct.
+
+Calibrate before concluding anything: render two small coloured buttons a known
+distance apart, click, and see which one fires. One round trip, and it turns a
+guess into a measurement. `xcrun simctl io booted screenshot` plus a pixel scan
+gives the target's exact position; the mapping from there is what has to be
+measured rather than derived.
+
+**After many hot reloads the app stops accepting touches.** Not a crash, not a
+red screen: gestures through react-native-gesture-handler keep working and
+every ordinary press stops. It looks exactly like the control you are testing
+being broken. `xcrun simctl terminate booted host.exp.Exponent` and reopen the
+exp:// URL before believing anything a tap did or did not do.
+
 **Verify the result, not the intent.** Edits by string-match have silently
 matched nothing more than once while being reported as applied. Read the file
 back.
