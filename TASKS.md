@@ -66,13 +66,24 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Everything from your last list is built and sitting in
-section 3.
+My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O136 | **Thicker underline.** The mark is drawn at the font's own hairline, which is what a text decoration gives you. |
+| O137 | **Rename the mark colours and add pink.** Red, Orange, Yellow, Green, Blue, Purple, Pink, replacing Amber, Rose, Violet, Teal, Blue. Your words. This is a palette both surfaces read, and existing marks carry the old names, so old marks have to keep drawing. |
+| O138 | **The selection toolbar is cream, not black.** |
+| O139 | **Notes: Pick up where you left off becomes one tile.** The home screen's tile, rows divided by hairlines, an icon at the left saying which of the four kinds it is, the section as an eyebrow, the text under it. No dashes beside the eyebrow. |
+| O140 | **Tags: a tag icon instead of a dot, each in its own colour.** |
+| O141 | **Tags: a count on the right of each row.** |
+| O142 | **Tags: one tile with rows, like the home screen's.** |
+| O143 | **Tags: an arrow at the right of each row that opens everything under that tag.** |
+| O144 | **A marker in the right margin for a note or a tag**, showing which of the two it is, so you can see where they are as you scroll. Today there is a left-gutter mark for notes only. |
+| O145 | **A delete button in the toolbar**, greyed out unless the selected words already carry a mark, that removes the highlight or underline. |
+| O146 | **Cut the line under the share toggle** when a note is open. |
+| O147 | **Resources: one Yours to Explore section, always.** All three tools in it, no second section for what is not owned, and a grey arrow bottom right that opens the add-ons on the website. **One thing to decide before I build the arrow:** CLAUDE.md says the app does not sell, because an app that hands people to external payment is what Apple rejects for. A link out to the website is the same shape as Get Started, which already does it, so I can build it that way: the app names no price and no checkout route, the server hands it a URL, and it opens in Safari. Say if you would rather it went nowhere until the app is approved. |
 
 ## 3. For you to review
 
@@ -90,11 +101,6 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R82 | **The dashboard telling you an exercise was unfinished.** You saw it, refreshed, and it was gone. What happened: the load that fetches your profile wrote your answers to the browser's storage and stopped there, and the page reads them from memory, which is filled once when the page opens and never again. So the load that went and got them rendered as though you had not done the exercise, and the next one was right. There was a forced reload covering that, capped at one per tab so it cannot loop, and a hard refresh lands in exactly the gap the cap leaves. The answers go into memory now, beside the write, so the first render is right. Nothing to do; it is worth a look next time you hard refresh. |
-| R83 | **The names on the reflection action plan tiles are white.** The coloured left edge still says whose is whose. The website has set those two names in white since that page existed, so this was the app's copy drifting rather than a new choice. |
-| R80 | **The toolbar never appeared because nothing was ever selected.** You could see words highlight under your finger on the results pages, so the gesture looked half-built. It was not built at all: on iOS a scrolling page takes a moving touch through Apple's own machinery before the app is asked, so the drag was cancelled the instant you moved. The selection you saw was the press, not the drag. It uses the gesture library the scroll view competes with now, so a held press wins and a quick one still scrolls. Driven end to end in the simulator: press, hold, drag, release, tap the highlighter, colour picker open on the right words. |
-| R81 | **The spacing you spotted was the same component, and it was everywhere.** Every markable paragraph in the app put the paragraph's own top margin on each of its words, so every wrapped line sat sixteen points further apart than it should. That is why it read as a line-height problem and why you were seeing it in more places: it was every paragraph you can mark, which is most of the app. Type styles go on the words now and box styles on the paragraph, and the gate runs the split rather than reading it. |
-| R66 | **Selecting text, the way you asked for it.** Press and hold a word, keep holding, drag across what you want, let go. The toolbar appears just above the selection with highlight, underline, tag, note and share, and choosing one opens straight on that step. In the simulator: click and hold for about half a second, keep the button down, drag, then release. The mouse is the finger. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -152,6 +158,11 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R82 | The dashboard reading an exercise as unfinished |
+| R83 | White names on the reflection action plan tiles |
+| R80 | Press, hold, drag, release, and the toolbar |
+| R81 | Paragraph spacing, everywhere text can be marked |
+| R66 | Selecting a fragment, the way it was asked for |
 | Q2 | The dot and eyebrow. Gone after a hard refresh |
 | R79 | The endpoint and page sweep, and the two Sign in links |
 | R78 | The reminder card, for couples who own Conflict Patterns |
