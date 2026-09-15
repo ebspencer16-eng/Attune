@@ -18,6 +18,7 @@
  */
 
 import { jsonBody } from './_lib/http.js';
+import { guardMailOrigin } from './_lib/origin.js';
 import { brandedEmail, _esc } from './_lib/branded-email.js';
 import { APP_LIVE } from './_lib/flags.js';
 import { SITE_URL } from './_lib/site.js';
@@ -35,11 +36,22 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  // Origin guard
-  const origin = req.headers.get('origin') || '';
-  if (origin && !origin.includes('attune-relationships.com') && !origin.includes('localhost') && !origin.includes('vercel.app')) {
-    return new Response('Forbidden', { status: 403 });
-  }
+  /**
+   * Who may make this endpoint send mail.
+   *
+   * What was here let a request with no Origin header through untouched, which
+   * is every request that is not a browser. So curl could hand us a name, an
+   * address, a total and an order number and we would send that person a
+   * branded order confirmation from our own domain. It also matched the origin
+   * by substring, so a host that merely ends with ours passed, and it trusted
+   * every *.vercel.app in existence.
+   *
+   * api/send-email.js had the same hole and was fixed. This file kept the old
+   * version, which is the failure this codebase is organised against: one rule,
+   * two copies, and the weaker one is the one nobody looked at again.
+   */
+  const refusal = guardMailOrigin(req);
+  if (refusal) return refusal;
 
   const _parsed = await jsonBody(req);
   if (_parsed.error) return _parsed.error;

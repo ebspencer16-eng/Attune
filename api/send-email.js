@@ -17,6 +17,7 @@
 
 export const config = { runtime: 'edge' };
 import { jsonBody } from './_lib/http.js';
+import { guardMailOrigin } from './_lib/origin.js';
 import { SITE_URL } from './_lib/site.js';
 import { unsubscribeUrl } from './_lib/email-footer.js';
 
@@ -325,12 +326,6 @@ function sanitizeBody(body) {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Constant-time compare, so a wrong secret leaks nothing through timing. */
-function timingSafeCompare(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
 
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
@@ -348,32 +343,13 @@ export default async function handler(req) {
   // Now: a browser request must come from one of our own origins, and a
   // request with no Origin must carry the internal secret. Server-to-server
   // callers set it; scripts from outside cannot.
-  const origin = req.headers.get('origin') || '';
-  const internalSecret = process.env.INTERNAL_API_SECRET || '';
-  const presentedSecret = req.headers.get('x-attune-internal') || '';
-
-  const originAllowed = (o) => {
-    try {
-      const host = new URL(o).hostname;
-      return host === 'attune-relationships.com'
-          || host.endsWith('.attune-relationships.com')
-          || host === 'localhost' || host === '127.0.0.1'
-          // Preview deployments only, not any *.vercel.app someone can create:
-          // the previous substring check trusted every Vercel app in existence.
-          || /^attune[a-z0-9-]*\.vercel\.app$/.test(host);
-    } catch { return false; }
-  };
-
-  if (origin) {
-    if (!originAllowed(origin)) return new Response('Forbidden', { status: 403 });
-  } else {
-    // No Origin: only our own server may call, and only with the secret. If
-    // the secret is unset we fail closed rather than reverting to open.
-    const ok = internalSecret && presentedSecret
-      && presentedSecret.length === internalSecret.length
-      && timingSafeCompare(presentedSecret, internalSecret);
-    if (!ok) return new Response('Forbidden', { status: 403 });
-  }
+  // The rule lives in api/_lib/origin.js, because api/send-order-email.js has
+  // to answer the same question and its copy of this was the version from
+  // before this one was tightened: no guard at all on a request with no
+  // Origin, and a substring match that accepted attune-relationships.com
+  // .evil.com. One rule, one file.
+  const refusal = guardMailOrigin(req);
+  if (refusal) return refusal;
 
   const _parsed = await jsonBody(req);
   if (_parsed.error) return _parsed.error;
