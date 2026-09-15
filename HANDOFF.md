@@ -1667,3 +1667,36 @@ header it depends on.
 first: if Physical Intimacy is still missing from the app after this, the
 cause is in your account's data rather than in the code, and knowing that
 changes what I look at next.
+
+---
+
+## 14 September 2026, third batch
+
+Your notes on the last batch, fourteen items, all built. Section 2 is empty.
+
+**The grounds are now measured rather than judged.** Every at-a-glance page
+sets white type on a gradient, and four of the five ended between 3.0 and 4.5
+to 1 against white, which is under what body text needs. `readable()` in
+`api/_lib/section-grounds.js` takes a colour toward black until it clears the
+ratio, and `check-ground-contrast.mjs` measures all 36 stops. The worst of it
+was the expectations category pages: their ground was the category colour at
+half opacity, which over the app's cream page composited to a pale wash.
+
+**Three sections stopped looking alike** by getting different hues, one of
+which came from the product rather than from me: Relationship Reflection's
+green is what that section already carries on What Comes Next.
+
+**Two gates were themselves the bug they check.** `check-overlapping-marks`
+carried its own copy of the nudge rule, so the app's rule changed and the copy
+went on passing against numbers nothing used. It lifts the function out of the
+app and runs it now. And `check-card-map-size`, written in this batch, passed
+a map at 95 per cent of the card because it budgeted height and never checked
+width.
+
+**One field's removal needed a decision, not a deletion.** Conversations Worth
+Having is gone, and the line that page carried for a couple aligned on
+everything would have gone with it. It moved to the at-a-glance page on both
+surfaces: an empty action plan with no explanation is worse than the page it
+replaced.
+
+**Where to pick up.** Section 3 has R46 to R52.
