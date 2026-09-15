@@ -936,7 +936,11 @@ function Dot({ value, colour, label = '', dy = 0, w }: {
   return (
     <View
       style={{
-        position: 'absolute', left: `${pct}%`, marginLeft: -11, marginTop: dy * 2,
+        // Centred on the track and then stepped, rather than left to its
+        // static position: an absolutely positioned child of a centred row has
+        // no defined top in React Native, and `dy` is points, not a multiple.
+        position: 'absolute', top: '50%', left: `${pct}%`,
+        marginLeft: -11, marginTop: -11 + dy,
         width: 22, height: 22, borderRadius: 11, backgroundColor: colour,
         borderWidth: 2.5, borderColor: Palette.white,
         alignItems: 'center', justifyContent: 'center',

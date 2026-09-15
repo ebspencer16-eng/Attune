@@ -2053,7 +2053,19 @@ function Connector({ from, to, width, gap }: {
         position: 'absolute', left: 0, top: from,
         width: length, height: gap === 0 ? 3 : 2,
         marginTop: gap === 0 ? -1.5 : -1,
-        transform: [{ translateX: -(length - width) / 2 }, { rotate: angle }],
+        /**
+         * A rotation turns an element about its own centre, so the centre has
+         * to be moved to the midpoint of the two rows first. translateX pulls
+         * the over-long bar back so its centre sits at the middle of the
+         * gutter; translateY drops it to halfway between the two rows. Without
+         * the second one every line pivots about its own row and lands
+         * nowhere near the item it is meant to join.
+         */
+        transform: [
+          { translateX: -(length - width) / 2 },
+          { translateY: dy / 2 },
+          { rotate: angle },
+        ],
         opacity: gap === 0 ? 0.95 : 0.5,
         borderRadius: 2, overflow: 'hidden',
       }}>
