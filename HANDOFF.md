@@ -1767,3 +1767,35 @@ top, and a tie below second that must change nothing.
 **Where to pick up.** R61 to R65. R61 is worth doing first in the simulator:
 it is the one that says whether marking works for a person rather than for a
 test.
+
+---
+
+## 15 September 2026, second batch
+
+Nine built, including the selection rebuild. Section 2 is empty; Q2 is still
+the only thing waiting on Ellie.
+
+**Selection is a drag now, and the reason it was not is worth keeping.**
+React Native does not report per-word geometry inside a flowing Text, which
+is why the first build used two taps. The way out was to stop nesting: each
+word is its own View in a wrapping row, so each reports its own frame. The
+half-second hold before the pan responder takes the gesture is load-bearing,
+not politeness: without it the paragraph eats every scroll that starts on a
+word.
+
+**Two gates were wrong in the same way, a week apart.** check-overlapping-marks
+counted `<Marker>` elements, so moving four pairs onto the shared Slider read
+as a failure. check-plans-agree's first fixture sent only the field the fix
+uses, so a planted branch preferring the old field fell through and passed. A
+gate that only supplies the shape the current code wants cannot see a branch
+on a field it never sends.
+
+**What Comes Next was telling couples something their own section did not.**
+Its Communication group came from commsProtocols; the Communication glance
+page draws commsActionPlan. Both real, both from the same answers, not the
+same list. The page's premise is that nothing on it is new, so the gate now
+compares the two rather than trusting the note that says they agree.
+
+**Where to pick up.** R66 to R72. R66 is the one to try first, in the
+simulator: click and hold about half a second, keep the button down, drag,
+release.
