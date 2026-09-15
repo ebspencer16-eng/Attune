@@ -80,6 +80,11 @@ export const CARD_TYPE = {
      the app had it at 0.875rem in a 0.55 white. A wordmark is the one thing on
      a screenshot that says where it came from, so a difference here is the
      difference between two products. */
+  /* The initial inside a mark on the dimensions card. Small, bold, and white
+     on the person's own colour. It is a size like any other, so it comes from
+     here: the app had it written into the component, which is how the two
+     surfaces stopped agreeing about everything else on these cards. */
+  mark:      { size: 0.5, family: 'body', weight: 700, lh: 1, alpha: 1 },
   wordmark:  { size: 0.75, family: 'display', weight: 700, alpha: 1 },
   /** The address, bottom right. */
   /* Also measured: 0.52rem, regular weight, tracked 0.12em, lowercase. The
@@ -208,7 +213,23 @@ export function cardTypeNative(role, cardWidth = CARD_REF_WIDTH, over) {
     fontSize,
     fontWeight: String(t.weight),
     ...(t.track != null ? { letterSpacing: Math.round(t.track * fontSize * 10) / 10 } : {}),
-    ...(t.lh != null ? { lineHeight: Math.ceil(fontSize * t.lh) } : {}),
+    /**
+     * ── WHY THE LINE BOX NEVER GOES BELOW THE FONT SIZE ───────────────────
+     * Ellie: "The % sign on storycard 4 is cut off on top", and "the 80% text
+     * on storycard 5 is cut off on top."
+     *
+     * Both figures are set tight on purpose: `stat` is 0.9 of its size and
+     * `statBig` 0.85, which on the web is leading and looks right, because a
+     * browser lets a glyph overflow its line box. React Native does not. It
+     * clips, from the top, so the two cards built around a number were the two
+     * cards missing the top of it.
+     *
+     * The tight leading stays for the website, which is where it works. Native
+     * gets a floor: never less than the size itself, plus a little for the
+     * accent on a capital. Nothing else about the scale changes, and
+     * check-card-type-clipping.mjs runs every role at several card widths.
+     */
+    ...(t.lh != null ? { lineHeight: Math.ceil(fontSize * Math.max(t.lh, 1.06)) } : {}),
     ...(t.upper ? { textTransform: 'uppercase' } : {}),
     ...(t.lower ? { textTransform: 'lowercase' } : {}),
     color: t.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${t.alpha})`,
@@ -316,3 +337,18 @@ export const STORYCARD_STYLE = {
   people: PERSON_COLORS,
   padding: CARD_PADDING,
 };
+
+/**
+ * How wide the couple map is on its card, as a fraction of the card.
+ *
+ * Ellie: "Can we make the map on storycard 2 larger?" It was 184 points on the
+ * website and 168 in the app, both written into their own renderers, so the
+ * card that is built around the map drew it at two sizes and neither was the
+ * one she wanted.
+ *
+ * A fraction rather than a number of points, because the app's cards are as
+ * wide as the phone and the website's are not. At the reference width this is
+ * 218 points, which is the largest the map goes before the type under it has
+ * nowhere to sit.
+ */
+export const CARD_MAP_PCT = 0.56;

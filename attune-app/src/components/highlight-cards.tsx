@@ -604,13 +604,17 @@ function Body({ card, onDone, map, w }: {
           <Text style={[S.titleSm, { textAlign: 'center', maxWidth: 320 }]}>{card.title}</Text>
           {map ? (
             <View style={{ marginTop: Spacing.md, marginBottom: Spacing.sm }}>
+              {/* The map is what this card is built around, so it takes a
+                  fixed share of the card rather than a number of points. The
+                  share is api/_lib/storycard-style.js's, which the website
+                  draws from too: it was 168 here and 184 there. */}
               <CoupleMap
                 a={map.a}
                 b={map.b}
                 aName={map.aName}
                 bName={map.bName}
                 quadrants={map.quadrants}
-                size={168}
+                size={Math.round(w * CARD_MAP_PCT)}
               />
             </View>
           ) : null}
@@ -627,26 +631,60 @@ function Body({ card, onDone, map, w }: {
         </View>
       );
 
-    case 'dimensions':
+    case 'dimensions': {
+      /**
+       * ── THE MARKS ON THIS CARD ────────────────────────────────────────
+       * Ellie: "storycard 3 on the web has the dots with initials in them, but
+       * on the app they are just smaller, colored dots", and "the app isn't
+       * offsetting the overlapping dots, so I can't see mine."
+       *
+       * Both are the website's rules, and the app had neither: a flat 12 point
+       * dot with no letter, no outline and no stagger, so a couple who answered
+       * alike saw one dot and a couple who did not saw two anonymous ones.
+       *
+       * When the two initials are the same a letter says nothing, so the marks
+       * lose their letters and the pair is named in a legend under the track,
+       * which is what the website does and what she asked for.
+       */
+      const you = card.names?.you || '';
+      const them = card.names?.them || '';
+      const sameInitial = !!you && !!them
+        && you.trim()[0]?.toUpperCase() === them.trim()[0]?.toUpperCase();
       return (
         <View>
           <Text style={[S.title, { marginBottom: Spacing.xl }]}>{card.title}</Text>
-          {(card.dimensions || []).map((d) => (
-            <View key={d.key} style={{ marginBottom: Spacing.lg }}>
-              <Text style={[S.label, { marginBottom: Spacing.xs }]}>{d.label}</Text>
-              <View style={{ height: 20, justifyContent: 'center' }}>
-                <View style={{ height: 2, borderRadius: 2, backgroundColor: `${WHITE}0.18)` }} />
-                <Dot value={d.a} colour={SC.people.you} />
-                <Dot value={d.b} colour={SC.people.them} />
+          {(card.dimensions || []).map((d) => {
+            const [dyYou, dyThem] = cardNudge(markPct(d.a), markPct(d.b));
+            return (
+              <View key={d.key} style={{ marginBottom: Spacing.lg }}>
+                <Text style={[S.label, { marginBottom: Spacing.xs }]}>{d.label}</Text>
+                {/* Tall enough for a staggered pair: the marks move up and down
+                    off the line, and a 20 point row clipped them. */}
+                <View style={{ height: 34, justifyContent: 'center' }}>
+                  <View style={{ height: 6, borderRadius: 3, backgroundColor: `${WHITE}0.12)` }} />
+                  <Dot value={d.a} colour={SC.people.you} label={sameInitial ? '' : you} dy={dyYou} w={w} />
+                  <Dot value={d.b} colour={SC.people.them} label={sameInitial ? '' : them} dy={dyThem} w={w} />
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
+                  <Text style={S.small}>{d.left}</Text>
+                  <Text style={S.small}>{d.right}</Text>
+                </View>
               </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
-                <Text style={S.small}>{d.left}</Text>
-                <Text style={S.small}>{d.right}</Text>
-              </View>
+            );
+          })}
+          {sameInitial ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: Spacing.lg, marginTop: Spacing.xs }}>
+              {[{ n: you, col: SC.people.you }, { n: them, col: SC.people.them }].map((x) => (
+                <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: x.col }} />
+                  <Text style={S.small}>{x.n}</Text>
+                </View>
+              ))}
             </View>
-          ))}
+          ) : null}
         </View>
       );
+    }
 
     case 'stat-pair':
       return (
@@ -850,16 +888,63 @@ function Donut({ pct, label, color }: { pct: number; label: string; color?: stri
 }
 
 /** A partner's position on a scale, 1 to 5. */
-function Dot({ value, colour }: { value: number | null; colour: string }) {
+/**
+ * The placement rule, from api/_lib/track-marks.js.
+ *
+ * Named here rather than imported because this is a separate Expo project that
+ * does not build against api/. check-track-marks.mjs fails the build if these
+ * stop matching that file, which is the documented arrangement: derive where
+ * you can, gate where you genuinely cannot.
+ */
+const CARD_SCALE_MAX = 5;
+const CLOSE_PCT = 8;
+const STAGGER = 7;
+
+/** The couple map's width as a share of the card. api/_lib/storycard-style.js. */
+const CARD_MAP_PCT = 0.56;
+
+/**
+ * Where a mark sits on a storycard track, as a percentage.
+ *
+ * The scale's top is api/_lib/track-marks.js's, which the website's copy of
+ * this card also divides by. It divided by 5 there and this divided by 4 after
+ * subtracting 1, so the same answer sat in two different places on what is
+ * meant to be one card. check-track-marks.mjs holds the number.
+ */
+function markPct(value: number | null): number | null {
   if (value == null) return null;
-  const pct = Math.max(0, Math.min(1, (value - 1) / 4)) * 100;
+  return Math.max(0, Math.min(1, value / CARD_SCALE_MAX)) * 100;
+}
+
+/** Two marks that land close together step off the line, in opposite directions. */
+function cardNudge(a: number | null, b: number | null): [number, number] {
+  if (a == null || b == null || Math.abs(a - b) >= CLOSE_PCT) return [0, 0];
+  return a <= b ? [-STAGGER, STAGGER] : [STAGGER, -STAGGER];
+}
+
+/**
+ * One person's mark: their colour, their initial, and a white outline so the
+ * front one of a staggered pair stays legible over the back one.
+ */
+function Dot({ value, colour, label = '', dy = 0, w }: {
+  value: number | null; colour: string; label?: string; dy?: number;
+  /** The card's width, which every size on a card is measured against. */
+  w: number;
+}) {
+  const pct = markPct(value);
+  if (pct == null) return null;
   return (
     <View
       style={{
-        position: 'absolute', left: `${pct}%`, marginLeft: -6,
-        width: 12, height: 12, borderRadius: 6, backgroundColor: colour,
-      }}
-    />
+        position: 'absolute', left: `${pct}%`, marginLeft: -11, marginTop: dy * 2,
+        width: 22, height: 22, borderRadius: 11, backgroundColor: colour,
+        borderWidth: 2.5, borderColor: Palette.white,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+      {label ? (
+        <Text style={t('mark', w)}>{label.trim()[0]?.toUpperCase()}</Text>
+      ) : null}
+    </View>
   );
 }
 

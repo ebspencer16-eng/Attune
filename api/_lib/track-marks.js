@@ -40,3 +40,20 @@ export const SBS_NEAR = 7;
 
 /** How far a mark steps when its row is already taken. */
 export const SBS_STEP = 9;
+
+/**
+ * The top of the scale the storycards place a mark against.
+ *
+ * ── WHY THIS IS HERE AND NOT A DIVISION IN TWO FILES ──────────────────────
+ * The dimensions storycard puts each person's score on a track. The website
+ * divides by 5 and the app divided by 4 after subtracting 1, so the same
+ * answer sat in two different places on what is meant to be the same card.
+ * Nobody would have caught that by reading either file: both look like a
+ * reasonable way to map a 1 to 5 answer onto a line.
+ *
+ * Five, because that is what the website has always drawn and the website is
+ * the card people have seen. It is deliberately not the results pages' own
+ * mapping, which starts the track at the lowest answer rather than at zero;
+ * that is a different chart with axis labels either end.
+ */
+export const CARD_SCALE_MAX = 5;

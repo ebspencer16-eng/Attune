@@ -103,7 +103,7 @@ import { CONFLICT_QUESTIONS } from "../api/_conflict-questions.js";
 const RESET_QUESTION = CONFLICT_QUESTIONS.find(q => q.id === 'c8')?.text || '';
 import { WROTE_ROWS } from "../api/_conflict-results-prose.js";
 import { STORY_CATEGORIES, REFLECTION_PAGES, reflectionOverview } from "../api/_lib/reflection-results.js";
-import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP } from "../api/_lib/track-marks.js";
+import { CLOSE_PCT as TM_CLOSE, STAGGER as TM_STAGGER, SBS_NEAR as TM_SBS_NEAR, SBS_STEP as TM_SBS_STEP, CARD_SCALE_MAX as TM_CARD_MAX } from "../api/_lib/track-marks.js";
 import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
@@ -118,7 +118,7 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 // The storycard type scale. The opener is drawn from it; the other eight
 // cards still carry their values inline, and those values are what the scale
 // was transcribed from, which is why the app matches them today.
-import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE } from "../api/_lib/storycard-style.js";
+import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE, CARD_REF_WIDTH as SC_REF_WIDTH, CARD_MAP_PCT as SC_MAP_PCT } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols } from "../api/_lib/comms-plan.js";
@@ -2387,8 +2387,8 @@ function DimTrackViz({ myScore = 3, theirScore = 3, color = "#9B5DE5", userName 
     <div style={{ margin: "0.95rem 0", position: "relative" }}>
       <div style={{ height: 5, background: "rgba(255,255,255,0.12)", borderRadius: 3, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: 3, background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.18))" }} />
-        <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
-        <div title={userName} style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: UC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT, zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>
+        <div title={partnerName} style={{ position: "absolute", top: "50%", left: theirPctV + "%", transform: `translate(-50%, calc(-50% + ${theirDy}px))`, width: 22, height: 22, borderRadius: "50%", background: PC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", ...scType("mark"), zIndex: 2 }}>{sameInitial ? "" : partnerName[0]}</div>
+        <div title={userName} style={{ position: "absolute", top: "50%", left: myPctV + "%", transform: `translate(-50%, calc(-50% + ${myDy}px))`, width: 22, height: 22, borderRadius: "50%", background: UC, border: "2.5px solid white", display: "flex", alignItems: "center", justifyContent: "center", ...scType("mark"), zIndex: 2 }}>{sameInitial ? "" : userName[0]}</div>
       </div>
       {sameInitial && (
         <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1.1rem" }}>
@@ -8635,12 +8635,16 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   // first. Dots only shift vertically when they actually overlap.
   const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   const DimSlider = ({ dim, meta }) => {
-    const myPct = Math.round(((myS[dim] || 3) / 5) * 100);
-    const theirPct = Math.round(((partS[dim] || 3) / 5) * 100);
-    const overlap = Math.abs(myPct - theirPct) < 6;
+    // The scale's top and the two overlap numbers all come from
+    // api/_lib/track-marks.js, so this card places a mark the way every other
+    // chart in the product does and the way the app's copy of this card does.
+    // It was 5, 6 and 10 written here, against the app's own three numbers.
+    const myPct = Math.round(((myS[dim] || 3) / TM_CARD_MAX) * 100);
+    const theirPct = Math.round(((partS[dim] || 3) / TM_CARD_MAX) * 100);
+    const overlap = Math.abs(myPct - theirPct) < TM_CLOSE;
     const myIsLeft = myPct <= theirPct;
-    const myDy = overlap ? (myIsLeft ? -10 : 10) : 0;
-    const theirDy = overlap ? (myIsLeft ? 10 : -10) : 0;
+    const myDy = overlap ? (myIsLeft ? -TM_STAGGER : TM_STAGGER) : 0;
+    const theirDy = overlap ? (myIsLeft ? TM_STAGGER : -TM_STAGGER) : 0;
     const legend = myIsLeft
       ? [{ name: userName, color: SC_PEOPLE.you }, { name: partnerName, color: SC_PEOPLE.them }]
       : [{ name: partnerName, color: SC_PEOPLE.them }, { name: userName, color: SC_PEOPLE.you }];
@@ -8707,8 +8711,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         {watermark}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem 1.75rem 3.5rem", textAlign: "center" }}>
           <div style={{ ...scType("titleSm"), marginBottom: "0.7rem", maxWidth: 320, animation: "fadeUp 0.5s 0.1s both" }}>Your unique relationship environment</div>
-          <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "0.6rem", width: 224, maxWidth: "84%" }}>
-            <CoupleMapSVG myS={myB} partS={partB} userName={userName} partnerName={partnerName} size={184} hideCaption axisLabelColor="rgba(255,255,255,0.62)" />
+          <div style={{ animation: "popIn 0.5s 0.25s cubic-bezier(0.34,1.56,0.64,1) both", marginBottom: "0.6rem", width: Math.round(SC_REF_WIDTH * SC_MAP_PCT) + 26, maxWidth: "92%" }}>
+            {/* One size for both surfaces, from api/_lib/storycard-style.js.
+                It was 184 here and 168 in the app. */}
+            <CoupleMapSVG myS={myB} partS={partB} userName={userName} partnerName={partnerName} size={Math.round(SC_REF_WIDTH * SC_MAP_PCT)} hideCaption axisLabelColor="rgba(255,255,255,0.62)" />
           </div>
           <div style={{ ...scType("lead"), marginBottom: "0.55rem", animation: "fadeUp 0.4s 0.4s both" }}>Your couple type: <span style={{ fontWeight: 700, color: "white" }}>{coupleType?.name || "The orbit"}</span></div>
           <p style={{ ...scType("bodySm"), maxWidth: 258, margin: 0, animation: "fadeUp 0.4s 0.5s both" }}>Explore your full results to learn what this looks like for the two of you.</p>

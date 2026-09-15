@@ -121,6 +121,12 @@ export function highlightCards({
     cards.push({
       id: 'comm-sliders', kind: 'dimensions', tone: 'deep-blue',
       title: 'How you each show up in the relationship',
+      /**
+       * The two names, because the marks on this card carry an initial each,
+       * and when both initials are the same they carry a legend instead. The
+       * app had neither and drew two anonymous dots.
+       */
+      names: { you, them },
       dimensions: peek.map((d) => ({
         key: d.key, label: d.label, left: d.left, right: d.right, a: d.a, b: d.b,
       })),
@@ -148,8 +154,23 @@ export function highlightCards({
     const overall = overallExpectationsPct({
       mine: ex2.mine, theirs: ex2.theirs, youName: you, themName: them,
     });
-    const lifeRows = expectations.life || [];
-    const respRows = expectations.categories.flatMap((cat) => cat.rows);
+    /**
+     * ── THE TWO RINGS, AND WHY THEY READ THE ROWS ─────────────────────────
+     * This was `expectations.life`, a field the summary used to send and does
+     * not any more: Life & Values became the sixth category, so its rows moved
+     * into `categories` and the separate array was dropped. Nothing here
+     * changed, so `|| []` took over and the Life & Values ring read 0% for
+     * every couple, while Responsibilities silently counted the life rows too.
+     *
+     * Ellie has reported this figure twice. It is the same shape both times: a
+     * rule about which rows are which, restated somewhere that did not hear
+     * about a change. So it reads the rows' own `kind` now, which is the field
+     * that decides it everywhere else, and check-expectations-rings.mjs runs
+     * both numbers against answers built to make them differ.
+     */
+    const allRows = expectations.categories.flatMap((cat) => cat.rows);
+    const lifeRows = allRows.filter((r) => r.kind === 'life');
+    const respRows = allRows.filter((r) => r.kind !== 'life');
     const pct = (rows) => (rows.length
       ? Math.round((rows.filter((r) => r.aligned).length / rows.length) * 100) : 0);
 

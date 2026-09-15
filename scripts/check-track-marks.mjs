@@ -19,25 +19,45 @@ import { readFileSync } from 'fs';
 import * as TRACK from '../api/_lib/track-marks.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const app = readFileSync(ROOT + 'attune-app/src/components/results.tsx', 'utf8');
+
+/**
+ * Both files that place a mark: the results pages and the storycards.
+ *
+ * It was only the first. The storycards are their own renderer and had their
+ * own numbers, and one of them disagreed: the card divided a score by 4 after
+ * subtracting 1 while the website's copy of the same card divided by 5, so the
+ * same answer sat in two different places on what is meant to be one card.
+ */
+const FILES = [
+  'attune-app/src/components/results.tsx',
+  'attune-app/src/components/highlight-cards.tsx',
+];
+const sources = FILES.map((f) => ({ file: f, text: readFileSync(ROOT + f, 'utf8') }));
 
 const problems = [];
 
 for (const [name, want] of Object.entries(TRACK)) {
-  const m = app.match(new RegExp(`^const ${name} = (-?[0-9.]+);`, 'm'));
-  if (!m) {
+  const seen = sources
+    .map(({ file, text }) => {
+      const m = text.match(new RegExp(`^const ${name} = (-?[0-9.]+);`, 'm'));
+      return m ? { file, got: Number(m[1]) } : null;
+    })
+    .filter(Boolean);
+
+  if (!seen.length) {
     problems.push(
-      `attune-app/src/components/results.tsx does not declare ${name}.\n`
+      `no file in the app declares ${name}.\n`
       + `      api/_lib/track-marks.js says it is ${want}. Either the app stopped\n`
       + '      using it, in which case remove it from that file, or it was renamed.');
     continue;
   }
-  const got = Number(m[1]);
-  if (got !== want) {
-    problems.push(
-      `${name} is ${got} in the app and ${want} in api/_lib/track-marks.js.\n`
-      + '      Two products cannot round the placement rule differently: the same\n'
-      + '      couple would read as agreeing on one and not on the other.');
+  for (const { file, got } of seen) {
+    if (got !== want) {
+      problems.push(
+        `${name} is ${got} in ${file} and ${want} in api/_lib/track-marks.js.\n`
+        + '      Two products cannot round the placement rule differently: the same\n'
+        + '      couple would read as agreeing on one and not on the other.');
+    }
   }
 }
 
