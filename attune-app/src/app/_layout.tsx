@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
@@ -57,9 +58,28 @@ export default function TabLayout() {
   if (!fontsReady && !fontError) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    /**
+     * ── WHY THE GESTURE ROOT IS HERE ────────────────────────────────────
+     * Marking a fragment of a sentence is a press, a hold and a drag inside a
+     * ScrollView, and on iOS a scroll view claims a moving touch through its
+     * own native recogniser before React Native's JS responder system is ever
+     * asked. react-native-gesture-handler is what competes with that
+     * recogniser, and it needs this root to reach it. Without it the selection
+     * gesture does nothing at all, silently, which is how it shipped.
+     */
+    /**
+     * ── WHY THE GESTURE ROOT IS HERE ────────────────────────────────────
+     * Marking a fragment of a sentence is a press, a hold and a drag inside a
+     * ScrollView, and on iOS a scroll view claims a moving touch through its
+     * own native recogniser before React Native's JS responder system is ever
+     * asked. react-native-gesture-handler is what competes with that
+     * recogniser, and this root is what its documentation asks for.
+     */
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AnimatedSplashOverlay />
+        <AppTabs />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

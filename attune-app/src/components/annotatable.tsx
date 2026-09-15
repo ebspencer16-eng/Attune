@@ -50,9 +50,10 @@
 
 import { useMemo, useRef, useState } from 'react';
 import {
-  PanResponder, Pressable, Text, View,
-  type LayoutRectangle, type StyleProp, type TextStyle,
+  Pressable, StyleSheet, Text, View,
+  type LayoutRectangle, type StyleProp, type TextStyle, type ViewStyle,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { SymbolView } from 'expo-symbols';
 
 import { annotationColor } from '@/constants/annotations';
@@ -82,6 +83,46 @@ const TOOLBAR: { action: MarkAction; icon: string; label: string }[] = [
 
 /** How long a press must be held before this takes the gesture from the scroll. */
 const HOLD_MS = 450;
+
+/**
+ * Which style properties belong to the words, and which to the paragraph.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * Ellie: "Spacing got messed up for intro paragraph on internal processing
+ * page... I'm noticing it more places, I assume it's the same bug."
+ *
+ * It was. Prose takes the style a <Text> would have taken and this component
+ * was putting all of it on every word. A paragraph styled
+ * `{ marginTop: 16, lineHeight: 26 }` became forty words each carrying a
+ * sixteen point top margin, so every wrapped line sat sixteen points further
+ * apart than it should. The longer the paragraph the worse it looked, and it
+ * looked like a line-height bug, which is why it was hard to place.
+ *
+ * So: anything that describes type goes on each word, and anything that
+ * describes the box goes on the row that holds them, once.
+ */
+const TEXT_KEYS = new Set([
+  'color', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'fontVariant',
+  'letterSpacing', 'lineHeight', 'textDecorationLine', 'textDecorationColor',
+  'textDecorationStyle', 'textTransform', 'includeFontPadding',
+  'textShadowColor', 'textShadowOffset', 'textShadowRadius', 'writingDirection',
+]);
+
+export function splitStyle(style: StyleProp<TextStyle>): { text: TextStyle; box: ViewStyle } {
+  const flat = (StyleSheet.flatten(style) || {}) as Record<string, unknown>;
+  const text: Record<string, unknown> = {};
+  const box: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(flat)) {
+    if (TEXT_KEYS.has(k)) text[k] = v;
+    // A row of words cannot be text-aligned, so the alignment moves to the
+    // row's own main axis. Without this a centred paragraph silently goes
+    // left, which is a quieter version of the same bug.
+    else if (k === 'textAlign') {
+      box.justifyContent = v === 'center' ? 'center' : v === 'right' ? 'flex-end' : 'flex-start';
+    } else box[k] = v;
+  }
+  return { text: text as TextStyle, box: box as ViewStyle };
+}
 
 /** The toolbar's height, for placing it above the selection. */
 const TOOLBAR_H = 44;
@@ -131,6 +172,7 @@ export default function Annotatable({
   /** A fragment was chosen, and what to do with it. */
   onSelect?: (fragment: string, action: MarkAction) => void;
 }) {
+  const { text: textStyle, box: boxStyle } = useMemo(() => splitStyle(style), [style]);
   const tokens = useMemo(() => tokenize(text), [text]);
   const starts = useMemo(() => offsets(tokens), [tokens]);
 
@@ -147,9 +189,6 @@ export default function Annotatable({
    * and never drawn, so writing it must not re-render the paragraph mid-drag.
    */
   const frames = useRef<Map<number, LayoutRectangle>>(new Map());
-  /** Whether a press has been held long enough for this to take the gesture. */
-  const armed = useRef(false);
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Which tokens each existing mark covers.
@@ -196,66 +235,110 @@ export default function Annotatable({
     return best;
   };
 
-  const clearHold = () => {
-    if (holdTimer.current) clearTimeout(holdTimer.current);
-    holdTimer.current = null;
-  };
-
   const clear = () => {
     setAnchor(null);
     setHead(null);
     setSettled(false);
-    armed.current = false;
-    clearHold();
   };
 
-  const responder = useMemo(() => PanResponder.create({
-    // The scroll view keeps the gesture until a press has been held. Arming is
-    // started here and cancelled by any movement before it fires.
-    onStartShouldSetPanResponder: () => {
-      armed.current = false;
-      clearHold();
-      holdTimer.current = setTimeout(() => { armed.current = true; }, HOLD_MS);
-      return false;
-    },
-    onMoveShouldSetPanResponder: (_e, g) => {
-      // Moving before the hold fires is a scroll, not a selection.
-      if (!armed.current && (Math.abs(g.dy) > 4 || Math.abs(g.dx) > 4)) clearHold();
-      return armed.current;
-    },
-    onPanResponderGrant: (e) => {
-      const i = wordAt(e.nativeEvent.locationX, e.nativeEvent.locationY);
+  /**
+   * ── WHY THIS IS NOT A PANRESPONDER ────────────────────────────────────────
+   * It was, and it could not work. On iOS a ScrollView scrolls through
+   * UIScrollView's own gesture recogniser, not through the JS responder
+   * system. The moment a finger inside one moves, that recogniser claims the
+   * touch and React Native cancels the JS touch, so
+   * onMoveShouldSetPanResponder is never asked. Instrumenting the old version
+   * in the simulator showed exactly that: the press was seen, the move never
+   * was, and no selection could begin however long the hold.
+   *
+   * That is why Ellie could not get a toolbar: not because the toolbar was
+   * misplaced, but because nothing ever selected anything, so it had nothing
+   * to appear over.
+   *
+   * react-native-gesture-handler talks to the same native recognisers the
+   * scroll view uses, so it can win the gesture rather than ask for it.
+   * activateAfterLongPress is the whole rule: hold still for HOLD_MS and this
+   * takes over; move before that and the scroll view keeps it, which is what
+   * makes a paragraph still scrollable.
+   *
+   * minDistance is deliberately unreachable. Without it the pan would also
+   * activate on distance, which would eat every scroll that began on a word.
+   * The long press is the only way in.
+   */
+  const pan = useMemo(() => Gesture.Pan()
+    .runOnJS(true)
+    .minDistance(10000)
+    .activateAfterLongPress(HOLD_MS)
+    .shouldCancelWhenOutside(false)
+    /**
+     * The toolbar is drawn over these words and its buttons are ordinary
+     * presses. A recogniser that cancels the touches beneath it while it waits
+     * for its long press would take those presses away, so it does not.
+     */
+    .cancelsTouchesInView(false)
+    .onStart((e) => {
+      const i = wordAt(e.x, e.y);
       if (i == null) return;
       setSettled(false);
       setAnchor(i);
       setHead(i);
-    },
-    onPanResponderMove: (e) => {
-      const i = wordAt(e.nativeEvent.locationX, e.nativeEvent.locationY);
+    })
+    .onUpdate((e) => {
+      const i = wordAt(e.x, e.y);
       if (i != null) setHead(i);
-    },
-    // The finger is up: the selection stands and the toolbar appears above it.
-    onPanResponderRelease: () => { armed.current = false; clearHold(); setSettled(true); },
-    onPanResponderTerminate: () => { armed.current = false; clearHold(); },
-  }), []);
+    })
+    // The finger is up: the selection stands and the toolbar appears by it.
+    .onEnd(() => setSettled(true)),
+  []);
+
+  /**
+   * One tap per toolbar action, and one to dismiss.
+   *
+   * Built here rather than inline so the gesture objects are stable across
+   * renders; a new gesture on every render detaches and reattaches the native
+   * recogniser, which loses taps that arrive mid-render.
+   */
+  const fragmentRef = useRef('');
+  const tapFor = useMemo(() => {
+    const cache = new Map<MarkAction, ReturnType<typeof Gesture.Tap>>();
+    return (action: MarkAction) => {
+      if (!cache.has(action)) {
+        cache.set(action, Gesture.Tap().runOnJS(true).onEnd(() => {
+          if (!fragmentRef.current) return;
+          onSelect?.(fragmentRef.current, action);
+          clear();
+        }));
+      }
+      return cache.get(action) as ReturnType<typeof Gesture.Tap>;
+    };
+  }, [onSelect]);
+  const cancelTap = useMemo(() => Gesture.Tap().runOnJS(true).onEnd(() => clear()), []);
 
   if (!onSelect || !tokens.length) return <Text style={style}>{text}</Text>;
 
   const lo = anchor == null ? null : Math.min(anchor, head ?? anchor);
   const hi = anchor == null ? null : Math.max(anchor, head ?? anchor);
   const fragment = lo == null ? '' : tokens.slice(lo, (hi as number) + 1).join('').trim();
+  // The tap gestures are built once and cannot close over this, so it is kept
+  // on a ref they can read at the moment of the tap.
+  fragmentRef.current = fragment;
 
-  /** The selection's own box, for placing the toolbar over its first line. */
+  /**
+   * The selection's own box: where its first line starts, and where its last
+   * line ends. Both, because the toolbar goes above the selection when there
+   * is room and below it when there is not.
+   */
   const box = (() => {
     if (lo == null) return null;
-    let minX = Infinity; let minY = Infinity;
+    let minX = Infinity; let minY = Infinity; let maxBottom = -Infinity;
     for (let i = lo; i <= (hi as number); i += 1) {
       const f = frames.current.get(i);
       if (!f) continue;
       if (f.y < minY) { minY = f.y; minX = f.x; }
       else if (f.y === minY && f.x < minX) minX = f.x;
+      if (f.y + f.height > maxBottom) maxBottom = f.y + f.height;
     }
-    return Number.isFinite(minY) ? { x: minX, y: minY } : null;
+    return Number.isFinite(minY) ? { x: minX, y: minY, bottom: maxBottom } : null;
   })();
 
   return (
@@ -263,23 +346,28 @@ export default function Annotatable({
       {/* ── THE WORDS ────────────────────────────────────────────────────
           A wrapping row of per-word Views rather than one Text with nested
           Texts, because a View reports its own frame and a nested Text does
-          not. See the note at the top: this is what makes dragging exact. */}
-      <View
-        {...responder.panHandlers}
-        style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        {tokens.map((tok, i) => {
-          const inSelection = lo != null && i >= lo && i <= (hi as number);
-          return (
-            <View
-              key={i}
-              onLayout={(e) => { frames.current.set(i, e.nativeEvent.layout); }}
-              style={inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)', borderRadius: 3 } : null}>
-              <Text style={[style, markStyle(marked.get(i))]}>{tok}</Text>
-            </View>
-          );
-        })}
-      </View>
+          not. See the note at the top: this is what makes dragging exact.
 
+          The paragraph's own box styles sit on this row and its type styles
+          on each word. Putting the whole style on every word gave every one
+          of them the paragraph's top margin, which is the spacing bug. */}
+      <GestureDetector gesture={pan}>
+        <View
+          style={[
+            { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' },
+            boxStyle,
+          ]}>
+          {tokens.map((tok, i) => {
+            const inSelection = lo != null && i >= lo && i <= (hi as number);
+            return (
+              <View
+                key={i}
+                onLayout={(e) => { frames.current.set(i, e.nativeEvent.layout); }}
+                style={inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)', borderRadius: 3 } : null}>
+                <Text style={[textStyle, markStyle(marked.get(i))]}>{tok}</Text>
+              </View>
+            );
+          })}
       {/* ── THE TOOLBAR ──────────────────────────────────────────────────
           On release, above the first line of the selection. Ellie: "Once they
           lift their finger, I want the toolbar to pop up right above the
@@ -294,19 +382,40 @@ export default function Annotatable({
           style={{
             position: 'absolute',
             left: Math.max(0, Math.min(box.x - 8, 20)),
-            top: box.y - TOOLBAR_H - 6,
+            /**
+             * Above the selection, unless the selection starts at the top of
+             * the block, in which case the toolbar would be drawn outside it.
+             * Outside is not always visible: a card with a radius clips its
+             * children, and the first paragraph of a page has nothing above it
+             * but the heading. Below the last line is the honest fallback, and
+             * it is still beside what was selected.
+             */
+            top: box.y >= TOOLBAR_H + 6 ? box.y - TOOLBAR_H - 6 : box.bottom + 6,
             flexDirection: 'row', alignItems: 'center',
             backgroundColor: c.textStrong, borderRadius: Radius.pill,
             paddingHorizontal: Spacing.xs, height: TOOLBAR_H,
             shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12,
             shadowOffset: { width: 0, height: 6 }, elevation: 6,
-          }}>
+          }}
+>
+          {/* ── WHY THESE ARE NOT PRESSABLES ──────────────────────────
+              A Pressable here never fired. The toolbar sits over the words,
+              and the words are under a gesture-handler recogniser; a plain
+              React Native touch and a native recogniser in the same place do
+              not negotiate with each other, so the tap reached neither. It was
+              verified in the simulator: a short tap did nothing at all and a
+              long one started a new selection underneath.
+
+              A gesture-handler tap does negotiate, because it is the same
+              system. It also wins over the pan by construction: the pan only
+              activates after a long press, and a tap is over before then. */}
           {TOOLBAR.map((t) => (
             <Pressable
               key={t.action}
               accessibilityRole="button"
               accessibilityLabel={t.label}
               onPress={() => { onSelect(fragment, t.action); clear(); }}
+              hitSlop={6}
               style={{ paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm }}>
               <SymbolView
                 name={t.icon as never}
@@ -320,11 +429,14 @@ export default function Annotatable({
             accessibilityRole="button"
             accessibilityLabel="Cancel"
             onPress={clear}
+            hitSlop={6}
             style={{ paddingLeft: Spacing.sm, paddingRight: Spacing.md, paddingVertical: Spacing.sm }}>
             <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.6)' }}>✕</Text>
           </Pressable>
         </View>
       ) : null}
+        </View>
+      </GestureDetector>
     </View>
   );
 }
