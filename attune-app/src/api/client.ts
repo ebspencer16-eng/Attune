@@ -986,6 +986,8 @@ export type Tag = {
    *  person made themselves. This is what lets the app label an annotation's
    *  anchor without keeping its own copy of the dimension list. */
   standard_key: string | null;
+  /** In the bin since this moment. Absent or null means live. */
+  deleted_at?: string | null;
 };
 
 /**
@@ -1415,6 +1417,28 @@ export function nudgePartner() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
+  });
+}
+
+/**
+ * Put a tag in the bin, take it out again, or remove it for good.
+ *
+ * Two deaths on purpose: Ellie asked for a greyed row where deleted tags live
+ * and a second, permanent delete from there that says it cannot be undone.
+ */
+export function deleteTag(id: string) {
+  return request<{ ok: true; tag: Tag }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'deleteTag', id }),
+  });
+}
+
+export function purgeTag(id: string) {
+  return request<{ ok: true; deleted: number }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'purgeTag', id }),
   });
 }
 

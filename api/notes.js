@@ -207,6 +207,55 @@ export default async function handler(req) {
      * from the reader's side "I want a tag called Money" is satisfied either
      * way, and an error here would be the product arguing about bookkeeping.
      */
+    /**
+     * ── A TAG HAS TWO DEATHS ──────────────────────────────────────────────
+     * Ellie: a tag page has a delete with an are-you-sure, a deleted tag drops
+     * to a greyed row at the foot of the list, and deleting it from there is
+     * permanent and says so.
+     *
+     * So: 'deleteTag' puts it in the bin, and 'purgeTag' removes the row. The
+     * second takes the note_tags rows with it, by the cascade on that table,
+     * which is exactly what cannot be undone.
+     *
+     * Both need migration 066. Until it is run, the bin column does not exist
+     * and PostgREST refuses the patch; that is reported rather than quietly
+     * turned into a hard delete, because a delete someone believes is
+     * recoverable and is not is the worst possible version of this.
+     */
+    if (action === 'deleteTag' || action === 'restoreTag') {
+      if (!body.id || !UUID_RE.test(String(body.id))) {
+        return json({ ok: false, error: 'missing or invalid id' }, 400);
+      }
+      const r = await rest(`tags?id=eq.${encodeURIComponent(String(body.id))}&owner_id=eq.${me}`, {
+        method: 'PATCH',
+        headers: { ...jsonHeaders, Prefer: 'return=representation' },
+        body: JSON.stringify({ deleted_at: action === 'deleteTag' ? new Date().toISOString() : null }),
+      });
+      if (!r.ok) {
+        const detail = await r.text().catch(() => '');
+        if (/deleted_at/.test(detail)) {
+          return json({ ok: false, error: 'deleting a tag needs migration 066. Run it in the SQL editor.' }, 503);
+        }
+        return json({ ok: false, error: 'that did not save' }, 500);
+      }
+      const rows = await r.json().catch(() => []);
+      if (!rows.length) return json({ ok: false, error: 'not found' }, 404);
+      return json({ ok: true, tag: rows[0] });
+    }
+
+    if (action === 'purgeTag') {
+      if (!body.id || !UUID_RE.test(String(body.id))) {
+        return json({ ok: false, error: 'missing or invalid id' }, 400);
+      }
+      // owner_id in the filter is the authorisation, as everywhere else here.
+      const r = await rest(`tags?id=eq.${encodeURIComponent(String(body.id))}&owner_id=eq.${me}`, {
+        method: 'DELETE',
+        headers: { ...svc, Prefer: 'return=representation' },
+      });
+      const gone = await r.json().catch(() => []);
+      return json({ ok: true, deleted: gone.length });
+    }
+
     if (action === 'createTag') {
       const name = String(body.name || '').trim();
       if (!name) return json({ ok: false, error: 'a tag needs a name' }, 400);
@@ -230,6 +279,22 @@ export default async function handler(req) {
         tag = (await ex.json().catch(() => []))?.[0] || null;
       }
       if (!tag) return json({ ok: false, error: 'create failed' }, 500);
+      /**
+       * A name in the bin is still taken, because the unique index does not
+       * care that the tag is deleted. Typing it again means "I want that tag",
+       * so it comes back rather than failing on a constraint the reader cannot
+       * see. Tolerant of migration 066 not having been run: without the
+       * column, nothing is ever in the bin and there is nothing to restore.
+       */
+      if (tag.deleted_at) {
+        const back = await rest(`tags?id=eq.${tag.id}&owner_id=eq.${me}`, {
+          method: 'PATCH',
+          headers: { ...jsonHeaders, Prefer: 'return=representation' },
+          body: JSON.stringify({ deleted_at: null }),
+        });
+        const rows = await back.json().catch(() => []);
+        if (rows.length) tag = rows[0];
+      }
       return json({ ok: true, tag });
     }
 

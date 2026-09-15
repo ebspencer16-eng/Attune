@@ -46,8 +46,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
-  createNote, createTag, deleteNote, fetchHome, fetchNotes, fetchPosts, fetchResults,
-  fetchTags, openSharedNote, shareNote, updateNote,
+  createNote, createTag, deleteNote, deleteTag, fetchHome, fetchNotes, fetchPosts,
+  fetchResults, fetchTags, openSharedNote, purgeTag, shareNote, updateNote,
 } from '@/api/client';
 import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -60,7 +60,7 @@ import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import {
-  Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
+  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -116,6 +116,20 @@ export default function NotesScreen() {
    * under a heading is the same screen with a filter on it.
    */
   const router = useRouter();
+  /**
+   * The line that says what just happened.
+   *
+   * Ellie: "there's no indication of 'delete note' doing anything... maybe a
+   * pop up note deleted with a check mark?" It clears itself, because a
+   * confirmation that needs dismissing is a second thing to do about something
+   * that is already finished.
+   */
+  const [flash, setFlash] = useState<string | null>(null);
+  const say = useCallback((msg: string) => {
+    setFlash(msg);
+    setTimeout(() => setFlash((cur) => (cur === msg ? null : cur)), 2400);
+  }, []);
+
   const [openTag, setOpenTag] = useState<Tag | null>(null);
 
   /**
@@ -200,6 +214,51 @@ export default function NotesScreen() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  /**
+   * The two deletes for a tag.
+   *
+   * The first is recoverable and asks plainly. The second removes the row and
+   * the filing that points at it, and says so in the words Ellie wrote.
+   */
+  const binTag = useCallback((tag: Tag) => {
+    Alert.alert(`Delete ${tag.name}?`, 'It moves to the bottom of your tag list. Typing the name again brings it back.', [
+      { text: 'Keep', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const res = await deleteTag(tag.id);
+          if (!res.ok) {
+            Alert.alert('Not deleted', res.error.kind === 'server' && res.error.status === 503
+              ? 'Deleting a tag needs migration 066. It is in supabase/migrations.'
+              : 'That did not delete. Try again in a moment.');
+            return;
+          }
+          setOpenTag(null);
+          say('✓ Tag deleted');
+          load();
+        },
+      },
+    ]);
+  }, [load, say]);
+
+  const purgeTagForGood = useCallback((tag: Tag) => {
+    Alert.alert('Are you sure?', 'This action cannot be undone.', [
+      { text: 'Keep', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const res = await purgeTag(tag.id);
+          if (!res.ok) { Alert.alert('Not deleted', 'That did not delete. Try again in a moment.'); return; }
+          say('✓ Tag deleted');
+          load();
+        },
+      },
+    ]);
+  }, [load, say]);
+
 
   // Reload when this tab comes into focus, not only when it mounts.
   //
@@ -381,8 +440,20 @@ export default function NotesScreen() {
             ) : (
               <Blank body="Nothing is filed under this tag yet. Tag a note or a highlight and it turns up here." />
             )}
+
+            {/* Ellie: "If I open the tag page, it should have a delete tag
+                button in the bottom left". Bottom left, and quiet: it is the
+                one thing on this screen that takes something away. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Delete the ${openTag.name} tag`}
+              onPress={() => binTag(openTag)}
+              style={{ alignSelf: 'flex-start', marginTop: Spacing.xxl }}>
+              <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete tag</Text>
+            </Pressable>
           </ScrollView>
         </ScreenFrame>
+        <Flash message={flash} />
       </Shell>
     );
   }
@@ -518,9 +589,12 @@ export default function NotesScreen() {
             placeholder={tagPlaceholder}
             onAdd={addTag}
             onOpen={setOpenTag}
+            onPurge={purgeTagForGood}
           />
         </View>
       </ScrollView>
+
+      <Flash message={flash} />
 
       {editing ? (
         <Editor
@@ -529,7 +603,7 @@ export default function NotesScreen() {
           canShare={partnerLinked}
           partner={partner}
           onClose={() => setEditing(null)}
-          onSaved={() => { setEditing(null); load(); }}
+          onSaved={(msg) => { setEditing(null); if (msg) say(msg); load(); }}
         />
       ) : null}
     </Shell>
@@ -665,7 +739,7 @@ function tagColor(tag: Tag): string {
 }
 
 function TagList({
-  tags, notes, sort, onChangeSort, placeholder, onAdd, onOpen,
+  tags, notes, sort, onChangeSort, placeholder, onAdd, onOpen, onPurge,
 }: {
   tags: Tag[];
   notes: Note[];
@@ -682,6 +756,8 @@ function TagList({
   onAdd: (name: string) => Promise<string | null>;
   /** Open everything filed under one tag. */
   onOpen: (tag: Tag) => void;
+  /** Remove a tag that is already in the bin, for good. */
+  onPurge: (tag: Tag) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
@@ -717,11 +793,22 @@ function TagList({
     return m;
   }, [tags, notes]);
 
+  /**
+   * The bin, and the list above it.
+   *
+   * A tag with deleted_at is in the bin: still here, still countable, and one
+   * more press from being gone. Tags arrive in one list from the server and
+   * are split here rather than in two requests, because the bin is small and
+   * asking twice for one screen is a second round trip for a greyed row.
+   */
+  const binned = useMemo(() => tags.filter((t) => t.deleted_at), [tags]);
+  const live = useMemo(() => tags.filter((t) => !t.deleted_at), [tags]);
+
   const ordered = useMemo(() => {
     const st = (t: Tag) => stats.get(t.id) || { count: 0, latest: 0 };
     const byName = (a: Tag, b: Tag) => a.name.localeCompare(b.name);
     const q = query.trim().toLowerCase();
-    const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : [...tags];
+    const list = q ? live.filter((t) => t.name.toLowerCase().includes(q)) : [...live];
     switch (sort) {
       case 'za': return list.sort((a, b) => byName(b, a));
       // Ties fall back to A to Z rather than to whatever order the server
@@ -732,7 +819,7 @@ function TagList({
       case 'fewest': return list.sort((a, b) => (st(a).count - st(b).count) || byName(a, b));
       default: return list.sort(byName);
     }
-  }, [tags, stats, sort, query]);
+  }, [live, stats, sort, query]);
 
   return (
     <View style={{ marginBottom: Spacing.xxl }}>
@@ -744,7 +831,7 @@ function TagList({
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Tags</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
         {/* Nothing to sort until there is something in the list. */}
-        {tags.length ? (
+        {live.length ? (
         <Pressable
           onPress={() => setOpen((v) => !v)}
           accessibilityRole="button"
@@ -843,7 +930,7 @@ function TagList({
       {/* The search field. Above the list, and only once there is a list long
           enough to be worth searching: a search box over three tags is a
           control that makes the screen look busier than it is. */}
-      {tags.length > 5 ? (
+      {live.length > 5 ? (
         <View
           style={{
             flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
@@ -922,6 +1009,80 @@ function TagList({
             : 'Add a tag to get started. Keep track of your tags in this section, with how many notes are filed under each.'}
         />
       )}
+
+      {/* ── THE BIN ──────────────────────────────────────────────────────
+          Ellie: "if a tag is deleted there should be a greyed out row at the
+          bottom of the tag list where deleted tags live, and you can delete
+          them from there permanently."
+
+          Greyed rather than hidden, because the thing worth knowing about a
+          deleted tag is that it is still recoverable by typing its name again,
+          and a list you cannot see does not tell you that. */}
+      {binned.length ? (
+        <View
+          style={{
+            marginTop: Spacing.md,
+            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+            borderRadius: Radius.lg, overflow: 'hidden', opacity: 0.6,
+          }}>
+          {binned.map((t, i) => (
+            <View
+              key={t.id}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+              }}>
+              <SymbolView
+                name="tag"
+                size={16}
+                tintColor={c.textMuted}
+                fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.textMuted }} />}
+                style={{ width: 18, height: 18 }}
+              />
+              <Text
+                style={{ ...Type.body, color: c.textMuted, flex: 1, textDecorationLine: 'line-through' }}
+                numberOfLines={1}>
+                {t.name}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Delete ${t.name} for good`}
+                onPress={() => onPurge(t)}
+                hitSlop={8}>
+                <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete</Text>
+              </Pressable>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * What just happened, said once and then gone.
+ *
+ * Ellie: "there's no indication of 'delete note' doing anything... maybe a pop
+ * up note deleted with a check mark?" It sits above the tab bar, over whatever
+ * is on screen, and takes no tap to dismiss: it is a receipt, not a decision.
+ */
+function Flash({ message }: { message: string | null }) {
+  if (!message) return null;
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute', left: 0, right: 0, bottom: BottomTabInset + Spacing.lg,
+        alignItems: 'center',
+      }}>
+      <View
+        style={{
+          backgroundColor: c.textStrong, borderRadius: Radius.pill,
+          paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md,
+        }}>
+        <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{message}</Text>
+      </View>
     </View>
   );
 }
@@ -1201,7 +1362,8 @@ function Editor({
   canShare: boolean;
   partner: string;
   onClose: () => void;
-  onSaved: () => void;
+  /** Saved, or deleted. The message is what the list should say about it. */
+  onSaved: (flash?: string) => void;
 }) {
   const [title, setTitle] = useState(note?.title ?? '');
   const [body, setBody] = useState(note?.body ?? '');
@@ -1258,7 +1420,10 @@ function Editor({
           const res = await deleteNote(note.id);
           setBusy(false);
           if (!res.ok) return Alert.alert('Not deleted', 'That did not delete. Try again in a moment.');
-          onSaved();
+          // The screen this is on closes, so the receipt is raised on the one
+          // underneath. Ellie: "there's no indication of 'delete note' doing
+          // anything, I have to click out of the note screen."
+          onSaved('✓ Note deleted');
         },
       },
     ]);

@@ -37,13 +37,12 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
-**Nothing waiting.** 061 to 065 are all run.
-
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
+| M66 | **`066_tag_bin.sql`.** Gives a tag a bin to sit in before it is gone for good, which is what you asked for. Until it runs, deleting a tag says so rather than pretending: the app shows "Deleting a tag needs migration 066". Everything else on the tag list works now. |
 
 ### Decide these
 
@@ -55,10 +54,9 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-**Nothing waiting.** Q2, the dot and eyebrow, cleared on your hard refresh.
-
 | # | Question |
 |--|--|
+| Q3 | **The workbook is not generated when your results are ready, and no email is ever sent.** You are right to have asked. What actually happens: generation runs in the browser, on the website, from a block that needs the order in that browser's storage, and only once both of you have finished. Nothing on the server does it. So a couple who finish and only ever open the app get "Generating now. We'll email you when it's ready." for ever, and there is no workbook-ready email in the product at all: the only workbook email is the discount offer to people who do not own one. **Two things I need from you.** First, the words: that sentence promises an email nothing sends, and I am not going to write its replacement. Second, the fix. My recommendation is to generate it on the server at the moment results open, which is the same moment I already use to tell a partner you finished; that is a day's work and it touches the .docx builder, so I would rather you chose it than have me start. The smaller version is to make the app's line true by saying what is actually the case, which is a copy change and still yours. |
 
 ## 2. Open
 
@@ -70,18 +68,13 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Everything from your list is built. The workbook is Q3 in
+section 1, because it is a decision rather than a task.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O148 | **The underline is not working.** Reported after the change from a text decoration to a border on the word. Find out whether it is the drawing or the making of one, in the simulator, before changing anything. |
-| O149 | **The margin marker is not showing.** It draws only for a note that carries no visible mark, and it sits eighteen points outside the paragraph's own box, either of which could be it. Same: reproduce before changing. |
-| O150 | **Show all on Pick up where you left off stops at ten.** Your words: "keep the 'see all' list limited to the past 10 marks". |
-| O151 | **Less space between the Explore arrow and In Practice.** |
-| O152 | **A pick-up row opens the mark where it lives**, in the results or the article, rather than the note screen. |
-| O153 | **Deleting says it deleted.** Today it happens and nothing on screen says so, and the note screen has to be closed by hand. You said the note screen should stop existing; that is a bigger change than the confirmation, so the confirmation comes first and I will ask before removing the screen. |
-| O154 | **Deleting a tag, and a place deleted tags go.** A delete at the bottom left of the tag page with an are-you-sure. A deleted tag drops to a greyed row at the foot of the tag list; deleting it from there is permanent and says so: "are you sure? This action cannot be undone". Needs a column on the tags table, so it comes with a migration for you to run. |
-| O155 | **The workbook says it is generating and asks you to wait for an email.** You asked whether it should already exist once results are done. Find out what actually triggers generation and when, and report before changing anything: this is a question about the order of operations rather than a screen. |
 
 ## 3. For you to review
 
@@ -99,6 +92,13 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R93 | **A new mark was invisible until you left the page and came back.** That is what "underline isn't working" was: it saved, it just did not draw. The row handed back to the screen said it was anchored to a results section, and an In Practice article anchors to something else, so the screen filtered it straight out. Highlights had it too. Drawing itself was never broken: I pushed a fake underline and a fake highlight through and both drew correctly, three points of colour and a wash. |
+| R94 | **The margin marker draws, and now covers tags too.** It only marked plain notes, so a highlight you had filed under a tag left nothing in the margin, and you had deleted the notes on the page you were looking at. Any tagged mark marks the margin now. |
+| R95 | **A pick-up row opens the mark where it lives.** A results mark takes you to Insights on that section; an article mark opens the article. A note with no anchor still opens in the editor, because words are all it is. |
+| R96 | **"All" stops at the last ten.** |
+| R97 | **Less space between the Explore arrow and In Practice.** |
+| R98 | **Deleting says it deleted.** A line appears above the tab bar for a couple of seconds: "✓ Note deleted", and the same for a tag. It clears itself. **On the note screen:** you said you do not want it to exist any more. I have not removed it, because it is also where a note with no anchor is written and where sharing is turned on, and taking it out is a different job than adding the confirmation. Tell me what should replace it and I will. |
+| R99 | **A tag has two deaths.** Open a tag and there is Delete tag at the bottom left, with an are-you-sure that says it moves to the bottom of your list. Deleted tags sit there greyed and struck through, and deleting one from there asks "Are you sure? This action cannot be undone" in your words. Typing a deleted tag's name again brings it back, because the name is still taken and failing on a constraint you cannot see would be worse. **Needs M66 in section 1.** |
 | R88 | **Notes: Pick up where you left off is one tile**, the home screen's shape, rows divided by hairlines. Icon at the left for highlight, underline, note or tag, the section as an eyebrow, the words under it, no dashes. |
 | R92 | **Resources is one section.** All your tools in Yours to Explore, nothing for what you do not own, and a grey "Explore more resources" arrow bottom right that opens the website in Safari. It shows whether or not you own everything: the physical copies and the gift are on that page too, and a control that appears on an invisible condition is one nobody trusts. **On the Apple risk:** this is the same shape as Get Started, which already opens the site. The app names no price and no checkout route, and the arrow opens /offerings in the system browser rather than a payment screen. Every price in the app went with the section that showed them. If you would rather it went nowhere until the app is approved, say so and I will take it out in one line. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
