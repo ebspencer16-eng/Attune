@@ -3321,7 +3321,15 @@ function Marker({ pct, color, label, dy = 0 }: {
   return (
     <View
       style={{
-        position: 'absolute', top: -8 + dy, left: `${pct}%`,
+        /**
+         * Centred on the track, then stepped. It was `top: -8 + dy`, measured
+         * from the top of the row rather than from the line, so a lone mark
+         * sat above the bar and a stepped pair sat above it together. Ellie
+         * asked for the pair to sit evenly about the bar, which is what
+         * centring makes true without changing the steps.
+         */
+        position: 'absolute', top: '50%', left: `${pct}%`,
+        marginTop: -10 + dy,
         marginLeft: -10,
         width: 20, height: 20, borderRadius: Radius.pill,
         backgroundColor: color, alignItems: 'center', justifyContent: 'center',
@@ -3333,8 +3341,24 @@ function Marker({ pct, color, label, dy = 0 }: {
 }
 
 /** How far apart to draw two marks that land on the same point. */
+/**
+ * Two marks that land close together, stepped apart about the line.
+ *
+ * ── WHY IT IS SYMMETRIC, AND WHY IT IS THE SHARED NUMBER ──────────────────
+ * Ellie: "when two answers are at the same point, they are above the line. I
+ * want the placement dots, if grouped, to be evenly vertically distributed
+ * with the bar in the middle."
+ *
+ * The offsets were already symmetric. What was not was where they started
+ * from: the mark was positioned from the top of its row rather than centred on
+ * the track, so an unstepped mark sat high and a stepped pair sat higher.
+ * Marker centres itself now and this returns the step either side of centre.
+ *
+ * Five points was this file's own number while every other pair of marks in
+ * the product steps by api/_lib/track-marks.js's seven. One rule.
+ */
 function markerNudge(a: number, b: number): [number, number] {
-  return Math.abs(a - b) < 1 ? [-5, 5] : [0, 0];
+  return Math.abs(a - b) < CLOSE_PCT ? [-STAGGER, STAGGER] : [0, 0];
 }
 
 /** Who the two marks are. Without it the initials are a puzzle. */

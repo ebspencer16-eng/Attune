@@ -500,22 +500,34 @@ function SortControl({ value, onChange }: { value: PostSort; onChange: (v: PostS
         <Text style={{ color: c.textMuted, fontSize: 10 }}>{open ? '\u25B4' : '\u25BE'}</Text>
       </Pressable>
 
+      {/* ── A POPUP, NOT A PANEL ────────────────────────────────────────
+          Ellie: "it doesn't need to drop down into a full tile, just a small
+          popup menu below the arrow, not full rows, there's currently too much
+          white space."
+
+          So it hangs under the control at the control's own width rather than
+          the column's, with rows the height of the thing they name. It is
+          absolutely positioned, which keeps the list from pushing the articles
+          down the page every time someone opens it. */}
       {open ? (
         <View
           style={{
-            marginTop: Spacing.sm,
+            position: 'absolute', top: 30, left: 0, zIndex: 10,
+            minWidth: 168,
             backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
             borderRadius: Radius.md, overflow: 'hidden',
+            shadowColor: Palette.ink, shadowOpacity: 0.12, shadowRadius: 12,
+            shadowOffset: { width: 0, height: 6 }, elevation: 4,
           }}>
           {POST_SORTS.map((o) => (
             <Pressable
               key={o.key}
               accessibilityRole="button"
               onPress={() => { onChange(o.key); setOpen(false); }}
-              style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+              style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md }}>
               <Text
                 style={{
-                  ...Type.small,
+                  ...Type.small, fontSize: 12,
                   color: o.key === value ? c.textStrong : c.textMuted,
                   fontWeight: o.key === value ? '700' : '400',
                 }}>

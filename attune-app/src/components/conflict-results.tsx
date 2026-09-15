@@ -329,27 +329,45 @@ function Snapshot({ data, accent }: {
     <ScrollView contentContainerStyle={pad}>
       {/* block: conflict-snapshot/head */}
       <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
+      {/* ── THE SNAPSHOT IS A TABLE ──────────────────────────────────────
+          Ellie: "Your patterns does match the web view, but the conflict
+          snapshot does not."
+
+          The website draws three columns, the question and a column per
+          person, under a header naming the two of them, with each answer in a
+          blue pill. This drew a row per person per question with a dot and a
+          name against it, so the same three questions read as six findings and
+          there was nothing to scan down.
+
+          Two columns of pills under two names, which is the website's table
+          with the question above each row rather than beside it, because the
+          questions are sentences and a phone has no room for a 1.6fr column. */}
       {/* block: conflict-snapshot/openings */}
       <View style={{ ...card }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Conflict</Text>
-        {content.snapshotRows.map((row) => {
+
+        {content.snapshotRows.map((row, i) => {
           const chips = content.openingChips[row.id];
           const mine = pickChip(you.openings, row.field);
           const theirs = partner ? pickChip(partner.openings, row.field) : null;
           return (
-            <View key={row.id} style={{ marginBottom: Spacing.lg }}>
-              <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.sm }}>{row.label}</Text>
-              <View style={{ gap: Spacing.sm }}>
-                <Chip name={names.you} text={chipText(chips, mine)} color={Palette.orange} />
-                {partner ? (
-                  <Chip name={names.partner} text={chipText(chips, theirs)} color={Palette.ink} />
-                ) : null}
+            <View
+              key={row.id}
+              style={{
+                paddingTop: i === 0 ? 0 : Spacing.lg,
+                marginTop: i === 0 ? 0 : Spacing.lg,
+                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+              }}>
+              <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>{row.label}</Text>
+              <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+                <SnapshotCell name={names.you} text={chipText(chips, mine)} own />
+                {partner ? <SnapshotCell name={names.partner} text={chipText(chips, theirs)} /> : null}
               </View>
             </View>
           );
         })}
         {!partner ? (
-          <Text style={{ ...Type.small, color: c.textMuted }}>
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg }}>
             {names.partner} has not finished this yet. Their side fills in when they do.
           </Text>
         ) : null}
@@ -396,12 +414,13 @@ function Snapshot({ data, accent }: {
             <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
               {content.resetQuestion}
             </Text>
-            {you.strength ? (
-              <Chip name={names.you} text={you.strength} color={Palette.orange} />
-            ) : null}
-            {partner?.strength ? (
-              <Chip name={names.partner} text={partner.strength} color={Palette.ink} />
-            ) : null}
+            {/* The website puts these two in the same pills as the rows
+                above, side by side. They were the old dot-and-name rows, which
+                is the shape the snapshot table has just left behind. */}
+            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+              {you.strength ? <SnapshotCell name={names.you} text={you.strength} own /> : null}
+              {partner?.strength ? <SnapshotCell name={names.partner} text={partner.strength} /> : null}
+            </View>
           </View>
         ) : null}
       </View>
@@ -584,15 +603,37 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
 
 // ── Pieces ─────────────────────────────────────────────────────────────────
 
-function Chip({ name, text, color }: { name: string; text: string; color: string }) {
+/**
+ * One person's answer to one snapshot question: their name, then the answer in
+ * the website's blue pill.
+ *
+ * The reader's own column carries the section's blue and their partner's is
+ * grey, which is the distinction the website draws between the two columns of
+ * its table and the only thing on the row saying which is which at a glance.
+ */
+function SnapshotCell({ name, text, own = false }: { name: string; text: string; own?: boolean }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-      <View style={{ width: 6, height: 6, borderRadius: Radius.pill, backgroundColor: color }} />
-      <Text style={{ ...Type.small, color: c.textMuted, width: 64 }} numberOfLines={1}>{name}</Text>
-      <Text style={{ ...Type.small, color: c.text, flex: 1 }}>{text}</Text>
+    <View style={{ flex: 1 }}>
+      <Text style={{ ...Type.eyebrow, fontSize: 9, color: own ? accentBlue : c.textMuted, marginBottom: Spacing.xs }}>
+        {name}
+      </Text>
+      <View
+        style={{
+          alignSelf: 'flex-start',
+          backgroundColor: own ? '#EEF3FF' : Palette.warm,
+          borderColor: own ? `${accentBlue}33` : c.border, borderWidth: 1,
+          borderRadius: Radius.pill, paddingVertical: 5, paddingHorizontal: Spacing.md,
+        }}>
+        <Text style={{ ...Type.small, fontWeight: '600', color: own ? accentBlue : c.textMuted }}>
+          {text}
+        </Text>
+      </View>
     </View>
   );
 }
+
+// Chip, a dot and a name against a value, drew the snapshot before it became
+// a table. Nothing uses that shape now.
 
 function RepairColumn({ title, items, accent }: {
   title: string; items: string[]; accent?: string;

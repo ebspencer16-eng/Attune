@@ -346,10 +346,7 @@ export default function NotesScreen() {
                 : null}
             </>
           ) : (
-            <Blank
-              title="Nothing here yet"
-              body="Notes, highlights and tags you leave anywhere in Attune land here, most recent first."
-            />
+            <Blank body="Write a note or highlight something in your results to get started. The last three things you left turn up here, most recent first." />
           )}
           </Section>
 
@@ -393,10 +390,9 @@ export default function NotesScreen() {
             </>
           ) : (
             <Blank
-              title="Nothing here yet"
               body={partner
-                ? `Anything ${partner} shares with you appears here, with the unread ones marked.`
-                : 'Anything your partner shares with you appears here, with the unread ones marked.'}
+                ? `Nothing shared with you yet. When ${partner} shares a note it turns up here, and the unread ones are marked.`
+                : 'Nothing shared with you yet. When your partner shares a note it turns up here, and the unread ones are marked.'}
             />
           )}
           </Section>
@@ -742,8 +738,12 @@ function TagList({
         </View>
       ) : null}
 
-      {/* Suggestions, and only the ones this person does not already have. */}
-      {offered.length ? (
+      {/* Suggestions, and only the ones this person does not already have.
+          They sit with the add field and appear with it: Ellie asked for the
+          empty tags section to show the empty table and its instruction
+          "rather than showing those pills", and a row of pills over an empty
+          list reads as a list of tags they already have. */}
+      {addOpen && offered.length ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md }}>
           {offered.map((sg) => (
             <Pressable
@@ -800,21 +800,40 @@ function TagList({
       </View>
       ) : (
         <Blank
-          title="Nothing here yet"
           body={query
             ? 'No tag by that name. Clear the search to see them all.'
-            : 'Tags you add appear here, with how many notes are filed under each.'}
+            : 'Add a tag to get started. Keep track of your tags in this section, with how many notes are filed under each.'}
         />
       )}
     </View>
   );
 }
 
-function Blank({ title, body }: { title: string; body: string }) {
+/**
+ * A section with nothing in it yet.
+ *
+ * ── WHY IT IS A TILE ──────────────────────────────────────────────────────
+ * Ellie: "Add the tiles for these blank sections, and add minor instructions."
+ * Text floating under a heading reads as a page that failed to load. The same
+ * words inside the bordered tile the section will eventually be full of reads
+ * as a place waiting to be used, and it shows the shape of the thing before
+ * there is anything in it, which is what she asked to see.
+ *
+ * The line is an instruction rather than a description: it says what to do,
+ * not what is absent.
+ */
+function Blank({ body }: { body: string }) {
   return (
-    <View style={{ paddingVertical: Spacing.xxl }}>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{title}</Text>
-      <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.xs }}>{body}</Text>
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, borderStyle: 'dashed',
+        paddingVertical: Spacing.xxl, paddingHorizontal: Spacing.lg,
+        alignItems: 'center',
+      }}>
+      <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center', lineHeight: 20 }}>
+        {body}
+      </Text>
     </View>
   );
 }

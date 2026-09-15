@@ -25,6 +25,7 @@
  */
 
 import { readFileSync } from 'node:fs';
+import * as TRACK from '../api/_lib/track-marks.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const src = readFileSync(`${ROOT}attune-app/src/components/results.tsx`, 'utf8');
@@ -41,8 +42,34 @@ markers.forEach((m) => {
   }
 });
 
-// The rule itself: matching values separate, different values do not.
-const nudge = (a, b) => (Math.abs(a - b) < 1 ? [-5, 5] : [0, 0]);
+/**
+ * The rule itself, taken out of the app rather than written again here.
+ *
+ * This gate used to carry its own copy of markerNudge, which is the failure it
+ * exists to catch, one level up: the app's rule changed from five points to
+ * the shared seven and from a hair's width to the shared threshold, and the
+ * copy here went on passing against numbers nothing used any more.
+ *
+ * The function is small and has no dependencies beyond two constants, so it is
+ * lifted out by name, stripped of its types and run.
+ */
+const nudge = (() => {
+  const m = src.match(/function markerNudge\(a: number, b: number\): \[number, number\] \{([\s\S]*?)\n\}/);
+  if (!m) {
+    console.error('[check-overlapping-marks] markerNudge is not in results.tsx under that name.');
+    process.exit(1);
+  }
+  const constants = ['CLOSE_PCT', 'STAGGER'].map((name) => {
+    const c = src.match(new RegExp(`^const ${name} = (-?[0-9.]+);`, 'm'));
+    if (!c) {
+      console.error(`[check-overlapping-marks] the app does not declare ${name}, which markerNudge reads.`);
+      process.exit(1);
+    }
+    return `const ${name} = ${c[1]};`;
+  }).join('\n');
+  // eslint-disable-next-line no-new-func
+  return new Function(`${constants}\nreturn (a, b) => {${m[1]}\n};`)();
+})();
 const CASES = [
   ['the same value', 40, 40, true],
   ['a hair apart', 40, 40.5, true],
@@ -56,6 +83,21 @@ for (const [name, a, b, wantSplit] of CASES) {
   if (split !== wantSplit) {
     problems.push(`${name}: the marks ${split ? 'separate' : 'do not separate'} and they should ${wantSplit ? '' : 'not '}.`);
   }
+  /**
+   * Ellie: "I want the placement dots, if grouped, to be evenly vertically
+   * distributed with the bar in the middle." So the two steps have to be equal
+   * and opposite. One of them being zero, or both going the same way, puts the
+   * pair off the line it is measured against.
+   */
+  if (split && x + y !== 0) {
+    problems.push(`${name}: the marks step ${x} and ${y}, which is not even about the bar.`);
+  }
+}
+
+// And the step is the shared one, not this file's own.
+const [stepA] = nudge(40, 40);
+if (Math.abs(stepA) !== TRACK.STAGGER) {
+  problems.push(`a stepped mark moves ${Math.abs(stepA)} points and api/_lib/track-marks.js says ${TRACK.STAGGER}.`);
 }
 
 if (problems.length) {
