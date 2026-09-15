@@ -67,9 +67,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O128 | **Notifications are written and nobody can read them.** The server records them, /api/notifications serves them, the app has two client functions for them, and no screen calls either. One kind is actually raised today: the notice that a partner deleted their account, which the retention policy promises in writing. That promise currently reaches nobody. |
-| O129 | **Five of the six notification kinds are never raised at all.** Copy exists for partner finished, results ready, partner nudged you, partner shared and new post. Nothing calls them. Either they are wired to the events they describe or they are copy on a shelf, which is the /email-preview problem again. |
-| O130 | **CLAUDE.md's not-built list is out of date.** It says Settings cannot edit a name or pronouns and that two home cards open the browser. Both are built: ProfileEditor is in Settings and the cards route in-app. A stale map is worse than none, because it is the first thing every session reads. |
 | O131 | **Sweep for bugs.** From outside with curl, and through the code for the shape that keeps recurring: one rule kept by hand in two places. |
 
 ## 3. For you to review
@@ -88,6 +85,10 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R73 | **Alerts reach you now.** Six kinds of alert have had copy since the notifications table went in, one was ever raised, and no screen in the app has ever read one. So the notice that a partner deleted their account, which the retention policy promises in writing, reached nobody. Five are raised now: your results are ready, your partner finished, your partner shared a note, your partner is waiting on you, and the account deletion. They arrive as rows at the top of the tile on Home, above what is next. Tapping one takes you to it and clears it. To see one: finish an exercise on one account when the other has finished theirs, or share a note from Notes. |
+| R74 | **The words in those alerts are mine, and they are yours to change.** Five short lines, two to ten words each, in `api/_lib/notifications.js`. They were written when the table was built and nothing has ever shown them to anyone, so nobody has read them yet. Tell me what you want them to say. |
+| R75 | **"Send them a reminder" now sends a reminder.** That card has been on the home screen since the card engine was written, pointing at the screen it was already on: it said it would send something and sent nothing. There is a cooldown of three days, and after you send one the card comes back as "Waiting on them", greyed out, which is the confirmation. No email goes with it. One person asking another to finish something should not arrive as a message from Attune, but say if you disagree. |
+| R76 | **New in In Practice is deliberately not an alert.** The home screen already carries a card for an unread post, and an alert would be the same prompt twice on one screen. The copy still exists and is recorded as unraised, so it reads as a decision rather than an oversight. Say the word and it turns on. |
 | R66 | **Selecting text, the way you asked for it.** Press and hold a word, keep holding, drag across what you want, let go. The toolbar appears just above the selection with highlight, underline, tag, note and share, and choosing one opens straight on that step. In the simulator: click and hold for about half a second, keep the button down, drag, then release. The mouse is the finger. |
 | R67 | **The reflection action plan tiles are on the ground now**, not white, matching the other at a glance pages and the site. |
 | R68 | **The checklist opens with everything closed**, six headers and their counts. |
