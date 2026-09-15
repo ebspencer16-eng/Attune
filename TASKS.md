@@ -64,13 +64,24 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Every item from your notes on 14 September is built and in
-section 3 or 4.
-
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O99 | **Physical Intimacy at a glance: the first tile's eyebrow should read Overview**, not Where you each land. App and site. The comms page was renamed and this one was not. |
+| O100 | **Physical Intimacy at a glance: the rows should show per cent aligned rather than two placement dots.** App and site. |
+| O101 | **In Practice titles are still cut off at the top.** The line box fix did not reach them, so the cause is somewhere else. Find it rather than padding it. |
+| O102 | **An article needs a way back.** A back to Resources arrow in the top left when one is open. |
+| O103 | **Tapping Resources or Notes while already on that tab returns to its landing page**, the way Insights does. Out of an article, out of whatever is open. |
+| O104 | **Remove the orange rule under the title on every expectations detailed page**, the one above the tip tile. |
+| O105 | **Relationship Reflection at a glance: the title should read Relationship Reflection**, and the line under it about how you each described things goes. App and site. |
+| O106 | **The website's How you each rated and Side by Side still carry the page dot and eyebrow in the top left.** They were meant to go from every results page. |
+| O107 | **Remove the description line on How you each rated**, the one about the distance between the two dots. App and site. |
+| O108 | **How you each rated: the bars should look like the communication detail pages'**, with the poles either side of the bar. App and site. |
+| O109 | **How you each rated: two tiles.** One for Overall, one for How things feel right now, and the second holds its three questions. |
+| O110 | **The app labels a placement dot in the bottom left; the site labels it under the dot.** Mirror the site. |
+| O111 | **Notes: drop the suggestion pills under the add field.** Put the examples in the field's own placeholder instead, something like "add a tag (ie. communicating needs, showing love, family)". |
+| O112 | **Say what each behaviour review item needs before it can be checked.** She asked whether R22 has to wait for the App Store. Most do not: the simulator can do text selection and the annotation path. The ones that genuinely need a real device or a live build should say so in their first words. |
 
 ## 3. For you to review
 
@@ -89,14 +100,6 @@ any order; work through them however suits.
 | # | Review |
 |--|--|
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
-| R3 | **App notes tab.** Pick up where you left off, shared notes, unread markers, the tag list with its A-Z default and the sort dropdown. |
-| R5 | **Website marketing pages.** The hero without orange italics, no subpage titles in banners, tighter vertical spacing, the founders note redesign, the FAQ and packages changes, In Practice. |
-| R50 | **Physical Intimacy, the whole section.** The hero reads Physical Intimacy Expectations and the line under it is gone. The action plan is three items on both surfaces, furthest apart first. Conversations Worth Having is gone from both. The detail pages have room above the heading, poles beside the bar like the communication pages, and nothing else: no progress bar, no state word, no description tile. |
-| R52 | **The Notes empty states, in their tiles.** Your line for the tags one, mine for the other two. The suggestion pills only appear with the add field now. |
-| R53 | **Every heading in the app, on its own line box.** You reported the In Practice titles clipped at the top. Every hero in the app was: React Native clips rather than overflowing, and the hero was 30 point type in a 34 point box against a face that declares 41. The two faces are measured out of their own files now and nothing may be set tighter than they allow, which also lifted the storycard figures. |
-| R54 | **The Already aligned panel, on all six category pages.** It was the section green at 7 per cent over the page, and a translucent panel has no colour of its own: on Career & Work's orange page it came out orange. It is a pale opaque tile now. A deep green one was the first fix and the gate refused it, because Household's own colour is that same green. |
-| R30 | **The Relationship Reflection section in the app, against the site.** At a glance should open with both your names and a line saying how you each described things overall, then the four ratings as blocks, then your action plan. How you each view the relationship and Side by Side are now light, in white cards, like the site. What you each admire has moved off at a glance and onto How you each view the relationship, which is where the site has it. |
-| R33 | **The Notes tag list.** It starts empty, with an add field at the top and your two suggestions under it. Adding a tag, tapping a suggestion, and the sort control only appearing once there is something to sort. |
 
 ### Copy, and whether the words are yours
 
@@ -107,7 +110,6 @@ any order; work through them however suits.
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
 | R13 | **The deletion emails**: the confirmation to the person, and the notice to their partner. My words, in `api/_lib/deletion-emails.js`. |
 | R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
-| R36 | **The five tag suggestions.** Yours are communicating needs and love. Mine are money, family and time together: short, lower case, about a life rather than about results, and deliberately not the names of dimensions or categories, which are the tags you asked to be rid of. In `TAG_SUGGESTIONS` in `api/_lib/tags.js`. Change any of them and both surfaces follow. |
 | R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
 
 ### Behaviour, which needs a real device
@@ -115,7 +117,6 @@ any order; work through them however suits.
 | # | Review |
 |--|--|
 | R34 | **Tap Insights while you are already on Insights.** It should go back to Highlights from wherever you were. Coming to Insights from another tab should land where you left off, as it does now. |
-| R35 | **Explore more resources, swiped to the end.** The fade on the right should be there while there is more to see and gone when there is not. Same on the results nav rows. |
 | R20 | **Sign-in holds.** Switch tabs, close the app, come back tomorrow. It should not ask again. |
 | R22 | **Select text, then highlight, underline, tag, note or share.** The whole annotation path. |
 | R23 | **The five exercises end to end in the app**, including Physical Intimacy, whose multi-select screens the automated driver cannot work. |
@@ -126,6 +127,11 @@ any order; work through them however suits.
 
 | Verified by you | What |
 |--|--|
+| R52 | The Notes empty states, in their tiles |
+| R3 | The app notes tab |
+| R5 | The website marketing pages |
+| R35 | The fade at the edge of a scrolling row |
+| R36 | Closed: no longer applicable |
 | R8 | The couple map, both surfaces |
 | R47 | The connecting lines, curved and even |
 | R48 | The couple map at 72% of the storycard |
