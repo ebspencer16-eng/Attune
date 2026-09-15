@@ -1627,7 +1627,15 @@ function WrittenPair({
             borderLeftColor: side.colour, borderLeftWidth: 4,
             marginBottom: i === 0 ? Spacing.sm : 0,
           }}>
-          <Text style={{ ...Type.eyebrow, fontSize: 9, color: side.colour, marginBottom: Spacing.xs }}>
+          {/* ── WHY THE NAME IS WHITE AND THE EDGE IS NOT ────────────────
+              Ellie: "can the names Ellie and Preston be in white? The colors
+              are hard to see on the bg." A person's colour on a translucent
+              tile over a section's own gradient is two colours fighting, and
+              at nine points the name loses. The website has always set these
+              two names in white for that reason; the app was the copy that
+              drifted. The left edge still carries the colour, which is where
+              the identity signal belongs: an edge has no text to read. */}
+          <Text style={{ ...Type.eyebrow, fontSize: 9, color: Palette.white, marginBottom: Spacing.xs }}>
             {side.name}
           </Text>
           <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{side.words}</Prose>

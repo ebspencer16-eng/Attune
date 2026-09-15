@@ -12129,12 +12129,32 @@ export default function App() {
             // + budget data to localStorage. Without this, a user logging in
             // on a new device defaults to Sarah's demo data even though their
             // real answers are stored server-side.
+            /**
+             * ── WHY THESE ALSO SET STATE ────────────────────────────────
+             * Ellie: "when I hard refreshed, my dashboard... showed my ex1 as
+             * incomplete. I refreshed again and it went away and I could access
+             * results."
+             *
+             * This block wrote the answers to localStorage and nothing else.
+             * The dashboard reads React state, which is initialised from
+             * localStorage at mount and never again, so the load that fetched
+             * the answers rendered as though they did not exist and the next
+             * one was right. There was a forced reload to paper over it, and it
+             * is correctly capped at one per tab, so a hard refresh lands in
+             * exactly the gap it cannot cover.
+             *
+             * Telling a couple an exercise is unfinished, and locking the
+             * results they have both completed, is the worst thing this screen
+             * can get wrong. So the answers go into state here, the way
+             * intimacy and conflict already did, and the render is right the
+             * first time.
+             */
             try {
-              if (profile?.ex1_answers)        localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers));
+              if (profile?.ex1_answers)        { localStorage.setItem('attune_ex1', JSON.stringify(profile.ex1_answers)); setEx1State(profile.ex1_answers); }
               else if (read.ok)                localStorage.removeItem('attune_ex1');
-              if (profile?.ex2_answers)        localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers));
+              if (profile?.ex2_answers)        { localStorage.setItem('attune_ex2', JSON.stringify(profile.ex2_answers)); setEx2State(profile.ex2_answers); }
               else if (read.ok)                localStorage.removeItem('attune_ex2');
-              if (profile?.ex3_answers)        localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
+              if (profile?.ex3_answers)        { localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers)); setEx3State(profile.ex3_answers); }
               else if (read.ok)                localStorage.removeItem('attune_ex3');
               if (profile?.ex1_answers_prior)  localStorage.setItem('attune_ex1_prior', JSON.stringify({ answers: profile.ex1_answers_prior, at: profile.ex1_prior_completed_at }));
               if (profile?.ex2_answers_prior)  localStorage.setItem('attune_ex2_prior', JSON.stringify({ answers: profile.ex2_answers_prior, at: profile.ex2_prior_completed_at }));
@@ -12164,14 +12184,18 @@ export default function App() {
               // into the exercise flow despite their answers being saved. If the
               // profile shows both exercises done, reconstruct the marker.
               if (profile?.joined_via_invite && profile?.ex1_answers && profile?.ex2_answers) {
-                localStorage.setItem('attune_partner_session', JSON.stringify({
+                // Into state as well as storage, for the same reason as the
+                // answers above: routing and the partner column read state.
+                const _marker = {
                   inviteCode: profile.invite_code || '',
                   name: profile.name || '',
                   ex1: profile.ex1_answers,
                   ex2: profile.ex2_answers,
                   ...(profile.ex3_answers ? { ex3: profile.ex3_answers } : {}),
                   completedAt: Date.now(),
-                }));
+                };
+                localStorage.setItem('attune_partner_session', JSON.stringify(_marker));
+                setPartnerSession((prev) => (prev && prev.ex1 && prev.ex2 ? prev : _marker));
               }
             } catch {}
             // Force a reload so the state initializers re-read localStorage.
