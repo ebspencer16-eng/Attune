@@ -63,11 +63,13 @@ CLAUDE.md, so anything new sits here until you do.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Everything I found is built and sitting in section 3 for your
+eye. Q2 in section 1 is the one thing I need from you.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O131 | **Sweep for bugs.** From outside with curl, and through the code for the shape that keeps recurring: one rule kept by hand in two places. |
 
 ## 3. For you to review
 
@@ -85,6 +87,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R79 | **The sweep itself, and what it did not find.** All 57 endpoints hit from outside with no credentials: no 500s, and every one that should refuse refused. All 40 public pages fetched and measured for readable text: two looked wrong and neither was. `/reviews` serves the FAQ page because the reviews page was folded into it on purpose, and `/portal` is a near-empty page because it is a retired URL kept only to forward old bookmarks. I checked why before reporting either, which is the habit that stops a deliberate retirement being undone. One genuine thing: the privacy choices page had two Sign in links pointing at two different places, one of them at the retired `/portal`. Both point at the live page now. |
 | R78 | **Couples who own Conflict Patterns were never offered the reminder.** The home screen decides whether to show "Send them a reminder" from a list of exercises, and that list was written out by hand with four of the five. Conflict Patterns was missing, so if you had finished it and your partner had not, the card never appeared, and your results were waiting on the one exercise the screen would not mention. The same bug was in the block six lines above it, was found, and was fixed there only. It reads the registry now. The gate that exists to catch this had been skipping the file, because the file imports the registry somewhere else in it, and it no longer does. Nothing for you to do. |
 | R77 | **Anyone could make the site send order confirmation emails.** Found by sweeping every endpoint from outside with curl, which is the habit CLAUDE.md asks for and which has now turned something up twice. `/api/send-order-email` checked who was calling only when the request came from a browser. Anything that is not a browser, which is any script anywhere, skipped the check entirely and could hand us a name, an email address, a total and an order number and have us send that person a branded Attune order confirmation for a purchase that never happened. The same endpoint also accepted any domain that merely ended with ours, and any Vercel preview in the world. `/api/send-email` had exactly this hole, was fixed, and this file kept the old version: one rule, two copies, and nobody looked at the weaker one again. Both now read one guard, and `check-mail-origin.mjs` runs both endpoints against six ways of asking and fails the build if a refusal stops being a refusal. Nothing for you to do. It is here because you should know it existed. |
 | R73 | **Alerts reach you now.** Six kinds of alert have had copy since the notifications table went in, one was ever raised, and no screen in the app has ever read one. So the notice that a partner deleted their account, which the retention policy promises in writing, reached nobody. Four are raised now: your partner finished, your partner shared a note, your partner is waiting on you, and the account deletion. They arrive as rows at the top of the tile on Home, above what is next. Tapping one takes you to it and clears it. To see one: finish an exercise on one account when the other has finished theirs, or share a note from Notes. |
