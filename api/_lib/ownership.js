@@ -43,6 +43,7 @@ export function capabilitiesFor(profile) {
   // workbook and admin code that works from orders does not need its own copy.
   const pkg = p.pkg || p.pkg_key || 'core';
 
+
   // ── WHAT EACH PACKAGE BUNDLES COMES FROM PKG_CAPS ────────────────────────
   // These lines used to name the packages themselves: `pkg === 'premium' ||
   // pkg === 'newlywed'`. That is package inclusion, written out a second time,
@@ -52,14 +53,39 @@ export function capabilitiesFor(profile) {
   //
   // Change what a package includes in PKG_CAPS and this follows. An add-on
   // flag on the profile grants on top, as it always did.
-  const caps = PKG_CAPS[pkg] || PKG_CAPS.core;
-  const ownsReflection = !!caps.hasReflection || !!p.addon_reflection;
+  /**
+   * ── THE THIRD SOURCE, AND WHY IT WAS MISSING ──────────────────────────────
+   * `profiles.entitlements` is the authoritative record of what an account
+   * owns: api/_lib/entitlements.js computes it as the grant-only union of
+   * every order under the account, the profile's own columns, a comp flag,
+   * and, for someone who joined by invite, their partner's orders. The website
+   * reads it. This read only the columns.
+   *
+   * So an add-on bought at checkout, which lands on an order row, was visible
+   * on the website and invisible to every endpoint the app calls. Ellie
+   * reported Physical Intimacy missing from the app three times. Twice it was
+   * explained by a developer-only grant on her browser, which was true then
+   * and was fixed. This is the half that was left: the app was asking a
+   * narrower question than the website.
+   *
+   * The union is grant-only in both directions, so reading the blob can add
+   * access someone paid for and can never take away access the columns grant.
+   * A stale blob therefore costs nothing.
+   */
+  const ent = p.entitlements && typeof p.entitlements === 'object' ? p.entitlements : {};
+  // The blob names a package too. The higher-ranked of the two wins, which is
+  // the same rule computeEntitlements uses when it merges several orders.
+  const blobCaps = PKG_CAPS[ent.pkg] || null;
+  const colCaps = PKG_CAPS[pkg] || PKG_CAPS.core;
+  const caps = (blobCaps && blobCaps.rank > colCaps.rank) ? blobCaps : colCaps;
+
+  const ownsReflection = !!caps.hasReflection || !!p.addon_reflection || !!ent.addonReflection;
   // Intimacy is add-on only on every package, so no capability bundles it.
-  const ownsIntimacy = !!caps.hasIntimacy || !!p.addon_intimacy;
-  const ownsConflict = !!caps.hasConflict || !!p.addon_conflict;
-  const ownsBudget = !!caps.hasBudget || !!p.addon_budget;
-  const ownsChecklist = !!caps.hasChecklist || !!p.addon_checklist;
-  const ownsWorkbook = !!caps.hasWorkbook || !!p.addon_workbook;
+  const ownsIntimacy = !!caps.hasIntimacy || !!p.addon_intimacy || !!ent.addonIntimacy;
+  const ownsConflict = !!caps.hasConflict || !!p.addon_conflict || !!ent.addonConflict;
+  const ownsBudget = !!caps.hasBudget || !!p.addon_budget || !!ent.addonBudget;
+  const ownsChecklist = !!caps.hasChecklist || !!p.addon_checklist || !!ent.addonChecklist;
+  const ownsWorkbook = !!caps.hasWorkbook || !!p.addon_workbook || !!ent.addonWorkbook;
 
   return {
     pkg,
@@ -92,4 +118,8 @@ export const OWNERSHIP_COLUMNS = [
   'pkg',
   'addon_reflection', 'addon_intimacy', 'addon_conflict',
   'addon_budget', 'addon_checklist', 'addon_workbook',
+  // The authoritative blob. A caller that does not select it gets a profile
+  // whose grants are only the columns, which is the narrower question that
+  // hid a paid-for add-on from the app.
+  'entitlements',
 ];

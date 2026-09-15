@@ -69,17 +69,30 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     .filter((cat) => cat.differences > 0)
     .sort((a, b) => b.differences - a.differences)
     .slice(0, 3);
-  if (expCats.length) {
+  /**
+   * The group appears whenever this couple has expectations results, which is
+   * what the website does. It was conditional on there being a difference, so
+   * a couple who agreed across every area lost the section entirely and their
+   * page had one fewer than the same couple's page on a laptop. The line for
+   * that case is the website's own.
+   */
+  if (expectations) {
     groups.push({
       id: 'exp',
       color: '#1B5FE8',
       label: 'Expectations',
       section: 'exp-overview',
-      items: expCats.map((cat) => ({
-        title: `Work through ${cat.label.toLowerCase()} together`,
-        body: `${cat.differences} ${cat.differences === 1 ? 'thing' : 'things'} here you each pictured differently. Start with the first one.`,
-        say: null,
-      })),
+      items: expCats.length
+        ? expCats.map((cat) => ({
+          title: `Work through ${cat.label.toLowerCase()} together`,
+          body: `${cat.differences} ${cat.differences === 1 ? 'thing' : 'things'} here you each pictured differently. Start with the first one.`,
+          say: null,
+        }))
+        : [{
+          title: 'Keep your expectations current',
+          body: 'You matched across every area. Revisit this when something changes.',
+          say: null,
+        }],
     });
   }
 

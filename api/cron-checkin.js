@@ -11,7 +11,7 @@
  *
  * Required env vars: SUPABASE_URL, SUPABASE_SERVICE_KEY, RESEND_API_KEY, FROM_EMAIL, CRON_SECRET
  */
-import { capabilitiesFor } from './_lib/ownership.js';
+import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 import { unsubscribeLink } from './_lib/email-footer.js';
 import { SITE_URL } from './_lib/site.js';
@@ -67,7 +67,7 @@ export default async function handler(req) {
     // for users who already have anniversary access.
     async function fetchUsers(sentAtField, window) {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?select=id,email,name,partner_name,created_at,ex3_completed,pkg` +
+        `${supabaseUrl}/rest/v1/profiles?select=id,email,name,partner_name,created_at,ex3_completed,${OWNERSHIP_COLUMNS.join(',')}` +
         `&email_opt_in=eq.true` +
         `&${sentAtField}=is.null` +
         `&created_at=gte.${window.start.toISOString()}` +

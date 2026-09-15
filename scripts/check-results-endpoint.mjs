@@ -126,6 +126,34 @@ if (body?.ok) {
 }
 
 /**
+ * ── WHAT COMES NEXT, AS THE ENDPOINT ACTUALLY ASSEMBLES IT ────────────────
+ * check-what-comes-next.mjs compares the groups the module can build with the
+ * groups the website builds. It cannot see the call: api/results.js passed
+ * `{ tiles: commsPlan.tiles }` into a function whose Communication group is
+ * built from `commsPlan.protocols`, so the group was written and then the one
+ * thing it reads was stripped on the way in. Ellie reported the app's page
+ * having fewer sections than the site's twice, and the second time the module
+ * was already right.
+ *
+ * So this asks the payload. The fixture answers every exercise, so every group
+ * the couple's ownership allows should be there.
+ */
+if (body?.ok) {
+  const groups = body.whatComesNext?.groups || [];
+  const ids = new Set(groups.map((g) => g.id));
+  for (const id of ['couple-type', 'comm', 'exp']) {
+    if (!ids.has(id)) {
+      problems.push(
+        `whatComesNext has no "${id}" group. The module builds one; something `
+        + 'between it and the payload is not passing what it reads.');
+    }
+  }
+  for (const g of groups) {
+    if (!g.items?.length) problems.push(`whatComesNext group "${g.id}" is empty`);
+  }
+}
+
+/**
  * ── EVERY FIELD THE APP READS, CHECKED AGAINST WHAT IS ACTUALLY SENT ───────
  * The list above is hand-written and therefore only as good as someone
  * remembering to add to it. This half is not: it reads the app's own source
@@ -166,4 +194,5 @@ if (problems.length) {
 
 console.log(
   `[check-results-endpoint] 200 ok, ${(body.commResponses || []).length} side-by-side rows, `
-  + `${(body.commDomains || []).length} domains, all fields the app reads are present.`);
+  + `${(body.commDomains || []).length} domains, ${(body.whatComesNext?.groups || []).length} What Comes Next groups, `
+  + 'all fields the app reads are present.');

@@ -26,7 +26,7 @@ export const config = { runtime: 'edge' };
 
 import { summarizeConflict } from './_lib/conflict-results.js';
 import { partnerView } from './_lib/conflict-partner-view.js';
-import { capabilitiesFor } from './_lib/ownership.js';
+import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import {
   PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, FREQUENCY_LABELS,
   SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, NO_ACTION_NEEDED,
@@ -83,7 +83,11 @@ export default async function handler(req) {
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
-    const cols = 'id,name,partner_name,partner_profile_id,pkg,addon_conflict,conflict_data';
+    // The ownership rule's own list, rather than the two columns this used to
+    // name. A grant that reached the account through an order lands in
+    // profiles.entitlements, which was not selected, so a couple who bought
+    // Conflict Patterns at checkout were told they do not own it.
+    const cols = ['id', 'name', 'partner_name', 'partner_profile_id', 'conflict_data', ...OWNERSHIP_COLUMNS].join(',');
 
     const meRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc });

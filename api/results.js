@@ -846,9 +846,17 @@ export default async function handler(req) {
        */
       whatComesNext: whatComesNext({
         coupleTypeId: results.coupleType,
-        // The same plan the communication page draws, so this page can collect
-        // its protocols the way the website's does.
-        commsPlan: { tiles: commsPlan.tiles },
+        /**
+         * The whole plan, protocols included.
+         *
+         * This passed `{ tiles: commsPlan.tiles }`, which is the shape the app
+         * is sent, and the protocols are what the Communication group is built
+         * from. So the group was written, and then the one thing it reads was
+         * stripped on the way in: the app's What Comes Next still had one
+         * section fewer than the website's, which is what Ellie reported the
+         * second time.
+         */
+        commsPlan,
         expectations,
         intimacy,
         reflection,

@@ -23,7 +23,7 @@ import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
 import { researchOfTheDay } from './_research.js';
 import { pickUp } from './_lib/pick-up.js';
-import { capabilitiesFor } from './_lib/ownership.js';
+import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -69,8 +69,11 @@ export default async function handler(req) {
       // new exercise ends up read as never started: the column is simply not in
       // the select, so it arrives undefined and nothing errors.
       ...EXERCISE_COLUMNS,
-      'addon_reflection', 'addon_budget', 'addon_checklist', 'addon_intimacy',
-      'addon_conflict', 'addon_workbook',
+      // The ownership rule's own list. These were named here by hand, which
+      // is how `entitlements` came to be missing from this endpoint's select
+      // while the rule needed it: a column that is not selected reads as
+      // undefined, and undefined reads as "does not own it".
+      ...OWNERSHIP_COLUMNS,
       'budget_data', 'checklist_data', 'profile_setup_complete',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
