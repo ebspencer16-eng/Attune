@@ -37,14 +37,14 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
-**One waiting: 064.** 061, 062 and 063 are all run.
+**One waiting: 065.** 061 to 064 are all run.
 
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M64 | **Run `supabase/migrations/064_drop_seeded_tags.sql`.** It clears the default tags out of accounts that already have them. The app and the endpoint have stopped creating them, so a new account opens an empty list either way; this is for the ones opened before today. It leaves alone any default tag somebody has actually filed a note under, because deleting it would take the tag off their note. It prints how many it is about to remove, then how many are left. |
+| M65 | **Run `supabase/migrations/065_website_article_reads.sql`.** It lets an In Practice article be marked read. The twelve pieces from the website open in the app now, and the table that records a read only accepts rows from the posts table, so reading one of them records nothing and the row never says "Read". Until you run it the app behaves as it does today; nothing breaks either way. It drops one foreign key and prints what is left. |
 
 ### Decide these
 
@@ -97,6 +97,7 @@ any order; work through them however suits.
 | R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
 | R30 | **The Relationship Reflection section in the app, against the site.** At a glance should open with both your names and a line saying how you each described things overall, then the four ratings as blocks, then your action plan. How you each view the relationship and Side by Side are now light, in white cards, like the site. What you each admire has moved off at a glance and onto How you each view the relationship, which is where the site has it. |
+| R37 | **Communication at a glance, in the app.** It is purple into orange now, which is what the site has always drawn. It was in Conflict's blue. Worth a look next to the site, and next to the other four at a glance pages. |
 | R31 | **The tile, on every at a glance page.** Comms, Expectations, Relationship Reflection, Physical Intimacy and Conflict all sit in the rounded tile you liked. Detail pages are full width. Worth looking at the five together to see whether the tile still reads as a tile when the page inside it is long. |
 | R32 | **In Practice articles, read in the app.** Tap any of the twelve on the Resources tab. They open in the app now instead of the browser: the same words as the website, the callouts and numbered steps as tiles, the research citations at the bottom. The Get started panel at the end of each article is deliberately not there, because the app does not sell. |
 | R33 | **The Notes tag list.** It starts empty, with an add field at the top and your two suggestions under it. Adding a tag, tapping a suggestion, and the sort control only appearing once there is something to sort. |
@@ -130,6 +131,7 @@ any order; work through them however suits.
 
 | Verified by you | What |
 |--|--|
+| M64 | Migration 064: the default tags, cleared out of accounts that already had them |
 | R28 | Migration 062: the qr columns and the policy that let anyone read order rows |
 | R29 | Migration 063: row level security on admin_presets |
 | R26 | Migration 061: the surface column, so app and site can be told apart |
@@ -181,6 +183,9 @@ build.
 | The "Swipe >" label is gone and the fade carries it | `EdgeFadedRow` draws each fade only when there is something past that edge, which covers the results nav too |
 | In Practice articles are read in the app | all twelve were pages on the website that the app handed to the browser. Their bodies are generated from those pages into `api/_in-practice-bodies.js`; `check-in-practice-bodies.mjs` proves every word of every article reaches the app and nothing else does, planted three ways |
 | The tag list starts empty, with an add field and five suggestions | opening Notes used to write twenty-one tags into the account. It writes nothing now, and the names an annotation is read through are sent as reference data instead, derived from the live lists on every request. `check-no-seeded-tags.mjs` runs the endpoint and proves all three, planted three ways |
+| Every results page is the same colour on both surfaces | it was not: the website paints Communication purple into the brand orange and the app painted it in Conflict's blue, because six page gradients were typed on both surfaces and five pairs happened to agree. One copy now, in `api/_lib/section-grounds.js`; `check-section-grounds.mjs`, planted four ways |
+| Physical Intimacy's Conversations page is cream, as it is on the site | it was in the section's dark gradient, which the site keeps for at a glance and the dimension pages |
+| A repeat tap on Insights cannot silently stop working | the handle it goes through is cleared only by the screen that set it; two screens overlapping for a moment would have left it null for the rest of the session |
 | Every results at a glance page is a rounded tile, detail pages are full width | your call, and my view is that it is the right one: a tile has edges, and edges claim that what is inside is the whole of something, which is true of an overview and false of a three-screen scroll. One component, `glance-tile.tsx`, so the five cannot drift |
 | Relationship Reflection looks like the site, page for page | the at-a-glance heading and its line were built inside src/App.jsx and are now built once for both; the two detail pages were dark in the app and light on the site, and are light; What you each admire moved to the page the site puts it on; the ranking shows every item |
 | Conflict's at a glance page is in the same tile | the detail pages already matched, bar a white card wrapped round two cream quote cards |

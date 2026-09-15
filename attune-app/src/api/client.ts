@@ -250,13 +250,29 @@ export type ResultsSection = { id: string; label: string };
  * first child is its overview. Labels are the website's own, so the same
  * screen is called the same thing on both.
  */
-export type ResultsNavGroup = {
+/**
+ * One entry in the results nav.
+ *
+ * `glance` marks a "results at a glance" page, which is drawn in a rounded
+ * tile rather than full width. `ground` is that page's gradient and
+ * `groundStops` is where each colour sits along it, both from
+ * api/_lib/section-grounds.js, so the app is not holding a second copy of the
+ * website's palette. It held one, and the Communication page was drawn in
+ * Conflict's blue for as long as the app has had one.
+ */
+export type ResultsNavEntry = {
   id: string;
   label: string;
+  color?: string;
+  glance?: boolean;
+  ground?: string[] | null;
+  groundStops?: number[] | null;
+};
+
+export type ResultsNavGroup = ResultsNavEntry & {
   /** Used in the top row, where the full label will not fit. */
   shortLabel?: string;
-  color?: string;
-  children?: { id: string; label: string; color?: string }[];
+  children?: ResultsNavEntry[];
 };
 
 /**

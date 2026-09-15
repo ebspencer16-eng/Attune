@@ -48,10 +48,17 @@ type Screen = 'overview' | 'snapshot' | 'patterns' | 'wrote';
 const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
 
 export default function ConflictResultsView({
-  data, section, accent, title = 'Conflict Styles',
+  data, section, accent, ground, groundStops, title = 'Conflict Styles',
 }: {
   /** The heading this page prints, from the server's pageTitles. */
   title?: string;
+  /**
+   * The at-a-glance page's gradient and where its colours sit, from the
+   * results nav. One copy, in api/_lib/section-grounds.js, which the website
+   * paints from too.
+   */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
   data: Extract<ConflictResults, { ready: true }>;
   /**
    * The section's colour, from the results nav the server builds. It is the
@@ -91,7 +98,7 @@ export default function ConflictResultsView({
 
   return (
     <View style={{ flex: 1 }}>
-      {screen === 'overview' ? <Glance data={data} title={title} /> : null}
+      {screen === 'overview' ? <Glance data={data} title={title} ground={ground} groundStops={groundStops} /> : null}
       {screen === 'snapshot' ? <Snapshot data={data} accent={accent} /> : null}
       {screen === 'patterns' ? <Patterns you={you} content={content} /> : null}
       {screen === 'wrote' ? <Wrote data={data} /> : null}
@@ -125,10 +132,13 @@ export default function ConflictResultsView({
  * which is where the website puts it, next to the partner's answer to the same
  * question rather than alone.
  */
-function Glance({ data, title }: {
+function Glance({ data, title, ground, groundStops }: {
   data: Extract<ConflictResults, { ready: true }>;
   /** The page's heading, from the server's pageTitles. */
   title: string;
+  /** The page's gradient and its stops, from the results nav. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
 }) {
   const { you, partner, content, names } = data;
   const worth = you.ranked.filter((p) => p.band === 'worth_watching' || p.band === 'worth_attention');
@@ -153,7 +163,7 @@ function Glance({ data, title }: {
        One ground for all of it, in the tile every at-a-glance page in the app
        takes, and the website's own three colours rather than the two this file
        had invented. */
-    <GlanceTile ground={['#1B2A5E', '#2F55C4', '#1B8FB8']}>
+    <GlanceTile ground={ground} locations={groundStops}>
       <>
         {/* The names, and nothing above them. The eyebrow and its dot were
             here, matching the website, and Ellie asked for both to go from

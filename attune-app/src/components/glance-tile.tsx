@@ -27,19 +27,36 @@ import { ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import {
-  BottomTabInset, MaxContentWidth, Radius, Spacing,
+  BottomTabInset, MaxContentWidth, Palette, Radius, Spacing,
 } from '@/constants/attune-theme';
 
 /** Clear of the tab bar, so the last line of a page is not under it. */
 export const ResultsBottomInset = BottomTabInset + Spacing.lg;
 
+/**
+ * Only for a payload written before the nav carried grounds.
+ *
+ * The brand ink, twice. Deliberately not any section's gradient: a page in the
+ * wrong section's colour is exactly what this arrangement exists to stop, and
+ * a flat dark that belongs to nothing is the honest version of not knowing
+ * which page this is.
+ */
+export const NeutralGround = [Palette.ink, Palette.ink] as const;
+
 export default function GlanceTile({
-  ground, children,
+  ground, locations, children,
 }: {
-  /** The page's own gradient, which the website also draws. Three stops. */
-  ground: readonly string[];
+  /**
+   * The page's gradient, from the server, which is where the website paints
+   * its own from. The fallback is only for a cached payload written before the
+   * nav carried grounds.
+   */
+  ground?: readonly string[] | null;
+  /** Where each stop sits, 0 to 1. The website's middle stop is at 55%. */
+  locations?: readonly number[] | null;
   children: React.ReactNode;
 }) {
+  const stops = ground?.length ? ground : NeutralGround;
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View
@@ -48,7 +65,8 @@ export default function GlanceTile({
           maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
         }}>
         <LinearGradient
-          colors={[...ground] as [string, string, ...string[]]}
+          colors={[...stops] as [string, string, ...string[]]}
+          locations={locations?.length === stops.length ? [...locations] as [number, number, ...number[]] : undefined}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>

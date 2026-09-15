@@ -25,6 +25,7 @@
 import { EXPECTATIONS_CATEGORIES } from '../_questions.js';
 import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
 import { COMM_DOMAINS } from './tags.js';
+import { SECTION_GROUNDS, groundFor, groundLocations } from './section-grounds.js';
 
 export const RESULTS_SECTIONS = [
   'highlights',
@@ -193,22 +194,40 @@ export function isResultsSection(key) {
 export function resultsNav({ hasReflection = false, intimacyReady = false, conflictListed = false } = {}) {
   const AT_A_GLANCE = 'Results at a glance';
 
+  /**
+   * An at-a-glance entry, with the two things that make it one.
+   *
+   * `glance` is what tells the app to draw the page in the rounded tile rather
+   * than full width, so that rule is the server's and not a list of five ids
+   * typed into a phone. `ground` is the page's gradient, the same stops the
+   * website paints, so the two products cannot end up in different colours.
+   * The Communication page did exactly that: the website drew it purple into
+   * orange and the app drew it in Conflict's blue.
+   */
+  const glance = (id) => ({
+    id, label: AT_A_GLANCE, glance: true,
+    ground: groundFor(id), groundStops: groundLocations(id),
+  });
+
   const groups = [
     { id: 'highlights', label: 'Highlights', color: '#E8673A' },
     { id: 'couple-type', label: 'Couple Type', color: '#E8673A' },
     {
       id: 'comm', label: 'Communication', shortLabel: 'Comms', color: '#9B5DE5',
       children: [
-        { id: 'comm-overview', label: AT_A_GLANCE },
+        glance('comm-overview'),
         ...COMM_DOMAINS.map(d => ({ id: `comm-${d.id}`, label: d.label, color: d.color })),
       ],
     },
     {
       id: 'exp', label: 'Expectations', color: '#1B5FE8',
       children: [
-        { id: 'exp-overview', label: AT_A_GLANCE },
+        glance('exp-overview'),
         ...EXPECTATIONS_CATEGORIES.map((cat, i) => ({
           id: `exp-convo-${i}`, label: cat.label, color: '#10B981',
+          // Every conversation page is on the one ground, which the website
+          // calls EXP_BG. Sent so the app is not holding its own copy of it.
+          ground: groundFor('exp-detail'), groundStops: groundLocations('exp-detail'),
         })),
       ],
     },
@@ -218,7 +237,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     groups.push({
       id: 'reflection', label: 'Relationship Reflection', shortLabel: 'Rel. Refl.', color: '#1B5FE8',
       children: [
-        { id: 'reflection-overview', label: AT_A_GLANCE },
+        glance('reflection-overview'),
         { id: 'reflection-ratings', label: 'How You Each Rated' },
         { id: 'reflection-story', label: 'Side by Side' },
       ],
@@ -229,7 +248,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     groups.push({
       id: 'intimacy', label: 'Physical Intimacy', shortLabel: 'Intimacy', color: '#B5546E',
       children: [
-        { id: 'intimacy-overview', label: AT_A_GLANCE },
+        glance('intimacy-overview'),
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label })),
         { id: 'intimacy-plan', label: 'Conversations Worth Having' },
       ],
@@ -240,7 +259,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     groups.push({
       id: 'conflict', label: 'Conflict Patterns', shortLabel: 'Conflict', color: '#1B5FE8',
       children: [
-        { id: 'conflict-overview', label: AT_A_GLANCE },
+        glance('conflict-overview'),
         { id: 'conflict-snapshot', label: 'Your Conflict Snapshot' },
         { id: 'conflict-patterns', label: 'Your Patterns' },
         { id: 'conflict-wrote', label: 'What You Each Wrote' },

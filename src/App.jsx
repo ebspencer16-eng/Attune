@@ -109,6 +109,9 @@ import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
 import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension } from "../api/_lib/intimacy-results.js";
+// The fixed page gradients, one copy for both surfaces: the app receives the
+// same stops on the results nav. See api/_lib/section-grounds.js.
+import { gradientCss } from "../api/_lib/section-grounds.js";
 import { COMM_DOMAINS, DIMENSION_DISPLAY_ORDER } from "../api/_lib/comm-domains.js";
 import { DIM_META as SHARED_DIM_META } from "../api/_workbook-content.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT, RING_COLORS as SC_RING, statColor as scStatColor } from "../api/_lib/storycard-style.js";
@@ -3532,7 +3535,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
     <MaybeNav noSideNav={noSideNav} navItems={personalityNavItems} currentStep={step} onGo={go} accent="#E8673A">
       {/* Brighter than the old near-black navy: this is the page people land
           on, and it was the darkest slide in the results. */}
-      <ResultsSlide bg="linear-gradient(150deg, #3B2A6B, #6C4BB0 55%, #C8522E)">
+      <ResultsSlide bg={gradientCss("comm-overview")}>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ color: "white" }}>
 
@@ -3771,7 +3774,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 // Detail-page ground. Lifted from near-black navy: the glance page moved to a
 // brighter treatment and these read as murky beside it. Still darker than the
 // glance page, so the two are distinguishable.
-const EXP_BG = "linear-gradient(145deg, #443D8C, #6F63D6 55%, #514AAE)";
+const EXP_BG = gradientCss("exp-detail");
 
 function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onGoBack, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
@@ -3913,7 +3916,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
         {/* Brighter than EXP_BG, which the detail pages keep. This is the
             landing page for the section. */}
-        <ResultsSlide bg="linear-gradient(150deg, #2E2A6B, #4C56C0 55%, #1B8FA8)">
+        <ResultsSlide bg={gradientCss("exp-overview")}>
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
             {/* Header */}
@@ -7007,7 +7010,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         <Layout accent="#1B5FE8" noPrevNext={true}>
           {/* Brighter than the detail pages, which keep the darker ground.
               Matches the comms and expectations glance pages. */}
-          <ResultsSlide bg="linear-gradient(150deg, #22285E, #3E63C8 55%, #10A5B8)">
+          <ResultsSlide bg={gradientCss("reflection-overview")}>
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ color: "white" }}>
               {/* Header — matches the comms + expectations overviews */}
@@ -7372,7 +7375,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return (
         <Layout accent={ROSE} noPrevNext={true}>
           {/* Brighter than the detail pages, which keep the darker ground. */}
-          <ResultsSlide bg="linear-gradient(150deg, #4A1B33, #A34468 55%, #C8703E)">
+          <ResultsSlide bg={gradientCss("intimacy-overview")}>
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ color: "white" }}>
               {/* Header — same shape as the comms + expectations overviews */}
@@ -7862,7 +7865,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
     return (
       <Layout accent={BLUE}>
-        <ResultsSlide bg="linear-gradient(150deg, #1B2A5E, #2F55C4 55%, #1B8FB8)">
+        <ResultsSlide bg={gradientCss("conflict-overview")}>
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
             <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{SC_TITLES["conflict-overview"]}</div>

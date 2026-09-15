@@ -178,14 +178,29 @@ export default async function handler(req) {
       // Record the revision read, not just the fact of reading.
       const pr = await rest(`posts?id=eq.${encodeURIComponent(body.id)}&${publishedFilter}&select=revision`, { headers: svc });
       const post = (await pr.json().catch(() => []))?.[0];
-      if (!post) return json({ ok: false, error: 'not found' }, 404);
 
-      await rest('post_reads?on_conflict=owner_id,post_id', {
+      /**
+       * A website article counts as read too.
+       *
+       * They open in the app now, so someone finishes one and the feed still
+       * shows it as unread, because this checked the posts table and a website
+       * piece is not in it. They are at revision 1: a page is edited in place
+       * and carries no revision, so there is nothing for a reader to be behind.
+       *
+       * Until migration 065 runs, post_reads.post_id still references
+       * posts(id) and the insert is refused. The read is reported rather than
+       * assumed for exactly that reason: `recorded` says whether it landed.
+       */
+      const article = post ? null : IN_PRACTICE.find((a) => a.slug === body.id);
+      if (!post && !article) return json({ ok: false, error: 'not found' }, 404);
+      const revision = post ? post.revision : 1;
+
+      const w = await rest('post_reads?on_conflict=owner_id,post_id', {
         method: 'POST',
         headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify({ owner_id: me, post_id: body.id, revision: post.revision, read_at: new Date().toISOString() }),
+        body: JSON.stringify({ owner_id: me, post_id: body.id, revision, read_at: new Date().toISOString() }),
       });
-      return json({ ok: true, revision: post.revision });
+      return json({ ok: true, revision, recorded: w.ok });
     }
 
     return json({ ok: false, error: 'unsupported action' }, 400);

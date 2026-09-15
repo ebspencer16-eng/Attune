@@ -28,13 +28,17 @@ export const Palette = {
 } as const;
 
 /**
- * The blue ground, one definition.
+ * The home screen's blue ground, one definition.
  *
  * Two shades of the same blue, dark to light. It is monochrome on purpose: the
  * home screen ran a three-hue gradient once and it was the app inventing a
- * palette the site does not have. These two are the ones the results glance
- * already paints its lead panel with, so the app has one blue ground rather
- * than two that nearly match.
+ * palette the site does not have.
+ *
+ * It used to say these were the results glance's colours too, and the results
+ * glance used it. They were not: the website paints Communication purple into
+ * the brand orange, and the app was painting it this blue, which belongs to
+ * Conflict. Results grounds come from api/_lib/section-grounds.js by way of
+ * the payload now, and nothing in results reads this.
  */
 export const BlueGround = ['#1B2A5E', '#2F55C4'] as const;
 

@@ -24,7 +24,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
-import GlanceTile from '@/components/glance-tile';
+import GlanceTile, { NeutralGround } from '@/components/glance-tile';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
@@ -40,7 +40,7 @@ import HighlightCards from '@/components/highlight-cards';
 import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import {
-  BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 /**
@@ -201,8 +201,13 @@ export default function Results({
   // to the top of. See showFirstSection.
   const firstSectionId = sections[0]?.id || 'highlights';
   useEffect(() => {
-    jumpToTop = () => rememberSection(firstSectionId);
-    return () => { jumpToTop = null; };
+    const mine = () => rememberSection(firstSectionId);
+    jumpToTop = mine;
+    // Cleared only if it is still ours. Two results screens can overlap for a
+    // moment when the tab remounts, and an unguarded cleanup running after the
+    // new screen registered would leave the handle null and the repeat tap
+    // doing nothing, for the rest of the session and silently.
+    return () => { if (jumpToTop === mine) jumpToTop = null; };
   }, [rememberSection, firstSectionId]);
 
   /**
@@ -232,6 +237,20 @@ export default function Results({
   const pageX = useRef<Record<string, number>>({});
   const section = sections.some((s) => s.id === sectionId) ? sectionId : (sections[0]?.id ?? 'highlights');
   const activeGroup = groupOf(section);
+
+  /**
+   * The nav's own entry for this page, which carries its ground and whether it
+   * is an at-a-glance page. Both come from api/_lib/section-grounds.js, the
+   * same module the website paints from.
+   */
+  const navEntry = (() => {
+    for (const g of groups) {
+      if (g.id === section) return g;
+      const child = g.children?.find((ch) => ch.id === section);
+      if (child) return child;
+    }
+    return null;
+  })();
 
   useEffect(() => {
     // A little to the left of each, so the active entry does not sit flush
@@ -413,6 +432,10 @@ export default function Results({
              that need their own accent take it from here rather than writing
              a second hex next to the website's. */
           accent={activeGroup?.color || undefined}
+          /* The page's gradient and where its colours sit, from the server. A
+             page that has none is cream, which is most of them. */
+          ground={navEntry?.ground || null}
+          groundStops={navEntry?.groundStops || null}
           expectations={expectations}
           highlights={highlights}
           commsPlan={commsPlan}
@@ -455,7 +478,7 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, accent, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
 }: {
@@ -467,6 +490,9 @@ function SectionBody({
   pageCopy: (key: string, fallback: string) => string;
   /** The section's colour, from the results nav the server builds. */
   accent?: string;
+  /** The page's gradient stops, and where each sits. Both from the server. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
   expectations: ExpectationsSummary | null;
   highlights: HighlightCard[];
   commsPlan: CommsPlan | null;
@@ -531,7 +557,7 @@ function SectionBody({
     return (
       <Glance
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
-        plan={commsPlan}
+        plan={commsPlan} ground={ground} groundStops={groundStops}
         title={pageTitle('comm-overview', 'Communication Styles')}
         placementsLabel={pageCopy('commPlacements', 'Communication style overview')}
       />
@@ -564,6 +590,7 @@ function SectionBody({
   if (section === 'exp-overview') {
     return (
       <ExpectationsOverview
+        ground={ground} groundStops={groundStops}
         summary={expectations} you={you} them={them}
         title={pageTitle('exp-overview', 'Expectations')}
       />
@@ -578,6 +605,10 @@ function SectionBody({
         bucket={bucket}
         you={you}
         them={them}
+        /* The page's gradient, from the nav. It was typed here and again in
+           src/App.jsx as EXP_BG. */
+        ground={ground}
+        groundStops={groundStops}
         /* The website heads the opening paragraph in the couple type's own
            colour, falling back to orange. Passed in rather than hardcoded:
            the app was using expectations blue, on a violet ground. */
@@ -592,15 +623,15 @@ function SectionBody({
     return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} />;
   }
 
-  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} />;
+  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} ground={ground} groundStops={groundStops} />;
   if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} />;
   if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
   // The reflection action plan had a page of its own on both surfaces. Ellie
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
 
-  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} />;
-  if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} />;
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} ground={ground} groundStops={groundStops} />;
+  if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} promptLabel={intimacy?.promptLabel || 'Talk about it'} />;
   if (section.startsWith('intimacy-')) {
     const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
     return (
@@ -634,7 +665,7 @@ function SectionBody({
     // the two products cannot drift on it the way a second hex would.
     return (
       <ConflictResultsView
-        data={conflict} section={section} accent={accent}
+        data={conflict} section={section} accent={accent} ground={ground} groundStops={groundStops}
         title={pageTitle('conflict-overview', 'Conflict Styles')}
       />
     );
@@ -648,9 +679,13 @@ function SectionBody({
 }
 
 function ExpectationsOverview({
-  summary, you, them, title = 'Expectations',
+  summary, you, them, ground, groundStops, title = 'Expectations',
 }: {
   summary: ExpectationsSummary | null; you: string; them: string;
+  /** The page's gradient and its stops, from the results nav. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
+
   /** Ellie: the page led with the couple's names, which does not say what the
       page is. From the server, so both surfaces cannot title it differently. */
   title?: string;
@@ -688,7 +723,7 @@ function ExpectationsOverview({
   return (
     /* Dark, like the website's Expectations landing page, and in a tile,
        because it is a page you take in at once. See GlanceTile. */
-    <GlanceTile ground={['#2E2A6B', '#4C56C0', '#1B8FA8']}>
+    <GlanceTile ground={ground} locations={groundStops}>
       <>
           <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
@@ -847,11 +882,14 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
 
 /** One conversation: every item in that category, differences first. */
 function ExpectationsConversation({
-  bucket, you, them, position, introColor, tipLabel,
+  bucket, you, them, position, introColor, tipLabel, ground, groundStops,
 }: {
   bucket: ExpectationsSummary['categories'][number] | null;
   you: string;
   them: string;
+  /** The page's gradient and its stops, from the results nav. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
   /** The tip tile's label, from the server, so it reads the same on the site. */
   tipLabel: string;
   position?: { index: number; total: number } | null;
@@ -870,7 +908,10 @@ function ExpectationsConversation({
 
   const gaps = bucket.rows.filter((r) => !r.aligned);
   const matched = bucket.rows.filter((r) => r.aligned);
-  const ground = ['#443D8C', '#6F63D6', '#514AAE'] as [string, string, string];
+  // From the server, where the website reads the same three stops. A payload
+  // written before the nav carried them falls back to the flat neutral rather
+  // than to a second copy of this page's colours. See NeutralGround.
+  const stops = (ground?.length === 3 ? ground : NeutralGround) as unknown as [string, string, string];
   const accent = SectionColor.expectations;
 
   return (
@@ -880,7 +921,8 @@ function ExpectationsConversation({
        a cream page, a summary sentence of its own and one card per row. */
     <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={ground}
+        colors={stops}
+        locations={groundStops?.length === 3 ? groundStops as [number, number, number] : undefined}
         start={{ x: 0.1, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
@@ -1095,7 +1137,12 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
   );
 }
 
-function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; you: string; them: string }) {
+function IntimacyOverview({ data, you, them, ground, groundStops }: {
+  data: IntimacyResults | null; you: string; them: string;
+  /** The page's gradient and its stops, from the results nav. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
+}) {
   if (!data) {
     return <Waiting title="Physical Intimacy" body={WAITING.LOCKED_BY_THEM} />;
   }
@@ -1105,7 +1152,7 @@ function IntimacyOverview({ data, you, them }: { data: IntimacyResults | null; y
   return (
     /* Dark rose, which is the website's ground for this section, in the tile
        every at-a-glance page takes. */
-    <GlanceTile ground={['#4A1B33', '#A34468', '#C8703E']}>
+    <GlanceTile ground={ground} locations={groundStops}>
       <>
           {/* The two names, then the line that says which version of the
             exercise this was. The app opened with "Physical Intimacy
@@ -1319,7 +1366,11 @@ function IntimacyDimensionView({
   );
 }
 
-function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
+function IntimacyConversations({ data, promptLabel }: {
+  data: IntimacyResults | null;
+  /** "Talk about it", from the server, the same two words the pages use. */
+  promptLabel: string;
+}) {
   if (!data) {
     return <Waiting title="Conversations Worth Having" body={WAITING.LOCKED_BY_THEM} />;
   }
@@ -1331,23 +1382,28 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
       />
     );
   }
+  /**
+   * ── WHY THIS PAGE IS CREAM ────────────────────────────────────────────────
+   * The website draws it on the ordinary ground, in rose-tinted cards with a
+   * rose edge. The app drew it in the section's dark gradient, which is the
+   * ground the website keeps for at-a-glance and the dimension pages, so the
+   * last page of Physical Intimacy was the one page of that section that did
+   * not look like its own section on the other surface.
+   *
+   * Found in a sweep rather than reported, and it is the same shape as the two
+   * Reflection detail pages Ellie did report.
+   */
+  const rose = SectionColor.intimacy;
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={['#4A1B33', '#A34468', '#C8703E'] as [string, string, string]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: Palette.white }}>Conversations Worth Having</Text>
+        <Text style={{ ...Type.title, color: c.textStrong }}>Conversations worth having</Text>
         {/* Why the list is still here when nothing is misaligned. Agreeing is
             not the same as having said it out loud. The website has printed
             this all along; it was a string inside src/App.jsx, so the app
             showed the list and left the reader to work out why. */}
         {data.allAlignedNote ? (
-          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.8)', marginTop: Spacing.sm }}>
+          <Prose style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 22 }}>
             {data.allAlignedNote}
           </Prose>
         ) : null}
@@ -1357,17 +1413,21 @@ function IntimacyConversations({ data }: { data: IntimacyResults | null }) {
             <View
               key={d.section}
               style={{
-                backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg,
+                backgroundColor: `${rose}0d`,
+                borderLeftColor: rose, borderLeftWidth: 3,
+                borderTopRightRadius: Radius.lg, borderBottomRightRadius: Radius.lg,
+                paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
               }}>
-              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)' }}>{d.label}</Text>
-              <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xs }}>{d.prompt}</Text>
+              <Text style={{ ...Type.eyebrow, color: rose, marginBottom: Spacing.xs }}>{d.label}</Text>
+              <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
+                <Text style={{ ...Type.eyebrow, fontSize: 9, color: rose, marginTop: 3 }}>{promptLabel}</Text>
+                <Prose style={{ ...Type.body, color: c.text, flex: 1, lineHeight: 23 }}>{d.prompt}</Prose>
+              </View>
             </View>
           ))}
         </View>
       </View>
     </ScrollView>
-    </View>
   );
 }
 
@@ -1380,7 +1440,12 @@ function ReflectionWaiting() {
   );
 }
 
-function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
+function ReflectionOverview({ data, ground, groundStops }: {
+  data: ReflectionResults | null;
+  /** The page's gradient and its stops, from the results nav. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
+}) {
   if (!data) return <ReflectionWaiting />;
   /**
    * The website's page, in the website's order: the two names, the line about
@@ -1399,7 +1464,7 @@ function ReflectionOverview({ data }: { data: ReflectionResults | null }) {
   const rows = data.ratings.filter((r) => r.key !== 'a0');
 
   return (
-    <GlanceTile ground={['#22285E', '#3E63C8', '#10A5B8']}>
+    <GlanceTile ground={ground} locations={groundStops}>
       <>
         <Text style={{ ...Type.hero, color: Palette.white }}>
           {ov?.headline || `${data.names.you} & ${data.names.them}`}
@@ -2115,11 +2180,15 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
 }
 
 function Glance({
-  results, you, them, viewer, wideGap, plan = null,
+  results, you, them, viewer, wideGap, plan = null, ground, groundStops,
   title = 'Communication Styles', placementsLabel = 'Communication style overview',
 }: {
   results: CoupleResults; you: string; them: string; viewer: 'a' | 'b';
   wideGap: number | null; plan?: CommsPlan | null;
+  /** The page's gradient and its stops, from the results nav. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
+
   /** From the server, so the two surfaces cannot title the page differently. */
   title?: string; placementsLabel?: string;
 }) {
@@ -2127,9 +2196,7 @@ function Glance({
   const dims = results.content?.dimensions ?? [];
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        {/* ── ONE TILE, NOT ONE PER DIMENSION ────────────────────────────────
+    /* ── ONE TILE, NOT ONE PER DIMENSION ────────────────────────────────────
             The website's glance is a single dark panel: the couple type, then
             "Where you each land" with every dimension as a tight row inside
             it. The app had the panel, then four of the ten dimensions as
@@ -2137,13 +2204,15 @@ function Glance({
             findings rather than one picture of the whole thing.
 
             All ten, in the server's order, in the panel. The point of this
-            page is the shape of the pair across everything, and you cannot see
-            a shape in four cards. */}
-        <LinearGradient
-          colors={[...BlueGround]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
+       page is the shape of the pair across everything, and you cannot see a
+       shape in four cards.
+
+       The tile used to paint itself in BlueGround, a two-stop blue from the
+       app's own theme, while the website painted this page purple into the
+       brand orange. Both now come from api/_lib/section-grounds.js by way of
+       the results nav. */
+    <GlanceTile ground={ground} locations={groundStops}>
+      <>
           {/* block: comm-overview/couple-type-lead */}
           {/* Ellie: "Title should be 'Communication Styles'. Remove the couple
               type header and description line below, that info was just
@@ -2220,9 +2289,8 @@ function Glance({
             </View>
           ) : null}
 
-        </LinearGradient>
-      </View>
-    </ScrollView>
+      </>
+    </GlanceTile>
   );
 }
 
