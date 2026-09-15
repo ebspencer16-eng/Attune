@@ -1736,3 +1736,34 @@ you each rated and Side by Side. I rendered both in a browser and read what
 sits above the heading: nothing. The page-eyebrow gate passes and matches the
 shape as well as the words. The sidebar's own row and the narrow window's
 pill bar both carry a dot and a section name; one of those is probably it.
+
+---
+
+## 15 September 2026
+
+Six more built. Section 2 is empty; Q2 is the only thing waiting on Ellie.
+
+**"Notes/highlights aren't working" was two answers.** The gesture is a long
+press, not a right click, and nothing in the app said so: the only
+instruction in the flow appears after a selection has started. And the place
+she most likely tried it, an In Practice article, had no marking at all. Its
+body was plain text, which made it the longest prose in the product and the
+one reading surface you could not mark. It anchors to `post_block` now, an
+anchor type the notes migration has accepted since it shipped and nothing had
+ever written.
+
+**The conflict bar had a trap in it.** c0 runs from "Really rocky" at 0 to
+"We handle it well" at 4, and BAND_COLORS runs the other way, from a pattern
+that never happens to one that happens often. Reading the band straight off
+the answer paints the couple who handle conflict best in the colour of the
+worst pattern. One function does the flip and
+`check-conflict-colours.mjs` runs it rather than reading it.
+
+**A fixed count is what makes a tie arbitrary.** The intimacy action plan has
+been wrong three times; it is now the two furthest apart plus anything level
+with the second, and the gate covers a tie at second, a three-way tie at the
+top, and a tie below second that must change nothing.
+
+**Where to pick up.** R61 to R65. R61 is worth doing first in the simulator:
+it is the one that says whether marking works for a person rather than for a
+test.
