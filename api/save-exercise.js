@@ -206,10 +206,18 @@ export default async function handler(req) {
  * and it happens exactly once per couple. Without that test, anyone editing an
  * answer months later would re-announce results that have been open all along.
  *
- * ── TWO ROWS, NOT ONE ─────────────────────────────────────────────────────
- * The event is shared and the framing is not. The person who just finished
- * reads "your results are ready"; their partner reads that this person
- * finished, because for them something changed while they were elsewhere.
+ * ── ONE ROW, NOT TWO ──────────────────────────────────────────────────────
+ * Only the partner hears about it. The person who just finished is holding the
+ * phone: the home screen already offers them "Your results are ready", from
+ * the card engine, and an alert above it saying the same sentence is one
+ * prompt printed twice. I built it the other way first and a screenshot of the
+ * home screen settled it.
+ *
+ * So results_ready has copy and no caller, recorded as such beside new_post.
+ * The only event it would fit is a couple becoming ready without either of
+ * them doing anything, and the one place that could happen, partner-sync
+ * linking two accounts, links a partner who has just arrived and answered
+ * nothing.
  */
 async function announceIfComplete({ admin, userId, exerciseKey }) {
   const cols = ['id', 'name', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
@@ -232,13 +240,10 @@ async function announceIfComplete({ admin, userId, exerciseKey }) {
   if (before.ready) return;
 
   const firstName = (n) => (n || '').trim().split(/\s+/)[0] || null;
-  await Promise.all([
-    recordNotification({ ownerId: me.id, kind: 'results_ready' }),
-    recordNotification({
-      ownerId: them.id,
-      kind: 'partner_finished',
-      subjectId: me.id,
-      copy: { partnerName: firstName(me.name) },
-    }),
-  ]);
+  await recordNotification({
+    ownerId: them.id,
+    kind: 'partner_finished',
+    subjectId: me.id,
+    copy: { partnerName: firstName(me.name) },
+  });
 }

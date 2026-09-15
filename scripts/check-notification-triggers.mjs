@@ -14,10 +14,11 @@
  * changes nothing.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * Whether a kind SHOULD have a caller. new_post has none, on purpose: the home
- * screen already raises a card for an unread post, and an alert saying the
- * same thing would put one prompt on the screen twice. That is a product
- * decision, written up in TASKS.md, not a rule for a gate.
+ * Whether a kind SHOULD have a caller. Two have none, both on purpose and both
+ * for the same reason: the home screen already raises a card for an unread
+ * post and a card for results that are ready, and an alert saying the same
+ * thing would put one prompt on that screen twice. Those are product
+ * decisions, written up in TASKS.md, not rules for a gate.
  *
  * Nor does it check that an alert reaches anyone. check-notification-reach.mjs
  * does that, from the other end.

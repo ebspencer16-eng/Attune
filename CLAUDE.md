@@ -501,10 +501,12 @@ rows nobody reads" was wrong in both halves, since exactly one module wrote
 them. Check a line here before repeating it.
 
 Alerts, for what they are now: six kinds with copy in
-`api/_lib/notifications.js`, five of them raised, recorded in the generated
-`api/_lib/notification-triggers.js`. `new_post` is deliberately not raised,
-because the home screen already carries a card for an unread post. They reach
-people as rows at the top of the home tile, not behind a bell.
+`api/_lib/notifications.js`, four of them raised, recorded in the generated
+`api/_lib/notification-triggers.js`. `new_post` and `results_ready` are
+deliberately not raised: the home screen already carries a card for an unread
+post and a card for results that are ready, and an alert above it saying the
+same sentence is one prompt printed twice. They reach people as rows at the top
+of the home tile, not behind a bell.
 `check-notification-reach.mjs` fails the build if a kind loses its copy, its
 destination, or the screen that draws it.
 
