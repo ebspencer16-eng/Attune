@@ -55,35 +55,21 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-Nothing outstanding. When I have a question it appears here.
-
 | # | Question |
 |--|--|
+| Q2 | **Where is the dot and eyebrow you can see on How you each rated and Side by Side?** I cannot find it. I rendered both pages in a browser and read what sits above the heading: nothing does, on either. The gate that forbids a page eyebrow passes, and it matches the shape as well as the words. Two things in the top left of the results view do carry a dot and a section name, and either could be what you mean: the sidebar's own row, which reads a dot then Relationship Reflection, and on a narrow window the pill bar above the page. Tell me which, or send a screenshot, and it goes. |
 
 ## 2. Open
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Q2 in section 1 is the one thing I need from you.
+**Nothing open.** Everything from your lists is built and sitting in section 3
+for your eye. Q2 in section 1 is the one thing I need from you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O99 | **Physical Intimacy at a glance: the first tile's eyebrow should read Overview**, not Where you each land. App and site. The comms page was renamed and this one was not. |
-| O100 | **Physical Intimacy at a glance: the rows should show per cent aligned rather than two placement dots.** App and site. |
-| O101 | **In Practice titles are still cut off at the top.** The line box fix did not reach them, so the cause is somewhere else. Find it rather than padding it. |
-| O102 | **An article needs a way back.** A back to Resources arrow in the top left when one is open. |
-| O103 | **Tapping Resources or Notes while already on that tab returns to its landing page**, the way Insights does. Out of an article, out of whatever is open. |
-| O104 | **Remove the orange rule under the title on every expectations detailed page**, the one above the tip tile. |
-| O105 | **Relationship Reflection at a glance: the title should read Relationship Reflection**, and the line under it about how you each described things goes. App and site. |
-| O106 | **The website's How you each rated and Side by Side still carry the page dot and eyebrow in the top left.** They were meant to go from every results page. |
-| O107 | **Remove the description line on How you each rated**, the one about the distance between the two dots. App and site. |
-| O108 | **How you each rated: the bars should look like the communication detail pages'**, with the poles either side of the bar. App and site. |
-| O109 | **How you each rated: two tiles.** One for Overall, one for How things feel right now, and the second holds its three questions. |
-| O110 | **The app labels a placement dot in the bottom left; the site labels it under the dot.** Mirror the site. |
-| O111 | **Notes: drop the suggestion pills under the add field.** Put the examples in the field's own placeholder instead, something like "add a tag (ie. communicating needs, showing love, family)". |
-| O112 | **Say what each behaviour review item needs before it can be checked.** She asked whether R22 has to wait for the App Store. Most do not: the simulator can do text selection and the annotation path. The ones that genuinely need a real device or a live build should say so in their first words. |
 
 ## 3. For you to review
 
@@ -101,10 +87,6 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R57 | **Physical Intimacy at a glance as percentages.** One bar per aspect with a figure beside it, rather than two dots. An aspect one of you skipped shows a dash, because unanswered is not nought per cent aligned. The eyebrow over them reads Overview. Both surfaces. |
-| R58 | **An article, the budget and the checklist all open under a back arrow now.** That is also why the titles were cut off: those three replaced the tab's contents and left the tab's safe area behind them, so their headings sat under the status bar. |
-| R59 | **The add a tag field carries its examples.** The pills under it are gone. The three in the placeholder are the first three of the list in `api/_lib/tags.js`, so reordering that list changes which three appear. |
-| R60 | **The orange rule under the expectations page titles is gone**, on both surfaces. |
 | R66 | **Selecting text, the way you asked for it.** Press and hold a word, keep holding, drag across what you want, let go. The toolbar appears just above the selection with highlight, underline, tag, note and share, and choosing one opens straight on that step. In the simulator: click and hold for about half a second, keep the button down, drag, then release. The mouse is the finger. |
 | R67 | **The reflection action plan tiles are on the ground now**, not white, matching the other at a glance pages and the site. |
 | R68 | **The checklist opens with everything closed**, six headers and their counts. |
@@ -112,7 +94,7 @@ any order; work through them however suits.
 | R70 | **Conflict at a glance says *private to you**, in red, level with Your action plan and out at the right margin. Both surfaces. |
 | R71 | **The tip tile's label is white** on every expectations detail page, and the pole labels on How you each rated wrap instead of clipping. |
 | R72 | **What Comes Next carries each section's own action plan.** Communication was built from a different list than the one its at a glance page draws, so the same couple was told two different things depending on which page they were on. |
-| R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
+| R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
 
@@ -150,6 +132,10 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R57 | Physical Intimacy at a glance, as percentages |
+| R58 | The back arrow, and the headings clear of the status bar |
+| R59 | The add a tag field, with its examples in it |
+| R60 | No orange rule under the expectations page titles |
 | R63 | Conflict at a glance, with colour in it |
 | R64 | The intimacy action plan: top two plus ties |
 | R65 | The pole labels on the bar centre line |
