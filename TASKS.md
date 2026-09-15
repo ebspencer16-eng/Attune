@@ -64,16 +64,13 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Q2 in section 1 is the one thing I need from you, and it is
+a question rather than a task.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O113 | **How you each rated: the pole labels should sit level with the bar.** They are centred against the bar and its answer labels together, so they ride high. |
-| O114 | **Conflict at a glance needs colour in the content, not only the ground.** The two bars, and the section labels. |
-| O115 | **Physical Intimacy action plan: the top two, plus anything tied with the second.** Three fixed was the last answer and it cuts a tie in half. |
-| O116 | **The checklist's sections should collapse and open.** A closed one still shows its progress, 0 of 6. |
-| O117 | **Answer: marking is a long press, not a right click**, and the app never says so. The instruction only appears once a selection has started, which is no help to someone who cannot start one. Say it where it applies. |
-| O118 | **In Practice articles cannot be marked at all.** Their bodies are plain text, so a long press does nothing, and that is the most likely place she tried. The anchor type for a post block already exists. |
 | O99 | **Physical Intimacy at a glance: the first tile's eyebrow should read Overview**, not Where you each land. App and site. The comms page was renamed and this one was not. |
 | O100 | **Physical Intimacy at a glance: the rows should show per cent aligned rather than two placement dots.** App and site. |
 | O101 | **In Practice titles are still cut off at the top.** The line box fix did not reach them, so the cause is somewhere else. Find it rather than padding it. |
@@ -110,6 +107,11 @@ any order; work through them however suits.
 | R58 | **An article, the budget and the checklist all open under a back arrow now.** That is also why the titles were cut off: those three replaced the tab's contents and left the tab's safe area behind them, so their headings sat under the status bar. |
 | R59 | **The add a tag field carries its examples.** The pills under it are gone. The three in the placeholder are the first three of the list in `api/_lib/tags.js`, so reordering that list changes which three appear. |
 | R60 | **The orange rule under the expectations page titles is gone**, on both surfaces. |
+| R61 | **Marking, and the gesture nobody guesses.** Press and hold the first word, tap the last, then choose. Not a right click. In Practice articles can be marked now, which they could not before, and each one ends with the line that says how. That line is mine: "Press and hold any sentence to highlight it, tag it or save a note." |
+| R62 | **The checklist's sections open and close.** A closed one still shows 3 of 7. Everything starts open. |
+| R63 | **Conflict at a glance, with colour in it.** The two bars carry the answer's own colour, running from the calm green at "We handle it well" to the loud one at "Really rocky", and the two section labels are the pale blue of the page's own gradient. |
+| R64 | **The Physical Intimacy action plan is the top two, plus anything level with the second.** So a tie is never cut in half by a fixed count. |
+| R65 | **The pole labels sit on the bar's centre line** on How you each rated, both surfaces. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 
 ### Copy, and whether the words are yours
