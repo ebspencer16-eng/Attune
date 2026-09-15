@@ -7195,7 +7195,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               const H = n * ROW;
               return (
               <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What matters most this year</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{REFLECTION_PAGES.priorities.title}</div>
                 <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 92px 1fr", padding: "0.95rem 1.15rem 1.1rem" }}>
                     {/* Left: user's ranking, aligned toward the connectors */}
@@ -7251,7 +7251,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   </div>
                   <div style={{ padding: "0.6rem 1.15rem", borderTop: `1px solid ${C.stone}40`, background: "#FAFAF8" }}>
                     <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, fontWeight: 300 }}>
-                      Each line links the same priority on both lists. The flatter the line, the closer you ranked it.
+                      {REFLECTION_PAGES.priorities.note}
                     </span>
                   </div>
                 </div>

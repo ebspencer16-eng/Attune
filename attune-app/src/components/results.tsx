@@ -1749,19 +1749,16 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
             heading. The app had them on the Action Plan under one it made up. */}
         {data.priorities?.you?.length && data.priorities?.them?.length ? (
           <View style={{ marginBottom: Spacing.xl }}>
-            <Eyebrow color={SectionColor.reflection}>What matters most this year</Eyebrow>
-            {/* Both lists in one card, which is how the website draws them:
-                the point is the two orders against each other, and two cards
-                read as two separate answers. */}
-            <View
-              style={{
-                flexDirection: 'row', gap: Spacing.lg,
-                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg,
-              }}>
-              <PriorityList name={data.names.you} items={data.priorities.you} color={YOU_COLOR} />
-              <PriorityList name={data.names.them} items={data.priorities.them} color={THEM_COLOR} />
-            </View>
+            <Eyebrow color={SectionColor.reflection}>
+              {data.pages?.priorities?.title || 'What matters most this year'}
+            </Eyebrow>
+            <PriorityPair
+              you={data.names.you}
+              them={data.names.them}
+              yours={data.priorities.you}
+              theirs={data.priorities.them}
+              note={data.pages?.priorities?.note || ''}
+            />
           </View>
         ) : null}
       </View>
@@ -1939,21 +1936,133 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
  * reflectionPlan, still arrives on the payload and still feeds that page.
  */
 /**
- * One person's ranking, in their order.
+ * The two rankings, with a line joining each item to itself.
  *
- * Every item, not the first three. The website prints the whole list, and the
- * bottom of a ranking is as much of an answer as the top: a thing ranked last
- * by one person and first by the other is the finding on this page.
+ * ── WHY THE LINES ARE THE POINT ───────────────────────────────────────────
+ * Ellie: "Rel relf how you each rated page 'what matters most this year'
+ * section needs to have the connecting lines exactly like the web view. Need
+ * to push the margins wider for this section so that there's more space in
+ * between the two columns for the lines."
+ *
+ * Two ordered lists side by side say very little: you have to hold one and
+ * scan the other. The line is what turns them into a finding, and its slope is
+ * the finding. Flat means you agree about where a thing sits; steep means one
+ * of you put it first and the other last.
+ *
+ * ── WHY IT IS NOT AN SVG ──────────────────────────────────────────────────
+ * The website's connectors are bezier curves. react-native-svg is not a
+ * dependency here, and the couple map made the same call for the same reason:
+ * this is a line between two points, which a rotated view does exactly as
+ * well. The gradient along it is expo-linear-gradient, which the app already
+ * uses everywhere. A straight line rather than a curve is the one difference,
+ * and at this width the curve is nearly straight anyway.
  */
-function PriorityList({ name, items, color }: { name: string; items: string[]; color?: string }) {
+function PriorityPair({ you, them, yours, theirs, note }: {
+  you: string; them: string; yours: string[]; theirs: string[]; note: string;
+}) {
+  /** One row per item, and the connector column between the two lists. */
+  const ROW = 30;
+  const GUTTER = 76;
+  const height = Math.max(yours.length, theirs.length) * ROW;
+
   return (
-    <View style={{ flex: 1 }}>
-      <Eyebrow color={color || c.textMuted}>{name}</Eyebrow>
-      {items.map((item, i) => (
-        <Text key={item} style={{ ...Type.small, color: c.text, marginTop: Spacing.xs, lineHeight: 18 }}>
-          {i + 1}. {item}
-        </Text>
-      ))}
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, overflow: 'hidden',
+      }}>
+      <View style={{ flexDirection: 'row', padding: Spacing.lg, paddingBottom: Spacing.md }}>
+        {/* Left: their own order, pushed against the connectors. */}
+        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+          <Eyebrow color={YOU_COLOR}>{you}</Eyebrow>
+          {yours.map((item, i) => (
+            <View key={item} style={{ height: ROW, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text numberOfLines={1} style={{ ...Type.small, color: c.text, textAlign: 'right' }}>{item}</Text>
+              <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: YOU_COLOR, opacity: 0.6 }}>
+                {`#${i + 1}`}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* The connectors. Each line joins one item to the same item on the
+            other side, so a line's slope is how differently it was ranked. */}
+        <View style={{ width: GUTTER }}>
+          <View style={{ height: EYEBROW_ROW }} />
+          <View style={{ height, overflow: 'visible' }}>
+            {yours.map((item, i) => {
+              const j = theirs.indexOf(item);
+              if (j < 0) return null;
+              return (
+                <Connector
+                  key={item}
+                  from={i * ROW + ROW / 2}
+                  to={j * ROW + ROW / 2}
+                  width={GUTTER}
+                  gap={Math.abs(i - j)}
+                />
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Right: their partner's order. */}
+        <View style={{ flex: 1 }}>
+          <Eyebrow color={THEM_COLOR}>{them}</Eyebrow>
+          {theirs.map((item, i) => (
+            <View key={item} style={{ height: ROW, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: THEM_COLOR, opacity: 0.6 }}>
+                {`#${i + 1}`}
+              </Text>
+              <Text numberOfLines={1} style={{ ...Type.small, color: c.text }}>{item}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {note ? (
+        <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderTopColor: c.border, borderTopWidth: 1, backgroundColor: Palette.warm }}>
+          <Text style={{ ...Type.small, color: c.textMuted, lineHeight: 18 }}>{note}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** The height an Eyebrow takes, so the two lists and the lines start level. */
+const EYEBROW_ROW = 22;
+
+/**
+ * One line, from a row on the left to a row on the right.
+ *
+ * A view as long as the distance between the two points, rotated to the angle
+ * between them, with the brand gradient along it: orange at the reader's end,
+ * indigo at their partner's, which is how every other pair of marks in the
+ * results is coloured. Thicker and stronger when the two rankings agree,
+ * because that is the line worth seeing first.
+ */
+function Connector({ from, to, width, gap }: {
+  from: number; to: number; width: number; gap: number;
+}) {
+  const dy = to - from;
+  const length = Math.sqrt(width * width + dy * dy);
+  const angle = `${Math.atan2(dy, width)}rad`;
+  return (
+    <View
+      style={{
+        position: 'absolute', left: 0, top: from,
+        width: length, height: gap === 0 ? 3 : 2,
+        marginTop: gap === 0 ? -1.5 : -1,
+        transform: [{ translateX: -(length - width) / 2 }, { rotate: angle }],
+        opacity: gap === 0 ? 0.95 : 0.5,
+        borderRadius: 2, overflow: 'hidden',
+      }}>
+      <LinearGradient
+        colors={[YOU_COLOR, THEM_COLOR]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={{ flex: 1 }}
+      />
     </View>
   );
 }

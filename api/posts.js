@@ -62,13 +62,27 @@ export default async function handler(req) {
     const publishedFilter = `published_at=not.is.null&published_at=lte.${nowIso}`;
 
     if (action === 'feed') {
-      const [pRes, rRes] = await Promise.all([
+      const [pRes, rRes, allRes] = await Promise.all([
         rest(`posts?${publishedFilter}&select=id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
         rest(`post_reads?owner_id=eq.${me}&select=post_id,revision,read_at`, { headers: svc }),
+        /**
+         * How many people have read each piece, for the Featured sort.
+         *
+         * Ellie: "Featured should promote the most popular articles first (and
+         * out of those should promote unread first)." Popularity is not a
+         * field anyone types; it is this count. Ids only, so the row carries
+         * nothing about who read what, and it is counted here rather than sent
+         * as rows: the app has no business holding a list of reads.
+         */
+        rest('post_reads?select=post_id&limit=10000', { headers: svc }),
       ]);
       const published = await pRes.json().catch(() => []);
       const reads = await rRes.json().catch(() => []);
       const readBy = new Map(reads.map(r => [r.post_id, r]));
+      const popularity = new Map();
+      for (const r of (await allRes.json().catch(() => []))) {
+        popularity.set(r.post_id, (popularity.get(r.post_id) || 0) + 1);
+      }
 
       /**
        * The shelf is both sources, not one or the other.
@@ -121,6 +135,8 @@ export default async function handler(req) {
           const r = readBy.get(p.id);
           return {
             ...p,
+            /** How many people have read it. The Featured sort's first key. */
+            reads: popularity.get(p.id) || 0,
             read: !!r,
             // A substantive edit bumps revision, so a post someone read before
             // a rewrite resurfaces rather than staying silently marked read.

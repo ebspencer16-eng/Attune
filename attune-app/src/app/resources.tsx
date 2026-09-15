@@ -52,6 +52,7 @@ export default function ResourcesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>(ALL);
+  const [sort, setSort] = useState<PostSort>('featured');
   const [error, setError] = useState<ApiError | null>(null);
 
   /**
@@ -181,9 +182,10 @@ export default function ResourcesScreen() {
 
   // Posts carry `category` when the author set one. Anything uncategorised
   // still shows under All, so a missing field never hides a piece.
-  const visible = category === ALL
+  const inCategory = category === ALL
     ? posts
     : posts.filter((p) => p.category === category);
+  const visible = sortPosts(inCategory, sort);
 
   // All, then whatever shelves the server says exist.
   const shelves = [ALL, ...categories];
@@ -284,6 +286,13 @@ export default function ResourcesScreen() {
                   );
                 })}
               </ScrollView>
+
+              {/* Ellie asked for this between the shelves and the list, which
+                  is where someone looks once they have narrowed the shelf and
+                  still have twelve things to choose from. */}
+              <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+                <SortControl value={sort} onChange={setSort} />
+              </View>
 
               <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
                 {visible.length ? (
@@ -431,6 +440,95 @@ function ExploreTile({ item }: { item: Item }) {
  * website. Marking it read is the app's job either way, or the badge and the
  * "new in In Practice" card keep raising something the person has read.
  */
+/**
+ * How the In Practice list is ordered.
+ *
+ * Ellie: "I want a 'sort by' dropdown that defaults to 'featured' but also
+ * offers newest to oldest, shortest to longest, or longest to shortest.
+ * Featured should promote the most popular articles first (and out of those
+ * should promote unread first)."
+ *
+ * Featured is read literally: most read first, and where two are level, the
+ * one this reader has not opened. Popularity is the server's count of how many
+ * people have read each piece, not an editorial flag, so nothing has to be
+ * maintained for this to stay true.
+ */
+export type PostSort = 'featured' | 'newest' | 'shortest' | 'longest';
+
+const POST_SORTS: { key: PostSort; label: string }[] = [
+  { key: 'featured', label: 'Featured' },
+  { key: 'newest', label: 'Newest to oldest' },
+  { key: 'shortest', label: 'Shortest to longest' },
+  { key: 'longest', label: 'Longest to shortest' },
+];
+
+function sortPosts(list: PostSummary[], sort: PostSort): PostSummary[] {
+  const out = [...list];
+  const minutes = (p: PostSummary) => p.read_minutes ?? 0;
+  const when = (p: PostSummary) => (p.published_at ? Date.parse(p.published_at) || 0 : 0);
+  switch (sort) {
+    // A piece with no reading time sorts last rather than first: a missing
+    // number is not a short article.
+    case 'shortest': return out.sort((a, b) => (minutes(a) || 1e6) - (minutes(b) || 1e6));
+    case 'longest': return out.sort((a, b) => minutes(b) - minutes(a));
+    case 'newest': return out.sort((a, b) => when(b) - when(a));
+    default:
+      return out.sort((a, b) =>
+        (b.reads ?? 0) - (a.reads ?? 0)
+        || Number(!!a.read) - Number(!!b.read)
+        || when(b) - when(a));
+  }
+}
+
+/** The dropdown itself, the same shape as the one on the Notes tag list. */
+function SortControl({ value, onChange }: { value: PostSort; onChange: (v: PostSort) => void }) {
+  const [open, setOpen] = useState(false);
+  const current = POST_SORTS.find((o) => o.key === value)?.label || '';
+  return (
+    <View style={{ marginBottom: Spacing.md }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Change how articles are sorted"
+        onPress={() => setOpen((v) => !v)}
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, alignSelf: 'flex-start',
+          paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs,
+          borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
+          backgroundColor: c.surface,
+        }}>
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{`Sort by: ${current}`}</Text>
+        <Text style={{ color: c.textMuted, fontSize: 10 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+      </Pressable>
+
+      {open ? (
+        <View
+          style={{
+            marginTop: Spacing.sm,
+            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+            borderRadius: Radius.md, overflow: 'hidden',
+          }}>
+          {POST_SORTS.map((o) => (
+            <Pressable
+              key={o.key}
+              accessibilityRole="button"
+              onPress={() => { onChange(o.key); setOpen(false); }}
+              style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+              <Text
+                style={{
+                  ...Type.small,
+                  color: o.key === value ? c.textStrong : c.textMuted,
+                  fontWeight: o.key === value ? '700' : '400',
+                }}>
+                {o.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 function PostRow({ post, first, onOpenPost }: { post: PostSummary; first: boolean; onOpenPost: (id: string) => void }) {
   return (
     <Pressable

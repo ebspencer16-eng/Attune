@@ -409,7 +409,7 @@ export type ReflectionResults = {
   /** The label over the question under each pair on Side by Side. */
   promptLabel?: string;
   /** Each Reflection page's heading and the line under it, from the server. */
-  pages?: Record<string, { title: string; sub?: string; eyebrowOwn?: string; aligned?: string }>;
+  pages?: Record<string, { title: string; sub?: string; note?: string; eyebrowOwn?: string; aligned?: string }>;
 };
 
 /**
@@ -844,6 +844,11 @@ export type PostSummary = {
   read: boolean;
   /** The post changed since they read it, so it is worth resurfacing. */
   revised: boolean;
+  /**
+   * How many people have read it. The Featured sort's first key, counted by
+   * the server: popularity is not something anyone types.
+   */
+  reads?: number;
   /**
    * Set when this is one of the website's In Practice pages rather than a row
    * in the posts table. The app opens it there and does not try to record a
@@ -1616,9 +1621,20 @@ export type ConflictResults =
       partner: ConflictPartnerView | null;
       partnerFinished: boolean;
       content: {
-        patternCopy: Record<string, Record<string, { note: string }>>;
+        /**
+         * Per pattern: its label, its one-line definition, and a note per
+         * frequency band. The definition was typed as part of the band map,
+         * so the app could not read it and drew a pattern's name with nothing
+         * saying what the pattern is.
+         */
+        patternCopy: Record<string, {
+          label?: string;
+          definition?: string;
+          [band: string]: { note: string } | string | undefined;
+        }>;
         patternActions: Record<string, { title: string; body: string }>;
-        patternNotes: Record<string, string>;
+        /** The awareness note a rare pattern gets, in place of an action. */
+        patternNotes: Record<string, { title: string; body: string }>;
         bandColors: string[];
         frequencyLabels: string[];
         /** The c8 question text, labelling each person's reset answer. */

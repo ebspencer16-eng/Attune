@@ -62,6 +62,15 @@ export const REFLECTION_PAGES = {
     title: 'How you each view the relationship',
     sub: 'Every question with a fixed answer, shown together. The distance between the two dots is the whole point.',
   },
+  /**
+   * The ranking, and the line under it that says how to read the connectors.
+   * Both were written inside src/App.jsx, so the app had no heading for this
+   * section and nothing explaining what the lines mean.
+   */
+  priorities: {
+    title: 'What matters most this year',
+    note: 'Each line links the same priority on both lists. The flatter the line, the closer you ranked it.',
+  },
   story: {
     title: 'Side by Side',
     sub: 'Everything you each wrote, unedited, next to each other. Read them together.',

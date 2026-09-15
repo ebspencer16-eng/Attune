@@ -47,6 +47,20 @@ type Screen = 'overview' | 'snapshot' | 'patterns' | 'wrote';
 
 const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
 
+/**
+ * The label over a pattern's advice. Which one appears is the point of having
+ * it: a pattern showing up regularly gets something to try, one that is rare
+ * gets something to keep in mind, and the difference is the reading.
+ *
+ * The website's two strings. They were one string here, and it was the wrong
+ * one for half the bands.
+ */
+const ADVICE_TRY = 'One thing to try';
+const ADVICE_KEEP = 'One thing to keep in mind';
+
+/** The section's blue, which the website uses for this label. */
+const accentBlue = '#1B5FE8';
+
 export default function ConflictResultsView({
   data, section, accent, ground, groundStops, title = 'Conflict Styles',
 }: {
@@ -431,45 +445,79 @@ function Patterns({
       ) : null}
 
       {/* block: conflict-patterns/rows */}
-      {/* Worst first, as the server ranked them. */}
-      {you.ranked.map((p) => {
-        const v = p.value ?? 0;
-        const color = content.bandColors[Math.min(v, content.bandColors.length - 1)] || c.border;
-        const label = content.frequencyLabels[v] || '';
-        const note = content.patternCopy[p.key]?.[String(v)]?.note;
-        const action = v >= 2 ? content.patternActions[p.key] : null;
+      {/* ── ONE CARD, A ROW PER PATTERN ──────────────────────────────────
+          The website draws the four patterns as rows inside one card, divided
+          by a hairline. The app drew a card each, so four readings of one
+          measure read as four separate findings, which is the same mistake the
+          comms glance used to make with its dimensions.
 
-        return (
-          <View key={p.key} style={{ ...card, marginBottom: Spacing.md }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong }}>
-              {content.patternNotes[p.key] ? titleFor(p.key) : titleFor(p.key)}
-            </Text>
+          Three other things were the website's and are here now: the
+          definition line under each name, the bar filled the way the website
+          fills it, and the label over the advice, which reads differently when
+          a pattern is rare. Ellie: "Conflict styles detailed pages don't match
+          the site's formatting." */}
+      <View style={card}>
+        {you.ranked.map((p, i) => {
+          const v = p.value ?? 0;
+          const color = content.bandColors[Math.min(v, content.bandColors.length - 1)] || c.border;
+          const label = content.frequencyLabels[v] || '';
+          const copy = content.patternCopy[p.key] || {};
+          // The band entries are objects and the label and definition are
+          // strings, in one map, which is how the website writes it.
+          const band = copy[String(v)];
+          const note = typeof band === 'object' ? band?.note : null;
+          const definition = typeof copy.definition === 'string' ? copy.definition : null;
+          // Sometimes and Often get the action; Rarely gets the awareness note;
+          // Never gets neither. Attaching an instruction to a pattern that is
+          // not happening would read as a warning about nothing.
+          const advice = v >= 2 ? content.patternActions[p.key] : v === 1 ? content.patternNotes[p.key] : null;
+          const adviceLabel = v >= 2 ? ADVICE_TRY : ADVICE_KEEP;
 
-            {/* Frequency named above the bar, in the bar's own colour, so the
-                colour is never the only thing carrying the meaning. */}
-            <Text style={{ ...Type.small, color, fontWeight: '700', textAlign: 'right', marginTop: Spacing.md }}>
-              {label}
-            </Text>
-            <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.xs, overflow: 'hidden' }}>
-              <View style={{ width: `${((v + 1) / 4) * 100}%`, height: 6, backgroundColor: color }} />
-            </View>
+          return (
+            <View
+              key={p.key}
+              style={{
+                paddingTop: i === 0 ? 0 : Spacing.lg,
+                marginTop: i === 0 ? 0 : Spacing.lg,
+                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+              }}>
+              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{titleFor(p.key)}</Text>
+              {definition ? (
+                <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>{definition}</Text>
+              ) : null}
 
-            {note ? (
-              <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>{note}</Prose>
-            ) : null}
-
-            {action ? (
-              <View style={{ marginTop: Spacing.md, borderTopWidth: 1, borderTopColor: c.border, paddingTop: Spacing.md }}>
-                <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.xs }}>
-                  One thing to try
-                </Text>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{action.title}</Text>
-                <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{action.body}</Prose>
+              {/* Frequency named above the bar, in the bar's own colour, so the
+                  colour is never the only thing carrying the meaning. */}
+              <Text style={{ ...Type.small, color, fontWeight: '700', textAlign: 'right', marginTop: Spacing.md }}>
+                {label}
+              </Text>
+              <View style={{ height: 5, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.xs, overflow: 'hidden' }}>
+                {/* The website's fill: the band as a share of the top band,
+                    with a sliver left visible at zero so the track reads as a
+                    measure rather than as an empty box. The app filled a
+                    quarter of the bar for a pattern that never happens. */}
+                <View style={{ width: `${Math.max((v / 3) * 100, 3)}%`, height: 5, backgroundColor: color }} />
               </View>
-            ) : null}
-          </View>
-        );
-      })}
+
+              {note ? (
+                <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>{note}</Prose>
+              ) : null}
+
+              {advice ? (
+                <View style={{ marginTop: Spacing.md, backgroundColor: '#F4F7FF', borderRadius: Radius.md, padding: Spacing.lg }}>
+                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: accentBlue, marginBottom: Spacing.xs }}>
+                    {adviceLabel}
+                  </Text>
+                  {v >= 2 && advice.title ? (
+                    <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: 2 }}>{advice.title}</Text>
+                  ) : null}
+                  <Prose style={{ ...Type.body, color: c.text }}>{advice.body || ''}</Prose>
+                </View>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
     </ScrollView>
   );
 }
