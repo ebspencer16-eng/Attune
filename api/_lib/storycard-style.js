@@ -347,8 +347,12 @@ export const STORYCARD_STYLE = {
  * one she wanted.
  *
  * A fraction rather than a number of points, because the app's cards are as
- * wide as the phone and the website's are not. At the reference width this is
- * 218 points, which is the largest the map goes before the type under it has
- * nowhere to sit.
+ * wide as the phone and the website's are not.
+ *
+ * 0.56 was the first answer, then 0.68, and Ellie asked for more again. This
+ * is 0.72, and the ceiling is 0.75: the card's own padding is 40 points a side,
+ * so on the narrowest phone the app supports a map past three quarters of the
+ * card is wider than the column it sits in. check-card-map-size.mjs holds both
+ * that and the height the type under it needs.
  */
-export const CARD_MAP_PCT = 0.56;
+export const CARD_MAP_PCT = 0.72;

@@ -901,7 +901,7 @@ const CLOSE_PCT = 8;
 const STAGGER = 7;
 
 /** The couple map's width as a share of the card. api/_lib/storycard-style.js. */
-const CARD_MAP_PCT = 0.56;
+const CARD_MAP_PCT = 0.72;
 
 /**
  * Where a mark sits on a storycard track, as a percentage.

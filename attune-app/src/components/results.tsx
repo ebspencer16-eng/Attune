@@ -1939,30 +1939,31 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
  * The two rankings, with a line joining each item to itself.
  *
  * ── WHY THE LINES ARE THE POINT ───────────────────────────────────────────
- * Ellie: "Rel relf how you each rated page 'what matters most this year'
- * section needs to have the connecting lines exactly like the web view. Need
- * to push the margins wider for this section so that there's more space in
- * between the two columns for the lines."
+ * Ellie: "'what matters most this year' section needs to have the connecting
+ * lines exactly like the web view. Need to push the margins wider for this
+ * section so that there's more space in between the two columns for the
+ * lines."
  *
  * Two ordered lists side by side say very little: you have to hold one and
  * scan the other. The line is what turns them into a finding, and its slope is
  * the finding. Flat means you agree about where a thing sits; steep means one
  * of you put it first and the other last.
  *
- * ── WHY IT IS NOT AN SVG ──────────────────────────────────────────────────
- * The website's connectors are bezier curves. react-native-svg is not a
- * dependency here, and the couple map made the same call for the same reason:
- * this is a line between two points, which a rotated view does exactly as
- * well. The gradient along it is expo-linear-gradient, which the app already
- * uses everywhere. A straight line rather than a curve is the one difference,
- * and at this width the curve is nearly straight anyway.
+ * ── WHY IT IS NOT AN SVG, AND HOW IT CURVES ───────────────────────────────
+ * react-native-svg is not a dependency, and the couple map made the same call
+ * for the same reason. The website's connectors are cubic beziers, which she
+ * asked for here too, so each line is drawn as a run of short segments along
+ * that curve: the same control points, sampled. At this width it is a dozen
+ * pieces and reads as one stroke.
  */
 function PriorityPair({ you, them, yours, theirs, note }: {
   you: string; them: string; yours: string[]; theirs: string[]; note: string;
 }) {
   /** One row per item, and the connector column between the two lists. */
   const ROW = 30;
-  const GUTTER = 76;
+  const GUTTER = 84;
+  /** Room between a rank number and where the lines start. */
+  const CLEARANCE = 8;
   const height = Math.max(yours.length, theirs.length) * ROW;
 
   return (
@@ -1971,7 +1972,10 @@ function PriorityPair({ you, them, yours, theirs, note }: {
         backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, overflow: 'hidden',
       }}>
-      <View style={{ flexDirection: 'row', padding: Spacing.lg, paddingBottom: Spacing.md }}>
+      {/* The tile's own inset. The text used to sit against the edge on both
+          sides, which is what Ellie means by wanting a buffer: a list reads as
+          cramped long before it reads as clipped. */}
+      <View style={{ flexDirection: 'row', padding: Spacing.xl, paddingBottom: Spacing.lg }}>
         {/* Left: their own order, pushed against the connectors. */}
         <View style={{ flex: 1, alignItems: 'flex-end' }}>
           <Eyebrow color={YOU_COLOR}>{you}</Eyebrow>
@@ -1999,7 +2003,8 @@ function PriorityPair({ you, them, yours, theirs, note }: {
                   from={i * ROW + ROW / 2}
                   to={j * ROW + ROW / 2}
                   width={GUTTER}
-                  gap={Math.abs(i - j)}
+                  inset={CLEARANCE}
+                  same={i === j}
                 />
               );
             })}
@@ -2021,7 +2026,7 @@ function PriorityPair({ you, them, yours, theirs, note }: {
       </View>
 
       {note ? (
-        <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderTopColor: c.border, borderTopWidth: 1, backgroundColor: Palette.warm }}>
+        <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, borderTopColor: c.border, borderTopWidth: 1, backgroundColor: Palette.warm }}>
           <Text style={{ ...Type.small, color: c.textMuted, lineHeight: 18 }}>{note}</Text>
         </View>
       ) : null}
@@ -2033,50 +2038,90 @@ function PriorityPair({ you, them, yours, theirs, note }: {
 const EYEBROW_ROW = 22;
 
 /**
- * One line, from a row on the left to a row on the right.
+ * One curve, from a row on the left to a row on the right.
  *
- * A view as long as the distance between the two points, rotated to the angle
- * between them, with the brand gradient along it: orange at the reader's end,
- * indigo at their partner's, which is how every other pair of marks in the
- * results is coloured. Thicker and stronger when the two rankings agree,
- * because that is the line worth seeing first.
+ * The website's path is `M x1 y1 C a y1, b y2, x2 y2`: a cubic that leaves
+ * each side horizontally and turns in the middle. The same control points are
+ * sampled here and drawn as a run of short segments, each a view rotated to
+ * its own slope with the brand gradient along it.
+ *
+ * ── WEIGHT ────────────────────────────────────────────────────────────────
+ * The matching-rank line used to be half again as thick and twice as opaque as
+ * the others. Ellie: "the straight line is much heavier than the others which
+ * is not good." Every line is the same weight now. A match is said by the line
+ * being flat, which is the thing the eye is already reading.
  */
-function Connector({ from, to, width, gap }: {
-  from: number; to: number; width: number; gap: number;
+function Connector({ from, to, width, inset, same }: {
+  from: number; to: number; width: number; inset: number; same: boolean;
 }) {
-  const dy = to - from;
-  const length = Math.sqrt(width * width + dy * dy);
-  const angle = `${Math.atan2(dy, width)}rad`;
+  /** The ends, pulled in so a line never touches a rank number. */
+  const x1 = inset;
+  const x2 = width - inset;
+  const span = x2 - x1;
+  // The website's control points, as a share of the span rather than the
+  // pixels it writes, so the curve keeps its shape at any gutter width.
+  const c1 = x1 + span * 0.45;
+  const c2 = x1 + span * 0.55;
+
+  const at = (t: number) => {
+    const u = 1 - t;
+    return {
+      x: u * u * u * x1 + 3 * u * u * t * c1 + 3 * u * t * t * c2 + t * t * t * x2,
+      y: u * u * u * from + 3 * u * u * t * from + 3 * u * t * t * to + t * t * t * to,
+    };
+  };
+
+  // Twelve segments. Enough that the joins are invisible at this size, few
+  // enough that a page of six rankings is not a hundred views.
+  const STEPS = 12;
+  const points = Array.from({ length: STEPS + 1 }, (_, i) => at(i / STEPS));
+  const thickness = 2;
+
   return (
-    <View
-      style={{
-        position: 'absolute', left: 0, top: from,
-        width: length, height: gap === 0 ? 3 : 2,
-        marginTop: gap === 0 ? -1.5 : -1,
-        /**
-         * A rotation turns an element about its own centre, so the centre has
-         * to be moved to the midpoint of the two rows first. translateX pulls
-         * the over-long bar back so its centre sits at the middle of the
-         * gutter; translateY drops it to halfway between the two rows. Without
-         * the second one every line pivots about its own row and lands
-         * nowhere near the item it is meant to join.
-         */
-        transform: [
-          { translateX: -(length - width) / 2 },
-          { translateY: dy / 2 },
-          { rotate: angle },
-        ],
-        opacity: gap === 0 ? 0.95 : 0.5,
-        borderRadius: 2, overflow: 'hidden',
-      }}>
-      <LinearGradient
-        colors={[YOU_COLOR, THEM_COLOR]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-        style={{ flex: 1 }}
-      />
-    </View>
+    <>
+      {points.slice(0, -1).map((p, i) => {
+        const q = points[i + 1];
+        const dx = q.x - p.x;
+        const dy = q.y - p.y;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        // Half a point of overlap at each join, so the segments read as one
+        // stroke rather than as a dotted line on a steep curve.
+        const drawn = length + 0.5;
+        const cx = (p.x + q.x) / 2;
+        const cy = (p.y + q.y) / 2;
+        return (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: cx - drawn / 2,
+              top: cy - thickness / 2,
+              width: drawn,
+              height: thickness,
+              transform: [{ rotate: `${Math.atan2(dy, dx)}rad` }],
+              opacity: same ? 0.85 : 0.5,
+              overflow: 'hidden',
+            }}>
+            {/* The gradient runs along the whole line, so each segment carries
+                its own slice of it rather than the full orange to indigo. */}
+            <LinearGradient
+              colors={[mixHex(YOU_COLOR, THEM_COLOR, i / STEPS), mixHex(YOU_COLOR, THEM_COLOR, (i + 1) / STEPS)]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={{ flex: 1 }}
+            />
+          </View>
+        );
+      })}
+    </>
   );
+}
+
+/** Two hex colours, mixed. Used to slice one gradient across many segments. */
+function mixHex(a: string, b: string, t: number): string {
+  const part = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  const mixed = [0, 1, 2].map((i) => Math.round(part(a, i) + (part(b, i) - part(a, i)) * t));
+  return `#${mixed.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
 /**

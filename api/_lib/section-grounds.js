@@ -41,23 +41,79 @@
  */
 const NAVY = '#1B2A5E';
 
+/**
+ * ── HOW DARK A STOP HAS TO BE ─────────────────────────────────────────────
+ * Every one of these pages sets white type on the gradient. Ellie: "The
+ * content is hard to read against these colors. How can we adjust the bgs to
+ * make the content readable?"
+ *
+ * Measured rather than judged: the light end of four of the five grounds was
+ * between 3.0 and 4.5 to 1 against white, and 4.5 is the readable ratio for
+ * body text. So each stop is taken down toward black until it clears it,
+ * which changes the colour as little as the requirement allows and leaves the
+ * hue alone. check-ground-contrast.mjs measures every stop on every ground.
+ */
+
+/** Relative luminance, the sRGB definition. */
+function luminance(hex) {
+  const h = hex.replace('#', '').slice(0, 6);
+  const parts = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+    .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * parts[0] + 0.7152 * parts[1] + 0.0722 * parts[2];
+}
+
+/** How white type reads on this colour, as a contrast ratio. */
+export function contrastOnWhiteText(hex) {
+  return 1.05 / (luminance(hex) + 0.05);
+}
+
+/** The same colour, taken toward black until white type clears `want`. */
+export function readable(hex, want = READABLE) {
+  const h = hex.replace('#', '').slice(0, 6);
+  const rgb = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  for (let k = 100; k > 0; k -= 1) {
+    const f = k / 100;
+    const c = `#${rgb.map((v) => Math.round(v * f).toString(16).padStart(2, '0')).join('')}`;
+    if (contrastOnWhiteText(c) >= want) return c;
+  }
+  return '#000000';
+}
+
+/** Body text on a coloured ground. The AA ratio, not a preference. */
+export const READABLE = 4.6;
+
+/**
+ * ── WHY THESE FIVE ARE DIFFERENT COLOURS ──────────────────────────────────
+ * Ellie: "expectations, rel relf, and conflict all look similar, can we get a
+ * little more distinction for each of those pages?" All three ran navy into a
+ * blue into a teal, because all three carry the same blue in the nav.
+ *
+ * They are five families now: Communication purple into the brand orange,
+ * Expectations indigo into teal, Relationship Reflection green, Conflict blue
+ * into a lighter blue, Physical Intimacy rose into terracotta. Reflection's
+ * green is not invented: it is the colour that section already carries on What
+ * Comes Next and in the app's own section palette.
+ */
+
 /** angle is CSS degrees; mid is the middle stop's position, in percent. */
-export const SECTION_GROUNDS = {
+const RAW = {
   'comm-overview': { angle: 150, mid: 55, stops: [NAVY, '#6C4BB0', '#C8522E'] },
   'exp-overview': { angle: 150, mid: 55, stops: [NAVY, '#4C56C0', '#1B8FA8'] },
-  /** Every expectations conversation page. The website calls this EXP_BG. */
+  /** Every expectations conversation page, for a category with no colour. */
   'exp-detail': { angle: 145, mid: 55, stops: [NAVY, '#6F63D6', '#514AAE'] },
-  'reflection-overview': { angle: 150, mid: 55, stops: [NAVY, '#3E63C8', '#10A5B8'] },
+  'reflection-overview': { angle: 150, mid: 55, stops: [NAVY, '#2F7D62', '#10B981'] },
   'intimacy-overview': { angle: 150, mid: 55, stops: ['#5E2340', '#A34468', '#C8703E'] },
   /**
-   * Ellie: "Conflict styles at a glance page needs some color, like other at a
-   * glance pages." It ran navy into a muted blue into a muted teal, which is
-   * reflection's gradient with the saturation taken out. The middle stop is
-   * the section's own blue now, and the tail the same teal. Nothing invented:
-   * both are colours the product already uses.
+   * Ellie: "Conflict styles at a glance page needs some color." It ran navy
+   * into a muted blue into a muted teal, which is reflection's old gradient
+   * with the saturation taken out.
    */
-  'conflict-overview': { angle: 150, mid: 55, stops: [NAVY, '#1B5FE8', '#1B8FB8'] },
+  'conflict-overview': { angle: 150, mid: 55, stops: [NAVY, '#2F55C4', '#5B7FE8'] },
 };
+
+export const SECTION_GROUNDS = Object.fromEntries(
+  Object.entries(RAW).map(([id, g]) => [id, { ...g, stops: g.stops.map((c) => readable(c)) }]),
+);
 
 /**
  * The ground for one expectations conversation page, in its category's colour.
@@ -74,7 +130,19 @@ export const SECTION_GROUNDS = {
  */
 export function groundForCategory(color) {
   if (!color) return SECTION_GROUNDS['exp-detail'].stops;
-  return [`${color}cc`, `${color}88`, NAVY];
+  /**
+   * Opaque, and dark enough to read on.
+   *
+   * These were the colour at two alphas, which is fine over a dark page and
+   * is not what either surface does: the app composites a gradient over cream,
+   * so a category colour at 53 per cent became a pale wash with white type on
+   * it. Ellie: "The content is hard to read against these colors."
+   *
+   * A deep version of the category's colour, then the readable version of it,
+   * then the shared navy. The category is still recognisable and every stop
+   * clears the body-text ratio.
+   */
+  return [readable(color, 9), readable(color), NAVY];
 }
 
 /** The stops, for a surface that builds its own gradient. */
