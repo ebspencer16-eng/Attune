@@ -68,22 +68,12 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** All twelve from your list are built and sitting in section 3.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O136 | **Thicker underline.** The mark is drawn at the font's own hairline, which is what a text decoration gives you. |
-| O137 | **Rename the mark colours and add pink.** Red, Orange, Yellow, Green, Blue, Purple, Pink, replacing Amber, Rose, Violet, Teal, Blue. Your words. This is a palette both surfaces read, and existing marks carry the old names, so old marks have to keep drawing. |
-| O138 | **The selection toolbar is cream, not black.** |
-| O139 | **Notes: Pick up where you left off becomes one tile.** The home screen's tile, rows divided by hairlines, an icon at the left saying which of the four kinds it is, the section as an eyebrow, the text under it. No dashes beside the eyebrow. |
-| O140 | **Tags: a tag icon instead of a dot, each in its own colour.** |
-| O141 | **Tags: a count on the right of each row.** |
-| O142 | **Tags: one tile with rows, like the home screen's.** |
-| O143 | **Tags: an arrow at the right of each row that opens everything under that tag.** |
-| O144 | **A marker in the right margin for a note or a tag**, showing which of the two it is, so you can see where they are as you scroll. Today there is a left-gutter mark for notes only. |
-| O145 | **A delete button in the toolbar**, greyed out unless the selected words already carry a mark, that removes the highlight or underline. |
-| O146 | **Cut the line under the share toggle** when a note is open. |
-| O147 | **Resources: one Yours to Explore section, always.** All three tools in it, no second section for what is not owned, and a grey arrow bottom right that opens the add-ons on the website. **One thing to decide before I build the arrow:** CLAUDE.md says the app does not sell, because an app that hands people to external payment is what Apple rejects for. A link out to the website is the same shape as Get Started, which already does it, so I can build it that way: the app names no price and no checkout route, the server hands it a URL, and it opens in Safari. Say if you would rather it went nowhere until the app is approved. |
 
 ## 3. For you to review
 
@@ -101,6 +91,15 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R84 | **Thicker underline.** Three points, drawn on the word itself. A text decoration has no thickness in React Native: it is whatever hairline the font declares and nothing about it can be set, which is why it looked thin. |
+| R85 | **The colours are Red, Orange, Yellow, Green, Blue, Purple and Pink.** Marks you made before this keep the colour you chose: the old keys map to the nearest new one rather than being rewritten, so nothing you have highlighted changes colour. |
+| R86 | **The toolbar is cream** with a hairline round it and the icons in ink. |
+| R87 | **A bin at the end of the toolbar**, grey until the selection is sitting on a mark. Selecting any part of a highlight reaches it, so you do not have to reproduce the exact words you marked. It comes off the screen at once and off the server behind that. |
+| R88 | **Notes: Pick up where you left off is one tile**, the home screen's shape, rows divided by hairlines. Icon at the left for highlight, underline, note or tag, the section as an eyebrow, the words under it, no dashes. |
+| R89 | **Tags: a tag icon in its own colour, a count on every row, and an arrow that opens everything under that tag.** A tag you typed has no colour of its own, so it takes one from the mark palette by its id: the same tag is the same colour every time and on every device. The count now shows zero as well, because with an arrow beside it the zero is what explains an empty list when you open one. |
+| R90 | **The margin marker is on the right and says which it is**, a note icon or a tag icon. It was a coloured bar on the left that only said something was there. |
+| R91 | **The line under the share toggle is gone.** |
+| R92 | **Resources is one section.** All your tools in Yours to Explore, nothing for what you do not own, and a grey "Explore more resources" arrow bottom right that opens the website in Safari. It shows whether or not you own everything: the physical copies and the gift are on that page too, and a control that appears on an invisible condition is one nobody trusts. **On the Apple risk:** this is the same shape as Get Started, which already opens the site. The app names no price and no checkout route, and the arrow opens /offerings in the system browser rather than a payment screen. Every price in the app went with the section that showed them. If you would rather it went nowhere until the app is approved, say so and I will take it out in one line. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
