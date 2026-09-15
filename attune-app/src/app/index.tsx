@@ -29,8 +29,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
-import { fetchHome, SITE_URL } from '@/api/client';
-import type { ApiError, HomeCard, HomeResponse } from '@/api/client';
+import { fetchHome, markNotificationRead, nudgePartner, SITE_URL } from '@/api/client';
+import type { ApiError, HomeAlert, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import Feedback from '@/components/feedback';
@@ -114,6 +114,18 @@ export default function HomeScreen() {
    */
   const open = (card: HomeCard) => {
     if (card.disabled) return;
+    /**
+     * A card that does something rather than going somewhere.
+     *
+     * "Send them a reminder" has been on this screen since the card engine was
+     * written, pointing at '/?view=home', which is the screen it is already
+     * on: it said it would send something and sent nothing. The server now
+     * marks that card with an action, and this runs it.
+     *
+     * Still not a branch on kind. One action name, run by name, so another can
+     * be added server-side without an app release.
+     */
+    if (card.action === 'nudge') { sendNudge(); return; }
     const target = card.app;
     if (target?.external) { Linking.openURL(target.external); return; }
     if (target?.route) {
@@ -143,6 +155,47 @@ export default function HomeScreen() {
         ? `${SITE}/app${card.deepLink.slice(1)}`
         : `${SITE}${card.deepLink}`);
     }
+  };
+
+  /**
+   * Alerts, and what a tap does to one.
+   *
+   * ── WHY THEY LIVE ON THIS SCREEN ──────────────────────────────────────
+   * The server has recorded alerts since the notifications table was added and
+   * nothing in the app has ever read one. A bell and an inbox would be a
+   * second place to look for things to do, beside a home screen whose whole
+   * job is to say what is next. So they are rows in the same tile, above the
+   * cards, and they route through the same open().
+   *
+   * Tapping marks it read and takes the row away at once. The request is not
+   * waited on: a row that hangs about while a PATCH goes through reads as a
+   * tap that missed. If it fails, the alert is still unread on the server and
+   * comes back on the next load, which is the right way round.
+   */
+  const [readIds, setReadIds] = useState<string[]>([]);
+  const alerts = (data?.alerts ?? []).filter(a => !readIds.includes(a.id));
+
+  const openAlert = (a: HomeAlert) => {
+    setReadIds(ids => [...ids, a.id]);
+    markNotificationRead(a.id);
+    open({ id: a.id, kind: a.kind, title: a.title, body: a.body || '', cta: '', deepLink: a.deepLink || '', app: a.app });
+  };
+
+  /**
+   * Tell a partner you are waiting on them.
+   *
+   * On success the screen reloads, and the card the tap came from comes back
+   * as "Waiting on them", greyed, on the server's own cooldown. That is the
+   * confirmation: no toast, and no second copy of the cooldown rule here to
+   * decide what to show.
+   */
+  const [nudgeFailed, setNudgeFailed] = useState(false);
+  const sendNudge = async () => {
+    setNudgeFailed(false);
+    const res = await nudgePartner();
+    if (!res.ok) { setNudgeFailed(true); return; }
+    setLoading(true);
+    load();
   };
 
   /**
@@ -307,13 +360,30 @@ export default function HomeScreen() {
               marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
               paddingVertical: Spacing.xs,
             }}>
+            {/* ── WHAT HAPPENED, ABOVE WHAT IS NEXT ───────────────────────
+                Unread alerts, newest first, at most five and usually none.
+                They sit above the prompt because they are the one thing on
+                this screen the reader could not have known: a partner
+                finishing, a note shared with them, an account deleted. The
+                prompt underneath is still there when they are gone. */}
+            {alerts.map((a, i) => (
+              <TileRow
+                key={a.id}
+                icon="bell.badge.fill"
+                title={a.title}
+                body={a.body}
+                first={i === 0}
+                onPress={() => openAlert(a)}
+              />
+            ))}
+
             {data.primary ? (
               <TileRow
                 icon="star.fill"
                 title={data.primary.title}
                 body={data.primary.body}
                 disabled={!!data.primary.disabled}
-                first
+                first={!alerts.length}
                 onPress={() => open(data.primary)}
               />
             ) : null}
@@ -345,6 +415,16 @@ export default function HomeScreen() {
               />
             ) : null}
           </View>
+
+          {/* The reminder did not go. Said here rather than on the row,
+              because the row is back at the top of the tile by the time this
+              renders and a message inside it would be attached to a card that
+              now says something else. */}
+          {nudgeFailed ? (
+            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>
+              That reminder did not send. Pull down and try again.
+            </Text>
+          ) : null}
 
           {error ? (
             <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>

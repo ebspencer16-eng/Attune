@@ -36,6 +36,7 @@ import { jsonBody } from './_lib/http.js';
 import { isValidAnchor, standardTags, TAG_SUGGESTIONS, TAG_PLACEHOLDER } from './_lib/tags.js';
 import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
+import { recordNotification } from './_lib/notifications.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -72,7 +73,7 @@ export default async function handler(req) {
     const rest = (path, init) => fetch(`${supabaseUrl}/rest/v1/${path}`, init);
 
     // Partner, for the couple key and for reading what they shared.
-    const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
+    const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
     const profile = (await pRes.json().catch(() => []))?.[0] || {};
     const partnerId = profile.partner_profile_id || null;
     const coupleKey = partnerId ? coupleKeyOf(me, partnerId) : null;
@@ -315,6 +316,21 @@ export default async function handler(req) {
           body: JSON.stringify(body.tagIds.map(t => ({ note_id: created.id, tag_id: t }))),
         });
       }
+      // Created already shared, which is the other way a note reaches a
+      // partner. Same rule as the share action below, so both routes into a
+      // partner's list go through one writer.
+      if (created && shared && partnerId) {
+        await recordNotification({
+          ownerId: partnerId,
+          kind: 'partner_shared',
+          subjectId: created.id,
+          copy: {
+            partnerName: (profile.name || '').trim().split(/\s+/)[0] || null,
+            dimensionLabel: RESULTS_SECTION_LABELS[created.anchor_key] || null,
+          },
+        });
+      }
+
       return json({ ok: true, note: created });
     }
 
@@ -374,6 +390,26 @@ export default async function handler(req) {
       });
       const rows = await r.json().catch(() => []);
       if (!rows.length) return json({ ok: false, error: 'not found' }, 404);
+
+      /**
+       * Sharing is the one thing here the other person cannot find out about.
+       * Everything else on this endpoint is someone editing their own notes.
+       *
+       * Only the turn from private to shared raises it, and only once a day
+       * per note, which recordNotification decides from subject_id. Unsharing
+       * says nothing: taking something back is not an announcement.
+       */
+      if (action === 'share' && patch.visibility === 'shared' && partnerId) {
+        await recordNotification({
+          ownerId: partnerId,
+          kind: 'partner_shared',
+          subjectId: rows[0].id,
+          copy: {
+            partnerName: (profile.name || '').trim().split(/\s+/)[0] || null,
+            dimensionLabel: RESULTS_SECTION_LABELS[rows[0].anchor_key] || null,
+          },
+        });
+      }
 
       // Tags could only ever be set when a note was created, so there was no
       // way to add or remove one afterwards. Replaced wholesale rather than

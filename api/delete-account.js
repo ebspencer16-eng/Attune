@@ -26,7 +26,7 @@ import { jsonBody } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 
 import { deletionConfirmationEmail, partnerDeletedEmail } from './_lib/deletion-emails.js';
-import { notificationFor } from './_lib/notifications.js';
+import { recordNotification } from './_lib/notifications.js';
 
 export const config = { runtime: 'edge' };
 
@@ -331,10 +331,11 @@ export default async function handler(req) {
 
   try {
     if (notify.partner) {
-      const alert = notificationFor('partner_deleted', { partnerName: notify.partner.theirName });
-      await admin.from('notifications').insert({
-        owner_id: notify.partner.id,
-        kind: alert.kind, title: alert.title, body: alert.body, deep_link: alert.deepLink,
+      await recordNotification({
+        ownerId: notify.partner.id,
+        kind: 'partner_deleted',
+        subjectId: userId,
+        copy: { partnerName: notify.partner.theirName },
       });
       // email_opt_in is honoured here the way the crons honour it. Someone who
       // asked us to stop emailing them has asked for that, and this is not an

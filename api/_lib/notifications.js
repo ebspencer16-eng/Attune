@@ -151,3 +151,66 @@ export function shouldRecord({ kind, subjectId = null, recent = [], now = Date.n
     && (now - new Date(r.created_at).getTime()) < DAY
   );
 }
+
+/**
+ * Write one alert to a person's list.
+ *
+ * ── WHY THIS IS HERE AND NOT AT EACH CALL SITE ────────────────────────────
+ * Four endpoints raise alerts now. Each one has to build the copy, check the
+ * duplicate rule, and insert, and three of those four reach Supabase a
+ * different way. That is four hand-kept copies of one rule, which is the
+ * failure this codebase is organised against, so the rule lives here once and
+ * the endpoints pass it a kind and an owner.
+ *
+ * It reads the environment itself rather than taking a client, because the
+ * callers are split between `createClient` and raw REST and the only thing
+ * they all have is the environment.
+ *
+ * ── IT NEVER THROWS ───────────────────────────────────────────────────────
+ * An alert is a courtesy on the side of something that matters: finishing an
+ * exercise, sharing a note, deleting an account. None of those should fail
+ * because the notifications table was unreachable. Failure returns false and
+ * says so in the log.
+ *
+ * @returns {Promise<boolean>} whether a row was written
+ */
+export async function recordNotification({ ownerId, kind, subjectId = null, copy = {} } = {}) {
+  if (!ownerId || !kind) return false;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY
+           || process.env.SUPABASE_SERVICE_ROLE_KEY
+           || process.env.SUPABASE_SERVICE_ROLE;
+  if (!url || !key) return false;
+
+  const alert = notificationFor(kind, copy);
+  if (!alert) return false;
+
+  const svc = { apikey: key, Authorization: `Bearer ${key}` };
+  try {
+    // The person's recent rows of this kind, which is what the duplicate rule
+    // reads. notifications_recent_idx exists for exactly this query.
+    const r = await fetch(
+      `${url}/rest/v1/notifications?owner_id=eq.${ownerId}&kind=eq.${encodeURIComponent(kind)}`
+      + '&select=kind,subject_id,created_at&order=created_at.desc&limit=5',
+      { headers: svc });
+    const recent = (await r.json().catch(() => [])) || [];
+    if (!shouldRecord({ kind, subjectId, recent })) return false;
+
+    const ins = await fetch(`${url}/rest/v1/notifications`, {
+      method: 'POST',
+      headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        owner_id: ownerId,
+        kind: alert.kind,
+        title: alert.title,
+        body: alert.body,
+        deep_link: alert.deepLink,
+        subject_id: subjectId,
+      }),
+    });
+    return ins.ok;
+  } catch (e) {
+    console.warn('[notifications] could not record', kind, e?.message);
+    return false;
+  }
+}

@@ -564,7 +564,32 @@ export type HomeCard = {
   // "Finish setting up your profile" is home plus Settings, because the
   // editor lives there rather than on a route of its own.
   app?: { route?: string; exercise?: string; external?: string; settings?: boolean; feedback?: boolean };
+  /**
+   * A card that does something instead of going somewhere.
+   *
+   * 'nudge' posts to /api/partner-nudge. Generic on purpose: the app runs the
+   * named action and does not branch on the card's kind, so another action can
+   * be added server-side with one line here.
+   */
+  action?: string | null;
   disabled?: boolean;
+};
+
+/**
+ * One unread alert, as the home endpoint sends it.
+ *
+ * Same shape as a card in the part that matters: a title, a line, and where
+ * tapping it goes. That is deliberate, so the home screen routes an alert
+ * through the same function it routes a card through.
+ */
+export type HomeAlert = {
+  id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  deepLink: string | null;
+  app?: HomeCard['app'];
+  createdAt: string;
 };
 
 /**
@@ -631,6 +656,11 @@ export type HomeResponse = {
   greeting: string;
   primary: HomeCard;
   secondary: HomeCard[];
+  /**
+   * Unread alerts, newest first, at most five. Absent from older payloads,
+   * which is why it is optional rather than defaulted server-side.
+   */
+  alerts?: HomeAlert[];
   badges: { toolbox: number; insights: number; practice: number; notes: number };
   /**
    * The only place readiness is reported. There used to be an optional
@@ -1370,6 +1400,22 @@ export async function trackScreenTime(view: string, ms: number): Promise<void> {
 
 export function fetchNotifications() {
   return request<{ ok: true; notifications: Notification[]; unread: number }>('/api/notifications');
+}
+
+/**
+ * Tell a partner you are waiting on them.
+ *
+ * `sent: false` with reason 'cooldown' is a success: they nudged recently and
+ * the server is declining to send a second one. The card greys itself out on
+ * the same rule, so this is the case where two clients disagreed about the
+ * date.
+ */
+export function nudgePartner() {
+  return request<{ ok: true; sent: boolean; reason?: string; nudgedAt?: string }>('/api/partner-nudge', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
 }
 
 export function markNotificationRead(id?: string) {

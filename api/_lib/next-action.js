@@ -59,6 +59,15 @@ import { EXERCISES } from '../_exercises.js';
 import { SITE_URL as SITE } from './site.js';
 
 /**
+ * How long a nudge lasts before another one is reasonable.
+ *
+ * Read here to grey the card out and by api/partner-nudge.js to refuse the
+ * second one. One number: a card that says "you nudged them recently" over an
+ * endpoint that would happily send another is two rules wearing one name.
+ */
+export const NUDGE_COOLDOWN_DAYS = 3;
+
+/**
  * The website address for a deepLink.
  *
  * Two shapes reach here. `/?view=budget` is a view inside the portal and
@@ -71,7 +80,7 @@ function websiteUrl(deepLink) {
   return link.startsWith('/?') ? `${SITE}/app${link.slice(1)}` : `${SITE}${link}`;
 }
 
-function appTargetFor(deepLink) {
+export function appTargetFor(deepLink) {
   // The feedback questionnaire runs in the app now. It is a page on the
   // website rather than a view, so it is matched here rather than in the view
   // list below. Nothing had asked these questions anywhere since the component
@@ -156,7 +165,7 @@ export function nextActions(state = {}) {
   const waitingOn = ['ex1', 'ex2', 'ex3', 'intimacy']
     .filter(k => ex[k]?.owned && ex[k].mine && !ex[k].theirs);
   if (waitingOn.length) {
-    const nudgedRecently = ago(state.partnerNudgedAt) < 3;
+    const nudgedRecently = ago(state.partnerNudgedAt) < NUDGE_COOLDOWN_DAYS;
     add({ id: 'nudge-partner', kind: 'nudge_partner', priority: 9,
       title: nudgedRecently ? `Waiting on ${them}` : `Send ${them} a reminder`,
       body: nudgedRecently
@@ -164,6 +173,15 @@ export function nextActions(state = {}) {
         : `You are done. ${them} has one exercise left, and your results unlock when they finish.`,
       cta: nudgedRecently ? 'View progress' : 'Send a reminder',
       disabled: nudgedRecently,
+      /**
+       * The one card that does something rather than going somewhere.
+       *
+       * `action` is generic: a client runs the named action instead of
+       * following the destination, and nothing here branches on kind. The
+       * deepLink stays what it was, so a client that has never heard of
+       * actions lands on the home screen rather than nowhere.
+       */
+      action: nudgedRecently ? null : 'nudge',
       deepLink: '/?view=home' });
   }
 

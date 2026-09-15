@@ -47,7 +47,10 @@
 import { jsonBody } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 
-import { EXERCISES } from './_exercises.js';
+import { EXERCISES, EXERCISE_COLUMNS } from './_exercises.js';
+import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
+import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
+import { recordNotification } from './_lib/notifications.js';
 
 export const config = { runtime: 'edge' };
 
@@ -172,5 +175,70 @@ export default async function handler(req) {
     return err(500, updateErr.message);
   }
 
+  // ── The last piece ───────────────────────────────────────────────────────
+  // Saved. Now: was that the exercise that opened this couple's results? Only
+  // completions can be, so progress saves skip the read entirely, and a
+  // failure here never touches the response: the answers are stored, and an
+  // alert is a courtesy on the side of that.
+  if (!isProgress) {
+    try {
+      await announceIfComplete({ admin, userId: resolvedUserId, exerciseKey: exercise });
+    } catch (e) {
+      console.warn('[save-exercise] completion alerts failed:', e?.message);
+    }
+  }
+
   return ok({ mode });
+}
+
+/**
+ * Tell both partners when a completion was the last one outstanding.
+ *
+ * ── WHY THE RULE IS NOT RESTATED HERE ─────────────────────────────────────
+ * Whether results are open is decided by api/_lib/results-gate.js and nowhere
+ * else. That file exists because the rule was once written three times and the
+ * three disagreed. This is a fourth caller, not a fourth copy.
+ *
+ * ── HOW "IT JUST BECAME READY" IS KNOWN WITHOUT A SECOND READ ─────────────
+ * The profile is read after the write, so it already carries this completion.
+ * Running the gate a second time with this one exercise flipped back to false
+ * is the state a moment ago. Ready now and not ready then is the transition,
+ * and it happens exactly once per couple. Without that test, anyone editing an
+ * answer months later would re-announce results that have been open all along.
+ *
+ * ── TWO ROWS, NOT ONE ─────────────────────────────────────────────────────
+ * The event is shared and the framing is not. The person who just finished
+ * reads "your results are ready"; their partner reads that this person
+ * finished, because for them something changed while they were elsewhere.
+ */
+async function announceIfComplete({ admin, userId, exerciseKey }) {
+  const cols = ['id', 'name', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
+
+  const { data: me } = await admin.from('profiles').select(cols).eq('id', userId).maybeSingle();
+  if (!me?.partner_profile_id) return;
+  const { data: them } = await admin.from('profiles').select(cols).eq('id', me.partner_profile_id).maybeSingle();
+  if (!them?.id) return;
+
+  const pkg = capabilitiesFor(me);
+  const mine = doneFromProfile(me);
+  const theirs = doneFromProfile(them);
+
+  const now = resultsGate({ pkg, mine, theirs, partnerLinked: true });
+  if (!now.ready) return;
+  const before = resultsGate({
+    pkg, theirs, partnerLinked: true,
+    mine: { ...mine, [exerciseKey]: false },
+  });
+  if (before.ready) return;
+
+  const firstName = (n) => (n || '').trim().split(/\s+/)[0] || null;
+  await Promise.all([
+    recordNotification({ ownerId: me.id, kind: 'results_ready' }),
+    recordNotification({
+      ownerId: them.id,
+      kind: 'partner_finished',
+      subjectId: me.id,
+      copy: { partnerName: firstName(me.name) },
+    }),
+  ]);
 }

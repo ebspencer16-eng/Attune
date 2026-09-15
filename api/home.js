@@ -17,7 +17,7 @@
 
 export const config = { runtime: 'edge' };
 
-import { nextActions, greeting } from './_lib/next-action.js';
+import { nextActions, greeting, appTargetFor } from './_lib/next-action.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
@@ -187,6 +187,39 @@ export default async function handler(req) {
       lastNote = (await nRes.json().catch(() => []))?.[0] || null;
     } catch { /* no notes table yet, or a read failure: the row falls back to a post */ }
 
+    /**
+     * Unread alerts, which is the whole of the app's notification surface.
+     *
+     * ── WHY HERE AND NOT ON A SCREEN OF ITS OWN ───────────────────────────
+     * /api/notifications has served this list since the table was added, the
+     * app has had fetchNotifications in its client for as long, and no screen
+     * has ever called it. A bell and an inbox is a second place to look for
+     * things to do, next to a home screen that exists to say what to do next.
+     *
+     * So they arrive as alerts on that screen, above the cards, carrying the
+     * same `app` destination a card does, worked out by the same function. The
+     * app routes them through the code that already routes cards.
+     *
+     * Five, newest first. A home screen is not an archive; /api/notifications
+     * still returns fifty for anything that wants the history.
+     */
+    let alerts = [];
+    try {
+      const aRes = await fetch(
+        `${supabaseUrl}/rest/v1/notifications?owner_id=eq.${me.id}&read_at=is.null`
+        + '&select=id,kind,title,body,deep_link,created_at&order=created_at.desc&limit=5',
+        { headers: svc });
+      alerts = ((await aRes.json().catch(() => [])) || []).map(n => ({
+        id: n.id,
+        kind: n.kind,
+        title: n.title,
+        body: n.body,
+        deepLink: n.deep_link,
+        app: appTargetFor(n.deep_link),
+        createdAt: n.created_at,
+      }));
+    } catch { /* no notifications table yet: the strip simply does not appear */ }
+
     const state = {
       now: new Date().toISOString(),
       firstName: (me.name || '').trim().split(/\s+/)[0] || null,
@@ -242,6 +275,8 @@ export default async function handler(req) {
       }),
       primary,
       secondary,
+      // Unread alerts, newest first. Empty is the normal case.
+      alerts,
       owned,
       // Both names, which the app needs to label a two-column status table.
       // client.ts already declared partnerName and the response has never
