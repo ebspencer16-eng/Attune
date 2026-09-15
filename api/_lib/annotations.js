@@ -38,19 +38,45 @@ export const ANNOTATION_KINDS = ['note', 'highlight', 'underline'];
  * and a phone.
  */
 export const ANNOTATION_COLORS = [
-  { key: 'amber',  name: 'Amber',  ink: '#B7791F', wash: '#FBEBC8' },
-  { key: 'rose',   name: 'Rose',   ink: '#B5546E', wash: '#FBE0E7' },
-  { key: 'violet', name: 'Violet', ink: '#7C5AC7', wash: '#EAE2FA' },
-  { key: 'teal',   name: 'Teal',   ink: '#2C8A87', wash: '#D6EFEE' },
+  { key: 'red',    name: 'Red',    ink: '#C0392B', wash: '#FADDD9' },
+  { key: 'orange', name: 'Orange', ink: '#E8673A', wash: '#FBE2D8' },
+  { key: 'yellow', name: 'Yellow', ink: '#B7791F', wash: '#FBEBC8' },
+  { key: 'green',  name: 'Green',  ink: '#2E7D5B', wash: '#D8EEE3' },
   { key: 'blue',   name: 'Blue',   ink: '#1B5FE8', wash: '#DEE8FD' },
+  { key: 'purple', name: 'Purple', ink: '#7C5AC7', wash: '#EAE2FA' },
+  { key: 'pink',   name: 'Pink',   ink: '#B5546E', wash: '#FBE0E7' },
 ];
 
+/**
+ * What the old keys mean now.
+ *
+ * ── WHY THIS EXISTS RATHER THAN A MIGRATION ───────────────────────────────
+ * Ellie: "Call colors Red Orange Yellow Green Blue Purple rather than the
+ * names you have listed. Also include Pink as a color option."
+ *
+ * A mark stores its colour as a key, and marks made before that are in the
+ * database with the old ones. Renaming without this would leave every existing
+ * highlight drawing in the default colour, which is not the colour anyone
+ * chose. Each old key maps to the new colour nearest the ink it was drawn in,
+ * so an existing mark keeps looking like itself.
+ *
+ * It is a lookup rather than a rewrite of the rows because a rewrite is a
+ * migration Ellie has to run, over data that is fine, to save a five-line map.
+ */
+const RETIRED_COLORS = {
+  amber:  'yellow',
+  rose:   'pink',
+  violet: 'purple',
+  teal:   'green',
+};
+
 /** The colour used when a highlight arrives with none, or with one we retired. */
-export const DEFAULT_ANNOTATION_COLOR = 'amber';
+export const DEFAULT_ANNOTATION_COLOR = 'yellow';
 
 /** One colour by key, or the default. Never undefined, so a render cannot break. */
 export function annotationColor(key) {
-  return ANNOTATION_COLORS.find((c) => c.key === key)
+  const k = RETIRED_COLORS[key] || key;
+  return ANNOTATION_COLORS.find((c) => c.key === k)
     || ANNOTATION_COLORS.find((c) => c.key === DEFAULT_ANNOTATION_COLOR);
 }
 

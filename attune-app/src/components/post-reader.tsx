@@ -113,7 +113,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
 }
 
 export default function PostReader({
-  id, onClose, notes = [], tags = [], partnerName = 'your partner', onCreated,
+  id, onClose, notes = [], tags = [], partnerName = 'your partner', onCreated, onRemoved,
 }: {
   id: string;
   onClose: () => void;
@@ -132,6 +132,8 @@ export default function PostReader({
   tags?: Tag[];
   partnerName?: string;
   onCreated?: (note: Note) => void;
+  /** A mark was removed, so the screen holding the notes can drop it. */
+  onRemoved?: (id: string) => void;
 }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -175,7 +177,8 @@ export default function PostReader({
       notes={notes}
       tags={tags}
       partnerName={partnerName}
-      onCreated={(note) => onCreated?.(note)}>
+      onCreated={(note) => onCreated?.(note)}
+      onRemoved={(id) => onRemoved?.(id)}>
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{

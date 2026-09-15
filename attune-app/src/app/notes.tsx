@@ -1144,9 +1144,6 @@ function Editor({
                 }}>
                 <View style={{ flex: 1, paddingRight: Spacing.lg }}>
                   <Text style={{ ...Type.cardTitle, color: c.textStrong }}>Share with {partner}</Text>
-                  <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-                    They can read it. Only you can change it.
-                  </Text>
                 </View>
                 <Switch
                   value={isShared}

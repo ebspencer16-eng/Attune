@@ -20,17 +20,30 @@ export type AnnotationColor = {
 };
 
 export const ANNOTATION_COLORS: AnnotationColor[] = [
-  { key: 'amber',  name: 'Amber',  ink: '#B7791F', wash: '#FBEBC8' },
-  { key: 'rose',   name: 'Rose',   ink: '#B5546E', wash: '#FBE0E7' },
-  { key: 'violet', name: 'Violet', ink: '#7C5AC7', wash: '#EAE2FA' },
-  { key: 'teal',   name: 'Teal',   ink: '#2C8A87', wash: '#D6EFEE' },
+  { key: 'red',    name: 'Red',    ink: '#C0392B', wash: '#FADDD9' },
+  { key: 'orange', name: 'Orange', ink: '#E8673A', wash: '#FBE2D8' },
+  { key: 'yellow', name: 'Yellow', ink: '#B7791F', wash: '#FBEBC8' },
+  { key: 'green',  name: 'Green',  ink: '#2E7D5B', wash: '#D8EEE3' },
   { key: 'blue',   name: 'Blue',   ink: '#1B5FE8', wash: '#DEE8FD' },
+  { key: 'purple', name: 'Purple', ink: '#7C5AC7', wash: '#EAE2FA' },
+  { key: 'pink',   name: 'Pink',   ink: '#B5546E', wash: '#FBE0E7' },
 ];
 
-export const DEFAULT_ANNOTATION_COLOR = 'amber';
+/**
+ * What the old keys mean now. Mirrors RETIRED_COLORS in
+ * api/_lib/annotations.js: a mark made before the palette was renamed is in
+ * the database under its old key, and without this every one of them would
+ * draw in the default colour instead of the colour someone chose.
+ */
+const RETIRED_COLORS: Record<string, string> = {
+  amber: 'yellow', rose: 'pink', violet: 'purple', teal: 'green',
+};
+
+export const DEFAULT_ANNOTATION_COLOR = 'yellow';
 
 /** One colour by key, never undefined, so a render cannot break on a bad key. */
 export function annotationColor(key?: string | null): AnnotationColor {
-  return ANNOTATION_COLORS.find((c) => c.key === key)
+  const k = (key && RETIRED_COLORS[key]) || key;
+  return ANNOTATION_COLORS.find((c) => c.key === k)
     || ANNOTATION_COLORS.find((c) => c.key === DEFAULT_ANNOTATION_COLOR)!;
 }

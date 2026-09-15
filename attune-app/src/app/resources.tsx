@@ -238,6 +238,7 @@ export default function ResourcesScreen() {
         tags={tags}
         partnerName={partnerName}
         onCreated={(note) => setNotes((prev) => [note, ...prev])}
+        onRemoved={(id) => setNotes((prev) => prev.filter((n) => n.id !== id))}
       />
     );
   }

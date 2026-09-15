@@ -28,7 +28,7 @@ import { Text, View, type StyleProp, type TextStyle } from 'react-native';
 import Annotatable, { type Mark, type MarkAction } from '@/components/annotatable';
 import { annotationColor } from '@/constants/annotations';
 import AnnotationSheet from '@/components/annotation-sheet';
-import type { Note, Tag } from '@/api/client';
+import { deleteNote, type Note, type Tag } from '@/api/client';
 
 type Ctx = {
   /** Marks on the section currently on screen, by the text they sit on. */
@@ -41,11 +41,18 @@ type Ctx = {
    * been through. Ellie asked for the toolbar to be the menu.
    */
   select: (sentence: string, action: MarkAction) => void;
+  /**
+   * Take a mark off. Ellie asked for a bin in the toolbar, greyed out unless
+   * the selection is sitting on a mark, and this is what it calls.
+   */
+  remove: (mark: Mark) => void;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
 };
 
-const AnnotationCtx = createContext<Ctx>({ marks: [], select: () => {}, enabled: false });
+const AnnotationCtx = createContext<Ctx>({
+  marks: [], select: () => {}, remove: () => {}, enabled: false,
+});
 
 export function useAnnotations() {
   return useContext(AnnotationCtx);
@@ -60,7 +67,7 @@ export function useAnnotations() {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, enabled } = useAnnotations();
+  const { marks, select, remove, enabled } = useAnnotations();
   const text = children || '';
   if (!enabled || !text) return <Text style={style}>{text}</Text>;
 
@@ -83,7 +90,7 @@ export function Prose({
   const silent = mine.filter((m) => m.kind === 'note');
   const tone = annotationColor(mine.find((m) => m.color)?.color);
 
-  const body = <Annotatable text={text} style={style} marks={marks} onSelect={select} />;
+  const body = <Annotatable text={text} style={style} marks={marks} onSelect={select} onRemove={remove} />;
   if (!silent.length) return body;
 
   return (
@@ -102,7 +109,7 @@ export function Prose({
 }
 
 export function AnnotationProvider({
-  children, section, notes, tags, partnerName, onCreated,
+  children, section, notes, tags, partnerName, onCreated, onRemoved,
   anchorType = 'results_section', anchorKey,
 }: {
   children: ReactNode;
@@ -126,6 +133,12 @@ export function AnnotationProvider({
   partnerName: string;
   /** A new mark was made, so the screen can add it without refetching. */
   onCreated: (note: Note) => void;
+  /**
+   * A mark was taken off, so the screen can drop it without refetching.
+   * Optional: a screen that does not pass it simply keeps drawing the mark
+   * until its next load, which is wrong but not broken.
+   */
+  onRemoved?: (id: string) => void;
 }) {
   const [selected, setSelected] = useState<{ text: string; action: MarkAction } | null>(null);
   const key = anchorKey || section;
@@ -147,8 +160,21 @@ export function AnnotationProvider({
   const value = useMemo<Ctx>(() => ({
     marks,
     select: (text: string, action: MarkAction) => setSelected({ text, action }),
+    /**
+     * Off the screen first, then off the server.
+     *
+     * A mark that lingers while a request goes out reads as a tap that missed,
+     * and this is the one action where the reader is looking straight at the
+     * thing they asked to remove. If the delete fails the mark comes back on
+     * the next load, which is the right way round: the words are never wrong,
+     * only briefly out of date.
+     */
+    remove: (mark: Mark) => {
+      onRemoved?.(mark.id);
+      deleteNote(mark.id);
+    },
     enabled: true,
-  }), [marks]);
+  }), [marks, onRemoved]);
 
   return (
     <AnnotationCtx.Provider value={value}>

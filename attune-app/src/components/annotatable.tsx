@@ -57,7 +57,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { SymbolView } from 'expo-symbols';
 
 import { annotationColor } from '@/constants/annotations';
-import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Colors, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -155,22 +155,41 @@ function markStyle(mark: Mark | undefined): TextStyle {
   if (!mark) return {};
   const col = annotationColor(mark.color);
   if (mark.kind === 'highlight') return { backgroundColor: col.wash, color: '#0E0B07' };
-  if (mark.kind === 'underline') {
-    return { textDecorationLine: 'underline', textDecorationColor: col.ink, textDecorationStyle: 'solid' };
-  }
-  // A note leaves the words alone. The margin marker says it is there, because
-  // a note is about the text rather than a change to it.
+  // An underline is drawn on the word's own box rather than as a text
+  // decoration; see markBox.
   return {};
 }
 
+/**
+ * The box under a marked word.
+ *
+ * ── WHY AN UNDERLINE IS NOT A TEXT DECORATION ─────────────────────────────
+ * Ellie: "Make underline thicker". A text decoration has no thickness in React
+ * Native: it is whatever hairline the font declares, and nothing about it can
+ * be set. Each word here is already its own View, so the line is that View's
+ * bottom border, which can be any weight and sits at a consistent distance
+ * from the baseline rather than riding the font's own metrics.
+ */
+const UNDERLINE_WEIGHT = 3;
+
+function markBox(mark: Mark | undefined) {
+  if (mark?.kind !== 'underline') return null;
+  return {
+    borderBottomWidth: UNDERLINE_WEIGHT,
+    borderBottomColor: annotationColor(mark.color).ink,
+  };
+}
+
 export default function Annotatable({
-  text, style, marks = [], onSelect,
+  text, style, marks = [], onSelect, onRemove,
 }: {
   text: string;
   style?: StyleProp<TextStyle>;
   marks?: Mark[];
   /** A fragment was chosen, and what to do with it. */
   onSelect?: (fragment: string, action: MarkAction) => void;
+  /** Take a mark off these words. Absent means the toolbar's bin stays grey. */
+  onRemove?: (mark: Mark) => void;
 }) {
   const { text: textStyle, box: boxStyle } = useMemo(() => splitStyle(style), [style]);
   const tokens = useMemo(() => tokenize(text), [text]);
@@ -324,6 +343,25 @@ export default function Annotatable({
   fragmentRef.current = fragment;
 
   /**
+   * The mark the selection is sitting on, if any.
+   *
+   * Ellie: "I want a delete button in the toolbar (greyed out unless there's a
+   * mark made) so that people can delete the highlight/underline over that
+   * text." So the bin is enabled by what is under the selection rather than by
+   * what the reader last did, and selecting any part of a mark is enough to
+   * reach it: a reader who wants a highlight gone should not have to reproduce
+   * the exact words they highlighted.
+   */
+  const markInSelection = (() => {
+    if (lo == null) return null;
+    for (let i = lo; i <= (hi as number); i += 1) {
+      const m = marked.get(i);
+      if (m && m.kind !== 'note') return m;
+    }
+    return null;
+  })();
+
+  /**
    * The selection's own box: where its first line starts, and where its last
    * line ends. Both, because the toolbar goes above the selection when there
    * is room and below it when there is not.
@@ -363,7 +401,10 @@ export default function Annotatable({
               <View
                 key={i}
                 onLayout={(e) => { frames.current.set(i, e.nativeEvent.layout); }}
-                style={inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)', borderRadius: 3 } : null}>
+                style={[
+                  markBox(marked.get(i)),
+                  inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)', borderRadius: 3 } : null,
+                ]}>
                 <Text style={[textStyle, markStyle(marked.get(i))]}>{tok}</Text>
               </View>
             );
@@ -392,10 +433,14 @@ export default function Annotatable({
              */
             top: box.y >= TOOLBAR_H + 6 ? box.y - TOOLBAR_H - 6 : box.bottom + 6,
             flexDirection: 'row', alignItems: 'center',
-            backgroundColor: c.textStrong, borderRadius: Radius.pill,
+            // Ellie: "Make the toolbar cream bg not black." A hairline comes
+            // with it: a black pill carried its own edge, and a cream one on a
+            // cream page needs one to sit above the words rather than in them.
+            backgroundColor: Palette.cream, borderRadius: Radius.pill,
+            borderColor: c.border, borderWidth: 1,
             paddingHorizontal: Spacing.xs, height: TOOLBAR_H,
-            shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12,
-            shadowOffset: { width: 0, height: 6 }, elevation: 6,
+            shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 10,
+            shadowOffset: { width: 0, height: 4 }, elevation: 6,
           }}
 >
           {/* ── WHY THESE ARE NOT PRESSABLES ──────────────────────────
@@ -420,18 +465,42 @@ export default function Annotatable({
               <SymbolView
                 name={t.icon as never}
                 size={18}
-                tintColor="#FFFFFF"
-                fallback={<Text style={{ ...Type.small, color: '#FFFFFF' }}>{t.label[0]}</Text>}
+                tintColor={c.textStrong}
+                fallback={<Text style={{ ...Type.small, color: c.textStrong }}>{t.label[0]}</Text>}
               />
             </Pressable>
           ))}
+
+          {/* ── THE BIN ──────────────────────────────────────────────────
+              Grey until the selection is sitting on a mark, and then it takes
+              that mark off. Last in the row because it is the one thing here
+              that removes rather than adds. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={markInSelection ? 'Remove this mark' : 'Nothing to remove'}
+            accessibilityState={{ disabled: !markInSelection }}
+            disabled={!markInSelection || !onRemove}
+            onPress={() => { if (markInSelection && onRemove) { onRemove(markInSelection); clear(); } }}
+            hitSlop={6}
+            style={{ paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm }}>
+            <SymbolView
+              name="trash"
+              size={18}
+              tintColor={markInSelection && onRemove ? c.textStrong : c.border}
+              fallback={(
+                <Text style={{ ...Type.small, color: markInSelection && onRemove ? c.textStrong : c.border }}>
+                  Del
+                </Text>
+              )}
+            />
+          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Cancel"
             onPress={clear}
             hitSlop={6}
             style={{ paddingLeft: Spacing.sm, paddingRight: Spacing.md, paddingVertical: Spacing.sm }}>
-            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.6)' }}>✕</Text>
+            <Text style={{ ...Type.small, color: c.textMuted }}>✕</Text>
           </Pressable>
         </View>
       ) : null}

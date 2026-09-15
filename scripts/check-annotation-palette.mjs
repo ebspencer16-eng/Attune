@@ -21,7 +21,7 @@
 
 import { readFileSync } from 'fs';
 import {
-  ANNOTATION_COLORS, ANNOTATION_KINDS, DEFAULT_ANNOTATION_COLOR,
+  ANNOTATION_COLORS, ANNOTATION_KINDS, DEFAULT_ANNOTATION_COLOR, annotationColor,
 } from '../api/_lib/annotations.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -87,6 +87,48 @@ if (!ANNOTATION_COLORS.some((c) => c.key === DEFAULT_ANNOTATION_COLOR)) {
     `the fallback colour '${DEFAULT_ANNOTATION_COLOR}' is not in the palette, so\n`
     + '      annotationColor() returns undefined for every unknown key and the\n'
     + '      results screen throws for anyone who has marked a sentence.');
+}
+
+/**
+ * A retired colour still has to draw.
+ *
+ * Ellie renamed the palette: amber, rose, violet and teal became yellow, pink,
+ * purple and green. Every mark made before that is in the database under its
+ * old key. Without a map, each one falls back to the default and a reader's
+ * pink highlights all turn yellow, which looks like the product changing their
+ * marks rather than a rename.
+ *
+ * Both surfaces carry the map, so both have to resolve an old key the same
+ * way. The server's is run rather than read; the app's is read, because it
+ * cannot be imported, which is the same arrangement as the palette itself.
+ */
+const appRetired = Object.fromEntries(
+  [...(app.match(/RETIRED_COLORS[^=]*=\s*\{([\s\S]*?)\}/)?.[1] || '')
+    .matchAll(/(\w+):\s*'(\w+)'/g)].map((m) => [m[1], m[2]]),
+);
+const serverRetired = Object.fromEntries(
+  [...(readFileSync(ROOT + 'api/_lib/annotations.js', 'utf8')
+    .match(/const RETIRED_COLORS = \{([\s\S]*?)\};/)?.[1] || '')
+    .matchAll(/(\w+):\s*'(\w+)'/g)].map((m) => [m[1], m[2]]),
+);
+
+for (const [old_, now] of Object.entries(serverRetired)) {
+  if (!ANNOTATION_COLORS.some((c) => c.key === now)) {
+    problems.push(`the retired colour '${old_}' points at '${now}', which is not in the palette.`);
+  }
+  if (annotationColor(old_)?.key !== now) {
+    problems.push(`the server does not resolve the retired colour '${old_}' to '${now}'.`);
+  }
+  if (appRetired[old_] !== now) {
+    problems.push(
+      `'${old_}' becomes '${now}' on the server and '${appRetired[old_] || 'nothing'}' in the app.\n`
+      + '      A mark made before the rename would be two different colours.');
+  }
+}
+for (const old_ of Object.keys(appRetired)) {
+  if (!(old_ in serverRetired)) {
+    problems.push(`the app maps the retired colour '${old_}' and the server does not.`);
+  }
 }
 
 // ── The tokeniser must not alter the text ──────────────────────────────────

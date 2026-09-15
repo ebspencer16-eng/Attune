@@ -454,7 +454,8 @@ export default function Results({
           notes={notes}
           tags={tags}
           partnerName={them}
-          onCreated={(note) => setNotes((prev) => [note, ...prev])}>
+          onCreated={(note) => setNotes((prev) => [note, ...prev])}
+          onRemoved={(id) => setNotes((prev) => prev.filter((n) => n.id !== id))}>
         <SectionBody
           section={section}
           /* The active nav group's colour, which the server sends. Sections
