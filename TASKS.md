@@ -37,12 +37,13 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
+**Nothing waiting.** 061 to 066 are all run.
+
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M66 | **`066_tag_bin.sql`.** Gives a tag a bin to sit in before it is gone for good, which is what you asked for. Until it runs, deleting a tag says so rather than pretending: the app shows "Deleting a tag needs migration 066". Everything else on the tag list works now. |
 
 ### Decide these
 
@@ -54,9 +55,10 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q3 is answered: no email, and generate on the server.
+
 | # | Question |
 |--|--|
-| Q3 | **The workbook is not generated when your results are ready, and no email is ever sent.** You are right to have asked. What actually happens: generation runs in the browser, on the website, from a block that needs the order in that browser's storage, and only once both of you have finished. Nothing on the server does it. So a couple who finish and only ever open the app get "Generating now. We'll email you when it's ready." for ever, and there is no workbook-ready email in the product at all: the only workbook email is the discount offer to people who do not own one. **Two things I need from you.** First, the words: that sentence promises an email nothing sends, and I am not going to write its replacement. Second, the fix. My recommendation is to generate it on the server at the moment results open, which is the same moment I already use to tell a partner you finished; that is a day's work and it touches the .docx builder, so I would rather you chose it than have me start. The smaller version is to make the app's line true by saying what is actually the case, which is a copy change and still yours. |
 
 ## 2. Open
 
@@ -68,8 +70,9 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Everything from your list is built. The workbook is Q3 in
-section 1, because it is a decision rather than a task.
+My list. Things to build or fix, none of them waiting on you.
+
+**Nothing open.**
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
@@ -92,6 +95,8 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R100 | **The workbook is built the moment your results open.** On the server, at the same instant the product tells your partner you finished, so a couple who only ever use the app get one. It was built in a browser before, by a block that needed the buyer's order in that browser's storage, which is why yours said it was still generating. The payload the generator is handed now comes from one module that both the website and the server read: two builders would mean two workbooks depending on which surface got there first. |
+| R101 | **Nothing promises an email any more.** Two places did. The app's line now reads "Building your workbook. Check back shortly." and the website's availability note says it is built as soon as your results open. **Both sentences are mine and yours to change.** A gate refuses any version of that line with the word email in it, since there is no workbook-ready email in the product. |
 | R93 | **A new mark was invisible until you left the page and came back.** That is what "underline isn't working" was: it saved, it just did not draw. The row handed back to the screen said it was anchored to a results section, and an In Practice article anchors to something else, so the screen filtered it straight out. Highlights had it too. Drawing itself was never broken: I pushed a fake underline and a fake highlight through and both drew correctly, three points of colour and a wash. |
 | R94 | **The margin marker draws, and now covers tags too.** It only marked plain notes, so a highlight you had filed under a tag left nothing in the margin, and you had deleted the notes on the page you were looking at. Any tagged mark marks the margin now. |
 | R95 | **A pick-up row opens the mark where it lives.** A results mark takes you to Insights on that section; an article mark opens the article. A note with no anchor still opens in the editor, because words are all it is. |

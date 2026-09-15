@@ -51,6 +51,7 @@ import { EXERCISES, EXERCISE_COLUMNS } from './_exercises.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
 import { recordNotification } from './_lib/notifications.js';
+import { SITE_URL } from './_lib/site.js';
 
 export const config = { runtime: 'edge' };
 
@@ -246,4 +247,55 @@ async function announceIfComplete({ admin, userId, exerciseKey }) {
     subjectId: me.id,
     copy: { partnerName: firstName(me.name) },
   });
+
+  // The other thing that becomes true at this moment.
+  await makeWorkbook({ me, pkg });
+}
+
+/**
+ * Build the workbook, now that there is enough to build one from.
+ *
+ * ── WHY HERE ──────────────────────────────────────────────────────────────
+ * Ellie: "I clicked workbook and it said generating now, we'll email you when
+ * it's ready. But shouldn't this have been generated immediately when our
+ * results are done? Shouldn't it be there already?"
+ *
+ * It should. Generation ran in the browser, from a block in src/App.jsx that
+ * needs the buyer's order in that browser's storage and both partners
+ * finished. A couple who finish and only ever open the app got the waiting
+ * sentence for ever, and there was no email behind it either: the only
+ * workbook email in the product is a discount offer to people who do not own
+ * one.
+ *
+ * This is the same moment the couple's results open, which is the earliest
+ * moment a workbook can be honest about what it contains.
+ *
+ * ── WHY IT CALLS AN ENDPOINT RATHER THAN DOING IT ─────────────────────────
+ * The generator is a Node function that produces a .docx and uploads it, and
+ * this runs on edge. The website's own trigger does exactly this, and the
+ * admin key is what tells store-workbook the payment was already established.
+ *
+ * Failure is logged and dropped. The answers are saved and the results are
+ * open; a missing workbook is a thing to retry, not a reason to fail the save
+ * someone is waiting on.
+ */
+async function makeWorkbook({ me, pkg }) {
+  if (!pkg?.ownsWorkbook) return;
+  const adminKey = process.env.ADMIN_API_KEY;
+  if (!adminKey) {
+    console.warn('[save-exercise] no ADMIN_API_KEY, so no workbook was generated');
+    return;
+  }
+  try {
+    const r = await fetch(`${SITE_URL}/api/store-workbook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+      body: JSON.stringify({ userId: me.id }),
+    });
+    if (!r.ok) {
+      console.warn('[save-exercise] workbook generation said', r.status, (await r.text().catch(() => '')).slice(0, 200));
+    }
+  } catch (e) {
+    console.warn('[save-exercise] workbook generation failed:', e?.message);
+  }
 }

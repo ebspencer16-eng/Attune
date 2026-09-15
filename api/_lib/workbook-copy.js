@@ -18,8 +18,21 @@
 export const WORKBOOK_COPY = {
   /** Ready, and the reader can have it. */
   ready: 'Download your workbook',
-  /** Owned, generating, not here yet. */
-  generating: "Generating now. We'll email you when it's ready.",
+  /**
+   * Owned, generating, not here yet.
+   *
+   * ── WHY THIS CHANGED ────────────────────────────────────────────────────
+   * It said "Generating now. We'll email you when it's ready." There is no
+   * workbook-ready email in this product and there has not been one for a
+   * while: the only workbook email is a discount offer to people who do not
+   * own one. Ellie: "I don't want an email sent, change that text."
+   *
+   * Building now starts the moment a couple's results open, so the honest
+   * version is short and says where to look rather than promising a message.
+   *
+   * These words are mine. Ellie's to change.
+   */
+  generating: 'Building your workbook. Check back shortly.',
 };
 
 /** The name the file is saved under, on either surface. */

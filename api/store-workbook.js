@@ -21,6 +21,9 @@ export const config = { runtime: 'nodejs' };
 import { SITE_URL } from './_lib/site.js';
 
 import { safeError } from './_lib/http.js';
+import { buildWorkbookPayload } from './_lib/workbook-payload.js';
+import { coupleResults } from './_lib/results.js';
+import { COUPLE_TYPES } from './_couple-types.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -83,6 +86,29 @@ export default async function handler(req, res) {
 
   const supabaseUrl  = process.env.SUPABASE_URL;
   const serviceKey   = process.env.SUPABASE_SERVICE_KEY;
+
+  /**
+   * ── BUILT HERE, FROM A USER ID ──────────────────────────────────────────
+   * The website hands this endpoint a whole payload, because it has one: it
+   * is the screen the couple just finished on. The server has no such screen.
+   * Ellie asked for the workbook to exist the moment results open, so the
+   * caller that matters now is api/save-exercise.js, and all it knows is who
+   * finished.
+   *
+   * So { userId } is enough. The payload is built from the two profiles with
+   * the same module the website builds it with, which is the only reason this
+   * cannot drift into a second workbook.
+   *
+   * Admin only, because a user id in a body is not proof of anything. The call
+   * that uses it is server to server with the internal key.
+   */
+  if (body?.userId && !body.scores) {
+    if (!isAdminCall) return res.status(403).json({ error: 'userId is for internal callers' });
+    if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Server not configured' });
+    const built = await payloadForCouple({ supabaseUrl, serviceKey, userId: body.userId });
+    if (!built) return res.status(409).json({ error: 'not enough answers for a workbook yet' });
+    body = { ...built, ...body };
+  }
 
   // Generate the docx by calling the existing workbook generator.
   // We send the admin key so the auth/payment gate inside generate-workbook
@@ -182,4 +208,54 @@ export default async function handler(req, res) {
     console.error('[store-workbook] storage error:', e);
     return res.status(500).json({ error: safeError('store-workbook', e, 'Storage upload failed.') });
   }
+}
+
+/**
+ * Everything the generator needs, from one person's id.
+ *
+ * Both profiles, both sets of answers, the couple type, and the order the file
+ * belongs to. Returns null when there is not enough to build a workbook worth
+ * sending: a half-answered one is worse than none, which is the rule the
+ * website's trigger already applied.
+ */
+async function payloadForCouple({ supabaseUrl, serviceKey, userId }) {
+  const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+  const get = async (path) => {
+    const r = await fetch(`${supabaseUrl}/rest/v1/${path}`, { headers: svc });
+    if (!r.ok) return null;
+    return (await r.json().catch(() => []))?.[0] || null;
+  };
+
+  const cols = 'id,name,partner_profile_id,ex1_answers,ex2_answers';
+  const me = await get(`profiles?id=eq.${userId}&select=${cols}`);
+  if (!me?.partner_profile_id) return null;
+  const them = await get(`profiles?id=eq.${me.partner_profile_id}&select=${cols}`);
+  if (!them) return null;
+
+  const has = (a) => !!a && Object.keys(a).length > 0;
+  if (!has(me.ex1_answers) || !has(them.ex1_answers)) return null;
+  if (!has(me.ex2_answers) || !has(them.ex2_answers)) return null;
+
+  const results = coupleResults({
+    aAnswers: me.ex1_answers, bAnswers: them.ex1_answers,
+    aName: me.name, bName: them.name,
+  });
+  const coupleType = COUPLE_TYPES.find((t) => t.id === results?.coupleType) || null;
+
+  // The order the file is filed under: the buyer's, which for an invitee is
+  // their partner's. Whichever row carries the workbook add-on.
+  const order = await get(
+    `orders?or=(user_id.eq.${me.id},user_id.eq.${them.id})&addon_workbook=not.is.null`
+    + '&select=order_num,workbook_url&order=created_at.desc&limit=1',
+  );
+
+  return {
+    ...buildWorkbookPayload(
+      me.name || 'Partner A', them.name || 'Partner B',
+      me.ex1_answers, them.ex1_answers,
+      me.ex2_answers, them.ex2_answers,
+      coupleType,
+    ),
+    orderId: order?.order_num || null,
+  };
 }

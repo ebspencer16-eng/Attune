@@ -1,4 +1,5 @@
 import { signedUrlIsLive } from "../api/_lib/workbook-link.js";
+import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
@@ -2834,78 +2835,6 @@ function calcDimScores(answers) {
 // It used to be mirrored here, with a comment asking whoever changed one copy
 // to remember the other. Imported at the top of this file.
 
-function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerEx1, ex2Answers, partnerEx2, coupleType) {
-  const myS = calcDimScores(ex1Answers);
-  const partS = calcDimScores(partnerEx1);
-
-  // Responsibilities: per-category arrays of { item, value } per partner.
-  // Item label is name-substituted (Extended Family rows reference each
-  // partner's family by name) so the renderer doesn't need access to
-  // userName/partnerName for substitution.
-  const responsibilities = { user: {}, partner: {} };
-  RESPONSIBILITY_CATEGORIES.forEach(cat => {
-    responsibilities.user[cat.id] = [];
-    responsibilities.partner[cat.id] = [];
-    cat.items.forEach(rawItem => {
-      const key = cat.id + '__' + rawItem;
-      const itemLabel = substName(rawItem, userName, partnerName);
-      const userValue = normRespValue(ex2Answers?.responsibilities?.[key] || null, true, userName, partnerName);
-      const partnerValue = normRespValue(partnerEx2?.responsibilities?.[mirrorRespKey(key)] || null, false, userName, partnerName);
-      responsibilities.user[cat.id].push({ item: itemLabel, value: userValue });
-      responsibilities.partner[cat.id].push({ item: itemLabel, value: partnerValue });
-    });
-  });
-
-  // Life questions: full set, keyed by lq_id, per partner. Topic is name-
-  // substituted so the renderer can use it directly.
-  const lifeQuestions = { user: {}, partner: {}, meta: {} };
-  LIFE_QUESTIONS.forEach(q => {
-    lifeQuestions.user[q.id] = ex2Answers?.life?.[q.id] || null;
-    lifeQuestions.partner[q.id] = partnerEx2?.life?.[mirrorLifeId(q.id)] || null;
-    lifeQuestions.meta[q.id] = {
-      category: q.category,
-      topic: substName(q.topic || '', userName, partnerName),
-    };
-  });
-
-  // Legacy expGaps shape — kept for backward compatibility with renderers
-  // that haven't been updated to use the new fields. Built from the same
-  // life-question data so values stay consistent. Only the original 7-key
-  // legacy set is included; new family-contact questions and Extended
-  // Family responsibilities live in the new fields above.
-  const LEGACY_EXP_KEYS = [
-    { key: 'household', label: 'Visible Household Labor' },
-    { key: 'emotional', label: 'Emotional & Invisible Labor' },
-    { key: 'financial', label: 'Financial & Money' },
-    { key: 'career',    label: 'Career' },
-    { key: 'children',  label: 'Children & Family' },
-    { key: 'lifestyle', label: 'Home & Lifestyle' },
-    { key: 'values',    label: 'Faith & Values' },
-  ];
-  const expGaps = LEGACY_EXP_KEYS.map(({ key, label }) => {
-    const yourAns = ex2Answers?.life?.['lq_' + key] || null;
-    const partnerAns = partnerEx2?.life?.[mirrorLifeId('lq_' + key)] || null;
-    return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
-  });
-
-  return {
-    userName,
-    partnerName,
-    scores: myS,
-    partnerScores: partS,
-    coupleType: coupleType || null,
-    // Per-couple-type phrase from tips[0].phraseTry. Surfaced separately
-    // so renderers don't need to walk the full tips array. Used by the
-    // Python workbook builder's reference card (sits between the names
-    // and the tiles). Null if coupleType is unavailable.
-    phraseThatLands: coupleType?.tips?.[0]?.phraseTry || null,
-    // NEW Phase 5a fields — full ex2 data
-    responsibilities,
-    lifeQuestions,
-    // LEGACY field — kept for backward compatibility
-    expGaps,
-  };
-}
 
 
 // ── PERSONALITY FEEDBACK GENERATOR ──────────────────────────────────────────
@@ -15309,7 +15238,7 @@ export default function App() {
               <div style={{ background: "#FAF7F2", border: "1px solid #E8DDD0", borderRadius: 14, padding: "1.25rem 1.4rem", marginBottom: "2rem" }}>
                 <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Availability</div>
                 <p style={{ fontSize: "0.85rem", color: "#5C4F45", lineHeight: 1.65, fontFamily: "'DM Sans', sans-serif", fontWeight: 300, margin: 0 }}>
-                  Available after you complete both exercises. Your workbook is generated from your actual answers. We'll email you when it's ready, usually within 24 hours.
+                  Available after you complete both exercises. Your workbook is generated from your actual answers, and it is built as soon as your results open.
                 </p>
               </div>
 
