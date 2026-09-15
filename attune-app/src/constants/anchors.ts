@@ -54,7 +54,6 @@ export const RESULTS_SECTIONS: Record<string, string> = {
   'reflection-ratings': 'How You Each Rated',
   'reflection-story': 'Side by Side',
   'intimacy-overview': 'Physical Intimacy',
-  'intimacy-plan': 'Conversations',
   'conflict-overview': 'Conflict Patterns',
   'conflict-snapshot': 'Your Conflict Snapshot',
   'conflict-patterns': 'Your Patterns',

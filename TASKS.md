@@ -64,24 +64,13 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Every item from your notes on 14 September is built and in
+section 3 or 4.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O83 | **Storycards: make the couple map larger again.** It went from 168 points to 218 and she wants more. The limit is the type under it, so this is the map against the lead line and the body line, not the map alone. |
-| O84 | **At a glance grounds: expectations, relationship reflection and conflict look alike.** All three run navy into a blue into a teal. She likes the colours; she wants to be able to tell the three pages apart. |
-| O85 | **At a glance grounds: the content is hard to read against them.** Contrast, not taste. Worth measuring rather than eyeballing: white on the mid stop of some of these is under the readable ratio. |
-| O86 | **The connecting lines: curve them like the site, and three fixes.** The site draws beziers. The line for a matching rank is much heavier than the rest and should not be. The lines touch the rank numbers, and the text touches the side of the tile; both need a little room. |
-| O87 | **The Conflict Snapshot does not match the site.** Your Patterns now does. Same treatment. |
-| O88 | **Sort by should be a small popup under the control, not a full-width tile of rows.** Too much white space in it. |
-| O89 | **The three empty Notes sections need their tile and a line of instruction.** Her wording for the tags one: "add a tag to get started, keep track of your tags in this section", in an empty table rather than the suggestion pills. Similar for the other two. |
-| O90 | **How you each rated: two answers at the same point sit above the bar.** They should be evenly distributed about it, one above and one below, with the bar in the middle. |
-| O91 | **Physical Intimacy at a glance: the site lists four action items and the app lists six.** Align them, and cut to the three where the two of you are furthest apart. |
-| O92 | **Physical Intimacy at a glance: the hero should read Physical Intimacy Expectations**, and the line under it about how things are now should go. Both surfaces. |
-| O93 | **Physical Intimacy detail pages in the app have no room above the heading.** |
-| O94 | **Physical Intimacy detail pages in the app carry more than the site's.** Remove the progress bar and its label, and the description tile. Keep the sliding bar with its poles, the talk about it tile, and the side by side dropdown. |
-| O95 | **Physical Intimacy detail sliders should look like the communication ones**, with the pole labels beside the bar rather than above it. |
-| O96 | **Remove Conversations Worth Having from Physical Intimacy**, on both surfaces. |
 
 ## 3. For you to review
 
@@ -105,6 +94,13 @@ any order; work through them however suits.
 | R5 | **Website marketing pages.** The hero without orange italics, no subpage titles in banners, tighter vertical spacing, the founders note redesign, the FAQ and packages changes, In Practice. |
 | R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
 | R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
+| R46 | **The five at a glance grounds, and whether you can tell them apart.** Communication purple into orange, Expectations indigo into teal, Relationship Reflection green, Conflict blue into a lighter blue, Physical Intimacy rose into terracotta. Reflection's green is the colour that section already carries on What Comes Next. Every stop is now dark enough for white type to clear the readable ratio, measured rather than judged, which is also what fixed the expectations category pages: their ground was the category colour at half opacity over cream. |
+| R47 | **The connecting lines, curved.** Same control points as the site's, drawn as twelve segments. Every line is the same weight now. The ends pull in so they never touch a rank number, and the tile has a full step of inset. |
+| R48 | **The couple map at 72% of the card.** The ceiling is 75%: past that it is wider than the column it sits in on the narrowest phone. |
+| R49 | **The Conflict Snapshot as a table.** Two columns of pills under the two names, with the question above each row rather than beside it, because the questions are sentences and a phone has no room for the site's first column. |
+| R50 | **Physical Intimacy, the whole section.** The hero reads Physical Intimacy Expectations and the line under it is gone. The action plan is three items on both surfaces, furthest apart first. Conversations Worth Having is gone from both. The detail pages have room above the heading, poles beside the bar like the communication pages, and nothing else: no progress bar, no state word, no description tile. |
+| R51 | **Two answers at the same point on How you each rated.** They sit evenly either side of the bar now rather than both above it. |
+| R52 | **The Notes empty states, in their tiles.** Your line for the tags one, mine for the other two. The suggestion pills only appear with the add field now. |
 | R30 | **The Relationship Reflection section in the app, against the site.** At a glance should open with both your names and a line saying how you each described things overall, then the four ratings as blocks, then your action plan. How you each view the relationship and Side by Side are now light, in white cards, like the site. What you each admire has moved off at a glance and onto How you each view the relationship, which is where the site has it. |
 | R37 | **Communication at a glance, in the app.** It is purple into orange now, which is what the site has always drawn. It was in Conflict's blue. Worth a look next to the site, and next to the other four at a glance pages. |
 | R31 | **The tile, on every at a glance page.** Comms, Expectations, Relationship Reflection, Physical Intimacy and Conflict all sit in the rounded tile you liked. Detail pages are full width. Worth looking at the five together to see whether the tile still reads as a tile when the page inside it is long. |

@@ -166,9 +166,6 @@ export const SECTION_BLOCKS = {
   // it: the action plan sits on the at-a-glance page, where a reader meets it
   // without a detour.
 
-  'intimacy-plan': [
-    { id: 'conversations', note: 'Each dimension worth talking about, with its prompt.' },
-  ],
 
   'reflection-overview': [
     { id: 'admired', optional: true, note: 'What you each admire, and whether it matched.' },

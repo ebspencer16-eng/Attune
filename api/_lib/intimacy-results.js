@@ -58,6 +58,31 @@ const DIM_TINT = {
 };
 
 /** The three stops, dark to light, for one dimension's page. */
+/**
+ * The three aspects the at-a-glance action plan names.
+ *
+ * ── WHY IT IS A FUNCTION AND NOT A SLICE IN TWO PLACES ────────────────────
+ * The website filtered its own copy of the dimensions to "not aligned, and
+ * answered" and took four. The app took three from a list filtered a different
+ * way. So the same couple saw four items on a laptop and six on a phone, and
+ * not the same four. Ellie: "6 is too many. Make sure these are aligned and
+ * maybe only list the top 3 based on where you're most misaligned."
+ *
+ * Takes either shape of row: the payload's dimensions carry `distancePct` and
+ * the website's summary carries `avgGap`, and both order the same way.
+ *
+ * Aligned aspects are left out, because an action plan is the things to do
+ * something about. So are aspects neither of them answered: there is no
+ * distance to be furthest on.
+ */
+export function intimacyActionPlan(rows) {
+  const distance = (d) => d.distancePct ?? d.avgGap ?? null;
+  return (rows || [])
+    .filter((d) => d.state !== 'unspoken' && d.state !== 'aligned' && distance(d) != null)
+    .sort((a, b) => distance(b) - distance(a))
+    .slice(0, 3);
+}
+
 export function groundForDimension(id) {
   const t = DIM_TINT[id] || DIM_TINT.frequency;
   return [`${t}dd`, `${t}99`, '#22204a'];
@@ -187,8 +212,12 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
      * question to ask each other.
      */
     promptLabel: TALK_ABOUT_IT,
-    /** The line under the two names on the glance page, by variant. */
-    lead: INTIMACY_LEAD[variant] || INTIMACY_LEAD.premarital,
+    /**
+     * `lead` was the line under the two names on the glance page, by variant.
+     * Ellie: the hero should read Physical Intimacy Expectations "and the line
+     * saying 'based on how things are now' should be removed". The variant
+     * lines are still in api/_intimacy-results-prose.js, unsent.
+     */
     /**
      * Set only when nothing is misaligned, which is when the conversations
      * page needs to say why it is still showing a list.
@@ -197,11 +226,21 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       ? null
       : INTIMACY_ALL_ALIGNED,
     dimensions,
-    // Ordered for the Conversations screen: furthest apart first, because that
-    // is where a conversation is most worth having. Dimensions nobody answered
-    // are left out rather than listed as nothing to discuss.
-    conversations: dimensions
-      .filter((d) => d.prompt && d.state !== 'unspoken')
-      .sort((a, b) => (b.distancePct ?? -1) - (a.distancePct ?? -1)),
+    /**
+     * The action plan on the at-a-glance page: three, furthest apart first.
+     *
+     * ── WHY IT IS ONE LIST AND WHY IT IS THREE ────────────────────────────
+     * The website filtered its own copy of the dimensions to "not aligned,
+     * and answered" and took four; the app took the first three of a list
+     * sorted by distance and filtered differently, so the same couple saw four
+     * items on a laptop and six on a phone. Ellie: "6 is too many. Make sure
+     * these are aligned and maybe only list the top 3 based on where you're
+     * most misaligned."
+     *
+     * Aligned dimensions are left out: an action plan is the things to do
+     * something about. A dimension neither of them answered is left out too,
+     * because there is no distance to be furthest on.
+     */
+    actionPlan: intimacyActionPlan(dimensions),
   };
 }

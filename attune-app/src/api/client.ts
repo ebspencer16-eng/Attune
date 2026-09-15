@@ -351,13 +351,16 @@ export type IntimacyDimension = {
 export type IntimacyResults = {
   /** The label above every dimension prompt, from api/_intimacy-results-prose.js. */
   promptLabel?: string;
-  /** The line under the two names on the glance page, by exercise variant. */
-  lead?: string;
-  /** Why the conversations list is still shown when nothing is misaligned. */
+  /** Why the action plan is still shown when nothing is misaligned. */
   allAlignedNote?: string | null;
   dimensions: IntimacyDimension[];
-  /** Furthest apart first: where a conversation is most worth having. */
-  conversations: IntimacyDimension[];
+  /**
+   * The at-a-glance page's action plan: three, furthest apart first, aligned
+   * dimensions left out. It was `conversations`, a longer list each surface
+   * sliced its own way, which is why the site showed four items and the app
+   * showed six.
+   */
+  actionPlan?: IntimacyDimension[];
 };
 
 /**

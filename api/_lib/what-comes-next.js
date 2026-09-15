@@ -96,14 +96,15 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     });
   }
 
-  // 3. Physical Intimacy, as the questions it produced, furthest apart first.
-  const convos = (intimacy?.conversations || []).slice(0, 3);
+  // 3. Physical Intimacy: the same three the at-a-glance page lists, from the
+  //    same field, rather than this function's own slice of a longer list.
+  const convos = intimacy?.actionPlan || [];
   if (convos.length) {
     groups.push({
       id: 'intimacy',
       color: '#C2185B',
       label: 'Physical Intimacy',
-      section: 'intimacy-plan',
+      section: 'intimacy-overview',
       items: convos.map((d) => ({ title: d.label, body: null, say: d.prompt })),
     });
   }

@@ -108,7 +108,7 @@ import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
 import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
-import { groundForDimension } from "../api/_lib/intimacy-results.js";
+import { groundForDimension, intimacyActionPlan } from "../api/_lib/intimacy-results.js";
 // The fixed page gradients, one copy for both surfaces: the app receives the
 // same stops on the results nav. See api/_lib/section-grounds.js.
 import { gradientCss, groundForCategory } from "../api/_lib/section-grounds.js";
@@ -6367,7 +6367,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         { id: "intimacy-overview", label: "Results at a glance" },
         { id: "intimacy-detail-header", label: "Detailed results", isDomainHeader: true, color: "#B5546E" },
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, italic: true, color: "#B5546E" })),
-        { id: "intimacy-plan", label: "Conversations Worth Having", isDeepChild: true, italic: true, color: "#B5546E" },
       ]
     }] : []),
     ...(conflictListed ? [{
@@ -6469,7 +6468,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story"] : []),
-    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`), "intimacy-plan"] : []),
+    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`)] : []),
     ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
     "what-comes-next",
   ];
@@ -6501,7 +6500,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "reflection-story") return "Side by Side";
     if (id === "intimacy-overview") return "Physical Intimacy";
     if (id.startsWith("intimacy-")) { const dd = INTIMACY_DIMENSIONS.find(x => `intimacy-${x.id}` === id); if (dd) return dd.label; }
-    if (id === "intimacy-plan") return "Conversations Worth Having";
     // Without these the Prev/Next buttons fell back to the raw section id and
     // read "conflict-patterns" instead of "Your Patterns".
     if (id === "conflict-overview") return "Conflict Patterns";
@@ -7361,10 +7359,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ color: "white" }}>
               {/* Header — same shape as the comms + expectations overviews */}
-              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{userName} &amp; {partnerName}</div>
-              <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>
-                {INTIMACY_LEAD[intimacyVariant] || INTIMACY_LEAD.premarital}
-              </p>
+              {/* Ellie: the hero "should have the hero read physical intimacy
+                  expectations", and the line under it about how things are now
+                  is gone. It led with the two names, which does not say what
+                  the page is. The title is shared, so neither surface drifts. */}
+              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "1rem" }}>{SC_TITLES["intimacy-overview"]}</div>
               
               {/* The placement bars: label left, bar right, key top-right (9.1). The
                   label is shared copy now, from api/_lib/results-sections.js. */}
@@ -7407,9 +7406,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
               {/* ── ACTION PLAN — the aspects worth talking about ── */}
               {(() => {
-                const items = (intimacySummary?.dimSummary || [])
-                  .filter(d => d.state !== "aligned" && d.avgGap != null).slice(0, 4);
-                if (!items.length) return null;
+                // Three, furthest apart first, from the one function both
+                // surfaces read. This filtered its own copy of the dimensions
+                // and took four while the app took three from a differently
+                // filtered list, so the same couple saw four items here and
+                // six on a phone. Ellie asked for three, and for them to be
+                // the same three.
+                const items = intimacyActionPlan(intimacySummary?.dimSummary || []);
+                if (!items.length) {
+                  // No plan, and the reason is worth saying: agreeing is not
+                  // the same as having said it out loud. This line used to be
+                  // on Conversations Worth Having, which is gone.
+                  return (
+                    <div style={{ marginBottom: "1rem", background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${ROSE}`, borderRadius: 12, padding: "0.9rem 1.1rem" }}>
+                      <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{INTIMACY_ALL_ALIGNED}</p>
+                    </div>
+                  );
+                }
                 return (
                   <div style={{ marginBottom: "1rem" }}>
                     {/* block: intimacy-overview/action-plan */}
@@ -7448,7 +7461,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const myPct = pos.mine == null ? null : Math.round(8 + pos.mine * 84);
       const partPct = pos.theirs == null ? null : Math.round(8 + pos.theirs * 84);
       const idx = dimIds.indexOf(dimMatch);
-      const nextId = idx < dimIds.length - 1 ? `intimacy-${dimIds[idx + 1]}` : "intimacy-plan";
+      const nextId = idx < dimIds.length - 1 ? `intimacy-${dimIds[idx + 1]}` : "what-comes-next";
       const prevId = idx > 0 ? `intimacy-${dimIds[idx - 1]}` : "intimacy-overview";
       const skipper = oneSidedSkip(dimMatch);
       const osk = INTIMACY_RESULTS_PROSE[dimMatch]?.oneSkipped;
@@ -7522,37 +7535,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     }
 
     // ── ACTION PLAN ──
-    if (section === "intimacy-plan") {
-      const misaligned = dims.filter(d => d.state === "discuss" || d.state === "different");
-      const list = misaligned.length ? misaligned : dims;
-      return (
-        <Layout accent={ROSE} noPrevNext={true}>
-          <div style={{ maxWidth: 660 }}>
-            {/* No page eyebrow. Ellie: "I want no page eyebrows throughout the
-                results experience." The nav you arrived through already names
-                the section, so the eyebrow repeated it directly above the
-                page's own title. */}
-            <div style={{ fontSize: "clamp(1.5rem,4vw,2rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Conversations worth having</div>
-            <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.5rem" }}>
-              {misaligned.length ? "" : INTIMACY_ALL_ALIGNED}
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-              {/* block: intimacy-plan/conversations */}
-              {list.map(d => (
-                <div key={d.id} style={{ borderLeft: `3px solid ${ROSE}`, background: `${ROSE}0d`, borderRadius: "0 12px 12px 0", padding: "1rem 1.25rem" }}>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: ROSE, fontFamily: BFONT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>{d.label}</div>
-                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                    <span style={{ fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: ROSE, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, paddingTop: "0.2rem" }}>{TALK_ABOUT_IT}</span>
-                    <p style={{ fontSize: "0.85rem", color: C.text, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.65, margin: 0 }}>{sub(INTIMACY_RESULTS_PROSE[d.id]?.prompt)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: "1.5rem" }}><PrevNext /></div>
-          </div>
-        </Layout>
-      );
-    }
+    // Conversations Worth Having had a page of its own here. Ellie asked for
+    // it to go from both surfaces: its list is the at-a-glance page's action
+    // plan, which a reader meets without a detour, and each of the six
+    // dimension pages already carries its own question.
 
     return null;
   }
@@ -15424,7 +15410,6 @@ export default function App() {
                 subnav = [
                   { label: "Results at a glance", id: "intimacy-overview" },
                   ...INTIMACY_DIMENSIONS.map(d => ({ label: d.label, id: `intimacy-${d.id}` })),
-                  { label: "Conversations", id: "intimacy-plan" },
                 ];
               }
               if (!subnav.length) return null;

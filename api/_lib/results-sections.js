@@ -45,9 +45,12 @@ export const RESULTS_SECTIONS = [
   // it is on the at-a-glance page, where a reader sees it without a detour.
   'reflection-overview', 'reflection-ratings', 'reflection-story',
 
+  // Ellie: "Remove conversations worth having from intimacy section on app and
+  // site." Its list is the at-a-glance page's action plan, which a reader
+  // meets without a detour, and the six dimension pages each carry their own
+  // question. The page repeated both.
   'intimacy-overview',
   ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`),
-  'intimacy-plan',
 
   // The four that the old regex silently refused.
   'conflict-overview', 'conflict-snapshot', 'conflict-patterns', 'conflict-wrote',
@@ -89,6 +92,12 @@ export const RESULTS_SECTIONS = [
  */
 export const PAGE_TITLES = {
   'comm-overview': 'Communication Styles',
+  /**
+   * Ellie: the Physical Intimacy at-a-glance hero "should have the hero read
+   * physical intimacy expectations". Both surfaces led with the couple's two
+   * names there, which does not say what the page is.
+   */
+  'intimacy-overview': 'Physical Intimacy Expectations',
   'exp-overview': 'Expectations',
   'conflict-overview': 'Conflict Styles',
   'reflection-ratings': 'How you each view the relationship',
@@ -137,7 +146,6 @@ export const RESULTS_SECTION_LABELS = {
   'reflection-story': 'Side by Side',
   'intimacy-overview': 'Physical Intimacy',
   ...Object.fromEntries(INTIMACY_DIMENSIONS.map(d => [`intimacy-${d.id}`, d.label])),
-  'intimacy-plan': 'Conversations Worth Having',
   'conflict-overview': 'Conflict Patterns',
   'conflict-snapshot': 'Your Conflict Snapshot',
   'conflict-patterns': 'Your Patterns',
@@ -257,7 +265,6 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
       children: [
         glance('intimacy-overview'),
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label })),
-        { id: 'intimacy-plan', label: 'Conversations Worth Having' },
       ],
     });
   }

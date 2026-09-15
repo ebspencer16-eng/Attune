@@ -630,8 +630,7 @@ function SectionBody({
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
 
-  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} ground={ground} groundStops={groundStops} />;
-  if (section === 'intimacy-plan') return <IntimacyConversations data={intimacy} promptLabel={intimacy?.promptLabel || 'Talk about it'} />;
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} ground={ground} groundStops={groundStops} />;
   if (section.startsWith('intimacy-')) {
     const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
     return (
@@ -1167,8 +1166,10 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
   );
 }
 
-function IntimacyOverview({ data, you, them, ground, groundStops }: {
+function IntimacyOverview({ data, you, them, title, ground, groundStops }: {
   data: IntimacyResults | null; you: string; them: string;
+  /** The page's heading, from the server's pageTitles. */
+  title: string;
   /** The page's gradient and its stops, from the results nav. */
   ground?: string[] | null;
   groundStops?: number[] | null;
@@ -1184,19 +1185,12 @@ function IntimacyOverview({ data, you, them, ground, groundStops }: {
        every at-a-glance page takes. */
     <GlanceTile ground={ground} locations={groundStops}>
       <>
-          {/* The two names, then the line that says which version of the
-            exercise this was. The app opened with "Physical Intimacy
-            Expectations" as its heading, which is the eyebrow the website used
-            to carry above the names; Ellie asked for that eyebrow to go, and
-            the names are what the website leads with on every glance page. The
-            line under them was a ternary inside src/App.jsx, so the app had
-            nothing to put there. */}
-        <Text style={{ ...Type.hero, color: Palette.white }}>{you} & {them}</Text>
-        {data.lead ? (
-          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm }}>
-            {data.lead}
-          </Prose>
-        ) : null}
+        {/* Ellie: the hero "should have the hero read physical intimacy
+            expectations", and the line under it about how things are now is
+            gone. Both surfaces led with the two names, which does not say what
+            the page is, and the line came in four variants nobody had asked
+            for. The title is the server's, so neither surface can drift. */}
+        <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
           {/* One panel, a row per dimension, each partner on the track. The app
               drew a card per dimension carrying one distance bar, which is a
@@ -1241,20 +1235,52 @@ function IntimacyOverview({ data, you, them, ground, groundStops }: {
           </View>
 
           {/* block: intimacy-overview/action-plan */}
-            <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
-              Your action plan
-            </Text>
-            {data.conversations.map((d) => (
-              <View
-                key={d.section}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-                }}>
-                <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{d.label}</Text>
-                <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{d.prompt}</Prose>
-              </View>
-            ))}
+          {/* Three, the furthest apart first, from the server. The website
+              filtered its own copy of the dimensions and took four while this
+              took three from a differently filtered list, so the same couple
+              saw four items on a laptop and six on a phone. Ellie: "6 is too
+              many. Make sure these are aligned and maybe only list the top 3
+              based on where you're most misaligned." */}
+          {/* When nothing is misaligned there is no plan, and the reason is
+              worth saying: agreeing is not the same as having said it out
+              loud. That line used to live on Conversations Worth Having, which
+              is gone, and it is the answer to "why is this section empty". */}
+          {!(data.actionPlan || []).length && data.allAlignedNote ? (
+            <View
+              style={{
+                marginTop: Spacing.xl,
+                backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.22)', borderWidth: 1,
+                borderLeftColor: SectionColor.intimacy, borderLeftWidth: 4,
+                borderRadius: Radius.lg, padding: Spacing.lg,
+              }}>
+              <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{data.allAlignedNote}</Prose>
+            </View>
+          ) : null}
+
+          {(data.actionPlan || []).length ? (
+            <View style={{ marginTop: Spacing.xl }}>
+              <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.md }}>
+                Your action plan
+              </Text>
+              {(data.actionPlan || []).map((d) => (
+                <View
+                  key={d.section}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.22)', borderWidth: 1,
+                    borderLeftColor: SectionColor.intimacy, borderLeftWidth: 4,
+                    borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+                  }}>
+                  {/* The website's card: "Talk about frequency" and the
+                      question under it, rather than the dimension's name as a
+                      label. */}
+                  <Text style={{ ...Type.cardTitle, color: Palette.white }}>
+                    {`Talk about ${d.label.toLowerCase()}`}
+                  </Text>
+                  <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.72)', marginTop: Spacing.xs }}>{d.prompt}</Prose>
+                </View>
+              ))}
+            </View>
+          ) : null}
       </>
     </GlanceTile>
   );
@@ -1275,7 +1301,10 @@ function IntimacyDimensionView({
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+      {/* Ellie: "Intimacy detailed pages on the app don't have buffer above
+          the heroes." Every other detail page in the app opens under the nav
+          with a step of space; these six opened against it. */}
+      <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: Palette.white }}>{dim.label}</Text>
         {dim.intro ? (
           <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Prose>
@@ -1293,32 +1322,30 @@ function IntimacyDimensionView({
 
             The poles come from the payload now; they were only in the
             question registry, which the app cannot import. */}
-        <View style={{ marginTop: Spacing.lg }}>
-          {dim.poles?.length === 2 ? (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.xs }}>
-              <Text style={{ ...Type.small, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>{dim.poles[0]}</Text>
-              <Text style={{ ...Type.small, fontWeight: '600', color: 'rgba(255,255,255,0.85)' }}>{dim.poles[1]}</Text>
-            </View>
-          ) : null}
-          <Slider
+        {/* ── THE BAR, WITH ITS POLES BESIDE IT ──────────────────────────
+            Ellie: "please make the sliding bars look like the ones on the
+            comms detailed pages, with the pole labels next to the bar rather
+            than above it." Same component as those pages, so there is one
+            bar in the app and not two that nearly match.
+
+            And two things are gone from this page, because the website does
+            not have them: the distance bar with its state word underneath,
+            and the tile of prose about the dimension. Ellie: "Remove the
+            progress bar and associated label and also the description tile.
+            Only include the sliding bar with its poles, the talk about it
+            tile, and the side by side response dropdown." */}
+        <View style={{ marginTop: Spacing.xl }}>
+          <SliderRow
+            label=""
+            left={dim.poles?.[0] || ''}
+            right={dim.poles?.[1] || ''}
             you={dim.positions?.you ?? null}
             them={dim.positions?.them ?? null}
             youName={you}
             themName={them}
             onDark
           />
-          <DistanceBar pct={dim.distancePct} state={dim.state} />
         </View>
-
-        {dim.body ? (
-          <View
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-              borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
-            }}>
-            <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{dim.body}</Prose>
-          </View>
-        ) : null}
 
         {/* ── THE QUESTION TO ASK ─────────────────────────────────────────
             In a tile with its label above it, which is what the website does.
@@ -1396,70 +1423,12 @@ function IntimacyDimensionView({
   );
 }
 
-function IntimacyConversations({ data, promptLabel }: {
-  data: IntimacyResults | null;
-  /** "Talk about it", from the server, the same two words the pages use. */
-  promptLabel: string;
-}) {
-  if (!data) {
-    return <Waiting title="Conversations Worth Having" body={WAITING.LOCKED_BY_THEM} />;
-  }
-  if (!data.conversations.length) {
-    return (
-      <Waiting
-        title="Conversations Worth Having"
-        body="Nothing here yet. These appear for the areas you both answered."
-      />
-    );
-  }
-  /**
-   * ── WHY THIS PAGE IS CREAM ────────────────────────────────────────────────
-   * The website draws it on the ordinary ground, in rose-tinted cards with a
-   * rose edge. The app drew it in the section's dark gradient, which is the
-   * ground the website keeps for at-a-glance and the dimension pages, so the
-   * last page of Physical Intimacy was the one page of that section that did
-   * not look like its own section on the other surface.
-   *
-   * Found in a sweep rather than reported, and it is the same shape as the two
-   * Reflection detail pages Ellie did report.
-   */
-  const rose = SectionColor.intimacy;
-  return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <Text style={{ ...Type.title, color: c.textStrong }}>Conversations worth having</Text>
-        {/* Why the list is still here when nothing is misaligned. Agreeing is
-            not the same as having said it out loud. The website has printed
-            this all along; it was a string inside src/App.jsx, so the app
-            showed the list and left the reader to work out why. */}
-        {data.allAlignedNote ? (
-          <Prose style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 22 }}>
-            {data.allAlignedNote}
-          </Prose>
-        ) : null}
-        {/* block: intimacy-plan/conversations */}
-        <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
-          {data.conversations.map((d) => (
-            <View
-              key={d.section}
-              style={{
-                backgroundColor: `${rose}0d`,
-                borderLeftColor: rose, borderLeftWidth: 3,
-                borderTopRightRadius: Radius.lg, borderBottomRightRadius: Radius.lg,
-                paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
-              }}>
-              <Text style={{ ...Type.eyebrow, color: rose, marginBottom: Spacing.xs }}>{d.label}</Text>
-              <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
-                <Text style={{ ...Type.eyebrow, fontSize: 9, color: rose, marginTop: 3 }}>{promptLabel}</Text>
-                <Prose style={{ ...Type.body, color: c.text, flex: 1, lineHeight: 23 }}>{d.prompt}</Prose>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-    </ScrollView>
-  );
-}
+/*
+ * IntimacyConversations drew Conversations Worth Having. Ellie asked for that
+ * page to go from both surfaces: its list is the at-a-glance page's action
+ * plan, which a reader meets without a detour, and each of the six dimension
+ * pages already carries its own question.
+ */
 
 function ReflectionWaiting() {
   return (
@@ -3264,7 +3233,13 @@ function SliderRow({
   };
   return (
     <View>
-      <Text style={{ ...Type.small, fontWeight: '700', color: onDark ? Palette.white : c.textStrong }}>{label}</Text>
+      {/* The label is optional: the intimacy pages name the dimension in their
+          own heading, so a second copy of it over the bar is the page saying
+          the same word twice. An empty Text still takes a line, so it is not
+          drawn rather than drawn empty. */}
+      {label ? (
+        <Text style={{ ...Type.small, fontWeight: '700', color: onDark ? Palette.white : c.textStrong }}>{label}</Text>
+      ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
         <Text style={{ ...pole, textAlign: 'right' }}>{left}</Text>
         {/* Inset so a dot at either extreme clears the pole word instead of
