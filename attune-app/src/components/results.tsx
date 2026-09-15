@@ -1831,12 +1831,22 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
   return (
     <View>
       <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>{r.short || r.question}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-        <Text style={{ ...pole, textAlign: 'right' }}>{r.low}</Text>
+      {/* ── THE POLES SIT LEVEL WITH THE BAR ───────────────────────────
+          Ellie: "pole labels on how you each rated should be middle aligned
+          with the bar itself."
+
+          The row centres its children, and the middle column is the bar plus
+          the answer labels under it, so centring put the poles level with the
+          middle of that whole stack: above the bar by half the label row.
+          They align to the top of the column instead and take the bar's own
+          height, which puts them on its centre line wherever the labels wrap
+          to one line or two. */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm }}>
+        <Text style={{ ...pole, height: BAR_ROW, lineHeight: BAR_ROW, textAlign: 'right' }}>{r.low}</Text>
         {/* Inset so a mark at either extreme clears the pole word. The same
             13 points the communication rows use. */}
         <View style={{ flex: 1, paddingHorizontal: 13 }}>
-          <View style={{ height: 24, justifyContent: 'center' }}>
+          <View style={{ height: BAR_ROW, justifyContent: 'center' }}>
             <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border }}>
               {r.gapSteps > 0 ? (
                 <View
@@ -1864,11 +1874,14 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
             )}
           </View>
         </View>
-        <Text style={pole}>{r.high}</Text>
+        <Text style={{ ...pole, height: BAR_ROW, lineHeight: BAR_ROW }}>{r.high}</Text>
       </View>
     </View>
   );
 }
+
+/** The height of the row the bar sits in the middle of. */
+const BAR_ROW = 24;
 
 /**
  * A mark's answer, printed under it.

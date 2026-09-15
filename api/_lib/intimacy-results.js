@@ -59,14 +59,19 @@ const DIM_TINT = {
 
 /** The three stops, dark to light, for one dimension's page. */
 /**
- * The three aspects the at-a-glance action plan names.
+ * The aspects the at-a-glance action plan names: the two furthest apart, and
+ * anything level with the second.
  *
- * ── WHY IT IS A FUNCTION AND NOT A SLICE IN TWO PLACES ────────────────────
- * The website filtered its own copy of the dimensions to "not aligned, and
- * answered" and took four. The app took three from a list filtered a different
- * way. So the same couple saw four items on a laptop and six on a phone, and
- * not the same four. Ellie: "6 is too many. Make sure these are aligned and
- * maybe only list the top 3 based on where you're most misaligned."
+ * ── WHY IT IS NOT A FIXED NUMBER ──────────────────────────────────────────
+ * It was four on the website and three in the app, then three on both. Ellie:
+ * "should list the top 2 things the pair disagrees on, but if #2 is tied with
+ * others, each that it is tied with must also be listed."
+ *
+ * A fixed count cuts a tie in half, and a tie is the one case where the cut is
+ * arbitrary: two aspects the same distance apart, one listed and one not,
+ * decided by whichever the list happened to hold first. So the rule is a
+ * threshold rather than a count. Two, unless the second is level with a third,
+ * in which case everything at that distance comes too.
  *
  * Takes either shape of row: the payload's dimensions carry `distancePct` and
  * the website's summary carries `avgGap`, and both order the same way.
@@ -77,10 +82,15 @@ const DIM_TINT = {
  */
 export function intimacyActionPlan(rows) {
   const distance = (d) => d.distancePct ?? d.avgGap ?? null;
-  return (rows || [])
+  const ranked = (rows || [])
     .filter((d) => d.state !== 'unspoken' && d.state !== 'aligned' && distance(d) != null)
-    .sort((a, b) => distance(b) - distance(a))
-    .slice(0, 3);
+    .sort((a, b) => distance(b) - distance(a));
+
+  if (ranked.length <= 2) return ranked;
+  // The distance the second one sits at. Everything at that distance is in,
+  // however many that turns out to be.
+  const cutoff = distance(ranked[1]);
+  return ranked.filter((d) => distance(d) >= cutoff);
 }
 
 export function groundForDimension(id) {

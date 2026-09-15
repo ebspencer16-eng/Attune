@@ -55,6 +55,37 @@ const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
  * The website's two strings. They were one string here, and it was the wrong
  * one for half the bands.
  */
+/**
+ * The two section labels on Conflict at a glance, and the colour of an answer
+ * on the shared measure.
+ *
+ * Both live in api/_conflict-results-prose.js, which the website imports. The
+ * app cannot, so it names them and check-conflict-colours.mjs fails the build
+ * if they stop matching: the documented arrangement, derive where you can and
+ * gate where you cannot.
+ */
+const GLANCE_LABEL = '#8FB2FF';
+
+/**
+ * The colour of one answer on the shared conflict measure.
+ *
+ * c0 runs from "Really rocky" at 0 to "We handle it well" at 4, so the scale
+ * is the opposite way round from the pattern bands, which run from a pattern
+ * that never happens to one that happens often. The value is flipped before
+ * it is looked up, or the page would paint the couple who say they handle
+ * conflict well in the colour of the worst pattern.
+ *
+ * Five answers, four bands: the two middle answers share one, which is the
+ * server's own scale and the one the patterns page draws, so a colour means
+ * the same thing on both pages of this section.
+ */
+function overallTone(bands: string[], value: number): string {
+  if (!bands?.length) return '#FFFFFF';
+  const worst = 4 - Math.min(Math.max(value, 0), 4);
+  const i = Math.min(Math.round((worst * (bands.length - 1)) / 4), bands.length - 1);
+  return bands[i];
+}
+
 const ADVICE_TRY = 'One thing to try';
 const ADVICE_KEEP = 'One thing to keep in mind';
 
@@ -197,7 +228,11 @@ function Glance({ data, title, ground, groundStops }: {
               backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)',
               borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.lg,
             }}>
-            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.35)', marginBottom: Spacing.md }}>
+            {/* Ellie: "Conflict styles at a glance page needs some color in
+                the content, can the bars be colored and can the section labels
+                be colored?" The two labels on this page were white at a third
+                opacity, which is as close to no colour as a label gets. */}
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: GLANCE_LABEL, marginBottom: Spacing.md }}>
               How you each describe conflict resolution in your relationship
             </Text>
             {overalls.map((r) => (
@@ -208,12 +243,18 @@ function Glance({ data, title, ground, groundStops }: {
                     {labels[r.value as number] || ''}
                   </Text>
                 </View>
-                <View style={{ height: 5, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.14)', overflow: 'hidden' }}>
+                {/* The bar carries the answer's own colour rather than white:
+                    the five answers run from "we work it out" to "it goes
+                    unresolved", and the colour is the fastest reading of which
+                    end someone is at. The five come from the band colours the
+                    server already sends, which is the same scale the patterns
+                    page draws. */}
+                <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.14)', overflow: 'hidden' }}>
                   <View
                     style={{
-                      height: 5,
+                      height: 6,
                       width: `${(((r.value as number) + 1) / 5) * 100}%`,
-                      backgroundColor: Palette.white, opacity: 0.85,
+                      backgroundColor: overallTone(content.bandColors, r.value as number),
                     }}
                   />
                 </View>
@@ -225,7 +266,7 @@ function Glance({ data, title, ground, groundStops }: {
         {/* block: conflict-overview/action-plan */}
         <Text
           style={{
-            ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.45)',
+            ...Type.eyebrow, fontSize: 9, color: GLANCE_LABEL,
             marginTop: Spacing.xl, marginBottom: Spacing.md,
           }}>
           Your action plan

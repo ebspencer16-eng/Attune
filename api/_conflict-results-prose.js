@@ -26,6 +26,35 @@ export const FREQUENCY_LABELS = ['Never', 'Rarely', 'Sometimes', 'Often'];
  * Per pattern, per frequency. The tip is the point of the line: something
  * specific enough to try tonight, not "work on communication".
  */
+/**
+ * The colour of one answer to the shared conflict measure.
+ *
+ * Ellie: "Conflict styles at a glance page needs some color in the content,
+ * can the bars be colored?" Both surfaces drew the two bars white.
+ *
+ * c0 runs from "Really rocky" at 0 to "We handle it well" at 4, which is the
+ * opposite way round from BAND_COLORS: those run from a pattern that never
+ * happens to one that happens often. So the answer is flipped before it is
+ * looked up, or a couple who say they handle conflict well would be painted
+ * in the colour of the worst pattern.
+ *
+ * Five answers, four bands: the two in the middle share one. Using the band
+ * colours rather than a new set means a colour says the same thing on both
+ * pages of this section.
+ */
+export function overallColor(value) {
+  const worst = 4 - Math.min(Math.max(Number(value) || 0, 0), 4);
+  const i = Math.min(Math.round((worst * (BAND_COLORS.length - 1)) / 4), BAND_COLORS.length - 1);
+  return BAND_COLORS[i];
+}
+
+/**
+ * The section labels on Conflict at a glance. They were white at a third
+ * opacity, which is as close to no colour as a label gets. The pale end of the
+ * page's own gradient, so they read as part of the section.
+ */
+export const GLANCE_LABEL = '#8FB2FF';
+
 export const PATTERN_COPY = {
   criticism: {
     label: 'Criticism',

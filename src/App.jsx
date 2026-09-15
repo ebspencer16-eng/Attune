@@ -3,7 +3,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
-import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict } from "../api/_conflict-results-prose.js";
+import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict, overallColor as conflictOverallColor, GLANCE_LABEL as CONFLICT_GLANCE_LABEL } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
 // moves the words a highlight was written against. contentFor(null) returns
@@ -7120,12 +7120,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         const mv = mine[q.id], tv = theirs[q.id];
         const gap = Math.abs(mv - tv);
         const tone = gap === 0 ? "#10b981" : gap === 1 ? "#1B5FE8" : "#E8673A";
-        const pole = { fontSize: "0.66rem", color: C.muted, fontFamily: BFONT, flexShrink: 0, width: "clamp(56px,18%,92px)", lineHeight: 1.3 };
+        // The poles sit on the bar's centre line. The row's middle column is
+        // the bar plus the answer labels under it, so centring the row put
+        // them level with the middle of that whole stack rather than with the
+        // bar. They take the bar row's height instead, which is the same fix
+        // the app needed. Ellie: "pole labels ... should be middle aligned
+        // with the bar itself."
+        const pole = { fontSize: "0.66rem", color: C.muted, fontFamily: BFONT, flexShrink: 0, width: "clamp(56px,18%,92px)", height: 6, lineHeight: "6px", display: "flex", alignItems: "center" };
         return (
           <div>
             <div style={{ fontFamily: HFONT, fontSize: "0.86rem", fontWeight: 700, color: C.ink, marginBottom: "0.7rem" }}>{q.text}</div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <span style={{ ...pole, textAlign: "right" }}>{q.scaleLabels[0]}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem" }}>
+              <span style={{ ...pole, justifyContent: "flex-end", textAlign: "right" }}>{q.scaleLabels[0]}</span>
               <div style={{ flex: 1, minWidth: 0, padding: "0 11px" }}>
                 <div style={{ position: "relative", height: 6, background: C.stone, borderRadius: 999 }}>
                   {gap > 0 && (
@@ -7874,22 +7880,25 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 else on the risk side is private to each reader. */}
             {/* block: conflict-overview/overall */}
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.8rem" }}>How you each describe conflict resolution in your relationship</div>
+              {/* Ellie: this page "needs some color in the content, can the
+                  bars be colored and can the section labels be colored?" Both
+                  labels were white at a third opacity. */}
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: CONFLICT_GLANCE_LABEL, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.8rem" }}>How you each describe conflict resolution in your relationship</div>
               {[[userName, myC0], [partnerName, theirC0]].map(([nm, v]) => (
                 <div key={nm} style={{ marginBottom: "0.7rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.3rem" }}>
                     <span style={{ fontSize: "0.78rem", color: "white", fontFamily: BFONT, fontWeight: 600 }}>{nm}</span>
                     <span style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>{C0_LABELS[v]}</span>
                   </div>
-                  <div style={{ height: 5, background: "rgba(255,255,255,0.14)", borderRadius: 99 }}>
-                    <div style={{ height: "100%", width: `${((v + 1) / 5) * 100}%`, background: "white", borderRadius: 99, opacity: 0.85 }} />
+                  <div style={{ height: 6, background: "rgba(255,255,255,0.14)", borderRadius: 99 }}>
+                    <div style={{ height: "100%", width: `${((v + 1) / 5) * 100}%`, background: conflictOverallColor(v), borderRadius: 99 }} />
                   </div>
                 </div>
               ))}
             </div>
 
             {/* block: conflict-overview/action-plan */}
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.7rem" }}>Your action plan</div>
+            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: CONFLICT_GLANCE_LABEL, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.7rem" }}>Your action plan</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
               {flagged.length > 0 ? flagged.map(p => (
                 <div key={p.key} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "1rem 1.2rem" }}>
