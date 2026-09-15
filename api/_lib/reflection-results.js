@@ -66,11 +66,11 @@ export const REFLECTION_PAGES = {
     title: 'Side by Side',
     sub: 'Everything you each wrote, unedited, next to each other. Read them together.',
   },
-  plan: {
-    title: 'Conversations worth having.',
-    eyebrowOwn: 'Reflection Action Plan',
-    aligned: "You're well-aligned across your reflections. Keep building on this foundation.",
-  },
+  // `plan` was the retired action plan page's heading, its eyebrow and its
+  // all-aligned line. The page is gone from both surfaces and nothing read
+  // these, so they were three pieces of copy on a copy-review surface that no
+  // customer could reach. Removed rather than kept "in case": the plan itself
+  // lives on the at-a-glance page and has its own words there.
 };
 
 export const STORY_CATEGORIES = (() => {

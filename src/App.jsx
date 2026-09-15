@@ -5138,35 +5138,11 @@ const JAMES_ANNIVERSARY_DEMO = {
 
 
 
-// ── Action plan item list with show-more ─────────────────────────────────────
-function ActionPlanList({ explores = [] }) {
-  const SHOW_INIT = 3;
-  const visible = explores; // #5: always show all; no reveal dropdown
-  const hidden = explores.length - SHOW_INIT;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
-      {visible.map((ins, i) => (
-        <div key={i} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, overflow: "hidden" }}>
-          <div style={{ background: "#F5F7FF", borderBottom: "1px solid rgba(27,95,232,0.12)", padding: "0.75rem 1.1rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1B5FE8", flexShrink: 0 }} />
-            <span style={{ fontSize: "0.85rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, lineHeight: 1.4 }}>{ins.prompt || ins.title}</span>
-          </div>
-          <div style={{ padding: "0.85rem 1.1rem" }}>
-            <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, margin: "0 0 0.65rem" }}>{ins.action}</p>
-            {ins.coupleTypeNote && (
-              <div style={{ padding: "0.5rem 0.75rem", background: "rgba(27,95,232,0.05)", borderRadius: 8, border: "1px solid rgba(27,95,232,0.1)" }}>
-                <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "#1B5FE8", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: BFONT }}>Your couple type · </span>
-                <span style={{ fontSize: "0.74rem", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 300 }}>{ins.coupleTypeNote}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-
+// The Relationship Reflection action plan had a page of its own and Ellie
+// removed it from both surfaces: the plan itself is on the at-a-glance page,
+// where a reader meets it without a detour. ActionPlanList drew that page and
+// outlived it, unused, for long enough to look like something still in service.
+//
 // ─────────────────────────────────────────────────────────────────────────────
 // BETA SURVEY MODAL — 4-question in-app feedback, triggered from results sidebar
 // ─────────────────────────────────────────────────────────────────────────────

@@ -101,8 +101,15 @@ export const PAGE_TITLES = {
  * "Where you each land" came to be written twice and renamed once.
  */
 export const PAGE_COPY = {
-  /** Over the placement bars on the communication overview. */
-  commPlacements: 'Communication style overview',
+  /**
+   * Over the placement bars on the communication overview.
+   *
+   * Ellie: "can just be titled 'overview' now that the main hero says
+   * communication styles". It read "Where you each land" before she renamed
+   * it, then "Communication style overview", which said the page's own title
+   * back to the reader two inches under it.
+   */
+  commPlacements: 'Overview',
   /** The tip tiles on an expectations conversation page. Takes both names. */
   expectationsTip: (you, them) => `A tip for ${you} and ${them}`,
   /**

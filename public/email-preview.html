@@ -54,11 +54,37 @@ function label(type) {
   return type.replace(/_/g, ' ').replace(/^./, function (c) { return c.toUpperCase(); });
 }
 
+/**
+ * ── WHY THE FRAME IS FILLED AND NOT POINTED ──────────────────────────────
+ * This used to set the iframe's src to the endpoint. The site sends
+ * X-Frame-Options: DENY on every path, which refuses a framed load even from
+ * its own origin, so the tabs and the subject line rendered and the panel
+ * under them stayed empty. That is the whole of "the preview page isn't
+ * working": nothing errored, nothing logged, the frame simply had no document
+ * in it.
+ *
+ * srcdoc is not a navigation, so the header does not apply, and the email
+ * still renders in its own document with its own styles, which is the reason
+ * to use a frame at all. The alternative was to weaken the header for this one
+ * path, which is a worse trade for a page only Ellie and I read.
+ */
 function show(item, tab) {
   var tabs = document.querySelectorAll('.tab');
   for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
   tab.classList.add('active');
-  document.getElementById('preview').src = ONE + encodeURIComponent(item.type);
+  var frame = document.getElementById('preview');
+  frame.removeAttribute('src');
+  frame.srcdoc = '<!doctype html><meta charset="utf-8"><body style="margin:0;font-family:sans-serif;color:#888;padding:2rem">Loading</body>';
+  fetch(ONE + encodeURIComponent(item.type))
+    .then(function (r) {
+      if (!r.ok) throw new Error('the endpoint answered ' + r.status);
+      return r.text();
+    })
+    .then(function (html) { frame.srcdoc = html; })
+    .catch(function (e) {
+      frame.srcdoc = '<!doctype html><meta charset="utf-8"><body style="margin:0;font-family:sans-serif;color:#b00;padding:2rem">'
+        + 'This email could not be loaded from the sender: ' + String(e.message) + '</body>';
+    });
   var sent = item.sentFrom || [];
   document.getElementById('meta').innerHTML =
     '<strong>Subject:</strong> ' + item.subject + ' &nbsp;·&nbsp; <strong>To: ' + item.to + '</strong>'

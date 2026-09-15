@@ -14,6 +14,15 @@
  */
 
 export const REFLECTION_PROMPTS = {
+        /**
+         * Ellie: "the site has 'talk about it' prompts for each section, but
+         * the app is missing some of them." One was missing, and from both
+         * surfaces: a_memory, "something small that happened recently that
+         * made me smile about us", is the first question the exercise asks and
+         * the only text question with no prompt under it. This line is mine,
+         * for her to keep or replace.
+         */
+        a_memory: 'Say what you each remember of it. The same moment is rarely the same from both sides.',
         a1: "Read each other's answer, then say why that moment and not another one.",
         a2: "Ask what it was like from the inside. You were both there, but not in the same way.",
         a6: "Ask what would help. The person working on it rarely wants to be fixed, they want to be noticed trying.",

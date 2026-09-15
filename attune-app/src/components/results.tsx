@@ -540,7 +540,7 @@ function SectionBody({
       <Glance
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         title={pageTitle('comm-overview', 'Communication Styles')}
-        placementsLabel={pageCopy('commPlacements', 'Communication style overview')}
+        placementsLabel={pageCopy('commPlacements', 'Overview')}
       />
     );
   }
@@ -559,7 +559,7 @@ function SectionBody({
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         plan={commsPlan} ground={ground} groundStops={groundStops}
         title={pageTitle('comm-overview', 'Communication Styles')}
-        placementsLabel={pageCopy('commPlacements', 'Communication style overview')}
+        placementsLabel={pageCopy('commPlacements', 'Overview')}
       />
     );
   }
@@ -2181,7 +2181,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
 
 function Glance({
   results, you, them, viewer, wideGap, plan = null, ground, groundStops,
-  title = 'Communication Styles', placementsLabel = 'Communication style overview',
+  title = 'Communication Styles', placementsLabel = 'Overview',
 }: {
   results: CoupleResults; you: string; them: string; viewer: 'a' | 'b';
   wideGap: number | null; plan?: CommsPlan | null;

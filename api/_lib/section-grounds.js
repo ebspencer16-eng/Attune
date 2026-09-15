@@ -27,15 +27,36 @@
  * given locations, so the app passes them.
  */
 
+/**
+ * The deep end of every at-a-glance gradient, and the one thing they share.
+ *
+ * Ellie: "I don't like the black bg, could we make all of these the attune
+ * navy bg?" Four of the five started somewhere between #22285E and #3B2A6B,
+ * which on a phone in a lit room reads as black. This is the navy the home
+ * screen already opens on, so the app has one dark rather than five nearly.
+ *
+ * Physical Intimacy is the exception and keeps its own deep rose. Its
+ * gradient runs rose into terracotta, and starting it navy makes a three-hue
+ * gradient that belongs to no section. Say the word and it follows the others.
+ */
+const NAVY = '#1B2A5E';
+
 /** angle is CSS degrees; mid is the middle stop's position, in percent. */
 export const SECTION_GROUNDS = {
-  'comm-overview': { angle: 150, mid: 55, stops: ['#3B2A6B', '#6C4BB0', '#C8522E'] },
-  'exp-overview': { angle: 150, mid: 55, stops: ['#2E2A6B', '#4C56C0', '#1B8FA8'] },
+  'comm-overview': { angle: 150, mid: 55, stops: [NAVY, '#6C4BB0', '#C8522E'] },
+  'exp-overview': { angle: 150, mid: 55, stops: [NAVY, '#4C56C0', '#1B8FA8'] },
   /** Every expectations conversation page. The website calls this EXP_BG. */
-  'exp-detail': { angle: 145, mid: 55, stops: ['#443D8C', '#6F63D6', '#514AAE'] },
-  'reflection-overview': { angle: 150, mid: 55, stops: ['#22285E', '#3E63C8', '#10A5B8'] },
-  'intimacy-overview': { angle: 150, mid: 55, stops: ['#4A1B33', '#A34468', '#C8703E'] },
-  'conflict-overview': { angle: 150, mid: 55, stops: ['#1B2A5E', '#2F55C4', '#1B8FB8'] },
+  'exp-detail': { angle: 145, mid: 55, stops: [NAVY, '#6F63D6', '#514AAE'] },
+  'reflection-overview': { angle: 150, mid: 55, stops: [NAVY, '#3E63C8', '#10A5B8'] },
+  'intimacy-overview': { angle: 150, mid: 55, stops: ['#5E2340', '#A34468', '#C8703E'] },
+  /**
+   * Ellie: "Conflict styles at a glance page needs some color, like other at a
+   * glance pages." It ran navy into a muted blue into a muted teal, which is
+   * reflection's gradient with the saturation taken out. The middle stop is
+   * the section's own blue now, and the tail the same teal. Nothing invented:
+   * both are colours the product already uses.
+   */
+  'conflict-overview': { angle: 150, mid: 55, stops: [NAVY, '#1B5FE8', '#1B8FB8'] },
 };
 
 /** The stops, for a surface that builds its own gradient. */
