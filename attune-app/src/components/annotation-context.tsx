@@ -25,7 +25,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 import { Text, View, type StyleProp, type TextStyle } from 'react-native';
 
-import Annotatable, { type Mark } from '@/components/annotatable';
+import Annotatable, { type Mark, type MarkAction } from '@/components/annotatable';
 import { annotationColor } from '@/constants/annotations';
 import AnnotationSheet from '@/components/annotation-sheet';
 import type { Note, Tag } from '@/api/client';
@@ -33,8 +33,14 @@ import type { Note, Tag } from '@/api/client';
 type Ctx = {
   /** Marks on the section currently on screen, by the text they sit on. */
   marks: Mark[];
-  /** A fragment was chosen. Opens the sheet. */
-  select: (sentence: string) => void;
+  /**
+   * A fragment was chosen, and what to do with it.
+   *
+   * The kind comes from the toolbar that appears over the selection, so the
+   * sheet opens on that step rather than on a menu the reader has already
+   * been through. Ellie asked for the toolbar to be the menu.
+   */
+  select: (sentence: string, action: MarkAction) => void;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
 };
@@ -121,7 +127,7 @@ export function AnnotationProvider({
   /** A new mark was made, so the screen can add it without refetching. */
   onCreated: (note: Note) => void;
 }) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ text: string; action: MarkAction } | null>(null);
   const key = anchorKey || section;
 
   const marks = useMemo<Mark[]>(() => notes
@@ -140,7 +146,7 @@ export function AnnotationProvider({
 
   const value = useMemo<Ctx>(() => ({
     marks,
-    select: setSelected,
+    select: (text: string, action: MarkAction) => setSelected({ text, action }),
     enabled: true,
   }), [marks]);
 
@@ -149,7 +155,8 @@ export function AnnotationProvider({
       {children}
       {selected ? (
         <AnnotationSheet
-          sentence={selected}
+          sentence={selected.text}
+          openOn={selected.action}
           anchorType={anchorType}
           anchorKey={key}
           tags={tags}

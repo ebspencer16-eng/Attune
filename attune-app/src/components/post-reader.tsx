@@ -43,10 +43,11 @@ const c = Colors.light;
 /**
  * The one instruction the marking flow needs and never gave.
  *
- * Mine, for Ellie to keep or replace. It names the gesture and what it is
- * for, in that order, because the gesture is the part nobody guesses.
+ * Mine, for Ellie to keep or replace. It names the gesture in the order a
+ * hand does it, because the gesture is the part nobody guesses: press, drag,
+ * release, and the toolbar is there.
  */
-const MARK_HINT = 'Press and hold any sentence to highlight it, tag it or save a note.';
+const MARK_HINT = 'Press and hold a word, drag across what you want, then choose what to do with it.';
 
 function Block({ block, accent }: { block: PostBlock; accent: string }) {
   const t = block.text || '';

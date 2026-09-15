@@ -54,7 +54,7 @@ const ACTIONS: { step: Step; icon: string; label: string }[] = [
 ];
 
 export default function AnnotationSheet({
-  sentence, anchorType, anchorKey, tags, partnerName, onClose, onSaved,
+  sentence, anchorType, anchorKey, tags, partnerName, onClose, onSaved, openOn,
 }: {
   /** The chosen text. Stored as the anchor context, so a mark can find its
    *  sentence again and a note can quote what it is about. */
@@ -66,10 +66,19 @@ export default function AnnotationSheet({
   tags: Tag[];
   partnerName: string;
   onClose: () => void;
+  /**
+   * Which step to open on.
+   *
+   * The toolbar over the selection asks this question now, so arriving here
+   * with an answer means the reader has already chosen and should not be shown
+   * the same five icons a second time. Absent, the menu is the first step,
+   * which is what any other caller gets.
+   */
+  openOn?: Step;
   /** Told what was created, so the page can paint the mark without refetching. */
   onSaved: (created: { id: string; kind: AnnotationKind; color: string | null; text: string }) => void;
 }) {
-  const [step, setStep] = useState<Step>('menu');
+  const [step, setStep] = useState<Step>(openOn || 'menu');
   const [body, setBody] = useState('');
   const [picked, setPicked] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
