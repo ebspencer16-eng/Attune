@@ -19,7 +19,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { useFocusEffect, useNavigation } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
+import { useTabReset } from '@/hooks/use-tab-reset';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -126,27 +127,13 @@ export default function InsightsScreen() {
   );
 
   /**
-   * Tapping Insights while already on Insights goes back to Highlights.
-   *
-   * iOS reports a repeat tap as a tab selection like any other, so the only
-   * thing separating the two is whether this screen was focused when it
-   * arrived: the navigator emits the press before it moves, so coming from
-   * another tab this reads false and nothing happens.
-   *
-   * Cast because expo-router types navigation against the routes, and
-   * `tabPress` is the navigator's event rather than a route.
+   * Tapping Insights while already on Insights goes back to Highlights, and
+   * closes an exercise if one is open. See useTabReset.
    */
-  const navigation = useNavigation() as unknown as {
-    addListener: (type: string, cb: () => void) => () => void;
-    isFocused: () => boolean;
-  };
-  useEffect(
-    () => navigation.addListener('tabPress', () => {
-      if (navigation.isFocused()) showFirstSection();
-    }),
-    [navigation],
-  );
-
+  useTabReset(useCallback(() => {
+    setOpenExercise(null);
+    showFirstSection();
+  }, []));
 
   if (loading) return <Shell><ScreenLoading label="Checking where you both are" /></Shell>;
 

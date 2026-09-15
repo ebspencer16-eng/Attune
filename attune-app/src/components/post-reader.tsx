@@ -32,6 +32,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { fetchPost, markPostRead, type ApiError, type Post, type PostBlock } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import ScreenFrame from '@/components/screen-frame';
 import {
   BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -119,19 +120,24 @@ export default function PostReader({ id, onClose }: { id: string; onClose: () =>
 
   useEffect(() => { load(); }, [load]);
 
-  if (loading) return <ScreenLoading label="Opening" />;
+  if (loading) {
+    return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label="Opening" /></ScreenFrame>;
+  }
   if (failed || !post) {
     return (
-      <ScreenError
-        error={failed || { kind: 'not_found', detail: 'post' }}
-        onRetry={() => { setLoading(true); load(); }}
-      />
+      <ScreenFrame onBack={onClose} backLabel="Resources">
+        <ScreenError
+          error={failed || { kind: 'not_found', detail: 'post' }}
+          onRetry={() => { setLoading(true); load(); }}
+        />
+      </ScreenFrame>
     );
   }
 
   const accent = post.hero_color || c.accent;
 
   return (
+    <ScreenFrame onBack={onClose} backLabel="Resources">
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{
@@ -139,16 +145,14 @@ export default function PostReader({ id, onClose }: { id: string; onClose: () =>
         paddingBottom: BottomTabInset + Spacing.xxl,
         maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
       }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.md }}>
-        <View style={{ flex: 1 }}>
-          {post.category ? (
-            <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.xs }}>{post.category}</Text>
-          ) : null}
-          <Text style={{ ...Type.hero, color: c.textStrong }}>{post.title}</Text>
-        </View>
-        <Pressable accessibilityRole="button" onPress={onClose} hitSlop={12}>
-          <Text style={{ ...Type.small, color: c.accentQuiet, paddingTop: 6 }}>Done</Text>
-        </Pressable>
+      {/* The way out is the arrow in the frame now, not a Done link at the
+          far right of the title. One control, in the corner every phone puts
+          a back control in. */}
+      <View>
+        {post.category ? (
+          <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.xs }}>{post.category}</Text>
+        ) : null}
+        <Text style={{ ...Type.hero, color: c.textStrong }}>{post.title}</Text>
       </View>
 
       {post.subtitle ? (
@@ -167,5 +171,6 @@ export default function PostReader({ id, onClose }: { id: string; onClose: () =>
 
       {(post.blocks || []).map((b) => <Block key={b.id} block={b} accent={accent} />)}
     </ScrollView>
+    </ScreenFrame>
   );
 }

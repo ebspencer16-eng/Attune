@@ -22,6 +22,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
+import { useTabReset } from '@/hooks/use-tab-reset';
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -144,6 +145,17 @@ export default function HomeScreen() {
     }
   };
 
+  /**
+   * Home has no sub-pages, so tapping its tab again does the other thing that
+   * gesture means everywhere else: back to the top. Without it Home would be
+   * the one tab in the bar where a repeat tap does nothing, which is the
+   * inconsistency Ellie reported about Resources and Notes.
+   */
+  const scroller = useRef<ScrollView | null>(null);
+  useTabReset(useCallback(() => {
+    scroller.current?.scrollTo({ y: 0, animated: true });
+  }, []));
+
   if (loading) return <Shell><ScreenLoading label="Getting your dashboard" /></Shell>;
 
   if (error?.kind === 'unauthorized') {
@@ -188,6 +200,7 @@ export default function HomeScreen() {
 
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView
+          ref={scroller}
           contentContainerStyle={{
             flexGrow: 1,
             paddingBottom: BottomTabInset + Spacing.lg,

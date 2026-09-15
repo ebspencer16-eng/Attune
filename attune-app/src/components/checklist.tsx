@@ -30,6 +30,7 @@ import {
   type ApiError, type ChecklistArea, type ChecklistCopy,
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import ScreenFrame from '@/components/screen-frame';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -90,13 +91,15 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
     });
   }, []);
 
-  if (loading) return <ScreenLoading label="Getting your checklist" />;
+  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label="Getting your checklist" /></ScreenFrame>;
   if (failed || !areas || !copy) {
     return (
-      <ScreenError
-        error={failed || { kind: 'server', status: 0, message: 'no checklist' }}
-        onRetry={() => { setLoading(true); load(); }}
-      />
+      <ScreenFrame onBack={onClose} backLabel="Resources">
+        <ScreenError
+          error={failed || { kind: 'server', status: 0, message: 'no checklist' }}
+          onRetry={() => { setLoading(true); load(); }}
+        />
+      </ScreenFrame>
     );
   }
 
@@ -104,6 +107,7 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
   const done = Object.keys(state).length;
 
   return (
+    <ScreenFrame onBack={onClose} backLabel="Resources">
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{
@@ -244,5 +248,6 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
         );
       })}
     </ScrollView>
+    </ScreenFrame>
   );
 }

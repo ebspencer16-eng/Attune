@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
+import { useTabReset } from '@/hooks/use-tab-reset';
 import {
   Linking, Pressable, RefreshControl, ScrollView, Text, View,
 } from 'react-native';
@@ -140,6 +141,16 @@ export default function ResourcesScreen() {
     }, [load]),
   );
 
+
+  /**
+   * Tapping Resources while already on Resources closes whatever is open and
+   * leaves you on the tab's own page: an article, the budget, the checklist.
+   */
+  useTabReset(useCallback(() => {
+    setOpenPost(null);
+    setOpenTool(null);
+    setCategory(ALL);
+  }, []));
 
   if (loading) return <Shell><ScreenLoading label="Loading your resources" /></Shell>;
 

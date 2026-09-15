@@ -38,6 +38,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
+import { useTabReset } from '@/hooks/use-tab-reset';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable,
   RefreshControl, ScrollView, Switch, Text, TextInput, View,
@@ -251,6 +252,16 @@ export default function NotesScreen() {
     ));
     openSharedNote(note.id);
   }, []);
+
+  /**
+   * Tapping Notes while already on Notes closes the editor and collapses the
+   * two lists back to their first few, which is the state the tab opens in.
+   */
+  useTabReset(useCallback(() => {
+    setEditing(null);
+    setShowAllMine(false);
+    setShowAllShared(false);
+  }, []));
 
   if (loading) return <Shell><ScreenLoading label="Getting your notes" /></Shell>;
 

@@ -31,6 +31,7 @@ import {
 } from '@/api/client';
 import { bFmt, computeReveal } from '@/constants/budget';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import ScreenFrame from '@/components/screen-frame';
 import {
   BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -87,13 +88,15 @@ export default function Budget({ onClose }: { onClose: () => void }) {
 
   const put = (patch: Partial<BudgetState>) => setState((p) => ({ ...p, ...patch }));
 
-  if (loading) return <ScreenLoading label="Getting your budget" />;
+  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label="Getting your budget" /></ScreenFrame>;
   if (failed || !cats || !copy) {
     return (
-      <ScreenError
-        error={failed || { kind: 'server', status: 0, message: 'no budget' }}
-        onRetry={() => { setLoading(true); load(); }}
-      />
+      <ScreenFrame onBack={onClose} backLabel="Resources">
+        <ScreenError
+          error={failed || { kind: 'server', status: 0, message: 'no budget' }}
+          onRetry={() => { setLoading(true); load(); }}
+        />
+      </ScreenFrame>
     );
   }
 
@@ -130,6 +133,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
   );
 
   return (
+    <ScreenFrame onBack={onClose} backLabel="Resources">
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       keyboardShouldPersistTaps="handled"
@@ -281,5 +285,6 @@ export default function Budget({ onClose }: { onClose: () => void }) {
         </View>
       ))}
     </ScrollView>
+    </ScreenFrame>
   );
 }
