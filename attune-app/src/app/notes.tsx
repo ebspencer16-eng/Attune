@@ -37,7 +37,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable,
@@ -52,6 +52,8 @@ import {
 import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
+import { showSection } from '@/components/results';
+import { showPost } from '@/app/resources';
 import SignIn from '@/components/sign-in';
 import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
@@ -62,6 +64,16 @@ import {
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
+
+/**
+ * How many marks "All" opens to.
+ *
+ * Ellie: "keep the 'see all' list limited to the past 10 marks." Pick up where
+ * you left off is about coming back to something, and the tenth thing you left
+ * is already further back than that. Everything older is still reachable
+ * through its tag or where it lives.
+ */
+const SHOW_ALL_LIMIT = 10;
 
 /** A note plus the two things the list has to know that the row itself does not. */
 type Row = { note: Note; readOnly: boolean };
@@ -103,7 +115,35 @@ export default function NotesScreen() {
    * rather than opening a modal over them: this is a tab, and a list of notes
    * under a heading is the same screen with a filter on it.
    */
+  const router = useRouter();
   const [openTag, setOpenTag] = useState<Tag | null>(null);
+
+  /**
+   * Open a mark where it lives.
+   *
+   * Ellie: "Clicking one of the pick up where you left off things should take
+   * you to that note where it lives not in this separate screen."
+   *
+   * A results mark sets the section the Insights tab opens on and switches to
+   * it. An In Practice mark opens the article on the Resources tab. A note with
+   * no anchor has nowhere to go, so it still opens in the editor: that is the
+   * only kind of note that is only ever words.
+   */
+  const openWhereItLives = useCallback((note: Note) => {
+    const key = note.anchor_key || '';
+    if (note.anchor_type === 'results_section' && key) {
+      showSection(key);
+      router.push('/insights');
+      return;
+    }
+    if (note.anchor_type === 'post_block' && key) {
+      // The key is slug#block; the reader wants the article, not the block.
+      showPost(key.split('#')[0]);
+      router.push('/resources');
+      return;
+    }
+    setEditing(note);
+  }, [router]);
 
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
@@ -334,7 +374,7 @@ export default function NotesScreen() {
                     source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
                     first={i === 0}
                     author={mine ? undefined : partner}
-                    onPress={mine ? () => setEditing(note) : undefined}
+                    onPress={() => openWhereItLives(note)}
                   />
                 ))}
               </Tile>
@@ -397,19 +437,19 @@ export default function NotesScreen() {
           {mineRecent.length ? (
             <>
               <Tile>
-                {(showAllMine ? mineRecent : mineRecent.slice(0, 3)).map((note, i) => (
+                {(showAllMine ? mineRecent.slice(0, SHOW_ALL_LIMIT) : mineRecent.slice(0, 3)).map((note, i) => (
                   <MarkRow
                     key={note.id}
                     note={note}
                     source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
                     first={i === 0}
-                    onPress={() => setEditing(note)}
+                    onPress={() => openWhereItLives(note)}
                   />
                 ))}
               </Tile>
               {mineRecent.length > 3 ? (
                 <More
-                  label={showAllMine ? 'Show fewer' : `All ${mineRecent.length}`}
+                  label={showAllMine ? 'Show fewer' : `All ${Math.min(mineRecent.length, SHOW_ALL_LIMIT)}`}
                   onPress={() => setShowAllMine((v) => !v)}
                 />
               ) : null}

@@ -382,7 +382,14 @@ export default function Annotatable({
   })();
 
   return (
-    <View>
+    /**
+     * The paragraph's own box styles live here rather than on the row of
+     * words, so that the row starts at this view's content origin. The toolbar
+     * is positioned from word frames, which are measured inside the row, and
+     * it is drawn here: the two only agree if the row is not offset from this
+     * view by a margin of its own.
+     */
+    <View style={boxStyle}>
       {/* ── THE WORDS ────────────────────────────────────────────────────
           A wrapping row of per-word Views rather than one Text with nested
           Texts, because a View reports its own frame and a nested Text does
@@ -392,11 +399,7 @@ export default function Annotatable({
           on each word. Putting the whole style on every word gave every one
           of them the paragraph's top margin, which is the spacing bug. */}
       <GestureDetector gesture={pan}>
-        <View
-          style={[
-            { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' },
-            boxStyle,
-          ]}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
           {tokens.map((tok, i) => {
             const inSelection = lo != null && i >= lo && i <= (hi as number);
             return (
@@ -411,6 +414,8 @@ export default function Annotatable({
               </View>
             );
           })}
+        </View>
+      </GestureDetector>
       {/* ── THE TOOLBAR ──────────────────────────────────────────────────
           On release, above the first line of the selection. Ellie: "Once they
           lift their finger, I want the toolbar to pop up right above the
@@ -506,8 +511,6 @@ export default function Annotatable({
           </Pressable>
         </View>
       ) : null}
-        </View>
-      </GestureDetector>
     </View>
   );
 }

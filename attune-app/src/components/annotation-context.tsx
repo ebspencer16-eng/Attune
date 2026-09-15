@@ -88,7 +88,18 @@ export function Prose({
    * Tapping it would be a second way to open something the text already opens.
    */
   const mine = marks.filter((m) => text.includes(m.text));
-  const silent = mine.filter((m) => m.kind === 'note');
+  /**
+   * What the margin has to announce.
+   *
+   * A highlight and an underline are already visible in the words. A note and
+   * a tag change nothing about them, which is the point of both and also the
+   * problem: scroll past and there is no sign anything is there.
+   *
+   * This was notes only, so a highlight someone had filed under a tag left no
+   * mark in the margin at all. Ellie asked for the margin to show "where notes
+   * and tags are", so a tagged mark of any kind counts.
+   */
+  const silent = mine.filter((m) => m.kind === 'note' || m.tagged);
   const tone = annotationColor(mine.find((m) => m.color)?.color);
 
   const body = <Annotatable text={text} style={style} marks={marks} onSelect={select} onRemove={remove} />;
@@ -220,8 +231,20 @@ export function AnnotationProvider({
               title: null,
               body: '',
               visibility: 'private',
-              anchor_type: 'results_section',
-              anchor_key: section,
+              /**
+               * ── WHY THESE ARE NOT LITERALS ──────────────────────────
+               * They were: 'results_section' and the section id. An In
+               * Practice article anchors to 'post_block' and a key of
+               * slug#block, so a mark made in an article was added to the
+               * screen under an anchor type the filter above does not match,
+               * and it did not draw until the reader left and came back.
+               *
+               * Ellie: "Underline isn't working." It was working; it was
+               * invisible until a reload, which is the same thing from the
+               * outside. Highlights had it too.
+               */
+              anchor_type: anchorType,
+              anchor_key: key,
               anchor_context: created.text,
               anchor_version: null,
               kind: created.kind,

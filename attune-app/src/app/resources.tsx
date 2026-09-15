@@ -44,6 +44,22 @@ const SITE = SITE_URL;
  */
 const ALL = 'All';
 
+/**
+ * Open an In Practice article from another tab.
+ *
+ * Ellie: a mark in the Notes tab should take you to where it lives, and for a
+ * mark on an article that means the article. The same one-slot handle the
+ * results screen uses for sections: a value for the next mount, and a setter
+ * for the mount that is already there behind the tab bar.
+ */
+let pendingPost: string | null = null;
+let openPostHandle: ((id: string) => void) | null = null;
+
+export function showPost(id: string) {
+  pendingPost = id;
+  openPostHandle?.(id);
+}
+
 export default function ResourcesScreen() {
   useScreenTime('resources');
   const [home, setHome] = useState<HomeResponse | null>(null);
@@ -63,7 +79,7 @@ export default function ResourcesScreen() {
    * is one line in one place.
    */
   const [openTool_, setOpenTool] = useState<string | null>(null);
-  const [openPost, setOpenPost] = useState<string | null>(null);
+  const [openPost, setOpenPost] = useState<string | null>(pendingPost);
   /**
    * The reader's own marks and tags, for marking inside an article.
    *
@@ -144,6 +160,13 @@ export default function ResourcesScreen() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // The handle showPost() moves, and the slot it left behind for this mount.
+  useEffect(() => {
+    pendingPost = null;
+    openPostHandle = (id: string) => { setOpenTool(null); setOpenPost(id); };
+    return () => { openPostHandle = null; };
+  }, []);
 
   // Reload when this tab comes into focus, not only when it mounts.
   //
@@ -310,10 +333,9 @@ export default function ResourcesScreen() {
             <Text style={{ ...Type.small, color: c.textMuted }}>{'\u2192'}</Text>
           </Pressable>
 
-          <View style={{ height: Spacing.xxl }} />
         </View>
 
-        <View style={{ marginTop: Spacing.xxl }}>
+        <View style={{ marginTop: Spacing.lg }}>
           <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
             <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>In Practice</Text>
           </View>

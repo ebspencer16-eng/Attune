@@ -157,6 +157,24 @@ export function forgetLastSection() {
  */
 let jumpToTop: (() => void) | null = null;
 
+/**
+ * Open the results on a given section, from anywhere.
+ *
+ * Ellie: "Clicking one of the pick up where you left off things should take you
+ * to that note where it lives not in this separate screen." A mark on a
+ * results section knows which section it is on, and the Notes tab is two
+ * components and a tab bar away from the state that decides what Insights
+ * shows. This is the same one-slot handle as showFirstSection: set where the
+ * next mount opens, and move the mounted one if there is one.
+ */
+export function showSection(id: string) {
+  lastSection = id;
+  goToSection?.(id);
+}
+
+/** The mounted results screen's section setter, if one is mounted. */
+let goToSection: ((id: string) => void) | null = null;
+
 /** Send the open results screen back to its first section. */
 export function showFirstSection() {
   // Cleared as well as called, so a tap that arrives while nothing is mounted
@@ -225,6 +243,13 @@ export default function Results({
   // clock, including stopping it when the app goes to the background.
   useScreenTime(sectionId ? `results:${sectionId}` : null);
   const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
+
+  // The handle showSection() moves, for when Notes sends someone to a mark
+  // while this screen is already mounted behind the tab bar.
+  useEffect(() => {
+    goToSection = rememberSection;
+    return () => { goToSection = null; };
+  }, [rememberSection]);
 
   // Register this screen as the one a repeat tap on the Insights tab returns
   // to the top of. See showFirstSection.
