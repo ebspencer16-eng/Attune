@@ -111,7 +111,7 @@ import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension, intimacyActionPlan } from "../api/_lib/intimacy-results.js";
 // The fixed page gradients, one copy for both surfaces: the app receives the
 // same stops on the results nav. See api/_lib/section-grounds.js.
-import { gradientCss, groundForCategory } from "../api/_lib/section-grounds.js";
+import { gradientCss, groundForCategory, ALIGNED_PANEL } from "../api/_lib/section-grounds.js";
 import { COMM_DOMAINS, DIMENSION_DISPLAY_ORDER } from "../api/_lib/comm-domains.js";
 import { DIM_META as SHARED_DIM_META } from "../api/_workbook-content.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT, RING_COLORS as SC_RING, statColor as scStatColor } from "../api/_lib/storycard-style.js";
@@ -4131,22 +4131,25 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
           {/* ── Already aligned in this category (7.3) ── */}
           {thisCatAligned.length > 0 && (
-            <div style={{ marginTop: thisCatGaps.length > 0 ? "1rem" : 0, background: "rgba(16,185,129,0.07)", border: "1.5px solid rgba(16,185,129,0.3)", borderRadius: 14, overflow: "hidden" }}>
-              <div style={{ padding: "0.65rem 1rem", borderBottom: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: "#10B981", fontFamily: BFONT }}>Already aligned</span>
-                <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.4)", fontFamily: BFONT, marginLeft: "auto" }}>{thisCatAligned.length} item{thisCatAligned.length !== 1 ? "s" : ""}</span>
+            <div style={{ marginTop: thisCatGaps.length > 0 ? "1rem" : 0, background: ALIGNED_PANEL.fill, border: `1.5px solid ${ALIGNED_PANEL.border}`, borderRadius: 14, overflow: "hidden" }}>
+              {/* Opaque, in its own deep green. It was the section green at 7
+                  per cent over the page's ground, which on Career & Work's
+                  orange page came out orange. */}
+              <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${ALIGNED_PANEL.border}`, background: ALIGNED_PANEL.head, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={ALIGNED_PANEL.accent} strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: ALIGNED_PANEL.accent, fontFamily: BFONT }}>Already aligned</span>
+                <span style={{ fontSize: "0.62rem", color: ALIGNED_PANEL.text, opacity: 0.55, fontFamily: BFONT, marginLeft: "auto" }}>{thisCatAligned.length} item{thisCatAligned.length !== 1 ? "s" : ""}</span>
               </div>
               <div>
                 {thisCatAligned.map((a, ai) => (
-                  <div key={ai} style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 0, padding: "0.55rem 1rem", borderTop: ai === 0 ? "none" : "1px solid rgba(16,185,129,0.12)", alignItems: "center" }}>
-                    <div style={{ fontSize: "0.76rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{a.item}</div>
-                    <div style={{ fontSize: "0.76rem", fontWeight: 600, color: "rgba(255,255,255,0.75)", fontFamily: BFONT, textAlign: "center", background: "rgba(255,255,255,0.06)", borderRadius: 6, padding: "0.2rem 0.4rem" }}>{resolveLabel(a.mine) || "—"}</div>
+                  <div key={ai} style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 0, padding: "0.55rem 1rem", borderTop: ai === 0 ? "none" : `1px solid ${ALIGNED_PANEL.border}`, alignItems: "center" }}>
+                    <div style={{ fontSize: "0.76rem", color: ALIGNED_PANEL.text, fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{a.item}</div>
+                    <div style={{ fontSize: "0.76rem", fontWeight: 600, color: ALIGNED_PANEL.text, fontFamily: BFONT, textAlign: "center", background: "rgba(4,120,87,0.08)", borderRadius: 6, padding: "0.2rem 0.4rem" }}>{resolveLabel(a.mine) || "—"}</div>
                   </div>
                 ))}
               </div>
-              <div style={{ padding: "0.5rem 1rem", borderTop: "1px solid rgba(16,185,129,0.15)" }}>
-                <span style={{ fontSize: "0.7rem", color: "rgba(16,185,129,0.85)", fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : ""}</span>
+              <div style={{ padding: "0.5rem 1rem", borderTop: `1px solid ${ALIGNED_PANEL.border}` }}>
+                <span style={{ fontSize: "0.7rem", color: ALIGNED_PANEL.accent, fontFamily: BFONT, fontWeight: 300 }}>{thisCatGaps.length === 0 ? `Fully aligned here. You and ${partnerName} are on the same page across all ${thisCatAligned.length} item${thisCatAligned.length !== 1 ? "s" : ""}.` : ""}</span>
               </div>
             </div>
           )}

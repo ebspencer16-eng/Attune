@@ -50,6 +50,23 @@ import {
  * was orange on one row and blue on the next and the eye had to re-learn who
  * was who on every card. A person is a colour; a dimension is a row.
  */
+/**
+ * The Already aligned panel on an expectations conversation page.
+ *
+ * Light and opaque. A translucent panel has no colour of its own: at 7 per
+ * cent over Career & Work's orange ground it came out orange. A deep green one
+ * was the first fix and the gate refused it, because Household's category
+ * colour is that same green. Every one of these pages is a dark gradient, so a
+ * pale tile is legible on all six. api/_lib/section-grounds.js holds these,
+ * which the website reads directly, and check-aligned-panel.mjs keeps them
+ * together.
+ */
+const ALIGNED_FILL = '#EDF8F2';
+const ALIGNED_HEAD = '#DCF0E6';
+const ALIGNED_BORDER = 'rgba(16,185,129,0.45)';
+const ALIGNED_ACCENT = '#047857';
+const ALIGNED_TEXT = '#1E1610';
+
 const YOU_COLOR = Palette.orange;
 // The website's partner colour on every chart it draws: #1B5FE8, which is
 // Palette.indigo. The app used ink, so the same two people were orange and
@@ -1021,19 +1038,19 @@ function ExpectationsConversation({
             <View
               style={{
                 marginTop: gaps.length ? Spacing.lg : 0,
-                backgroundColor: 'rgba(16,185,129,0.07)',
-                borderColor: 'rgba(16,185,129,0.3)', borderWidth: 1.5,
+                backgroundColor: ALIGNED_FILL,
+                borderColor: ALIGNED_BORDER, borderWidth: 1.5,
                 borderRadius: Radius.lg, overflow: 'hidden',
               }}>
               <View
                 style={{
                   flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
                   paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
-                  backgroundColor: 'rgba(16,185,129,0.1)',
-                  borderBottomColor: 'rgba(16,185,129,0.2)', borderBottomWidth: 1,
+                  backgroundColor: ALIGNED_HEAD,
+                  borderBottomColor: ALIGNED_BORDER, borderBottomWidth: 1,
                 }}>
-                <Text style={{ ...Type.eyebrow, color: '#10B981', flex: 1 }}>Already aligned</Text>
-                <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                <Text style={{ ...Type.eyebrow, color: ALIGNED_ACCENT, flex: 1 }}>Already aligned</Text>
+                <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
                   {`${matched.length} item${matched.length !== 1 ? 's' : ''}`}
                 </Text>
               </View>
@@ -1043,16 +1060,16 @@ function ExpectationsConversation({
                   style={{
                     flexDirection: 'row', alignItems: 'center',
                     paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
-                    borderTopColor: 'rgba(16,185,129,0.12)', borderTopWidth: i === 0 ? 0 : 1,
+                    borderTopColor: ALIGNED_BORDER, borderTopWidth: i === 0 ? 0 : 1,
                   }}>
-                  <Text style={{ ...Type.small, fontSize: 12, color: 'rgba(255,255,255,0.6)', flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
+                  <Text style={{ ...Type.small, fontSize: 12, color: ALIGNED_TEXT, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
                     {row.item}
                   </Text>
                   <Text
                     style={{
                       ...Type.small, fontSize: 12, fontWeight: '600',
-                      color: 'rgba(255,255,255,0.75)', flex: 1, textAlign: 'center',
-                      backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 6,
+                      color: ALIGNED_TEXT, flex: 1, textAlign: 'center',
+                      backgroundColor: 'rgba(4,120,87,0.08)', borderRadius: 6,
                       paddingVertical: 2, paddingHorizontal: 4,
                     }}>
                     {row.you || '\u2014'}
@@ -1060,8 +1077,8 @@ function ExpectationsConversation({
                 </View>
               ))}
               {!gaps.length ? (
-                <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, borderTopColor: 'rgba(16,185,129,0.15)', borderTopWidth: 1 }}>
-                  <Text style={{ ...Type.small, fontSize: 12, color: 'rgba(16,185,129,0.85)' }}>
+                <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, borderTopColor: ALIGNED_BORDER, borderTopWidth: 1 }}>
+                  <Text style={{ ...Type.small, fontSize: 12, color: ALIGNED_ACCENT }}>
                     {`Fully aligned here. You and ${them} are on the same page across all ${matched.length} item${matched.length !== 1 ? 's' : ''}.`}
                   </Text>
                 </View>

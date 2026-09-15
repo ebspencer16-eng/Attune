@@ -90,23 +90,13 @@ any order; work through them however suits.
 |--|--|
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 | R3 | **App notes tab.** Pick up where you left off, shared notes, unread markers, the tag list with its A-Z default and the sort dropdown. |
-| R4 | **App resources tab.** The narrower collections tile with arrows, the circular "yours to explore" shapes, the In Practice grid, and the tiles for budget, workbook and checklist. |
 | R5 | **Website marketing pages.** The hero without orange italics, no subpage titles in banners, tighter vertical spacing, the founders note redesign, the FAQ and packages changes, In Practice. |
-| R6 | **Website results pages.** Eyebrows and pills removed, the comms summary page gone, the couple type action items in their new shape, the expectations dividing line. |
-| R8 | **The couple map**, both surfaces: the two marks, the small print, and that the shading reads as the couple type's colour rather than generic orange. |
-| R46 | **The five at a glance grounds, and whether you can tell them apart.** Communication purple into orange, Expectations indigo into teal, Relationship Reflection green, Conflict blue into a lighter blue, Physical Intimacy rose into terracotta. Reflection's green is the colour that section already carries on What Comes Next. Every stop is now dark enough for white type to clear the readable ratio, measured rather than judged, which is also what fixed the expectations category pages: their ground was the category colour at half opacity over cream. |
-| R47 | **The connecting lines, curved.** Same control points as the site's, drawn as twelve segments. Every line is the same weight now. The ends pull in so they never touch a rank number, and the tile has a full step of inset. |
-| R48 | **The couple map at 72% of the card.** The ceiling is 75%: past that it is wider than the column it sits in on the narrowest phone. |
-| R49 | **The Conflict Snapshot as a table.** Two columns of pills under the two names, with the question above each row rather than beside it, because the questions are sentences and a phone has no room for the site's first column. |
 | R50 | **Physical Intimacy, the whole section.** The hero reads Physical Intimacy Expectations and the line under it is gone. The action plan is three items on both surfaces, furthest apart first. Conversations Worth Having is gone from both. The detail pages have room above the heading, poles beside the bar like the communication pages, and nothing else: no progress bar, no state word, no description tile. |
-| R51 | **Two answers at the same point on How you each rated.** They sit evenly either side of the bar now rather than both above it. |
 | R52 | **The Notes empty states, in their tiles.** Your line for the tags one, mine for the other two. The suggestion pills only appear with the add field now. |
+| R53 | **Every heading in the app, on its own line box.** You reported the In Practice titles clipped at the top. Every hero in the app was: React Native clips rather than overflowing, and the hero was 30 point type in a 34 point box against a face that declares 41. The two faces are measured out of their own files now and nothing may be set tighter than they allow, which also lifted the storycard figures. |
+| R54 | **The Already aligned panel, on all six category pages.** It was the section green at 7 per cent over the page, and a translucent panel has no colour of its own: on Career & Work's orange page it came out orange. It is a pale opaque tile now. A deep green one was the first fix and the gate refused it, because Household's own colour is that same green. |
 | R30 | **The Relationship Reflection section in the app, against the site.** At a glance should open with both your names and a line saying how you each described things overall, then the four ratings as blocks, then your action plan. How you each view the relationship and Side by Side are now light, in white cards, like the site. What you each admire has moved off at a glance and onto How you each view the relationship, which is where the site has it. |
-| R37 | **Communication at a glance, in the app.** It is purple into orange now, which is what the site has always drawn. It was in Conflict's blue. Worth a look next to the site, and next to the other four at a glance pages. |
-| R31 | **The tile, on every at a glance page.** Comms, Expectations, Relationship Reflection, Physical Intimacy and Conflict all sit in the rounded tile you liked. Detail pages are full width. Worth looking at the five together to see whether the tile still reads as a tile when the page inside it is long. |
-| R32 | **In Practice articles, read in the app.** Tap any of the twelve on the Resources tab. They open in the app now instead of the browser: the same words as the website, the callouts and numbered steps as tiles, the research citations at the bottom. The Get started panel at the end of each article is deliberately not there, because the app does not sell. |
 | R33 | **The Notes tag list.** It starts empty, with an add field at the top and your two suggestions under it. Adding a tag, tapping a suggestion, and the sort control only appearing once there is something to sort. |
-| R9 | **The Engagement tab** in the admin, rebuilt to your layout: four headline tiles, the funnel and acquisition lines, five time charts to one height, two Learning tables over two notes charts. Worth looking at once migration 061 has been running long enough to have numbers in it. |
 
 ### Copy, and whether the words are yours
 
@@ -136,6 +126,16 @@ any order; work through them however suits.
 
 | Verified by you | What |
 |--|--|
+| R8 | The couple map, both surfaces |
+| R47 | The connecting lines, curved and even |
+| R48 | The couple map at 72% of the storycard |
+| R49 | The Conflict Snapshot as a table |
+| R51 | Two answers at the same point, evenly either side of the bar |
+| R37 | Communication at a glance in its own purple into orange |
+| R31 | The tile on every at a glance page |
+| R9 | The Engagement tab, as it stands |
+| R4 | The app resources tab |
+| R6 | The website results pages |
 | R38 | The storycards: the marks carry initials and step apart, the two clipped figures are whole, and the Life & Values ring is right. The map is still too small, which is O83 |
 | R42 | Your Patterns matches the site. The Conflict Snapshot does not, which is O87 |
 | R43 | Sort by, and what it offers. Its menu is too heavy, which is O88 |

@@ -116,6 +116,41 @@ export const SECTION_GROUNDS = Object.fromEntries(
 );
 
 /**
+ * The Already aligned panel, on an expectations conversation page.
+ *
+ * ── WHY IT IS LIGHT, AND OPAQUE ───────────────────────────────────────────
+ * Ellie: "Career and work is the only one that clashes and makes the already
+ * aligned section hard to see."
+ *
+ * It was the section green at 7 per cent over whatever the page's ground is. A
+ * translucent panel has no colour of its own; it borrows the one underneath.
+ * Over the violet page it read green and over Career & Work's orange one it
+ * read orange.
+ *
+ * The first fix was a deep green panel, and check-aligned-panel.mjs refused
+ * it: Household's category colour is the same green, so on that one page the
+ * panel would have been invisible in a new way. Which is the point of asking
+ * the question of all six rather than of the one that was reported.
+ *
+ * So it is light. Every one of these pages is a dark gradient, so a pale panel
+ * is legible on all six whatever their hue, and "you already agree about
+ * these" is the calm half of the page anyway. Its type is ink rather than
+ * white, for the same reason.
+ */
+export const ALIGNED_PANEL = {
+  /** The tile. Pale green, opaque. */
+  fill: '#EDF8F2',
+  /** The heading bar over it, a shade deeper. */
+  head: '#DCF0E6',
+  /** The line around it and the rules between its rows. */
+  border: 'rgba(16,185,129,0.45)',
+  /** The heading, and the tick beside it. */
+  accent: '#047857',
+  /** Everything else inside it. */
+  text: '#1E1610',
+};
+
+/**
  * The ground for one expectations conversation page, in its category's colour.
  *
  * Ellie: "Expectations detailed pages bgs should be gradients matching their

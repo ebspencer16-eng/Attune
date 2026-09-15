@@ -19,6 +19,8 @@
  * api/_lib/section-blocks.js, checked by check-section-blocks.mjs.
  */
 
+import { minLineHeight } from './font-metrics.js';
+
 /**
  * The type scale, which is the thing the two surfaces kept disagreeing about.
  *
@@ -225,11 +227,14 @@ export function cardTypeNative(role, cardWidth = CARD_REF_WIDTH, over) {
      * cards missing the top of it.
      *
      * The tight leading stays for the website, which is where it works. Native
-     * gets a floor: never less than the size itself, plus a little for the
-     * accent on a capital. Nothing else about the scale changes, and
-     * check-card-type-clipping.mjs runs every role at several card widths.
+     * gets a floor, and the floor is the font's own line box rather than a
+     * number that looked like enough: 1.06 was the first answer here and
+     * Playfair Display declares 1.41, so the heroes were still losing their
+     * top edge. See api/_lib/font-metrics.js.
      */
-    ...(t.lh != null ? { lineHeight: Math.ceil(fontSize * Math.max(t.lh, 1.06)) } : {}),
+    ...(t.lh != null
+      ? { lineHeight: Math.max(Math.ceil(fontSize * t.lh), minLineHeight(t.family, fontSize)) }
+      : {}),
     ...(t.upper ? { textTransform: 'uppercase' } : {}),
     ...(t.lower ? { textTransform: 'lowercase' } : {}),
     color: t.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${t.alpha})`,

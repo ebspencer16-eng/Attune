@@ -193,10 +193,25 @@ export function inputType(t: {
   };
 }
 
+/**
+ * ── EVERY LINE BOX FITS ITS FACE ──────────────────────────────────────────
+ * Ellie, on the In Practice reader: "Titles / heroes cut off on the top."
+ *
+ * React Native clips rather than overflowing: set a lineHeight smaller than
+ * the font's own line box and the top of the line goes, which is where a
+ * display face keeps its ascenders. The hero was 30 point type in a 34 point
+ * box, 1.13 of its size, and Playfair Display declares 1.41. So every hero in
+ * the app has been losing its top edge, worst on the screens that set one.
+ *
+ * The ratios are the fonts' own, read out of the files: 1.41 for Playfair
+ * Display and 1.33 for DM Sans. check-font-line-boxes.mjs reads them again on
+ * every build and fails if any of these is set tighter than its face allows,
+ * so swapping a font cannot quietly start clipping.
+ */
 export const Type = {
-  hero: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 34, fontWeight: '700' },
-  title: { fontFamily: Fonts.display, fontSize: 22, lineHeight: 27, fontWeight: '700' },
-  cardTitle: { fontFamily: Fonts.bodyBold, fontSize: 16, lineHeight: 21, fontWeight: '700' },
+  hero: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 43, fontWeight: '700' },
+  title: { fontFamily: Fonts.display, fontSize: 22, lineHeight: 32, fontWeight: '700' },
+  cardTitle: { fontFamily: Fonts.bodyBold, fontSize: 16, lineHeight: 22, fontWeight: '700' },
   body: { fontFamily: Fonts.body, fontSize: 15, lineHeight: 24, fontWeight: '400' },
   small: { fontFamily: Fonts.body, fontSize: 13, lineHeight: 19, fontWeight: '400' },
   /** Section labels: uppercase, tracked, small. */
