@@ -99,6 +99,11 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R56 | **Relationship Reflection, again.** At a glance is titled Relationship Reflection with no line under it. How you each rated has no line either, and is two tiles: Overall, then How things feel right now with its three questions. The bars have their poles either side, like the communication pages, and each answer is printed under its own mark rather than as a sentence along the bottom. Both surfaces. |
+| R57 | **Physical Intimacy at a glance as percentages.** One bar per aspect with a figure beside it, rather than two dots. An aspect one of you skipped shows a dash, because unanswered is not nought per cent aligned. The eyebrow over them reads Overview. Both surfaces. |
+| R58 | **An article, the budget and the checklist all open under a back arrow now.** That is also why the titles were cut off: those three replaced the tab's contents and left the tab's safe area behind them, so their headings sat under the status bar. |
+| R59 | **The add a tag field carries its examples.** The pills under it are gone. The three in the placeholder are the first three of the list in `api/_lib/tags.js`, so reordering that list changes which three appear. |
+| R60 | **The orange rule under the expectations page titles is gone**, on both surfaces. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 
 ### Copy, and whether the words are yours
@@ -112,15 +117,25 @@ any order; work through them however suits.
 | R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
 | R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
 
-### Behaviour, which needs a real device
+### Behaviour, which has to be used rather than looked at
+
+You asked whether these have to wait for the App Store. Almost none of them
+do. Each one now opens with what it needs, so you can tell at a glance
+whether it is something you can do this afternoon in the simulator.
+
+The simulator is a real copy of the app: taps, drags, text selection and the
+keyboard all work, with the mouse standing in for a finger. What it cannot do
+is be a phone that has been closed for a day, or have a real Apple ID, or
+receive a notification from Apple's servers.
 
 | # | Review |
 |--|--|
-| R34 | **Tap Insights while you are already on Insights.** It should go back to Highlights from wherever you were. Coming to Insights from another tab should land where you left off, as it does now. |
-| R20 | **Sign-in holds.** Switch tabs, close the app, come back tomorrow. It should not ask again. |
-| R22 | **Select text, then highlight, underline, tag, note or share.** The whole annotation path. |
-| R23 | **The five exercises end to end in the app**, including Physical Intimacy, whose multi-select screens the automated driver cannot work. |
-| R24 | **The workbook**, opened as a file from the app, and the PDF if you have `WORKBOOK_SERVICE_URL` set. |
+| R34 | **Simulator.** Tap Insights while you are already on Insights. It should go back to Highlights from wherever you were. Coming to Insights from another tab should land where you left off, as it does now. |
+| R55 | **Simulator.** Same gesture on Resources, Notes and Home: Resources should close an article or a tool, Notes should close the editor, Home should scroll to the top. |
+| R22 | **Simulator.** Press and hold a word in your results, drag to select a phrase, then highlight, underline, tag, note or share it. The long press is a click and hold; the drag is a drag. Nothing here needs a real device. |
+| R23 | **Simulator.** The five exercises end to end, including Physical Intimacy, whose multi-select screens the automated driver cannot work but a person can. |
+| R24 | **Simulator for the file, a real device to read it.** The workbook opens as a .docx from the app; the simulator can download it and hand it to whatever opens .docx files on your Mac. The PDF needs `WORKBOOK_SERVICE_URL` set, which is a server setting rather than a phone one. |
+| R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
 
 
 ## 4. Done and verified

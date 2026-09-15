@@ -400,8 +400,12 @@ export type ReflectionResults = {
    * no line at all.
    */
   overview?: {
-    headline: string;
-    line: string;
+    /**
+     * The two labels the at-a-glance page prints over its parts. `headline`
+     * and `line` were here and are gone: the page is titled from pageTitles
+     * like every other glance page, and the line under it said what the
+     * ratings below it already said.
+     */
     ratingsLabel: string;
     planLabel: string;
   };
@@ -977,6 +981,8 @@ export function fetchTags() {
     tags: Tag[];
     standard?: { standard_key: string; name: string; color: string | null }[];
     suggestions?: string[];
+    /** What the add field says when it is empty. Built from `suggestions`. */
+    tagPlaceholder?: string;
     sections?: Record<string, string>;
   }>('/api/notes?action=tags');
 }

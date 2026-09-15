@@ -652,7 +652,7 @@ function SectionBody({
     return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} />;
   }
 
-  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} ground={ground} groundStops={groundStops} />;
+  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} />;
   if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} />;
   if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
   // The reflection action plan had a page of its own on both surfaces. Ellie
@@ -1467,8 +1467,10 @@ function ReflectionWaiting() {
   );
 }
 
-function ReflectionOverview({ data, ground, groundStops }: {
+function ReflectionOverview({ data, title, ground, groundStops }: {
   data: ReflectionResults | null;
+  /** The page's heading, from the server's pageTitles. */
+  title: string;
   /** The page's gradient and its stops, from the results nav. */
   ground?: string[] | null;
   groundStops?: number[] | null;
@@ -1493,14 +1495,10 @@ function ReflectionOverview({ data, ground, groundStops }: {
   return (
     <GlanceTile ground={ground} locations={groundStops}>
       <>
-        <Text style={{ ...Type.hero, color: Palette.white }}>
-          {ov?.headline || `${data.names.you} & ${data.names.them}`}
-        </Text>
-        {ov?.line ? (
-          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.sm, lineHeight: 23 }}>
-            {ov.line}
-          </Prose>
-        ) : null}
+        {/* Ellie: the title "should read Relationship Reflection" and the line
+            under it goes. It led with the two names and then a sentence saying
+            what the four ratings below it already say. */}
+        <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
         {/* block: reflection-overview/ratings */}
         {rows.length ? (
@@ -1683,18 +1681,24 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
 
+        {/* ── TWO TILES ────────────────────────────────────────────────
+            Ellie: "I want one tile for overall and one tile for how things
+            feel right now, and the how things feel right now tile should have
+            3 questions in it."
+
+            It was a card per question, five cards down the page, so the one
+            rating that is about the relationship as a whole sat in the same
+            frame as the three that are about a part of it. */}
         {overall ? (
-          <View style={{ marginBottom: Spacing.xl }}>
-            <Eyebrow color={SectionColor.reflection}>Overall</Eyebrow>
-            <ScaleCard r={overall} names={data.names} />
-          </View>
+          <RatedTile label="Overall" rows={[overall]} names={data.names} />
         ) : null}
 
         {rest.length ? (
-          <View style={{ marginBottom: Spacing.xl }}>
-            <Eyebrow color={SectionColor.reflection}>How things feel right now</Eyebrow>
-            {rest.map((r) => <ScaleCard key={r.key} r={r} names={data.names} />)}
-          </View>
+          <RatedTile
+            label={data.overview?.ratingsLabel || 'How things feel right now'}
+            rows={rest}
+            names={data.names}
+          />
         ) : null}
 
         {/* ── WHAT YOU EACH ADMIRE ──────────────────────────────────────
@@ -1764,48 +1768,131 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
 }
 
 /**
+ * One tile of ratings, with a heading.
+ *
+ * Ellie asked for two: Overall on its own, then the three that are about a
+ * part of the relationship. It was a card per question, which framed the
+ * question about the whole the same way as the questions about the parts.
+ */
+function RatedTile({ label, rows, names }: {
+  label: string; rows: ReflectionRating[]; names: { you: string; them: string };
+}) {
+  return (
+    <View style={{ marginBottom: Spacing.xl }}>
+      <Eyebrow color={SectionColor.reflection}>{label}</Eyebrow>
+      <View
+        style={{
+          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          borderRadius: Radius.lg, paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+        }}>
+        {rows.map((r, i) => (
+          <View
+            key={r.key}
+            style={{
+              paddingTop: i === 0 ? 0 : Spacing.lg,
+              marginTop: i === 0 ? 0 : Spacing.lg,
+              borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+            }}>
+            <RatedRow r={r} names={names} />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/**
  * One rating, both people on it.
  *
- * The website's card: the question, the two ends of the scale, a track with
- * the distance between the two marks shaded, and each person's answer in
- * words underneath. The shading is the point of the page, so it is drawn and
- * not described.
+ * ── THE TWO THINGS ELLIE ASKED FOR ────────────────────────────────────────
+ * "I want the sliding bars on how you each rated page to look like they do on
+ * comms detailed pages with the poles on the sides of the bars", and "the site
+ * labels individuals' placement dots under the dot itself and the app does it
+ * in the bottom left. I don't like it in the bottom left, please mirror the
+ * way the site does this."
+ *
+ * So the poles sit either side of the track, as they do on every communication
+ * page, and each person's answer is printed under their own mark rather than
+ * as a sentence along the bottom. A sentence under a chart makes the reader
+ * carry a name back up to a dot; a label under the dot does not.
+ *
+ * When the two marks land on the same point there is one label, not two on top
+ * of each other, and it names both people.
  */
-function ScaleCard({ r, names }: { r: ReflectionRating; names: { you: string; them: string } }) {
-  // Named for their unit: both are already percentages, from the server.
+function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; them: string } }) {
   const [loPct, hiPct] = [Math.min(r.you.pct, r.them.pct), Math.max(r.you.pct, r.them.pct)];
-  // Green when they answered the same, blue at one step, orange beyond. The
-  // website's three, and it is a distance rather than a grade.
   const tone = r.gapSteps === 0 ? '#10b981' : r.gapSteps === 1 ? SectionColor.reflection : YOU_COLOR;
   const [dyYou, dyThem] = markerNudge(r.you.pct, r.them.pct);
+  const together = r.gapSteps === 0;
+  const pole = {
+    ...Type.small, fontSize: 11, fontWeight: '600' as const, color: c.textMuted, width: 62,
+  };
+
+  return (
+    <View>
+      <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>{r.short || r.question}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+        <Text style={{ ...pole, textAlign: 'right' }}>{r.low}</Text>
+        {/* Inset so a mark at either extreme clears the pole word. The same
+            13 points the communication rows use. */}
+        <View style={{ flex: 1, paddingHorizontal: 13 }}>
+          <View style={{ height: 24, justifyContent: 'center' }}>
+            <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border }}>
+              {r.gapSteps > 0 ? (
+                <View
+                  style={{
+                    position: 'absolute', top: 0, bottom: 0,
+                    left: `${loPct}%`, width: `${hiPct - loPct}%`,
+                    backgroundColor: tone, opacity: 0.22, borderRadius: Radius.pill,
+                  }}
+                />
+              ) : null}
+            </View>
+            <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(names.you)} dy={dyYou} />
+            <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(names.them)} dy={dyThem} />
+          </View>
+
+          {/* Each answer under its own mark. */}
+          <View style={{ height: 30, marginTop: 2 }}>
+            {together ? (
+              <DotLabel pct={r.you.pct} text={r.you.label} color={c.text} />
+            ) : (
+              <>
+                <DotLabel pct={r.you.pct} text={r.you.label} color={YOU_COLOR} />
+                <DotLabel pct={r.them.pct} text={r.them.label} color={THEM_COLOR} />
+              </>
+            )}
+          </View>
+        </View>
+        <Text style={pole}>{r.high}</Text>
+      </View>
+    </View>
+  );
+}
+
+/**
+ * A mark's answer, printed under it.
+ *
+ * Centred on the mark and clamped at both ends, because a label centred under
+ * a mark at 0 or 100 per cent would hang off the side of the track. Two lines
+ * at most: these are phrases like "A bit distant", and a third line would push
+ * the next question down the page.
+ */
+function DotLabel({ pct, text, color }: { pct: number; text: string; color: string }) {
+  const align = pct <= 15 ? 'flex-start' : pct >= 85 ? 'flex-end' : 'center';
   return (
     <View
       style={{
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-        borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+        position: 'absolute', left: `${pct}%`, marginLeft: -50, width: 100,
+        alignItems: align,
       }}>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{r.question}</Text>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.md }}>
-        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, flex: 1 }}>{r.low}</Text>
-        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, flex: 1, textAlign: 'right' }}>{r.high}</Text>
-      </View>
-      <View style={{ height: 24, justifyContent: 'center', marginTop: Spacing.xs }}>
-        <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border }}>
-          {r.gapSteps > 0 ? (
-            <View
-              style={{
-                position: 'absolute', top: 0, bottom: 0,
-                left: `${loPct}%`, width: `${hiPct - loPct}%`,
-                backgroundColor: tone, opacity: 0.22, borderRadius: Radius.pill,
-              }}
-            />
-          ) : null}
-        </View>
-        <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(names.you)} dy={dyYou} />
-        <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(names.them)} dy={dyThem} />
-      </View>
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-        {names.you}: {r.you.label}. {names.them}: {r.them.label}.
+      <Text
+        numberOfLines={2}
+        style={{
+          ...Type.small, fontSize: 11, fontWeight: '700', color,
+          textAlign: align === 'center' ? 'center' : align === 'flex-start' ? 'left' : 'right',
+        }}>
+        {text}
       </Text>
     </View>
   );

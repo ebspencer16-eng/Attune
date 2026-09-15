@@ -7003,10 +7003,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 </div>
               </div>
-              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "0.6rem" }}>{ov.headline}</div>
-              <p style={{ fontSize: "0.92rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>
-                {ov.line}
-              </p>
+              {/* Ellie: the title "should read Relationship Reflection" and
+                  the line under it goes. Both surfaces read the title from
+                  PAGE_TITLES, so neither can drift. */}
+              <div style={{ fontSize: "clamp(1.8rem,6vw,2.8rem)", fontWeight: 700, fontFamily: HFONT, lineHeight: 1.05, marginBottom: "1rem" }}>{SC_TITLES["reflection-overview"]}</div>
 
               {/* How you feel right now — scale questions (8.2) */}
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "1.1rem 1.25rem", marginBottom: "1rem" }}>
@@ -7104,69 +7104,97 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const ratedScales = scaleQs.filter(q => mine[q.id] != null && theirs[q.id] != null);
       const pct = v => (v / 4) * 100;
 
+      /**
+       * One rating, both people on it.
+       *
+       * Ellie: "I want the sliding bars on how you each rated page to look
+       * like they do on comms detailed pages with the poles on the sides of
+       * the bars." So the two ends sit either side of the track rather than
+       * above its corners, which is how every communication row is drawn and
+       * how the app draws this one now.
+       *
+       * Each person's answer stays under their own mark, which is what the app
+       * was asked to copy from here.
+       */
       const ScaleRow = ({ q }) => {
         const mv = mine[q.id], tv = theirs[q.id];
         const gap = Math.abs(mv - tv);
         const tone = gap === 0 ? "#10b981" : gap === 1 ? "#1B5FE8" : "#E8673A";
+        const pole = { fontSize: "0.66rem", color: C.muted, fontFamily: BFONT, flexShrink: 0, width: "clamp(56px,18%,92px)", lineHeight: 1.3 };
         return (
-          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.1rem 1.25rem 0.9rem", marginBottom: "0.75rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", marginBottom: "1rem" }}>
-              <span style={{ fontFamily: HFONT, fontSize: "0.86rem", fontWeight: 700, color: C.ink }}>{q.text}</span>
-
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>{q.scaleLabels[0]}</span>
-              <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>{q.scaleLabels[q.scaleLabels.length - 1]}</span>
-            </div>
-            <div style={{ position: "relative", height: 6, background: C.stone, borderRadius: 999, marginBottom: "0.15rem" }}>
-              {gap > 0 && (
-                <div style={{ position: "absolute", top: 0, bottom: 0, left: `${Math.min(pct(mv), pct(tv))}%`, width: `${Math.abs(pct(mv) - pct(tv))}%`, background: tone, opacity: 0.22, borderRadius: 999 }} />
-              )}
-              {[[mv, userName, "#E8673A", 2, -5], [tv, partnerName, "#1B5FE8", 1, 5]].map(([v, name, col, z, dy]) => (
-                <div key={name} style={{ position: "absolute", top: "50%", left: `${pct(v)}%`, transform: `translate(-50%, calc(-50% + ${gap === 0 ? dy : 0}px))`, width: 18, height: 18, borderRadius: "50%", background: col, border: "2.5px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.18)", zIndex: z, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700, fontFamily: BFONT }}>{_reflSameInit ? "" : name[0]}</div>
-              ))}
-            </div>
-            <div style={{ position: "relative", height: gap === 0 ? 20 : 18, marginTop: gap === 0 ? 10 : 6 }}>
-              {gap === 0 ? (
-                // Same score: one label centred under the shared position, so the
-                // two names cannot print on top of each other.
-                <span style={{ position: "absolute", left: `${pct(mv)}%`, transform: "translateX(-50%)", fontSize: "0.66rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", textAlign: "center" }}>
-                  {_reflSameInit && (<><span style={{ color: "#E8673A" }}>{userName}</span><span style={{ color: C.muted }}> &amp; </span><span style={{ color: "#1B5FE8" }}>{partnerName}</span><span style={{ color: C.muted }}> · </span></>)}
-                  <span style={{ color: C.text, fontWeight: 600 }}>{q.scaleLabels[mv]}</span>
-                </span>
-              ) : [[mv, userName, "#E8673A"], [tv, partnerName, "#1B5FE8"]].map(([v, name, col], idx) => {
-                const isLeft = pct(v) < pct(idx === 0 ? tv : mv);
-                return (
-                  <span key={name} style={{ position: "absolute", left: `${pct(v)}%`, transform: isLeft ? "translateX(-100%)" : "translateX(0)", paddingRight: isLeft ? 5 : 0, paddingLeft: isLeft ? 0 : 5, fontSize: "0.66rem", fontWeight: 700, color: col, fontFamily: BFONT, whiteSpace: "nowrap" }}>
-                    {_reflSameInit ? (name + " · " + q.scaleLabels[v]) : q.scaleLabels[v]}
-                  </span>
-                );
-              })}
+          <div>
+            <div style={{ fontFamily: HFONT, fontSize: "0.86rem", fontWeight: 700, color: C.ink, marginBottom: "0.7rem" }}>{q.text}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+              <span style={{ ...pole, textAlign: "right" }}>{q.scaleLabels[0]}</span>
+              <div style={{ flex: 1, minWidth: 0, padding: "0 11px" }}>
+                <div style={{ position: "relative", height: 6, background: C.stone, borderRadius: 999 }}>
+                  {gap > 0 && (
+                    <div style={{ position: "absolute", top: 0, bottom: 0, left: `${Math.min(pct(mv), pct(tv))}%`, width: `${Math.abs(pct(mv) - pct(tv))}%`, background: tone, opacity: 0.22, borderRadius: 999 }} />
+                  )}
+                  {[[mv, userName, "#E8673A", 2, -TM_STAGGER], [tv, partnerName, "#1B5FE8", 1, TM_STAGGER]].map(([v, name, col, z, dy]) => (
+                    <div key={name} style={{ position: "absolute", top: "50%", left: `${pct(v)}%`, transform: `translate(-50%, calc(-50% + ${gap === 0 ? dy : 0}px))`, width: 18, height: 18, borderRadius: "50%", background: col, border: "2.5px solid white", boxShadow: "0 1px 4px rgba(0,0,0,0.18)", zIndex: z, display: "flex", alignItems: "center", justifyContent: "center", ...scType("mark") }}>{_reflSameInit ? "" : name[0]}</div>
+                  ))}
+                </div>
+                <div style={{ position: "relative", height: 20, marginTop: gap === 0 ? 10 : 6 }}>
+                  {gap === 0 ? (
+                    // Same score: one label under the shared mark, so the two
+                    // names cannot print on top of each other.
+                    <span style={{ position: "absolute", left: `${pct(mv)}%`, transform: "translateX(-50%)", fontSize: "0.66rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", textAlign: "center" }}>
+                      {_reflSameInit && (<><span style={{ color: "#E8673A" }}>{userName}</span><span style={{ color: C.muted }}> &amp; </span><span style={{ color: "#1B5FE8" }}>{partnerName}</span><span style={{ color: C.muted }}> · </span></>)}
+                      <span style={{ color: C.text, fontWeight: 600 }}>{q.scaleLabels[mv]}</span>
+                    </span>
+                  ) : [[mv, userName, "#E8673A"], [tv, partnerName, "#1B5FE8"]].map(([v, name, col], idx) => {
+                    const isLeft = pct(v) < pct(idx === 0 ? tv : mv);
+                    return (
+                      <span key={name} style={{ position: "absolute", left: `${pct(v)}%`, transform: isLeft ? "translateX(-100%)" : "translateX(0)", paddingRight: isLeft ? 5 : 0, paddingLeft: isLeft ? 0 : 5, fontSize: "0.66rem", fontWeight: 700, color: col, fontFamily: BFONT, whiteSpace: "nowrap" }}>
+                        {_reflSameInit ? (name + " · " + q.scaleLabels[v]) : q.scaleLabels[v]}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+              <span style={pole}>{q.scaleLabels[q.scaleLabels.length - 1]}</span>
             </div>
           </div>
         );
       };
+
+      /**
+       * A tile of ratings under one heading.
+       *
+       * Ellie: "I want one tile for overall and one tile for how things feel
+       * right now, and the how things feel right now tile should have 3
+       * questions in it." It was a card per question, so the rating about the
+       * relationship as a whole sat in the same frame as the three about parts
+       * of it.
+       */
+      const RatedTile = ({ label, rows }) => (
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>{label}</div>
+          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1.1rem 1.25rem" }}>
+            {rows.map((q, i) => (
+              <div key={q.id} style={{ paddingTop: i === 0 ? 0 : "1.1rem", marginTop: i === 0 ? 0 : "1.1rem", borderTop: i === 0 ? "none" : `1px solid ${C.stone}` }}>
+                <ScaleRow q={q} />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
 
       return (
         <Layout accent="#1B5FE8" noPrevNext={true}>
           <div style={{ maxWidth: 660 }}>
             {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.ratings.title}</h2>
-            <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>{REFLECTION_PAGES.ratings.sub}</p>
+            {/* The line under this heading is gone, on both surfaces. */}
 
             {overallQ && mine.a0 != null && theirs.a0 != null && (
-              <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Overall</div>
-                <ScaleRow q={overallQ} />
-              </div>
+              <RatedTile label="Overall" rows={[overallQ]} />
             )}
 
+            {/* block: reflection-ratings/scales */}
             {ratedScales.filter(q => q.id !== "a0").length > 0 && (
-              <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>How things feel right now</div>
-                {/* block: reflection-ratings/scales */}
-                {ratedScales.filter(q => q.id !== "a0").map(q => <ScaleRow key={q.id} q={q} />)}
-              </div>
+              <RatedTile label="How things feel right now" rows={ratedScales.filter(q => q.id !== "a0")} />
             )}
 
             {/* Admiration pick */}

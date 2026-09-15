@@ -101,6 +101,12 @@ export const PAGE_TITLES = {
   'exp-overview': 'Expectations',
   'conflict-overview': 'Conflict Styles',
   'reflection-ratings': 'How you each view the relationship',
+  /**
+   * Ellie: the at-a-glance title "should read Relationship Reflection". It
+   * led with the couple's two names, which is what every glance page used to
+   * do and what the other four have stopped doing.
+   */
+  'reflection-overview': 'Relationship Reflection',
 };
 
 /**

@@ -75,7 +75,7 @@ export default function NotesScreen() {
    * what made every new account arrive with twenty-one tags in it.
    */
   const [standard, setStandard] = useState<{ standard_key: string; name: string; color: string | null }[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [tagPlaceholder, setTagPlaceholder] = useState('Add a tag');
   const [sectionLabels, setSectionLabels] = useState<Record<string, string>>({});
   const [postTitles, setPostTitles] = useState<Record<string, string>>({});
   const [resultsVersion, setResultsVersion] = useState<number | null>(null);
@@ -119,7 +119,7 @@ export default function NotesScreen() {
       setTags(t.data.tags);
       setSectionLabels(t.data.sections ?? {});
       setStandard(t.data.standard ?? []);
-      setSuggestions(t.data.suggestions ?? []);
+      setTagPlaceholder(t.data.tagPlaceholder || 'Add a tag');
     }
     if (h.ok) {
       setPartnerName(h.data.partnerName ?? null);
@@ -417,7 +417,7 @@ export default function NotesScreen() {
             notes={[...mineRecent, ...sharedRecent]}
             sort={tagSort}
             onChangeSort={setTagSort}
-            suggestions={suggestions}
+            placeholder={tagPlaceholder}
             onAdd={addTag}
           />
         </View>
@@ -551,14 +551,19 @@ const TAG_SORTS: { key: TagSort; label: string }[] = [
 ];
 
 function TagList({
-  tags, notes, sort, onChangeSort, suggestions, onAdd,
+  tags, notes, sort, onChangeSort, placeholder, onAdd,
 }: {
   tags: Tag[];
   notes: Note[];
   sort: TagSort;
   onChangeSort: (s: TagSort) => void;
-  /** The line under the field. Ellie's words, from the server. */
-  suggestions: string[];
+  /**
+   * What the empty field says, from the server. It carries the examples that
+   * used to be a row of pills under it. Ellie: "remove the pill examples
+   * underneath and instead have the 'add a tag' text in the write in box read
+   * 'add a tag (ie. communicating needs, showing love, family)'."
+   */
+  placeholder: string;
   /** Returns an error to show, or null when the tag was added. */
   onAdd: (name: string) => Promise<string | null>;
 }) {
@@ -580,10 +585,6 @@ function TagList({
     if (!err) setDraft('');
   };
 
-  // A suggestion already in the list is not a suggestion. Compared without
-  // case, which is how the server decides a tag already exists.
-  const have = new Set(tags.map((t) => t.name.trim().toLowerCase()));
-  const offered = suggestions.filter((sg) => !have.has(sg.trim().toLowerCase()));
 
   // Count and freshness per tag, from the notes already on screen.
   const stats = useMemo(() => {
@@ -700,12 +701,12 @@ function TagList({
           flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
           backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
           borderRadius: Radius.lg, paddingHorizontal: Spacing.lg,
-          marginBottom: offered.length ? Spacing.sm : Spacing.md,
+          marginBottom: Spacing.md,
         }}>
         <TextInput
           value={draft}
           onChangeText={(v) => { setDraft(v); setFailed(null); }}
-          placeholder="Add a tag"
+          placeholder={placeholder}
           placeholderTextColor={c.textMuted}
           autoCapitalize="none"
           returnKeyType="done"
@@ -749,29 +750,9 @@ function TagList({
         </View>
       ) : null}
 
-      {/* Suggestions, and only the ones this person does not already have.
-          They sit with the add field and appear with it: Ellie asked for the
-          empty tags section to show the empty table and its instruction
-          "rather than showing those pills", and a row of pills over an empty
-          list reads as a list of tags they already have. */}
-      {addOpen && offered.length ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md }}>
-          {offered.map((sg) => (
-            <Pressable
-              accessibilityRole="button"
-              key={sg}
-              onPress={() => add(sg)}
-              disabled={adding}
-              style={{
-                paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
-                borderRadius: Radius.pill, borderWidth: 1,
-                borderColor: c.border, backgroundColor: c.surface,
-              }}>
-              <Text style={{ ...Type.small, fontSize: 12, color: c.textMuted }}>{sg}</Text>
-            </Pressable>
-          ))}
-        </View>
-      ) : null}
+      {/* The suggestions were a row of pills here. They are in the field's
+          own placeholder now, which is where an example belongs: a pill over
+          an empty list reads as a tag you already have. */}
 
       {failed ? (
         <Text style={{ ...Type.small, color: c.accent, marginBottom: Spacing.md }}>{failed}</Text>

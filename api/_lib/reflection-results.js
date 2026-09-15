@@ -60,7 +60,12 @@ export const REFLECTION_PAGES = {
   eyebrow: 'Relationship Reflection',
   ratings: {
     title: 'How you each view the relationship',
-    sub: 'Every question with a fixed answer, shown together. The distance between the two dots is the whole point.',
+    /**
+     * The line under the heading is gone. Ellie: "On app and site, how you
+     * each rated, remove the description line." The page shows the questions
+     * and both answers; a sentence explaining that it does was the page
+     * describing itself.
+     */
   },
   /**
    * The ranking, and the line under it that says how to read the connectors.
@@ -106,21 +111,20 @@ export const STORY_CATEGORIES = (() => {
  * Exported as well as used below, because the website has the raw answers and
  * builds this page without going through the payload.
  */
-export function reflectionOverview({ mine, theirs, you = 'You', them = 'Your partner' }) {
-  const labels = ANNIVERSARY_QUESTIONS.find((q) => q.id === 'a0')?.scaleLabels || [];
-  const a = scaleValue(mine?.a0);
-  const b = scaleValue(theirs?.a0);
-  const base = {
-    headline: `${you} & ${them}`,
+export function reflectionOverview() {
+  /**
+   * The line under the heading is gone. Ellie: "the description line ('You're
+   * both feeling really good. A shared read on where you are') should be
+   * removed." It was a sentence saying what the four ratings below it already
+   * say, in an order the reader did not choose.
+   *
+   * The headline is gone with it: the page is titled from PAGE_TITLES now,
+   * like every other at-a-glance page, rather than leading with two names.
+   */
+  return {
     ratingsLabel: 'How you feel right now',
     planLabel: 'Your action plan',
   };
-  if (a == null || b == null || !labels.length) return { ...base, line: '' };
-  const shared = String(labels[Math.round((a + b) / 2)] || '').toLowerCase();
-  const line = Math.abs(a - b) <= 1
-    ? `You're both feeling ${shared}. A shared read on where you are.`
-    : `${you} says ${String(labels[a] || '').toLowerCase()}. ${them} says ${String(labels[b] || '').toLowerCase()}. Both worth understanding.`;
-  return { ...base, line };
 }
 
 export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Your partner' }) {
@@ -183,7 +187,7 @@ export function reflectionResults({ mine, theirs, youName = 'You', themName = 'Y
    * rating this line is about. It is deliberately not in the panel below:
    * it is said here, in words, rather than drawn again as a fourth bar.
    */
-  const overview = reflectionOverview({ mine, theirs, you, them });
+  const overview = reflectionOverview();
 
   /** The one pick question, as a quality rather than an adjective. */
   const admired = {

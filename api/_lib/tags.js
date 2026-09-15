@@ -112,6 +112,20 @@ export const TAG_SUGGESTIONS = [
   'time together',
 ];
 
+/**
+ * The add field's own placeholder.
+ *
+ * Ellie: "let's remove the pill examples underneath and instead have the 'add
+ * a tag' text in the write in box read 'add a tag (ie. communicating needs,
+ * showing love, family)' or something along those lines that fits in the bar."
+ *
+ * The first three of the five, because five do not fit a phone's field and a
+ * placeholder that runs off the end says less than three that do not. Built
+ * from the same list rather than typed again, which means the order of that
+ * list decides which three appear: move one up to put it in the field.
+ */
+export const TAG_PLACEHOLDER = `Add a tag (ie. ${TAG_SUGGESTIONS.slice(0, 3).join(', ')})`;
+
 export function standardTags({ ownsIntimacy = false } = {}) {
   const tags = [];
 

@@ -33,7 +33,7 @@
 export const config = { runtime: 'edge' };
 
 import { jsonBody } from './_lib/http.js';
-import { isValidAnchor, standardTags, TAG_SUGGESTIONS } from './_lib/tags.js';
+import { isValidAnchor, standardTags, TAG_SUGGESTIONS, TAG_PLACEHOLDER } from './_lib/tags.js';
 import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
@@ -163,8 +163,15 @@ export default async function handler(req) {
          * Not the person's tags, and not written to their account.
          */
         standard: standardTags({ ownsIntimacy }),
-        /** The line under the add field. Ellie's words, in api/_lib/tags.js. */
+        /**
+         * The add field's placeholder, and the list it is built from. The
+         * suggestions were a row of pills under the field; Ellie asked for
+         * them in the field itself instead. Both are sent: the list is what
+         * the placeholder is made of, and it is what anything else offering a
+         * suggestion would read.
+         */
         suggestions: TAG_SUGGESTIONS,
+        tagPlaceholder: TAG_PLACEHOLDER,
         /**
          * What each results section is called.
          *
