@@ -51,7 +51,10 @@ import {
 } from '@/api/client';
 import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import ScreenFrame from '@/components/screen-frame';
 import SignIn from '@/components/sign-in';
+import { SymbolView } from 'expo-symbols';
+import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import {
@@ -92,6 +95,15 @@ export default function NotesScreen() {
   const [showAllMine, setShowAllMine] = useState(false);
   const [showAllShared, setShowAllShared] = useState(false);
   const [tagSort, setTagSort] = useState<TagSort>('az');
+  /**
+   * The tag whose notes are on screen.
+   *
+   * Ellie: "Each tag row should have an arrow on the right side to open up the
+   * list of all the tags in that section." It replaces the three sections
+   * rather than opening a modal over them: this is a tab, and a list of notes
+   * under a heading is the same screen with a filter on it.
+   */
+  const [openTag, setOpenTag] = useState<Tag | null>(null);
 
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
@@ -259,6 +271,7 @@ export default function NotesScreen() {
    */
   useTabReset(useCallback(() => {
     setEditing(null);
+    setOpenTag(null);
     setShowAllMine(false);
     setShowAllShared(false);
   }, []));
@@ -277,6 +290,62 @@ export default function NotesScreen() {
   }
 
   const partner = partnerName || 'your partner';
+
+  /**
+   * One tag, opened.
+   *
+   * Everything filed under it, the reader's own and the partner's, in the same
+   * rows the rest of the screen uses. Its own screen rather than a section,
+   * because a filter that leaves the other two sections on the page reads as
+   * though they are filtered too.
+   */
+  if (openTag) {
+    const has = (n: Note) => (n.tagIds || []).includes(openTag.id);
+    // Whose a note is comes from which list it was in, not from comparing ids:
+    // the two lists are already the answer to that question.
+    const inTag = [
+      ...mineRecent.filter(has).map((note) => ({ note, mine: true })),
+      ...sharedRecent.filter(has).map((note) => ({ note, mine: false })),
+    ].sort((a, b) => Date.parse(b.note.updated_at) - Date.parse(a.note.updated_at));
+    return (
+      <Shell>
+        <ScreenFrame onBack={() => setOpenTag(null)} backLabel="Notes">
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: Spacing.xl, paddingBottom: Spacing.xxxl,
+              maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
+            }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.xl }}>
+              <SymbolView
+                name="tag"
+                size={22}
+                tintColor={tagColor(openTag)}
+                fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: tagColor(openTag) }} />}
+                style={{ width: 24, height: 24 }}
+              />
+              <Text style={{ ...Type.hero, color: c.textStrong, flex: 1 }}>{openTag.name}</Text>
+            </View>
+            {inTag.length ? (
+              <Tile>
+                {inTag.map(({ note, mine }, i) => (
+                  <MarkRow
+                    key={note.id}
+                    note={note}
+                    source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                    first={i === 0}
+                    author={mine ? undefined : partner}
+                    onPress={mine ? () => setEditing(note) : undefined}
+                  />
+                ))}
+              </Tile>
+            ) : (
+              <Blank body="Nothing is filed under this tag yet. Tag a note or a highlight and it turns up here." />
+            )}
+          </ScrollView>
+        </ScreenFrame>
+      </Shell>
+    );
+  }
 
   return (
     <Shell>
@@ -327,34 +396,23 @@ export default function NotesScreen() {
           <Section title="Pick up where you left off">
           {mineRecent.length ? (
             <>
-              {mineRecent.slice(0, 3).map((note) => (
-                <NoteCard
-                  key={note.id}
-                  note={note}
-                  tags={tags}
-                  source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
-                  moved={hasMoved(note, resultsVersion)}
-                  onPress={() => setEditing(note)}
-                />
-              ))}
+              <Tile>
+                {(showAllMine ? mineRecent : mineRecent.slice(0, 3)).map((note, i) => (
+                  <MarkRow
+                    key={note.id}
+                    note={note}
+                    source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                    first={i === 0}
+                    onPress={() => setEditing(note)}
+                  />
+                ))}
+              </Tile>
               {mineRecent.length > 3 ? (
                 <More
                   label={showAllMine ? 'Show fewer' : `All ${mineRecent.length}`}
                   onPress={() => setShowAllMine((v) => !v)}
                 />
               ) : null}
-              {showAllMine
-                ? mineRecent.slice(3).map((note) => (
-                  <NoteCard
-                    key={note.id}
-                    note={note}
-                    tags={tags}
-                    source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
-                    moved={hasMoved(note, resultsVersion)}
-                    onPress={() => setEditing(note)}
-                  />
-                ))
-                : null}
             </>
           ) : (
             <Blank body="Write a note or highlight something in your results to get started. The last three things you left turn up here, most recent first." />
@@ -419,6 +477,7 @@ export default function NotesScreen() {
             onChangeSort={setTagSort}
             placeholder={tagPlaceholder}
             onAdd={addTag}
+            onOpen={setOpenTag}
           />
         </View>
       </ScrollView>
@@ -550,8 +609,23 @@ const TAG_SORTS: { key: TagSort; label: string }[] = [
   { key: 'fewest', label: 'Fewest notes' },
 ];
 
+/**
+ * A colour for a tag.
+ *
+ * A standard tag arrives with one. A tag someone typed does not, and Ellie
+ * asked for each to be different, so it gets one from the mark palette by a
+ * hash of its id: stable between renders and between devices, and never a
+ * colour the product does not already use.
+ */
+function tagColor(tag: Tag): string {
+  if (tag.color) return tag.color;
+  let h = 0;
+  for (let i = 0; i < tag.id.length; i += 1) h = (h * 31 + tag.id.charCodeAt(i)) >>> 0;
+  return ANNOTATION_COLORS[h % ANNOTATION_COLORS.length].ink;
+}
+
 function TagList({
-  tags, notes, sort, onChangeSort, placeholder, onAdd,
+  tags, notes, sort, onChangeSort, placeholder, onAdd, onOpen,
 }: {
   tags: Tag[];
   notes: Note[];
@@ -566,6 +640,8 @@ function TagList({
   placeholder: string;
   /** Returns an error to show, or null when the tag was added. */
   onAdd: (name: string) => Promise<string | null>;
+  /** Open everything filed under one tag. */
+  onOpen: (tag: Tag) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
@@ -767,26 +843,35 @@ function TagList({
         {ordered.map((t, i) => {
           const st = stats.get(t.id) || { count: 0, latest: 0 };
           return (
-            <View
+            <Pressable
               key={t.id}
+              accessibilityRole="button"
+              accessibilityLabel={`${t.name}, ${st.count} note${st.count === 1 ? '' : 's'}`}
+              onPress={() => onOpen(t)}
               style={{
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
                 paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
               }}>
-              <View
-                style={{
-                  width: 8, height: 8, borderRadius: 4,
-                  backgroundColor: t.color || c.accentQuiet,
-                }}
+              {/* Ellie: "rather than being a dot to the left of each tag, it
+                  should be a tag icon and each should be a different color."
+                  A tag the person made carries no colour of its own, so one is
+                  given to it, deterministically, out of the same palette their
+                  marks use rather than a second palette invented here. */}
+              <SymbolView
+                name="tag"
+                size={16}
+                tintColor={tagColor(t)}
+                fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tagColor(t) }} />}
+                style={{ width: 18, height: 18 }}
               />
               <Text style={{ ...Type.body, color: c.text, flex: 1 }} numberOfLines={1}>{t.name}</Text>
-              {/* The count, and nothing when a tag is empty. A "0" on every
-                  unused tag turns a list of places into a scorecard. */}
-              {st.count ? (
-                <Text style={{ ...Type.small, color: c.textMuted }}>{st.count}</Text>
-              ) : null}
-            </View>
+              {/* The count, on every row. It was hidden at zero, which read as
+                  a list of places rather than a scorecard; with an arrow beside
+                  it, a zero is what explains an empty list when you open one. */}
+              <Text style={{ ...Type.small, color: c.textMuted }}>{st.count}</Text>
+              <Text style={{ color: c.accent, fontSize: 16 }}>{'\u203A'}</Text>
+            </Pressable>
           );
         })}
       </View>
@@ -798,6 +883,106 @@ function TagList({
         />
       )}
     </View>
+  );
+}
+
+/**
+ * A tile of rows, the home screen's shape.
+ *
+ * Ellie: "pick up where you left off section should be one tile like the one
+ * at the bottom of the homepage, one tile with rows separated by the
+ * horizontal lines."
+ *
+ * Three stacked cards read as three things; one tile with hairlines reads as
+ * one list, which is what this is.
+ */
+function Tile({ children }: { children: React.ReactNode }) {
+  return (
+    <View
+      style={{
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, overflow: 'hidden',
+      }}>
+      {children}
+    </View>
+  );
+}
+
+/**
+ * Which of the four things a row is.
+ *
+ * Ellie: "Each row should have an icon to the left that shows highlighter,
+ * underline, note, or tag." Three of those are the mark's own kind. The fourth
+ * is a note whose whole point was filing it: tags and no words of its own.
+ */
+function markIcon(note: Note): { icon: string; label: string } {
+  if (note.kind === 'highlight') return { icon: 'highlighter', label: 'Highlight' };
+  if (note.kind === 'underline') return { icon: 'underline', label: 'Underline' };
+  if ((note.tagIds?.length || 0) > 0 && !note.body.trim() && !note.title?.trim()) {
+    return { icon: 'tag', label: 'Tag' };
+  }
+  return { icon: 'square.and.pencil', label: 'Note' };
+}
+
+/**
+ * One row of that tile.
+ *
+ * The section above, in an eyebrow, and the words below it. No rule beside the
+ * eyebrow: Ellie asked for the dashes to go, and the icon at the left already
+ * carries the colour that rule was carrying.
+ */
+function MarkRow({
+  note, source, first, unread, author, onPress,
+}: {
+  note: Note;
+  source?: ResolvedAnchor | null;
+  first?: boolean;
+  unread?: boolean;
+  author?: string;
+  onPress?: () => void;
+}) {
+  const { icon, label } = markIcon(note);
+  // The reader's own words when there are any, and the marked text when there
+  // are not: a highlight has nothing else to show, and showing nothing would
+  // make the row a label for an empty space.
+  const words = note.title?.trim() || note.body.trim() || note.anchor_context?.trim() || '';
+  const tone = note.kind && note.kind !== 'note'
+    ? annotationColor(note.color).ink
+    : (source?.color || c.accentQuiet);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${label}${source ? ` on ${source.label}` : ''}`}
+      onPress={onPress}
+      disabled={!onPress}
+      style={{
+        flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.md,
+        paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+        borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
+      }}>
+      <SymbolView
+        name={icon as never}
+        size={18}
+        tintColor={tone}
+        fallback={<Text style={{ ...Type.small, color: tone }}>{label[0]}</Text>}
+        style={{ width: 20, height: 20, marginTop: 2 }}
+      />
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+          <Text style={{ ...Type.eyebrow, color: c.textMuted }} numberOfLines={1}>
+            {source?.label || (author ? `From ${author}` : label)}
+          </Text>
+          {unread ? (
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.accent }}>New</Text>
+          ) : null}
+        </View>
+        <Text numberOfLines={2} style={{ ...Type.body, color: c.text, marginTop: 3 }}>
+          {words}
+        </Text>
+      </View>
+      <Text style={{ color: c.accent, fontSize: 16, marginTop: 2 }}>{'\u203A'}</Text>
+    </Pressable>
   );
 }
 

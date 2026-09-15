@@ -24,6 +24,7 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 import { Text, View, type StyleProp, type TextStyle } from 'react-native';
+import { SymbolView } from 'expo-symbols';
 
 import Annotatable, { type Mark, type MarkAction } from '@/components/annotatable';
 import { annotationColor } from '@/constants/annotations';
@@ -93,16 +94,36 @@ export function Prose({
   const body = <Annotatable text={text} style={style} marks={marks} onSelect={select} onRemove={remove} />;
   if (!silent.length) return body;
 
+  /**
+   * ── WHICH SIDE, AND WHICH ICON ───────────────────────────────────────────
+   * Ellie: "I want the icon to appear in the right margin of the page that
+   * shows a note icon or a tag icon to show where notes and tags are."
+   *
+   * It was a coloured bar in the left gutter, which says something is here and
+   * not what. A note and a tag are different things to come back to: one is
+   * something you wrote, the other is somewhere you filed it. So the marker is
+   * the icon of whichever it is, and a paragraph carrying both shows the tag,
+   * because the tag is the thing you would be scanning for.
+   *
+   * Right margin, as asked. Absolutely positioned and not hit-testable: it is
+   * a sign, not a control, and tapping it would be a second way to open
+   * something the words already open.
+   */
+  const tagged = silent.some((m) => m.tagged);
+
   return (
     <View>
       <View
         pointerEvents="none"
-        style={{
-          position: 'absolute', left: -12, top: 5,
-          width: 3, height: 16, borderRadius: 2,
-          backgroundColor: tone.ink,
-        }}
-      />
+        style={{ position: 'absolute', right: -18, top: 3 }}>
+        <SymbolView
+          name={(tagged ? 'tag' : 'square.and.pencil') as never}
+          size={13}
+          tintColor={tone.ink}
+          fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: tone.ink }} />}
+          style={{ width: 14, height: 14 }}
+        />
+      </View>
       {body}
     </View>
   );
@@ -155,6 +176,7 @@ export function AnnotationProvider({
       kind: n.kind || 'note',
       color: n.color ?? null,
       text: n.anchor_context as string,
+      tagged: (n.tagIds?.length || 0) > 0,
     })), [notes, section, anchorType]);
 
   const value = useMemo<Ctx>(() => ({

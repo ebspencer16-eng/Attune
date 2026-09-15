@@ -68,6 +68,8 @@ export type Mark = {
   color?: string | null;
   /** The exact text that was marked, which is how a mark finds its words. */
   text: string;
+  /** Whether it is filed under a tag, which is what the margin marker shows. */
+  tagged?: boolean;
 };
 
 /** What the toolbar offers, in the order Ellie listed them. */

@@ -30,7 +30,6 @@ import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
 import { fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
-import EdgeFadedRow from '@/components/edge-faded-row';
 import SignIn from '@/components/sign-in';
 import {
   AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
@@ -208,9 +207,6 @@ export default function ResourcesScreen() {
   // new was added.
   const catalogue = (home?.catalogue ?? []).filter((r) => r.kind !== 'exercise');
   const owned = catalogue.filter((r) => ownedKeys.has(r.key));
-  // Only what they do not have. When they have everything this is empty and
-  // the whole section is skipped, so In Practice follows the owned tiles.
-  const more = catalogue.filter((r) => !ownedKeys.has(r.key));
 
   // Posts carry `category` when the author set one. Anything uncategorised
   // still shows under All, so a missing field never hides a piece.
@@ -258,11 +254,21 @@ export default function ResourcesScreen() {
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.xl }}>Resources</Text>
 
+          {/* ── ONE SECTION, ALWAYS ──────────────────────────────────────
+              Ellie: "I like the way my resources page looks so much more now
+              that all 3 resources are in the 'yours to explore' category and
+              there's no section for add-ons. Can we make this the default."
+
+              It was two sections: what you own as circles, and what you do not
+              as a row of cards with prices on them. A tab that spends half its
+              height on things the reader has not bought is a shop, and this is
+              the tab they come to to use what they have. So the second section
+              is gone and what is left is one line out to the website. */}
+          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
+            Yours to explore
+          </Text>
           {owned.length ? (
             <>
-              <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
-                Yours to explore
-              </Text>
               {/* A row of circles, wrapping only if someone owns more than four. */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
                 {owned.map((r) => <OwnedTile key={r.key} item={r} onOpen={openTool} />)}
@@ -275,26 +281,37 @@ export default function ResourcesScreen() {
                   {workbookNote}
                 </Text>
               ) : null}
-              <View style={{ height: Spacing.xxl }} />
             </>
           ) : null}
-        </View>
 
-        {more.length ? (
-          <>
-            {/* The row said "Swipe >" beside this heading. It said it whether
-                or not there was anything to swipe to, which is the version of
-                this that reads as noise. The fade at the right edge carries
-                it instead, and EdgeFadedRow only draws that fade when there
-                is something past it. */}
-            <View style={{ paddingHorizontal: Spacing.xl, marginBottom: Spacing.md }}>
-              <Text style={{ ...Type.eyebrow, color: c.textMuted }}>Explore more resources</Text>
-            </View>
-            <EdgeFadedRow>
-              {more.map((r) => <ExploreTile key={r.key} item={r} />)}
-            </EdgeFadedRow>
-          </>
-        ) : null}
+          {/* ── THE WAY TO THE REST ──────────────────────────────────────
+              Grey, bottom right, and out to the website in the system browser,
+              which is the only shape this is allowed to take: the app names no
+              price and no checkout, and /offerings is the page the website
+              already sells from. Get Started does exactly this.
+
+              It is also the whole of the previous section: the reader who wants
+              another tool goes and gets it in the place that can take payment,
+              and the tab stays a place to use what you have. */}
+          {/* Always, not only when something is unowned. A reader who owns
+              everything still has a reason to go: the physical copies and the
+              gift are on the same page, and a control that appears and
+              disappears with an invisible condition is one nobody trusts. */}
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel="Explore more resources on the website"
+            onPress={() => Linking.openURL(`${SITE}/offerings`)}
+            hitSlop={8}
+            style={{
+              alignSelf: 'flex-end', marginTop: Spacing.lg,
+              flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+            }}>
+            <Text style={{ ...Type.small, color: c.textMuted }}>Explore more resources</Text>
+            <Text style={{ ...Type.small, color: c.textMuted }}>{'\u2192'}</Text>
+          </Pressable>
+
+          <View style={{ height: Spacing.xxl }} />
+        </View>
 
         <View style={{ marginTop: Spacing.xxl }}>
           <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
@@ -449,30 +466,6 @@ function OwnedTile({ item, onOpen }: { item: Item; onOpen: (key: string) => void
   );
 }
 
-function ExploreTile({ item }: { item: Item }) {
-  const color = AccentFor[item.key] ?? AccentFallback;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => Linking.openURL(`${SITE}/offerings`)}
-      style={{
-        width: 190, backgroundColor: c.surface,
-        borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg,
-        padding: Spacing.lg,
-      }}>
-      {/* No coloured rule above the title. It was a stripe standing in for a
-          design decision, and it put a bar over every tile in a row that is
-          already a row of bordered boxes. */}
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{item.label}</Text>
-      <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, minHeight: 34 }}>
-        {item.blurb}
-      </Text>
-      <Text style={{ ...Type.small, color: Palette.orange, fontWeight: '700', marginTop: Spacing.md }}>
-        {`$${item.price}`}
-      </Text>
-    </Pressable>
-  );
-}
 
 /**
  * One piece in In Practice.
