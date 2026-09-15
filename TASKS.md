@@ -64,13 +64,19 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Q2 in section 1 is the one thing I need from you, and it is
-a question rather than a task.
-
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O119 | **The reflection action plan tiles are white on the app's at-a-glance page.** Every other glance page, and the site, draws them translucent on the ground. |
+| O120 | **Rebuild selection: press and hold, then drag.** Lift a finger and a toolbar appears just above what is selected, with the kinds of mark to choose from. Two taps was the old answer and she has rejected it. Also tell her how to work it in the simulator. |
+| O121 | **The checklist's sections start closed.** |
+| O122 | **Intimacy detail pages: no legend in the side by side dropdown** unless the two initials are the same. |
+| O123 | **Intimacy detail pages: the side by side rows should render like the communication ones**, poles either side of the bar, text wrapped. Same component, not the same look by hand. |
+| O124 | **Conflict at a glance: a private to you line in red**, level with Your action plan and right aligned in the margin. App and site. |
+| O125 | **The tip tile's label on expectations detail pages should be white.** |
+| O126 | **How you each rated: wrap the pole labels** so they are not cut off, in both tiles. |
+| O127 | **What Comes Next must carry each section's own action plan.** The communication group is built from the protocols and the comms at-a-glance page draws the action tiles, so the two say different things. Every group on that page should be the same items as its section's at-a-glance plan. |
 | O99 | **Physical Intimacy at a glance: the first tile's eyebrow should read Overview**, not Where you each land. App and site. The comms page was renamed and this one was not. |
 | O100 | **Physical Intimacy at a glance: the rows should show per cent aligned rather than two placement dots.** App and site. |
 | O101 | **In Practice titles are still cut off at the top.** The line box fix did not reach them, so the cause is somewhere else. Find it rather than padding it. |
@@ -102,16 +108,10 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R56 | **Relationship Reflection, again.** At a glance is titled Relationship Reflection with no line under it. How you each rated has no line either, and is two tiles: Overall, then How things feel right now with its three questions. The bars have their poles either side, like the communication pages, and each answer is printed under its own mark rather than as a sentence along the bottom. Both surfaces. |
 | R57 | **Physical Intimacy at a glance as percentages.** One bar per aspect with a figure beside it, rather than two dots. An aspect one of you skipped shows a dash, because unanswered is not nought per cent aligned. The eyebrow over them reads Overview. Both surfaces. |
 | R58 | **An article, the budget and the checklist all open under a back arrow now.** That is also why the titles were cut off: those three replaced the tab's contents and left the tab's safe area behind them, so their headings sat under the status bar. |
 | R59 | **The add a tag field carries its examples.** The pills under it are gone. The three in the placeholder are the first three of the list in `api/_lib/tags.js`, so reordering that list changes which three appear. |
 | R60 | **The orange rule under the expectations page titles is gone**, on both surfaces. |
-| R61 | **Marking, and the gesture nobody guesses.** Press and hold the first word, tap the last, then choose. Not a right click. In Practice articles can be marked now, which they could not before, and each one ends with the line that says how. That line is mine: "Press and hold any sentence to highlight it, tag it or save a note." |
-| R62 | **The checklist's sections open and close.** A closed one still shows 3 of 7. Everything starts open. |
-| R63 | **Conflict at a glance, with colour in it.** The two bars carry the answer's own colour, running from the calm green at "We handle it well" to the loud one at "Really rocky", and the two section labels are the pale blue of the page's own gradient. |
-| R64 | **The Physical Intimacy action plan is the top two, plus anything level with the second.** So a tie is never cut in half by a fixed count. |
-| R65 | **The pole labels sit on the bar's centre line** on How you each rated, both surfaces. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 
 ### Copy, and whether the words are yours
@@ -150,6 +150,9 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R63 | Conflict at a glance, with colour in it |
+| R64 | The intimacy action plan: top two plus ties |
+| R65 | The pole labels on the bar centre line |
 | R52 | The Notes empty states, in their tiles |
 | R3 | The app notes tab |
 | R5 | The website marketing pages |
