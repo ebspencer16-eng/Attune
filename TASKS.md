@@ -63,13 +63,14 @@ CLAUDE.md, so anything new sits here until you do.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Everything from your lists is built and sitting in section 3
-for your eye. Q2 in section 1 is the one thing I need from you.
-
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O128 | **Notifications are written and nobody can read them.** The server records them, /api/notifications serves them, the app has two client functions for them, and no screen calls either. One kind is actually raised today: the notice that a partner deleted their account, which the retention policy promises in writing. That promise currently reaches nobody. |
+| O129 | **Five of the six notification kinds are never raised at all.** Copy exists for partner finished, results ready, partner nudged you, partner shared and new post. Nothing calls them. Either they are wired to the events they describe or they are copy on a shelf, which is the /email-preview problem again. |
+| O130 | **CLAUDE.md's not-built list is out of date.** It says Settings cannot edit a name or pronouns and that two home cards open the browser. Both are built: ProfileEditor is in Settings and the cards route in-app. A stale map is worse than none, because it is the first thing every session reads. |
+| O131 | **Sweep for bugs.** From outside with curl, and through the code for the shape that keeps recurring: one rule kept by hand in two places. |
 
 ## 3. For you to review
 
