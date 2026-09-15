@@ -64,6 +64,19 @@ function sideOf(value) {
   return null;
 }
 
+/**
+ * A childhood answer, or nothing.
+ *
+ * The website prints an em dash for an unanswered one and for the two values
+ * that mean it did not come up. Sending null instead lets each surface decide
+ * how to say "nothing here", which on a phone is not always a dash.
+ */
+export function childhoodValue(value) {
+  const v = String(value ?? '').trim();
+  if (!v || v === 'N/A' || v === "Didn't apply") return null;
+  return v;
+}
+
 /** An answer as a name the reader will recognise. */
 export function normRespValue(value, isSelf, youName, themName) {
   const side = sideOf(value);
@@ -145,6 +158,21 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
         item: substName(item, you, them),
         you: normRespValue(rawYours, true, you, them),
         them: normRespValue(rawTheirs, false, you, them),
+        /**
+         * What each of them grew up with.
+         *
+         * The exercise asks it beside every responsibility and the website
+         * prints it: its conversations table has an Expects and an Experienced
+         * column for each person. The app had two of those four, because these
+         * answers were never on the payload. Ellie: "web shows convos to have
+         * with more columns. App needs to show that as well."
+         *
+         * Not mirrored. "Primarily mine" is a claim about who does it now and
+         * has to be flipped to compare; this is a claim about the house each
+         * of them grew up in, which is theirs either way.
+         */
+        youExperienced: childhoodValue(mine?.childhood?.[key]),
+        themExperienced: childhoodValue(theirs?.childhood?.[key]),
         aligned,
       };
     }).filter(Boolean));

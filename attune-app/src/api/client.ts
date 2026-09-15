@@ -286,6 +286,13 @@ export type ResultsNavGroup = ResultsNavEntry & {
 export type ExpectationRow = {
   key: string;
   kind: 'responsibility' | 'life';
+  /**
+   * What each of them grew up with, when they said. The website's
+   * conversations table has an Expects and an Experienced column per person;
+   * these are the second pair, and they were not on the payload at all.
+   */
+  youExperienced?: string | null;
+  themExperienced?: string | null;
   category: string;
   item: string;
   prompt?: string | null;

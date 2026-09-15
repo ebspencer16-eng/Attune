@@ -59,6 +59,24 @@ export const SECTION_GROUNDS = {
   'conflict-overview': { angle: 150, mid: 55, stops: [NAVY, '#1B5FE8', '#1B8FB8'] },
 };
 
+/**
+ * The ground for one expectations conversation page, in its category's colour.
+ *
+ * Ellie: "Expectations detailed pages bgs should be gradients matching their
+ * category color." All six drew the one violet, so the colour the category
+ * carries everywhere else, on its tile, its pill and its bar, stopped at the
+ * door of its own page.
+ *
+ * Built the way the intimacy dimension pages are built, which is the pattern
+ * this codebase already had for exactly this: the tint at two alphas over the
+ * shared deep end, so six pages are recognisably one section in six colours
+ * rather than six unrelated grounds.
+ */
+export function groundForCategory(color) {
+  if (!color) return SECTION_GROUNDS['exp-detail'].stops;
+  return [`${color}cc`, `${color}88`, NAVY];
+}
+
 /** The stops, for a surface that builds its own gradient. */
 export function groundFor(id) {
   return SECTION_GROUNDS[id]?.stops || null;

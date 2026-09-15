@@ -111,7 +111,7 @@ import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension } from "../api/_lib/intimacy-results.js";
 // The fixed page gradients, one copy for both surfaces: the app receives the
 // same stops on the results nav. See api/_lib/section-grounds.js.
-import { gradientCss } from "../api/_lib/section-grounds.js";
+import { gradientCss, groundForCategory } from "../api/_lib/section-grounds.js";
 import { COMM_DOMAINS, DIMENSION_DISPLAY_ORDER } from "../api/_lib/comm-domains.js";
 import { DIM_META as SHARED_DIM_META } from "../api/_workbook-content.js";
 import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT, RING_COLORS as SC_RING, statColor as scStatColor } from "../api/_lib/storycard-style.js";
@@ -3774,7 +3774,9 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 // Detail-page ground. Lifted from near-black navy: the glance page moved to a
 // brighter treatment and these read as murky beside it. Still darker than the
 // glance page, so the two are distinguishable.
-const EXP_BG = gradientCss("exp-detail");
+// EXP_BG, the one violet every expectations page used to draw, is gone: each
+// page is on its own category's colour now. The stops it named live on as the
+// fallback in groundForCategory, for a category with no colour of its own.
 
 function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onGoBack, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
   // ── Fixed 5 display categories ──────────────────────────────────────────────
@@ -3914,8 +3916,8 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   if (step === 0) {
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        {/* Brighter than EXP_BG, which the detail pages keep. This is the
-            landing page for the section. */}
+        {/* Brighter than the detail pages, which are on their category's own
+            colour. This is the landing page for the section. */}
         <ResultsSlide bg={gradientCss("exp-overview")}>
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
@@ -4031,7 +4033,11 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
     return (
       <MaybeNav noSideNav={noSideNav} navItems={expectationsNavItems} currentStep={navCurrentStep} onGo={go} accent="#1B5FE8">
-        <ResultsSlide bg={fc.bg || EXP_BG}>
+        {/* The category's own colour, from api/_lib/section-grounds.js, which
+            the app reads through the results nav. `fc.bg` never existed on a
+            category, so every one of the six drew EXP_BG and the colour each
+            carries on its tile, its pill and its bar stopped at its own page. */}
+        <ResultsSlide bg={`linear-gradient(145deg, ${groundForCategory(fc.color).join(", ")})`}>
           <link href={FONT_URL} rel="stylesheet" />
 
           {/* The exercise eyebrow was removed from here earlier and left an

@@ -1082,6 +1082,14 @@ function ExpectationsConversation({
  * the content here. A row that collapsed to a tick when two people matched
  * would hide the thing they matched on.
  */
+/**
+ * The website's two column headings on the conversations table. Two words
+ * each, and the same two words, so a reader moving between the surfaces is
+ * reading the same table.
+ */
+const EXPECTS_LABEL = 'Expects';
+const EXPERIENCED_LABEL = 'Experienced';
+
 function ExpectationRowView({
   row, you, them,
 }: { row: ExpectationRow; you: string; them: string }) {
@@ -1096,15 +1104,37 @@ function ExpectationRowView({
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{row.prompt}</Text>
       ) : null}
 
+      {/* ── FOUR VALUES, NOT TWO ────────────────────────────────────────
+          The website's table carries Expects and Experienced for each person.
+          The app drew the two Expects, so half of what the exercise asked
+          about this responsibility was collected and never shown. Ellie: "web
+          shows convos to have with more columns. App needs to show that as
+          well."
+
+          Stacked per person rather than as four columns: four columns on a
+          phone is two words a line. The pairing is the same, and each label
+          says which is which. */}
       <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{you}</Text>
-          <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.you}</Prose>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{them}</Text>
-          <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.xs }}>{row.them}</Prose>
-        </View>
+        {[
+          { name: you, expects: row.you, lived: row.youExperienced, tint: c.accentQuiet },
+          { name: them, expects: row.them, lived: row.themExperienced, tint: c.textMuted },
+        ].map((side) => (
+          <View key={side.name} style={{ flex: 1 }}>
+            <Text style={{ ...Type.eyebrow, color: side.tint }}>{side.name}</Text>
+            <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.xs }}>
+              {EXPECTS_LABEL}
+            </Text>
+            <Prose style={{ ...Type.body, color: c.text }}>{side.expects}</Prose>
+            {side.lived ? (
+              <>
+                <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.sm }}>
+                  {EXPERIENCED_LABEL}
+                </Text>
+                <Prose style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic' }}>{side.lived}</Prose>
+              </>
+            ) : null}
+          </View>
+        ))}
       </View>
 
     </View>

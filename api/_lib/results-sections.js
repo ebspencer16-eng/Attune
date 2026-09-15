@@ -25,7 +25,7 @@
 import { EXPECTATIONS_CATEGORIES } from '../_questions.js';
 import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
 import { COMM_DOMAINS } from './tags.js';
-import { SECTION_GROUNDS, groundFor, groundLocations } from './section-grounds.js';
+import { SECTION_GROUNDS, groundFor, groundLocations, groundForCategory } from './section-grounds.js';
 
 export const RESULTS_SECTIONS = [
   'highlights',
@@ -232,9 +232,9 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
         glance('exp-overview'),
         ...EXPECTATIONS_CATEGORIES.map((cat, i) => ({
           id: `exp-convo-${i}`, label: cat.label, color: '#10B981',
-          // Every conversation page is on the one ground, which the website
-          // calls EXP_BG. Sent so the app is not holding its own copy of it.
-          ground: groundFor('exp-detail'), groundStops: groundLocations('exp-detail'),
+          // Each conversation page is on its own category's colour. They were
+          // all on the one violet, on both surfaces.
+          ground: groundForCategory(cat.color), groundStops: groundLocations('exp-detail'),
         })),
       ],
     },
