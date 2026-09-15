@@ -37,14 +37,13 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
-**One waiting: 065.** 061 to 064 are all run.
+**Nothing waiting.** 061 to 065 are all run.
 
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M65 | **Run `supabase/migrations/065_website_article_reads.sql`.** It lets an In Practice article be marked read. The twelve pieces from the website open in the app now, and the table that records a read only accepts rows from the posts table, so reading one of them records nothing and the row never says "Read". Until you run it the app behaves as it does today; nothing breaks either way. It drops one foreign key and prints what is left. |
 
 ### Decide these
 
@@ -65,13 +64,30 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.** Every item on the list you sent on 13 September is built
-and in section 3 or 4.
-
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O63 | **Bug: /email-preview shows the tabs and no email.** Found it: the site sends `X-Frame-Options: DENY` on every path, which blocks a page from framing anything, including its own endpoint. The page loads each email into an iframe by URL, so the frame is refused and the panel stays blank. Confirmed in a headless browser: 13 tabs, the subject line, and an iframe with no document in it. Fix is to fetch the email and hand the markup to the frame rather than a URL, which is not a framed navigation and is not blocked. No header change. |
+| O64 | **Storycard 2: make the couple map larger.** |
+| O65 | **Storycard 3: the dots should carry each person's initial, as they do on the web.** When both initials are the same, keep the large dots, drop the letters, and put a legend under them instead. |
+| O66 | **Storycard 3: the two dots overlap and one is hidden.** The app is not offsetting them the way the results pages now do. |
+| O67 | **Storycard 4: the % sign is clipped along the top.** |
+| O68 | **Storycard 5: the 80% is clipped along the top.** |
+| O69 | **Storycard 5: the Life and Values figure is wrong.** It has been wrong before and been fixed before. So this is two jobs: fix it, and put a gate on the arithmetic so it cannot go back. Ellie: "confirm that these calculations are solid and won't revert." |
+| O70 | **At a glance pages: the tile ground should be the Attune navy, not near-black.** She likes the tiles; it is the colour inside them. |
+| O71 | **Expectations detailed pages: the app is missing columns the site has.** The site shows what each partner expects and what each has experienced. The app shows fewer. |
+| O72 | **Expectations detailed pages: the ground should be a gradient in the category's own colour.** |
+| O73 | **Relationship Reflection, how you each rated: What matters most this year needs the connecting lines.** Exactly as the site draws them, and the two columns need to sit further apart to give the lines room. |
+| O74 | **Relationship Reflection, Side by Side: some Talk about it prompts are missing in the app.** The site has one under every pair. |
+| O75 | **Conflict Styles at a glance needs colour**, like the other at a glance pages. |
+| O76 | **Conflict Styles detailed pages do not match the site.** Same treatment as Relationship Reflection got. |
+| O77 | **Physical Intimacy is still missing in the app.** Her third time reporting it, so the first thing to establish is what "missing" means here: which surface, signed in as whom, and what the payload says. |
+| O78 | **What Comes Next shows four groups and should show every one the site shows.** |
+| O79 | **Resources, In Practice: a Sort by dropdown** between the category pills and the article list. Defaults to Featured, which is most popular first and unread first within that, and offers newest to oldest, shortest to longest, and longest to shortest. |
+| O80 | **Notes: build the three sections with their empty states.** Pick up where you left off, three rows previewing your last three marks; Shared with you, three rows with unread buttons; then your tags with a count each, a search field above the list and a plus button top right. She wants to see the shape with nothing in it. I write the nothing-here-yet lines and she approves them live. |
+| O81 | **Comms at a glance: rename Communication style overview to Overview**, on both surfaces, now that the page heading says Communication Styles. |
+| O82 | **The site still has the Relationship Reflection action plan page.** The app removed it. Both were meant to. |
 
 ## 3. For you to review
 
@@ -89,7 +105,6 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R27 | **The emails are at attune-relationships.com/email-preview.** Thirteen tabs across the top, one per email. Click a tab and the email renders below it exactly as it sends, because the page asks the code that sends it rather than holding its own copy. Under the tabs it says the subject line, who it goes to, which file builds it, and where in the code it is triggered from. The first tab, partner invite, is the one customers see most. No sign-in needed. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 | R3 | **App notes tab.** Pick up where you left off, shared notes, unread markers, the tag list with its A-Z default and the sort dropdown. |
 | R4 | **App resources tab.** The narrower collections tile with arrows, the circular "yours to explore" shapes, the In Practice grid, and the tiles for budget, workbook and checklist. |
@@ -132,6 +147,7 @@ any order; work through them however suits.
 | Verified by you | What |
 |--|--|
 | M64 | Migration 064: the default tags, cleared out of accounts that already had them |
+| M65 | Migration 065: so an In Practice article read in the app can be marked read |
 | R28 | Migration 062: the qr columns and the policy that let anyone read order rows |
 | R29 | Migration 063: row level security on admin_presets |
 | R26 | Migration 061: the surface column, so app and site can be told apart |
