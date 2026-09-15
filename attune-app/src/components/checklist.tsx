@@ -58,6 +58,12 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState<ApiError | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+  /**
+   * Which areas are open. Absent means open, so a checklist that has never
+   * been touched reads exactly as it did before, and closing is something the
+   * reader does rather than something they arrive at.
+   */
+  const [openAreas, setOpenAreas] = useState<Record<string, boolean>>({});
   const [open, setOpen] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -153,6 +159,19 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
       {areas.map((area) => {
         const areaDone = area.items.filter((it) => state[keyFor(area.id, it.text)]).length;
         const allDone = areaDone === area.items.length;
+        /**
+         * ── WHY A SECTION CAN BE CLOSED ─────────────────────────────────
+         * Ellie: "Checklist high level sections (name change, merging
+         * finances, etc.) should be able to be collapsed down or opened
+         * again. If closed, it should still show 0/6."
+         *
+         * Six areas of six or seven items each is forty rows, and a checklist
+         * is read by the one thing you are doing this week. The count stays on
+         * the header whether it is open or shut, which is the point: a closed
+         * section still has to say where it stands, or closing it hides the
+         * progress along with the items.
+         */
+        const isOpen = openAreas[area.id] ?? true;
         return (
           <View
             key={area.id}
@@ -160,10 +179,15 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
               marginTop: Spacing.lg, backgroundColor: c.surface,
               borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, overflow: 'hidden',
             }}>
-            <View
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: isOpen }}
+              accessibilityLabel={`${area.label}, ${areaDone} of ${area.items.length} done`}
+              onPress={() => setOpenAreas((o) => ({ ...o, [area.id]: !isOpen }))}
               style={{
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                padding: Spacing.lg, borderBottomColor: c.border, borderBottomWidth: 1,
+                padding: Spacing.lg,
+                borderBottomColor: c.border, borderBottomWidth: isOpen ? 1 : 0,
               }}>
               <SymbolView
                 name={(AREA_ICON[area.id] || 'checklist') as never}
@@ -182,9 +206,14 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
                   {copy.areaDone}
                 </Text>
               ) : null}
-            </View>
+              {/* The chevron, so the header reads as something you can open
+                  rather than as a heading that happens to be tappable. */}
+              <Text style={{ ...Type.small, color: c.textMuted, fontSize: 12 }}>
+                {isOpen ? '\u25B4' : '\u25BE'}
+              </Text>
+            </Pressable>
 
-            {area.items.map((item) => {
+            {isOpen ? area.items.map((item) => {
               const key = keyFor(area.id, item.text);
               const v = state[key];
               const isDone = v === true;
@@ -243,7 +272,7 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
                   ) : null}
                 </View>
               );
-            })}
+            }) : null}
           </View>
         );
       })}

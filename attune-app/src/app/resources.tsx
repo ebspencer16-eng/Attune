@@ -23,8 +23,8 @@ import {
 import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchHome, fetchPosts, SITE_URL } from '@/api/client';
-import type { ApiError, CatalogueItem, HomeResponse, PostSummary } from '@/api/client';
+import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
+import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
@@ -65,6 +65,16 @@ export default function ResourcesScreen() {
    */
   const [openTool_, setOpenTool] = useState<string | null>(null);
   const [openPost, setOpenPost] = useState<string | null>(null);
+  /**
+   * The reader's own marks and tags, for marking inside an article.
+   *
+   * Fetched with everything else rather than when an article opens: a reader
+   * who long-presses a sentence should not wait on two requests to find out
+   * whether the gesture did anything.
+   */
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [partnerName, setPartnerName] = useState('your partner');
   const [tools, setTools] = useState<ToolData | null>(null);
   const [workbookNote, setWorkbookNote] = useState<string | null>(null);
 
@@ -112,12 +122,23 @@ export default function ResourcesScreen() {
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
     loadingRef.current = true;
-    const [h, p, t] = await Promise.all([fetchHome(), fetchPosts(), fetchToolData()]);
-    if (h.ok) { setHome(h.data); setError(null); }
+    // The last two are for marking inside an article: this reader's own marks,
+    // so they paint on the words, and their tags, so the sheet can offer them.
+    // Fetched here rather than when an article opens, because a reader who
+    // long-presses a sentence should not wait on two requests to find out
+    // whether the gesture did anything.
+    const [h, p, t, n, g] = await Promise.all([
+      fetchHome(), fetchPosts(), fetchToolData(), fetchNotes(), fetchTags(),
+    ]);
+    if (h.ok) { setHome(h.data); setError(null); setPartnerName(h.data.partnerName || 'your partner'); }
     else setError(h.error);
     if (t.ok) setTools(t.data);
     if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); setPostsFailed(false); }
     else setPostsFailed(true);
+    // A failed read here costs marking, not the tab, so it is not an error
+    // state: the articles still open and still read.
+    if (n.ok) setNotes([...n.data.notes, ...n.data.annotations]);
+    if (g.ok) setTags(g.data.tags);
     setLoading(false);
     setRefreshing(false);
     loadingRef.current = false;
@@ -207,7 +228,18 @@ export default function ResourcesScreen() {
   if (openPost) {
     // Reloading on close so a post that has just been read stops showing as
     // new without the reader having to know what the feed looks like.
-    return <PostReader id={openPost} onClose={() => { setOpenPost(null); load(); }} />;
+    return (
+      <PostReader
+        id={openPost}
+        onClose={() => { setOpenPost(null); load(); }}
+        /* What marking needs: this reader's own marks so they paint on the
+           words, and their tags so the sheet can offer them. */
+        notes={notes}
+        tags={tags}
+        partnerName={partnerName}
+        onCreated={(note) => setNotes((prev) => [note, ...prev])}
+      />
+    );
   }
   if (openTool_ === 'budget') {
     return (

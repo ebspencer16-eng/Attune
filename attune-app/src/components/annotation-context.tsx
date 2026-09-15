@@ -97,10 +97,22 @@ export function Prose({
 
 export function AnnotationProvider({
   children, section, notes, tags, partnerName, onCreated,
+  anchorType = 'results_section', anchorKey,
 }: {
   children: ReactNode;
   /** The results section on screen. Becomes the anchor key. */
   section: string;
+  /**
+   * What kind of thing is being marked.
+   *
+   * Results prose was the only kind for a long time, so this was assumed. An
+   * In Practice article is the other kind: its anchor is `post_block`, and its
+   * key is the post's slug and a block id. The validator in api/_lib/tags.js
+   * has accepted both since notes existed; only one had ever been written.
+   */
+  anchorType?: string;
+  /** What a new mark anchors to. Defaults to the section itself. */
+  anchorKey?: string;
   /** The reader's own notes. Shared ones from the partner are not marks on
    *  this reader's text and are not passed in. */
   notes: Note[];
@@ -110,17 +122,21 @@ export function AnnotationProvider({
   onCreated: (note: Note) => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const key = anchorKey || section;
 
   const marks = useMemo<Mark[]>(() => notes
-    .filter((n) => n.anchor_type === 'results_section'
-      && n.anchor_key === section
+    .filter((n) => n.anchor_type === anchorType
+      // A post's marks are keyed `slug#block`, so a reader's marks on this
+      // article are the ones whose key starts with its slug. A results
+      // section's key is the section id and matches outright.
+      && (n.anchor_key === section || (n.anchor_key || '').startsWith(`${section}#`))
       && !!n.anchor_context)
     .map((n) => ({
       id: n.id,
       kind: n.kind || 'note',
       color: n.color ?? null,
       text: n.anchor_context as string,
-    })), [notes, section]);
+    })), [notes, section, anchorType]);
 
   const value = useMemo<Ctx>(() => ({
     marks,
@@ -134,8 +150,8 @@ export function AnnotationProvider({
       {selected ? (
         <AnnotationSheet
           sentence={selected}
-          anchorType="results_section"
-          anchorKey={section}
+          anchorType={anchorType}
+          anchorKey={key}
           tags={tags}
           partnerName={partnerName}
           onClose={() => setSelected(null)}

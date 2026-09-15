@@ -30,14 +30,23 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { fetchPost, markPostRead, type ApiError, type Post, type PostBlock } from '@/api/client';
+import { fetchPost, markPostRead, type ApiError, type Note, type Post, type PostBlock, type Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
+import { AnnotationProvider, Prose } from '@/components/annotation-context';
 import {
   BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
+
+/**
+ * The one instruction the marking flow needs and never gave.
+ *
+ * Mine, for Ellie to keep or replace. It names the gesture and what it is
+ * for, in that order, because the gesture is the part nobody guesses.
+ */
+const MARK_HINT = 'Press and hold any sentence to highlight it, tag it or save a note.';
 
 function Block({ block, accent }: { block: PostBlock; accent: string }) {
   const t = block.text || '';
@@ -55,7 +64,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
           marginTop: Spacing.lg, paddingLeft: Spacing.lg,
           borderLeftColor: accent, borderLeftWidth: 3,
         }}>
-        <Text style={{ ...Type.body, color: c.text, fontStyle: 'italic', lineHeight: 26 }}>{t}</Text>
+        <Prose style={{ ...Type.body, color: c.text, fontStyle: 'italic', lineHeight: 26 }}>{t}</Prose>
       </View>
     );
   }
@@ -66,7 +75,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
         {t.split('\n').filter((l) => l.trim()).map((line, i) => (
           <View key={`${block.id}-${i}`} style={{ flexDirection: 'row', gap: Spacing.md }}>
             <Text style={{ ...Type.body, color: accent }}>•</Text>
-            <Text style={{ ...Type.body, color: c.text, flex: 1, lineHeight: 25 }}>{line.trim()}</Text>
+            <Prose style={{ ...Type.body, color: c.text, flex: 1, lineHeight: 25 }}>{line.trim()}</Prose>
           </View>
         ))}
       </View>
@@ -85,7 +94,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
         {block.label ? (
           <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>{block.label}</Text>
         ) : null}
-        <Text style={{ ...Type.body, color: c.textStrong, lineHeight: 25 }}>{t}</Text>
+        <Prose style={{ ...Type.body, color: c.textStrong, lineHeight: 25 }}>{t}</Prose>
         {/* A research claim cites its work. An article that cites its sources
             on the website and not here is two different articles. */}
         {block.source ? (
@@ -98,11 +107,31 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
   }
   // paragraph, and anything the editor grows later.
   return (
-    <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.lg, lineHeight: 26 }}>{t}</Text>
+    <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.lg, lineHeight: 26 }}>{t}</Prose>
   );
 }
 
-export default function PostReader({ id, onClose }: { id: string; onClose: () => void }) {
+export default function PostReader({
+  id, onClose, notes = [], tags = [], partnerName = 'your partner', onCreated,
+}: {
+  id: string;
+  onClose: () => void;
+  /**
+   * ── WHY AN ARTICLE CAN BE MARKED ──────────────────────────────────────
+   * Ellie: "Notes/highlights aren't working. Should I be able to right click
+   * to bring up the menu?" It is a long press rather than a right click, and
+   * it worked on results prose and nowhere else. An article is the most
+   * likely place to try it: it is the longest prose in the product and the
+   * one screen that reads like something to mark up.
+   *
+   * The anchor type for a block of a post has existed since the notes
+   * migration and nothing had ever written one.
+   */
+  notes?: Note[];
+  tags?: Tag[];
+  partnerName?: string;
+  onCreated?: (note: Note) => void;
+}) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState<ApiError | null>(null);
@@ -138,6 +167,14 @@ export default function PostReader({ id, onClose }: { id: string; onClose: () =>
 
   return (
     <ScreenFrame onBack={onClose} backLabel="Resources">
+    <AnnotationProvider
+      section={post.id}
+      anchorType="post_block"
+      anchorKey={`${post.id}#${post.blocks?.[0]?.id || 'body'}`}
+      notes={notes}
+      tags={tags}
+      partnerName={partnerName}
+      onCreated={(note) => onCreated?.(note)}>
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{
@@ -170,7 +207,18 @@ export default function PostReader({ id, onClose }: { id: string; onClose: () =>
       <View style={{ height: 2, backgroundColor: accent, opacity: 0.5, borderRadius: 2, marginTop: Spacing.lg }} />
 
       {(post.blocks || []).map((b) => <Block key={b.id} block={b} accent={accent} />)}
+
+      {/* ── HOW TO MARK SOMETHING ──────────────────────────────────────
+          Ellie asked whether marking was a right click. It is a long press,
+          and nothing in the app said so: the one instruction in the flow
+          appears after a selection has started, which is no help to someone
+          who cannot start one. It sits at the end rather than the top,
+          because it is a thing to notice once and never again. */}
+      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xxl, textAlign: 'center' }}>
+        {MARK_HINT}
+      </Text>
     </ScrollView>
+    </AnnotationProvider>
     </ScreenFrame>
   );
 }
