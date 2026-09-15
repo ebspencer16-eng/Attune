@@ -29,8 +29,10 @@ const DAY = 24 * 60 * 60 * 1000;
  * @param state {
  *   now, firstName, partnerName,
  *   profileComplete,                        has a name, pronouns, the basics
- *   exercises: { ex1, ex2, ex3, intimacy }  each { owned, mine, theirs } booleans
- *   resultsReady,                           both partners done with ex1 + ex2
+ *   exercises: keyed by every exercise in the registry, each of them
+ *                 { owned, mine, theirs } booleans
+ *   resultsReady,   both partners through every exercise the couple owns,
+ *                   decided by api/_lib/results-gate.js
  *   resultsLastOpenedAt,                    ISO string or null
  *   resources: { budget, checklist }        each { owned, started, complete }
  *   inPractice: { latestId, latestTitle, latestPublishedAt, lastReadAt },
@@ -162,8 +164,14 @@ export function nextActions(state = {}) {
 
   // 2. Partner has not finished, and you have. The only case where nudging is
   //    the genuinely useful action.
-  const waitingOn = ['ex1', 'ex2', 'ex3', 'intimacy']
-    .filter(k => ex[k]?.owned && ex[k].mine && !ex[k].theirs);
+  // From the registry, like the block above it. This was written out by hand
+  // with four of the five: Conflict Patterns was missing, so a couple who owned
+  // it, where one of them had finished it and the other had not, was never
+  // offered the reminder. The loop above had exactly this bug and was fixed;
+  // this line is the same bug, six lines further down, and it survived because
+  // the gate skips any file that imports the registry at all.
+  const waitingOn = EXERCISES
+    .filter(({ key }) => ex[key]?.owned && ex[key].mine && !ex[key].theirs);
   if (waitingOn.length) {
     const nudgedRecently = ago(state.partnerNudgedAt) < NUDGE_COOLDOWN_DAYS;
     add({ id: 'nudge-partner', kind: 'nudge_partner', priority: 9,

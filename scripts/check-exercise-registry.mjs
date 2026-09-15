@@ -68,6 +68,41 @@ for (const file of FILES) {
   // plain includes('_exercises.js'), so writing the filename in a comment was
   // enough to switch the gate off for that file. Found by planting the bug the
   // gate exists to catch and watching it pass.
+  //
+  // ── EXCEPT FOR A LIST WRITTEN OUT INSIDE IT ─────────────────────────────
+  // Importing the registry exempted the whole file, and that exemption hid a
+  // real bug for months. api/_lib/next-action.js imports EXERCISES, loops over
+  // it to raise "finish this exercise", and six lines below that had
+  //
+  //   ['ex1', 'ex2', 'ex3', 'intimacy']
+  //
+  // written out by hand to decide whether to offer a reminder. Conflict
+  // Patterns was missing, so a couple who owned it and were waiting on each
+  // other over it were never offered one. The file imported the registry, so
+  // this gate skipped it entirely, and the comment at the top of that block
+  // says Conflict Patterns had already been missing once.
+  //
+  // So an array literal made only of exercise keys is checked wherever it
+  // appears. Narrow on purpose: every element has to be a key, and there have
+  // to be at least two, so a pair like ['ex1', 'id'] and a lookup keyed by
+  // exercise are both left alone. A list of keys is the one shape that is
+  // always a restatement of the registry.
+  //
+  // A hand-written list that is COMPLETE still passes. That is the boundary,
+  // deliberately: what has cost time here is a list missing one, not a list
+  // written out. Failing every complete list would flag correct code, and a
+  // gate that cries wolf gets loosened until it matches nothing.
+  const keys = new Set(EXERCISES.map(e => e.key));
+  for (const m of text.matchAll(/\[\s*(['"`][a-z0-9_]+['"`]\s*,\s*)+['"`][a-z0-9_]+['"`]\s*,?\s*\]/gi)) {
+    const members = [...m[0].matchAll(/['"`]([a-z0-9_]+)['"`]/gi)].map(x => x[1]);
+    if (members.length < 2) continue;
+    if (!members.every(k => keys.has(k))) continue;          // not a list of exercises
+    const missing = [...keys].filter(k => !members.includes(k));
+    if (missing.length) {
+      problems.push({ file, group: `the list ${m[0].replace(/\s+/g, ' ')}`, missing });
+    }
+  }
+
   if (/^\s*import\s[^\n]*_exercises\.js/m.test(text)) continue;
 
   for (const group of GROUPS) {
