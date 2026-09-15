@@ -4064,7 +4064,10 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
           {/* ── FOCAL POINT: Couple-type starter ── */}
           <div style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.13)", borderRadius: 14, padding: "1.1rem 1.3rem", marginBottom: "1.4rem" }}>
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: coupleTypeColor || "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.55rem", opacity: 0.9 }}>
+            {/* White, on both surfaces. It was the couple type's own colour,
+                which on six different category grounds is six different
+                amounts of legible. */}
+            <div style={{ fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "white", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.55rem" }}>
               {coupleTypeName ? SC_COPY.expectationsTip(userName, partnerName) : "A tip for you both"}
             </div>
             <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, fontWeight: 400, lineHeight: 1.7, margin: 0 }}>
@@ -7126,7 +7129,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         // bar. They take the bar row's height instead, which is the same fix
         // the app needed. Ellie: "pole labels ... should be middle aligned
         // with the bar itself."
-        const pole = { fontSize: "0.66rem", color: C.muted, fontFamily: BFONT, flexShrink: 0, width: "clamp(56px,18%,92px)", height: 6, lineHeight: "6px", display: "flex", alignItems: "center" };
+        // Wrapping, and level with the bar. Ellie: "wrap pole titles so that
+        // text isn't cut off." These are phrases rather than words, and a
+        // fixed 6px line box cut every one of them to nothing.
+        const pole = { fontSize: "0.66rem", color: C.muted, fontFamily: BFONT, flexShrink: 0, width: "clamp(64px,20%,104px)", lineHeight: 1.25, marginTop: -3 };
         return (
           <div>
             <div style={{ fontFamily: HFONT, fontSize: "0.86rem", fontWeight: 700, color: C.ink, marginBottom: "0.7rem" }}>{q.text}</div>
@@ -7898,7 +7904,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
 
             {/* block: conflict-overview/action-plan */}
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: CONFLICT_GLANCE_LABEL, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.7rem" }}>Your action plan</div>
+            {/* The heading, and the note that this list is nobody else's.
+                Level with the heading and out at the right margin, which is
+                where an aside belongs: it qualifies the heading without
+                interrupting it. This page is read together and the plan on it
+                is built from patterns only the reader can see. */}
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.7rem" }}>
+              <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: CONFLICT_GLANCE_LABEL, fontFamily: BFONT, fontWeight: 700 }}>Your action plan</div>
+              <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "#FF8A7A", fontFamily: BFONT, flexShrink: 0 }}>{CONFLICT_RESULTS_COPY.glancePrivate}</div>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
               {flagged.length > 0 ? flagged.map(p => (
                 <div key={p.key} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 14, padding: "1rem 1.2rem" }}>

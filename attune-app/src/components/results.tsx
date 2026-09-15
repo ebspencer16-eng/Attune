@@ -987,10 +987,12 @@ function ExpectationsConversation({
               }}>
               {/* The website names both people when the paragraph is the one
                   written for their pairing, and stays general when it is not. */}
-              {/* The couple type's colour, as the website heads it. This was
-                  SectionColor.expectations, which is blue, on a violet ground:
-                  Ellie called it very hard to read and she is right. */}
-              <Text style={{ ...Type.eyebrow, color: introColor || '#E8673A', marginBottom: Spacing.sm }}>
+              {/* White. It was the couple type's own colour, which on six
+                  different category grounds is six different amounts of
+                  legible: the same label was orange on the career page and
+                  violet on the life one. Ellie: "change 'a tip for ellie and
+                  preston' to have white text." */}
+              <Text style={{ ...Type.eyebrow, color: Palette.white, marginBottom: Spacing.sm }}>
                 {/* Ellie renamed these: the old label was a sentence where a
                     label belongs, and it was the longest line on the page. */}
                 {bucket.introIsForPair ? tipLabel : 'A tip for you both'}
@@ -1412,7 +1414,14 @@ function IntimacyDimensionView({
              The control is the shared Disclosure, not a copy of the comms one,
              so the two cannot drift into looking almost alike. */
           <Disclosure title={`Side by side ${dim.label.toLowerCase()} responses`}>
-            <Legend you={you} them={them} />
+            {/* ── THE LEGEND, ONLY WHEN IT SAYS SOMETHING ────────────────
+                Ellie: "we don't need the legend in the side by side dropdown
+                section unless the users have the same initial." Every mark
+                carries its own initial, so naming the two colours underneath
+                repeats what each dot already says. When both initials are the
+                same the marks carry no letter, and then the legend is the only
+                thing telling them apart. */}
+            {initial(you) === initial(them) ? <Legend you={you} them={them} /> : null}
             {/* block: intimacy-dimension/questions */}
             {dim.questions.map((q) => (
               <View
@@ -1421,26 +1430,26 @@ function IntimacyDimensionView({
                   backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
                   borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
                 }}>
-                <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{q.text}</Prose>
-                <View style={{ height: 28, justifyContent: 'center', marginTop: Spacing.md }}>
-                  <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-                  {q.you != null ? (
-                    <Marker
-                      pct={q.you * 100} color={YOU_COLOR} label={initial(you)}
-                      dy={q.them != null ? markerNudge(q.you * 100, q.them * 100)[0] : 0}
-                    />
-                  ) : null}
-                  {q.them != null ? (
-                    <Marker
-                      pct={q.them * 100} color={THEM_COLOR} label={initial(them)}
-                      dy={q.you != null ? markerNudge(q.you * 100, q.them * 100)[1] : 0}
-                    />
-                  ) : null}
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
-                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1 }}>{q.low}</Text>
-                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', flex: 1, textAlign: 'right' }}>{q.high}</Text>
-                </View>
+                <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginBottom: Spacing.md }}>{q.text}</Prose>
+                {/* ── THE SAME ROW THE COMMUNICATION PAGES DRAW ──────────
+                    Ellie: "I want the side by side dropdown sections to render
+                    like the comms ones do, with the pole labels on either side
+                    of the bar with wrapped text. Use the same formatting."
+
+                    So it is the same component, not the same look rebuilt by
+                    hand: the poles sit either side and wrap, the track is
+                    inset so a mark at an extreme clears the words, and the two
+                    marks step apart by the shared rule when they land close. */}
+                <SliderRow
+                  label=""
+                  left={q.low}
+                  right={q.high}
+                  you={q.you}
+                  them={q.them}
+                  youName={you}
+                  themName={them}
+                  onDark
+                />
               </View>
             ))}
           </Disclosure>
@@ -1580,30 +1589,50 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
 }
 
 /** Two people's words on the same question, stacked and attributed. */
+/**
+ * Two people's words on the same question, on a dark ground.
+ *
+ * ── WHY THE TILES ARE NOT WHITE ───────────────────────────────────────────
+ * Ellie: "In the app the rel relf action plans on the at a glance page are in
+ * white tiles, but it's not that way on other at a glance pages or on the
+ * site."
+ *
+ * They were the app's ordinary cream card, which is right on a cream page and
+ * wrong on this one: every other at-a-glance tile in the app and on the
+ * website is white at a tenth over the section's own gradient, with a left
+ * edge in the person's colour. This is that, and it is the same treatment the
+ * site gives these two cards.
+ */
 function WrittenPair({
   you, them, yourWords, theirWords, prompt,
 }: {
   you: string; them: string; yourWords: string; theirWords: string;
   prompt?: string | null;
 }) {
+  const tile = {
+    backgroundColor: 'rgba(255,255,255,0.13)',
+    borderColor: 'rgba(255,255,255,0.22)', borderWidth: 1,
+    borderRadius: Radius.lg, padding: Spacing.lg,
+  } as const;
   return (
     <>
-      <View
-        style={{
-          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-          borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.sm,
-        }}>
-        <Eyebrow>{you}</Eyebrow>
-        <Prose style={{ ...Type.body, color: c.text }}>{yourWords}</Prose>
-      </View>
-      <View
-        style={{
-          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-          borderRadius: Radius.lg, padding: Spacing.lg,
-        }}>
-        <Eyebrow color={c.textMuted}>{them}</Eyebrow>
-        <Prose style={{ ...Type.body, color: c.text }}>{theirWords}</Prose>
-      </View>
+      {[
+        { name: you, words: yourWords, colour: YOU_COLOR },
+        { name: them, words: theirWords, colour: THEM_COLOR },
+      ].map((side, i) => (
+        <View
+          key={side.name}
+          style={{
+            ...tile,
+            borderLeftColor: side.colour, borderLeftWidth: 4,
+            marginBottom: i === 0 ? Spacing.sm : 0,
+          }}>
+          <Text style={{ ...Type.eyebrow, fontSize: 9, color: side.colour, marginBottom: Spacing.xs }}>
+            {side.name}
+          </Text>
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{side.words}</Prose>
+        </View>
+      ))}
 
       {/* ── THE QUESTION UNDER THE PAIR ────────────────────────────────
           Two answers side by side do not need a verdict, they need something
@@ -1611,7 +1640,7 @@ function WrittenPair({
           pair since this page existed; the app printed the two answers and
           stopped, which is the half that does the work. */}
       {prompt ? (
-        <Text style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: Spacing.sm, lineHeight: 19 }}>
+        <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', marginTop: Spacing.sm, lineHeight: 19 }}>
           {prompt}
         </Text>
       ) : null}
@@ -1619,30 +1648,6 @@ function WrittenPair({
   );
 }
 
-/**
- * How you each rated, on the same line.
- *
- * One track per question with both marks on it, the way the communication
- * scales already work, so a reader who has come this far already knows how to
- * read it. No colour runs from bad to good: two steps apart on how connected
- * someone feels is the most useful thing on the page, not a failure.
- */
-/**
- * The heading and the line under it on a Reflection page.
- *
- * Both come from the payload, from api/_lib/reflection-results.js. They were
- * typed inside src/App.jsx, so the app could not read them: it showed a bare
- * heading and went straight into the content, and on the ratings page it
- * showed a heading of its own invention, "How You Each Rated", because the
- * real one was somewhere it could not reach.
- */
-/**
- * The heading and standfirst on a Reflection detail page.
- *
- * Ink on cream, because both pages that use it are light, the way the website
- * draws them. It was white, from when all three Reflection pages in the app
- * were on the dark slide.
- */
 function ReflectionHead({ page }: { page?: { title: string; sub?: string } | null }) {
   if (!page?.title) return null;
   return (
@@ -1824,8 +1829,18 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
   const tone = r.gapSteps === 0 ? '#10b981' : r.gapSteps === 1 ? SectionColor.reflection : YOU_COLOR;
   const [dyYou, dyThem] = markerNudge(r.you.pct, r.them.pct);
   const together = r.gapSteps === 0;
+  /**
+   * The two ends of the scale.
+   *
+   * Ellie: "wrap pole titles so that text isn't cut off." These are phrases,
+   * not words: "Going through a rough patch" at eleven points needs three
+   * lines in 62 points and was being cut to one. So the box is wider, the
+   * line height is tight enough for three lines to sit either side of a
+   * 24-point bar, and nothing clips.
+   */
   const pole = {
-    ...Type.small, fontSize: 11, fontWeight: '600' as const, color: c.textMuted, width: 62,
+    ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '600' as const,
+    color: c.textMuted, width: 74,
   };
 
   return (
@@ -1842,7 +1857,10 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
           height, which puts them on its centre line wherever the labels wrap
           to one line or two. */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm }}>
-        <Text style={{ ...pole, height: BAR_ROW, lineHeight: BAR_ROW, textAlign: 'right' }}>{r.low}</Text>
+        {/* Level with the bar, and free to wrap. Taking the bar's own height
+            centred them and clipped anything over one line, which is most of
+            these: the two are done with a margin instead. */}
+        <Text style={{ ...pole, marginTop: POLE_LIFT, textAlign: 'right' }}>{r.low}</Text>
         {/* Inset so a mark at either extreme clears the pole word. The same
             13 points the communication rows use. */}
         <View style={{ flex: 1, paddingHorizontal: 13 }}>
@@ -1874,7 +1892,7 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
             )}
           </View>
         </View>
-        <Text style={{ ...pole, height: BAR_ROW, lineHeight: BAR_ROW }}>{r.high}</Text>
+        <Text style={{ ...pole, marginTop: POLE_LIFT }}>{r.high}</Text>
       </View>
     </View>
   );
@@ -1882,6 +1900,12 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
 
 /** The height of the row the bar sits in the middle of. */
 const BAR_ROW = 24;
+
+/**
+ * How far a pole label sits from the top of its column, so its first line is
+ * level with the bar. Half the bar row, less half a line.
+ */
+const POLE_LIFT = 5;
 
 /**
  * A mark's answer, printed under it.

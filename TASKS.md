@@ -64,19 +64,12 @@ Nothing outstanding. When I have a question it appears here.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.** Q2 in section 1 is the one thing I need from you.
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O119 | **The reflection action plan tiles are white on the app's at-a-glance page.** Every other glance page, and the site, draws them translucent on the ground. |
-| O120 | **Rebuild selection: press and hold, then drag.** Lift a finger and a toolbar appears just above what is selected, with the kinds of mark to choose from. Two taps was the old answer and she has rejected it. Also tell her how to work it in the simulator. |
-| O121 | **The checklist's sections start closed.** |
-| O122 | **Intimacy detail pages: no legend in the side by side dropdown** unless the two initials are the same. |
-| O123 | **Intimacy detail pages: the side by side rows should render like the communication ones**, poles either side of the bar, text wrapped. Same component, not the same look by hand. |
-| O124 | **Conflict at a glance: a private to you line in red**, level with Your action plan and right aligned in the margin. App and site. |
-| O125 | **The tip tile's label on expectations detail pages should be white.** |
-| O126 | **How you each rated: wrap the pole labels** so they are not cut off, in both tiles. |
-| O127 | **What Comes Next must carry each section's own action plan.** The communication group is built from the protocols and the comms at-a-glance page draws the action tiles, so the two say different things. Every group on that page should be the same items as its section's at-a-glance plan. |
 | O99 | **Physical Intimacy at a glance: the first tile's eyebrow should read Overview**, not Where you each land. App and site. The comms page was renamed and this one was not. |
 | O100 | **Physical Intimacy at a glance: the rows should show per cent aligned rather than two placement dots.** App and site. |
 | O101 | **In Practice titles are still cut off at the top.** The line box fix did not reach them, so the cause is somewhere else. Find it rather than padding it. |
@@ -112,6 +105,13 @@ any order; work through them however suits.
 | R58 | **An article, the budget and the checklist all open under a back arrow now.** That is also why the titles were cut off: those three replaced the tab's contents and left the tab's safe area behind them, so their headings sat under the status bar. |
 | R59 | **The add a tag field carries its examples.** The pills under it are gone. The three in the placeholder are the first three of the list in `api/_lib/tags.js`, so reordering that list changes which three appear. |
 | R60 | **The orange rule under the expectations page titles is gone**, on both surfaces. |
+| R66 | **Selecting text, the way you asked for it.** Press and hold a word, keep holding, drag across what you want, let go. The toolbar appears just above the selection with highlight, underline, tag, note and share, and choosing one opens straight on that step. In the simulator: click and hold for about half a second, keep the button down, drag, then release. The mouse is the finger. |
+| R67 | **The reflection action plan tiles are on the ground now**, not white, matching the other at a glance pages and the site. |
+| R68 | **The checklist opens with everything closed**, six headers and their counts. |
+| R69 | **Intimacy detail pages: the side by side rows are the communication rows**, poles either side and wrapped, and the legend only appears when your initials match. |
+| R70 | **Conflict at a glance says *private to you**, in red, level with Your action plan and out at the right margin. Both surfaces. |
+| R71 | **The tip tile's label is white** on every expectations detail page, and the pole labels on How you each rated wrap instead of clipping. |
+| R72 | **What Comes Next carries each section's own action plan.** Communication was built from a different list than the one its at a glance page draws, so the same couple was told two different things depending on which page they were on. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 30 sections. |
 
 ### Copy, and whether the words are yours

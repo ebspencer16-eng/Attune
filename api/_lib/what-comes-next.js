@@ -42,23 +42,36 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     });
   }
 
-  // 2. Communication. The website has drawn these protocols on this page since
-  //    it existed; this function did not build them at all, which is why the
-  //    app's What Comes Next had one section fewer than the website's. Ellie:
-  //    "It needs to mirror the what comes next on the site."
-  //
-  //    Three of them, the website's own limit, from the same commsProtocols
-  //    both surfaces already share.
-  if (commsPlan?.protocols?.length) {
+  /**
+   * 2. Communication, as the at-a-glance page's own action plan.
+   *
+   * ── WHY NOT THE PROTOCOLS ─────────────────────────────────────────────
+   * This page collected commsProtocols while the Communication at-a-glance
+   * page draws commsActionPlan, so the same couple was given two different
+   * lists of things to do about communication depending on which page they
+   * were on. Ellie: "Comms action items on what comes next page are different
+   * from and need to match the action plan from comms at a glance. Please
+   * ensure that each section in the what comes next page's action plan matches
+   * the action plan from each section's at a glance page."
+   *
+   * That is the rule this whole page is supposed to follow: nothing here is a
+   * new claim, every group is what the reader already met in context. The
+   * tiles are that, so the tiles are what it takes.
+   */
+  if (commsPlan?.tiles?.length) {
     groups.push({
       id: 'comm',
       color: '#E8673A',
       label: 'Communication',
       section: 'comm-overview',
-      items: commsPlan.protocols.slice(0, 3).map((pr) => ({
-        title: pr.title,
-        body: null,
-        say: pr.thisWeek || pr.body || null,
+      items: commsPlan.tiles.map((tile) => ({
+        // The domain is the heading on the glance tile, and the advice is its
+        // body. A tile for an aligned domain carries a title of its own.
+        title: tile.title || tile.label,
+        body: tile.body || null,
+        // The extra line the hardest domain carries. It is on the tile, so it
+        // is here: this page is the same list, not a summary of it.
+        say: tile.reflect || null,
       })),
     });
   }

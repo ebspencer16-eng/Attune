@@ -201,6 +201,19 @@ export const CONFLICT_RESULTS_COPY = {
   wroteTitle: 'What you each wrote',
   sharedBadge: 'Shared',
   privateBadge: 'Just for you',
+  /**
+   * The note beside Your action plan on the at-a-glance page.
+   *
+   * Ellie: "add a '*private to you' sentence in red text that is vertically
+   * aligned with 'your action plan' but right aligned in the margin."
+   *
+   * This page is read together, and the action plan on it is built from
+   * patterns only the reader can see. Nothing on the page said so, which is
+   * the one place in this product where that silence costs something: a
+   * partner reading over a shoulder would assume they were looking at a
+   * shared list.
+   */
+  glancePrivate: '*private to you',
 
   allClear: 'None of the four patterns are showing up often for you. That is worth knowing, and worth saying to {partner}.',
 };

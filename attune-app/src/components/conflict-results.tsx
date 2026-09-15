@@ -67,6 +67,13 @@ const SCREENS: Screen[] = ['overview', 'snapshot', 'patterns', 'wrote'];
 const GLANCE_LABEL = '#8FB2FF';
 
 /**
+ * The red on "*private to you". Not the brand orange: this is the one line in
+ * the results that is a warning rather than an accent, and it has to read as
+ * one against a dark blue ground.
+ */
+const PRIVATE_RED = '#FF8A7A';
+
+/**
  * The colour of one answer on the shared conflict measure.
  *
  * c0 runs from "Really rocky" at 0 to "We handle it well" at 4, so the scale
@@ -264,13 +271,22 @@ function Glance({ data, title, ground, groundStops }: {
         ) : null}
 
         {/* block: conflict-overview/action-plan */}
-        <Text
+        {/* The heading, and the note that this list is nobody else's. Ellie
+            asked for it level with the heading and out at the right margin,
+            which is where an aside belongs: it qualifies the heading without
+            interrupting it. */}
+        <View
           style={{
-            ...Type.eyebrow, fontSize: 9, color: GLANCE_LABEL,
-            marginTop: Spacing.xl, marginBottom: Spacing.md,
+            flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between',
+            gap: Spacing.md, marginTop: Spacing.xl, marginBottom: Spacing.md,
           }}>
-          Your action plan
-        </Text>
+          <Text style={{ ...Type.eyebrow, fontSize: 9, color: GLANCE_LABEL }}>
+            Your action plan
+          </Text>
+          <Text style={{ ...Type.small, fontSize: 11, fontWeight: '600', color: PRIVATE_RED }}>
+            {content.copy.glancePrivate || '*private to you'}
+          </Text>
+        </View>
         {worth.length ? (
           <View style={{ gap: Spacing.md }}>
             {worth.map((p) => {

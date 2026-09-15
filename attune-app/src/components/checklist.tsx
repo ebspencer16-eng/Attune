@@ -59,9 +59,9 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
   const [failed, setFailed] = useState<ApiError | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   /**
-   * Which areas are open. Absent means open, so a checklist that has never
-   * been touched reads exactly as it did before, and closing is something the
-   * reader does rather than something they arrive at.
+   * Which areas are open. Absent means closed: the checklist opens as six
+   * headers with their counts, and opening one is what a reader does when
+   * they pick a thing to work on.
    */
   const [openAreas, setOpenAreas] = useState<Record<string, boolean>>({});
   const [open, setOpen] = useState<string | null>(null);
@@ -171,7 +171,10 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
          * section still has to say where it stands, or closing it hides the
          * progress along with the items.
          */
-        const isOpen = openAreas[area.id] ?? true;
+        // Ellie: "have everything start closed." Six areas of six or seven
+        // items is forty rows, and the page opens on what there is rather than
+        // on all of it; the counts on the headers are the summary.
+        const isOpen = openAreas[area.id] ?? false;
         return (
           <View
             key={area.id}

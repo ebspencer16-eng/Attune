@@ -31,9 +31,29 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const src = readFileSync(`${ROOT}attune-app/src/components/results.tsx`, 'utf8');
 const problems = [];
 
+/**
+ * Two ways a pair of marks reaches a track, and both have to offset.
+ *
+ * <Marker> is one mark and takes its own dy. <Slider> draws the pair itself
+ * and works the offset out inside. Counting only Markers made this gate
+ * fragile in a way that showed: moving the intimacy rows onto the shared
+ * SliderRow dropped the Marker count from six to two and the gate reported
+ * that as a failure, when what had actually happened is that four pairs moved
+ * to a component that offsets them.
+ *
+ * So: every Marker still has to carry a dy, Slider still has to compute one,
+ * and the floor counts both kinds of site together.
+ */
 const markers = [...src.matchAll(/<Marker\b[\s\S]{0,260}?\/>/g)].map((m) => m[0]);
-if (markers.length < 4) {
-  problems.push(`found ${markers.length} Marker elements; there were 6 when this was written.`);
+const sliders = [...src.matchAll(/<Slider(?:Row)?\b/g)].map((m) => m[0]);
+if (markers.length + sliders.length < 6) {
+  problems.push(`found ${markers.length} Marker and ${sliders.length} Slider sites; there were 6 pairs when this was written.`);
+}
+
+// Slider draws its own pair, so the rule has to be inside it.
+const slider = src.slice(src.indexOf('function Slider('), src.indexOf('function Dot('));
+if (!/CLOSE_PCT/.test(slider) || !/STAGGER/.test(slider)) {
+  problems.push('Slider does not use the shared closeness rule, so its two marks can print on top of each other.');
 }
 markers.forEach((m) => {
   if (!/\bdy=/.test(m)) {
@@ -106,4 +126,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-overlapping-marks] ${markers.length} marks, every one offset when it shares a point.`);
+console.log(`[check-overlapping-marks] ${markers.length} marks and ${sliders.length} sliders, every one offset when a pair shares a point.`);
