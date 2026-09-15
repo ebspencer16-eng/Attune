@@ -68,6 +68,12 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O113 | **How you each rated: the pole labels should sit level with the bar.** They are centred against the bar and its answer labels together, so they ride high. |
+| O114 | **Conflict at a glance needs colour in the content, not only the ground.** The two bars, and the section labels. |
+| O115 | **Physical Intimacy action plan: the top two, plus anything tied with the second.** Three fixed was the last answer and it cuts a tie in half. |
+| O116 | **The checklist's sections should collapse and open.** A closed one still shows its progress, 0 of 6. |
+| O117 | **Answer: marking is a long press, not a right click**, and the app never says so. The instruction only appears once a selection has started, which is no help to someone who cannot start one. Say it where it applies. |
+| O118 | **In Practice articles cannot be marked at all.** Their bodies are plain text, so a long press does nothing, and that is the most likely place she tried. The anchor type for a post block already exists. |
 | O99 | **Physical Intimacy at a glance: the first tile's eyebrow should read Overview**, not Where you each land. App and site. The comms page was renamed and this one was not. |
 | O100 | **Physical Intimacy at a glance: the rows should show per cent aligned rather than two placement dots.** App and site. |
 | O101 | **In Practice titles are still cut off at the top.** The line box fix did not reach them, so the cause is somewhere else. Find it rather than padding it. |
