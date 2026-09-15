@@ -1700,3 +1700,39 @@ surfaces: an empty action plan with no explanation is worse than the page it
 replaced.
 
 **Where to pick up.** Section 3 has R46 to R52.
+
+---
+
+## 14 September 2026, fourth batch
+
+Thirteen of fourteen built. The fourteenth is a question, Q2, because I
+cannot reproduce it.
+
+**The clipped titles were two bugs wearing the same clothes.** The first was
+the type: a lineHeight below the font's own line box, fixed last batch. The
+second is why they were still clipped: the article reader, the budget and the
+checklist are returned from their tab's component in place of the tab's
+contents, and the tab's SafeAreaView was left behind with them, so each began
+at the physical top of the screen with its heading under the status bar.
+`ScreenFrame` is the frame they sit in now, and it carries the back arrow
+too, because every one of them is somewhere you arrive from a tab and have to
+leave.
+
+**A gesture that works on one tab is worse than one that works nowhere.**
+Insights had the repeat-tap reset written into the screen; it is a hook now
+and every tab uses it. `check-tab-reset.mjs` reads the tab bar and requires
+each tab in it to call the hook. It caught Home, which nobody had asked
+about and which would have been the one tab where the gesture did nothing.
+
+**Where a rule ends up depends on what it is about.** The intimacy action
+plan became one function because both surfaces were slicing their own list;
+the tag placeholder is built from the suggestions list rather than typed, so
+the order of that list decides what the field says. Neither is a new idea in
+this codebase, and both are cheaper than the gate that would otherwise be
+needed.
+
+**Q2 is the open one.** She sees a dot and an eyebrow on the website's How
+you each rated and Side by Side. I rendered both in a browser and read what
+sits above the heading: nothing. The page-eyebrow gate passes and matches the
+shape as well as the words. The sidebar's own row and the narrow window's
+pill bar both carry a dot and a section name; one of those is probably it.
