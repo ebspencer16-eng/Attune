@@ -408,7 +408,7 @@ export default function Annotatable({
                 onLayout={(e) => { frames.current.set(i, e.nativeEvent.layout); }}
                 style={[
                   markBox(marked.get(i)),
-                  inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)', borderRadius: 3 } : null,
+                  inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)' } : null,
                 ]}>
                 <Text style={[textStyle, markStyle(marked.get(i))]}>{tok}</Text>
               </View>

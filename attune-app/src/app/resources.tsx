@@ -28,7 +28,7 @@ import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } fr
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
-import { fetchToolData, type ToolData } from '@/api/client';
+import { buildWorkbook, fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import {
@@ -125,7 +125,27 @@ export default function ResourcesScreen() {
         if (r.ok) { setTools(r.data); wb = r.data.workbook; }
       }
       if (wb?.url) { Linking.openURL(wb.url); return; }
+
+      /**
+       * ── ASK FOR IT, RATHER THAN WAITING FOR SOMETHING ELSE TO ──────────
+       * Ellie: "My workbook still says building your workbook check back
+       * shortly. This should build as soon as results unlock and should be
+       * ready for users to click immediately."
+       *
+       * It is built when results unlock now, which fixes it for every couple
+       * from here on. It does nothing for a couple whose results opened months
+       * ago, which is every couple that exists today. So a tap on a workbook
+       * that is not there asks for one and waits: it takes a few seconds and
+       * the tile says what is happening.
+       */
       setWorkbookNote(wb?.copy.generating || null);
+      const made = await buildWorkbook();
+      if (made.ok && made.data.url) {
+        setWorkbookNote(null);
+        const again = await fetchToolData();
+        if (again.ok) setTools(again.data);
+        Linking.openURL(made.data.url);
+      }
       return;
     }
     Linking.openURL(`${SITE}/app?view=${key}`);

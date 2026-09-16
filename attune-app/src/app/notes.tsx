@@ -1354,6 +1354,22 @@ function NoteCard({
  * Only ever opened on the person's own notes. The server refuses anyone else's,
  * and the shared list does not offer the press that opens this.
  */
+/**
+ * Writing or changing a note, as a popup.
+ *
+ * ── WHY IT IS NOT A SCREEN ANY MORE ───────────────────────────────────────
+ * Ellie: "I still want the note screen deleted... when I click add a note it
+ * should just be a popup with the write in box, the toggle, and an option to
+ * add a tag."
+ *
+ * It was a full-screen sheet with a title field, a body field, a tag picker, a
+ * share toggle and a delete, which is a form. A note is a sentence someone
+ * wants to keep. The title went with the screen: it was optional, almost
+ * nobody filled it in, and the list already leads with the first line of the
+ * body when there is none.
+ *
+ * What is left is the box, the toggle and a way to file it.
+ */
 function Editor({
   note, tags, canShare, partner, onClose, onSaved,
 }: {
@@ -1365,32 +1381,35 @@ function Editor({
   /** Saved, or deleted. The message is what the list should say about it. */
   onSaved: (flash?: string) => void;
 }) {
-  const [title, setTitle] = useState(note?.title ?? '');
   const [body, setBody] = useState(note?.body ?? '');
   const [isShared, setIsShared] = useState(note?.visibility === 'shared');
   const [picked, setPicked] = useState<string[]>(note?.tagIds ?? []);
+  const [showTags, setShowTags] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const wasShared = note?.visibility === 'shared';
   const canSave = body.trim().length > 0 && !busy;
+  const live = tags.filter((t) => !t.deleted_at);
 
   const save = async () => {
     setBusy(true);
-    const cleanTitle = title.trim() || null;
 
     if (!note) {
       const res = await createNote({
         body: body.trim(),
-        title: cleanTitle ?? undefined,
         visibility: isShared ? 'shared' : 'private',
         tagIds: picked,
       });
       setBusy(false);
       if (!res.ok) return Alert.alert('Not saved', 'That did not save. Try again in a moment.');
-      return onSaved();
+      return onSaved('✓ Note saved');
     }
 
-    const res = await updateNote({ id: note.id, title: cleanTitle, body: body.trim(), tagIds: picked });
+    // The title is no longer edited here, so it is left exactly as it was
+    // rather than cleared: a note written before this popup existed may have
+    // one, and losing it on an unrelated edit would be this screen throwing
+    // away something someone typed.
+    const res = await updateNote({ id: note.id, title: note.title, body: body.trim(), tagIds: picked });
     if (!res.ok) {
       setBusy(false);
       return Alert.alert('Not saved', 'That did not save. Try again in a moment.');
@@ -1398,14 +1417,14 @@ function Editor({
     // Visibility is a separate action on the server, so it is a separate call.
     // Only made when it actually changed.
     if (isShared !== wasShared) {
-      const s = await shareNote(note.id, isShared ? 'shared' : 'private');
-      if (!s.ok) {
+      const sh = await shareNote(note.id, isShared ? 'shared' : 'private');
+      if (!sh.ok) {
         setBusy(false);
         return Alert.alert('Saved, not shared', 'The note saved. Sharing did not go through.');
       }
     }
     setBusy(false);
-    onSaved();
+    onSaved('✓ Note saved');
   };
 
   const remove = () => {
@@ -1420,9 +1439,6 @@ function Editor({
           const res = await deleteNote(note.id);
           setBusy(false);
           if (!res.ok) return Alert.alert('Not deleted', 'That did not delete. Try again in a moment.');
-          // The screen this is on closes, so the receipt is raised on the one
-          // underneath. Ellie: "there's no indication of 'delete note' doing
-          // anything, I have to click out of the note screen."
           onSaved('✓ Note deleted');
         },
       },
@@ -1430,111 +1446,59 @@ function Editor({
   };
 
   return (
-    <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, backgroundColor: c.background }}>
-        <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-          <View
+        style={{ flex: 1 }}>
+        {/* The ground behind it. Tapping it closes, which is what a popup
+            over a list means everywhere else. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          onPress={busy ? undefined : onClose}
+          style={{ flex: 1, backgroundColor: 'rgba(14,11,7,0.35)', justifyContent: 'center', padding: Spacing.xl }}>
+          {/* Stops a tap inside the card reaching the ground behind it. */}
+          <Pressable
+            onPress={() => {}}
             style={{
-              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-              paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg,
+              backgroundColor: c.background, borderRadius: Radius.xl,
+              padding: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
             }}>
-            <Pressable
-      accessibilityRole="button" onPress={onClose} hitSlop={10} disabled={busy}>
-              <Text style={{ ...Type.body, color: c.textMuted }}>Close</Text>
-            </Pressable>
-            <Pressable
-      accessibilityRole="button" onPress={save} hitSlop={10} disabled={!canSave}>
-              {busy ? (
-                <ActivityIndicator color={c.accentQuiet} />
-              ) : (
-                <Text style={{ ...Type.body, color: canSave ? c.accent : c.textMuted, fontWeight: '700' }}>
-                  Save
-                </Text>
-              )}
-            </Pressable>
-          </View>
-
-          <ScrollView
-            contentContainerStyle={{
-              paddingHorizontal: Spacing.xl, paddingBottom: Spacing.xxxl,
-              maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
-            }}
-            keyboardShouldPersistTaps="handled">
-            {/* An annotation's anchor is not editable, so it is shown as the
-                heading rather than a field: it says what this note is about
-                without pretending it can be changed here. */}
+            {/* What the note is about, when it is about something. Not
+                editable: an anchor is where the note lives, not a field. */}
             {note?.anchor_context ? (
               <View
                 style={{
                   borderLeftWidth: 2, borderLeftColor: c.border,
                   paddingLeft: Spacing.md, marginBottom: Spacing.lg,
                 }}>
-                <Text style={{ ...Type.small, color: c.textMuted }}>{note.anchor_context}</Text>
+                <Text numberOfLines={3} style={{ ...Type.small, color: c.textMuted }}>
+                  {note.anchor_context}
+                </Text>
               </View>
             ) : null}
 
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Title"
-              placeholderTextColor={c.textMuted}
-              style={{ ...inputType(Type.title), color: c.textStrong, paddingVertical: Spacing.sm }}
-            />
             <TextInput
               value={body}
               onChangeText={setBody}
-              placeholder="Write it down."
+              placeholder="Write a note"
               placeholderTextColor={c.textMuted}
               multiline
               autoFocus={!note}
-              textAlignVertical="top"
-              style={{ ...inputType(Type.body), color: c.text, minHeight: 180, paddingVertical: Spacing.sm }}
+              style={{
+                ...inputType(Type.body), color: c.text, minHeight: 110, textAlignVertical: 'top',
+                padding: Spacing.lg, borderRadius: Radius.md,
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              }}
             />
-
-            {/* Tags this person has made. Nothing is seeded any more, so this
-                is empty until they add one on the Notes screen, and a note
-                written before then simply carries no tag. */}
-            {tags.length ? (
-              <View style={{ marginTop: Spacing.xl }}>
-                <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>
-                  Tags
-                </Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
-                  {tags.map((t) => {
-                    const on = picked.includes(t.id);
-                    return (
-                      <Pressable
-      accessibilityRole="button"
-                        key={t.id}
-                        onPress={() => setPicked((p) => (on ? p.filter((x) => x !== t.id) : [...p, t.id]))}
-                        style={{
-                          paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
-                          borderRadius: Radius.pill, borderWidth: 1,
-                          backgroundColor: on ? (t.color || c.textStrong) : c.surface,
-                          borderColor: on ? (t.color || c.textStrong) : c.border,
-                        }}>
-                        <Text style={{ ...Type.small, fontSize: 12, fontWeight: '600', color: on ? Palette.white : c.textMuted }}>
-                          {t.name}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-            ) : null}
 
             {canShare ? (
               <View
                 style={{
                   flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                  borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
+                  marginTop: Spacing.lg,
                 }}>
-                <View style={{ flex: 1, paddingRight: Spacing.lg }}>
-                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>Share with {partner}</Text>
-                </View>
+                <Text style={{ ...Type.body, color: c.text }}>{`Share with ${partner}`}</Text>
                 <Switch
                   value={isShared}
                   onValueChange={setIsShared}
@@ -1543,14 +1507,81 @@ function Editor({
               </View>
             ) : null}
 
-            {note ? (
-              <Pressable
-      accessibilityRole="button" onPress={remove} disabled={busy} style={{ marginTop: Spacing.xxl, alignSelf: 'flex-start' }}>
-                <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete note</Text>
-              </Pressable>
+            {/* ── FILING IT ────────────────────────────────────────────────
+                Closed until asked for. A row of every tag someone owns, open
+                on a screen this small, is more of the popup than the note. */}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setShowTags((v) => !v)}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.lg }}>
+              <SymbolView
+                name="tag"
+                size={15}
+                tintColor={c.accentQuiet}
+                fallback={<Text style={{ ...Type.small, color: c.accentQuiet }}>#</Text>}
+                style={{ width: 16, height: 16 }}
+              />
+              <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>
+                {picked.length ? `${picked.length} tag${picked.length === 1 ? '' : 's'}` : 'Add a tag'}
+              </Text>
+            </Pressable>
+
+            {showTags ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
+                {live.length ? live.map((t) => {
+                  const on = picked.includes(t.id);
+                  return (
+                    <Pressable
+                      key={t.id}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                      onPress={() => setPicked((p) => (on ? p.filter((x) => x !== t.id) : [...p, t.id]))}
+                      style={{
+                        paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
+                        borderRadius: Radius.pill, borderWidth: 1,
+                        backgroundColor: on ? c.textStrong : c.surface,
+                        borderColor: on ? c.textStrong : c.border,
+                      }}>
+                      <Text style={{ ...Type.small, color: on ? Palette.white : c.text }}>{t.name}</Text>
+                    </Pressable>
+                  );
+                }) : (
+                  <Text style={{ ...Type.small, color: c.textMuted }}>
+                    No tags yet. Add one on the Notes tab.
+                  </Text>
+                )}
+              </View>
             ) : null}
-          </ScrollView>
-        </SafeAreaView>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.lg, marginTop: Spacing.xl }}>
+              {note ? (
+                <Pressable accessibilityRole="button" onPress={remove} disabled={busy} hitSlop={8}>
+                  <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete</Text>
+                </Pressable>
+              ) : null}
+              <View style={{ flex: 1 }} />
+              <Pressable accessibilityRole="button" onPress={onClose} disabled={busy} hitSlop={8}>
+                <Text style={{ ...Type.small, color: c.textMuted }}>Close</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={canSave ? save : undefined}
+                accessibilityState={{ disabled: !canSave }}
+                style={{
+                  paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md,
+                  borderRadius: Radius.md, backgroundColor: canSave ? c.textStrong : c.border,
+                }}>
+                {busy ? (
+                  <ActivityIndicator color={Palette.white} />
+                ) : (
+                  <Text style={{ ...Type.small, fontWeight: '700', color: canSave ? Palette.white : c.textMuted }}>
+                    Save
+                  </Text>
+                )}
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
       </KeyboardAvoidingView>
     </Modal>
   );

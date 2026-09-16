@@ -37,13 +37,12 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
-**Nothing waiting.** 061 to 066 are all run.
-
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
+| M67 | **`067_test_couple.sql`.** The account you asked for. After you run it, sign in on the simulator as **tester@attune-relationships.com** with the password **AttuneTest2026**. It owns premium and every add-on, it has answered nothing, and its partner has finished all five exercises, so results unlock the moment you finish yours and the workbook builds itself at that moment. Running it twice changes nothing. There is a commented block at the bottom that clears your answers so you can walk through it again. Two inserts in it are wrapped in a way that prints a notice rather than failing the file, because the auth identities table and the orders table have both changed shape across Supabase versions: if you see a notice, tell me which and I will adjust. I have signed the simulator out for you. |
 
 ### Decide these
 
@@ -77,13 +76,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O158 | **The margin marker did not appear on a note you just left.** You saw it on internal processing. It draws, and I have watched it draw, so this is about when: most likely the note was added to the screen without the flag the marker reads. Reproduce, then fix. |
 | O159 | **Take a mark to its own line, not just its page.** Your question on R95: today it opens the section and leaves you at the top of it. It should scroll to the words. |
-| O160 | **The note screen goes.** Your words: no notes without an anchor, the share toggle lives in the note itself, and adding a note is a popup with the box, the toggle and a way to add a tag. That is a rewrite of the editor rather than a change to it. |
-| O165 | **Selection is one continuous block.** Rounded boxes around each word today, straight edges above and below wanted. |
-| O166 | **The top of an In Practice article cannot be marked.** The title, the standfirst and the read time are plain text; only the body is markable. |
-| O167 | **A workbook for couples whose results are already open.** Building it when results unlock does nothing for a couple who unlocked months ago, which is every couple there is today, including yours. It has to be built on demand the first time someone asks for one that is missing. |
-| O168 | **A test couple you can sign in as**, with every exercise finished on the partner's side and every add-on owned. Delivered as a migration, because it writes rows, and I do not run those. |
 
 ## 3. For you to review
 
@@ -242,6 +235,11 @@ receive a notification from Apple's servers.
 
 | # | Review |
 |--|--|
+| R105 | **The margin marker was drawn outside the paragraph.** Fine on an article, invisible on a results page, where most prose sits in a tile with rounded corners that clips whatever hangs outside it. The paragraph gives up eighteen points of width for it now, so it cannot be clipped by anything. |
+| R106 | **The note screen is gone.** Adding a note is a popup: the box, the share toggle, and a way to add a tag. The title field went with the screen. It was optional, almost nobody filled it in, and the list already leads with the first line of a note that has none. An existing note keeps its title rather than losing it on an unrelated edit. |
+| R107 | **The selection is one block**, straight above and below, not a rounded box per word. |
+| R108 | **The top of an In Practice article can be marked**: the title, the standfirst and every heading. Only the body could be, which is to say the one sentence a piece opens with was the one sentence you could not keep. |
+| R109 | **The workbook builds when you ask for it.** Building it when results unlock does nothing for a couple whose results opened months ago, which is every couple that exists today. Tapping a workbook that is not there now asks for one and hands it over when it lands, a few seconds later. Also: an invitee could never find the file at all, because the lookup only ever asked for orders in their own name and the order belongs to the buyer. |
 | R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
 
 

@@ -55,7 +55,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
 
   if (block.type === 'heading') {
     return (
-      <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xxl }}>{t}</Text>
+      <Prose style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xxl }}>{t}</Prose>
     );
   }
   if (block.type === 'quote') {
@@ -193,13 +193,19 @@ export default function PostReader({
         {post.category ? (
           <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.xs }}>{post.category}</Text>
         ) : null}
-        <Text style={{ ...Type.hero, color: c.textStrong }}>{post.title}</Text>
+        {/* ── THE TOP OF THE PIECE IS MARKABLE TOO ──────────────────────
+            Ellie: "I'm not able to select text in the top section of in
+            practice articles." The title, the standfirst and every heading
+            were plain Text while only the body was Prose, so the sentence most
+            worth marking in a piece, the one it opens with, was the one
+            sentence that could not be. */}
+        <Prose style={{ ...Type.hero, color: c.textStrong }}>{post.title}</Prose>
       </View>
 
       {post.subtitle ? (
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>
+        <Prose style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>
           {post.subtitle}
-        </Text>
+        </Prose>
       ) : null}
 
       {post.read_minutes ? (

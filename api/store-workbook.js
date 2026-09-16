@@ -43,6 +43,8 @@ export default async function handler(req, res) {
   const authHeader  = req.headers.authorization || '';
   const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
   const isAdminCall = !!(adminKey && reqAdminKey && reqAdminKey === adminKey);
+  /** The signed-in caller, when there is one. */
+  let callerId = null;
 
   if (!isAdminCall) {
     if (!authSupabaseUrl || !authServiceKey) {
@@ -60,6 +62,9 @@ export default async function handler(req, res) {
       const userId = userJson?.id;
       const userEmail = userJson?.email;
       if (!userId) return res.status(401).json({ error: 'Invalid auth token' });
+      // Kept for the payload builder below: a signed-in caller builds their own
+      // workbook and nobody else's.
+      callerId = userId;
 
       const orderQuery = userEmail
         ? `or=(user_id.eq.${userId},buyer_email.eq.${encodeURIComponent(userEmail)})`
@@ -102,10 +107,18 @@ export default async function handler(req, res) {
    * Admin only, because a user id in a body is not proof of anything. The call
    * that uses it is server to server with the internal key.
    */
-  if (body?.userId && !body.scores) {
-    if (!isAdminCall) return res.status(403).json({ error: 'userId is for internal callers' });
+  if (!body?.scores) {
+    /**
+     * Who the workbook is for, when no payload came with the request.
+     *
+     * An internal caller says whose; a signed-in person gets their own and
+     * cannot ask for anyone else's. The gate above has already established
+     * that this person owns a workbook.
+     */
+    const forUser = isAdminCall ? body?.userId : callerId;
+    if (!forUser) return res.status(400).json({ error: 'nothing to build from' });
     if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Server not configured' });
-    const built = await payloadForCouple({ supabaseUrl, serviceKey, userId: body.userId });
+    const built = await payloadForCouple({ supabaseUrl, serviceKey, userId: forUser });
     if (!built) return res.status(409).json({ error: 'not enough answers for a workbook yet' });
     body = { ...built, ...body };
   }

@@ -135,8 +135,18 @@ export default async function handler(req) {
        */
       let workbook = null;
       if (caps.ownsWorkbook) {
+        /**
+         * The buyer's order, which for an invitee is their partner's.
+         *
+         * This asked only for rows owned by the reader, so Partner B, who
+         * never bought anything, never found the file their couple owns. The
+         * same shape of miss as the generation trigger that only ever ran in
+         * the buyer's browser.
+         */
+        const owners = [me, profile.partner_profile_id].filter(Boolean)
+          .map((id) => `user_id.eq.${id}`).join(',');
         const oRes = await rest(
-          `orders?user_id=eq.${me}&workbook_url=not.is.null&select=order_num,workbook_url&order=created_at.desc&limit=1`,
+          `orders?or=(${owners})&workbook_url=not.is.null&select=order_num,workbook_url&order=created_at.desc&limit=1`,
           { headers: svc });
         const row = (await oRes.json().catch(() => []))?.[0];
         // The stored URL was signed for seven days when the file was made, so

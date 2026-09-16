@@ -51,6 +51,9 @@ type Ctx = {
   enabled: boolean;
 };
 
+/** The width a paragraph gives up so its margin marker has somewhere to be. */
+const MARGIN_MARKER = 18;
+
 const AnnotationCtx = createContext<Ctx>({
   marks: [], select: () => {}, remove: () => {}, enabled: false,
 });
@@ -122,11 +125,25 @@ export function Prose({
    */
   const tagged = silent.some((m) => m.tagged);
 
+  /**
+   * ── WHY THE MARKER SITS INSIDE THE BLOCK ─────────────────────────────────
+   * Ellie: "Just left a note on internal processing and see nothing in the
+   * margin." It was drawn eighteen points outside the paragraph's own box,
+   * which is fine on an article, where the paragraph is on the page, and
+   * invisible on a results page, where most prose is inside a tile with a
+   * radius and `overflow: hidden`. A child outside its parent's bounds is
+   * clipped there, and the marker was the child.
+   *
+   * So the block reserves the margin instead: a paragraph carrying a note is
+   * a little narrower, and the icon sits in the space that made. It costs a
+   * few points of line width on the paragraphs that have one, and it cannot be
+   * clipped by anything.
+   */
   return (
-    <View>
+    <View style={{ paddingRight: MARGIN_MARKER }}>
       <View
         pointerEvents="none"
-        style={{ position: 'absolute', right: -18, top: 3 }}>
+        style={{ position: 'absolute', right: 0, top: 3 }}>
         <SymbolView
           name={(tagged ? 'tag' : 'square.and.pencil') as never}
           size={13}

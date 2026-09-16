@@ -1426,6 +1426,21 @@ export function nudgePartner() {
  * Two deaths on purpose: Ellie asked for a greyed row where deleted tags live
  * and a second, permanent delete from there that says it cannot be undone.
  */
+/**
+ * Build this couple's workbook now.
+ *
+ * Only for the reader's own couple: the endpoint takes the person from the
+ * token and refuses a request that names anyone else. Slow by nature, because
+ * it generates a document and uploads it, so the screen that calls it says so.
+ */
+export function buildWorkbook() {
+  return request<{ ok: true; url: string | null; filename: string }>('/api/store-workbook', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+}
+
 export function deleteTag(id: string) {
   return request<{ ok: true; tag: Tag }>('/api/notes', {
     method: 'POST',
