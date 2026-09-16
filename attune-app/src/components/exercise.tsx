@@ -33,6 +33,17 @@ import { WAITING } from '@/constants/waiting';
 
 const c = Colors.light;
 
+/**
+ * The heights that keep the controls still.
+ *
+ * Both are the tallest case in the exercise rather than a guess: the longest
+ * question runs to three lines of the title face, and the longest pair of
+ * options to six of the small one. A shorter question leaves space above the
+ * options rather than pulling them up the screen.
+ */
+const QUESTION_HEIGHT = 104;
+const OPTIONS_HEIGHT = 170;
+
 export default function Exercise({
   exerciseKey, onClose, onFinished,
 }: { exerciseKey: string; onClose: () => void; onFinished: () => void }) {
@@ -205,11 +216,25 @@ export default function Exercise({
           <View style={{ width: `${(answeredCount / Math.max(1, questions.length)) * 100}%`, height: 3, backgroundColor: c.accent }} />
         </View>
 
-        <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>{item.text}</Text>
+        {/* ── EVERYTHING BELOW THIS STAYS PUT ─────────────────────────────
+            Ellie: "I'd like to have A and B and the answer choices in a fixed
+            position regardless of the size of the questions."
 
-        {/* The two ends, given equal space. Lettered rather than ordered, so
-            neither reads as the first or the better one. */}
-        <View style={{ marginTop: Spacing.lg, gap: Spacing.md }}>
+            A question is one line or three, and without a floor under it the
+            two options and the scale walk up and down the screen between
+            questions. Answering twenty-five of those means re-finding the
+            controls every time. The question block is given the height of its
+            longest case, and the options are given the height of theirs, so
+            the scale lands in the same place on every screen. */}
+        <View style={{ minHeight: QUESTION_HEIGHT, justifyContent: 'flex-start', marginTop: Spacing.xl }}>
+          <Text style={{ ...Type.title, color: c.textStrong }}>{item.text}</Text>
+        </View>
+
+        {/* The two ends, side by side and given equal space. Lettered rather
+            than ordered, so neither reads as the first or the better one.
+            Ellie: "I want A and B options to be listed side by side not
+            vertically." */}
+        <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: Spacing.md, minHeight: OPTIONS_HEIGHT }}>
           <Option letter="A" text={item.a} />
           <Option letter="B" text={item.b} />
         </View>
@@ -247,45 +272,71 @@ export default function Exercise({
           </Text>
         ) : null}
 
-        <Pressable
-      accessibilityRole="button"
-          onPress={advance}
-          disabled={chosen == null || saving}
-          style={{
-            marginTop: Spacing.xl, borderRadius: Radius.md, paddingVertical: Spacing.md,
-            alignItems: 'center',
-            backgroundColor: chosen == null ? c.border : c.accent,
-          }}>
-          {saving && isLast ? (
-            <ActivityIndicator color={Palette.white} />
-          ) : (
-            <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>
-              {isLast ? 'Finish' : 'Next'}
-            </Text>
-          )}
-        </Pressable>
+        {/* ── BACK AND NEXT, ON THEIR OWN SIDES ───────────────────────────
+            Ellie: "Rather than next and back both being centered and
+            vertically stacked, I want a small arrow on the left that says back
+            and arrow on the right that says next."
 
-        {idx > 0 ? (
+            The row keeps its shape on the first question, where there is
+            nothing to go back to: the space stays and Next does not move. */}
+        <View
+          style={{
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+            marginTop: Spacing.xl,
+          }}>
+          {idx > 0 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back to the previous question"
+              onPress={() => setIdx(idx - 1)}
+              hitSlop={10}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm }}>
+              <Text style={{ ...Type.body, color: c.textMuted }}>{'\u2039'}</Text>
+              <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
+            </Pressable>
+          ) : <View />}
+
           <Pressable
-      accessibilityRole="button" onPress={() => setIdx(idx - 1)} style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
-            <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
+            accessibilityRole="button"
+            accessibilityLabel={isLast ? 'Finish' : 'Next question'}
+            onPress={advance}
+            disabled={chosen == null || saving}
+            hitSlop={10}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm }}>
+            {saving && isLast ? (
+              <ActivityIndicator color={c.accent} />
+            ) : (
+              <>
+                <Text style={{ ...Type.small, fontWeight: '700', color: chosen == null ? c.border : c.accent }}>
+                  {isLast ? 'Finish' : 'Next'}
+                </Text>
+                <Text style={{ ...Type.body, color: chosen == null ? c.border : c.accent }}>{'\u203A'}</Text>
+              </>
+            )}
           </Pressable>
-        ) : null}
+        </View>
       </ScrollView>
     </Shell>
   );
 }
 
+/**
+ * One end of the scale, as a card.
+ *
+ * Side by side now rather than stacked, so the letter goes above its words
+ * instead of beside them: two columns of text with a letter in the left margin
+ * of each leaves almost nothing for the words.
+ */
 function Option({ letter, text }: { letter: string; text: string }) {
   return (
     <View
       style={{
-        flexDirection: 'row', gap: Spacing.md,
+        flex: 1,
         backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg,
       }}>
-      <Text style={{ ...Type.cardTitle, color: c.accentQuiet }}>{letter}</Text>
-      <Text style={{ ...Type.body, color: c.text, flex: 1 }}>{text}</Text>
+      <Text style={{ ...Type.cardTitle, color: c.accentQuiet, marginBottom: Spacing.xs }}>{letter}</Text>
+      <Text style={{ ...Type.small, color: c.text, lineHeight: 19 }}>{text}</Text>
     </View>
   );
 }

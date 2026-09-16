@@ -28,6 +28,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import type { ConflictOpenings, ConflictResults, ConflictSummary } from '@/api/client';
 import GlanceTile from '@/components/glance-tile';
 import { Prose } from '@/components/annotation-context';
+import { ResultsScroll } from '@/components/results-scroll';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -383,7 +384,7 @@ function Snapshot({ data, accent }: {
   const { you, partner, names, content } = data;
 
   return (
-    <ScrollView contentContainerStyle={pad}>
+    <ResultsScroll contentContainerStyle={pad}>
       {/* block: conflict-snapshot/head */}
       <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
       {/* ── THE SNAPSHOT IS A TABLE ──────────────────────────────────────
@@ -481,7 +482,7 @@ function Snapshot({ data, accent }: {
           </View>
         ) : null}
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -495,7 +496,7 @@ function Patterns({
   you, content,
 }: { you: ConflictSummary; content: Extract<ConflictResults, { ready: true }>['content'] }) {
   return (
-    <ScrollView contentContainerStyle={pad}>
+    <ResultsScroll contentContainerStyle={pad}>
       {/* block: conflict-patterns/head */}
       <PageHead copy={content.copy} title={content.copy.patternsTitle} shared={false} />
       {/* The privacy line sits above the content, not below it, because someone
@@ -594,7 +595,7 @@ function Patterns({
           );
         })}
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -630,17 +631,17 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
 
   if (!rows.length) {
     return (
-      <ScrollView contentContainerStyle={pad}>
+      <ResultsScroll contentContainerStyle={pad}>
         <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
         <Text style={{ ...Type.body, color: c.textMuted }}>
           Neither of you wrote anything on these questions.
         </Text>
-      </ScrollView>
+      </ResultsScroll>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={pad}>
+    <ResultsScroll contentContainerStyle={pad}>
       {/* block: conflict-wrote/head */}
       <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
       {/* block: conflict-wrote/rows */}
@@ -654,7 +655,7 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
           <Written name={names.partner} text={r.theirs} />
         </View>
       ))}
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 

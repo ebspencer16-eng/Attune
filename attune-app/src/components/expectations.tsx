@@ -34,6 +34,7 @@ import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import { ResultsScroll } from '@/components/results-scroll';
 
 const c = Colors.light;
 
@@ -173,7 +174,7 @@ export default function Expectations({
   if (stage === 'structure') {
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
+        <ResultsScroll contentContainerStyle={pad}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Expectations</Text>
           <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>
             Who ran the household you grew up in?
@@ -198,7 +199,7 @@ export default function Expectations({
             disabled={!answers.childhoodStructure}
             onPress={() => setStage('responsibilities')}
           />
-        </ScrollView>
+        </ResultsScroll>
       </Shell>
     );
   }
@@ -207,7 +208,7 @@ export default function Expectations({
   if (stage === 'responsibilities' && cat) {
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
+        <ResultsScroll contentContainerStyle={pad}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{cat.label}</Text>
             <Text style={{ ...Type.small, color: c.textMuted }}>
@@ -327,7 +328,7 @@ export default function Expectations({
         ) : null}
 
         {catIdx > 0 ? <Secondary label="Back" onPress={() => setCatIdx(catIdx - 1)} /> : null}
-        </ScrollView>
+        </ResultsScroll>
       </Shell>
     );
   }
@@ -338,7 +339,7 @@ export default function Expectations({
     const isLast = lifeIdx === life.length - 1;
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
+        <ResultsScroll contentContainerStyle={pad}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{lifeQ.topic}</Text>
             <Text style={{ ...Type.small, color: c.textMuted }}>
@@ -372,7 +373,7 @@ export default function Expectations({
             }}
           />
           {lifeIdx > 0 ? <Secondary label="Back" onPress={() => setLifeIdx(lifeIdx - 1)} /> : null}
-        </ScrollView>
+        </ResultsScroll>
       </Shell>
     );
   }

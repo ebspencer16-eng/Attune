@@ -22,9 +22,10 @@
  * sentence is gone is simply not drawn rather than drawn in the wrong place.
  */
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { SymbolView } from 'expo-symbols';
+import { scrollIntoResultsView } from '@/components/results-scroll';
 
 import Annotatable, { type Mark, type MarkAction } from '@/components/annotatable';
 import { annotationColor } from '@/constants/annotations';
@@ -49,13 +50,18 @@ type Ctx = {
   remove: (mark: Mark) => void;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
+  /**
+   * The words this screen was opened to land on, when it was opened from a
+   * note. The paragraph holding them scrolls itself into view once.
+   */
+  focus?: string | null;
 };
 
 /** The width a paragraph gives up so its margin marker has somewhere to be. */
 const MARGIN_MARKER = 18;
 
 const AnnotationCtx = createContext<Ctx>({
-  marks: [], select: () => {}, remove: () => {}, enabled: false,
+  marks: [], select: () => {}, remove: () => {}, enabled: false, focus: null,
 });
 
 export function useAnnotations() {
@@ -71,7 +77,7 @@ export function useAnnotations() {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, remove, enabled } = useAnnotations();
+  const { marks, select, remove, enabled, focus } = useAnnotations();
   const text = children || '';
   if (!enabled || !text) return <Text style={style}>{text}</Text>;
 
@@ -105,8 +111,31 @@ export function Prose({
   const silent = mine.filter((m) => m.kind === 'note' || m.tagged);
   const tone = annotationColor(mine.find((m) => m.color)?.color);
 
+  /**
+   * ── LANDING ON THE LINE ─────────────────────────────────────────────────
+   * Ellie: "yes, on the line not just on the page." The paragraph that holds
+   * the marked words asks the page to scroll to it, once, after it has been
+   * laid out: its own position is not known until then.
+   *
+   * Matched on the text because that is how a mark finds its words everywhere
+   * else here. A paragraph that does not hold them does nothing at all, which
+   * is most of them.
+   */
+  const holdsFocus = !!focus && text.includes(focus);
+  const scrolled = useRef(false);
+  const block = useRef<View | null>(null);
+  const onLaidOut = () => {
+    if (!holdsFocus || scrolled.current) return;
+    scrolled.current = true;
+    scrollIntoResultsView(block.current);
+  };
+
   const body = <Annotatable text={text} style={style} marks={marks} onSelect={select} onRemove={remove} />;
-  if (!silent.length) return body;
+  if (!silent.length) {
+    return holdsFocus
+      ? <View ref={block} onLayout={onLaidOut}>{body}</View>
+      : body;
+  }
 
   /**
    * ── WHICH SIDE, AND WHICH ICON ───────────────────────────────────────────
@@ -140,7 +169,7 @@ export function Prose({
    * clipped by anything.
    */
   return (
-    <View style={{ paddingRight: MARGIN_MARKER }}>
+    <View ref={block} onLayout={onLaidOut} style={{ paddingRight: MARGIN_MARKER }}>
       <View
         pointerEvents="none"
         style={{ position: 'absolute', right: 0, top: 3 }}>
@@ -158,7 +187,7 @@ export function Prose({
 }
 
 export function AnnotationProvider({
-  children, section, notes, tags, partnerName, onCreated, onRemoved,
+  children, section, notes, tags, partnerName, onCreated, onRemoved, focus = null,
   anchorType = 'results_section', anchorKey,
 }: {
   children: ReactNode;
@@ -188,6 +217,8 @@ export function AnnotationProvider({
    * until its next load, which is wrong but not broken.
    */
   onRemoved?: (id: string) => void;
+  /** Words to scroll to, once, when this screen is opened from a note. */
+  focus?: string | null;
 }) {
   const [selected, setSelected] = useState<{ text: string; action: MarkAction } | null>(null);
   const key = anchorKey || section;
@@ -224,7 +255,8 @@ export function AnnotationProvider({
       deleteNote(mark.id);
     },
     enabled: true,
-  }), [marks, onRemoved]);
+    focus,
+  }), [marks, onRemoved, focus]);
 
   return (
     <AnnotationCtx.Provider value={value}>

@@ -25,6 +25,7 @@
 
 import { ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ResultsScroll } from '@/components/results-scroll';
 
 import {
   BottomTabInset, MaxContentWidth, Palette, Radius, Spacing,
@@ -58,7 +59,7 @@ export default function GlanceTile({
 }) {
   const stops = ground?.length ? ground : NeutralGround;
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View
         style={{
           paddingHorizontal: Spacing.xl,
@@ -73,6 +74,6 @@ export default function GlanceTile({
           {children}
         </LinearGradient>
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }

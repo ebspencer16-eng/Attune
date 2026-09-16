@@ -39,6 +39,7 @@ import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
+import { ResultsScroll } from '@/components/results-scroll';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -167,9 +168,22 @@ let jumpToTop: (() => void) | null = null;
  * shows. This is the same one-slot handle as showFirstSection: set where the
  * next mount opens, and move the mounted one if there is one.
  */
-export function showSection(id: string) {
+export function showSection(id: string, markText?: string | null) {
   lastSection = id;
+  // The words to land on, for the screen that is about to draw them. Read once
+  // by the provider and cleared, so a second visit to the same section does not
+  // jump somewhere the reader did not ask to go.
+  pendingMark = markText || null;
   goToSection?.(id);
+}
+
+/** The marked words the next results render should scroll to, if any. */
+let pendingMark: string | null = null;
+
+export function takePendingMark(): string | null {
+  const m = pendingMark;
+  pendingMark = null;
+  return m;
 }
 
 /** The mounted results screen's section setter, if one is mounted. */
@@ -243,6 +257,14 @@ export default function Results({
   // clock, including stopping it when the app goes to the background.
   useScreenTime(sectionId ? `results:${sectionId}` : null);
   const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
+
+  /**
+   * The marked words to scroll to on this render, if the reader arrived from a
+   * note rather than from the nav. Taken once: scrolling to it again on the
+   * next render would fight the reader for control of the page.
+   */
+  const [focusMark, setFocusMark] = useState<string | null>(null);
+  useEffect(() => { setFocusMark(takePendingMark()); }, [sectionId]);
 
   // The handle showSection() moves, for when Notes sends someone to a mark
   // while this screen is already mounted behind the tab bar.
@@ -480,7 +502,9 @@ export default function Results({
           tags={tags}
           partnerName={them}
           onCreated={(note) => setNotes((prev) => [note, ...prev])}
-          onRemoved={(id) => setNotes((prev) => prev.filter((n) => n.id !== id))}>
+          onRemoved={(id) => setNotes((prev) => prev.filter((n) => n.id !== id))}
+          /* The words the Notes tab sent us to, when it sent us. */
+          focus={focusMark}>
         <SectionBody
           section={section}
           /* The active nav group's colour, which the server sends. Sections
@@ -981,7 +1005,7 @@ function ExpectationsConversation({
         end={{ x: 1, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+      <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{bucket.label}</Text>
@@ -1116,7 +1140,7 @@ function ExpectationsConversation({
             </View>
           ) : null}
         </View>
-      </ScrollView>
+      </ResultsScroll>
     </View>
   );
 }
@@ -1356,7 +1380,7 @@ function IntimacyDimensionView({
         end={{ x: 1, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+      <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       {/* Ellie: "Intimacy detailed pages on the app don't have buffer above
           the heroes." Every other detail page in the app opens under the nav
           with a step of space; these six opened against it. */}
@@ -1481,7 +1505,7 @@ function IntimacyDimensionView({
           </Disclosure>
         ) : null}
       </View>
-    </ScrollView>
+    </ResultsScroll>
     </View>
   );
 }
@@ -1715,7 +1739,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
   const rest = data.ratings.filter((r) => r.key !== 'a0');
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
@@ -1802,7 +1826,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
           </View>
         ) : null}
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -1998,7 +2022,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
    */
   const label = data.promptLabel || 'Talk about it';
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <ReflectionHead page={data.pages?.story} />
 
@@ -2080,7 +2104,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
           );
         })}
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -2303,7 +2327,7 @@ function WhatComesNext({
        source rather than every item of every group laid out flat. The app
        listed them all open with a paragraph under each title, which is three
        screens of scrolling for a page whose job is to gather things up. */
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.lg, lineHeight: 20 }}>
@@ -2325,7 +2349,7 @@ function WhatComesNext({
           ))}
         </View>
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -2406,7 +2430,7 @@ function NextGroup({
 
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
         {/* not markable: the app saying a section is not ready, not a finding.
@@ -2414,13 +2438,13 @@ function Waiting({ title, body }: { title: string; body: string }) {
             would outlive the words it was made on. */}
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
 function NotYet({ section }: { section: string }) {
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.xl }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Not on your phone yet</Text>
@@ -2433,7 +2457,7 @@ function NotYet({ section }: { section: string }) {
           </Text>
         </View>
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -2671,7 +2695,7 @@ function CoupleType({ results, you, them, title }: {
   const accent = type.color || c.accent;
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         {/* block: couple-type/lead
 
@@ -2930,7 +2954,7 @@ function CoupleType({ results, you, them, title }: {
           </View>
         ) : null}
       </View>
-    </ScrollView>
+    </ResultsScroll>
   );
 }
 
@@ -2965,7 +2989,7 @@ function Domain({
         end={{ x: 1, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+      <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           {/* No exercise-name eyebrow. "Communication" over a page already
               reached from a tab called Comms is a label on a label. */}
@@ -3037,7 +3061,7 @@ function Domain({
           {/* block: comm-domain/side-by-side */}
           <SideBySide dims={dims} you={you} them={them} viewer={viewer} label={title} rows={responses} />
         </View>
-      </ScrollView>
+      </ResultsScroll>
     </View>
   );
 }

@@ -146,7 +146,9 @@ export default function NotesScreen() {
   const openWhereItLives = useCallback((note: Note) => {
     const key = note.anchor_key || '';
     if (note.anchor_type === 'results_section' && key) {
-      showSection(key);
+      // The words as well as the page: the section opens scrolled to the
+      // paragraph this mark sits on.
+      showSection(key, note.anchor_context);
       router.push('/insights');
       return;
     }
@@ -272,8 +274,23 @@ export default function NotesScreen() {
   // stack requests.
   useFocusEffect(
     useCallback(() => {
-      if (!loadingRef.current) load();
-    }, [load]),
+      if (loadingRef.current) return;
+      /**
+       * ── WHY A STALE SIGN-IN SCREEN NEEDS THE SPINNER BACK ──────────────
+       * Ellie: "clicking the insights tab initially showed the sign in page
+       * again, but then I tried again and it worked."
+       *
+       * All four tabs mount when the app starts, so a tab loaded while signed
+       * out holds an unauthorized error. Signing in on one tab reloads that
+       * one; this one reloads when it is next focused, and until that request
+       * lands it goes on rendering the sign-in screen it stored earlier. The
+       * reload was already happening. What was missing is that the screen said
+       * nothing about it, so a session that was fine looked like one that had
+       * ended.
+       */
+      if (error?.kind === 'unauthorized') setLoading(true);
+      load();
+    }, [load, error?.kind]),
   );
 
 

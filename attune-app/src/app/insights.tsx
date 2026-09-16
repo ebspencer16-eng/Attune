@@ -41,6 +41,21 @@ import { WAITING } from '@/constants/waiting';
 
 const c = Colors.light;
 
+/**
+ * The table's three columns, as widths rather than as flex.
+ *
+ * Ellie: "Table rendering weirdly, the column lines need to match up." They
+ * did not: the header was three flex children and so was every row, and flex
+ * distributes what is left after each child's own content is measured. A blank
+ * header cell and a cell holding "01 Relationship Reflection" do not measure
+ * the same, so the two rows divided the width differently and the rules
+ * between the columns stepped sideways.
+ *
+ * Percentages take the negotiation away. The header and the rows are given the
+ * same three numbers from one place, so they cannot disagree.
+ */
+const COL = { label: '46%', person: '27%' } as const;
+
 
 export default function InsightsScreen() {
   useScreenTime('insights');
@@ -122,8 +137,23 @@ export default function InsightsScreen() {
   // stack requests.
   useFocusEffect(
     useCallback(() => {
-      if (!loadingRef.current) load();
-    }, [load]),
+      if (loadingRef.current) return;
+      /**
+       * ── WHY A STALE SIGN-IN SCREEN NEEDS THE SPINNER BACK ──────────────
+       * Ellie: "clicking the insights tab initially showed the sign in page
+       * again, but then I tried again and it worked."
+       *
+       * All four tabs mount when the app starts, so a tab loaded while signed
+       * out holds an unauthorized error. Signing in on one tab reloads that
+       * one; this one reloads when it is next focused, and until that request
+       * lands it goes on rendering the sign-in screen it stored earlier. The
+       * reload was already happening. What was missing is that the screen said
+       * nothing about it, so a session that was fine looked like one that had
+       * ended.
+       */
+      if (error?.kind === 'unauthorized') setLoading(true);
+      load();
+    }, [load, error?.kind]),
   );
 
   /**
@@ -263,7 +293,7 @@ function StatusTable({
       }}>
       {/* Header: blank, then a column each. */}
       <View style={{ flexDirection: 'row', backgroundColor: Palette.warm, borderBottomWidth: 1, borderBottomColor: c.border }}>
-        <View style={{ flex: 1.6 }} />
+        <View style={{ width: COL.label }} />
         <HeaderCell label={you} />
         <HeaderCell label={partner} />
       </View>
@@ -280,7 +310,7 @@ function StatusTable({
               mid-word at 1.15, which reads as a rendering fault rather than a
               long name. There was an accent dot here too; it cost the label
               about fifteen points and the web table does not have one. */}
-          <View style={{ flex: 1.6, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.md, paddingLeft: Spacing.md, paddingRight: Spacing.sm }}>
+          <View style={{ width: COL.label, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.md, paddingLeft: Spacing.md, paddingRight: Spacing.sm }}>
             <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
               {String(i + 1).padStart(2, '0')}
             </Text>
@@ -301,7 +331,7 @@ function StatusTable({
 
 function HeaderCell({ label }: { label: string }) {
   return (
-    <View style={{ flex: 1, padding: Spacing.md, borderLeftWidth: 1, borderLeftColor: c.border }}>
+    <View style={{ width: COL.person, padding: Spacing.md, borderLeftWidth: 1, borderLeftColor: c.border }}>
       <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textStrong, textAlign: 'center' }}>
         {label}
       </Text>
@@ -322,7 +352,7 @@ function StatusCell({ done, muted, onPress }: { done: boolean; muted?: boolean; 
     <Wrap
       onPress={onPress}
       style={{
-        flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        width: COL.person, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: Spacing.xs, paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm,
         borderLeftWidth: 1, borderLeftColor: c.border,
       }}>

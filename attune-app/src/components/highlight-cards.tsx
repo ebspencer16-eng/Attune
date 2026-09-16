@@ -55,6 +55,7 @@ import * as Sharing from 'expo-sharing';
 
 import type { HighlightCard, PersonResults } from '@/api/client';
 import CoupleMap from '@/components/couple-map';
+import { ResultsScroll } from '@/components/results-scroll';
 
 /** What the couple type card needs to draw the same map the website's does. */
 export type MapData = {
@@ -386,7 +387,7 @@ function Reel({
         ))}
       </View>
 
-      <ScrollView
+      <ResultsScroll
         ref={pager}
         horizontal
         pagingEnabled
@@ -405,7 +406,7 @@ function Reel({
             <Card card={card} onDone={onDone} w={cardW} h={cardH} active={i === index} shotRef={refFor(i)} map={map} />
           </Pressable>
         ))}
-      </ScrollView>
+      </ResultsScroll>
 
       {/* block: highlights/controls */}
       {/* ── PREVIOUS AND NEXT ───────────────────────────────────────────

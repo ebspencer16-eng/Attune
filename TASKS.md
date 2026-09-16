@@ -75,11 +75,12 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
+**Nothing open.**
+
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O159 | **Take a mark to its own line, not just its page.** Your question on R95: today it opens the section and leaves you at the top of it. It should scroll to the words. |
 
 ## 3. For you to review
 
@@ -237,6 +238,10 @@ receive a notification from Apple's servers.
 
 | # | Review |
 |--|--|
+| R112 | **Opening a mark lands on the line.** Every results page now shares one scroll view, and the paragraph holding the marked words asks it to scroll there once, after layout, with a little headroom above. I have not been able to drive this end to end myself: it needs a mark on a results section and a tap, and my synthetic taps have been landing in the wrong place all week. Worth a try from the Notes tab on a results mark. |
+| R113 | **The table's columns line up.** They were three flex children in the header and three more in each row, and flex divides what is left after each child's content is measured: a blank header cell and a cell holding "01 Relationship Reflection" do not measure the same, so the two rows divided the width differently. Fixed percentages from one place now. |
+| R114 | **The sign-in screen no longer flashes on a tab you have not visited.** All four tabs load when the app starts, so a tab that loaded while signed out was holding a sign-in screen. It did reload when you opened it, and said nothing while it did, so a session that was fine looked like one that had ended. It shows the spinner now. |
+| R115 | **The exercises: A and B side by side, Back at the left and Next at the right, both with arrows, and the controls in the same place on every question.** The question block and the option row each have a floor under them, so a one-line question and a three-line one put the scale in the same spot. |
 | R105 | **The margin marker was drawn outside the paragraph.** Fine on an article, invisible on a results page, where most prose sits in a tile with rounded corners that clips whatever hangs outside it. The paragraph gives up eighteen points of width for it now, so it cannot be clipped by anything. |
 | R106 | **The note screen is gone.** Adding a note is a popup: the box, the share toggle, and a way to add a tag. The title field went with the screen. It was optional, almost nobody filled it in, and the list already leads with the first line of a note that has none. An existing note keeps its title rather than losing it on an unrelated edit. |
 | R107 | **The selection is one block**, straight above and below, not a rounded box per word. |

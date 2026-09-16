@@ -96,8 +96,23 @@ export default function HomeScreen() {
   // stack requests.
   useFocusEffect(
     useCallback(() => {
-      if (!loadingRef.current) load();
-    }, [load]),
+      if (loadingRef.current) return;
+      /**
+       * ── WHY A STALE SIGN-IN SCREEN NEEDS THE SPINNER BACK ──────────────
+       * Ellie: "clicking the insights tab initially showed the sign in page
+       * again, but then I tried again and it worked."
+       *
+       * All four tabs mount when the app starts, so a tab loaded while signed
+       * out holds an unauthorized error. Signing in on one tab reloads that
+       * one; this one reloads when it is next focused, and until that request
+       * lands it goes on rendering the sign-in screen it stored earlier. The
+       * reload was already happening. What was missing is that the screen said
+       * nothing about it, so a session that was fine looked like one that had
+       * ended.
+       */
+      if (error?.kind === 'unauthorized') setLoading(true);
+      load();
+    }, [load, error?.kind]),
   );
 
 
