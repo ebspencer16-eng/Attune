@@ -55,10 +55,9 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-**Nothing waiting.** Q3 is answered: no email, and generate on the server.
-
 | # | Question |
 |--|--|
+| Q4 | **"If partner deletes account, results are locked for both partners" contradicts what you publish.** Your retention policy says the opposite, in writing: "If one partner deletes their account, we will anonymize that partner's responses in the joint results display. The other partner retains access to their own responses and the portions of the joint results derived solely from their own answers." It used to work the way you have just asked for, by accident: a cascade in the database deleted the couple's results row, and someone who had paid, finished and read their results opened the app and was told they were waiting for a partner who no longer existed. Migration 059 fixed that on purpose and a gate holds it. So this is not a small backend change: it reverses a published promise and deletes something a paying customer has already been given. **I have not touched it.** The alert copy for a deleted partner is also on hold until you answer, because the sentence you wrote describes the behaviour you are asking for rather than the behaviour today. Tell me which way you want it and I will make the product and the policy agree. |
 
 ## 2. Open
 
@@ -72,12 +71,23 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.**
+My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O158 | **The margin marker did not appear on a note you just left.** You saw it on internal processing. It draws, and I have watched it draw, so this is about when: most likely the note was added to the screen without the flag the marker reads. Reproduce, then fix. |
+| O159 | **Take a mark to its own line, not just its page.** Your question on R95: today it opens the section and leaves you at the top of it. It should scroll to the words. |
+| O160 | **The note screen goes.** Your words: no notes without an anchor, the share toggle lives in the note itself, and adding a note is a popup with the box, the toggle and a way to add a tag. That is a rewrite of the editor rather than a change to it. |
+| O161 | **The home tile's third row.** Bold line reads Pick up where you left off; grey line is one line of what you marked, ending in an ellipsis at the margin. |
+| O162 | **The two other home lines.** Under Your results are ready: 'Insights and guidance based on your responses'. Under the budget: 'Build your budget with a customizable tool'. Your words. |
+| O163 | **Every piece of prose gets a generated list in this document.** Starting with the home tile, the deletion emails, and the workbook. Generated from what the product actually sends, the way the alert copy is, so a list here can never describe words nobody sees. Your new standing rule. |
+| O164 | **The alert copy changes.** Two kinds deleted, three rewritten in your words, one held: see Q4. |
+| O165 | **Selection is one continuous block.** Rounded boxes around each word today, straight edges above and below wanted. |
+| O166 | **The top of an In Practice article cannot be marked.** The title, the standfirst and the read time are plain text; only the body is markable. |
+| O167 | **A workbook for couples whose results are already open.** Building it when results unlock does nothing for a couple who unlocked months ago, which is every couple there is today, including yours. It has to be built on demand the first time someone asks for one that is missing. |
+| O168 | **A test couple you can sign in as**, with every exercise finished on the partner's side and every add-on owned. Delivered as a migration, because it writes rows, and I do not run those. |
 
 ## 3. For you to review
 
@@ -96,16 +106,6 @@ any order; work through them however suits.
 | # | Review |
 |--|--|
 | R100 | **The workbook is built the moment your results open.** On the server, at the same instant the product tells your partner you finished, so a couple who only ever use the app get one. It was built in a browser before, by a block that needed the buyer's order in that browser's storage, which is why yours said it was still generating. The payload the generator is handed now comes from one module that both the website and the server read: two builders would mean two workbooks depending on which surface got there first. |
-| R101 | **Nothing promises an email any more.** Two places did. The app's line now reads "Building your workbook. Check back shortly." and the website's availability note says it is built as soon as your results open. **Both sentences are mine and yours to change.** A gate refuses any version of that line with the word email in it, since there is no workbook-ready email in the product. |
-| R93 | **A new mark was invisible until you left the page and came back.** That is what "underline isn't working" was: it saved, it just did not draw. The row handed back to the screen said it was anchored to a results section, and an In Practice article anchors to something else, so the screen filtered it straight out. Highlights had it too. Drawing itself was never broken: I pushed a fake underline and a fake highlight through and both drew correctly, three points of colour and a wash. |
-| R94 | **The margin marker draws, and now covers tags too.** It only marked plain notes, so a highlight you had filed under a tag left nothing in the margin, and you had deleted the notes on the page you were looking at. Any tagged mark marks the margin now. |
-| R95 | **A pick-up row opens the mark where it lives.** A results mark takes you to Insights on that section; an article mark opens the article. A note with no anchor still opens in the editor, because words are all it is. |
-| R96 | **"All" stops at the last ten.** |
-| R97 | **Less space between the Explore arrow and In Practice.** |
-| R98 | **Deleting says it deleted.** A line appears above the tab bar for a couple of seconds: "✓ Note deleted", and the same for a tag. It clears itself. **On the note screen:** you said you do not want it to exist any more. I have not removed it, because it is also where a note with no anchor is written and where sharing is turned on, and taking it out is a different job than adding the confirmation. Tell me what should replace it and I will. |
-| R99 | **A tag has two deaths.** Open a tag and there is Delete tag at the bottom left, with an are-you-sure that says it moves to the bottom of your list. Deleted tags sit there greyed and struck through, and deleting one from there asks "Are you sure? This action cannot be undone" in your words. Typing a deleted tag's name again brings it back, because the name is still taken and failing on a constraint you cannot see would be worse. **Needs M66 in section 1.** |
-| R88 | **Notes: Pick up where you left off is one tile**, the home screen's shape, rows divided by hairlines. Icon at the left for highlight, underline, note or tag, the section as an eyebrow, the words under it, no dashes. |
-| R92 | **Resources is one section.** All your tools in Yours to Explore, nothing for what you do not own, and a grey "Explore more resources" arrow bottom right that opens the website in Safari. It shows whether or not you own everything: the physical copies and the gift are on that page too, and a control that appears on an invisible condition is one nobody trusts. **On the Apple risk:** this is the same shape as Get Started, which already opens the site. The app names no price and no checkout route, and the arrow opens /offerings in the system browser rather than a payment screen. Every price in the app went with the section that showed them. If you would rather it went nowhere until the app is approved, say so and I will take it out in one line. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -115,10 +115,6 @@ any order; work through them however suits.
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
-| R74 | **The alert copy, listed just below this table.** Six short lines, mine, in `api/_lib/notifications.js`. Nothing has ever shown them to anyone, so nobody has read them yet. The list is generated from the alerts themselves rather than typed out, so it cannot drift from what the app shows. Tell me what you want them to say. |
-| R13 | **The deletion emails**: the confirmation to the person, and the notice to their partner. My words, in `api/_lib/deletion-emails.js`. |
-| R17 | **The workbook's same-type moment blocks for XX, YY and ZZ.** Eighteen moments, ninety lines, mine, written to match the WW set. In `api/_workbook-prose.js` as `MOMENTS_SHARED_X/Y/Z`. |
-| R25 | **The workbook's dimension pages and moment cards now use the personalised wording**, the one that names both people. Your call on G14. Worth reading one dimension and one moment card to see it land. |
 
 #### The alert copy, for R74
 
@@ -151,11 +147,6 @@ receive a notification from Apple's servers.
 
 | # | Review |
 |--|--|
-| R34 | **Simulator.** Tap Insights while you are already on Insights. It should go back to Highlights from wherever you were. Coming to Insights from another tab should land where you left off, as it does now. |
-| R55 | **Simulator.** Same gesture on Resources, Notes and Home: Resources should close an article or a tool, Notes should close the editor, Home should scroll to the top. |
-| R22 | **Simulator.** Press and hold a word in your results, drag to select a phrase, then highlight, underline, tag, note or share it. The long press is a click and hold; the drag is a drag. Nothing here needs a real device. |
-| R23 | **Simulator.** The five exercises end to end, including Physical Intimacy, whose multi-select screens the automated driver cannot work but a person can. |
-| R24 | **Simulator for the file, a real device to read it.** The workbook opens as a .docx from the app; the simulator can download it and hand it to whatever opens .docx files on your Mac. The PDF needs `WORKBOOK_SERVICE_URL` set, which is a server setting rather than a phone one. |
 | R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
 
 
@@ -163,6 +154,15 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R101 | The workbook lines, with no email promised |
+| R93 | A new mark drawing without a reload |
+| R96 | "All" stopping at the last ten |
+| R97 | The space before In Practice |
+| R99 | A tag has two deaths |
+| R88 | Pick up where you left off, as one tile |
+| R92 | One Resources section, and the way out |
+| R34 | Insights tab, tapped twice |
+| R55 | The same gesture on the other three tabs |
 | R85 | The seven colour names, with old marks keeping theirs |
 | R86 | The cream toolbar |
 | R87 | The bin, grey until the selection is on a mark |
