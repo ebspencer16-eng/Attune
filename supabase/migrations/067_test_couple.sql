@@ -30,15 +30,26 @@
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   email_confirmed_at, created_at, updated_at,
-  raw_app_meta_data, raw_user_meta_data
+  raw_app_meta_data, raw_user_meta_data,
+  -- ── WHY THE EMPTY STRINGS ───────────────────────────────────────────
+  -- Supabase's auth service reads these as text, not as nullable text. A
+  -- row inserted without them has nulls, and every sign-in for that user
+  -- fails inside the service before it ever checks the password: the app
+  -- shows "something went wrong on our end" and the log says nothing
+  -- useful. They are empty strings on a real signup too.
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  email_change_token_current, phone_change, phone_change_token,
+  reauthentication_token
 )
 values
   ('00000000-0000-0000-0000-000000000000', '11111111-1111-4111-8111-111111111111', 'authenticated', 'authenticated',
    'tester@attune-relationships.com', crypt('AttuneTest2026', gen_salt('bf')),
-   now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb),
+   now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb,
+   '', '', '', '', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', '22222222-2222-4222-8222-222222222222', 'authenticated', 'authenticated',
    'tester-partner@attune-relationships.com', crypt('AttuneTest2026', gen_salt('bf')),
-   now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb)
+   now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb,
+   '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 
 -- Supabase looks an email sign-in up through identities, not through
@@ -97,8 +108,8 @@ update public.profiles set
   ex2_completed = true, ex2_completed_at = now(),
   ex3_answers = '{"a0":4,"a_sat_conn":4,"a_sat_comm":2,"a_sat_fun":3,"a8":"A sample answer for How We''re Doing, written so the reflection pages have words to show."}'::jsonb,
   ex3_completed = true, ex3_completed_at = now(),
-  intimacy_data = '{"answers":{"iq_freq_want":0.5,"iq_freq_relative":0,"iq_freq_meaning":0.75,"iq_init_who":0,"iq_init_feel":0.5,"iq_init_turndown":0,"iq_comfort_ease":1,"iq_comfort_safe":["desired","privacy"],"iq_comfort_off":0.5,"iq_comm_open":1,"iq_comm_moment":0.5,"iq_comm_debrief":0,"iq_adv_appetite":1,"iq_adv_suggest":0.75,"iq_adv_balance":1,"iq_mean_for":["security","ritual"],"iq_mean_disconnect":0.5,"iq_mean_hope":0},"variant":"married","completedAt":"2026-09-16T21:21:43.249Z"}'::jsonb,
-  conflict_data = '{"answers":{"c0":3,"c1":"b","c2":"a","c_crit":0,"c_cont":1,"c_def":3,"c_stone":2,"c8":"Using humor","c9":"A sample answer for c9, long enough to read like something a person typed.","c_repair":["Directly asking what I need","Suggesting a pause","Naming that they see it from my side","Physical affection (a hug, holding hands)","Humor to break the tension","A genuine apology"],"c_topic":"b","c_grat":"A sample answer for c_grat, long enough to read like something a person typed."},"completedAt":"2026-09-16T21:21:43.250Z"}'::jsonb
+  intimacy_data = '{"answers":{"iq_freq_want":0.5,"iq_freq_relative":0,"iq_freq_meaning":0.75,"iq_init_who":0,"iq_init_feel":0.5,"iq_init_turndown":0,"iq_comfort_ease":1,"iq_comfort_safe":["desired","privacy"],"iq_comfort_off":0.5,"iq_comm_open":1,"iq_comm_moment":0.5,"iq_comm_debrief":0,"iq_adv_appetite":1,"iq_adv_suggest":0.75,"iq_adv_balance":1,"iq_mean_for":["security","ritual"],"iq_mean_disconnect":0.5,"iq_mean_hope":0},"variant":"married","completedAt":"2026-09-16T22:32:51.807Z"}'::jsonb,
+  conflict_data = '{"answers":{"c0":3,"c1":"b","c2":"a","c_crit":0,"c_cont":1,"c_def":3,"c_stone":2,"c8":"Using humor","c9":"A sample answer for c9, long enough to read like something a person typed.","c_repair":["Directly asking what I need","Suggesting a pause","Naming that they see it from my side","Physical affection (a hug, holding hands)","Humor to break the tension","A genuine apology"],"c_topic":"b","c_grat":"A sample answer for c_grat, long enough to read like something a person typed."},"completedAt":"2026-09-16T22:32:51.808Z"}'::jsonb
 where id = '22222222-2222-4222-8222-222222222222';
 
 -- ── The order that pays for it ─────────────────────────────────────────────

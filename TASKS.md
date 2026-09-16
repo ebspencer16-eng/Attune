@@ -42,7 +42,8 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M67 | **`067_test_couple.sql`.** The account you asked for. After you run it, sign in on the simulator as **tester@attune-relationships.com** with the password **AttuneTest2026**. It owns premium and every add-on, it has answered nothing, and its partner has finished all five exercises, so results unlock the moment you finish yours and the workbook builds itself at that moment. Running it twice changes nothing. There is a commented block at the bottom that clears your answers so you can walk through it again. Two inserts in it are wrapped in a way that prints a notice rather than failing the file, because the auth identities table and the orders table have both changed shape across Supabase versions: if you see a notice, tell me which and I will adjust. I have signed the simulator out for you. |
+| M68 | **`068_test_couple_signin_repair.sql`. This is why the tester could not sign in.** 067 made both accounts correctly and left eight columns on them null. Supabase's auth service reads those columns as text rather than as nullable text, so it fails inside itself before it ever checks the password, and the app has no way to tell that from the server being broken: "something went wrong on our end" is exactly what it says. A real signup fills them with empty strings. This does the same for the two test rows and nothing else. 067 has been corrected too, so a fresh run would not need this. |
+| M69 | **`069_deleted_partner_account.sql`.** The login you asked for in Q4: **tester-alone@attune-relationships.com**, same password. Finished, owning everything, with results that open and the other person's name taken out of them, which is what the retention policy promises. It is its own couple rather than a deletion of the tester's partner, because deleting that partner would take the walkthrough with it. The frozen results row in it is built by the product's own results store, so it is the shape the screen will actually be served. |
 
 ### Decide these
 
@@ -54,9 +55,11 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q4 is answered: the behaviour stays as it is, and you
+have a login to see it with, in M69 above.
+
 | # | Question |
 |--|--|
-| Q4 | **"If partner deletes account, results are locked for both partners" contradicts what you publish.** Your retention policy says the opposite, in writing: "If one partner deletes their account, we will anonymize that partner's responses in the joint results display. The other partner retains access to their own responses and the portions of the joint results derived solely from their own answers." It used to work the way you have just asked for, by accident: a cascade in the database deleted the couple's results row, and someone who had paid, finished and read their results opened the app and was told they were waiting for a partner who no longer existed. Migration 059 fixed that on purpose and a gate holds it. So this is not a small backend change: it reverses a published promise and deletes something a paying customer has already been given. **I have not touched it.** The alert copy for a deleted partner is also on hold until you answer, because the sentence you wrote describes the behaviour you are asking for rather than the behaviour today. Tell me which way you want it and I will make the product and the policy agree. |
 
 ## 2. Open
 
@@ -101,9 +104,8 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R102 | **The home tile's lines, listed below this table.** Generated from the priority engine itself, one row per wording a card can show, including the greyed-out versions. Your two new lines are in it, and so is every line I have written that you have not seen yet. |
-| R103 | **The alert copy is yours now.** Two kinds deleted, three rewritten in your words. The one for a deleted partner is held: see Q4 in section 1, because the line you wrote describes results being gone and they are not. Its title is yours already, with the right pronoun. |
-| R104 | **Every prose list is generated from now on**, which is your standing rule. The deletion emails and the workbook are listed below too, and a gate regenerates all of them on every build and fails if the document and the product disagree. Anything I have not listed yet is a gap you can see rather than a claim you cannot check. |
+| R110 | **All eleven home lines are yours**, plus the third row of the tile, which now says what the new publication card says rather than having a second name for the same event. The generated list below shows every one of them. The one line that needs a possessive, "Results unlock once Preston finishes his final exercise", reads the partner's own pronouns. |
+| R111 | **Both deletion emails are your prose.** The greeting line above them is gone, because your version opens with it and the email said it twice. The research sentence is still conditional: someone who opted out before deleting should not be told a copy was kept. |
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
@@ -118,17 +120,17 @@ one row per wording. Sample names are Ellie and Preston.
 
 | Bold line | Line under it | Button |
 |--|--|--|
-| Finish setting up your profile | We still need …. Your results address you both by name throughout. | Set up |
-| Finish Communication | Preston has finished this one. Your results unlock when you do. | Continue |
-| Waiting on Preston | You nudged them recently. Give it a day or two. | View progress |
-| Send Preston a reminder | You are done. Preston has one exercise left, and your results unlock when they finish. | Send a reminder |
+| Finish setting up your profile | We need info to properly set up your exercises | Set up |
+| Complete your exercises | Your results unlock once you and Preston complete your exercises | Continue |
+| Waiting on Preston | You sent a reminder recently | View progress |
+| Send Preston a reminder | Results unlock once Preston finishes his final exercise | Send a reminder |
 | Your results are ready | Insights and guidance based on your responses | Open results |
-| Pick up Communication | You started this. It saves as you go. | Continue |
-| Start Communication | Included with your package. | Start |
-| New in In Practice | Something new to read. | Read |
+| Pick up Communication | This exercise is in progress and status has been saved | Continue |
+| Start a new exercise | You have purchased exercises that you have not completed | Start |
+| New publication to explore | View this and others in your resources tab | Read |
 | Revisit … | You flagged this and have not come back to it. | Open |
-| How is Attune working for you? | Two questions. It shapes what we build next. | Leave feedback |
-| Start budget | Build your budget with a customizable tool | Start |
+| Tell us about your experience | Take a minute to share feedback to help us shape Attune | Leave feedback |
+| Explore build-a-budget | Build your budget with a customizable tool | Start |
 
 The third row of the tile, which is either something of yours to return to
 or something new to read:
@@ -136,7 +138,7 @@ or something new to read:
 | Bold line | Line under it |
 |--|--|
 | Pick up where you left off | one line of what you marked, cut at the margin |
-| Explore something new | the newest In Practice piece, by name |
+| New publication to explore | the newest In Practice piece, by name |
 
 <!-- end copy:home -->
 
@@ -149,8 +151,8 @@ footer each one carries is the shared one and is not repeated here.
 
 | Sent to | Subject | What it says |
 |--|--|--|
-| The person who deleted | Your Attune account is deleted | Your account is deleted Your Attune account has been deleted. Understanding takes intention. Attune Relationships Your account is deleted Ellie, this is the confirmation we promised. Your name, email address, sign-in and every answer you gave are gone from Attune. Two things outlast the account, and you should know what they are. A de-identified copy of your exercise answers, with no name, email or invite code attached. You can ask us to remove it at any time. Your payment record, which is held by Stripe rather than by us, and kept on their schedule to meet financial recordkeeping law. If you had a partner on Attune, they keep their own answers. The parts of your results that came from both of you are gone. If any of that is not what you expected, write to us at hello@attune-relationships.com and a person will answer. This is the last email we will send you. Manage email preferences © 2026 Attune Relationships · attune-relationships.com |
-| Their partner | Preston deleted their Attune account | Preston deleted their Attune account Preston deleted their Attune account. Understanding takes intention. Attune Relationships Preston deleted their Attune account Ellie, this changes part of what you can see. Everything you answered is still yours and still here. The parts of your results that came from both of you are gone, because they were built from answers that no longer exist. We are not able to say why they deleted their account. If you have questions about your own, write to hello@attune-relationships.com. Open Attune Questions? Reply to this email or reach us at hello@attune-relationships.com Manage email preferences © 2026 Attune Relationships · attune-relationships.com |
+| The person who deleted | Your Attune account is deleted | Your account is deleted Your Attune account has been deleted. Understanding takes intention. Attune Relationships Your account is deleted Ellie, this is Attune Relationships confirming that your name, email address, sign-in, and every answer you gave are gone from Attune. Two things outlast the account: A de-identified copy of your exercise answers, with no name, email or invite code attached, and your payment record, which is held by Stripe rather than by us, and kept on their schedule to meet financial recordkeeping law. If you had a partner on Attune, they keep their own answers, but the parts of their results section that came from both of you are gone. If any of that is not what you expected, write to us at hello@attune-relationships.com and a person will answer. This is the last email we will send you. Manage email preferences © 2026 Attune Relationships · attune-relationships.com |
+| Their partner | Preston deleted their Attune account | Preston deleted their Attune account Preston deleted their Attune account. Understanding takes intention. Attune Relationships Preston deleted their Attune account Ellie, this is Attune Relationships writing to let you know that Preston deleted their Attune account. Your account is intact and accessible, but the parts of your results that were produced dependent on Preston's responses are gone, because they were built from answers that no longer exist. We are not able to say why they deleted their account, but if you have questions about your own, please write to hello@attune-relationships.com. Open Attune Questions? Reply to this email or reach us at hello@attune-relationships.com Manage email preferences © 2026 Attune Relationships · attune-relationships.com |
 
 <!-- end copy:deletion-emails -->
 
@@ -247,6 +249,12 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R103 | The alert copy, in Ellie's words |
+| R104 | Generated prose lists as the standing practice |
+| R17 | The workbook moment blocks |
+| R25 | The workbook wording that names both people |
+| R74 | The alert copy list |
+| M67 | The test couple, run |
 | R101 | The workbook lines, with no email promised |
 | R93 | A new mark drawing without a reload |
 | R96 | "All" stopping at the last ten |

@@ -72,9 +72,12 @@ export function pickUp({ note, inPractice } = {}) {
   if (inPractice?.latestId && inPractice?.latestTitle) {
     return {
       kind: 'discover',
-      label: 'Explore something new',
-      title: inPractice.latestTitle,
-      preview: null,
+      // Ellie: "explore something new should just match #8", which is the new
+      // post card in the engine. The same event should not have two names
+      // depending on which row of the tile it lands in.
+      label: 'New publication to explore',
+      title: 'New publication to explore',
+      preview: 'View this and others in your resources tab',
       app: { route: '/resources' },
       deepLink: '/?view=practice',
     };

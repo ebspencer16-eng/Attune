@@ -39,6 +39,10 @@ const fill = (s) => String(s ?? '')
   .replace(/\$\{them\}/g, THEM)
   .replace(/\$\{you\}/g, YOU)
   .replace(/\$\{label\}/g, 'Communication')
+  // The one line that asks for a possessive. Rendering it as an ellipsis made
+  // the table say "finishes … final exercise", which reads as a missing word
+  // rather than as a pronoun that depends on the reader's partner.
+  .replace(/\$\{pronounForm\([^)]*\)\}/g, 'his')
   .replace(/\$\{[^}]+\}/g, '…')
   .replace(/\{U\}/g, YOU)
   .replace(/\{P\}/g, THEM);
@@ -84,9 +88,15 @@ function homeBlock() {
    * Ellie writes one tool at a time, and anything she has not written keeps the
    * generic line. Without this they would be invisible in a list of copy.
    */
-  const blurbs = [...src.matchAll(/const RESOURCE_BLURB = \{([\s\S]*?)\};/g)]
-    .flatMap((m) => [...m[1].matchAll(/(\w+):\s*'([^']*)'/g)])
-    .map((m) => `| Start ${m[1]} | ${esc(m[2])} | Start |`);
+  const lookup = (name) => Object.fromEntries(
+    [...src.matchAll(new RegExp(`const ${name} = \\{([\\s\\S]*?)\\};`, 'g'))]
+      .flatMap((m) => [...m[1].matchAll(/(\w+):\s*'([^']*)'/g)])
+      .map((m) => [m[1], m[2]]),
+  );
+  const titles = lookup('RESOURCE_TITLE');
+  const blurbLines = lookup('RESOURCE_BLURB');
+  const blurbs = [...new Set([...Object.keys(titles), ...Object.keys(blurbLines)])]
+    .map((key) => `| ${esc(titles[key] || 'Start a new exercise')} | ${esc(blurbLines[key] || 'You have purchased exercises that you have not completed')} | Start |`);
 
   // The third row, which has two states of its own.
   const pickUp = readFileSync(`${ROOT}api/_lib/pick-up.js`, 'utf8');

@@ -64,7 +64,7 @@ export default async function handler(req) {
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
     const cols = [
-      'id', 'name', 'pronouns', 'partner_name', 'partner_profile_id', 'pkg',
+      'id', 'name', 'pronouns', 'partner_pronouns', 'partner_name', 'partner_profile_id', 'pkg',
       // Answer columns come from the registry. Selecting them by hand is how a
       // new exercise ends up read as never started: the column is simply not in
       // the select, so it arrives undefined and nothing errors.
@@ -224,6 +224,10 @@ export default async function handler(req) {
       now: new Date().toISOString(),
       firstName: (me.name || '').trim().split(/\s+/)[0] || null,
       partnerName: (partner?.name || '').trim().split(/\s+/)[0] || null,
+      // For the one line that needs a possessive: "Results unlock once Preston
+      // finishes his final exercise". Their own pronouns first, and what this
+      // reader wrote down about them as the fallback.
+      partnerPronouns: partner?.pronouns || me.partner_pronouns || null,
       /**
        * Is the profile actually set up?
        *

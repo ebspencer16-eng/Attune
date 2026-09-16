@@ -59,6 +59,7 @@ import { EXERCISES } from '../_exercises.js';
  * doing nothing. That is honest: the thing genuinely lives there.
  */
 import { SITE_URL as SITE } from './site.js';
+import { pronounForm } from './role-tokens.js';
 
 /**
  * How long a nudge lasts before another one is reasonable.
@@ -78,6 +79,11 @@ export const NUDGE_COOLDOWN_DAYS = 3;
  */
 const RESOURCE_BLURB = {
   budget: 'Build your budget with a customizable tool',
+};
+
+/** The name a resource card leads with, when Ellie has written one. */
+const RESOURCE_TITLE = {
+  budget: 'Explore build-a-budget',
 };
 
 /**
@@ -150,7 +156,7 @@ export function nextActions(state = {}) {
       : 'a couple of details';
     add({ id: 'profile', kind: 'profile_setup', priority: 12,
       title: 'Finish setting up your profile',
-      body: `We still need ${missing}. Your results address you both by name throughout.`,
+      body: 'We need info to properly set up your exercises',
       cta: 'Set up', deepLink: '/?view=profile' });
   }
 
@@ -165,9 +171,8 @@ export function nextActions(state = {}) {
     const e = ex[key];
     if (e?.owned && !e.mine) {
       add({ id: `finish-${key}`, kind: 'finish_exercise', priority: 10,
-        title: `Finish ${label}`,
-        body: e.theirs ? `${them} has finished this one. Your results unlock when you do.`
-                       : 'About 20 minutes. Your answers stay yours until you both finish.',
+        title: 'Complete your exercises',
+        body: `Your results unlock once you and ${them} complete your exercises`,
         cta: 'Continue', deepLink: `/?view=${link}` });
       break; // one exercise at a time, in order
     }
@@ -188,8 +193,8 @@ export function nextActions(state = {}) {
     add({ id: 'nudge-partner', kind: 'nudge_partner', priority: 9,
       title: nudgedRecently ? `Waiting on ${them}` : `Send ${them} a reminder`,
       body: nudgedRecently
-        ? `You nudged them recently. Give it a day or two.`
-        : `You are done. ${them} has one exercise left, and your results unlock when they finish.`,
+        ? 'You sent a reminder recently'
+        : `Results unlock once ${them} finishes ${pronounForm(state.partnerPronouns, 'pos')} final exercise`,
       cta: nudgedRecently ? 'View progress' : 'Send a reminder',
       disabled: nudgedRecently,
       /**
@@ -218,10 +223,13 @@ export function nextActions(state = {}) {
     const r = res[key];
     if (r?.owned && !r.complete) {
       add({ id: `use-${key}`, kind: 'use_resource', priority: 7,
-        title: r.started ? `Pick up ${label}` : `Start ${label}`,
-        // Ellie's words for the budget. The others keep the generic line until
-        // she writes one, which is why this is a lookup rather than a rewrite.
-        body: r.started ? 'You started this. It saves as you go.' : (RESOURCE_BLURB[key] || 'Included with your package.'),
+        title: r.started ? `Pick up ${label}` : (RESOURCE_TITLE[key] || 'Start a new exercise'),
+        // Ellie's words. The started line is the same for every tool; the
+        // other one is per tool, and anything she has not written keeps the
+        // general sentence rather than something invented for it.
+        body: r.started
+          ? 'This exercise is in progress and status has been saved'
+          : (RESOURCE_BLURB[key] || 'You have purchased exercises that you have not completed'),
         cta: r.started ? 'Continue' : 'Start', deepLink: `/?view=${link}` });
       break;
     }
@@ -230,8 +238,8 @@ export function nextActions(state = {}) {
   // 6. A new In Practice post they have not read.
   if (ip.latestId && ago(ip.latestPublishedAt) < 30 && ago(ip.lastReadAt) > ago(ip.latestPublishedAt)) {
     add({ id: 'new-post', kind: 'new_post', priority: 5,
-      title: 'New in In Practice',
-      body: ip.latestTitle || 'Something new to read.',
+      title: 'New publication to explore',
+      body: 'View this and others in your resources tab',
       cta: 'Read', deepLink: `/?view=practice&post=${ip.latestId}` });
   }
 
@@ -252,8 +260,8 @@ export function nextActions(state = {}) {
   //    rate you is noise; asking a regular is a fair request.
   if ((state.opens30d || 0) >= 5 && !state.feedbackGivenAt) {
     add({ id: 'feedback', kind: 'feedback', priority: 2,
-      title: 'How is Attune working for you?',
-      body: 'Two questions. It shapes what we build next.',
+      title: 'Tell us about your experience',
+      body: 'Take a minute to share feedback to help us shape Attune',
       // A page, not a view. /?view=feedback drew the header and nothing else.
       cta: 'Leave feedback', deepLink: '/feedback' });
   }
