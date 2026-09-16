@@ -221,7 +221,7 @@ export default async function handler(req) {
  * nothing.
  */
 async function announceIfComplete({ admin, userId, exerciseKey }) {
-  const cols = ['id', 'name', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
+  const cols = ['id', 'name', 'pronouns', 'partner_pronouns', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
 
   const { data: me } = await admin.from('profiles').select(cols).eq('id', userId).maybeSingle();
   if (!me?.partner_profile_id) return;
@@ -245,7 +245,12 @@ async function announceIfComplete({ admin, userId, exerciseKey }) {
     ownerId: them.id,
     kind: 'partner_finished',
     subjectId: me.id,
-    copy: { partnerName: firstName(me.name) },
+    copy: {
+      partnerName: firstName(me.name),
+      // The alert is about me, so it takes my pronouns. What my partner wrote
+      // down about me is the fallback, and they/them is the fallback for that.
+      partnerPronouns: me.pronouns || them.partner_pronouns,
+    },
   });
 
   // The other thing that becomes true at this moment.

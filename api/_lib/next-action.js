@@ -70,6 +70,17 @@ import { SITE_URL as SITE } from './site.js';
 export const NUDGE_COOLDOWN_DAYS = 3;
 
 /**
+ * What a resource card says under its title, when it has not been started.
+ *
+ * Ellie's words, one at a time. Anything not named here keeps the generic
+ * line, which is the honest default: a blurb invented for a tool nobody has
+ * described is the product speaking for her.
+ */
+const RESOURCE_BLURB = {
+  budget: 'Build your budget with a customizable tool',
+};
+
+/**
  * The website address for a deepLink.
  *
  * Two shapes reach here. `/?view=budget` is a view inside the portal and
@@ -197,7 +208,7 @@ export function nextActions(state = {}) {
   if (state.resultsReady && !state.resultsLastOpenedAt) {
     add({ id: 'open-results', kind: 'open_results', priority: 8,
       title: 'Your results are ready',
-      body: `Everything you and ${them} answered, side by side.`,
+      body: 'Insights and guidance based on your responses',
       cta: 'Open results', deepLink: '/?view=results' });
   }
 
@@ -208,7 +219,9 @@ export function nextActions(state = {}) {
     if (r?.owned && !r.complete) {
       add({ id: `use-${key}`, kind: 'use_resource', priority: 7,
         title: r.started ? `Pick up ${label}` : `Start ${label}`,
-        body: r.started ? 'You started this. It saves as you go.' : 'Included with your package.',
+        // Ellie's words for the budget. The others keep the generic line until
+        // she writes one, which is why this is a lookup rather than a rewrite.
+        body: r.started ? 'You started this. It saves as you go.' : (RESOURCE_BLURB[key] || 'Included with your package.'),
         cta: r.started ? 'Continue' : 'Start', deepLink: `/?view=${link}` });
       break;
     }

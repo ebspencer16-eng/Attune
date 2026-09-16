@@ -39,7 +39,30 @@ const problems = [];
 const BODY = Math.max(0, api.indexOf('export default'));
 const at = (needle) => { const i = api.indexOf(needle, BODY); return i < 0 ? -1 : i; };
 
-const readAddresses = at('select(\'name, email, partner_profile_id\')');
+/**
+ * The read that gets the names and addresses, whatever else it also selects.
+ *
+ * This matched the select list character for character, so adding one column
+ * to it failed the build with "the names and addresses are never read", which
+ * is a gate describing the state of one line rather than the rule it cares
+ * about. The rule is that a profile's name and email are in hand before the
+ * auth user goes.
+ */
+const readAddresses = (() => {
+  const re = /\.select\((['"`])([^'"`]*)\1\)/g;
+  re.lastIndex = BODY;
+  for (let m = re.exec(api); m; m = re.exec(api)) {
+    if (!/\bname\b/.test(m[2]) || !/\bemail\b/.test(m[2])) continue;
+    // The person being deleted, not their partner. Both rows are read here and
+    // both carry a name and an email, so matching either would pass with the
+    // deleter's own read gone, which is the read this is about: their address
+    // is the one the auth delete takes away.
+    if (/\.eq\(\s*['"`]id['"`]\s*,\s*userId\s*\)/.test(api.slice(m.index, m.index + 200))) {
+      return m.index;
+    }
+  }
+  return -1;
+})();
 const deleteUser = at('auth.admin.deleteUser');
 const confirmation = at('deletionConfirmationEmail');
 const partnerEmail = at('partnerDeletedEmail');

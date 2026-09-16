@@ -20,6 +20,8 @@
  * Attune is not a daily product and should not behave like one.
  */
 
+import { pronounForm } from './role-tokens.js';
+
 const DAY = 24 * 60 * 60 * 1000;
 export const COOLDOWN_DAYS = 4;
 export const MAX_PER_MONTH = 4;
@@ -29,12 +31,9 @@ export const MAX_PER_MONTH = 4;
 const PUSHABLE = {
   // Something changed while they were away, and it unlocks the product.
   partner_finished:  { urgency: 10, quiet: false },
-  results_ready:     { urgency: 10, quiet: false },
   // Their partner asked for them, which is a person waiting, not us.
   partner_nudged_you:{ urgency: 9,  quiet: false },
   partner_shared:    { urgency: 8,  quiet: false },
-  // Genuinely new content, at most monthly, and only if they read the last one.
-  new_post:          { urgency: 3,  quiet: true },
   // Something changed that they cannot find out any other way, and that
   // changes what is in the product for them. Quiet: it is not good news and it
   // does not need to arrive with a sound.
@@ -88,20 +87,29 @@ export function shouldNotify(event, history = {}, now = Date.now()) {
   };
 }
 
-/** Events the server can raise, with copy. No urgency language, no guilt. */
-export function notificationFor(kind, { partnerName, postTitle, dimensionLabel } = {}) {
+/**
+ * Events the server can raise, with copy. No urgency language, no guilt.
+ *
+ * ── THE WORDS ARE ELLIE'S ─────────────────────────────────────────────────
+ * She read them in TASKS.md, where they are listed by a generator rather than
+ * typed, and sent back the ones she wanted changed. Two kinds went entirely:
+ * results_ready and new_post, because the home screen already carries a card
+ * for each and an alert above it is the same sentence printed twice.
+ *
+ * `partnerPronouns` is here for the one line that needs a possessive. A name
+ * does not tell you a pronoun; the profile does, and pronounForm falls back to
+ * they/them, which is the form that is never wrong about a person.
+ */
+export function notificationFor(kind, { partnerName, partnerPronouns, dimensionLabel } = {}) {
   const them = partnerName || 'Your partner';
+  const pos = pronounForm(partnerPronouns, 'pos');
   switch (kind) {
     case 'partner_finished':
-      return { kind, title: `${them} finished`, body: 'Your results are ready to open together.', deepLink: '/?view=results' };
-    case 'results_ready':
-      return { kind, title: 'Your results are ready', body: 'Everything you both answered, side by side.', deepLink: '/?view=results' };
+      return { kind, title: `${them} completed ${pos} exercises`, body: 'Explore your results', deepLink: '/?view=results' };
     case 'partner_nudged_you':
-      return { kind, title: `${them} is waiting on you`, body: 'One exercise left before your results unlock.', deepLink: '/?view=home' };
+      return { kind, title: `${them} sent you a nudge`, body: 'Complete your exercises to unlock your results', deepLink: '/?view=home' };
     case 'partner_shared':
       return { kind, title: `${them} shared something with you`, body: dimensionLabel ? `A note on ${dimensionLabel}.` : 'A note from your results.', deepLink: '/?view=notes' };
-    case 'new_post':
-      return { kind, title: 'New in In Practice', body: postTitle || 'Something new to read.', deepLink: '/?view=practice' };
     /**
      * Their partner deleted their account.
      *
@@ -113,12 +121,21 @@ export function notificationFor(kind, { partnerName, postTitle, dimensionLabel }
      * that the joint parts of their results are gone. Everything they answered
      * themselves is still theirs.
      *
-     * Wording is mine. Ellie's to edit.
+     * ── THE TITLE IS ELLIE'S, THE LINE UNDER IT IS NOT YET ──────────────
+     * She rewrote both. The title is hers and is here. The line she wrote for
+     * underneath says the couple's results experience is now unavailable, and
+     * that is not what happens: the retention policy promises the survivor
+     * keeps their results with the departed partner anonymised, and migration
+     * 059 made that true after a cascade had been quietly deleting them.
+     *
+     * So the old line stands until she answers Q4 in TASKS.md. Shipping her
+     * sentence now would tell someone their results are gone while they are
+     * still there, which is worse than either outcome she is choosing between.
      */
     case 'partner_deleted':
       return {
         kind,
-        title: `${them} deleted their Attune account`,
+        title: `${them} deleted ${pos} Attune account`,
         body: 'Your own answers are still here. The parts of your results that came from both of you are not.',
         deepLink: '/?view=home',
       };

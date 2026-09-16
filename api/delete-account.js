@@ -114,10 +114,10 @@ export default async function handler(req) {
   const notify = { self: null, partner: null };
   try {
     const { data: me } = await admin.from('profiles')
-      .select('name, email, partner_profile_id')
+      .select('name, email, pronouns, partner_profile_id')
       .eq('id', userId)
       .maybeSingle();
-    notify.self = { name: me?.name || null, email: me?.email || caller.email || null };
+    notify.self = { name: me?.name || null, email: me?.email || caller.email || null, pronouns: me?.pronouns || null };
     if (me?.partner_profile_id) {
       const { data: them } = await admin.from('profiles')
         .select('id, name, email, email_opt_in')
@@ -335,7 +335,10 @@ export default async function handler(req) {
         ownerId: notify.partner.id,
         kind: 'partner_deleted',
         subjectId: userId,
-        copy: { partnerName: notify.partner.theirName },
+        copy: {
+          partnerName: notify.partner.theirName,
+          partnerPronouns: notify.self?.pronouns,
+        },
       });
       // email_opt_in is honoured here the way the crons honour it. Someone who
       // asked us to stop emailing them has asked for that, and this is not an

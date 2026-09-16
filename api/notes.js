@@ -73,7 +73,7 @@ export default async function handler(req) {
     const rest = (path, init) => fetch(`${supabaseUrl}/rest/v1/${path}`, init);
 
     // Partner, for the couple key and for reading what they shared.
-    const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
+    const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,pronouns,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
     const profile = (await pRes.json().catch(() => []))?.[0] || {};
     const partnerId = profile.partner_profile_id || null;
     const coupleKey = partnerId ? coupleKeyOf(me, partnerId) : null;
@@ -391,6 +391,7 @@ export default async function handler(req) {
           subjectId: created.id,
           copy: {
             partnerName: (profile.name || '').trim().split(/\s+/)[0] || null,
+            partnerPronouns: profile.pronouns,
             dimensionLabel: RESULTS_SECTION_LABELS[created.anchor_key] || null,
           },
         });
@@ -471,6 +472,7 @@ export default async function handler(req) {
           subjectId: rows[0].id,
           copy: {
             partnerName: (profile.name || '').trim().split(/\s+/)[0] || null,
+            partnerPronouns: profile.pronouns,
             dimensionLabel: RESULTS_SECTION_LABELS[rows[0].anchor_key] || null,
           },
         });

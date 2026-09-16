@@ -45,18 +45,25 @@ function peek(text) {
  */
 export function pickUp({ note, inPractice } = {}) {
   if (note) {
-    // A note's title is optional. When there is none the anchored thing names
-    // it, and when it is loose the first words of the body do.
-    const title = (note.title || '').trim()
-      || (note.anchor_context || '').trim()
-      || peek(note.body)
-      || 'Your note';
+    /**
+     * ── WHAT THE ROW SAYS, AND WHAT IT SHOWS ────────────────────────────
+     * Ellie: "I would like for the prompt to revisit a note/mark to instead
+     * read 'Pick up where you left off' as the bold subject line then 1 line of
+     * the text I highlighted/marked/selected as the grey text."
+     *
+     * So the bold line is the same four words every time, and the grey line is
+     * what she marked. The row used to put her own marked text in bold and her
+     * note underneath, which reads as a quotation with a comment: two pieces of
+     * her writing and nothing saying what the row is for.
+     *
+     * The marked text first, because that is the thing she pointed at. A loose
+     * note has none, so its own words stand in.
+     */
     return {
       kind: 'resume',
       label: 'Pick up where you left off',
-      title,
-      // Not repeated when the title already is the body's opening words.
-      preview: title === peek(note.body) ? null : peek(note.body),
+      title: 'Pick up where you left off',
+      preview: peek(note.anchor_context) || peek(note.body) || (note.title || '').trim() || null,
       app: { route: '/notes' },
       deepLink: '/?view=notes',
     };

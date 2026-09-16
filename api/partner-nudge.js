@@ -68,7 +68,7 @@ export default async function handler(req) {
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
     const rest = (p, init) => fetch(`${supabaseUrl}/rest/v1/${p}`, init);
 
-    const pRes = await rest(`profiles?id=eq.${me}&select=id,name,partner_profile_id,partner_nudged_at`, { headers: svc });
+    const pRes = await rest(`profiles?id=eq.${me}&select=id,name,pronouns,partner_profile_id,partner_nudged_at`, { headers: svc });
     const profile = (await pRes.json().catch(() => []))?.[0] || null;
     if (!profile) return json({ ok: false, error: 'no profile' }, 404);
     if (!profile.partner_profile_id) return json({ ok: false, error: 'no partner linked' }, 400);
@@ -95,7 +95,10 @@ export default async function handler(req) {
       ownerId: profile.partner_profile_id,
       kind: 'partner_nudged_you',
       subjectId: me,
-      copy: { partnerName: (profile.name || '').trim().split(/\s+/)[0] || null },
+      copy: {
+        partnerName: (profile.name || '').trim().split(/\s+/)[0] || null,
+        partnerPronouns: profile.pronouns,
+      },
     });
 
     return json({ ok: true, sent: true, recorded, nudgedAt });
