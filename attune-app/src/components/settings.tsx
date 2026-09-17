@@ -15,6 +15,8 @@
  */
 
 import { useEffect, useState } from 'react';
+import Constants from 'expo-constants';
+import * as Updates from 'expo-updates';
 import {
   ActivityIndicator, Linking, Modal, Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
@@ -196,6 +198,20 @@ export default function Settings({
 
       <ExerciseStatus />
 
+      {/* ── WHICH VERSION IS THIS ───────────────────────────────────────────
+          Ellie, with the app on her phone: "Not seeing the changes in my app on
+          my phone, what do I need to do for that?"
+
+          A fair question with no answer on the screen. The app checks for new
+          code when it opens, downloads it in the background, and runs it the
+          next time it opens, so a change is one launch behind and there was
+          nothing anywhere saying which code was running. This line says it: the
+          version, the build, and when the running update was published.
+
+          It reads "development" in Expo Go, where updates are switched off, so
+          it never claims something the simulator cannot know. */}
+      <AppVersion />
+
       {/* ── Delete account ──────────────────────────────────────────────────
           Quiet, and last on the screen. The first version was a bordered card
           of warning text directly under the other settings, which put an
@@ -346,5 +362,35 @@ function Row({ label, onPress, last }: { label: string; onPress: () => void; las
       <Text style={{ ...Type.body, color: c.text }}>{label}</Text>
       <Text style={{ ...Type.body, color: c.textMuted }}>{'›'}</Text>
     </Pressable>
+  );
+}
+
+/**
+ * What is running, in one quiet line.
+ *
+ * Nothing here is a setting. It is the line support asks for and the line that
+ * answers "have I got the new one yet".
+ */
+function AppVersion() {
+  const version = Constants.expoConfig?.version || '';
+  const build = Constants.expoConfig?.ios?.buildNumber || '';
+  /**
+   * Updates.createdAt is when the running bundle was published. In Expo Go and
+   * on a build made before updates existed it is null, which is the honest
+   * answer rather than today's date.
+   */
+  const published = Updates.createdAt
+    ? Updates.createdAt.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+    : null;
+
+  return (
+    <View style={{ marginTop: Spacing.xxl, alignItems: 'center' }}>
+      <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
+        {`Attune ${version}${build ? ` (${build})` : ''}`}
+      </Text>
+      <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: 2 }}>
+        {published ? `Updated ${published}` : 'Development build'}
+      </Text>
+    </View>
   );
 }
