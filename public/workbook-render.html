@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!-- The page is laid out for print, 794 points wide. Telling a phone the
+     viewport is that wide makes it show the whole page scaled to fit, which is
+     what a document should do on a phone: legible at a glance, readable by
+     pinching. width=device-width instead cut the cover in half, because the
+     cover's type is sized in points for paper. Desktop is unaffected. -->
+<meta name="viewport" content="width=820"/>
 <title>Attune Workbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>

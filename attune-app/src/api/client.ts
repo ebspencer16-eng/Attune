@@ -1672,7 +1672,18 @@ export type WorkbookView = {
 };
 
 export async function fetchWorkbookView() {
-  return request<{ ok: true; data: WorkbookView }>('/api/workbook-view');
+  /**
+   * The payload is unwrapped here rather than at the call site.
+   *
+   * `request` hands back the whole response body as `data`, so the endpoint's
+   * own `data` field sits one level further in than it looks. Reading
+   * `view.data.p1` therefore gave undefined, and the workbook page fell back
+   * to its placeholders: the cover read "Partner A & Partner B" with a screen
+   * full of correct data sitting one key away.
+   */
+  const res = await request<{ ok: true; data: WorkbookView }>('/api/workbook-view');
+  if (!res.ok) return res;
+  return { ok: true as const, data: res.data.data };
 }
 
 /** Expectations. A different shape from ex1, so it gets its own reader. */
