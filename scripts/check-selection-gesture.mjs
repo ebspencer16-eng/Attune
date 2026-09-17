@@ -35,10 +35,30 @@ import { readFileSync } from 'node:fs';
 const ROOT = new URL('..', import.meta.url).pathname;
 const file = 'attune-app/src/components/annotatable.tsx';
 const src = readFileSync(ROOT + file, 'utf8');
+/**
+ * The file with its comments taken out.
+ *
+ * It was declared halfway down, for the PanResponder check. The frame check
+ * needs it too: planted against by commenting the frame line out, and the
+ * first version of that check passed, because the words had stopped measuring
+ * themselves while the text was still in the file. A gate that reads
+ * commented-out code is reading a description of the product.
+ */
+const code = src.replace(/\/\*[\s\S]*?\*\//g, '')
+  .split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+
 const fails = [];
 
-/** 1. Per-word frames. */
-if (!/onLayout=\{\(e\) => \{ frames\.current\.set/.test(src)) {
+/**
+ * 1. Per-word frames.
+ *
+ * Matched on the thing rather than on its formatting. This was pinned to the
+ * exact one-line handler, so adding a second statement inside it, which is
+ * what reporting a mark's position to the margin needed, read as the words
+ * having stopped measuring themselves. The rule is that a word's onLayout puts
+ * its frame in the map; how many lines that takes is not the rule.
+ */
+if (!/onLayout=\{\(e\) => \{[\s\S]{0,400}?frames\.current\.set\(/.test(code)) {
   fails.push('words do not report their own frames, so a drag cannot know which word it is over');
 }
 if (!/flexWrap: 'wrap'/.test(src)) {
@@ -46,8 +66,6 @@ if (!/flexWrap: 'wrap'/.test(src)) {
 }
 
 /** 2. The drag, and the wait before it. */
-const code = src.replace(/\/\*[\s\S]*?\*\//g, '')
-  .split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l)).join('\n');
 if (/PanResponder/.test(code)) {
   fails.push('this is back on a PanResponder, which a ScrollView beats on iOS: the move is never seen');
 }

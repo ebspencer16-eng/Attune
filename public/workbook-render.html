@@ -107,6 +107,19 @@
 </head>
 <body>
 
+<button id="save-pdf" type="button">Save as PDF</button>
+<style>
+  /* A control, not part of the document: it sits out of the way on screen and
+     is not printed. The app opens this page full screen, so this is how a
+     reader gets the file onto their phone. */
+  #save-pdf {
+    position: fixed; right: 16px; bottom: 16px; z-index: 10;
+    font-family: var(--bfont); font-size: 11pt; font-weight: 600;
+    color: white; background: var(--indigo); border: none; border-radius: 10px;
+    padding: 12px 18px; cursor: pointer; box-shadow: 0 6px 20px rgba(27,95,232,0.3);
+  }
+  @media print { #save-pdf { display: none; } }
+</style>
 <script>
 // Parse workbook data from URL params
 const params = new URLSearchParams(window.location.search);
@@ -310,6 +323,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // Also set immediately in case DOMContentLoaded already fired
 document.body.classList.add('workbook-ready');
+/**
+ * The same builder the website uses.
+ *
+ * src/App.jsx loads html2pdf from this CDN and prints this page with these
+ * options. Doing it here means the app gets the identical file without a
+ * second renderer anywhere, which is the whole point of the app opening this
+ * page rather than drawing its own.
+ */
+document.getElementById('save-pdf').addEventListener('click', async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  button.textContent = 'Building...';
+  try {
+    if (!window.html2pdf) {
+      await new Promise((ok, fail) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = ok;
+        script.onerror = fail;
+        document.head.appendChild(script);
+      });
+    }
+    const safe = (name) => String(name || 'Attune').replace(/\s+/g, '_');
+    await window.html2pdf().set({
+      margin: [10, 14],
+      filename: `Attune_Workbook_${safe(p1)}_and_${safe(p2)}.pdf`,
+      image: { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css'] },
+    }).from(document.body).save();
+    button.textContent = 'Save as PDF';
+  } catch (err) {
+    console.warn('[workbook] could not build the PDF', err);
+    button.textContent = 'Could not build it';
+  }
+  button.disabled = false;
+});
 </script>
 </body>
 </html>

@@ -303,6 +303,28 @@ reach a stubbed `fetch`, and counting the calls, is what made the ordering
 visible. If a gate is about when something happens, the thing has to be able to
 happen.
 
+**Before building a renderer, find out whether one exists.** Ellie asked for
+the workbook to open in the app. I converted the .docx into HTML, then into a
+PDF, wrote a font pipeline for it, and shipped both. Her answer: "This does not
+look like the workbook we render on the site. Please use the exact same pdf
+builder."
+
+`public/workbook-render.html` had been there the whole time. It is the
+workbook: a designed page the website hands a payload to and prints, through
+`api/generate-pdf.js` when Browserless is configured and html2pdf in the
+browser when it is not. Two greps would have found it. Instead there were two
+workbooks for a day, and the one the app showed was the wrong one.
+
+The rule this file already states, pointed at myself: a second renderer of
+anything is the same failure as a second copy of a rule. The question to ask
+before writing one is not "how would I build this" but "what already builds
+this", and the answer lives in `api/` and `public/` more often than it looks.
+
+`check-workbook-view.mjs` now holds the one page to its two callers: the app's
+payload, the website's payload and the keys the page reads are the same set,
+and a caller that drops one fails the build rather than rendering a workbook
+with a blank half.
+
 **A page that shows people what the product does is a copy of the product.**
 /email-preview held six hand-written mock-ups of emails while the product sent
 nineteen from five modules. Five real emails had no preview at all, one

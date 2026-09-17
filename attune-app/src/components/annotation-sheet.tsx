@@ -76,7 +76,13 @@ export default function AnnotationSheet({
    */
   openOn?: Step;
   /** Told what was created, so the page can paint the mark without refetching. */
-  onSaved: (created: { id: string; kind: AnnotationKind; color: string | null; text: string }) => void;
+  onSaved: (created: {
+    id: string;
+    kind: AnnotationKind;
+    color: string | null;
+    text: string;
+    tagIds?: string[];
+  }) => void;
 }) {
   const [step, setStep] = useState<Step>(openOn || 'menu');
   const [body, setBody] = useState('');
@@ -124,6 +130,14 @@ export default function AnnotationSheet({
       kind: opts.kind,
       color: opts.color ?? null,
       text: sentence,
+      /**
+       * Ellie: "Just left a tag and it put a note icon." The margin shows a
+       * tag icon for a tagged mark and a pencil for a note, and it reads that
+       * off the mark's tags. This object is the mark until the next load, and
+       * it was leaving the tags behind, so a tag looked like a note until the
+       * screen was reopened.
+       */
+      tagIds: picked.length ? picked : undefined,
     });
     onClose();
   };

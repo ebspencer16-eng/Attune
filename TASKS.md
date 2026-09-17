@@ -49,8 +49,7 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
-| M72 | **TestFlight, step by step: `app/TESTFLIGHT.md`.** Everything that does not need your credentials is done and committed: eas.json with a production profile, the bundle id, the team id, the icons and the privacy manifest. What is left is an Expo account, an Apple login, and Apple's own questions, none of which I can or should do for you. The walkthrough is one command at a time with what each one asks and what to answer. The first build takes ten to twenty minutes on their machines; the whole run is about an hour including Apple's processing. Send me anything red. |
-| O208 | **A table rather than buttons, if you still want one.** You: "I want expectations exercise in the app to have a table like the site mobile experience. Not a million pill shaped buttons." The pills went yesterday: the app draws the site's cards now, with four fixed columns that line up down the page. Look at it before I build a third version, and if you still want the column headings across the top, say so and it is an afternoon. |
+| M72 | **TestFlight: you are at step 4 of `app/TESTFLIGHT.md`.** Steps 1 to 3 are done: you are logged in as attune-relationships and the project exists, which is why app.json now carries a project id (committed). Step 4 is the two Supabase values, and they are not there yet: I checked the production environment and it is empty. A build without them installs fine and signs nobody in. |
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
@@ -91,10 +90,10 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R165 | **The workbook is a PDF now.** Converted from the document that was actually generated, so there is still only one workbook, and set in our own faces with page numbers. Zoom, share and print are the phone's own. What does not survive the conversion is colour and the page furniture: Word carries those as run properties and tables of coloured cells, and none of it is in what a converter reads. |
-| R166 | **The margin marker sits in the margin** and takes its colour from the prose it belongs to: white on the coloured grounds where you could not see it, ink on the cream ones where white would be nothing. It reserves no width, so nothing moves. |
-| R167 | **A note is private or shared on the note itself**, with the partner named under the switch. Private by default. Sharing was a separate action on the menu, so writing a note and then wanting it seen meant closing the sheet and selecting the words again. |
-| R168 | **Physical Intimacy asks the couple, not the profile.** One framing question, answered by whoever gets there first, carried over for both, which is what the website has always done and what you described. The app was deciding from the relationship status instead, so a couple could be asked one way on one surface and the other way on the other, and the results then compared answers to two different questions. The app never sees the partner's answers to find this out: the server projects the single field. |
+| R169 | **The workbook is the website's own page now.** You were right: what I had built was a second renderer, and it looked like one. The app opens public/workbook-render.html, the page the website designs and prints, with this couple's data from the server. There is a Save as PDF button on it that runs the same html2pdf the website runs, so the file is the same file. A gate holds the page to both callers. |
+| R170 | **The margin icon sits on the mark's own line** and shows a tag for a tag. It was pinned to the top of the paragraph, and a mark made just now was leaving its tags behind, so a tag looked like a note until the screen was reopened. |
+| R171 | **That warning is gone.** The scroll-to-a-mark measurement used an API the new React Native architecture warns about on every call. It measures two windows and reads the page's own offset instead, which is the same number with nothing deprecated in it. Worth trying R112 again: open a mark from Notes and see whether it lands on the line. |
+| R172 | **Updates reach an installed build without rebuilding.** expo-updates is in, the channels are configured, and app/TESTFLIGHT.md has a section answering exactly this. Sixteen Expo packages were a patch behind and are now at the versions the SDK expects; the app runs in the simulator unchanged. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -118,7 +117,6 @@ receive a notification from Apple's servers.
 
 | # | Review |
 |--|--|
-| R112 | **Opening a mark lands on the line.** Every results page now shares one scroll view, and the paragraph holding the marked words asks it to scroll there once, after layout, with a little headroom above. I have not been able to drive this end to end myself: it needs a mark on a results section and a tap, and my synthetic taps have been landing in the wrong place all week. Worth a try from the Notes tab on a results mark. |
 | R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
 
 
@@ -135,6 +133,8 @@ receive a notification from Apple's servers.
 | R138 | An exercise in progress is counted properly |
 | R139 | The household page's arrows |
 | R123 | An opening page for every exercise, both surfaces |
+| R167 | Private or shared on the note itself |
+| R168 | Physical Intimacy asks the couple |
 | R163 | Expects or Experienced, by a switch |
 | R164 | The finding and the mark centred in the gap |
 | R113 | The status table's columns line up |

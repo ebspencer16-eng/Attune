@@ -154,7 +154,25 @@ export function Prose({
     scrollIntoResultsView(block.current);
   };
 
-  const body = <Annotatable text={text} style={style} marks={marks} onSelect={select} onRemove={remove} />;
+  /**
+   * Where the marks sit inside this paragraph, once it has been laid out.
+   *
+   * Ellie: "Placement should be in line with the note itself (or the top of
+   * the selected text)." The marker was pinned to the top of the paragraph,
+   * which on a six line paragraph with a note on the last line points at the
+   * wrong sentence.
+   */
+  const [markTops, setMarkTops] = useState<Map<string, number> | null>(null);
+  const body = (
+    <Annotatable
+      text={text}
+      style={style}
+      marks={marks}
+      onSelect={select}
+      onRemove={remove}
+      onMarkTops={setMarkTops}
+    />
+  );
   if (!silent.length) {
     return holdsFocus
       ? <View ref={block} onLayout={onLaidOut}>{body}</View>
@@ -203,11 +221,24 @@ export function Prose({
    */
   const markerColor = textIsLight(style) ? Palette.white : tone.ink;
 
+  /**
+   * The line the marker sits on: the first line of the first mark that has
+   * something to announce, and the top of the paragraph until the words have
+   * measured themselves.
+   */
+  const markerTop = silent.reduce((top, m) => {
+    const y = markTops?.get(m.id);
+    return y == null ? top : Math.min(top, y);
+  }, Number.POSITIVE_INFINITY);
+
   return (
     <View ref={block} onLayout={onLaidOut}>
       <View
         pointerEvents="none"
-        style={{ position: 'absolute', right: -MARGIN_OUTSIDE, top: 3 }}>
+        style={{
+          position: 'absolute', right: -MARGIN_OUTSIDE,
+          top: Number.isFinite(markerTop) ? markerTop + 2 : 3,
+        }}>
         <SymbolView
           name={(tagged ? 'tag' : 'square.and.pencil') as never}
           size={13}
@@ -333,6 +364,9 @@ export function AnnotationProvider({
               anchor_version: null,
               kind: created.kind,
               color: created.color,
+              // The tags come with it, so the margin draws a tag icon for a
+              // tag straight away rather than a pencil until the next load.
+              tagIds: created.tagIds,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             } as Note);

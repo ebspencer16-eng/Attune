@@ -21,9 +21,7 @@ export const config = { runtime: 'nodejs' };
 import { SITE_URL } from './_lib/site.js';
 
 import { safeError } from './_lib/http.js';
-import { buildWorkbookPayload } from './_lib/workbook-payload.js';
-import { coupleResults } from './_lib/results.js';
-import { COUPLE_TYPES } from './_couple-types.js';
+import { payloadForCouple } from './_lib/workbook-couple.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -223,52 +221,3 @@ export default async function handler(req, res) {
   }
 }
 
-/**
- * Everything the generator needs, from one person's id.
- *
- * Both profiles, both sets of answers, the couple type, and the order the file
- * belongs to. Returns null when there is not enough to build a workbook worth
- * sending: a half-answered one is worse than none, which is the rule the
- * website's trigger already applied.
- */
-async function payloadForCouple({ supabaseUrl, serviceKey, userId }) {
-  const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
-  const get = async (path) => {
-    const r = await fetch(`${supabaseUrl}/rest/v1/${path}`, { headers: svc });
-    if (!r.ok) return null;
-    return (await r.json().catch(() => []))?.[0] || null;
-  };
-
-  const cols = 'id,name,partner_profile_id,ex1_answers,ex2_answers';
-  const me = await get(`profiles?id=eq.${userId}&select=${cols}`);
-  if (!me?.partner_profile_id) return null;
-  const them = await get(`profiles?id=eq.${me.partner_profile_id}&select=${cols}`);
-  if (!them) return null;
-
-  const has = (a) => !!a && Object.keys(a).length > 0;
-  if (!has(me.ex1_answers) || !has(them.ex1_answers)) return null;
-  if (!has(me.ex2_answers) || !has(them.ex2_answers)) return null;
-
-  const results = coupleResults({
-    aAnswers: me.ex1_answers, bAnswers: them.ex1_answers,
-    aName: me.name, bName: them.name,
-  });
-  const coupleType = COUPLE_TYPES.find((t) => t.id === results?.coupleType) || null;
-
-  // The order the file is filed under: the buyer's, which for an invitee is
-  // their partner's. Whichever row carries the workbook add-on.
-  const order = await get(
-    `orders?or=(user_id.eq.${me.id},user_id.eq.${them.id})&addon_workbook=not.is.null`
-    + '&select=order_num,workbook_url&order=created_at.desc&limit=1',
-  );
-
-  return {
-    ...buildWorkbookPayload(
-      me.name || 'Partner A', them.name || 'Partner B',
-      me.ex1_answers, them.ex1_answers,
-      me.ex2_answers, them.ex2_answers,
-      coupleType,
-    ),
-    orderId: order?.order_num || null,
-  };
-}

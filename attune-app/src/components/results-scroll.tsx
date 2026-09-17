@@ -19,10 +19,16 @@
  */
 
 import { forwardRef, useCallback, useRef } from 'react';
-import { findNodeHandle, ScrollView, type ScrollViewProps } from 'react-native';
+import { ScrollView, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewProps } from 'react-native';
 
-/** The results scroll view currently on screen, if there is one. */
-let active: { scroll: ScrollView | null } | null = null;
+/**
+ * The results scroll view currently on screen, and how far down it is.
+ *
+ * The offset is kept here because scrolling to a paragraph needs it: the
+ * paragraph can say where it is on the screen, and where it is in the document
+ * is that plus wherever the page has been scrolled to.
+ */
+let active: { scroll: ScrollView | null; offsetY: number } | null = null;
 
 /** How far above the marked words to stop, so they are not against the edge. */
 const HEADROOM = 90;
@@ -33,12 +39,26 @@ export const ResultsScroll = forwardRef<ScrollView, ScrollViewProps>(
 
     const attach = useCallback((node: ScrollView | null) => {
       own.current = node;
-      active = node ? { scroll: node } : null;
+      active = node ? { scroll: node, offsetY: 0 } : null;
       if (typeof forwarded === 'function') forwarded(node);
       else if (forwarded) (forwarded as { current: ScrollView | null }).current = node;
     }, [forwarded]);
 
-    return <ScrollView {...props} ref={attach} />;
+    const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (active && active.scroll === own.current) active.offsetY = e.nativeEvent.contentOffset.y;
+      props.onScroll?.(e);
+    }, [props]);
+
+    return (
+      <ScrollView
+        {...props}
+        ref={attach}
+        onScroll={onScroll}
+        // Often enough to keep the offset honest, rarely enough to cost
+        // nothing: this is only read when someone opens a mark.
+        scrollEventThrottle={props.scrollEventThrottle ?? 64}
+      />
+    );
   },
 );
 
@@ -50,16 +70,34 @@ export const ResultsScroll = forwardRef<ScrollView, ScrollViewProps>(
  * Silently does nothing when no results page is mounted, which is the right
  * answer to "scroll to something that is not being shown".
  */
-export function scrollIntoResultsView(view: { measureLayout?: unknown } | null) {
+export function scrollIntoResultsView(view: { measureInWindow?: unknown } | null) {
   const scroll = active?.scroll;
-  if (!scroll || !view || typeof (view as never as { measureLayout: unknown }).measureLayout !== 'function') return;
-  const node = findNodeHandle(scroll);
-  if (node == null) return;
-  (view as never as {
-    measureLayout: (n: number, ok: (x: number, y: number) => void, fail: () => void) => void;
-  }).measureLayout(
-    node,
-    (_x, y) => { scroll.scrollTo({ y: Math.max(0, y - HEADROOM), animated: true }); },
-    () => { /* the view went away between the layout and the measure */ },
-  );
+  const measure = (view as never as { measureInWindow?: (cb: (x: number, y: number) => void) => void })
+    ?.measureInWindow;
+  if (!scroll || typeof measure !== 'function') return;
+
+  /**
+   * ── WHY NOT measureLayout ───────────────────────────────────────────────
+   * It used to measure the paragraph against the scroll view by node handle,
+   * which the new React Native architecture warns about on every call: Ellie
+   * caught it on screen. "ref.measureLayout must be called with a ref to a
+   * native component."
+   *
+   * Two window measurements and the page's own offset give the same number
+   * with nothing deprecated in it: where the paragraph is on the screen, minus
+   * where the page starts on the screen, plus how far the page is already
+   * scrolled.
+   */
+  const scrollMeasure = (scroll as never as {
+    measureInWindow?: (cb: (x: number, y: number) => void) => void;
+  }).measureInWindow;
+  if (typeof scrollMeasure !== 'function') return;
+
+  scrollMeasure.call(scroll, (_sx: number, scrollTop: number) => {
+    measure.call(view, (_x: number, y: number) => {
+      const offset = active?.offsetY ?? 0;
+      const target = offset + (y - scrollTop) - HEADROOM;
+      scroll.scrollTo({ y: Math.max(0, target), animated: true });
+    });
+  });
 }

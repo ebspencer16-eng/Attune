@@ -1654,6 +1654,27 @@ export function fetchExerciseQuestions<T>(exercise: string) {
     `/api/questions?exercise=${encodeURIComponent(exercise)}`);
 }
 
+/**
+ * What the website's workbook page needs to draw this couple's workbook.
+ *
+ * The app does not build a workbook or a PDF: it opens the page the website
+ * renders, with the payload that page takes. See api/workbook-view.js.
+ */
+export type WorkbookView = {
+  p1: string;
+  p2: string;
+  ct: string;
+  ctTagline: string;
+  ctColor: string;
+  scores: Record<string, number>;
+  partnerScores: Record<string, number>;
+  expGaps: unknown[];
+};
+
+export async function fetchWorkbookView() {
+  return request<{ ok: true; data: WorkbookView }>('/api/workbook-view');
+}
+
 /** Expectations. A different shape from ex1, so it gets its own reader. */
 export function fetchExpectations() {
   return request<ExpectationsSet & { ok: true }>('/api/questions?exercise=ex2');

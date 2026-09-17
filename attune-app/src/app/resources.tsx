@@ -24,6 +24,7 @@ import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
+import { fetchWorkbookView } from '@/api/client';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
@@ -116,40 +117,32 @@ export default function ResourcesScreen() {
    * hands off to the website.
    */
   /**
-   * The workbook, as full a page as a .docx can be inside an app.
+   * ── THE WORKBOOK IS THE WEBSITE'S PAGE ──────────────────────────────────
+   * Ellie: "This does not look like the workbook we render on the site. Please
+   * use the exact same pdf builder."
    *
-   * Ellie: "Can it open as a page in the app?" This is as close as it gets
-   * without a second renderer. The workbook is a Word document, and nothing in
-   * this app can draw one: the file is built by api/generate-workbook.js out
-   * of docx paragraphs and tables. Full screen, in the app's own colours, with
-   * the app's name on the bar, so it reads as a page of the product rather
-   * than as a browser someone was thrown into. iOS draws the document itself
-   * inside it.
+   * She was right. What I had built converted the .docx into a PDF of its own,
+   * which is a second renderer: the thing this codebase is organised against,
+   * and it looked like it. public/workbook-render.html is the workbook the
+   * website draws and prints, and it has been there all along.
    *
-   * The other way to answer her question is a native reader built from the
-   * workbook payload, which is a real piece of work and is in TASKS.md as a
-   * decision for her rather than something to start on a guess.
+   * So the app opens that page, full screen and in the app's own colours, with
+   * the payload from /api/workbook-view. It zooms, it prints, and it saves as
+   * a PDF through the share sheet, all of which is the phone's own. There is
+   * one workbook and one renderer.
    */
-  const openWorkbook = (url: string) => openBrowserAsync(
-    /**
-     * The workbook as a page rather than as a download.
-     *
-     * Ellie, of the converted web page: "This looks bad. I just want the PDF
-     * to be viewable through the app. People can download and print or they
-     * can zoom in." /api/workbook-pdf converts the document that was actually
-     * generated into a PDF, so there is no second version of the workbook to
-     * drift, and iOS shows a PDF inside the app with zoom, share and print
-     * already on it. The signed storage link the app holds is the only way in
-     * and expires in an hour.
-     */
-    `${SITE}/api/workbook-pdf?file=${encodeURIComponent(url)}`,
-    {
+  const openWorkbook = async () => {
+    const view = await fetchWorkbookView();
+    if (!view.ok) { setWorkbookNote(tools?.workbook?.copy.generating || null); return false; }
+    const data = encodeURIComponent(JSON.stringify(view.data));
+    await openBrowserAsync(`${SITE}/workbook-render?data=${data}`, {
       presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
       toolbarColor: c.background,
       controlsColor: c.accent,
       enableBarCollapsing: true,
-    },
-  );
+    });
+    return true;
+  };
 
   const openTool = async (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
@@ -157,6 +150,7 @@ export default function ResourcesScreen() {
       // If the load failed there is no url and no copy, and the old code
       // answered a tap by setting the note to null, which renders nothing.
       // Ask again on the tap instead.
+      if (await openWorkbook()) return;
       let wb = tools?.workbook;
       if (!wb) {
         const r = await fetchToolData();
@@ -173,7 +167,14 @@ export default function ResourcesScreen() {
        * it with its own viewer inside that sheet; what changes is that nobody
        * is thrown out of the product to read their own workbook.
        */
-      if (wb?.url) { await openWorkbook(wb.url); return; }
+      /**
+       * The file, for anyone whose page could not be built.
+       *
+       * The page needs both partners' answers; the .docx is already on the
+       * order for a couple who bought it, so it is still the fallback rather
+       * than a dead end.
+       */
+      if (wb?.url) { Linking.openURL(wb.url); return; }
 
       /**
        * ── ASK FOR IT, RATHER THAN WAITING FOR SOMETHING ELSE TO ──────────
@@ -193,7 +194,7 @@ export default function ResourcesScreen() {
         setWorkbookNote(null);
         const again = await fetchToolData();
         if (again.ok) setTools(again.data);
-        await openWorkbook(made.data.url);
+        Linking.openURL(made.data.url);
       }
       return;
     }

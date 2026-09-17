@@ -34,6 +34,12 @@ anyone else you invite, up to a hundred people, without the app being public.
 
 ---
 
+> **Steps 1 to 3 are done.** You logged in as `attune-relationships` and
+> created the project, which is why `app.json` now carries a project id. The
+> next thing you need is step 4, and the two variables are not there yet: I
+> checked, and the production environment is empty. A build without them
+> installs fine and signs nobody in.
+
 ## Step 1. Make the Expo account
 
 Go to **expo.dev/signup** in a browser. Use your work email. Pick any username;
@@ -167,6 +173,37 @@ uploads, and finishes in a couple of minutes.
 That is it. The app on your phone is the real thing.
 
 ---
+
+## Do my changes reach TestFlight on their own?
+
+You asked, and the answer is: most of them, yes, in about a minute, without
+rebuilding or resubmitting anything.
+
+The app is two things in one file. There is the **native shell**, which is
+Xcode's part: the icon, the permissions, the libraries that touch the camera or
+the keychain. And there is **everything we write**, which is JavaScript: every
+screen, every word, every layout, every fix in the lists you send me.
+
+`expo-updates` is now in the app, which means a build you have installed checks
+for new JavaScript when it opens. So:
+
+**A change to what we write:** one command, and the app updates itself the next
+time it is opened.
+
+    npx eas-cli update --branch production --message "what changed"
+
+**A change to the native shell:** a new build and a new submit. That is adding
+a library that touches the phone itself, changing the icon or the app's name,
+or moving to a new Expo SDK. It is the same two commands as the first time, and
+it is rare.
+
+I will tell you which one a change needs. If I say "this one needs a build", it
+needs the two commands below. Otherwise it is the update command, or nothing at
+all if I have already run it.
+
+One catch worth knowing: an update only reaches builds made from the same
+version of the app. `app.json` says version 1.0.0, so every 1.0.0 build gets
+1.0.0 updates. When the version changes, that is a build.
 
 ## Every build after the first one
 

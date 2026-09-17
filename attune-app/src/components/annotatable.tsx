@@ -183,17 +183,36 @@ function markBox(mark: Mark | undefined) {
 }
 
 export default function Annotatable({
-  text, style, marks = [], onSelect, onRemove,
+  text, style, marks = [], onSelect, onRemove, onMarkTops,
 }: {
   text: string;
   style?: StyleProp<TextStyle>;
   marks?: Mark[];
   /** A fragment was chosen, and what to do with it. */
   onSelect?: (fragment: string, action: MarkAction) => void;
+  /**
+   * Where each mark's first word sits inside this paragraph.
+   *
+   * Ellie, of the margin icon: "Placement should be in line with the note
+   * itself (or the top of the selected text)." The paragraph knows where its
+   * marks are only because these words measure themselves, so the measurement
+   * is reported up rather than guessed at from the outside.
+   */
+  onMarkTops?: (tops: Map<string, number>) => void;
   /** Take a mark off these words. Absent means the toolbar's bin stays grey. */
   onRemove?: (mark: Mark) => void;
 }) {
   const { text: textStyle, box: boxStyle } = useMemo(() => splitStyle(style), [style]);
+
+  /**
+   * The top of each mark's first word, reported once the words have settled.
+   *
+   * Every word measures itself already, for the drag. This keeps the smallest
+   * y per mark and hands it up on the next tick, so the margin icon can sit on
+   * the line the mark is on rather than at the top of the paragraph.
+   */
+  const markTops = useRef(new Map<string, number>());
+  const report = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tokens = useMemo(() => tokenize(text), [text]);
   const starts = useMemo(() => offsets(tokens), [tokens]);
 
@@ -405,7 +424,17 @@ export default function Annotatable({
             return (
               <View
                 key={i}
-                onLayout={(e) => { frames.current.set(i, e.nativeEvent.layout); }}
+                onLayout={(e) => {
+                  frames.current.set(i, e.nativeEvent.layout);
+                  const mark = marked.get(i);
+                  if (!mark || !onMarkTops) return;
+                  const y = e.nativeEvent.layout.y;
+                  const seen = markTops.current.get(mark.id);
+                  if (seen != null && seen <= y) return;
+                  markTops.current.set(mark.id, y);
+                  if (report.current) clearTimeout(report.current);
+                  report.current = setTimeout(() => onMarkTops(new Map(markTops.current)), 0);
+                }}
                 style={[
                   markBox(marked.get(i)),
                   inSelection ? { backgroundColor: 'rgba(27,95,232,0.22)' } : null,
