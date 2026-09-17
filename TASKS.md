@@ -55,25 +55,12 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-**Nothing waiting.** Q7 is answered: a profile is always complete before the
-exercises open, so an unknown status is not a state a customer reaches.
-
 | # | Question |
 |--|--|
+| Q8 | **Your new intimacy opening drops the line that says this is not therapy.** The old page ended with "This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified." Your replacement is now live on both surfaces and that sentence is gone with it. It is your call and I have made the change you asked for; I am flagging it rather than quietly keeping it, because it is the one line on that page that is there for someone having a hard time. Say "leave it out" and I will stop asking, or send me a sentence and I will put it back under the body. |
+| Q9 | **The button under the opening page says two different things.** The app says "Begin exercise" on all five. The site says "Start" on Expectations and Relationship Reflection, "Begin" on Physical Intimacy, "Begin exercise" on Conflict Patterns. One word for all ten, and it is yours to pick. |
 
 ## 2. Open
-
-My list. Things to build or fix, none of them waiting on you.
-
-My list. Things to build or fix, none of them waiting on you.
-
-My list. Things to build or fix, none of them waiting on you.
-
-My list. Things to build or fix, none of them waiting on you.
-
-My list. Things to build or fix, none of them waiting on you.
-
-My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
@@ -84,8 +71,6 @@ When you send me a list, or when a sweep turns something up, it appears here.
 | O201 | **The intimacy framing should be a question the couple answers, not a column on the profile.** Your description of how it used to work is how the website still works: it asks one framing question, the first partner answers it, and it locks for both. The app reads relationship_status instead, which is a different rule for the same decision and is why a couple could be asked one way on one surface and the other way on the other. Make the app use the couple's own answer, the way the site does. |
 | O199 | **The completion pages.** Both surfaces, all five exercises. |
 | O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
-| O190 | **The responsibilities grid.** The site asks a whole category on one screen, each row a task with two sets of buttons: who did it in your childhood home, and who does it in yours. The app asks one task at a time. The data both collect is the same, which is why nothing has broken; the screens are not. This is the rest of "it needs to be the same as the mobile web experience". |
-| O189 | **Rebuild the app's Expectations exercise to match the mobile web experience.** Your words: "Hate the setup of this exercise. It needs to be the same as the mobile web experience." This is the big one on the list and you are waiting on it, so it gets a plan in this document before it gets code. |
 
 ## 3. For you to review
 
@@ -103,6 +88,8 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R140 | **Expectations asks the page the site asks.** One category to a page, under its own name, with the line saying what to do, and each responsibility carrying two rows of four buttons that line up under each other: growing up, and now. Extended Family asks only the second row, because those are each partner's own family. The words come from the server rather than from the app, so the two surfaces cannot drift again. This is the rest of "it needs to be the same as the mobile web experience"; the completion page is still open as O186. |
+| R141 | **Continue Expectations opens the exercise.** It landed you on the Insights tab and left you to find the row and tap the count beside your own name. The server has always said which exercise the card is for; the app was not reading it. |
 | R137 | **The opening page appears for Expectations.** It never did, for anyone: that exercise starts its answers as five empty maps rather than as nothing, so the screen counted five and believed you were already underway. |
 | R138 | **An exercise in progress is counted properly.** Same root: the count read the top level of the saved answers, which for Expectations is always five whatever you have answered, so the status never moved. It counts what is inside now. |
 | R139 | **The household page has the same arrows as everything else.** It was the one screen left with the old buttons. |
@@ -116,118 +103,19 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R130 | **Both intimacy framings, listed below.** Eleven of the eighteen questions are worded differently for a couple who are not yet physically intimate. You were reading the second set because of the missing status, which M70 fixes. Your proposed Q6 wording is already exactly what the already-intimate version says. Q9's says "When something feels off in the moment, you" where you wanted "you usually", which is a change you can make from the table. |
-| R131 | **Every exercise's opening page, listed below.** Conflict Patterns is the long one you meant. |
-| R132 | **Every loading line, listed below, with where it appears.** Insights says "Generating your insights" and every exercise says "Fetching your exercise", both in your words. They were typed into fifteen screens and are one file now, which is what makes the list possible. |
+| R130 | **Both intimacy framings, listed below, with your seven rewordings in.** Two small liberties, both easy to undo: 5 reads "How do you expect to feel about initiating?" rather than "expecct", with the question mark the already-intimate version has; everything else is your sentence exactly. |
+| R131 | **Every exercise's opening page, listed below, in your words, on both surfaces.** The footnote is gone from all five. Two things went with the old copy: Communication no longer says you answer every question twice (the part-two screen still does), and Conflict Patterns no longer says twelve questions, about ten minutes, and that one section stays private. Say the word and either goes back as a second paragraph. The website read its own copy until now; all five pages read the module the app reads, so this cannot drift again. |
+| R132 | **Every loading line, listed below, with your five changes in.** |
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
-
-#### The home tile, for R102
-
-<!-- copy:home: generated by scripts/build-copy-docs.mjs -->
-
-Every line the home tile can show. The first table is the priority engine:
-a card is one row, and a card whose wording changes with the situation has
-one row per wording. Sample names are Ellie and Preston.
-
-| Bold line | Line under it | Button |
-|--|--|--|
-| Finish setting up your profile | We need info to properly set up your exercises | Set up |
-| Continue Communication | You've completed …/… questions | Continue |
-| Complete your exercises | Your results unlock once you and Preston complete your exercises | Continue |
-| Waiting on Preston | You sent a reminder recently | View progress |
-| Send Preston a reminder | Results unlock once Preston finishes his final exercise | Send a reminder |
-| Your results are ready | Insights and guidance based on your responses | Open results |
-| Pick up Communication | This exercise is in progress and status has been saved | Continue |
-| Start a new exercise | You have purchased exercises that you have not completed | Start |
-| New publication to explore | View this and others in your resources tab | Read |
-| Revisit … | You flagged this and have not come back to it. | Open |
-| Tell us about your experience | Take a minute to share feedback to help us shape Attune | Leave feedback |
-| Explore build-a-budget | Build your budget with a customizable tool | Start |
-
-The third row of the tile, which is either something of yours to return to
-or something new to read:
-
-| Bold line | Line under it |
-|--|--|
-| Pick up where you left off | one line of what you marked, cut at the margin |
-| New publication to explore | the newest In Practice piece, by name |
-
-<!-- end copy:home -->
-
-#### The deletion emails, for R13
-
-<!-- copy:deletion-emails: generated by scripts/build-copy-docs.mjs -->
-
-Both emails, rendered with sample names and stripped of their markup. The
-footer each one carries is the shared one and is not repeated here.
-
-| Sent to | Subject | What it says |
-|--|--|--|
-| The person who deleted | Your Attune account is deleted | Your account is deleted Your Attune account has been deleted. Understanding takes intention. Attune Relationships Your account is deleted Ellie, this is Attune Relationships confirming that your name, email address, sign-in, and every answer you gave are gone from Attune. Two things outlast the account: A de-identified copy of your exercise answers, with no name, email or invite code attached, and your payment record, which is held by Stripe rather than by us, and kept on their schedule to meet financial recordkeeping law. If you had a partner on Attune, they keep their own answers, but the parts of their results section that came from both of you are gone. If any of that is not what you expected, write to us at hello@attune-relationships.com and a person will answer. This is the last email we will send you. Manage email preferences © 2026 Attune Relationships · attune-relationships.com |
-| Their partner | Preston deleted their Attune account | Preston deleted their Attune account Preston deleted their Attune account. Understanding takes intention. Attune Relationships Preston deleted their Attune account Ellie, this is Attune Relationships writing to let you know that Preston deleted their Attune account. Your account is intact and accessible, but the parts of your results that were produced dependent on Preston's responses are gone, because they were built from answers that no longer exist. We are not able to say why they deleted their account, but if you have questions about your own, please write to hello@attune-relationships.com. Open Attune Questions? Reply to this email or reach us at hello@attune-relationships.com Manage email preferences © 2026 Attune Relationships · attune-relationships.com |
-
-<!-- end copy:deletion-emails -->
-
-#### The workbook, for R17 and R25
-
-<!-- copy:workbook: generated by scripts/build-copy-docs.mjs -->
-
-The workbook's dimension pages, 10 of them, and the moment cards
-for couples of the same type. Sample names are Ellie and Preston; the real
-document uses yours.
-
-| Dimension | What it measures | When you are close | When you are far apart |
-|--|--|--|--|
-| energy | How each of you recovers, socially, emotionally, physically. Inward: solitude recharges. Outward: connection recharges. This shapes your weekend default, how you decompress, and what a good evening looks like. | Ellie and Preston recover in similar ways. This quietly removes friction, you're rarely on opposite ends after a hard week. |  |
-| expression | How freely each of you shares what's going on internally, not the content of feelings, but how naturally they surface. Expressive partners wear their emotional state; guarded partners process privately and share selectively. | Ellie and Preston are operating in the same register. Neither tends to feel overwhelmed by too much sharing or starved by too little. |  |
-| reassurance | How each of you stays sure of where you stand. Voiced: hearing it said keeps you close. Assumed: security is the baseline and does not need confirming. This shapes what a long quiet stretch means to each of you. | Ellie and Preston need reassurance in similar amounts. Neither of you is left waiting for a signal the other never thought to send. |  |
-| needs | How directly each partner communicates needs, whether they ask outright or signal indirectly. Direct communicators state needs explicitly. Indirect communicators hint, hope to be noticed, or pull back. | Ellie and Preston communicate needs with similar directness. There are fewer unspoken expectations, and less of the resentment that builds when needs go unnamed. |  |
-| bids | How reliably each partner notices and responds to small, everyday bids for connection, a comment, a gesture, a look. These micro-moments are the primary currency of sustained intimacy. | Ellie and Preston both notice and respond naturally to each other's small bids. This is one of the strongest predictors of relationship satisfaction over time. |  |
-| conflict | How each partner responds when something feels wrong, whether the instinct is to engage immediately or need space first. This is about timing, not care. | Ellie and Preston move toward resolution with similar timing. This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic. |  |
-| repair | What each partner needs to feel genuinely repaired after conflict. One end needs explicit verbal acknowledgment. The other can move forward once the warmth is back, without needing the formal exchange. | Ellie and Preston both know what "okay again" feels like and reach it in similar ways. This shortens the distance between conflict and repair. |  |
-| listening | How each of you shows you are listening. Reflective: you go quiet and stay with it. Responsive: you engage, ask, reflect back. Both are attention. They just look nothing alike from the outside. | Ellie and Preston listen in similar ways. That works until one of you needs the other mode. Ask which one is wanted before you give it. |  |
-| love | How each partner most naturally gives and receives affection. Specifically: does verbal expression land most deeply, or does love register more through presence, action, and shared experience? | Ellie and Preston express and receive love through compatible channels. When care is expressed in a language the other naturally receives, the signal lands without translation. |  |
-| feedback | How comfortably each partner gives and receives direct, honest feedback. Guarded partners tend toward defensiveness. Open partners can engage with critical input without feeling attacked. | Ellie and Preston are in a similar place on feedback. This creates a low-friction environment for honest conversations, things that need to be said, get said. |  |
-
-The same-type moment cards, 24 of them:
-
-| Type | Situation | The moment | What is happening | Try this |
-|--|--|--|--|--|
-| W | hard_workday | One of you walks in mid-story. The other is also full of the day. Both have something they want to land first. | Two Ws come home wanting to externalize. The talking is the processing. Neither of you has finished the day until you've said it out loud. When you both arrive full at the same time, you can talk over each other instead of taking turns. |  |
-| W | quiet_worry | One of you has gone unusually quiet. For Ws, silence at home is a flag. Something is heavy enough to interrupt the normal flow of talking. | Two Ws are unusually attuned to each other's verbal patterns because both of you use words to feel okay. When one of you stops talking, the other notices fast. The risk is reading the silence wrong. |  |
-| W | during_conflict | Tension is rising. Both of you are leaning in, both of you want to address it now, both of you are talking. The volume creeps up. | Ws don't want conflict to sit. You both want it surfaced and resolved. That's the strength. The risk is two engaged Ws can talk over each other, escalate together, and lose the thread of the actual fight. |  |
-| W | after_conflict | The hard part is over. You've both said what needed saying. The room is quieter, but the thing isn't quite closed yet. | Both of you need verbal repair to feel done. A nod or a hug isn't enough. For Ws, the closure happens when one of you names it out loud. |  |
-| W | wanting_closeness | One of you is reaching. Sitting closer, asking what the other is up to, finding excuses to be in the same room. | Bids for closeness in a W-W pair often look like conversation starters. Casual questions, light topics, low-stakes ramble. The actual ask is presence, not the topic. |  |
-| W | external_stress | One of you is dealing with something hard. Work, family, a deadline. They're reaching toward the relationship, not retreating from it. | Under pressure, Ws reach outward. Not to be fixed. To be present in. The risk in a W-W pair is that when you're both stressed at the same time, both of you are reaching, and neither of you is anchored. |  |
-| X | hard_workday | Both of you are home. Both of you had a day. The kitchen gets tidied, the mail gets opened, and neither of you says what the day was like. | Xs come toward each other and hold the inside back. Two of you together means two people who want the company and do not volunteer the content. Being in the same room reads as connection, so the day goes unsaid and nobody notices it has. |  |
-| X | quiet_worry | One of you is carrying something. The routine is normal. Dinner happens. Nothing looks wrong, and something is. | An X under strain gets busier and more available, not quieter. Two Xs can both be managing something privately while being perfectly pleasant to each other, for weeks. |  |
-| X | during_conflict | You are both in it, and you are both being reasonable. The voices stay level. The point keeps not landing. | Xs engage with a disagreement and keep the feeling out of it. Two of you can argue the facts for an hour without either of you saying what actually hurt, which is why it does not resolve. |  |
-| X | after_conflict | It is finished. You are both being kind. Neither of you has mentioned it since. | Xs repair through behaviour. Coffee gets made, the plan gets kept, the tone is warm. Two Xs can both feel repaired without either of you knowing the other does. |  |
-| X | wanting_closeness | One of you keeps ending up in the same room. Sitting nearby. Suggesting something to do together. | An X asks for closeness by doing rather than saying. Two Xs get a lot of shared activity and not much stated wanting, and either of you can end up unsure whether you were chosen or just nearby. |  |
-| X | external_stress | Something outside the relationship is pressing on one of you. A deadline, a diagnosis, a family thing. Life at home carries on looking ordinary. | Under pressure an X takes on more, tightens up and stays present. Two Xs both do it, so the household runs beautifully and nobody has said they are struggling. |  |
-| Y | hard_workday | You both come in and go quiet. Separate rooms, or the same room with a wall up. Neither of you has said a word about the day. | Ys need to come down before they can talk, and then they talk honestly. Two of you means two people decompressing at once, and the honest conversation keeps getting postponed because neither of you is ready at the same time. |  |
-| Y | quiet_worry | One of you is somewhere else. Present in the room, not in the conversation. It has been a few days. | A Y goes inward first and says it fully later. Two Ys can both be inward at once, and the silence stops registering as unusual because it is what the house normally sounds like. |  |
-| Y | during_conflict | It got sharp. One of you has stopped talking. Then the other one does too. | Ys pull back to think rather than to punish. When you both do it, the conversation ends without ending, and two people sit in separate rooms rehearsing the honest version they would say if the other one asked. |  |
-| Y | after_conflict | The heat is gone. You have both been quiet for a while. It is not clear to either of you whether it is over. | A Y needs the space first and the conversation second. Two Ys get the space right and skip the conversation, so the thing looks resolved and is only paused. |  |
-| Y | wanting_closeness | One of you has come looking. Not for a conversation. For the other person to be there. | A Y reaching is a bigger move than it looks, because the default is inward. Two Ys can both want closeness at the same time and both wait, each reading the other's quiet as not now. |  |
-| Y | external_stress | One of you is under real pressure from outside. The house has gone very quiet. | Ys handle strain by going in and then telling you the truth about it afterwards. When you are both under it, both of you go in, and the telling can be a long time coming. |  |
-| Z | hard_workday | Both of you are home, both of you had a day, and the evening passes without either of you saying anything about it. | Zs take space and keep the inside in. Two of you means a calm house and very little information. It works for years, and then something has been unsaid long enough that neither of you knows how to start. |  |
-| Z | quiet_worry | Something is wrong with one of you. There is no visible sign of it. There rarely is. | A Z absorbs and keeps going. With two Zs, nothing about the surface changes when something is badly wrong, so the other person has no signal to read even if they are looking. |  |
-| Z | during_conflict | It sharpened, and then it stopped. Nobody left the room. Nobody said anything either. | Zs disengage to protect the relationship, not to punish. Two Zs shut it down almost instantly, which means the disagreement never actually happens and never actually ends. |  |
-| Z | after_conflict | A day has passed. Things are normal again. Neither of you has mentioned it. | Zs repair by letting time do it. Two Zs get very good at moving on and never confirming, so the same argument can recur for years without either of you knowing it was never closed. |  |
-| Z | wanting_closeness | One of you wants to be close and has not said so. The evening looks exactly like every other evening. | A Z asks for closeness in very small ways, or not at all. When both of you are Zs, the signals are small enough on both sides that they can pass each other completely. |  |
-| Z | external_stress | Something hard is happening to one of you. The routine holds. Everything gets done. | Under pressure a Z contracts and carries on. Two Zs under pressure produce a household that looks completely fine and two people managing alone, in the same rooms, at the same time. |  |
-
-<!-- end copy:workbook -->
 
 #### The two intimacy framings, for R130
 
 <!-- copy:intimacy: generated by scripts/build-copy-docs.mjs -->
 
 Every question in Physical Intimacy Expectations, both ways it can be
-asked. 11 of 18 are worded differently for a couple who
+asked. 17 of 18 are worded differently for a couple who
 are not yet physically intimate; the rest are the same sentence either way.
 Which one a reader gets is decided by the relationship status on their
 profile, so a profile with none falls back to the not-yet wording.
@@ -238,18 +126,18 @@ profile, so a profile with none falls back to the not-yet wording.
 | 2 | Relative desire | Compared to your partner, you tend to | When your ideal and your partner's don't match, you expect to |
 | 3 | Frequency as a signal | How much does frequency signal the health of your relationship to you? | How much do you expect frequency to signal the relationship's health? |
 | 4 | Who initiates | Who usually initiates? | Who do you expect will usually initiate? |
-| 5 | Comfort initiating | How do you feel about initiating? | *same* |
-| 6 | Being turned down | When you turn your partner down, you want them to | When you turn your partner down, you expect to want them to |
+| 5 | Comfort initiating | How do you feel about initiating? | How do you expect to feel about initiating? |
+| 6 | Being turned down | When you turn your partner down, you want them to | When you turn your partner down, you expect that you will want them to |
 | 7 | Being vulnerable | How at ease do you feel being physically vulnerable? | How at ease do you expect to feel being physically vulnerable? |
 | 8 | What helps you feel comfortable | What might help you feel most comfortable? (select all that are true) | *same* |
 | 9 | When something feels off | When something feels off in the moment, you | When something feels off in the moment, you expect to |
 | 10 | Talking about intimacy | How openly can you talk about intimacy? | How openly do you expect to be able to talk about intimacy? |
-| 11 | Saying what you want | Saying what you want in the moment | *same* |
-| 12 | Talking afterward | Talking afterward about what worked | *same* |
-| 13 | Appetite for novelty | Your appetite for trying new things | *same* |
-| 14 | When a new idea comes up | When your partner suggests something new, you | *same* |
+| 11 | Saying what you want | Saying what you want in the moment | You expect that, for you, saying what you want in the moment |
+| 12 | Talking afterward | Talking afterward about what worked | You expect that, for you, talking afterward about what worked |
+| 13 | Appetite for novelty | Your appetite for trying new things | You expect that, for you, your appetite for trying new things |
+| 14 | When a new idea comes up | When your partner suggests something new, you | You expect that, when your partner suggests something new, you |
 | 15 | Novelty vs routine | How do novelty and routine balance for you now? | How do you expect novelty and routine to balance over a long marriage? |
-| 16 | What it is primarily about | What is physical intimacy primarily about for you? (select up to two) | *same* |
+| 16 | What it is primarily about | What is physical intimacy primarily about for you? (select up to two) | At this point, what do you expect physical intimacy to primarily be about for you two? (select up to two) |
 | 17 | When disconnected | When you're emotionally disconnected, physical intimacy tends to | When you're emotionally disconnected, you expect physical intimacy to |
 | 18 | What you hope it means | What does intimacy most mean in your marriage now? | What do you most hope intimacy will mean in your marriage? |
 
@@ -264,11 +152,11 @@ the long one.
 
 | Exercise | Heading | What it says | Footnote | Button |
 |--|--|--|--|--|
-| Communication styles | First, how you communicate. | This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Both take about 15 minutes. Answer honestly. You answer every question twice: once about yourself, and once the way you think your partner would answer it. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
-| Expectations | What you expect. | Relationship frustrations frequently trace back to an unmet expectation, whether conscious or not. Two parts. First, life and values questions: children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, extended family, and emotional responsibilities. You will also share who did each of these in your childhood home. That context helps explain why you each carry the expectations you do. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
-| Relationship Reflection | The moments that make a relationship are worth naming. | A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer. When Preston finishes, you will see where your stories overlap and where you each saw something the other did not. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
-| Physical Intimacy Expectations | What you each expect. | Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect. You answer on your own. Neither of you sees the other’s answers until you have both finished. There are no right answers, and no answer here is better than another. This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
-| Conflict Patterns | Conflict patterns | Conflict is part of every relationship. This exercise helps each of you identify patterns linked to relationship strain so that you can approach conflict in a healthy way. Twelve questions, about ten minutes. Two ask you to write a sentence. You answer on your own, and one section stays private to you that Preston never sees. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
+| Communication styles | First, how you communicate. | This is the communication styles exercise. It looks at how you each process internally, how you connect as a couple, and how you communicate when things get hard. |  | Begin exercise |
+| Expectations | What you each expect | Frustration in relationships often traces back to unmet expectations, whether conscious or not. This exercise consists of two parts. First, life and values, and second, responsibilities. |  | Begin exercise |
+| Relationship Reflection | How you each feel about your relationship | Reflecting on your relationship throughout this exercise can be as meaningful as you make it, and can shape the steps you take next. |  | Begin exercise |
+| Physical Intimacy Expectations | Understanding your sex life | Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. These private questions help you identify areas to discuss with each other. |  | Begin exercise |
+| Conflict Patterns | Conflict patterns | Conflict is part of every relationship. This short exercise helps you understand your relationship environment and navigate conflict more productively. |  | Begin exercise |
 
 <!-- end copy:intros -->
 
@@ -282,34 +170,18 @@ makes this list possible.
 
 | Line | Where |
 |--|--|
-| Getting your dashboard | Home: the dashboard's first paint. |
+| Loading your dashboard | Home: the dashboard's first paint. |
 | Generating your insights | Insights: results and exercise status together. |
-| Loading your resources | Resources: the tools and the In Practice list. |
+| Gathering your resources | Resources: the tools and the In Practice list. |
 | Getting your notes | Notes: notes, marks and tags. |
 | Fetching your exercise | Any exercise, fetching its questions. |
 | Opening | An In Practice piece opening. |
-| Getting your profile | Settings, reading the profile to edit. |
-| Getting your budget | The budget tool. |
-| Getting your checklist | The Starting Out checklist. |
+| Loading your profile | Settings, reading the profile to edit. |
+| Loading your budget | The budget tool. |
+| Loading your checklist | The Starting Out checklist. |
 | One moment | Profile setup and the feedback form, both waiting on their copy. |
 
 <!-- end copy:loading -->
-
-#### The alert copy, for R74
-
-<!-- notification-copy: generated by scripts/build-notification-copy-doc.mjs -->
-
-Generated from the alerts themselves, so it cannot drift from what the app
-shows. Preston stands in for a partner's first name. Every one of these is sent.
-
-| | When it is sent | Title | Line under it |
-|--|--|--|--|
-| On | your partner finishes the last exercise, so your results open | Preston completed their exercises | Explore your results |
-| On | your partner taps Send a reminder | Preston sent you a nudge | Complete your exercises to unlock your results |
-| On | your partner shares a note with you | Preston shared something with you | A note on Conflict Patterns. |
-| On | your partner deletes their account | Preston deleted their Attune account | Your own answers are still here. The parts of your results that came from both of you are not. |
-
-<!-- end notification-copy -->
 
 ### Behaviour, which has to be used rather than looked at
 

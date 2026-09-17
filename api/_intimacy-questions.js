@@ -96,7 +96,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_init_feel', dimension: 'initiating', kind: 'scale',
     topic: 'Comfort initiating',
-    premarital: 'How do you feel about initiating?',
+    premarital: 'How do you expect to feel about initiating?',
     married: 'How do you feel about initiating?',
     options: [
       { label: 'I like being the one who initiates', value: 1.0 },
@@ -110,7 +110,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_init_turndown', dimension: 'initiating', kind: 'scale',
     topic: 'Being turned down',
-    premarital: 'When you turn your partner down, you expect to want them to',
+    premarital: 'When you turn your partner down, you expect that you will want them to',
     married: 'When you turn your partner down, you want them to',
     options: [
       { label: 'Not take it personally and let it pass', value: 1.0 },
@@ -186,7 +186,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_comm_moment', dimension: 'communication', kind: 'scale',
     topic: 'Saying what you want',
-    premarital: 'Saying what you want in the moment',
+    premarital: 'You expect that, for you, saying what you want in the moment',
     married: 'Saying what you want in the moment',
     options: [
       { label: 'Comes easily to me', value: 1.0 },
@@ -200,7 +200,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_comm_debrief', dimension: 'communication', kind: 'scale',
     topic: 'Talking afterward',
-    premarital: 'Talking afterward about what worked',
+    premarital: 'You expect that, for you, talking afterward about what worked',
     married: 'Talking afterward about what worked',
     options: [
       { label: 'I want that kind of debrief', value: 1.0 },
@@ -216,7 +216,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_adv_appetite', dimension: 'adventure', kind: 'scale',
     topic: 'Appetite for novelty',
-    premarital: 'Your appetite for trying new things',
+    premarital: 'You expect that, for you, your appetite for trying new things',
     married: 'Your appetite for trying new things',
     options: [
       { label: 'I want a lot of novelty', value: 1.0 },
@@ -230,7 +230,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_adv_suggest', dimension: 'adventure', kind: 'scale',
     topic: 'When a new idea comes up',
-    premarital: 'When your partner suggests something new, you',
+    premarital: 'You expect that, when your partner suggests something new, you',
     married: 'When your partner suggests something new, you',
     // label stays canonical (used for storage + scoring). premarital/married give
     // the display string so the option reads grammatically after the bare "you":
@@ -263,7 +263,7 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_mean_for', dimension: 'meaning', kind: 'multi',
     topic: 'What it is primarily about',
-    premarital: 'What is physical intimacy primarily about for you? (select up to two)',
+    premarital: 'At this point, what do you expect physical intimacy to primarily be about for you two? (select up to two)',
     married: 'What is physical intimacy primarily about for you? (select up to two)',
     multi: true, maxSelect: 2,
     options: [

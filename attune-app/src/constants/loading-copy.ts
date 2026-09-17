@@ -20,11 +20,11 @@
 
 export const LOADING = {
   /** Home: the dashboard's first paint. */
-  home: 'Getting your dashboard',
+  home: 'Loading your dashboard',
   /** Insights: results and exercise status together. */
   insights: 'Generating your insights',
   /** Resources: the tools and the In Practice list. */
-  resources: 'Loading your resources',
+  resources: 'Gathering your resources',
   /** Notes: notes, marks and tags. */
   notes: 'Getting your notes',
   /** Any exercise, fetching its questions. */
@@ -32,11 +32,11 @@ export const LOADING = {
   /** An In Practice piece opening. */
   post: 'Opening',
   /** Settings, reading the profile to edit. */
-  profile: 'Getting your profile',
+  profile: 'Loading your profile',
   /** The budget tool. */
-  budget: 'Getting your budget',
+  budget: 'Loading your budget',
   /** The Starting Out checklist. */
-  checklist: 'Getting your checklist',
+  checklist: 'Loading your checklist',
   /** Profile setup and the feedback form, both waiting on their copy. */
   moment: 'One moment',
 } as const;

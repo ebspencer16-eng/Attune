@@ -3,7 +3,7 @@ import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, EX1_SCALE, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
-import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
+import { CONFLICT_SECTIONS, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict, overallColor as conflictOverallColor, GLANCE_LABEL as CONFLICT_GLANCE_LABEL } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
 // from the version stamped on their results row, so revising the wording never
@@ -33,6 +33,7 @@ import {
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
+import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
 import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
@@ -939,31 +940,40 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   const setLife = (id, value) => setAnswers(a => ({ ...a, life: { ...a.life, [id]: value } }));
   const lifeAnswered = activeLifeQs.every(q => answers.life?.[q.id]);
 
+  // The opening page, from the module both surfaces read.
+  const ex2Intro = exerciseIntro("ex2", { partner: partnerName });
   if (phase === "intro") return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
       <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 . What You Expect</p>
       <h2 style={{ fontFamily: font.display, fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>
-        Relationship frustrations frequently<br /><em style={{ fontStyle: "normal", color: "inherit" }}>trace back to an unmet expectation,</em><br />whether conscious or not.
+        {ex2Intro.title}
       </h2>
-      <p style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
-        {isRevisited
-          ? "One part, no responsibilities section this time. Just the life and values questions, revisited. See what's shifted, what's stayed the same, and what that means for where you are now."
-          : isAnniversary
-          ? "Two parts. First, how you each feel about the things that shape your shared life, family, values, money, conflict, connection. Then, who has each been quietly assuming handles what."
-          : "Two parts. First, life and values questions: children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, extended family, and emotional responsibilities. You'll also share who did each of these in your childhood home. That context helps explain why you each carry the expectations you do."
-        }
-      </p>
-      <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2.5rem", borderLeft: ("3px solid " + (C.stone)), paddingLeft: "1rem" }}>
-        {isRevisited
-          ? "There's no right direction for things to shift. Answer honestly, not how you think you should feel, but how you actually do. You'll see both sets of answers together once you've both finished."
-          : isAnniversary
-          ? "Answer honestly, not how you think you should feel, but how you actually do. You'll see your answers alongside your partner's only after you've both finished."
-          : "Sometimes expectations go unmet because they were never said. Sometimes they were said but heard differently. Either way, seeing them side by side is the point. Answer for yourself, you'll see your answers alongside your partner's only after you've both finished."
-        }
-      </p>
-      <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.5rem" }}>Built on relationship research and shaped with licensed therapists.</p>
+      {/* The core reading comes from api/_lib/exercise-intro.js, which is what
+          the app reads too. The two package variants keep their own wording,
+          because the app cannot tell those cases apart and has never been
+          sent them. */}
+      {isRevisited || isAnniversary ? (
+        <p style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
+          {isRevisited
+            ? "One part, no responsibilities section this time. Just the life and values questions, revisited. See what's shifted, what's stayed the same, and what that means for where you are now."
+            : "Two parts. First, how you each feel about the things that shape your shared life, family, values, money, conflict, connection. Then, who has each been quietly assuming handles what."
+          }
+        </p>
+      ) : ex2Intro.body.map(para => (
+        <p key={para.slice(0, 24)} style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
+          {para}
+        </p>
+      ))}
+      {isRevisited || isAnniversary ? (
+        <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2.5rem", borderLeft: ("3px solid " + (C.stone)), paddingLeft: "1rem" }}>
+          {isRevisited
+            ? "There's no right direction for things to shift. Answer honestly, not how you think you should feel, but how you actually do. You'll see both sets of answers together once you've both finished."
+            : "Answer honestly, not how you think you should feel, but how you actually do. You'll see your answers alongside your partner's only after you've both finished."
+          }
+        </p>
+      ) : null}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: ("1px solid " + (C.stone)), paddingTop: "1.5rem" }}>
         <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body }}>{isRevisited ? "~10 minutes · life questions only" : "~15 minutes · 2 parts"}</p>
         <button onClick={() => setPhase("life")}
@@ -1331,22 +1341,21 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
     return v != null && v !== '';
   });
 
+  // The opening page, from the module both surfaces read.
+  const intimacyIntro = exerciseIntro('intimacy', { partner: partnerName });
+
   // ── INTRO ──
   if (phase === 'intro') return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{exerciseNumber ? `Exercise 0${exerciseNumber} · ` : ""}Physical Intimacy Expectations</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>What you each expect.</h2>
-      <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
-        Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect.
-      </p>
-      <p style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
-        You answer on your own. Neither of you sees the other's answers until you have both finished. There are no right answers, and no answer here is better than another.
-      </p>
-      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "0.85rem" }}>
-        This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.
-      </p>
-      <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontWeight: 400, lineHeight: 1.6, marginBottom: "2rem" }}>Built on relationship research and shaped with licensed therapists.</p>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>{intimacyIntro.title}</h2>
+      {intimacyIntro.body.map(para => (
+        <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
+          {para}
+        </p>
+      ))}
+      <div style={{ marginBottom: "1rem" }} />
       <button onClick={() => setPhase(lockedVariant ? 'questions' : 'branch')}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
         Begin →
@@ -1505,16 +1514,20 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
     fontSize: "0.88rem", color: C.ink, lineHeight: 1.45, transition: "border-color 0.12s, background 0.12s",
   });
 
+  // The opening page, from the module both surfaces read.
+  const conflictIntro = exerciseIntro('conflict', { partner: partnerName });
+
   // ── INTRO ─────────────────────────────────────────────────────────────────
   if (phase === 'intro') return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05 · Conflict Patterns</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>Conflict patterns</h2>
-      <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.25rem" }}>{CONFLICT_INTRO}</p>
-      <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "1.75rem" }}>
-        Twelve questions, about ten minutes. Two ask you to write a sentence. You answer on your own, and one section stays private to you that {partnerName} never sees.
-      </p>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>{conflictIntro.title}</h2>
+      {conflictIntro.body.map(para => (
+        <p key={para.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.75rem" }}>
+          {para}
+        </p>
+      ))}
       <button onClick={() => setPhase('questions')}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
         Begin exercise →
@@ -3022,6 +3035,9 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The opening page, from the module both surfaces read.
+  const ex1Intro = exerciseIntro('ex1', { partner: partnerName });
+
   // ── Combined intro (Exercise 01 + 02 preview) — matches Partner B copy ─
   if (phase === 'intro') {
     return (
@@ -3032,12 +3048,13 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
           Exercise 01 of 02 &middot; {userName} &amp; {partnerName}
         </p>
         <p style={{ fontFamily: font.display, fontSize: "clamp(1.6rem, 5vw, 2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.25rem" }}>
-          First, how you communicate.
+          {ex1Intro.title}
         </p>
-        <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
-          This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Exercise 02 comes next and maps what you each expect. Both take about 15 minutes. Answer honestly. View results once you and your partner have completed the exercises.
-        </p>
-        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1.75rem" }}>Built on relationship research and shaped with licensed therapists.</p>
+        {ex1Intro.body.map(para => (
+          <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
+            {para}
+          </p>
+        ))}
         <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
           {[
             { num: '01', title: 'Communication', color: '#E8673A', desc: PERSONALITY_QUESTIONS.length + ' questions, about you and your partner' },
@@ -4162,6 +4179,9 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
     else onBack();
   };
 
+  // The opening page, from the module both surfaces read.
+  const ex3Intro = exerciseIntro('ex3', { partner: partnerName });
+
   // ── Intro screen (Exercise 03) ────────────────────────────────────────
   // Mirrors the Expectations intro format: eyebrow, hook title, concrete
   // description, follow-up, duration, button. Shown once per fresh start;
@@ -4173,15 +4193,13 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
         <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 03 · Our Relationship Story</p>
         <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>
-          The moments that make a relationship are worth naming.
+          {ex3Intro.title}
         </p>
-        <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1rem" }}>
-          A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer.
-        </p>
-        <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem", borderLeft: "3px solid #10b981", paddingLeft: "0.85rem", fontStyle: "italic" }}>
-          When {partnerName} finishes {partnerPossAbs}, you'll see where your stories overlap and where you each saw something the other didn't.
-        </p>
-        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 400, lineHeight: 1.6, marginBottom: "1rem" }}>Built on relationship research and shaped with licensed therapists.</p>
+        {ex3Intro.body.map(para => (
+          <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1rem" }}>
+            {para}
+          </p>
+        ))}
         <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", letterSpacing: "0.05em" }}>
           ~10 minutes
         </p>

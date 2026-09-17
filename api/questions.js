@@ -34,7 +34,7 @@ import {
   GROWING_UP_LABEL, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL,
 } from './_lib/expectations-page.js';
 import {
-  conflictQuestionsInOrder, CONFLICT_SECTIONS, FREQUENCY_OPTIONS, CONFLICT_INTRO,
+  conflictQuestionsInOrder, CONFLICT_SECTIONS, FREQUENCY_OPTIONS,
   CONFLICT_REQUIRED,
 } from './_conflict-questions.js';
 import { ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION } from './_anniversary-questions.js';

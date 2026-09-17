@@ -35,62 +35,62 @@ import { CONFLICT_INTRO } from '../_conflict-questions.js';
  * @returns {{title: string, body: string[], note: string|null, cta: string}|null}
  */
 export function exerciseIntro(key, { partner = 'your partner' } = {}) {
-  const RESEARCH = 'Built on relationship research and shaped with licensed therapists.';
-
+  /**
+   * ── THE FOOTNOTE IS GONE ────────────────────────────────────────────────
+   * Ellie: "on each page, remove 'Built on relationship research and shaped
+   * with licensed therapists.' We can add something like this later."
+   *
+   * It is `note: null` rather than a deleted field, because both surfaces
+   * render the note when there is one and a later line goes back in one place.
+   */
   switch (key) {
     case 'ex1':
       return {
         title: 'First, how you communicate.',
         body: [
-          'This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Both take about 15 minutes. Answer honestly.',
-          'You answer every question twice: once about yourself, and once the way you think your partner would answer it.',
+          'This is the communication styles exercise. It looks at how you each process internally, how you connect as a couple, and how you communicate when things get hard.',
         ],
-        note: RESEARCH,
+        note: null,
         cta: 'Begin exercise',
       };
 
     case 'ex2':
       return {
-        title: 'What you expect.',
+        title: 'What you each expect',
         body: [
-          'Relationship frustrations frequently trace back to an unmet expectation, whether conscious or not.',
-          'Two parts. First, life and values questions: children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, extended family, and emotional responsibilities. You will also share who did each of these in your childhood home. That context helps explain why you each carry the expectations you do.',
+          'Frustration in relationships often traces back to unmet expectations, whether conscious or not. This exercise consists of two parts. First, life and values, and second, responsibilities.',
         ],
-        note: RESEARCH,
+        note: null,
         cta: 'Begin exercise',
       };
 
     case 'ex3':
       return {
-        title: 'The moments that make a relationship are worth naming.',
+        title: 'How you each feel about your relationship',
         body: [
-          'A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer.',
-          `When ${partner} finishes, you will see where your stories overlap and where you each saw something the other did not.`,
+          'Reflecting on your relationship throughout this exercise can be as meaningful as you make it, and can shape the steps you take next.',
         ],
-        note: RESEARCH,
+        note: null,
         cta: 'Begin exercise',
       };
 
     case 'intimacy':
       return {
-        title: 'What you each expect.',
+        title: 'Understanding your sex life',
         body: [
-          'Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect.',
-          'You answer on your own. Neither of you sees the other’s answers until you have both finished. There are no right answers, and no answer here is better than another.',
-          'This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.',
+          'Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. These private questions help you identify areas to discuss with each other.',
         ],
-        note: RESEARCH,
+        note: null,
         cta: 'Begin exercise',
       };
 
     case 'conflict':
       return {
+        // CONFLICT_INTRO is this exercise's opening sentence wherever it is
+        // shown, so the page reads it rather than holding a second copy.
         title: 'Conflict patterns',
-        body: [
-          CONFLICT_INTRO,
-          `Twelve questions, about ten minutes. Two ask you to write a sentence. You answer on your own, and one section stays private to you that ${partner} never sees.`,
-        ],
-        note: RESEARCH,
+        body: [CONFLICT_INTRO],
+        note: null,
         cta: 'Begin exercise',
       };
 

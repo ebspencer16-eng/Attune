@@ -36,8 +36,8 @@ export const CONFLICT_SECTIONS = [
 
 /** Shown before the first question. Sets expectation: noticing, not verdict. */
 export const CONFLICT_INTRO =
-  "Conflict is part of every relationship. This exercise helps each of you identify "
-  + "patterns linked to relationship strain so that you can approach conflict in a healthy way.";
+  "Conflict is part of every relationship. This short exercise helps you understand "
+  + "your relationship environment and navigate conflict more productively.";
 
 /** Frequency options, shared by the four risk questions. Value is the rate. */
 export const FREQUENCY_OPTIONS = [

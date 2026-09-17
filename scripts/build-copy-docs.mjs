@@ -47,136 +47,7 @@ const fill = (s) => String(s ?? '')
   .replace(/\{U\}/g, YOU)
   .replace(/\{P\}/g, THEM);
 
-// ── 1. The home screen's tile ──────────────────────────────────────────────
-function homeBlock() {
-  const src = readFileSync(`${ROOT}api/_lib/next-action.js`, 'utf8');
-  const rows = [];
-  for (const m of src.matchAll(/add\(\{([\s\S]*?)\}\);/g)) {
-    const body = m[1];
-    /**
-     * Every string a field can produce.
-     *
-     * A field is read from its name to the start of the next one, and every
-     * quoted string in between is a wording the card can show: a condition
-     * carries two, and the greyed-out version of a card is copy too. Reading
-     * only the first version, or only same-line conditions, left four cards in
-     * this table with an empty line under them.
-     */
-    const FIELDS = ['id', 'kind', 'priority', 'title', 'body', 'cta', 'action', 'disabled', 'deepLink'];
-    const strings = (field) => {
-      const from = body.search(new RegExp(`(^|\\s)${field}:`));
-      if (from < 0) return [];
-      const rest = body.slice(from + field.length + 1);
-      const ends = FIELDS.filter((f) => f !== field)
-        .map((f) => rest.search(new RegExp(`(^|\\s)${f}:`)))
-        .filter((i) => i > 0);
-      const chunk = rest.slice(0, ends.length ? Math.min(...ends) : undefined);
-      return [...chunk.matchAll(/(`[^`]*`|'[^']*'|"[^"]*")/g)].map((m) => fill(m[1].slice(1, -1)));
-    };
-
-    const titles = strings('title');
-    const bodies = strings('body');
-    const ctas = strings('cta');
-    if (!titles.length) continue;
-    for (let i = 0; i < titles.length; i += 1) {
-      rows.push(`| ${esc(titles[i])} | ${esc(bodies[i] ?? bodies[0])} | ${esc(ctas[i] ?? ctas[0])} |`);
-    }
-  }
-
-  /**
-   * The per-resource lines, which are a lookup rather than a string in a card:
-   * Ellie writes one tool at a time, and anything she has not written keeps the
-   * generic line. Without this they would be invisible in a list of copy.
-   */
-  const lookup = (name) => Object.fromEntries(
-    [...src.matchAll(new RegExp(`const ${name} = \\{([\\s\\S]*?)\\};`, 'g'))]
-      .flatMap((m) => [...m[1].matchAll(/(\w+):\s*'([^']*)'/g)])
-      .map((m) => [m[1], m[2]]),
-  );
-  const titles = lookup('RESOURCE_TITLE');
-  const blurbLines = lookup('RESOURCE_BLURB');
-  const blurbs = [...new Set([...Object.keys(titles), ...Object.keys(blurbLines)])]
-    .map((key) => `| ${esc(titles[key] || 'Start a new exercise')} | ${esc(blurbLines[key] || 'You have purchased exercises that you have not completed')} | Start |`);
-
-  // The third row, which has two states of its own.
-  const pickUp = readFileSync(`${ROOT}api/_lib/pick-up.js`, 'utf8');
-  const labels = [...pickUp.matchAll(/label:\s*'([^']*)'/g)].map((m) => m[1]);
-
-  return [
-    'Every line the home tile can show. The first table is the priority engine:',
-    'a card is one row, and a card whose wording changes with the situation has',
-    'one row per wording. Sample names are Ellie and Preston.',
-    '',
-    '| Bold line | Line under it | Button |',
-    '|--|--|--|',
-    ...rows,
-    ...blurbs,
-    '',
-    'The third row of the tile, which is either something of yours to return to',
-    'or something new to read:',
-    '',
-    '| Bold line | Line under it |',
-    '|--|--|',
-    `| ${esc(labels[0] || 'Pick up where you left off')} | one line of what you marked, cut at the margin |`,
-    `| ${esc(labels[1] || 'Explore something new')} | the newest In Practice piece, by name |`,
-  ].join('\n');
-}
-
-// ── 2. The deletion emails ─────────────────────────────────────────────────
-async function deletionBlock() {
-  const m = await import(`${ROOT}api/_lib/deletion-emails.js`);
-  const text = (html) => String(html || '')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  const a = m.deletionConfirmationEmail({ name: YOU, researchKept: true });
-  const b = m.partnerDeletedEmail({ toName: YOU, theirName: THEM, userId: 'sample' });
-  return [
-    'Both emails, rendered with sample names and stripped of their markup. The',
-    'footer each one carries is the shared one and is not repeated here.',
-    '',
-    '| Sent to | Subject | What it says |',
-    '|--|--|--|',
-    `| The person who deleted | ${esc(a.subject)} | ${esc(text(a.html))} |`,
-    `| Their partner | ${esc(b.subject)} | ${esc(text(b.html))} |`,
-  ].join('\n');
-}
-
-// ── 3. The workbook ────────────────────────────────────────────────────────
-async function workbookBlock() {
-  const m = await import(`${ROOT}api/_workbook-prose.js`);
-  const dims = Object.entries(m.DIM_CONTENT);
-  const dimRows = dims.map(([key, c]) => `| ${key} | ${esc(fill(c.measures))} | ${esc(fill(c.closeText))} | ${esc(fill(c.farText))} |`);
-
-  const momentRows = [];
-  for (const set of ['MOMENTS_SHARED_W', 'MOMENTS_SHARED_X', 'MOMENTS_SHARED_Y', 'MOMENTS_SHARED_Z']) {
-    for (const [situation, c] of Object.entries(m[set] || {})) {
-      momentRows.push(`| ${set.replace('MOMENTS_SHARED_', '')} | ${situation} | ${esc(fill(c.moment))} | ${esc(fill(c.happening))} | ${esc(fill(c.tryThis))} |`);
-    }
-  }
-
-  return [
-    `The workbook's dimension pages, ${dims.length} of them, and the moment cards`,
-    'for couples of the same type. Sample names are Ellie and Preston; the real',
-    'document uses yours.',
-    '',
-    '| Dimension | What it measures | When you are close | When you are far apart |',
-    '|--|--|--|--|',
-    ...dimRows,
-    '',
-    `The same-type moment cards, ${momentRows.length} of them:`,
-    '',
-    '| Type | Situation | The moment | What is happening | Try this |',
-    '|--|--|--|--|--|',
-    ...momentRows,
-  ].join('\n');
-}
-
-// ── 4. The two framings of the intimacy questions ─────────────────────────
+// ── 1. The two framings of the intimacy questions ─────────────────────────
 async function intimacyBlock() {
   const m = await import(`${ROOT}api/_intimacy-questions.js`);
   const rows = m.INTIMACY_QUESTIONS.map((q, i) => {
@@ -197,7 +68,7 @@ async function intimacyBlock() {
   ].join('\n');
 }
 
-// ── 5. The page that opens each exercise ──────────────────────────────────
+// ── 2. The page that opens each exercise ──────────────────────────────────
 async function introBlock() {
   const m = await import(`${ROOT}api/_lib/exercise-intro.js`);
   const { EXERCISES } = await import(`${ROOT}api/_exercises.js`);
@@ -216,7 +87,7 @@ async function introBlock() {
   ].join('\n');
 }
 
-// ── 6. What the app says while it waits ───────────────────────────────────
+// ── 3. What the app says while it waits ───────────────────────────────────
 function loadingBlock() {
   const src = readFileSync(`${ROOT}attune-app/src/constants/loading-copy.ts`, 'utf8');
   const rows = [];
@@ -237,10 +108,19 @@ function loadingBlock() {
 }
 
 // ── Write them in ──────────────────────────────────────────────────────────
+/**
+ * ── WHAT IS NO LONGER HERE ────────────────────────────────────────────────
+ * The home tile, the two deletion emails and the workbook's prose each had a
+ * block. Ellie read all three, sent her changes, approved them, and asked for
+ * the tables to come out: "R74 has been approved, remove this reference table
+ * from tasks." A table nobody is reading any more costs review attention on
+ * the wrong half of the document, which is the same failure the blocks exist
+ * to prevent, pointed the other way.
+ *
+ * The prose itself is still generated from the product wherever it is shown.
+ * Adding a block back is a few lines; the builders are in the history.
+ */
 const BLOCKS = {
-  home: homeBlock(),
-  'deletion-emails': await deletionBlock(),
-  workbook: await workbookBlock(),
   intimacy: await intimacyBlock(),
   intros: await introBlock(),
   loading: loadingBlock(),
