@@ -25,7 +25,6 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import GlanceTile, { NeutralGround } from '@/components/glance-tile';
-import PageWash from '@/components/page-wash';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
@@ -426,6 +425,10 @@ export default function Results({
           you are in. A group with no pages of its own shows no second row. */}
       <EdgeFadedRow
         ref={topNav}
+        /* The fade has to fade into the page's wash. Left on flat cream it
+           drew a pale band across the top of the results, which is half of
+           what "segmented" was. */
+        ground={Palette.warm}
         gap={Spacing.sm}
         contentContainerStyle={{ paddingBottom: Spacing.md }}>
         {groups.map((g) => {
@@ -459,6 +462,7 @@ export default function Results({
 
       {activeGroup?.children?.length ? (
         <EdgeFadedRow
+          ground={Palette.warm}
           ref={pageNav}
           gap={Spacing.lg}
           contentContainerStyle={{ paddingBottom: Spacing.md }}>
@@ -495,17 +499,15 @@ export default function Results({
       ) : null}
 
       <View style={{ flex: 1 }}>
-        {/* ── THE GROUND UNDER THE RESULTS ─────────────────────────────
-            Ellie: "Can we do the same bg gradient behind the at a glance cards
-            and highlight cards in results?"
+        {/* ── THE GROUND IS THE TAB'S, NOT THIS VIEW'S ─────────────────
+            Ellie: "Insights bg feels segmented - can you make the bg
+            continuous on each page rather than separating the header section?"
 
-            The glance tiles and the storycards paint their own grounds, from
-            api/_lib/section-grounds.js; what sits behind them was flat cream,
-            so a coloured card floated on nothing. This is the same wash the
-            Learn and Notes tabs use, behind every section: the sections that
-            carry their own colour still do, and the ones that do not stop
-            looking like a blank page. */}
-        <PageWash />
+            It was two washes. The tab paints one from the top of the screen,
+            and this view painted a second starting under the header, so the
+            gradient restarted halfway down and drew a line across the page
+            exactly where the chips are. One wash, owned by the tab, and
+            everything inside it is transparent. */}
         {/* Everything inside can be marked. A <Prose> outside this provider is
             a plain Text, so nothing breaks if a screen is rendered elsewhere. */}
         <AnnotationProvider
@@ -1849,7 +1851,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
   const rest = data.ratings.filter((r) => r.key !== 'a0');
 
   return (
-    <ResultsScroll style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
@@ -2132,7 +2134,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
    */
   const label = data.promptLabel || 'Talk about it';
   return (
-    <ResultsScroll style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
+    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
       <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <ReflectionHead page={data.pages?.story} />
 

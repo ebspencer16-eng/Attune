@@ -52,11 +52,18 @@ export default function PageWash({ tint }: {
       />
       {/* The corner. A tenth of a colour over warm cream is a suggestion of
           colour rather than a colour, which is what keeps this a ground. */}
+      {/* ── NO EDGES ───────────────────────────────────────────────────
+          Ellie: "Insights bg feels segmented." Part of that was this: the tint
+          was drawn into a box 380 points tall, so wherever it happened to still
+          carry colour at its last row, the box's own bottom edge showed as a
+          line across the page. It covers the whole screen now and fades to
+          nothing a fifth of the way down, which leaves nothing to draw an edge
+          with. */}
       <LinearGradient
         colors={[withAlpha(hue, 0.1), withAlpha(hue, 0)]}
         start={{ x: 1, y: 0 }}
-        end={{ x: 0.1, y: 0.35 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 380 }}
+        end={{ x: 0.1, y: 0.22 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
     </View>
   );
