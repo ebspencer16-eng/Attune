@@ -26,11 +26,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchQuestions, saveExercise } from '@/api/client';
 import type { ApiError, QuestionItem, QuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
-import { ExerciseEyebrow, ExerciseNav, ExerciseOpening } from '@/components/exercise-chrome';
+import {
+  ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
+} from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
 
@@ -124,7 +127,7 @@ export default function Exercise({
     return res.ok;
   }, [exerciseKey, set]);
 
-  if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
+  if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) {
     return (
       <Shell onClose={onClose}>
@@ -250,7 +253,7 @@ export default function Exercise({
         />
 
         <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
-          <View style={{ width: `${(answeredCount / Math.max(1, questions.length)) * 100}%`, height: 3, backgroundColor: c.accent }} />
+          <View style={{ width: `${(answeredCount / Math.max(1, questions.length)) * 100}%`, height: 3, backgroundColor: exerciseColor(set.exercise.key) }} />
         </View>
 
         {/* ── EVERYTHING BELOW THIS STAYS PUT ─────────────────────────────

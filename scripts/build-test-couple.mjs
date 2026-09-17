@@ -293,10 +293,15 @@ exception when others then
 end $$;
 
 -- ── The two profiles ───────────────────────────────────────────────────────
-insert into public.profiles (id, email, name, pronouns, partner_name, partner_pronouns, partner_email, pkg, profile_setup_complete)
+-- relationship_status decides which wording Physical Intimacy Expectations
+-- uses: eleven of its eighteen questions are asked one way of a couple who are
+-- already intimate and another way of a couple who are not yet, and anything
+-- that is not married or remarried gets the second. A test couple with no
+-- status was being asked the whole exercise the wrong way round.
+insert into public.profiles (id, email, name, pronouns, partner_name, partner_pronouns, partner_email, pkg, relationship_status, profile_setup_complete)
 values
-  ('${TESTER_ID}', '${TESTER_EMAIL}', 'Tester', 'they/them', 'Testpartner', 'they/them', '${PARTNER_EMAIL}', 'premium', true),
-  ('${PARTNER_ID}', '${PARTNER_EMAIL}', 'Testpartner', 'they/them', 'Tester', 'they/them', '${TESTER_EMAIL}', 'premium', true)
+  ('${TESTER_ID}', '${TESTER_EMAIL}', 'Tester', 'they/them', 'Testpartner', 'they/them', '${PARTNER_EMAIL}', 'premium', 'married', true),
+  ('${PARTNER_ID}', '${PARTNER_EMAIL}', 'Testpartner', 'they/them', 'Tester', 'they/them', '${TESTER_EMAIL}', 'premium', 'married', true)
 on conflict (id) do nothing;
 
 -- Linked to each other, owning everything. Written as an update as well as an

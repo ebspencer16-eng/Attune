@@ -29,6 +29,7 @@ import {
   type AboutYou, type ApiError, type EditableProfile,
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { LOADING } from '@/constants/loading-copy';
 import {
   Colors, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -89,7 +90,7 @@ export default function ProfileEditor({ onSaved }: { onSaved?: () => void }) {
   if (error) {
     return <ScreenError error={error} onRetry={() => { setError(null); setAttempt((n) => n + 1); }} />;
   }
-  if (!loaded) return <ScreenLoading label="Getting your profile" />;
+  if (!loaded) return <ScreenLoading label={LOADING.profile} />;
 
   const field = (key: keyof EditableProfile, label: string, placeholder: string) => (
     <View style={{ marginTop: Spacing.lg }}>

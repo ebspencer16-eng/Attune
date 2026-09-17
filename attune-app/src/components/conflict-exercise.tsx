@@ -25,8 +25,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchConflictQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ConflictQuestion, ConflictQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { LOADING } from '@/constants/loading-copy';
 import {
-  ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
+  ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor,
 } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
@@ -88,7 +89,7 @@ export default function ConflictExercise({
     return res.ok;
   }, [set]);
 
-  if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
+  if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
   if (!set) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 
@@ -266,43 +267,14 @@ function Body({
   }
 
   if (q.kind === 'rank') {
-    const opts = (q.options ?? []) as string[];
-    const order = Array.isArray(value) ? (value as string[]) : [];
     return (
-      <View>
-        <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
-          Tap in order, best first. Tap a chosen one again to take it back out.
-        </Text>
-        <View style={{ gap: Spacing.sm }}>
-          {opts.map((o) => {
-            const rank = order.indexOf(o);
-            const chosen = rank >= 0;
-            return (
-              <Pressable
-      accessibilityRole="button"
-                key={o}
-                onPress={() => onChange(chosen ? order.filter((x) => x !== o) : [...order, o])}
-                style={{
-                  ...card, flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                  borderColor: chosen ? c.accent : c.border, borderWidth: chosen ? 2 : 1,
-                }}>
-                <View
-                  style={{
-                    width: 24, height: 24, borderRadius: Radius.pill,
-                    alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: chosen ? c.accent : c.background,
-                    borderColor: c.border, borderWidth: chosen ? 0 : 1,
-                  }}>
-                  <Text style={{ ...Type.small, fontWeight: '700', color: chosen ? Palette.white : c.textMuted }}>
-                    {chosen ? rank + 1 : ''}
-                  </Text>
-                </View>
-                <Text style={{ ...Type.body, color: c.text, flex: 1 }}>{o}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
+      <RankInOrder
+        options={(q.options ?? []) as string[]}
+        order={Array.isArray(value) ? (value as string[]) : null}
+        onChange={onChange}
+        color={exerciseColor('conflict')}
+        hint="Tap them in order, best first. Tap one again to take it back."
+      />
     );
   }
 

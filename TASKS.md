@@ -44,6 +44,7 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
+| M70 | **`070_test_couple_status.sql`. This is why the intimacy questions read strangely.** Not an error in the question: that exercise asks eleven of its eighteen questions two ways, one for a couple who are already physically intimate and one for a couple who are not yet, and which one you get is decided by the relationship status on your profile. 067 built the test couple without one, so you were asked the whole exercise the other way round. This sets it to married on all three test accounts. Both framings are listed in section 3 for you to read. |
 
 ### Decide these
 
@@ -55,11 +56,9 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-**Nothing waiting.** Q5 and Q6 are answered: your part two wording, and
-"Question 6 of 50" on both surfaces.
-
 | # | Question |
 |--|--|
+| Q7 | **Should a profile with no relationship status be asked the not-yet-intimate version?** That is what happens today: anything that is not 'married' or 'remarried' gets the wording for a couple who are not yet physically intimate. For a real customer that only happens if the status was never recorded, and the exercise then asks eleven questions as though they are engaged. My instinct is that an unknown status should get the already-intimate wording, since that is the larger group and the assumption is less presumptuous either way it lands, but it is your call and it is a sentence in front of a customer. |
 
 ## 2. Open
 
@@ -81,16 +80,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O191 | **Remove 'You answer on your own. Neither of you sees the other's answers until you have both finished.' from the intimacy questions**, and from the site if it says it there too. |
-| O192 | **Every exercise's progress bar takes that exercise's colour.** |
-| O193 | **Q6 of intimacy: 'When you turn your partner down, you expect to want them to'.** Find out whether that is the not-yet-intimate wording showing on the wrong variant, then either fix the bug or make it your sentence: 'When you turn your partner down, you want them to'. |
-| O194 | **Remove 'Choose as many as are true' from under the choices on Q8.** |
-| O195 | **'(select all that are true)' becomes an italic 'Select all that apply'**, at the end of every question that has a phrase like it. |
-| O196 | **A table of both intimacy framings, question by question**, so you can see what the exercise asks a couple who are already intimate and what it asks a couple who are not. |
-| O197 | **A table of every exercise's opening page**, so the conflict one can be cut down. |
-| O198 | **Conflict's ranking question behaves like Relationship Reflection's**: tapping an option moves it into the ordered list and colours it. |
 | O199 | **The completion pages.** Both surfaces, all five exercises. |
-| O200 | **The loading lines.** 'Checking where you both are' becomes 'Generating your insights', 'Getting your questions' becomes 'Fetching your exercise', and a table of every one of them with where it appears. |
 | O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
 | O190 | **The responsibilities grid.** The site asks a whole category on one screen, each row a task with two sets of buttons: who did it in your childhood home, and who does it in yours. The app asks one task at a time. The data both collect is the same, which is why nothing has broken; the screens are not. This is the rest of "it needs to be the same as the mobile web experience". |
 | O189 | **Rebuild the app's Expectations exercise to match the mobile web experience.** Your words: "Hate the setup of this exercise. It needs to be the same as the mobile web experience." This is the big one on the list and you are waiting on it, so it gets a plan in this document before it gets code. |
@@ -111,6 +101,10 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R133 | **The line under every intimacy question is gone**, and so is "Choose as many as are true". The exercise's opening page says the first once, which is where it belongs. |
+| R134 | **"(select all that are true)" is now an italic "Select all that apply"** on its own line, on any question that ends with a phrase like it. Split off the question rather than edited into it, so the question bank stays one source. |
+| R135 | **Every progress bar is its exercise's colour.** |
+| R136 | **Conflict's ranking works like Reflection's**: a tapped option moves into the ordered list and takes the exercise's colour. Both exercises had written their own; there is one now. |
 | R123 | **Every exercise opens with a page that says what it is**, the same page on both surfaces. They existed on the web, written into the page rather than into a module, which is why the app had none: there was nothing to read. Resuming a half-finished exercise skips it. |
 | R124 | **One eyebrow and one set of arrows across all five exercises.** The eyebrow is the exercise's full name in its own colour. Reflection was showing the category of the question where the exercise's name belongs. |
 | R125 | **"Question 6 of 50" on both surfaces**, counting position rather than answers, so going back to question three says three. |
@@ -132,6 +126,9 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R130 | **Both intimacy framings, listed below.** Eleven of the eighteen questions are worded differently for a couple who are not yet physically intimate. You were reading the second set because of the missing status, which M70 fixes. Your proposed Q6 wording is already exactly what the already-intimate version says. Q9's says "When something feels off in the moment, you" where you wanted "you usually", which is a change you can make from the table. |
+| R131 | **Every exercise's opening page, listed below.** Conflict Patterns is the long one you meant. |
+| R132 | **Every loading line, listed below, with where it appears.** Insights says "Generating your insights" and every exercise says "Fetching your exercise", both in your words. They were typed into fifteen screens and are one file now, which is what makes the list possible. |
 | R110 | **All eleven home lines are yours**, plus the third row of the tile, which now says what the new publication card says rather than having a second name for the same event. The generated list below shows every one of them. The one line that needs a possessive, "Results unlock once Preston finishes his final exercise", reads the partner's own pronouns. |
 | R111 | **Both deletion emails are your prose.** The greeting line above them is gone, because your version opens with it and the email said it twice. The research sentence is still conditional: someone who opted out before deleting should not be told a copy was kept. |
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
@@ -236,6 +233,79 @@ The same-type moment cards, 24 of them:
 | Z | external_stress | Something hard is happening to one of you. The routine holds. Everything gets done. | Under pressure a Z contracts and carries on. Two Zs under pressure produce a household that looks completely fine and two people managing alone, in the same rooms, at the same time. |  |
 
 <!-- end copy:workbook -->
+
+#### The two intimacy framings, for R130
+
+<!-- copy:intimacy: generated by scripts/build-copy-docs.mjs -->
+
+Every question in Physical Intimacy Expectations, both ways it can be
+asked. 11 of 18 are worded differently for a couple who
+are not yet physically intimate; the rest are the same sentence either way.
+Which one a reader gets is decided by the relationship status on their
+profile, so a profile with none falls back to the not-yet wording.
+
+| # | Topic | Already intimate | Not yet |
+|--|--|--|--|
+| 1 | How often feels right | How often do you want physical intimacy? | How often do you imagine wanting physical intimacy? |
+| 2 | Relative desire | Compared to your partner, you tend to | When your ideal and your partner's don't match, you expect to |
+| 3 | Frequency as a signal | How much does frequency signal the health of your relationship to you? | How much do you expect frequency to signal the relationship's health? |
+| 4 | Who initiates | Who usually initiates? | Who do you expect will usually initiate? |
+| 5 | Comfort initiating | How do you feel about initiating? | *same* |
+| 6 | Being turned down | When you turn your partner down, you want them to | When you turn your partner down, you expect to want them to |
+| 7 | Being vulnerable | How at ease do you feel being physically vulnerable? | How at ease do you expect to feel being physically vulnerable? |
+| 8 | What helps you feel comfortable | What might help you feel most comfortable? (select all that are true) | *same* |
+| 9 | When something feels off | When something feels off in the moment, you | When something feels off in the moment, you expect to |
+| 10 | Talking about intimacy | How openly can you talk about intimacy? | How openly do you expect to be able to talk about intimacy? |
+| 11 | Saying what you want | Saying what you want in the moment | *same* |
+| 12 | Talking afterward | Talking afterward about what worked | *same* |
+| 13 | Appetite for novelty | Your appetite for trying new things | *same* |
+| 14 | When a new idea comes up | When your partner suggests something new, you | *same* |
+| 15 | Novelty vs routine | How do novelty and routine balance for you now? | How do you expect novelty and routine to balance over a long marriage? |
+| 16 | What it is primarily about | What is physical intimacy primarily about for you? (select up to two) | *same* |
+| 17 | When disconnected | When you're emotionally disconnected, physical intimacy tends to | When you're emotionally disconnected, you expect physical intimacy to |
+| 18 | What you hope it means | What does intimacy most mean in your marriage now? | What do you most hope intimacy will mean in your marriage? |
+
+<!-- end copy:intimacy -->
+
+#### The page that opens each exercise, for R131
+
+<!-- copy:intros: generated by scripts/build-copy-docs.mjs -->
+
+The page that opens each exercise, on both surfaces. Conflict Patterns is
+the long one.
+
+| Exercise | Heading | What it says | Footnote | Button |
+|--|--|--|--|--|
+| Communication styles | First, how you communicate. | This is the communication exercise. It looks at how you connect, handle conflict, and show up day to day. Both take about 15 minutes. Answer honestly. You answer every question twice: once about yourself, and once the way you think your partner would answer it. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
+| Expectations | What you expect. | Relationship frustrations frequently trace back to an unmet expectation, whether conscious or not. Two parts. First, life and values questions: children, finances, where you live, how you handle conflict and repair. Then, who you expect to handle what across household, financial, career, extended family, and emotional responsibilities. You will also share who did each of these in your childhood home. That context helps explain why you each carry the expectations you do. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
+| Relationship Reflection | The moments that make a relationship are worth naming. | A mix of scale questions, short reflections, and a few rankings. Nothing to study for. Just answer. When Preston finishes, you will see where your stories overlap and where you each saw something the other did not. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
+| Physical Intimacy Expectations | What you each expect. | Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. This is a private set of questions about what you each expect. You answer on your own. Neither of you sees the other’s answers until you have both finished. There are no right answers, and no answer here is better than another. This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
+| Conflict Patterns | Conflict patterns | Conflict is part of every relationship. This exercise helps each of you identify patterns linked to relationship strain so that you can approach conflict in a healthy way. Twelve questions, about ten minutes. Two ask you to write a sentence. You answer on your own, and one section stays private to you that Preston never sees. | Built on relationship research and shaped with licensed therapists. | Begin exercise |
+
+<!-- end copy:intros -->
+
+#### What the app says while it waits, for R132
+
+<!-- copy:loading: generated by scripts/build-copy-docs.mjs -->
+
+Every line the app shows while it is waiting, and where it appears. They
+were typed into fifteen screens; they are one file now, which is what
+makes this list possible.
+
+| Line | Where |
+|--|--|
+| Getting your dashboard | Home: the dashboard's first paint. |
+| Generating your insights | Insights: results and exercise status together. |
+| Loading your resources | Resources: the tools and the In Practice list. |
+| Getting your notes | Notes: notes, marks and tags. |
+| Fetching your exercise | Any exercise, fetching its questions. |
+| Opening | An In Practice piece opening. |
+| Getting your profile | Settings, reading the profile to edit. |
+| Getting your budget | The budget tool. |
+| Getting your checklist | The Starting Out checklist. |
+| One moment | Profile setup and the feedback form, both waiting on their copy. |
+
+<!-- end copy:loading -->
 
 #### The alert copy, for R74
 

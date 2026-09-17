@@ -31,6 +31,7 @@ import Checklist from '@/components/checklist';
 import { buildWorkbook, fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
+import { LOADING } from '@/constants/loading-copy';
 import {
   AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -230,7 +231,7 @@ export default function ResourcesScreen() {
     setCategory(ALL);
   }, []));
 
-  if (loading) return <Shell><ScreenLoading label="Loading your resources" /></Shell>;
+  if (loading) return <Shell><ScreenLoading label={LOADING.resources} /></Shell>;
 
   // This screen had no failure handling at all. Signed out, it rendered an
   // empty page with a lone "Nothing published yet", which reads as a product

@@ -37,6 +37,7 @@ import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
 
@@ -173,7 +174,7 @@ export default function Expectations({
     });
   }, [cat, answers]);
 
-  if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
+  if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
   if (!set) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 

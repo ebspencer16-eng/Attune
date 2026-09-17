@@ -28,6 +28,7 @@ import {
   type AboutYou, type ApiError, type ProfileSetupCopy,
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { LOADING } from '@/constants/loading-copy';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -93,7 +94,7 @@ export default function ProfileSetup({ onDone }: { onDone: () => void }) {
       />
     );
   }
-  if (!copy) return <ScreenLoading label="One moment" />;
+  if (!copy) return <ScreenLoading label={LOADING.moment} />;
 
   const ready = !!name.trim() && !!partnerName.trim();
 

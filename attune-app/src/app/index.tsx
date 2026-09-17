@@ -36,6 +36,7 @@ import SignIn from '@/components/sign-in';
 import Feedback from '@/components/feedback';
 import Settings from '@/components/settings';
 import { forgetLastSection } from '@/components/results';
+import { LOADING } from '@/constants/loading-copy';
 import {
   BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
   Spacing, Type,
@@ -224,7 +225,7 @@ export default function HomeScreen() {
     scroller.current?.scrollTo({ y: 0, animated: true });
   }, []));
 
-  if (loading) return <Shell><ScreenLoading label="Getting your dashboard" /></Shell>;
+  if (loading) return <Shell><ScreenLoading label={LOADING.home} /></Shell>;
 
   if (error?.kind === 'unauthorized') {
     return (

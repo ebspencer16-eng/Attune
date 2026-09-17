@@ -39,8 +39,24 @@ import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
+
+/**
+ * A question and the instruction tacked onto the end of it.
+ *
+ * The question bank writes "(select all that are true)" after the question
+ * itself. Ellie asked for "Select all that apply", italic, on any question
+ * with a phrase like it. Splitting rather than rewriting means the question
+ * bank stays one source and every phrasing of that instruction gets the same
+ * treatment, including ones written later.
+ */
+function splitInstruction(text: string): { text: string; instruction: string | null } {
+  const m = /^(.*?)\s*\((select all[^)]*|choose as many[^)]*)\)\s*$/i.exec(text || '');
+  if (!m) return { text: text || '', instruction: null };
+  return { text: m[1], instruction: 'Select all that apply' };
+}
 
 /** A scalar answer is stored as the option label; a multi as an array of values. */
 type Answers = Record<string, string | (string | null)[]>;
@@ -100,7 +116,7 @@ export default function IntimacyExercise({
     return res.ok;
   }, [set]);
 
-  if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
+  if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) {
     return (
       <Shell onClose={onClose}>
@@ -211,7 +227,18 @@ export default function IntimacyExercise({
           <View style={{ width: `${((idx + 1) / items.length) * 100}%`, height: 3, backgroundColor: exerciseColor('intimacy') }} />
         </View>
 
-        <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>{item.text}</Text>
+        {/* ── THE INSTRUCTION AT THE END OF A QUESTION ─────────────────
+            Ellie: change "(select all that are true)" to an italicised "Select
+            all that apply", "on any question with a similar phrase at the
+            end". So it is split off the question rather than edited into the
+            question text: the same treatment works for every phrasing the
+            question bank has, and the questions stay one source. */}
+        <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
+          {splitInstruction(item.text).text}
+          {splitInstruction(item.text).instruction ? (
+            <Text style={{ fontStyle: 'italic' }}>{`\n${splitInstruction(item.text).instruction}`}</Text>
+          ) : null}
+        </Text>
 
         <View style={{ marginTop: Spacing.lg, gap: Spacing.sm }}>
           {item.options.map((o) => {
@@ -245,12 +272,6 @@ export default function IntimacyExercise({
           })}
         </View>
 
-        {isMulti ? (
-          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-            Choose as many as are true.
-          </Text>
-        ) : null}
-
         {saveFailed ? (
           <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
             That answer has not saved yet. It will try again on the next one.
@@ -268,14 +289,7 @@ export default function IntimacyExercise({
           color={exerciseColor('intimacy')}
         />
 
-        {/* The website's own words, from the exercise intro. What was here
-            was written for the app and promised something the product does
-            not: it said the partner never sees these answers. The exercise is
-            sold as "answered independently, compared side by side". */}
-        <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center', marginTop: Spacing.lg }}>
-          You answer on your own. Neither of you sees the other's answers until
-          you have both finished.
-        </Text>
+
       </ScrollView>
     </Shell>
   );

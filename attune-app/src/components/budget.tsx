@@ -32,6 +32,7 @@ import {
 import { bFmt, computeReveal } from '@/constants/budget';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
+import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -88,7 +89,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
 
   const put = (patch: Partial<BudgetState>) => setState((p) => ({ ...p, ...patch }));
 
-  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label="Getting your budget" /></ScreenFrame>;
+  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label={LOADING.budget} /></ScreenFrame>;
   if (failed || !cats || !copy) {
     return (
       <ScreenFrame onBack={onClose} backLabel="Resources">

@@ -34,6 +34,7 @@ import { fetchPost, markPostRead, type ApiError, type Note, type Post, type Post
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
 import { AnnotationProvider, Prose } from '@/components/annotation-context';
+import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -153,7 +154,7 @@ export default function PostReader({
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label="Opening" /></ScreenFrame>;
+    return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label={LOADING.post} /></ScreenFrame>;
   }
   if (failed || !post) {
     return (

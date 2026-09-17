@@ -59,6 +59,7 @@ import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
+import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -392,7 +393,7 @@ export default function NotesScreen() {
     setShowAllShared(false);
   }, []));
 
-  if (loading) return <Shell><ScreenLoading label="Getting your notes" /></Shell>;
+  if (loading) return <Shell><ScreenLoading label={LOADING.notes} /></Shell>;
 
   if (error?.kind === 'unauthorized') {
     return (

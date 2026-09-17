@@ -31,6 +31,7 @@ import {
 } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
+import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -97,7 +98,7 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
     });
   }, []);
 
-  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label="Getting your checklist" /></ScreenFrame>;
+  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label={LOADING.checklist} /></ScreenFrame>;
   if (failed || !areas || !copy) {
     return (
       <ScreenFrame onBack={onClose} backLabel="Resources">

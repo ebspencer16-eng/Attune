@@ -23,6 +23,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { fetchFeedbackForm, sendFeedback, type ApiError, type FeedbackForm } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import { useScreenTime } from '@/hooks/use-screen-time';
+import { LOADING } from '@/constants/loading-copy';
 import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -74,7 +75,7 @@ export default function Feedback({ onDone }: { onDone: () => void }) {
   if (error) {
     return <ScreenError error={error} onRetry={() => { setError(null); setAttempt((n) => n + 1); }} />;
   }
-  if (!form) return <ScreenLoading label="One moment" />;
+  if (!form) return <ScreenLoading label={LOADING.moment} />;
 
   if (sent) {
     return (

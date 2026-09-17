@@ -159,3 +159,74 @@ export function ExerciseOpening({
     </ScrollView>
   );
 }
+
+/**
+ * Ranking, by tapping in order.
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * Ellie: "Ranking question (Q10) should have the same functionality as the one
+ * from rel relf, I want the options to move into their ordered list and become
+ * colored once you select it."
+ *
+ * Two exercises ask for a ranking and each had written its own. Reflection
+ * moved a chosen option into a list at the top; Conflict left it in place and
+ * put a number beside it. This is Reflection's, in the exercise's own colour,
+ * used by both.
+ *
+ * Not drag and drop. Reordering by dragging on a phone is fiddly enough that
+ * people give up and accept whatever order they land on, which produces a
+ * ranking nobody meant. Tapping in order is slower to describe and faster to
+ * do, and tapping again takes it back.
+ */
+export function RankInOrder({
+  options, order, onChange, color, hint,
+}: {
+  options: string[];
+  order: string[] | null;
+  onChange: (v: string[]) => void;
+  color?: string;
+  hint?: string;
+}) {
+  const picked = order ?? [];
+  const remaining = options.filter((o) => !picked.includes(o));
+  const tint = color || c.accent;
+
+  return (
+    <View style={{ marginTop: Spacing.lg }}>
+      <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
+        {hint || 'Tap them in order, most important first. Tap one again to take it back.'}
+      </Text>
+
+      {picked.map((o, i) => (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${o}, ranked ${i + 1}. Tap to take it back.`}
+          key={o}
+          onPress={() => onChange(picked.filter((p) => p !== o))}
+          style={{
+            flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+            paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+            borderRadius: Radius.md, marginBottom: Spacing.sm,
+            backgroundColor: tint,
+          }}>
+          <Text style={{ ...Type.cardTitle, color: Palette.white }}>{i + 1}</Text>
+          <Text style={{ ...Type.body, color: Palette.white, flex: 1 }}>{o}</Text>
+        </Pressable>
+      ))}
+
+      {remaining.map((o) => (
+        <Pressable
+          accessibilityRole="button"
+          key={o}
+          onPress={() => onChange([...picked, o])}
+          style={{
+            paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+            borderRadius: Radius.md, marginBottom: Spacing.sm,
+            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          }}>
+          <Text style={{ ...Type.body, color: c.text }}>{o}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}

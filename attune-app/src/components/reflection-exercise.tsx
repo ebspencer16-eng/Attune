@@ -29,11 +29,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchExerciseQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ReflectionQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
-import { ExerciseEyebrow, ExerciseNav, exerciseColor, ExerciseOpening } from '@/components/exercise-chrome';
+import {
+  ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor,
+} from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
 
@@ -101,7 +104,7 @@ export default function ReflectionExercise({
     return res.ok;
   }, [set]);
 
-  if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
+  if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) {
     return (
       <Shell onClose={onClose}>
@@ -229,10 +232,11 @@ export default function ReflectionExercise({
           ) : null}
 
           {item.type === 'rank' && item.options ? (
-            <RankChoice
+            <RankInOrder
               options={item.options}
               order={Array.isArray(value) ? value : null}
               onChange={setValue}
+              color={exerciseColor('ex3')}
             />
           ) : null}
 
@@ -327,59 +331,6 @@ function PickChoice({
           </Pressable>
         );
       })}
-    </View>
-  );
-}
-
-/**
- * Ranking, by tapping in order.
- *
- * Not drag and drop. Reordering by dragging on a phone is fiddly enough that
- * people give up and accept whatever order they land on, which produces a
- * ranking nobody meant. Tapping in order is slower to describe and faster to
- * do, and tapping again takes it back.
- */
-function RankChoice({
-  options, order, onChange,
-}: { options: string[]; order: string[] | null; onChange: (v: string[]) => void }) {
-  const picked = order ?? [];
-  const remaining = options.filter((o) => !picked.includes(o));
-
-  return (
-    <View style={{ marginTop: Spacing.lg }}>
-      <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
-        Tap them in order, most important first. Tap one again to take it back.
-      </Text>
-
-      {picked.map((o, i) => (
-        <Pressable
-      accessibilityRole="button"
-          key={o}
-          onPress={() => onChange(picked.filter((p) => p !== o))}
-          style={{
-            flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-            paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-            borderRadius: Radius.md, marginBottom: Spacing.sm,
-            backgroundColor: c.textStrong,
-          }}>
-          <Text style={{ ...Type.cardTitle, color: Palette.white }}>{i + 1}</Text>
-          <Text style={{ ...Type.body, color: Palette.white, flex: 1 }}>{o}</Text>
-        </Pressable>
-      ))}
-
-      {remaining.map((o) => (
-        <Pressable
-      accessibilityRole="button"
-          key={o}
-          onPress={() => onChange([...picked, o])}
-          style={{
-            paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-            borderRadius: Radius.md, marginBottom: Spacing.sm,
-            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-          }}>
-          <Text style={{ ...Type.body, color: c.text }}>{o}</Text>
-        </Pressable>
-      ))}
     </View>
   );
 }

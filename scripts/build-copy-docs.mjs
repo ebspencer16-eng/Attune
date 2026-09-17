@@ -176,11 +176,74 @@ async function workbookBlock() {
   ].join('\n');
 }
 
+// ── 4. The two framings of the intimacy questions ─────────────────────────
+async function intimacyBlock() {
+  const m = await import(`${ROOT}api/_intimacy-questions.js`);
+  const rows = m.INTIMACY_QUESTIONS.map((q, i) => {
+    const same = q.premarital === q.married;
+    return `| ${i + 1} | ${esc(q.topic || q.id)} | ${esc(q.married)} | ${same ? '*same*' : esc(q.premarital)} |`;
+  });
+  const differing = m.INTIMACY_QUESTIONS.filter((q) => q.premarital !== q.married).length;
+  return [
+    'Every question in Physical Intimacy Expectations, both ways it can be',
+    `asked. ${differing} of ${m.INTIMACY_QUESTIONS.length} are worded differently for a couple who`,
+    'are not yet physically intimate; the rest are the same sentence either way.',
+    'Which one a reader gets is decided by the relationship status on their',
+    'profile, so a profile with none falls back to the not-yet wording.',
+    '',
+    '| # | Topic | Already intimate | Not yet |',
+    '|--|--|--|--|',
+    ...rows,
+  ].join('\n');
+}
+
+// ── 5. The page that opens each exercise ──────────────────────────────────
+async function introBlock() {
+  const m = await import(`${ROOT}api/_lib/exercise-intro.js`);
+  const { EXERCISES } = await import(`${ROOT}api/_exercises.js`);
+  const rows = EXERCISES.map((e) => {
+    const intro = m.exerciseIntro(e.key, { partner: THEM });
+    if (!intro) return null;
+    return `| ${esc(e.fullLabel || e.label)} | ${esc(intro.title)} | ${intro.body.map(esc).join(' ')} | ${esc(intro.note)} | ${esc(intro.cta)} |`;
+  }).filter(Boolean);
+  return [
+    'The page that opens each exercise, on both surfaces. Conflict Patterns is',
+    'the long one.',
+    '',
+    '| Exercise | Heading | What it says | Footnote | Button |',
+    '|--|--|--|--|--|',
+    ...rows,
+  ].join('\n');
+}
+
+// ── 6. What the app says while it waits ───────────────────────────────────
+function loadingBlock() {
+  const src = readFileSync(`${ROOT}attune-app/src/constants/loading-copy.ts`, 'utf8');
+  const rows = [];
+  // Each line is preceded by the comment saying where it appears, which is the
+  // context she asked for and the reason they are in one file.
+  for (const m of src.matchAll(/\/\*\* ([^*]+?) \*\/\s*\n\s*(\w+): '([^']*)'/g)) {
+    rows.push(`| ${esc(m[3])} | ${esc(m[1])} |`);
+  }
+  return [
+    'Every line the app shows while it is waiting, and where it appears. They',
+    'were typed into fifteen screens; they are one file now, which is what',
+    'makes this list possible.',
+    '',
+    '| Line | Where |',
+    '|--|--|',
+    ...rows,
+  ].join('\n');
+}
+
 // ── Write them in ──────────────────────────────────────────────────────────
 const BLOCKS = {
   home: homeBlock(),
   'deletion-emails': await deletionBlock(),
   workbook: await workbookBlock(),
+  intimacy: await intimacyBlock(),
+  intros: await introBlock(),
+  loading: loadingBlock(),
 };
 
 let doc = readFileSync(DOC, 'utf8');

@@ -38,6 +38,7 @@ import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
 
@@ -165,7 +166,7 @@ export default function InsightsScreen() {
     showFirstSection();
   }, []));
 
-  if (loading) return <Shell><ScreenLoading label="Checking where you both are" /></Shell>;
+  if (loading) return <Shell><ScreenLoading label={LOADING.insights} /></Shell>;
 
   if (error?.kind === 'unauthorized') {
     return (

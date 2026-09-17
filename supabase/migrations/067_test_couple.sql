@@ -77,10 +77,15 @@ exception when others then
 end $$;
 
 -- ── The two profiles ───────────────────────────────────────────────────────
-insert into public.profiles (id, email, name, pronouns, partner_name, partner_pronouns, partner_email, pkg, profile_setup_complete)
+-- relationship_status decides which wording Physical Intimacy Expectations
+-- uses: eleven of its eighteen questions are asked one way of a couple who are
+-- already intimate and another way of a couple who are not yet, and anything
+-- that is not married or remarried gets the second. A test couple with no
+-- status was being asked the whole exercise the wrong way round.
+insert into public.profiles (id, email, name, pronouns, partner_name, partner_pronouns, partner_email, pkg, relationship_status, profile_setup_complete)
 values
-  ('11111111-1111-4111-8111-111111111111', 'tester@attune-relationships.com', 'Tester', 'they/them', 'Testpartner', 'they/them', 'tester-partner@attune-relationships.com', 'premium', true),
-  ('22222222-2222-4222-8222-222222222222', 'tester-partner@attune-relationships.com', 'Testpartner', 'they/them', 'Tester', 'they/them', 'tester@attune-relationships.com', 'premium', true)
+  ('11111111-1111-4111-8111-111111111111', 'tester@attune-relationships.com', 'Tester', 'they/them', 'Testpartner', 'they/them', 'tester-partner@attune-relationships.com', 'premium', 'married', true),
+  ('22222222-2222-4222-8222-222222222222', 'tester-partner@attune-relationships.com', 'Testpartner', 'they/them', 'Tester', 'they/them', 'tester@attune-relationships.com', 'premium', 'married', true)
 on conflict (id) do nothing;
 
 -- Linked to each other, owning everything. Written as an update as well as an
@@ -108,8 +113,8 @@ update public.profiles set
   ex2_completed = true, ex2_completed_at = now(),
   ex3_answers = '{"a0":4,"a_sat_conn":4,"a_sat_comm":2,"a_sat_fun":3,"a8":"A sample answer for How We''re Doing, written so the reflection pages have words to show."}'::jsonb,
   ex3_completed = true, ex3_completed_at = now(),
-  intimacy_data = '{"answers":{"iq_freq_want":0.5,"iq_freq_relative":0,"iq_freq_meaning":0.75,"iq_init_who":0,"iq_init_feel":0.5,"iq_init_turndown":0,"iq_comfort_ease":1,"iq_comfort_safe":["desired","privacy"],"iq_comfort_off":0.5,"iq_comm_open":1,"iq_comm_moment":0.5,"iq_comm_debrief":0,"iq_adv_appetite":1,"iq_adv_suggest":0.75,"iq_adv_balance":1,"iq_mean_for":["security","ritual"],"iq_mean_disconnect":0.5,"iq_mean_hope":0},"variant":"married","completedAt":"2026-09-16T22:32:51.807Z"}'::jsonb,
-  conflict_data = '{"answers":{"c0":3,"c1":"b","c2":"a","c_crit":0,"c_cont":1,"c_def":3,"c_stone":2,"c8":"Using humor","c9":"A sample answer for c9, long enough to read like something a person typed.","c_repair":["Directly asking what I need","Suggesting a pause","Naming that they see it from my side","Physical affection (a hug, holding hands)","Humor to break the tension","A genuine apology"],"c_topic":"b","c_grat":"A sample answer for c_grat, long enough to read like something a person typed."},"completedAt":"2026-09-16T22:32:51.808Z"}'::jsonb
+  intimacy_data = '{"answers":{"iq_freq_want":0.5,"iq_freq_relative":0,"iq_freq_meaning":0.75,"iq_init_who":0,"iq_init_feel":0.5,"iq_init_turndown":0,"iq_comfort_ease":1,"iq_comfort_safe":["desired","privacy"],"iq_comfort_off":0.5,"iq_comm_open":1,"iq_comm_moment":0.5,"iq_comm_debrief":0,"iq_adv_appetite":1,"iq_adv_suggest":0.75,"iq_adv_balance":1,"iq_mean_for":["security","ritual"],"iq_mean_disconnect":0.5,"iq_mean_hope":0},"variant":"married","completedAt":"2026-09-17T03:42:57.395Z"}'::jsonb,
+  conflict_data = '{"answers":{"c0":3,"c1":"b","c2":"a","c_crit":0,"c_cont":1,"c_def":3,"c_stone":2,"c8":"Using humor","c9":"A sample answer for c9, long enough to read like something a person typed.","c_repair":["Directly asking what I need","Suggesting a pause","Naming that they see it from my side","Physical affection (a hug, holding hands)","Humor to break the tension","A genuine apology"],"c_topic":"b","c_grat":"A sample answer for c_grat, long enough to read like something a person typed."},"completedAt":"2026-09-17T03:42:57.396Z"}'::jsonb
 where id = '22222222-2222-4222-8222-222222222222';
 
 -- ── The order that pays for it ─────────────────────────────────────────────
