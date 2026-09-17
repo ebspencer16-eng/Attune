@@ -975,6 +975,15 @@ function ExpectationsConversation({
    *  paragraph in. Orange when there is no type. */
   introColor?: string;
 }) {
+  /**
+   * Which of the two the table is showing. Expects first: it is the answer the
+   * page is about, and what someone grew up with is the context for it.
+   *
+   * Declared above the early return, because a hook below one runs on some
+   * renders and not others, and React counts them in order.
+   */
+  const [lived, setLived] = useState(false);
+
   if (!bucket || bucket.answered === 0) {
     return (
       <Waiting
@@ -1060,8 +1069,27 @@ function ExpectationsConversation({
           {/* block: exp-conversation/questions */}
           {gaps.length ? (
             <View style={{ backgroundColor: Palette.white, borderRadius: Radius.lg, overflow: 'hidden' }}>
-              <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, backgroundColor: `${accent}14` }}>
-                <Text style={{ ...Type.eyebrow, color: accent }}>Conversations to have</Text>
+              <View
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                  paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                  backgroundColor: `${accent}14`,
+                }}>
+                <Text style={{ ...Type.eyebrow, color: accent, flex: 1 }}>Conversations to have</Text>
+                {/* ── ONE PAIR AT A TIME ────────────────────────────────
+                    Ellie: "What about a toggle for expects v experienced above
+                    the table itself?" Four columns on a phone gives each
+                    answer about seventy points to sit in, and half of them are
+                    sentences. Two columns and a switch gives each answer twice
+                    the room, and the comparison a reader is making is between
+                    two people rather than between the two columns.
+
+                    Absent where the category never asked, which is Extended
+                    Family: a switch with nothing behind it is worse than no
+                    switch. */}
+                {showLived ? (
+                  <ColumnToggle value={lived} onChange={setLived} accent={accent} />
+                ) : null}
               </View>
               {/* ── FOUR COLUMNS, NOT FOUR ROWS ──────────────────────────
                   Ellie: "Expectations results expects and experienced need to
@@ -1080,18 +1108,7 @@ function ExpectationsConversation({
                 <Text style={{ ...Type.eyebrow, fontSize: 9, color: accent, width: CONVO_COL.person, textAlign: 'center' }}>{you}</Text>
                 <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, width: CONVO_COL.person, textAlign: 'center' }}>{them}</Text>
               </View>
-              {showLived ? (
-                <View style={{ flexDirection: 'row', paddingHorizontal: Spacing.lg, paddingTop: 2 }}>
-                  <View style={{ width: CONVO_COL.item }} />
-                  {[EXPECTS_LABEL, EXPERIENCED_LABEL, EXPECTS_LABEL, EXPERIENCED_LABEL].map((label, i) => (
-                    <Text
-                      key={`${label}${i}`}
-                      style={{ ...Type.eyebrow, fontSize: 7, color: c.textMuted, width: CONVO_COL.half, textAlign: 'center' }}>
-                      {label}
-                    </Text>
-                  ))}
-                </View>
-              ) : null}
+
               {gaps.map((row, i) => (
                 <View
                   key={row.key}
@@ -1103,8 +1120,8 @@ function ExpectationsConversation({
                   <Text style={{ ...Type.small, fontSize: 11, color: c.text, width: CONVO_COL.item, paddingRight: Spacing.sm, lineHeight: 15 }}>
                     {row.item}
                   </Text>
-                  <ConversationCell value={row.you} lived={row.youExperienced} showLived={showLived} tint={c.textStrong} />
-                  <ConversationCell value={row.them} lived={row.themExperienced} showLived={showLived} tint={c.textMuted} />
+                  <ConversationCell value={lived ? row.youExperienced : row.you} muted={lived} tint={c.textStrong} />
+                  <ConversationCell value={lived ? row.themExperienced : row.them} muted={lived} tint={c.textMuted} />
                 </View>
               ))}
             </View>
@@ -1172,40 +1189,59 @@ function ExpectationsConversation({
 }
 
 /**
- * One person's two columns: what they expect, and what they grew up with.
- *
- * The growing-up column is dropped for a category that does not ask it, which
- * is Extended Family: those are each partner's own family, so there is no
- * shared childhood to compare.
+ * One person's answer in the conversations table: what they expect, or what
+ * they grew up with, depending on the switch above the table.
  */
 function ConversationCell({
-  value, lived, showLived, tint,
-}: { value?: string | null; lived?: string | null; showLived: boolean; tint: string }) {
+  value, muted, tint,
+}: { value?: string | null; muted?: boolean; tint: string }) {
   return (
-    <>
-      <Text
-        style={{
-          ...Type.small, fontSize: 11, fontWeight: '700', color: tint,
-          width: showLived ? CONVO_COL.half : CONVO_COL.person,
-          textAlign: 'center', lineHeight: 15,
-        }}>
-        {value || '\u2014'}
-      </Text>
-      {showLived ? (
-        <Text
-          style={{
-            ...Type.small, fontSize: 10, fontStyle: 'italic', color: c.textMuted,
-            width: CONVO_COL.half, textAlign: 'center', lineHeight: 15,
-          }}>
-          {lived || '\u2014'}
-        </Text>
-      ) : null}
-    </>
+    <Text
+      style={{
+        ...Type.small, fontSize: 11, fontWeight: muted ? '600' : '700',
+        fontStyle: muted ? 'italic' : 'normal',
+        color: muted ? c.textMuted : tint,
+        width: CONVO_COL.person, textAlign: 'center', lineHeight: 15,
+      }}>
+      {value || '\u2014'}
+    </Text>
+  );
+}
+
+/** Expects or Experienced, above the table that draws one of them. */
+function ColumnToggle({
+  value, onChange, accent,
+}: { value: boolean; onChange: (v: boolean) => void; accent: string }) {
+  return (
+    <View style={{ flexDirection: 'row', borderRadius: Radius.pill, backgroundColor: Palette.white, overflow: 'hidden' }}>
+      {[false, true].map((option) => {
+        const on = option === value;
+        return (
+          <Pressable
+            key={String(option)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            onPress={() => onChange(option)}
+            style={{
+              paddingVertical: 4, paddingHorizontal: Spacing.sm,
+              backgroundColor: on ? accent : 'transparent',
+            }}>
+            <Text
+              style={{
+                ...Type.eyebrow, fontSize: 8,
+                color: on ? Palette.white : c.textMuted,
+              }}>
+              {option ? EXPERIENCED_LABEL : EXPECTS_LABEL}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
 /** The table's columns, as percentages so every row lines up. */
-const CONVO_COL = { item: '34%', person: '33%', half: '16.5%' } as const;
+const CONVO_COL = { item: '34%', person: '33%' } as const;
 
 /**
  * One item, with both answers.

@@ -375,7 +375,19 @@ export default function HomeScreen() {
             <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.lg }}>
               {data.greeting}
             </Text>
-            <View style={{ flex: 1, justifyContent: 'center', paddingBottom: Spacing.xl }}>
+            {/* ── CENTRED IN WHAT IS LEFT ────────────────────────────────
+                Ellie: "no matter where the bottom tile is, the insight of the
+                day and bg mark is centered between the bottom of the line on
+                top and the top of the tile."
+
+                It already took the space under the greeting, but it also
+                carried a bottom padding, which pushed the centre of the
+                finding up by half of it. The block ends where the tile starts,
+                so with nothing padding it the middle of this is the middle of
+                that gap, whatever the tile below is holding. The mark comes
+                with it: the glow is drawn inside the finding rather than
+                positioned against the screen. */}
+            <View style={{ flex: 1, justifyContent: 'center' }}>
               {data.research ? <ResearchNote finding={data.research} /> : null}
             </View>
           </View>

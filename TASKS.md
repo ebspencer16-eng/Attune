@@ -55,9 +55,11 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q10 is answered: the workbook opens as a converted web
+version inside the app.
+
 | # | Question |
 |--|--|
-| Q10 | **How far should "open the workbook in the app" go?** It opens full screen in our colours now, and iOS draws the Word document inside it. Drawing it ourselves means a second renderer: the workbook is built as Word paragraphs and tables by a two and a half thousand line generator, and a native reader would be a new one over the same payload, with the .docx kept for printing and email. That is days rather than hours and it is a feature rather than a fix, so it is your call. The middle option is a web version of the workbook opening in the same full-screen view, which would read as a page of the app on a phone at a fraction of the cost. |
 
 ## 2. Open
 
@@ -88,11 +90,9 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R157 | **The white glow is off, so what is behind the finding is just the mark.** Both switches sit together in the home screen: WHITE_GLOW back to true puts the old one back, and turning the mark off as well is exactly the screen from two days ago. |
-| R158 | **Expects and Experienced are columns.** Four of them, two per person, fixed widths so every row lines up. A category that asks no growing-up question, which is Extended Family, gets two columns rather than a column of dashes. |
-| R159 | **"Both of us" is gone from the results.** Where the exercise asked what Both meant, that answer is the value now: "Genuinely 50/50", or "Usually Ellie, sometimes Preston". Rows answered before that follow-up existed say "Both". One rule, read by both surfaces. |
-| R160 | **The opener's second line fits.** The measure went from 260 to 300 on both surfaces. |
-| R161 | **The workbook opens full screen in the app's colours** rather than in a sheet with Safari's. It is still iOS drawing the document inside it, which is the honest limit of what a .docx can be here: see Q10. |
+| R162 | **The workbook opens as a page in the app.** Not a second version of it: the page converts the document that was actually generated, so a change to the workbook shows up here with nothing to update and there is never a web version saying something different. It carries our type and colours; the parts of the Word layout that were tables are tables that scroll sideways rather than squeeze. Two things to judge: whether the reading holds up, and whether you want the .docx still reachable from somewhere for printing and email. |
+| R163 | **Expects or Experienced, by a switch above the table** rather than four columns. Each answer gets twice the room, and the comparison stays between the two of you. Categories that never asked the growing-up question have no switch. |
+| R164 | **The finding and the mark are centred in the gap**, whatever the tile below is holding. They were centred in that space already but carried a bottom padding, which pushed them up by half of it. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -141,6 +141,8 @@ receive a notification from Apple's servers.
 | R138 | An exercise in progress is counted properly |
 | R139 | The household page's arrows |
 | R123 | An opening page for every exercise, both surfaces |
+| R159 | "Both of us" gone from the results |
+| R160 | The opener's second line fits |
 | M71 | The test couple's Expectations answers, repaired |
 | R156 | An exercise asked for by name opens |
 | R148 | Part two: Responsibilities |

@@ -130,12 +130,24 @@ export default function ResourcesScreen() {
    * workbook payload, which is a real piece of work and is in TASKS.md as a
    * decision for her rather than something to start on a guess.
    */
-  const openWorkbook = (url: string) => openBrowserAsync(url, {
-    presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-    toolbarColor: c.background,
-    controlsColor: c.accent,
-    enableBarCollapsing: true,
-  });
+  const openWorkbook = (url: string) => openBrowserAsync(
+    /**
+     * The workbook as a page rather than as a download.
+     *
+     * Ellie: "Web version of the workbook opening in an in-app experience is
+     * ok for now." /api/workbook-web converts the document that was actually
+     * generated, so there is no second version of the workbook to drift; it
+     * takes the signed storage link the app already holds, which expires in an
+     * hour and is the only way in.
+     */
+    `${SITE}/api/workbook-web?file=${encodeURIComponent(url)}`,
+    {
+      presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+      toolbarColor: c.background,
+      controlsColor: c.accent,
+      enableBarCollapsing: true,
+    },
+  );
 
   const openTool = async (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
