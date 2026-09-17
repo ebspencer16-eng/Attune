@@ -37,13 +37,13 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
+**Nothing waiting.** 061 to 069 are all run.
+
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M68 | **`068_test_couple_signin_repair.sql`. This is why the tester could not sign in.** 067 made both accounts correctly and left eight columns on them null. Supabase's auth service reads those columns as text rather than as nullable text, so it fails inside itself before it ever checks the password, and the app has no way to tell that from the server being broken: "something went wrong on our end" is exactly what it says. A real signup fills them with empty strings. This does the same for the two test rows and nothing else. 067 has been corrected too, so a fresh run would not need this. |
-| M69 | **`069_deleted_partner_account.sql`.** The login you asked for in Q4: **tester-alone@attune-relationships.com**, same password. Finished, owning everything, with results that open and the other person's name taken out of them, which is what the retention policy promises. It is its own couple rather than a deletion of the tester's partner, because deleting that partner would take the walkthrough with it. The frozen results row in it is built by the product's own results store, so it is the shape the screen will actually be served. |
 
 ### Decide these
 
@@ -75,12 +75,20 @@ My list. Things to build or fix, none of them waiting on you.
 
 My list. Things to build or fix, none of them waiting on you.
 
-**Nothing open.**
+My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O169 | **An exercise you have started says so.** The table shows Start on something with answers already saved. The column exists and nothing reads it. |
+| O170 | **The home prompt for an exercise in progress.** 'Continue [name]', and under it 'You've completed [#]/[#] questions'. Needs the server to count them, which it does not today. |
+| O171 | **Flip the weight of the A and B tiles against the answer choices.** The tiles are white and the choices are greyed, which points at the thing you cannot tap. |
+| O172 | **The eyebrow in Communication reads 'Communication styles'.** |
+| O173 | **The screen before part two is wrong.** Your words for it: no eyebrow, hero reads 'Part Two: All the same questions, but about your partner', no description. First I check what the site says, and if the two differ I bring both here rather than choosing. |
+| O174 | **Part two italicises 'your partner' in every question, as the site does.** And a sweep for any other formatting the two surfaces do differently. |
+| O175 | **The Next arrow needed several taps on Q35.** Reproduce before changing: a target that small is the obvious suspect, and so is the scroll view under it. |
+| O176 | **The exercise's own pages mirror the site.** Begin, part two, and complete. The completion hero should read 'Communication styles exercise complete' rather than 'That is everything'. |
 
 ## 3. For you to review
 
@@ -254,6 +262,8 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| M68 | The sign-in repair, run |
+| M69 | The deleted-partner account, run |
 | R103 | The alert copy, in Ellie's words |
 | R104 | Generated prose lists as the standing practice |
 | R17 | The workbook moment blocks |
