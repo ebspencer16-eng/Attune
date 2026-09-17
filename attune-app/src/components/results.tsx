@@ -1075,12 +1075,16 @@ function ExpectationsConversation({
                   <Text style={{ ...Type.small, fontSize: 12, color: c.text, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
                     {row.item}
                   </Text>
-                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.textStrong, flex: 1, textAlign: 'center' }}>
-                    {row.you || '\u2014'}
-                  </Text>
-                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.textMuted, flex: 1, textAlign: 'center' }}>
-                    {row.them || '\u2014'}
-                  </Text>
+                  {/* ── WHAT BOTH TURNED OUT TO MEAN ────────────────────
+                      Ellie: "could we have grey italicized text under both
+                      that says '50/50' or 'usually [name]'? I think that would
+                      fit and give the full detail."
+
+                      Under the answer rather than in a column, because it only
+                      exists for one answer out of four, and the same on the
+                      website's table. */}
+                  <ConversationCell value={row.you} detail={row.youDetail} lived={row.youExperienced} tint={c.textStrong} />
+                  <ConversationCell value={row.them} detail={row.themDetail} lived={row.themExperienced} tint={c.textMuted} />
                 </View>
               ))}
             </View>
@@ -1119,15 +1123,22 @@ function ExpectationsConversation({
                   <Text style={{ ...Type.small, fontSize: 12, color: ALIGNED_TEXT, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
                     {row.item}
                   </Text>
-                  <Text
-                    style={{
-                      ...Type.small, fontSize: 12, fontWeight: '600',
-                      color: ALIGNED_TEXT, flex: 1, textAlign: 'center',
-                      backgroundColor: 'rgba(4,120,87,0.08)', borderRadius: 6,
-                      paddingVertical: 2, paddingHorizontal: 4,
-                    }}>
-                    {row.you || '\u2014'}
-                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        ...Type.small, fontSize: 12, fontWeight: '600',
+                        color: ALIGNED_TEXT, textAlign: 'center',
+                        backgroundColor: 'rgba(4,120,87,0.08)', borderRadius: 6,
+                        paddingVertical: 2, paddingHorizontal: 4,
+                      }}>
+                      {row.you || '\u2014'}
+                    </Text>
+                    {row.youDetail ? (
+                      <Text style={{ ...Type.small, fontSize: 10, fontStyle: 'italic', color: ALIGNED_TEXT, opacity: 0.75, textAlign: 'center', marginTop: 1 }}>
+                        {row.youDetail}
+                      </Text>
+                    ) : null}
+                  </View>
                 </View>
               ))}
               {!gaps.length ? (
@@ -1141,6 +1152,47 @@ function ExpectationsConversation({
           ) : null}
         </View>
       </ResultsScroll>
+    </View>
+  );
+}
+
+/**
+ * One person's answer in the conversations table.
+ *
+ * Three things, in the order the website puts them: what they expect, what
+ * "Both of us" turned out to mean, and what they grew up with. Ellie: "Didn't
+ * we also used to include the experienced and expects columns?" The website's
+ * table has four columns for two people; a phone has room for two, so the
+ * second value is stacked under the first with the website's own label rather
+ * than dropped.
+ */
+function ConversationCell({
+  value, detail, lived, tint,
+}: { value?: string | null; detail?: string | null; lived?: string | null; tint: string }) {
+  return (
+    <View style={{ flex: 1 }}>
+      <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: tint, textAlign: 'center' }}>
+        {value || '\u2014'}
+      </Text>
+      {detail ? (
+        <Text
+          style={{
+            ...Type.small, fontSize: 10, fontStyle: 'italic',
+            color: c.textMuted, textAlign: 'center', marginTop: 1,
+          }}>
+          {detail}
+        </Text>
+      ) : null}
+      {lived ? (
+        <>
+          <Text style={{ ...Type.eyebrow, fontSize: 8, color: c.textMuted, textAlign: 'center', marginTop: 4 }}>
+            {EXPERIENCED_LABEL}
+          </Text>
+          <Text style={{ ...Type.small, fontSize: 10, fontStyle: 'italic', color: c.textMuted, textAlign: 'center' }}>
+            {lived}
+          </Text>
+        </>
+      ) : null}
     </View>
   );
 }

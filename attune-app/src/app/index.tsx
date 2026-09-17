@@ -601,7 +601,7 @@ const GLOW_ALPHA = 0.0133;
  * a size where its own resolution helps rather than hurts.
  */
 const MARK_BEHIND_INSIGHT = true;
-const MARK_WIDTH = 250;
+const MARK_WIDTH = 300;
 /**
  * Out of focus, without a blur.
  *
@@ -613,7 +613,11 @@ const MARK_WIDTH = 250;
  * easiest thing on the screen to read.
  */
 const MARK_LAYERS = 5;
-const MARK_LAYER_OPACITY = 0.022;
+// Ellie, of the first attempt: "I can't see this at all if it's there." It was
+// a tenth of full strength across five copies, which on a mid-blue ground is
+// nothing. Three times that, and the mark is visible as a shape behind the
+// finding while the text over it is still the sharpest thing on the screen.
+const MARK_LAYER_OPACITY = 0.07;
 const MARK_LAYER_STEP = 0.045;
 
 /**

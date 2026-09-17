@@ -21,7 +21,7 @@
  * name would stop lining up between them, which is the whole comparison.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
@@ -31,7 +31,7 @@ import { fetchExpectations, saveExercise } from '@/api/client';
 import type { ApiError, ExpectationsSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
-  ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
+  ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
 } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
@@ -94,6 +94,22 @@ export default function Expectations({
   // lost their connection mid-exercise had no way to know their last answers
   // were only in memory.
   const [saveFailed, setSaveFailed] = useState(false);
+
+  /**
+   * ── EVERY PAGE STARTS AT THE TOP ────────────────────────────────────────
+   * Ellie: "When I click next on a responsibilities page I should be brought
+   * to the top of the next page. Currently brought to the next page then have
+   * to scroll to the top."
+   *
+   * A category is four or five cards long, so Next from the bottom of one page
+   * lands at the bottom of the next, under its heading. The website scrolls to
+   * the top on every category change and this is the same thing: one ref,
+   * because the stages share a scroll view.
+   */
+  const scroller = useRef<ScrollView>(null);
+  const toTop = useCallback(() => {
+    scroller.current?.scrollTo({ y: 0, animated: false });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -230,15 +246,11 @@ export default function Expectations({
     );
   }
 
-  if (stage === 'done') {
+  // The same closing screen as every other exercise, from the server.
+  if (stage === 'done' && set.complete) {
     return (
       <Shell onClose={onClose}>
-        <View style={{ padding: Spacing.xl }}>
-          <Text style={{ ...Type.hero, color: c.textStrong }}>That is everything</Text>
-          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-            {WAITING.EXERCISE_FOOTER}</Text>
-          <Primary label="Done" onPress={onFinished} />
-        </View>
+        <ExerciseComplete exerciseKey="ex2" completion={set.complete} onDone={onFinished} />
       </Shell>
     );
   }
@@ -247,7 +259,7 @@ export default function Expectations({
   if (stage === 'structure') {
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
+        <ScrollView ref={scroller} contentContainerStyle={pad}>
           {/* Ellie: "No eyebrow on the household background question page
               please." The page has one question on it and the question is the
               heading; a label above it repeating the exercise's name is a
@@ -333,7 +345,7 @@ export default function Expectations({
     const asksChildhood = cat.asksChildhood !== false;
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
+        <ScrollView ref={scroller} contentContainerStyle={pad}>
           <ExerciseEyebrow
             exerciseKey="ex2"
             label={set.exercise.fullLabel || set.exercise.label}
@@ -431,8 +443,8 @@ export default function Expectations({
 
           <ExerciseNav
             onBack={catIdx > 0
-              ? () => setCatIdx(catIdx - 1)
-              : () => { setStage('structure'); }}
+              ? () => { setCatIdx(catIdx - 1); toTop(); }
+              : () => { setStage('structure'); toTop(); }}
             nextLabel={catIdx + 1 < cats.length ? 'Next' : 'Finish'}
             disabled={!catDone || (saving && catIdx + 1 === cats.length)}
             busy={saving && catIdx + 1 === cats.length}
@@ -441,6 +453,7 @@ export default function Expectations({
               if (catIdx + 1 < cats.length) {
                 persist(answers, false);
                 setCatIdx(catIdx + 1);
+                toTop();
                 return;
               }
               // Responsibilities is the last part now, so this is the end.
@@ -464,7 +477,7 @@ export default function Expectations({
     const isLast = lifeIdx === life.length - 1;
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
+        <ScrollView ref={scroller} contentContainerStyle={pad}>
           {/* The eyebrow is the exercise's full name in its own colour, on
               every page of every exercise. The question's own category sits
               under it, where it does not compete with the exercise's name. */}
@@ -493,7 +506,7 @@ export default function Expectations({
           ))}
 
           <ExerciseNav
-            onBack={lifeIdx > 0 ? () => setLifeIdx(lifeIdx - 1) : undefined}
+            onBack={lifeIdx > 0 ? () => { setLifeIdx(lifeIdx - 1); toTop(); } : undefined}
             nextLabel={isLast ? 'Continue' : 'Next'}
             disabled={!chosen}
             color={exerciseColor('ex2')}
@@ -503,6 +516,7 @@ export default function Expectations({
               // is what sets the labels for part two.
               if (isLast) setStage('part-two');
               else setLifeIdx(lifeIdx + 1);
+              toTop();
             }}
           />
         </ScrollView>

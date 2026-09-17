@@ -1499,6 +1499,8 @@ export type ExpectationsSet = {
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
+  /** The screen that closes it, from api/_lib/exercise-complete.js. */
+  complete?: { title: string; body: string[]; cta: string } | null;
   names: { you: string; partner: string };
   childhoodStructures: { id: string; label: string; cols: string[] }[];
   /** `key` is the raw item text and is what the answer is stored under. `label`
@@ -1543,6 +1545,8 @@ export type QuestionSet = {
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
+  /** The screen that closes it, from api/_lib/exercise-complete.js. */
+  complete?: { title: string; body: string[]; cta: string } | null;
   scale: { val: number; label: string }[];
   items: QuestionItem[];
   /** Every key a finished set contains, so the app never counts items itself. */
@@ -1573,6 +1577,8 @@ export type ReflectionQuestionSet = {
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
+  /** The screen that closes it, from api/_lib/exercise-complete.js. */
+  complete?: { title: string; body: string[]; cta: string } | null;
   version: number;
   items: {
     id: string;
@@ -1602,6 +1608,8 @@ export type IntimacyQuestionSet = {
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
+  /** The screen that closes it, from api/_lib/exercise-complete.js. */
+  complete?: { title: string; body: string[]; cta: string } | null;
   variant: 'premarital' | 'married';
   dimensions: { id: string; label: string }[];
   items: {
@@ -1824,6 +1832,8 @@ export type ConflictQuestionSet = {
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
+  /** The screen that closes it, from api/_lib/exercise-complete.js. */
+  complete?: { title: string; body: string[]; cta: string } | null;
   sections: { id: string; label: string; questions: string[] }[];
   frequencyOptions: { value: number; label: string }[];
   items: ConflictQuestion[];

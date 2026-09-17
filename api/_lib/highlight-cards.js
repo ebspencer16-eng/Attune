@@ -61,6 +61,19 @@ function peekDimensions(sortedByGap) {
     .map((i) => sortedByGap[i]);
 }
 
+/**
+ * The first card's two lines.
+ *
+ * Ellie: "on storycard 1 in the highlights experience, can we change 'This is
+ * what you look like together.' to 'Use insights to learn and grow together'
+ * no period after built from your independent answers either."
+ *
+ * Two lines and no full stops, so the break is in the string. Exported because
+ * the website's storycard deck draws this card itself: it held its own copy of
+ * this sentence, which is how the two of them had drifted before.
+ */
+export const OPENER_BODY = 'Built from your independent answers\nUse insights to learn and grow together';
+
 export function highlightCards({
   dimensions = [], coupleTypeId, names, expectations, reflection, intimacy, ex2,
 }) {
@@ -103,7 +116,7 @@ export function highlightCards({
     id: 'opener', kind: 'opener', tone: 'night',
     eyebrow: 'Your results',
     names: { you, them },
-    body: 'Built from your independent answers. This is what you look like together.',
+    body: OPENER_BODY,
     footer: 'Tap to begin',
   });
 

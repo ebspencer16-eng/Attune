@@ -29,6 +29,7 @@ import {
 } from './_questions.js';
 import { EXERCISES } from './_exercises.js';
 import { exerciseIntro } from './_lib/exercise-intro.js';
+import { exerciseComplete } from './_lib/exercise-complete.js';
 import { PART_TWO } from './_lib/part-two.js';
 import {
   asksChildhood, categoryIntro, futureLabel, isAnniversaryStatus,
@@ -140,6 +141,8 @@ export default async function handler(req) {
         // The screen that opens this exercise, the same words the website
         // opens it with. See api/_lib/exercise-intro.js.
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
+        // The screen that closes it, from api/_lib/exercise-complete.js.
+        complete: exerciseComplete(exercise.key),
         scale: EX1_SCALE,
         // The break between answering about yourself and answering about your
         // partner. Sent as an item rather than a count so the app does not have
@@ -169,6 +172,8 @@ export default async function handler(req) {
         // The screen that opens this exercise, the same words the website
         // opens it with. See api/_lib/exercise-intro.js.
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
+        // The screen that closes it, from api/_lib/exercise-complete.js.
+        complete: exerciseComplete(exercise.key),
         names: { you, partner },
 
         // Who raised you decides what the "growing up" column is called.
@@ -239,6 +244,8 @@ export default async function handler(req) {
         ok: true,
         exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
+        // The screen that closes it, from api/_lib/exercise-complete.js.
+        complete: exerciseComplete(exercise.key),
         sections: CONFLICT_SECTIONS,
         frequencyOptions: FREQUENCY_OPTIONS,
         items: conflictQuestionsInOrder(),
@@ -273,6 +280,8 @@ export default async function handler(req) {
         ok: true,
         exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
+        // The screen that closes it, from api/_lib/exercise-complete.js.
+        complete: exerciseComplete(exercise.key),
         version: ANNIVERSARY_VERSION,
         items: ANNIVERSARY_QUESTIONS.map(q => ({
           id: q.id,
@@ -317,6 +326,8 @@ export default async function handler(req) {
         ok: true,
         exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
+        // The screen that closes it, from api/_lib/exercise-complete.js.
+        complete: exerciseComplete(exercise.key),
         variant,
         dimensions: INTIMACY_DIMENSIONS,
         items: INTIMACY_QUESTIONS.map(q => ({

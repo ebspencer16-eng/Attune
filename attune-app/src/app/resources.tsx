@@ -23,6 +23,7 @@ import {
 import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
@@ -114,6 +115,11 @@ export default function ResourcesScreen() {
    * and CLAUDE.md is explicit that the app does not sell. Anything else still
    * hands off to the website.
    */
+  /** The workbook, in a sheet this app owns rather than in Safari. */
+  const openWorkbook = (url: string) => openBrowserAsync(url, {
+    presentationStyle: WebBrowserPresentationStyle.PAGE_SHEET,
+  });
+
   const openTool = async (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
     if (key === 'workbook') {
@@ -125,7 +131,18 @@ export default function ResourcesScreen() {
         const r = await fetchToolData();
         if (r.ok) { setTools(r.data); wb = r.data.workbook; }
       }
-      if (wb?.url) { Linking.openURL(wb.url); return; }
+      /**
+       * ── IT OPENS IN THE APP ────────────────────────────────────────────
+       * Ellie: "it built quickly but exported me to the web. I would like for
+       * the workbook to open right in the app."
+       *
+       * Linking.openURL hands the file to Safari, which is leaving the app.
+       * openBrowserAsync shows it in a sheet the app owns, with a Done button
+       * that comes back here. The file is still a .docx and iOS still previews
+       * it with its own viewer inside that sheet; what changes is that nobody
+       * is thrown out of the product to read their own workbook.
+       */
+      if (wb?.url) { await openWorkbook(wb.url); return; }
 
       /**
        * ── ASK FOR IT, RATHER THAN WAITING FOR SOMETHING ELSE TO ──────────
@@ -145,7 +162,7 @@ export default function ResourcesScreen() {
         setWorkbookNote(null);
         const again = await fetchToolData();
         if (again.ok) setTools(again.data);
-        Linking.openURL(made.data.url);
+        await openWorkbook(made.data.url);
       }
       return;
     }

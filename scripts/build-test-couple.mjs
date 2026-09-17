@@ -22,13 +22,14 @@
 
 import { writeFileSync } from 'node:fs';
 
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from '../api/_questions.js';
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, CHILDHOOD_STRUCTURES } from '../api/_questions.js';
 import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
 import { conflictQuestionsInOrder, FREQUENCY_OPTIONS } from '../api/_conflict-questions.js';
 import { REFLECTION_QUESTIONS } from '../api/_anniversary-questions.js';
 import { coupleResults } from '../api/_lib/results.js';
 import { resultsGate } from '../api/_lib/results-gate.js';
 import { EXERCISES } from '../api/_exercises.js';
+import { asksChildhood } from '../api/_lib/expectations-page.js';
 import { getOrComputeResults } from '../api/_lib/results-store.js';
 
 // Fixed ids so the file can be run twice and mean the same couple.
@@ -70,12 +71,63 @@ function ex1For(offset) {
   return out;
 }
 
-function ex2For(offset) {
+/**
+ * ── THE VOCABULARY IS THE EXERCISE'S ──────────────────────────────────────
+ * This wrote 'me', 'partner' and 'shared', which the exercise has never
+ * written and nothing reads. The product stores the name of whoever does the
+ * thing, or "Both of us", or "Doesn't apply to us", and every surface maps
+ * from those. So the seeded partner's column in the results table read
+ * "shared" and "me" where it should have read "Both of us" and a name, and the
+ * alignment maths compared strings it did not recognise.
+ *
+ * Ellie, reading her own results: "convos to have table says 'shared' not
+ * 'both', didn't it used to say both?" It never did, for this couple. Seed
+ * data in a vocabulary the product does not use is a test that proves the
+ * wrong thing.
+ *
+ * Built from the same list the exercise builds its buttons from, so it cannot
+ * drift again: [you, them, 'Both of us', "Doesn't apply to us"].
+ */
+function ex2For(offset, you, them) {
+  const cols = [you, them, 'Both of us', "Doesn't apply to us"];
+  // What "Both of us" turned out to mean, as the exercise offers it.
+  const detailOpts = [
+    'Genuinely 50/50',
+    `Usually ${you}, sometimes ${them}`,
+    `Usually ${them}, sometimes ${you}`,
+  ];
+  // Everyone in the seed grew up in the same shape of household, so the
+  // growing-up columns have names on them rather than "Adult 1".
+  const structure = CHILDHOOD_STRUCTURES[0];
+
   const responsibilities = {};
+  const bothDetail = {};
+  const childhood = {};
+  const childhoodBothDetail = {};
   for (const cat of RESPONSIBILITY_CATEGORIES) {
     for (const item of cat.items) {
-      const v = pick(`${cat.id}${item}`, offset) % 3;
-      responsibilities[`${cat.id}__${item}`] = v === 0 ? 'me' : v === 1 ? 'partner' : 'shared';
+      const key = `${cat.id}__${item}`;
+      const choice = cols[pick(`${cat.id}${item}`, offset) % cols.length];
+      responsibilities[key] = choice;
+      // The refinement only exists for Both, which is what the results now
+      // draw under the answer.
+      if (choice === 'Both of us') {
+        bothDetail[key] = detailOpts[pick(`d${cat.id}${item}`, offset) % detailOpts.length];
+      }
+      // Extended Family asks about each partner's own family, so it has no
+      // growing-up question. api/_lib/expectations-page.js is the one place
+      // that says which categories do.
+      if (asksChildhood(cat.id)) {
+        const col = structure.cols[pick(`c${cat.id}${item}`, offset) % structure.cols.length];
+        childhood[key] = col;
+        if (col === 'Both') {
+          childhoodBothDetail[key] = [
+            'Genuinely 50/50',
+            `Usually ${structure.cols[0]}, sometimes ${structure.cols[1]}`,
+            `Usually ${structure.cols[1]}, sometimes ${structure.cols[0]}`,
+          ][pick(`cd${cat.id}${item}`, offset) % 3];
+        }
+      }
     }
   }
   const life = {};
@@ -85,7 +137,7 @@ function ex2For(offset) {
       ? String(opts[pick(q.id, offset) % opts.length]?.value ?? opts[pick(q.id, offset) % opts.length])
       : `A sample answer for ${q.topic || q.id}.`;
   }
-  return { responsibilities, life, childhood: {}, childhoodStructure: null };
+  return { responsibilities, bothDetail, life, childhood, childhoodBothDetail, childhoodStructure: structure.id };
 }
 
 function ex3For(offset) {
@@ -162,7 +214,7 @@ function conflictFor(offset) {
 }
 
 const partner = {
-  ex1: ex1For(1), ex2: ex2For(2), ex3: ex3For(3),
+  ex1: ex1For(1), ex2: ex2For(2, 'Testpartner', 'Tester'), ex3: ex3For(3),
   intimacy: intimacyFor(4), conflict: conflictFor(5),
 };
 // The tester answers nothing: going through the exercises is the point.
@@ -196,6 +248,10 @@ if (gate.ready) {
  * asked to write, which is exactly what a first computation does.
  */
 const survivorEx1 = ex1For(6);
+// Their own names, not the other test couple's. Responsibilities are stored as
+// the name of whoever does the thing, so reusing the couple's answers here
+// would put "Testpartner" in Solo's results.
+const survivorEx2 = ex2For(6, 'Solo', 'Departed');
 const goneEx1 = ex1For(7);
 let frozenRow = null;
 await getOrComputeResults({
@@ -445,7 +501,7 @@ update public.profiles set
   profile_setup_complete = true,
   ex1_answers = ${j(survivorEx1)},
   ex1_completed = true, ex1_completed_at = now(),
-  ex2_answers = ${j(partner.ex2)},
+  ex2_answers = ${j(survivorEx2)},
   ex2_completed = true, ex2_completed_at = now(),
   ex3_answers = ${j(partner.ex3)},
   ex3_completed = true, ex3_completed_at = now(),
@@ -477,6 +533,51 @@ select
   (select count(*) from public.couple_results where partner_a = '${SURVIVOR_ID}')  as frozen_results;
 `;
 writeFileSync(new URL('../supabase/migrations/069_deleted_partner_account.sql', import.meta.url), survivorSql);
+
+/**
+ * ── THE REPAIR, FOR ROWS THAT ARE ALREADY IN THE DATABASE ─────────────────
+ * 067 and 069 have been run, so fixing them fixes nothing that exists. This
+ * writes the corrected Expectations answers over the two seeded rows that
+ * carried the invented vocabulary, and touches nothing else: the tester's own
+ * answers are hers, and she is part way through that exercise.
+ *
+ * Regenerated alongside the other two, from the same objects, so there is no
+ * second copy of the seed to drift.
+ */
+const repairSql = `-- 071_test_couple_ex2_repair.sql
+-- Generated by scripts/build-test-couple.mjs. Safe to re-run.
+--
+-- What this fixes: the seeded Expectations answers were written as 'me',
+-- 'partner' and 'shared', which the exercise has never written. The product
+-- stores the name of whoever does the thing, or "Both of us", or "Doesn't
+-- apply to us". So the results table showed 'shared' where it should have said
+-- "Both of us", and the alignment maths was comparing strings it did not
+-- recognise.
+--
+-- It also adds what was missing from the seed entirely: what each of them grew
+-- up with, and what "Both of us" turned out to mean.
+--
+-- It does NOT touch the tester's own answers, and it does NOT recompute the
+-- deleted-partner account's frozen results row, which was written from the old
+-- answers and is frozen by design.
+
+update public.profiles set ex2_answers = ${j(partner.ex2)}
+where id = '${PARTNER_ID}';
+
+update public.profiles set ex2_answers = ${j(survivorEx2)}
+where id = '${SURVIVOR_ID}';
+
+-- ── Verification ───────────────────────────────────────────────────────────
+-- Every stored answer should be a name, "Both of us" or "Doesn't apply to us".
+select
+  (select count(*) from jsonb_each_text((ex2_answers->'responsibilities')::jsonb)
+     where value in ('me', 'partner', 'shared')) as old_vocabulary_left,
+  (select count(*) from jsonb_each_text((ex2_answers->'responsibilities')::jsonb)) as answers,
+  (select count(*) from jsonb_each_text((ex2_answers->'childhood')::jsonb))        as grew_up_with,
+  (select count(*) from jsonb_each_text((ex2_answers->'bothDetail')::jsonb))       as both_refinements
+from public.profiles where id = '${PARTNER_ID}';
+`;
+writeFileSync(new URL('../supabase/migrations/071_test_couple_ex2_repair.sql', import.meta.url), repairSql);
 console.log(
   `[build-test-couple] wrote 067_test_couple.sql and 069_deleted_partner_account.sql: ${PERSONALITY_QUESTIONS.length} ex1 answers, `
   + `${Object.keys(partner.ex2.life).length} life answers, ${Object.keys(partner.intimacy.answers).length} intimacy, `

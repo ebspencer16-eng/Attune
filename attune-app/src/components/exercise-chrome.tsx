@@ -160,6 +160,66 @@ export function ExerciseOpening({
   );
 }
 
+/** What the server sends to close an exercise. */
+export type ExerciseCompletion = {
+  title: string;
+  body: string[];
+  cta: string;
+};
+
+/**
+ * The screen that closes an exercise.
+ *
+ * ── WHY EVERY EXERCISE HAS THE SAME ONE ───────────────────────────────────
+ * Ellie: "Exercise complete page still needs a rebuild. Should say '[Exercise]
+ * Complete' in bold, then keep the description as is, have the done button say
+ * 'back to insights' and have all that content in the middle of the page like
+ * the intro pages."
+ *
+ * Built like ExerciseOpening on purpose: same centring, same measure, same
+ * button. Finishing an exercise should look like the mirror of starting it.
+ * The tick above the name is the only thing here that is not on the opening
+ * page, and it is the one thing this screen has to say at a glance.
+ */
+export function ExerciseComplete({
+  exerciseKey, completion, onDone,
+}: {
+  exerciseKey?: string | null;
+  completion: ExerciseCompletion;
+  onDone: () => void;
+}) {
+  const tint = exerciseColor(exerciseKey);
+  return (
+    <ScrollView
+      contentContainerStyle={{
+        padding: Spacing.xl, paddingBottom: Spacing.xxxl, flexGrow: 1, justifyContent: 'center',
+      }}>
+      <View
+        style={{
+          width: 44, height: 44, borderRadius: 22, backgroundColor: tint,
+          alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg,
+        }}>
+        <Text style={{ color: Palette.white, fontSize: 20, fontWeight: '700' }}>{'\u2713'}</Text>
+      </View>
+      <Text style={{ ...Type.hero, color: c.textStrong }}>{completion.title}</Text>
+      {completion.body.map((para) => (
+        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg, lineHeight: 24 }}>
+          {para}
+        </Text>
+      ))}
+      <Pressable
+        accessibilityRole="button"
+        onPress={onDone}
+        style={{
+          marginTop: Spacing.xxl, borderRadius: Radius.md, paddingVertical: Spacing.lg,
+          alignItems: 'center', backgroundColor: tint,
+        }}>
+        <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{completion.cta}</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
 /**
  * Ranking, by tapping in order.
  *

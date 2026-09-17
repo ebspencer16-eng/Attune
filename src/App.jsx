@@ -34,7 +34,9 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
+import { exerciseComplete } from "../api/_lib/exercise-complete.js";
 import { PART_TWO } from "../api/_lib/part-two.js";
+import { OPENER_BODY } from "../api/_lib/highlight-cards.js";
 import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
 import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
@@ -1414,7 +1416,7 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>✓</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Done.</h2>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>{exerciseComplete("intimacy").title}</h2>
       <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
         Your answers are saved. When {partnerName} finishes too, your comparison unlocks on your dashboard.
       </p>
@@ -1563,7 +1565,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
   if (phase === 'done') return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>Done.</h2>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>{exerciseComplete("conflict").title}</h2>
       <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
         {WAITING.EXERCISE_FOOTER}
       </p>
@@ -4259,7 +4261,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
           </div>
         </div>
         <p style={{ fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "0.6rem" }}>Your story is captured</p>
-        <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.85rem", lineHeight: 1.1 }}>Reflection Complete.</p>
+        <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.85rem", lineHeight: 1.1 }}>{exerciseComplete("ex3").title}</p>
         <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, marginBottom: "2rem", lineHeight: 1.7, maxWidth: 420, margin: "0 auto 2rem" }}>
           You named the moments, the shifts, and the things you hope for. When {partnerName} finishes {partnerPossAbs}, you'll see where your stories overlap and where you each saw something the other didn't.
         </p>
@@ -8716,8 +8718,8 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             {userName}<br/><span style={{ ...scType("amp") }}>&amp;</span><br/>{partnerName}
           </div>
           <div style={{ width: 40, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.5rem", animation: "popIn 0.4s 0.35s both" }} />
-          <p style={{ ...scType("body"), maxWidth: 260, margin: 0, animation: "fadeUp 0.4s 0.4s both" }}>
-            Built from your independent answers. This is what you look like together.
+          <p style={{ ...scType("body"), maxWidth: 260, margin: 0, whiteSpace: "pre-line", animation: "fadeUp 0.4s 0.4s both" }}>
+            {OPENER_BODY}
           </p>
         </div>
         <div style={{ ...scType("footer"), textAlign: "center", padding: "0 0 1.75rem", animation: "fadeUp 0.4s 0.55s both" }}>Tap to begin</div>
@@ -14560,7 +14562,7 @@ export default function App() {
             {ex2Answers
               ? <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Exercise 2 Complete.</p>
+                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>{exerciseComplete("ex2").title}</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your expectations are recorded</p>
                   <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "0.75rem", lineHeight: 1.75 }}>That took honesty. Most couples don't have these conversations until they have to.</p>
                   <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".") : ("When " + partnerName + " finishes all exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
@@ -14680,7 +14682,7 @@ export default function App() {
             {ex3Answers ? (
               <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                 <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-                <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Reflection Complete.</p>
+                <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>{exerciseComplete("ex3").title}</p>
                 <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "1.5rem" }}>Your relationship story is captured</p>
                 <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
                   {bothDone

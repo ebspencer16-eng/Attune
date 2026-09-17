@@ -37,13 +37,12 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 
 ### Run these in the SQL editor
 
-**Nothing waiting.** 061 to 069 are all run.
-
 I deliver migrations and you run them. That is deliberate and it is in
-CLAUDE.md, so anything new sits here until you do.
+CLAUDE.md, so anything new sits here until you do. 061 to 070 are all run.
 
 | # | Migration |
 |--|--|
+| M71 | **071_test_couple_ex2_repair.sql.** Your test partner's Expectations answers were seeded in a vocabulary the product does not use, which is why your results table said "shared" instead of "Both of us". This rewrites those two seeded rows, adds what they grew up with and what "Both of us" meant for them, and does not touch your own answers. |
 
 ### Decide these
 
@@ -90,14 +89,15 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R142 | **Part one says which part it is.** The counter reads "Life & Values 5/12" rather than "Question 5 of 12", from the label the results already use for those questions. |
-| R143 | **Expectations has a part two screen**, the same shape as the comms one: your sentence, no eyebrow, nothing under it. Both surfaces, from one module that also holds the comms sentence, which was typed into both surfaces until now. Spelled "Responsibilities". |
+| R148 | **The part two screen says just "Part two: Responsibilities".** The rest of the sentence you wrote for it is not anywhere now. If you want a line under the hero, it needs one from you: the sentence as written begins "Part two: Responsibilities helps you...", so it reads oddly under a hero that says the first three words. |
+| R149 | **The mark behind the insight of the day, visible this time.** It was at a tenth of full strength, which on that blue is nothing; it is three times that now, and bigger. Still one switch to revert, still two constants for size and strength. |
+| R150 | **The workbook opens in the app**, in a sheet the app owns with a Done button, rather than throwing you out to Safari. It is still a .docx and iOS still previews it with its own viewer inside that sheet. |
+| R151 | **Every page of the responsibilities starts at the top.** Next from the bottom of one category was landing at the bottom of the next. |
+| R152 | **A completion page for every exercise, on both surfaces.** "[Exercise] complete" in the exercise's own name from the registry, the description you already had, a tick in the exercise's colour, and everything centred like the opening page. The app's button says "Back to insights". The website's completion screens keep their own extra prose and their own buttons, which say "Back to dashboard", because "insights" is the app's word for that screen: tell me if you want one word on both. |
+| R153 | **The conversations table shows the full detail.** What "Both of us" turned out to mean sits under the answer in grey italics, and what each of you grew up with sits under that, labelled the way the website labels it. Both surfaces. |
+| R154 | **"shared", "me" and "partner" were the test data, not the product.** Your partner's seeded answers were written in a vocabulary the exercise has never used, so the table showed those words where it should have shown "Both of us" and a name, and the alignment maths was comparing strings it did not recognise. Migration 071 fixes the two seeded accounts and leaves your own answers alone. The generator is fixed too, so it cannot come back. |
+| R155 | **Storycard one, in your words**, and no full stops on either line. |
 | R144 | **What "Both of us" turned out to mean is on the results.** It sits under the answer it refines, in both the website's conversations table and the app's, for whichever of you answered Both. Nothing has ever shown it before, so this is a first pass to react to rather than a finished design: it could be a column, a line under the table, or left where it is. |
-| R145 | **The progress circle sweeps round** rather than filling from the bottom. Two windows and a rotation, no drawing library. |
-| R146 | **The mark behind the insight of the day.** Five copies at slightly different sizes, each too faint to find on its own, so the edges go soft without a blur. One switch reverts it: `MARK_BEHIND_INSIGHT = false` in the home screen and the page is exactly what you have now. Size and strength are two more constants beside it, so "bigger", "fainter" or "higher up" are one-line changes. |
-| R147 | **Start, on all ten opening pages**, and the not-therapy line back as its own paragraph under yours. |
-| R128 | **The status table shows the count and a filled circle**, so the middle state is no wider than the other two, and it calls ex1 Communication styles. |
-| R100 | **The workbook is built the moment your results open.** On the server, at the same instant the product tells your partner you finished, so a couple who only ever use the app get one. It was built in a browser before, by a block that needed the buyer's order in that browser's storage, which is why yours said it was still generating. The payload the generator is handed now comes from one module that both the website and the server read: two builders would mean two workbooks depending on which surface got there first. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -146,6 +146,10 @@ receive a notification from Apple's servers.
 | R138 | An exercise in progress is counted properly |
 | R139 | The household page's arrows |
 | R123 | An opening page for every exercise, both surfaces |
+| R142 | Part one says which part it is |
+| R145 | The progress circle sweeps round |
+| R147 | Start on all ten opening pages, and the not-therapy line back |
+| R128 | The status table: a count, a wedge, and Communication styles |
 | M70 | The test couple's relationship status, run |
 | R133 | The line under every intimacy question, gone |
 | R134 | Select all that apply, italic and on its own line |

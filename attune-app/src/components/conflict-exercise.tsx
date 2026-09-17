@@ -27,7 +27,7 @@ import type { ApiError, ConflictQuestion, ConflictQuestionSet } from '@/api/clie
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor,
+  ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor,
 } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
@@ -93,16 +93,21 @@ export default function ConflictExercise({
   if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
   if (!set) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 
-  if (done) {
+  /**
+   * ── THE SAME CLOSING SCREEN AS EVERY OTHER EXERCISE ──────────────────────
+   * Ellie: "Build a nice completion page for each exercise." There were six of
+   * these across the two surfaces saying four different things. The words come
+   * from api/_lib/exercise-complete.js and the screen is the mirror of the one
+   * that opened the exercise.
+   */
+  if (done && set.complete) {
     return (
       <Shell onClose={onClose}>
-        <View style={{ padding: Spacing.xl }}>
-          <Text style={{ ...Type.hero, color: c.textStrong }}>That is everything</Text>
-          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
-            Your answers are saved. Your patterns stay private to you, always.
-          </Text>
-          <Primary label="Done" onPress={onFinished} />
-        </View>
+        <ExerciseComplete
+          exerciseKey={'conflict'}
+          completion={set.complete}
+          onDone={onFinished}
+        />
       </Shell>
     );
   }

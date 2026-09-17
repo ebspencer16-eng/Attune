@@ -15,7 +15,16 @@
 
 export const PART_TWO = {
   ex1: 'Part Two: All the same questions, but about your partner',
-  ex2: 'Part two: Responsibilities helps you identify your expectations for your shared or separate efforts and why you each expect what you do.',
+  /**
+   * Ellie wrote a sentence for this screen and then, seeing it set as a hero,
+   * cut it to the name: "Change exp pt 2 intro page hero to just say Part two:
+   * Responsibilities."
+   *
+   * The rest of what she wrote is not here and is not anywhere. It is named in
+   * TASKS.md rather than trimmed into a line by me, because a line under this
+   * one is copy and copy is hers.
+   */
+  ex2: 'Part two: Responsibilities',
 };
 
 /** The divider for one exercise, or null if it has one part. */
