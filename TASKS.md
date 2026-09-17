@@ -81,6 +81,16 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O191 | **Remove 'You answer on your own. Neither of you sees the other's answers until you have both finished.' from the intimacy questions**, and from the site if it says it there too. |
+| O192 | **Every exercise's progress bar takes that exercise's colour.** |
+| O193 | **Q6 of intimacy: 'When you turn your partner down, you expect to want them to'.** Find out whether that is the not-yet-intimate wording showing on the wrong variant, then either fix the bug or make it your sentence: 'When you turn your partner down, you want them to'. |
+| O194 | **Remove 'Choose as many as are true' from under the choices on Q8.** |
+| O195 | **'(select all that are true)' becomes an italic 'Select all that apply'**, at the end of every question that has a phrase like it. |
+| O196 | **A table of both intimacy framings, question by question**, so you can see what the exercise asks a couple who are already intimate and what it asks a couple who are not. |
+| O197 | **A table of every exercise's opening page**, so the conflict one can be cut down. |
+| O198 | **Conflict's ranking question behaves like Relationship Reflection's**: tapping an option moves it into the ordered list and colours it. |
+| O199 | **The completion pages.** Both surfaces, all five exercises. |
+| O200 | **The loading lines.** 'Checking where you both are' becomes 'Generating your insights', 'Getting your questions' becomes 'Fetching your exercise', and a table of every one of them with where it appears. |
 | O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
 | O190 | **The responsibilities grid.** The site asks a whole category on one screen, each row a task with two sets of buttons: who did it in your childhood home, and who does it in yours. The app asks one task at a time. The data both collect is the same, which is why nothing has broken; the screens are not. This is the rest of "it needs to be the same as the mobile web experience". |
 | O189 | **Rebuild the app's Expectations exercise to match the mobile web experience.** Your words: "Hate the setup of this exercise. It needs to be the same as the mobile web experience." This is the big one on the list and you are waiting on it, so it gets a plan in this document before it gets code. |
