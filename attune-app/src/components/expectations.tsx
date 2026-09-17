@@ -185,7 +185,17 @@ export default function Expectations({
    * them. Skipped for someone coming back to a half-finished exercise, who has
    * read it already and wants their place.
    */
-  const started = Object.keys(answers || {}).length > 0;
+  /**
+   * ── WHY THIS IS NOT Object.keys(answers) ────────────────────────────────
+   * Ellie: "Didn't see an intro page." This exercise's answers start as a
+   * shape rather than as nothing: five empty maps, one per part. Counting the
+   * keys of that says five, so the screen believed the exercise was already
+   * underway and skipped its own opening page, every time, for everyone.
+   */
+  const started = !!answers.childhoodStructure
+    || Object.keys(answers.life || {}).length > 0
+    || Object.keys(answers.responsibilities || {}).length > 0
+    || Object.keys(answers.childhood || {}).length > 0;
 
   if (opening && set.intro && !started) {
     return (
@@ -247,10 +257,12 @@ export default function Expectations({
               />
             );
           })}
-          <Primary
-            label="Continue"
+          <ExerciseNav
+            onBack={() => { setStage('life'); setLifeIdx(life.length - 1); }}
+            nextLabel="Continue"
             disabled={!answers.childhoodStructure}
-            onPress={() => setStage('responsibilities')}
+            color={exerciseColor('ex2')}
+            onNext={() => setStage('responsibilities')}
           />
         </ScrollView>
       </Shell>

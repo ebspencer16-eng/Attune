@@ -67,8 +67,33 @@ export function progressFor(profile, exercise) {
   if (finished) return { started: false, answered: total, total };
 
   const answers = answersIn(profile?.[`${exercise.key}_progress`]);
-  const answered = answers
-    ? Object.values(answers).filter((v) => v != null && v !== '').length
-    : 0;
+  const answered = countAnswers(answers);
   return { started: answered > 0, answered, total };
+}
+
+/**
+ * How many questions have an answer in a saved blob.
+ *
+ * ── WHY IT LOOKS INSIDE ───────────────────────────────────────────────────
+ * Most exercises save a flat map of question id to answer, and counting its
+ * values is the whole job. Expectations does not: it saves five maps, one per
+ * part, and counting the top level of that says five whatever anyone has
+ * answered. Ellie: "Not seeing the in progress status when I exited out."
+ *
+ * One level deep and no further, because that is the only shape that exists.
+ * A value that is itself a map counts as the number of answers inside it.
+ */
+function countAnswers(answers) {
+  if (!answers || typeof answers !== 'object') return 0;
+  let n = 0;
+  for (const v of Object.values(answers)) {
+    if (v == null || v === '') continue;
+    if (Array.isArray(v)) { if (v.length) n += 1; continue; }
+    if (typeof v === 'object') {
+      n += Object.values(v).filter((x) => x != null && x !== '').length;
+      continue;
+    }
+    n += 1;
+  }
+  return n;
 }

@@ -44,7 +44,6 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M70 | **`070_test_couple_status.sql`. This is why the intimacy questions read strangely.** Not an error in the question: that exercise asks eleven of its eighteen questions two ways, one for a couple who are already physically intimate and one for a couple who are not yet, and which one you get is decided by the relationship status on your profile. 067 built the test couple without one, so you were asked the whole exercise the other way round. This sets it to married on all three test accounts. Both framings are listed in section 3 for you to read. |
 
 ### Decide these
 
@@ -56,9 +55,11 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q7 is answered: a profile is always complete before the
+exercises open, so an unknown status is not a state a customer reaches.
+
 | # | Question |
 |--|--|
-| Q7 | **Should a profile with no relationship status be asked the not-yet-intimate version?** That is what happens today: anything that is not 'married' or 'remarried' gets the wording for a couple who are not yet physically intimate. For a real customer that only happens if the status was never recorded, and the exercise then asks eleven questions as though they are engaged. My instinct is that an unknown status should get the already-intimate wording, since that is the larger group and the assumption is less presumptuous either way it lands, but it is your call and it is a sentence in front of a customer. |
 
 ## 2. Open
 
@@ -80,6 +81,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O201 | **The intimacy framing should be a question the couple answers, not a column on the profile.** Your description of how it used to work is how the website still works: it asks one framing question, the first partner answers it, and it locks for both. The app reads relationship_status instead, which is a different rule for the same decision and is why a couple could be asked one way on one surface and the other way on the other. Make the app use the couple's own answer, the way the site does. |
 | O199 | **The completion pages.** Both surfaces, all five exercises. |
 | O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
 | O190 | **The responsibilities grid.** The site asks a whole category on one screen, each row a task with two sets of buttons: who did it in your childhood home, and who does it in yours. The app asks one task at a time. The data both collect is the same, which is why nothing has broken; the screens are not. This is the rest of "it needs to be the same as the mobile web experience". |
@@ -101,24 +103,12 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R133 | **The line under every intimacy question is gone**, and so is "Choose as many as are true". The exercise's opening page says the first once, which is where it belongs. |
-| R134 | **"(select all that are true)" is now an italic "Select all that apply"** on its own line, on any question that ends with a phrase like it. Split off the question rather than edited into it, so the question bank stays one source. |
-| R135 | **Every progress bar is its exercise's colour.** |
-| R136 | **Conflict's ranking works like Reflection's**: a tapped option moves into the ordered list and takes the exercise's colour. Both exercises had written their own; there is one now. |
+| R137 | **The opening page appears for Expectations.** It never did, for anyone: that exercise starts its answers as five empty maps rather than as nothing, so the screen counted five and believed you were already underway. |
+| R138 | **An exercise in progress is counted properly.** Same root: the count read the top level of the saved answers, which for Expectations is always five whatever you have answered, so the status never moved. It counts what is inside now. |
+| R139 | **The household page has the same arrows as everything else.** It was the one screen left with the old buttons. |
 | R123 | **Every exercise opens with a page that says what it is**, the same page on both surfaces. They existed on the web, written into the page rather than into a module, which is why the app had none: there was nothing to read. Resuming a half-finished exercise skips it. |
-| R124 | **One eyebrow and one set of arrows across all five exercises.** The eyebrow is the exercise's full name in its own colour. Reflection was showing the category of the question where the exercise's name belongs. |
-| R125 | **"Question 6 of 50" on both surfaces**, counting position rather than answers, so going back to question three says three. |
-| R126 | **Your part two screen**, on both surfaces, with no eyebrow and no paragraph under it. |
-| R127 | **Reflection loses the two lines under its button**, and its selected answers are green rather than black. All of them, not only Q9: one question in green and the rest in black reads as a mistake. |
 | R128 | **The status table shows the count and a filled circle**, so the middle state is no wider than the other two, and it calls ex1 Communication styles. |
-| R129 | **Expectations runs in the website's order**: life and values, then the household question, then responsibilities. The app had them backwards, so the same exercise was two different exercises depending on where you did it. The household page asks the website's question and neither surface has an eyebrow on it. |
 | R116 | **An exercise you have started says In progress**, in the clay the website uses, with the dot in the middle state. The column holding a half-answered exercise has existed as long as the exercises have; nothing ever read it, so someone thirty questions in was shown Start. |
-| R117 | **The home prompt for one in progress reads "Continue Communication" and "You've completed 6/50 questions".** The count comes from the saved answers, and it reads both shapes that column holds: the website stores the answers with the question you were on, the app stores the answers alone. |
-| R118 | **The answer choices carry the weight now and the A and B tiles step back.** You were right that it pointed at the two things you cannot tap. |
-| R119 | **The eyebrow says Communication styles**, and the completion screen says "Communication styles exercise complete" on both surfaces. The fuller name is a registry field, so every exercise says its own rather than this one being special-cased, and the three-column table keeps the short one, which is all that fits it. |
-| R120 | **Part two italicises "your partner"**, the same split the website makes. |
-| R121 | **The Next arrow was dead while an answer saved.** Every answer writes to the server and the control was disabled for as long as that took, so on a slow round trip taps went nowhere: that is the five clicks on Q35. Only the final save disables it now, because that is the one worth waiting for. |
-| R122 | **One formatting drift found and closed while checking for them:** the five scale labels were typed into the website and exported from the server for the app. They agreed, which is the only reason nothing had broken. The website reads the server's list now. Two more differences are Q6 in section 1, because they are choices rather than bugs. |
 | R100 | **The workbook is built the moment your results open.** On the server, at the same instant the product tells your partner you finished, so a couple who only ever use the app get one. It was built in a browser before, by a block that needed the buyer's order in that browser's storage, which is why yours said it was still generating. The payload the generator is handed now comes from one module that both the website and the server read: two builders would mean two workbooks depending on which surface got there first. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
@@ -129,8 +119,6 @@ any order; work through them however suits.
 | R130 | **Both intimacy framings, listed below.** Eleven of the eighteen questions are worded differently for a couple who are not yet physically intimate. You were reading the second set because of the missing status, which M70 fixes. Your proposed Q6 wording is already exactly what the already-intimate version says. Q9's says "When something feels off in the moment, you" where you wanted "you usually", which is a change you can make from the table. |
 | R131 | **Every exercise's opening page, listed below.** Conflict Patterns is the long one you meant. |
 | R132 | **Every loading line, listed below, with where it appears.** Insights says "Generating your insights" and every exercise says "Fetching your exercise", both in your words. They were typed into fifteen screens and are one file now, which is what makes the list possible. |
-| R110 | **All eleven home lines are yours**, plus the third row of the tile, which now says what the new publication card says rather than having a second name for the same event. The generated list below shows every one of them. The one line that needs a possessive, "Results unlock once Preston finishes his final exercise", reads the partner's own pronouns. |
-| R111 | **Both deletion emails are your prose.** The greeting line above them is gone, because your version opens with it and the email said it twice. The research sentence is still conditional: someone who opted out before deleting should not be told a copy was kept. |
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
@@ -352,6 +340,24 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| M70 | The test couple's relationship status, run |
+| R133 | The line under every intimacy question, gone |
+| R134 | Select all that apply, italic and on its own line |
+| R135 | Progress bars in their exercise colours |
+| R136 | Conflict's ranking, like Reflection's |
+| R124 | One eyebrow and one set of arrows |
+| R125 | Question 6 of 50, both surfaces |
+| R126 | The part two screen |
+| R127 | Reflection's two lines gone, selections green |
+| R129 | Expectations in the website's order |
+| R117 | Continue Communication, with the count |
+| R118 | The weight on the answer choices |
+| R119 | Communication styles, and its completion line |
+| R120 | Part two in italics |
+| R121 | The Next arrow, no longer dead while saving |
+| R122 | One scale, read by both surfaces |
+| R110 | The eleven home lines |
+| R111 | Both deletion emails |
 | M68 | The sign-in repair, run |
 | M69 | The deleted-partner account, run |
 | R103 | The alert copy, in Ellie's words |
