@@ -23,7 +23,6 @@ import {
 import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { fetchWorkbookView } from '@/api/client';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
@@ -136,21 +135,17 @@ export default function ResourcesScreen() {
     if (!view.ok) { setWorkbookNote(tools?.workbook?.copy.generating || null); return false; }
     const data = encodeURIComponent(JSON.stringify(view.data));
     /**
-     * The PDF, not the page.
+     * ── THE BROWSER BUILDS IT, AS IT DOES FOR THE WEBSITE ─────────────────
+     * Ellie: "the pdf generater opens in the browser. That's fine, let's just
+     * have it do that and open the same pdf as the website in the browser."
      *
-     * Ellie: "It shouldn't resize the web's pdf at all, this looks messed up."
-     * The page is laid out for paper, so a phone showing it squeezes it. The
-     * PDF is the same page printed, and a PDF viewer fits the page rather than
-     * reflowing it: nothing is resized, and zoom, share and print are the
-     * phone's own. api/workbook-pdf.js prints it with the settings the website
-     * prints it with.
+     * So the app opens the website's workbook page with ?auto=1 and the
+     * browser builds the file the moment it is drawn, with the same builder
+     * and the same options a customer gets on the website. The system browser
+     * rather than a sheet inside the app, because this ends in a PDF the phone
+     * displays, saves and prints, and that is the browser's own job.
      */
-    await openBrowserAsync(`${SITE}/api/workbook-pdf?data=${data}`, {
-      presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-      toolbarColor: c.background,
-      controlsColor: c.accent,
-      enableBarCollapsing: true,
-    });
+    await Linking.openURL(`${SITE}/workbook-render?data=${data}&auto=1`);
     return true;
   };
 
@@ -166,17 +161,6 @@ export default function ResourcesScreen() {
         const r = await fetchToolData();
         if (r.ok) { setTools(r.data); wb = r.data.workbook; }
       }
-      /**
-       * ── IT OPENS IN THE APP ────────────────────────────────────────────
-       * Ellie: "it built quickly but exported me to the web. I would like for
-       * the workbook to open right in the app."
-       *
-       * Linking.openURL hands the file to Safari, which is leaving the app.
-       * openBrowserAsync shows it in a sheet the app owns, with a Done button
-       * that comes back here. The file is still a .docx and iOS still previews
-       * it with its own viewer inside that sheet; what changes is that nobody
-       * is thrown out of the product to read their own workbook.
-       */
       /**
        * The file, for anyone whose page could not be built.
        *

@@ -340,29 +340,38 @@ document.body.classList.add('workbook-ready');
  * second renderer anywhere, which is the whole point of the app opening this
  * page rather than drawing its own.
  */
-document.getElementById('save-pdf').addEventListener('click', async (e) => {
-  const button = e.currentTarget;
+/** The options the website has always printed this page with. */
+function pdfOptions() {
+  const safe = (name) => String(name || 'Attune').replace(/\s+/g, '_');
+  return {
+    margin: [10, 14],
+    filename: `Attune_Workbook_${safe(p1)}_and_${safe(p2)}.pdf`,
+    image: { type: 'jpeg', quality: 0.97 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css'] },
+  };
+}
+
+async function loadBuilder() {
+  if (window.html2pdf) return;
+  await new Promise((ok, fail) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = ok;
+    script.onerror = fail;
+    document.head.appendChild(script);
+  });
+}
+
+const button = document.getElementById('save-pdf');
+
+button.addEventListener('click', async () => {
   button.disabled = true;
   button.textContent = 'Building...';
   try {
-    if (!window.html2pdf) {
-      await new Promise((ok, fail) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        script.onload = ok;
-        script.onerror = fail;
-        document.head.appendChild(script);
-      });
-    }
-    const safe = (name) => String(name || 'Attune').replace(/\s+/g, '_');
-    await window.html2pdf().set({
-      margin: [10, 14],
-      filename: `Attune_Workbook_${safe(p1)}_and_${safe(p2)}.pdf`,
-      image: { type: 'jpeg', quality: 0.97 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['avoid-all', 'css'] },
-    }).from(document.body).save();
+    await loadBuilder();
+    await window.html2pdf().set(pdfOptions()).from(document.body).save();
     button.textContent = 'Save as PDF';
   } catch (err) {
     console.warn('[workbook] could not build the PDF', err);
@@ -370,6 +379,47 @@ document.getElementById('save-pdf').addEventListener('click', async (e) => {
   }
   button.disabled = false;
 });
+
+/**
+ * ── STRAIGHT TO THE PDF ───────────────────────────────────────────────────
+ * Ellie: "the pdf generater opens in the browser. That's fine, let's just have
+ * it do that and open the same pdf as the website in the browser."
+ *
+ * The app opens this page with ?auto=1, so the browser builds the file the
+ * moment the page is drawn and shows it: the same builder, the same options,
+ * the same PDF a customer downloads from the website. Nothing to tap.
+ *
+ * The page itself is never what someone sees for more than a second, so it
+ * says what is happening while the file is being built. If the browser will
+ * not display a blob, which some in-app browsers will not, it falls back to
+ * saving, which is what the website's own button does.
+ */
+if (params.get('auto') === '1') {
+  button.style.display = 'none';
+  const waiting = document.createElement('div');
+  waiting.textContent = 'Building your workbook...';
+  waiting.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;'
+    + 'justify-content:center;background:var(--cream);color:var(--muted);'
+    + "font-family:var(--bfont);font-size:12pt;z-index:20;";
+  document.body.appendChild(waiting);
+
+  (async () => {
+    try {
+      await loadBuilder();
+      const url = await window.html2pdf().set(pdfOptions()).from(document.body).outputPdf('bloburl');
+      window.location.replace(url);
+    } catch (err) {
+      console.warn('[workbook] could not open the PDF, saving it instead', err);
+      try {
+        await window.html2pdf().set(pdfOptions()).from(document.body).save();
+        waiting.textContent = 'Your workbook has been saved.';
+      } catch {
+        waiting.remove();
+        button.style.display = '';
+      }
+    }
+  })();
+}
 </script>
 </body>
 </html>
