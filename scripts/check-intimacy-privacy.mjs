@@ -137,7 +137,46 @@ const ALLOWED_ENDPOINTS = new Map([
   ['save-exercise.js', 'stores the answers'],
   // Removes it.
   ['delete-account.js', 'deletes and archives on request'],
+  /**
+   * Reads the couple's framing answer, and nothing else.
+   *
+   * The wording of this exercise is the couple's own answer to one question,
+   * and the second partner inherits it, so /api/questions has to be able to
+   * find out which one it is. It never fetches the partner's record: Postgres
+   * projects the single field, so what arrives is the word "married" or
+   * "premarital". The assertion below holds that shape, because "allowed" with
+   * no conditions is how an endpoint quietly starts returning more than it
+   * needed.
+   */
+  ['questions.js', 'reads the couple\'s framing answer, projected to that one field'],
 ]);
+
+/**
+ * questions.js may name the column only to project the framing out of it.
+ *
+ * Planted against: changing the select to the whole column fails this, which
+ * is the mistake that would actually happen, because a whole-column select is
+ * what every other query in that file looks like.
+ */
+{
+  const text = readFileSync(new URL('questions.js', apiDir), 'utf8');
+  /**
+   * Two shapes are allowed and nothing else:
+   *
+   *   intimacy_data->>variant   the partner's framing, projected by Postgres
+   *   profile?.intimacy_data    the reader's own record, already fetched for
+   *                             their saved answers, which is their own data
+   */
+  const left = text
+    .replace(/intimacy_data->>variant/g, '')
+    .replace(/profile\??\.intimacy_data/g, '');
+  if (left.includes('intimacy_data')) {
+    problems.push(
+      'api/questions.js names intimacy_data in a shape that is neither the reader\'s own '
+      + "record nor the framing projection. It may read the couple's framing answer and "
+      + 'nothing else.');
+  }
+}
 
 let checked = 0;
 function scan(dir, prefix = '') {

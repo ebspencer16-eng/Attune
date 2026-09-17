@@ -49,6 +49,7 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
+| O208 | **A table rather than buttons, if you still want one.** You: "I want expectations exercise in the app to have a table like the site mobile experience. Not a million pill shaped buttons." The pills went yesterday: the app draws the site's cards now, with four fixed columns that line up down the page. Look at it before I build a third version, and if you still want the column headings across the top, say so and it is an afternoon. |
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
@@ -67,12 +68,11 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
+**Nothing open.** Everything you have sent is built and sitting in section 3
+for your eye, and the one thing left for you to decide is O208 in section 1.
+
 | # | Task |
 |--|--|
-| O208 | **A table rather than buttons, if you still want one.** You: "I want expectations exercise in the app to have a table like the site mobile experience. Not a million pill shaped buttons." The pills went yesterday: the app draws the site's cards now, with four fixed columns that line up down the page. Look at it before I build a third version, and if you still want the column headings across the top, say so and it is an afternoon. |
-| O201 | **The intimacy framing should be a question the couple answers, not a column on the profile.** Your description of how it used to work is how the website still works: it asks one framing question, the first partner answers it, and it locks for both. The app reads relationship_status instead, which is a different rule for the same decision and is why a couple could be asked one way on one surface and the other way on the other. Make the app use the couple's own answer, the way the site does. |
-| O199 | **The completion pages.** Both surfaces, all five exercises. |
-| O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
 
 ## 3. For you to review
 
@@ -90,9 +90,10 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R162 | **The workbook opens as a page in the app.** Not a second version of it: the page converts the document that was actually generated, so a change to the workbook shows up here with nothing to update and there is never a web version saying something different. It carries our type and colours; the parts of the Word layout that were tables are tables that scroll sideways rather than squeeze. Two things to judge: whether the reading holds up, and whether you want the .docx still reachable from somewhere for printing and email. |
-| R163 | **Expects or Experienced, by a switch above the table** rather than four columns. Each answer gets twice the room, and the comparison stays between the two of you. Categories that never asked the growing-up question have no switch. |
-| R164 | **The finding and the mark are centred in the gap**, whatever the tile below is holding. They were centred in that space already but carried a bottom padding, which pushed them up by half of it. |
+| R165 | **The workbook is a PDF now.** Converted from the document that was actually generated, so there is still only one workbook, and set in our own faces with page numbers. Zoom, share and print are the phone's own. What does not survive the conversion is colour and the page furniture: Word carries those as run properties and tables of coloured cells, and none of it is in what a converter reads. |
+| R166 | **The margin marker sits in the margin** and takes its colour from the prose it belongs to: white on the coloured grounds where you could not see it, ink on the cream ones where white would be nothing. It reserves no width, so nothing moves. |
+| R167 | **A note is private or shared on the note itself**, with the partner named under the switch. Private by default. Sharing was a separate action on the menu, so writing a note and then wanting it seen meant closing the sheet and selecting the words again. |
+| R168 | **Physical Intimacy asks the couple, not the profile.** One framing question, answered by whoever gets there first, carried over for both, which is what the website has always done and what you described. The app was deciding from the relationship status instead, so a couple could be asked one way on one surface and the other way on the other, and the results then compared answers to two different questions. The app never sees the partner's answers to find this out: the server projects the single field. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -117,14 +118,6 @@ receive a notification from Apple's servers.
 | # | Review |
 |--|--|
 | R112 | **Opening a mark lands on the line.** Every results page now shares one scroll view, and the paragraph holding the marked words asks it to scroll there once, after layout, with a little headroom above. I have not been able to drive this end to end myself: it needs a mark on a results section and a tap, and my synthetic taps have been landing in the wrong place all week. Worth a try from the Notes tab on a results mark. |
-| R113 | **The table's columns line up.** They were three flex children in the header and three more in each row, and flex divides what is left after each child's content is measured: a blank header cell and a cell holding "01 Relationship Reflection" do not measure the same, so the two rows divided the width differently. Fixed percentages from one place now. |
-| R114 | **The sign-in screen no longer flashes on a tab you have not visited.** All four tabs load when the app starts, so a tab that loaded while signed out was holding a sign-in screen. It did reload when you opened it, and said nothing while it did, so a session that was fine looked like one that had ended. It shows the spinner now. |
-| R115 | **The exercises: A and B side by side, Back at the left and Next at the right, both with arrows, and the controls in the same place on every question.** The question block and the option row each have a floor under them, so a one-line question and a three-line one put the scale in the same spot. |
-| R105 | **The margin marker was drawn outside the paragraph.** Fine on an article, invisible on a results page, where most prose sits in a tile with rounded corners that clips whatever hangs outside it. The paragraph gives up eighteen points of width for it now, so it cannot be clipped by anything. |
-| R106 | **The note screen is gone.** Adding a note is a popup: the box, the share toggle, and a way to add a tag. The title field went with the screen. It was optional, almost nobody filled it in, and the list already leads with the first line of a note that has none. An existing note keeps its title rather than losing it on an unrelated edit. |
-| R107 | **The selection is one block**, straight above and below, not a rounded box per word. |
-| R108 | **The top of an In Practice article can be marked**: the title, the standfirst and every heading. Only the body could be, which is to say the one sentence a piece opens with was the one sentence you could not keep. |
-| R109 | **The workbook builds when you ask for it.** Building it when results unlock does nothing for a couple whose results opened months ago, which is every couple that exists today. Tapping a workbook that is not there now asks for one and hands it over when it lands, a few seconds later. Also: an invitee could never find the file at all, because the lookup only ever asked for orders in their own name and the order belongs to the buyer. |
 | R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
 
 
@@ -141,6 +134,15 @@ receive a notification from Apple's servers.
 | R138 | An exercise in progress is counted properly |
 | R139 | The household page's arrows |
 | R123 | An opening page for every exercise, both surfaces |
+| R163 | Expects or Experienced, by a switch |
+| R164 | The finding and the mark centred in the gap |
+| R113 | The status table's columns line up |
+| R114 | No sign-in flash on a tab you have not visited |
+| R115 | A and B side by side, arrows, fixed positions |
+| R106 | The note screen is gone |
+| R107 | The selection is one block |
+| R108 | The top of an article can be marked |
+| R109 | The workbook builds when you ask for it |
 | R159 | "Both of us" gone from the results |
 | R160 | The opener's second line fits |
 | M71 | The test couple's Expectations answers, repaired |

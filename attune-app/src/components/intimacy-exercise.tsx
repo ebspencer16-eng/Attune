@@ -103,18 +103,37 @@ export default function IntimacyExercise({
     return () => { cancelled = true; };
   }, [attempt]);
 
+  /**
+   * ── THE FRAMING IS THE COUPLE'S ANSWER ──────────────────────────────────
+   * Ellie: "We used to start this exercise with one framing question (just
+   * like ex2 does), but the first partner to do the exercise answered and the
+   * second partner didn't need to answer it again, it just carried over."
+   *
+   * Null from the server means nobody has answered it yet, so this screen asks
+   * and sends the answer back with the exercise. Once either partner has, the
+   * server sends the locked value and this stays null.
+   */
+  const [chosen, setChosen] = useState<'premarital' | 'married' | null>(null);
+  const variant = set?.variant || chosen;
+
   const items = set?.items ?? [];
   const item = items[idx];
 
   const persist = useCallback(async (next: Answers, completed: boolean) => {
     setSaving(true);
     const res = await saveExercise({
-      exercise: 'intimacy', answers: next, completed, shape: set?.exercise.shape,
+      exercise: 'intimacy',
+      answers: next,
+      completed,
+      shape: set?.exercise.shape,
+      // The framing answer lives in the record, which is where the website
+      // keeps it and how the second partner inherits it.
+      record: variant ? { variant } : undefined,
     });
     setSaving(false);
     setSaveFailed(!res.ok);
     return res.ok;
-  }, [set]);
+  }, [set, variant]);
 
   if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) {
@@ -137,6 +156,40 @@ export default function IntimacyExercise({
    * read it already and wants their place.
    */
   const started = Object.keys(answers || {}).length > 0;
+
+  /**
+   * The one question that decides the wording, asked once per couple.
+   *
+   * After the opening page, because it is part of the exercise rather than
+   * something to answer before knowing what the exercise is, and the website
+   * asks it in the same place.
+   */
+  if (!opening && !variant && set.framing) {
+    return (
+      <Shell onClose={onClose}>
+        <ScrollView contentContainerStyle={{ padding: Spacing.xl, paddingBottom: BottomTabInset + Spacing.xxl, flexGrow: 1, justifyContent: 'center' }}>
+          <Text style={{ ...Type.eyebrow, color: exerciseColor('intimacy') }}>{set.framing.eyebrow}</Text>
+          <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.md }}>{set.framing.title}</Text>
+          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg, lineHeight: 24 }}>
+            {set.framing.note}
+          </Text>
+          {set.framing.options.map((option) => (
+            <Pressable
+              key={option.variant}
+              accessibilityRole="button"
+              onPress={() => setChosen(option.variant)}
+              style={{
+                marginTop: Spacing.lg, padding: Spacing.lg, borderRadius: Radius.lg,
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+              }}>
+              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{option.label}</Text>
+              <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>{option.sub}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </Shell>
+    );
+  }
 
   if (opening && set.intro && !started) {
     return (
@@ -169,6 +222,17 @@ export default function IntimacyExercise({
       </Shell>
     );
   }
+
+  /**
+   * The wording for the framing this couple chose.
+   *
+   * The server sends both sets with the questions, so answering that one
+   * question does not cost another request. `text` is what it sent for the
+   * variant it knew about, which is the fallback for an older payload.
+   */
+  const questionText = (variant && item.texts?.[variant]) || item.text;
+  const optionLabel = (o: { label: string; labels?: { premarital: string; married: string } }) =>
+    (variant && o.labels?.[variant]) || o.label;
 
   const value = answers[item.id];
   const isMulti = item.kind === 'multi';
@@ -232,9 +296,9 @@ export default function IntimacyExercise({
             question text: the same treatment works for every phrasing the
             question bank has, and the questions stay one source. */}
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
-          {splitInstruction(item.text).text}
-          {splitInstruction(item.text).instruction ? (
-            <Text style={{ fontStyle: 'italic' }}>{`\n${splitInstruction(item.text).instruction}`}</Text>
+          {splitInstruction(questionText).text}
+          {splitInstruction(questionText).instruction ? (
+            <Text style={{ fontStyle: 'italic' }}>{`\n${splitInstruction(questionText).instruction}`}</Text>
           ) : null}
         </Text>
 
@@ -263,7 +327,7 @@ export default function IntimacyExercise({
                     ...Type.body,
                     color: on ? Palette.white : declining ? c.textMuted : c.text,
                   }}>
-                  {o.label}
+                  {optionLabel(o)}
                 </Text>
               </Pressable>
             );

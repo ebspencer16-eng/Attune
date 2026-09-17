@@ -1611,7 +1611,19 @@ export type IntimacyQuestionSet = {
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   /** The screen that closes it, from api/_lib/exercise-complete.js. */
   complete?: { title: string; body: string[]; cta: string } | null;
-  variant: 'premarital' | 'married';
+  /**
+   * Which wording this couple is asked, or null when neither partner has
+   * answered the framing question yet. The variant is the couple's own answer,
+   * stored in the exercise's record: api/_lib/intimacy-framing.js.
+   */
+  variant: 'premarital' | 'married' | null;
+  /** The framing question, sent only while it is still unanswered. */
+  framing?: {
+    eyebrow: string;
+    title: string;
+    note: string;
+    options: { variant: 'premarital' | 'married'; label: string; sub: string }[];
+  } | null;
   dimensions: { id: string; label: string }[];
   items: {
     id: string;
@@ -1619,7 +1631,13 @@ export type IntimacyQuestionSet = {
     kind: 'scale' | 'selfref' | 'multi';
     topic: string;
     text: string;
-    options: { label: string; value: string | number | null }[];
+    /** Both wordings, so answering the framing question needs no second fetch. */
+    texts?: { premarital: string; married: string };
+    options: {
+      label: string;
+      value: string | number | null;
+      labels?: { premarital: string; married: string };
+    }[];
   }[];
   requiredIds: string[];
 };
@@ -1671,6 +1689,14 @@ export async function saveExercise(input: {
    * successfully and never count as finished.
    */
   shape?: 'answers' | 'record';
+  /**
+   * Anything else that belongs in a record-shaped exercise's stored object.
+   *
+   * Physical Intimacy keeps the couple's framing answer here, which is where
+   * the website has always kept it: the second partner inherits it, so it has
+   * to live with the answers rather than on a profile.
+   */
+  record?: Record<string, unknown>;
 }): Promise<ApiResult<{ ok: true }>> {
   const token = await getToken();
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
@@ -1692,7 +1718,7 @@ export async function saveExercise(input: {
   // because the whole record lands in one column and there is nowhere else for
   // it to go.
   const payload = input.shape === 'record'
-    ? { answers: input.answers, ...(completedAt ? { completedAt } : {}) }
+    ? { answers: input.answers, ...(input.record || {}), ...(completedAt ? { completedAt } : {}) }
     : input.answers;
 
   return request<{ ok: true }>('/api/save-exercise', {

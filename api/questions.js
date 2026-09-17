@@ -30,6 +30,7 @@ import {
 import { EXERCISES } from './_exercises.js';
 import { exerciseIntro } from './_lib/exercise-intro.js';
 import { exerciseComplete } from './_lib/exercise-complete.js';
+import { framingQuestion, lockedVariant, DEFAULT_VARIANT } from './_lib/intimacy-framing.js';
 import { PART_TWO } from './_lib/part-two.js';
 import {
   asksChildhood, categoryIntro, futureLabel, isAnniversaryStatus,
@@ -105,10 +106,10 @@ export default async function handler(req) {
     // registry so this does not go stale when an exercise is added.
     const answerCols = EXERCISES.map(e => e.column);
     const progressCols = EXERCISES.filter(e => e.shape !== 'record').map(e => `${e.key}_progress`);
-    // relationship_status picks the Physical Intimacy wording. Without it the
-    // variant silently falls back to premarital, which asks a married couple
-    // how they imagine things will be.
-    const profCols = ['name', 'partner_name', 'relationship_status', ...answerCols, ...progressCols].join(',');
+    // partner_profile_id is here for Physical Intimacy: its wording is the
+    // couple's own answer to one framing question, and the second partner
+    // inherits whatever the first one said. See api/_lib/intimacy-framing.js.
+    const profCols = ['name', 'partner_name', 'relationship_status', 'partner_profile_id', ...answerCols, ...progressCols].join(',');
     const profRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${profCols}`, { headers: svc });
     const profile = (await profRes.json().catch(() => []))?.[0] || null;
@@ -311,16 +312,38 @@ export default async function handler(req) {
        * Physical Intimacy.
        *
        * The wording changes with where the couple is: the premarital set asks
-       * how someone imagines things, the married set asks how they are. The
-       * variant is resolved here from the profile rather than chosen by the
-       * app, so both partners are always asked the same version.
+       * how someone imagines things, the married set asks how they are.
+       *
+       * ── THE COUPLE DECIDES, NOT THE PROFILE ───────────────────────────
+       * This read relationship_status, which is a second rule for a decision
+       * the website has always made by asking. Ellie: "the first partner to do
+       * the exercise answered and the second partner didn't need to answer it
+       * again, it just carried over for both partners." So the answer is read
+       * out of the exercise's own record, mine or my partner's, and when
+       * neither exists the app asks the question and sends it back with the
+       * answers. api/_lib/intimacy-framing.js holds the rule and the words.
        *
        * Every question can be declined. That is a real answer, stored and
        * scored differently from an unanswered one, so the option is sent as
        * part of the question rather than added by the app.
        */
-      const variant = (profile?.relationship_status === 'married'
-        || profile?.relationship_status === 'remarried') ? 'married' : 'premarital';
+      /**
+       * ── ONLY THE FRAMING, NEVER THE ANSWERS ───────────────────────────
+       * The partner's record is not fetched. Postgres projects the one field
+       * this needs, so what comes back is the word "married" or "premarital"
+       * and nothing else: the answers never enter this handler, which is the
+       * promise check-intimacy-privacy.mjs exists to keep.
+       */
+      let partnerFraming = null;
+      if (profile?.partner_profile_id) {
+        const pRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${profile.partner_profile_id}`
+          + '&select=variant:intimacy_data->>variant',
+          { headers: svc });
+        partnerFraming = (await pRes.json().catch(() => []))?.[0] || null;
+      }
+      const locked = lockedVariant(profile?.intimacy_data, partnerFraming);
+      const variant = locked || DEFAULT_VARIANT;
 
       return json({
         ok: true,
@@ -328,7 +351,13 @@ export default async function handler(req) {
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
         // The screen that closes it, from api/_lib/exercise-complete.js.
         complete: exerciseComplete(exercise.key),
-        variant,
+        /**
+         * Null until this couple has answered the framing question, which is
+         * how the app knows to ask it. `framing` carries the question itself,
+         * so the words live on the server with everything else a screen says.
+         */
+        variant: locked,
+        framing: locked ? null : framingQuestion((profile?.partner_name || '').trim() || 'your partner'),
         dimensions: INTIMACY_DIMENSIONS,
         items: INTIMACY_QUESTIONS.map(q => ({
           id: q.id,
@@ -336,7 +365,24 @@ export default async function handler(req) {
           kind: q.kind,
           topic: q.topic,
           text: q[variant] || q.text || q.premarital,
-          options: (q.options || []).map(o => ({ label: o.label, value: o.value })),
+          /**
+           * Both wordings, because the app may be about to ask the framing
+           * question and needs the other set the moment it is answered. Eleven
+           * of the eighteen differ; the rest are the same sentence twice,
+           * which costs nothing.
+           */
+          texts: {
+            premarital: q.premarital || q.text || '',
+            married: q.married || q.text || q.premarital || '',
+          },
+          options: (q.options || []).map(o => ({
+            label: o[variant] || o.label,
+            value: o.value,
+            // The website words some options differently under each framing:
+            // "Would be eager" against "Are eager". Sent both ways for the
+            // same reason as the question text.
+            labels: { premarital: o.premarital || o.label, married: o.married || o.label },
+          })),
         })),
         // Nothing is required. Someone who wants to skip the whole exercise has
         // said something by doing that, and the results say so rather than

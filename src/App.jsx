@@ -35,6 +35,7 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
 import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 import { exerciseComplete } from "../api/_lib/exercise-complete.js";
+import { framingQuestion } from "../api/_lib/intimacy-framing.js";
 import { PART_TWO } from "../api/_lib/part-two.js";
 import { OPENER_BODY } from "../api/_lib/highlight-cards.js";
 import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
@@ -1389,19 +1390,23 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
     </div>
   );
 
+  // The one question that sets the wording for both of them.
+  const framingCopy = framingQuestion(partnerName);
+
   // ── BRANCH QUESTION (first partner only) ──
   if (phase === 'branch') return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>One question first</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.5rem", fontWeight: 700, color: C.ink, lineHeight: 1.25, marginBottom: "1rem" }}>Are you and {partnerName} regularly physically intimate?</h2>
+      {/* The words come from api/_lib/intimacy-framing.js, which is also what
+          the app is sent: one question, asked the same way on both. */}
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{framingCopy.eyebrow}</div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "1.5rem", fontWeight: 700, color: C.ink, lineHeight: 1.25, marginBottom: "1rem" }}>{framingCopy.title}</h2>
       <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, marginBottom: "1.75rem" }}>
-        This sets the framing for both of you. Whoever starts first decides it for the couple.
+        {framingCopy.note}
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        {[{ v: 'married', label: 'Yes', sub: 'Questions about how things are now' },
-          { v: 'premarital', label: 'No', sub: 'Questions about what you expect' }].map(o => (
-          <button key={o.v} onClick={() => { setVariant(o.v); onChooseVariant?.(o.v); setPhase('questions'); }}
+        {framingCopy.options.map(o => (
+          <button key={o.variant} onClick={() => { setVariant(o.variant); onChooseVariant?.(o.variant); setPhase('questions'); }}
             style={{ textAlign: "left", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1rem 1.25rem", cursor: "pointer", fontFamily: BFONT }}>
             <div style={{ fontSize: "1rem", fontWeight: 700, color: C.ink }}>{o.label}</div>
             <div style={{ fontSize: "0.78rem", color: C.muted, fontWeight: 300, marginTop: 2 }}>{o.sub}</div>
