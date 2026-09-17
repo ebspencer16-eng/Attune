@@ -22,7 +22,26 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { Palette } from '@/constants/attune-theme';
 
-export default function PageWash() {
+/** #RRGGBB to rgba, so a tint can be given an opacity without a second constant. */
+function withAlpha(hex: string, alpha: number) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+export default function PageWash({ tint }: {
+  /**
+   * The colour in the corner. The brand orange by default.
+   *
+   * Ellie: "Exercise screens should have a hue gradient like the learn and
+   * notes, but the hue gradient should be the exercise color." So an exercise
+   * passes its own, which it already has: one colour per exercise, from
+   * AccentFor, the same one its progress bar and its arrows use.
+   */
+  tint?: string;
+} = {}) {
+  const hue = tint || Palette.orange;
   return (
     <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <LinearGradient
@@ -31,10 +50,10 @@ export default function PageWash() {
         end={{ x: 0, y: 0.45 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
-      {/* The corner. Orange at four per cent over warm cream is a suggestion of
+      {/* The corner. A tenth of a colour over warm cream is a suggestion of
           colour rather than a colour, which is what keeps this a ground. */}
       <LinearGradient
-        colors={['rgba(232,103,58,0.10)', 'rgba(232,103,58,0)']}
+        colors={[withAlpha(hue, 0.1), withAlpha(hue, 0)]}
         start={{ x: 1, y: 0 }}
         end={{ x: 0.1, y: 0.35 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 380 }}

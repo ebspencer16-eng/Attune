@@ -82,7 +82,21 @@ export default function InsightsScreen() {
   useEffect(() => {
     if (!requestedExercise) return;
     setOpenExercise(requestedExercise);
-    router.setParams({ exercise: undefined });
+    /**
+     * ── CLEARING THE PARAM CANNOT TAKE THE SCREEN DOWN ────────────────────
+     * "Attempted to navigate before mounting the Root Layout component."
+     * This tab is mounted by the tab bar as the app starts, which can be
+     * before the navigator is ready, and setParams then throws: a red screen
+     * on a cold start, from a line whose only job is tidying up after itself.
+     *
+     * Deferred a tick so the navigator exists, and wrapped, because the worst
+     * case of failing to clear it is that closing the exercise reopens it
+     * once. That is a great deal better than the app not starting.
+     */
+    const tidy = setTimeout(() => {
+      try { router.setParams({ exercise: undefined }); } catch { /* not mounted */ }
+    }, 0);
+    return () => clearTimeout(tidy);
   }, [requestedExercise]);
 
   const loadingRef = useRef(false);

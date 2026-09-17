@@ -25,6 +25,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchConflictQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ConflictQuestion, ConflictQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
   ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, RankInOrder, exerciseColor,
@@ -343,6 +344,11 @@ function Secondary({ label, onPress }: { label: string; onPress: () => void }) {
 function Shell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      {/* Ellie: "Exercise screens should have a hue gradient like the learn and
+          notes, but the hue gradient should be the exercise color." Its own
+          colour, from the same place its progress bar and its arrows take
+          theirs, so an exercise renamed or recoloured takes this with it. */}
+      <PageWash tint={exerciseColor('conflict')} />
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
         <Pressable
       accessibilityRole="button" onPress={onClose} hitSlop={10}>

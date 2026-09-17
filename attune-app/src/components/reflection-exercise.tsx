@@ -36,6 +36,7 @@ import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
@@ -361,6 +362,11 @@ function FreeText({
 function Shell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      {/* Ellie: "Exercise screens should have a hue gradient like the learn and
+          notes, but the hue gradient should be the exercise color." Its own
+          colour, from the same place its progress bar and its arrows take
+          theirs, so an exercise renamed or recoloured takes this with it. */}
+      <PageWash tint={exerciseColor('ex3')} />
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
         <Pressable
       accessibilityRole="button" onPress={onClose} hitSlop={10}>

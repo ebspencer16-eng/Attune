@@ -18,11 +18,12 @@ import {
   ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { OAUTH_PROVIDERS, isAuthConfigured, signIn, signInWithProvider } from '@/api/auth';
 import type { OAuthProvider } from '@/api/auth';
-import { AttuneMark } from '@/components/screen-states';
-import { Colors, MaxContentWidth, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
+import BrandHeader from '@/components/brand-header';
+import { BlueGround, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -75,7 +76,7 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
   };
 
   const field = {
-    backgroundColor: c.surface,
+    backgroundColor: 'rgba(255,255,255,0.94)',
     borderColor: c.border,
     borderWidth: 1,
     borderRadius: Radius.md,
@@ -87,7 +88,20 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
   } as const;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: BlueGround[0] }}>
+      {/* ── THE FIRST SCREEN, ON THE BRAND'S OWN GROUND ──────────────────
+          Ellie: "Sign in screen on the blue ground with the lockup sounds
+          right." It is the first thing a new customer sees and it was the
+          plainest screen in the app: a mark and two fields on cream. The blue
+          is the home screen's, from one place, and the lockup is the same one
+          every tab carries. */}
+      <LinearGradient
+        colors={[...BlueGround]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <BrandHeader tone="light" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -97,16 +111,12 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
             flexGrow: 1, justifyContent: 'center', padding: Spacing.xl,
             maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
           }}>
-          <View style={{ alignItems: 'center' }}>
-            <AttuneMark />
-          </View>
-
-          <Text style={{ ...Type.title, color: c.textStrong, textAlign: 'center' }}>
+          <Text style={{ ...Type.hero, color: Palette.white, textAlign: 'center' }}>
             Sign in to Attune
           </Text>
           <Text
             style={{
-              ...Type.small, color: c.textMuted, textAlign: 'center',
+              ...Type.small, color: 'rgba(255,255,255,0.75)', textAlign: 'center',
               marginTop: Spacing.sm, marginBottom: Spacing.xl,
             }}>
             Use the email you bought with.
@@ -162,7 +172,7 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
               with: npx expo start --ios --clear
             </Text>
           ) : (
-            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.75)', marginTop: Spacing.md }}>
               Connected to Attune.
             </Text>
           )}
@@ -187,9 +197,9 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
               password button above. Both or neither: Guideline 4.8 requires
               Sign in with Apple wherever another provider is offered. */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginVertical: Spacing.xl }}>
-            <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
-            <Text style={{ ...Type.small, color: c.textMuted }}>or</Text>
-            <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.25)' }} />
+            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)' }}>or</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.25)' }} />
           </View>
 
           <View style={{ gap: Spacing.md }}>
