@@ -81,18 +81,8 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O177 | **Your part two screen, on both surfaces.** No eyebrow, hero reads 'Part Two: All the same questions, but about your partner', no description. |
-| O178 | **The counter reads 'Question 6 of 50' on both surfaces.** |
-| O179 | **An opening page for every exercise, the same on both surfaces.** Name, a short description, begin. First I find out what the site actually does today, because you remember one and I want to check before building a second. |
-| O180 | **Back and Next as arrows in every exercise**, not just Communication. |
-| O181 | **Relationship Reflection loses 'you can leave this one blank' and '1 of 5 required answered'.** |
-| O182 | **Every question page's eyebrow is the exercise's full name, in that exercise's colour.** |
-| O183 | **Q9 of Relationship Reflection: a selected answer takes the exercise's colour**, not black. |
-| O184 | **The status table shows the count and a pie, not the words In progress.** 6/50 beside a circle filled to the portion done, in orange. |
-| O185 | **The status table calls ex1 Communication styles.** |
-| O186 | **The completion page matches the site.** Same check as the opening page: what the site does first, then both. |
-| O187 | **No eyebrow on the household background page in Expectations.** |
-| O188 | **What the site's household question says, against the app's.** You do not recognise 'who ran the household you grew up in', so I bring both before changing either. |
+| O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
+| O190 | **The responsibilities grid.** The site asks a whole category on one screen, each row a task with two sets of buttons: who did it in your childhood home, and who does it in yours. The app asks one task at a time. The data both collect is the same, which is why nothing has broken; the screens are not. This is the rest of "it needs to be the same as the mobile web experience". |
 | O189 | **Rebuild the app's Expectations exercise to match the mobile web experience.** Your words: "Hate the setup of this exercise. It needs to be the same as the mobile web experience." This is the big one on the list and you are waiting on it, so it gets a plan in this document before it gets code. |
 
 ## 3. For you to review
@@ -111,6 +101,13 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R123 | **Every exercise opens with a page that says what it is**, the same page on both surfaces. They existed on the web, written into the page rather than into a module, which is why the app had none: there was nothing to read. Resuming a half-finished exercise skips it. |
+| R124 | **One eyebrow and one set of arrows across all five exercises.** The eyebrow is the exercise's full name in its own colour. Reflection was showing the category of the question where the exercise's name belongs. |
+| R125 | **"Question 6 of 50" on both surfaces**, counting position rather than answers, so going back to question three says three. |
+| R126 | **Your part two screen**, on both surfaces, with no eyebrow and no paragraph under it. |
+| R127 | **Reflection loses the two lines under its button**, and its selected answers are green rather than black. All of them, not only Q9: one question in green and the rest in black reads as a mistake. |
+| R128 | **The status table shows the count and a filled circle**, so the middle state is no wider than the other two, and it calls ex1 Communication styles. |
+| R129 | **Expectations runs in the website's order**: life and values, then the household question, then responsibilities. The app had them backwards, so the same exercise was two different exercises depending on where you did it. The household page asks the website's question and neither surface has an eyebrow on it. |
 | R116 | **An exercise you have started says In progress**, in the clay the website uses, with the dot in the middle state. The column holding a half-answered exercise has existed as long as the exercises have; nothing ever read it, so someone thirty questions in was shown Start. |
 | R117 | **The home prompt for one in progress reads "Continue Communication" and "You've completed 6/50 questions".** The count comes from the saved answers, and it reads both shapes that column holds: the website stores the answers with the question you were on, the app stores the answers alone. |
 | R118 | **The answer choices carry the weight now and the A and B tiles step back.** You were right that it pointed at the two things you cannot tap. |
