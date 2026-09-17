@@ -77,6 +77,24 @@ export function childhoodValue(value) {
   return v;
 }
 
+/**
+ * What a results page shows for one answer.
+ *
+ * ── WHY "BOTH OF US" IS NOT IT ────────────────────────────────────────────
+ * Ellie: "I don't like seeing both of us." It is the longest value in a narrow
+ * column and it is the least informative one: the exercise asks a follow-up
+ * every time someone picks it, precisely because both rarely means half.
+ *
+ * So the refinement is the answer wherever there is one, and "Both" is the
+ * fallback for the rows answered before that follow-up existed. Every results
+ * surface reads this rather than deciding for itself.
+ */
+export function respDisplay(value, detail) {
+  if (detail) return detail;
+  if (value === 'Both of us') return 'Both';
+  return value;
+}
+
 /** An answer as a name the reader will recognise. */
 export function normRespValue(value, isSelf, youName, themName) {
   const side = sideOf(value);
@@ -169,8 +187,17 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
         category: cat.label,
         categoryIndex,
         item: substName(item, you, them),
-        you: normRespValue(rawYours, true, you, them),
-        them: normRespValue(rawTheirs, false, you, them),
+        /**
+         * The answer as the results show it.
+         *
+         * "Both of us" never reaches a page now: where the exercise asked what
+         * Both meant, that answer is the one shown, and respDisplay is the one
+         * place that decides. It used to be sent as a value plus a refinement
+         * underneath, which put the least informative word in the column and
+         * the informative one in small print below it.
+         */
+        you: respDisplay(normRespValue(rawYours, true, you, them), bothDetailFor(mine, key)),
+        them: respDisplay(normRespValue(rawTheirs, false, you, them), bothDetailFor(theirs, mirrorRespKey(key))),
         /**
          * What each of them grew up with.
          *
@@ -186,25 +213,6 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
          */
         youExperienced: childhoodValue(mine?.childhood?.[key]),
         themExperienced: childhoodValue(theirs?.childhood?.[key]),
-        /**
-         * What "Both of us" turned out to mean.
-         *
-         * The exercise asks it every time someone answers Both, because both
-         * rarely means exactly half, and then no surface has ever shown the
-         * answer back. Ellie: "I honestly forgot we ask the 'a bit more
-         * specifically' thing, I like it, but how should we make that visible
-         * in the results experience?"
-         *
-         * Not mirrored, and not normalised. These strings name people
-         * outright, "Usually Ellie, sometimes Preston", so they read the same
-         * way from either side of the couple. Flipping them would be the bug
-         * that mirroring exists to prevent, pointed backwards.
-         *
-         * Empty unless that person answered Both, so a surface can show it
-         * under the answer it belongs to without deciding anything.
-         */
-        youDetail: bothDetailFor(mine, key),
-        themDetail: bothDetailFor(theirs, mirrorRespKey(key)),
         aligned,
       };
     }).filter(Boolean));

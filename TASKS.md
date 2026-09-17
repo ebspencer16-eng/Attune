@@ -38,11 +38,12 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 ### Run these in the SQL editor
 
 I deliver migrations and you run them. That is deliberate and it is in
-CLAUDE.md, so anything new sits here until you do. 061 to 070 are all run.
+CLAUDE.md, so anything new sits here until you do.
+
+**Nothing waiting.** 061 to 071 are all run.
 
 | # | Migration |
 |--|--|
-| M71 | **071_test_couple_ex2_repair.sql.** Your test partner's Expectations answers were seeded in a vocabulary the product does not use, which is why your results table said "shared" instead of "Both of us". This rewrites those two seeded rows, adds what they grew up with and what "Both of us" meant for them, and does not touch your own answers. |
 
 ### Decide these
 
@@ -54,11 +55,9 @@ CLAUDE.md, so anything new sits here until you do. 061 to 070 are all run.
 
 ### Answer these
 
-**Nothing waiting.** Q8 and Q9 are answered: the not-therapy line stays as its
-own paragraph under yours, and every opening page says Start.
-
 | # | Question |
 |--|--|
+| Q10 | **How far should "open the workbook in the app" go?** It opens full screen in our colours now, and iOS draws the Word document inside it. Drawing it ourselves means a second renderer: the workbook is built as Word paragraphs and tables by a two and a half thousand line generator, and a native reader would be a new one over the same payload, with the .docx kept for printing and email. That is days rather than hours and it is a feature rather than a fix, so it is your call. The middle option is a web version of the workbook opening in the same full-screen view, which would read as a page of the app on a phone at a fraction of the cost. |
 
 ## 2. Open
 
@@ -89,16 +88,11 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R156 | **An exercise asked for by name opens, even once results are ready.** The Insights tab drew results and swallowed the request. Every exercise being finished is the usual reason results are ready, so it rarely came up, but a card that says open this and opens something else is a request that went nowhere. |
-| R148 | **The part two screen says just "Part two: Responsibilities".** The rest of the sentence you wrote for it is not anywhere now. If you want a line under the hero, it needs one from you: the sentence as written begins "Part two: Responsibilities helps you...", so it reads oddly under a hero that says the first three words. |
-| R149 | **The mark behind the insight of the day, visible this time.** It was at a tenth of full strength, which on that blue is nothing; it is three times that now, and bigger. Still one switch to revert, still two constants for size and strength. |
-| R150 | **The workbook opens in the app**, in a sheet the app owns with a Done button, rather than throwing you out to Safari. It is still a .docx and iOS still previews it with its own viewer inside that sheet. |
-| R151 | **Every page of the responsibilities starts at the top.** Next from the bottom of one category was landing at the bottom of the next. |
-| R152 | **A completion page for every exercise, on both surfaces.** "[Exercise] complete" in the exercise's own name from the registry, the description you already had, a tick in the exercise's colour, and everything centred like the opening page. The app's button says "Back to insights". The website's completion screens keep their own extra prose and their own buttons, which say "Back to dashboard", because "insights" is the app's word for that screen: tell me if you want one word on both. |
-| R153 | **The conversations table shows the full detail.** What "Both of us" turned out to mean sits under the answer in grey italics, and what each of you grew up with sits under that, labelled the way the website labels it. Both surfaces. |
-| R154 | **"shared", "me" and "partner" were the test data, not the product.** Your partner's seeded answers were written in a vocabulary the exercise has never used, so the table showed those words where it should have shown "Both of us" and a name, and the alignment maths was comparing strings it did not recognise. Migration 071 fixes the two seeded accounts and leaves your own answers alone. The generator is fixed too, so it cannot come back. |
-| R155 | **Storycard one, in your words**, and no full stops on either line. |
-| R144 | **What "Both of us" turned out to mean is on the results.** It sits under the answer it refines, in both the website's conversations table and the app's, for whichever of you answered Both. Nothing has ever shown it before, so this is a first pass to react to rather than a finished design: it could be a column, a line under the table, or left where it is. |
+| R157 | **The white glow is off, so what is behind the finding is just the mark.** Both switches sit together in the home screen: WHITE_GLOW back to true puts the old one back, and turning the mark off as well is exactly the screen from two days ago. |
+| R158 | **Expects and Experienced are columns.** Four of them, two per person, fixed widths so every row lines up. A category that asks no growing-up question, which is Extended Family, gets two columns rather than a column of dashes. |
+| R159 | **"Both of us" is gone from the results.** Where the exercise asked what Both meant, that answer is the value now: "Genuinely 50/50", or "Usually Ellie, sometimes Preston". Rows answered before that follow-up existed say "Both". One rule, read by both surfaces. |
+| R160 | **The opener's second line fits.** The measure went from 260 to 300 on both surfaces. |
+| R161 | **The workbook opens full screen in the app's colours** rather than in a sheet with Safari's. It is still iOS drawing the document inside it, which is the honest limit of what a .docx can be here: see Q10. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -147,6 +141,12 @@ receive a notification from Apple's servers.
 | R138 | An exercise in progress is counted properly |
 | R139 | The household page's arrows |
 | R123 | An opening page for every exercise, both surfaces |
+| M71 | The test couple's Expectations answers, repaired |
+| R156 | An exercise asked for by name opens |
+| R148 | Part two: Responsibilities |
+| R151 | Every responsibilities page starts at the top |
+| R152 | A completion page for every exercise |
+| R154 | Seed data in the product's own vocabulary |
 | R142 | Part one says which part it is |
 | R145 | The progress circle sweeps round |
 | R147 | Start on all ten opening pages, and the not-therapy line back |

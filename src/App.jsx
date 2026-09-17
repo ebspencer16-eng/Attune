@@ -32,7 +32,7 @@ import {
 // cannot alter which values reach the maths.
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
-import { agrees, normRespValue, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
+import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 import { exerciseComplete } from "../api/_lib/exercise-complete.js";
 import { PART_TWO } from "../api/_lib/part-two.js";
@@ -4088,15 +4088,13 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                       <div style={{ fontSize: "0.78rem", fontWeight: 500, color: "#2a2848", fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{g.item}</div>
                       {/* userName expects, and what Both turned out to mean */}
                       <div style={{ fontSize: "0.8rem", fontWeight: 700, color: fc.color, fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: fc.color + "0d", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem" }}>
-                        {resolveLabel(g.mine) || "—"}
-                        {myDetail ? <div style={{ fontSize: "0.6rem", fontWeight: 500, fontStyle: "italic", color: fc.color, opacity: 0.75, marginTop: "0.1rem" }}>{myDetail}</div> : null}
+                        {respDisplay(resolveLabel(g.mine), myDetail) || "—"}
                       </div>
                       {/* userName experienced */}
                       {hasAnyChildhood && <div style={{ fontSize: "0.72rem", color: "#aaa", fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.35, textAlign: "center" }}>{childLabel(myChild)}</div>}
                       {/* partnerName expects, and what Both turned out to mean */}
                       <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#555", fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: "rgba(0,0,0,0.04)", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem", borderLeft: "1px solid rgba(0,0,0,0.07)" }}>
-                        {resolveLabel(g.theirs) || "—"}
-                        {partDetail ? <div style={{ fontSize: "0.6rem", fontWeight: 500, fontStyle: "italic", color: "#777", marginTop: "0.1rem" }}>{partDetail}</div> : null}
+                        {respDisplay(resolveLabel(g.theirs), partDetail) || "—"}
                       </div>
                       {/* partnerName experienced */}
                       {hasAnyChildhood && <div style={{ fontSize: "0.72rem", color: "#aaa", fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.35, textAlign: "center" }}>{childLabel(partChild)}</div>}
@@ -8718,7 +8716,7 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             {userName}<br/><span style={{ ...scType("amp") }}>&amp;</span><br/>{partnerName}
           </div>
           <div style={{ width: 40, height: 2, background: "linear-gradient(90deg, #E8673A, #1B5FE8)", borderRadius: 2, marginBottom: "1.5rem", animation: "popIn 0.4s 0.35s both" }} />
-          <p style={{ ...scType("body"), maxWidth: 260, margin: 0, whiteSpace: "pre-line", animation: "fadeUp 0.4s 0.4s both" }}>
+          <p style={{ ...scType("body"), maxWidth: 300, margin: 0, whiteSpace: "pre-line", animation: "fadeUp 0.4s 0.4s both" }}>
             {OPENER_BODY}
           </p>
         </div>

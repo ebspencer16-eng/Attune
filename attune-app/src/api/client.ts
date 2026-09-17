@@ -293,9 +293,10 @@ export type ExpectationRow = {
    */
   youExperienced?: string | null;
   themExperienced?: string | null;
-  /** What "Both of us" turned out to mean, for whoever answered it that way. */
-  youDetail?: string | null;
-  themDetail?: string | null;
+  /**
+   * "Both of us" never arrives: where the exercise asked what Both meant, the
+   * server sends that answer as the value. api/_lib/expectations.js decides.
+   */
   category: string;
   item: string;
   prompt?: string | null;

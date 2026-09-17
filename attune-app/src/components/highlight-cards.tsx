@@ -583,7 +583,11 @@ function Body({ card, onDone, map, w }: {
           <Text style={[S.amp, { marginVertical: Spacing.xs }]}>&</Text>
           <Text style={[S.hero, { textAlign: 'center' }]}>{card.names?.them}</Text>
           <Rule />
-          <Text style={[S.body, { textAlign: 'center', maxWidth: 260 }]}>{card.body}</Text>
+          {/* Ellie: "Widen margins so that use insights to learn and grow
+              together fit on one line." 260 broke her second line in two; the
+              card is 320 wide at its narrowest, so this is the measure with
+              the padding still on it. */}
+          <Text style={[S.body, { textAlign: 'center', maxWidth: 300 }]}>{card.body}</Text>
           <Text style={[S.footer, { marginTop: Spacing.xxl }]}>{card.footer}</Text>
         </View>
       );

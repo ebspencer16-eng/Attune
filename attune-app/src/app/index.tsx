@@ -584,6 +584,18 @@ const GLOW_DIAMETER = 330;
 const GLOW_ALPHA = 0.0133;
 
 /**
+ * Whether the white glow is painted at all.
+ *
+ * Ellie, of the mark behind the finding: "Can we try this without the original
+ * circle glow? Just the mark glow?" The rings are what the screen had before
+ * the mark existed, so this is the switch that turns them off without deleting
+ * the thing that took three attempts to get right. Both switches are here
+ * together: WHITE_GLOW true and MARK_BEHIND_INSIGHT false is exactly the
+ * screen she had two days ago.
+ */
+const WHITE_GLOW = false;
+
+/**
  * The mark behind the finding.
  *
  * Ellie: "I like the idea of a mark-only attune logo behind the insight of the
@@ -681,7 +693,7 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
               />
             );
           }) : null}
-          {Array.from({ length: GLOW_RINGS }, (_, i) => {
+          {(WHITE_GLOW ? Array.from({ length: GLOW_RINGS }, (_, i) => {
             // Largest first, so each smaller ring paints on top and the alpha
             // builds toward the centre.
             const size = GLOW_DIAMETER * (1 - i / GLOW_RINGS);
@@ -695,7 +707,7 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
                 }}
               />
             );
-          })}
+          }) : null)}
         </View>
       </View>
 

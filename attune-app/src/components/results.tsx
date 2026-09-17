@@ -986,6 +986,10 @@ function ExpectationsConversation({
 
   const gaps = bucket.rows.filter((r) => !r.aligned);
   const matched = bucket.rows.filter((r) => r.aligned);
+  // Extended Family asks no growing-up question, so its table has two columns
+  // rather than four. Read off the rows rather than off a list of category
+  // ids, which would be a second copy of a rule the server already applies.
+  const showLived = bucket.rows.some((r) => r.youExperienced || r.themExperienced);
   // From the server, where the website reads the same three stops. A payload
   // written before the nav carried them falls back to the flat neutral rather
   // than to a second copy of this page's colours. See NeutralGround.
@@ -1059,11 +1063,35 @@ function ExpectationsConversation({
               <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, backgroundColor: `${accent}14` }}>
                 <Text style={{ ...Type.eyebrow, color: accent }}>Conversations to have</Text>
               </View>
+              {/* ── FOUR COLUMNS, NOT FOUR ROWS ──────────────────────────
+                  Ellie: "Expectations results expects and experienced need to
+                  be seperated in columns not rows." The website's table has
+                  Expects and Experienced per person; the app had stacked them
+                  inside one cell, which reads as four answers in a column
+                  rather than as two people side by side.
+
+                  Fixed percentages rather than flex, because flex divides what
+                  is left after each cell has measured its own text: a cell
+                  holding "Usually Testpartner, sometimes Tester" beside one
+                  holding "Mom" would put the two people's columns in different
+                  places on every row. */}
               <View style={{ flexDirection: 'row', paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm }}>
-                <View style={{ flex: 1.6 }} />
-                <Text style={{ ...Type.eyebrow, fontSize: 9, color: accent, flex: 1, textAlign: 'center' }}>{you}</Text>
-                <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, flex: 1, textAlign: 'center' }}>{them}</Text>
+                <View style={{ width: CONVO_COL.item }} />
+                <Text style={{ ...Type.eyebrow, fontSize: 9, color: accent, width: CONVO_COL.person, textAlign: 'center' }}>{you}</Text>
+                <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, width: CONVO_COL.person, textAlign: 'center' }}>{them}</Text>
               </View>
+              {showLived ? (
+                <View style={{ flexDirection: 'row', paddingHorizontal: Spacing.lg, paddingTop: 2 }}>
+                  <View style={{ width: CONVO_COL.item }} />
+                  {[EXPECTS_LABEL, EXPERIENCED_LABEL, EXPECTS_LABEL, EXPERIENCED_LABEL].map((label, i) => (
+                    <Text
+                      key={`${label}${i}`}
+                      style={{ ...Type.eyebrow, fontSize: 7, color: c.textMuted, width: CONVO_COL.half, textAlign: 'center' }}>
+                      {label}
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
               {gaps.map((row, i) => (
                 <View
                   key={row.key}
@@ -1072,19 +1100,11 @@ function ExpectationsConversation({
                     paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                     borderTopColor: `${accent}20`, borderTopWidth: i === 0 ? 0 : 1,
                   }}>
-                  <Text style={{ ...Type.small, fontSize: 12, color: c.text, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
+                  <Text style={{ ...Type.small, fontSize: 11, color: c.text, width: CONVO_COL.item, paddingRight: Spacing.sm, lineHeight: 15 }}>
                     {row.item}
                   </Text>
-                  {/* ── WHAT BOTH TURNED OUT TO MEAN ────────────────────
-                      Ellie: "could we have grey italicized text under both
-                      that says '50/50' or 'usually [name]'? I think that would
-                      fit and give the full detail."
-
-                      Under the answer rather than in a column, because it only
-                      exists for one answer out of four, and the same on the
-                      website's table. */}
-                  <ConversationCell value={row.you} detail={row.youDetail} lived={row.youExperienced} tint={c.textStrong} />
-                  <ConversationCell value={row.them} detail={row.themDetail} lived={row.themExperienced} tint={c.textMuted} />
+                  <ConversationCell value={row.you} lived={row.youExperienced} showLived={showLived} tint={c.textStrong} />
+                  <ConversationCell value={row.them} lived={row.themExperienced} showLived={showLived} tint={c.textMuted} />
                 </View>
               ))}
             </View>
@@ -1133,11 +1153,6 @@ function ExpectationsConversation({
                       }}>
                       {row.you || '\u2014'}
                     </Text>
-                    {row.youDetail ? (
-                      <Text style={{ ...Type.small, fontSize: 10, fontStyle: 'italic', color: ALIGNED_TEXT, opacity: 0.75, textAlign: 'center', marginTop: 1 }}>
-                        {row.youDetail}
-                      </Text>
-                    ) : null}
                   </View>
                 </View>
               ))}
@@ -1157,45 +1172,40 @@ function ExpectationsConversation({
 }
 
 /**
- * One person's answer in the conversations table.
+ * One person's two columns: what they expect, and what they grew up with.
  *
- * Three things, in the order the website puts them: what they expect, what
- * "Both of us" turned out to mean, and what they grew up with. Ellie: "Didn't
- * we also used to include the experienced and expects columns?" The website's
- * table has four columns for two people; a phone has room for two, so the
- * second value is stacked under the first with the website's own label rather
- * than dropped.
+ * The growing-up column is dropped for a category that does not ask it, which
+ * is Extended Family: those are each partner's own family, so there is no
+ * shared childhood to compare.
  */
 function ConversationCell({
-  value, detail, lived, tint,
-}: { value?: string | null; detail?: string | null; lived?: string | null; tint: string }) {
+  value, lived, showLived, tint,
+}: { value?: string | null; lived?: string | null; showLived: boolean; tint: string }) {
   return (
-    <View style={{ flex: 1 }}>
-      <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: tint, textAlign: 'center' }}>
+    <>
+      <Text
+        style={{
+          ...Type.small, fontSize: 11, fontWeight: '700', color: tint,
+          width: showLived ? CONVO_COL.half : CONVO_COL.person,
+          textAlign: 'center', lineHeight: 15,
+        }}>
         {value || '\u2014'}
       </Text>
-      {detail ? (
+      {showLived ? (
         <Text
           style={{
-            ...Type.small, fontSize: 10, fontStyle: 'italic',
-            color: c.textMuted, textAlign: 'center', marginTop: 1,
+            ...Type.small, fontSize: 10, fontStyle: 'italic', color: c.textMuted,
+            width: CONVO_COL.half, textAlign: 'center', lineHeight: 15,
           }}>
-          {detail}
+          {lived || '\u2014'}
         </Text>
       ) : null}
-      {lived ? (
-        <>
-          <Text style={{ ...Type.eyebrow, fontSize: 8, color: c.textMuted, textAlign: 'center', marginTop: 4 }}>
-            {EXPERIENCED_LABEL}
-          </Text>
-          <Text style={{ ...Type.small, fontSize: 10, fontStyle: 'italic', color: c.textMuted, textAlign: 'center' }}>
-            {lived}
-          </Text>
-        </>
-      ) : null}
-    </View>
+    </>
   );
 }
+
+/** The table's columns, as percentages so every row lines up. */
+const CONVO_COL = { item: '34%', person: '33%', half: '16.5%' } as const;
 
 /**
  * One item, with both answers.
@@ -1238,8 +1248,8 @@ function ExpectationRowView({
           says which is which. */}
       <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
         {[
-          { name: you, expects: row.you, detail: row.youDetail, lived: row.youExperienced, tint: c.accentQuiet },
-          { name: them, expects: row.them, detail: row.themDetail, lived: row.themExperienced, tint: c.textMuted },
+          { name: you, expects: row.you, lived: row.youExperienced, tint: c.accentQuiet },
+          { name: them, expects: row.them, lived: row.themExperienced, tint: c.textMuted },
         ].map((side) => (
           <View key={side.name} style={{ flex: 1 }}>
             <Text style={{ ...Type.eyebrow, color: side.tint }}>{side.name}</Text>
@@ -1247,14 +1257,6 @@ function ExpectationRowView({
               {EXPECTS_LABEL}
             </Text>
             <Prose style={{ ...Type.body, color: c.text }}>{side.expects}</Prose>
-            {/* What Both turned out to mean. It sits under the answer it
-                refines rather than in a column of its own, because it only
-                exists for one answer out of four. */}
-            {side.detail ? (
-              <Prose style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: 2 }}>
-                {side.detail}
-              </Prose>
-            ) : null}
             {side.lived ? (
               <>
                 <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.sm }}>

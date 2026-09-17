@@ -115,9 +115,26 @@ export default function ResourcesScreen() {
    * and CLAUDE.md is explicit that the app does not sell. Anything else still
    * hands off to the website.
    */
-  /** The workbook, in a sheet this app owns rather than in Safari. */
+  /**
+   * The workbook, as full a page as a .docx can be inside an app.
+   *
+   * Ellie: "Can it open as a page in the app?" This is as close as it gets
+   * without a second renderer. The workbook is a Word document, and nothing in
+   * this app can draw one: the file is built by api/generate-workbook.js out
+   * of docx paragraphs and tables. Full screen, in the app's own colours, with
+   * the app's name on the bar, so it reads as a page of the product rather
+   * than as a browser someone was thrown into. iOS draws the document itself
+   * inside it.
+   *
+   * The other way to answer her question is a native reader built from the
+   * workbook payload, which is a real piece of work and is in TASKS.md as a
+   * decision for her rather than something to start on a guess.
+   */
   const openWorkbook = (url: string) => openBrowserAsync(url, {
-    presentationStyle: WebBrowserPresentationStyle.PAGE_SHEET,
+    presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+    toolbarColor: c.background,
+    controlsColor: c.accent,
+    enableBarCollapsing: true,
   });
 
   const openTool = async (key: string) => {
