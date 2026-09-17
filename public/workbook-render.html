@@ -106,7 +106,11 @@
 
   @media print {
     body { background: white; }
-    .page { padding: 0.75in 0.9in; }
+    /* The sheet is the page, so a full-bleed cover bleeds. Without this the
+       printer's own margin sits outside the page's, and the cover prints as a
+       column in the middle of a white sheet. */
+    @page { size: A4; margin: 0; }
+    .page { padding: 0.75in 0.9in; width: 100%; min-height: 297mm; }
   }
 </style>
 </head>

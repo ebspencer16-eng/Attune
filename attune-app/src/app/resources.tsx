@@ -135,7 +135,17 @@ export default function ResourcesScreen() {
     const view = await fetchWorkbookView();
     if (!view.ok) { setWorkbookNote(tools?.workbook?.copy.generating || null); return false; }
     const data = encodeURIComponent(JSON.stringify(view.data));
-    await openBrowserAsync(`${SITE}/workbook-render?data=${data}`, {
+    /**
+     * The PDF, not the page.
+     *
+     * Ellie: "It shouldn't resize the web's pdf at all, this looks messed up."
+     * The page is laid out for paper, so a phone showing it squeezes it. The
+     * PDF is the same page printed, and a PDF viewer fits the page rather than
+     * reflowing it: nothing is resized, and zoom, share and print are the
+     * phone's own. api/workbook-pdf.js prints it with the settings the website
+     * prints it with.
+     */
+    await openBrowserAsync(`${SITE}/api/workbook-pdf?data=${data}`, {
       presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
       toolbarColor: c.background,
       controlsColor: c.accent,
