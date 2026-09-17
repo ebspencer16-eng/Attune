@@ -158,6 +158,19 @@ export default function HomeScreen() {
         // there rather than on a route of its own.
         if (target.settings) { setSettingsOpen(true); return; }
         if (target.feedback) { setFeedbackOpen(true); return; }
+        /**
+         * An exercise card opens the exercise, not the tab it lives on.
+         *
+         * appTargetFor has been sending which exercise the card is for since
+         * it was written, and nothing read it: "Continue Expectations" put
+         * someone on the Insights tab and left them to find the row and tap
+         * the count beside their own name. The server said where to go and the
+         * app went halfway.
+         */
+        if (target.exercise) {
+          router.push({ pathname: target.route, params: { exercise: target.exercise } } as never);
+          return;
+        }
         router.push(target.route as never);
         return;
       }

@@ -19,7 +19,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -69,6 +69,20 @@ export default function InsightsScreen() {
   // the rest still live on the website and the row says so rather than opening
   // a screen that cannot ask anything.
   const [openExercise, setOpenExercise] = useState<string | null>(null);
+
+  /**
+   * The exercise a home card asked for, if any.
+   *
+   * Consumed once and cleared. Leaving it on the route would reopen the
+   * exercise every time someone closed it, which is a screen you cannot get
+   * out of.
+   */
+  const { exercise: requestedExercise } = useLocalSearchParams<{ exercise?: string }>();
+  useEffect(() => {
+    if (!requestedExercise) return;
+    setOpenExercise(requestedExercise);
+    router.setParams({ exercise: undefined });
+  }, [requestedExercise]);
 
   const loadingRef = useRef(false);
   // Which load is current. A load that finishes after a newer one started must

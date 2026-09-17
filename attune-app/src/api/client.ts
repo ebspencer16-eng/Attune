@@ -1501,10 +1501,25 @@ export type ExpectationsSet = {
   /** `key` is the raw item text and is what the answer is stored under. `label`
    *  is the same text with names substituted, and is what a person reads. They
    *  differ because two partners substitute different names into one item. */
-  categories: { id: string; label: string; items: { key: string; label: string }[] }[];
+  categories: {
+    id: string;
+    label: string;
+    /** The line under the category name, saying what to do on this page. */
+    intro: string;
+    /** Whether this category asks the growing-up row. Extended Family does not. */
+    asksChildhood: boolean;
+    items: { key: string; label: string }[];
+  }[];
   futureCols: string[];
   futureColsDisplay: string[];
   futureDetailOpts: string[];
+  /** The headings over the two rows of buttons, from the server. */
+  growingUpLabel: string;
+  futureLabel: string;
+  /** What is asked once someone answers Both, and the same prompt once it is
+   *  the thing holding the page up. */
+  bothDetailLabel: string;
+  bothDetailRequiredLabel: string;
   lifeQuestions: { id: string; topic: string; text: string; options: string[] }[];
 };
 

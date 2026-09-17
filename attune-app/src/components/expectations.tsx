@@ -161,18 +161,38 @@ export default function Expectations({
   const life = set?.lifeQuestions ?? [];
   const lifeQ = life[lifeIdx];
 
-  const catDone = useMemo(() => {
-    if (!cat) return false;
-    return cat.items.every((it) => {
-      const key = `${cat.id}__${it.key}`;
-      const choice = answers.responsibilities[key];
-      if (!choice) return false;
-      // "Both of us" is not an answer on its own. Both rarely means exactly
-      // half, and which way it leans is the part worth knowing.
-      if (choice === 'Both of us' && !answers.bothDetail[key]) return false;
-      return true;
-    });
-  }, [cat, answers]);
+  /**
+   * The item is answered, in the sense the page cares about.
+   *
+   * "Both of us" is not an answer on its own. Both rarely means exactly half,
+   * and which way it leans is the part worth knowing, so the item is not done
+   * until the follow-up is answered too. The website counts it the same way.
+   */
+  const itemDone = useCallback((catId: string, itemKey: string) => {
+    const key = `${catId}__${itemKey}`;
+    const choice = answers.responsibilities[key];
+    if (!choice) return false;
+    if (choice === 'Both of us' && !answers.bothDetail[key]) return false;
+    return true;
+  }, [answers]);
+
+  // Across every category, which is what the bar at the top of the page reads,
+  // as the website's does.
+  const totals = useMemo(() => {
+    let total = 0;
+    let answered = 0;
+    for (const ct of cats) {
+      for (const it of ct.items) {
+        total += 1;
+        if (itemDone(ct.id, it.key)) answered += 1;
+      }
+    }
+    return { total, answered };
+  }, [cats, itemDone]);
+
+  const catDone = useMemo(
+    () => !!cat && cat.items.every((it) => itemDone(cat.id, it.key)),
+    [cat, itemDone]);
 
   if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
@@ -270,42 +290,70 @@ export default function Expectations({
   }
 
   // ── Stage 2: responsibilities, a category at a time ──────────────────────
+  /**
+   * ── THE PAGE THE WEBSITE ASKS ───────────────────────────────────────────
+   * Ellie: "Hate the setup of this exercise. It needs to be the same as the
+   * mobile web experience."
+   *
+   * One category to a page, under the category's own name, with the line
+   * saying what to do that the website shows. Each responsibility is a card
+   * with two rows of four buttons: who handled it growing up, and who handles
+   * it now. The columns are fixed widths rather than flexed, so the two rows
+   * line up under each other, which is the whole point of asking them that way.
+   *
+   * Extended Family asks only the second row. Those are each partner's own
+   * family, so there is no shared childhood to compare. The server says which
+   * categories ask it; see api/_lib/expectations-page.js.
+   */
   if (stage === 'responsibilities' && cat) {
+    const tint = exerciseColor('ex2');
+    const asksChildhood = cat.asksChildhood !== false;
     return (
       <Shell onClose={onClose}>
         <ScrollView contentContainerStyle={pad}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{cat.label}</Text>
-            <Text style={{ ...Type.small, color: c.textMuted }}>
-              {catIdx + 1} of {cats.length}
-            </Text>
+          <ExerciseEyebrow
+            exerciseKey="ex2"
+            label={set.exercise.fullLabel || set.exercise.label}
+            right={`${totals.answered} of ${totals.total}`}
+          />
+          <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
+            <View style={{ width: `${totals.total ? (totals.answered / totals.total) * 100 : 0}%`, height: 3, backgroundColor: tint }} />
           </View>
-          <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>
-            In your home, who does this?
+
+          <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.lg }}>
+            {cat.label}
+          </Text>
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>
+            {cat.intro}
+          </Text>
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>
+            {`Category ${catIdx + 1} of ${cats.length}`}
           </Text>
 
           {cat.items.map((it) => {
             const key = `${cat.id}__${it.key}`;
             const choice = answers.responsibilities[key];
+            const needsDetail = choice === 'Both of us' && !answers.bothDetail[key];
+            const done = itemDone(cat.id, it.key);
             return (
-              <View key={key} style={{ ...card, marginBottom: Spacing.md }}>
+              <View
+                key={key}
+                style={{
+                  ...card, marginBottom: Spacing.md,
+                  borderColor: done ? tint : c.border,
+                }}>
                 <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>
                   {it.label}
                 </Text>
-                {/* Growing up, then now. Both rows, as the website asks them:
-                    most of what people expect at home traces back to what they
-                    saw, and the comparison is the point of the exercise. */}
-                <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.sm }}>
-                  Growing up
-                </Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
-                  {childCols.map((col) => (
-                    <Pill
-                      key={col}
-                      label={col}
-                      small
-                      selected={answers.childhood[key] === col}
-                      onPress={() => setAnswers((a) => ({
+
+                {asksChildhood ? (
+                  <>
+                    <RowLabel text={set.growingUpLabel} color={Palette.clay} />
+                    <OptionRow
+                      options={childCols}
+                      value={answers.childhood[key]}
+                      color={Palette.clay}
+                      onPick={(col) => setAnswers((a) => ({
                         ...a,
                         childhood: { ...a.childhood, [key]: col },
                         childhoodBothDetail: col === 'Both'
@@ -313,76 +361,59 @@ export default function Expectations({
                           : Object.fromEntries(Object.entries(a.childhoodBothDetail).filter(([k]) => k !== key)),
                       }))}
                     />
-                  ))}
-                </View>
-                {answers.childhood[key] === 'Both' ? (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.sm }}>
-                    {childDetailOpts.map((opt) => (
-                      <Pill
-                        key={opt}
-                        label={opt}
-                        small
-                        selected={answers.childhoodBothDetail[key] === opt}
-                        onPress={() => setAnswers((a) => ({
+                    {answers.childhood[key] === 'Both' ? (
+                      <DetailRow
+                        label={set.bothDetailLabel}
+                        options={childDetailOpts}
+                        value={answers.childhoodBothDetail[key]}
+                        onPick={(opt) => setAnswers((a) => ({
                           ...a, childhoodBothDetail: { ...a.childhoodBothDetail, [key]: opt },
                         }))}
                       />
-                    ))}
-                  </View>
+                    ) : null}
+                  </>
                 ) : null}
 
-                <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.sm }}>
-                  In your home
-                </Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
-                  {set.futureCols.map((col, i) => (
-                    <Pill
-                      key={col}
-                      label={set.futureColsDisplay[i] || col}
-                      selected={choice === col}
-                      onPress={() => setAnswers((a) => ({
-                        ...a,
-                        responsibilities: { ...a.responsibilities, [key]: col },
-                        // Dropping the detail when the answer moves away from
-                        // Both, so a stale refinement cannot survive.
-                        bothDetail: col === 'Both of us'
-                          ? a.bothDetail
-                          : Object.fromEntries(Object.entries(a.bothDetail).filter(([k]) => k !== key)),
+                <View style={{ marginTop: asksChildhood ? Spacing.lg : 0 }}>
+                  <RowLabel text={set.futureLabel} color={tint} />
+                  <OptionRow
+                    options={set.futureCols}
+                    labels={set.futureColsDisplay}
+                    value={choice}
+                    color={tint}
+                    onPick={(col) => setAnswers((a) => ({
+                      ...a,
+                      responsibilities: { ...a.responsibilities, [key]: col },
+                      // Dropping the detail when the answer moves away from
+                      // Both, so a stale refinement cannot survive.
+                      bothDetail: col === 'Both of us'
+                        ? a.bothDetail
+                        : Object.fromEntries(Object.entries(a.bothDetail).filter(([k]) => k !== key)),
+                    }))}
+                  />
+                  {choice === 'Both of us' ? (
+                    <DetailRow
+                      label={needsDetail ? set.bothDetailRequiredLabel : set.bothDetailLabel}
+                      options={set.futureDetailOpts}
+                      value={answers.bothDetail[key]}
+                      onPick={(opt) => setAnswers((a) => ({
+                        ...a, bothDetail: { ...a.bothDetail, [key]: opt },
                       }))}
                     />
-                  ))}
+                  ) : null}
                 </View>
-
-                {choice === 'Both of us' ? (
-                  <View style={{ marginTop: Spacing.md, borderTopWidth: 1, borderTopColor: c.border, paddingTop: Spacing.md }}>
-                    <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.sm }}>
-                      Both, meaning:
-                    </Text>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
-                      {set.futureDetailOpts.map((opt) => (
-                        <Pill
-                          key={opt}
-                          label={opt}
-                          small
-                          selected={answers.bothDetail[key] === opt}
-                          onPress={() => setAnswers((a) => ({
-                            ...a, bothDetail: { ...a.bothDetail, [key]: opt },
-                          }))}
-                        />
-                      ))}
-                    </View>
-                  </View>
-                ) : null}
               </View>
             );
           })}
 
           <ExerciseNav
-            onBack={catIdx > 0 ? () => setCatIdx(catIdx - 1) : undefined}
+            onBack={catIdx > 0
+              ? () => setCatIdx(catIdx - 1)
+              : () => { setStage('structure'); }}
             nextLabel={catIdx + 1 < cats.length ? 'Next' : 'Finish'}
             disabled={!catDone || (saving && catIdx + 1 === cats.length)}
             busy={saving && catIdx + 1 === cats.length}
-            color={exerciseColor('ex2')}
+            color={tint}
             onNext={async () => {
               if (catIdx + 1 < cats.length) {
                 persist(answers, false);
@@ -395,12 +426,10 @@ export default function Expectations({
             }}
           />
           {saveFailed ? (
-          <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
-            That answer has not saved yet. It will try again on the next one.
-          </Text>
-        ) : null}
-
-
+            <Text style={{ ...Type.small, color: c.accentQuiet, marginTop: Spacing.md }}>
+              That answer has not saved yet. It will try again on the next one.
+            </Text>
+          ) : null}
         </ScrollView>
       </Shell>
     );
@@ -413,12 +442,18 @@ export default function Expectations({
     return (
       <Shell onClose={onClose}>
         <ScrollView contentContainerStyle={pad}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{lifeQ.topic}</Text>
-            <Text style={{ ...Type.small, color: c.textMuted }}>
-              {lifeIdx + 1} of {life.length}
-            </Text>
+          {/* The eyebrow is the exercise's full name in its own colour, on
+              every page of every exercise. The question's own category sits
+              under it, where it does not compete with the exercise's name. */}
+          <ExerciseEyebrow
+            exerciseKey="ex2"
+            label={set.exercise.fullLabel || set.exercise.label}
+            right={`Question ${lifeIdx + 1} of ${life.length}`}
+          />
+          <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
+            <View style={{ width: `${((lifeIdx + 1) / Math.max(1, life.length)) * 100}%`, height: 3, backgroundColor: exerciseColor('ex2') }} />
           </View>
+          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg }}>{lifeQ.topic}</Text>
           <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs, marginBottom: Spacing.lg }}>
             {lifeQ.text}
           </Text>
@@ -480,6 +515,93 @@ function Pill({
         {label}
       </Text>
     </Pressable>
+  );
+}
+
+/**
+ * The four-column row of answers.
+ *
+ * ── WHY THE WIDTHS ARE FIXED ────────────────────────────────────────────
+ * Two of these sit one above the other, growing up and now, and the reason to
+ * ask them that way is that a person can read straight down a column. Flex
+ * distributes free space, so a row holding "Preston" and one holding "Dad"
+ * would put their columns in different places and the comparison would be gone.
+ * Four fixed widths with the gaps between them is what keeps them aligned.
+ */
+function OptionRow({
+  options, labels, value, color, onPick,
+}: {
+  options: string[];
+  labels?: string[];
+  value?: string;
+  color: string;
+  onPick: (option: string) => void;
+}) {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      {options.map((opt, i) => {
+        const on = value === opt;
+        return (
+          <Pressable
+            key={opt}
+            accessibilityRole="button"
+            accessibilityLabel={opt}
+            accessibilityState={{ selected: on }}
+            onPress={() => onPick(opt)}
+            style={{
+              width: '23.5%', minHeight: 44, borderRadius: Radius.md,
+              alignItems: 'center', justifyContent: 'center',
+              paddingHorizontal: 3, paddingVertical: Spacing.xs,
+              backgroundColor: on ? color : c.background,
+              borderColor: on ? color : c.border, borderWidth: 1,
+            }}>
+            <Text
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+              style={{
+                ...Type.small, fontSize: 11, lineHeight: 14, textAlign: 'center',
+                fontWeight: on ? '700' : '600',
+                color: on ? Palette.white : c.textMuted,
+              }}>
+              {labels?.[i] || opt}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** The small heading over one of those rows, in that row's colour. */
+function RowLabel({ text, color }: { text: string; color: string }) {
+  return (
+    <Text style={{ ...Type.eyebrow, fontSize: 10, color, marginBottom: Spacing.sm }}>
+      {text}
+    </Text>
+  );
+}
+
+/** What is asked after someone answers Both. Wraps, because these are sentences. */
+function DetailRow({
+  label, options, value, onPick,
+}: {
+  label: string;
+  options: string[];
+  value?: string;
+  onPick: (option: string) => void;
+}) {
+  return (
+    <View style={{ marginTop: Spacing.sm }}>
+      <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginBottom: Spacing.sm }}>
+        {label}
+      </Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+        {options.map((opt) => (
+          <Pill key={opt} label={opt} small selected={value === opt} onPress={() => onPick(opt)} />
+        ))}
+      </View>
+    </View>
   );
 }
 

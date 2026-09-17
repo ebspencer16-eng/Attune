@@ -30,6 +30,10 @@ import {
 import { EXERCISES } from './_exercises.js';
 import { exerciseIntro } from './_lib/exercise-intro.js';
 import {
+  asksChildhood, categoryIntro, futureLabel, isAnniversaryStatus,
+  GROWING_UP_LABEL, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL,
+} from './_lib/expectations-page.js';
+import {
   conflictQuestionsInOrder, CONFLICT_SECTIONS, FREQUENCY_OPTIONS, CONFLICT_INTRO,
   CONFLICT_REQUIRED,
 } from './_conflict-questions.js';
@@ -154,6 +158,9 @@ export default async function handler(req) {
       // caller that can put someone else's name on the answers.
       const you = (profile?.name || '').trim() || 'You';
       const partner = (profile?.partner_name || '').trim() || 'Your partner';
+      // Married couples are not answering about a future home. The website
+      // reads the same statuses off the same column.
+      const anniversary = isAnniversaryStatus(profile?.relationship_status);
 
       return json({
         ok: true,
@@ -166,18 +173,37 @@ export default async function handler(req) {
         // Who raised you decides what the "growing up" column is called.
         childhoodStructures: CHILDHOOD_STRUCTURES,
 
-        // Items carry their raw text as the key and their readable text as the
-        // label. The key has to stay raw: two partners substitute different
-        // names into the same item, and a key that moved with the name would
-        // stop lining up between them.
+        /**
+         * ── THE PAGE, NOT JUST THE QUESTIONS ────────────────────────────
+         * Ellie: "It needs to be the same as the mobile web experience."
+         *
+         * The website asks one category per page, under the category's name,
+         * with a line saying what to do and a growing-up row on every category
+         * except Extended Family. All of that came with the questions here
+         * rather than being written a second time in the app. See
+         * api/_lib/expectations-page.js.
+         *
+         * Items carry their raw text as the key and their readable text as the
+         * label. The key has to stay raw: two partners substitute different
+         * names into the same item, and a key that moved with the name would
+         * stop lining up between them.
+         */
         categories: RESPONSIBILITY_CATEGORIES.map(cat => ({
           id: cat.id,
           label: cat.label,
+          intro: categoryIntro(cat.id, { anniversary }),
+          asksChildhood: asksChildhood(cat.id),
           items: cat.items.map(item => ({
             key: item,
             label: substName(item, you, partner),
           })),
         })),
+
+        // The two row headings, and what is asked once someone answers Both.
+        growingUpLabel: GROWING_UP_LABEL,
+        futureLabel: futureLabel({ anniversary }),
+        bothDetailLabel: BOTH_DETAIL_LABEL,
+        bothDetailRequiredLabel: BOTH_DETAIL_REQUIRED_LABEL,
 
         futureCols: [you, partner, 'Both of us', "Doesn't apply to us"],
         futureColsDisplay: [you, partner, 'Both', 'N/A'],

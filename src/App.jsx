@@ -33,6 +33,7 @@ import {
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
+import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
 import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
 // share cards, anything outside the results tree. Components inside the
@@ -1008,7 +1009,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
     const childCols = structure.cols || ["Mom", "Dad", "Both", "N/A"];
     const futureCols = [userName, partnerName, "Both of us", "Doesn't apply to us"];
     const futureColsDisplay = [userName, partnerName, "Both", "N/A"];
-    const futureLabel = isAnniversary ? "In our home" : "In our future home";
+    const futureLabel = respFutureLabel({ anniversary: isAnniversary });
 
     const setResp = (catId, item, value) => {
       const key = catId + "__" + item;
@@ -1049,7 +1050,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
     // Replaces the wide grid that forced horizontal scrolling on phones.
     const cat = RESPONSIBILITY_CATEGORIES[Math.min(catIndex, RESPONSIBILITY_CATEGORIES.length - 1)];
     const numCats = RESPONSIBILITY_CATEGORIES.length;
-    const isExtFamCat = cat.id === "extended_family";
+    const isExtFamCat = !asksChildhood(cat.id);
     const activeFutureCols = futureCols;
     const activeFutureDisplay = futureColsDisplay;
     const futureColors = { [userName]: "#E8673A", [partnerName]: "#1B5FE8", "Both of us": "#2AB07F", "Doesn't apply to us": "#9C8E7C", "Primarily mine": "#E8673A", "Balanced": "#2AB07F", "Primarily my partner's": "#1B5FE8", "Doesn't apply": "#9C8E7C" };
@@ -1105,9 +1106,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
 
         <h2 style={{ fontFamily: font.display, fontSize: "1.45rem", fontWeight: 700, color: C.ink, marginBottom: "0.2rem", lineHeight: 1.1 }}>{cat.label}</h2>
         <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "1.25rem" }}>
-          {isExtFamCat
-            ? "How the two of you handle this now. No growing-up question here, these are your own families."
-            : "For each responsibility, select who handled it growing up, and who you expect to handle it " + (isAnniversary ? "in your home." : "in your future home.")}
+          {respCategoryIntro(cat.id, { anniversary: isAnniversary })}
         </p>
 
         {/* Item cards */}
@@ -1130,13 +1129,13 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
                 {/* Growing up row (omitted for Extended Family) */}
                 {!isExtFamCat && (
                   <div style={{ marginBottom: "0.65rem" }}>
-                    <p style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#A0622A", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.3rem" }}>Growing up</p>
+                    <p style={{ fontSize: "0.55rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#A0622A", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.3rem" }}>{GROWING_UP_LABEL}</p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.35rem" }}>
                       {childCols.map(col => optBtn(childVal === col, "#A0622A", col, col, () => setChild(cat.id, item, col)))}
                     </div>
                     {showChildExpand && (
                       <div style={{ marginTop: "0.5rem", background: "#FBF8F3", borderRadius: 10, padding: "0.5rem 0.6rem" }}>
-                        <p style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700, margin: "0 0 0.35rem" }}>A bit more specifically:</p>
+                        <p style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, fontWeight: 700, margin: "0 0 0.35rem" }}>{BOTH_DETAIL_LABEL}</p>
                         <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
                           {childDetailOpts.map(opt => {
                             const sel = childBothDetail === opt;
@@ -1162,7 +1161,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
                   {showFutureExpand && (
                     <div style={{ marginTop: "0.5rem", background: needsDetail ? "rgba(42,176,127,0.07)" : "rgba(42,176,127,0.04)", border: "1px solid rgba(42,176,127,0.25)", borderRadius: 10, padding: "0.5rem 0.6rem" }}>
                       <p style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a8a63", fontFamily: font.body, fontWeight: 700, margin: "0 0 0.35rem" }}>
-                        {needsDetail ? "A bit more specificity required to continue:" : "A bit more specifically:"}
+                        {needsDetail ? BOTH_DETAIL_REQUIRED_LABEL : BOTH_DETAIL_LABEL}
                       </p>
                       <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
                         {futureDetailOpts.map(opt => {
