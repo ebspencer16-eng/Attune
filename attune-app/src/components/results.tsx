@@ -1186,8 +1186,8 @@ function ExpectationRowView({
           says which is which. */}
       <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
         {[
-          { name: you, expects: row.you, lived: row.youExperienced, tint: c.accentQuiet },
-          { name: them, expects: row.them, lived: row.themExperienced, tint: c.textMuted },
+          { name: you, expects: row.you, detail: row.youDetail, lived: row.youExperienced, tint: c.accentQuiet },
+          { name: them, expects: row.them, detail: row.themDetail, lived: row.themExperienced, tint: c.textMuted },
         ].map((side) => (
           <View key={side.name} style={{ flex: 1 }}>
             <Text style={{ ...Type.eyebrow, color: side.tint }}>{side.name}</Text>
@@ -1195,6 +1195,14 @@ function ExpectationRowView({
               {EXPECTS_LABEL}
             </Text>
             <Prose style={{ ...Type.body, color: c.text }}>{side.expects}</Prose>
+            {/* What Both turned out to mean. It sits under the answer it
+                refines rather than in a column of its own, because it only
+                exists for one answer out of four. */}
+            {side.detail ? (
+              <Prose style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: 2 }}>
+                {side.detail}
+              </Prose>
+            ) : null}
             {side.lived ? (
               <>
                 <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.sm }}>

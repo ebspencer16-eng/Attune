@@ -34,6 +34,7 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
+import { PART_TWO } from "../api/_lib/part-two.js";
 import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
 import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
@@ -978,11 +979,34 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
         <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body }}>{isRevisited ? "~10 minutes · life questions only" : "~15 minutes · 2 parts"}</p>
         <button onClick={() => setPhase("life")}
           style={{ background: "#1B5FE8", color: "white", border: "none", padding: "0.9rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>
-          Start →
+          {ex2Intro.cta} →
         </button>
       </div>
     </div>
   );
+
+  // The screen between the two halves, the same sentence the app shows.
+  if (phase === "part-two") {
+    return (
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "3.5rem 0 2rem", animation: "fadeIn 0.5s ease" }}>
+        <link href={FONT_LINK} rel="stylesheet" />
+        <style>{"@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}"}</style>
+        <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem,5vw,2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.5rem" }}>
+          {PART_TWO.ex2}
+        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button onClick={() => { setPhase("life"); setLifeQ(activeLifeQs.length - 1); }}
+            style={{ background: "transparent", border: ("1.5px solid " + C.stone), color: C.muted, padding: "0.7rem 1.4rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>
+            ← Back
+          </button>
+          <button onClick={() => setPhase("childhood-setup")}
+            style={{ background: "#1B5FE8", color: "white", border: "none", padding: "0.85rem 2rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>
+            Continue →
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (phase === "childhood-setup") {
     return (
@@ -995,7 +1019,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
         <p style={{ fontSize: "0.88rem", color: C.muted, lineHeight: 1.75, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem" }}>
           This shapes how you answer the next section, and helps us give you more personalized context in your results.
         </p>
-        <button onClick={() => { setPhase("life"); setLifeQ(activeLifeQs.length - 1); }}
+        <button onClick={() => setPhase("part-two")}
         style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body, padding: "0 0 1rem", textAlign: "left" }}>
         ← Back to Part 1
       </button>
@@ -1293,7 +1317,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
                 try { localStorage.removeItem(progressKey); } catch {}
                 onComplete({ ...answers, childhoodStructure });
               } else {
-                setPhase("childhood-setup");
+                setPhase("part-two");
               }
             }}
               style={{ background: lqSel ? "#4CAF50" : C.stone, color: "white", border: "none", padding: "0.7rem 1.8rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: lqSel ? "pointer" : "default", fontFamily: font.body, borderRadius: 8, fontWeight: 600, boxShadow: lqSel ? "0 3px 16px rgba(76,175,80,0.45)" : "none" }}>
@@ -1358,7 +1382,7 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
       <div style={{ marginBottom: "1rem" }} />
       <button onClick={() => setPhase(lockedVariant ? 'questions' : 'branch')}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
-        Begin →
+        {intimacyIntro.cta} →
       </button>
     </div>
   );
@@ -1530,7 +1554,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
       ))}
       <button onClick={() => setPhase('questions')}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
-        Begin exercise →
+        {conflictIntro.cta} →
       </button>
     </div>
   );
@@ -3069,7 +3093,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         </div>
         <button onClick={() => setPhase('questions')}
           style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.9rem 2.25rem", fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700 }}>
-          Begin Exercise 01 →
+          {ex1Intro.cta} →
         </button>
       </div>
     );
@@ -3136,7 +3160,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         <link href={FONT_LINK} rel="stylesheet" />
         <div style={{ height: 3, background: "#E5E2DC" }}><div style={{ height: "100%", width: progress + "%", background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} /></div>
         <div style={{ maxWidth: 520, margin: "0 auto", padding: "3.5rem 1.5rem 2rem", animation: "fadeIn 0.5s ease" }}>
-          <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>Part Two: All the same questions, but about your partner</p>
+          <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>{PART_TWO.ex1}</p>
           <button onClick={() => { const ni = idx + 1; setIdx(ni); setChosen(answers[questions[ni]?.answerKey] ?? null); if (!fresh) { try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: ni })); } catch {} } }} style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", padding: "0.95rem 2rem", borderRadius: 10, cursor: "pointer", fontFamily: font.body, fontSize: "0.95rem", fontWeight: 600, minHeight: 48 }}>Continue →</button>
         </div>
       </div>
@@ -4050,17 +4074,28 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   const ck = `${fc.id}__${g.item}`;
                   const myChild = myAnswers?.childhood?.[ck];
                   const partChild = partnerAnswers?.childhood?.[ck];
+                  // What "Both of us" turned out to mean, shown under the
+                  // answer it refines. Asked every time and shown nowhere
+                  // until now.
+                  const myDetail = myAnswers?.bothDetail?.[ck] || null;
+                  const partDetail = partnerAnswers?.bothDetail?.[ck] || null;
                   const isLast = gi === thisCatGaps.length - 1;
                   return (
                     <div key={gi} style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, padding: "0.65rem 1rem", borderTop: `1px solid ${fc.color}10`, alignItems: "center", background: gi % 2 === 1 ? fc.color + "06" : "transparent" }}>
                       {/* Responsibility name */}
                       <div style={{ fontSize: "0.78rem", fontWeight: 500, color: "#2a2848", fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{g.item}</div>
-                      {/* userName expects */}
-                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: fc.color, fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: fc.color + "0d", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem" }}>{resolveLabel(g.mine) || "—"}</div>
+                      {/* userName expects, and what Both turned out to mean */}
+                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: fc.color, fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: fc.color + "0d", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem" }}>
+                        {resolveLabel(g.mine) || "—"}
+                        {myDetail ? <div style={{ fontSize: "0.6rem", fontWeight: 500, fontStyle: "italic", color: fc.color, opacity: 0.75, marginTop: "0.1rem" }}>{myDetail}</div> : null}
+                      </div>
                       {/* userName experienced */}
                       {hasAnyChildhood && <div style={{ fontSize: "0.72rem", color: "#aaa", fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.35, textAlign: "center" }}>{childLabel(myChild)}</div>}
-                      {/* partnerName expects */}
-                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#555", fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: "rgba(0,0,0,0.04)", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem", borderLeft: "1px solid rgba(0,0,0,0.07)" }}>{resolveLabel(g.theirs) || "—"}</div>
+                      {/* partnerName expects, and what Both turned out to mean */}
+                      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#555", fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: "rgba(0,0,0,0.04)", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem", borderLeft: "1px solid rgba(0,0,0,0.07)" }}>
+                        {resolveLabel(g.theirs) || "—"}
+                        {partDetail ? <div style={{ fontSize: "0.6rem", fontWeight: 500, fontStyle: "italic", color: "#777", marginTop: "0.1rem" }}>{partDetail}</div> : null}
+                      </div>
                       {/* partnerName experienced */}
                       {hasAnyChildhood && <div style={{ fontSize: "0.72rem", color: "#aaa", fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.35, textAlign: "center" }}>{childLabel(partChild)}</div>}
                     </div>
@@ -4205,7 +4240,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
         </p>
         <button onClick={() => setPhase('questions')}
           style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.85rem 2rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>
-          Start →
+          {ex3Intro.cta} →
         </button>
       </div>
     );

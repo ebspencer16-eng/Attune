@@ -55,10 +55,11 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q8 and Q9 are answered: the not-therapy line stays as its
+own paragraph under yours, and every opening page says Start.
+
 | # | Question |
 |--|--|
-| Q8 | **Your new intimacy opening drops the line that says this is not therapy.** The old page ended with "This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified." Your replacement is now live on both surfaces and that sentence is gone with it. It is your call and I have made the change you asked for; I am flagging it rather than quietly keeping it, because it is the one line on that page that is there for someone having a hard time. Say "leave it out" and I will stop asking, or send me a sentence and I will put it back under the body. |
-| Q9 | **The button under the opening page says two different things.** The app says "Begin exercise" on all five. The site says "Start" on Expectations and Relationship Reflection, "Begin" on Physical Intimacy, "Begin exercise" on Conflict Patterns. One word for all ten, and it is yours to pick. |
 
 ## 2. Open
 
@@ -68,6 +69,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
+| O208 | **A table rather than buttons, if you still want one.** You: "I want expectations exercise in the app to have a table like the site mobile experience. Not a million pill shaped buttons." The pills went yesterday: the app draws the site's cards now, with four fixed columns that line up down the page. Look at it before I build a third version, and if you still want the column headings across the top, say so and it is an afternoon. |
 | O201 | **The intimacy framing should be a question the couple answers, not a column on the profile.** Your description of how it used to work is how the website still works: it asks one framing question, the first partner answers it, and it locks for both. The app reads relationship_status instead, which is a different rule for the same decision and is why a couple could be asked one way on one surface and the other way on the other. Make the app use the couple's own answer, the way the site does. |
 | O199 | **The completion pages.** Both surfaces, all five exercises. |
 | O186 | **The completion page matches the site.** The site says "Exercise 2 Complete." with an eyebrow under it and a line about what is next; the app says the exercise's name and a waiting line. Both surfaces get one version, and the hero is already yours. |
@@ -88,14 +90,13 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R140 | **Expectations asks the page the site asks.** One category to a page, under its own name, with the line saying what to do, and each responsibility carrying two rows of four buttons that line up under each other: growing up, and now. Extended Family asks only the second row, because those are each partner's own family. The words come from the server rather than from the app, so the two surfaces cannot drift again. This is the rest of "it needs to be the same as the mobile web experience"; the completion page is still open as O186. |
-| R141 | **Continue Expectations opens the exercise.** It landed you on the Insights tab and left you to find the row and tap the count beside your own name. The server has always said which exercise the card is for; the app was not reading it. |
-| R137 | **The opening page appears for Expectations.** It never did, for anyone: that exercise starts its answers as five empty maps rather than as nothing, so the screen counted five and believed you were already underway. |
-| R138 | **An exercise in progress is counted properly.** Same root: the count read the top level of the saved answers, which for Expectations is always five whatever you have answered, so the status never moved. It counts what is inside now. |
-| R139 | **The household page has the same arrows as everything else.** It was the one screen left with the old buttons. |
-| R123 | **Every exercise opens with a page that says what it is**, the same page on both surfaces. They existed on the web, written into the page rather than into a module, which is why the app had none: there was nothing to read. Resuming a half-finished exercise skips it. |
+| R142 | **Part one says which part it is.** The counter reads "Life & Values 5/12" rather than "Question 5 of 12", from the label the results already use for those questions. |
+| R143 | **Expectations has a part two screen**, the same shape as the comms one: your sentence, no eyebrow, nothing under it. Both surfaces, from one module that also holds the comms sentence, which was typed into both surfaces until now. Spelled "Responsibilities". |
+| R144 | **What "Both of us" turned out to mean is on the results.** It sits under the answer it refines, in both the website's conversations table and the app's, for whichever of you answered Both. Nothing has ever shown it before, so this is a first pass to react to rather than a finished design: it could be a column, a line under the table, or left where it is. |
+| R145 | **The progress circle sweeps round** rather than filling from the bottom. Two windows and a rotation, no drawing library. |
+| R146 | **The mark behind the insight of the day.** Five copies at slightly different sizes, each too faint to find on its own, so the edges go soft without a blur. One switch reverts it: `MARK_BEHIND_INSIGHT = false` in the home screen and the page is exactly what you have now. Size and strength are two more constants beside it, so "bigger", "fainter" or "higher up" are one-line changes. |
+| R147 | **Start, on all ten opening pages**, and the not-therapy line back as its own paragraph under yours. |
 | R128 | **The status table shows the count and a filled circle**, so the middle state is no wider than the other two, and it calls ex1 Communication styles. |
-| R116 | **An exercise you have started says In progress**, in the clay the website uses, with the dot in the middle state. The column holding a half-answered exercise has existed as long as the exercises have; nothing ever read it, so someone thirty questions in was shown Start. |
 | R100 | **The workbook is built the moment your results open.** On the server, at the same instant the product tells your partner you finished, so a couple who only ever use the app get one. It was built in a browser before, by a block that needed the buyer's order in that browser's storage, which is why yours said it was still generating. The payload the generator is handed now comes from one module that both the website and the server read: two builders would mean two workbooks depending on which surface got there first. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
@@ -103,85 +104,9 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R130 | **Both intimacy framings, listed below, with your seven rewordings in.** Two small liberties, both easy to undo: 5 reads "How do you expect to feel about initiating?" rather than "expecct", with the question mark the already-intimate version has; everything else is your sentence exactly. |
-| R131 | **Every exercise's opening page, listed below, in your words, on both surfaces.** The footnote is gone from all five. Two things went with the old copy: Communication no longer says you answer every question twice (the part-two screen still does), and Conflict Patterns no longer says twelve questions, about ten minutes, and that one section stays private. Say the word and either goes back as a second paragraph. The website read its own copy until now; all five pages read the module the app reads, so this cannot drift again. |
-| R132 | **Every loading line, listed below, with your five changes in.** |
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
 | R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
-
-#### The two intimacy framings, for R130
-
-<!-- copy:intimacy: generated by scripts/build-copy-docs.mjs -->
-
-Every question in Physical Intimacy Expectations, both ways it can be
-asked. 17 of 18 are worded differently for a couple who
-are not yet physically intimate; the rest are the same sentence either way.
-Which one a reader gets is decided by the relationship status on their
-profile, so a profile with none falls back to the not-yet wording.
-
-| # | Topic | Already intimate | Not yet |
-|--|--|--|--|
-| 1 | How often feels right | How often do you want physical intimacy? | How often do you imagine wanting physical intimacy? |
-| 2 | Relative desire | Compared to your partner, you tend to | When your ideal and your partner's don't match, you expect to |
-| 3 | Frequency as a signal | How much does frequency signal the health of your relationship to you? | How much do you expect frequency to signal the relationship's health? |
-| 4 | Who initiates | Who usually initiates? | Who do you expect will usually initiate? |
-| 5 | Comfort initiating | How do you feel about initiating? | How do you expect to feel about initiating? |
-| 6 | Being turned down | When you turn your partner down, you want them to | When you turn your partner down, you expect that you will want them to |
-| 7 | Being vulnerable | How at ease do you feel being physically vulnerable? | How at ease do you expect to feel being physically vulnerable? |
-| 8 | What helps you feel comfortable | What might help you feel most comfortable? (select all that are true) | *same* |
-| 9 | When something feels off | When something feels off in the moment, you | When something feels off in the moment, you expect to |
-| 10 | Talking about intimacy | How openly can you talk about intimacy? | How openly do you expect to be able to talk about intimacy? |
-| 11 | Saying what you want | Saying what you want in the moment | You expect that, for you, saying what you want in the moment |
-| 12 | Talking afterward | Talking afterward about what worked | You expect that, for you, talking afterward about what worked |
-| 13 | Appetite for novelty | Your appetite for trying new things | You expect that, for you, your appetite for trying new things |
-| 14 | When a new idea comes up | When your partner suggests something new, you | You expect that, when your partner suggests something new, you |
-| 15 | Novelty vs routine | How do novelty and routine balance for you now? | How do you expect novelty and routine to balance over a long marriage? |
-| 16 | What it is primarily about | What is physical intimacy primarily about for you? (select up to two) | At this point, what do you expect physical intimacy to primarily be about for you two? (select up to two) |
-| 17 | When disconnected | When you're emotionally disconnected, physical intimacy tends to | When you're emotionally disconnected, you expect physical intimacy to |
-| 18 | What you hope it means | What does intimacy most mean in your marriage now? | What do you most hope intimacy will mean in your marriage? |
-
-<!-- end copy:intimacy -->
-
-#### The page that opens each exercise, for R131
-
-<!-- copy:intros: generated by scripts/build-copy-docs.mjs -->
-
-The page that opens each exercise, on both surfaces. Conflict Patterns is
-the long one.
-
-| Exercise | Heading | What it says | Footnote | Button |
-|--|--|--|--|--|
-| Communication styles | First, how you communicate. | This is the communication styles exercise. It looks at how you each process internally, how you connect as a couple, and how you communicate when things get hard. |  | Begin exercise |
-| Expectations | What you each expect | Frustration in relationships often traces back to unmet expectations, whether conscious or not. This exercise consists of two parts. First, life and values, and second, responsibilities. |  | Begin exercise |
-| Relationship Reflection | How you each feel about your relationship | Reflecting on your relationship throughout this exercise can be as meaningful as you make it, and can shape the steps you take next. |  | Begin exercise |
-| Physical Intimacy Expectations | Understanding your sex life | Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. These private questions help you identify areas to discuss with each other. |  | Begin exercise |
-| Conflict Patterns | Conflict patterns | Conflict is part of every relationship. This short exercise helps you understand your relationship environment and navigate conflict more productively. |  | Begin exercise |
-
-<!-- end copy:intros -->
-
-#### What the app says while it waits, for R132
-
-<!-- copy:loading: generated by scripts/build-copy-docs.mjs -->
-
-Every line the app shows while it is waiting, and where it appears. They
-were typed into fifteen screens; they are one file now, which is what
-makes this list possible.
-
-| Line | Where |
-|--|--|
-| Loading your dashboard | Home: the dashboard's first paint. |
-| Generating your insights | Insights: results and exercise status together. |
-| Gathering your resources | Resources: the tools and the In Practice list. |
-| Getting your notes | Notes: notes, marks and tags. |
-| Fetching your exercise | Any exercise, fetching its questions. |
-| Opening | An In Practice piece opening. |
-| Loading your profile | Settings, reading the profile to edit. |
-| Loading your budget | The budget tool. |
-| Loading your checklist | The Starting Out checklist. |
-| One moment | Profile setup and the feedback form, both waiting on their copy. |
-
-<!-- end copy:loading -->
 
 ### Behaviour, which has to be used rather than looked at
 
@@ -212,6 +137,15 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R130 | Both intimacy framings, your seven rewordings |
+| R131 | Every exercise's opening page, your words, both surfaces |
+| R132 | Every loading line, your five changes |
+| R140 | Expectations asks the page the site asks |
+| R141 | Continue Expectations opens the exercise |
+| R137 | The opening page appears for Expectations |
+| R138 | An exercise in progress is counted properly |
+| R139 | The household page's arrows |
+| R123 | An opening page for every exercise, both surfaces |
 | M70 | The test couple's relationship status, run |
 | R133 | The line under every intimacy question, gone |
 | R134 | Select all that apply, italic and on its own line |
@@ -483,6 +417,13 @@ build.
 ---
 
 ## How this is kept
+
+**An approved table comes out.** Ellie: "When I have approved a review point
+for which you built a review table below sec3, please remove the associated
+table as I have already reviewed it." A table that has done its job costs
+review attention on the wrong half of the document, which is the failure the
+tables exist to prevent. The builders are in git history, so the next one is a
+few lines rather than a rewrite.
 
 1. A list arrives. This file is updated first, before any work.
 2. Work happens.

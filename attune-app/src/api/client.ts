@@ -293,6 +293,9 @@ export type ExpectationRow = {
    */
   youExperienced?: string | null;
   themExperienced?: string | null;
+  /** What "Both of us" turned out to mean, for whoever answered it that way. */
+  youDetail?: string | null;
+  themDetail?: string | null;
   category: string;
   item: string;
   prompt?: string | null;
@@ -1513,6 +1516,10 @@ export type ExpectationsSet = {
   futureCols: string[];
   futureColsDisplay: string[];
   futureDetailOpts: string[];
+  /** The screen between part one and part two. */
+  partTwo: string;
+  /** What part one is called, so its counter can say which part you are in. */
+  lifeLabel: string;
   /** The headings over the two rows of buttons, from the server. */
   growingUpLabel: string;
   futureLabel: string;

@@ -4,6 +4,8 @@
 // 26 questions across 10 dimensions, in the order they are asked. Grouped by
 // results domain: internal processing, how you connect, when things get hard.
 // Part 2 re-asks all of them about the partner (see PARTNER_VIEW_TEXT).
+import { PART_TWO } from './_lib/part-two.js';
+
 export const PERSONALITY_QUESTIONS = [
   // ── Internal processing: energy, expression, reassurance ──────────────────
   { id:"en6", dimension:"energy",      text:"When it comes to your social lives, you lean toward:", a:"Independent. Your own friendships and plans are part of how you stay yourself.", b:"Shared. Doing things together is how you most want to spend your time." },
@@ -191,7 +193,9 @@ export function twoPartEx1() {
       b: pv.b ?? q.b,
     };
   });
-  return [...part1, { __partBreak: true, id: '__partBreak' }, ...part2];
+  // The divider carries its own words, so each surface renders what it is
+  // given rather than holding a copy of the sentence.
+  return [...part1, { __partBreak: true, id: '__partBreak', text: PART_TWO.ex1 }, ...part2];
 }
 
 /**

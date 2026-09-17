@@ -194,7 +194,7 @@ export default function Exercise({
               paragraph under it. The site said one thing here and the app said
               another; this is what both say now. */}
           <Text style={{ ...Type.hero, color: c.textStrong }}>
-            Part Two: All the same questions, but about your partner
+            {item.text}
           </Text>
           <Pressable
       accessibilityRole="button"

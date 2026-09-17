@@ -364,25 +364,66 @@ function HeaderCell({ label }: { label: string }) {
 }
 
 /**
- * How much of an exercise is done, as a filled circle.
+ * How much of an exercise is done, as a ring that fills round.
  *
  * ── WHY IT IS DRAWN THIS WAY ──────────────────────────────────────────────
- * A wedge is an arc, and an arc needs a path, and a path needs a drawing
- * library this app does not carry. What it does have is layout: a circle, and
- * inside it a bar that grows from the bottom. It reads as a filled proportion,
- * which is what the number beside it says in words, and it costs no dependency
- * and no bridge call.
+ * Ellie: "Progress pie chart on status table should look like a circular
+ * loading bar not a circle filling in from the bottom up."
+ *
+ * An arc needs a path, and a path needs a drawing library this app does not
+ * carry. What it does have is two windows and a rotation. Each window shows
+ * one half of a circle; inside each sits a ring with only two of its four
+ * borders painted, which renders as a half-circle arc, and rotating that arc
+ * inside its window leaves exactly the swept part visible.
+ *
+ * The maths, once: a ring with its top and right borders painted covers 10:30
+ * to 4:30, which is a 180 degree arc centred on 45 degrees. Rotating it by
+ * `a - 135` puts its end at `a` degrees clockwise from twelve. The right
+ * window clips that to 0 to 180, so the first half of the sweep is the first
+ * arc; the left window clips the second arc to 180 to 360, which is the rest.
  */
-function Pie({ portion }: { portion: number }) {
-  const filledPct = Math.max(0, Math.min(1, portion)) * 100;
-  return (
+function ProgressRing({
+  portion, size = 17, thickness = 2.5, color, track,
+}: { portion: number; size?: number; thickness?: number; color: string; track: string }) {
+  const deg = Math.max(0, Math.min(1, portion)) * 360;
+  const half = size / 2;
+
+  const arc = (rotate: number) => (
     <View
       style={{
-        width: 17, height: 17, borderRadius: Radius.pill, overflow: 'hidden',
-        borderWidth: 1.5, borderColor: StatusColor.inProgress,
-        justifyContent: 'flex-end',
-      }}>
-      <View style={{ height: `${filledPct}%`, backgroundColor: StatusColor.inProgress }} />
+        position: 'absolute', width: size, height: size, borderRadius: half,
+        borderWidth: thickness,
+        borderTopColor: color, borderRightColor: color,
+        borderBottomColor: 'transparent', borderLeftColor: 'transparent',
+        transform: [{ rotate: `${rotate}deg` }],
+      }}
+    />
+  );
+
+  return (
+    <View style={{ width: size, height: size }}>
+      {/* The unfilled ring, so an exercise barely started still reads as a
+          circle rather than as a dash floating on its own. */}
+      <View
+        style={{
+          position: 'absolute', width: size, height: size, borderRadius: half,
+          borderWidth: thickness, borderColor: track,
+        }}
+      />
+      {/* First half of the sweep. */}
+      <View style={{ position: 'absolute', left: half, width: half, height: size, overflow: 'hidden' }}>
+        <View style={{ position: 'absolute', left: -half, width: size, height: size }}>
+          {arc(Math.min(deg, 180) - 135)}
+        </View>
+      </View>
+      {/* The rest of it, once past halfway. */}
+      {deg > 180 ? (
+        <View style={{ position: 'absolute', left: 0, width: half, height: size, overflow: 'hidden' }}>
+          <View style={{ position: 'absolute', left: 0, width: size, height: size }}>
+            {arc(deg - 135)}
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -429,7 +470,11 @@ function StatusCell({
           ) : null}
         </View>
       ) : (
-        <Pie portion={(answered || 0) / Math.max(total || 1, 1)} />
+        <ProgressRing
+          portion={(answered || 0) / Math.max(total || 1, 1)}
+          color={StatusColor.inProgress}
+          track={c.border}
+        />
       )}
       <Text
         style={{

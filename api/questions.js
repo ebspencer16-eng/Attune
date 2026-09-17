@@ -25,10 +25,11 @@ export const config = { runtime: 'edge' };
 
 import {
   twoPartEx1, EX1_SCALE, RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS,
-  CHILDHOOD_STRUCTURES, substName,
+  CHILDHOOD_STRUCTURES, substName, LIFE_CATEGORY_LABEL,
 } from './_questions.js';
 import { EXERCISES } from './_exercises.js';
 import { exerciseIntro } from './_lib/exercise-intro.js';
+import { PART_TWO } from './_lib/part-two.js';
 import {
   asksChildhood, categoryIntro, futureLabel, isAnniversaryStatus,
   GROWING_UP_LABEL, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL,
@@ -198,6 +199,11 @@ export default async function handler(req) {
             label: substName(item, you, partner),
           })),
         })),
+
+        // The screen between the two halves, and what part one is called, so
+        // its counter can say which part you are in.
+        partTwo: PART_TWO.ex2,
+        lifeLabel: LIFE_CATEGORY_LABEL,
 
         // The two row headings, and what is asked once someone answers Both.
         growingUpLabel: GROWING_UP_LABEL,

@@ -86,7 +86,7 @@ export default function Expectations({
    * responsibilities, then life. Someone doing it on both surfaces was doing
    * two different exercises in two different orders.
    */
-  const [stage, setStage] = useState<'life' | 'structure' | 'responsibilities' | 'done'>('life');
+  const [stage, setStage] = useState<'life' | 'part-two' | 'structure' | 'responsibilities' | 'done'>('life');
   const [catIdx, setCatIdx] = useState(0);
   const [lifeIdx, setLifeIdx] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -278,13 +278,36 @@ export default function Expectations({
             );
           })}
           <ExerciseNav
-            onBack={() => { setStage('life'); setLifeIdx(life.length - 1); }}
+            onBack={() => setStage('part-two')}
             nextLabel="Continue"
             disabled={!answers.childhoodStructure}
             color={exerciseColor('ex2')}
             onNext={() => setStage('responsibilities')}
           />
         </ScrollView>
+      </Shell>
+    );
+  }
+
+  /**
+   * ── THE DIVIDER ─────────────────────────────────────────────────────────
+   * Ellie: "Expectations part 2 should have an intro page like comms part 2."
+   * Her words, from api/_lib/part-two.js, which is also where the comms one
+   * lives now. No eyebrow above it and no paragraph under it, which is the
+   * shape she chose for comms.
+   */
+  if (stage === 'part-two') {
+    return (
+      <Shell onClose={onClose}>
+        <View style={{ padding: Spacing.xl, flex: 1, justifyContent: 'center' }}>
+          <Text style={{ ...Type.hero, color: c.textStrong }}>{set.partTwo}</Text>
+          <ExerciseNav
+            onBack={() => { setStage('life'); setLifeIdx(life.length - 1); }}
+            nextLabel="Continue"
+            color={exerciseColor('ex2')}
+            onNext={() => setStage('structure')}
+          />
+        </View>
       </Shell>
     );
   }
@@ -448,7 +471,10 @@ export default function Expectations({
           <ExerciseEyebrow
             exerciseKey="ex2"
             label={set.exercise.fullLabel || set.exercise.label}
-            right={`Question ${lifeIdx + 1} of ${life.length}`}
+            /* Ellie: "counter for pt 1 should say life and values 5/12 or
+               something to show that this is part 1." The label is the one the
+               results use for these questions, from the server. */
+            right={`${set.lifeLabel} ${lifeIdx + 1}/${life.length}`}
           />
           <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
             <View style={{ width: `${((lifeIdx + 1) / Math.max(1, life.length)) * 100}%`, height: 3, backgroundColor: exerciseColor('ex2') }} />
@@ -473,9 +499,9 @@ export default function Expectations({
             color={exerciseColor('ex2')}
             onNext={() => {
               persist(answers, false);
-              // Part one done: on to who ran the household, which is what sets
-              // the labels for part two.
-              if (isLast) setStage('structure');
+              // Part one done: the divider, then who ran the household, which
+              // is what sets the labels for part two.
+              if (isLast) setStage('part-two');
               else setLifeIdx(lifeIdx + 1);
             }}
           />

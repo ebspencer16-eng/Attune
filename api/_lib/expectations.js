@@ -139,6 +139,19 @@ export function agrees(yourValue, theirValue) {
  * answered are dropped rather than shown blank: an expectation only one person
  * has stated is not a comparison.
  */
+/**
+ * The refinement someone gave after answering "Both of us", if they did.
+ *
+ * Read through sideOf rather than by comparing the string to "Both of us":
+ * the stored value is whatever the exercise wrote, and this file already has
+ * one place that decides which side an answer names.
+ */
+function bothDetailFor(answers, key) {
+  if (!answers || !key) return null;
+  if (sideOf(answers?.responsibilities?.[key]) !== 'both') return null;
+  return answers?.bothDetail?.[key] || null;
+}
+
 export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Your partner' }) {
   const you = youName || 'You';
   const them = themName || 'Your partner';
@@ -173,6 +186,25 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
          */
         youExperienced: childhoodValue(mine?.childhood?.[key]),
         themExperienced: childhoodValue(theirs?.childhood?.[key]),
+        /**
+         * What "Both of us" turned out to mean.
+         *
+         * The exercise asks it every time someone answers Both, because both
+         * rarely means exactly half, and then no surface has ever shown the
+         * answer back. Ellie: "I honestly forgot we ask the 'a bit more
+         * specifically' thing, I like it, but how should we make that visible
+         * in the results experience?"
+         *
+         * Not mirrored, and not normalised. These strings name people
+         * outright, "Usually Ellie, sometimes Preston", so they read the same
+         * way from either side of the couple. Flipping them would be the bug
+         * that mirroring exists to prevent, pointed backwards.
+         *
+         * Empty unless that person answered Both, so a surface can show it
+         * under the answer it belongs to without deciding anything.
+         */
+        youDetail: bothDetailFor(mine, key),
+        themDetail: bothDetailFor(theirs, mirrorRespKey(key)),
         aligned,
       };
     }).filter(Boolean));

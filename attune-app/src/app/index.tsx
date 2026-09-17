@@ -23,7 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -584,6 +584,39 @@ const GLOW_DIAMETER = 330;
 const GLOW_ALPHA = 0.0133;
 
 /**
+ * The mark behind the finding.
+ *
+ * Ellie: "I like the idea of a mark-only attune logo behind the insight of the
+ * day. Maybe 'glow-y' in a way that feels unfocused and not too distracting. I
+ * want the text over it to be easy to read, but I want the landing page to
+ * feel branded. Build this, but be able to revert quickly to what we have."
+ *
+ * So it is one switch. MARK_BEHIND_INSIGHT = false is exactly the screen she
+ * has now, with nothing else to undo.
+ *
+ * It sits under the glow rather than over it: the rings brighten toward the
+ * centre, which washes the middle of the mark out and leaves its edges soft.
+ * That is the unfocused part, and it costs no blur, which this app cannot do
+ * without a dependency. The asset is the same PNG the rest of the app uses, at
+ * a size where its own resolution helps rather than hurts.
+ */
+const MARK_BEHIND_INSIGHT = true;
+const MARK_WIDTH = 250;
+/**
+ * Out of focus, without a blur.
+ *
+ * One copy of the mark has the edges the artwork has, and she asked for
+ * something unfocused. A few copies at slightly different sizes, each too
+ * faint to find on its own, leave no single edge anywhere: the same argument
+ * as the glow rings above, applied to a picture instead of a circle. The
+ * opacities sum to about a tenth, which is where the text over it stays the
+ * easiest thing on the screen to read.
+ */
+const MARK_LAYERS = 5;
+const MARK_LAYER_OPACITY = 0.022;
+const MARK_LAYER_STEP = 0.045;
+
+/**
  * Ellie: "Let's call it insight of the day for now, we can adjust later if we
  * decide to." Her words, so they live in one place rather than inline.
  */
@@ -629,6 +662,21 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
           costs nothing but plain Views that never re-render. */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          {MARK_BEHIND_INSIGHT ? Array.from({ length: MARK_LAYERS }, (_, i) => {
+            const width = MARK_WIDTH * (1 + i * MARK_LAYER_STEP);
+            return (
+              <Image
+                key={i}
+                source={require('@/assets/images/attune-mark.png')}
+                style={{
+                  position: 'absolute',
+                  width, height: width * (64 / 88),
+                  opacity: MARK_LAYER_OPACITY,
+                }}
+                resizeMode="contain"
+              />
+            );
+          }) : null}
           {Array.from({ length: GLOW_RINGS }, (_, i) => {
             // Largest first, so each smaller ring paints on top and the alpha
             // builds toward the centre.

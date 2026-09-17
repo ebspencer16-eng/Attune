@@ -21,6 +21,11 @@
  * the app, because the app cannot yet tell those two cases apart. It is
  * written down rather than quietly dropped: TASKS.md carries it.
  *
+ * ── ONE WORD ON THE BUTTON ───────────────────────────────────────────────
+ * Ellie: "Use start throughout." It said Start on two of the website's pages,
+ * Begin on one, Begin exercise on another, and Begin exercise on all five of
+ * the app's. The word is here once and both surfaces render it.
+ *
  * ── ON THE NUMBERS ────────────────────────────────────────────────────────
  * "Exercise 01 of 02" is the website's own framing from when there were two.
  * The eyebrow here names the exercise instead, because a couple who bought
@@ -51,7 +56,7 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
           'This is the communication styles exercise. It looks at how you each process internally, how you connect as a couple, and how you communicate when things get hard.',
         ],
         note: null,
-        cta: 'Begin exercise',
+        cta: 'Start',
       };
 
     case 'ex2':
@@ -61,7 +66,7 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
           'Frustration in relationships often traces back to unmet expectations, whether conscious or not. This exercise consists of two parts. First, life and values, and second, responsibilities.',
         ],
         note: null,
-        cta: 'Begin exercise',
+        cta: 'Start',
       };
 
     case 'ex3':
@@ -71,7 +76,7 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
           'Reflecting on your relationship throughout this exercise can be as meaningful as you make it, and can shape the steps you take next.',
         ],
         note: null,
-        cta: 'Begin exercise',
+        cta: 'Start',
       };
 
     case 'intimacy':
@@ -79,9 +84,12 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
         title: 'Understanding your sex life',
         body: [
           'Physical intimacy is one of the biggest things couples assume they are aligned on, and one of the least talked about. These private questions help you identify areas to discuss with each other.',
+          // Ellie, asked whether this should go with the copy it used to sit
+          // under: "Keep it as a separate paragraph below mine."
+          'This is an expectations tool, not therapy. If anything here brings up something heavier, that is worth talking through with someone qualified.',
         ],
         note: null,
-        cta: 'Begin exercise',
+        cta: 'Start',
       };
 
     case 'conflict':
@@ -91,7 +99,7 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
         title: 'Conflict patterns',
         body: [CONFLICT_INTRO],
         note: null,
-        cta: 'Begin exercise',
+        cta: 'Start',
       };
 
     default:

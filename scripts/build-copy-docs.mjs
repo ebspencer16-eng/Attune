@@ -121,9 +121,12 @@ function loadingBlock() {
  * Adding a block back is a few lines; the builders are in the history.
  */
 const BLOCKS = {
-  intimacy: await intimacyBlock(),
-  intros: await introBlock(),
-  loading: loadingBlock(),
+  // Empty on purpose. Every block that has been built here was read, changed
+  // and approved, and an approved table comes out: see "How this is kept" in
+  // TASKS.md. The builders for the home tile, the deletion emails, the
+  // workbook, the intimacy framings, the opening pages and the loading lines
+  // are all in git history, so the next table is a few lines rather than a
+  // rewrite.
 };
 
 let doc = readFileSync(DOC, 'utf8');
