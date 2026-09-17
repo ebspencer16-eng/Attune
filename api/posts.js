@@ -82,8 +82,26 @@ export default async function handler(req) {
     const publishedFilter = `published_at=not.is.null&published_at=lte.${nowIso}`;
 
     if (action === 'feed') {
+      /**
+       * ── THE FEED WORKS BEFORE THE MIGRATION AND AFTER IT ────────────────
+       * hero_image and keywords arrive with migration 072, which Ellie runs
+       * when she runs it. PostgREST refuses a select naming a column that does
+       * not exist, and this endpoint answers 500 when it does, so shipping the
+       * new select on its own took the whole shelf down: "In Practice could not
+       * load." It did that between a deploy and a migration, which is exactly
+       * the window every schema change has.
+       *
+       * So the new columns are asked for, and if the answer is no, the old
+       * select runs instead and the two fields come back empty. Nothing to
+       * remember to remove either: once the migration is run the first query
+       * succeeds and the fallback never fires.
+       */
+      const FEED_COLS = 'id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision';
+      const feedQuery = (cols) =>
+        rest(`posts?${publishedFilter}&select=${cols}&order=published_at.desc&limit=50`, { headers: svc });
+
       const [pRes, rRes, allRes, sRes] = await Promise.all([
-        rest(`posts?${publishedFilter}&select=id,title,subtitle,category,dimension_keys,keywords,read_minutes,hero_color,hero_image,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
+        feedQuery(`${FEED_COLS},keywords,hero_image`),
         rest(`post_reads?owner_id=eq.${me}&select=post_id,revision,read_at`, { headers: svc }),
         /**
          * How many people have read each piece, for the Featured sort.
@@ -101,7 +119,9 @@ export default async function handler(req) {
         // is theirs.
         rest(`saved_posts?owner_id=eq.${me}&select=post_id`, { headers: svc }),
       ]);
-      const published = await pRes.json().catch(() => []);
+      const published = pRes.ok
+        ? await pRes.json().catch(() => [])
+        : await (await feedQuery(FEED_COLS)).json().catch(() => []);
       const reads = await rRes.json().catch(() => []);
       const readBy = new Map(reads.map(r => [r.post_id, r]));
       const savedIds = new Set((await sRes.json().catch(() => [])).map((r) => r.post_id));
