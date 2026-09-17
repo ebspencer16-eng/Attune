@@ -94,28 +94,32 @@ Both values are public by design: the key ships in the website's bundle already
 and grants nothing on its own, because row-level security decides what any
 request can touch.
 
-## Step 5. Make the app record at Apple
+## Step 5. The app record at Apple: let the build make it
 
-Apple needs somewhere to put the build before TestFlight can hand it out.
+An App ID has to be registered to your team before Apple will accept a build
+under it, and `com.attunerelationships.app` never has been. That is why the
+dropdown in App Store Connect only offers `com.attunerelationships.web`: you
+cannot pick an identifier that does not exist yet, and you cannot type one in
+there.
 
-1. Go to **appstoreconnect.apple.com** and sign in with the Apple ID that owns
-   the developer account.
-2. **Apps → the blue + → New App.**
-3. Fill in:
-   - **Platform:** iOS
-   - **Name:** Attune Relationships (this is the App Store name; it has to be
-     unique across the whole store, so if it is taken, tell me before changing
-     it, because the name is in the app too)
-   - **Primary language:** English (U.S.)
-   - **Bundle ID:** pick `com.attunerelationships.app` from the list. If it is
-     not in the list, stop and tell me: it means the identifier has not been
-     registered to the team yet, which is a two minute fix on my side.
-   - **SKU:** `attune-ios` (this is an internal reference, nobody sees it)
-   - **User Access:** Full Access
-4. Create.
+**So do not create the app by hand.** The build in step 6 registers the
+identifier with your team the first time it sets up credentials, and the submit
+in step 7 offers to create the App Store Connect record once it exists. Both
+ask before they do it.
 
-You do not have to fill in screenshots, descriptions or pricing yet. Those are
-for the public App Store listing, not for TestFlight.
+Leave `com.attunerelationships.web` alone. It belongs to something else, and
+the app's identifier is written into the app itself and into the links that let
+attune-relationships.com open it.
+
+If step 7 does not offer to create the app, come back here: at that point the
+identifier will exist and **Apps → + → New App** will list it, with the details
+in the next paragraph.
+
+For that form, when you get to it: Platform **iOS**, Name **Attune
+Relationships**, Primary language **English (U.S.)**, Bundle ID
+**com.attunerelationships.app**, SKU **attune-ios**, User Access **Full
+Access**. Screenshots and descriptions are for the public listing, not for
+TestFlight.
 
 ## Step 6. Build it
 
