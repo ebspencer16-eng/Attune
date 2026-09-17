@@ -73,33 +73,26 @@ What it asks:
 This writes a project id into `app.json`. That is expected, and it is the one
 change you should tell me about so I can commit it.
 
-## Step 4. Give the build the two settings the app needs
+## Step 4. The two settings the app needs
 
-The app talks to Supabase, and it needs the address and the public key to do
-it. They are not in the repo on purpose, so the build service needs its own
-copy. Both are safe to hand over: they are in the website's public bundle
-already, and they grant nothing on their own.
+**Done.** The app talks to Supabase, and the build service needs the address
+and the public key to do it. They are not in the repo on purpose, so they live
+with EAS instead.
 
-Find them in **Vercel → the Attune project → Settings → Environment
-Variables**. They are called `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-Copy the values somewhere you can paste from.
+`eas env:create` is gone from the CLI, and the command that replaced it did not
+take the environment the way its own prompt implied. There is a third command
+that reads the values straight out of `attune-app/.env`, so nothing had to be
+copied from Vercel at all:
 
-Then run this, once per value:
+    npx eas-cli env:push production --path .env
 
-    npx eas-cli env:create --name EXPO_PUBLIC_SUPABASE_URL --scope project --visibility plaintext
-
-It asks for the value: paste the one from `VITE_SUPABASE_URL`. When it asks
-which environments, choose **production** (space to select, Enter to confirm).
-
-Then the second one:
-
-    npx eas-cli env:create --name EXPO_PUBLIC_SUPABASE_ANON_KEY --scope project --visibility plaintext
-
-Same thing, with the value from `VITE_SUPABASE_ANON_KEY`.
-
-To check both landed:
+That is what was run, with your session on this machine. To see what is there:
 
     npx eas-cli env:list --environment production
+
+Both values are public by design: the key ships in the website's bundle already
+and grants nothing on its own, because row-level security decides what any
+request can touch.
 
 ## Step 5. Make the app record at Apple
 
