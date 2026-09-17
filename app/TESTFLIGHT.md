@@ -123,49 +123,57 @@ TestFlight.
 
 ## Step 6. Build it
 
-    npx eas-cli build --platform ios --profile production
+One command, no flags to mistype. Everything it needs is in `package.json`:
 
-This is the long one: usually ten to twenty minutes, and it runs on Expo's
-machines, so you can close the laptop lid once it says the build is queued.
+    npm run testflight
+
+If the terminal ever says something like "flag --profile expects a value", it
+is because a long command arrived split across two lines. That is what these
+short ones are for: there is nothing in them to split.
+
+This is the long step: ten to twenty minutes, on Expo's machines, so you can
+close the laptop lid once it says the build is queued.
 
 What it asks, in order:
 
-- **"Do you want to log in to your Apple account?"** Yes. It asks for the
-  Apple ID, the password, and then the six digit code Apple sends to your
-  phone. This is Apple's own two factor, not something Expo invented.
-- **"Generate a new Apple Distribution Certificate?"** Yes. A certificate is
-  how Apple knows a build is really from you. Expo stores it and reuses it
-  for every future build, so this question only comes up once.
-- **"Generate a new Apple Provisioning Profile?"** Yes, for the same reason.
+- **"Do you want to log in to your Apple account?"** Yes. Apple ID, password,
+  then the six digit code Apple sends to your phone.
+- **"Register bundle identifier com.attunerelationships.app?"** Yes. This is the
+  step that makes the identifier exist, which is why it cannot be picked in App
+  Store Connect before now.
+- **"Generate a new Apple Distribution Certificate?"** Yes. A certificate is how
+  Apple knows a build is really from you. It is stored and reused, so this is
+  asked once.
+- **"Generate a new Apple Provisioning Profile?"** Yes, same reason.
 
-Then it prints a link. Open it: that page shows the build happening, line by
-line. When it finishes, the page has a green tick and the file is stored on
-Expo's servers. You do not need to download it.
+Then it prints a link. Open it to watch the build. When it finishes the page has
+a green tick and the file lives on Expo's servers; there is nothing to download.
 
 **If it fails,** copy the whole red section and send it to me. Almost every
-first build failure is a native module needing a line of configuration, which
-is my job, not yours.
+first build failure is a native module needing a line of configuration, which is
+my job.
 
 ## Step 7. Send it to Apple
 
-    npx eas-cli submit --platform ios --profile production --latest
+    npm run testflight:send
 
-`--latest` means "the build you just made". It asks for the Apple ID again,
-uploads, and finishes in a couple of minutes.
+It uses the build you just made. Now that the identifier exists, this offers to
+create the App Store Connect record: say yes, and if it asks, the name is
+**Attune Relationships**, the language is **English (U.S.)** and the SKU is
+**attune-ios**.
 
 ## Step 8. TestFlight
 
 1. In App Store Connect, open the app, then the **TestFlight** tab. The build
    says **Processing** for five to thirty minutes. Apple is scanning it.
-2. When processing ends, Apple asks one question: **export compliance**. The
-   honest answer for this app is that it uses only standard HTTPS encryption,
-   so tick **"None of the algorithms mentioned above"** and continue. If it
-   words it as a yes or no question about encryption, the answer is that you
-   use exempt standard encryption.
+2. When processing ends, Apple asks one question: **export compliance**. This
+   app uses only standard HTTPS encryption, so tick **"None of the algorithms
+   mentioned above"** and continue. If it is worded as a yes or no question
+   about encryption, the answer is that you use exempt standard encryption.
 3. **Internal Testing → the + beside Testers → add yourself.** Internal testers
-   get builds immediately with no Apple review.
+   get builds immediately, with no Apple review.
 4. On your phone, install **TestFlight** from the App Store, sign in with the
-   same Apple ID, and Attune will be waiting there. Tap Install.
+   same Apple ID, and Attune will be waiting. Tap Install.
 
 That is it. The app on your phone is the real thing.
 
@@ -206,8 +214,8 @@ version of the app. `app.json` says version 1.0.0, so every 1.0.0 build gets
 
 Two commands, and none of the questions above:
 
-    npx eas-cli build --platform ios --profile production
-    npx eas-cli submit --platform ios --profile production --latest
+    npm run testflight
+    npm run testflight:send
 
 The version number takes care of itself: `autoIncrement` in `eas.json` bumps
 the build number every time, which is the thing Apple refuses a repeat of.

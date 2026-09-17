@@ -45,7 +45,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "testflight": "npx eas-cli build --platform ios --profile production",
+    "testflight:send": "npx eas-cli submit --platform ios --profile production --latest",
+    "testflight:check": "npx eas-cli env:list --environment production"
   },
   "private": true
 }
