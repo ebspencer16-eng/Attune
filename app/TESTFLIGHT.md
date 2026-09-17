@@ -193,9 +193,14 @@ screen, every word, every layout, every fix in the lists you send me.
 for new JavaScript when it opens. So:
 
 **A change to what we write:** one command, and the app updates itself the next
-time it is opened.
+time it is opened. The CLI wants the environment named as well as the branch,
+which it does not tell you until it refuses:
 
-    npx eas-cli update --branch production --message "what changed"
+    npx eas-cli update --branch production --environment production --message "what changed"
+
+There is a short version of that too, which is what I use:
+
+    npm run testflight:update
 
 **A change to the native shell:** a new build and a new submit. That is adding
 a library that touches the phone itself, changing the icon or the app's name,

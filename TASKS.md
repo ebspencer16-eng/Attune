@@ -89,6 +89,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R179 | **Today's work is on your phone already.** The app on TestFlight picked up an update over the air: the Learn tab, the saves, the search, the share sheet, the lightbulb and the home mark. Close the app fully and reopen it if you do not see them. What is not there yet is the icon, the "Attune" name under it and the new splash, because those are part of the build rather than the code: they arrive on your next `npm run testflight`. |
 | R174 | **The Learn tab.** Renamed everywhere, including the two server lines that pointed at "your resources tab". A search box above the shelves, My lists with Saved and Read, and every piece as a card with the ARTICLE label and a bookmark, which is the shape of the app you showed me. Saved is new and is yours to build; Read has been recorded since the feed existed and has never been shown as a list. |
 | R175 | **Articles can carry an illustration.** The card draws it when a post has one. Until then the ground is tinted by shelf, with the mark in the corner, so a card without a picture looks intentional rather than broken. Adding pictures is a content job: the column is there and the admin accepts it, so the moment you have artwork it appears. |
 | R176 | **Search.** It matches the title, the standfirst, the shelf, the dimension tags and any keywords added in the admin, and two words narrow rather than widen. Try "conflict", then "repair". |

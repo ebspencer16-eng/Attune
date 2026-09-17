@@ -48,7 +48,8 @@
     "lint": "expo lint",
     "testflight": "npx eas-cli build --platform ios --profile production",
     "testflight:send": "npx eas-cli submit --platform ios --profile production --latest",
-    "testflight:check": "npx eas-cli env:list --environment production"
+    "testflight:check": "npx eas-cli env:list --environment production",
+    "testflight:update": "npx eas-cli update --branch production --environment production"
   },
   "private": true
 }
