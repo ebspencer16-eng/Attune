@@ -55,10 +55,11 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
+**Nothing waiting.** Q5 and Q6 are answered: your part two wording, and
+"Question 6 of 50" on both surfaces.
+
 | # | Question |
 |--|--|
-| Q5 | **The screen before part two: the site says something different, so you choose.** You asked me to bring both rather than pick. **The site:** eyebrow "Part 2 of 2", hero "Now, the same questions about your partner.", then "You just answered these about yourself. This time, answer the same set the way you think *your partner* would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers." **The app today:** eyebrow "Part two", hero "Now the same questions, about your partner", and a shorter line about guessing. **Yours:** no eyebrow, hero "Part Two: All the same questions, but about your partner", no description. Say which and both surfaces get it. |
-| Q6 | **Two more places the two surfaces say it differently, while I am in here.** First, the question counter: the site reads "Part 1 of 2 · Question 6 of 50" and the app reads "6 of 50" beside the exercise name. Second, the screen that starts an exercise: the site opens Communication with its own introduction and the app opens straight on question one. Neither is wrong; they are just not the same thing, and you said these pages need to mirror. Tell me which version wins and I will make them match. |
 
 ## 2. Open
 
@@ -80,7 +81,19 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O173 | **The screen before part two is wrong.** Your words for it: no eyebrow, hero reads 'Part Two: All the same questions, but about your partner', no description. First I check what the site says, and if the two differ I bring both here rather than choosing. |
+| O177 | **Your part two screen, on both surfaces.** No eyebrow, hero reads 'Part Two: All the same questions, but about your partner', no description. |
+| O178 | **The counter reads 'Question 6 of 50' on both surfaces.** |
+| O179 | **An opening page for every exercise, the same on both surfaces.** Name, a short description, begin. First I find out what the site actually does today, because you remember one and I want to check before building a second. |
+| O180 | **Back and Next as arrows in every exercise**, not just Communication. |
+| O181 | **Relationship Reflection loses 'you can leave this one blank' and '1 of 5 required answered'.** |
+| O182 | **Every question page's eyebrow is the exercise's full name, in that exercise's colour.** |
+| O183 | **Q9 of Relationship Reflection: a selected answer takes the exercise's colour**, not black. |
+| O184 | **The status table shows the count and a pie, not the words In progress.** 6/50 beside a circle filled to the portion done, in orange. |
+| O185 | **The status table calls ex1 Communication styles.** |
+| O186 | **The completion page matches the site.** Same check as the opening page: what the site does first, then both. |
+| O187 | **No eyebrow on the household background page in Expectations.** |
+| O188 | **What the site's household question says, against the app's.** You do not recognise 'who ran the household you grew up in', so I bring both before changing either. |
+| O189 | **Rebuild the app's Expectations exercise to match the mobile web experience.** Your words: "Hate the setup of this exercise. It needs to be the same as the mobile web experience." This is the big one on the list and you are waiting on it, so it gets a plan in this document before it gets code. |
 
 ## 3. For you to review
 
