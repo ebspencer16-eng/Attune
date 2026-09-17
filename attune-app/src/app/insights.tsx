@@ -208,7 +208,16 @@ export default function InsightsScreen() {
   // Results own their own scrolling, so they sit outside this one. A vertical
   // ScrollView inside another vertical ScrollView does not scroll: the outer
   // one takes the gesture and the inner one never moves.
-  if (ready) {
+  /**
+   * Results, unless something asked for an exercise by name.
+   *
+   * A home card can ask for one, and once results are ready this branch used
+   * to swallow that: the tab drew results and the exercise never opened. Every
+   * exercise being finished is the usual reason results are ready, so it did
+   * not come up often, but "open this exercise" answered with a different
+   * screen is a request that silently went nowhere.
+   */
+  if (ready && !openExercise) {
     return (
       <Shell>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>

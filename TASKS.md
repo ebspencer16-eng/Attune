@@ -89,6 +89,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R156 | **An exercise asked for by name opens, even once results are ready.** The Insights tab drew results and swallowed the request. Every exercise being finished is the usual reason results are ready, so it rarely came up, but a card that says open this and opens something else is a request that went nowhere. |
 | R148 | **The part two screen says just "Part two: Responsibilities".** The rest of the sentence you wrote for it is not anywhere now. If you want a line under the hero, it needs one from you: the sentence as written begins "Part two: Responsibilities helps you...", so it reads oddly under a hero that says the first three words. |
 | R149 | **The mark behind the insight of the day, visible this time.** It was at a tenth of full strength, which on that blue is nothing; it is three times that now, and bigger. Still one switch to revert, still two constants for size and strength. |
 | R150 | **The workbook opens in the app**, in a sheet the app owns with a Done button, rather than throwing you out to Safari. It is still a .docx and iOS still previews it with its own viewer inside that sheet. |
