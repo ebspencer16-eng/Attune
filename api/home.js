@@ -18,6 +18,7 @@
 export const config = { runtime: 'edge' };
 
 import { nextActions, greeting, appTargetFor } from './_lib/next-action.js';
+import { progressFor } from './_lib/exercise-progress.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
@@ -63,12 +64,20 @@ export default async function handler(req) {
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+    // The half-answered ones, from the registry for the same reason the answer
+    // columns come from it. Built above the select rather than inside it:
+    // check-profile-columns reads the quoted strings in that array, and a
+    // shape name written in a filter there reads as a column.
+    const PROGRESS_COLUMNS = EXERCISES
+      .filter((e) => e.shape !== 'record')
+      .map((e) => `${e.key}_progress`);
     const cols = [
       'id', 'name', 'pronouns', 'partner_pronouns', 'partner_name', 'partner_profile_id', 'pkg',
       // Answer columns come from the registry. Selecting them by hand is how a
       // new exercise ends up read as never started: the column is simply not in
       // the select, so it arrives undefined and nothing errors.
       ...EXERCISE_COLUMNS,
+      ...PROGRESS_COLUMNS,
       // The ownership rule's own list. These were named here by hand, which
       // is how `entitlements` came to be missing from this endpoint's select
       // while the rule needed it: a column that is not selected reads as
@@ -123,6 +132,21 @@ export default async function handler(req) {
         inApp: !!e.inApp,
         mine: isExerciseDone(e, me[e.column]),
         theirs: isExerciseDone(e, partner?.[e.column]),
+        /**
+         * ── STARTED, AND HOW FAR ────────────────────────────────────────
+         * Ellie: "I exited after only a few questions of ex1, but I expected
+         * the status table to say in progress or something, it didn't, but it
+         * did save my progress."
+         *
+         * It was saved. Nothing read it. ex{N}_progress has held a partly
+         * answered exercise since the column was added, and both surfaces
+         * asked only whether the thing was finished, so a person who had
+         * answered thirty of fifty questions was shown Start.
+         *
+         * Counted here rather than in the app, because the app would have to
+         * know the shape of every exercise's progress blob to count it.
+         */
+        ...progressFor(me, e),
       },
     ]));
 

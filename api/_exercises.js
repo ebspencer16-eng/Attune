@@ -43,6 +43,19 @@
 export const EXERCISES = [
   {
     order: 1, key: 'ex1', inApp: true, label: 'Communication',
+    /**
+     * What to call it where there is room for its whole name.
+     *
+     * Ellie, of the exercise's own eyebrow: "please change the eyebrow to say
+     * communication styles rather than just communication", and of its
+     * completion screen: "Communication styles exercise complete".
+     *
+     * A second name rather than a rename, because `label` is the column header
+     * in a three-column table on a phone and "Communication styles" does not
+     * fit it. Anything without one falls back to label, so this is a field to
+     * fill in when a name needs more room, not a field to keep in step.
+     */
+    fullLabel: 'Communication styles',
     column: 'ex1_answers', shape: 'answers',
     localKey: 'attune_ex1', progressKey: 'attune_ex1_progress',
     view: 'exercise1', capability: null, partnerField: 'ex1', selfOnly: false,

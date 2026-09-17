@@ -55,11 +55,10 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-**Nothing waiting.** Q4 is answered: the behaviour stays as it is, and you
-have a login to see it with, in M69 above.
-
 | # | Question |
 |--|--|
+| Q5 | **The screen before part two: the site says something different, so you choose.** You asked me to bring both rather than pick. **The site:** eyebrow "Part 2 of 2", hero "Now, the same questions about your partner.", then "You just answered these about yourself. This time, answer the same set the way you think *your partner* would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers." **The app today:** eyebrow "Part two", hero "Now the same questions, about your partner", and a shorter line about guessing. **Yours:** no eyebrow, hero "Part Two: All the same questions, but about your partner", no description. Say which and both surfaces get it. |
+| Q6 | **Two more places the two surfaces say it differently, while I am in here.** First, the question counter: the site reads "Part 1 of 2 · Question 6 of 50" and the app reads "6 of 50" beside the exercise name. Second, the screen that starts an exercise: the site opens Communication with its own introduction and the app opens straight on question one. Neither is wrong; they are just not the same thing, and you said these pages need to mirror. Tell me which version wins and I will make them match. |
 
 ## 2. Open
 
@@ -81,14 +80,7 @@ When you send me a list, or when a sweep turns something up, it appears here.
 
 | # | Task |
 |--|--|
-| O169 | **An exercise you have started says so.** The table shows Start on something with answers already saved. The column exists and nothing reads it. |
-| O170 | **The home prompt for an exercise in progress.** 'Continue [name]', and under it 'You've completed [#]/[#] questions'. Needs the server to count them, which it does not today. |
-| O171 | **Flip the weight of the A and B tiles against the answer choices.** The tiles are white and the choices are greyed, which points at the thing you cannot tap. |
-| O172 | **The eyebrow in Communication reads 'Communication styles'.** |
 | O173 | **The screen before part two is wrong.** Your words for it: no eyebrow, hero reads 'Part Two: All the same questions, but about your partner', no description. First I check what the site says, and if the two differ I bring both here rather than choosing. |
-| O174 | **Part two italicises 'your partner' in every question, as the site does.** And a sweep for any other formatting the two surfaces do differently. |
-| O175 | **The Next arrow needed several taps on Q35.** Reproduce before changing: a target that small is the obvious suspect, and so is the scroll view under it. |
-| O176 | **The exercise's own pages mirror the site.** Begin, part two, and complete. The completion hero should read 'Communication styles exercise complete' rather than 'That is everything'. |
 
 ## 3. For you to review
 
@@ -106,6 +98,13 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R116 | **An exercise you have started says In progress**, in the clay the website uses, with the dot in the middle state. The column holding a half-answered exercise has existed as long as the exercises have; nothing ever read it, so someone thirty questions in was shown Start. |
+| R117 | **The home prompt for one in progress reads "Continue Communication" and "You've completed 6/50 questions".** The count comes from the saved answers, and it reads both shapes that column holds: the website stores the answers with the question you were on, the app stores the answers alone. |
+| R118 | **The answer choices carry the weight now and the A and B tiles step back.** You were right that it pointed at the two things you cannot tap. |
+| R119 | **The eyebrow says Communication styles**, and the completion screen says "Communication styles exercise complete" on both surfaces. The fuller name is a registry field, so every exercise says its own rather than this one being special-cased, and the three-column table keeps the short one, which is all that fits it. |
+| R120 | **Part two italicises "your partner"**, the same split the website makes. |
+| R121 | **The Next arrow was dead while an answer saved.** Every answer writes to the server and the control was disabled for as long as that took, so on a slow round trip taps went nowhere: that is the five clicks on Q35. Only the final save disables it now, because that is the one worth waiting for. |
+| R122 | **One formatting drift found and closed while checking for them:** the five scale labels were typed into the website and exported from the server for the app. They agreed, which is the only reason nothing had broken. The website reads the server's list now. Two more differences are Q6 in section 1, because they are choices rather than bugs. |
 | R100 | **The workbook is built the moment your results open.** On the server, at the same instant the product tells your partner you finished, so a couple who only ever use the app get one. It was built in a browser before, by a block that needed the buyer's order in that browser's storage, which is why yours said it was still generating. The payload the generator is handed now comes from one module that both the website and the server read: two builders would mean two workbooks depending on which surface got there first. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
@@ -130,6 +129,7 @@ one row per wording. Sample names are Ellie and Preston.
 | Bold line | Line under it | Button |
 |--|--|--|
 | Finish setting up your profile | We need info to properly set up your exercises | Set up |
+| Continue Communication | You've completed …/… questions | Continue |
 | Complete your exercises | Your results unlock once you and Preston complete your exercises | Continue |
 | Waiting on Preston | You sent a reminder recently | View progress |
 | Send Preston a reminder | Results unlock once Preston finishes his final exercise | Send a reminder |

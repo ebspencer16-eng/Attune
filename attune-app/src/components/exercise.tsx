@@ -130,7 +130,12 @@ export default function Exercise({
     return (
       <Shell onClose={onClose}>
         <View style={{ padding: Spacing.xl }}>
-          <Text style={{ ...Type.hero, color: c.textStrong }}>That is everything</Text>
+          {/* Ellie: "I want it to change to Communication styles exercise
+              complete". From the registry's fuller name, so every exercise
+              says its own rather than this one being special-cased. */}
+          <Text style={{ ...Type.hero, color: c.textStrong }}>
+            {`${set.exercise.fullLabel || set.exercise.label} exercise complete`}
+          </Text>
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>
             {WAITING.EXERCISE_FOOTER}</Text>
           <Pressable
@@ -205,7 +210,7 @@ export default function Exercise({
       <ScrollView contentContainerStyle={{ padding: Spacing.xl, paddingBottom: BottomTabInset, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>
-            {item.isPV ? 'About your partner' : set.exercise.label}
+            {item.isPV ? 'About your partner' : (set.exercise.fullLabel || set.exercise.label)}
           </Text>
           <Text style={{ ...Type.small, color: c.textMuted }}>
             {answeredCount} of {questions.length}
@@ -227,7 +232,19 @@ export default function Exercise({
             longest case, and the options are given the height of theirs, so
             the scale lands in the same place on every screen. */}
         <View style={{ minHeight: QUESTION_HEIGHT, justifyContent: 'flex-start', marginTop: Spacing.xl }}>
-          <Text style={{ ...Type.title, color: c.textStrong }}>{item.text}</Text>
+          {/* ── "YOUR PARTNER", IN ITALICS ──────────────────────────────
+              Ellie: "Part 2 in the app needs to italicize 'your partner' in
+              each question's text just like the online experience." The
+              website splits the question on those two words and emphasises
+              them; this does the same thing with the same split, because the
+              emphasis is what tells someone this half is not about them. */}
+          <Text style={{ ...Type.title, color: c.textStrong }}>
+            {item.text.split(/(your partner)/i).map((seg, i) => (
+              /^your partner$/i.test(seg)
+                ? <Text key={i} style={{ fontStyle: 'italic' }}>{seg}</Text>
+                : seg
+            ))}
+          </Text>
         </View>
 
         {/* The two ends, side by side and given equal space. Lettered rather
@@ -248,16 +265,20 @@ export default function Exercise({
                 onPress={() => choose(s.val)}
                 accessibilityLabel={s.label}
                 style={{
+                  // Ellie: "A and B tiles are white, and the answer choices
+                  // are slightly greyed out. Can we flip that?" She is right:
+                  // the white cards were the two things you cannot tap. The
+                  // weight belongs on the five you can.
                   flex: 1, paddingVertical: Spacing.md, borderRadius: Radius.md,
                   alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: on ? c.textStrong : c.surface,
-                  borderColor: on ? c.textStrong : c.border, borderWidth: 1,
+                  backgroundColor: on ? c.textStrong : Palette.white,
+                  borderColor: on ? c.textStrong : c.accentQuiet, borderWidth: on ? 1 : 1.5,
                 }}>
                 <Text
                   numberOfLines={2}
                   style={{
                     ...Type.small, fontSize: 11, lineHeight: 14, textAlign: 'center',
-                    fontWeight: '700', color: on ? Palette.white : c.textMuted,
+                    fontWeight: '700', color: on ? Palette.white : c.text,
                   }}>
                   {s.label}
                 </Text>
@@ -300,7 +321,18 @@ export default function Exercise({
             accessibilityRole="button"
             accessibilityLabel={isLast ? 'Finish' : 'Next question'}
             onPress={advance}
-            disabled={chosen == null || saving}
+            /**
+             * ── WHY SAVING NO LONGER DISABLES THIS ────────────────────────
+             * Ellie: "Q35 'next' arrow on comms ex took like 5 clicks to
+             * work." Every answer writes to the server, and this was disabled
+             * for as long as that took, so on a slow round trip the control
+             * was dead for a second or two and taps went nowhere.
+             *
+             * The intermediate saves are deliberately not waited on: the next
+             * answer retries them. Only the last one is, because it is what
+             * marks the exercise complete.
+             */
+            disabled={chosen == null || (saving && isLast)}
             hitSlop={10}
             style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm }}>
             {saving && isLast ? (
@@ -331,12 +363,14 @@ function Option({ letter, text }: { letter: string; text: string }) {
   return (
     <View
       style={{
+        // Flat on the page rather than a white card. These two are what the
+        // question means, not what to press.
         flex: 1,
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        backgroundColor: 'transparent', borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg,
       }}>
       <Text style={{ ...Type.cardTitle, color: c.accentQuiet, marginBottom: Spacing.xs }}>{letter}</Text>
-      <Text style={{ ...Type.small, color: c.text, lineHeight: 19 }}>{text}</Text>
+      <Text style={{ ...Type.small, color: c.textMuted, lineHeight: 19 }}>{text}</Text>
     </View>
   );
 }

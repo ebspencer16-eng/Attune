@@ -607,6 +607,14 @@ export type ExerciseState = {
   theirs: boolean;
   /** Whether the app can ask this exercise. From api/_exercises.js. */
   inApp?: boolean;
+  /**
+   * Part answered and put down. The column holding a half-finished exercise
+   * has existed since the exercises did; nothing read it until someone left
+   * one and was shown Start.
+   */
+  started?: boolean;
+  answered?: number;
+  total?: number;
 };
 
 /** One purchasable thing, from api/_catalogue.js. Price is whole dollars. */
@@ -1483,7 +1491,7 @@ export type QuestionItem = {
 
 export type ExpectationsSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   names: { you: string; partner: string };
   childhoodStructures: { id: string; label: string; cols: string[] }[];
   /** `key` is the raw item text and is what the answer is stored under. `label`
@@ -1506,7 +1514,7 @@ export type SavedAnswers = {
 
 export type QuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   scale: { val: number; label: string }[];
   items: QuestionItem[];
   /** Every key a finished set contains, so the app never counts items itself. */
@@ -1534,7 +1542,7 @@ export function fetchQuestions(exercise: string) {
  */
 export type ReflectionQuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   version: number;
   items: {
     id: string;
@@ -1561,7 +1569,7 @@ export type ReflectionQuestionSet = {
  */
 export type IntimacyQuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   variant: 'premarital' | 'married';
   dimensions: { id: string; label: string }[];
   items: {
@@ -1781,7 +1789,7 @@ export type ConflictQuestionSet = {
    * is what reads the answers back and calls them complete or not.
    */
   requiredIds: string[];
-  exercise: { key: string; label: string; shape: 'answers' | 'record'; view: string };
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
   intro: string | null;
   sections: { id: string; label: string; questions: string[] }[];
   frequencyOptions: { value: number; label: string }[];

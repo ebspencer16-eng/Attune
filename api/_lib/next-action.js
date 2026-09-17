@@ -170,9 +170,22 @@ export function nextActions(state = {}) {
   for (const { key, label, view: link } of EXERCISES) {
     const e = ex[key];
     if (e?.owned && !e.mine) {
+      /**
+       * ── STARTED IS A DIFFERENT PROMPT FROM NOT STARTED ──────────────────
+       * Ellie: "If one of the exercises is in progress, can the first prompt
+       * on the home page be 'Continue [exercise name]' and the line under say
+       * 'You've completed [#]/[#] questions'".
+       *
+       * Someone twenty questions in does not need to be told what the
+       * exercises are for. They need the name of the one they are in and how
+       * much is left.
+       */
+      const started = e.started && e.answered > 0;
       add({ id: `finish-${key}`, kind: 'finish_exercise', priority: 10,
-        title: 'Complete your exercises',
-        body: `Your results unlock once you and ${them} complete your exercises`,
+        title: started ? `Continue ${label}` : 'Complete your exercises',
+        body: started
+          ? `You've completed ${e.answered}/${e.total} questions`
+          : `Your results unlock once you and ${them} complete your exercises`,
         cta: 'Continue', deepLink: `/?view=${link}` });
       break; // one exercise at a time, in order
     }

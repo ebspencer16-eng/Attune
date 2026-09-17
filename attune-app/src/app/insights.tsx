@@ -321,7 +321,11 @@ function StatusTable({
           {/* Only your own column is actionable, and only for exercises the
               app can actually ask. A cell that opens nothing is worse than a
               plain status. */}
-          <StatusCell done={e.mine} onPress={!e.mine && e.inApp ? () => onOpen(e.key) : undefined} />
+          <StatusCell
+            done={e.mine}
+            started={e.started}
+            onPress={!e.mine && e.inApp ? () => onOpen(e.key) : undefined}
+          />
           <StatusCell done={e.theirs} muted />
         </View>
       ))}
@@ -346,7 +350,9 @@ function HeaderCell({ label }: { label: string }) {
  * partners but has no notion of an exercise being underway, so an "in progress"
  * state here would be invented rather than observed.
  */
-function StatusCell({ done, muted, onPress }: { done: boolean; muted?: boolean; onPress?: () => void }) {
+function StatusCell({
+  done, started, muted, onPress,
+}: { done: boolean; started?: boolean; muted?: boolean; onPress?: () => void }) {
   const Wrap: React.ElementType = onPress ? Pressable : View;
   return (
     <Wrap
@@ -356,14 +362,19 @@ function StatusCell({ done, muted, onPress }: { done: boolean; muted?: boolean; 
         gap: Spacing.xs, paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm,
         borderLeftWidth: 1, borderLeftColor: c.border,
       }}>
+      {/* Three states, not two. Ellie: "I exited after only a few questions
+          of ex1, but I expected the status table to say in progress or
+          something". The middle one is the clay the website uses for it. */}
       <View
         style={{
           width: 17, height: 17, borderRadius: Radius.pill,
           alignItems: 'center', justifyContent: 'center',
-          backgroundColor: done ? StatusColor.done : StatusColor.waiting,
+          backgroundColor: done ? StatusColor.done : started ? StatusColor.inProgress : StatusColor.waiting,
         }}>
         {done ? (
           <Text style={{ fontSize: 9, lineHeight: 11, color: Palette.white, fontWeight: '700' }}>{'✓'}</Text>
+        ) : started ? (
+          <Text style={{ fontSize: 11, lineHeight: 12, color: Palette.white, fontWeight: '700' }}>{'·'}</Text>
         ) : null}
       </View>
       <Text
@@ -371,7 +382,7 @@ function StatusCell({ done, muted, onPress }: { done: boolean; muted?: boolean; 
           ...Type.small, fontWeight: done ? '700' : '600',
           color: done ? StatusColor.done : muted ? StatusColor.waitingText : c.accentQuiet,
         }}>
-        {done ? 'Done' : onPress ? 'Start' : 'Pending'}
+        {done ? 'Done' : started ? 'In progress' : onPress ? 'Start' : 'Pending'}
       </Text>
     </Wrap>
   );

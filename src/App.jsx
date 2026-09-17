@@ -2,7 +2,7 @@ import { signedUrlIsLive } from "../api/_lib/workbook-link.js";
 import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
-import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
+import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, EX1_SCALE, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, CONFLICT_INTRO, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
 import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NEEDED, SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, FREQUENCY_LABELS, interpConflict, overallColor as conflictOverallColor, GLANCE_LABEL as CONFLICT_GLANCE_LABEL } from "../api/_conflict-results-prose.js";
 // Results copy now lives in versioned snapshots. A couple's results render
@@ -3113,13 +3113,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
     }
   };
 
-  const SCALE = [
-    { val: 1, label: "Strongly A" },
-    { val: 2, label: "Mostly A" },
-    { val: 3, label: "In the middle" },
-    { val: 4, label: "Mostly B" },
-    { val: 5, label: "Strongly B" },
-  ];
+  const SCALE = EX1_SCALE;
 
   if (q?.__partBreak) {
     return (
@@ -14441,7 +14435,7 @@ export default function App() {
             {ex1Answers
               ? <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Exercise 1 Complete.</p>
+                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Communication styles exercise complete</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#4CAF50", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your communication profile is mapped</p>
                   {/* Body copy prioritizes the next concrete action:
                       - If they haven't done Ex2 → tell them that's next
