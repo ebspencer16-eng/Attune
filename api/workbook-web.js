@@ -50,6 +50,48 @@ function storageOriginAllowed(url) {
   }
 }
 
+/**
+ * Drop the tables that are not tables.
+ *
+ * The generator draws rules and gradient bars as a row of narrow coloured
+ * cells, because docx has no other way to put a coloured bar on a page. Word
+ * shows a gradient; a converter sees a table of empty cells and renders a row
+ * of little boxes. Anything with no words in it was decoration, so it goes.
+ *
+ * Depth-counted rather than matched with a regex: the document nests tables
+ * inside table cells, and a lazy match would swallow the wrong closing tag and
+ * take a page of real content with it.
+ */
+function dropEmptyTables(html) {
+  let out = '';
+  let i = 0;
+  while (i < html.length) {
+    const start = html.indexOf('<table', i);
+    if (start === -1) { out += html.slice(i); break; }
+    out += html.slice(i, start);
+
+    let depth = 0;
+    let j = start;
+    let end = -1;
+    while (j < html.length) {
+      const open = html.indexOf('<table', j);
+      const close = html.indexOf('</table>', j);
+      if (close === -1) break;
+      if (open !== -1 && open < close) { depth += 1; j = open + 6; continue; }
+      depth -= 1;
+      j = close + 8;
+      if (depth === 0) { end = j; break; }
+    }
+    if (end === -1) { out += html.slice(start); break; }
+
+    const block = html.slice(start, end);
+    const text = block.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+    if (text) out += block;
+    i = end;
+  }
+  return out;
+}
+
 /** The page's own type and colours, so it reads as Attune rather than as Word. */
 const STYLE = `
   :root {
@@ -132,7 +174,8 @@ export default async function handler(req, res) {
     const buffer = Buffer.from(await fetched.arrayBuffer());
     const { value } = await mammoth.convertToHtml({ buffer });
     // Tables scroll rather than squeeze on a phone, so each one is wrapped.
-    const body = String(value || '').replace(/<table/g, '<div class="table-wrap"><table')
+    const body = dropEmptyTables(String(value || ''))
+      .replace(/<table/g, '<div class="table-wrap"><table')
       .replace(/<\/table>/g, '</table></div>');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     // Private: this is one couple's document, minted for one hour.
