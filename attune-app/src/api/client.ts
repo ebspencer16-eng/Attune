@@ -615,6 +615,8 @@ export type ExerciseState = {
   started?: boolean;
   answered?: number;
   total?: number;
+  /** The name with room to breathe, for anywhere that is not a table column. */
+  fullLabel?: string;
 };
 
 /** One purchasable thing, from api/_catalogue.js. Price is whole dollars. */

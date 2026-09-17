@@ -978,7 +978,6 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 0 2rem", animation: "fadeIn 0.5s ease" }}>
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{"@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}"}</style>
-        <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 · Before we start</p>
         <h2 style={{ fontFamily: font.display, fontSize: "clamp(1.5rem,4vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.85rem" }}>
           Who were the primary adults<br /><em style={{ fontStyle: "normal", color: "inherit" }}>in your home growing up?</em>
         </h2>
@@ -3121,9 +3120,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         <link href={FONT_LINK} rel="stylesheet" />
         <div style={{ height: 3, background: "#E5E2DC" }}><div style={{ height: "100%", width: progress + "%", background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} /></div>
         <div style={{ maxWidth: 520, margin: "0 auto", padding: "3.5rem 1.5rem 2rem", animation: "fadeIn 0.5s ease" }}>
-          <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>Part 2 of 2</p>
-          <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>Now, the same questions about your partner.</p>
-          <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>You just answered these about yourself. This time, answer the same set the way you think <em>your partner</em> would. It shows each of you where your reads of each other line up, and where they do not. There are no right answers.</p>
+          <p style={{ fontFamily: font.display, fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>Part Two: All the same questions, but about your partner</p>
           <button onClick={() => { const ni = idx + 1; setIdx(ni); setChosen(answers[questions[ni]?.answerKey] ?? null); if (!fresh) { try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers, idx: ni })); } catch {} } }} style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", padding: "0.95rem 2rem", borderRadius: 10, cursor: "pointer", fontFamily: font.body, fontSize: "0.95rem", fontWeight: 600, minHeight: 48 }}>Continue →</button>
         </div>
       </div>
@@ -3146,7 +3143,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>
-            Part {q.isPV ? "2" : "1"} of 2 &middot; Question {answeredNum} of {qCount}
+            Question {answeredNum} of {qCount}
           </p>
           <p style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1C1C1E", fontFamily: "'Playfair Display', serif", lineHeight: 1.4, margin: 0 }}>
             {q.partnerView

@@ -124,6 +124,7 @@ export default async function handler(req) {
       {
         key: e.key,
         label: e.label,
+        fullLabel: e.fullLabel || e.label,
         order: e.order,
         owned: !e.capability || !!caps[e.capability],
         // Whether the app can ask this one. Sent so the app holds no list of

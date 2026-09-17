@@ -314,8 +314,11 @@ function StatusTable({
             <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
               {String(i + 1).padStart(2, '0')}
             </Text>
+            {/* Ellie: "please call ex1 communication styles in the status
+                table". The fuller name from the registry, with the short one
+                as the fallback for anything that has not been given one. */}
             <Text style={{ ...Type.small, color: c.textStrong, fontWeight: '500', flex: 1 }}>
-              {e.label || e.key}
+              {e.fullLabel || e.label || e.key}
             </Text>
           </View>
           {/* Only your own column is actionable, and only for exercises the
@@ -324,6 +327,8 @@ function StatusTable({
           <StatusCell
             done={e.mine}
             started={e.started}
+            answered={e.answered}
+            total={e.total}
             onPress={!e.mine && e.inApp ? () => onOpen(e.key) : undefined}
           />
           <StatusCell done={e.theirs} muted />
@@ -344,6 +349,30 @@ function HeaderCell({ label }: { label: string }) {
 }
 
 /**
+ * How much of an exercise is done, as a filled circle.
+ *
+ * ── WHY IT IS DRAWN THIS WAY ──────────────────────────────────────────────
+ * A wedge is an arc, and an arc needs a path, and a path needs a drawing
+ * library this app does not carry. What it does have is layout: a circle, and
+ * inside it a bar that grows from the bottom. It reads as a filled proportion,
+ * which is what the number beside it says in words, and it costs no dependency
+ * and no bridge call.
+ */
+function Pie({ portion }: { portion: number }) {
+  const filledPct = Math.max(0, Math.min(1, portion)) * 100;
+  return (
+    <View
+      style={{
+        width: 17, height: 17, borderRadius: Radius.pill, overflow: 'hidden',
+        borderWidth: 1.5, borderColor: StatusColor.inProgress,
+        justifyContent: 'flex-end',
+      }}>
+      <View style={{ height: `${filledPct}%`, backgroundColor: StatusColor.inProgress }} />
+    </View>
+  );
+}
+
+/**
  * One person's state for one exercise.
  *
  * Done or not, and nothing in between. /api/home reports completion for both
@@ -351,8 +380,11 @@ function HeaderCell({ label }: { label: string }) {
  * state here would be invented rather than observed.
  */
 function StatusCell({
-  done, started, muted, onPress,
-}: { done: boolean; started?: boolean; muted?: boolean; onPress?: () => void }) {
+  done, started, answered, total, muted, onPress,
+}: {
+  done: boolean; started?: boolean; answered?: number; total?: number;
+  muted?: boolean; onPress?: () => void;
+}) {
   const Wrap: React.ElementType = onPress ? Pressable : View;
   return (
     <Wrap
@@ -362,27 +394,34 @@ function StatusCell({
         gap: Spacing.xs, paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm,
         borderLeftWidth: 1, borderLeftColor: c.border,
       }}>
-      {/* Three states, not two. Ellie: "I exited after only a few questions
-          of ex1, but I expected the status table to say in progress or
-          something". The middle one is the clay the website uses for it. */}
-      <View
-        style={{
-          width: 17, height: 17, borderRadius: Radius.pill,
-          alignItems: 'center', justifyContent: 'center',
-          backgroundColor: done ? StatusColor.done : started ? StatusColor.inProgress : StatusColor.waiting,
-        }}>
-        {done ? (
-          <Text style={{ fontSize: 9, lineHeight: 11, color: Palette.white, fontWeight: '700' }}>{'✓'}</Text>
-        ) : started ? (
-          <Text style={{ fontSize: 11, lineHeight: 12, color: Palette.white, fontWeight: '700' }}>{'·'}</Text>
-        ) : null}
-      </View>
+      {/* ── THREE STATES, AND THE MIDDLE ONE IS A COUNT ──────────────────
+          Ellie: "I don't like that in progress fits differently in the status
+          table. What if we just listed the progress count like 6/50, and used
+          the circle icon as a pie chart to show portion complete?"
+
+          So the circle is the same size in all three states and the words
+          beside it are short in all three: a tick and Done, a filled wedge and
+          6/50, an empty circle and Start. Nothing reflows between rows. */}
+      {done || !started ? (
+        <View
+          style={{
+            width: 17, height: 17, borderRadius: Radius.pill,
+            alignItems: 'center', justifyContent: 'center',
+            backgroundColor: done ? StatusColor.done : StatusColor.waiting,
+          }}>
+          {done ? (
+            <Text style={{ fontSize: 9, lineHeight: 11, color: Palette.white, fontWeight: '700' }}>{'✓'}</Text>
+          ) : null}
+        </View>
+      ) : (
+        <Pie portion={(answered || 0) / Math.max(total || 1, 1)} />
+      )}
       <Text
         style={{
           ...Type.small, fontWeight: done ? '700' : '600',
           color: done ? StatusColor.done : muted ? StatusColor.waitingText : c.accentQuiet,
         }}>
-        {done ? 'Done' : started ? 'In progress' : onPress ? 'Start' : 'Pending'}
+        {done ? 'Done' : started ? `${answered}/${total}` : onPress ? 'Start' : 'Pending'}
       </Text>
     </Wrap>
   );

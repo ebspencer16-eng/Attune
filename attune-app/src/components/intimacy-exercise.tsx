@@ -34,6 +34,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchExerciseQuestions, saveExercise } from '@/api/client';
 import type { ApiError, IntimacyQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { ExerciseEyebrow, ExerciseNav, exerciseColor } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -171,17 +172,14 @@ export default function IntimacyExercise({
           padding: Spacing.xl, paddingBottom: BottomTabInset,
           maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
         }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>
-            {dimension?.label || item.topic}
-          </Text>
-          <Text style={{ ...Type.small, color: c.textMuted }}>
-            {idx + 1} of {items.length}
-          </Text>
-        </View>
+        <ExerciseEyebrow
+          exerciseKey="intimacy"
+          label={set.exercise.fullLabel || set.exercise.label}
+          right={`Question ${idx + 1} of ${items.length}`}
+        />
 
         <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
-          <View style={{ width: `${((idx + 1) / items.length) * 100}%`, height: 3, backgroundColor: c.accent }} />
+          <View style={{ width: `${((idx + 1) / items.length) * 100}%`, height: 3, backgroundColor: exerciseColor('intimacy') }} />
         </View>
 
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>{item.text}</Text>
@@ -232,31 +230,14 @@ export default function IntimacyExercise({
 
         {/* Never disabled. Nothing here is required, and a greyed Next on a
             question someone does not want to answer is the app insisting. */}
-        <Pressable
-      accessibilityRole="button"
-          onPress={advance}
-          disabled={saving}
-          style={{
-            marginTop: Spacing.xl, borderRadius: Radius.md, paddingVertical: Spacing.md,
-            alignItems: 'center', backgroundColor: c.accent,
-          }}>
-          {saving && isLast
-            ? <ActivityIndicator color={Palette.white} />
-            : (
-              <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>
-                {isLast ? 'Finish' : value == null ? 'Skip' : 'Next'}
-              </Text>
-            )}
-        </Pressable>
-
-        {idx > 0 ? (
-          <Pressable
-      accessibilityRole="button"
-            onPress={() => setIdx(idx - 1)}
-            style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
-            <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
-          </Pressable>
-        ) : null}
+        <ExerciseNav
+          onBack={idx > 0 ? () => setIdx(idx - 1) : undefined}
+          onNext={advance}
+          nextLabel={isLast ? 'Finish' : value == null ? 'Skip' : 'Next'}
+          disabled={saving && isLast}
+          busy={saving && isLast}
+          color={exerciseColor('intimacy')}
+        />
 
         {/* The website's own words, from the exercise intro. What was here
             was written for the app and promised something the product does

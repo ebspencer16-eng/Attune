@@ -34,7 +34,6 @@ import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
-import { ResultsScroll } from '@/components/results-scroll';
 
 const c = Colors.light;
 
@@ -174,14 +173,24 @@ export default function Expectations({
   if (stage === 'structure') {
     return (
       <Shell onClose={onClose}>
-        <ResultsScroll contentContainerStyle={pad}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Expectations</Text>
-          <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>
-            Who ran the household you grew up in?
+        <ScrollView contentContainerStyle={pad}>
+          {/* Ellie: "No eyebrow on the household background question page
+              please." The page has one question on it and the question is the
+              heading; a label above it repeating the exercise's name is a
+              second heading for the same screen. */}
+          {/* ── THE SITE'S WORDS, NOT THE APP'S ──────────────────────────
+              Ellie: "I don't remember the 'who ran the household you grew up
+              in' text. What do we have on the site?" She was right not to: the
+              website asks "Who were the primary adults in your home growing
+              up?" and this screen had been given its own wording. The site's
+              is the one that has been read by customers, so it is the one both
+              surfaces use. */}
+          <Text style={{ ...Type.title, color: c.textStrong }}>
+            Who were the primary adults in your home growing up?
           </Text>
           <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
-            This sets the labels for the next questions. Most of what people
-            expect at home traces back to what they saw growing up.
+            This shapes how you answer the next section, and helps us give you
+            more personalized context in your results.
           </Text>
           {set.childhoodStructures.map((st) => {
             const on = answers.childhoodStructure === st.id;
@@ -199,7 +208,7 @@ export default function Expectations({
             disabled={!answers.childhoodStructure}
             onPress={() => setStage('responsibilities')}
           />
-        </ResultsScroll>
+        </ScrollView>
       </Shell>
     );
   }
@@ -208,7 +217,7 @@ export default function Expectations({
   if (stage === 'responsibilities' && cat) {
     return (
       <Shell onClose={onClose}>
-        <ResultsScroll contentContainerStyle={pad}>
+        <ScrollView contentContainerStyle={pad}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{cat.label}</Text>
             <Text style={{ ...Type.small, color: c.textMuted }}>
@@ -328,7 +337,7 @@ export default function Expectations({
         ) : null}
 
         {catIdx > 0 ? <Secondary label="Back" onPress={() => setCatIdx(catIdx - 1)} /> : null}
-        </ResultsScroll>
+        </ScrollView>
       </Shell>
     );
   }
@@ -339,7 +348,7 @@ export default function Expectations({
     const isLast = lifeIdx === life.length - 1;
     return (
       <Shell onClose={onClose}>
-        <ResultsScroll contentContainerStyle={pad}>
+        <ScrollView contentContainerStyle={pad}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{lifeQ.topic}</Text>
             <Text style={{ ...Type.small, color: c.textMuted }}>
@@ -373,7 +382,7 @@ export default function Expectations({
             }}
           />
           {lifeIdx > 0 ? <Secondary label="Back" onPress={() => setLifeIdx(lifeIdx - 1)} /> : null}
-        </ResultsScroll>
+        </ScrollView>
       </Shell>
     );
   }

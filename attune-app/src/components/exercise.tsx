@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchQuestions, saveExercise } from '@/api/client';
 import type { ApiError, QuestionItem, QuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { ExerciseEyebrow, ExerciseNav } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -157,13 +158,11 @@ export default function Exercise({
     return (
       <Shell onClose={onClose}>
         <View style={{ padding: Spacing.xl, flex: 1, justifyContent: 'center' }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Part two</Text>
-          <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm }}>
-            Now the same questions, about your partner
-          </Text>
-          <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.md }}>
-            Answer how you think they would. Nobody is marked right or wrong on
-            these, and your partner never sees what you guessed.
+          {/* Ellie's words, and her structure: no eyebrow above it and no
+              paragraph under it. The site said one thing here and the app said
+              another; this is what both say now. */}
+          <Text style={{ ...Type.hero, color: c.textStrong }}>
+            Part Two: All the same questions, but about your partner
           </Text>
           <Pressable
       accessibilityRole="button"
@@ -182,6 +181,9 @@ export default function Exercise({
   if (!item) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
 
   const chosen = answers[item.answerKey] ?? null;
+  // Where they are, not how much they have done: going back to question three
+  // should say three, and it said "40 of 50" because forty were answered.
+  const questionNumber = questions.findIndex((q) => q.answerKey === item.answerKey) + 1;
   const isLast = idx === items.length - 1;
 
   const choose = (val: number) => {
@@ -208,14 +210,15 @@ export default function Exercise({
   return (
     <Shell onClose={onClose}>
       <ScrollView contentContainerStyle={{ padding: Spacing.xl, paddingBottom: BottomTabInset, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>
-            {item.isPV ? 'About your partner' : (set.exercise.fullLabel || set.exercise.label)}
-          </Text>
-          <Text style={{ ...Type.small, color: c.textMuted }}>
-            {answeredCount} of {questions.length}
-          </Text>
-        </View>
+        {/* Ellie: the counter says "question 6 of 50" on both surfaces now,
+            "that way there's no misunderstanding that each section might be 50
+            questions". The eyebrow is the exercise's full name in its own
+            colour, on every exercise, from one component. */}
+        <ExerciseEyebrow
+          exerciseKey={set.exercise.key}
+          label={set.exercise.fullLabel || set.exercise.label}
+          right={`Question ${questionNumber} of ${questions.length}`}
+        />
 
         <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
           <View style={{ width: `${(answeredCount / Math.max(1, questions.length)) * 100}%`, height: 3, backgroundColor: c.accent }} />
@@ -293,60 +296,14 @@ export default function Exercise({
           </Text>
         ) : null}
 
-        {/* ── BACK AND NEXT, ON THEIR OWN SIDES ───────────────────────────
-            Ellie: "Rather than next and back both being centered and
-            vertically stacked, I want a small arrow on the left that says back
-            and arrow on the right that says next."
+        <ExerciseNav
+          onBack={idx > 0 ? () => setIdx(idx - 1) : undefined}
+          onNext={advance}
+          nextLabel={isLast ? 'Finish' : 'Next'}
+          disabled={chosen == null || (saving && isLast)}
+          busy={saving && isLast}
+        />
 
-            The row keeps its shape on the first question, where there is
-            nothing to go back to: the space stays and Next does not move. */}
-        <View
-          style={{
-            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-            marginTop: Spacing.xl,
-          }}>
-          {idx > 0 ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Back to the previous question"
-              onPress={() => setIdx(idx - 1)}
-              hitSlop={10}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm }}>
-              <Text style={{ ...Type.body, color: c.textMuted }}>{'\u2039'}</Text>
-              <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
-            </Pressable>
-          ) : <View />}
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isLast ? 'Finish' : 'Next question'}
-            onPress={advance}
-            /**
-             * ── WHY SAVING NO LONGER DISABLES THIS ────────────────────────
-             * Ellie: "Q35 'next' arrow on comms ex took like 5 clicks to
-             * work." Every answer writes to the server, and this was disabled
-             * for as long as that took, so on a slow round trip the control
-             * was dead for a second or two and taps went nowhere.
-             *
-             * The intermediate saves are deliberately not waited on: the next
-             * answer retries them. Only the last one is, because it is what
-             * marks the exercise complete.
-             */
-            disabled={chosen == null || (saving && isLast)}
-            hitSlop={10}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.sm }}>
-            {saving && isLast ? (
-              <ActivityIndicator color={c.accent} />
-            ) : (
-              <>
-                <Text style={{ ...Type.small, fontWeight: '700', color: chosen == null ? c.border : c.accent }}>
-                  {isLast ? 'Finish' : 'Next'}
-                </Text>
-                <Text style={{ ...Type.body, color: chosen == null ? c.border : c.accent }}>{'\u203A'}</Text>
-              </>
-            )}
-          </Pressable>
-        </View>
       </ScrollView>
     </Shell>
   );

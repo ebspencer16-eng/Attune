@@ -29,6 +29,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchExerciseQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ReflectionQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { ExerciseEyebrow, ExerciseNav, exerciseColor } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -161,18 +162,21 @@ export default function ReflectionExercise({
             padding: Spacing.xl, paddingBottom: BottomTabInset,
             maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
           }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{item.category}</Text>
-            <Text style={{ ...Type.small, color: c.textMuted }}>
-              {idx + 1} of {items.length}
-            </Text>
-          </View>
+          {/* Ellie: "Eyebrow in top left should just say relationship
+              reflection on every question page." It was the category of the
+              question, which changes every few screens and reads as the name
+              of something you have not heard of. */}
+          <ExerciseEyebrow
+            exerciseKey="ex3"
+            label={set.exercise.fullLabel || set.exercise.label}
+            right={`Question ${idx + 1} of ${items.length}`}
+          />
 
           <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
             <View
               style={{
                 width: `${((idx + 1) / items.length) * 100}%`,
-                height: 3, backgroundColor: c.accent,
+                height: 3, backgroundColor: exerciseColor('ex3'),
               }}
             />
           </View>
@@ -217,45 +221,21 @@ export default function ReflectionExercise({
             </Text>
           ) : null}
 
-          <Pressable
-      accessibilityRole="button"
-            onPress={advance}
-            disabled={!canAdvance || saving}
-            style={{
-              marginTop: Spacing.xl, borderRadius: Radius.md, paddingVertical: Spacing.md,
-              alignItems: 'center',
-              backgroundColor: canAdvance ? c.accent : c.border,
-            }}>
-            {saving && isLast
-              ? <ActivityIndicator color={Palette.white} />
-              : (
-                <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>
-                  {isLast ? 'Finish' : canAdvance && value == null ? 'Skip' : 'Next'}
-                </Text>
-              )}
-          </Pressable>
+          {/* Ellie: "Remove the 'you can leave this one blank' and '1 of 5
+              required answered' from this exercise's question pages." The
+              first was a note under the button and the second a count under
+              that, and between them the screen spent three lines explaining
+              itself. Skip still says Skip when there is nothing entered, which
+              is the same information in the place it is needed. */}
+          <ExerciseNav
+            onBack={idx > 0 ? () => setIdx(idx - 1) : undefined}
+            onNext={advance}
+            nextLabel={isLast ? 'Finish' : canAdvance && value == null ? 'Skip' : 'Next'}
+            disabled={!canAdvance || (saving && isLast)}
+            busy={saving && isLast}
+            color={exerciseColor('ex3')}
+          />
 
-          {/* Said plainly rather than hidden behind a greyed button. Someone
-              who has nothing to write for a question should know they can
-              move on rather than inventing something. */}
-          {!isRequired ? (
-            <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center', marginTop: Spacing.sm }}>
-              You can leave this one blank.
-            </Text>
-          ) : null}
-
-          {idx > 0 ? (
-            <Pressable
-      accessibilityRole="button"
-              onPress={() => setIdx(idx - 1)}
-              style={{ marginTop: Spacing.sm, paddingVertical: Spacing.sm, alignItems: 'center' }}>
-              <Text style={{ ...Type.small, color: c.textMuted, fontWeight: '600' }}>Back</Text>
-            </Pressable>
-          ) : null}
-
-          <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center', marginTop: Spacing.lg }}>
-            {answeredRequired} of {required.length} required answered
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </Shell>
@@ -283,8 +263,8 @@ function ScaleChoice({
             style={{
               paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
               borderRadius: Radius.md,
-              backgroundColor: on ? c.textStrong : c.surface,
-              borderColor: on ? c.textStrong : c.border, borderWidth: 1,
+              backgroundColor: on ? exerciseColor('ex3') : c.surface,
+              borderColor: on ? exerciseColor('ex3') : c.border, borderWidth: 1,
             }}>
             <Text style={{ ...Type.body, color: on ? Palette.white : c.text }}>{label}</Text>
           </Pressable>
@@ -309,8 +289,8 @@ function PickChoice({
             style={{
               paddingVertical: Spacing.sm + 2, paddingHorizontal: Spacing.lg,
               borderRadius: Radius.pill,
-              backgroundColor: on ? c.textStrong : c.surface,
-              borderColor: on ? c.textStrong : c.border, borderWidth: 1,
+              backgroundColor: on ? exerciseColor('ex3') : c.surface,
+              borderColor: on ? exerciseColor('ex3') : c.border, borderWidth: 1,
             }}>
             <Text style={{ ...Type.small, fontWeight: '600', color: on ? Palette.white : c.text }}>
               {o}

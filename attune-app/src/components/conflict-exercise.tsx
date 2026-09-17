@@ -25,6 +25,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchConflictQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ConflictQuestion, ConflictQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
+import { ExerciseEyebrow, ExerciseNav, exerciseColor } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -143,12 +144,13 @@ export default function ConflictExercise({
   return (
     <Shell onClose={onClose}>
       <ScrollView contentContainerStyle={pad} keyboardShouldPersistTaps="handled">
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{set.exercise.label}</Text>
-          <Text style={{ ...Type.small, color: c.textMuted }}>{idx + 1} of {set.items.length}</Text>
-        </View>
+        <ExerciseEyebrow
+          exerciseKey="conflict"
+          label={set.exercise.fullLabel || set.exercise.label}
+          right={`Question ${idx + 1} of ${set.items.length}`}
+        />
         <View style={{ height: 3, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.sm, overflow: 'hidden' }}>
-          <View style={{ width: `${((idx + 1) / set.items.length) * 100}%`, height: 3, backgroundColor: c.accent }} />
+          <View style={{ width: `${((idx + 1) / set.items.length) * 100}%`, height: 3, backgroundColor: exerciseColor('conflict') }} />
         </View>
 
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl, marginBottom: Spacing.lg }}>
@@ -157,11 +159,13 @@ export default function ConflictExercise({
 
         <Body q={q} value={value} onChange={set1} frequencyOptions={set.frequencyOptions} />
 
-        <Primary
-          label={isLast ? 'Finish' : 'Next'}
-          disabled={!answered || saving}
+        <ExerciseNav
+          onBack={idx > 0 ? () => setIdx(idx - 1) : undefined}
+          nextLabel={isLast ? 'Finish' : 'Next'}
+          disabled={!answered || (saving && isLast)}
           busy={saving && isLast}
-          onPress={async () => {
+          color={exerciseColor('conflict')}
+          onNext={async () => {
             const next = { ...answers };
             if (isLast) {
               // Checked across the whole set, not just this screen. Back lets
@@ -192,8 +196,6 @@ export default function ConflictExercise({
             That answer has not saved yet. It will try again on the next one.
           </Text>
         ) : null}
-
-        {idx > 0 ? <Secondary label="Back" onPress={() => setIdx(idx - 1)} /> : null}
       </ScrollView>
     </Shell>
   );
