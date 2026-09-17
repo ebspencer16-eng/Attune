@@ -29,7 +29,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchExerciseQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ReflectionQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
-import { ExerciseEyebrow, ExerciseNav, exerciseColor } from '@/components/exercise-chrome';
+import { ExerciseEyebrow, ExerciseNav, exerciseColor, ExerciseOpening } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -43,6 +43,13 @@ export default function ReflectionExercise({
   onClose, onFinished,
 }: { onClose: () => void; onFinished: () => void }) {
   useScreenTime('exercise3');
+  /**
+   * Whether the opening screen is still showing.
+   *
+   * `started` is what makes it skippable: someone resuming a half-answered
+   * exercise has read this page and wants the question they left off on.
+   */
+  const [opening, setOpening] = useState(true);
   const [set, setSet] = useState<ReflectionQuestionSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,6 +113,28 @@ export default function ReflectionExercise({
     );
   }
   if (!set || !items.length || !item) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
+
+  /**
+   * ── THE SCREEN THAT OPENS IT ────────────────────────────────────────────
+   * Ellie: "Need the flow to match exactly for web and app." The website opens
+   * every exercise with its name and what it is for; the app opened none of
+   * them. Skipped for someone coming back to a half-finished exercise, who has
+   * read it already and wants their place.
+   */
+  const started = Object.keys(answers || {}).length > 0;
+
+  if (opening && set.intro && !started) {
+    return (
+      <Shell onClose={onClose}>
+        <ExerciseOpening
+          exerciseKey="ex3"
+          label={set.exercise.fullLabel || set.exercise.label}
+          intro={set.intro}
+          onBegin={() => setOpening(false)}
+        />
+      </Shell>
+    );
+  }
 
   if (done) {
     return (

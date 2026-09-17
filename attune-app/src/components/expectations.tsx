@@ -31,6 +31,9 @@ import { fetchExpectations, saveExercise } from '@/api/client';
 import type { ApiError, ExpectationsSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import {
+  ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
+} from '@/components/exercise-chrome';
+import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
@@ -55,6 +58,13 @@ export default function Expectations({
   onClose, onFinished,
 }: { onClose: () => void; onFinished: () => void }) {
   useScreenTime('exercise2');
+  /**
+   * Whether the opening screen is still showing.
+   *
+   * `started` is what makes it skippable: someone resuming a half-answered
+   * exercise has read this page and wants the question they left off on.
+   */
+  const [opening, setOpening] = useState(true);
   const [set, setSet] = useState<ExpectationsSet | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +74,18 @@ export default function Expectations({
   const [attempt, setAttempt] = useState(0);
 
   const [answers, setAnswers] = useState<Answers>(EMPTY);
-  const [stage, setStage] = useState<'structure' | 'responsibilities' | 'life' | 'done'>('structure');
+  /**
+   * ── THE ORDER IS THE WEBSITE'S ──────────────────────────────────────────
+   * Ellie: "Hate the setup of this exercise. It needs to be the same as the
+   * mobile web experience."
+   *
+   * The website asks the life and values questions first, then who ran the
+   * household you grew up in, then the responsibilities that question sets the
+   * labels for. The app asked them backwards: the household question, then
+   * responsibilities, then life. Someone doing it on both surfaces was doing
+   * two different exercises in two different orders.
+   */
+  const [stage, setStage] = useState<'life' | 'structure' | 'responsibilities' | 'done'>('life');
   const [catIdx, setCatIdx] = useState(0);
   const [lifeIdx, setLifeIdx] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -155,6 +176,28 @@ export default function Expectations({
   if (loading) return <Shell onClose={onClose}><ScreenLoading label="Getting your questions" /></Shell>;
   if (error) return <Shell onClose={onClose}><ScreenError error={error} onRetry={() => { setError(null); setLoading(true); setAttempt((n) => n + 1); }} /></Shell>;
   if (!set) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
+
+  /**
+   * ── THE SCREEN THAT OPENS IT ────────────────────────────────────────────
+   * Ellie: "Need the flow to match exactly for web and app." The website opens
+   * every exercise with its name and what it is for; the app opened none of
+   * them. Skipped for someone coming back to a half-finished exercise, who has
+   * read it already and wants their place.
+   */
+  const started = Object.keys(answers || {}).length > 0;
+
+  if (opening && set.intro && !started) {
+    return (
+      <Shell onClose={onClose}>
+        <ExerciseOpening
+          exerciseKey="ex2"
+          label={set.exercise.fullLabel || set.exercise.label}
+          intro={set.intro}
+          onBegin={() => setOpening(false)}
+        />
+      </Shell>
+    );
+  }
 
   if (stage === 'done') {
     return (
@@ -321,13 +364,21 @@ export default function Expectations({
             );
           })}
 
-          <Primary
-            label={catIdx + 1 < cats.length ? 'Next' : 'Continue'}
-            disabled={!catDone}
-            onPress={() => {
-              persist(answers, false);
-              if (catIdx + 1 < cats.length) setCatIdx(catIdx + 1);
-              else setStage('life');
+          <ExerciseNav
+            onBack={catIdx > 0 ? () => setCatIdx(catIdx - 1) : undefined}
+            nextLabel={catIdx + 1 < cats.length ? 'Next' : 'Finish'}
+            disabled={!catDone || (saving && catIdx + 1 === cats.length)}
+            busy={saving && catIdx + 1 === cats.length}
+            color={exerciseColor('ex2')}
+            onNext={async () => {
+              if (catIdx + 1 < cats.length) {
+                persist(answers, false);
+                setCatIdx(catIdx + 1);
+                return;
+              }
+              // Responsibilities is the last part now, so this is the end.
+              const ok = await persist(answers, true);
+              if (ok) setStage('done');
             }}
           />
           {saveFailed ? (
@@ -336,7 +387,7 @@ export default function Expectations({
           </Text>
         ) : null}
 
-        {catIdx > 0 ? <Secondary label="Back" onPress={() => setCatIdx(catIdx - 1)} /> : null}
+
         </ScrollView>
       </Shell>
     );
@@ -367,21 +418,19 @@ export default function Expectations({
             />
           ))}
 
-          <Primary
-            label={isLast ? 'Finish' : 'Next'}
-            disabled={!chosen || saving}
-            busy={saving && isLast}
-            onPress={async () => {
-              if (isLast) {
-                const ok = await persist(answers, true);
-                if (ok) setStage('done');
-                return;
-              }
+          <ExerciseNav
+            onBack={lifeIdx > 0 ? () => setLifeIdx(lifeIdx - 1) : undefined}
+            nextLabel={isLast ? 'Continue' : 'Next'}
+            disabled={!chosen}
+            color={exerciseColor('ex2')}
+            onNext={() => {
               persist(answers, false);
-              setLifeIdx(lifeIdx + 1);
+              // Part one done: on to who ran the household, which is what sets
+              // the labels for part two.
+              if (isLast) setStage('structure');
+              else setLifeIdx(lifeIdx + 1);
             }}
           />
-          {lifeIdx > 0 ? <Secondary label="Back" onPress={() => setLifeIdx(lifeIdx - 1)} /> : null}
         </ScrollView>
       </Shell>
     );

@@ -12,9 +12,11 @@
  * not have to be made five times and remembered five times.
  */
 
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
-import { AccentFallback, AccentFor, Colors, Spacing, Type } from '@/constants/attune-theme';
+import {
+  AccentFallback, AccentFor, Colors, Palette, Radius, Spacing, Type,
+} from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -99,5 +101,61 @@ export function ExerciseNav({
         )}
       </Pressable>
     </View>
+  );
+}
+
+/** What the server sends to open an exercise. */
+export type ExerciseIntro = {
+  title: string;
+  body: string[];
+  note?: string | null;
+  cta: string;
+};
+
+/**
+ * The screen that opens an exercise.
+ *
+ * ── WHY EVERY EXERCISE HAS ONE NOW ────────────────────────────────────────
+ * Ellie: "Rel Relf jumps right in to the questioning and I don't like that.
+ * Need the flow to match exactly for web and app."
+ *
+ * The website opens all five with a page like this and the app opened none of
+ * them, which is two products rather than one. The words come from the server
+ * so they cannot be a third version: api/_lib/exercise-intro.js.
+ */
+export function ExerciseOpening({
+  exerciseKey, label, intro, onBegin,
+}: {
+  exerciseKey?: string | null;
+  label: string;
+  intro: ExerciseIntro;
+  onBegin: () => void;
+}) {
+  const tint = exerciseColor(exerciseKey);
+  return (
+    <ScrollView
+      contentContainerStyle={{
+        padding: Spacing.xl, paddingBottom: Spacing.xxxl, flexGrow: 1, justifyContent: 'center',
+      }}>
+      <Text style={{ ...Type.eyebrow, color: tint }}>{label}</Text>
+      <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.md }}>{intro.title}</Text>
+      {intro.body.map((para) => (
+        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg, lineHeight: 24 }}>
+          {para}
+        </Text>
+      ))}
+      {intro.note ? (
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>{intro.note}</Text>
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        onPress={onBegin}
+        style={{
+          marginTop: Spacing.xxl, borderRadius: Radius.md, paddingVertical: Spacing.lg,
+          alignItems: 'center', backgroundColor: tint,
+        }}>
+        <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{intro.cta}</Text>
+      </Pressable>
+    </ScrollView>
   );
 }

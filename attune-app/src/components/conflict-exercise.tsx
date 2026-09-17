@@ -25,7 +25,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchConflictQuestions, saveExercise } from '@/api/client';
 import type { ApiError, ConflictQuestion, ConflictQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
-import { ExerciseEyebrow, ExerciseNav, exerciseColor } from '@/components/exercise-chrome';
+import {
+  ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
+} from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
@@ -107,17 +109,12 @@ export default function ConflictExercise({
   if (intro && set.intro) {
     return (
       <Shell onClose={onClose}>
-        <ScrollView contentContainerStyle={pad}>
-          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{set.exercise.label}</Text>
-          <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.lg }}>{set.intro}</Text>
-          <View style={{ ...card, marginTop: Spacing.lg }}>
-            <Text style={{ ...Type.body, color: c.text }}>
-              Answer honestly. The section about your own patterns is never shown
-              to your partner.
-            </Text>
-          </View>
-          <Primary label="Start" onPress={() => setIntro(false)} />
-        </ScrollView>
+        <ExerciseOpening
+          exerciseKey="conflict"
+          label={set.exercise.fullLabel || set.exercise.label}
+          intro={set.intro}
+          onBegin={() => setIntro(false)}
+        />
       </Shell>
     );
   }

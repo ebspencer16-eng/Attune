@@ -26,7 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchQuestions, saveExercise } from '@/api/client';
 import type { ApiError, QuestionItem, QuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
-import { ExerciseEyebrow, ExerciseNav } from '@/components/exercise-chrome';
+import { ExerciseEyebrow, ExerciseNav, ExerciseOpening } from '@/components/exercise-chrome';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -48,6 +48,13 @@ const OPTIONS_HEIGHT = 170;
 export default function Exercise({
   exerciseKey, onClose, onFinished,
 }: { exerciseKey: string; onClose: () => void; onFinished: () => void }) {
+  /**
+   * Whether the opening screen is still showing.
+   *
+   * `started` is what makes it skippable: someone resuming a half-answered
+   * exercise has read this page and wants the question they left off on.
+   */
+  const [opening, setOpening] = useState(true);
   const [set, setSet] = useState<QuestionSet | null>(null);
   // Keyed by whichever exercise this is rendering, not by the file. The key
   // is the registry's view, so the app and the website file their time under
@@ -126,6 +133,28 @@ export default function Exercise({
     );
   }
   if (!set || !items.length) return <Shell onClose={onClose}><ScreenLoading /></Shell>;
+
+  /**
+   * ── THE SCREEN THAT OPENS IT ────────────────────────────────────────────
+   * Ellie: "Need the flow to match exactly for web and app." The website opens
+   * every exercise with its name and what it is for; the app opened none of
+   * them. Skipped for someone coming back to a half-finished exercise, who has
+   * read it already and wants their place.
+   */
+  const started = Object.keys(answers || {}).length > 0;
+
+  if (opening && set.intro && !started) {
+    return (
+      <Shell onClose={onClose}>
+        <ExerciseOpening
+          exerciseKey="ex1"
+          label={set.exercise.fullLabel || set.exercise.label}
+          intro={set.intro}
+          onBegin={() => setOpening(false)}
+        />
+      </Shell>
+    );
+  }
 
   if (done) {
     return (

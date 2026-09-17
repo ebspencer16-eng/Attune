@@ -1494,6 +1494,8 @@ export type QuestionItem = {
 export type ExpectationsSet = {
   saved: SavedAnswers;
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
+  intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   names: { you: string; partner: string };
   childhoodStructures: { id: string; label: string; cols: string[] }[];
   /** `key` is the raw item text and is what the answer is stored under. `label`
@@ -1517,6 +1519,8 @@ export type SavedAnswers = {
 export type QuestionSet = {
   saved: SavedAnswers;
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
+  intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   scale: { val: number; label: string }[];
   items: QuestionItem[];
   /** Every key a finished set contains, so the app never counts items itself. */
@@ -1545,6 +1549,8 @@ export function fetchQuestions(exercise: string) {
 export type ReflectionQuestionSet = {
   saved: SavedAnswers;
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
+  intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   version: number;
   items: {
     id: string;
@@ -1572,6 +1578,8 @@ export type ReflectionQuestionSet = {
 export type IntimacyQuestionSet = {
   saved: SavedAnswers;
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
+  intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   variant: 'premarital' | 'married';
   dimensions: { id: string; label: string }[];
   items: {
@@ -1792,7 +1800,8 @@ export type ConflictQuestionSet = {
    */
   requiredIds: string[];
   exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
-  intro: string | null;
+  /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
+  intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   sections: { id: string; label: string; questions: string[] }[];
   frequencyOptions: { value: number; label: string }[];
   items: ConflictQuestion[];
