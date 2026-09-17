@@ -375,6 +375,13 @@ export default function HomeScreen() {
             <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.lg }}>
               {data.greeting}
             </Text>
+            {/* The mark, plainly, under the greeting: the one piece of brand on
+                a screen whose whole ground is the brand colour. */}
+            <Image
+              source={require('@/assets/images/attune-mark.png')}
+              style={{ width: 54, height: 54 * (64 / 88), marginTop: Spacing.lg, opacity: 0.95 }}
+              resizeMode="contain"
+            />
             {/* ── CENTRED IN WHAT IS LEFT ────────────────────────────────
                 Ellie: "no matter where the bottom tile is, the insight of the
                 day and bg mark is centered between the bottom of the line on
@@ -605,7 +612,18 @@ const GLOW_ALPHA = 0.0133;
  * together: WHITE_GLOW true and MARK_BEHIND_INSIGHT false is exactly the
  * screen she had two days ago.
  */
-const WHITE_GLOW = false;
+const WHITE_GLOW = true;
+
+/**
+ * ── WHERE THE MARK ENDED UP ───────────────────────────────────────────────
+ * Ellie, having seen both: "revert to the glow behind the insight of the day,
+ * and add the logo below the 'good afternoon' line and above the insight. Not
+ * the glow-y logo, just the regular mark."
+ *
+ * So the white glow is back on, the stack behind the finding is off, and the
+ * mark is a plain image under the greeting. Every version is still one switch
+ * away, which is the point of having them as switches.
+ */
 
 /**
  * The mark behind the finding.
@@ -624,7 +642,7 @@ const WHITE_GLOW = false;
  * without a dependency. The asset is the same PNG the rest of the app uses, at
  * a size where its own resolution helps rather than hurts.
  */
-const MARK_BEHIND_INSIGHT = true;
+const MARK_BEHIND_INSIGHT = false;
 const MARK_WIDTH = 300;
 /**
  * Out of focus, without a blur.

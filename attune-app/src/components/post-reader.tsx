@@ -154,11 +154,11 @@ export default function PostReader({
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label={LOADING.post} /></ScreenFrame>;
+    return <ScreenFrame onBack={onClose} backLabel="Learn"><ScreenLoading label={LOADING.post} /></ScreenFrame>;
   }
   if (failed || !post) {
     return (
-      <ScreenFrame onBack={onClose} backLabel="Resources">
+      <ScreenFrame onBack={onClose} backLabel="Learn">
         <ScreenError
           error={failed || { kind: 'not_found', detail: 'post' }}
           onRetry={() => { setLoading(true); load(); }}
@@ -170,7 +170,7 @@ export default function PostReader({
   const accent = post.hero_color || c.accent;
 
   return (
-    <ScreenFrame onBack={onClose} backLabel="Resources">
+    <ScreenFrame onBack={onClose} backLabel="Learn">
     <AnnotationProvider
       section={post.id}
       anchorType="post_block"

@@ -8,22 +8,9 @@
     "scheme": "attune",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.attunerelationships.app",
       "supportsTablet": false,
       "associatedDomains": [
-        "applinks:attune-relationships.com",
-        "applinks:www.attune-relationships.com",
-        "webcredentials:attune-relationships.com",
-        "webcredentials:www.attune-relationships.com",
-        "applinks:attune-relationships.com",
-        "applinks:www.attune-relationships.com",
-        "webcredentials:attune-relationships.com",
-        "webcredentials:www.attune-relationships.com",
-        "applinks:attune-relationships.com",
-        "applinks:www.attune-relationships.com",
-        "webcredentials:attune-relationships.com",
-        "webcredentials:www.attune-relationships.com",
         "applinks:attune-relationships.com",
         "applinks:www.attune-relationships.com",
         "webcredentials:attune-relationships.com",
@@ -158,7 +145,8 @@
         ]
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDisplayName": "Attune"
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -182,9 +170,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#1B2A5E",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 120
         }
       ],
       "expo-secure-store",

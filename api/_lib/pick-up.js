@@ -77,7 +77,7 @@ export function pickUp({ note, inPractice } = {}) {
       // depending on which row of the tile it lands in.
       label: 'New publication to explore',
       title: 'New publication to explore',
-      preview: 'View this and others in your resources tab',
+      preview: 'View this and others in your Learn tab',
       app: { route: '/resources' },
       deepLink: '/?view=practice',
     };

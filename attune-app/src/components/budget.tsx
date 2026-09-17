@@ -89,10 +89,10 @@ export default function Budget({ onClose }: { onClose: () => void }) {
 
   const put = (patch: Partial<BudgetState>) => setState((p) => ({ ...p, ...patch }));
 
-  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label={LOADING.budget} /></ScreenFrame>;
+  if (loading) return <ScreenFrame onBack={onClose} backLabel="Learn"><ScreenLoading label={LOADING.budget} /></ScreenFrame>;
   if (failed || !cats || !copy) {
     return (
-      <ScreenFrame onBack={onClose} backLabel="Resources">
+      <ScreenFrame onBack={onClose} backLabel="Learn">
         <ScreenError
           error={failed || { kind: 'server', status: 0, message: 'no budget' }}
           onRetry={() => { setLoading(true); load(); }}
@@ -134,7 +134,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <ScreenFrame onBack={onClose} backLabel="Resources">
+    <ScreenFrame onBack={onClose} backLabel="Learn">
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       keyboardShouldPersistTaps="handled"

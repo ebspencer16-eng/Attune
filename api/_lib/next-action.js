@@ -252,7 +252,7 @@ export function nextActions(state = {}) {
   if (ip.latestId && ago(ip.latestPublishedAt) < 30 && ago(ip.lastReadAt) > ago(ip.latestPublishedAt)) {
     add({ id: 'new-post', kind: 'new_post', priority: 5,
       title: 'New publication to explore',
-      body: 'View this and others in your resources tab',
+      body: 'View this and others in your Learn tab',
       cta: 'Read', deepLink: `/?view=practice&post=${ip.latestId}` });
   }
 

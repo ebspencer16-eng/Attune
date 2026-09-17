@@ -354,7 +354,7 @@ export default function ResourcesScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.xl }}>Resources</Text>
+          <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.xl }}>Learn</Text>
 
           {/* ── ONE SECTION, ALWAYS ──────────────────────────────────────
               Ellie: "I like the way my resources page looks so much more now

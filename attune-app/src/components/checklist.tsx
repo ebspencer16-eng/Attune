@@ -98,10 +98,10 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
     });
   }, []);
 
-  if (loading) return <ScreenFrame onBack={onClose} backLabel="Resources"><ScreenLoading label={LOADING.checklist} /></ScreenFrame>;
+  if (loading) return <ScreenFrame onBack={onClose} backLabel="Learn"><ScreenLoading label={LOADING.checklist} /></ScreenFrame>;
   if (failed || !areas || !copy) {
     return (
-      <ScreenFrame onBack={onClose} backLabel="Resources">
+      <ScreenFrame onBack={onClose} backLabel="Learn">
         <ScreenError
           error={failed || { kind: 'server', status: 0, message: 'no checklist' }}
           onRetry={() => { setLoading(true); load(); }}
@@ -114,7 +114,7 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
   const done = Object.keys(state).length;
 
   return (
-    <ScreenFrame onBack={onClose} backLabel="Resources">
+    <ScreenFrame onBack={onClose} backLabel="Learn">
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{
