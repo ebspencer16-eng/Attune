@@ -23,12 +23,13 @@
  */
 
 import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Text, View, type StyleProp, type TextStyle } from 'react-native';
+import { StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { scrollIntoResultsView } from '@/components/results-scroll';
 
 import Annotatable, { type Mark, type MarkAction } from '@/components/annotatable';
 import { annotationColor } from '@/constants/annotations';
+import { Palette } from '@/constants/attune-theme';
 import AnnotationSheet from '@/components/annotation-sheet';
 import { deleteNote, type Note, type Tag } from '@/api/client';
 
@@ -57,8 +58,31 @@ type Ctx = {
   focus?: string | null;
 };
 
-/** The width a paragraph gives up so its margin marker has somewhere to be. */
-const MARGIN_MARKER = 18;
+/**
+ * How far into the margin the marker sits, measured from the paragraph's own
+ * right edge.
+ *
+ * Ellie: "Icons in margin should be white to be visible and should be to the
+ * right of the tile, so it shouldn't impact the tile or page spacing, it
+ * should just be in what is currently blank margin."
+ *
+ * So the paragraph gives up nothing. It used to reserve this width, which
+ * narrowed every paragraph carrying a note, and that was the fix for the
+ * marker being clipped by a tile. The tiles that hold results prose are
+ * padded panels rather than clipped ones, so the marker can sit outside the
+ * block again and land on the page's own ground.
+ */
+const MARGIN_OUTSIDE = 20;
+
+/** Whether a paragraph's own colour is a light one, so the marker matches. */
+function textIsLight(style: StyleProp<TextStyle>): boolean {
+  const flat = StyleSheet.flatten(style) as TextStyle | undefined;
+  const color = String(flat?.color ?? '').toLowerCase().replace(/\s/g, '');
+  if (!color) return false;
+  if (color === '#fff' || color === '#ffffff' || color === 'white') return true;
+  // The results pages write their light prose as rgba white at some opacity.
+  return color.startsWith('rgba(255,255,255');
+}
 
 const AnnotationCtx = createContext<Ctx>({
   marks: [], select: () => {}, remove: () => {}, enabled: false, focus: null,
@@ -168,16 +192,27 @@ export function Prose({
    * few points of line width on the paragraphs that have one, and it cannot be
    * clipped by anything.
    */
+  /**
+   * The colour is the paragraph's own.
+   *
+   * White on the coloured grounds, where she could not see it at all, and the
+   * mark's own ink on the cream pages, where white would be a blank space.
+   * Taken from the style the paragraph was given rather than from a list of
+   * which sections are dark, which would be a second copy of a fact the style
+   * already carries.
+   */
+  const markerColor = textIsLight(style) ? Palette.white : tone.ink;
+
   return (
-    <View ref={block} onLayout={onLaidOut} style={{ paddingRight: MARGIN_MARKER }}>
+    <View ref={block} onLayout={onLaidOut}>
       <View
         pointerEvents="none"
-        style={{ position: 'absolute', right: 0, top: 3 }}>
+        style={{ position: 'absolute', right: -MARGIN_OUTSIDE, top: 3 }}>
         <SymbolView
           name={(tagged ? 'tag' : 'square.and.pencil') as never}
           size={13}
-          tintColor={tone.ink}
-          fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: tone.ink }} />}
+          tintColor={markerColor}
+          fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: markerColor }} />}
           style={{ width: 14, height: 14 }}
         />
       </View>

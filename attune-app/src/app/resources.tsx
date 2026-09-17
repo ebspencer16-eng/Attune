@@ -134,13 +134,15 @@ export default function ResourcesScreen() {
     /**
      * The workbook as a page rather than as a download.
      *
-     * Ellie: "Web version of the workbook opening in an in-app experience is
-     * ok for now." /api/workbook-web converts the document that was actually
-     * generated, so there is no second version of the workbook to drift; it
-     * takes the signed storage link the app already holds, which expires in an
-     * hour and is the only way in.
+     * Ellie, of the converted web page: "This looks bad. I just want the PDF
+     * to be viewable through the app. People can download and print or they
+     * can zoom in." /api/workbook-pdf converts the document that was actually
+     * generated into a PDF, so there is no second version of the workbook to
+     * drift, and iOS shows a PDF inside the app with zoom, share and print
+     * already on it. The signed storage link the app holds is the only way in
+     * and expires in an hour.
      */
-    `${SITE}/api/workbook-web?file=${encodeURIComponent(url)}`,
+    `${SITE}/api/workbook-pdf?file=${encodeURIComponent(url)}`,
     {
       presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
       toolbarColor: c.background,

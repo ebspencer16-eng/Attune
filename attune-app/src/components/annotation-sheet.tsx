@@ -80,6 +80,8 @@ export default function AnnotationSheet({
 }) {
   const [step, setStep] = useState<Step>(openOn || 'menu');
   const [body, setBody] = useState('');
+  /** Whether this note goes to the partner. Private unless someone says so. */
+  const [shareIt, setShareIt] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [localTags, setLocalTags] = useState<Tag[]>(tags);
@@ -300,13 +302,53 @@ export default function AnnotationSheet({
                   backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
                 }}
               />
+              {/* ── PRIVATE OR SHARED, ON THE NOTE ITSELF ──────────────
+                  Ellie: "When I leave a note, there should be a toggle to make
+                  it a shared or private note."
+
+                  Sharing was a separate action on the menu, which meant
+                  deciding before writing: someone who wrote a note and then
+                  wanted their partner to see it had to close this, select the
+                  words again and pick Share. The toggle is on the note, so the
+                  decision is made where it is actually made.
+
+                  Private is the default, because a note is private until
+                  someone says otherwise. */}
+              {step === 'note' ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.lg }}>
+                  <View style={{ flexDirection: 'row', borderRadius: Radius.pill, backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, overflow: 'hidden' }}>
+                    {[false, true].map((option) => {
+                      const on = option === shareIt;
+                      return (
+                        <Pressable
+                          key={String(option)}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: on }}
+                          onPress={() => setShareIt(option)}
+                          style={{
+                            paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                            backgroundColor: on ? c.textStrong : 'transparent',
+                          }}>
+                          <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+                            {option ? 'Shared' : 'Private'}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <Text style={{ ...Type.small, color: c.textMuted, flex: 1 }}>
+                    {shareIt ? `${partnerName} will see this` : 'Only you can see this'}
+                  </Text>
+                </View>
+              ) : null}
+
               {/* Share sends whether or not anything was typed, which is what
                   Ellie asked for: the sentence is the message, and the box is
                   for saying something about it if you want to. */}
               <Primary
-                label={step === 'share' ? `Send to ${partnerName}` : 'Save note'}
+                label={step === 'share' || shareIt ? `Send to ${partnerName}` : 'Save note'}
                 disabled={step === 'note' && !body.trim()}
-                onPress={() => save({ kind: 'note', shared: step === 'share' })}
+                onPress={() => save({ kind: 'note', shared: step === 'share' || shareIt })}
               />
             </View>
           ) : null}
