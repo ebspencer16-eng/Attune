@@ -484,6 +484,14 @@ npx expo start --ios      # add --clear when a change does not appear
 
 Identifiers: Team `HX5FX68K6L`, bundle `com.attunerelationships.app`.
 
+**Builds go through EAS.** `attune-app/eas.json` has three profiles;
+`production` is the one that reaches TestFlight, and it auto-increments the
+build number, which is the thing Apple refuses a repeat of. Ellie runs the
+build and submit commands herself, because they need her Expo account and her
+Apple login: `app/TESTFLIGHT.md` is the walkthrough, written for her. The two
+public Supabase values are EAS environment variables rather than repo files,
+for the same reason `attune-app/.env` is gitignored.
+
 The API base URL is `https://www.attune-relationships.com`. **Keep the www.**
 
 Built: home, resources, insights, sign-in, notes, settings, all five exercises,
