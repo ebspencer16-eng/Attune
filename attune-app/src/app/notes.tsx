@@ -59,6 +59,7 @@ import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
+import BrandHeader from '@/components/brand-header';
 import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
@@ -487,7 +488,8 @@ export default function NotesScreen() {
             tintColor={c.accentQuiet}
           />
         }>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <BrandHeader />
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text style={{ ...Type.hero, color: c.textStrong }}>Notes</Text>
             {/* Writing a note is the only thing this screen creates, so it gets
@@ -525,7 +527,7 @@ export default function NotesScreen() {
           <Section title="Pick up where you left off">
           {mineRecent.length ? (
             <>
-              <Tile>
+              <Tile accent={c.accent}>
                 {(showAllMine ? mineRecent.slice(0, SHOW_ALL_LIMIT) : mineRecent.slice(0, 3)).map((note, i) => (
                   <MarkRow
                     key={note.id}
@@ -1003,13 +1005,24 @@ function TagList({
                   A tag the person made carries no colour of its own, so one is
                   given to it, deterministically, out of the same palette their
                   marks use rather than a second palette invented here. */}
-              <SymbolView
-                name="tag"
-                size={16}
-                tintColor={tagColor(t)}
-                fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tagColor(t) }} />}
-                style={{ width: 18, height: 18 }}
-              />
+              {/* The icon in its own colour, in a disc of the same colour at a
+                  tint. A row of icons on white was the plainest part of the
+                  plainest screen; this is the tag's colour doing the work it
+                  was already given. */}
+              <View
+                style={{
+                  width: 30, height: 30, borderRadius: 15,
+                  backgroundColor: `${tagColor(t)}1a`,
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                <SymbolView
+                  name="tag"
+                  size={15}
+                  tintColor={tagColor(t)}
+                  fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tagColor(t) }} />}
+                  style={{ width: 17, height: 17 }}
+                />
+              </View>
               <Text style={{ ...Type.body, color: c.text, flex: 1 }} numberOfLines={1}>{t.name}</Text>
               {/* The count, on every row. It was hidden at zero, which read as
                   a list of places rather than a scorecard; with an arrow beside
@@ -1115,12 +1128,23 @@ function Flash({ message }: { message: string | null }) {
  * Three stacked cards read as three things; one tile with hairlines reads as
  * one list, which is what this is.
  */
-function Tile({ children }: { children: React.ReactNode }) {
+function Tile({ children, accent }: { children: React.ReactNode; accent?: string }) {
+  /**
+   * ── A LINE OF COLOUR DOWN THE EDGE ──────────────────────────────────────
+   * Ellie: "I want the learn page to have more color and branding, I don't
+   * want it to feel so plain. Same with notes tab."
+   *
+   * This screen is white cards on cream and nothing else. The rule down the
+   * left is the smallest thing that fixes that without inventing a palette: it
+   * is the section's own colour, and it is the same device the website uses on
+   * its results tiles.
+   */
   return (
     <View
       style={{
         backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, overflow: 'hidden',
+        ...(accent ? { borderLeftColor: accent, borderLeftWidth: 4 } : null),
       }}>
       {children}
     </View>

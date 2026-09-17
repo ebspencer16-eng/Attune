@@ -28,8 +28,7 @@ export default function AppTabs() {
 
       <NativeTabs.Trigger name="insights">
         <NativeTabs.Trigger.Label>Insights</NativeTabs.Trigger.Label>
-        {/* Ellie: "Change insights tab icon to a lightbulb." */}
-        <NativeTabs.Trigger.Icon sf={{ default: 'lightbulb', selected: 'lightbulb.fill' }} />
+        <NativeTabs.Trigger.Icon sf={{ default: 'chart.bar', selected: 'chart.bar.fill' }} />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="resources">
@@ -37,7 +36,9 @@ export default function AppTabs() {
             name, because a route is an address and renaming it breaks every
             link and every stored deep link that points at it. */}
         <NativeTabs.Trigger.Label>Learn</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'square.grid.2x2', selected: 'square.grid.2x2.fill' }} />
+        {/* Ellie: "I want the insights icon to revert to what it was and I want
+            the learn tab to be the lightbulb icon." */}
+        <NativeTabs.Trigger.Icon sf={{ default: 'lightbulb', selected: 'lightbulb.fill' }} />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="notes">

@@ -38,6 +38,7 @@ import {
   Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
+import BrandHeader from '@/components/brand-header';
 import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
@@ -221,6 +222,7 @@ export default function InsightsScreen() {
     return (
       <Shell>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <BrandHeader />
           <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
         </View>
         <Results results={results} owned={home?.owned ?? []} />
@@ -264,6 +266,7 @@ export default function InsightsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
+        <BrandHeader />
         <Text style={{ ...Type.hero, color: c.textStrong }}>Your exercises</Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
           {/* Both branches were written in the app. The first named the partner,

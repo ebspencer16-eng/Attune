@@ -21,6 +21,7 @@ import {
   Image, Linking, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SymbolView } from 'expo-symbols';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchWorkbookView, savePost } from '@/api/client';
@@ -29,12 +30,13 @@ import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } fr
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
+import BrandHeader from '@/components/brand-header';
 import { buildWorkbook, fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, SectionColor, Radius, Spacing, Type,
+  AccentFallback, AccentFor, BlueGround, Colors, MaxContentWidth, Palette, SectionColor, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -75,6 +77,8 @@ export default function ResourcesScreen() {
    */
   const [query, setQuery] = useState('');
   const [list, setList] = useState<'all' | 'saved' | 'read'>('all');
+  /** Which shelf is open as a page of its own, if any. */
+  const [openShelf, setOpenShelf] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -386,6 +390,49 @@ export default function ResourcesScreen() {
     );
   }
 
+  /**
+   * ── THE SHELF PAGE ──────────────────────────────────────────────────────
+   * Ellie: "Each section should also have an arrow that opens to a page with
+   * all the articles for that section organized in rows."
+   *
+   * Same cards, one per row, and the search and the lists stay behind on the
+   * tab: this page is one shelf and nothing else.
+   */
+  if (openShelf) {
+    const inShelf = posts.filter((p) => p.category === openShelf);
+    return (
+      <Shell>
+        <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+          <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back to Learn"
+              onPress={() => setOpenShelf(null)}
+              hitSlop={12}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingVertical: Spacing.sm }}>
+              <Text style={{ ...Type.body, color: c.accent, lineHeight: 22 }}>{'\u2039'}</Text>
+              <Text style={{ ...Type.small, fontWeight: '600', color: c.accent }}>Back to Learn</Text>
+            </Pressable>
+            <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
+              {openShelf}
+            </Text>
+            {inShelf.map((post) => (
+              <PostCard key={post.id} post={post} shelves={categories} onOpenPost={setOpenPost} onToggleSave={toggleSave} />
+            ))}
+          </View>
+        </ScrollView>
+      </Shell>
+    );
+  }
+
+  /**
+   * Whether the reader is narrowing rather than browsing.
+   *
+   * Searching or picking a list is a question with an answer, so it gets one
+   * list of answers. Browsing is a shelf at a time.
+   */
+  const narrowing = terms.length > 0 || list !== 'all';
+
   return (
     <Shell>
       <ScrollView
@@ -393,31 +440,20 @@ export default function ResourcesScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.xl }}>Learn</Text>
+        <BrandHeader />
 
-          {/* ── ONE SECTION, ALWAYS ──────────────────────────────────────
-              Ellie: "I like the way my resources page looks so much more now
-              that all 3 resources are in the 'yours to explore' category and
-              there's no section for add-ons. Can we make this the default."
-
-              It was two sections: what you own as circles, and what you do not
-              as a row of cards with prices on them. A tab that spends half its
-              height on things the reader has not bought is a shop, and this is
-              the tab they come to to use what they have. So the second section
-              is gone and what is left is one line out to the website. */}
-          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          {/* Ellie: "I want the section labels on that page to be hero text not
+              eyebrow text." So the sections carry the page rather than a title
+              above them repeating the tab's own name. */}
+          <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>
             Yours to explore
           </Text>
           {owned.length ? (
             <>
-              {/* A row of circles, wrapping only if someone owns more than four. */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
                 {owned.map((r) => <OwnedTile key={r.key} item={r} onOpen={openTool} />)}
               </View>
-              {/* The workbook is the one tile that can be tapped and have
-                  nothing to give yet. Saying so here, under the tiles, rather
-                  than in an alert: it is information, not an interruption. */}
               {workbookNote ? (
                 <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
                   {workbookNote}
@@ -426,19 +462,6 @@ export default function ResourcesScreen() {
             </>
           ) : null}
 
-          {/* ── THE WAY TO THE REST ──────────────────────────────────────
-              Grey, bottom right, and out to the website in the system browser,
-              which is the only shape this is allowed to take: the app names no
-              price and no checkout, and /offerings is the page the website
-              already sells from. Get Started does exactly this.
-
-              It is also the whole of the previous section: the reader who wants
-              another tool goes and gets it in the place that can take payment,
-              and the tab stays a place to use what you have. */}
-          {/* Always, not only when something is unowned. A reader who owns
-              everything still has a reason to go: the physical copies and the
-              gift are on the same page, and a control that appears and
-              disappears with an invisible condition is one nobody trusts. */}
           <Pressable
             accessibilityRole="link"
             accessibilityLabel="Explore more resources on the website"
@@ -451,20 +474,44 @@ export default function ResourcesScreen() {
             <Text style={{ ...Type.small, color: c.textMuted }}>Explore more resources</Text>
             <Text style={{ ...Type.small, color: c.textMuted }}>{'\u2192'}</Text>
           </Pressable>
-
         </View>
 
-        <View style={{ marginTop: Spacing.lg }}>
+        {/* ── THE INSIGHT, ON THE HOME SCREEN'S OWN BLUE ──────────────────
+            Ellie: "then the insight of the day in a tile with the blue
+            homescreen gradient". The same finding the home screen opens with,
+            and the same ground, which is the one piece of strong colour this
+            app has. It is what stops this tab reading as a list of lists. */}
+        {home?.research ? (
+          <View style={{ paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+            <LinearGradient
+              colors={[...BlueGround]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0.9, y: 1 }}
+              style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.55)', marginBottom: Spacing.md }}>
+                Insight of the day
+              </Text>
+              <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
+                {home.research.body}
+              </Text>
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic', marginTop: Spacing.lg }}>
+                {home.research.source}
+              </Text>
+            </LinearGradient>
+          </View>
+        ) : null}
+
+        <View style={{ marginTop: Spacing.xxl }}>
           <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-            <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>In Practice</Text>
+            <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>In Practice</Text>
           </View>
 
           {posts.length ? (
             <>
               <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-                {/* Ellie: "Can we have a search bar for the articles?" It sits
-                    above the shelves, because searching is what someone does
-                    instead of browsing rather than after it. */}
+                {/* Search first, then the two lists, then the shelves. Someone
+                    who knows what they are looking for should not have to walk
+                    past four shelves to ask for it. */}
                 <View
                   style={{
                     flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
@@ -489,11 +536,7 @@ export default function ResourcesScreen() {
                   />
                 </View>
 
-                {/* My lists. Saved is hers to build; Read is the app's own
-                    record, which has been kept since the feed existed and has
-                    never been shown as a list. */}
-                <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>My lists</Text>
-                <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg }}>
+                <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl }}>
                   {([['all', 'All'], ['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
                     const on = list === key;
                     return (
@@ -517,58 +560,66 @@ export default function ResourcesScreen() {
                 </View>
               </View>
 
-              {/* Same four categories as practice.html, so someone who reads on
-                  the web finds the same shelves here. 'All' first and selected,
-                  because most people are browsing rather than searching. */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.sm, paddingBottom: Spacing.md }}>
-                {shelves.map((cat) => {
-                  const on = cat === category;
+              {narrowing ? (
+                /* One list, because this is an answer to a question. */
+                <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+                  {visible.length ? (
+                    visible.map((post) => (
+                      <PostCard key={post.id} post={post} shelves={categories} onOpenPost={setOpenPost} onToggleSave={toggleSave} />
+                    ))
+                  ) : (
+                    <Text style={{ ...Type.body, color: c.textMuted }}>
+                      {terms.length
+                        ? `Nothing matches ${query.trim()}.`
+                        : list === 'saved'
+                          ? 'Nothing saved yet. Tap the bookmark on an article to keep it here.'
+                          : 'Nothing read yet.'}
+                    </Text>
+                  )}
+                </View>
+              ) : (
+                /**
+                 * ── A SHELF AT A TIME ────────────────────────────────────
+                 * Ellie: "have them organized in sections with eyebrow text for
+                 * each section... Each section should have articles side by
+                 * side, and users can swipe to see them."
+                 *
+                 * The shelves come from the server, so this list is whatever
+                 * the website's own categories are. A shelf with nothing on it
+                 * is not drawn, which is why this maps over what is there
+                 * rather than over the four names.
+                 */
+                categories.map((shelf) => {
+                  const inShelf = sortPosts(posts.filter((post) => post.category === shelf), sort);
+                  if (!inShelf.length) return null;
                   return (
-                    <Pressable
-      accessibilityRole="button"
-                      key={cat}
-                      onPress={() => setCategory(cat)}
-                      style={{
-                        paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
-                        borderRadius: Radius.pill,
-                        backgroundColor: on ? c.textStrong : c.surface,
-                        borderColor: on ? c.textStrong : c.border, borderWidth: 1,
-                      }}>
-                      <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
-                        {cat}
-                      </Text>
-                    </Pressable>
+                    <View key={shelf} style={{ marginBottom: Spacing.xl }}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`See everything in ${shelf}`}
+                        onPress={() => setOpenShelf(shelf)}
+                        style={{
+                          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                          paddingHorizontal: Spacing.xl, marginBottom: Spacing.md,
+                          maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
+                        }}>
+                        <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{shelf}</Text>
+                        <Text style={{ ...Type.body, color: c.accent }}>{'\u2192'}</Text>
+                      </Pressable>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingHorizontal: Spacing.xl, gap: Spacing.md }}>
+                        {inShelf.map((post) => (
+                          <View key={post.id} style={{ width: 260 }}>
+                            <PostCard post={post} shelves={categories} onOpenPost={setOpenPost} onToggleSave={toggleSave} />
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </View>
                   );
-                })}
-              </ScrollView>
-
-              {/* Ellie asked for this between the shelves and the list, which
-                  is where someone looks once they have narrowed the shelf and
-                  still have twelve things to choose from. */}
-              <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-                <SortControl value={sort} onChange={setSort} />
-              </View>
-
-              <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-                {visible.length ? (
-                  visible.map((p) => (
-                    <PostCard key={p.id} post={p} shelves={categories} onOpenPost={setOpenPost} onToggleSave={toggleSave} />
-                  ))
-                ) : (
-                  <Text style={{ ...Type.body, color: c.textMuted }}>
-                    {terms.length
-                      ? `Nothing matches ${query.trim()}.`
-                      : list === 'saved'
-                        ? 'Nothing saved yet. Tap the bookmark on an article to keep it here.'
-                        : list === 'read'
-                          ? 'Nothing read yet.'
-                          : `Nothing in ${category.toLowerCase()} yet.`}
-                  </Text>
-                )}
-              </View>
+                })
+              )}
             </>
           ) : (
             <View style={{ paddingHorizontal: Spacing.xl }}>

@@ -36,6 +36,7 @@ import SignIn from '@/components/sign-in';
 import Feedback from '@/components/feedback';
 import Settings from '@/components/settings';
 import { forgetLastSection } from '@/components/results';
+import BrandHeader from '@/components/brand-header';
 import { LOADING } from '@/constants/loading-copy';
 import {
   BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
@@ -372,7 +373,10 @@ export default function HomeScreen() {
                 glow) further down to be centered between the greeting and the
                 tile below." The glow comes with it: it is drawn inside the
                 finding, not positioned against the screen. */}
-            <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.lg }}>
+            {/* The lockup, on every page. On the blue it takes the light
+                tone; everywhere else it is ink. */}
+            <BrandHeader tone="light" />
+            <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.md }}>
               {data.greeting}
             </Text>
             {/* The mark, plainly, under the greeting: the one piece of brand on
