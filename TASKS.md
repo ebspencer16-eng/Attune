@@ -90,6 +90,9 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R191 | **The lockup is in one place on every screen.** It is literally one element now: a shared frame draws it above the scroll view, so it cannot sit at four different heights and it no longer slides away when a page moves. The home screen's profile button moved into that row rather than keeping a line of its own, and the mark that sat under the greeting is gone, because the lockup above it carries the same mark. |
+| R192 | **The wash is behind the results too.** Glance tiles and storycards paint their own grounds; what sat behind them was flat cream, so a coloured card floated on nothing. Same wash as Learn and Notes. |
+| R193 | **The mark is on every waiting screen**, above the spinner. A spinner on cream is the spinner every app has. |
 | R184 | **The lockup is larger and in the website's face**, Playfair rather than body text, with the mark scaled up to match. |
 | R185 | **Cards are the same height.** The standfirst is gone from the tile, and the title has room for two lines whether it needs them or not, which is the other half of making them uniform. |
 | R186 | **Share on the insight of the day and on the storycards**, both through Apple's own sheet. A storycard sends its own words, in the order the card shows them, and the address. |

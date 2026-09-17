@@ -30,7 +30,7 @@ import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } fr
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
-import BrandHeader from '@/components/brand-header';
+import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
 import ShareButton from '@/components/share-button';
 import { buildWorkbook, fetchToolData, type ToolData } from '@/api/client';
@@ -460,7 +460,6 @@ export default function ResourcesScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
-        <BrandHeader />
 
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           {/* Ellie: "I want the section labels on that page to be hero text not
@@ -674,12 +673,7 @@ export default function ResourcesScreen() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
-      <PageWash />
-      {children}
-    </SafeAreaView>
-  );
+  return <TabScreen>{children}</TabScreen>;
 }
 
 type Item = CatalogueItem;

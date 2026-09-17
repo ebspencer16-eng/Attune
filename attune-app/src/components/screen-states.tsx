@@ -33,6 +33,18 @@ function Centre({ children }: { children: React.ReactNode }) {
 export function ScreenLoading({ label = 'Loading' }: { label?: string }) {
   return (
     <Centre>
+      {/* ── THE MARK, WHILE IT WAITS ──────────────────────────────────────
+          Ellie: "Any other design things we could do to incorporate attune
+          branding throughout?"
+
+          A spinner on cream is the same spinner every app has. The mark above
+          it, quietly, makes the wait the product's own without adding anything
+          anyone has to read. */}
+      <Image
+        source={require('@/assets/images/attune-mark.png')}
+        style={{ width: 44, height: 44 * (64 / 88), opacity: 0.5, marginBottom: Spacing.xl }}
+        resizeMode="contain"
+      />
       <ActivityIndicator color={c.accentQuiet} />
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg }}>{label}</Text>
     </Centre>

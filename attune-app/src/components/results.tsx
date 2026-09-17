@@ -25,6 +25,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import CoupleMap from '@/components/couple-map';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import GlanceTile, { NeutralGround } from '@/components/glance-tile';
+import PageWash from '@/components/page-wash';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
@@ -494,6 +495,17 @@ export default function Results({
       ) : null}
 
       <View style={{ flex: 1 }}>
+        {/* ── THE GROUND UNDER THE RESULTS ─────────────────────────────
+            Ellie: "Can we do the same bg gradient behind the at a glance cards
+            and highlight cards in results?"
+
+            The glance tiles and the storycards paint their own grounds, from
+            api/_lib/section-grounds.js; what sits behind them was flat cream,
+            so a coloured card floated on nothing. This is the same wash the
+            Learn and Notes tabs use, behind every section: the sections that
+            carry their own colour still do, and the ones that do not stop
+            looking like a blank page. */}
+        <PageWash />
         {/* Everything inside can be marked. A <Prose> outside this provider is
             a plain Text, so nothing breaks if a screen is rendered elsewhere. */}
         <AnnotationProvider

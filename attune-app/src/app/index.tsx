@@ -282,6 +282,35 @@ export default function HomeScreen() {
       />
 
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        {/* Ellie: "I want the lockup in the top to be at the exact same
+            position across all screens." So it sits outside the scroll view
+            here exactly as TabScreen puts it on the other three: same element,
+            same padding, and it does not slide away when the page moves. */}
+        <BrandHeader
+          tone="light"
+          right={(
+            <Pressable
+              onPress={() => setSettingsOpen(true)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Your profile and settings"
+              style={{ padding: Spacing.xs }}>
+              <SymbolView
+                name="person.crop.circle"
+                size={28}
+                tintColor={Palette.white}
+                fallback={(
+                  <View
+                    style={{
+                      width: 28, height: 28, borderRadius: 14, borderWidth: 1.5,
+                      borderColor: 'rgba(255,255,255,0.7)',
+                    }}
+                  />
+                )}
+              />
+            </Pressable>
+          )}
+        />
         <ScrollView
           ref={scroller}
           contentContainerStyle={{
@@ -334,33 +363,6 @@ export default function HomeScreen() {
                 own gear icon, and "Settings" in a bordered pill reads as
                 preferences rather than as the place your account lives. A
                 profile glyph in the corner is where people look for that. */}
-            <View
-              style={{
-                flexDirection: 'row', alignItems: 'center',
-                justifyContent: 'flex-end',
-                marginTop: Spacing.xs,
-              }}>
-              <Pressable
-                onPress={() => setSettingsOpen(true)}
-                hitSlop={12}
-                accessibilityRole="button"
-                accessibilityLabel="Your profile and settings"
-                style={{ padding: Spacing.xs }}>
-                <SymbolView
-                  name="person.crop.circle"
-                  size={30}
-                  tintColor={Palette.white}
-                  fallback={
-                    <View
-                      style={{
-                        width: 30, height: 30, borderRadius: 15, borderWidth: 1.5,
-                        borderColor: 'rgba(255,255,255,0.7)',
-                      }}
-                    />
-                  }
-                />
-              </Pressable>
-            </View>
 
             {/* ── HELLO, THEN THE FINDING ────────────────────────────────
                 The greeting sits under the profile row. The finding is centred
@@ -373,19 +375,12 @@ export default function HomeScreen() {
                 glow) further down to be centered between the greeting and the
                 tile below." The glow comes with it: it is drawn inside the
                 finding, not positioned against the screen. */}
-            {/* The lockup, on every page. On the blue it takes the light
-                tone; everywhere else it is ink. */}
-            <BrandHeader tone="light" />
             <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.md }}>
               {data.greeting}
             </Text>
-            {/* The mark, plainly, under the greeting: the one piece of brand on
-                a screen whose whole ground is the brand colour. */}
-            <Image
-              source={require('@/assets/images/attune-mark.png')}
-              style={{ width: 54, height: 54 * (64 / 88), marginTop: Spacing.lg, opacity: 0.95 }}
-              resizeMode="contain"
-            />
+            {/* The mark that was under the greeting is gone: the lockup at
+                the top of every screen carries it now, and two of them on one
+                screen is the same thing said twice. */}
             {/* ── CENTRED IN WHAT IS LEFT ────────────────────────────────
                 Ellie: "no matter where the bottom tile is, the insight of the
                 day and bg mark is centered between the bottom of the line on

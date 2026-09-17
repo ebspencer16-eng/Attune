@@ -20,13 +20,26 @@ const c = Colors.light;
 /** The product's name, written once. */
 export const BRAND_NAME = 'Attune Relationships';
 
-export default function BrandHeader({ tone = 'ink' }: { tone?: 'ink' | 'light' }) {
+export default function BrandHeader({
+  tone = 'ink', right,
+}: {
+  tone?: 'ink' | 'light';
+  /**
+   * One control at the end of the row.
+   *
+   * The home screen's profile button was on a line of its own once the lockup
+   * moved out of the scroll view, which is a row holding one small circle. It
+   * belongs here, opposite the name.
+   */
+  right?: React.ReactNode;
+}) {
   const color = tone === 'light' ? 'rgba(255,255,255,0.85)' : c.textStrong;
   return (
     <View
       style={{
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: Spacing.sm, paddingTop: Spacing.sm, paddingBottom: Spacing.md,
+        paddingHorizontal: Spacing.xl,
       }}>
       {/* Ellie: "I want the mark and text for the lockup to be larger and in
           the font of the website top left 'Attune', not in the body text it
@@ -40,6 +53,7 @@ export default function BrandHeader({ tone = 'ink' }: { tone?: 'ink' | 'light' }
       <Text style={{ ...Type.title, fontSize: 19, lineHeight: 26, color }}>
         {BRAND_NAME}
       </Text>
+      {right ? <View style={{ position: 'absolute', right: Spacing.xl }}>{right}</View> : null}
     </View>
   );
 }

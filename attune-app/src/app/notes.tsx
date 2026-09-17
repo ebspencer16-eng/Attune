@@ -59,7 +59,7 @@ import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
-import BrandHeader from '@/components/brand-header';
+import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
@@ -489,7 +489,6 @@ export default function NotesScreen() {
             tintColor={c.accentQuiet}
           />
         }>
-        <BrandHeader />
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text style={{ ...Type.hero, color: c.textStrong }}>Notes</Text>
@@ -632,12 +631,7 @@ export default function NotesScreen() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
-      <PageWash />
-      {children}
-    </SafeAreaView>
-  );
+  return <TabScreen>{children}</TabScreen>;
 }
 
 /**
