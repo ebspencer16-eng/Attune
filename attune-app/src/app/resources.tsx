@@ -18,12 +18,12 @@ import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import {
-  Linking, Pressable, RefreshControl, ScrollView, Text, View,
+  Image, Linking, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchWorkbookView } from '@/api/client';
+import { fetchWorkbookView, savePost } from '@/api/client';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
@@ -34,7 +34,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  AccentFallback, AccentFor, Colors, MaxContentWidth, Palette, SectionColor, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -66,6 +66,15 @@ export default function ResourcesScreen() {
   useScreenTime('resources');
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [posts, setPosts] = useState<PostSummary[]>([]);
+  /**
+   * ── SEARCHING, AND THE TWO LISTS ────────────────────────────────────────
+   * Ellie: "Can we have a search bar for the articles?" and "My lists" with
+   * Saved and Read, which is how the app she showed me organises its Learn
+   * tab. The words a search matches come from the server, per post: title,
+   * standfirst, shelf, tags and whatever keywords she adds in the admin.
+   */
+  const [query, setQuery] = useState('');
+  const [list, setList] = useState<'all' | 'saved' | 'read'>('all');
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -194,6 +203,22 @@ export default function ResourcesScreen() {
     }
     Linking.openURL(`${SITE}/app?view=${key}`);
   };
+  /**
+   * Saved on the screen first, then on the server.
+   *
+   * A bookmark that waits for a round trip reads as a tap that missed. A
+   * failed write puts it back, which is the only honest thing to do with a
+   * list someone is building.
+   */
+  const toggleSave = async (post: PostSummary) => {
+    const next = !post.saved;
+    setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, saved: next } : p)));
+    const res = await savePost(post.id, next);
+    if (!res.ok) {
+      setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, saved: !next } : p)));
+    }
+  };
+
   // Tracked separately from the catalogue: In Practice failing is not the same
   // as In Practice being empty, and the screen said the same thing for both.
   const [postsFailed, setPostsFailed] = useState(false);
@@ -315,7 +340,22 @@ export default function ResourcesScreen() {
   const inCategory = category === ALL
     ? posts
     : posts.filter((p) => p.category === category);
-  const visible = sortPosts(inCategory, sort);
+  const inList = list === 'all'
+    ? inCategory
+    : inCategory.filter((p) => (list === 'saved' ? p.saved : p.read));
+  /**
+   * Every word typed has to appear somewhere in the post's terms, so two words
+   * narrow rather than widen. Matching on the start of a word rather than the
+   * whole one, because someone typing "argu" is looking for arguments.
+   */
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const found = terms.length
+    ? inList.filter((p) => {
+      const hay = `${p.search || ''} ${p.title} ${p.subtitle || ''}`.toLowerCase();
+      return terms.every((t) => hay.split(/[^a-z0-9']+/).some((w) => w.startsWith(t)));
+    })
+    : inList;
+  const visible = sortPosts(found, sort);
 
   // All, then whatever shelves the server says exist.
   const shelves = [ALL, ...categories];
@@ -421,6 +461,62 @@ export default function ResourcesScreen() {
 
           {posts.length ? (
             <>
+              <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+                {/* Ellie: "Can we have a search bar for the articles?" It sits
+                    above the shelves, because searching is what someone does
+                    instead of browsing rather than after it. */}
+                <View
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                    backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                    borderRadius: Radius.pill, paddingHorizontal: Spacing.lg,
+                    marginBottom: Spacing.lg,
+                  }}>
+                  <SymbolView
+                    name={'magnifyingglass' as never}
+                    size={15}
+                    tintColor={c.textMuted}
+                    fallback={<Text style={{ color: c.textMuted }}>{'\u2315'}</Text>}
+                  />
+                  <TextInput
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholder="Search a topic"
+                    placeholderTextColor={c.textMuted}
+                    returnKeyType="search"
+                    clearButtonMode="while-editing"
+                    style={{ ...Type.body, color: c.text, flex: 1, paddingVertical: Spacing.md }}
+                  />
+                </View>
+
+                {/* My lists. Saved is hers to build; Read is the app's own
+                    record, which has been kept since the feed existed and has
+                    never been shown as a list. */}
+                <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.sm }}>My lists</Text>
+                <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg }}>
+                  {([['all', 'All'], ['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
+                    const on = list === key;
+                    return (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        key={key}
+                        onPress={() => setList(key)}
+                        style={{
+                          paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                          borderRadius: Radius.pill,
+                          backgroundColor: on ? c.accent : c.surface,
+                          borderColor: on ? c.accent : c.border, borderWidth: 1,
+                        }}>
+                        <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+                          {label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
               {/* Same four categories as practice.html, so someone who reads on
                   the web finds the same shelves here. 'All' first and selected,
                   because most people are browsing rather than searching. */}
@@ -458,12 +554,18 @@ export default function ResourcesScreen() {
 
               <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
                 {visible.length ? (
-                  <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
-                    {visible.map((p, i) => <PostRow key={p.id} post={p} first={i === 0} onOpenPost={setOpenPost} />)}
-                  </View>
+                  visible.map((p) => (
+                    <PostCard key={p.id} post={p} shelves={categories} onOpenPost={setOpenPost} onToggleSave={toggleSave} />
+                  ))
                 ) : (
                   <Text style={{ ...Type.body, color: c.textMuted }}>
-                    Nothing in {category.toLowerCase()} yet.
+                    {terms.length
+                      ? `Nothing matches ${query.trim()}.`
+                      : list === 'saved'
+                        ? 'Nothing saved yet. Tap the bookmark on an article to keep it here.'
+                        : list === 'read'
+                          ? 'Nothing read yet.'
+                          : `Nothing in ${category.toLowerCase()} yet.`}
                   </Text>
                 )}
               </View>
@@ -679,48 +781,120 @@ function SortControl({ value, onChange }: { value: PostSort; onChange: (v: PostS
   );
 }
 
-function PostRow({ post, first, onOpenPost }: { post: PostSummary; first: boolean; onOpenPost: (id: string) => void }) {
+/** The tints a card's ground can take, in the order the shelves come back. */
+const CARD_TINTS = [SectionColor.communication, SectionColor.expectations, SectionColor.reflection, SectionColor.intimacy];
+
+/**
+ * One article, as a card.
+ *
+ * ── WHY A CARD AND NOT A ROW ──────────────────────────────────────────────
+ * Ellie, with the Natural Cycles app open: "I want articles to have a little
+ * image like the natural cycles app... I like that natural cycles has a little
+ * 'article' box on the image."
+ *
+ * So: the illustration with its label and its bookmark, then the title, then
+ * how long it takes. A post with no illustration gets its own tinted ground
+ * rather than a grey box, so the shelf looks finished before every piece has
+ * been drawn for.
+ */
+function PostCard({
+  post, shelves, onOpenPost, onToggleSave,
+}: {
+  post: PostSummary;
+  /** The shelves in the server's order, which is where a card's tint comes from. */
+  shelves: string[];
+  onOpenPost: (id: string) => void;
+  onToggleSave: (post: PostSummary) => void;
+}) {
+  /**
+   * ── THE GROUND, UNTIL THERE ARE ILLUSTRATIONS ─────────────────────────
+   * Not one flat colour for every card, which reads as a picture that failed
+   * to load, and not a new palette either. The shelf decides: its position in
+   * the server's own list picks one of the section colours this app already
+   * uses, at a tint. Twelve pieces across four shelves come out as four
+   * families, which is what the shelves are.
+   */
+  const shelfIndex = Math.max(0, shelves.indexOf(post.category || ''));
+  const ground = post.hero_color || `${CARD_TINTS[shelfIndex % CARD_TINTS.length]}1f`;
   return (
     <Pressable
       accessibilityRole="button"
       onPress={() => {
         /**
-         * A post from the posts table opens in the app. Ellie: "I want all of
-         * these to open in app if the user is in the app."
-         *
-         * An In Practice page is not a row in that table, it is a static page
-         * on the website. Its body is generated from the page into
-         * api/_in-practice-bodies.js and served by /api/posts, so those open
-         * here too. `external` is now only set when a body did not come
-         * through, which is the one case where the website is the better
-         * answer. Nothing records a read against them: the write would fail on
-         * a foreign key, so the endpoint answers 404 and the reader ignores
-         * it. See api/_in-practice.js.
-         *
-         * Reading is marked by the reader, on open, not here.
+         * A post from the posts table opens in the app. An In Practice page is
+         * a static page on the website whose body is generated into
+         * api/_in-practice-bodies.js, so those open here too; `external` is
+         * only set when a body did not come through. Reading is marked by the
+         * reader, on open, not here.
          */
         if (post.external) { Linking.openURL(post.external); return; }
         onOpenPost(post.id);
       }}
       style={{
-        paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
-        borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, overflow: 'hidden', marginBottom: Spacing.md,
       }}>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{post.title}</Text>
-      {post.subtitle ? (
-        <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-          {post.subtitle}
-        </Text>
-      ) : null}
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
-        {/* The reading time is the one thing on this line that helps someone
-            decide, so it carries the accent. Updated and Read are state, and
-            stay quiet. */}
-        {post.read_minutes ? (
-          <Text style={{ color: c.accent }}>{`${post.read_minutes} min read`}</Text>
+      <View style={{ height: 132, backgroundColor: ground, justifyContent: 'space-between' }}>
+        {post.hero_image ? (
+          <Image
+            source={{ uri: post.hero_image }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            resizeMode="cover"
+          />
+        ) : (
+          /* The mark, quietly, so a card with no illustration still looks like
+             something rather than like something missing. */
+          <Image
+            source={require('@/assets/images/attune-mark.png')}
+            style={{
+              position: 'absolute', right: Spacing.lg, bottom: Spacing.md,
+              width: 64, height: 64 * (64 / 88), opacity: 0.22,
+            }}
+            resizeMode="contain"
+          />
+        )}
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: Spacing.md }}>
+          {/* The label, so a reader knows what kind of thing they are about to
+              open before they read the title. */}
+          <View style={{ backgroundColor: 'rgba(255,253,249,0.92)', borderRadius: Radius.sm, paddingVertical: 3, paddingHorizontal: Spacing.sm }}>
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textStrong }}>Article</Text>
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={post.saved ? `Remove ${post.title} from your list` : `Save ${post.title} to your list`}
+            hitSlop={12}
+            onPress={() => onToggleSave(post)}
+            style={{
+              width: 30, height: 30, borderRadius: 15,
+              backgroundColor: 'rgba(255,253,249,0.92)',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+            <SymbolView
+              name={(post.saved ? 'bookmark.fill' : 'bookmark') as never}
+              size={14}
+              tintColor={post.saved ? c.accent : c.textStrong}
+              fallback={<Text style={{ fontSize: 13, color: post.saved ? c.accent : c.textStrong }}>{post.saved ? '\u2605' : '\u2606'}</Text>}
+            />
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={{ padding: Spacing.lg }}>
+        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{post.title}</Text>
+        {post.subtitle ? (
+          <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
+            {post.subtitle}
+          </Text>
         ) : null}
-        {post.revised ? '  ·  Updated' : post.read ? '  ·  Read' : ''}
-      </Text>
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
+          {post.read_minutes ? (
+            <Text style={{ color: c.accent }}>{`${post.read_minutes} min read`}</Text>
+          ) : null}
+          {post.revised ? '  \u00b7  Updated' : post.read ? '  \u00b7  Read' : ''}
+        </Text>
+      </View>
     </Pressable>
   );
 }

@@ -28,9 +28,10 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
 
-import { fetchPost, markPostRead, type ApiError, type Note, type Post, type PostBlock, type Tag } from '@/api/client';
+import { fetchPost, markPostRead, SITE_URL, type ApiError, type Note, type Post, type PostBlock, type Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
 import { AnnotationProvider, Prose } from '@/components/annotation-context';
@@ -113,6 +114,39 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
   );
 }
 
+/**
+ * Send this piece to someone, through the phone's own share sheet.
+ *
+ * Ellie: "Create 'share' buttons on articles, etc. that pops up the share bar
+ * on apple that offers different apps, options to copy, etc." That sheet is
+ * the system's: Messages, Mail, copy, whatever the reader has. What we hand it
+ * is the article on the website, because a link into the app is only useful to
+ * someone who already has it.
+ */
+function ShareArticle({ post }: { post: Post }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Share ${post.title}`}
+      hitSlop={12}
+      onPress={() => {
+        Share.share({
+          title: post.title,
+          message: `${post.title} — ${SITE_URL}/in-practice/${post.id}`,
+        }).catch(() => { /* the sheet was dismissed, which is not a failure */ });
+      }}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+      <SymbolView
+        name={'square.and.arrow.up' as never}
+        size={16}
+        tintColor={c.accent}
+        fallback={<Text style={{ ...Type.small, color: c.accent }}>Share</Text>}
+        style={{ width: 18, height: 20 }}
+      />
+    </Pressable>
+  );
+}
+
 export default function PostReader({
   id, onClose, notes = [], tags = [], partnerName = 'your partner', onCreated, onRemoved,
 }: {
@@ -170,7 +204,7 @@ export default function PostReader({
   const accent = post.hero_color || c.accent;
 
   return (
-    <ScreenFrame onBack={onClose} backLabel="Learn">
+    <ScreenFrame onBack={onClose} backLabel="Learn" action={<ShareArticle post={post} />}>
     <AnnotationProvider
       section={post.id}
       anchorType="post_block"

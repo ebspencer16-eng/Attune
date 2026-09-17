@@ -896,9 +896,15 @@ export type PostSummary = {
   dimension_keys: string[];
   read_minutes: number | null;
   hero_color: string | null;
+  /** An illustration for the card, when the post has one. */
+  hero_image?: string | null;
+  /** Search terms the server built from the title, shelf, tags and keywords. */
+  search?: string;
   published_at: string;
   revision: number;
   read: boolean;
+  /** On this reader's list. */
+  saved?: boolean;
   /** The post changed since they read it, so it is worth resurfacing. */
   revised: boolean;
   /**
@@ -929,6 +935,20 @@ export type PostBlock = {
 };
 
 export type Post = PostSummary & { blocks: PostBlock[] };
+
+/**
+ * Put a post on this reader's list, or take it off.
+ *
+ * Answers with the state the reader should now see, so the screen never has to
+ * work out what a second tap meant.
+ */
+export async function savePost(id: string, saved: boolean) {
+  return request<{ ok: true; saved: boolean }>('/api/posts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: saved ? 'save' : 'unsave', id }),
+  });
+}
 
 export type Note = {
   id: string;

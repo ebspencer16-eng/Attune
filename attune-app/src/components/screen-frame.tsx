@@ -30,18 +30,26 @@ import { Colors, Spacing, Type } from '@/constants/attune-theme';
 const c = Colors.light;
 
 export default function ScreenFrame({
-  onBack, backLabel, children,
+  onBack, backLabel, action, children,
 }: {
   /** What the arrow does. Omitted only by a screen nobody can leave. */
   onBack?: () => void;
   /** Where it goes back to, named. "Back" alone says nothing on a phone. */
   backLabel?: string;
+  /**
+   * One control opposite the back arrow.
+   *
+   * Sharing an article lives here rather than at the end of it: someone
+   * decides to send a piece to their partner while they are reading, not after
+   * they have scrolled to the bottom.
+   */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
       {onBack ? (
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, paddingBottom: Spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, paddingBottom: Spacing.xs }}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={backLabel ? `Back to ${backLabel}` : 'Back'}
@@ -53,6 +61,7 @@ export default function ScreenFrame({
               {backLabel ? `Back to ${backLabel}` : 'Back'}
             </Text>
           </Pressable>
+          {action}
         </View>
       ) : null}
       {children}

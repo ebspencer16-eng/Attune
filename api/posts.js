@@ -25,6 +25,26 @@ import { IN_PRACTICE_BODIES } from './_in-practice-bodies.js';
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
 
+/**
+ * The words a search can match for one post.
+ *
+ * Lower case and de-duplicated, because a search box is typed in lower case and
+ * a term in both the title and the keywords should count once. The dimension
+ * prefixes go: someone searching "conflict" means the subject, not the string
+ * "dim:conflict".
+ */
+function searchTerms(post) {
+  const parts = [
+    post.title || '',
+    post.subtitle || '',
+    post.category || '',
+    ...(post.keywords || []),
+    ...(post.dimension_keys || []).map((k) => String(k).split(':').pop()),
+  ];
+  const words = parts.join(' ').toLowerCase().split(/[^a-z0-9']+/).filter((w) => w.length > 2);
+  return [...new Set(words)].join(' ');
+}
+
 export default async function handler(req) {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY
@@ -62,8 +82,8 @@ export default async function handler(req) {
     const publishedFilter = `published_at=not.is.null&published_at=lte.${nowIso}`;
 
     if (action === 'feed') {
-      const [pRes, rRes, allRes] = await Promise.all([
-        rest(`posts?${publishedFilter}&select=id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
+      const [pRes, rRes, allRes, sRes] = await Promise.all([
+        rest(`posts?${publishedFilter}&select=id,title,subtitle,category,dimension_keys,keywords,read_minutes,hero_color,hero_image,published_at,revision&order=published_at.desc&limit=50`, { headers: svc }),
         rest(`post_reads?owner_id=eq.${me}&select=post_id,revision,read_at`, { headers: svc }),
         /**
          * How many people have read each piece, for the Featured sort.
@@ -75,10 +95,16 @@ export default async function handler(req) {
          * as rows: the app has no business holding a list of reads.
          */
         rest('post_reads?select=post_id&limit=10000', { headers: svc }),
+        // What this reader has saved. Ellie: "I want to add 'save' an article
+        // to add to a reading list." saved_posts has existed since migration
+        // 044 and nothing has ever written to it. Ids only: what someone saves
+        // is theirs.
+        rest(`saved_posts?owner_id=eq.${me}&select=post_id`, { headers: svc }),
       ]);
       const published = await pRes.json().catch(() => []);
       const reads = await rRes.json().catch(() => []);
       const readBy = new Map(reads.map(r => [r.post_id, r]));
+      const savedIds = new Set((await sRes.json().catch(() => [])).map((r) => r.post_id));
       const popularity = new Map();
       for (const r of (await allRes.json().catch(() => []))) {
         popularity.set(r.post_id, (popularity.get(r.post_id) || 0) + 1);
@@ -111,6 +137,10 @@ export default async function handler(req) {
         dimension_keys: [],
         read_minutes: a.readMinutes,
         hero_color: null,
+        hero_image: null,
+        keywords: [],
+        saved: false,
+        search: searchTerms({ title: a.title, subtitle: a.excerpt, category: shelfFor(a) }),
         published_at: null,
         revision: 1,
         /**
@@ -138,6 +168,18 @@ export default async function handler(req) {
             /** How many people have read it. The Featured sort's first key. */
             reads: popularity.get(p.id) || 0,
             read: !!r,
+            saved: savedIds.has(p.id),
+            /**
+             * What a search matches on, built here rather than in the app.
+             *
+             * Ellie: "use key words and a tagging system to smart search for
+             * relevant articles." The tagging system is dimension_keys, which
+             * carries prefixes a reader would never type, so they are stripped;
+             * the words she adds per post in the admin come through as they
+             * are; and the shelf is in there because "conflict" should find
+             * everything on that shelf whether or not a post says the word.
+             */
+            search: searchTerms(p),
             // A substantive edit bumps revision, so a post someone read before
             // a rewrite resurfaces rather than staying silently marked read.
             revised: !!r && r.revision < p.revision,
@@ -217,6 +259,31 @@ export default async function handler(req) {
         body: JSON.stringify({ owner_id: me, post_id: body.id, revision, read_at: new Date().toISOString() }),
       });
       return json({ ok: true, revision, recorded: w.ok });
+    }
+
+    /**
+     * ── SAVING, AND TAKING IT BACK ────────────────────────────────────────
+     * One row per reader per post, which the unique index on saved_posts
+     * already enforces, so saving twice is not an error and unsaving something
+     * that was never saved is not either. Both answer with the state the
+     * reader should now see, so the app never has to guess.
+     */
+    if (req.method === 'POST' && (action === 'save' || action === 'unsave')) {
+      if (!body.id) return json({ ok: false, error: 'missing id' }, 400);
+      if (action === 'save') {
+        const w = await rest('saved_posts?on_conflict=owner_id,post_id', {
+          method: 'POST',
+          headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({ owner_id: me, post_id: body.id }),
+        });
+        if (!w.ok) return json({ ok: false, error: 'could not save that' }, 500);
+        return json({ ok: true, saved: true });
+      }
+      const d = await rest(`saved_posts?owner_id=eq.${me}&post_id=eq.${encodeURIComponent(body.id)}`, {
+        method: 'DELETE', headers: { ...svc, Prefer: 'return=minimal' },
+      });
+      if (!d.ok) return json({ ok: false, error: 'could not unsave that' }, 500);
+      return json({ ok: true, saved: false });
     }
 
     return json({ ok: false, error: 'unsupported action' }, 400);

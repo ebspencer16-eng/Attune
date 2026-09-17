@@ -130,6 +130,10 @@ export default async function handler(req) {
         read_minutes: body.readMinutes ?? Math.max(1, Math.round(
           blocks.reduce((n, b) => n + (b.text || '').split(/\s+/).length, 0) / 200)),
         hero_color: body.heroColor || null,
+        // The card's illustration and the words a reader might search for.
+        // Both optional: a post without either looks and searches as it did.
+        hero_image: body.heroImage || null,
+        keywords: Array.isArray(body.keywords) ? body.keywords : [],
         // A published post keeps its date on save. Publishing is its own action.
         published_at: existing ? existing.published_at : null,
         // Only bump when the editor says the change is worth resurfacing.

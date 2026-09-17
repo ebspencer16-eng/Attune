@@ -40,10 +40,9 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
-**Nothing waiting.** 061 to 071 are all run.
-
 | # | Migration |
 |--|--|
+| M73 | **072_post_images_and_keywords.sql.** Two columns on posts for the Learn tab: `hero_image`, the illustration a card shows, and `keywords`, the words a reader might type that are not in the title. Both optional, so nothing changes until a post uses them. The search works today off titles, standfirsts, shelves and tags; keywords are what makes it find "in-laws" in a piece that says "extended family". |
 
 ### Decide these
 
@@ -90,6 +89,11 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R174 | **The Learn tab.** Renamed everywhere, including the two server lines that pointed at "your resources tab". A search box above the shelves, My lists with Saved and Read, and every piece as a card with the ARTICLE label and a bookmark, which is the shape of the app you showed me. Saved is new and is yours to build; Read has been recorded since the feed existed and has never been shown as a list. |
+| R175 | **Articles can carry an illustration.** The card draws it when a post has one. Until then the ground is tinted by shelf, with the mark in the corner, so a card without a picture looks intentional rather than broken. Adding pictures is a content job: the column is there and the admin accepts it, so the moment you have artwork it appears. |
+| R176 | **Search.** It matches the title, the standfirst, the shelf, the dimension tags and any keywords added in the admin, and two words narrow rather than widen. Try "conflict", then "repair". |
+| R177 | **Share, through the phone's own sheet.** Top right of an article: Messages, Mail, copy, whatever you have. It sends the piece's address on the website, because a link into the app is only useful to someone who already has it. |
+| R178 | **The Insights tab is a lightbulb**, and the home screen has the white glow back with the mark under the greeting. |
 | R173 | **The workbook opens in the browser and builds itself.** Your call, and the simpler one: the app opens the website's workbook page with a flag that makes the browser build the PDF straight away, with the same builder and the same options a customer gets on the website. One file, one builder, no server renderer. The page says "Building your workbook" for the second it takes. |
 | R170 | **The margin icon sits on the mark's own line** and shows a tag for a tag. It was pinned to the top of the paragraph, and a mark made just now was leaving its tags behind, so a tag looked like a note until the screen was reopened. |
 | R171 | **That warning is gone.** The scroll-to-a-mark measurement used an API the new React Native architecture warns about on every call. It measures two windows and reads the page's own offset instead, which is the same number with nothing deprecated in it. Worth trying R112 again: open a mark from Notes and see whether it lands on the line. |
