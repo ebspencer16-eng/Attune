@@ -28,20 +28,56 @@ const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, header
 /**
  * The words a search can match for one post.
  *
- * Lower case and de-duplicated, because a search box is typed in lower case and
- * a term in both the title and the keywords should count once. The dimension
- * prefixes go: someone searching "conflict" means the subject, not the string
- * "dim:conflict".
+ * ── WHY THE WHOLE ARTICLE IS IN HERE ──────────────────────────────────────
+ * Ellie: "I searched show love and it didn't come up with anything since that
+ * phrase isn't in any titles, but we need an in depth system to analyze
+ * articles and suggest search results based on content."
+ *
+ * Right. A search over titles is a search over twelve sentences. This indexes
+ * what a piece actually says: its title, its standfirst, its shelf, its tags,
+ * the keywords set in the admin, and every word of its body. A piece about
+ * showing love now answers "show love" whether or not anyone thought to put
+ * those two words in the headline.
+ *
+ * Words shorter than three letters go, and so do the hundred or so that carry
+ * no meaning on their own, because "the" matching everything is the same as
+ * matching nothing. Everything else stays as typed: no stemming, because the
+ * app matches on the start of a word, which covers plurals and most endings
+ * without a dictionary to keep.
  */
-function searchTerms(post) {
+const STOPWORDS = new Set([
+  'the', 'and', 'for', 'you', 'your', 'yours', 'are', 'was', 'were', 'been', 'being',
+  'that', 'this', 'these', 'those', 'with', 'from', 'into', 'about', 'than', 'then',
+  'they', 'them', 'their', 'there', 'here', 'what', 'when', 'where', 'which', 'who',
+  'will', 'would', 'could', 'should', 'have', 'has', 'had', 'not', 'but', 'its',
+  'it\'s', 'one', 'two', 'out', 'off', 'own', 'get', 'got', 'can', 'cant', 'dont',
+  'doesn', 'didn', 'isn', 'aren', 'wasn', 'weren', 'won', 'wouldn', 'couldn',
+  'shouldn', 'just', 'like', 'more', 'most', 'some', 'any', 'all', 'both', 'each',
+  'because', 'while', 'after', 'before', 'again', 'once', 'over', 'under', 'very',
+]);
+
+/** Every word a block of an article holds, whatever shape the block is. */
+function blockWords(blocks) {
+  if (!Array.isArray(blocks)) return '';
+  return blocks.map((b) => {
+    if (!b) return '';
+    if (typeof b === 'string') return b;
+    return [b.text, b.title, b.heading, ...(Array.isArray(b.items) ? b.items : [])]
+      .filter((v) => typeof v === 'string').join(' ');
+  }).join(' ');
+}
+
+function searchTerms(post, body) {
   const parts = [
     post.title || '',
     post.subtitle || '',
     post.category || '',
     ...(post.keywords || []),
     ...(post.dimension_keys || []).map((k) => String(k).split(':').pop()),
+    blockWords(body || post.blocks),
   ];
-  const words = parts.join(' ').toLowerCase().split(/[^a-z0-9']+/).filter((w) => w.length > 2);
+  const words = parts.join(' ').toLowerCase().split(/[^a-z0-9']+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
   return [...new Set(words)].join(' ');
 }
 
@@ -96,7 +132,7 @@ export default async function handler(req) {
        * remember to remove either: once the migration is run the first query
        * succeeds and the fallback never fires.
        */
-      const FEED_COLS = 'id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision';
+      const FEED_COLS = 'id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision,blocks';
       const feedQuery = (cols) =>
         rest(`posts?${publishedFilter}&select=${cols}&order=published_at.desc&limit=50`, { headers: svc });
 
@@ -160,7 +196,10 @@ export default async function handler(req) {
         hero_image: null,
         keywords: [],
         saved: false,
-        search: searchTerms({ title: a.title, subtitle: a.excerpt, category: shelfFor(a) }),
+        search: searchTerms(
+          { title: a.title, subtitle: a.excerpt, category: shelfFor(a) },
+          IN_PRACTICE_BODIES[a.slug]?.blocks,
+        ),
         published_at: null,
         revision: 1,
         /**
@@ -183,8 +222,12 @@ export default async function handler(req) {
         categories: POST_CATEGORIES,
         posts: posts.map(p => {
           const r = readBy.get(p.id);
+          // The body is indexed and then dropped: a shelf does not need twelve
+          // articles' worth of prose, and sending it would be a payload nobody
+          // reads several hundred times over.
+          const { blocks, ...card } = p;
           return {
-            ...p,
+            ...card,
             /** How many people have read it. The Featured sort's first key. */
             reads: popularity.get(p.id) || 0,
             read: !!r,
@@ -199,7 +242,7 @@ export default async function handler(req) {
              * are; and the shelf is in there because "conflict" should find
              * everything on that shelf whether or not a post says the word.
              */
-            search: searchTerms(p),
+            search: searchTerms(p, blocks),
             // A substantive edit bumps revision, so a post someone read before
             // a rewrite resurfaces rather than staying silently marked read.
             revised: !!r && r.revision < p.revision,

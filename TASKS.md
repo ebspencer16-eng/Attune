@@ -48,6 +48,7 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
+| O209 | **One environment variable in Vercel, and the admin appears in the app.** Settings → Environment Variables → add `ADMIN_EMAILS` with your address and Carolina's, comma separated, no spaces needed. Until it is set nobody sees the row, including you. It is not a key: the admin still asks for its own password exactly as it does in a browser. I have not set it because it holds two people's addresses, and those are yours to type rather than mine to guess. |
 | M72 | **TestFlight: the next command is the build.** Steps 1 to 4 of `app/TESTFLIGHT.md` are done, including the two Supabase values. The App Store Connect dropdown only offers `com.attunerelationships.web` because `com.attunerelationships.app` has never been registered to the team; an identifier cannot be typed into that form. The build registers it when it sets up credentials, and the submit then offers to create the app record, so the app is not made by hand at all. Step 5 in the walkthrough says so now. |
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
@@ -89,6 +90,13 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
+| R184 | **The lockup is larger and in the website's face**, Playfair rather than body text, with the mark scaled up to match. |
+| R185 | **Cards are the same height.** The standfirst is gone from the tile, and the title has room for two lines whether it needs them or not, which is the other half of making them uniform. |
+| R186 | **Share on the insight of the day and on the storycards**, both through Apple's own sheet. A storycard sends its own words, in the order the card shows them, and the address. |
+| R187 | **The cream pages have a ground.** A warm wash at the top fading to cream, with a breath of the orange in the corner: the pages were one flat colour from the status bar down, which is why everything on them read as floating. Same wash on Learn and Notes. |
+| R188 | **The search field no longer clips its own text.** It was using a paragraph's line height on a single line. |
+| R189 | **Search reads the articles, not just the titles.** Every word of every piece is indexed now, with the filler words dropped, so "show love" finds the piece that says it. Two words still narrow; if that finds nothing, the pieces matching either come back with the best first rather than an empty screen. |
+| R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
 | R180 | **The Learn tab, rebuilt to your order.** Lockup, Yours to explore as a hero, the insight of the day on the home screen's own blue, then In Practice: search, then Saved and Read, then a shelf at a time with the articles side by side. Each shelf's arrow opens that shelf as a page of rows. Section labels are hero; the shelf labels inside In Practice are eyebrows, which is the hierarchy you described. |
 | R181 | **The lockup is on every tab**, in ink on the cream pages and light on the blue one. |
 | R182 | **Colour.** Learn: the blue insight tile, and each shelf's cards tinted by shelf. Notes: a rule of colour down the left of the tiles and each tag's own colour behind its icon. Tell me if you want more or less of it; it is deliberately restrained rather than decorative. |

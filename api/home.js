@@ -19,6 +19,7 @@ export const config = { runtime: 'edge' };
 
 import { nextActions, greeting, appTargetFor } from './_lib/next-action.js';
 import { progressFor } from './_lib/exercise-progress.js';
+import { isAdminAddress } from './_lib/admins.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
@@ -83,6 +84,7 @@ export default async function handler(req) {
       // while the rule needed it: a column that is not selected reads as
       // undefined, and undefined reads as "does not own it".
       ...OWNERSHIP_COLUMNS,
+      'email',
       'budget_data', 'checklist_data', 'profile_setup_complete',
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
@@ -295,6 +297,15 @@ export default async function handler(req) {
 
     return json({
       ok: true,
+      /**
+       * Whether to show the way into the admin.
+       *
+       * Not a permission: every admin endpoint is behind ADMIN_SECRET and asks
+       * for it regardless. This is what decides whether the app draws the row
+       * at all, so the two people who use it stop having to type the address
+       * into a browser. See api/_lib/admins.js.
+       */
+      admin: isAdminAddress(me.email),
       greeting: greeting({
         now: state.now,
         firstName: state.firstName,

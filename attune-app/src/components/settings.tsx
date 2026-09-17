@@ -16,6 +16,7 @@
 
 import { useEffect, useState } from 'react';
 import Constants from 'expo-constants';
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import * as Updates from 'expo-updates';
 import {
   ActivityIndicator, Linking, Modal, Pressable, ScrollView, Text, TextInput, View,
@@ -54,6 +55,61 @@ const SITE = SITE_URL;
  * that says. No interpretation: if this panel and a screen disagree, the screen
  * is wrong, and that is worth being able to see.
  */
+/**
+ * The way into the admin, for the two people who have one.
+ *
+ * ── WHY IT ASKS THE SERVER ────────────────────────────────────────────────
+ * Ellie: "Can you adjust carolina's and my app view so that we can access admin
+ * page through our portal?"
+ *
+ * Whether to draw this is the server's answer, from ADMIN_EMAILS, because a
+ * list of who can reach the admin does not belong in an app anyone can
+ * download. It is not a permission either: the admin asks for its own password
+ * exactly as it does in a browser, so the worst this can do is show a door.
+ *
+ * It fetches for itself rather than taking a prop, which is how ExerciseStatus
+ * below it works: Settings has no payload of its own and threading one through
+ * for a row that nine people in ten never see would be the wrong shape.
+ */
+function AdminRow() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetchHome();
+      if (!cancelled && res.ok) setShow(!!res.data.admin);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!show) return null;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Open the admin"
+      onPress={() => openBrowserAsync(`${SITE}/admin`, {
+        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+        toolbarColor: c.background,
+        controlsColor: c.accent,
+      })}
+      style={{
+        marginTop: Spacing.xxl, flexDirection: 'row', alignItems: 'center',
+        justifyContent: 'space-between', gap: Spacing.md,
+        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+        borderRadius: Radius.lg, paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+      }}>
+      <View style={{ flex: 1 }}>
+        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>Admin</Text>
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
+          Orders, posts, engagement. Asks for the admin password.
+        </Text>
+      </View>
+      <Text style={{ color: c.accent, fontSize: 16 }}>{'\u203A'}</Text>
+    </Pressable>
+  );
+}
+
 function ExerciseStatus() {
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [failed, setFailed] = useState(false);
@@ -210,6 +266,8 @@ export default function Settings({
 
           It reads "development" in Expo Go, where updates are switched off, so
           it never claims something the simulator cannot know. */}
+      <AdminRow />
+
       <AppVersion />
 
       {/* ── Delete account ──────────────────────────────────────────────────

@@ -60,6 +60,7 @@ import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import BrandHeader from '@/components/brand-header';
+import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
@@ -633,6 +634,7 @@ export default function NotesScreen() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      <PageWash />
       {children}
     </SafeAreaView>
   );

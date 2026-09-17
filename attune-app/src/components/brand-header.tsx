@@ -28,12 +28,16 @@ export default function BrandHeader({ tone = 'ink' }: { tone?: 'ink' | 'light' }
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: Spacing.sm, paddingTop: Spacing.sm, paddingBottom: Spacing.md,
       }}>
+      {/* Ellie: "I want the mark and text for the lockup to be larger and in
+          the font of the website top left 'Attune', not in the body text it
+          currently uses." The website sets that in Playfair at 700, which is
+          this app's display face: Type.title, one size down. */}
       <Image
         source={require('@/assets/images/attune-mark.png')}
-        style={{ width: 22, height: 22 * (64 / 88) }}
+        style={{ width: 34, height: 34 * (64 / 88) }}
         resizeMode="contain"
       />
-      <Text style={{ ...Type.small, fontWeight: '700', letterSpacing: 0.2, color }}>
+      <Text style={{ ...Type.title, fontSize: 19, lineHeight: 26, color }}>
         {BRAND_NAME}
       </Text>
     </View>

@@ -31,12 +31,14 @@ import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
 import Checklist from '@/components/checklist';
 import BrandHeader from '@/components/brand-header';
+import PageWash from '@/components/page-wash';
+import ShareButton from '@/components/share-button';
 import { buildWorkbook, fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, BlueGround, Colors, MaxContentWidth, Palette, SectionColor, Radius, Spacing, Type,
+  AccentFallback, AccentFor, BlueGround, Colors, MaxContentWidth, Palette, SectionColor, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -352,13 +354,31 @@ export default function ResourcesScreen() {
    * narrow rather than widen. Matching on the start of a word rather than the
    * whole one, because someone typing "argu" is looking for arguments.
    */
-  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const found = terms.length
-    ? inList.filter((p) => {
-      const hay = `${p.search || ''} ${p.title} ${p.subtitle || ''}`.toLowerCase();
-      return terms.every((t) => hay.split(/[^a-z0-9']+/).some((w) => w.startsWith(t)));
-    })
-    : inList;
+  /**
+   * ── WHAT A SEARCH MATCHES ───────────────────────────────────────────────
+   * The server indexes every word of an article, not just its title, so the
+   * work here is only in reading the query the way someone means it.
+   *
+   * Words of one or two letters go: they are "in", "to", "my", which the index
+   * drops as well, and keeping them would mean "in laws" finds nothing while
+   * "laws" finds two. Matching is on the start of a word, so "argu" finds
+   * arguments and "repair" finds repairing.
+   *
+   * Every word has to appear, which is how someone expects two words to
+   * behave. If that finds nothing, the pieces that match any of them come back
+   * instead, most matches first: an empty screen is a worse answer than a near
+   * one.
+   */
+  const terms = query.trim().toLowerCase().split(/[^a-z0-9']+/).filter((t) => t.length > 2);
+  const score = (post: PostSummary) => {
+    const words = `${post.search || ''} ${post.title} ${post.subtitle || ''}`
+      .toLowerCase().split(/[^a-z0-9']+/);
+    return terms.filter((t) => words.some((w) => w.startsWith(t))).length;
+  };
+  const everyTerm = terms.length ? inList.filter((p) => score(p) === terms.length) : inList;
+  const found = !terms.length || everyTerm.length
+    ? everyTerm
+    : inList.filter((p) => score(p) > 0).sort((a, b) => score(b) - score(a));
   const visible = sortPosts(found, sort);
 
   // All, then whatever shelves the server says exist.
@@ -494,9 +514,21 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
               </Text>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic', marginTop: Spacing.lg }}>
-                {home.research.source}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, marginTop: Spacing.lg }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic', flex: 1 }}>
+                  {home.research.source}
+                </Text>
+                {/* Ellie: "I want a share button on the insight of the day tile
+                    on learn tab." The finding and where it came from, which is
+                    the whole of what the tile says. */}
+                <ShareButton
+                  tone="light"
+                  label="Share"
+                  title="Insight of the day"
+                  accessibilityLabel="Share the insight of the day"
+                  message={`${home.research.body}\n\n${home.research.source}\n${SITE}`}
+                />
+              </View>
             </LinearGradient>
           </View>
         ) : null}
@@ -532,7 +564,12 @@ export default function ResourcesScreen() {
                     placeholderTextColor={c.textMuted}
                     returnKeyType="search"
                     clearButtonMode="while-editing"
-                    style={{ ...Type.body, color: c.text, flex: 1, paddingVertical: Spacing.md }}
+                    /* Ellie: "Text cuts off on bottom in the in practice
+                       search tab." Type.body carries a line height set for
+                       paragraphs, and a single-line input clips its descenders
+                       against it. inputType strips that, which is what it is
+                       for: every other field in the app already uses it. */
+                    style={{ ...inputType(Type.body), color: c.text, flex: 1, paddingVertical: Spacing.md }}
                   />
                 </View>
 
@@ -639,6 +676,7 @@ export default function ResourcesScreen() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['top']}>
+      <PageWash />
       {children}
     </SafeAreaView>
   );
@@ -933,12 +971,14 @@ function PostCard({
       </View>
 
       <View style={{ padding: Spacing.lg }}>
-        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{post.title}</Text>
-        {post.subtitle ? (
-          <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-            {post.subtitle}
-          </Text>
-        ) : null}
+        {/* Ellie: "No description of articles in the tiles on learn tab, that
+            should make them all uniformed height, right?" Right, as long as the
+            title is given the room for two lines whether or not it needs them:
+            a one-line title beside a two-line one is the same ragged edge the
+            standfirst was making. */}
+        <Text numberOfLines={2} style={{ ...Type.cardTitle, color: c.textStrong, minHeight: 46 }}>
+          {post.title}
+        </Text>
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
           {post.read_minutes ? (
             <Text style={{ color: c.accent }}>{`${post.read_minutes} min read`}</Text>

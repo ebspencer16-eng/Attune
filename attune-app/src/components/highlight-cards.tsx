@@ -54,6 +54,8 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
 import type { HighlightCard, PersonResults } from '@/api/client';
+import { SITE_URL } from '@/api/client';
+import ShareButton from '@/components/share-button';
 import CoupleMap from '@/components/couple-map';
 import { ResultsScroll } from '@/components/results-scroll';
 
@@ -221,6 +223,21 @@ function typeGround(accent?: string | null): Ground {
  * card is under a page header and a row of section pills, and a story card
  * with product chrome above it is not a story card.
  */
+/**
+ * A storycard, as something you can send someone.
+ *
+ * The cards are pictures of numbers and prose, and a share sheet takes text, so
+ * this is the card's own words in the order it shows them. Whatever a card
+ * happens to carry: they are not all the same shape, and a card that gained a
+ * field later should not need this changed.
+ */
+function shareTextFor(card: HighlightCard | undefined) {
+  if (!card) return SITE_URL;
+  const lines = [card.title, card.typeName, card.lead, card.body, card.footer]
+    .filter((line): line is string => typeof line === 'string' && line.trim().length > 0);
+  return [...new Set(lines)].join('\n\n') + `\n\n${SITE_URL}`;
+}
+
 export default function HighlightCards({
   cards, onDone, accent, style, map,
 }: {
@@ -356,9 +373,20 @@ function Reel({
           <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
             <Text style={{ ...Type.eyebrow, color: `${WHITE}0.5)` }}>{'\u2039'}  Close</Text>
           </Pressable>
-          <Pressable onPress={onDone} hitSlop={12} accessibilityRole="button">
-            <Text style={{ ...Type.eyebrow, color: Palette.white }}>Full results  {'\u2192'}</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.lg }}>
+            {/* Ellie: "I also want a share button on highlight storycards."
+                What it sends is the card in front of them, in words: these are
+                made to be shown to someone, which is what a storycard is for. */}
+            <ShareButton
+              tone="light"
+              accessibilityLabel="Share this card"
+              title="Attune"
+              message={shareTextFor(cards[index]) }
+            />
+            <Pressable onPress={onDone} hitSlop={12} accessibilityRole="button">
+              <Text style={{ ...Type.eyebrow, color: Palette.white }}>Full results  {'\u2192'}</Text>
+            </Pressable>
+          </View>
         </View>
       </SafeAreaView>
 

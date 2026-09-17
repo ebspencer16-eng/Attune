@@ -637,6 +637,11 @@ export type CatalogueItem = {
 
 export type HomeResponse = {
   /**
+   * Whether to offer the way into the admin. Not a permission: the admin still
+   * asks for its own secret. See api/_lib/admins.js.
+   */
+  admin?: boolean;
+  /**
    * The home tile's third row: something to return to. Two states, both
    * decided server-side in api/_lib/pick-up.js so the app renders one shape.
    * Null when there is neither a note nor a published post.
