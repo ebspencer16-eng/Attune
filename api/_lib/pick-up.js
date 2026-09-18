@@ -32,7 +32,18 @@ const PREVIEW = 90;
 function peek(text) {
   const t = (text || '').replace(/\s+/g, ' ').trim();
   if (!t) return null;
-  return t.length > PREVIEW ? `${t.slice(0, PREVIEW).trimEnd()}…` : t;
+  const cut = t.length > PREVIEW ? `${t.slice(0, PREVIEW).trimEnd()}…` : t;
+  /**
+   * ── IT STARTS WITH A CAPITAL ────────────────────────────────────────────
+   * Ellie: "The third row in the bottom tile on my app homepage doesn't
+   * capitalize the lines the way the others do."
+   *
+   * The other lines are written; this one is quoted, and a mark usually starts
+   * mid-sentence, so the tile read "sharing thoughts aloud..." under two lines
+   * that began properly. Only the first letter is touched: the rest is what
+   * they marked, and a sentence case pass would rewrite their own words.
+   */
+  return cut.charAt(0).toUpperCase() + cut.slice(1);
 }
 
 /**

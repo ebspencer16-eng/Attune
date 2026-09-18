@@ -30,18 +30,22 @@ import { Colors } from '@/constants/attune-theme';
 const c = Colors.light;
 
 export default function TabScreen({
-  children, ground = 'cream',
+  children, ground = 'cream', tint, second,
 }: {
   children: React.ReactNode;
   /** 'cream' takes the wash and the ink lockup; 'blue' takes neither. */
   ground?: 'cream' | 'blue';
+  /** The wash's colour, when a tab wants its own. */
+  tint?: string;
+  /** A second colour in the opposite corner, for a page that wants both. */
+  second?: string;
 }) {
   const blue = ground === 'blue';
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: blue ? 'transparent' : c.background }}
       edges={['top']}>
-      {blue ? null : <PageWash />}
+      {blue ? null : <PageWash tint={tint} second={second} />}
       <BrandHeader tone={blue ? 'light' : 'ink'} />
       <View style={{ flex: 1 }}>{children}</View>
     </SafeAreaView>

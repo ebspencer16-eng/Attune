@@ -30,7 +30,7 @@ function withAlpha(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
-export default function PageWash({ tint }: {
+export default function PageWash({ tint, second }: {
   /**
    * The colour in the corner. The brand orange by default.
    *
@@ -40,6 +40,16 @@ export default function PageWash({ tint }: {
    * AccentFor, the same one its progress bar and its arrows use.
    */
   tint?: string;
+  /**
+   * A second colour, in the opposite corner.
+   *
+   * Ellie, of the Notes tab: "Give notes screen a colored bg. Something
+   * branded." The brand's own gradient is the orange and the indigo, which is
+   * what the website's rules and the storycards' top edge are made of. At a
+   * tenth each over cream it is a coloured page rather than a coloured block,
+   * and the notes on it stay black on near-white.
+   */
+  second?: string;
 } = {}) {
   const hue = tint || Palette.orange;
   return (
@@ -65,6 +75,16 @@ export default function PageWash({ tint }: {
         end={{ x: 0.1, y: 0.22 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
+      {second ? (
+        /* The other corner, coming up from the bottom left, so the page reads
+           as one gradient rather than two stains. */
+        <LinearGradient
+          colors={[withAlpha(second, 0), withAlpha(second, 0.12)]}
+          start={{ x: 0.9, y: 0.45 }}
+          end={{ x: 0, y: 1 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+      ) : null}
     </View>
   );
 }

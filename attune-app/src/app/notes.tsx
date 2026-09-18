@@ -631,7 +631,10 @@ export default function NotesScreen() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <TabScreen>{children}</TabScreen>;
+  /* Ellie: "Give notes screen a colored bg. Something branded." The brand's
+     two colours, one in each corner, at a tenth each: the same pair the
+     website draws its rules with. */
+  return <TabScreen tint={Palette.orange} second={Palette.indigo}>{children}</TabScreen>;
 }
 
 /**

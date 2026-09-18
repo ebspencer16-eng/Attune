@@ -465,8 +465,9 @@ export default function ResourcesScreen() {
           {/* Ellie: "I want the section labels on that page to be hero text not
               eyebrow text." So the sections carry the page rather than a title
               above them repeating the tab's own name. */}
+          {/* Ellie: "Rename 'yours to explore' section to 'Resources'." */}
           <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>
-            Yours to explore
+            Resources
           </Text>
           {owned.length ? (
             <>
