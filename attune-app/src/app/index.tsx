@@ -36,6 +36,7 @@ import SignIn from '@/components/sign-in';
 import Feedback from '@/components/feedback';
 import Settings from '@/components/settings';
 import { forgetLastSection, showResultsFromStart } from '@/components/results';
+import { forgetLastSeen, keepLastSeen, lastSeen } from '@/api/last-seen';
 import BrandHeader from '@/components/brand-header';
 import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghost-tile';
 import { LOADING } from '@/constants/loading-copy';
@@ -67,6 +68,21 @@ export default function HomeScreen() {
   // rows or three, and the reading gets the rest. A fixed height put the third
   // row underneath the tab bar on the day a third row first existed.
   const topHeight = useWindowDimensions().height * 0.38;
+  /**
+   * ── THE SCREEN BEFORE THE NETWORK ───────────────────────────────────────
+   * Ellie: "When I open the testflight attune app, it takes a long time to
+   * load my dashboard each time."
+   *
+   * It did, and the reason was measurable: warm, /api/home answers in a third
+   * of a second; cold, it took between one and three and a half seconds, and a
+   * function nobody has called for an hour is always cold. The app asked for it
+   * on every launch and drew a spinner until it came back.
+   *
+   * So the last payload is read from the keychain on mount and drawn as soon
+   * as it arrives, with the request running behind it. The read is a few
+   * milliseconds against a cold start of seconds, so on any launch after the
+   * first the dashboard is simply there. See api/last-seen.ts.
+   */
   const [data, setData] = useState<HomeResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,7 +94,7 @@ export default function HomeScreen() {
   const load = useCallback(async () => {
     loadingRef.current = true;
     const res = await fetchHome();
-    if (res.ok) { setData(res.data); setError(null); }
+    if (res.ok) { setData(res.data); setError(null); keepLastSeen('home', res.data); }
     else { setError(res.error); }
     setLoading(false);
     setRefreshing(false);
@@ -86,6 +102,23 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  /**
+   * The cache, drawn if it gets here before the network does.
+   *
+   * `setData((cur) => cur ?? seen)` rather than a plain set: if the request
+   * won the race, the fresh answer is already on screen and must not be
+   * replaced by an older one. Same for the spinner.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    lastSeen<HomeResponse>('home').then((seen) => {
+      if (cancelled || !seen) return;
+      setData((cur) => cur ?? seen);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Reload when this tab comes into focus, not only when it mounts.
   //
@@ -526,6 +559,8 @@ export default function HomeScreen() {
           onClose={() => setSettingsOpen(false)}
           onSignedOut={() => {
             forgetLastSection();
+            /* The next person to open this phone is not necessarily this one. */
+            forgetLastSeen();
             setSettingsOpen(false); setLoading(true); load();
           }}
         />

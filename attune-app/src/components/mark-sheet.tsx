@@ -29,7 +29,7 @@
  */
 
 import { useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 
 import { deleteNote, shareNote, updateNote, type Note, type Tag } from '@/api/client';
@@ -75,6 +75,8 @@ export default function MarkSheet({
   const [picked, setPicked] = useState<string[]>(note.tagIds || []);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  /** The chips, closed until the tag icon is tapped. The editor's rule. */
+  const [showTags, setShowTags] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const tone = annotationColor(note.color);
@@ -148,7 +150,25 @@ export default function MarkSheet({
           />
 
           <ScrollView contentContainerStyle={{ paddingHorizontal: Spacing.xl }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+            {/* ── THE WORDS IT SITS ON, FIRST ────────────────────────────
+                Ellie: "put the quote from the text above the note eyebrow and
+                the date, that line should be above the note text itself."
+
+                Which is the right order and worth saying why: the quote is the
+                thing you recognise. It is what tells you which note this is
+                before you have read a word of it, so it goes at the top and
+                the label and the date sit between it and what you wrote. */}
+            {note.anchor_context ? (
+              <View style={{ paddingLeft: Spacing.lg, borderLeftWidth: 3, borderLeftColor: tone.ink }}>
+                <Text style={{ ...Type.body, color: c.textMuted }}>{note.anchor_context}</Text>
+              </View>
+            ) : null}
+
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                marginTop: note.anchor_context ? Spacing.xl : 0,
+              }}>
               <View
                 style={{
                   width: 26, height: 26, borderRadius: 13,
@@ -159,7 +179,7 @@ export default function MarkSheet({
                   name={(picked.length ? 'tag' : 'square.and.pencil') as never}
                   size={13}
                   tintColor={tone.ink}
-                  fallback={<Text style={{ ...Type.small, color: tone.ink }}>{'•'}</Text>}
+                  fallback={<Text style={{ ...Type.small, color: tone.ink }}>{'\u2022'}</Text>}
                   style={{ width: 14, height: 14 }}
                 />
               </View>
@@ -169,72 +189,75 @@ export default function MarkSheet({
               ) : null}
             </View>
 
-            {/* ── WHAT IT IS ABOUT ────────────────────────────────────────
-                The words the mark sits on, quoted. Without them a note that
-                says "ask about this" is a note about nothing. */}
-            {note.anchor_context ? (
-              <View
-                style={{
-                  marginTop: Spacing.lg, paddingLeft: Spacing.lg,
-                  borderLeftWidth: 3, borderLeftColor: tone.ink,
-                }}>
-                <Text style={{ ...Type.body, color: c.textMuted, fontStyle: 'italic' }}>
-                  {note.anchor_context}
-                </Text>
-              </View>
-            ) : null}
-
-            {/* The note itself. A highlight has none, and says so rather than
-                showing an empty space that looks like a failure to load. */}
+            {/* What you wrote, in italics. Ellie: "The note text itself should
+                be italicized." It sets the thing a person wrote apart from the
+                product's own words above and below it. */}
             <Text
               style={{
                 ...Type.body, color: note.body ? c.text : c.textMuted,
-                marginTop: Spacing.xl, lineHeight: 25,
+                fontStyle: 'italic', marginTop: Spacing.lg, lineHeight: 25,
               }}>
               {note.body || `A ${kind.toLowerCase()} with nothing written under it.`}
             </Text>
 
-            {/* ── SHARED OR PRIVATE ───────────────────────────────────────
-                Named rather than switched: "Shared with Preston" says who, and
-                who is the whole question. */}
-            <Pressable
-              accessibilityRole="switch"
-              accessibilityState={{ checked: shared }}
-              onPress={toggleShare}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                marginTop: Spacing.xxl, paddingVertical: Spacing.md,
-              }}>
-              <View
-                style={{
-                  width: 46, height: 28, borderRadius: 14, padding: 3,
-                  backgroundColor: shared ? c.accent : c.border,
-                  alignItems: shared ? 'flex-end' : 'flex-start',
-                }}>
-                <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: Palette.white }} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ ...Type.cardTitle, color: c.textStrong }}>
-                  {shared ? `Shared with ${partnerName}` : 'Private'}
-                </Text>
-                <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-                  {shared
-                    ? `${partnerName} can read this in their notes.`
-                    : 'Only you can see this.'}
-                </Text>
-              </View>
-            </Pressable>
+            {/* ── ONE ROW: FILE IT, AND WHO CAN SEE IT ───────────────────
+                Ellie: "make the private/public the toggle like it exists on
+                the writing a note page rather than a switch like it is here.
+                Can also remove tags as its own section and put it in line with
+                the privacy toggle as just a tag icon with the plus sign?"
 
-            {/* ── TAGS ────────────────────────────────────────────────────
-                The reader's own tags as chips. Making a new one is the Notes
-                screen's job and stays there: a sheet that can create tags is a
-                second place tags are made. */}
-            <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginTop: Spacing.xl }}>Tags</Text>
-            {tags.length ? (
+                So it is the editor's own control, a Switch with the partner
+                named beside it, rather than a second thing that does the same
+                job in a different shape. Tagging is the icon at the other end
+                of the same row, and the chips open under it when asked for,
+                which is exactly how the editor does it. */}
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                marginTop: Spacing.xxl,
+              }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: showTags }}
+                accessibilityLabel={picked.length ? `${picked.length} tags` : 'Add a tag'}
+                onPress={() => setShowTags((v) => !v)}
+                hitSlop={10}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <SymbolView
+                  name="tag"
+                  size={17}
+                  tintColor={picked.length ? c.accent : c.accentQuiet}
+                  fallback={<Text style={{ ...Type.small, color: c.accentQuiet }}>{'#'}</Text>}
+                  style={{ width: 19, height: 19 }}
+                />
+                <SymbolView
+                  name="plus"
+                  size={10}
+                  tintColor={picked.length ? c.accent : c.accentQuiet}
+                  fallback={<Text style={{ ...Type.small, color: c.accentQuiet }}>{'+'}</Text>}
+                  style={{ width: 11, height: 11 }}
+                />
+                {picked.length ? (
+                  <Text style={{ ...Type.small, color: c.accent, fontWeight: '700', marginLeft: 4 }}>
+                    {String(picked.length)}
+                  </Text>
+                ) : null}
+              </Pressable>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
+                <Text style={{ ...Type.body, color: c.text }}>{`Share with ${partnerName}`}</Text>
+                <Switch
+                  value={shared}
+                  onValueChange={toggleShare}
+                  trackColor={{ true: c.accent, false: c.border }}
+                />
+              </View>
+            </View>
+
+            {showTags ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
-                {tags.map((t) => {
+                {tags.length ? tags.map((t) => {
                   const on = picked.includes(t.id);
-                  const col = annotationColor(t.color);
                   return (
                     <Pressable
                       key={t.id}
@@ -242,24 +265,21 @@ export default function MarkSheet({
                       accessibilityState={{ selected: on }}
                       onPress={() => toggleTag(t.id)}
                       style={{
-                        flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+                        paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
                         borderRadius: Radius.pill, borderWidth: 1,
-                        borderColor: on ? col.ink : c.border,
-                        backgroundColor: on ? col.wash : 'transparent',
-                        paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
+                        backgroundColor: on ? c.textStrong : c.surface,
+                        borderColor: on ? c.textStrong : c.border,
                       }}>
-                      <Text style={{ ...Type.small, fontWeight: '700', color: on ? col.ink : c.textMuted }}>
-                        {t.name}
-                      </Text>
+                      <Text style={{ ...Type.small, color: on ? Palette.white : c.text }}>{t.name}</Text>
                     </Pressable>
                   );
-                })}
+                }) : (
+                  <Text style={{ ...Type.small, color: c.textMuted }}>
+                    No tags yet. Add one on the Notes tab.
+                  </Text>
+                )}
               </View>
-            ) : (
-              <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm }}>
-                No tags yet. Make one on the Notes tab and it will be offered here.
-              </Text>
-            )}
+            ) : null}
 
             {error ? (
               <Text style={{ ...Type.small, color: c.accent, marginTop: Spacing.lg }}>{error}</Text>

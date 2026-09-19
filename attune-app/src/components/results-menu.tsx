@@ -43,27 +43,45 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 
 import type { ResultsNavGroup } from '@/api/client';
-import { AccentFallback, BottomTabInset, Palette, Spacing, Type } from '@/constants/attune-theme';
+import { AccentFallback, Palette, Spacing, Type } from '@/constants/attune-theme';
 
 /**
  * A glyph per section. A lookup, so an unknown group still draws.
  *
+ * ── OUTLINED, AND ELLIE'S CHOICES ─────────────────────────────────────────
+ * She named all eight: "Highlights make it photo strips from a photo booth,
+ * couple type make it a couple holding hands, Communication should be the
+ * speech bubbles, Expectations should be a brain, Rel relf should be a
+ * storybook, Physical intimacy should be a heart, Conflict patterns is good,
+ * What comes next should be a checklist. All icons should be white outlined
+ * not filled in."
+ *
+ * Outlined is the base name in SF Symbols; `.fill` is the solid one. So the
+ * rule is simply that no name here ends in `.fill`, and check-nav-icons.mjs
+ * says so, because "make them outlined" is the kind of change that gets undone
+ * one icon at a time.
+ *
+ * `figure.2.right.holdinghands` is the literal one for a couple. There is no
+ * photo-booth symbol, and `film` is the closest thing to a strip of frames.
+ *
  * These are the only strings in this file that are not the server's, and they
  * carry no meaning the label does not already carry: an icon here is rhythm,
- * not information.
+ * not information. A group the server adds tomorrow appears in the right place
+ * wearing the fallback rather than vanishing, which is the difference between
+ * a lookup and a list.
  */
 const GROUP_ICON: Record<string, string> = {
-  highlights: 'sparkles',
-  'couple-type': 'person.2.fill',
-  comm: 'bubble.left.and.bubble.right.fill',
-  exp: 'checklist',
-  reflection: 'heart.text.square.fill',
-  intimacy: 'heart.fill',
+  highlights: 'film',
+  'couple-type': 'figure.2.right.holdinghands',
+  comm: 'bubble.left.and.bubble.right',
+  exp: 'brain',
+  reflection: 'book',
+  intimacy: 'heart',
   conflict: 'arrow.triangle.branch',
-  'what-comes-next': 'flag.fill',
+  'what-comes-next': 'checklist',
 };
 
-const ICON_FALLBACK = 'circle.fill';
+const ICON_FALLBACK = 'circle';
 
 export default function ResultsMenu({
   groups, current, onOpenSection, density = 'page',
@@ -91,7 +109,10 @@ export default function ResultsMenu({
 
   return (
     <ScrollView
-      contentContainerStyle={{ paddingBottom: big ? BottomTabInset : 0 }}
+      /* No bottom inset of its own. The landing page sits inside a PageTile
+         now, and the tile is what keeps the last band clear of the tab bar;
+         a second clearance here is a strip of empty tile under the list. */
+      contentContainerStyle={{ paddingBottom: 0 }}
       showsVerticalScrollIndicator={false}>
       {groups.map((g, i) => {
         const color = g.color || AccentFallback;

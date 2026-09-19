@@ -40,11 +40,22 @@ export const GhostInk = '#FFFFFF';
 export const GhostInkQuiet = 'rgba(255,255,255,0.8)';
 
 export default function GhostTile({
-  children, style, radius = Radius.xl + 10,
+  children, style, radius = Radius.xl + 10, material = 'clear',
 }: {
   children: React.ReactNode;
   style?: ViewStyle;
   radius?: number;
+  /**
+   * Which glass.
+   *
+   * `clear` keeps the ground's value and is right over a colour you chose, like
+   * the home screen's navy. `regular` lightens what is behind it, which is what
+   * a control floating over a page it does not own wants: the results arrows
+   * sit over a cream page on one section and a dark gradient on the next, and
+   * a pane that is always lighter than both is the only one an ink chevron
+   * reads on either.
+   */
+  material?: 'clear' | 'regular';
 }) {
   const shape: ViewStyle = { borderRadius: radius, overflow: 'hidden', ...style };
 
@@ -59,14 +70,20 @@ export default function GhostTile({
      * closer reading of "ghost".
      */
     return (
-      <GlassView glassEffectStyle="clear" style={shape}>
+      <GlassView glassEffectStyle={material} style={shape}>
         {children}
       </GlassView>
     );
   }
 
   return (
-    <View style={{ ...shape, backgroundColor: GhostFill, borderWidth: 1, borderColor: GhostEdge }}>
+    <View
+      style={{
+        ...shape,
+        backgroundColor: material === 'regular' ? 'rgba(255,255,255,0.82)' : GhostFill,
+        borderWidth: 1,
+        borderColor: material === 'regular' ? 'rgba(255,255,255,0.6)' : GhostEdge,
+      }}>
       {children}
     </View>
   );

@@ -2926,10 +2926,10 @@ async function postsLoad() {
     tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No posts yet.</td></tr>';
     return;
   }
-  const tone = { draft: '#8C7A68', scheduled: '#C98A2E', published: '#2E7D5B' };
+  const tone = { draft: '#7A6753', scheduled: '#C98A2E', published: '#2E7D5B' };
   tbody.innerHTML = POSTS.map(p => `
     <tr>
-      <td style="color:#1B2547;">${escapeHtml(p.title || p.id)}<div style="font-size:.68rem;color:#8C7A68;">${escapeHtml(p.id)}</div></td>
+      <td style="color:#1B2547;">${escapeHtml(p.title || p.id)}<div style="font-size:.68rem;color:#7A6753;">${escapeHtml(p.id)}</div></td>
       <td style="color:${tone[p.status]};text-transform:capitalize;">${p.status}</td>
       <td style="color:#586187;">${p.published_at ? new Date(p.published_at).toLocaleString() : '&mdash;'}</td>
       <td style="color:#586187;">${p.revision}</td>
@@ -2991,7 +2991,7 @@ function renderBlocks() {
         <button class="btn-secondary" onclick="postRemoveBlock(${i})">&times;</button>
       </div>
     </div>
-    <div style="font-size:.62rem;color:#8C7A68;margin:-.35rem 0 .6rem 3.6rem;">
+    <div style="font-size:.62rem;color:#7A6753;margin:-.35rem 0 .6rem 3.6rem;">
       ${b.id ? 'id ' + b.id + ' &middot; highlights on this block survive an edit' : 'new block, no highlights yet'}
     </div>`).join('');
 }
@@ -3563,7 +3563,7 @@ window.renderFbCoverage = function renderCoverage(rowsArg) {
   const bothReplied = Object.values(byCouple).filter(nn => nn >= 2).length;
   const oneReplied = couples - bothReplied;
   const stat = (label, value, colour) => `<div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.35rem 0"><div style="font-size:.74rem;color:var(--text)">${label}</div><div style="font-size:.85rem;font-weight:700;color:${colour};white-space:nowrap">${value}</div></div>`;
-  el.innerHTML = stat('Total responses', rows.length, '#1B5FE8') + stat('Couples represented', couples, '#1B5FE8') + stat('Both partners replied', bothReplied, '#10B981') + stat('Only one partner replied', oneReplied, '#E8673A') + (unlinked ? stat('Not linked to a couple', unlinked, '#8C7A68') : '');
+  el.innerHTML = stat('Total responses', rows.length, '#1B5FE8') + stat('Couples represented', couples, '#1B5FE8') + stat('Both partners replied', bothReplied, '#10B981') + stat('Only one partner replied', oneReplied, '#E8673A') + (unlinked ? stat('Not linked to a couple', unlinked, '#7A6753') : '');
 };
 
 // Concluding remarks: one pill per write-in question; score-linked ones add a
@@ -3767,7 +3767,7 @@ function generateOrders() {
       nuance:'The risk is one person feeling unheard while the other is confused, because resolution happened on the surface but not underneath.',
       scoresA:{ energy:2.8, expression:4.0, listening:3.9, values:2.7, love:2.1, needs:2.2, bids:4.1, conflict:1.9, stress:2.2, repair:3.7, feedback:3.8 },
       scoresB:{ energy:3.5, expression:2.2, listening:3.2, values:3.3, love:3.5, needs:3.8, bids:3.2, conflict:2.2, stress:3.5, repair:2.4, feedback:2.3 } },
-    { id:'WZ', name:'The opening', color:'#C17F47',
+    { id:'WZ', name:'The opening', color:'#A66534',
       tagline:'One reaches, one reserves. The gap between those instincts is the conversation worth having.',
       description:'{U} and {P} have the widest gap in the pairing set – full mismatch on both axes.',
       nuance:'Complementary styles create strong balance when named explicitly. Without naming, they create distance.',
@@ -3779,7 +3779,7 @@ function generateOrders() {
       nuance:'Neither is misreading the other on purpose. You are each behaving according to your own self-evident logic.',
       scoresA:{ energy:3.8, expression:2.0, listening:3.1, values:2.8, love:1.9, needs:2.0, bids:2.6, conflict:1.9, stress:4.0, repair:2.0, feedback:1.9 },
       scoresB:{ energy:3.2, expression:3.9, listening:3.8, values:3.1, love:2.5, needs:2.2, bids:3.7, conflict:3.9, stress:3.6, repair:3.8, feedback:3.5 } },
-    { id:'XZ', name:'Quiet Efficiency',color:'#8C7A68',
+    { id:'XZ', name:'Quiet Efficiency',color:'#7A6753',
       tagline:'Both hold things close. The work is making sure ease does not cover for what needs to be said.',
       description:'{U} and {P} share a preference for internal processing and understatement.',
       nuance:'The risk is mutual silence. Both think the other is fine. Sometimes neither is.',
@@ -6394,7 +6394,7 @@ function refreshQSandbox() {
   document.getElementById('qsandbox-movement').innerHTML =
     `<strong style="color:#1B2547;">${moved}</strong> of ${n} individuals (${movedPct}%) would change type under these question weights.<br>` +
     `<span style="color:#586187;">${wholePct}% of dimension scores land exactly on a whole number.</span> ` +
-    `<span style="color:#8C7A68;">Lower is better: scores sitting on 1&ndash;5 ticks are what make results look uncalculated.</span>`;
+    `<span style="color:#7A6753;">Lower is better: scores sitting on 1&ndash;5 ticks are what make results look uncalculated.</span>`;
   document.getElementById('qsandbox-status').textContent = 'Preview only, not saved';
 }
 

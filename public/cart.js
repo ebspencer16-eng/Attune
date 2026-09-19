@@ -488,10 +488,10 @@ var CART_MARKUP = `<div class="cart-toast" id="cart-toast">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h3 id="added-modal-name" style="font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;color:#0E0B07;margin-bottom:.4rem;line-height:1.2;">Added to cart</h3>
-    <p style="font-size:.82rem;color:#8C7A68;line-height:1.6;margin-bottom:1.5rem;">Your package is in your cart. Ready to continue?</p>
+    <p style="font-size:.82rem;color:#7A6753;line-height:1.6;margin-bottom:1.5rem;">Your package is in your cart. Ready to continue?</p>
     <div style="display:flex;flex-direction:column;gap:.65rem;">
       <button onclick="openCart();closeAddedModal();" style="background:linear-gradient(135deg,#E8673A,#d45a2e);color:white;border:none;padding:.85rem 1.5rem;border-radius:12px;font-size:.82rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">View cart →</button>
-      <button onclick="closeAddedModal();" style="background:none;border:1.5px solid #E8DDD0;color:#8C7A68;padding:.75rem 1.5rem;border-radius:12px;font-size:.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Continue browsing</button>
+      <button onclick="closeAddedModal();" style="background:none;border:1.5px solid #E8DDD0;color:#7A6753;padding:.75rem 1.5rem;border-radius:12px;font-size:.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Continue browsing</button>
     </div>
   </div>
 </div>

@@ -89,8 +89,34 @@ if (!both) {
   // `alignedPct` is `distancePct` inverted, which is already listed. The
   // at-a-glance page draws it as one bar per aspect rather than two marks,
   // which is the same comparison said as a number.
+  /**
+   * `picks` is a deliberate widening, and this is the argument for it.
+   *
+   * Ellie: "can you make sure the what it's for question on physical intimacy
+   * is pulling correctly?" It was not pulling at all. `iq_mean_for` asks what
+   * physical intimacy is primarily about and takes up to two answers from a
+   * list. It has no position on a scale, so the row builder dropped it, and
+   * the page named after the question never asked it.
+   *
+   * What this lets through is each partner's chosen option labels rather than
+   * a number. That is a change of shape, not of promise: a scale question's
+   * position already maps one to one onto the option that was chosen, so the
+   * rows below have always said which answer each person gave. A multi-answer
+   * question simply has no axis to say it on.
+   *
+   * It is still narrower than it looks, and the assertion under the loop is
+   * what makes that true rather than hopeful: every string in `picks` has to
+   * be one of that question's own option labels. Nothing a person typed can
+   * reach this field, because there is no question here anyone types into and
+   * this would fail the build if there ever were.
+   *
+   * Both halves of the promise are unchanged. intimacyResults returns null
+   * unless both answer sets exist, so nothing crosses before both have
+   * finished, and the comparison still goes only to the two of them.
+   */
   const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'poles', 'state', 'distancePct', 'alignedPct',
-    'positions', 'ground', 'body', 'reason', 'prompt', 'questions'];
+    'positions', 'ground', 'body', 'reason', 'prompt', 'questions', 'picks'];
+  const ALLOWED_PICK = ['id', 'text', 'topic', 'you', 'them'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];
 
   const extraTop = Object.keys(both).filter((k) => !ALLOWED_TOP.includes(k));
@@ -99,6 +125,30 @@ if (!both) {
   for (const d of both.dimensions) {
     const extra = Object.keys(d).filter((k) => !ALLOWED_DIM.includes(k));
     if (extra.length) problems.push(`dimension ${d.id} carries unlisted fields: ${extra.join(', ')}`);
+    for (const pick of d.picks || []) {
+      const extraPick = Object.keys(pick).filter((k) => !ALLOWED_PICK.includes(k));
+      if (extraPick.length) problems.push(`a ${d.id} pick carries unlisted fields: ${extraPick.join(', ')}`);
+      /**
+       * Only choices, and only this question's own.
+       *
+       * This is what keeps `picks` a list of selections rather than a channel
+       * for whatever a person wrote. A label that is not in the registry's
+       * options for that question is, by definition, not something they picked.
+       */
+      const q = INTIMACY_QUESTIONS.find((x) => x.id === pick.id);
+      const labels = new Set((q?.options || []).map((o) => o.label));
+      for (const side of ['you', 'them']) {
+        if (!Array.isArray(pick[side])) {
+          problems.push(`${d.id}/${pick.id} sends ${side} as ${typeof pick[side]}, not a list of choices`);
+          continue;
+        }
+        for (const label of pick[side]) {
+          if (!labels.has(label)) {
+            problems.push(`${d.id}/${pick.id} sends "${label}" as a ${side} choice, which is not one of its options`);
+          }
+        }
+      }
+    }
     for (const row of d.questions || []) {
       const extraRow = Object.keys(row).filter((k) => !ALLOWED_ROW.includes(k));
       if (extraRow.length) problems.push(`a ${d.id} row carries unlisted fields: ${extraRow.join(', ')}`);

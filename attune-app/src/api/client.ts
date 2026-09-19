@@ -356,6 +356,26 @@ export type IntimacyDimension = {
     you: number | null;
     them: number | null;
   }[];
+  /**
+   * Questions that take more than one answer, with what each of them chose.
+   *
+   * ── WHY THEY ARE NOT IN `questions` ─────────────────────────────────────
+   * Ellie: "can you make sure the what it's for question on physical intimacy
+   * is pulling correctly?" It was not pulling at all. `iq_mean_for` asks what
+   * physical intimacy is primarily about and takes up to two answers from a
+   * list, so it has no position on a scale, so the row builder dropped it. The
+   * What It Is For page showed two questions and neither was what it is for.
+   *
+   * A pair of choices against another pair is two answers to read, not a gap
+   * to measure, so it arrives as lists and is drawn as lists.
+   */
+  picks?: {
+    id: string;
+    text: string;
+    topic: string;
+    you: string[];
+    them: string[];
+  }[];
 };
 
 export type IntimacyResults = {

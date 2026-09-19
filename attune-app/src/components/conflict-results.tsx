@@ -26,7 +26,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import type { ConflictOpenings, ConflictResults, ConflictSummary } from '@/api/client';
-import GlanceTile from '@/components/glance-tile';
+import PageTile from '@/components/page-tile';
 import { Prose } from '@/components/annotation-context';
 import { ResultsScroll } from '@/components/results-scroll';
 import {
@@ -216,7 +216,7 @@ function Glance({ data, title, ground, groundStops }: {
        One ground for all of it, in the tile every at-a-glance page in the app
        takes, and the website's own three colours rather than the two this file
        had invented. */
-    <GlanceTile ground={ground} locations={groundStops}>
+    <PageTile ground={ground} locations={groundStops}>
       <>
         {/* The names, and nothing above them. The eyebrow and its dot were
             here, matching the website, and Ellie asked for both to go from
@@ -323,7 +323,7 @@ function Glance({ data, title, ground, groundStops }: {
           </View>
         )}
       </>
-    </GlanceTile>
+    </PageTile>
   );
 }
 

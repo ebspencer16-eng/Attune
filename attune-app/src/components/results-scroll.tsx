@@ -54,6 +54,25 @@ export const ResultsScroll = forwardRef<ScrollView, ScrollViewProps>(
         {...props}
         ref={attach}
         onScroll={onScroll}
+        /**
+         * ── PINCH TO ZOOM ──────────────────────────────────────────────────
+         * Ellie: "can we make any page zoom-able?"
+         *
+         * Any results page, and here rather than on each of them, because this
+         * is the one scroll view all of them use. iOS does the work: a
+         * ScrollView with a zoom range pinches like a photo and snaps back.
+         *
+         * Three times rather than more. Past that the lines are longer than the
+         * screen and reading becomes a horizontal scroll, which is worse than
+         * small type. It does not fight the long press that starts a text
+         * selection: one finger and two are different gestures.
+         *
+         * A caller can still turn it off by passing its own value, which is
+         * what the spread above is for.
+         */
+        minimumZoomScale={props.minimumZoomScale ?? 1}
+        maximumZoomScale={props.maximumZoomScale ?? 3}
+        bouncesZoom={props.bouncesZoom ?? true}
         // Often enough to keep the offset honest, rarely enough to cost
         // nothing: this is only read when someone opens a mark.
         scrollEventThrottle={props.scrollEventThrottle ?? 64}

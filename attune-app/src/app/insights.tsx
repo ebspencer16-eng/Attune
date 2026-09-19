@@ -63,6 +63,8 @@ export default function InsightsScreen() {
   useScreenTime('insights');
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [results, setResults] = useState<ResultsResponse | null>(null);
+  /** The colour of the results section on screen, for the wash behind it. */
+  const [accent, setAccent] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -234,14 +236,21 @@ export default function InsightsScreen() {
    */
   if (ready && !openExercise) {
     return (
-      <Shell>
+      <Shell tint={accent}>
         {/* The "Your results" hero moved inside Results, because it belongs to
             the landing menu rather than to every page under it. A detail page
             says where it is in one line, which is what Ellie asked the header
             to do: "[Section]:[detailed page]". Two headings above that, one of
             them the same on all twenty-nine pages, is the nav repeating
             itself. */}
-        <Results results={results} owned={home?.owned ?? []} />
+        <Results
+          results={results}
+          owned={home?.owned ?? []}
+          /* The section's colour, which the wash behind it takes. See the
+             note on onAccent: the tab paints one wash, so the page has to
+             say what colour it is rather than painting its own. */
+          onAccent={setAccent}
+        />
       </Shell>
     );
   }
@@ -296,8 +305,16 @@ export default function InsightsScreen() {
   );
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
-  return <TabScreen>{children}</TabScreen>;
+function Shell({ children, tint }: { children: React.ReactNode; tint?: string | null }) {
+  /* ── VISUAL COHESION, PER SECTION ──────────────────────────────────────
+     Ellie: "What can we do to create some visual cohesion for each section?
+     Maybe a bg tint in the gradient?"
+
+     The wash behind every page of a section is that section's colour, so
+     Expectations reads blue and Physical Intimacy reads rose whichever of
+     their pages you are on. It is behind the tile rather than in it, which
+     costs nothing in legibility: nothing is read on it. */
+  return <TabScreen tint={tint || undefined}>{children}</TabScreen>;
 }
 
 /**
@@ -523,7 +540,11 @@ function StatusCell({
  * The individual section screens are the next piece of work. This renders the
  * couple type and what is available, which is what the payload supports today.
  */
-function Results({ results, owned }: { results: ResultsResponse | null; owned: string[] }) {
+function Results({ results, owned, onAccent }: {
+  results: ResultsResponse | null; owned: string[];
+  /** Passed straight through: the section's colour, for the wash. */
+  onAccent?: (color: string | null) => void;
+}) {
   if (!results) {
     return (
       <Text style={{ ...Type.body, color: c.textMuted }}>
@@ -578,6 +599,7 @@ function Results({ results, owned }: { results: ResultsResponse | null; owned: s
       whatComesNext={results.whatComesNext}
       pageTitles={results.pageTitles ?? null}
       pageCopy={results.pageCopy ?? null}
+      onAccent={onAccent}
     />
   );
 }

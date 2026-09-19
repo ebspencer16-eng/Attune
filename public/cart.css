@@ -59,7 +59,7 @@
   .cart-pkg-badge{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .65rem;border-radius:999px;margin-bottom:.4rem;display:inline-block}
   /* Add-on rendered as its own line item, tied to the package above it */
   .cart-addon-row{padding-left:1.9rem;box-shadow:inset 3px 0 0 #F0E1CE}
-  .cart-addon-badge{background:#ECE6DC;color:#8C7A68}
+  .cart-addon-badge{background:#ECE6DC;color:#7A6753}
   /* Always-visible add-on picker */
   .cart-addon-picker{display:flex;flex-direction:column;gap:.4rem}
   .cart-addon-picker-label{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.1rem}

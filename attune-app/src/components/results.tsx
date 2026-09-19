@@ -24,7 +24,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 
 import CoupleMap from '@/components/couple-map';
-import GlanceTile, { NeutralGround } from '@/components/glance-tile';
+import PageTile, { NeutralGround, ResultsBottomInset } from '@/components/page-tile';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
@@ -38,6 +38,7 @@ import type {
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import ResultsMenu from '@/components/results-menu';
+import GhostTile from '@/components/ghost-tile';
 import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import { ResultsScroll } from '@/components/results-scroll';
@@ -90,22 +91,40 @@ const THEM_COLOR = Palette.indigo;
 const c = Colors.light;
 
 /**
- * How much room every results section leaves at the bottom.
+ * Which of its section's detail pages you are on.
  *
- * This has been both things. The previous and next buttons once sat under the
- * content carrying BottomTabInset, so they were what kept the last card clear
- * of the tab bar; removing them took the clearance with it and the last
- * paragraph of every section ran underneath Home and Insights, so the
- * clearance moved into the scrolling content where it did not depend on a row
- * happening to be there.
- *
- * The buttons are back, at Ellie's ask, and they are back below the scroll
- * view with the tab bar's clearance on them. So the content is clear of the
- * tab bar because the row underneath it is, and its own inset is ordinary
- * bottom padding again. If that row is ever removed a second time, this is the
- * number that has to grow with it.
+ * Ellie: "the comms detailed pages lost their 1/3 marks in the top left."
+ * Top left, above the title, in whichever ink the page is set in. One
+ * component so that eleven detail pages cannot end up with eleven versions of
+ * a two-character label.
  */
-const ResultsBottomInset = Spacing.xxl;
+function StepCount({ step, onDark }: {
+  step: { index: number; total: number } | null; onDark?: boolean;
+}) {
+  if (!step) return null;
+  return (
+    // not markable: a position indicator, not a finding. A mark anchored to
+    // "2/3" would follow the number rather than the page.
+    <Text
+      style={{
+        ...Type.eyebrow,
+        color: onDark ? 'rgba(255,255,255,0.55)' : c.textMuted,
+        marginBottom: Spacing.sm,
+      }}>
+      {`${step.index}/${step.total}`}
+    </Text>
+  );
+}
+
+/** How big the floating page arrows are. */
+const ARROW = 46;
+
+/*
+ * The bottom inset moved into PageTile, which is now the one thing every
+ * results page is wrapped in and therefore the one place that has to know
+ * about the tab bar. It was declared here and imported from the tile as well,
+ * which is two numbers for one clearance.
+ */
 
 /**
  * How many protocols the Communication overview shows.
@@ -242,7 +261,21 @@ export default function Results({
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
   commsPlan = null, commDomains = [], commResponses = [], storycardStyle = null,
   reflectionPlan = null, pageTitles = null, pageCopy: serverCopy = null,
+  onAccent,
 }: {
+  /**
+   * The colour of the section being read, handed up as it changes.
+   *
+   * ── WHY IT LEAVES THIS COMPONENT ────────────────────────────────────────
+   * Ellie: "What can we do to create some visual cohesion for each section?
+   * Maybe a bg tint in the gradient?"
+   *
+   * The tint belongs on the wash behind the page, and that wash is painted by
+   * the tab, once, which is the whole point of R197: two washes drew a line
+   * across the screen where they met. So this screen cannot paint it. It says
+   * which colour it is in and the tab paints it.
+   */
+  onAccent?: (color: string | null) => void;
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
@@ -374,6 +407,35 @@ export default function Results({
     ? sectionId
     : MENU_SECTION;
   const activeGroup = groupOf(section);
+
+  /**
+   * Which of its section's detail pages this is.
+   *
+   * ── WHY IT IS DERIVED FROM THE NAV ──────────────────────────────────────
+   * Ellie: "At some point, the comms detailed pages lost their 1/3 marks in
+   * the top left. Please ensure that these counts exist on every detailed page
+   * in each exercise section."
+   *
+   * Only the expectations conversations had one, counted inside that page from
+   * its own list, which is why no other section could have one without the
+   * same counting being written again. The nav already knows every section's
+   * pages and their order, so the count comes from there and every section
+   * gets it at once.
+   *
+   * At-a-glance pages are not in the count. A section's "1 of 3" means its
+   * three detail pages, which is what the number meant on the website and what
+   * Ellie is asking to have back; counting the overview as one of them would
+   * turn every section's 1/3 into 2/4.
+   */
+  const step = (() => {
+    const kids = (activeGroup?.children || []).filter((ch) => !ch.glance);
+    const i = kids.findIndex((ch) => ch.id === section);
+    return i >= 0 && kids.length > 1 ? { index: i + 1, total: kids.length } : null;
+  })();
+
+  /* Reported after render rather than during: calling a parent's setState
+     while this one is rendering is the warning every React app earns once. */
+  useEffect(() => { onAccent?.(activeGroup?.color || null); }, [activeGroup?.color, onAccent]);
 
   /**
    * The nav's own entry for this page, which carries its ground and whether it
@@ -527,32 +589,35 @@ export default function Results({
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg }}>
           <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
         </View>
-        {/* Edge to edge, which is what makes them bands rather than cards. */}
-        <ResultsMenu
-          groups={groups}
-          current={null}
-          onOpenSection={rememberSection}
-        />
+        {/* ── IN A TILE, LIKE EVERY OTHER PAGE ─────────────────────────
+            Ellie: "Please make the insights nav landing in a tile like the
+            other insights pages." The bands ran edge to edge, which made the
+            one screen that is pure navigation the only screen in the section
+            with a different shape. Same inset and radius as the pages it
+            leads to, and the bands keep their full width inside it. */}
+        <PageTile padding={0}>
+          <ResultsMenu
+            groups={groups}
+            current={null}
+            onOpenSection={rememberSection}
+          />
+        </PageTile>
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      {/* ── THE NAV, IN ONE LINE ──────────────────────────────────────────
-          Ellie: "Within results pages, I want to have the hamburger nav in the
-          top left that opens a mini menu", and "page headers should indicate
-          [Section]:[detailed page]".
+      {/* ── THE WAY OUT, AND NOTHING ELSE ────────────────────────────────
+          Ellie asked for the header to read "[Section]: [detailed page]", saw
+          it, and asked for it back out: "Remove the section:detailed page line
+          up top on insights pages."
 
-          This replaced two rows of chips: twenty-nine entries through a window
-          four wide, scrolled sideways to find the one you wanted. The line
-          says where you are, and the hamburger beside it is how you go
-          somewhere else. */}
-      <View
-        style={{
-          flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-          paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md,
-        }}>
+          She is right and the reason is worth keeping. Every page already
+          opens with its own title, in Playfair, two lines below this. The
+          breadcrumb said the same thing smaller, above it, which is a heading
+          printed twice. The hamburger is the only thing that row was for. */}
+      <View style={{ paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md }}>
         <Pressable
           ref={burger}
           accessibilityRole="button"
@@ -569,15 +634,10 @@ export default function Results({
             size={16}
             tintColor={activeGroup?.color || c.textStrong}
             // not markable: the hamburger's glyph, shown only where SF Symbols is unavailable.
-            fallback={<Text style={{ ...Type.body, color: c.textStrong }}>{'≡'}</Text>}
+            fallback={<Text style={{ ...Type.body, color: c.textStrong }}>{'\u2261'}</Text>}
             style={{ width: 18, height: 18 }}
           />
         </Pressable>
-        <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textMuted, flex: 1 }}>
-          {activeGroup && activeGroup.id !== section
-            ? `${activeGroup.label}: ${labelOf(section)}`
-            : labelOf(section)}
-        </Text>
       </View>
 
       <View style={{ flex: 1 }}>
@@ -607,6 +667,7 @@ export default function Results({
           focus={focusMark}>
         <SectionBody
           section={section}
+          step={step}
           /* The active nav group's colour, which the server sends. Sections
              that need their own accent take it from here rather than writing
              a second hex next to the website's. */
@@ -641,65 +702,70 @@ export default function Results({
       </View>
 
       {/* ── BACK AND FORWARD ──────────────────────────────────────────────
-          Ellie: "Within results pages on the app, we need to add the back and
-          forward arrows at the bottom of each page, just like the website
-          does."
+          Ellie, first: "we need to add the back and forward arrows at the
+          bottom of each page, just like the website does." Then, seeing them:
+          "Nav arrows on bottom shouldn't have text, should just be arrows.
+          Also, would rather they be glass-like bubbles that stay in place
+          regardless of how you scroll the page, but I don't want them in their
+          own cream bar, just on the page itself."
 
-          They were taken out once, on the argument that reading results is not
-          a wizard and the nav above offers any page by name rather than only
-          the adjacent one. That was true of the two chip rows and it is not
-          true of the menu: going to the next page is now a tap on the
-          hamburger, a tap on a band and a tap on a row. Three taps for the
-          commonest move in the product is what these are for.
+          So they float rather than sit in a row: absolutely positioned over
+          the page, which means they cost the page no height and are reachable
+          from anywhere in a scroll three screens long. The words are gone; a
+          chevron in a circle at the two bottom corners is a shape people
+          already know, and the page under it says where they are.
 
-          Each names where it is going. An arrow alone at the foot of a long
-          page is a control you have to try to find out what it does. */}
-      <View
-        style={{
-          flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-          paddingHorizontal: Spacing.xl,
-          paddingTop: Spacing.md,
-          /* Clear of the floating tab bar. They sat under it, which is the
-             same as not being there. */
-          paddingBottom: Spacing.sm, marginBottom: BottomTabInset,
-        }}>
-        {prev ? (
+          `regular` glass rather than `clear`. These sit over a cream page on
+          one section and a dark gradient on the next, and only a pane that is
+          lighter than both leaves an ink chevron legible on either. */}
+      {prev ? (
+        <GhostTile
+          material="regular"
+          radius={ARROW / 2}
+          style={{
+            position: 'absolute', left: Spacing.lg, bottom: BottomTabInset + Spacing.md,
+            width: ARROW, height: ARROW,
+          }}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Back to ${labelOf(prev)}`}
             onPress={() => rememberSection(prev)}
-            style={{
-              flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-              paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-              borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
-              backgroundColor: c.surface,
-            }}>
-            // not markable: the back arrow, nav furniture rather than prose.
-            <Text style={{ ...Type.body, color: activeGroup?.color || c.textStrong }}>{'‹'}</Text>
-            <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, flex: 1 }}>
-              {labelOf(prev)}
-            </Text>
+            style={{ width: ARROW, height: ARROW, alignItems: 'center', justifyContent: 'center' }}>
+            <SymbolView
+              name={'chevron.left' as never}
+              size={17}
+              tintColor={c.textStrong}
+              // not markable: the back arrow, nav furniture rather than prose.
+              fallback={<Text style={{ ...Type.title, color: c.textStrong }}>{'\u2039'}</Text>}
+              style={{ width: 19, height: 19 }}
+            />
           </Pressable>
-        ) : <View style={{ flex: 1 }} />}
-        {next ? (
+        </GhostTile>
+      ) : null}
+      {next ? (
+        <GhostTile
+          material="regular"
+          radius={ARROW / 2}
+          style={{
+            position: 'absolute', right: Spacing.lg, bottom: BottomTabInset + Spacing.md,
+            width: ARROW, height: ARROW,
+          }}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`On to ${labelOf(next)}`}
             onPress={() => rememberSection(next)}
-            style={{
-              flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-              paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-              borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
-              backgroundColor: c.surface,
-            }}>
-            <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>
-              {labelOf(next)}
-            </Text>
-            // not markable: the forward arrow, nav furniture rather than prose.
-            <Text style={{ ...Type.body, color: activeGroup?.color || c.textStrong }}>{'›'}</Text>
+            style={{ width: ARROW, height: ARROW, alignItems: 'center', justifyContent: 'center' }}>
+            <SymbolView
+              name={'chevron.right' as never}
+              size={17}
+              tintColor={c.textStrong}
+              // not markable: the forward arrow, nav furniture rather than prose.
+              fallback={<Text style={{ ...Type.title, color: c.textStrong }}>{'\u203A'}</Text>}
+              style={{ width: 19, height: 19 }}
+            />
           </Pressable>
-        ) : <View style={{ flex: 1 }} />}
-      </View>
+        </GhostTile>
+      ) : null}
 
       {/* ── THE SAME MENU, UNDER THE HAMBURGER ────────────────────────────
           Ellie: "same colors, banners, functionality as the landing page but
@@ -748,11 +814,13 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, step, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
 }: {
   section: string;
+  /** Which of its section's detail pages this is, from the nav. */
+  step: { index: number; total: number } | null;
   /** The server's heading for a page, and the strings inside it that both
       surfaces print. Passed down rather than reached for, so a page that does
       not take a title cannot quietly invent one. */
@@ -856,6 +924,7 @@ function SectionBody({
         you={you}
         them={them}
         viewer={viewer}
+        step={step}
       />
     );
   }
@@ -897,8 +966,8 @@ function SectionBody({
   }
 
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} />;
-  if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} />;
-  if (section === 'reflection-story') return <ReflectionStory data={reflection} />;
+  if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} step={step} />;
+  if (section === 'reflection-story') return <ReflectionStory data={reflection} step={step} />;
   // The reflection action plan had a page of its own on both surfaces. Ellie
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
@@ -912,6 +981,7 @@ function SectionBody({
         you={you}
         them={them}
         promptLabel={intimacy?.promptLabel || 'Talk about it'}
+        step={step}
       />
     );
   }
@@ -994,8 +1064,8 @@ function ExpectationsOverview({
 
   return (
     /* Dark, like the website's Expectations landing page, and in a tile,
-       because it is a page you take in at once. See GlanceTile. */
-    <GlanceTile ground={ground} locations={groundStops}>
+       because it is a page you take in at once. See PageTile. */
+    <PageTile ground={ground} locations={groundStops}>
       <>
           <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
@@ -1090,7 +1160,7 @@ function ExpectationsOverview({
             </View>
           )}
       </>
-    </GlanceTile>
+    </PageTile>
   );
 }
 
@@ -1204,23 +1274,12 @@ function ExpectationsConversation({
        progress bar, the paragraph it opens with, then the differences as a
        two-column table and what you already agree on underneath. The app had
        a cream page, a summary sentence of its own and one card per row. */
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={stops}
-        locations={groundStops?.length === 3 ? groundStops as [number, number, number] : undefined}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile ground={stops} locations={groundStops}>
+          <StepCount step={position ?? null} onDark />
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{bucket.label}</Text>
-            {position ? (
-              <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-                {`${position.index} of ${position.total}`}
-              </Text>
-            ) : null}
+            {/* The count moved to the top left, where Ellie asked for it and
+                where every other detail page now carries it. */}
           </View>
 
           {/* The rule under the title is gone. It went in as O51, when Ellie asked
@@ -1376,9 +1435,7 @@ function ExpectationsConversation({
               ) : null}
             </View>
           ) : null}
-        </View>
-      </ResultsScroll>
-    </View>
+    </PageTile>
   );
 }
 
@@ -1548,7 +1605,7 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
   return (
     /* Dark rose, which is the website's ground for this section, in the tile
        every at-a-glance page takes. */
-    <GlanceTile ground={ground} locations={groundStops}>
+    <PageTile ground={ground} locations={groundStops}>
       <>
         {/* Ellie: the hero "should have the hero read physical intimacy
             expectations", and the line under it about how things are now is
@@ -1654,29 +1711,22 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
             </View>
           ) : null}
       </>
-    </GlanceTile>
+    </PageTile>
   );
 }
 
 function IntimacyDimensionView({
-  dim, you, them, promptLabel,
-}: { dim: IntimacyDimension | null; you: string; them: string; promptLabel: string }) {
+  dim, you, them, promptLabel, step = null,
+}: {
+  dim: IntimacyDimension | null; you: string; them: string; promptLabel: string;
+  step?: { index: number; total: number } | null;
+}) {
   if (!dim) {
     return <Waiting title="Physical Intimacy" body={WAITING.LOCKED_BY_THEM} />;
   }
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={(dim.ground?.length === 3 ? dim.ground : ['#7A2540dd', '#7A254099', '#22204a']) as [string, string, string]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      {/* Ellie: "Intimacy detailed pages on the app don't have buffer above
-          the heroes." Every other detail page in the app opens under the nav
-          with a step of space; these six opened against it. */}
-      <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile ground={dim.ground?.length === 3 ? dim.ground : ['#7A2540dd', '#7A254099', '#22204a']}>
+        <StepCount step={step} onDark />
         <Text style={{ ...Type.title, color: Palette.white }}>{dim.label}</Text>
         {dim.intro ? (
           <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Prose>
@@ -1743,6 +1793,43 @@ function IntimacyDimensionView({
           </View>
         ) : null}
 
+        {/* ── WHAT EACH OF THEM CHOSE ────────────────────────────────────
+            Ellie: "can you make sure the what it's for question on physical
+            intimacy is pulling correctly?" It was not pulling at all: it takes
+            up to two answers from a list, so it has no place on a track, so the
+            row builder dropped it and the page named after the question never
+            asked it. Choices are read, not measured, so they are drawn as
+            chips rather than forced onto a scale.
+
+            The heading is the question's own topic and the chips are its own
+            option labels. No new words. */}
+        {(dim.picks || []).map((q) => (
+          <View key={q.id} style={{ marginTop: Spacing.xl }}>
+            <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>{q.topic || q.text}</Text>
+            {[{ name: you, list: q.you }, { name: them, list: q.them }].map((side) => (
+              <View key={side.name} style={{ marginTop: Spacing.md }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.6)' }}>{side.name}</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.xs }}>
+                  {side.list.length ? side.list.map((label) => (
+                    <View
+                      key={label}
+                      style={{
+                        borderRadius: Radius.pill, borderWidth: 1,
+                        borderColor: 'rgba(255,255,255,0.3)',
+                        backgroundColor: 'rgba(255,255,255,0.10)',
+                        paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+                      }}>
+                      <Text style={{ ...Type.small, color: Palette.white }}>{label}</Text>
+                    </View>
+                  )) : (
+                    <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.45)' }}>{'\u2014'}</Text>
+                  )}
+                </View>
+              </View>
+            ))}
+          </View>
+        ))}
+
         {/* The side-by-side comparison, which is what the exercise is sold as:
             "answered independently, compared side by side". The app could not
             draw this until the server carried positions, so the website had a
@@ -1796,9 +1883,7 @@ function IntimacyDimensionView({
             ))}
           </Disclosure>
         ) : null}
-      </View>
-    </ResultsScroll>
-    </View>
+    </PageTile>
   );
 }
 
@@ -1844,7 +1929,7 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
   const rows = data.ratings.filter((r) => r.key !== 'a0');
 
   return (
-    <GlanceTile ground={ground} locations={groundStops}>
+    <PageTile ground={ground} locations={groundStops}>
       <>
         {/* Ellie: the title "should read Relationship Reflection" and the line
             under it goes. It led with the two names and then a sentence saying
@@ -1926,7 +2011,7 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
           </View>
         ) : null}
       </>
-    </GlanceTile>
+    </PageTile>
   );
 }
 
@@ -2012,7 +2097,10 @@ function ReflectionHead({ page }: { page?: { title: string; sub?: string } | nul
   );
 }
 
-function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
+function ReflectionRatings({ data, step = null }: {
+  data: ReflectionResults | null;
+  step?: { index: number; total: number } | null;
+}) {
   if (!data) return <ReflectionWaiting />;
   if (!data.ratings.length) {
     return <Waiting title="How you each view the relationship" body="Neither of you answered the rating questions." />;
@@ -2031,8 +2119,8 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
   const rest = data.ratings.filter((r) => r.key !== 'a0');
 
   return (
-    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile>
+        <StepCount step={step} />
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
 
@@ -2117,8 +2205,7 @@ function ReflectionRatings({ data }: { data: ReflectionResults | null }) {
             />
           </View>
         ) : null}
-      </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
@@ -2292,7 +2379,10 @@ function DotLabel({ pct, text, color }: { pct: number; text: string; color: stri
  * paragraphs on a phone is four words a line. Whose words they are is said
  * above each one.
  */
-function ReflectionStory({ data }: { data: ReflectionResults | null }) {
+function ReflectionStory({ data, step = null }: {
+  data: ReflectionResults | null;
+  step?: { index: number; total: number } | null;
+}) {
   if (!data) return <ReflectionWaiting />;
   if (!data.written.length) {
     return (
@@ -2314,8 +2404,8 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
    */
   const label = data.promptLabel || 'Talk about it';
   return (
-    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile>
+        <StepCount step={step} />
         <ReflectionHead page={data.pages?.story} />
 
         {/* ── GROUPED, AS THE WEBSITE GROUPS IT ────────────────────────────
@@ -2395,8 +2485,7 @@ function ReflectionStory({ data }: { data: ReflectionResults | null }) {
             </View>
           );
         })}
-      </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
@@ -2619,8 +2708,7 @@ function WhatComesNext({
        source rather than every item of every group laid out flat. The app
        listed them all open with a paragraph under each title, which is three
        screens of scrolling for a page whose job is to gather things up. */
-    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile>
         <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.lg, lineHeight: 20 }}>
           Each part of your results ends in something to do. They are gathered here,
@@ -2640,8 +2728,7 @@ function WhatComesNext({
             />
           ))}
         </View>
-      </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
@@ -2722,23 +2809,20 @@ function NextGroup({
 
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
-    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile>
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
         {/* not markable: the app saying a section is not ready, not a finding.
             It is gone the moment the partner answers, so a mark anchored to it
             would outlive the words it was made on. */}
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{body}</Text>
-      </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
 function NotYet({ section }: { section: string }) {
   return (
-    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-        <View style={{ backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.xl }}>
+    <PageTile>
+        <View>
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Not on your phone yet</Text>
           <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm }}>
             This section is part of your results and is written and ready on the
@@ -2748,8 +2832,7 @@ function NotYet({ section }: { section: string }) {
             Open it at attune-relationships.com in the meantime.
           </Text>
         </View>
-      </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
@@ -2878,7 +2961,7 @@ function Glance({
        app's own theme, while the website painted this page purple into the
        brand orange. Both now come from api/_lib/section-grounds.js by way of
        the results nav. */
-    <GlanceTile ground={ground} locations={groundStops}>
+    <PageTile ground={ground} locations={groundStops}>
       <>
           {/* block: comm-overview/couple-type-lead */}
           {/* Ellie: "Title should be 'Communication Styles'. Remove the couple
@@ -2957,7 +3040,7 @@ function Glance({
           ) : null}
 
       </>
-    </GlanceTile>
+    </PageTile>
   );
 }
 
@@ -2987,8 +3070,7 @@ function CoupleType({ results, you, them, title }: {
   const accent = type.color || c.accent;
 
   return (
-    <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-      <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile>
         {/* block: couple-type/lead
 
             The page opens on what the answers uncovered, not on the type name.
@@ -3245,16 +3327,16 @@ function CoupleType({ results, you, them, title }: {
             })}
           </View>
         ) : null}
-      </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
 /** One Communication domain: every dimension in it, both partners on each. */
 function Domain({
-  title, accent, dims, you, them, viewer, tile = null, domain = null, responses = [],
+  title, accent, dims, you, them, viewer, tile = null, domain = null, responses = [], step = null,
 }: {
   title: string; accent: string; dims: ResultDimension[];
+  step?: { index: number; total: number } | null;
   you: string; them: string; viewer: 'a' | 'b';
   tile?: CommsPlan['tiles'][number] | null;
   domain?: { label: string; color: string; prose: string; ground: string[] } | null;
@@ -3274,15 +3356,8 @@ function Domain({
 
        The stops come from the server, from api/_lib/comm-domains.js, which the
        website builds its own gradient from. Neither surface holds the colour. */
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={ground}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+    <PageTile ground={ground}>
+          <StepCount step={step} onDark />
           {/* No exercise-name eyebrow. "Communication" over a page already
               reached from a tab called Comms is a label on a label. */}
           <Text style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
@@ -3352,9 +3427,7 @@ function Domain({
 
           {/* block: comm-domain/side-by-side */}
           <SideBySide dims={dims} you={you} them={them} viewer={viewer} label={title} rows={responses} />
-        </View>
-      </ResultsScroll>
-    </View>
+    </PageTile>
   );
 }
 

@@ -165,7 +165,7 @@
     color:#0E0B07;line-height:1.2;
   }
   .item-block-sub{
-    font-size:.72rem;color:#8C7A68;margin-top:.1rem;
+    font-size:.72rem;color:#7A6753;margin-top:.1rem;
   }
   .item-intent{
     display:flex;gap:var(--s-xs);margin-bottom:.9rem;
@@ -200,7 +200,7 @@
   <div id="coCheckInbox">
     <h1>Check your inbox.</h1>
     <p id="coInboxCopy">We sent a link to <strong id="coEmailDisp">your email</strong>. Use it to set up your account and get started.</p>
-    <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#8C7A68;margin:0 0 var(--s-lg)"></p>
+    <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#7A6753;margin:0 0 var(--s-lg)"></p>
     <p style="font-size:.82rem;color:var(--muted);">Didn't get the email? Check your spam folder, or reach out to us at <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);">hello@attune-relationships.com</a>.</p>
     <a id="startLink" href="/app" style="display:none"></a>
   </div>
@@ -262,7 +262,7 @@
           </div>
           <div style="flex:1">
             <div style="font-size:.88rem;font-weight:700;color:#0E0B07;margin-bottom:.2rem"><span id="addonPromptTitle">Add Personalized Workbook</span> <span style="color:#E8673A" id="addonPromptPrice">+$19</span></div>
-            <div style="font-size:.75rem;color:#8C7A68;line-height:1.6" id="addonPromptDesc"></div>
+            <div style="font-size:.75rem;color:#7A6753;line-height:1.6" id="addonPromptDesc"></div>
           </div>
         </label>
       </div>
@@ -284,14 +284,14 @@
 
         <!-- Physical shipping (shown for physical packages) -->
         <div id="formatToggleSection" style="display:none;margin-bottom:var(--s-md)">
-  <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8C7A68;margin-bottom:var(--s-xs);font-family:'DM Sans',sans-serif">Format</div>
+  <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7A6753;margin-bottom:var(--s-xs);font-family:'DM Sans',sans-serif">Format</div>
   <div style="display:flex;gap:var(--s-xs)">
     <button class="fmt-btn active" data-fmt="digital" onclick="setFormat('digital')"
       style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8673A;background:#FFF0EB;color:#E8673A;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
       Digital · $89
     </button>
     <button class="fmt-btn" data-fmt="physical" onclick="setFormat('physical')"
-      style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8DDD0;background:white;color:#8C7A68;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
+      style="flex:1;padding:.6rem;border-radius:10px;border:1.5px solid #E8DDD0;background:white;color:#7A6753;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">
       Gift box · $124
     </button>
   </div>
@@ -426,20 +426,20 @@
 
         <!-- Promo code input -->
         <div id="promoBlock" style="margin-top:1.1rem;padding-top:var(--s-md);border-top:1px solid #F3EDE6">
-          <button type="button" id="promoToggle" onclick="togglePromo()" style="background:none;border:none;color:#8C7A68;font-size:.78rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:0;text-decoration:underline;text-decoration-color:#E8DDD0;text-underline-offset:3px">Have a promo code?</button>
+          <button type="button" id="promoToggle" onclick="togglePromo()" style="background:none;border:none;color:#7A6753;font-size:.78rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:0;text-decoration:underline;text-decoration-color:#E8DDD0;text-underline-offset:3px">Have a promo code?</button>
           <div id="promoInputWrap" style="display:none;margin-top:var(--s-sm)">
             <div style="display:flex;gap:var(--s-xs)">
               <input id="promoInput" type="text" placeholder="Enter code" style="flex:1;min-width:0;padding:.55rem .7rem;border:1.5px solid #E8DDD0;border-radius:8px;font-size:.82rem;font-family:'DM Sans',sans-serif;text-transform:uppercase;color:#1E1610;background:white;outline:none;letter-spacing:.02em" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromo();}">
               <button type="button" onclick="applyPromo()" style="padding:.55rem var(--s-md);background:#1E1610;color:white;border:none;border-radius:8px;font-size:.76rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap">Apply</button>
             </div>
-            <div id="promoFeedback" style="margin-top:var(--s-xs);font-size:.72rem;font-family:'DM Sans',sans-serif;color:#8C7A68;line-height:1.5;min-height:1rem"></div>
+            <div id="promoFeedback" style="margin-top:var(--s-xs);font-size:.72rem;font-family:'DM Sans',sans-serif;color:#7A6753;line-height:1.5;min-height:1rem"></div>
           </div>
           <div id="promoApplied" style="display:none;margin-top:.25rem;padding:.55rem var(--s-sm);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;display:none;align-items:center;justify-content:space-between;gap:var(--s-xs);font-family:'DM Sans',sans-serif">
             <div>
               <div style="font-size:.72rem;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase">Promo applied</div>
               <div id="promoAppliedCode" style="font-size:.8rem;color:#1E1610;font-weight:600;margin-top:.15rem"></div>
             </div>
-            <button type="button" onclick="removePromo()" aria-label="Remove promo code" style="background:none;border:none;color:#8C7A68;font-size:1.1rem;cursor:pointer;padding:.15rem .4rem;line-height:1">×</button>
+            <button type="button" onclick="removePromo()" aria-label="Remove promo code" style="background:none;border:none;color:#7A6753;font-size:1.1rem;cursor:pointer;padding:.15rem .4rem;line-height:1">×</button>
           </div>
         </div>
 
@@ -633,10 +633,10 @@ async function refreshTax() {
   const taxLineEl = document.getElementById('taxLine');
   if (taxLineEl) {
     taxLineEl.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#8C7A68">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#7A6753">
         <span>Sales tax</span>
         <span style="font-size:.72rem;color:#B8AC9C;display:inline-flex;align-items:center;gap:.35rem">
-          <span class="tax-spinner" style="width:10px;height:10px;border:1.5px solid rgba(140,122,104,.3);border-top-color:#8C7A68;border-radius:50%;display:inline-block;animation:taxSpin .7s linear infinite"></span>
+          <span class="tax-spinner" style="width:10px;height:10px;border:1.5px solid rgba(140,122,104,.3);border-top-color:#7A6753;border-radius:50%;display:inline-block;animation:taxSpin .7s linear infinite"></span>
           calculating…
         </span>
       </div>
@@ -946,7 +946,7 @@ function renderItemsStep() {
       ${isPhysical ? `
         <div class="form-divider" style="margin-top:.9rem">
           Shipping address
-          <span style="font-weight:400;font-family:'DM Sans',sans-serif;font-size:.68rem;color:#8C7A68;letter-spacing:0;text-transform:none;margin-left:var(--s-xs)">or use Apple Pay / Google Pay below</span>
+          <span style="font-weight:400;font-family:'DM Sans',sans-serif;font-size:.68rem;color:#7A6753;letter-spacing:0;text-transform:none;margin-left:var(--s-xs)">or use Apple Pay / Google Pay below</span>
         </div>
         <div class="form-group">
           <label class="form-label">Full name</label>
@@ -1057,7 +1057,7 @@ function renderSummary() {
     const p = PACKAGES[g.item.pkg] || PACKAGES.core;
     const isPhys = g.item.format === 'physical';
     total += g.subtotal;
-    const qtyLabel = g.qty > 1 ? ` <span style="color:#8C7A68;font-size:.7rem">× ${g.qty}</span>` : '';
+    const qtyLabel = g.qty > 1 ? ` <span style="color:#7A6753;font-size:.7rem">× ${g.qty}</span>` : '';
     const pkgBase = (isPhys ? p.physicalPrice : p.digitalPrice) * g.qty;
     rows += `
       <div class="co-card-detail">
@@ -1081,7 +1081,7 @@ function renderSummary() {
       rows += `
       <div class="co-card-detail" style="padding-left:.7rem;box-shadow:inset 3px 0 0 #F0E1CE">
         <div>
-          <div class="name"><span class="badge" style="background:#F0E6D8;color:#8C7A68;margin-left:0;margin-right:.4rem">Add-on</span>${a.label}</div>
+          <div class="name"><span class="badge" style="background:#F0E6D8;color:#7A6753;margin-left:0;margin-right:.4rem">Add-on</span>${a.label}</div>
         </div>
         <div class="price">$${a.price * g.qty}</div>
       </div>`;
@@ -1128,7 +1128,7 @@ function renderSummary() {
       <div class="co-card-detail" style="border-top:1px solid #E8DDD0;margin-top:.4rem;padding-top:var(--s-xs)">
         <div>
           <div class="name" style="color:#10B981">Promo code applied</div>
-          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#8C7A68">${subLabel}</span>
+          <span class="sub" style="font-family:monospace;font-size:.7rem;color:#7A6753">${subLabel}</span>
         </div>
         <div class="price" style="color:#10B981">−$${discount}</div>
       </div>`;
@@ -1149,7 +1149,7 @@ function renderSummary() {
     // No quote yet — show placeholder
     if (taxLineEl) {
       taxLineEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#8C7A68">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#7A6753">
           <span>Sales tax</span>
           <span style="font-size:.72rem;color:#B8AC9C">calculated from billing ZIP</span>
         </div>`;
@@ -1877,7 +1877,7 @@ async function applyPromo() {
   const code = (inp.value || '').trim().toUpperCase();
   if (!code) { fb.textContent = 'Please enter a code.'; fb.style.color = '#B45309'; return; }
   fb.textContent = 'Checking…';
-  fb.style.color = '#8C7A68';
+  fb.style.color = '#7A6753';
 
   // Client-side validation first so we don't show a loading state for obviously
   // invalid codes. Server will also validate.

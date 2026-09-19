@@ -22,6 +22,7 @@
  * import across packages, so neither is converted yet. See HANDOFF.md.
  */
 
+import { EXERCISES } from '../_exercises.js';
 import { EXPECTATIONS_CATEGORIES } from '../_questions.js';
 import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
 import { COMM_DOMAINS } from './tags.js';
@@ -216,6 +217,43 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
   const AT_A_GLANCE = 'Results at a glance';
 
   /**
+   * A section that is an exercise takes the exercise's name and colour.
+   *
+   * ── WHY IT IS LOOKED UP RATHER THAN TYPED ────────────────────────────────
+   * Ellie asked for two things at once: "Please make the colors in the nav
+   * landing match the exercise colors", and "Use full names of exercises in
+   * nav landing and hamburger (communication styles, physical intimacy
+   * expectations)".
+   *
+   * Both were the same bug. Five colours and five names were typed here, and
+   * five more of each live in api/_exercises.js, which is the registry that
+   * decides what exercises exist at all. So Communication was orange while you
+   * answered it and violet when you read it back, and the section that is
+   * called "Physical Intimacy Expectations" everywhere else was "Physical
+   * Intimacy" here.
+   *
+   * `fullLabel` first, because that field exists for exactly this: a name for
+   * where there is room for the whole of it. A group whose id is not an
+   * exercise keeps whatever it was given.
+   */
+  /**
+   * The fallback carries no colour of its own.
+   *
+   * A hex here "just in case the registry is missing one" is the second copy
+   * this is meant to remove, whatever value it holds today. An exercise the
+   * registry has never heard of gets the brand's neutral clay, which belongs
+   * to no section and therefore cannot be the wrong section's colour.
+   */
+  const NEUTRAL = '#C17F47';
+  const fromExercise = (key, fallbackLabel) => {
+    const e = EXERCISES.find(x => x.key === key);
+    return {
+      label: e ? (e.fullLabel || e.label) : fallbackLabel,
+      color: e?.color || NEUTRAL,
+    };
+  };
+
+  /**
    * An at-a-glance entry, with the two things that make it one.
    *
    * `glance` is what tells the app to draw the page in the rounded tile rather
@@ -234,14 +272,14 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     { id: 'highlights', label: 'Highlights', color: '#E8673A' },
     { id: 'couple-type', label: 'Couple Type', color: '#E8673A' },
     {
-      id: 'comm', label: 'Communication', shortLabel: 'Comms', color: '#9B5DE5',
+      id: 'comm', shortLabel: 'Comms', ...fromExercise('ex1', 'Communication'),
       children: [
         glance('comm-overview'),
         ...COMM_DOMAINS.map(d => ({ id: `comm-${d.id}`, label: d.label, color: d.color })),
       ],
     },
     {
-      id: 'exp', label: 'Expectations', color: '#1B5FE8',
+      id: 'exp', ...fromExercise('ex2', 'Expectations'),
       children: [
         glance('exp-overview'),
         ...EXPECTATIONS_CATEGORIES.map((cat, i) => ({
@@ -256,7 +294,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
 
   if (hasReflection) {
     groups.push({
-      id: 'reflection', label: 'Relationship Reflection', shortLabel: 'Rel. Refl.', color: '#1B5FE8',
+      id: 'reflection', shortLabel: 'Rel. Refl.', ...fromExercise('ex3', 'Relationship Reflection'),
       children: [
         glance('reflection-overview'),
         { id: 'reflection-ratings', label: 'How You Each Rated' },
@@ -267,7 +305,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
 
   if (intimacyReady) {
     groups.push({
-      id: 'intimacy', label: 'Physical Intimacy', shortLabel: 'Intimacy', color: '#B5546E',
+      id: 'intimacy', shortLabel: 'Intimacy', ...fromExercise('intimacy', 'Physical Intimacy'),
       children: [
         glance('intimacy-overview'),
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label })),
@@ -277,7 +315,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
 
   if (conflictListed) {
     groups.push({
-      id: 'conflict', label: 'Conflict Patterns', shortLabel: 'Conflict', color: '#1B5FE8',
+      id: 'conflict', shortLabel: 'Conflict', ...fromExercise('conflict', 'Conflict Patterns'),
       children: [
         glance('conflict-overview'),
         { id: 'conflict-snapshot', label: 'Your Conflict Snapshot' },

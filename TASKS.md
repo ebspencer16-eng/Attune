@@ -48,20 +48,16 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
-| O211 | **The darker type, on the website too.** You asked for higher contrast and the app has it: the quiet brown went from 3.9 to 1 against the cream to 5.1, and the clay that labels sections from 3.1 to 4.4. Both of those are the website's colours, typed into `src/App.jsx` 117 and 24 times, and a colour that means one thing on two surfaces should change on both or on neither. I did the app first because that is what you were reading on, and I have not touched the site because it is 141 edits to how every page looks and that is a call rather than a fix. Say the word and it is one pass. |
-| O209 | **One environment variable in Vercel, and the admin appears in the app.** Settings → Environment Variables → add `ADMIN_EMAILS` with your address and Carolina's, comma separated, no spaces needed. Until it is set nobody sees the row, including you. It is not a key: the admin still asks for its own password exactly as it does in a browser. I have not set it because it holds two people's addresses, and those are yours to type rather than mine to guess. |
-| M72 | **The icon and the name need a second build. Two commands.** Build 1 is on your phone and everything since has reached it over the air, but the icon, the "Attune" name under it and the dark blue splash are part of the build itself, and they were made after build 1 went up. So: `cd attune-app && npm run testflight`, wait for it to say the build finished, then `npm run testflight:send`. Apple takes ten to twenty minutes to process it, TestFlight then offers you an update, and the tile on your home screen changes when you install it. Everything else in `app/TESTFLIGHT.md` steps 1 to 4 is already done. |
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
 
 ### Answer these
 
-One waiting: Q11.
+**Nothing waiting.** Q11 is answered: any page, and it is R214.
 
 | # | Question |
 |--|--|
-| Q11 | **"Can we zoom in on these pages?" — which pages?** That one arrived without a picture attached and I cannot tell what it points at. If it is the results pages, I can add pinch to zoom. If it is that the type is small, R204 may already have covered it. Tell me which and it is quick either way. |
 
 ## 2. Open
 
@@ -69,8 +65,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 18 September is built and sitting in section 3,
-apart from Q11, which I cannot answer without knowing which pages you meant.
+**Nothing open.** The batch of 19 September is built and sitting in section 3.
 
 | # | Task |
 |--|--|
@@ -92,47 +87,16 @@ any order; work through them however suits.
 | # | Review |
 |--|--|
 | R200 | **Notes has a ground of its own.** Warm at the top through the orange, settling into the indigo at the bottom, so the tiles and the tag rows sit on something rather than on flat cream. It is the same wash the other tabs use, with a second colour added underneath; tell me if it wants to be stronger. |
-| R198 | **"Yours to explore" is now "Resources".** |
-| R199 | **The third row capitalises like the other two.** The first two rows of that tile start from a note's title, which is already capitalised. The third starts from the sentence your mark sits inside, cut at a word boundary, so it could begin mid-sentence in lower case. It is capitalised on the way out now. |
 | R210 | **The Insights nav, rebuilt.** A landing page of coloured bands, one per section, in the website's own colours. Opening one closes the others and lists its pages. Inside a page: a hamburger top left that drops the same menu, a line saying Section: page, and back and forward at the foot. The two rows of chips are gone. Nothing you read changed, only how you get to it. |
 | R211 | **Results are ready now opens the storycards**, and the landing page is where they end. The Insights tab on its own still opens the menu. |
 | R212 | **Home.** The tile is a pane of glass rather than a cream box, with white type and each icon in its own disc. The greeting is bigger and further from the lockup, which is what was clashing: they were both bold Playfair in white, forty points apart. |
-| R213 | **Type is darker throughout.** It is measurable rather than a matter of taste: the quiet brown was 3.9 to 1 against the cream and the readable floor is 4.5. It is 5.1 now, and the clay that labels sections went from 3.1 to 4.4. Same two hues, taken down until they clear the floor. |
-| R201 | **The percentage on the storycards has its top back.** The same bug as last time, in the other half: the fix and the gate that proves it both live in the module the website shares, and the app has its own copy of that arithmetic because an Expo project cannot import from `api/`. The gate was testing the function your phone never runs. It runs both now, and four ways of reintroducing the bug were tried against it. |
 | R202 | **Sharing says Attune Relationships**, and the little picture is the mark with the name under it. That thumbnail is Apple's, built from the website's social image, which is a wide banner: a square thumbnail cut from the middle of a banner is a fragment of a headline. There is a square one now. It is the home page's card that changed, so a link to attune-relationships.com will preview as the lockup rather than the banner; Twitter keeps the banner. Say the word and I put it back. |
 | R203 | **The home tile is a ghost bubble.** iOS 26's own glass, so it takes its light from the blue behind it rather than being a white rectangle at twelve per cent. |
-| R207 | **Your lost note, and why it was lost.** There was no icon because there was no mark. The notes endpoint answers with two lists, one of notes with no anchor and one of everything anchored to a page, and the results screen has been reading the first since the feature shipped. Nothing on any results page has ever drawn a highlight, an underline or a margin icon, on any account. Reading the right list fixed all three at once, and a gate now holds every screen that fetches notes to the anchored list. |
-| R208 | **A mark opens.** Tap the icon in the right margin and the note comes up: the words it sits on, what you wrote, the date, private or shared with Preston, its tags, and delete with the "this cannot be undone" question. The icon sits inside the paragraph now rather than in the margin outside it, because outside the block means inside whatever the block is in, and not every tile on a results page is a padded one. |
-| R209 | **A deleted tag goes into a closed Archive** at the foot of the list, in grey, with a count. Opening it offers Restore as well as Delete: the server has allowed restoring since tags could be deleted and nothing had ever asked, which made "archive" a word for a waiting room. |
-| R204 | **The third row of the home tile capitalises.** |
-| R197 | **The background runs the length of the page.** Insights was painting two washes, one from the tab and one starting under the header, so the gradient restarted and drew a line across the page exactly where the chips are. One wash, owned by the tab; everything inside it is transparent; and the tint no longer lives in a box of its own, which was drawing a second edge further down. The chip rows fade into the wash rather than into flat cream. Same fix reaches Learn, Notes and the exercises, because they share the component. |
-| R194 | **Each exercise has its own wash**, in its own colour: Communication orange, Expectations blue, Reflection green, Intimacy rose, Conflict blue. Taken from the same place its progress bar and arrows take theirs, so nothing new to keep in step. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
-| R196 | **A cold-start crash, found by accident and fixed.** Opening the app straight onto the Insights tab could run the line that tidies up the "open this exercise" parameter before the navigator existed, and React Native takes the whole screen down for that: "Attempted to navigate before mounting the Root Layout component". It is deferred a tick and wrapped now. Worst case it fails to tidy and closing an exercise reopens it once, which is better than the app not starting. |
-| R191 | **The lockup is in one place on every screen.** It is literally one element now: a shared frame draws it above the scroll view, so it cannot sit at four different heights and it no longer slides away when a page moves. The home screen's profile button moved into that row rather than keeping a line of its own, and the mark that sat under the greeting is gone, because the lockup above it carries the same mark. |
-| R192 | **The wash is behind the results too.** Glance tiles and storycards paint their own grounds; what sat behind them was flat cream, so a coloured card floated on nothing. Same wash as Learn and Notes. |
-| R193 | **The mark is on every waiting screen**, above the spinner. A spinner on cream is the spinner every app has. |
-| R184 | **The lockup is larger and in the website's face**, Playfair rather than body text, with the mark scaled up to match. |
-| R185 | **Cards are the same height.** The standfirst is gone from the tile, and the title has room for two lines whether it needs them or not, which is the other half of making them uniform. |
-| R186 | **Share on the insight of the day and on the storycards**, both through Apple's own sheet. A storycard sends its own words, in the order the card shows them, and the address. |
-| R187 | **The cream pages have a ground.** A warm wash at the top fading to cream, with a breath of the orange in the corner: the pages were one flat colour from the status bar down, which is why everything on them read as floating. Same wash on Learn and Notes. |
-| R188 | **The search field no longer clips its own text.** It was using a paragraph's line height on a single line. |
-| R189 | **Search reads the articles, not just the titles.** Every word of every piece is indexed now, with the filler words dropped, so "show love" finds the piece that says it. Two words still narrow; if that finds nothing, the pieces matching either come back with the best first rather than an empty screen. |
 | R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
-| R180 | **The Learn tab, rebuilt to your order.** Lockup, Yours to explore as a hero, the insight of the day on the home screen's own blue, then In Practice: search, then Saved and Read, then a shelf at a time with the articles side by side. Each shelf's arrow opens that shelf as a page of rows. Section labels are hero; the shelf labels inside In Practice are eyebrows, which is the hierarchy you described. |
-| R181 | **The lockup is on every tab**, in ink on the cream pages and light on the blue one. |
-| R182 | **Colour.** Learn: the blue insight tile, and each shelf's cards tinted by shelf. Notes: a rule of colour down the left of the tiles and each tag's own colour behind its icon. Tell me if you want more or less of it; it is deliberately restrained rather than decorative. |
 | R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. |
-| R179 | **Today's work is on your phone already.** The app on TestFlight picked up an update over the air: the Learn tab, the saves, the search, the share sheet, the lightbulb and the home mark. Close the app fully and reopen it if you do not see them. What is not there yet is the icon, the "Attune" name under it and the new splash, because those are part of the build rather than the code: they arrive on your next `npm run testflight`. |
-| R174 | **The Learn tab.** Renamed everywhere, including the two server lines that pointed at "your resources tab". A search box above the shelves, My lists with Saved and Read, and every piece as a card with the ARTICLE label and a bookmark, which is the shape of the app you showed me. Saved is new and is yours to build; Read has been recorded since the feed existed and has never been shown as a list. |
 | R175 | **Articles can carry an illustration.** The card draws it when a post has one. Until then the ground is tinted by shelf, with the mark in the corner, so a card without a picture looks intentional rather than broken. Adding pictures is a content job: the column is there and the admin accepts it, so the moment you have artwork it appears. |
-| R176 | **Search.** It matches the title, the standfirst, the shelf, the dimension tags and any keywords added in the admin, and two words narrow rather than widen. Try "conflict", then "repair". |
-| R177 | **Share, through the phone's own sheet.** Top right of an article: Messages, Mail, copy, whatever you have. It sends the piece's address on the website, because a link into the app is only useful to someone who already has it. |
-| R178 | **The Insights tab is a lightbulb**, and the home screen has the white glow back with the mark under the greeting. |
 | R173 | **The workbook opens in the browser and builds itself.** Your call, and the simpler one: the app opens the website's workbook page with a flag that makes the browser build the PDF straight away, with the same builder and the same options a customer gets on the website. One file, one builder, no server renderer. The page says "Building your workbook" for the second it takes. |
-| R170 | **The margin icon sits on the mark's own line** and shows a tag for a tag. It was pinned to the top of the paragraph, and a mark made just now was leaving its tags behind, so a tag looked like a note until the screen was reopened. |
-| R171 | **That warning is gone.** The scroll-to-a-mark measurement used an API the new React Native architecture warns about on every call. It measures two windows and reads the page's own offset instead, which is the same number with nothing deprecated in it. Worth trying R112 again: open a mark from Notes and see whether it lands on the line. |
-| R172 | **Updates reach an installed build without rebuilding.** expo-updates is in, the channels are configured, and app/TESTFLIGHT.md has a section answering exactly this. Sixteen Expo packages were a patch behind and are now at the versions the SDK expects; the app runs in the simulator unchanged. |
 | R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
 
 ### Copy, and whether the words are yours
@@ -163,6 +127,44 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R198 | "Yours to explore" is now "Resources" |
+| R199 | The third row capitalises like the other two |
+| R213 | Type is darker throughout |
+| R201 | The percentage on the storycards has its top back |
+| R207 | Your lost note, and why it was lost |
+| R208 | A mark opens |
+| R209 | A deleted tag goes into a closed Archive |
+| R204 | The third row of the home tile capitalises |
+| R220 | **The Insights nav, your nine.** The arrows are two chevrons in glass, fixed at the bottom corners and on the page rather than in a bar. The Section: page line is gone; the hamburger is the whole of that row now. Every page is in a tile, the landing included. The landing's colours are the exercise colours and its labels are the exercises' full names, both read from the one registry that decides what exercises exist, so the section you answer and the section you read are the same colour and the same name. Eight new icons, all outlined. And the wash behind every page is its section's colour, which is the cohesion you asked about: Expectations reads blue on all seven of its pages. |
+| R221 | **The step counts are back, on every detailed page.** Only the expectations conversations had one, counted inside that page from its own list, which is why no other section could have one. It comes from the nav now, so Communication, Physical Intimacy, Relationship Reflection and Conflict all have it at once. At-a-glance pages are not counted: 1/3 means the three detail pages, which is what it meant on the website. |
+| R222 | **The mark sheet, your five.** Quote first, then the label and the date, then the note in italics. The private toggle is the switch the note editor uses rather than a second control doing the same job in a different shape, and tagging is a tag-and-plus at the other end of that row, with the chips opening under it. The warning I could not reproduce by reading; the sheet is rebuilt, so tell me if it is still there. |
+| R223 | **The "what it's for" question was never shown, on either surface.** You were right to ask. It takes up to two answers from a list, so it has no position on a scale, so the row builder dropped it and the page named after the question never asked it. It draws now, as two sets of chips. Two things fell out of fixing it: the app stores a multi-answer as an internal key rather than the words, so it would have printed "closeness" at you, and the privacy gate stopped the change until I could prove the field can only ever carry an option from the list. Please check your own answer reads right. |
+| R224 | **The dashboard should be there the moment you open the app.** Measured: warm, the endpoint answers in a third of a second; cold, it took between one and three and a half, three times running, and a function nobody has called for an hour is always cold. The app asked on every launch and drew a spinner until it came back. It keeps the last one now and draws that first. The first launch after installing still waits once. |
+| R225 | **Every results page pinches to zoom**, up to three times. Past that a line is wider than the screen and reading becomes a sideways scroll. |
+| R226 | **The website's type is darker too.** 188 places across 29 files, both hues, the same values the app now uses. |
+| R197 | The background runs the length of the page |
+| R194 | Each exercise has its own wash |
+| R196 | A cold-start crash, found by accident and fixed |
+| R191 | The lockup is in one place on every screen |
+| R192 | The wash is behind the results too |
+| R193 | The mark is on every waiting screen |
+| R184 | The lockup is larger and in the website's face |
+| R185 | Cards are the same height |
+| R186 | Share on the insight of the day and on the storycards |
+| R187 | The cream pages have a ground |
+| R188 | The search field no longer clips its own text |
+| R189 | Search reads the articles, not just the titles |
+| R180 | The Learn tab, rebuilt to your order |
+| R181 | The lockup is on every tab |
+| R182 | Colour |
+| R179 | Today's work is on your phone already |
+| R174 | The Learn tab |
+| R176 | Search |
+| R177 | Share, through the phone's own sheet |
+| R178 | The Insights tab is a lightbulb |
+| R170 | The margin icon sits on the mark's own line |
+| R171 | That warning is gone |
+| R172 | Updates reach an installed build without rebuilding |
 | R130 | Both intimacy framings, your seven rewordings |
 | R131 | Every exercise's opening page, your words, both surfaces |
 | R132 | Every loading line, your five changes |

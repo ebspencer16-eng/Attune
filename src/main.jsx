@@ -128,7 +128,7 @@ const FallbackUI = ({ error }) => {
   return (
   <div style={{ padding: '3rem 1.5rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif', maxWidth: 560, margin: '0 auto' }}>
     <h2 style={{ fontSize: '1.4rem', marginBottom: '0.75rem', color: '#0E0B07' }}>Something went wrong.</h2>
-    <p style={{ fontSize: '0.9rem', color: '#8C7A68', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+    <p style={{ fontSize: '0.9rem', color: '#7A6753', marginBottom: '1.5rem', lineHeight: 1.6 }}>
       We've been notified. Try refreshing the page. Your progress is saved.
     </p>
     <button onClick={() => window.location.reload()}
@@ -137,7 +137,7 @@ const FallbackUI = ({ error }) => {
     </button>
     <details style={{ marginTop: '1.75rem', textAlign: 'left' }}>
       <summary style={{ fontSize: '0.72rem', color: '#B3A693', cursor: 'pointer', fontFamily: 'system-ui, sans-serif' }}>Technical details</summary>
-      <pre style={{ marginTop: '0.5rem', fontSize: '0.68rem', color: '#8C7A68', background: '#F7F2EA', border: '1px solid #E8DDD0', borderRadius: 8, padding: '0.75rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowX: 'auto' }}>{msg}{stackHead ? '\n\n' + stackHead : ''}</pre>
+      <pre style={{ marginTop: '0.5rem', fontSize: '0.68rem', color: '#7A6753', background: '#F7F2EA', border: '1px solid #E8DDD0', borderRadius: 8, padding: '0.75rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowX: 'auto' }}>{msg}{stackHead ? '\n\n' + stackHead : ''}</pre>
     </details>
   </div>
   );

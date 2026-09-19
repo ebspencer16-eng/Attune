@@ -40,9 +40,28 @@
  *              /api/home tells the app, so the app keeps no list of its own.
  *              Flip to true here when the screen exists, in one place.
  */
+/**
+ * The colour each exercise wears, everywhere it is named.
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * Ellie: "Please make the colors in the nav landing match the exercise
+ * colors." They did not, and could not: the results nav had its own five
+ * colours typed into api/_lib/results-sections.js, and the app tints each
+ * exercise screen from its own table in attune-theme.ts. Two lists, no third
+ * thing saying what an exercise's colour is, so Communication was the brand
+ * orange while you were answering it and a violet the moment you read it back.
+ *
+ * The registry is the one place that already knows what exercises exist, so
+ * it is where the colour belongs. The nav reads it; check-exercise-colours.mjs
+ * holds the app's copy to it, because an Expo project cannot import from api/.
+ *
+ * This is not the same thing as a results page's GROUND, which is a gradient
+ * per page and lives in api/_lib/section-grounds.js. A colour names a section;
+ * a ground is what one of its pages is painted on.
+ */
 export const EXERCISES = [
   {
-    order: 1, key: 'ex1', inApp: true, label: 'Communication',
+    order: 1, key: 'ex1', color: '#E8673A', inApp: true, label: 'Communication',
     /**
      * What to call it where there is room for its whole name.
      *
@@ -61,25 +80,25 @@ export const EXERCISES = [
     view: 'exercise1', capability: null, partnerField: 'ex1', selfOnly: false,
   },
   {
-    order: 2, key: 'ex2', inApp: true, label: 'Expectations',
+    order: 2, key: 'ex2', color: '#1B5FE8', inApp: true, label: 'Expectations',
     column: 'ex2_answers', shape: 'answers',
     localKey: 'attune_ex2', progressKey: 'attune_ex2_progress',
     view: 'exercise2', capability: null, partnerField: 'ex2', selfOnly: false,
   },
   {
-    order: 3, key: 'ex3', inApp: true, label: 'Relationship Reflection',
+    order: 3, key: 'ex3', color: '#10B981', inApp: true, label: 'Relationship Reflection',
     column: 'ex3_answers', shape: 'answers',
     localKey: 'attune_ex3', progressKey: 'attune_ex3_progress',
     view: 'exercise3', capability: 'hasAnniversary', partnerField: 'ex3', selfOnly: false,
   },
   {
-    order: 4, key: 'intimacy', inApp: true, label: 'Physical Intimacy Expectations',
+    order: 4, key: 'intimacy', color: '#B5546E', inApp: true, label: 'Physical Intimacy Expectations',
     column: 'intimacy_data', shape: 'record',
     localKey: 'attune_intimacy', progressKey: 'attune_intimacy_progress',
     view: 'intimacy', capability: 'hasIntimacy', partnerField: 'intimacy', selfOnly: false,
   },
   {
-    order: 5, key: 'conflict', inApp: true, label: 'Conflict Patterns',
+    order: 5, key: 'conflict', color: '#1B5FE8', inApp: true, label: 'Conflict Patterns',
     column: 'conflict_data', shape: 'record',
     localKey: 'attune_conflict', progressKey: 'attune_conflict_progress',
     view: 'conflict', capability: 'hasConflict', partnerField: 'conflict', selfOnly: true,

@@ -130,15 +130,75 @@ function positionOf(question, answer) {
 }
 
 /**
+ * What each of them chose on a question that takes more than one answer.
+ *
+ * ── THE QUESTION THAT WAS NEVER SHOWN ─────────────────────────────────────
+ * Ellie: "can you make sure the what it's for question on physical intimacy is
+ * pulling correctly?"
+ *
+ * It was not pulling at all. `iq_mean_for` asks what physical intimacy is
+ * primarily about and takes up to two answers from a list, so its answer is a
+ * pair of choices rather than a point on a scale. questionRows places points,
+ * finds no position for a list, and drops the row. So the What It Is For page
+ * showed two questions and neither of them was what it is for, on both
+ * surfaces, since the section shipped.
+ *
+ * The fix is to carry the choices rather than to force them onto an axis:
+ * "closeness and play" against "release" is two answers to compare, not a gap
+ * to measure. No new words: the heading is the question's own `topic` and the
+ * chips are its own option labels.
+ */
+function questionPicks(dimensionId, answersMine, answersTheirs, variant) {
+  /**
+   * ── THE TWO STORAGE SHAPES, RECONCILED ──────────────────────────────────
+   * One exercise, two conventions: a single-select answer is stored as the
+   * option's LABEL and a multi-select answer as its VALUE. See `choose` in
+   * attune-app/src/components/intimacy-exercise.tsx, which says so.
+   *
+   * So the first version of this handed 'closeness' and 'play' straight to the
+   * screen, which is an internal key in front of a customer. Everything a
+   * reader sees is a label, whichever way it was stored, and a stored value
+   * with no option behind it is dropped rather than printed raw.
+   *
+   * A null in the list is "prefer not to say". It is left out: a decline is
+   * the absence of a choice, not a choice, and the website has never drawn one.
+   */
+  const labelsFor = (q, stored) => {
+    const opts = q.options || [];
+    return (Array.isArray(stored) ? stored : stored == null ? [] : [stored])
+      .filter((v) => v != null)
+      .map((v) => opts.find((o) => o.value === v) || opts.find((o) => o.label === v))
+      .filter((o) => o && o.value != null)
+      .map((o) => o.label);
+  };
+
+  return INTIMACY_QUESTIONS
+    .filter((q) => q.dimension === dimensionId && q.multi)
+    .map((q) => ({
+      id: q.id,
+      text: q[variant] || q.premarital || q.topic || '',
+      topic: q.topic || '',
+      you: labelsFor(q, answersMine?.[q.id]),
+      them: labelsFor(q, answersTheirs?.[q.id]),
+    }))
+    .filter((r) => r.you.length || r.them.length);
+}
+
+/**
  * The side-by-side rows for one dimension, matching the website's screen.
  *
  * selfref questions are left out, as the website leaves them out: they ask
  * about you relative to your partner, so two positions on one axis would be
  * comparing two different questions.
+ *
+ * So are multi-answer questions, explicitly rather than by accident. They used
+ * to fall out here because no option label matched a list, which looked like
+ * filtering and was really a question quietly going missing. They come back
+ * through questionPicks.
  */
 function questionRows(dimensionId, answersMine, answersTheirs, variant) {
   return INTIMACY_QUESTIONS
-    .filter((q) => q.dimension === dimensionId && q.kind !== 'selfref')
+    .filter((q) => q.dimension === dimensionId && q.kind !== 'selfref' && !q.multi)
     .map((q) => {
       const scored = (q.options || []).filter((o) => o.value != null)
         .slice().sort((a, b) => a.value - b.value);
@@ -212,6 +272,12 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       // Both people's positions, question by question. This is the screen the
       // catalogue sells as "compared side by side".
       questions: questionRows(d.id, answersMine, answersTheirs, variant),
+      /**
+       * The questions that take more than one answer, with what each of them
+       * chose. "What it is primarily about" is the only one today, and it is
+       * the question the section is named after.
+       */
+      picks: questionPicks(d.id, answersMine, answersTheirs, variant),
       // ── AND THE TWO AVERAGES, FOR THE OVERVIEW ROW ───────────────────
       // The website's overview plots each partner on a track per dimension.
       // The app only had the distance between them, so it drew one bar where

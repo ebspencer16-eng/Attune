@@ -208,8 +208,8 @@ function useMobile(breakpoint = 640) {
 
 const C = {
   cream: "#FFFDF9", warm: "#FBF8F3", stone: "#E8DDD0",
-  clay: "#C17F47", bark: "#7C4D28", deep: "#14100A",
-  text: "#1E1610", muted: "#8C7A68", accent: "#C17F47",
+  clay: "#A66534", bark: "#7C4D28", deep: "#14100A",
+  text: "#1E1610", muted: "#7A6753", accent: "#A66534",
   ink: "#0E0B07",
   // Dimension accent palette -- used on exercise cards
   dAccent: ["#E8673A","#1B5FE8","#2AB07F","#E040A0","#F5A623","#9B5DE5","#00B4CC","#E8503A"],
@@ -1873,7 +1873,7 @@ const NEAR_AXIS_PROSE = NEAR_AXIS_PROSE_SHARED;
 // Shareable couple type card component
 
 // ── COUPLE MAP SVG COMPONENT ──────────────────────────────────────────────────
-function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false, axisLabelColor = "#8C7A68" }) {
+function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false, axisLabelColor = "#7A6753" }) {
   const typeInfoA = computeIndividualType(myS);
   const typeInfoB = computeIndividualType(partS);
   const itA = INDIVIDUAL_TYPES[typeInfoA.typeCode];
@@ -2060,7 +2060,7 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
       {!hideCaption && (
       <div style={{ marginTop: "0.75rem" }}>
         {MAP_CAPTION.map((para, i) => (
-          <p key={i} style={{ fontSize: "0.72rem", color: "#8C7A68", lineHeight: 1.65, margin: i === MAP_CAPTION.length - 1 ? 0 : "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
+          <p key={i} style={{ fontSize: "0.72rem", color: "#7A6753", lineHeight: 1.65, margin: i === MAP_CAPTION.length - 1 ? 0 : "0 0 0.5rem", fontWeight: 300, fontFamily: BFONT }}>
             {para}
           </p>
         ))}
@@ -2092,7 +2092,7 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.65rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
-        <p style={{ fontSize: "0.83rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
+        <p style={{ fontSize: "0.83rem", color: "#7A6753", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
       </div>
     </div>
   );
@@ -2110,7 +2110,7 @@ function GrowSquare({ color = "#9B5DE5", icon, title, sub, cta, onClick, href, d
         {icon}
       </div>
       <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#0E0B07", fontFamily: BFONT, lineHeight: 1.3, marginBottom: "0.25rem" }}>{title}</div>
-      <div style={{ fontSize: "0.73rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
+      <div style={{ fontSize: "0.73rem", color: "#7A6753", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.5 }}>{sub}</div>
       <div style={{ marginTop: "auto", paddingTop: "0.7rem", fontSize: "0.76rem", fontWeight: 700, fontFamily: BFONT, color: disabled ? "#B3A693" : color }}>{cta}</div>
     </>
   );
@@ -2484,7 +2484,7 @@ function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
   const myName = chosenPartner === 'p1' ? p1 : p2;
   const theirName = chosenPartner === 'p1' ? p2 : p1;
 
-  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#8C7A68', stone: '#E8DDD0', warm: '#FFFDF9' };
+  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#7A6753', stone: '#E8DDD0', warm: '#FFFDF9' };
   const inp = { width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: C.ink, background: C.warm, outline: 'none', boxSizing: 'border-box' };
 
   return (
@@ -2587,7 +2587,7 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
   const [password, setPassword] = React.useState('');
   const [err, setErr] = React.useState('');
   const [loading, setLoading] = React.useState(false);
-  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#8C7A68', stone: '#E8DDD0', warm: '#FFFDF9' };
+  const C = { orange: '#E8673A', indigo: '#1B5FE8', ink: '#0E0B07', muted: '#7A6753', stone: '#E8DDD0', warm: '#FFFDF9' };
   const inp = { width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${C.stone}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: C.ink, background: C.warm, outline: 'none', marginBottom: '0.65rem', boxSizing: 'border-box' };
   const genInvite = () => Math.random().toString(36).slice(2, 10).toUpperCase();
 
@@ -2688,15 +2688,15 @@ function ProfileSetupTile({ account, onSetup, onDismiss }) {
 
   return (
     <div style={{ background: 'white', border: '1.5px solid #E8DDD0', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', position: 'relative' }}>
-      <button onClick={onDismiss} aria-label="Dismiss" title="Dismiss" style={{ position: 'absolute', top: 12, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#8C7A68', fontSize: '1rem', lineHeight: 1 }}>✕</button>
+      <button onClick={onDismiss} aria-label="Dismiss" title="Dismiss" style={{ position: 'absolute', top: 12, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#7A6753', fontSize: '1rem', lineHeight: 1 }}>✕</button>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
         <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#E8673A20,#1B5FE820)', border: '1.5px solid #E8DDD0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.1rem' }}>✦</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.25rem', fontFamily: "'DM Sans', sans-serif" }}>Before you start your exercises</div>
-          <div style={{ fontSize: '0.75rem', color: '#8C7A68', marginBottom: '1rem', lineHeight: 1.55 }}>Complete your profile so your results are personalized to you.</div>
+          <div style={{ fontSize: '0.75rem', color: '#7A6753', marginBottom: '1rem', lineHeight: 1.55 }}>Complete your profile so your results are personalized to you.</div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: s.done ? '#059669' : '#8C7A68', background: s.done ? '#ECFDF5' : '#F5F0EC', borderRadius: 99, padding: '0.25rem 0.7rem' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: s.done ? '#059669' : '#7A6753', background: s.done ? '#ECFDF5' : '#F5F0EC', borderRadius: 99, padding: '0.25rem 0.7rem' }}>
                 <span>{s.done ? '✓' : '·'}</span>
                 <span>{s.label}</span>
               </div>
@@ -4393,7 +4393,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
 
 // Stylized line icons for the Starting Out checklist section headers, matching
 // the site's lucide-style stroke set. Replaces the emoji glyphs.
-function ChecklistIcon({ id, color = "#8C7A68", size = 22 }) {
+function ChecklistIcon({ id, color = "#7A6753", size = 22 }) {
   const p = {
     namechange: <><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></>,
     finances:   <><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></>,
@@ -4789,7 +4789,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
 // Stylized line icons for the budget category headers, matching the site's
 // lucide-style stroke set. Replaces the emoji glyphs so the tool reads
 // consistent with the rest of Attune.
-function BudgetIcon({ id, color = "#8C7A68", size = 18 }) {
+function BudgetIcon({ id, color = "#7A6753", size = 18 }) {
   const p = {
     housing:   <><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></>,
     transport: <><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></>,
@@ -5390,7 +5390,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
 
   const pctChanged = Math.round((changes.length / totalComparable) * 100);
   const shiftLevel = pctChanged >= 30 ? 'significant' : pctChanged >= 10 ? 'notable' : 'minor';
-  const shiftColor = pctChanged >= 30 ? '#E8673A' : pctChanged >= 10 ? '#C17F47' : '#10b981';
+  const shiftColor = pctChanged >= 30 ? '#E8673A' : pctChanged >= 10 ? '#A66534' : '#10b981';
 
   return (
     <div style={{
@@ -5417,7 +5417,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
           ? `${userName}, your answers are consistent across time.`
           : `${userName}, you shifted on ${changes.length} of ${totalComparable} questions.`}
       </div>
-      <p style={{ fontSize: '0.82rem', color: '#8C7A68', fontFamily: BFONT, lineHeight: 1.6, margin: '0 0 0.85rem' }}>
+      <p style={{ fontSize: '0.82rem', color: '#7A6753', fontFamily: BFONT, lineHeight: 1.6, margin: '0 0 0.85rem' }}>
         {changes.length === 0
           ? `You completed this on ${priorDateStr} and your views have held steady.`
           : `You completed this on ${priorDateStr}. That's a ${shiftLevel} shift, ${pctChanged}% of your answers changed.`}
@@ -5428,7 +5428,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
           style={{
             background: 'transparent',
             border: '1px solid rgba(232,103,58,0.35)',
-            color: '#C17F47',
+            color: '#A66534',
             fontSize: '0.72rem',
             fontWeight: 600,
             padding: '0.5rem 0.9rem',
@@ -5449,7 +5449,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
                 fontSize: '0.6rem',
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
-                color: '#8C7A68',
+                color: '#7A6753',
                 fontWeight: 700,
                 fontFamily: BFONT,
                 marginBottom: '0.55rem',
@@ -5469,12 +5469,12 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
                   </div>
                   <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'stretch', flexWrap: 'wrap' }}>
                     <div style={{ flex: '1 1 140px', background: '#FBF8F3', border: '1px solid #E8DDD0', borderRadius: 7, padding: '0.45rem 0.6rem' }}>
-                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8C7A68', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Before</div>
+                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7A6753', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Before</div>
                       <div style={{ fontSize: '0.76rem', color: '#5C4A38', fontFamily: BFONT, lineHeight: 1.45 }}>{c.before}</div>
                     </div>
-                    <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: '#C17F47' }}>→</div>
+                    <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: '#A66534' }}>→</div>
                     <div style={{ flex: '1 1 140px', background: 'linear-gradient(135deg, rgba(232,103,58,0.06), rgba(27,95,232,0.06))', border: '1px solid rgba(232,103,58,0.25)', borderRadius: 7, padding: '0.45rem 0.6rem' }}>
-                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#C17F47', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Now</div>
+                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#A66534', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Now</div>
                       <div style={{ fontSize: '0.76rem', color: '#0E0B07', fontFamily: BFONT, lineHeight: 1.45 }}>{c.after}</div>
                     </div>
                   </div>
@@ -5482,7 +5482,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
               ))}
             </div>
           ))}
-          <p style={{ fontSize: '0.7rem', color: '#8C7A68', fontFamily: BFONT, lineHeight: 1.6, margin: '0.5rem 0 0', fontStyle: 'italic' }}>
+          <p style={{ fontSize: '0.7rem', color: '#7A6753', fontFamily: BFONT, lineHeight: 1.6, margin: '0.5rem 0 0', fontStyle: 'italic' }}>
             Shifts between retakes are normal and often meaningful. They're worth a conversation.
           </p>
         </div>
@@ -6374,7 +6374,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       {sidebarSections.map(sec => {
         const isActive = section === sec.id || (sec.children && section.startsWith(sec.id + "-"));
         const isExpanded = sec.id === "comm" ? commExpanded : sec.id === "exp" ? expExpanded : sec.id === "reflection" ? reflExpanded : sec.id === "intimacy" ? intimExpanded : sec.id === "conflict" ? conflictExpanded : false;
-        const color = sec.color || "#8C7A68";
+        const color = sec.color || "#7A6753";
         return (
           <div key={sec.id}>
             <button onClick={() => {
@@ -6386,8 +6386,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 else if (sec.id === "conflict") { setConflictExpanded(e => !e); if (!conflictExpanded) go("conflict-overview"); }
               } else { go(sec.id); }
             }} data-nav-active={section === sec.id ? "true" : undefined} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
-              <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#8C7A68" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
-              {sec.children && <span style={{ fontSize: "0.95rem", lineHeight: 1, color: "#8C7A68", opacity: 0.85 }}>{isExpanded ? "▾" : "▸"}</span>}
+              <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#7A6753" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
+              {sec.children && <span style={{ fontSize: "0.95rem", lineHeight: 1, color: "#7A6753", opacity: 0.85 }}>{isExpanded ? "▾" : "▸"}</span>}
             </button>
             {sec.children && isExpanded && (
               <div style={{ paddingLeft: "0.75rem", display: "flex", flexDirection: "column", gap: "0.08rem", marginBottom: "0.25rem" }}>
@@ -6403,7 +6403,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   const childColor = child.color || color;
                   return (
                     <button key={child.id} data-nav-active={section === child.id ? "true" : undefined} onClick={() => go(child.id)} style={{ background: section === child.id ? childColor + "12" : "transparent", border: "none", borderLeft: section === child.id ? `2px solid ${childColor}` : "2px solid transparent", borderRadius: "0 6px 6px 0", padding: child.isDeepChild ? "0.25rem 0.6rem 0.25rem 1.25rem" : "0.35rem 0.6rem", textAlign: "left", cursor: "pointer", fontFamily: BFONT, transition: "all .12s" }}>
-                      <span style={{ fontSize: child.isDeepChild ? "0.65rem" : "0.7rem", fontStyle: child.italic ? "italic" : "normal", fontWeight: section === child.id ? 700 : 400, color: section === child.id ? childColor : child.isDeepChild ? "#AAA098" : "#8C7A68" }}>{child.label}</span>
+                      <span style={{ fontSize: child.isDeepChild ? "0.65rem" : "0.7rem", fontStyle: child.italic ? "italic" : "normal", fontWeight: section === child.id ? 700 : 400, color: section === child.id ? childColor : child.isDeepChild ? "#AAA098" : "#7A6753" }}>{child.label}</span>
                     </button>
                   );
                 })}
@@ -7353,7 +7353,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section.startsWith("intimacy") && intimacyBothDone) {
     const ROSE = "#B5546E";
     const ROSE_DARK = "#4a1c30";
-    const stateColor = { aligned: "#10b981", discuss: "#E8673A", different: "#B5546E", unspoken: "#8C7A68", incomplete: "#8C7A68" };
+    const stateColor = { aligned: "#10b981", discuss: "#E8673A", different: "#B5546E", unspoken: "#7A6753", incomplete: "#7A6753" };
     const stateLabel = { aligned: "Aligned", discuss: "Worth discussing", different: "Different expectations", unspoken: "Left unspoken", incomplete: "Incomplete" };
     const sub = (s) => (s || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
     const dims = intimacySummary.dimSummary;
@@ -9741,7 +9741,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.9rem" }}>
         <div style={{ flex: 1, height: 1, background: "#E8DDD0" }} />
-        <span style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif" }}>or</span>
+        <span style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif" }}>or</span>
         <div style={{ flex: 1, height: 1, background: "#E8DDD0" }} />
       </div>
     </>
@@ -9793,10 +9793,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
       <div style={{ position: "fixed", inset: 0, background: "#1e1a35", zIndex: 500, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isMobile ? "0" : "1rem", overflowY: "auto" }}
         onClick={e => e.target === e.currentTarget && onClose()}>
         <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "2rem 1.25rem" : "2.5rem 2rem", width: "100%", margin: isMobile ? 0 : "auto", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative" }}>
-          <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753", lineHeight: 1 }}>✕</button>
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.35rem", fontSize: "1.6rem", color: "white" }}>✦</div>
           <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.5rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.5rem", lineHeight: 1.2 }}>Welcome to your Attune experience.</div>
-          <p style={{ fontSize: "0.85rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginBottom: "1.75rem", lineHeight: 1.7 }}>
+          <p style={{ fontSize: "0.85rem", color: "#7A6753", fontFamily: "'DM Sans', sans-serif", marginBottom: "1.75rem", lineHeight: 1.7 }}>
             {_isGiftContext ? "Someone gave you this as a gift. " : ""}Two assessments. One conversation. Built from your answers.
           </p>
           <button onClick={() => setWelcomeAck(true)}
@@ -9813,7 +9813,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       onClick={e => e.target === e.currentTarget && onClose()}>
       <style>{`@keyframes authShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 45% { transform: translateX(-8px); } 60% { transform: translateX(8px); } 75% { transform: translateX(-4px); } 90% { transform: translateX(4px); } }`}</style>
       <div style={{ background: "#FFFDF9", borderRadius: isMobile ? 0 : 22, padding: isMobile ? "1.5rem 1.25rem 1.25rem" : "2rem 2rem 1.75rem", width: "100%", margin: isMobile ? 0 : "auto", minHeight: isMobile ? "100vh" : "auto", maxWidth: isMobile ? "none" : 440, boxShadow: isMobile ? "none" : "0 32px 80px rgba(0,0,0,0.28)", position: "relative", animation: shake ? "authShake 0.45s cubic-bezier(.36,.07,.19,.97)" : undefined }}>
-        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68", lineHeight: 1 }}>✕</button>
+        <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753", lineHeight: 1 }}>✕</button>
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
@@ -9832,7 +9832,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               if (t === "signup" && mode !== "signup") { window.location.href = "/start"; return; }
               setTab(t); setErr("");
             }}
-              style={{ flex: 1, padding: "0.5rem", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", fontWeight: 600, background: tab === t ? "white" : "transparent", color: tab === t ? "#0E0B07" : "#8C7A68", boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.1)" : "none", transition: "all 0.15s" }}>
+              style={{ flex: 1, padding: "0.5rem", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", fontWeight: 600, background: tab === t ? "white" : "transparent", color: tab === t ? "#0E0B07" : "#7A6753", boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.1)" : "none", transition: "all 0.15s" }}>
               {t === "signup" ? "Create account" : "Sign in"}
             </button>
           ))}
@@ -9841,19 +9841,19 @@ function AuthModal({ mode, onClose, onSuccess }) {
         {tab === "signup" ? (
           <>
             <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Set up your profile</div>
-            <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Your answers are private until both of you are done. We'll never show your partner what you wrote until results unlock.</p>
+            <p style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Your answers are private until both of you are done. We'll never show your partner what you wrote until results unlock.</p>
             {oauthIdentity ? (
-              <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.7rem 0.9rem", marginBottom: "1rem", fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>
+              <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.7rem 0.9rem", marginBottom: "1rem", fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>
                 Signed in with {oauthIdentity.provider === 'apple' ? 'Apple' : 'Google'}
                 {oauthIdentity.user?.email ? ` as ${oauthIdentity.user.email}` : ''}. Finish your profile below.
               </div>
             ) : providerRow('Continue with')}
             {inp("Your first name", "name", "text", { autoComplete: 'given-name' })}
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your pronouns</div>
+            <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Your pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
                 <button key={p} onClick={() => upd("pronouns", form.pronouns === p ? "" : p)}
-                  style={{ flex: 1, padding: "0.45rem 0.3rem", borderRadius: 8, border: `1.5px solid ${form.pronouns === p ? "#E8673A" : "#E8DDD0"}`, background: form.pronouns === p ? "#FFF0EB" : "white", color: form.pronouns === p ? "#E8673A" : "#8C7A68", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s", marginBottom: "0.6rem" }}>
+                  style={{ flex: 1, padding: "0.45rem 0.3rem", borderRadius: 8, border: `1.5px solid ${form.pronouns === p ? "#E8673A" : "#E8DDD0"}`, background: form.pronouns === p ? "#FFF0EB" : "white", color: form.pronouns === p ? "#E8673A" : "#7A6753", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s", marginBottom: "0.6rem" }}>
                   {p}
                 </button>
               ))}
@@ -9865,13 +9865,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
               </>
             )}
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.75rem" }} />
-            <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner, required before results unlock</p>
+            <p style={{ fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.6rem", fontWeight: 600 }}>Your partner, required before results unlock</p>
             {inp("Partner's first name", "partnerName", "text", { autoComplete: 'off' })}
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Partner's pronouns</div>
+            <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>Partner's pronouns</div>
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0rem" }}>
               {["she/her", "he/him", "they/them"].map(p => (
                 <button key={p} onClick={() => upd("partnerPronouns", form.partnerPronouns === p ? "" : p)}
-                  style={{ flex: 1, padding: "0.45rem 0.3rem", borderRadius: 8, border: `1.5px solid ${form.partnerPronouns === p ? "#1B5FE8" : "#E8DDD0"}`, background: form.partnerPronouns === p ? "#EEF0FF" : "white", color: form.partnerPronouns === p ? "#1B5FE8" : "#8C7A68", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s", marginBottom: "0.6rem" }}>
+                  style={{ flex: 1, padding: "0.45rem 0.3rem", borderRadius: 8, border: `1.5px solid ${form.partnerPronouns === p ? "#1B5FE8" : "#E8DDD0"}`, background: form.partnerPronouns === p ? "#EEF0FF" : "white", color: form.partnerPronouns === p ? "#1B5FE8" : "#7A6753", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s", marginBottom: "0.6rem" }}>
                   {p}
                 </button>
               ))}
@@ -9883,7 +9883,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               { autoComplete: 'off' })}
             <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.75rem 1rem", marginBottom: "0.85rem", display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
               <span style={{ fontSize: "0.82rem", flexShrink: 0 }}>✦</span>
-              <p style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, margin: 0 }}>Attune uses your names and pronouns to personalize your results, making the insights feel specific to you two, not generic.</p>
+              <p style={{ fontSize: "0.72rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, margin: 0 }}>Attune uses your names and pronouns to personalize your results, making the insights feel specific to you two, not generic.</p>
             </div>
 
             {/* ── Optional demographics ──
@@ -9894,7 +9894,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
                 {ABOUT_YOU.title}
               </div>
-              <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
+              <p style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
                 {ABOUT_YOU.why}
               </p>
               {/* The five questions come from api/_lib/profile-setup-copy.js, which
@@ -9903,7 +9903,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
                   and the Demographics page is built on these columns. */}
               {ABOUT_YOU.fields.map(({ key: k, label, options: opts }) => (
                 <div key={k} style={{ marginBottom: "0.65rem" }}>
-                  <label style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
+                  <label style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
                   <select value={form[k]} onChange={e => upd(k, e.target.value)}
                     style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                     {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -9915,7 +9915,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
             <label style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", cursor: "pointer", marginBottom: "1.25rem", marginTop: "0.25rem" }}>
               <input type="checkbox" checked={form.emailOptIn} onChange={e => upd("emailOptIn", e.target.checked)}
                 style={{ marginTop: "0.2rem", accentColor: "#E8673A", width: 15, height: 15, flexShrink: 0 }} />
-              <span style={{ fontSize: "0.72rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
+              <span style={{ fontSize: "0.72rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
                 Send me occasional opportunities to continue relationship growth through Attune.
               </span>
             </label>
@@ -9937,11 +9937,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
               {loading ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.55rem" }}><InlineSpinner /> Signing in…</span> : "Sign in →"}
             </button>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.85rem" }}>
-              <p style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", margin: 0 }}>
+              <p style={{ fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", margin: 0 }}>
                 No account yet?{" "}
                 <button onClick={() => { if (mode !== "signup") { window.location.href = "/start"; } else { setTab("signup"); } }} style={{ background: "none", border: "none", color: "#E8673A", fontWeight: 700, cursor: "pointer", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif" }}>Get started →</button>
               </p>
-              <button onClick={() => { setTab("reset"); setErr(""); setResetSent(false); }} style={{ background: "none", border: "none", color: "#8C7A68", fontSize: "0.72rem", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textDecoration: "underline" }}>Forgot password?</button>
+              <button onClick={() => { setTab("reset"); setErr(""); setResetSent(false); }} style={{ background: "none", border: "none", color: "#7A6753", fontSize: "0.72rem", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textDecoration: "underline" }}>Forgot password?</button>
             </div>
           </>
         ) : tab === "reset" ? (
@@ -9950,7 +9950,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
               <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
                 <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg,#E8673A,#1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", fontSize: "1.4rem" }}>✓</div>
                 <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.5rem" }}>Check your inbox</div>
-                <p style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                <p style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "1.5rem" }}>
                   If an account exists for <strong style={{ color: "#0E0B07" }}>{form.email}</strong>, we've sent a reset link. It expires in 30 minutes.
                 </p>
                 <button onClick={() => { setTab("login"); setErr(""); setResetSent(false); }} style={{ background: "none", border: "none", color: "#E8673A", fontWeight: 700, cursor: "pointer", fontSize: "0.78rem", fontFamily: "'DM Sans',sans-serif" }}>← Back to sign in</button>
@@ -9958,14 +9958,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
             ) : (
               <>
                 <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.1rem", fontWeight: 700, color: "#0E0B07", marginBottom: "0.35rem" }}>Reset your password</div>
-                <p style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Enter the email you used to create your account. We'll send you a link to reset your password.</p>
+                <p style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", marginBottom: "1.25rem", lineHeight: 1.55 }}>Enter the email you used to create your account. We'll send you a link to reset your password.</p>
                 {inp("Your email address", "email", "email")}
                 {err && <p style={{ color: "#ef4444", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif", marginBottom: "0.75rem" }}>{err}</p>}
                 <button onClick={handleReset} disabled={loading}
                   style={{ width: "100%", padding: "0.9rem", background: "#0E0B07", color: "white", border: "none", borderRadius: 12, fontSize: "0.85rem", fontWeight: 700, cursor: loading ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: loading ? 0.7 : 1 }}>
                   {loading ? "Sending…" : "Send reset link →"}
                 </button>
-                <p style={{ textAlign: "center", marginTop: "0.85rem", fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif" }}>
+                <p style={{ textAlign: "center", marginTop: "0.85rem", fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif" }}>
                   <button onClick={() => { setTab("login"); setErr(""); }} style={{ background: "none", border: "none", color: "#E8673A", fontWeight: 700, cursor: "pointer", fontSize: "0.75rem", fontFamily: "'DM Sans',sans-serif" }}>← Back to sign in</button>
                 </p>
               </>
@@ -10027,12 +10027,12 @@ function NewPasswordScreen({ onDone }) {
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', fontSize: '1.4rem' }}>✓</div>
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem' }}>Password updated.</div>
-            <p style={{ fontSize: '0.82rem', color: '#8C7A68', lineHeight: 1.6 }}>Signing you in now…</p>
+            <p style={{ fontSize: '0.82rem', color: '#7A6753', lineHeight: 1.6 }}>Signing you in now…</p>
           </div>
         ) : (
           <>
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.15rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.35rem' }}>Set a new password</div>
-            <p style={{ fontSize: '0.78rem', color: '#8C7A68', marginBottom: '1.5rem', lineHeight: 1.55 }}>Choose something you haven't used before.</p>
+            <p style={{ fontSize: '0.78rem', color: '#7A6753', marginBottom: '1.5rem', lineHeight: 1.55 }}>Choose something you haven't used before.</p>
             {inp('New password', password, setPassword)}
             {inp('Confirm password', confirm, setConfirm)}
             {err && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginBottom: '0.75rem' }}>{err}</p>}
@@ -10376,7 +10376,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           </div>
         </div>
 
-        <p style={{ fontSize: '0.8rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7, marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.8rem', color: '#7A6753', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7, marginBottom: '1.5rem' }}>
           {existing
             ? `You already have an Attune account with this email. Sign in to join ${inviteFrom}. Your answers stay private until you're both done, then your results unlock together.`
             : WAITING.BEFORE_PURCHASE}
@@ -10385,7 +10385,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
         {!existing && inp('Your first name', 'name', 'text', { autoComplete: 'given-name' })}
         {inp('Your email', 'email', 'email')}
         {_iie && form.email.trim().toLowerCase() === _iie && (
-          <p style={{ fontSize: '0.68rem', color: '#8C7A68', fontFamily: "'DM Sans', sans-serif", margin: '-0.35rem 0 0.6rem', lineHeight: 1.4 }}>
+          <p style={{ fontSize: '0.68rem', color: '#7A6753', fontFamily: "'DM Sans', sans-serif", margin: '-0.35rem 0 0.6rem', lineHeight: 1.4 }}>
             From your invite. Change it if this isn't your email.
           </p>
         )}
@@ -10399,7 +10399,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
             Tell us about yourself
           </div>
-          <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
+          <p style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
             Helps us understand who Attune serves. Responses are kept separately from names and emails, and only ever used in aggregate.
           </p>
           {[
@@ -10410,7 +10410,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
             { k: "signupSource", label: "How did you hear about Attune?", opts: [["", "Prefer not to say"], ["friend", "Friend or family"], ["social", "Social media"], ["search", "Search"], ["gift", "Received as a gift"], ["therapist", "Therapist or counselor"], ["other", "Other"]] },
           ].map(({ k, label, opts }) => (
             <div key={k} style={{ marginBottom: "0.65rem" }}>
-              <label style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
+              <label style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
               <select value={form[k]} onChange={e => upd(k, e.target.value)}
                 style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                 {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -10435,7 +10435,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           </p>
         )}
 
-        <p style={{ fontSize: '0.68rem', color: '#C17F47', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
+        <p style={{ fontSize: '0.68rem', color: '#A66534', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
           Attune uses your names to personalize your results. Your answers are never shared with your partner individually, only as part of your joint results.
         </p>
       </div>
@@ -10867,9 +10867,9 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
           <div>
             <div style={{ display: "inline-block", background: p.badgeColor, color: p.badgeText, fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.22rem 0.65rem", borderRadius: 999, marginBottom: "0.5rem", fontFamily: BFONT }}>{p.badge}</div>
             <div style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>{p.title}</div>
-            <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: BFONT, marginTop: "0.2rem", fontStyle: "italic" }}>{p.tagline}</div>
+            <div style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: BFONT, marginTop: "0.2rem", fontStyle: "italic" }}>{p.tagline}</div>
           </div>
-          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#7A6753", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
         </div>
 
         {/* Body */}
@@ -10878,7 +10878,7 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
 
           {/* What's included */}
           <div style={{ marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What's included</div>
+            <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>What's included</div>
             {p.includes.map((item, i) => (
               <div key={i} style={{ display: "flex", gap: "0.65rem", alignItems: "flex-start", marginBottom: "0.4rem" }}>
                 <div style={{ width: 16, height: 16, borderRadius: "50%", background: p.accentColor + "18", border: "1.5px solid " + p.accentColor + "40", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "0.1rem" }}>
@@ -10892,13 +10892,13 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
           {/* Variant selector */}
           {p.variants && !cartAdded && (
             <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Format</div>
+              <div style={{ fontSize: "0.58rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.5rem" }}>Format</div>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 {p.variants.map(v => (
                   <button key={v.id} onClick={() => setVariant(v.id)}
                     style={{ flex: 1, padding: "0.6rem 0.75rem", border: "1.5px solid " + (variant === v.id ? p.accentColor : "#E8DDD0"), background: variant === v.id ? p.accentColor + "0E" : "white", borderRadius: 10, cursor: "pointer", fontFamily: BFONT, transition: "all 0.15s", textAlign: "left" }}>
-                    <div style={{ fontSize: "0.75rem", fontWeight: 700, color: variant === v.id ? "#0E0B07" : "#8C7A68" }}>{v.label}</div>
-                    <div style={{ fontSize: "0.72rem", color: variant === v.id ? p.accentColor : "#8C7A68", fontWeight: 600 }}>{v.price}</div>
+                    <div style={{ fontSize: "0.75rem", fontWeight: 700, color: variant === v.id ? "#0E0B07" : "#7A6753" }}>{v.label}</div>
+                    <div style={{ fontSize: "0.72rem", color: variant === v.id ? p.accentColor : "#7A6753", fontWeight: 600 }}>{v.price}</div>
                   </button>
                 ))}
               </div>
@@ -10910,7 +10910,7 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", paddingTop: "1.25rem", borderTop: "1px solid #E8DDD0" }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1 }}>{displayPrice}</div>
-                <div style={{ fontSize: "0.62rem", color: "#8C7A68", fontFamily: BFONT, marginTop: "0.2rem" }}>per couple</div>
+                <div style={{ fontSize: "0.62rem", color: "#7A6753", fontFamily: BFONT, marginTop: "0.2rem" }}>per couple</div>
               </div>
               <button onClick={() => onAddToCart(product, variant)}
                 style={{ background: "linear-gradient(135deg," + p.accentColor + ",#d45a2e)", color: "white", border: "none", borderRadius: 12, padding: "0.85rem 1.75rem", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, letterSpacing: "0.04em", boxShadow: "0 4px 16px " + p.accentColor + "44" }}>
@@ -10927,7 +10927,7 @@ function UpsellModal({ product, cartAdded, onAddToCart, onCheckout, onClose }) {
               </div>
               <div style={{ display: "flex", gap: "0.65rem" }}>
                 <button onClick={onClose}
-                  style={{ flex: 1, background: "white", border: "1.5px solid #E8DDD0", color: "#8C7A68", borderRadius: 12, padding: "0.75rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: BFONT }}>
+                  style={{ flex: 1, background: "white", border: "1.5px solid #E8DDD0", color: "#7A6753", borderRadius: 12, padding: "0.75rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: BFONT }}>
                   Keep browsing
                 </button>
                 <button onClick={onCheckout}
@@ -11003,9 +11003,9 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
           <div>
             <div style={{ display: "inline-block", background: "#FFF0EB", color: "#E8673A", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.22rem 0.65rem", borderRadius: 999, marginBottom: "0.5rem", fontFamily: "'DM Sans', sans-serif" }}>Explore packages & add-ons</div>
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15 }}>Upgrade your experience</div>
-            <div style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", marginTop: "0.2rem", fontStyle: "italic" }}>Choose the package that fits where you are.</div>
+            <div style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: "'DM Sans', sans-serif", marginTop: "0.2rem", fontStyle: "italic" }}>Choose the package that fits where you are.</div>
           </div>
-          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7A68", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
+          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "#7A6753", fontSize: "1.3rem", lineHeight: 1, padding: "0.15rem", flexShrink: 0, marginTop: "-0.15rem" }}>✕</button>
         </div>
 
         {/* Packages list */}
@@ -11018,7 +11018,7 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem", flexWrap: "wrap" }}>
                     <div style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: p.color, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>{p.badge}</div>
-                    {isCurrent && <div style={{ fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", background: "#F3EDE6", padding: "0.15rem 0.5rem", borderRadius: 999 }}>Current</div>}
+                    {isCurrent && <div style={{ fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", background: "#F3EDE6", padding: "0.15rem 0.5rem", borderRadius: 999 }}>Current</div>}
                   </div>
                   <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.15, marginBottom: "0.25rem" }}>{p.name}</div>
                   <div style={{ fontSize: "0.78rem", color: "#5C4A38", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5, marginBottom: "0.6rem" }}>{p.description}</div>
@@ -11047,7 +11047,7 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
 
         {/* Add-ons */}
         <div style={{ padding: "0.25rem 1.75rem 1.25rem" }}>
-          <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.75rem" }}>Add-ons</div>
+          <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.75rem" }}>Add-ons</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {addOns.map(a => (
               <div key={a.id}
@@ -11057,7 +11057,7 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", marginBottom: "0.15rem" }}>{a.name}</div>
-                  <div style={{ fontSize: "0.74rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", fontWeight: 300, lineHeight: 1.45 }}>{a.desc}</div>
+                  <div style={{ fontSize: "0.74rem", color: "#7A6753", fontFamily: "'DM Sans', sans-serif", fontWeight: 300, lineHeight: 1.45 }}>{a.desc}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem", flexShrink: 0 }}>
                   <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap" }}>{a.price}</div>
@@ -11073,7 +11073,7 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
 
         {/* Footer link */}
         <div style={{ padding: "0.85rem 1.75rem 1.5rem", borderTop: "1px solid #E8DDD0", textAlign: "center" }}>
-          <a href="/offerings" style={{ fontSize: "0.75rem", fontWeight: 600, color: "#8C7A68", fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>
+          <a href="/offerings" style={{ fontSize: "0.75rem", fontWeight: 600, color: "#7A6753", fontFamily: "'DM Sans', sans-serif", textDecoration: "none" }}>
             See full package details on the offerings page →
           </a>
         </div>
@@ -13674,7 +13674,7 @@ export default function App() {
         <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.5rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)', textAlign: 'center' }}>
           <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.35rem', fontSize: '1.7rem', color: 'white' }}>✓</div>
           <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.5rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem', lineHeight: 1.2 }}>Your email is confirmed.</div>
-          <p style={{ fontSize: '0.85rem', color: '#8C7A68', marginBottom: '1.75rem', lineHeight: 1.7 }}>You're all set. Set up your profile to get started.</p>
+          <p style={{ fontSize: '0.85rem', color: '#7A6753', marginBottom: '1.75rem', lineHeight: 1.7 }}>You're all set. Set up your profile to get started.</p>
           <button onClick={() => { setShowConfirmedLanding(false); setShowProfileSetup(true); try { window.__attuneConfirmType = ''; } catch {} }}
             style={{ width: '100%', padding: '0.9rem', border: 'none', borderRadius: 12, background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.02em' }}>
             Get started with account setup →
@@ -14073,7 +14073,7 @@ export default function App() {
                           Continue {target.label} →
                         </button>
                         <button onClick={() => { window.__attune_welcome_back_dismissed = true; setView(view); }}
-                          style={{ background: "transparent", border: "1px solid rgba(140,122,104,0.3)", borderRadius: 10, padding: "0.55rem 0.8rem", fontSize: "0.72rem", color: "#8C7A68", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                          style={{ background: "transparent", border: "1px solid rgba(140,122,104,0.3)", borderRadius: 10, padding: "0.55rem 0.8rem", fontSize: "0.72rem", color: "#7A6753", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
                           Dismiss
                         </button>
                       </div>
@@ -14110,7 +14110,7 @@ export default function App() {
                     <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(27,95,232,0.18)", borderTopColor: "#1B5FE8", flexShrink: 0, animation: "attune-spin 0.8s linear infinite" }} />
                     <div>
                       <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>Checking for {account.partnerName || "your partner"}'s results…</div>
-                      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Just a moment.</div>
+                      <div style={{ fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Just a moment.</div>
                     </div>
                   </div>
                 )}
@@ -14119,7 +14119,7 @@ export default function App() {
                     <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1rem" }}>✓</div>
                     <div>
                       <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>{account.partnerName || "Your partner"} has joined.</div>
-                      <div style={{ fontSize: "0.75rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>{WAITING.DASHBOARD}</div>
+                      <div style={{ fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>{WAITING.DASHBOARD}</div>
                     </div>
                   </div>
                 )}
@@ -14194,7 +14194,7 @@ export default function App() {
                       ].map((r, i) => ({ ...r, num: String(i + 1).padStart(2, "0") }));
                       const COLS = "minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)";
                       const dot = (done, inProgress) => (
-                        <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.56rem", color: "white", background: done ? "#059669" : inProgress ? "#C17F47" : "#D4C0A8", fontWeight: 700 }}>{done ? "✓" : inProgress ? "·" : ""}</span>
+                        <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.56rem", color: "white", background: done ? "#059669" : inProgress ? "#A66534" : "#D4C0A8", fontWeight: 700 }}>{done ? "✓" : inProgress ? "·" : ""}</span>
                       );
                       const hCell = { padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 0.8rem", fontSize: isMobile ? "0.74rem" : "0.8rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 700, borderLeft: "1px solid #F0E9E0", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
                       const stCell = { padding: isMobile ? "0.8rem 0.4rem" : "0.85rem 0.7rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.35rem", borderLeft: "1px solid #F0E9E0" };
@@ -14221,7 +14221,7 @@ export default function App() {
                                   onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
                                   onMouseLeave={clickable ? (e => e.currentTarget.style.background = "transparent") : undefined}>
                                   {dot(r.myDone, r.myInProgress)}
-                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#C17F47", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume →" : "Start →"}</span>
+                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#A66534", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume →" : "Start →"}</span>
                                 </div>
                                 {/* Partner column — status only */}
                                 <div style={stCell}>
@@ -14298,13 +14298,13 @@ export default function App() {
                         disabled={!workbookReady} />
                     )}
                     {pkg.hasBudget && (
-                      <GrowSquare color="#C17F47" icon={GrowIcons.budget("#C17F47")}
+                      <GrowSquare color="#A66534" icon={GrowIcons.budget("#A66534")}
                         title="Shared Budget Builder"
                         sub="Build a financial plan together from your results."
                         cta="Open →" onClick={() => setView("budget")} />
                     )}
                     {pkg.hasChecklist && (
-                      <GrowSquare color="#C17F47" icon={GrowIcons.checklist("#C17F47")}
+                      <GrowSquare color="#A66534" icon={GrowIcons.checklist("#A66534")}
                         title={CHECKLIST_COPY.title}
                         sub="A practical guide to starting your life together."
                         cta="Open →" onClick={() => setView("checklist")} />
@@ -14317,7 +14317,7 @@ export default function App() {
                       title="How to start a hard conversation"
                       sub="Opening lines for the topics that matter most."
                       cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
-                    <GrowSquare color="#C17F47" icon={GrowIcons.library("#C17F47")}
+                    <GrowSquare color="#A66534" icon={GrowIcons.library("#A66534")}
                       title="The full library"
                       sub="Guides on communication, conflict, and growing together."
                       cta="Explore →" href="/practice?from=app" />
@@ -14380,12 +14380,12 @@ export default function App() {
                   {done && <div style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: color, fontWeight: 700, fontFamily: BFONT, marginTop: "0.2rem" }}>{doneLabel || "Complete ✓"}</div>}
                 </div>
               </div>
-              <div style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: BFONT, lineHeight: 1.55, marginBottom: "0.85rem" }}>{sub}</div>
+              <div style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: BFONT, lineHeight: 1.55, marginBottom: "0.85rem" }}>{sub}</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ height: 4, background: "#E8DDD0", borderRadius: 2, flex: 1, marginRight: "0.85rem", overflow: "hidden" }}>
                   <div style={{ height: "100%", background: done ? "linear-gradient(90deg," + color + "," + accent + ")" : "#E8DDD0", width: done ? "100%" : inProgress ? "45%" : "0%", borderRadius: 2, transition: "width 0.4s ease" }} />
                 </div>
-                <span style={{ fontSize: "0.72rem", fontWeight: 600, color: done ? color : "#8C7A68", fontFamily: BFONT, flexShrink: 0 }}>{done ? "Done" : inProgress ? "In progress" : "Start →"}</span>
+                <span style={{ fontSize: "0.72rem", fontWeight: 600, color: done ? color : "#7A6753", fontFamily: BFONT, flexShrink: 0 }}>{done ? "Done" : inProgress ? "In progress" : "Start →"}</span>
               </div>
             </div>
           );
@@ -14394,11 +14394,11 @@ export default function App() {
             <div style={{ flex: 1, overflowY: "auto", background: "#FBF8F3" }}>
               <div style={{ maxWidth: 620, margin: "0 auto", padding: isMobile ? "2rem 1.25rem" : "3rem 2rem" }}>
                 <div style={{ marginBottom: "2rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#C17F47", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Your exercises</div>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Your exercises</div>
                   <h1 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.75rem" : "2.1rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em", marginBottom: "0.5rem" }}>
                     Complete each exercise independently.
                   </h1>
-                  <p style={{ fontSize: "0.88rem", color: "#8C7A68", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65 }}>
+                  <p style={{ fontSize: "0.88rem", color: "#7A6753", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65 }}>
                     Answer on your own before comparing. The comparison only appears when both of you are done.
                   </p>
                 </div>
@@ -14475,7 +14475,7 @@ export default function App() {
                 )}
 
                 {!bothDone && (
-                  <div style={{ background: "#F7F4EE", border: "1px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.25rem", fontSize: "0.8rem", color: "#8C7A68", fontFamily: BFONT, lineHeight: 1.6 }}>
+                  <div style={{ background: "#F7F4EE", border: "1px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.25rem", fontSize: "0.8rem", color: "#7A6753", fontFamily: BFONT, lineHeight: 1.6 }}>
                     <strong style={{ color: "#5A5750" }}>Waiting on {partnerName || "your partner"}?</strong>  Share your Attune link so they can complete their side. {WAITING.DASHBOARD}
                   </div>
                 )}
@@ -14884,11 +14884,11 @@ export default function App() {
 
                 {/* Header */}
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#C17F47", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Resources</div>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Resources</div>
                   <h1 style={{ fontFamily: font.display, fontSize: isMobile ? "1.75rem" : "2.2rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.12, letterSpacing: "-.02em", marginBottom: "0.6rem" }}>
                     Keep going.
                   </h1>
-                  <p style={{ fontSize: "0.9rem", color: "#8C7A68", lineHeight: 1.7, fontFamily: font.body, fontWeight: 300, maxWidth: 480 }}>
+                  <p style={{ fontSize: "0.9rem", color: "#7A6753", lineHeight: 1.7, fontFamily: font.body, fontWeight: 300, maxWidth: 480 }}>
                     Tools to work through your results, and reading to help you understand each other better.
                   </p>
                 </div>
@@ -14908,7 +14908,7 @@ export default function App() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#0E0B07", fontFamily: font.body, marginBottom: "0.2rem" }}>{addon.name}</div>
-                          <div style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: font.body, fontWeight: 300, lineHeight: 1.45 }}>{addon.desc}</div>
+                          <div style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: font.body, fontWeight: 300, lineHeight: 1.45 }}>{addon.desc}</div>
                         </div>
                         <div style={{ fontSize: "0.75rem", fontWeight: 600, color: addon.color, fontFamily: font.body, flexShrink: 0 }}>{addon.price} →</div>
                       </div>
@@ -14931,7 +14931,7 @@ export default function App() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.3rem" }}>
                             <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#9B5DE5", opacity: 0.6, flexShrink: 0 }} />
-                            <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#8C7A68", fontFamily: font.body, textTransform: "uppercase", letterSpacing: ".08em" }}>{post.tag}</span>
+                            <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#7A6753", fontFamily: font.body, textTransform: "uppercase", letterSpacing: ".08em" }}>{post.tag}</span>
                           </div>
                           <div style={{ fontSize: "0.85rem", fontWeight: 500, color: "#0E0B07", fontFamily: font.body, lineHeight: 1.45 }}>{post.title}</div>
                         </div>
@@ -14948,9 +14948,9 @@ export default function App() {
                   onMouseLeave={e => e.currentTarget.style.borderColor = "#E8DDD0"}>
                   <div>
                     <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0E0B07", fontFamily: font.body, marginBottom: "0.25rem" }}>Explore all Attune publications</div>
-                    <div style={{ fontSize: "0.78rem", color: "#8C7A68", fontFamily: font.body, fontWeight: 300 }}>Guides, reads, and exercises for every stage of a relationship.</div>
+                    <div style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: font.body, fontWeight: 300 }}>Guides, reads, and exercises for every stage of a relationship.</div>
                   </div>
-                  <span style={{ fontSize: "1.1rem", color: "#C17F47", flexShrink: 0, marginLeft: "1rem" }}>→</span>
+                  <span style={{ fontSize: "1.1rem", color: "#A66534", flexShrink: 0, marginLeft: "1rem" }}>→</span>
                 </a>
 
               </div>
@@ -14974,7 +14974,7 @@ export default function App() {
 
                 {/* Header */}
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#C17F47", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Account</div>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Account</div>
                   <h1 style={{ fontFamily: font.display, fontSize: isMobile ? "1.75rem" : "2.1rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em" }}>
                     {userName || "Your"} & {partnerName || "Partner"}
                   </h1>
@@ -14983,7 +14983,7 @@ export default function App() {
                 {/* Personal info */}
                 <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
                   <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: font.body }}>Personal info</div>
+                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Personal info</div>
                   </div>
                   {[
                     { label: "Your name", value: userName || "—" },
@@ -14993,7 +14993,7 @@ export default function App() {
                     { label: "Email", value: account?.email || (isLoggedIn ? "Signed in" : "Not signed in") },
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: font.body, flexShrink: 0 }}>{row.label}</span>
+                      <span style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: font.body, flexShrink: 0 }}>{row.label}</span>
                       <span style={{ fontSize: "0.85rem", color: "#0E0B07", fontFamily: font.body, fontWeight: 500, textAlign: "right" }}>{row.value}</span>
                     </div>
                   ))}
@@ -15009,7 +15009,7 @@ export default function App() {
                 {isLoggedIn && !account?.joinedViaInvite && account?.partnerEmail && !account?.partnerJoined && (
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
                     <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: font.body }}>Partner invite</div>
+                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Partner invite</div>
                     </div>
                     <div style={{ padding: "1.1rem 1.35rem" }}>
                       <div style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body, lineHeight: 1.5, marginBottom: "0.85rem" }}>
@@ -15037,7 +15037,7 @@ export default function App() {
                 {/* Package */}
                 <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
                   <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: font.body }}>Your package</div>
+                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Your package</div>
                   </div>
                   <div style={{ padding: "1.1rem 1.35rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
@@ -15063,7 +15063,7 @@ export default function App() {
                 {/* Exercise status */}
                 <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, marginBottom: "1.25rem", overflow: "hidden" }}>
                   <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: font.body }}>Progress</div>
+                    <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Progress</div>
                   </div>
                   {[
                     { label: "Communication exercise", done: !!ex1Answers, who: `${userName || "You"}` },
@@ -15073,7 +15073,7 @@ export default function App() {
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
                       <span style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body }}>{row.label}</span>
-                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: row.done ? "#065f46" : "#C17F47", fontFamily: font.body, background: row.done ? "rgba(16,185,129,0.1)" : "#FDF8F3", padding: "2px 10px", borderRadius: 99 }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: row.done ? "#065f46" : "#A66534", fontFamily: font.body, background: row.done ? "rgba(16,185,129,0.1)" : "#FDF8F3", padding: "2px 10px", borderRadius: 99 }}>
                         {row.done ? "Complete" : "Pending"}
                       </span>
                     </div>
@@ -15084,10 +15084,10 @@ export default function App() {
                 {isLoggedIn && (
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 16, overflow: "hidden" }}>
                     <div style={{ padding: "1rem 1.35rem", borderBottom: "1px solid #F3EDE6" }}>
-                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, fontFamily: font.body }}>Session</div>
+                      <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, fontFamily: font.body }}>Session</div>
                     </div>
                     <div style={{ padding: "0.85rem 1.35rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#8C7A68", fontFamily: font.body }}>Signed in as {account?.email || userName}</span>
+                      <span style={{ fontSize: "0.82rem", color: "#7A6753", fontFamily: font.body }}>Signed in as {account?.email || userName}</span>
                       <button
                         onClick={async () => {
                           const { supabase: sb, hasSupabase } = await import('./supabase.js');
@@ -15127,7 +15127,7 @@ export default function App() {
                       <div style={{ maxWidth: 340, margin: "0 auto", textAlign: "left" }}>
                         <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
                           This permanently deletes your account and your answers. It cannot be undone.{" "}
-                          <a href="/legal#privacy" style={{ color: "#C17F47" }}>What is deleted</a>.
+                          <a href="/legal#privacy" style={{ color: "#A66534" }}>What is deleted</a>.
                         </p>
                         <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
                           Enter your password, then type DELETE to confirm.
@@ -15202,7 +15202,7 @@ export default function App() {
                           <button
                             disabled={deleteBusy}
                             onClick={() => { setDeleteOpen(false); setDeleteConfirm(""); setDeleteErr(""); }}
-                            style={{ fontSize: "0.74rem", fontWeight: 600, color: "#8C7A68", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.5rem 0.3rem" }}>
+                            style={{ fontSize: "0.74rem", fontWeight: 600, color: "#7A6753", fontFamily: font.body, background: "none", border: "none", cursor: "pointer", padding: "0.5rem 0.3rem" }}>
                             Cancel
                           </button>
                         </div>
@@ -15227,7 +15227,7 @@ export default function App() {
             <div style={{ maxWidth: 680, margin: "0 auto", width: "100%", padding: isMobile ? "2rem 1.25rem" : "3rem 2rem" }}>
               {/* Hero */}
               <div style={{ marginBottom: "2.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#C17F47", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Add-on</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Add-on</div>
                 <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.75rem" : "2.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em", marginBottom: "1rem" }}>
                   The Personalized Workbook
                 </h1>
@@ -15263,7 +15263,7 @@ export default function App() {
                       </div>
                     ))}
                   </div>
-                  <div style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid #E8DDD0", fontSize: "0.8rem", color: "#8C7A68", fontFamily: "'DM Sans', sans-serif" }}>
+                  <div style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid #E8DDD0", fontSize: "0.8rem", color: "#7A6753", fontFamily: "'DM Sans', sans-serif" }}>
                     Typically 20–30 pages depending on your results. Structured to work through together at your own pace.
                   </div>
                 </div>
@@ -15278,13 +15278,13 @@ export default function App() {
                   <div key={opt.format} style={{ background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1.25rem" }}>
                     <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#0E0B07", marginBottom: "0.35rem", fontFamily: "'DM Sans', sans-serif" }}>{opt.format}</div>
                     <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'Playfair Display', Georgia, serif", marginBottom: "0.35rem" }}>{opt.price}</div>
-                    <div style={{ fontSize: "0.75rem", color: "#8C7A68", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif" }}>{opt.detail}</div>
+                    <div style={{ fontSize: "0.75rem", color: "#7A6753", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif" }}>{opt.detail}</div>
                   </div>
                 ))}
               </div>
 
               <div style={{ background: "#FAF7F2", border: "1px solid #E8DDD0", borderRadius: 14, padding: "1.25rem 1.4rem", marginBottom: "2rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#8C7A68", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Availability</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#7A6753", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Availability</div>
                 <p style={{ fontSize: "0.85rem", color: "#5C4F45", lineHeight: 1.65, fontFamily: "'DM Sans', sans-serif", fontWeight: 300, margin: 0 }}>
                   Available after you complete both exercises. Your workbook is generated from your actual answers, and it is built as soon as your results open.
                 </p>
@@ -15294,7 +15294,7 @@ export default function App() {
                 <a href="/offerings" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)", color: "white", padding: "0.85rem 1.75rem", borderRadius: 12, fontSize: "0.82rem", fontWeight: 700, textDecoration: "none", fontFamily: "'DM Sans', sans-serif", letterSpacing: ".04em", textTransform: "uppercase" }}>
                   Add to order →
                 </a>
-                <a href="/offerings" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "transparent", color: "#8C7A68", padding: "0.85rem 1.25rem", borderRadius: 12, fontSize: "0.82rem", fontWeight: 500, textDecoration: "none", fontFamily: "'DM Sans', sans-serif", border: "1.5px solid #E8DDD0" }}>
+                <a href="/offerings" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "transparent", color: "#7A6753", padding: "0.85rem 1.25rem", borderRadius: 12, fontSize: "0.82rem", fontWeight: 500, textDecoration: "none", fontFamily: "'DM Sans', sans-serif", border: "1.5px solid #E8DDD0" }}>
                   See all packages
                 </a>
               </div>
@@ -15397,7 +15397,7 @@ export default function App() {
                   ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#059669", fontFamily: font.body }}>Complete</span>
                   : (r.you
                       ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: C.clay, fontFamily: font.body }}>Start →</span>
-                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#C17F47", fontFamily: font.body }}>Pending</span>)}
+                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A66534", fontFamily: font.body }}>Pending</span>)}
               </div>
             ))}
           </div>
@@ -15479,7 +15479,7 @@ export default function App() {
                       return (
                         <button key={item.id}
                           onClick={() => { setActiveResult(item.id); document.querySelector("[data-results-scroll]") && (document.querySelector("[data-results-scroll]").scrollTop = 0); }}
-                          style={{ background: "none", border: "none", borderBottom: isActive ? "2px solid #E8673A" : "2px solid transparent", padding: "0.6rem 0.85rem", fontSize: "0.7rem", fontWeight: isActive ? 700 : 400, color: isActive ? "#0E0B07" : "#8C7A68", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s", flexShrink: 0 }}>
+                          style={{ background: "none", border: "none", borderBottom: isActive ? "2px solid #E8673A" : "2px solid transparent", padding: "0.6rem 0.85rem", fontSize: "0.7rem", fontWeight: isActive ? 700 : 400, color: isActive ? "#0E0B07" : "#7A6753", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s", flexShrink: 0 }}>
                           {item.label}
                         </button>
                       );
@@ -15679,11 +15679,11 @@ export default function App() {
         React.useEffect(() => { document.getElementById(`profile_${fieldKey}_val`).value = sel; }, [sel]);
         return (
           <div style={{ marginBottom: "0.65rem" }}>
-            <div style={{ fontSize: "0.65rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{label}</div>
+            <div style={{ fontSize: "0.65rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{label}</div>
             <div style={{ display: "flex", gap: "0.4rem" }}>
               {["she/her","he/him","they/them"].map(p => (
                 <button key={p} onClick={() => setSel(sel === p ? "" : p)} type="button"
-                  style={{ flex: 1, padding: "0.4rem 0.2rem", borderRadius: 8, border: `1.5px solid ${sel===p ? accentColor : "#E8DDD0"}`, background: sel===p ? bgColor : "white", color: sel===p ? accentColor : "#8C7A68", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s" }}>
+                  style={{ flex: 1, padding: "0.4rem 0.2rem", borderRadius: 8, border: `1.5px solid ${sel===p ? accentColor : "#E8DDD0"}`, background: sel===p ? bgColor : "white", color: sel===p ? accentColor : "#7A6753", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s" }}>
                   {p}
                 </button>
               ))}
@@ -15696,14 +15696,14 @@ export default function App() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
           onClick={e => e.target === e.currentTarget && setShowProfileSetup(false)}>
           <div style={{ background: "#FFFDF9", borderRadius: 22, padding: "2rem", width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,0.28)", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
-            <button onClick={() => setShowProfileSetup(false)} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#8C7A68" }}>✕</button>
+            <button onClick={() => setShowProfileSetup(false)} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#7A6753" }}>✕</button>
             <div style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "1.2rem", fontWeight: 700, color: "#0E0B07", marginBottom: "1.5rem" }}>{PROFILE_SETUP_COPY.title}</div>
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.yourName}</div>
+            <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.yourName}</div>
             <input type="text" placeholder={PROFILE_SETUP_COPY.yourNamePlaceholder} defaultValue={account?.name || ""} id="profile_name"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
             <PronounPicker label="Your pronouns" fieldKey="pronouns" accentColor="#E8673A" bgColor="#FFF0EB" />
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.85rem" }} />
-            <div style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.partnerName}</div>
+            <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.partnerName}</div>
             <input type="text" placeholder={PROFILE_SETUP_COPY.partnerNamePlaceholder} defaultValue={account?.partnerName || ""} id="profile_partnerName"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
             <PronounPicker label="Partner's pronouns" fieldKey="partnerPronouns" accentColor="#1B5FE8" bgColor="#EEF0FF" />
@@ -15711,7 +15711,7 @@ export default function App() {
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "1.25rem", boxSizing: "border-box" }} />
             <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.65rem 0.9rem", marginBottom: "1rem", display: "flex", gap: "0.55rem", alignItems: "flex-start" }}>
               <span style={{ fontSize: "0.78rem", flexShrink: 0 }}>✦</span>
-              <p style={{ fontSize: "0.7rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, margin: 0 }}>{PROFILE_SETUP_COPY.why}</p>
+              <p style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55, margin: 0 }}>{PROFILE_SETUP_COPY.why}</p>
             </div>
             <button onClick={() => {
               const name = document.getElementById("profile_name")?.value.trim();
@@ -15774,7 +15774,7 @@ export default function App() {
             <label style={{ display: "flex", alignItems: "flex-start", gap: "0.55rem", cursor: "pointer", marginTop: "1rem" }}>
               <input type="checkbox" id="profile_emailOptIn" defaultChecked={account?.emailOptIn !== false}
                 style={{ marginTop: "0.15rem", accentColor: "#E8673A", width: 14, height: 14, flexShrink: 0 }} />
-              <span style={{ fontSize: "0.68rem", color: "#8C7A68", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
+              <span style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.55 }}>
                 Send me occasional opportunities to continue relationship growth through Attune.
               </span>
             </label>
