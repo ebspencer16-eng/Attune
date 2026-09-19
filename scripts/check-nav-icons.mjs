@@ -45,12 +45,41 @@ for (const [id, name] of Object.entries(icons)) {
   }
 }
 
+/**
+ * Every section that is an exercise has an icon, and nothing else does.
+ *
+ * ── WHY THE RULE NARROWED ─────────────────────────────────────────────────
+ * It used to be "every section the server can send". Ellie: "Maybe only the
+ * exercises have icons?" Highlights, Couple Type and What Comes Next are ways
+ * of reading the results rather than things you answered, and a glyph on them
+ * made a list of five sections read as a list of eight equal things.
+ *
+ * Both directions are checked. A new exercise without an icon is the failure
+ * this gate was written for; an icon creeping back onto one of the other three
+ * is the decision quietly reverting, which is the same failure wearing the
+ * opposite sign.
+ */
 const { resultsNav } = await import(`${ROOT}api/_lib/results-sections.js`);
+const { EXERCISES } = await import(`${ROOT}api/_exercises.js`);
+
+/** Which nav group each exercise is, mirroring check-exercise-colours. */
+const EXERCISE_GROUP = new Set(['comm', 'exp', 'reflection', 'intimacy', 'conflict']);
+
 // Every optional section switched on, so this sees every group that can exist.
 for (const g of resultsNav({ hasReflection: true, intimacyReady: true, conflictListed: true })) {
-  if (!icons[g.id]) {
-    problems.push(`the server can send a section '${g.id}' (${g.label}) and the app has no icon for it.`);
+  const isExercise = EXERCISE_GROUP.has(g.id);
+  if (isExercise && !icons[g.id]) {
+    problems.push(`'${g.id}' (${g.label}) is an exercise and the app has no icon for it.`);
   }
+  if (!isExercise && icons[g.id]) {
+    problems.push(`'${g.id}' (${g.label}) is not an exercise and has an icon. Only the exercises carry one.`);
+  }
+}
+
+if (EXERCISE_GROUP.size !== EXERCISES.length) {
+  problems.push(
+    `there are ${EXERCISES.length} exercises and this gate knows ${EXERCISE_GROUP.size} nav groups. `
+    + 'A new exercise needs its group adding here, or its icon goes unchecked.');
 }
 
 if (problems.length) {
@@ -59,4 +88,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-nav-icons] ${Object.keys(icons).length} icons, all outlined, one for every section the server can send.`);
+console.log(`[check-nav-icons] ${Object.keys(icons).length} icons, all outlined, one per exercise and none anywhere else.`);

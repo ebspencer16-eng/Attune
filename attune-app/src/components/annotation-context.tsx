@@ -71,25 +71,28 @@ type Ctx = {
 };
 
 /**
- * How much room a paragraph gives up so its marker has somewhere to sit.
+ * How far into the tile's own padding the marker sits.
  *
- * ── THIS HAS BEEN BOTH WAYS, AND THIS IS WHY IT IS BACK ───────────────────
- * Ellie once: "Icons in margin should be white to be visible and should be to
- * the right of the tile, so it shouldn't impact the tile or page spacing."
- * That is what the outside placement was for, and it cost the paragraph
- * nothing, which was the point.
+ * ── THIS HAS BEEN THREE THINGS, AND THIS IS THE LAST ──────────────────────
+ * First it was drawn outside the paragraph's box, on the argument that a note
+ * should cost the text nothing. Ellie then could not find a note at all,
+ * because outside the block means inside whatever the block is in, and not
+ * every tile in the results is a padded one.
  *
- * Ellie again, later: "I have a note called test that I can't find... there's
- * no icon on the page to point it out." Outside the block means inside
- * whatever the block is in, and not every tile in the results is a padded
- * panel. On the clipped ones the marker was simply gone.
+ * So the paragraph reserved the width instead, and she caught that too: "I
+ * think the icon in the right margin has adjusted the margin of that paragraph
+ * - I don't want that... I don't want the note or tag icon to adjust the
+ * margins of the text at all anywhere throughout the app. I want them to be
+ * tight to the right side of the tile, there should be enough space there to
+ * fit the icon."
  *
- * Of the two failures, a paragraph that is a few points narrower on the lines
- * that carry a mark is the one nobody will ever report. A note you cannot find
- * is the one she reported twice. So: inside, always, and it pays for itself in
- * width only on paragraphs that have something to announce.
+ * She is right, and the room she is pointing at is real: every results page is
+ * a PageTile with 24 points of padding on each side. The marker sits in that,
+ * hard against the tile's inner edge, and the paragraph gives up nothing. A
+ * negative offset rather than a reserved width, and small enough that it
+ * cannot reach past the tile's own edge and be clipped.
  */
-const MARKER_RESERVE = 30;
+const MARKER_INSET = 18;
 
 /** Whether a paragraph's own colour is a light one, so the marker matches. */
 function textIsLight(style: StyleProp<TextStyle>): boolean {
@@ -266,36 +269,29 @@ export function Prose({
    * has already stopped at.
    */
   return (
-    <View ref={block} onLayout={onLaidOut} style={{ paddingRight: MARKER_RESERVE }}>
+    <View ref={block} onLayout={onLaidOut}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={tagged ? 'Open this tag' : 'Open this note'}
         hitSlop={10}
         onPress={() => openMark(silent[0].id)}
         style={{
-          position: 'absolute', right: 0, zIndex: 2,
-          top: Number.isFinite(markerTop) ? markerTop - 2 : 0,
+          position: 'absolute', right: -MARKER_INSET, zIndex: 2,
+          top: Number.isFinite(markerTop) ? markerTop : 2,
         }}>
-        {/* ── A DISC, NOT A GLYPH ──────────────────────────────────────────
-            Thirteen points of hairline symbol against body copy is something
-            you find once you know it is there. The disc is what makes it a
-            thing on the page rather than a speck, and it is what says the
-            icon can be tapped. Its wash is the mark's own colour on the cream
-            pages and a white veil on the coloured ones. */}
-        <View
-          style={{
-            width: 24, height: 24, borderRadius: 12,
-            backgroundColor: textIsLight(style) ? 'rgba(255,255,255,0.18)' : tone.wash,
-            alignItems: 'center', justifyContent: 'center',
-          }}>
-          <SymbolView
-            name={(tagged ? 'tag.fill' : 'square.and.pencil') as never}
-            size={13}
-            tintColor={markerColor}
-            fallback={<View style={{ width: 3, height: 14, borderRadius: 2, backgroundColor: markerColor }} />}
-            style={{ width: 14, height: 14 }}
-          />
-        </View>
+        {/* ── THE ICON, AND NOTHING ROUND IT ────────────────────────────
+            Ellie: "I don't want the icon in a circle like it currently is,
+            just the icon." The disc was there to make a thirteen point
+            hairline symbol findable against body copy. Sixteen points in the
+            mark's own ink, in the tile's margin with nothing else in it, is
+            findable without a container. */}
+        <SymbolView
+          name={(tagged ? 'tag' : 'square.and.pencil') as never}
+          size={16}
+          tintColor={markerColor}
+          fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: markerColor }} />}
+          style={{ width: 17, height: 17 }}
+        />
       </Pressable>
       {body}
     </View>

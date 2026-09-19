@@ -40,10 +40,14 @@
 
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 
 import type { ResultsNavGroup } from '@/api/client';
-import { AccentFallback, Palette, Spacing, Type } from '@/constants/attune-theme';
+import { AccentFallback, Colors, Fonts, Spacing, Type } from '@/constants/attune-theme';
+import { withAlpha } from '@/components/page-wash';
+
+const c = Colors.light;
 
 /**
  * A glyph per section. A lookup, so an unknown group still draws.
@@ -71,15 +75,25 @@ import { AccentFallback, Palette, Spacing, Type } from '@/constants/attune-theme
  * a lookup and a list.
  */
 const GROUP_ICON: Record<string, string> = {
-  highlights: 'film',
-  'couple-type': 'figure.2.right.holdinghands',
   comm: 'bubble.left.and.bubble.right',
   exp: 'brain',
   reflection: 'book',
   intimacy: 'heart',
   conflict: 'arrow.triangle.branch',
-  'what-comes-next': 'checklist',
 };
+
+/*
+ * ── AND THE THREE THAT HAVE NONE ──────────────────────────────────────────
+ * Ellie: "Maybe only the exercises have icons?"
+ *
+ * Highlights, Couple Type and What Comes Next are ways of reading the results
+ * rather than things you answered. A glyph on them claimed a parity with the
+ * five exercises that they do not have, and it made the list read as eight
+ * equal things when it is five sections with a way in and a way out.
+ *
+ * Their labels still line up, because the space is kept whether or not there
+ * is anything in it.
+ */
 
 const ICON_FALLBACK = 'circle';
 
@@ -91,9 +105,9 @@ export default function ResultsMenu({
   current?: string | null;
   onOpenSection: (id: string) => void;
   /**
-   * How much room a band takes. The landing page is the whole screen and can
-   * afford presence; the dropdown is over a page someone is reading and should
-   * not cover all of it.
+   * How much room a row takes. The landing page is the whole screen and can
+   * afford air; the dropdown is over a page someone is reading and should not
+   * cover all of it.
    */
   density?: 'page' | 'sheet';
 }) {
@@ -104,124 +118,143 @@ export default function ResultsMenu({
   const [open, setOpen] = useState<string | null>(groupHolding(current));
 
   const big = density === 'page';
-  const bandPad = big ? Spacing.lg : Spacing.md;
-  const titleSize = big ? 22 : 18;
 
   return (
     <ScrollView
-      /* No bottom inset of its own. The landing page sits inside a PageTile
-         now, and the tile is what keeps the last band clear of the tab bar;
-         a second clearance here is a strip of empty tile under the list. */
+      /* No bottom inset of its own: on the landing page the tile provides the
+         clearance, and in the dropdown the sheet does. */
       contentContainerStyle={{ paddingBottom: 0 }}
       showsVerticalScrollIndicator={false}>
       {groups.map((g, i) => {
         const color = g.color || AccentFallback;
-        /**
-         * ── WHY EACH BAND IS A LITTLE DARKER THAN THE ONE ABOVE ────────────
-         * The server gives seven groups five colours: Highlights and Couple
-         * Type are both the brand orange, Expectations and Relationship
-         * Reflection are both the brand blue. Stacked edge to edge, two
-         * neighbours sharing a colour are one band with two labels in it, and
-         * the reader has no way to see that the second is a separate thing.
-         *
-         * A veil rather than a second set of hexes: the brand colours stay
-         * exactly what the website paints, and the step down the stack is the
-         * same shape as the reference Ellie sent, which is one colour walking
-         * darker as it goes.
-         */
-        const step = `rgba(0,0,0,${(i * 0.055).toFixed(3)})`;
         const isOpen = open === g.id;
         const kids = g.children || [];
         const holdsCurrent = g.id === current || kids.some((ch) => ch.id === current);
+        const icon = GROUP_ICON[g.id];
 
         return (
           <View key={g.id}>
-            {/* ── THE BAND ──────────────────────────────────────────────
-                Its own colour, edge to edge, with the label in Playfair over
-                it. Not an eyebrow: the sections are the largest thing on this
-                screen because choosing one is the only thing to do on it. */}
+            {/* ── A ROW, NOT A BAND ──────────────────────────────────────
+                Ellie, having asked for the coloured blocks and then seen them:
+                "The colors on the insights landing page are so ugly. Can we
+                adjust these in some way to be softer/stylized/tints rather
+                than full color blocks? I want this to feel attune branded,
+                right now it feels juvenile." And: "The more I think about it,
+                the more I envision the landing page being more of a TOC that
+                doesn't have such harsh colors."
+
+                So the colour left the ground and went into the icon, which is
+                what she suggested herself: "the tiles on landing page should
+                just be shaded lightly with the attune gradient but the icon
+                should match the color of the exercise". The row is cream with
+                a hairline under it and a breath of the section's colour at the
+                left edge; the section is named in the same ink as everything
+                else on the page. */}
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ expanded: kids.length ? isOpen : undefined }}
               accessibilityLabel={g.label}
               onPress={() => {
                 // A group with no pages of its own is not a folder. Opening it
-                // would show an empty band, so it just goes there.
+                // would show an empty row, so it just goes there.
                 if (!kids.length) { onOpenSection(g.id); return; }
                 setOpen(isOpen ? null : g.id);
               }}
               style={{
-                backgroundColor: color,
-                paddingVertical: isOpen ? bandPad * 0.8 : bandPad,
+                paddingVertical: big ? Spacing.lg : Spacing.md,
                 paddingHorizontal: Spacing.xl,
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
+                borderTopWidth: i === 0 ? 0 : 1,
+                borderTopColor: c.border,
+                backgroundColor: isOpen ? withAlpha(color, 0.05) : 'transparent',
               }}>
-              <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: step }]} />
-              <SymbolView
-                name={(GROUP_ICON[g.id] || ICON_FALLBACK) as never}
-                size={big ? 24 : 19}
-                tintColor={Palette.white}
-                fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: Palette.white }} />}
-                style={{ width: big ? 28 : 22, height: big ? 28 : 22 }}
+              {/* The brand wash: the section's own colour at five per cent,
+                  fading out across the row. A tint, not a block. */}
+              <LinearGradient
+                pointerEvents="none"
+                colors={[withAlpha(color, 0.14), withAlpha(color, 0)]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
               />
+              {/* ── ONLY THE EXERCISES CARRY AN ICON ─────────────────────
+                  Ellie: "Maybe only the exercises have icons?" Highlights,
+                  Couple Type and What Comes Next are ways of reading the
+                  results rather than things you answered, and a glyph on them
+                  claimed a parity they do not have. Where there is no icon the
+                  label still lines up, because the space is kept. */}
+              <View style={{ width: big ? 26 : 22, alignItems: 'center' }}>
+                {icon ? (
+                  <SymbolView
+                    name={icon as never}
+                    size={big ? 22 : 18}
+                    tintColor={color}
+                    fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />}
+                    style={{ width: big ? 24 : 20, height: big ? 24 : 20 }}
+                  />
+                ) : null}
+              </View>
+              {/* ── NOT A HERO ───────────────────────────────────────────
+                  Ellie: "Landing page shouldn't all be in the hero text, it
+                  feels too loud/bold", and "Text should be slightly smaller so
+                  that nothing trails off". Physical Intimacy Expectations is
+                  the longest label in the product and it now fits on one line
+                  on the narrowest phone this app supports. */}
               <Text
                 numberOfLines={1}
                 style={{
-                  ...Type.title, fontSize: titleSize, lineHeight: Math.ceil(titleSize * 1.41),
-                  color: Palette.white, flex: 1,
+                  ...Type.cardTitle,
+                  fontFamily: Fonts.display,
+                  fontSize: big ? 17 : 15,
+                  lineHeight: Math.ceil((big ? 17 : 15) * 1.41),
+                  color: c.textStrong,
+                  flex: 1,
                 }}>
                 {g.label}
               </Text>
-              {/* A dot rather than a tick: it says "you are in here" without
-                  claiming the section is finished. */}
               {holdsCurrent && !isOpen ? (
-                <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: Palette.white }} />
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: color }} />
               ) : null}
+              {/* Ellie: "Make dropdown arrows in hamburger nav larger." */}
               {kids.length ? (
-                <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: big ? 15 : 13 }}>
-                  {isOpen ? '▴' : '▾'}
+                <Text style={{ color: c.textMuted, fontSize: big ? 18 : 17, lineHeight: 22 }}>
+                  {isOpen ? '\u25B4' : '\u25BE'}
                 </Text>
               ) : null}
             </Pressable>
 
-            {/* ── THE PAGES INSIDE IT ───────────────────────────────────
-                On the band's own colour, darkened by a veil rather than by a
-                second hex, so a section that changes colour on the website
-                changes here in one place and its rows follow. */}
+            {/* The pages inside it, indented under the label they belong to. */}
             {isOpen && kids.length ? (
-              <View style={{ backgroundColor: color }}>
-                <View style={{ backgroundColor: step }}>
-                <View style={{ backgroundColor: 'rgba(0,0,0,0.22)' }}>
-                  {kids.map((ch) => {
-                    const on = ch.id === current;
-                    return (
-                      <Pressable
-                        key={ch.id}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: on }}
-                        onPress={() => onOpenSection(ch.id)}
+              <View style={{ backgroundColor: withAlpha(color, 0.05) }}>
+                {kids.map((ch) => {
+                  const on = ch.id === current;
+                  return (
+                    <Pressable
+                      key={ch.id}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                      onPress={() => onOpenSection(ch.id)}
+                      style={{
+                        flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+                        paddingVertical: big ? Spacing.md : Spacing.sm + 2,
+                        paddingLeft: Spacing.xl + (big ? 26 : 22) + Spacing.lg,
+                        paddingRight: Spacing.xl,
+                        borderTopWidth: 1, borderTopColor: c.border,
+                      }}>
+                      <Text
+                        numberOfLines={1}
                         style={{
-                          flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                          paddingVertical: big ? Spacing.md + 2 : Spacing.md,
-                          paddingLeft: Spacing.xl + (big ? 28 : 22) + Spacing.lg,
-                          paddingRight: Spacing.xl,
+                          ...Type.small,
+                          fontWeight: on ? '700' : '400',
+                          color: on ? color : c.text,
+                          flex: 1,
                         }}>
-                        <Text
-                          numberOfLines={1}
-                          style={{
-                            ...Type.body,
-                            fontWeight: on ? '700' : '400',
-                            color: on ? Palette.white : 'rgba(255,255,255,0.86)',
-                            flex: 1,
-                          }}>
-                          {ch.label}
-                        </Text>
-                        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15 }}>{'›'}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                </View>
+                        {ch.label}
+                      </Text>
+                      <Text style={{ color: c.textMuted, fontSize: 14 }}>{'\u203A'}</Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             ) : null}
           </View>

@@ -38,6 +38,7 @@ import type {
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import ResultsMenu from '@/components/results-menu';
+import EdgeFadedRow from '@/components/edge-faded-row';
 import GhostTile from '@/components/ghost-tile';
 import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
@@ -105,16 +106,44 @@ function StepCount({ step, onDark }: {
   return (
     // not markable: a position indicator, not a finding. A mark anchored to
     // "2/3" would follow the number rather than the page.
+    /* Ellie: "Detailed page count (1/3) should be in the top right not top
+       left. Make sure that's where it lives for all detailed pages across all
+       exercises." Right-aligned in its own full-width row, so it sits in the
+       tile's corner whatever the title under it does. */
     <Text
       style={{
         ...Type.eyebrow,
         color: onDark ? 'rgba(255,255,255,0.55)' : c.textMuted,
+        textAlign: 'right',
         marginBottom: Spacing.sm,
       }}>
       {`${step.index}/${step.total}`}
     </Text>
   );
 }
+
+/**
+ * How wide the hamburger's dropdown is.
+ *
+ * Ellie asked for it narrower than the page. Wide enough for the longest
+ * section name the product has, which is Physical Intimacy Expectations, and
+ * no wider.
+ */
+const MENU_WIDTH = 268;
+
+/**
+ * Ink on a coloured ground, in one place.
+ *
+ * The theme already names these; this is the shorthand the dark pages use, so
+ * putting a page on a gradient is a rename rather than an invention. A page on
+ * a gradient must not reach for c.text: that is the cream page's ink, and on a
+ * green it is a smudge.
+ */
+const INK = c.onDark;
+const INK_QUIET = c.onDarkMuted;
+/** A panel on a coloured ground, and its edge. */
+const PANEL = 'rgba(255,255,255,0.10)';
+const PANEL_EDGE = 'rgba(255,255,255,0.22)';
 
 /** How big the floating page arrows are. */
 const ARROW = 46;
@@ -348,8 +377,12 @@ export default function Results({
    */
   const burger = useRef<View | null>(null);
   const [dropTop, setDropTop] = useState(0);
+  const [dropLeft, setDropLeft] = useState<number>(Spacing.xl);
   const openNav = () => {
-    burger.current?.measureInWindow((_x, y, _w, h) => setDropTop(y + h + Spacing.sm));
+    burger.current?.measureInWindow((x, y, _w, h) => {
+      setDropTop(y + h + Spacing.sm);
+      setDropLeft(x);
+    });
     setNavOpen(true);
   };
 
@@ -427,6 +460,16 @@ export default function Results({
    * Ellie is asking to have back; counting the overview as one of them would
    * turn every section's 1/3 into 2/4.
    */
+  /**
+   * Whether the section line uses short names.
+   *
+   * "Abbreviate appropriately based on how many exercises a user has
+   * purchased." A core package has five sections and their full names fit; a
+   * premium one has eight and they do not. All or none, because a line mixing
+   * "Expectations" with "Rel. Refl." reads as a typo rather than as a choice.
+   */
+  const shortNav = groups.length > 5;
+
   const step = (() => {
     const kids = (activeGroup?.children || []).filter((ch) => !ch.glance);
     const i = kids.findIndex((ch) => ch.id === section);
@@ -617,7 +660,11 @@ export default function Results({
           opens with its own title, in Playfair, two lines below this. The
           breadcrumb said the same thing smaller, above it, which is a heading
           printed twice. The hamburger is the only thing that row was for. */}
-      <View style={{ paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md }}>
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+          paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md,
+        }}>
         <Pressable
           ref={burger}
           accessibilityRole="button"
@@ -638,6 +685,51 @@ export default function Results({
             style={{ width: 18, height: 18 }}
           />
         </Pressable>
+
+        {/* ── THE SECTIONS, IN ONE LINE ──────────────────────────────────
+            Ellie: "Please add a line above the content tile in insights that
+            shows the main sections of the nav in light grey text separated by
+            a bullet point, and puts the section you're currently on in orange
+            font. Abbreviate appropriately based on how many exercises a user
+            has purchased. Make that nav line intuitive, if I click on another
+            section I should be brought to that section's at a glance page."
+
+            The abbreviation is the server's `shortLabel`, which exists for
+            exactly this and was written when the chips needed it. Which names
+            are short and which are full is decided by how many sections this
+            couple has: at five or fewer there is room for the whole name, and
+            past that every one of them shortens together, because a row where
+            two are abbreviated and three are not reads as a mistake. */}
+        <EdgeFadedRow ground={Palette.warm} gap={0} contentContainerStyle={{ alignItems: 'center' }}>
+          {groups.map((g, i) => {
+            const on = g.id === activeGroup?.id;
+            return (
+              <View key={g.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {i > 0 ? (
+                  <Text style={{ ...Type.small, fontSize: 11, color: c.border }}>{'  \u2022  '}</Text>
+                ) : null}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  accessibilityLabel={g.label}
+                  hitSlop={8}
+                  /* Straight to the section's overview, which is its first
+                     page, or to the section itself when it has no pages. */
+                  onPress={() => rememberSection(g.children?.length ? g.children[0].id : g.id)}>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      ...Type.small, fontSize: 11,
+                      fontWeight: on ? '700' : '400',
+                      color: on ? c.accent : c.textMuted,
+                    }}>
+                    {shortNav ? (g.shortLabel || g.label) : g.label}
+                  </Text>
+                </Pressable>
+              </View>
+            );
+          })}
+        </EdgeFadedRow>
       </View>
 
       <View style={{ flex: 1 }}>
@@ -783,13 +875,26 @@ export default function Results({
                 is sits under it, not over it. So the top row landed behind the
                 clock and the Dynamic Island. The number is read where it is
                 known, in the screen, and carried in. */}
+            {/* ── NARROW, AND OFF THE ICON ────────────────────────────────
+                Ellie: "Make hamburger nav narrower and dropdown from the
+                hamburger icon, not spreading the full width of the page."
+
+                So it is pinned to the left, the width of a menu rather than
+                the width of the screen, with its top left corner under the
+                button that opened it. `dropLeft` is measured with `dropTop`
+                from the same call, for the same reason: a Modal is its own
+                window and cannot ask where anything is. */}
             <Pressable
               onPress={() => {}}
               style={{
-                marginHorizontal: Spacing.lg,
-                marginTop: dropTop,
-                borderRadius: Radius.xl, overflow: 'hidden',
-                flexShrink: 1,
+                position: 'absolute',
+                left: dropLeft,
+                top: dropTop,
+                width: MENU_WIDTH,
+                borderRadius: Radius.lg, overflow: 'hidden',
+                backgroundColor: c.surface,
+                borderWidth: 1, borderColor: c.border,
+                maxHeight: '74%',
               }}>
               <ResultsMenu
                 groups={groups}
@@ -889,7 +994,7 @@ function SectionBody({
     return (
       <CoupleType
         results={results} you={you} them={them}
-        title={pageCopy('coupleTypeTitle', `${you} and ${them}'s unique relationship dynamic`)}
+        title={pageCopy('coupleTypeTitle', `${you} and ${them}'s relationship dynamic`)}
       />
     );
   }
@@ -966,8 +1071,8 @@ function SectionBody({
   }
 
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} />;
-  if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} step={step} />;
-  if (section === 'reflection-story') return <ReflectionStory data={reflection} step={step} />;
+  if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} step={step} ground={ground} groundStops={groundStops} />;
+  if (section === 'reflection-story') return <ReflectionStory data={reflection} step={step} ground={ground} groundStops={groundStops} />;
   // The reflection action plan had a page of its own on both surfaces. Ellie
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
@@ -2097,9 +2202,14 @@ function ReflectionHead({ page }: { page?: { title: string; sub?: string } | nul
   );
 }
 
-function ReflectionRatings({ data, step = null }: {
+function ReflectionRatings({ data, step = null, ground = null, groundStops = null }: {
   data: ReflectionResults | null;
   step?: { index: number; total: number } | null;
+  /* Ellie: "Rel Relf detailed pages can't be cream tiles. Match them to
+     exercise please." The section's own ground, from the nav, which is the
+     one its overview page is already painted with. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
 }) {
   if (!data) return <ReflectionWaiting />;
   if (!data.ratings.length) {
@@ -2119,7 +2229,7 @@ function ReflectionRatings({ data, step = null }: {
   const rest = data.ratings.filter((r) => r.key !== 'a0');
 
   return (
-    <PageTile>
+    <PageTile ground={ground} locations={groundStops}>
         <StepCount step={step} />
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
@@ -2160,16 +2270,16 @@ function ReflectionRatings({ data, step = null }: {
                 <View
                   key={x.from}
                   style={{
-                    flex: 1, backgroundColor: c.surface,
-                    borderColor: c.border, borderWidth: 1,
+                    flex: 1, backgroundColor: PANEL,
+                    borderColor: PANEL_EDGE, borderWidth: 1,
                     borderTopColor: x.col, borderTopWidth: 3,
                     borderRadius: Radius.lg, padding: Spacing.lg,
                   }}>
                   <Text style={{ ...Type.eyebrow, fontSize: 9, color: x.col, marginBottom: Spacing.xs }}>
                     {x.from} admires
                   </Text>
-                  <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{x.val}</Text>
-                  <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>in {x.about}</Text>
+                  <Text style={{ ...Type.cardTitle, color: Palette.white }}>{x.val}</Text>
+                  <Text style={{ ...Type.small, color: INK_QUIET, marginTop: 2 }}>in {x.about}</Text>
                 </View>
               ))}
             </View>
@@ -2379,9 +2489,14 @@ function DotLabel({ pct, text, color }: { pct: number; text: string; color: stri
  * paragraphs on a phone is four words a line. Whose words they are is said
  * above each one.
  */
-function ReflectionStory({ data, step = null }: {
+function ReflectionStory({ data, step = null, ground = null, groundStops = null }: {
   data: ReflectionResults | null;
   step?: { index: number; total: number } | null;
+  /* Ellie: "Rel Relf detailed pages can't be cream tiles. Match them to
+     exercise please." The section's own ground, from the nav, which is the
+     one its overview page is already painted with. */
+  ground?: string[] | null;
+  groundStops?: number[] | null;
 }) {
   if (!data) return <ReflectionWaiting />;
   if (!data.written.length) {
@@ -2404,7 +2519,7 @@ function ReflectionStory({ data, step = null }: {
    */
   const label = data.promptLabel || 'Talk about it';
   return (
-    <PageTile>
+    <PageTile ground={ground} locations={groundStops}>
         <StepCount step={step} />
         <ReflectionHead page={data.pages?.story} />
 
@@ -2433,11 +2548,11 @@ function ReflectionStory({ data, step = null }: {
                 <View
                   key={w.key}
                   style={{
-                    backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                    backgroundColor: PANEL, borderColor: PANEL_EDGE, borderWidth: 1,
                     borderRadius: Radius.lg, marginBottom: Spacing.md, overflow: 'hidden',
                   }}>
-                  <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: Palette.warm, borderBottomColor: c.border, borderBottomWidth: 1 }}>
-                    <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{w.question}</Text>
+                  <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: Palette.warm, borderBottomColor: PANEL_EDGE, borderBottomWidth: 1 }}>
+                    <Text style={{ ...Type.cardTitle, color: Palette.white }}>{w.question}</Text>
                   </View>
 
                   {[
@@ -2448,12 +2563,12 @@ function ReflectionStory({ data, step = null }: {
                       key={side.name}
                       style={{
                         paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                        borderBottomColor: c.border, borderBottomWidth: i === 0 ? 1 : 0,
+                        borderBottomColor: PANEL_EDGE, borderBottomWidth: i === 0 ? 1 : 0,
                       }}>
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: side.col, marginBottom: Spacing.xs }}>
                         {side.name}
                       </Text>
-                      <Prose style={{ ...Type.body, color: c.text, fontStyle: 'italic', lineHeight: 24 }}>
+                      <Prose style={{ ...Type.body, color: INK, fontStyle: 'italic', lineHeight: 24 }}>
                         {`"${side.words}"`}
                       </Prose>
                     </View>
@@ -2470,12 +2585,12 @@ function ReflectionStory({ data, step = null }: {
                       style={{
                         flexDirection: 'row', gap: Spacing.sm,
                         paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                        backgroundColor: Palette.warm, borderTopColor: c.border, borderTopWidth: 1,
+                        backgroundColor: Palette.warm, borderTopColor: PANEL_EDGE, borderTopWidth: 1,
                       }}>
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: YOU_COLOR, marginTop: 2 }}>
                         {label}
                       </Text>
-                      <Text style={{ ...Type.small, color: c.text, flex: 1, lineHeight: 20 }}>
+                      <Text style={{ ...Type.small, color: INK, flex: 1, lineHeight: 20 }}>
                         {w.prompt}
                       </Text>
                     </View>
@@ -2709,7 +2824,9 @@ function WhatComesNext({
        listed them all open with a paragraph under each title, which is three
        screens of scrolling for a page whose job is to gather things up. */
     <PageTile>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>What to do with all of this.</Text>
+        {/* Ellie: "Change hero for what comes next action page to 'What comes
+            next' on app and site." */}
+        <Text style={{ ...Type.hero, color: c.textStrong }}>What comes next</Text>
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.lg, lineHeight: 20 }}>
           Each part of your results ends in something to do. They are gathered here,
           grouped by where they came from. Open one to see its items and the words to

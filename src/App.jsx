@@ -81,6 +81,16 @@ import { PKG_CAPS, ORDER_SELECT, computeEntitlements, mergeEntitlementsGrantOnly
 import { OAUTH_PROVIDERS } from "../api/_lib/auth-providers.js";
 import { resultsGate } from "../api/_lib/results-gate.js";
 import { availableSections as availableResultsSections, PAGE_TITLES as SC_TITLES, PAGE_COPY as SC_COPY } from "../api/_lib/results-sections.js";
+/**
+ * Notes, on the website, against the real endpoint.
+ *
+ * Ellie: "Need the note functionality and page built into the website
+ * interface." The page that was here kept a notebook in localStorage while
+ * /api/notes carried the real ones, so a mark made on a phone was invisible on
+ * a laptop and the other way round. See src/notes-web.jsx.
+ */
+import { NotesView as ConnectedNotesView, ResultsMarkingLayer, notesApi } from "./notes-web.jsx";
+import { RESULTS_SECTION_LABELS } from "../api/_lib/results-sections.js";
 // The reflection question set, moved out of this file so the app can reach
 // it too. See api/_anniversary-questions.js.
 import {
@@ -3492,7 +3502,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // -- SIDE NAV ITEMS --
   // Group ordered dims by domain for sidebar display
   const personalityNavItems = [
-    { label: "Results at a glance", step: 0 },
+    { label: "Overview", step: 0 },
     { label: "Detailed results", step: "detail-section", isSection: true },
     ...detailDomains.map((domain, i) => ({ label: domain.label, step: i + 1, isChild: true, italic: true, color: domain.color })),
   ];
@@ -3868,7 +3878,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
 
   // ── Nav items ─────────────────────────────────────────────────────────────────
   const expectationsNavItems = [
-    { label: "Results at a glance", step: 0 },
+    { label: "Overview", step: 0 },
     { label: "Detailed results", step: "detail-section", isSection: true },
     ...FIXED_CATS.map((fc, i) => ({
       label: fc.label, step: `convo-${i}`, isChild: true, italic: true,
@@ -6324,7 +6334,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     {
       id: "comm", label: "Communication", shortLabel: "Comms", icon: "◉", color: "#9B5DE5",
       children: [
-        { id: "comm-overview", label: "Results at a glance" },
+        { id: "comm-overview", label: "Overview" },
         { id: "comm-detail-header", label: "Detailed results", isDomainHeader: true, color: "#9B5DE5" },
         ...UR_DOMAINS.map(g => ({ id: `comm-${g.id}`, label: g.label, isDeepChild: true, italic: true, color: g.color })),
       ]
@@ -6332,7 +6342,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     {
       id: "exp", label: "Expectations", icon: "◉", color: "#1B5FE8",
       children: [
-        { id: "exp-overview", label: "Results at a glance" },
+        { id: "exp-overview", label: "Overview" },
         { id: "exp-detail-header", label: "Detailed results", isDomainHeader: true, color: "#10B981" },
         ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
       ]
@@ -6340,7 +6350,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...(hasAnniversary ? [{
       id: "reflection", label: "Relationship Reflection", shortLabel: "Refl.", icon: "◉", color: "#1B5FE8",
       children: [
-        { id: "reflection-overview", label: "Results at a glance" },
+        { id: "reflection-overview", label: "Overview" },
         { id: "reflection-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
         { id: "reflection-ratings", label: "How You Each Rated", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "reflection-story", label: "Side by Side", isDeepChild: true, italic: true, color: "#1B5FE8" },
@@ -6349,7 +6359,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     ...(intimacyBothDone ? [{
       id: "intimacy", label: "Physical Intimacy", shortLabel: "Intimacy", icon: "◉", color: "#B5546E",
       children: [
-        { id: "intimacy-overview", label: "Results at a glance" },
+        { id: "intimacy-overview", label: "Overview" },
         { id: "intimacy-detail-header", label: "Detailed results", isDomainHeader: true, color: "#B5546E" },
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, italic: true, color: "#B5546E" })),
       ]
@@ -6358,7 +6368,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       id: "conflict", label: "Conflict Patterns", shortLabel: "Conflict", icon: "\u25C9", color: "#1B5FE8",
       locked: !conflictBothDone,
       children: [
-        { id: "conflict-overview", label: "Results at a glance" },
+        { id: "conflict-overview", label: "Overview" },
         { id: "conflict-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
         { id: "conflict-snapshot", label: "Your Conflict Snapshot", isDeepChild: true, italic: true, color: "#1B5FE8" },
         { id: "conflict-patterns", label: "Your Patterns", isDeepChild: true, italic: true, color: "#1B5FE8" },
@@ -7947,7 +7957,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     return (
       <Layout accent="#E8673A" noPrevNext={true}>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What to do with all of this.</h2>
+          <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What comes next</h2>
 
           {/* ── ACTION ITEMS — one dropdown per exercise the couple has ── */}
           {(() => {
@@ -11637,6 +11647,23 @@ export default function App() {
   // device was last on, and it skips the highlights reel, which would
   // otherwise swallow the link on a first open and drop the reader on card one.
   const _deepSection = params.get('s') || null;
+  /**
+   * The reader's own marks, for painting back onto the results.
+   *
+   * Loaded once when the results are first opened rather than on every render:
+   * they change only when someone makes one, and this page is long.
+   */
+  const [webMarks, setWebMarks] = useState([]);
+  useEffect(() => {
+    if (view !== "results" || !isLoggedIn) return;
+    let cancelled = false;
+    notesApi.list().then((r) => {
+      if (cancelled || !r.ok) return;
+      setWebMarks(r.data.annotations || []);
+    });
+    return () => { cancelled = true; };
+  }, [view, isLoggedIn]);
+
   const [activeResult, setActiveResult] = useState(
     (initialView === 'results' && _deepSection) ? _migrateResult(_deepSection)
       : (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? _secMap[_demoSec]
@@ -14489,7 +14516,7 @@ export default function App() {
             {ex1Answers
               ? <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Communication styles exercise complete</p>
+                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Communication Styles exercise complete</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#4CAF50", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your communication profile is mapped</p>
                   {/* Body copy prioritizes the next concrete action:
                       - If they haven't done Ex2 → tell them that's next
@@ -14861,7 +14888,13 @@ export default function App() {
 
         {/* ── OUR NOTES ── */}
         {view === "notes" && (
-          <NotesView userName={userName} partnerName={partnerName} notesState={notesState} setNotesState={setNotesState} onBack={() => setView("home")} />
+          <ConnectedNotesView
+            userName={userName}
+            partnerName={partnerName}
+            sectionLabels={RESULTS_SECTION_LABELS}
+            onOpenSection={(id) => { setActiveResult(id); setView("results"); }}
+            onBack={() => setView("home")}
+          />
         )}
 
     
@@ -15425,6 +15458,17 @@ export default function App() {
       />
     )}
     {view === "results" && bothDone && highlightsSeen && (
+          /* ── SELECT A SENTENCE AND MARK IT ─────────────────────────────
+             The same five actions the app offers, writing the same anchors, so
+             a mark made on a laptop opens on the phone. The layer is
+             display:contents, so it changes nothing about this panel's
+             layout. See src/notes-web.jsx. */
+          <ResultsMarkingLayer
+            section={activeResult}
+            partnerName={partnerName}
+            marks={webMarks}
+            onSaved={(n) => setWebMarks((prev) => [n, ...prev])}
+            enabled={!isDemo}>
           <div style={{ position: "fixed", top: 56, left: 0, right: 0, bottom: 60, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 50, background: C.warm, paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div style={{ background: "rgba(255,253,249,0.97)", backdropFilter: "blur(12px)", borderBottom: ("1px solid " + (C.stone)), padding: isMobile ? "0.75rem 1rem" : "0.9rem 1.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               {/* Hidden in demo: there is no account, so the dashboard renders
@@ -15443,7 +15487,7 @@ export default function App() {
               let subnav = [];
               if (inRefl) {
                 subnav = [
-                  { label: "Results at a glance", id: "reflection-overview" },
+                  { label: "Overview", id: "reflection-overview" },
                   { label: "How You Each Rated", id: "reflection-ratings" },
                   { label: "Side by Side", id: "reflection-story" },
                               ];
@@ -15453,19 +15497,19 @@ export default function App() {
                 // tab but Overview landed back on Overview. The strip scrolls,
                 // so it mirrors the desktop sidebar rather than abbreviating.
                 subnav = [
-                  { label: "Results at a glance", id: "comm-overview" },
+                  { label: "Overview", id: "comm-overview" },
                   { label: "Internal Processing", id: "comm-inner" },
                   { label: "How You Connect", id: "comm-connection" },
                   { label: "When Things Get Hard", id: "comm-hard" },
                 ];
               } else if (inExp) {
                 subnav = [
-                  { label: "Results at a glance", id: "exp-overview" },
+                  { label: "Overview", id: "exp-overview" },
                   ...FIXED_CATS.map((fc, ci) => ({ label: fc.label, id: `exp-convo-${ci}` })),
                 ];
               } else if (inIntim) {
                 subnav = [
-                  { label: "Results at a glance", id: "intimacy-overview" },
+                  { label: "Overview", id: "intimacy-overview" },
                   ...INTIMACY_DIMENSIONS.map(d => ({ label: d.label, id: `intimacy-${d.id}` })),
                 ];
               }
@@ -15580,6 +15624,7 @@ export default function App() {
               </div>
             </div>
           </div>
+          </ResultsMarkingLayer>
         )}
         {/* Footer peek strip — visible below results pane when in results view */}
         {view === "results" && bothDone && highlightsSeen && (

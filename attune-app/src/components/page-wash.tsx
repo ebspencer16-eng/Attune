@@ -23,7 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Palette } from '@/constants/attune-theme';
 
 /** #RRGGBB to rgba, so a tint can be given an opacity without a second constant. */
-function withAlpha(hex: string, alpha: number) {
+export function withAlpha(hex: string, alpha: number) {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
   if (!m) return hex;
   const n = parseInt(m[1], 16);

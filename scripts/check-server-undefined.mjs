@@ -92,6 +92,9 @@ const GLOBALS = new Set([
   'window', 'document', 'navigator', 'location', 'history', 'localStorage',
   'sessionStorage', 'alert', 'confirm', 'prompt', 'getComputedStyle', 'Image',
   'Option', 'Node', 'Element', 'HTMLElement', 'MutationObserver', 'Chart',
+  // NodeFilter: the constants document.createTreeWalker takes. Used by
+  // src/notes-web.jsx to walk the results for the text a mark sits on.
+  'NodeFilter', 'Range', 'Selection',
   'IntersectionObserver', 'ResizeObserver', 'requestAnimationFrame',
   'cancelAnimationFrame', 'matchMedia', 'screen', 'frames', 'parent', 'top',
   'self', 'XMLHttpRequest', 'WebSocket', 'CSS', 'DOMParser', 'Stripe',

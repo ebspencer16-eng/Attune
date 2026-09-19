@@ -74,7 +74,8 @@ export const EXERCISES = [
      * fit it. Anything without one falls back to label, so this is a field to
      * fill in when a name needs more room, not a field to keep in step.
      */
-    fullLabel: 'Communication styles',
+    // Ellie: "Styles should be capitalized in communication styles."
+    fullLabel: 'Communication Styles',
     column: 'ex1_answers', shape: 'answers',
     localKey: 'attune_ex1', progressKey: 'attune_ex1_progress',
     view: 'exercise1', capability: null, partnerField: 'ex1', selfOnly: false,

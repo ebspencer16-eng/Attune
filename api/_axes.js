@@ -51,7 +51,13 @@ export const AXES = [
  * Two paragraphs, not one string with a break in it, so each surface sets its
  * own spacing.
  */
+/**
+ * Ellie: "replace the two paragraphs under the couple map on the couple type
+ * page with one line: 'Placement calculated based on 10 dimension scores.'"
+ *
+ * Still a list rather than a string, because both surfaces iterate it and a
+ * second line is a line she may want back.
+ */
 export const MAP_CAPTION = [
-  'Where you each sit on this map is calculated from your responses. Scores for Conflict, Repair, and Stress determine placement on the Engage/Withdraw axis, and Expression, Feedback, and Needs scores determine placement on the Open/Guarded axis.',
-  'Two people who think they know their type will almost always land somewhere different than expected.',
+  'Placement calculated based on 10 dimension scores.',
 ];

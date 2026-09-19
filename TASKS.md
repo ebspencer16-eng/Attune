@@ -40,14 +40,16 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
+**Nothing waiting.** 072 is run.
+
 | # | Migration |
 |--|--|
-| M73 | **072_post_images_and_keywords.sql.** Two columns on posts for the Learn tab: `hero_image`, the illustration a card shows, and `keywords`, the words a reader might type that are not in the title. Both optional, so nothing changes until a post uses them. The search works today off titles, standfirsts, shelves and tags; keywords are what makes it find "in-laws" in a piece that says "extended family". |
 
 ### Decide these
 
 | # | Decision |
 |--|--|
+| O238 | **The "What It Is For" scale is labelled with an axis it does not measure. This one needs your words, and probably Carolina's read.** You were right to distrust it. Here is what I found. Five of the six intimacy aspects are labelled with the axis their questions run along: Frequency is "Less often / More often" and its questions ask how often; Adventurousness is "Prefers the familiar / Wants novelty" and its questions ask about novelty. What It Is For is labelled "Release and play / Closeness and connection", and its two scored questions are "when you're emotionally disconnected, physical intimacy tends to" (off the table / how we reconnect) and "what does intimacy most mean in your marriage now" (still working that out / a primary way we stay close). Neither of those measures release or play. Both run from less connection-oriented to more. So a low average means "intimacy is not where we reconnect, and I am still working out what it means", and it is drawn at the end of the track that says "Release and play". That is how your answer about reconnecting after conflict came out looking like a statement about fun. The one question that does ask about release and play is the multi-select, and it has no position on a scale, so it contributes nothing to the mark. **What I need from you:** two short pole labels for that track that describe what is actually measured. Something in the shape of "Still working it out" to "A primary way we stay close", in your words. Change the poles and the page is honest; change the questions instead and it is a scoring change, which is a bigger decision and Carolina's to weigh in on. I have not guessed at either. |
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
@@ -65,7 +67,8 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 19 September is built and sitting in section 3.
+**Nothing open.** The batch of 20 September is built and sitting in section 3.
+One thing came out of it that needs you rather than me: O238.
 
 | # | Task |
 |--|--|
@@ -90,8 +93,6 @@ any order; work through them however suits.
 | R210 | **The Insights nav, rebuilt.** A landing page of coloured bands, one per section, in the website's own colours. Opening one closes the others and lists its pages. Inside a page: a hamburger top left that drops the same menu, a line saying Section: page, and back and forward at the foot. The two rows of chips are gone. Nothing you read changed, only how you get to it. |
 | R211 | **Results are ready now opens the storycards**, and the landing page is where they end. The Insights tab on its own still opens the menu. |
 | R212 | **Home.** The tile is a pane of glass rather than a cream box, with white type and each icon in its own disc. The greeting is bigger and further from the lockup, which is what was clashing: they were both bold Playfair in white, forty points apart. |
-| R202 | **Sharing says Attune Relationships**, and the little picture is the mark with the name under it. That thumbnail is Apple's, built from the website's social image, which is a wide banner: a square thumbnail cut from the middle of a banner is a fragment of a headline. There is a square one now. It is the home page's card that changed, so a link to attune-relationships.com will preview as the lockup rather than the banner; Twitter keeps the banner. Say the word and I put it back. |
-| R203 | **The home tile is a ghost bubble.** iOS 26's own glass, so it takes its light from the blue behind it rather than being a white rectangle at twelve per cent. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
 | R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
 | R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. |
@@ -127,6 +128,8 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R203 | The home tile is a ghost bubble |
+| R202 | Sharing says Attune Relationships, with the lockup as the thumbnail |
 | R198 | "Yours to explore" is now "Resources" |
 | R199 | The third row capitalises like the other two |
 | R213 | Type is darker throughout |
@@ -135,6 +138,31 @@ receive a notification from Apple's servers.
 | R208 | A mark opens |
 | R209 | A deleted tag goes into a closed Archive |
 | R204 | The third row of the home tile capitalises |
+| O213 | **The landing is a table of contents now.** The colour left the ground and went into the icon, which is what you suggested: each row is cream with a hairline under it and a wash of its section's colour fading out across it. Nothing is a block. |
+| O214 | **The landing is not hero type.** Playfair still, a shade above body size. |
+| O215 | **Nothing trails off.** Physical Intimacy Expectations is the longest label the product has and it sits on one line on the narrowest phone. |
+| O216 | **Only the exercises carry an icon**, in the exercise's own colour. Highlights, Couple Type and What Comes Next are ways of reading results rather than things you answered, and a glyph on them made five sections read as eight equal things. Gated both ways, so the ninth icon cannot arrive and these three cannot get one back by accident. |
+| O217 | **The step count is top right**, on every detail page in every section. |
+| O218 | **The section line is above the tile.** Grey, bullet separated, the one you are on in orange, and tapping one opens that section's overview. It abbreviates when a couple has more than five sections, all of them together: a line mixing "Expectations" with "Rel. Refl." reads as a typo rather than a choice. |
+| O219 | **The dropdown arrows are larger.** |
+| O220 | **The hamburger menu is cream**, with hairline dividers and the section colours in the icons. Same component as the landing, so the two cannot drift. |
+| O221 | **It is narrow and hangs off the hamburger**, measured from the button rather than pinned to the screen. |
+| O222 | **"At a glance" is "Overview" everywhere**, and the overview pages are titled "Expectations Overview", "Communication Styles Overview" and so on. Nav and page titles, app and site. |
+| O223 | **What comes next.** Your hero, both surfaces. |
+| O224 | **"Unique" is out of the couple type hero**, both surfaces. |
+| O225 | **One line under the couple map**, yours, both surfaces. It is derived on the way out rather than stored, so it reaches couples who finished last year as well as new ones. |
+| O226 | **Your three Communication paragraphs**, in the module both surfaces read. |
+| O227 | **Communication Styles is capitalised.** |
+| O228 | **Sharing the insight says "Insight of the day".** Everything else still shares as Attune Relationships. |
+| O229 | **The margin icon costs the text nothing.** No reserved width, no disc, just the icon, sitting in the padding the tile already has. It has been outside the block, then inside it, and this is the third arrangement and the one that satisfies both things you asked for: findable on every page, and not moving a single line of type. |
+| O230 | **Relationship Reflection and Conflict Patterns detail pages are on their section's ground**, the same gradient their overview page uses, with the type flipped to read on it. |
+| O231 | **Communication counts only what it asks for.** A tile exists for all three domains whether or not there is anything to do in one, so your page said three and showed two blank rows. The count is the rows, so filtering the rows fixed both. |
+| O232 | **Relationship Reflection carries its own action plan.** It was taking one written answer and making two rows of it. It now takes the plan its overview page draws, with both of your own words underneath. |
+| O233 | **Conflict Patterns carries yours.** It was one hardcoded sentence, on the argument that the patterns are private so nothing about them should repeat. That confused two promises: they are private from your partner, not from you, and this page is built per reader. Same selection the overview makes. |
+| O234 | **The intimacy question, and what was actually wrong.** Your missing answer was a copy edit. Answers are stored as the words that were on the button, and commit 6b00d10 renamed "One of several ways" to "One of several ways we stay close", which is the option you had chosen. From that commit your answer matched nothing and your mark did not draw. Five options have been reworded since the exercise shipped and every one of them silently dropped the answers already given under the old wording. Retired wordings now resolve, and `check-answer-labels` fails the build if another edit is made without recording the old words. The lookup also existed twice, so fixing one copy left the results page still dropping it; there is one now. Separately, the multi-answer question is drawn at all for the first time. What is left is the axis, which is O238 and needs your words. |
+| O235 | **Notes on the website.** The page that was there kept a notebook in localStorage under a line that said "Saved to this device only". It reads the real endpoint now: your marks grouped by the page they sit on, what you have written, what your partner shared, your tags, sharing and delete. And you can mark results prose on a laptop: select a sentence and the same five actions the app offers appear, writing the same anchors, so a mark made on a laptop opens on the phone. Existing marks paint back onto the words. |
+| O236 | **Questions about Notes and colour**, at the foot of this document rather than in a reply, so they survive the session. Five of them, and one of them changes what the others are worth. |
+| O237 | **Three directions for the app's colour**, same place, with what each one costs. |
 | R220 | **The Insights nav, your nine.** The arrows are two chevrons in glass, fixed at the bottom corners and on the page rather than in a bar. The Section: page line is gone; the hamburger is the whole of that row now. Every page is in a tile, the landing included. The landing's colours are the exercise colours and its labels are the exercises' full names, both read from the one registry that decides what exercises exist, so the section you answer and the section you read are the same colour and the same name. Eight new icons, all outlined. And the wash behind every page is its section's colour, which is the cohesion you asked about: Expectations reads blue on all seven of its pages. |
 | R221 | **The step counts are back, on every detailed page.** Only the expectations conversations had one, counted inside that page from its own list, which is why no other section could have one. It comes from the nav now, so Communication, Physical Intimacy, Relationship Reflection and Conflict all have it at once. At-a-glance pages are not counted: 1/3 means the three detail pages, which is what it meant on the website. |
 | R222 | **The mark sheet, your five.** Quote first, then the label and the date, then the note in italics. The private toggle is the switch the note editor uses rather than a second control doing the same job in a different shape, and tagging is a tag-and-plus at the other end of that row, with the chips opening under it. The warning I could not reproduce by reading; the sheet is rebuilt, so tell me if it is still there. |
@@ -466,6 +494,91 @@ build.
 | 132.4 | We need to make sure the app pipes in the welcome back, good morning, etc. messages appropriately - it’s noon... | check-greeting-clock |
 
 ---
+
+---
+
+## Design: where I think this goes, and what I need from you
+
+You asked for thought partnership rather than another pass, so this is
+questions and options rather than a redesign. It lives here rather than in a
+reply so it survives the session.
+
+### The one thing I believe is doing most of the damage
+
+Every reference you sent has something made by a person in it. The task app has
+illustration. The food app has photography. Even the flat colour-block one has a
+drawn magnifying glass. Attune is type and gradient from the first screen to the
+last, and I think that, more than any layout, is what reads as generated.
+
+The Learn cards already accept artwork and there is none, so every card falls
+back to a tinted ground with the mark in the corner. That is the largest single
+lever available and it is not a code job.
+
+**Question 1.** Is there any budget or appetite for imagery, of any kind? It
+does not have to be photography. A set of six or eight simple drawn marks, one
+per results section, would carry the whole app. Answer this one and it changes
+what the rest of these are worth.
+
+### Questions about Notes, since that is the screen you called boring
+
+Notes is a filing cabinet: a list, a list of tags, an empty state. Every other
+tab has a subject. Notes has storage.
+
+**Question 2.** What is the Notes tab *for*, in a sentence? I can think of three
+answers and they build differently. "Everything I marked, so I can find it
+again" is a library and wants search and filtering. "What we are working on
+right now" is a worklist and wants the three most recent things and a way to
+tick one off. "A record of us paying attention to this" is a history and wants
+dates, volume, and the shape of it over time.
+
+**Question 3.** Should Notes show your partner's shared notes as prominently as
+your own, or is it your room with a letterbox in it? Right now it is the second
+and does not say so.
+
+**Question 4.** Is there anything you would want to *do* from Notes other than
+read? Turn a mark into a conversation to have. Send one to the other person with
+a question attached. Mark one as done.
+
+### Three directions I could take the app's colour, and what each costs
+
+These are alternatives, not a list to pick all of.
+
+**A. Sections own the app, not just the results.** Today the Insights pages
+carry a section's colour and nothing else does. This would mean a note about
+Expectations carries blue wherever it appears: in Notes, on the home tile, in
+Learn. The product would feel like five coloured rooms. Cost: the colours stop
+meaning "you are in this section" and start meaning "this thing is about that
+section", which is a bigger claim and harder to keep true.
+
+**B. One accent, used rarely and always for the same thing.** The opposite:
+cream, ink and the orange, with the orange reserved strictly for "this is the
+thing to do next". Sections keep colour only inside Insights. This is the
+quietest and the most confident, and it is closest to how the website reads.
+Cost: less colour, not more, which is not what you asked for.
+
+**C. Warmth rather than colour.** Keep the palette, change the surfaces: paper
+grain, a slight tint on the cream, cards with a real edge rather than a hairline,
+the display face used at larger sizes in more places. Makes the app feel printed
+instead of drawn. Cost: it is a lot of small changes and none of them will
+screenshot well on their own.
+
+**Question 5.** Which of those three is closest to what you pictured when you
+said "more color and branding"?
+
+### Two smaller things I would do regardless, if you want them
+
+- **A dark tab bar.** The light one is the most generic element on any screen,
+  and every reference you sent has a dark or high-contrast one.
+- **A segmented arc instead of a flat bar** for alignment, like the calorie
+  gauge in the food app. Same number, considerably less stock.
+
+### And one answer to a question you asked
+
+**Did we shrink the font to fit the tiles?** No. The type on every results page
+is the size it was; the tile took its width from the page's own margins, which
+were already there. The only thing that got smaller is the landing page's
+section names, which were hero-sized and are now a shade above body size,
+because you asked for that. Nothing in the results reads smaller than it did.
 
 ## How this is kept
 

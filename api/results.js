@@ -718,6 +718,21 @@ export default async function handler(req) {
       };
     })();
 
+    /* Hoisted out of the response object so whatComesNext below can be given
+       it. It was read there as a bare name, which is a ReferenceError the
+       moment the line runs; check-server-undefined caught it. */
+    const reflectionPlan = (ownership.ownsReflection && bothDone('ex3') && me.ex3_answers && partner?.ex3_answers)
+        ? deriveAnniversaryInsights(
+            me.ex3_answers, partner.ex3_answers,
+            me.name || 'You', partner?.name || 'Your partner',
+            COUPLE_TYPES.find((t) => t.id === results.coupleType) || null,
+          ).map((ins) => ({
+            title: reflectionActionTitle(ins.title, contentFor(contentVersion ?? null)),
+            body: ins.body || null,
+            action: ins.action || null,
+            tier: ins.tier || null,
+          }))
+        : null;
     return json({
       ok: true, ready: true, cached, recomputed: reason,
       // Labels are applied on the way out, not baked into the stored blob.
@@ -800,18 +815,7 @@ export default async function handler(req) {
        * are derived rather than written: each carries the evidence it rests
        * on, and one that speaks for both people needs a piece from each.
        */
-      reflectionPlan: (ownership.ownsReflection && bothDone('ex3') && me.ex3_answers && partner?.ex3_answers)
-        ? deriveAnniversaryInsights(
-            me.ex3_answers, partner.ex3_answers,
-            me.name || 'You', partner?.name || 'Your partner',
-            COUPLE_TYPES.find((t) => t.id === results.coupleType) || null,
-          ).map((ins) => ({
-            title: reflectionActionTitle(ins.title, contentFor(contentVersion ?? null)),
-            body: ins.body || null,
-            action: ins.action || null,
-            tier: ins.tier || null,
-          }))
-        : null,
+      reflectionPlan,
 
       /**
        * The highlight storycards, read in order before anything else.
@@ -860,7 +864,15 @@ export default async function handler(req) {
         expectations,
         intimacy,
         reflection,
+        /* The section's own action plan, which is what its overview page
+           draws. Without it this page made two rows out of one written answer.
+           See the note in what-comes-next.js. */
+        reflectionPlan,
         conflictReady: ownership.ownsConflict,
+        /* The reader's OWN conflict answers, so their action plan can be the
+           one their overview page shows them. Private from the partner, not
+           from the reader, and this payload is already per viewer. */
+        conflictAnswers: me?.conflict_data || null,
         names: { you: me.name || 'You', them: partner?.name || 'your partner' },
       }),
       /**

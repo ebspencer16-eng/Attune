@@ -35,6 +35,12 @@ import {
 
 const c = Colors.light;
 
+/** Ink on a coloured ground. Same three names as results.tsx uses. */
+const INK = c.onDark;
+const INK_QUIET = c.onDarkMuted;
+const PANEL = 'rgba(255,255,255,0.10)';
+const PANEL_EDGE = 'rgba(255,255,255,0.22)';
+
 /**
  * The four Conflict screens, named exactly as the server names them.
  *
@@ -152,9 +158,9 @@ export default function ConflictResultsView({
   return (
     <View style={{ flex: 1 }}>
       {screen === 'overview' ? <Glance data={data} title={title} ground={ground} groundStops={groundStops} /> : null}
-      {screen === 'snapshot' ? <Snapshot data={data} accent={accent} /> : null}
-      {screen === 'patterns' ? <Patterns you={you} content={content} /> : null}
-      {screen === 'wrote' ? <Wrote data={data} /> : null}
+      {screen === 'snapshot' ? <Snapshot data={data} accent={accent} ground={ground} groundStops={groundStops} /> : null}
+      {screen === 'patterns' ? <Patterns you={you} content={content} ground={ground} groundStops={groundStops} /> : null}
+      {screen === 'wrote' ? <Wrote data={data} ground={ground} groundStops={groundStops} /> : null}
     </View>
   );
 }
@@ -378,13 +384,16 @@ function PageHead({
 }
 
 /** Snapshot. The three shared questions, and what each of you helps with. */
-function Snapshot({ data, accent }: {
+function Snapshot({ data, accent, ground = null, groundStops = null }: {
   data: Extract<ConflictResults, { ready: true }>; accent?: string;
+  /* Ellie: "Same with conflict patterns detailed pages." The section's own
+     ground, from the nav, which its overview page already uses. */
+  ground?: string[] | null; groundStops?: number[] | null;
 }) {
   const { you, partner, names, content } = data;
 
   return (
-    <ResultsScroll contentContainerStyle={pad}>
+    <PageTile ground={ground} locations={groundStops}>
       {/* block: conflict-snapshot/head */}
       <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
       {/* ── THE SNAPSHOT IS A TABLE ──────────────────────────────────────
@@ -414,9 +423,9 @@ function Snapshot({ data, accent }: {
               style={{
                 paddingTop: i === 0 ? 0 : Spacing.lg,
                 marginTop: i === 0 ? 0 : Spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
               }}>
-              <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>{row.label}</Text>
+              <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>{row.label}</Text>
               <View style={{ flexDirection: 'row', gap: Spacing.md }}>
                 <SnapshotCell name={names.you} text={chipText(chips, mine)} own />
                 {partner ? <SnapshotCell name={names.partner} text={chipText(chips, theirs)} /> : null}
@@ -425,7 +434,7 @@ function Snapshot({ data, accent }: {
           );
         })}
         {!partner ? (
-          <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg }}>
+          <Text style={{ ...Type.small, color: INK_QUIET, marginTop: Spacing.lg }}>
             {names.partner} has not finished this yet. Their side fills in when they do.
           </Text>
         ) : null}
@@ -468,8 +477,8 @@ function Snapshot({ data, accent }: {
             The question's own text is the label, because a heading would be
             customer copy. */}
         {you.strength || partner?.strength ? (
-          <View style={{ marginTop: Spacing.lg, borderTopColor: c.border, borderTopWidth: 1, paddingTop: Spacing.lg }}>
-            <Text style={{ ...Type.small, color: c.textMuted, marginBottom: Spacing.md }}>
+          <View style={{ marginTop: Spacing.lg, borderTopColor: PANEL_EDGE, borderTopWidth: 1, paddingTop: Spacing.lg }}>
+            <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>
               {content.resetQuestion}
             </Text>
             {/* The website puts these two in the same pills as the rows
@@ -482,7 +491,7 @@ function Snapshot({ data, accent }: {
           </View>
         ) : null}
       </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
@@ -493,10 +502,14 @@ function Snapshot({ data, accent }: {
  * parameter, so there is nothing here to accidentally render.
  */
 function Patterns({
-  you, content,
-}: { you: ConflictSummary; content: Extract<ConflictResults, { ready: true }>['content'] }) {
+  you, content, ground = null, groundStops = null,
+}: {
+  you: ConflictSummary;
+  content: Extract<ConflictResults, { ready: true }>['content'];
+  ground?: string[] | null; groundStops?: number[] | null;
+}) {
   return (
-    <ResultsScroll contentContainerStyle={pad}>
+    <PageTile ground={ground} locations={groundStops}>
       {/* block: conflict-patterns/head */}
       <PageHead copy={content.copy} title={content.copy.patternsTitle} shared={false} />
       {/* The privacy line sits above the content, not below it, because someone
@@ -516,7 +529,7 @@ function Patterns({
       </Text>
 
       {content.copy.patternsIntro ? (
-        <Prose style={{ ...Type.body, color: c.textMuted, marginBottom: Spacing.lg }}>
+        <Prose style={{ ...Type.body, color: INK_QUIET, marginBottom: Spacing.lg }}>
           {content.copy.patternsIntro}
         </Prose>
       ) : null}
@@ -536,7 +549,7 @@ function Patterns({
       <View style={card}>
         {you.ranked.map((p, i) => {
           const v = p.value ?? 0;
-          const color = content.bandColors[Math.min(v, content.bandColors.length - 1)] || c.border;
+          const color = content.bandColors[Math.min(v, content.bandColors.length - 1)] || PANEL_EDGE;
           const label = content.frequencyLabels[v] || '';
           const copy = content.patternCopy[p.key] || {};
           // The band entries are objects and the label and definition are
@@ -556,11 +569,11 @@ function Patterns({
               style={{
                 paddingTop: i === 0 ? 0 : Spacing.lg,
                 marginTop: i === 0 ? 0 : Spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
               }}>
-              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{titleFor(p.key)}</Text>
+              <Text style={{ ...Type.cardTitle, color: Palette.white }}>{titleFor(p.key)}</Text>
               {definition ? (
-                <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>{definition}</Text>
+                <Text style={{ ...Type.small, color: INK_QUIET, marginTop: 2 }}>{definition}</Text>
               ) : null}
 
               {/* Frequency named above the bar, in the bar's own colour, so the
@@ -568,7 +581,7 @@ function Patterns({
               <Text style={{ ...Type.small, color, fontWeight: '700', textAlign: 'right', marginTop: Spacing.md }}>
                 {label}
               </Text>
-              <View style={{ height: 5, borderRadius: Radius.pill, backgroundColor: c.border, marginTop: Spacing.xs, overflow: 'hidden' }}>
+              <View style={{ height: 5, borderRadius: Radius.pill, backgroundColor: PANEL_EDGE, marginTop: Spacing.xs, overflow: 'hidden' }}>
                 {/* The website's fill: the band as a share of the top band,
                     with a sliver left visible at zero so the track reads as a
                     measure rather than as an empty box. The app filled a
@@ -577,7 +590,7 @@ function Patterns({
               </View>
 
               {note ? (
-                <Prose style={{ ...Type.body, color: c.text, marginTop: Spacing.md }}>{note}</Prose>
+                <Prose style={{ ...Type.body, color: INK, marginTop: Spacing.md }}>{note}</Prose>
               ) : null}
 
               {advice ? (
@@ -586,21 +599,24 @@ function Patterns({
                     {adviceLabel}
                   </Text>
                   {v >= 2 && advice.title ? (
-                    <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: 2 }}>{advice.title}</Text>
+                    <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: 2 }}>{advice.title}</Text>
                   ) : null}
-                  <Prose style={{ ...Type.body, color: c.text }}>{advice.body || ''}</Prose>
+                  <Prose style={{ ...Type.body, color: INK }}>{advice.body || ''}</Prose>
                 </View>
               ) : null}
             </View>
           );
         })}
       </View>
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
 /** What You Each Wrote. Only the questions you both answered knowing they were shared. */
-function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
+function Wrote({ data, ground = null, groundStops = null }: {
+  data: Extract<ConflictResults, { ready: true }>;
+  ground?: string[] | null; groundStops?: number[] | null;
+}) {
   const { you, partner, names, content } = data;
 
   /**
@@ -631,12 +647,12 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
 
   if (!rows.length) {
     return (
-      <ResultsScroll contentContainerStyle={pad}>
+      <PageTile ground={ground} locations={groundStops}>
         <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
-        <Text style={{ ...Type.body, color: c.textMuted }}>
+        <Text style={{ ...Type.body, color: INK_QUIET }}>
           Neither of you wrote anything on these questions.
         </Text>
-      </ResultsScroll>
+      </PageTile>
     );
   }
 
@@ -650,7 +666,7 @@ function Wrote({ data }: { data: Extract<ConflictResults, { ready: true }> }) {
           around two cream ones is a box in a box. */}
       {rows.map((r) => (
         <View key={r.label} style={{ marginBottom: Spacing.xl }}>
-          <Text style={{ ...Type.eyebrow, color: c.textMuted, marginBottom: Spacing.md }}>{r.label}</Text>
+          <Text style={{ ...Type.eyebrow, color: INK_QUIET, marginBottom: Spacing.md }}>{r.label}</Text>
           <Written name={names.you} text={r.mine} />
           <Written name={names.partner} text={r.theirs} />
         </View>

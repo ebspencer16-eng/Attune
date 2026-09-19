@@ -35,8 +35,7 @@ import {
   INTIMACY_DIMENSIONS,
   INTIMACY_QUESTIONS,
   summarizeIntimacy,
-  intimacyDimensionSkips,
-} from '../_intimacy-questions.js';
+  intimacyDimensionSkips, intimacyOption } from '../_intimacy-questions.js';
 import {
   INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT, INTIMACY_LEAD, INTIMACY_ALL_ALIGNED,
 } from '../_intimacy-results-prose.js';
@@ -125,7 +124,15 @@ function proseFor(dimensionId, state, skips) {
  */
 function positionOf(question, answer) {
   if (answer == null) return null;
-  const option = (question.options || []).find((o) => o.label === answer);
+  /**
+   * Through the registry's own lookup, not a second copy of it.
+   *
+   * This used to match on `o.label` here and nowhere else, which meant an
+   * answer given under a wording that has since been edited resolved in the
+   * scorer and not on the results page, or the other way round. One function,
+   * and it knows about retired wordings. See RETIRED_OPTION_LABELS.
+   */
+  const option = intimacyOption(question, answer);
   return option && option.value != null ? option.value : null;
 }
 
@@ -167,7 +174,7 @@ function questionPicks(dimensionId, answersMine, answersTheirs, variant) {
     const opts = q.options || [];
     return (Array.isArray(stored) ? stored : stored == null ? [] : [stored])
       .filter((v) => v != null)
-      .map((v) => opts.find((o) => o.value === v) || opts.find((o) => o.label === v))
+      .map((v) => opts.find((o) => o.value === v) || intimacyOption(q, v))
       .filter((o) => o && o.value != null)
       .map((o) => o.label);
   };

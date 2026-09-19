@@ -526,6 +526,11 @@ export default function ResourcesScreen() {
                   tone="light"
                   label="Share"
                   accessibilityLabel="Share the insight of the day"
+                  /* Ellie: "if they're sharing the insight can we have the text
+                     say insight of the day?" The subject is the product's name
+                     everywhere else, which is right for a storycard and for a
+                     link; this one is a named thing and says which. */
+                  title="Insight of the day"
                   message={`${home.research.body}\n\n${home.research.source}`}
                   url={SITE}
                 />

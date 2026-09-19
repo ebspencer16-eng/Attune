@@ -92,22 +92,27 @@ export const RESULTS_SECTIONS = [
  * These are the four that had to agree.
  */
 export const PAGE_TITLES = {
-  'comm-overview': 'Communication Styles',
+  /**
+   * Ellie: page titles "should read 'Expectations Overview' rather than just
+   * 'Expectations'". Every overview page names its section and then says which
+   * of that section's pages it is, which is what the rest of them do.
+   */
+  'comm-overview': 'Communication Styles Overview',
   /**
    * Ellie: the Physical Intimacy at-a-glance hero "should have the hero read
    * physical intimacy expectations". Both surfaces led with the couple's two
    * names there, which does not say what the page is.
    */
-  'intimacy-overview': 'Physical Intimacy Expectations',
-  'exp-overview': 'Expectations',
-  'conflict-overview': 'Conflict Styles',
+  'intimacy-overview': 'Physical Intimacy Expectations Overview',
+  'exp-overview': 'Expectations Overview',
+  'conflict-overview': 'Conflict Patterns Overview',
   'reflection-ratings': 'How you each view the relationship',
   /**
    * Ellie: the at-a-glance title "should read Relationship Reflection". It
    * led with the couple's two names, which is what every glance page used to
    * do and what the other four have stopped doing.
    */
-  'reflection-overview': 'Relationship Reflection',
+  'reflection-overview': 'Relationship Reflection Overview',
 };
 
 /**
@@ -136,7 +141,8 @@ export const PAGE_COPY = {
    * old line, "What your responses uncover about your unique relationship
    * dynamic", ran to five on a phone and said the same thing.
    */
-  coupleTypeTitle: (you, them) => `${you} and ${them}'s unique relationship dynamic`,
+  // Ellie: "remove 'unique' from hero of couple type results page".
+  coupleTypeTitle: (you, them) => `${you} and ${them}'s relationship dynamic`,
 };
 
 export const RESULTS_SECTION_LABELS = {
@@ -214,7 +220,12 @@ export function isResultsSection(key) {
  * is meant to match.
  */
 export function resultsNav({ hasReflection = false, intimacyReady = false, conflictListed = false } = {}) {
-  const AT_A_GLANCE = 'Results at a glance';
+  /**
+   * Ellie: "Change 'at a glance' to 'overview' throughout site and app nav and
+   * page titles. Page titles should read 'Expectations Overview' rather than
+   * just 'Expectations'."
+   */
+  const AT_A_GLANCE = 'Overview';
 
   /**
    * A section that is an exercise takes the exercise's name and colour.
@@ -268,6 +279,17 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     ground: groundFor(id), groundStops: groundLocations(id),
   });
 
+  /**
+   * A detail page painted with its section's own ground.
+   *
+   * Takes the overview's id rather than a colour, so a section that is
+   * repainted moves all of its pages at once and none of them can be left on
+   * last year's gradient.
+   */
+  const detail = (overviewId) => ({
+    ground: groundFor(overviewId), groundStops: groundLocations(overviewId),
+  });
+
   const groups = [
     { id: 'highlights', label: 'Highlights', color: '#E8673A' },
     { id: 'couple-type', label: 'Couple Type', color: '#E8673A' },
@@ -297,8 +319,16 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
       id: 'reflection', shortLabel: 'Rel. Refl.', ...fromExercise('ex3', 'Relationship Reflection'),
       children: [
         glance('reflection-overview'),
-        { id: 'reflection-ratings', label: 'How You Each Rated' },
-        { id: 'reflection-story', label: 'Side by Side' },
+        /**
+         * Ellie: "Rel Relf detailed pages can't be cream tiles. Match them to
+         * exercise please. Same with conflict patterns detailed pages."
+         *
+         * Their section's own ground, which is the one its overview page is
+         * already painted with. Not a new gradient: two pages of one section
+         * on two greens is the thing these grounds exist to stop.
+         */
+        { id: 'reflection-ratings', label: 'How You Each Rated', ...detail('reflection-overview') },
+        { id: 'reflection-story', label: 'Side by Side', ...detail('reflection-overview') },
       ],
     });
   }
@@ -318,9 +348,9 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
       id: 'conflict', shortLabel: 'Conflict', ...fromExercise('conflict', 'Conflict Patterns'),
       children: [
         glance('conflict-overview'),
-        { id: 'conflict-snapshot', label: 'Your Conflict Snapshot' },
-        { id: 'conflict-patterns', label: 'Your Patterns' },
-        { id: 'conflict-wrote', label: 'What You Each Wrote' },
+        { id: 'conflict-snapshot', label: 'Your Conflict Snapshot', ...detail('conflict-overview') },
+        { id: 'conflict-patterns', label: 'Your Patterns', ...detail('conflict-overview') },
+        { id: 'conflict-wrote', label: 'What You Each Wrote', ...detail('conflict-overview') },
       ],
     });
   }

@@ -331,8 +331,72 @@ export function intimacyDimensionSkips(mineAnswers, theirsAnswers) {
   return out;
 }
 
+/**
+ * Wordings that used to be on a button, and the option they belonged to.
+ *
+ * ── THE BUG THIS EXISTS FOR ───────────────────────────────────────────────
+ * Ellie, of her own Physical Intimacy results: "why don't I have a response
+ * for the second one?"
+ *
+ * Because an answer is stored as the words that were on the button, and those
+ * words have been edited. Commit 6b00d10 renamed three options, including
+ * "One of several ways" to "One of several ways we stay close", which is the
+ * option she had chosen on iq_mean_hope. From that commit on, her stored
+ * answer matched nothing, the lookup returned null, and her mark simply did
+ * not draw. No error, no warning, and a results page quietly missing half of
+ * what she said.
+ *
+ * ── WHY THIS IS THE SHAPE OF THE FIX ──────────────────────────────────────
+ * The real fix is not to store display copy as data, and that is a migration
+ * over every saved answer, which is Ellie's to run and a larger decision. This
+ * is the read-side half: an answer written under an old wording still resolves
+ * to the option it was, so nobody's results silently lose a question because a
+ * word was improved.
+ *
+ * It is keyed by question id as well as by wording, so two questions that once
+ * shared a phrase cannot resolve into each other.
+ *
+ * ── AND WHY A GATE ────────────────────────────────────────────────────────
+ * This list cannot be kept by hand. check-answer-labels.mjs holds every option
+ * label against the last committed version and fails the build if one changed
+ * without its old wording being recorded here. In a product where every word a
+ * customer reads is rewritten until it is right, that is the difference
+ * between a copy edit and a data loss.
+ */
+export const RETIRED_OPTION_LABELS = {
+  // 6b00d10, "Intimacy exercise copy: three option relabels"
+  iq_adv_balance: {
+    'Keeping it fresh matters a lot to me': 'Novelty matters more to me',
+    // b2b66d0, "reword ... adventure question to novelty vs routine"
+    'Comfort matters more to me': 'Routine matters more to me',
+    'I value the familiar strongly': 'I value the tried and true strongly',
+  },
+  iq_mean_disconnect: {
+    'Depend on the day': 'Help, depending on the day',
+  },
+  iq_mean_hope: {
+    'One of several ways': 'One of several ways we stay close',
+  },
+};
+
+/**
+ * The option a stored answer refers to, current wording or retired.
+ *
+ * Exported because api/_lib/intimacy-results.js had its own copy of this
+ * lookup, matching on `o.label` and nothing else. Two copies of one rule, and
+ * fixing the retired wordings in this one left the results page still dropping
+ * the answer, which is precisely the failure CLAUDE.md opens with.
+ */
+export function intimacyOption(q, label) {
+  return optByLabel(q, label);
+}
+
 function optByLabel(q, label) {
-  return q.options.find(o => o.label === label) || null;
+  const direct = q.options.find(o => o.label === label);
+  if (direct) return direct;
+  // The same answer, under the wording it was given under.
+  const was = RETIRED_OPTION_LABELS[q.id]?.[label];
+  return (was && q.options.find(o => o.label === was)) || null;
 }
 
 // Per-dimension slider positions (0..1) for each partner, for the results
