@@ -23,7 +23,7 @@
  */
 
 import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { scrollIntoResultsView } from '@/components/results-scroll';
 
@@ -31,6 +31,7 @@ import Annotatable, { type Mark, type MarkAction } from '@/components/annotatabl
 import { annotationColor } from '@/constants/annotations';
 import { Palette } from '@/constants/attune-theme';
 import AnnotationSheet from '@/components/annotation-sheet';
+import MarkSheet from '@/components/mark-sheet';
 import { deleteNote, type Note, type Tag } from '@/api/client';
 
 type Ctx = {
@@ -49,6 +50,17 @@ type Ctx = {
    * the selection is sitting on a mark, and this is what it calls.
    */
   remove: (mark: Mark) => void;
+  /**
+   * Open a mark that already exists.
+   *
+   * Ellie: "I want the icons to be on the right hand side and for when I click
+   * on it to see a pop up with the note, the date it was left, the toggle for
+   * shared/private, the option to tag the note, and option to delete the note."
+   *
+   * So the margin marker stopped being a sign and became a control. See
+   * components/mark-sheet.tsx for what it opens.
+   */
+  openMark: (id: string) => void;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
   /**
@@ -59,20 +71,25 @@ type Ctx = {
 };
 
 /**
- * How far into the margin the marker sits, measured from the paragraph's own
- * right edge.
+ * How much room a paragraph gives up so its marker has somewhere to sit.
  *
- * Ellie: "Icons in margin should be white to be visible and should be to the
- * right of the tile, so it shouldn't impact the tile or page spacing, it
- * should just be in what is currently blank margin."
+ * ── THIS HAS BEEN BOTH WAYS, AND THIS IS WHY IT IS BACK ───────────────────
+ * Ellie once: "Icons in margin should be white to be visible and should be to
+ * the right of the tile, so it shouldn't impact the tile or page spacing."
+ * That is what the outside placement was for, and it cost the paragraph
+ * nothing, which was the point.
  *
- * So the paragraph gives up nothing. It used to reserve this width, which
- * narrowed every paragraph carrying a note, and that was the fix for the
- * marker being clipped by a tile. The tiles that hold results prose are
- * padded panels rather than clipped ones, so the marker can sit outside the
- * block again and land on the page's own ground.
+ * Ellie again, later: "I have a note called test that I can't find... there's
+ * no icon on the page to point it out." Outside the block means inside
+ * whatever the block is in, and not every tile in the results is a padded
+ * panel. On the clipped ones the marker was simply gone.
+ *
+ * Of the two failures, a paragraph that is a few points narrower on the lines
+ * that carry a mark is the one nobody will ever report. A note you cannot find
+ * is the one she reported twice. So: inside, always, and it pays for itself in
+ * width only on paragraphs that have something to announce.
  */
-const MARGIN_OUTSIDE = 20;
+const MARKER_RESERVE = 30;
 
 /** Whether a paragraph's own colour is a light one, so the marker matches. */
 function textIsLight(style: StyleProp<TextStyle>): boolean {
@@ -85,7 +102,8 @@ function textIsLight(style: StyleProp<TextStyle>): boolean {
 }
 
 const AnnotationCtx = createContext<Ctx>({
-  marks: [], select: () => {}, remove: () => {}, enabled: false, focus: null,
+  marks: [], select: () => {}, remove: () => {}, openMark: () => {},
+  enabled: false, focus: null,
 });
 
 export function useAnnotations() {
@@ -101,7 +119,7 @@ export function useAnnotations() {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, remove, enabled, focus } = useAnnotations();
+  const { marks, select, remove, openMark, enabled, focus } = useAnnotations();
   const text = children || '';
   if (!enabled || !text) return <Text style={style}>{text}</Text>;
 
@@ -231,29 +249,61 @@ export function Prose({
     return y == null ? top : Math.min(top, y);
   }, Number.POSITIVE_INFINITY);
 
+  /**
+   * ── WHY IT MOVED BACK INSIDE THE BLOCK ───────────────────────────────────
+   * Ellie: "I have a note called test that I can't find. It says it's in
+   * internal processing but there's no icon on the page to point it out."
+   *
+   * It was drawn twenty points outside the paragraph's own right edge, on the
+   * argument that the tiles holding results prose are padded rather than
+   * clipped. Some are. Not all of them are, and a marker that is visible on
+   * most pages and absent on the rest is worse than one that is always a
+   * little tighter in, because the absence reads as "there is no note here".
+   *
+   * Inside the block it cannot be clipped by anything, ever, on any page.
+   * What it costs is the last few points of the longest line on a paragraph
+   * that carries a mark, and a paragraph that carries a mark is one the reader
+   * has already stopped at.
+   */
   return (
-    <View ref={block} onLayout={onLaidOut}>
-      <View
-        pointerEvents="none"
+    <View ref={block} onLayout={onLaidOut} style={{ paddingRight: MARKER_RESERVE }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={tagged ? 'Open this tag' : 'Open this note'}
+        hitSlop={10}
+        onPress={() => openMark(silent[0].id)}
         style={{
-          position: 'absolute', right: -MARGIN_OUTSIDE,
-          top: Number.isFinite(markerTop) ? markerTop + 2 : 3,
+          position: 'absolute', right: 0, zIndex: 2,
+          top: Number.isFinite(markerTop) ? markerTop - 2 : 0,
         }}>
-        <SymbolView
-          name={(tagged ? 'tag' : 'square.and.pencil') as never}
-          size={13}
-          tintColor={markerColor}
-          fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: markerColor }} />}
-          style={{ width: 14, height: 14 }}
-        />
-      </View>
+        {/* ── A DISC, NOT A GLYPH ──────────────────────────────────────────
+            Thirteen points of hairline symbol against body copy is something
+            you find once you know it is there. The disc is what makes it a
+            thing on the page rather than a speck, and it is what says the
+            icon can be tapped. Its wash is the mark's own colour on the cream
+            pages and a white veil on the coloured ones. */}
+        <View
+          style={{
+            width: 24, height: 24, borderRadius: 12,
+            backgroundColor: textIsLight(style) ? 'rgba(255,255,255,0.18)' : tone.wash,
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+          <SymbolView
+            name={(tagged ? 'tag.fill' : 'square.and.pencil') as never}
+            size={13}
+            tintColor={markerColor}
+            fallback={<View style={{ width: 3, height: 14, borderRadius: 2, backgroundColor: markerColor }} />}
+            style={{ width: 14, height: 14 }}
+          />
+        </View>
+      </Pressable>
       {body}
     </View>
   );
 }
 
 export function AnnotationProvider({
-  children, section, notes, tags, partnerName, onCreated, onRemoved, focus = null,
+  children, section, notes, tags, partnerName, onCreated, onRemoved, onChanged, focus = null,
   anchorType = 'results_section', anchorKey,
 }: {
   children: ReactNode;
@@ -283,10 +333,20 @@ export function AnnotationProvider({
    * until its next load, which is wrong but not broken.
    */
   onRemoved?: (id: string) => void;
+  /**
+   * A mark was changed from the sheet: shared, un-shared, or re-tagged.
+   *
+   * Same argument as onRemoved. A screen that does not pass it keeps drawing
+   * the old state until it next loads, and the margin icon is the visible half
+   * of that: a note that has just been tagged should show a tag.
+   */
+  onChanged?: (note: Note) => void;
   /** Words to scroll to, once, when this screen is opened from a note. */
   focus?: string | null;
 }) {
   const [selected, setSelected] = useState<{ text: string; action: MarkAction } | null>(null);
+  /** Which existing mark the reader has opened from the margin, if any. */
+  const [openId, setOpenId] = useState<string | null>(null);
   const key = anchorKey || section;
 
   const marks = useMemo<Mark[]>(() => notes
@@ -320,13 +380,33 @@ export function AnnotationProvider({
       onRemoved?.(mark.id);
       deleteNote(mark.id);
     },
+    openMark: setOpenId,
     enabled: true,
     focus,
   }), [marks, onRemoved, focus]);
 
+  /**
+   * The row behind the mark the reader tapped.
+   *
+   * Looked up here rather than carried on the Mark, because a Mark is what a
+   * paragraph needs to paint itself and the sheet needs the whole note: its
+   * words, its date, who can see it. Two shapes for one row is how they drift.
+   */
+  const openNote = openId ? notes.find((n) => n.id === openId) : null;
+
   return (
     <AnnotationCtx.Provider value={value}>
       {children}
+      {openNote ? (
+        <MarkSheet
+          note={openNote}
+          tags={tags}
+          partnerName={partnerName}
+          onClose={() => setOpenId(null)}
+          onChanged={(n) => onChanged?.(n)}
+          onDeleted={(id) => onRemoved?.(id)}
+        />
+      ) : null}
       {selected ? (
         <AnnotationSheet
           sentence={selected.text}

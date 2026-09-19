@@ -148,7 +148,7 @@ function ShareArticle({ post }: { post: Post }) {
 }
 
 export default function PostReader({
-  id, onClose, notes = [], tags = [], partnerName = 'your partner', onCreated, onRemoved,
+  id, onClose, notes = [], tags = [], partnerName = 'your partner', onCreated, onRemoved, onChanged,
 }: {
   id: string;
   onClose: () => void;
@@ -169,6 +169,8 @@ export default function PostReader({
   onCreated?: (note: Note) => void;
   /** A mark was removed, so the screen holding the notes can drop it. */
   onRemoved?: (id: string) => void;
+  /** A mark was shared, tagged or otherwise changed from its sheet. */
+  onChanged?: (note: Note) => void;
 }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -213,7 +215,11 @@ export default function PostReader({
       tags={tags}
       partnerName={partnerName}
       onCreated={(note) => onCreated?.(note)}
-      onRemoved={(id) => onRemoved?.(id)}>
+      onRemoved={(id) => onRemoved?.(id)}
+      /* Sharing, tagging or deleting a mark from the sheet. The reader screen
+         does not hold the list, so it passes the change up the same way it
+         passes a new one. */
+      onChanged={(note) => onChanged?.(note)}>
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{

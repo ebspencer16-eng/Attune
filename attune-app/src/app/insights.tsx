@@ -235,9 +235,12 @@ export default function InsightsScreen() {
   if (ready && !openExercise) {
     return (
       <Shell>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-            <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
-        </View>
+        {/* The "Your results" hero moved inside Results, because it belongs to
+            the landing menu rather than to every page under it. A detail page
+            says where it is in one line, which is what Ellie asked the header
+            to do: "[Section]:[detailed page]". Two headings above that, one of
+            them the same on all twenty-nine pages, is the nav repeating
+            itself. */}
         <Results results={results} owned={home?.owned ?? []} />
       </Shell>
     );

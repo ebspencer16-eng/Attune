@@ -384,6 +384,42 @@ and plant each of them. If the rule is "X must not reach Y", the four to try
 every time are: X named outright, X destructured, X reached through a list
 or a lookup, and X assigned to a name one line earlier.
 
+**A gate can point at the wrong copy of a duplicated rule, and then it is
+worse than nothing, because it reports success about code nobody runs.**
+
+Ellie, for the third time: "Percentages are cut off on some storycards." The
+90% on the alignment card had lost the top ring of its %.
+
+`check-card-type-clipping.mjs` was passing, and it was right to. It runs
+`cardTypeNative` from `api/_lib/storycard-style.js`, which floors a line height
+at the font's own line box and has since the second report. The app was never
+calling it. An Expo project cannot import from `api/`, so
+`highlight-cards.tsx` carries its own copy of the same arithmetic, and that
+copy had no floor. Sixty point type in a fifty-four point box, clipped from
+the top, on the one card built around a number.
+
+Two copies of a rule is the failure this file is about. What was new is that
+the check existed, was specific, was about exactly this, and was aimed at the
+half that was already correct. So when a rule genuinely cannot be shared,
+which is the case whenever the app needs something `api/` computes, the gate
+has to execute *the copy that ships*. `check-card-type-clipping.mjs` now lifts
+`t()` out of the app's TSX by brace depth, strips its types with esbuild, runs
+it, and compares its answer to the server's at three card widths. It throws
+rather than passing if it cannot find the function, because a gate that has
+lost its subject must never report success.
+
+The same week, in the other direction: `/api/notes` answers with `notes`, the
+rows with no anchor, and `annotations`, every row anchored to a page.
+`results.tsx` read `notes` and handed it to the marking layer, so no highlight,
+no underline and no margin icon had ever drawn on a results page, on any
+account, since the feature shipped. Nothing failed. The list was a real list
+and it was the wrong one. The Learn tab read both and worked, which is why
+marking an article looked fine and marking a results page never did.
+
+Two similar names for two halves of one answer is the same shape as two copies
+of a rule: nothing tells you which one you took. `check-annotation-source.mjs`
+holds every caller of `fetchNotes()` to reading the anchored list.
+
 **A plant that changed nothing proves nothing.** Nine more gates were planted
 against afterwards and all nine held, but three of those runs reported a
 clean pass on the first try because the string being replaced was not in the

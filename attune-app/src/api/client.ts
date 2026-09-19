@@ -567,7 +567,12 @@ export type HomeCard = {
   // `settings` means the card lands on a tab and opens something on it.
   // "Finish setting up your profile" is home plus Settings, because the
   // editor lives there rather than on a route of its own.
-  app?: { route?: string; exercise?: string; external?: string; settings?: boolean; feedback?: boolean };
+  app?: {
+    route?: string; exercise?: string; external?: string;
+    settings?: boolean; feedback?: boolean;
+    /** Open the results at the storycards rather than at the landing menu. */
+    results?: boolean;
+  };
   /**
    * A card that does something instead of going somewhere.
    *
@@ -1485,6 +1490,23 @@ export function deleteTag(id: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'deleteTag', id }),
+  });
+}
+
+/**
+ * Take a tag back out of the archive.
+ *
+ * The server has had `restoreTag` since tags could be deleted at all, and
+ * nothing had ever called it: the app offered the bin and the permanent
+ * delete and no way back, which made "archive" a word for a waiting room.
+ * Ellie asked for an archive folder, and an archive you cannot take anything
+ * out of is a bin with a longer name.
+ */
+export function restoreTag(id: string) {
+  return request<{ ok: true; tag: Tag }>('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'restoreTag', id }),
   });
 }
 

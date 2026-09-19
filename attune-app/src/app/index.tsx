@@ -35,8 +35,9 @@ import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/scre
 import SignIn from '@/components/sign-in';
 import Feedback from '@/components/feedback';
 import Settings from '@/components/settings';
-import { forgetLastSection } from '@/components/results';
+import { forgetLastSection, showResultsFromStart } from '@/components/results';
 import BrandHeader from '@/components/brand-header';
+import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghost-tile';
 import { LOADING } from '@/constants/loading-copy';
 import {
   BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
@@ -159,6 +160,16 @@ export default function HomeScreen() {
         // there rather than on a route of its own.
         if (target.settings) { setSettingsOpen(true); return; }
         if (target.feedback) { setFeedbackOpen(true); return; }
+        /**
+         * "Your results are ready" opens the storycards, not the menu.
+         *
+         * Ellie asked for the cards to be the first thing this card shows, and
+         * the landing page to be where they end. The Insights tab on its own
+         * still opens the menu; the difference is which sentence brought you
+         * here, which is why the server says so rather than the app guessing
+         * from the route.
+         */
+        if (target.results) { showResultsFromStart(); }
         /**
          * An exercise card opens the exercise, not the tab it lives on.
          *
@@ -375,7 +386,25 @@ export default function HomeScreen() {
                 glow) further down to be centered between the greeting and the
                 tile below." The glow comes with it: it is drawn inside the
                 finding, not positioned against the screen. */}
-            <Text style={{ ...Type.hero, color: Palette.white, marginTop: Spacing.md }}>
+            {/* ── THE GREETING IS NOT A SECOND LOCKUP ────────────────────
+                Ellie: "the lockup clashes with the welcome back message right
+                below since they're like the same size."
+
+                They were 19 point and 30, both bold Playfair in white, forty
+                points apart. Close enough in texture to read as two titles
+                arguing rather than as furniture and a voice.
+
+                Only one of them can move. The lockup sits in the same place on
+                every screen, which she asked for and which is the point of it,
+                so the greeting is what changes: bigger, and with room above it
+                so the two are not a stack. Playfair is bundled in Bold alone,
+                so the separation has to come from size and air rather than
+                from a lighter weight. */}
+            <Text
+              style={{
+                ...Type.hero, fontSize: 38, lineHeight: 54,
+                color: Palette.white, marginTop: Spacing.xxl,
+              }}>
               {data.greeting}
             </Text>
             {/* The mark that was under the greeting is gone: the lockup at
@@ -401,9 +430,16 @@ export default function HomeScreen() {
           {/* ── THE TILE ─────────────────────────────────────────────────
               One container, not three cards. Everything the product is asking
               for lives here, which is what lets the blue above it stay quiet. */}
-          <View
+          {/* ── A PANE, NOT A BOX ────────────────────────────────────────
+              Ellie: "instead of the tile being cream, can it be a little ghost
+              bubble with a transluscent feel? White text and icons."
+
+              The cream stopped the blue dead at its top edge, so the one
+              screen that is entirely the brand colour had a rectangle of
+              something else sitting on it. See components/ghost-tile.tsx for
+              what draws it. */}
+          <GhostTile
             style={{
-              backgroundColor: Palette.cream, borderRadius: Radius.xl,
               marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
               paddingVertical: Spacing.xs,
             }}>
@@ -461,7 +497,7 @@ export default function HomeScreen() {
                 onPress={() => open(data.pickUp as unknown as HomeCard)}
               />
             ) : null}
-          </View>
+          </GhostTile>
 
           {/* The reminder did not go. Said here rather than on the row,
               because the row is back at the top of the tile by the time this
@@ -815,33 +851,41 @@ function TileRow({
       disabled={disabled}
       style={{
         paddingVertical: Spacing.lg,
-        borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
+        borderTopWidth: first ? 0 : 1, borderTopColor: GhostRule,
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
         opacity: disabled ? 0.5 : 1,
       }}>
-      <SymbolView
-        name={icon as never}
-        size={20}
-        /* Ellie: "This looks great, but needs a little color. Maybe the icons
-           in the bottom tile could be orange?" They were the muted brown, the
-           same colour as the body text under each title, so the one element in
-           the tile carrying meaning read as punctuation. Orange is the brand's
-           accent and already the colour of the chevron at the other end of the
-           row, which is what makes the two ends of a row look like a pair.
-           A disabled row keeps the muted brown: an orange icon on a row that
-           cannot be tapped is a promise the row does not keep. */
-        tintColor={disabled ? c.textMuted : Palette.orange}
-        style={{ width: 22, height: 22 }}
-      />
+      {/* ── THE ICON SITS IN SOMETHING ─────────────────────────────────
+          A glyph floating at the left edge of a row, above another glyph, above
+          another, is a list of bullet points. Every app Ellie sent as a
+          reference puts its row icons inside a soft disc, and the reason it
+          works is that the disc gives the row a left edge and a rhythm without
+          a rule or a border.
+
+          The icon was orange, which was right on cream and is the one colour
+          that disappears on this blue. It is white in a white wash now. */}
+      <View
+        style={{
+          width: 38, height: 38, borderRadius: 19,
+          backgroundColor: 'rgba(255,255,255,0.16)',
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+        <SymbolView
+          name={icon as never}
+          size={19}
+          tintColor={disabled ? GhostInkQuiet : GhostInk}
+          style={{ width: 21, height: 21 }}
+        />
+      </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{title}</Text>
+        <Text style={{ ...Type.cardTitle, color: GhostInk }}>{title}</Text>
         {body ? (
-          <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
+          <Text numberOfLines={1} style={{ ...Type.small, color: GhostInkQuiet, marginTop: 2 }}>
             {body}
           </Text>
         ) : null}
       </View>
-      {!disabled ? <Text style={{ ...Type.body, color: Palette.orange }}>{'\u203A'}</Text> : null}
+      {!disabled ? <Text style={{ ...Type.body, color: GhostInkQuiet }}>{'\u203A'}</Text> : null}
     </Pressable>
   );
 }

@@ -16,12 +16,37 @@ import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
+/**
+ * ── WHAT THE SHEET CALLS THIS ─────────────────────────────────────────────
+ * Ellie: "I want the subject text to be attune relationships instead of
+ * insight of the day."
+ *
+ * It is the product's name everywhere, not the name of the screen the share
+ * came from. Someone receiving a mail with the subject "Insight of the day"
+ * has no idea who sent it or what it is.
+ *
+ * It is the default rather than something each caller passes, because the
+ * answer is the same at every call site and a default is one fewer place to
+ * get it wrong.
+ */
+const SUBJECT = 'Attune Relationships';
+
 export default function ShareButton({
-  message, title, label, tone = 'ink', accessibilityLabel,
+  message, url, title = SUBJECT, label, tone = 'ink', accessibilityLabel,
 }: {
-  /** What lands in the message. The address goes on the end. */
+  /** What lands in the message. */
   message: string;
-  /** The sheet's own title, where the platform shows one. */
+  /**
+   * The address, as its own item rather than inside the message.
+   *
+   * iOS builds the preview card, and the little image on it, from the Open
+   * Graph tags of this address. Left inside the message text it is a string
+   * the system may or may not decide to look at; passed here it is a link,
+   * and the card is reliable. public/home.html carries the square lockup for
+   * exactly this.
+   */
+  url?: string;
+  /** The sheet's own title, and the subject of a mail. Defaults to the name. */
   title?: string;
   /** Shown beside the icon. Omitted for a bare icon. */
   label?: string;
@@ -35,7 +60,13 @@ export default function ShareButton({
       accessibilityLabel={accessibilityLabel || 'Share'}
       hitSlop={12}
       onPress={() => {
-        Share.share({ title, message }).catch(() => {
+        Share.share(
+          { title, message, ...(url ? { url } : null) },
+          // `subject` rides in the options rather than the content, which is
+          // where React Native puts it and why the wrong words were showing:
+          // iOS reads the subject and ignores the title entirely.
+          { subject: title },
+        ).catch(() => {
           /* dismissed, which is not a failure */
         });
       }}

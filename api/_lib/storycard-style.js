@@ -19,7 +19,7 @@
  * api/_lib/section-blocks.js, checked by check-section-blocks.mjs.
  */
 
-import { minLineHeight } from './font-metrics.js';
+import { LINE_BOX, minLineHeight } from './font-metrics.js';
 
 /**
  * The type scale, which is the thing the two surfaces kept disagreeing about.
@@ -338,6 +338,23 @@ export const STORYCARD_STYLE = {
   // different products.
   type: CARD_TYPE,
   typeRefWidth: CARD_REF_WIDTH,
+  /**
+   * ── THE FLOOR TRAVELS WITH THE SCALE ────────────────────────────────────
+   * Ellie: "Percentages are cut off on some storycards." Again, and the
+   * reason was not the number.
+   *
+   * `stat` is set at 0.9 of its own size and `statBig` at 0.85, which is
+   * leading on the web and a clip on a phone. cardTypeNative floors that at
+   * the face's own line box, and check-card-type-clipping proved it does.
+   * Both were true. The app never called cardTypeNative: it has its own copy
+   * of the arithmetic, because an Expo project cannot import from api/, and
+   * that copy had no floor. So the gate passed on the function nothing on the
+   * phone was running, and 90% lost the top of its % sign.
+   *
+   * The ratios go over the wire with the scale now, so the app applies the
+   * same floor from the same numbers rather than hardcoding 1.41.
+   */
+  lineBox: LINE_BOX,
   rule: { gradient: RULE_GRADIENT, ...RULE_SIZE },
   people: PERSON_COLORS,
   padding: CARD_PADDING,

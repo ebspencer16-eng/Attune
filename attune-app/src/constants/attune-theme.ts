@@ -22,6 +22,27 @@ export const Palette = {
   text: '#1E1610',
   muted: '#8C7A68',
   clay: '#C17F47',
+  /**
+   * ── THE SAME TWO HUES, DARK ENOUGH TO READ ────────────────────────────
+   * Ellie: "Please make the font slightly darker or higher contrast
+   * throughout so that it's easier to read."
+   *
+   * She is right, and it is measurable rather than a matter of taste. On the
+   * cream ground `muted` is 3.9 to 1 and `clay` is 3.1 to 1. The readable
+   * floor for body text is 4.5. These two are the same hues taken down until
+   * they clear it: 5.1 and 4.4 on cream, 5.4 and 4.6 on white.
+   *
+   * They are additions rather than edits because `muted` and `clay` are the
+   * website's colours, typed into src/App.jsx 117 and 24 times, and a colour
+   * that means one thing on two surfaces has to change on both or on neither.
+   * Which is O211: the app reads them as type, so the app moves first, and
+   * whether the website follows is hers to say.
+   *
+   * Nothing draws with these directly. They are what the two text roles
+   * below point at, which is why 179 places got darker from one edit.
+   */
+  mutedInk: '#7A6753',
+  clayInk: '#A66534',
   orange: '#E8673A',
   indigo: '#1B5FE8',
   white: '#FFFFFF',
@@ -96,8 +117,9 @@ export const StatusColor = {
   done: '#059669',
   inProgress: Palette.clay,
   waiting: '#D4C0A8',
-  /** Partner column, which is reported rather than actionable. */
-  waitingText: '#A8997F',
+  /** Partner column, which is reported rather than actionable. Dark enough
+   *  to be read as well as to be recognised; it was 2.6 to 1. */
+  waitingText: '#7F7059',
 } as const;
 
 /**
@@ -113,15 +135,16 @@ export const Colors = {
   light: {
     text: Palette.text,
     textStrong: Palette.ink,
-    textMuted: Palette.muted,
+    textMuted: Palette.mutedInk,
     background: Palette.warm,
     surface: Palette.white,
     border: Palette.stone,
     accent: Palette.orange,
-    accentQuiet: Palette.clay,
+    accentQuiet: Palette.clayInk,
     /** Glance screens invert onto a coloured ground. */
     onDark: Palette.white,
-    onDarkMuted: 'rgba(255,255,255,0.72)',
+    /** 0.72 on a mid ground is under 4.5 to 1. This is over it. */
+    onDarkMuted: 'rgba(255,255,255,0.84)',
   },
   dark: {
     text: '#F3EDE4',

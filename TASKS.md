@@ -56,11 +56,11 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Answer these
 
-**Nothing waiting.** Q10 is answered: the workbook opens as a converted web
-version inside the app.
+One waiting: Q11.
 
 | # | Question |
 |--|--|
+| Q11 | **"Can we zoom in on these pages?" — which pages?** That one arrived without a picture attached and I cannot tell what it points at. If it is the results pages, I can add pinch to zoom. If it is that the type is small, R204 may already have covered it. Tell me which and it is quick either way. |
 
 ## 2. Open
 
@@ -68,8 +68,8 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** Everything you have sent is built and sitting in section 3
-for your eye, and the one thing left for you to decide is O208 in section 1.
+**Nothing open.** The batch of 18 September is built and sitting in section 3,
+apart from Q11, which I cannot answer without knowing which pages you meant.
 
 | # | Task |
 |--|--|
@@ -93,6 +93,17 @@ any order; work through them however suits.
 | R200 | **Notes has a ground of its own.** Warm at the top through the orange, settling into the indigo at the bottom, so the tiles and the tag rows sit on something rather than on flat cream. It is the same wash the other tabs use, with a second colour added underneath; tell me if it wants to be stronger. |
 | R198 | **"Yours to explore" is now "Resources".** |
 | R199 | **The third row capitalises like the other two.** The first two rows of that tile start from a note's title, which is already capitalised. The third starts from the sentence your mark sits inside, cut at a word boundary, so it could begin mid-sentence in lower case. It is capitalised on the way out now. |
+| R210 | **The Insights nav, rebuilt.** A landing page of coloured bands, one per section, in the website's own colours. Opening one closes the others and lists its pages. Inside a page: a hamburger top left that drops the same menu, a line saying Section: page, and back and forward at the foot. The two rows of chips are gone. Nothing you read changed, only how you get to it. |
+| R211 | **Results are ready now opens the storycards**, and the landing page is where they end. The Insights tab on its own still opens the menu. |
+| R212 | **Home.** The tile is a pane of glass rather than a cream box, with white type and each icon in its own disc. The greeting is bigger and further from the lockup, which is what was clashing: they were both bold Playfair in white, forty points apart. |
+| R213 | **Type is darker throughout.** It is measurable rather than a matter of taste: the quiet brown was 3.9 to 1 against the cream and the readable floor is 4.5. It is 5.1 now, and the clay that labels sections went from 3.1 to 4.4. Same two hues, taken down until they clear the floor. |
+| R201 | **The percentage on the storycards has its top back.** The same bug as last time, in the other half: the fix and the gate that proves it both live in the module the website shares, and the app has its own copy of that arithmetic because an Expo project cannot import from `api/`. The gate was testing the function your phone never runs. It runs both now, and four ways of reintroducing the bug were tried against it. |
+| R202 | **Sharing says Attune Relationships**, and the little picture is the mark with the name under it. That thumbnail is Apple's, built from the website's social image, which is a wide banner: a square thumbnail cut from the middle of a banner is a fragment of a headline. There is a square one now. It is the home page's card that changed, so a link to attune-relationships.com will preview as the lockup rather than the banner; Twitter keeps the banner. Say the word and I put it back. |
+| R203 | **The home tile is a ghost bubble.** iOS 26's own glass, so it takes its light from the blue behind it rather than being a white rectangle at twelve per cent. |
+| R207 | **Your lost note, and why it was lost.** There was no icon because there was no mark. The notes endpoint answers with two lists, one of notes with no anchor and one of everything anchored to a page, and the results screen has been reading the first since the feature shipped. Nothing on any results page has ever drawn a highlight, an underline or a margin icon, on any account. Reading the right list fixed all three at once, and a gate now holds every screen that fetches notes to the anchored list. |
+| R208 | **A mark opens.** Tap the icon in the right margin and the note comes up: the words it sits on, what you wrote, the date, private or shared with Preston, its tags, and delete with the "this cannot be undone" question. The icon sits inside the paragraph now rather than in the margin outside it, because outside the block means inside whatever the block is in, and not every tile on a results page is a padded one. |
+| R209 | **A deleted tag goes into a closed Archive** at the foot of the list, in grey, with a count. Opening it offers Restore as well as Delete: the server has allowed restoring since tags could be deleted and nothing had ever asked, which made "archive" a word for a waiting room. |
+| R204 | **The third row of the home tile capitalises.** |
 | R197 | **The background runs the length of the page.** Insights was painting two washes, one from the tab and one starting under the header, so the gradient restarted and drew a line across the page exactly where the chips are. One wash, owned by the tab; everything inside it is transparent; and the tint no longer lives in a box of its own, which was drawing a second edge further down. The chip rows fade into the wash rather than into flat cream. Same fix reaches Learn, Notes and the exercises, because they share the component. |
 | R194 | **Each exercise has its own wash**, in its own colour: Communication orange, Expectations blue, Reflection green, Intimacy rose, Conflict blue. Taken from the same place its progress bar and arrows take theirs, so nothing new to keep in step. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |

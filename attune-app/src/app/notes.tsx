@@ -47,7 +47,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   createNote, createTag, deleteNote, deleteTag, fetchHome, fetchNotes, fetchPosts,
-  fetchResults, fetchTags, openSharedNote, purgeTag, shareNote, updateNote,
+  fetchResults, fetchTags, openSharedNote, purgeTag, restoreTag, shareNote, updateNote,
 } from '@/api/client';
 import type { ApiError, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -262,6 +262,19 @@ export default function NotesScreen() {
         },
       },
     ]);
+  }, [load, say]);
+
+  /**
+   * Back out of the archive.
+   *
+   * No confirmation: restoring is the reversible one, and a dialog in front of
+   * an action you can simply do again teaches people to tap through dialogs.
+   */
+  const restoreTagFromArchive = useCallback(async (tag: Tag) => {
+    const res = await restoreTag(tag.id);
+    if (!res.ok) { Alert.alert('Not restored', 'That did not restore. Try again in a moment.'); return; }
+    say('\u2713 Tag restored');
+    load();
   }, [load, say]);
 
 
@@ -610,6 +623,7 @@ export default function NotesScreen() {
             onAdd={addTag}
             onOpen={setOpenTag}
             onPurge={purgeTagForGood}
+            onRestore={restoreTagFromArchive}
           />
         </View>
       </ScrollView>
@@ -758,7 +772,7 @@ function tagColor(tag: Tag): string {
 }
 
 function TagList({
-  tags, notes, sort, onChangeSort, placeholder, onAdd, onOpen, onPurge,
+  tags, notes, sort, onChangeSort, placeholder, onAdd, onOpen, onPurge, onRestore,
 }: {
   tags: Tag[];
   notes: Note[];
@@ -775,8 +789,10 @@ function TagList({
   onAdd: (name: string) => Promise<string | null>;
   /** Open everything filed under one tag. */
   onOpen: (tag: Tag) => void;
-  /** Remove a tag that is already in the bin, for good. */
+  /** Remove a tag that is already in the archive, for good. */
   onPurge: (tag: Tag) => void;
+  /** Take a tag back out of the archive. */
+  onRestore: (tag: Tag) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
@@ -785,6 +801,8 @@ function TagList({
   /** The add field opens from the plus, which is where Ellie asked for it. */
   const [addOpen, setAddOpen] = useState(false);
   const [query, setQuery] = useState('');
+  /** The archive is shut on arrival. That is the whole of what was asked. */
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const add = async (name: string) => {
     const clean = name.trim();
@@ -1049,41 +1067,89 @@ function TagList({
           deleted tag is that it is still recoverable by typing its name again,
           and a list you cannot see does not tell you that. */}
       {binned.length ? (
-        <View
-          style={{
-            marginTop: Spacing.md,
-            backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-            borderRadius: Radius.lg, overflow: 'hidden', opacity: 0.6,
-          }}>
-          {binned.map((t, i) => (
+        <View style={{ marginTop: Spacing.md }}>
+          {/* ── THE FOLDER ────────────────────────────────────────────────
+              Ellie: "When I delete a tag I want it to go into an archive
+              folder at the bottom of the list in grey, not visible unless I
+              click into the folder."
+
+              It was a greyed list sitting open under the live one, on the
+              argument that a deleted tag is worth seeing because it is still
+              recoverable. That argument was about the tags; this is about the
+              screen. Struck-through rows under the list you actually use are
+              noise on every visit, for a thing you go looking for twice a
+              year. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: archiveOpen }}
+            accessibilityLabel={`Archive, ${binned.length} tag${binned.length === 1 ? '' : 's'}`}
+            onPress={() => setArchiveOpen((v) => !v)}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+              paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+              borderRadius: Radius.lg, borderWidth: 1, borderColor: c.border,
+              backgroundColor: c.surface, opacity: 0.75,
+            }}>
+            <SymbolView
+              name={(archiveOpen ? 'folder.fill' : 'folder') as never}
+              size={15}
+              tintColor={c.textMuted}
+              fallback={<View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: c.textMuted }} />}
+              style={{ width: 17, height: 17 }}
+            />
+            <Text style={{ ...Type.body, color: c.textMuted, flex: 1 }}>Archive</Text>
+            <Text style={{ ...Type.small, color: c.textMuted }}>{binned.length}</Text>
+            <Text style={{ color: c.textMuted, fontSize: 12 }}>{archiveOpen ? '▴' : '▾'}</Text>
+          </Pressable>
+
+          {archiveOpen ? (
             <View
-              key={t.id}
               style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+                marginTop: Spacing.sm,
+                backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+                borderRadius: Radius.lg, overflow: 'hidden', opacity: 0.8,
               }}>
-              <SymbolView
-                name="tag"
-                size={16}
-                tintColor={c.textMuted}
-                fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.textMuted }} />}
-                style={{ width: 18, height: 18 }}
-              />
-              <Text
-                style={{ ...Type.body, color: c.textMuted, flex: 1, textDecorationLine: 'line-through' }}
-                numberOfLines={1}>
-                {t.name}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Delete ${t.name} for good`}
-                onPress={() => onPurge(t)}
-                hitSlop={8}>
-                <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete</Text>
-              </Pressable>
+              {binned.map((t, i) => (
+                <View
+                  key={t.id}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+                    paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                    borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+                  }}>
+                  <SymbolView
+                    name="tag"
+                    size={16}
+                    tintColor={c.textMuted}
+                    fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.textMuted }} />}
+                    style={{ width: 18, height: 18 }}
+                  />
+                  <Text
+                    style={{ ...Type.body, color: c.textMuted, flex: 1, textDecorationLine: 'line-through' }}
+                    numberOfLines={1}>
+                    {t.name}
+                  </Text>
+                  {/* Out of the archive, which is the half that makes it an
+                      archive rather than a bin. The server has allowed this
+                      since tags could be deleted and nothing had ever asked. */}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Restore ${t.name}`}
+                    onPress={() => onRestore(t)}
+                    hitSlop={8}>
+                    <Text style={{ ...Type.small, color: c.accent, fontWeight: '700' }}>Restore</Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete ${t.name} for good`}
+                    onPress={() => onPurge(t)}
+                    hitSlop={8}>
+                    <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Delete</Text>
+                  </Pressable>
+                </View>
+              ))}
             </View>
-          ))}
+          ) : null}
         </View>
       ) : null}
     </View>

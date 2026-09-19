@@ -401,6 +401,7 @@ export default function ResourcesScreen() {
         partnerName={partnerName}
         onCreated={(note) => setNotes((prev) => [note, ...prev])}
         onRemoved={(id) => setNotes((prev) => prev.filter((n) => n.id !== id))}
+        onChanged={(note) => setNotes((prev) => prev.map((n) => (n.id === note.id ? note : n)))}
       />
     );
   }
@@ -524,9 +525,9 @@ export default function ResourcesScreen() {
                 <ShareButton
                   tone="light"
                   label="Share"
-                  title="Insight of the day"
                   accessibilityLabel="Share the insight of the day"
-                  message={`${home.research.body}\n\n${home.research.source}\n${SITE}`}
+                  message={`${home.research.body}\n\n${home.research.source}`}
+                  url={SITE}
                 />
               </View>
             </LinearGradient>

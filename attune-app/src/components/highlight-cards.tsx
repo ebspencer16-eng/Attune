@@ -132,6 +132,12 @@ let SC = {
    */
   type: null as Record<string, TypeSpec> | null,
   typeRefWidth: 390,
+  /**
+   * The faces' own line boxes, from api/_lib/font-metrics.js by way of the
+   * payload. See the note on `t()`: without these the app clips its own
+   * numbers from the top.
+   */
+  lineBox: { display: 1.41, body: 1.33 } as Record<string, number>,
   rule: { gradient: ['#E8673A', '#1B5FE8'], width: 40, height: 2 },
   /**
    * Which colour each person is. The app drew the partner's placement dot in a
@@ -173,7 +179,32 @@ function t(role: string, cardWidth: number, over?: Partial<TypeSpec>): Record<st
     fontSize,
     fontWeight: String(spec.weight),
     ...(spec.track != null ? { letterSpacing: Math.round(spec.track * fontSize * 10) / 10 } : {}),
-    ...(spec.lh != null ? { lineHeight: Math.ceil(fontSize * spec.lh) } : {}),
+    /**
+     * ── THE LINE BOX NEVER GOES BELOW THE FACE'S OWN ──────────────────────
+     * Ellie: "Percentages are cut off on some storycards."
+     *
+     * `stat` is set at 0.9 of its size and `statBig` at 0.85. On the web that
+     * is leading and a browser lets the glyph overflow. React Native clips,
+     * from the top, which is where a % keeps its upper ring, so 90% lost it.
+     *
+     * api/_lib/storycard-style.js has floored this since the last time she
+     * reported it, and check-card-type-clipping proved it. Both were true and
+     * neither helped: that floor is inside cardTypeNative, and this function
+     * is the app's own copy of the same arithmetic, written because an Expo
+     * project cannot import from api/. The gate was testing the function the
+     * phone never runs.
+     *
+     * The ratios arrive on the payload rather than being typed here, and the
+     * gate now runs THIS function as well.
+     */
+    ...(spec.lh != null
+      ? {
+          lineHeight: Math.max(
+            Math.ceil(fontSize * spec.lh),
+            Math.ceil(fontSize * (SC.lineBox?.[spec.family] ?? 1.33)),
+          ),
+        }
+      : {}),
     ...(spec.upper ? { textTransform: 'uppercase' as const } : {}),
     ...(spec.lower ? { textTransform: 'lowercase' as const } : {}),
     color: spec.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${spec.alpha})`,
@@ -232,10 +263,12 @@ function typeGround(accent?: string | null): Ground {
  * field later should not need this changed.
  */
 function shareTextFor(card: HighlightCard | undefined) {
-  if (!card) return SITE_URL;
+  if (!card) return '';
   const lines = [card.title, card.typeName, card.lead, card.body, card.footer]
     .filter((line): line is string => typeof line === 'string' && line.trim().length > 0);
-  return [...new Set(lines)].join('\n\n') + `\n\n${SITE_URL}`;
+  // The address is passed to the sheet as a link now rather than pasted on the
+  // end here, so iOS builds a preview card from it instead of guessing.
+  return [...new Set(lines)].join('\n\n');
 }
 
 export default function HighlightCards({
@@ -380,8 +413,8 @@ function Reel({
             <ShareButton
               tone="light"
               accessibilityLabel="Share this card"
-              title="Attune"
               message={shareTextFor(cards[index]) }
+              url={SITE_URL}
             />
             <Pressable onPress={onDone} hitSlop={12} accessibilityRole="button">
               <Text style={{ ...Type.eyebrow, color: Palette.white }}>Full results  {'\u2192'}</Text>

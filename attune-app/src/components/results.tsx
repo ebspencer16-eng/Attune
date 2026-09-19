@@ -20,10 +20,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
 
 import CoupleMap from '@/components/couple-map';
-import EdgeFadedRow from '@/components/edge-faded-row';
 import GlanceTile, { NeutralGround } from '@/components/glance-tile';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -37,6 +37,7 @@ import type {
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
+import ResultsMenu from '@/components/results-menu';
 import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import { ResultsScroll } from '@/components/results-scroll';
@@ -91,13 +92,20 @@ const c = Colors.light;
 /**
  * How much room every results section leaves at the bottom.
  *
- * The previous and next buttons used to sit under the content and carried
- * BottomTabInset, so they were what kept the last card clear of the tab bar.
- * Removing them took that with it, and the last paragraph of every section
- * would have run underneath Home and Insights. The clearance belongs to the
- * scrolling content, not to a row that happened to be there.
+ * This has been both things. The previous and next buttons once sat under the
+ * content carrying BottomTabInset, so they were what kept the last card clear
+ * of the tab bar; removing them took the clearance with it and the last
+ * paragraph of every section ran underneath Home and Insights, so the
+ * clearance moved into the scrolling content where it did not depend on a row
+ * happening to be there.
+ *
+ * The buttons are back, at Ellie's ask, and they are back below the scroll
+ * view with the tab bar's clearance on them. So the content is clear of the
+ * tab bar because the row underneath it is, and its own inset is ordinary
+ * bottom padding again. If that row is ever removed a second time, this is the
+ * number that has to grow with it.
  */
-const ResultsBottomInset = BottomTabInset + Spacing.lg;
+const ResultsBottomInset = Spacing.xxl;
 
 /**
  * How many protocols the Communication overview shows.
@@ -134,6 +142,21 @@ function interp(text: string | null | undefined, you: string, them: string): str
  * the component.
  */
 let lastSection: string | null = null;
+
+/**
+ * The landing menu, as a section id.
+ *
+ * ── WHY A SECTION AND NOT A FLAG ──────────────────────────────────────────
+ * Ellie: "after the storycard highlights, full results should start with the
+ * landing page." So the menu is somewhere you arrive, go back to, and are sent
+ * to from other screens, which is everything a section is. A boolean beside
+ * the section id would be a second piece of state saying where you are, and
+ * the two would disagree the first time one of them was set alone.
+ *
+ * It is not in the server's list, so nothing can link to it by accident, and
+ * the guard below has to name it explicitly.
+ */
+export const MENU_SECTION = '__menu';
 
 /**
  * Forget where the last reader was.
@@ -189,12 +212,29 @@ export function takePendingMark(): string | null {
 /** The mounted results screen's section setter, if one is mounted. */
 let goToSection: ((id: string) => void) | null = null;
 
-/** Send the open results screen back to its first section. */
+/** Send the open results screen back to the landing menu. */
 export function showFirstSection() {
   // Cleared as well as called, so a tap that arrives while nothing is mounted
   // still decides where the next mount opens.
   lastSection = null;
   jumpToTop?.();
+}
+
+/**
+ * Open the results at the beginning: the storycards, then the menu.
+ *
+ * Ellie: "When a user clicks results are ready or something from their
+ * homepage, they should be brought straight to the storycard highlights
+ * experience and then, after the storycard highlights, full results should
+ * start with the landing page."
+ *
+ * Which is why this exists alongside showFirstSection. Tapping the Insights
+ * tab is "let me look at my results" and lands on the menu; being told the
+ * results are ready is "show me", and show me starts with the cards.
+ */
+export function showResultsFromStart() {
+  lastSection = 'highlights';
+  goToSection?.('highlights');
 }
 
 export default function Results({
@@ -250,13 +290,35 @@ export default function Results({
   // Module scope rather than a store: it is one string, it should not outlive
   // the process, and it must not be persisted, because a section a couple no
   // longer owns should not be restored on next launch.
-  const [sectionId, setSectionId] = useState<string>(lastSection || sections[0]?.id || 'highlights');
+  const [sectionId, setSectionId] = useState<string>(lastSection || MENU_SECTION);
 
   // Time per results section, keyed the way the website keys it so the
   // Engagement page can draw one against the other. useScreenTime owns the
   // clock, including stopping it when the app goes to the background.
   useScreenTime(sectionId ? `results:${sectionId}` : null);
   const rememberSection = useCallback((id: string) => { lastSection = id; setSectionId(id); }, []);
+  /** Whether the hamburger's dropdown is showing. */
+  const [navOpen, setNavOpen] = useState(false);
+  /**
+   * Where the dropdown hangs from, in window coordinates.
+   *
+   * ── WHY IT IS MEASURED ────────────────────────────────────────────────
+   * The first version put the sheet at the top of the screen with a safe-area
+   * inset on it, and the inset came back zero: a Modal is its own window on
+   * iOS, and there is no SafeAreaProvider above it to ask. The top row landed
+   * behind the clock and the Dynamic Island.
+   *
+   * Asking the button where it is answers the question without needing to
+   * know anything about the phone. It is also the better behaviour: Ellie
+   * asked for "a dropdown from the hamburger nav", and a dropdown hangs off
+   * the control that opened it rather than off the top of the screen.
+   */
+  const burger = useRef<View | null>(null);
+  const [dropTop, setDropTop] = useState(0);
+  const openNav = () => {
+    burger.current?.measureInWindow((_x, y, _w, h) => setDropTop(y + h + Spacing.sm));
+    setNavOpen(true);
+  };
 
   /**
    * The marked words to scroll to on this render, if the reader arrived from a
@@ -275,7 +337,7 @@ export default function Results({
 
   // Register this screen as the one a repeat tap on the Insights tab returns
   // to the top of. See showFirstSection.
-  const firstSectionId = sections[0]?.id || 'highlights';
+  const firstSectionId = MENU_SECTION;
   useEffect(() => {
     const mine = () => rememberSection(firstSectionId);
     jumpToTop = mine;
@@ -300,18 +362,17 @@ export default function Results({
   const groupOf = (id: string) =>
     groups.find((g) => g.id === id || g.children?.some((ch) => ch.id === id)) ?? null;
 
-  /**
-   * Keep both rows following the reader.
-   *
-   * Twenty-nine sections is far wider than a phone, so moving forward left the
-   * entry for the page you were reading off to the right, and the row then
-   * claimed you were still at the start.
+  /*
+   * The two chip rows kept scroll positions and measured each entry's x, so
+   * the row could follow the reader across twenty-nine sections. There is no
+   * row to follow any more: the menu shows every section at once, and the page
+   * says where it is in one line. All of that went with them.
    */
-  const topNav = useRef<ScrollView>(null);
-  const pageNav = useRef<ScrollView>(null);
-  const groupX = useRef<Record<string, number>>({});
-  const pageX = useRef<Record<string, number>>({});
-  const section = sections.some((s) => s.id === sectionId) ? sectionId : (sections[0]?.id ?? 'highlights');
+  // The menu is not one of the server's sections, so it has to be allowed
+  // through by name before the list is consulted.
+  const section = sectionId === MENU_SECTION || sections.some((s) => s.id === sectionId)
+    ? sectionId
+    : MENU_SECTION;
   const activeGroup = groupOf(section);
 
   /**
@@ -327,15 +388,6 @@ export default function Results({
     }
     return null;
   })();
-
-  useEffect(() => {
-    // A little to the left of each, so the active entry does not sit flush
-    // against the edge and look like the row starts there.
-    const gx = activeGroup ? groupX.current[activeGroup.id] : undefined;
-    if (gx != null) topNav.current?.scrollTo({ x: Math.max(0, gx - Spacing.xl), animated: true });
-    const px = pageX.current[section];
-    if (px != null) pageNav.current?.scrollTo({ x: Math.max(0, px - Spacing.xl), animated: true });
-  }, [section, activeGroup]);
 
   // Conflict Patterns is a separate payload with its own privacy rules, so it
   // is fetched separately rather than folded into /api/results. Not owning the
@@ -367,7 +419,25 @@ export default function Results({
     (async () => {
       const [n, t] = await Promise.all([fetchNotes(), fetchTags()]);
       if (cancelled) return;
-      if (n.ok) setNotes(n.data.notes);
+      /**
+       * ── ANNOTATIONS, NOT NOTES ──────────────────────────────────────────
+       * Ellie: "I have a note called test that I can't find. It says it's in
+       * internal processing but there's no icon on the page to point it out."
+       *
+       * There was no icon because there was no mark. /api/notes splits its
+       * answer in two: `notes` is the standalone ones and `annotations` is
+       * every row with an anchor, which is exactly the set that draws on a
+       * results page. This read `notes`, the half with the anchored rows
+       * filtered out, so the marking layer has been handed an empty list
+       * since it shipped. No highlight, no underline and no margin icon has
+       * ever appeared on a results page, on any account.
+       *
+       * The Learn tab got this right and takes both lists, which is why
+       * marking an In Practice article worked and marking a results page
+       * never did. One of the two surfaces was written from the endpoint and
+       * the other from the name of the field.
+       */
+      if (n.ok) setNotes(n.data.annotations);
       if (t.ok) setTags(t.data.tags);
     })();
     return () => { cancelled = true; };
@@ -418,85 +488,97 @@ export default function Results({
     && (!conflict?.ready
       || (section !== 'conflict-patterns' && !(conflict.ready && conflict.partnerFinished)));
 
+  /**
+   * The order pages are read in, flattened out of the nav.
+   *
+   * Ellie: "Within results pages on the app, we need to add the back and
+   * forward arrows at the bottom of each page, just like the website does."
+   *
+   * Derived from the nav rather than from `sections`, because the nav is what
+   * decides the order on both surfaces and `sections` is only the list of what
+   * exists. A group with pages contributes its pages; a group without
+   * contributes itself.
+   */
+  const order = useMemo(() => groups.flatMap((g) => (
+    g.children?.length ? g.children.map((ch) => ch.id) : [g.id]
+  )), [groups]);
+  const at = order.indexOf(section);
+  const prev = at > 0 ? order[at - 1] : null;
+  const next = at >= 0 && at < order.length - 1 ? order[at + 1] : null;
+
+  /** The label of a section id, wherever it sits in the nav. */
+  const labelOf = (id: string): string => {
+    for (const g of groups) {
+      if (g.id === id) return g.label;
+      const ch = g.children?.find((x) => x.id === id);
+      if (ch) return ch.label;
+    }
+    return sections.find((x) => x.id === id)?.label || '';
+  };
+
+  /**
+   * ── THE LANDING MENU ──────────────────────────────────────────────────
+   * The whole screen, with no chrome of its own. There is nothing to go back
+   * to from here and nothing to page through: it is the way in.
+   */
+  if (section === MENU_SECTION) {
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg }}>
+          <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
+        </View>
+        {/* Edge to edge, which is what makes them bands rather than cards. */}
+        <ResultsMenu
+          groups={groups}
+          current={null}
+          onOpenSection={rememberSection}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
-      {/* Two levels, the same as the sidebar on the website.
-          Top row is the sections; the row under it is the pages inside the one
-          you are in. A group with no pages of its own shows no second row. */}
-      <EdgeFadedRow
-        ref={topNav}
-        /* The fade has to fade into the page's wash. Left on flat cream it
-           drew a pale band across the top of the results, which is half of
-           what "segmented" was. */
-        ground={Palette.warm}
-        gap={Spacing.sm}
-        contentContainerStyle={{ paddingBottom: Spacing.md }}>
-        {groups.map((g) => {
-          const on = g.id === activeGroup?.id;
-          return (
-            <Pressable
-      accessibilityRole="button"
-              key={g.id}
-              onPress={() => rememberSection(g.children?.length ? g.children[0].id : g.id)}
-              onLayout={(e) => { groupX.current[g.id] = e.nativeEvent.layout.x; }}
-              style={{
-                paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
-                minHeight: 36, justifyContent: 'center',
-                borderRadius: Radius.pill,
-                backgroundColor: on ? (g.color || c.textStrong) : c.surface,
-                borderColor: on ? (g.color || c.textStrong) : c.border,
-                borderWidth: 1,
-              }}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  ...Type.small, fontWeight: '700', lineHeight: 18,
-                  color: on ? Palette.white : c.textMuted,
-                }}>
-                {g.shortLabel || g.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </EdgeFadedRow>
+      {/* ── THE NAV, IN ONE LINE ──────────────────────────────────────────
+          Ellie: "Within results pages, I want to have the hamburger nav in the
+          top left that opens a mini menu", and "page headers should indicate
+          [Section]:[detailed page]".
 
-      {activeGroup?.children?.length ? (
-        <EdgeFadedRow
-          ground={Palette.warm}
-          ref={pageNav}
-          gap={Spacing.lg}
-          contentContainerStyle={{ paddingBottom: Spacing.md }}>
-          {activeGroup.children.map((child) => {
-            const on = child.id === section;
-            return (
-              <Pressable
-      accessibilityRole="button"
-                key={child.id}
-                onPress={() => rememberSection(child.id)}
-                onLayout={(e) => { pageX.current[child.id] = e.nativeEvent.layout.x; }}
-                style={{ paddingVertical: Spacing.xs, minHeight: 28, justifyContent: 'center' }}>
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    ...Type.small, lineHeight: 18,
-                    fontWeight: on ? '700' : '400',
-                    color: on ? (activeGroup.color || c.textStrong) : c.textMuted,
-                  }}>
-                  {child.label}
-                </Text>
-                {/* Underline rather than a second row of pills: two rows of
-                    pills reads as two equal choices, and these are not. */}
-                <View
-                  style={{
-                    height: 2, marginTop: 2, borderRadius: Radius.pill,
-                    backgroundColor: on ? (activeGroup.color || c.textStrong) : 'transparent',
-                  }}
-                />
-              </Pressable>
-            );
-          })}
-        </EdgeFadedRow>
-      ) : null}
+          This replaced two rows of chips: twenty-nine entries through a window
+          four wide, scrolled sideways to find the one you wanted. The line
+          says where you are, and the hamburger beside it is how you go
+          somewhere else. */}
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+          paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md,
+        }}>
+        <Pressable
+          ref={burger}
+          accessibilityRole="button"
+          accessibilityLabel="Sections"
+          onPress={openNav}
+          hitSlop={10}
+          style={{
+            width: 34, height: 34, borderRadius: Radius.md,
+            alignItems: 'center', justifyContent: 'center',
+            backgroundColor: c.surface, borderWidth: 1, borderColor: c.border,
+          }}>
+          <SymbolView
+            name={'line.3.horizontal' as never}
+            size={16}
+            tintColor={activeGroup?.color || c.textStrong}
+            // not markable: the hamburger's glyph, shown only where SF Symbols is unavailable.
+            fallback={<Text style={{ ...Type.body, color: c.textStrong }}>{'≡'}</Text>}
+            style={{ width: 18, height: 18 }}
+          />
+        </Pressable>
+        <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textMuted, flex: 1 }}>
+          {activeGroup && activeGroup.id !== section
+            ? `${activeGroup.label}: ${labelOf(section)}`
+            : labelOf(section)}
+        </Text>
+      </View>
 
       <View style={{ flex: 1 }}>
         {/* ── THE GROUND IS THE TAB'S, NOT THIS VIEW'S ─────────────────
@@ -517,6 +599,10 @@ export default function Results({
           partnerName={them}
           onCreated={(note) => setNotes((prev) => [note, ...prev])}
           onRemoved={(id) => setNotes((prev) => prev.filter((n) => n.id !== id))}
+          /* A mark opened from the margin can be shared, tagged or deleted from
+             the sheet. Same argument as onRemoved: the screen holds the list,
+             so the screen is what has to hear about it. */
+          onChanged={(note) => setNotes((prev) => prev.map((n) => (n.id === note.id ? note : n)))}
           /* The words the Notes tab sent us to, when it sent us. */
           focus={focusMark}>
         <SectionBody
@@ -553,11 +639,102 @@ export default function Results({
         />
         </AnnotationProvider>
       </View>
-      {/* No previous and next buttons.
-          They ran across the bottom of every results page, taking a strip of
-          the screen on the longest pages in the product to offer a move the
-          nav above already offers, by name, to any section rather than only
-          the adjacent one. Reading results is not a wizard. */}
+
+      {/* ── BACK AND FORWARD ──────────────────────────────────────────────
+          Ellie: "Within results pages on the app, we need to add the back and
+          forward arrows at the bottom of each page, just like the website
+          does."
+
+          They were taken out once, on the argument that reading results is not
+          a wizard and the nav above offers any page by name rather than only
+          the adjacent one. That was true of the two chip rows and it is not
+          true of the menu: going to the next page is now a tap on the
+          hamburger, a tap on a band and a tap on a row. Three taps for the
+          commonest move in the product is what these are for.
+
+          Each names where it is going. An arrow alone at the foot of a long
+          page is a control you have to try to find out what it does. */}
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+          paddingHorizontal: Spacing.xl,
+          paddingTop: Spacing.md,
+          /* Clear of the floating tab bar. They sat under it, which is the
+             same as not being there. */
+          paddingBottom: Spacing.sm, marginBottom: BottomTabInset,
+        }}>
+        {prev ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Back to ${labelOf(prev)}`}
+            onPress={() => rememberSection(prev)}
+            style={{
+              flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+              paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+              borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
+              backgroundColor: c.surface,
+            }}>
+            // not markable: the back arrow, nav furniture rather than prose.
+            <Text style={{ ...Type.body, color: activeGroup?.color || c.textStrong }}>{'‹'}</Text>
+            <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, flex: 1 }}>
+              {labelOf(prev)}
+            </Text>
+          </Pressable>
+        ) : <View style={{ flex: 1 }} />}
+        {next ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`On to ${labelOf(next)}`}
+            onPress={() => rememberSection(next)}
+            style={{
+              flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+              paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+              borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
+              backgroundColor: c.surface,
+            }}>
+            <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, flex: 1, textAlign: 'right' }}>
+              {labelOf(next)}
+            </Text>
+            // not markable: the forward arrow, nav furniture rather than prose.
+            <Text style={{ ...Type.body, color: activeGroup?.color || c.textStrong }}>{'›'}</Text>
+          </Pressable>
+        ) : <View style={{ flex: 1 }} />}
+      </View>
+
+      {/* ── THE SAME MENU, UNDER THE HAMBURGER ────────────────────────────
+          Ellie: "same colors, banners, functionality as the landing page but
+          in a dropdown from the hamburger nav." One component, two densities,
+          so the two cannot drift into two menus. */}
+      {navOpen ? (
+        <Modal transparent animationType="fade" onRequestClose={() => setNavOpen(false)}>
+          <Pressable
+            accessibilityLabel="Close"
+            onPress={() => setNavOpen(false)}
+            style={{ flex: 1, backgroundColor: 'rgba(14,11,7,0.38)' }}>
+            {/* ── THE INSET COMES FROM OUTSIDE THE MODAL ──────────────────
+                A SafeAreaView inside a Modal reports nothing on iOS: the modal
+                is its own window and the provider that knows where the notch
+                is sits under it, not over it. So the top row landed behind the
+                clock and the Dynamic Island. The number is read where it is
+                known, in the screen, and carried in. */}
+            <Pressable
+              onPress={() => {}}
+              style={{
+                marginHorizontal: Spacing.lg,
+                marginTop: dropTop,
+                borderRadius: Radius.xl, overflow: 'hidden',
+                flexShrink: 1,
+              }}>
+              <ResultsMenu
+                groups={groups}
+                current={section}
+                density="sheet"
+                onOpenSection={(id) => { setNavOpen(false); rememberSection(id); }}
+              />
+            </Pressable>
+          </Pressable>
+        </Modal>
+      ) : null}
     </View>
   );
 }
@@ -625,7 +802,10 @@ function SectionBody({
             bName: results.content?.names?.b || 'Your partner',
             quadrants: results.content?.mapQuadrants,
           }}
-          onDone={() => onGoToSection('couple-type')}
+          /* Ellie: "after the storycard highlights, full results should start
+             with the landing page." It used to drop the reader on Couple Type,
+             which is the next card's subject rather than the way in. */
+          onDone={() => onGoToSection(MENU_SECTION)}
         />
       );
     }

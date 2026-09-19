@@ -109,7 +109,21 @@ export function appTargetFor(deepLink) {
   const view = /[?&]view=([^&]+)/.exec(deepLink || '')?.[1] || '';
 
   // Tabs the app has.
-  if (view === 'results') return { route: '/insights' };
+  /**
+   * Results, from the beginning.
+   *
+   * Ellie: "When a user clicks results are ready or something from their
+   * homepage, they should be brought straight to the storycard highlights
+   * experience and then, after the storycard highlights, full results should
+   * start with the landing page."
+   *
+   * The Insights tab on its own opens the landing menu now, which is right for
+   * "let me go and look". This card is the product saying "they are ready",
+   * and that is a different sentence: it starts with the cards. Same shape as
+   * `settings` and `exercise` below, so the app routes on a named thing rather
+   * than on which card it came from.
+   */
+  if (view === 'results') return { route: '/insights', results: true };
   if (view === 'home' || view === '') return { route: '/' };
   if (view === 'practice') return { route: '/resources' };
   if (view === 'notes') return { route: '/notes' };
