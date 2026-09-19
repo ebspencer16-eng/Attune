@@ -184,7 +184,7 @@ export default function ResultsMenu({
               }}
               style={{
                 paddingVertical: big ? Spacing.lg : Spacing.md,
-                paddingLeft: isExercise ? Spacing.xl + Spacing.lg : Spacing.xl,
+                paddingLeft: isExercise ? Spacing.xl + Spacing.md : Spacing.xl,
                 paddingRight: Spacing.xl,
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
@@ -228,12 +228,25 @@ export default function ResultsMenu({
                 style={{
                   ...Type.cardTitle,
                   fontFamily: Fonts.display,
-                  fontSize: big ? 17 : 15,
+                  /**
+                   * ── INDENTED, AND A SHADE SMALLER ──────────────────────
+                   * Ellie asked for the exercises "indented and italicised.
+                   * Just to provide some visual variation."
+                   *
+                   * They are indented, under a heading of their own. They are
+                   * not italic, and that is a limit rather than a decision:
+                   * only PlayfairDisplay-Bold is bundled, there is no italic
+                   * face, and iOS does not slant a registered face on request.
+                   * Asking for italic here produces nothing at all, which is
+                   * worse than not asking. The theme says the same thing about
+                   * weights, for the same reason.
+                   *
+                   * The size step is what stops the longest label truncating
+                   * once the indent has taken its width: Physical Intimacy
+                   * Expectations is twenty-nine characters and has to fit.
+                   */
+                  fontSize: big ? (isExercise ? 15.5 : 17) : 15,
                   lineHeight: Math.ceil((big ? 17 : 15) * 1.41),
-                  /* Indented and italic, which is the whole of the variation
-                     she asked for: the four that are not exercises read as the
-                     spine and the five that are read as a set inside it. */
-                  fontStyle: isExercise ? 'italic' : 'normal',
                   color: c.textStrong,
                   flex: 1,
                 }}>
@@ -264,7 +277,7 @@ export default function ResultsMenu({
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
                         paddingVertical: big ? Spacing.md : Spacing.sm + 2,
-                        paddingLeft: Spacing.xl + Spacing.lg + (big ? 26 : 22) + Spacing.lg,
+                        paddingLeft: Spacing.xl + Spacing.md + (big ? 26 : 22) + Spacing.lg,
                         paddingRight: Spacing.xl,
                         borderTopWidth: 1, borderTopColor: c.border,
                       }}>

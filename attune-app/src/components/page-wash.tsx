@@ -69,10 +69,21 @@ export default function PageWash({ tint, second }: {
           line across the page. It covers the whole screen now and fades to
           nothing a fifth of the way down, which leaves nothing to draw an edge
           with. */}
+      {/* ── STRONG ENOUGH TO BE A SECTION'S COLOUR ────────────────────────
+          Ellie, of the cover pages: "that exercise's color as a tinted
+          gradient on cream, then that same bg persists through the exercise's
+          section behind the tiles."
+
+          At a tenth it was a suggestion of colour, which was right when the
+          wash was decoration. It is doing a job now: it is the thing that says
+          Expectations is blue on all seven of its pages, and a suggestion
+          cannot say that. Two stops rather than one, so it still fades to
+          nothing rather than ending on an edge. */}
       <LinearGradient
-        colors={[withAlpha(hue, 0.1), withAlpha(hue, 0)]}
+        colors={[withAlpha(hue, 0.26), withAlpha(hue, 0.08), withAlpha(hue, 0)]}
+        locations={[0, 0.45, 1]}
         start={{ x: 1, y: 0 }}
-        end={{ x: 0.1, y: 0.22 }}
+        end={{ x: 0.1, y: 0.45 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
       {second ? (

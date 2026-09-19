@@ -2277,13 +2277,22 @@ function WrittenPair({
   );
 }
 
+/**
+ * The heading on a Relationship Reflection page.
+ *
+ * ── LIGHT, LIKE EVERYTHING ELSE ON THESE PAGES ────────────────────────────
+ * Ellie: "I need the text to be visible against the bg." These two lines were
+ * the last dark ink left on a page that had become a dark gradient: the panels
+ * inside it were converted and this sits above them, so it was missed. Ink on
+ * navy is not low contrast, it is invisible.
+ */
 function ReflectionHead({ page }: { page?: { title: string; sub?: string } | null }) {
   if (!page?.title) return null;
   return (
     <View style={{ marginBottom: Spacing.lg }}>
-      <Text style={{ ...Type.title, color: c.textStrong }}>{page.title}</Text>
+      <Text style={{ ...Type.title, color: Palette.white }}>{page.title}</Text>
       {page.sub ? (
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 19 }}>
+        <Text style={{ ...Type.small, color: INK_QUIET, marginTop: Spacing.sm, lineHeight: 19 }}>
           {page.sub}
         </Text>
       ) : null}

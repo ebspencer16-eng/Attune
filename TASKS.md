@@ -68,24 +68,11 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-The batch of 21 September, recorded in full before any of it was built.
+**Nothing open.** The batch of 21 September is built and sitting in section 3.
+Two things need you rather than me: O238 and O239.
 
 | # | Task |
 |--|--|
-| **The table of contents** |  |
-| O240 | **Group the exercises under a heading of their own.** "In TOC-type menu, maybe there's a section called exercise results and the exercises are indented and italicised? Just to provide some visual variation?" |
-| O241 | **The menu wears Attune's colours, not the sections'.** "Menu should just be attune colors, the only exercise colors should be the icons to the left of the exercise names." So the row washes go; the icon is the only coloured thing. |
-| O242 | **The dropdown arrows again.** "Dropdown arrows on the menu should be larger." They were enlarged once and are still too small. |
-| **The couple map** |  |
-| O243 | **The caption moves and changes weight.** "placement calculated based on 10 dimension scores should be italicized and small below the 'your couple map' eyebrow." So it sits under the eyebrow rather than under the map. |
-| O244 | **No individual type labels on the map.** "No ind type labels in the couple map on storycards or couple type page." The four quadrant names come off both surfaces' maps. |
-| **Moving through Insights** |  |
-| O245 | **The section line follows you.** "Top line nav should move as you move through the insights, current tab should always be centered." |
-| **Cover pages** |  |
-| O246 | **A cover page per exercise.** "I think there should be a cover page for each exercise with that exercise's color as a tinted gradient on cream, then that same bg persists through the exercise's section behind the tiles." |
-| O247 | **The overview pages change with them.** "Because we will have the cover pages, the overview pages should only say overview at the top and should also have a count in the top right (1/4)." So the overview joins the numbered set rather than sitting outside it. |
-| **Relationship Reflection** |  |
-| O248 | **Ghost tiles, and legible type.** "Rel Relf detailed pages need to be adjusted, I want ghost tiles instead of white and I need the text to be visible against the bg." |
 
 ## 3. For you to review
 
@@ -152,6 +139,15 @@ receive a notification from Apple's servers.
 | R208 | A mark opens |
 | R209 | A deleted tag goes into a closed Archive |
 | R204 | The third row of the home tile capitalises |
+| O240 | **The exercises sit under a heading of their own**, indented, with "Exercise results" above them. Not italic, and that is a limit rather than a choice: only PlayfairDisplay-Bold is bundled, there is no italic face, and iOS draws nothing at all rather than slanting one. Say the word and I will add the italic font file; it is a build, not an update. |
+| O241 | **The menu is Attune's colours only.** Every row carried a gradient of its section's colour; the icon is the one coloured thing now. |
+| O242 | **The arrows are larger again**, half as big again as last time. |
+| O243 | **The map caption is italic, small, and under the eyebrow** rather than under the map, where it read as a conclusion drawn from what you had just looked at. |
+| O244 | **The four type names are off the map**, on the storycard and the couple type page, on both surfaces. The quadrant tints stay, so the map still has regions; it no longer tells each of you which one you are. |
+| O245 | **The section line follows you**, and the section you are on stays centred. Measured rather than counted, because the names are different lengths and abbreviate together. |
+| O246 | **Every exercise has a cover page**: its name on its own colour, tinted into the cream, and that ground carries through every page of the section behind the tiles. The tint is stronger than it was, because it is doing a job now rather than decorating. |
+| O247 | **The overview is 1/4.** It only says "Overview" at the top, since the cover carried the name two taps earlier, and it is counted with the detail pages. The cover is not counted: it is the door, and a door is not one of four rooms. |
+| O248 | **Relationship Reflection reads.** Three panels were still cream with dark type on them, left from when those pages were cream; they are ghost tiles now. Two headings were still dark ink, above panels that had already been converted, which is the same miss twice. The same heading on the Conflict pages had it too. |
 | O213 | **The landing is a table of contents now.** The colour left the ground and went into the icon, which is what you suggested: each row is cream with a hairline under it and a wash of its section's colour fading out across it. Nothing is a block. |
 | O214 | **The landing is not hero type.** Playfair still, a shade above body size. |
 | O215 | **Nothing trails off.** Physical Intimacy Expectations is the longest label the product has and it sits on one line on the narrowest phone. |

@@ -368,7 +368,10 @@ function PageHead({
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           gap: Spacing.md,
         }}>
-        <Text style={{ ...Type.title, color: c.textStrong, flex: 1 }}>{title}</Text>
+        {/* White, because the three Conflict detail pages moved onto the
+            section's own gradient. The same miss as ReflectionHead: the panels
+            below were converted and the heading above them was not. */}
+        <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{title}</Text>
         <View
           style={{
             paddingHorizontal: Spacing.md, paddingVertical: 3, borderRadius: Radius.pill,
