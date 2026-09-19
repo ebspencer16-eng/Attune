@@ -74,7 +74,17 @@ if (!both) {
   // `lead` is gone with the line it carried. Left out rather than left listed:
   // this allowlist is the promise, and a name in it that nothing sends is a
   // promise about something that does not exist.
-  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'actionPlan', 'promptLabel', 'allAlignedNote'];
+  /**
+   * `domains` is the six aspects grouped onto two pages, at Ellie's ask. It
+   * carries nothing the `dimensions` below it does not already carry: the
+   * entries in it ARE those dimensions, grouped, plus a label and a prompt
+   * chosen from among them. The assertion under the loop holds that: every
+   * dimension inside a domain has to be one that is already allowed through on
+   * its own, by id, so a grouped view cannot become a second channel with
+   * looser rules than the thing it groups.
+   */
+  const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'domains', 'actionPlan', 'promptLabel', 'allAlignedNote'];
+  const ALLOWED_DOMAIN = ['section', 'id', 'label', 'ground', 'dimensions', 'prompt', 'promptFrom', 'picks'];
   // `positions` is the two partners' averages over the questions in this
   // dimension. It is an aggregate of `questions`, which is already listed
   // below and is the whole point of the screen, so it exposes nothing new: it
@@ -121,6 +131,22 @@ if (!both) {
 
   const extraTop = Object.keys(both).filter((k) => !ALLOWED_TOP.includes(k));
   if (extraTop.length) problems.push(`payload carries unlisted fields: ${extraTop.join(', ')}`);
+
+  /** Every domain is a grouping of dimensions that are themselves allowed. */
+  const dimById = new Map(both.dimensions.map((d) => [d.id, d]));
+  for (const dom of both.domains || []) {
+    const extra = Object.keys(dom).filter((k) => !ALLOWED_DOMAIN.includes(k));
+    if (extra.length) problems.push(`domain ${dom.id} carries unlisted fields: ${extra.join(', ')}`);
+    for (const d of dom.dimensions || []) {
+      if (!dimById.has(d.id)) {
+        problems.push(`domain ${dom.id} carries a dimension '${d.id}' that is not in the payload's own list, so nothing has checked it.`);
+      }
+      const extraDim = Object.keys(d).filter((k) => !ALLOWED_DIM.includes(k) && k !== 'leadWithPicks');
+      if (extraDim.length) {
+        problems.push(`domain ${dom.id}'s ${d.id} carries unlisted fields: ${extraDim.join(', ')}`);
+      }
+    }
+  }
 
   for (const d of both.dimensions) {
     const extra = Object.keys(d).filter((k) => !ALLOWED_DIM.includes(k));

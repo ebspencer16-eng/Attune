@@ -27,6 +27,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import type { ConflictOpenings, ConflictResults, ConflictSummary } from '@/api/client';
 import PageTile from '@/components/page-tile';
+import StepCount from '@/components/step-count';
 import { Prose } from '@/components/annotation-context';
 import { ResultsScroll } from '@/components/results-scroll';
 import {
@@ -40,6 +41,7 @@ const INK = c.onDark;
 const INK_QUIET = c.onDarkMuted;
 const PANEL = 'rgba(255,255,255,0.10)';
 const PANEL_EDGE = 'rgba(255,255,255,0.22)';
+const PANEL_BAND = 'rgba(255,255,255,0.16)';
 
 /**
  * The four Conflict screens, named exactly as the server names them.
@@ -107,8 +109,17 @@ const ADVICE_KEEP = 'One thing to keep in mind';
 const accentBlue = '#1B5FE8';
 
 export default function ConflictResultsView({
-  data, section, accent, ground, groundStops, title = 'Conflict Styles',
+  data, section, accent, ground, groundStops, title = 'Conflict Styles', step = null,
 }: {
+  /**
+   * Which of the section's pages this is.
+   *
+   * Ellie: "Add 1/3 page count on conflict pages just like other sections."
+   * Conflict is the one section whose pages live in their own file, which is
+   * the only reason it did not have one: the count is computed from the nav in
+   * results.tsx and was never passed across the boundary.
+   */
+  step?: { index: number; total: number } | null;
   /** The heading this page prints, from the server's pageTitles. */
   title?: string;
   /**
@@ -158,9 +169,9 @@ export default function ConflictResultsView({
   return (
     <View style={{ flex: 1 }}>
       {screen === 'overview' ? <Glance data={data} title={title} ground={ground} groundStops={groundStops} /> : null}
-      {screen === 'snapshot' ? <Snapshot data={data} accent={accent} ground={ground} groundStops={groundStops} /> : null}
-      {screen === 'patterns' ? <Patterns you={you} content={content} ground={ground} groundStops={groundStops} /> : null}
-      {screen === 'wrote' ? <Wrote data={data} ground={ground} groundStops={groundStops} /> : null}
+      {screen === 'snapshot' ? <Snapshot data={data} accent={accent} ground={ground} groundStops={groundStops} step={step} /> : null}
+      {screen === 'patterns' ? <Patterns you={you} content={content} ground={ground} groundStops={groundStops} step={step} /> : null}
+      {screen === 'wrote' ? <Wrote data={data} ground={ground} groundStops={groundStops} step={step} /> : null}
     </View>
   );
 }
@@ -372,32 +383,34 @@ function PageHead({
             section's own gradient. The same miss as ReflectionHead: the panels
             below were converted and the heading above them was not. */}
         <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{title}</Text>
-        <View
-          style={{
-            paddingHorizontal: Spacing.md, paddingVertical: 3, borderRadius: Radius.pill,
-            backgroundColor: shared ? '#E7F3EC' : '#FBE9F1',
-          }}>
-          <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: shared ? '#2E7D5B' : '#B5546E' }}>
-            {shared ? (copy.sharedBadge || 'Shared') : (copy.privateBadge || 'Just for you')}
-          </Text>
-        </View>
+        {/* ── NO BADGE ON THE DETAIL PAGES ────────────────────────────────
+            Ellie: "Remove shared pill from conflict snapshot page and just for
+            you pill on your patterns page."
+
+            The badge stays where it does real work, which is the at-a-glance
+            page's action plan: that one says "private to you" beside a list a
+            reader might otherwise assume their partner is reading. On a page
+            heading it was a label on every page saying the same two things
+            alternately, which is the kind of thing people stop seeing. */}
       </View>
     </View>
   );
 }
 
 /** Snapshot. The three shared questions, and what each of you helps with. */
-function Snapshot({ data, accent, ground = null, groundStops = null }: {
+function Snapshot({ data, accent, ground = null, groundStops = null, step = null }: {
   data: Extract<ConflictResults, { ready: true }>; accent?: string;
   /* Ellie: "Same with conflict patterns detailed pages." The section's own
      ground, from the nav, which its overview page already uses. */
   ground?: string[] | null; groundStops?: number[] | null;
+  step?: { index: number; total: number } | null;
 }) {
   const { you, partner, names, content } = data;
 
   return (
     <PageTile ground={ground} locations={groundStops}>
       {/* block: conflict-snapshot/head */}
+      <StepCount step={step} />
       <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
       {/* ── THE SNAPSHOT IS A TABLE ──────────────────────────────────────
           Ellie: "Your patterns does match the web view, but the conflict
@@ -424,8 +437,11 @@ function Snapshot({ data, accent, ground = null, groundStops = null }: {
             <View
               key={row.id}
               style={{
-                paddingTop: i === 0 ? 0 : Spacing.lg,
-                marginTop: i === 0 ? 0 : Spacing.lg,
+                /* Ellie: "Too much vertical space between rows on conflict
+                   snapshot conflict tile." Sixteen above the rule and sixteen
+                   below it is thirty-two points between two short rows. */
+                paddingTop: i === 0 ? 0 : Spacing.md,
+                marginTop: i === 0 ? 0 : Spacing.md,
                 borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
               }}>
               <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>{row.label}</Text>
@@ -479,8 +495,10 @@ function Snapshot({ data, accent, ground = null, groundStops = null }: {
 
             The question's own text is the label, because a heading would be
             customer copy. */}
+        {/* Ellie: "and in the repair tile between sections 1 and 2." Same
+            doubling: a margin above the rule and a padding below it. */}
         {you.strength || partner?.strength ? (
-          <View style={{ marginTop: Spacing.lg, borderTopColor: PANEL_EDGE, borderTopWidth: 1, paddingTop: Spacing.lg }}>
+          <View style={{ marginTop: Spacing.md, borderTopColor: PANEL_EDGE, borderTopWidth: 1, paddingTop: Spacing.md }}>
             <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>
               {content.resetQuestion}
             </Text>
@@ -505,15 +523,17 @@ function Snapshot({ data, accent, ground = null, groundStops = null }: {
  * parameter, so there is nothing here to accidentally render.
  */
 function Patterns({
-  you, content, ground = null, groundStops = null,
+  you, content, ground = null, groundStops = null, step = null,
 }: {
   you: ConflictSummary;
   content: Extract<ConflictResults, { ready: true }>['content'];
   ground?: string[] | null; groundStops?: number[] | null;
+  step?: { index: number; total: number } | null;
 }) {
   return (
     <PageTile ground={ground} locations={groundStops}>
       {/* block: conflict-patterns/head */}
+      <StepCount step={step} />
       <PageHead copy={content.copy} title={content.copy.patternsTitle} shared={false} />
       {/* The privacy line sits above the content, not below it, because someone
           reading their own worst pattern should know it is private before they
@@ -597,8 +617,16 @@ function Patterns({
               ) : null}
 
               {advice ? (
-                <View style={{ marginTop: Spacing.md, backgroundColor: '#F4F7FF', borderRadius: Radius.md, padding: Spacing.lg }}>
-                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: accentBlue, marginBottom: Spacing.xs }}>
+                /* ── WHITE ON NEAR-WHITE ────────────────────────────────
+                   Ellie: "Text is invisible in conflict patterns tile."
+
+                   It was: the tile was #F4F7FF and everything in it had been
+                   converted to white when the page moved onto the dark
+                   gradient. The tile itself was the one thing the conversion
+                   missed, so three lines of white type sat on a white panel.
+                   A ghost band, like every other panel on these pages. */
+                <View style={{ marginTop: Spacing.md, backgroundColor: PANEL_BAND, borderColor: PANEL_EDGE, borderWidth: 1, borderRadius: Radius.md, padding: Spacing.lg }}>
+                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.xs }}>
                     {adviceLabel}
                   </Text>
                   {v >= 2 && advice.title ? (
@@ -616,9 +644,10 @@ function Patterns({
 }
 
 /** What You Each Wrote. Only the questions you both answered knowing they were shared. */
-function Wrote({ data, ground = null, groundStops = null }: {
+function Wrote({ data, ground = null, groundStops = null, step = null }: {
   data: Extract<ConflictResults, { ready: true }>;
   ground?: string[] | null; groundStops?: number[] | null;
+  step?: { index: number; total: number } | null;
 }) {
   const { you, partner, names, content } = data;
 
@@ -651,7 +680,8 @@ function Wrote({ data, ground = null, groundStops = null }: {
   if (!rows.length) {
     return (
       <PageTile ground={ground} locations={groundStops}>
-        <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
+        <StepCount step={step} />
+      <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
         <Text style={{ ...Type.body, color: INK_QUIET }}>
           Neither of you wrote anything on these questions.
         </Text>
@@ -660,8 +690,19 @@ function Wrote({ data, ground = null, groundStops = null }: {
   }
 
   return (
-    <ResultsScroll contentContainerStyle={pad}>
+    /* ── THE PAGE HAD NO TILE ──────────────────────────────────────────────
+       Ellie: "What you each wrote white text is invisible. Missing that page's
+       tile, I want all insights pages to be in a tile."
+
+       Both true and the same cause: this function has two returns, the empty
+       state and the page, and the conversion to PageTile replaced the first
+       one. So the empty state got a dark tile and the page itself stayed a
+       bare scroll on cream, with type that had already been turned white for
+       the tile it never got. A replacement that stops at the first match is
+       how half a function gets converted. */
+    <PageTile ground={ground} locations={groundStops}>
       {/* block: conflict-wrote/head */}
+      <StepCount step={step} />
       <PageHead copy={content.copy} title={content.copy.wroteTitle} shared />
       {/* block: conflict-wrote/rows */}
       {/* The label, then the two quote cards. No outer card: the website has
@@ -674,7 +715,7 @@ function Wrote({ data, ground = null, groundStops = null }: {
           <Written name={names.partner} text={r.theirs} />
         </View>
       ))}
-    </ResultsScroll>
+    </PageTile>
   );
 }
 
@@ -746,23 +787,30 @@ function RepairColumn({ title, items, accent }: {
  * pair reads as a pair. The app returned null, so a question one of you had
  * skipped showed a single card with nothing saying the other half was empty.
  */
+/**
+ * One person's answer, quoted.
+ *
+ * A cream card with brown type, which was right while this page was cream and
+ * is the last thing on it that had not moved. Ghost, like every other panel on
+ * these pages now.
+ */
 function Written({ name, text }: { name: string; text: string | null }) {
   return (
     <View
       style={{
-        backgroundColor: '#FDF6EC', borderColor: '#EBD9BE', borderWidth: 1,
+        backgroundColor: PANEL, borderColor: PANEL_EDGE, borderWidth: 1,
         borderRadius: Radius.md, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md,
         marginBottom: Spacing.md,
       }}>
       <Text
         style={{
-          ...Type.eyebrow, fontSize: 9, color: '#9A6B2F', marginBottom: Spacing.xs,
+          ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.xs,
         }}>
         {name}
       </Text>
       <Prose
         style={{
-          ...Type.body, color: c.textStrong, lineHeight: 24,
+          ...Type.body, color: Palette.white, lineHeight: 24,
           fontStyle: text ? 'italic' : 'normal',
         }}>
         {text ? `“${text}”` : 'No answer given.'}

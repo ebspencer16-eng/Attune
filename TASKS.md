@@ -49,7 +49,6 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
-| O239 | **The security challenge is already gone, and there is probably nothing to find.** It lifted on its own about twenty minutes after it started, and the API has answered normally since. That is why you cannot see the toggle: Vercel only shows Attack Challenge Mode while it is relevant, and on current plans it lives under the project's **Firewall** tab rather than Settings, as *Attack Challenge Mode* in the right-hand panel. If it is not there, it is off. Nothing to do unless the app starts answering "Something went wrong" across the board again, and if it does, that tab is where to look first. |
 
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
@@ -68,11 +67,41 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 21 September is built and sitting in section 3.
-Two things need you rather than me: O238 and O239.
+The batch of 22 September, recorded in full before any of it was built.
 
 | # | Task |
 |--|--|
+| **The menu** |  |
+| O249 | **Indent the exercises further.** "Further indent the exercise results in the menu, the icon should be indented and the text should come after that." The icon moves in with the label rather than the label moving away from the icon. |
+| O250 | **The dropdown does not list the cover.** "Dropdown for each exercise should not list the cover page. If a user just taps on the exercise from the menu it should take them to the cover page, but if they tap the dropdown then they should see the full list." So the name and the arrow do different things. |
+| **Physical Intimacy, regrouped** |  |
+| O251 | **Six dimension pages become two.** Her grouping: **How it happens** — Frequency, Initiating, Adventurousness. **What makes it work** — Comfort & Safety, Communication, What It Is For. |
+| O252 | **Built like the Communication detail pages.** "No intro paragraph, but an overall orientation tile that has the 3 bars, and a 'talk about it' prompt based on whichever of the 3 sections had the biggest discrepancy for the pairing. If two are tied, use the above ordering as a prioritized list for which should be prompted. Also make sure the dropdown side by side section is built." |
+| O253 | **What makes it work leads with the choices, not a bar.** "what makes it work should feature the what is it primarily about section in the overview tile instead of the bar for the 'what it is for' section." |
+| O254 | **Two questions change, on both surfaces.** "Remove 'what does intimacy most mean in your marriage now' question from exercise and results. Move 'when you're emotionally disconnected, physical intimacy tends to' to the comfort and safety category." |
+| O255 | **Old anchors have to keep resolving.** Not her instruction, mine: regrouping changes section ids, and a note is found by its page's id. Every mark anyone has made on an intimacy dimension page would stop resolving without aliases, which is the same failure as the copy edit that lost her answer. Aliases, and a gate holding them. |
+| **Cover pages** |  |
+| O256 | **Louder and more branded.** "Cover pages need to be redone, they need to be louder and more branded. More visually interesting." |
+| O257 | **And a way forward off them.** "Cover pages should have a 'get started' or 'see insights' button that brings you to the overview page for that section - just to make the nav super clear." |
+| **Conflict Patterns** |  |
+| O258 | **Too much air in two tiles.** "Too much vertical space between rows on conflict snapshot conflict tile and in the repair tile between sections 1 and 2." |
+| O259 | **Two pills come off.** "Remove shared pill from conflict snapshot page and just for you pill on your patterns page." |
+| O260 | **Text is invisible in the conflict patterns tile.** |
+| O261 | **The page count is missing on the conflict pages.** "Add 1/3 page count on conflict pages just like other sections." |
+| O262 | **What You Each Wrote has no tile and unreadable type.** "What you each wrote white text is invisible. Missing that page's tile, I want all insights pages to be in a tile." |
+| **Relationship Reflection** |  |
+| O263 | **What Comes Next shows eleven things and should show two.** "Rel RElf in the what comes next section has 11 things - it should only have 2, and it should be what we each wrote for ourselves." This reverses O232, which gave the section its full action plan two days ago; her call, and the note under it says so. |
+| O264 | **Two labels are hard to read on the overview.** "'How do you feel right now' eyebrow is hard to see on rel relf overview - adjust that and the pole labels in the same tile." |
+| O265 | **And two on the detail page.** "'Ellie admires' and 'preston admires' is hard to read on rel relf detailed page." |
+| O266 | **Condense the How you feel right now tile.** "Too much blank space." |
+| **Couple Type** |  |
+| O267 | **Remove the "what this looks like in your relationship" tile**, app and site. |
+| **Consistency** |  |
+| O268 | **Hero height and page count, the same everywhere.** "There's too much space above the page headers on expectations detailed pages. Make sure the height of the hero and placement of page count is consistent across pages and across sections." |
+| **Learn** |  |
+| O269 | **No "explore more resources" arrow when there is nothing more to explore.** "I shouldn't have an explore more resources arrow if I own all the resources." |
+| **Colour** |  |
+| O270 | **The three plain tabs.** "Insights landing menu, learn tab, and notes tab all feel very plain. Please add a lot more color and visual appeal to those pages." |
 
 ## 3. For you to review
 
@@ -126,6 +155,7 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| O239 | The Vercel security challenge, and where the toggle lives |
 | R212 | Home: the glass tile and the greeting |
 | R211 | Results are ready opens the storycards |
 | R200 | Notes has a ground of its own |

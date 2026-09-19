@@ -254,7 +254,6 @@ export const SECTION_BLOCKS = {
     { id: 'axes', note: 'What each axis means, both poles. Without it the map is a picture.' },
     { id: 'individual-types', note: 'Each partner alone: their type, a blurb, a bar per axis.' },
     { id: 'name', note: 'The type name and its tagline.' },
-    { id: 'description', note: 'What this pairing is like.' },
     { id: 'strengths', optional: true, note: 'What comes naturally.' },
     { id: 'sticking-points', optional: true, note: "What's worth being aware of." },
     { id: 'tips', optional: true, note: 'Phrase to try.' },

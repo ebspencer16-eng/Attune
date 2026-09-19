@@ -141,36 +141,32 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
   }
 
   /**
-   * 4. Reflection, as its own at-a-glance action plan.
+   * 4. Reflection, in their own words.
    *
-   * ── WHAT WAS WRONG ────────────────────────────────────────────────────
-   * Ellie: "Rel Relf action items don't carry to what comes next correctly,
-   * I'm only seeing 'ellie wrote' and 'preston wrote'."
+   * ── THIS HAS BEEN BOTH WAYS ───────────────────────────────────────────
+   * It was these two rows, then Ellie: "Rel Relf action items don't carry to
+   * what comes next correctly, I'm only seeing 'ellie wrote' and 'preston
+   * wrote'." So it took the section's whole action plan instead.
    *
-   * That is exactly what this did: it took one written answer, a6, and made
-   * two rows of it titled with their names. The section's actual action plan
-   * is reflectionPlan, which is what its overview page draws, and the rule
-   * stated at the top of this file is that every group here is what the reader
-   * already met in context.
+   * Then, seeing that: "Rel RElf in the what comes next section has 11 things
+   * - it should only have 2, and it should be what we each wrote for
+   * ourselves." Eleven insights on a page whose job is to gather things up is
+   * the page becoming a second copy of the section.
    *
-   * Their own words stay, underneath, because a commitment each of them wrote
-   * is the one item on this page nobody had to be advised into.
+   * So it is the two commitments again, and this note is here so the next
+   * person to read "only two rows?" knows it was asked for twice.
    */
-  const reflectionItems = (reflectionPlan || [])
-    .filter((r) => r.title)
-    .map((r) => ({ title: r.title, body: r.body || null, say: r.action || null }));
   const commitment = (reflection?.written || []).find((w) => w.key === 'a6');
   if (commitment && (commitment.you || commitment.them)) {
-    if (commitment.you) reflectionItems.push({ title: `${you} wrote`, body: commitment.you, say: null });
-    if (commitment.them) reflectionItems.push({ title: `${them} wrote`, body: commitment.them, say: null });
-  }
-  if (reflectionItems.length) {
+    const items = [];
+    if (commitment.you) items.push({ title: `${you} wrote`, body: commitment.you, say: null });
+    if (commitment.them) items.push({ title: `${them} wrote`, body: commitment.them, say: null });
     groups.push({
       id: 'reflection',
       color: '#10B981',
       label: 'Relationship Reflection',
       section: 'reflection-overview',
-      items: reflectionItems,
+      items,
     });
   }
 

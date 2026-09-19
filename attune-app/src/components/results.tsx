@@ -25,21 +25,23 @@ import { SymbolView } from 'expo-symbols';
 
 import CoupleMap from '@/components/couple-map';
 import PageTile, { NeutralGround, ResultsBottomInset } from '@/components/page-tile';
+import StepCount from '@/components/step-count';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
 import { AnnotationProvider, Prose } from '@/components/annotation-context';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  CommsPlan, HighlightCard, IntimacyDimension, IntimacyResults, NextStepGroup,
+  CommsPlan, HighlightCard, IntimacyDomain, IntimacyResults, NextStepGroup,
   ReflectionInsight, ReflectionRating, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
   Note, Tag,
 } from '@/api/client';
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
-import ResultsMenu from '@/components/results-menu';
+import ResultsMenu, { GROUP_ICON } from '@/components/results-menu';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import GhostTile from '@/components/ghost-tile';
+import { withAlpha } from '@/components/page-wash';
 import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import { ResultsScroll } from '@/components/results-scroll';
@@ -99,28 +101,6 @@ const c = Colors.light;
  * component so that eleven detail pages cannot end up with eleven versions of
  * a two-character label.
  */
-function StepCount({ step, onDark }: {
-  step: { index: number; total: number } | null; onDark?: boolean;
-}) {
-  if (!step) return null;
-  return (
-    // not markable: a position indicator, not a finding. A mark anchored to
-    // "2/3" would follow the number rather than the page.
-    /* Ellie: "Detailed page count (1/3) should be in the top right not top
-       left. Make sure that's where it lives for all detailed pages across all
-       exercises." Right-aligned in its own full-width row, so it sits in the
-       tile's corner whatever the title under it does. */
-    <Text
-      style={{
-        ...Type.eyebrow,
-        color: onDark ? 'rgba(255,255,255,0.55)' : c.textMuted,
-        textAlign: 'right',
-        marginBottom: Spacing.sm,
-      }}>
-      {`${step.index}/${step.total}`}
-    </Text>
-  );
-}
 
 /**
  * How wide the hamburger's dropdown is.
@@ -828,6 +808,7 @@ export default function Results({
           /* The cover's title is the nav entry's own label, which is the
              exercise's full name from the registry. */
           coverTitle={navEntry?.label || ''}
+          coverIcon={activeGroup ? GROUP_ICON[activeGroup.id] || null : null}
           /* The active nav group's colour, which the server sends. Sections
              that need their own accent take it from here rather than writing
              a second hex next to the website's. */
@@ -987,7 +968,7 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, step, coverTitle, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, step, coverTitle, coverIcon, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
 }: {
@@ -996,6 +977,8 @@ function SectionBody({
   step: { index: number; total: number } | null;
   /** What a cover page is called: the nav entry's own label. */
   coverTitle: string;
+  /** The section's icon, the same one the menu draws. */
+  coverIcon: string | null;
   /** The server's heading for a page, and the strings inside it that both
       surfaces print. Passed down rather than reached for, so a page that does
       not take a title cannot quietly invent one. */
@@ -1076,7 +1059,14 @@ function SectionBody({
    * copy, and copy is Ellie's.
    */
   if (section.endsWith('-cover')) {
-    return <Cover title={coverTitle} accent={accent || c.accent} />;
+    return (
+      <Cover
+        title={coverTitle}
+        accent={accent || c.accent}
+        icon={coverIcon}
+        onStart={() => onGoToSection(section.replace('-cover', '-overview'))}
+      />
+    );
   }
 
   if (section === 'couple-type') {
@@ -1168,10 +1158,10 @@ function SectionBody({
 
   if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} placementsLabel={pageCopy('commPlacements', 'Overview')} ground={ground} groundStops={groundStops} />;
   if (section.startsWith('intimacy-')) {
-    const dim = intimacy?.dimensions.find((d) => d.section === section) ?? null;
+    const domain = intimacy?.domains?.find((d) => d.section === section) ?? null;
     return (
-      <IntimacyDimensionView
-        dim={dim}
+      <IntimacyDomainView
+        domain={domain}
         you={you}
         them={them}
         promptLabel={intimacy?.promptLabel || 'Talk about it'}
@@ -1203,6 +1193,7 @@ function SectionBody({
       <ConflictResultsView
         data={conflict} section={section} accent={accent} ground={ground} groundStops={groundStops}
         title={pageTitle('conflict-overview', 'Conflict Styles')}
+        step={step}
       />
     );
   }
@@ -1909,175 +1900,168 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
   );
 }
 
-function IntimacyDimensionView({
-  dim, you, them, promptLabel, step = null,
+/**
+ * One of the two Physical Intimacy pages.
+ *
+ * ── WHAT IT REPLACED ──────────────────────────────────────────────────────
+ * Six pages, one per aspect, each with a bar, a prompt and a side-by-side.
+ * Ellie: "Regroup physical intimacy pages just like we did for comms...
+ * Organize these pages just like the comms detailed pages are organized. No
+ * intro paragraph, but an overall orientation tile that has the 3 bars, and a
+ * 'talk about it' prompt based on whichever of the 3 sections had the biggest
+ * discrepancy for the pairing."
+ *
+ * So this is the Communication domain page's shape, with intimacy's data in
+ * it: an orientation panel of three rows, one prompt, and the responses behind
+ * a dropdown. The grouping, the widest gap and the tie-break all come from the
+ * server, because two surfaces deciding which aspect to prompt on is two
+ * surfaces prompting on different ones.
+ */
+function IntimacyDomainView({
+  domain, you, them, promptLabel, step = null,
 }: {
-  dim: IntimacyDimension | null; you: string; them: string; promptLabel: string;
+  domain: IntimacyDomain | null; you: string; them: string; promptLabel: string;
   step?: { index: number; total: number } | null;
 }) {
-  if (!dim) {
+  if (!domain) {
     return <Waiting title="Physical Intimacy" body={WAITING.LOCKED_BY_THEM} />;
   }
+  const ground = domain.ground?.length === 3
+    ? domain.ground
+    : ['#7A2540dd', '#7A254099', '#22204a'];
+
   return (
-    <PageTile ground={dim.ground?.length === 3 ? dim.ground : ['#7A2540dd', '#7A254099', '#22204a']}>
-        <StepCount step={step} onDark />
-        <Text style={{ ...Type.title, color: Palette.white }}>{dim.label}</Text>
-        {dim.intro ? (
-          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.sm }}>{dim.intro}</Prose>
-        ) : null}
+    <PageTile ground={ground}>
+      <StepCount step={step} onDark />
+      <Text style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
+        {domain.label}
+      </Text>
 
-        {/* ── WHERE YOU EACH LAND ─────────────────────────────────────────
-            block: intimacy-dimension/state
+      {/* ── ONE PANEL, ONE ROW PER ASPECT ────────────────────────────────
+          The Communication pages' "Overall orientation" panel, with intimacy's
+          three aspects in it. No intro paragraph above it, which Ellie asked
+          for and which these pages never had anything to put in anyway. */}
+      <View
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.18)',
+          borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, gap: Spacing.lg,
+        }}>
+        {/* block: intimacy-dimension/state */}
+        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)' }}>Overall orientation</Text>
+        {domain.dimensions.map((d) => (
+          <View key={d.id}>
+            {/* not markable: the aspect's name, which is a label on a row of
+                the panel rather than a finding. The questions inside the
+                dropdown below are the prose here, and those are markable. */}
+            <Text style={{ ...Type.body, color: Palette.white, marginBottom: Spacing.xs }}>
+              {d.label}
+            </Text>
+            {d.leadWithPicks ? (
+              /* ── CHOICES, NOT A BAR ────────────────────────────────────
+                 Ellie: "what makes it work should feature the what is it
+                 primarily about section in the overview tile instead of the bar
+                 for the 'what is it for' section." The server decides which row
+                 this is, so both surfaces pick the same one. */
+              (d.picks || []).map((q) => (
+                <View key={q.id}>
+                  {[{ name: you, list: q.you }, { name: them, list: q.them }].map((side) => (
+                    <View key={side.name} style={{ marginTop: Spacing.sm }}>
+                      <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
+                        {side.name}
+                      </Text>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.xs }}>
+                        {side.list.length ? side.list.map((label) => (
+                          <View
+                            key={label}
+                            style={{
+                              borderRadius: Radius.pill, borderWidth: 1,
+                              borderColor: 'rgba(255,255,255,0.3)',
+                              backgroundColor: 'rgba(255,255,255,0.10)',
+                              paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+                            }}>
+                            <Text style={{ ...Type.small, color: Palette.white }}>{label}</Text>
+                          </View>
+                        )) : (
+                          <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.45)' }}>{'\u2014'}</Text>
+                        )}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              ))
+            ) : (
+              <SliderRow
+                label=""
+                left={d.poles?.[0] || ''}
+                right={d.poles?.[1] || ''}
+                you={d.positions?.you ?? null}
+                them={d.positions?.them ?? null}
+                youName={you}
+                themName={them}
+                onDark
+              />
+            )}
+          </View>
+        ))}
+      </View>
 
-            Both partners on one track between the two poles, which is what the
-            website draws here and what the overview page of this same section
-            already drew. This page had a single bar of the DISTANCE between
-            them with a word under it, so the one screen devoted to a dimension
-            showed less than the summary of all six did, and a distance with no
-            ends reads as a score rather than as two people.
+      {/* ── THE ONE THING TO TALK ABOUT ──────────────────────────────────
+          From whichever aspect the two of them are furthest apart on, with
+          ties broken by the order Ellie listed. The prompt is that aspect's
+          own: a prompt written for the pair would be a new claim on a page
+          whose whole content is things the reader has already met. */}
+      {domain.prompt ? (
+        <View
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.18)',
+            borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
+          }}>
+          <Text style={{ ...Type.eyebrow, color: '#E08DA6', marginBottom: Spacing.sm }}>
+            {promptLabel}
+          </Text>
+          {/* block: intimacy-dimension/prompt */}
+          <Prose style={{ ...Type.body, color: Palette.white, lineHeight: 26 }}>
+            {domain.prompt}
+          </Prose>
+        </View>
+      ) : null}
 
-            The poles come from the payload now; they were only in the
-            question registry, which the app cannot import. */}
-        {/* ── THE BAR, WITH ITS POLES BESIDE IT ──────────────────────────
-            Ellie: "please make the sliding bars look like the ones on the
-            comms detailed pages, with the pole labels next to the bar rather
-            than above it." Same component as those pages, so there is one
-            bar in the app and not two that nearly match.
+      {/* ── AND THE RESPONSES ────────────────────────────────────────────
+          Ellie: "Also make sure the dropdown side by side section is built."
+          Every question across the three aspects, both people on each. Behind
+          a disclosure, like the Communication pages. */}
+      {/* block: intimacy-dimension/questions */}
+      <IntimacySideBySide domain={domain} you={you} them={them} />
+    </PageTile>
+  );
+}
 
-            And two things are gone from this page, because the website does
-            not have them: the distance bar with its state word underneath,
-            and the tile of prose about the dimension. Ellie: "Remove the
-            progress bar and associated label and also the description tile.
-            Only include the sliding bar with its poles, the talk about it
-            tile, and the side by side response dropdown." */}
-        <View style={{ marginTop: Spacing.xl }}>
+/** Every question on this page, both partners on each, behind a dropdown. */
+function IntimacySideBySide({
+  domain, you, them,
+}: { domain: IntimacyDomain; you: string; them: string }) {
+  const rows = domain.dimensions.flatMap((d) => (d.questions || []).map((q) => ({ ...q, dim: d.label })));
+  if (!rows.length) return null;
+  return (
+    <Disclosure title={`Side by side ${domain.label.toLowerCase()} responses`}>
+      {rows.map((q) => (
+        <View key={q.id} style={{ marginBottom: Spacing.lg }}>
+          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginBottom: Spacing.md }}>
+            {q.text}
+          </Prose>
           <SliderRow
             label=""
-            left={dim.poles?.[0] || ''}
-            right={dim.poles?.[1] || ''}
-            you={dim.positions?.you ?? null}
-            them={dim.positions?.them ?? null}
+            left={q.low}
+            right={q.high}
+            you={q.you}
+            them={q.them}
             youName={you}
             themName={them}
             onDark
           />
         </View>
-
-        {/* ── THE QUESTION TO ASK ─────────────────────────────────────────
-            In a tile with its label above it, which is what the website does.
-            The app printed the prompt as a bare heading, so the one sentence
-            on the page that is a question to ask each other arrived looking
-            like another statement about them.
-
-            The label comes from the payload: it was typed inline in
-            src/App.jsx and nowhere the app could read it. */}
-        {dim.prompt ? (
-          <View
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.18)',
-              borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg, marginTop: Spacing.xl,
-            }}>
-            <Text style={{ ...Type.eyebrow, color: '#E08DA6', marginBottom: Spacing.sm }}>
-              {promptLabel}
-            </Text>
-            {/* block: intimacy-dimension/prompt */}
-            <Prose style={{ ...Type.body, color: Palette.white, lineHeight: 26 }}>
-              {dim.prompt}
-            </Prose>
-          </View>
-        ) : null}
-
-        {/* ── WHAT EACH OF THEM CHOSE ────────────────────────────────────
-            Ellie: "can you make sure the what it's for question on physical
-            intimacy is pulling correctly?" It was not pulling at all: it takes
-            up to two answers from a list, so it has no place on a track, so the
-            row builder dropped it and the page named after the question never
-            asked it. Choices are read, not measured, so they are drawn as
-            chips rather than forced onto a scale.
-
-            The heading is the question's own topic and the chips are its own
-            option labels. No new words. */}
-        {(dim.picks || []).map((q) => (
-          <View key={q.id} style={{ marginTop: Spacing.xl }}>
-            <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>{q.topic || q.text}</Text>
-            {[{ name: you, list: q.you }, { name: them, list: q.them }].map((side) => (
-              <View key={side.name} style={{ marginTop: Spacing.md }}>
-                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.6)' }}>{side.name}</Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.xs }}>
-                  {side.list.length ? side.list.map((label) => (
-                    <View
-                      key={label}
-                      style={{
-                        borderRadius: Radius.pill, borderWidth: 1,
-                        borderColor: 'rgba(255,255,255,0.3)',
-                        backgroundColor: 'rgba(255,255,255,0.10)',
-                        paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
-                      }}>
-                      <Text style={{ ...Type.small, color: Palette.white }}>{label}</Text>
-                    </View>
-                  )) : (
-                    <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.45)' }}>{'\u2014'}</Text>
-                  )}
-                </View>
-              </View>
-            ))}
-          </View>
-        ))}
-
-        {/* The side-by-side comparison, which is what the exercise is sold as:
-            "answered independently, compared side by side". The app could not
-            draw this until the server carried positions, so the website had a
-            screen the app did not. */}
-        {dim.questions?.length ? (
-          /* Behind the same dropdown the Communication pages use, which is
-             what Ellie asked for. It used to sit open on the page, so the most
-             explicit content in the product was on screen the moment the page
-             loaded with no step in between.
-
-             The control is the shared Disclosure, not a copy of the comms one,
-             so the two cannot drift into looking almost alike. */
-          <Disclosure title={`Side by side ${dim.label.toLowerCase()} responses`}>
-            {/* ── THE LEGEND, ONLY WHEN IT SAYS SOMETHING ────────────────
-                Ellie: "we don't need the legend in the side by side dropdown
-                section unless the users have the same initial." Every mark
-                carries its own initial, so naming the two colours underneath
-                repeats what each dot already says. When both initials are the
-                same the marks carry no letter, and then the legend is the only
-                thing telling them apart. */}
-            {initial(you) === initial(them) ? <Legend you={you} them={them} /> : null}
-            {/* block: intimacy-dimension/questions */}
-            {dim.questions.map((q) => (
-              <View
-                key={q.id}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1,
-                  borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-                }}>
-                <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginBottom: Spacing.md }}>{q.text}</Prose>
-                {/* ── THE SAME ROW THE COMMUNICATION PAGES DRAW ──────────
-                    Ellie: "I want the side by side dropdown sections to render
-                    like the comms ones do, with the pole labels on either side
-                    of the bar with wrapped text. Use the same formatting."
-
-                    So it is the same component, not the same look rebuilt by
-                    hand: the poles sit either side and wrap, the track is
-                    inset so a mark at an extreme clears the words, and the two
-                    marks step apart by the shared rule when they land close. */}
-                <SliderRow
-                  label=""
-                  left={q.low}
-                  right={q.high}
-                  you={q.you}
-                  them={q.them}
-                  youName={you}
-                  themName={them}
-                  onDark
-                />
-              </View>
-            ))}
-          </Disclosure>
-        ) : null}
-    </PageTile>
+      ))}
+    </Disclosure>
   );
 }
 
@@ -2139,12 +2123,18 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
               borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg,
             }}>
-            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.35)', marginBottom: Spacing.lg }}>
+            {/* ── READABLE, AND TIGHTER ──────────────────────────────────
+                Ellie: "'How do you feel right now' eyebrow is hard to see on
+                rel relf overview - adjust that and the pole labels in the same
+                tile." Both were white at a third opacity, which on this ground
+                is about two to one. And: "Vertically condense how you feel
+                right now tile. Too much blank space." */}
+            <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.8)', marginBottom: Spacing.md }}>
               {ov?.ratingsLabel || 'How you feel right now'}
             </Text>
             {rows.map((r) => (
-              <View key={r.key} style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontWeight: '500', marginBottom: Spacing.xs }}>
+              <View key={r.key} style={{ marginBottom: Spacing.sm }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.85)', fontWeight: '500', marginBottom: 2 }}>
                   {r.short || r.question}
                 </Text>
                 {/* Two rows of filled steps rather than two marks on a track.
@@ -2153,7 +2143,7 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
                   <Text
                     numberOfLines={2}
-                    style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.32)', width: 62, textAlign: 'right', lineHeight: 12 }}>
+                    style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.72)', width: 62, textAlign: 'right', lineHeight: 12 }}>
                     {r.low}
                   </Text>
                   <View style={{ flex: 1, gap: 4 }}>
@@ -2173,7 +2163,7 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
                   </View>
                   <Text
                     numberOfLines={2}
-                    style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.32)', width: 62, lineHeight: 12 }}>
+                    style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.72)', width: 62, lineHeight: 12 }}>
                     {r.high}
                   </Text>
                 </View>
@@ -2373,7 +2363,13 @@ function ReflectionRatings({ data, step = null, ground = null, groundStops = nul
                     borderTopColor: x.col, borderTopWidth: 3,
                     borderRadius: Radius.lg, padding: Spacing.lg,
                   }}>
-                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: x.col, marginBottom: Spacing.xs }}>
+                  {/* Ellie: "'Ellie admires' and 'preston admires' is hard to
+                      read on rel relf detailed page." It was the person's own
+                      colour, which is a mark colour chosen to read on cream
+                      and on white cards, not on a dark green gradient. The
+                      colour is already carried by the rule along the top of
+                      this card, so the label does not have to carry it too. */}
+                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.8)', marginBottom: Spacing.xs }}>
                     {x.from} admires
                   </Text>
                   <Text style={{ ...Type.cardTitle, color: Palette.white }}>{x.val}</Text>
@@ -3445,23 +3441,14 @@ function CoupleType({ results, you, them, title }: {
           </Prose>
         </LinearGradient>
 
-        {/* block: couple-type/description */}
-        {/* `patterns`, which is what the website's "What this looks like in
-            your relationship" tile prints. The app printed `description`, a
-            different field with different words, so this tile said something
-            else entirely on the two products. Near-axis overrides are already
-            applied server-side.
+        {/* ── THE PATTERNS TILE IS GONE ─────────────────────────────────
+            Ellie: "Remove the 'what this looks like in your relationship' tile
+            from the couple type page (app and site)."
 
-            The heading was missing too, so the paragraph arrived unlabelled
-            and the reader had to work out what it was describing. */}
-        <View style={{ ...card(), marginTop: Spacing.lg }}>
-          <Text style={{ ...Type.eyebrow, color: type.color || accent, marginBottom: Spacing.md }}>
-            What this looks like in your relationship
-          </Text>
-          <Prose style={{ ...Type.body, color: c.text }}>
-            {interp((type.patterns?.length ? type.patterns.join(' ') : type.description), you, them)}
-          </Prose>
-        </View>
+            The block marker goes with it: api/_lib/section-blocks.js is what
+            both surfaces owe each other, and leaving the marker behind would
+            have the gate insisting the website still draw a tile that has been
+            taken off both. */}
 
         {/* The website's three blocks, in the website's order and with the
             website's headings. All three were absent because /api/results did
@@ -3563,13 +3550,67 @@ function CoupleType({ results, you, them, title }: {
  * half of Ellie's ask that is easy to miss: "then that same bg persists
  * through the exercise's section behind the tiles."
  */
-function Cover({ title, accent }: { title: string; accent: string }) {
+function Cover({ title, accent, icon, onStart }: {
+  title: string; accent: string; icon?: string | null; onStart?: () => void;
+}) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xxl }}>
-      <View style={{ width: 54, height: 3, borderRadius: 2, backgroundColor: accent, marginBottom: Spacing.xl }} />
+      {/* ── LOUDER ───────────────────────────────────────────────────────
+          Ellie: "Cover pages need to be redone, they need to be louder and
+          more branded. More visually interesting."
+
+          The first version was a rule, a name and a lot of cream. This gives
+          the page something to look at: the section's own icon at size, in its
+          own colour, on a disc of the same colour; the name under it; and the
+          brand's gradient rule the storycards use, so a cover looks like it
+          came from the same product as the cards. */}
+      <View
+        style={{
+          width: 108, height: 108, borderRadius: 54,
+          backgroundColor: withAlpha(accent, 0.12),
+          borderWidth: 1, borderColor: withAlpha(accent, 0.3),
+          alignItems: 'center', justifyContent: 'center',
+          marginBottom: Spacing.xl,
+        }}>
+        <SymbolView
+          name={(icon || 'sparkles') as never}
+          size={46}
+          tintColor={accent}
+          fallback={<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: accent }} />}
+          style={{ width: 50, height: 50 }}
+        />
+      </View>
+
       {/* not markable: the section's own name, which is a label rather than a
           finding. A mark anchored to it would follow the word, not the page. */}
       <Text style={{ ...Type.hero, color: c.textStrong, textAlign: 'center' }}>{title}</Text>
+
+      {/* The brand's own rule, orange into indigo, the one the storycards
+          carry under the couple's names. */}
+      <LinearGradient
+        colors={[Palette.orange, Palette.indigo]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ width: 72, height: 3, borderRadius: 2, marginTop: Spacing.lg }}
+      />
+
+      {/* ── AND A WAY IN ─────────────────────────────────────────────────
+          Ellie: "Cover pages should have a 'get started' or 'see insights'
+          button that brings you to the overview page for that section - just
+          to make the nav super clear." Her words, the second of the two. */}
+      {onStart ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onStart}
+          style={{
+            marginTop: Spacing.xxl,
+            backgroundColor: accent,
+            borderRadius: Radius.pill,
+            paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
+          }}>
+          <Text style={{ ...Type.cardTitle, color: Palette.white }}>See insights</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

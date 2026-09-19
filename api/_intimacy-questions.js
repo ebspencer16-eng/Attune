@@ -20,6 +20,40 @@
 // This is a SCAFFOLD question set. Final copy is under review; ids are stable
 // so answers persist across copy edits.
 
+/**
+ * The two pages Physical Intimacy is read on, and which aspects sit on each.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * Ellie: "Regroup physical intimacy pages just like we did for comms. 2 pages:
+ * How it happens - Frequency, Initiating, Adventurousness. What makes it work
+ * - Comfort & Safety, Communication, What It Is For."
+ *
+ * Six dimension pages of three questions each is six screens a couple scrolls
+ * through one aspect at a time. Communication has ten dimensions on three
+ * pages for the same reason, and it is the arrangement she has spent the most
+ * time with.
+ *
+ * ── THE ORDER INSIDE EACH IS A PRIORITY, NOT A PREFERENCE ─────────────────
+ * "a 'talk about it' prompt based on whichever of the 3 sections had the
+ * biggest discrepancy for the pairing. If two are tied, use the above ordering
+ * as a prioritized list for which should be prompted."
+ *
+ * So `dims` is ordered, and the tie-break reads it left to right. Written
+ * once, here, rather than in the two renderers that need it.
+ */
+export const INTIMACY_DOMAINS = [
+  {
+    id: 'how',
+    label: 'How it happens',
+    dims: ['frequency', 'initiating', 'adventure'],
+  },
+  {
+    id: 'works',
+    label: 'What makes it work',
+    dims: ['comfort', 'communication', 'meaning'],
+  },
+];
+
 export const INTIMACY_DIMENSIONS = [
   { id: 'frequency',   label: 'Frequency',        poles: ['Less often', 'More often'] },
   { id: 'initiating',  label: 'Initiating',       poles: ['Waits to be asked', 'Likes to initiate'] },
@@ -277,7 +311,22 @@ export const INTIMACY_QUESTIONS = [
     ],
   },
   {
-    id: 'iq_mean_disconnect', dimension: 'meaning', kind: 'scale',
+    /**
+     * ── IT MOVED, AND THE OTHER ONE WENT ──────────────────────────────────
+     * Ellie: "Remove 'what does intimacy most mean in your marriage now'
+     * question from exercise and results. Move 'when you're emotionally
+     * disconnected, physical intimacy tends to' to the comfort and safety
+     * category."
+     *
+     * Which also settles the thing she caught: What It Is For was labelled
+     * "Release and play / Closeness and connection" while the two questions
+     * scored under it measured neither. One of those is gone and the other is
+     * here, so that aspect now has only the multi-answer question left, no
+     * position on a scale, and nothing to plot on an axis it does not measure.
+     * The label problem solves itself by the questions moving to where they
+     * belong.
+     */
+    id: 'iq_mean_disconnect', dimension: 'comfort', kind: 'scale',
     topic: 'When disconnected',
     premarital: "When you're emotionally disconnected, you expect physical intimacy to",
     married: "When you're emotionally disconnected, physical intimacy tends to",
@@ -287,20 +336,6 @@ export const INTIMACY_QUESTIONS = [
       { label: 'Help, depending on the day', value: 0.5 },
       { label: 'Feel hard until we talk', value: 0.25 },
       { label: 'Be off the table for me', value: 0.0 },
-      PNS,
-    ],
-  },
-  {
-    id: 'iq_mean_hope', dimension: 'meaning', kind: 'scale',
-    topic: 'What you hope it means',
-    premarital: 'What do you most hope intimacy will mean in your marriage?',
-    married: 'What does intimacy most mean in your marriage now?',
-    options: [
-      { label: 'A primary way we stay close', value: 1.0 },
-      { label: 'One of several ways we stay close', value: 0.75 },
-      { label: 'Important but not central', value: 0.5 },
-      { label: 'Meaningful in its own lane', value: 0.25 },
-      { label: "I'm still working that out", value: 0.0 },
       PNS,
     ],
   },
@@ -363,6 +398,24 @@ export function intimacyDimensionSkips(mineAnswers, theirsAnswers) {
  * customer reads is rewritten until it is right, that is the difference
  * between a copy edit and a data loss.
  */
+/**
+ * Questions that have been taken out on purpose.
+ *
+ * check-answer-labels treats a question disappearing as a data loss, which is
+ * right: it usually is. A deliberate removal is the exception and has to say so
+ * out loud, because "we meant to" and "nobody noticed" look identical in a
+ * diff.
+ *
+ * Answers already given to one of these stay in the row and are simply never
+ * read again. Nothing deletes them: a question can come back, and a person's
+ * answer should still be there if it does.
+ */
+export const RETIRED_QUESTIONS = {
+  // Ellie, 22 September: "Remove 'what does intimacy most mean in your
+  // marriage now' question from exercise and results."
+  iq_mean_hope: 'removed at Ellie\'s request, 22 September',
+};
+
 export const RETIRED_OPTION_LABELS = {
   // 6b00d10, "Intimacy exercise copy: three option relabels"
   iq_adv_balance: {
@@ -373,9 +426,6 @@ export const RETIRED_OPTION_LABELS = {
   },
   iq_mean_disconnect: {
     'Depend on the day': 'Help, depending on the day',
-  },
-  iq_mean_hope: {
-    'One of several ways': 'One of several ways we stay close',
   },
 };
 

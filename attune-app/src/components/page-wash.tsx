@@ -90,7 +90,9 @@ export default function PageWash({ tint, second }: {
         /* The other corner, coming up from the bottom left, so the page reads
            as one gradient rather than two stains. */
         <LinearGradient
-          colors={[withAlpha(second, 0), withAlpha(second, 0.12)]}
+          /* Raised with the top corner, for the same reason: this is a
+             section's colour now, not decoration. */
+          colors={[withAlpha(second, 0), withAlpha(second, 0.2)]}
           start={{ x: 0.9, y: 0.45 }}
           end={{ x: 0, y: 1 }}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}

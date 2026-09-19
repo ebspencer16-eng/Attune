@@ -24,7 +24,7 @@
 
 import { EXERCISES } from '../_exercises.js';
 import { EXPECTATIONS_CATEGORIES } from '../_questions.js';
-import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
+import { INTIMACY_DIMENSIONS, INTIMACY_DOMAINS } from '../_intimacy-questions.js';
 import { COMM_DOMAINS } from './tags.js';
 import { SECTION_GROUNDS, groundFor, groundLocations, groundForCategory } from './section-grounds.js';
 
@@ -36,6 +36,33 @@ import { SECTION_GROUNDS, groundFor, groundLocations, groundForCategory } from '
  * anchored to it, silently, which is how Conflict Patterns went a release
  * without being annotatable.
  */
+/**
+ * Section ids that no longer exist, and the page that took their place.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Physical Intimacy had a page per aspect and now has two pages, at Ellie's
+ * ask. A note is found by the id of the page it sits on, so every mark anyone
+ * has made on `intimacy-frequency` and its five siblings would simply stop
+ * resolving: no error, no warning, the note still in the table and invisible
+ * on every surface.
+ *
+ * That is the same failure as the copy edit that lost her own answer, and it
+ * is avoidable in exactly the same way: keep the old name, say what it became,
+ * and resolve through it. check-section-aliases holds every alias to a section
+ * that exists and fails the build if a retired id is left pointing nowhere.
+ *
+ * The anchor validator accepts these, so an old note still validates. The nav
+ * never offers them, so nothing new is written against one.
+ */
+export const RETIRED_SECTIONS = Object.fromEntries(
+  INTIMACY_DOMAINS.flatMap(d => d.dims.map(dim => [`intimacy-${dim}`, `intimacy-${d.id}`])),
+);
+
+/** The page a section id leads to today, following a rename if there was one. */
+export function currentSection(id) {
+  return RETIRED_SECTIONS[id] || id;
+}
+
 export const COVER_SECTIONS = ['comm-cover', 'exp-cover', 'reflection-cover', 'intimacy-cover', 'conflict-cover'];
 
 /*
@@ -69,7 +96,7 @@ export const RESULTS_SECTIONS = [
   // meets without a detour, and the six dimension pages each carry their own
   // question. The page repeated both.
   'intimacy-cover', 'intimacy-overview',
-  ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`),
+  ...INTIMACY_DOMAINS.map(d => `intimacy-${d.id}`),
 
   // The four that the old regex silently refused.
   'conflict-cover', 'conflict-overview', 'conflict-snapshot', 'conflict-patterns', 'conflict-wrote',
@@ -185,7 +212,7 @@ export const RESULTS_SECTION_LABELS = {
   'reflection-ratings': 'How You Each Rated',
   'reflection-story': 'Side by Side',
   'intimacy-overview': 'Physical Intimacy',
-  ...Object.fromEntries(INTIMACY_DIMENSIONS.map(d => [`intimacy-${d.id}`, d.label])),
+  ...Object.fromEntries(INTIMACY_DOMAINS.map(d => [`intimacy-${d.id}`, d.label])),
   'conflict-overview': 'Conflict Patterns',
   'conflict-snapshot': 'Your Conflict Snapshot',
   'conflict-patterns': 'Your Patterns',
@@ -228,7 +255,15 @@ export function sectionsWithLabels(opts) {
 
 /** Sections are a fixed set, so membership is the whole validation. */
 export function isResultsSection(key) {
-  return RESULTS_SECTIONS.includes(key);
+  /**
+   * A retired id is still a valid anchor.
+   *
+   * Notes anchored to the six Physical Intimacy dimension pages were written
+   * when those pages existed. Refusing them now would make every one of those
+   * marks fail validation on its next write, which is the quietest way for a
+   * feature to stop working. See RETIRED_SECTIONS.
+   */
+  return RESULTS_SECTIONS.includes(key) || key in RETIRED_SECTIONS;
 }
 
 /**
@@ -390,7 +425,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
       children: [
         cover('intimacy', fromExercise('intimacy', 'Physical Intimacy').label),
         glance('intimacy-overview'),
-        ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label })),
+        ...INTIMACY_DOMAINS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, ...detail('intimacy-overview') })),
       ],
     });
   }

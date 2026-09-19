@@ -32,7 +32,7 @@
  */
 
 import {
-  INTIMACY_DIMENSIONS,
+  INTIMACY_DIMENSIONS, INTIMACY_DOMAINS,
   INTIMACY_QUESTIONS,
   summarizeIntimacy,
   intimacyDimensionSkips, intimacyOption } from '../_intimacy-questions.js';
@@ -301,7 +301,95 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
     };
   });
 
+  /**
+   * The two pages Physical Intimacy is read on.
+   *
+   * ── WHY THEY ARE BUILT FROM THE DIMENSIONS ────────────────────────────
+   * Ellie: "Organize these pages just like the comms detailed pages are
+   * organized. No intro paragraph, but an overall orientation tile that has
+   * the 3 bars, and a 'talk about it' prompt based on whichever of the 3
+   * sections had the biggest discrepancy for the pairing."
+   *
+   * Everything here is the dimension payload already built above, grouped.
+   * Nothing is recomputed: a domain's three bars are its three dimensions'
+   * positions, and its prompt is one of their prompts. A second scoring pass
+   * over the same answers is how two pages of one section start disagreeing.
+   */
+  const domains = INTIMACY_DOMAINS.map((dom) => {
+    const mine = dom.dims
+      .map((id) => dimensions.find((d) => d.id === id))
+      .filter(Boolean);
+
+    /**
+     * Which of the three to ask about.
+     *
+     * "If two are tied, use the above ordering as a prioritized list for which
+     * should be prompted." `dom.dims` is that order, and `mine` is built from
+     * it, so a stable sort on distance alone leaves ties in her order. A
+     * dimension neither of them answered has no distance and cannot be the
+     * widest gap in anything.
+     */
+    const ranked = mine
+      .filter((d) => d.distancePct != null)
+      .slice()
+      .sort((a, b) => b.distancePct - a.distancePct);
+    const lead = ranked[0] || null;
+
+    return {
+      section: `intimacy-${dom.id}`,
+      id: dom.id,
+      label: dom.label,
+      /** The section's own ground, so both pages of it match. */
+      ground: groundForDimension(dom.dims[0]),
+      /**
+       * The three rows of the orientation tile, in her order.
+       *
+       * `leadWithPicks` is the rule for which of them is chips rather than a
+       * bar, decided here so the two surfaces cannot decide it differently.
+       * Ellie: "what makes it work should feature the what is it primarily
+       * about section in the overview tile instead of the bar for the 'what is
+       * it for' section." A dimension with choices and no position has nothing
+       * to plot, which is true of What It Is For now that its two scale
+       * questions have moved or gone, and would be true of the next one like
+       * it without anyone naming it.
+       */
+      dimensions: mine.map((d) => ({
+        ...d,
+        leadWithPicks: (d.picks?.length || 0) > 0
+          && d.positions?.you == null && d.positions?.them == null,
+      })),
+      /**
+       * The one thing to talk about, and which aspect it came from.
+       *
+       * The prompt is that dimension's own, written for it. A prompt invented
+       * for the pair would be a new claim on a page whose whole content is
+       * things the reader has already met.
+       */
+      prompt: lead?.prompt || null,
+      promptFrom: lead ? { id: lead.id, label: lead.label } : null,
+      /**
+       * Whether this page leads with choices instead of a bar.
+       *
+       * Ellie: "what makes it work should feature the what is it primarily
+       * about section in the overview tile instead of the bar for the 'what is
+       * it for' section." What It Is For has only the multi-answer question
+       * left now, so it has no position to plot and its chips are the only
+       * thing it has to show. Derived rather than named: a dimension with
+       * picks and no scale questions leads with its picks, which is true of
+       * that one and would be true of the next one like it.
+       */
+      picks: mine.flatMap((d) => (d.positions?.you == null && d.positions?.them == null
+        ? (d.picks || [])
+        : [])),
+    };
+  });
+
   return {
+    /**
+     * The two grouped pages. The six dimensions are still sent, because the
+     * overview plots all six and the action plan names them.
+     */
+    domains,
     /**
      * The label the website puts above every prompt. Sent because it was typed
      * inline in src/App.jsx and nowhere the app could read it, so the app

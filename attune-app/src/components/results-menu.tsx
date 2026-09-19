@@ -44,6 +44,7 @@ import { SymbolView } from 'expo-symbols';
 
 import type { ResultsNavGroup } from '@/api/client';
 import { AccentFallback, Colors, Fonts, Palette, Spacing, Type } from '@/constants/attune-theme';
+import { withAlpha } from '@/components/page-wash';
 
 const c = Colors.light;
 
@@ -72,7 +73,7 @@ const c = Colors.light;
  * wearing the fallback rather than vanishing, which is the difference between
  * a lookup and a list.
  */
-const GROUP_ICON: Record<string, string> = {
+export const GROUP_ICON: Record<string, string> = {
   comm: 'bubble.left.and.bubble.right',
   exp: 'brain',
   reflection: 'book',
@@ -176,15 +177,25 @@ export default function ResultsMenu({
               accessibilityRole="button"
               accessibilityState={{ expanded: kids.length ? isOpen : undefined }}
               accessibilityLabel={g.label}
-              onPress={() => {
-                // A group with no pages of its own is not a folder. Opening it
-                // would show an empty row, so it just goes there.
-                if (!kids.length) { onOpenSection(g.id); return; }
-                setOpen(isOpen ? null : g.id);
-              }}
+              /**
+               * ── THE NAME AND THE ARROW DO DIFFERENT THINGS ──────────────
+               * Ellie: "Dropdown for each exercise should not list the cover
+               * page. If a user just taps on the exercise from the menu it
+               * should take them to the cover page, but if they tap the
+               * dropdown then they should see the full list."
+               *
+               * So the row opens the section and the chevron opens the list.
+               * A group with no pages of its own has no chevron and the whole
+               * row simply goes there.
+               */
+              onPress={() => onOpenSection(kids.length ? kids[0].id : g.id)}
               style={{
                 paddingVertical: big ? Spacing.lg : Spacing.md,
-                paddingLeft: isExercise ? Spacing.xl + Spacing.md : Spacing.xl,
+                /* Ellie: "Further indent the exercise results in the menu,
+                   the icon should be indented and the text should come after
+                   that." The whole row moves in, icon first, rather than the
+                   label moving away from its icon. */
+                paddingLeft: isExercise ? Spacing.xl + Spacing.lg : Spacing.xl,
                 paddingRight: Spacing.xl,
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
@@ -206,14 +217,30 @@ export default function ResultsMenu({
                   results rather than things you answered, and a glyph on them
                   claimed a parity they do not have. Where there is no icon the
                   label still lines up, because the space is kept. */}
-              <View style={{ width: big ? 26 : 22, alignItems: 'center' }}>
+              {/* ── THE ICON IN ITS OWN LIGHT ──────────────────────────────
+                  Ellie: "Insights landing menu, learn tab, and notes tab all
+                  feel very plain. Please add a lot more color and visual
+                  appeal to those pages."
+
+                  The rows stay cream, which is the other thing she asked for.
+                  What carries the colour is the disc: the section's own hue at
+                  a tenth, with the icon in it at full strength. It is the same
+                  shape the home tile's rows use, so the two screens read as
+                  one product rather than two lists. */}
+              <View
+                style={{
+                  width: big ? 38 : 30, height: big ? 38 : 30, borderRadius: big ? 19 : 15,
+                  alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: icon ? withAlpha(color, 0.12) : 'transparent',
+                  borderWidth: icon ? 1 : 0, borderColor: withAlpha(color, 0.26),
+                }}>
                 {icon ? (
                   <SymbolView
                     name={icon as never}
-                    size={big ? 22 : 18}
+                    size={big ? 19 : 16}
                     tintColor={color}
                     fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />}
-                    style={{ width: big ? 24 : 20, height: big ? 24 : 20 }}
+                    style={{ width: big ? 21 : 18, height: big ? 21 : 18 }}
                   />
                 ) : null}
               </View>
@@ -257,16 +284,25 @@ export default function ResultsMenu({
               ) : null}
               {/* Ellie: "Make dropdown arrows in hamburger nav larger." */}
               {kids.length ? (
-                <Text style={{ color: c.textMuted, fontSize: big ? 24 : 22, lineHeight: 28 }}>
-                  {isOpen ? '\u25B4' : '\u25BE'}
-                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: isOpen }}
+                  accessibilityLabel={`${g.label}, show pages`}
+                  hitSlop={12}
+                  onPress={() => setOpen(isOpen ? null : g.id)}>
+                  <Text style={{ color: c.textMuted, fontSize: big ? 24 : 22, lineHeight: 28 }}>
+                    {isOpen ? '\u25B4' : '\u25BE'}
+                  </Text>
+                </Pressable>
               ) : null}
             </Pressable>
 
             {/* The pages inside it, indented under the label they belong to. */}
             {isOpen && kids.length ? (
-              <View style={{ backgroundColor: Palette.warm }}>
-                {kids.map((ch) => {
+              <View style={{ backgroundColor: Palette.warm, borderLeftWidth: 3, borderLeftColor: color }}>
+                {/* The cover is where the row itself goes, so listing it here
+                    would be the same destination twice in one menu. */}
+                {kids.filter((ch) => !ch.cover).map((ch) => {
                   const on = ch.id === current;
                   return (
                     <Pressable
@@ -277,7 +313,7 @@ export default function ResultsMenu({
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
                         paddingVertical: big ? Spacing.md : Spacing.sm + 2,
-                        paddingLeft: Spacing.xl + Spacing.md + (big ? 26 : 22) + Spacing.lg,
+                        paddingLeft: Spacing.xl + Spacing.lg + (big ? 38 : 30) + Spacing.lg,
                         paddingRight: Spacing.xl,
                         borderTopWidth: 1, borderTopColor: c.border,
                       }}>

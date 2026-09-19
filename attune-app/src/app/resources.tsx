@@ -483,6 +483,16 @@ export default function ResourcesScreen() {
             </>
           ) : null}
 
+          {/* ── ONLY WHEN THERE IS MORE ────────────────────────────────────
+              Ellie: "I shouldn't have an explore more resources arrow if I own
+              all the resources."
+
+              She is right and it was worse than redundant: it is a link to the
+              offerings page, so a customer who has bought everything was being
+              pointed at a shop with nothing in it for them. Derived from the
+              catalogue the server already sends rather than from a count, so a
+              new resource appearing makes the link come back on its own. */}
+          {owned.length < catalogue.length ? (
           <Pressable
             accessibilityRole="link"
             accessibilityLabel="Explore more resources on the website"
@@ -495,6 +505,7 @@ export default function ResourcesScreen() {
             <Text style={{ ...Type.small, color: c.textMuted }}>Explore more resources</Text>
             <Text style={{ ...Type.small, color: c.textMuted }}>{'\u2192'}</Text>
           </Pressable>
+          ) : null}
         </View>
 
         {/* ── THE INSIGHT, ON THE HOME SCREEN'S OWN BLUE ──────────────────
@@ -680,7 +691,14 @@ export default function ResourcesScreen() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <TabScreen>{children}</TabScreen>;
+  /* ── COLOUR ON LEARN ──────────────────────────────────────────────────
+     Ellie: "Insights landing menu, learn tab, and notes tab all feel very
+     plain. Please add a lot more color and visual appeal to those pages."
+
+     The wash the other tabs use, in the two ends of the brand: the indigo
+     coming down from the top right and the orange up from the bottom left.
+     Learn was the one tab with no ground at all. */
+  return <TabScreen tint={Palette.indigo} second={Palette.orange}>{children}</TabScreen>;
 }
 
 type Item = CatalogueItem;

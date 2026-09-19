@@ -59,7 +59,7 @@ function useContent() {
   const version = React.useContext(ContentContext);
   return React.useMemo(() => contentFor(version), [version]);
 }
-import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, INTIMACY_DOMAINS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
 // Flip to true only after the full partner-view flow is verified end-to-end.
@@ -2243,6 +2243,154 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
 
 // Canvas-based text measurement so label placement can react to real widths.
 let _dlMeasCtx = null;
+/**
+ * One of the two Physical Intimacy pages, on the website.
+ *
+ * ── WHY IT IS ITS OWN COMPONENT ───────────────────────────────────────────
+ * Ellie regrouped six dimension pages into two, "just like we did for comms".
+ * The per-dimension renderer below draws one aspect and is eighty lines of
+ * inline JSX in the middle of a switch; calling it three times was not
+ * available without lifting it out first. This draws the page the way the
+ * Communication domain pages are drawn: an orientation panel of three rows,
+ * one prompt, and the responses behind a dropdown.
+ *
+ * The grouping, the widest gap and the tie-break are all read from the shared
+ * modules rather than decided here. Two surfaces choosing which aspect to
+ * prompt on is two surfaces prompting on different ones, and the app reads
+ * exactly these numbers off the payload.
+ */
+function IntimacyDomainPage({
+  domain, dims, positions, myAnswers, partnerAnswers, userName, partnerName, variant, onGo,
+}) {
+  const rows = domain.dims
+    .map(id => ({
+      meta: INTIMACY_DIMENSIONS.find(x => x.id === id),
+      state: dims.find(x => x.id === id),
+      pos: positions[id] || {},
+      id,
+    }))
+    .filter(r => r.meta);
+
+  /* The widest gap, with ties left in Ellie's order because `domain.dims` is
+     that order and the sort is stable. */
+  const lead = rows
+    .filter(r => r.state?.avgGap != null)
+    .slice()
+    .sort((a, b) => b.state.avgGap - a.state.avgGap)[0] || null;
+  const prompt = lead ? INTIMACY_RESULTS_PROSE[lead.id]?.prompt : null;
+
+  /* Which row is choices rather than a bar. What It Is For has only its
+     multi-answer question left, so it has no position to plot. Ellie: "what
+     makes it work should feature the what is it primarily about section in the
+     overview tile instead of the bar for the 'what is it for' section." */
+  const hasScale = (id) => INTIMACY_QUESTIONS.some(q => q.dimension === id && q.kind !== "multi" && q.kind !== "selfref");
+
+  const panel = {
+    background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)",
+    borderRadius: 14, padding: "1.25rem", marginBottom: "1.25rem",
+  };
+  const eyebrow = {
+    fontSize: "0.6rem", letterSpacing: "0.18em", textTransform: "uppercase",
+    color: "rgba(255,255,255,0.75)", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.9rem",
+  };
+
+  return (
+    <div>
+      <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 700, color: "white", marginBottom: "1.25rem" }}>
+        {domain.label}
+      </h2>
+
+      <div style={panel}>
+        <div style={eyebrow}>Overall orientation</div>
+        {rows.map(r => (
+          <div key={r.id} style={{ marginBottom: "1.1rem" }}>
+            <div style={{ fontSize: "0.9rem", color: "white", fontFamily: BFONT, marginBottom: "0.4rem" }}>
+              {r.meta.label}
+            </div>
+            {hasScale(r.id) ? (
+              <IntimacyTrack
+                left={r.meta.poles?.[0] || ""}
+                right={r.meta.poles?.[1] || ""}
+                mine={r.pos.mine}
+                theirs={r.pos.theirs}
+                userName={userName}
+                partnerName={partnerName}
+              />
+            ) : (
+              <IntimacyResponseBreakdown
+                dim={r.id}
+                myAnswers={myAnswers}
+                partnerAnswers={partnerAnswers}
+                userName={userName}
+                partnerName={partnerName}
+                variant={variant}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {prompt ? (
+        <div style={panel}>
+          <div style={{ ...eyebrow, color: "#E08DA6" }}>{TALK_ABOUT_IT}</div>
+          <p style={{ fontSize: "0.95rem", color: "white", fontFamily: BFONT, lineHeight: 1.7, margin: 0 }}>
+            {prompt}
+          </p>
+        </div>
+      ) : null}
+
+      <details style={{ ...panel, padding: 0 }}>
+        <summary style={{ cursor: "pointer", listStyle: "none", padding: "1rem 1.25rem", color: "white", fontFamily: BFONT, fontSize: "0.85rem", fontWeight: 700 }}>
+          {`Side by side ${domain.label.toLowerCase()} responses`}
+          <span style={{ fontSize: "0.9rem", opacity: 0.6, float: "right" }}>▾</span>
+        </summary>
+        <div style={{ padding: "0 1.25rem 1.25rem" }}>
+          {rows.map(r => (
+            <IntimacyResponseBreakdown
+              key={r.id}
+              dim={r.id}
+              myAnswers={myAnswers}
+              partnerAnswers={partnerAnswers}
+              userName={userName}
+              partnerName={partnerName}
+              variant={variant}
+            />
+          ))}
+        </div>
+      </details>
+
+      <NavButtons
+        onBack={() => onGo("intimacy-overview")}
+        onNext={() => onGo(domain.id === "how" ? "intimacy-works" : "what-comes-next")}
+        nextLabel={(domain.id === "how" ? "What makes it work" : "What Comes Next") + " →"}
+      />
+    </div>
+  );
+}
+
+/** Two marks on one track, the website's own bar for an intimacy aspect. */
+function IntimacyTrack({ left, right, mine, theirs, userName, partnerName }) {
+  const pct = (v) => (v == null ? null : Math.round(8 + v * 84));
+  const a = pct(mine);
+  const b = pct(theirs);
+  const pole = { fontSize: "0.7rem", color: "rgba(255,255,255,0.8)", fontFamily: BFONT, width: 92, flexShrink: 0 };
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+      <div style={pole}>{left}</div>
+      <div style={{ position: "relative", flex: 1, height: 26 }}>
+        <div style={{ position: "absolute", top: 12, left: 0, right: 0, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.22)" }} />
+        {a != null ? (
+          <div title={userName} style={{ position: "absolute", top: 5, left: `${a}%`, marginLeft: -8, width: 16, height: 16, borderRadius: 999, background: "#E8673A", border: "2px solid white" }} />
+        ) : null}
+        {b != null ? (
+          <div title={partnerName} style={{ position: "absolute", top: 5, left: `${b}%`, marginLeft: -8, width: 16, height: 16, borderRadius: 999, background: "#1B5FE8", border: "2px solid white" }} />
+        ) : null}
+      </div>
+      <div style={{ ...pole, textAlign: "right" }}>{right}</div>
+    </div>
+  );
+}
+
 function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partnerName, variant = "premarital" }) {
   const qs = (INTIMACY_QUESTIONS || []).filter(q => q.dimension === dim && q.kind !== "selfref");
   const valOf = (q, ans) => { if (ans == null) return null; const o = q.options.find(x => x.label === ans); return (o && o.value != null) ? o.value : null; };
@@ -6361,7 +6509,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       children: [
         { id: "intimacy-overview", label: "Overview" },
         { id: "intimacy-detail-header", label: "Detailed results", isDomainHeader: true, color: "#B5546E" },
-        ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, italic: true, color: "#B5546E" })),
+        ...INTIMACY_DOMAINS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, italic: true, color: "#B5546E" })),
       ]
     }] : []),
     ...(conflictListed ? [{
@@ -6463,7 +6611,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "exp-overview",
     ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story"] : []),
-    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`)] : []),
+    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DOMAINS.map(d => `intimacy-${d.id}`)] : []),
     ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
     "what-comes-next",
   ];
@@ -6494,7 +6642,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     if (id === "reflection-ratings") return "How You Each Rated";
     if (id === "reflection-story") return "Side by Side";
     if (id === "intimacy-overview") return "Physical Intimacy";
-    if (id.startsWith("intimacy-")) { const dd = INTIMACY_DIMENSIONS.find(x => `intimacy-${x.id}` === id); if (dd) return dd.label; }
+    if (id.startsWith("intimacy-")) { const dd = INTIMACY_DOMAINS.find(x => `intimacy-${x.id}` === id) || INTIMACY_DIMENSIONS.find(x => `intimacy-${x.id}` === id); if (dd) return dd.label; }
     // Without these the Prev/Next buttons fell back to the raw section id and
     // read "conflict-patterns" instead of "Your Patterns".
     if (id === "conflict-overview") return "Conflict Patterns";
@@ -6799,16 +6947,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
 
-          {/* block: couple-type/description */}
-          {/* 7. WHAT THIS LOOKS LIKE IN YOUR RELATIONSHIP */}
-          <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem", marginBottom: "1.25rem" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: ct.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
-              What this looks like in your relationship
-            </div>
-            <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.75, margin: 0, fontWeight: 400 }}>
-              {_proseSet(ct.patterns, _nearProse.patternsNearEngage, _nearProse.patternsNearOpen).join(" ")}
-            </p>
-          </div>
+          {/* 7. The "what this looks like in your relationship" tile was
+              removed from both surfaces at Ellie's ask, 22 September. */}
 
           {/* 8. SIDE-BY-SIDE: WHAT COMES NATURALLY | WHAT'S WORTH BEING AWARE OF */}
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
@@ -7483,7 +7623,40 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
     }
 
-    // ── PER-DIMENSION PAGE ──
+    /* ── ONE PAGE PER DOMAIN, THREE ASPECTS ON EACH ───────────────────────
+       Ellie: "Regroup physical intimacy pages just like we did for comms. 2
+       pages: How it happens - Frequency, Initiating, Adventurousness. What
+       makes it work - Comfort & Safety, Communication, What It Is For."
+
+       The page is still built by the renderer below, which draws one aspect.
+       It is called once per aspect in the domain rather than once for the
+       page, so the three stack: same bars, same prompts, same dropdown, no
+       second renderer to keep in step with this one.
+
+       INTIMACY_DOMAINS is the grouping and the tie-break order, shared with
+       the app and with the scoring. */
+    const domainMatch = INTIMACY_DOMAINS.find(dm => section === `intimacy-${dm.id}`);
+    if (domainMatch) {
+      return (
+        <Layout>
+          <ResultsSlide>
+            <IntimacyDomainPage
+              domain={domainMatch}
+              dims={dims}
+              positions={positions}
+              myAnswers={intimacyAnswers}
+              partnerAnswers={partnerIntimacy?.answers}
+              userName={userName}
+              partnerName={partnerName}
+              variant={intimacyVariant}
+              onGo={go}
+            />
+          </ResultsSlide>
+        </Layout>
+      );
+    }
+
+    // ── PER-DIMENSION PAGE (retired ids only; see RETIRED_SECTIONS) ──
     const dimMatch = dimIds.find(id => section === `intimacy-${id}`);
     if (dimMatch) {
       const d = INTIMACY_DIMENSIONS.find(x => x.id === dimMatch);

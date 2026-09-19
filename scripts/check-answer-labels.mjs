@@ -69,12 +69,23 @@ try {
 const now = labelsOf(live);
 const was = labelsOf(before);
 const retired = live.RETIRED_OPTION_LABELS || {};
+const retiredQuestions = live.RETIRED_QUESTIONS || {};
 const problems = [];
 
 for (const [qid, oldLabels] of Object.entries(was)) {
   const current = now[qid];
   if (!current) {
-    problems.push(`question ${qid} is gone. Every answer stored against it is unreachable.`);
+    /**
+     * A question can be taken out on purpose, and that is not a data loss: the
+     * answers stay in the row and are simply never read again. What must not
+     * happen is a question vanishing without anyone saying they meant it, so
+     * the removal has to be recorded in RETIRED_QUESTIONS with a reason.
+     */
+    if (!retiredQuestions[qid]) {
+      problems.push(
+        `question ${qid} is gone and is not in RETIRED_QUESTIONS. `
+        + 'Every answer stored against it becomes unreadable. Record the removal and why.');
+    }
     continue;
   }
   for (const label of oldLabels) {
@@ -93,6 +104,9 @@ for (const [qid, oldLabels] of Object.entries(was)) {
 
 /** A retired wording that is also a live one would resolve to itself. */
 for (const [qid, map] of Object.entries(retired)) {
+  // A retired wording on a question that has itself been retired is dead
+  // weight rather than a fault. Say so once, quietly, by skipping it.
+  if (!now[qid] && retiredQuestions[qid]) continue;
   for (const [from, to] of Object.entries(map)) {
     if (now[qid]?.has(from)) {
       problems.push(`${qid}: "${from}" is listed as retired and is still an option.`);
@@ -114,4 +128,6 @@ if (problems.length) {
 }
 
 const kept = Object.values(retired).reduce((n, m) => n + Object.keys(m).length, 0);
-console.log(`[check-answer-labels] ${Object.keys(now).length} questions; every reworded option is recorded (${kept} retired wordings).`);
+console.log(
+  `[check-answer-labels] ${Object.keys(now).length} questions; every reworded option is recorded `
+  + `(${kept} retired wordings, ${Object.keys(retiredQuestions).length} retired questions).`);

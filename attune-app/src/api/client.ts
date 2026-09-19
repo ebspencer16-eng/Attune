@@ -386,7 +386,37 @@ export type IntimacyDimension = {
   }[];
 };
 
+/**
+ * One of the two pages Physical Intimacy is read on.
+ *
+ * ── WHY IT IS NOT SIX PAGES ANY MORE ──────────────────────────────────────
+ * Ellie: "Regroup physical intimacy pages just like we did for comms." Six
+ * screens of one aspect each became two, built the way the Communication
+ * domain pages are: an orientation tile of three rows, one prompt, and the
+ * side-by-side underneath.
+ *
+ * Everything here is grouped rather than recomputed. A domain's three rows are
+ * three dimensions from the same payload, and its prompt is one of their
+ * prompts, so the two pages of a section cannot disagree with each other.
+ */
+export type IntimacyDomain = {
+  section: string;
+  id: string;
+  label: string;
+  ground?: string[] | null;
+  /** The three rows, in the order Ellie listed them. */
+  dimensions: (IntimacyDimension & {
+    /** This row is the choices rather than a bar. Decided by the server. */
+    leadWithPicks?: boolean;
+  })[];
+  /** The one thing to talk about, from whichever row has the widest gap. */
+  prompt?: string | null;
+  promptFrom?: { id: string; label: string } | null;
+};
+
 export type IntimacyResults = {
+  /** The two grouped pages. The six dimensions are still sent for the overview. */
+  domains?: IntimacyDomain[];
   /** The label above every dimension prompt, from api/_intimacy-results-prose.js. */
   promptLabel?: string;
   /** Why the action plan is still shown when nothing is misaligned. */
