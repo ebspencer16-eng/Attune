@@ -49,7 +49,6 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
-
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
@@ -67,41 +66,10 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-The batch of 22 September, recorded in full before any of it was built.
+**Nothing open.** The batch of 22 September is built and sitting in section 3.
 
 | # | Task |
 |--|--|
-| **The menu** |  |
-| O249 | **Indent the exercises further.** "Further indent the exercise results in the menu, the icon should be indented and the text should come after that." The icon moves in with the label rather than the label moving away from the icon. |
-| O250 | **The dropdown does not list the cover.** "Dropdown for each exercise should not list the cover page. If a user just taps on the exercise from the menu it should take them to the cover page, but if they tap the dropdown then they should see the full list." So the name and the arrow do different things. |
-| **Physical Intimacy, regrouped** |  |
-| O251 | **Six dimension pages become two.** Her grouping: **How it happens** — Frequency, Initiating, Adventurousness. **What makes it work** — Comfort & Safety, Communication, What It Is For. |
-| O252 | **Built like the Communication detail pages.** "No intro paragraph, but an overall orientation tile that has the 3 bars, and a 'talk about it' prompt based on whichever of the 3 sections had the biggest discrepancy for the pairing. If two are tied, use the above ordering as a prioritized list for which should be prompted. Also make sure the dropdown side by side section is built." |
-| O253 | **What makes it work leads with the choices, not a bar.** "what makes it work should feature the what is it primarily about section in the overview tile instead of the bar for the 'what it is for' section." |
-| O254 | **Two questions change, on both surfaces.** "Remove 'what does intimacy most mean in your marriage now' question from exercise and results. Move 'when you're emotionally disconnected, physical intimacy tends to' to the comfort and safety category." |
-| O255 | **Old anchors have to keep resolving.** Not her instruction, mine: regrouping changes section ids, and a note is found by its page's id. Every mark anyone has made on an intimacy dimension page would stop resolving without aliases, which is the same failure as the copy edit that lost her answer. Aliases, and a gate holding them. |
-| **Cover pages** |  |
-| O256 | **Louder and more branded.** "Cover pages need to be redone, they need to be louder and more branded. More visually interesting." |
-| O257 | **And a way forward off them.** "Cover pages should have a 'get started' or 'see insights' button that brings you to the overview page for that section - just to make the nav super clear." |
-| **Conflict Patterns** |  |
-| O258 | **Too much air in two tiles.** "Too much vertical space between rows on conflict snapshot conflict tile and in the repair tile between sections 1 and 2." |
-| O259 | **Two pills come off.** "Remove shared pill from conflict snapshot page and just for you pill on your patterns page." |
-| O260 | **Text is invisible in the conflict patterns tile.** |
-| O261 | **The page count is missing on the conflict pages.** "Add 1/3 page count on conflict pages just like other sections." |
-| O262 | **What You Each Wrote has no tile and unreadable type.** "What you each wrote white text is invisible. Missing that page's tile, I want all insights pages to be in a tile." |
-| **Relationship Reflection** |  |
-| O263 | **What Comes Next shows eleven things and should show two.** "Rel RElf in the what comes next section has 11 things - it should only have 2, and it should be what we each wrote for ourselves." This reverses O232, which gave the section its full action plan two days ago; her call, and the note under it says so. |
-| O264 | **Two labels are hard to read on the overview.** "'How do you feel right now' eyebrow is hard to see on rel relf overview - adjust that and the pole labels in the same tile." |
-| O265 | **And two on the detail page.** "'Ellie admires' and 'preston admires' is hard to read on rel relf detailed page." |
-| O266 | **Condense the How you feel right now tile.** "Too much blank space." |
-| **Couple Type** |  |
-| O267 | **Remove the "what this looks like in your relationship" tile**, app and site. |
-| **Consistency** |  |
-| O268 | **Hero height and page count, the same everywhere.** "There's too much space above the page headers on expectations detailed pages. Make sure the height of the hero and placement of page count is consistent across pages and across sections." |
-| **Learn** |  |
-| O269 | **No "explore more resources" arrow when there is nothing more to explore.** "I shouldn't have an explore more resources arrow if I own all the resources." |
-| **Colour** |  |
-| O270 | **The three plain tabs.** "Insights landing menu, learn tab, and notes tab all feel very plain. Please add a lot more color and visual appeal to those pages." |
 
 ## 3. For you to review
 
@@ -169,6 +137,28 @@ receive a notification from Apple's servers.
 | R208 | A mark opens |
 | R209 | A deleted tag goes into a closed Archive |
 | R204 | The third row of the home tile capitalises |
+| O249 | **The exercises are indented further**, icon and all, so the row moves in rather than the label moving away from its icon. |
+| O250 | **The name and the arrow do different things.** Tapping the exercise opens its cover; tapping the chevron opens the list, and the list no longer repeats the cover. |
+| O251 | **Six intimacy pages are two.** How it happens: Frequency, Initiating, Adventurousness. What makes it work: Comfort & Safety, Communication, What It Is For. |
+| O252 | **Built like the Communication pages.** No intro paragraph, an orientation tile of three rows, one Talk about it prompt from whichever aspect the two of you are furthest apart on, and the side-by-side behind a dropdown. Ties break in the order you listed, because that order is what the grouping is written in. |
+| O253 | **What makes it work leads with the choices.** The third row is the chips rather than a bar, decided by the server so both surfaces pick the same row. |
+| O254 | **Two questions changed, both surfaces.** "What does intimacy most mean in your marriage now" is gone. "When you're emotionally disconnected" is in Comfort & Safety. That also settles O238 without new copy: What It Is For now has only its multi-answer question, so there is no position to plot on an axis that did not measure it. |
+| O255 | **Old marks still resolve.** The six retired page ids alias to the two that replaced them, the anchor validator accepts them, and `check-section-aliases` fails the build if one is left pointing nowhere. Without it every mark anyone had made on an intimacy page would have gone quiet. |
+| O256 | **The covers are louder**: the section's icon at size in its own colour on a disc, the name under it, and the brand's own orange-into-indigo rule. |
+| O257 | **And they have a "See insights" button** into the overview. |
+| O258 | **Both conflict tiles are tighter.** Each had a margin above a rule and a padding below it, which is thirty-two points between two short rows. |
+| O259 | **The two pills are off the detail pages.** The badge stays on the at-a-glance action plan, which is the one place it does real work. |
+| O260 | **The invisible tile.** It was #F4F7FF with white type on it: the page moved onto a dark gradient and everything in the tile was converted except the tile. |
+| O261 | **The conflict pages have a page count.** They are the one section whose pages live in their own file, which is the only reason they did not: the count is computed from the nav and was never passed across. StepCount is its own file now, so there is one of it. |
+| O262 | **What You Each Wrote has its tile.** That function has two returns, the empty state and the page, and the conversion replaced the first. So the empty state got the dark tile and the page stayed a bare scroll on cream with type already turned white for a tile it never got. |
+| O263 | **Relationship Reflection is two rows again**, what you each wrote for yourselves. This reverses what I did two days ago at your ask; the note in the code says it was asked for twice, so nobody quietly changes it back. |
+| O264 | **The eyebrow and the pole labels are readable.** They were white at a third opacity, which is about two to one on that ground. |
+| O265 | **So are "Ellie admires" and "Preston admires."** They were each person's own mark colour, which is chosen to read on cream. |
+| O266 | **That tile is tighter.** |
+| O267 | **The "what this looks like in your relationship" tile is gone**, app and site, and out of the block spec so neither surface is held to drawing it. |
+| O268 | **The count reserves its height on every page**, so a page with one and a page without start their titles on the same line. That is what had the expectations pages sitting lower than the rest. |
+| O269 | **No "explore more resources" arrow when you own everything.** It pointed at the offerings page, so someone who had bought it all was being sent to a shop with nothing in it for them. Derived from the catalogue, so a new resource brings the link back on its own. |
+| O270 | **Colour on the three plain tabs.** The menu's rows stay cream, which you asked for, and the colour is in the icon: the section's hue behind it at a tenth, the same shape the home tile's rows use. An open section carries its colour down the left edge. Learn has the brand wash it never had, and every wash is stronger than it was, because it is doing a job now rather than decorating. |
 | O240 | **The exercises sit under a heading of their own**, indented, with "Exercise results" above them. Not italic, and that is a limit rather than a choice: only PlayfairDisplay-Bold is bundled, there is no italic face, and iOS draws nothing at all rather than slanting one. Say the word and I will add the italic font file; it is a build, not an update. |
 | O241 | **The menu is Attune's colours only.** Every row carried a gradient of its section's colour; the icon is the one coloured thing now. |
 | O242 | **The arrows are larger again**, half as big again as last time. |
@@ -199,7 +189,7 @@ receive a notification from Apple's servers.
 | O231 | **Communication counts only what it asks for.** A tile exists for all three domains whether or not there is anything to do in one, so your page said three and showed two blank rows. The count is the rows, so filtering the rows fixed both. |
 | O232 | **Relationship Reflection carries its own action plan.** It was taking one written answer and making two rows of it. It now takes the plan its overview page draws, with both of your own words underneath. |
 | O233 | **Conflict Patterns carries yours.** It was one hardcoded sentence, on the argument that the patterns are private so nothing about them should repeat. That confused two promises: they are private from your partner, not from you, and this page is built per reader. Same selection the overview makes. |
-| O234 | **The intimacy question, and what was actually wrong.** Your missing answer was a copy edit. Answers are stored as the words that were on the button, and commit 6b00d10 renamed "One of several ways" to "One of several ways we stay close", which is the option you had chosen. From that commit your answer matched nothing and your mark did not draw. Five options have been reworded since the exercise shipped and every one of them silently dropped the answers already given under the old wording. Retired wordings now resolve, and `check-answer-labels` fails the build if another edit is made without recording the old words. The lookup also existed twice, so fixing one copy left the results page still dropping it; there is one now. Separately, the multi-answer question is drawn at all for the first time. What is left is the axis, which is O238 and needs your words. |
+| O234 | **The intimacy question, and what was actually wrong.** Your missing answer was a copy edit. Answers are stored as the words that were on the button, and commit 6b00d10 renamed "One of several ways" to "One of several ways we stay close", which is the option you had chosen. From that commit your answer matched nothing and your mark did not draw. Five options have been reworded since the exercise shipped and every one of them silently dropped the answers already given under the old wording. Retired wordings now resolve, and `check-answer-labels` fails the build if another edit is made without recording the old words. The lookup also existed twice, so fixing one copy left the results page still dropping it; there is one now. Separately, the multi-answer question is drawn at all for the first time. What was left was the axis, and the regroup settled it: see O254. |
 | O235 | **Notes on the website.** The page that was there kept a notebook in localStorage under a line that said "Saved to this device only". It reads the real endpoint now: your marks grouped by the page they sit on, what you have written, what your partner shared, your tags, sharing and delete. And you can mark results prose on a laptop: select a sentence and the same five actions the app offers appear, writing the same anchors, so a mark made on a laptop opens on the phone. Existing marks paint back onto the words. |
 | O236 | **Questions about Notes and colour**, at the foot of this document rather than in a reply, so they survive the session. Five of them, and one of them changes what the others are worth. |
 | O237 | **Three directions for the app's colour**, same place, with what each one costs. |

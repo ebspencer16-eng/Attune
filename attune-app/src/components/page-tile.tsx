@@ -98,6 +98,21 @@ export default function PageTile({
           maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
         }}>
         {dark ? (
+          /**
+           * ── AN OPAQUE BACKING UNDER THE GRADIENT ──────────────────────
+           * The section grounds carry alpha in their stops: `#6E2A48dd` and
+           * `#6E2A4899`. That was written when these pages were painted edge
+           * to edge over the app's own dark background, where the translucency
+           * did nothing visible. Every results page is a tile on a light wash
+           * now, so the same stops composite against cream and the tile comes
+           * out pale mauve with white type on it.
+           *
+           * The backing is the last stop, which is the deep end of every one of
+           * these gradients, so the alpha composites against what it was always
+           * meant to composite against. Nothing about the shared stops changes,
+           * which matters: the website paints from the same numbers.
+           */
+          <View style={{ borderRadius: Radius.xl, backgroundColor: ground![ground!.length - 1], overflow: 'hidden' }}>
           <LinearGradient
             colors={[...(ground as readonly string[])] as [string, string, ...string[]]}
             locations={
@@ -110,6 +125,7 @@ export default function PageTile({
             style={{ borderRadius: Radius.xl, padding }}>
             {children}
           </LinearGradient>
+          </View>
         ) : (
           /* A hairline rather than a shadow, for the reason the theme gives:
              this product is read side by side about a relationship, and heavy
