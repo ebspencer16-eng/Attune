@@ -100,14 +100,21 @@ export default function CoupleMap({
       <View style={{ width: size, height: size, borderRadius: Radius.lg, overflow: 'hidden' }}>
         {/* Four quadrants, in the server's order: W X Y Z. */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: size, height: size }}>
+          {/* ── NO QUADRANT NAMES ──────────────────────────────────────
+              Ellie: "No ind type labels in the couple map on storycards or
+              couple type page."
+
+              Each corner carried an individual type: The Initiator, The
+              Anchor, The Feeler, The Protector. This product's subject is the
+              gap between two people, and four named boxes invite each of them
+              to find their own corner and stop reading. The tints stay, so the
+              map still has regions; it just does not tell anyone which one
+              they are. Same change on the website. */}
           {qs.map((q) => (
             <View
               key={q.code}
-              style={{ width: size / 2, height: size / 2, backgroundColor: q.fill, padding: Spacing.sm }}>
-              <Text style={{ ...label, fontSize: 9, color: q.color }} numberOfLines={1}>
-                {q.name}
-              </Text>
-            </View>
+              style={{ width: size / 2, height: size / 2, backgroundColor: q.fill }}
+            />
           ))}
         </View>
 

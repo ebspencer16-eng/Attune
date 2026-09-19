@@ -25,7 +25,7 @@
  */
 
 import { forwardRef, useRef, useState } from 'react';
-import { ScrollView, View, useWindowDimensions } from 'react-native';
+import { ScrollView, View, useWindowDimensions, type ViewProps } from 'react-native';
 import type { NativeScrollEvent, NativeSyntheticEvent, StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -54,10 +54,18 @@ type Props = {
   /** The ground the row sits on, when it is not the screen background. */
   ground?: string;
   gap?: number;
+  /**
+   * Told how wide the row is, when it is laid out.
+   *
+   * The results section line centres whichever entry you are on, and centring
+   * needs the width of the window as well as the position of the entry. The
+   * row is the only thing that knows the first of those.
+   */
+  onLayout?: ViewProps['onLayout'];
 };
 
 const EdgeFadedRow = forwardRef<ScrollView, Props>(function EdgeFadedRow(
-  { children, contentContainerStyle, style, ground = c.background, gap = Spacing.md }, ref,
+  { children, contentContainerStyle, style, ground = c.background, gap = Spacing.md, onLayout }, ref,
 ) {
   const { width } = useWindowDimensions();
   const fade = Math.min(28, width * 0.08);
@@ -89,7 +97,7 @@ const EdgeFadedRow = forwardRef<ScrollView, Props>(function EdgeFadedRow(
   };
 
   return (
-    <View style={style}>
+    <View style={style} onLayout={onLayout}>
       <ScrollView
         ref={ref}
         horizontal

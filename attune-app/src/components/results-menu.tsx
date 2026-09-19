@@ -39,13 +39,11 @@
  */
 
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 
 import type { ResultsNavGroup } from '@/api/client';
-import { AccentFallback, Colors, Fonts, Spacing, Type } from '@/constants/attune-theme';
-import { withAlpha } from '@/components/page-wash';
+import { AccentFallback, Colors, Fonts, Palette, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -131,9 +129,33 @@ export default function ResultsMenu({
         const kids = g.children || [];
         const holdsCurrent = g.id === current || kids.some((ch) => ch.id === current);
         const icon = GROUP_ICON[g.id];
+        const isExercise = !!icon;
+        /**
+         * ── THE EXERCISES GET A HEADING ────────────────────────────────────
+         * Ellie: "maybe there's a section called exercise results and the
+         * exercises are indented and italicised? Just to provide some visual
+         * variation?"
+         *
+         * The five exercises are contiguous in the nav and always have been,
+         * so the heading goes above the first of them rather than being a
+         * group the server has to invent. `isExercise` is having an icon,
+         * which is already the rule for what an exercise is here.
+         */
+        const firstExercise = isExercise && !GROUP_ICON[groups[i - 1]?.id];
 
         return (
           <View key={g.id}>
+            {firstExercise ? (
+              <View
+                style={{
+                  paddingTop: big ? Spacing.lg : Spacing.md,
+                  paddingBottom: Spacing.sm,
+                  paddingHorizontal: Spacing.xl,
+                  borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+                }}>
+                <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
+              </View>
+            ) : null}
             {/* ── A ROW, NOT A BAND ──────────────────────────────────────
                 Ellie, having asked for the coloured blocks and then seen them:
                 "The colors on the insights landing page are so ugly. Can we
@@ -162,21 +184,22 @@ export default function ResultsMenu({
               }}
               style={{
                 paddingVertical: big ? Spacing.lg : Spacing.md,
-                paddingHorizontal: Spacing.xl,
+                paddingLeft: isExercise ? Spacing.xl + Spacing.lg : Spacing.xl,
+                paddingRight: Spacing.xl,
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
                 borderTopColor: c.border,
-                backgroundColor: isOpen ? withAlpha(color, 0.05) : 'transparent',
+                backgroundColor: isOpen ? Palette.warm : 'transparent',
               }}>
-              {/* The brand wash: the section's own colour at five per cent,
-                  fading out across the row. A tint, not a block. */}
-              <LinearGradient
-                pointerEvents="none"
-                colors={[withAlpha(color, 0.14), withAlpha(color, 0)]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
+              {/* ── NO WASH ─────────────────────────────────────────────────
+                  Ellie: "Menu should just be attune colors, the only exercise
+                  colors should be the icons to the left of the exercise names."
+
+                  Each row carried a gradient of its section's colour at 14 per
+                  cent. Eight of those stacked is still eight colours, quieter.
+                  The icon is the only coloured thing now, which is what she
+                  asked for twice: once as a suggestion and once as a
+                  correction. */}
               {/* ── ONLY THE EXERCISES CARRY AN ICON ─────────────────────
                   Ellie: "Maybe only the exercises have icons?" Highlights,
                   Couple Type and What Comes Next are ways of reading the
@@ -207,6 +230,10 @@ export default function ResultsMenu({
                   fontFamily: Fonts.display,
                   fontSize: big ? 17 : 15,
                   lineHeight: Math.ceil((big ? 17 : 15) * 1.41),
+                  /* Indented and italic, which is the whole of the variation
+                     she asked for: the four that are not exercises read as the
+                     spine and the five that are read as a set inside it. */
+                  fontStyle: isExercise ? 'italic' : 'normal',
                   color: c.textStrong,
                   flex: 1,
                 }}>
@@ -217,7 +244,7 @@ export default function ResultsMenu({
               ) : null}
               {/* Ellie: "Make dropdown arrows in hamburger nav larger." */}
               {kids.length ? (
-                <Text style={{ color: c.textMuted, fontSize: big ? 18 : 17, lineHeight: 22 }}>
+                <Text style={{ color: c.textMuted, fontSize: big ? 24 : 22, lineHeight: 28 }}>
                   {isOpen ? '\u25B4' : '\u25BE'}
                 </Text>
               ) : null}
@@ -225,7 +252,7 @@ export default function ResultsMenu({
 
             {/* The pages inside it, indented under the label they belong to. */}
             {isOpen && kids.length ? (
-              <View style={{ backgroundColor: withAlpha(color, 0.05) }}>
+              <View style={{ backgroundColor: Palette.warm }}>
                 {kids.map((ch) => {
                   const on = ch.id === current;
                   return (
@@ -237,7 +264,7 @@ export default function ResultsMenu({
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
                         paddingVertical: big ? Spacing.md : Spacing.sm + 2,
-                        paddingLeft: Spacing.xl + (big ? 26 : 22) + Spacing.lg,
+                        paddingLeft: Spacing.xl + Spacing.lg + (big ? 26 : 22) + Spacing.lg,
                         paddingRight: Spacing.xl,
                         borderTopWidth: 1, borderTopColor: c.border,
                       }}>

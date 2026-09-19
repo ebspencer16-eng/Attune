@@ -265,6 +265,14 @@ export type ResultsNavEntry = {
   label: string;
   color?: string;
   glance?: boolean;
+  /**
+   * The page a section opens on: its name, on the section's own ground.
+   *
+   * Not counted in the "1/4" a detail page shows, deliberately: the cover is
+   * the door and a door is not one of four rooms. See `cover` in
+   * api/_lib/results-sections.js.
+   */
+  cover?: boolean;
   ground?: string[] | null;
   groundStops?: number[] | null;
 };

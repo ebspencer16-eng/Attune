@@ -24,6 +24,21 @@ const routing = src.slice(start, end === -1 ? undefined : end);
 const exact = new Set([...routing.matchAll(/section === '([a-z0-9-]+)'/g)].map((m) => m[1]));
 const prefixes = [...routing.matchAll(/section\.startsWith\('([a-z0-9-]+)'\)/g)].map((m) => m[1]);
 
+/**
+ * ── AND THE SUFFIX FORM ───────────────────────────────────────────────────
+ * The cover pages are `comm-cover`, `exp-cover` and so on, built by the server
+ * from the exercise registry. The app draws them with one branch on
+ * `section.endsWith('-cover')`, for the same reason the domain pages went
+ * through a table: a list of five ids is a list that goes stale the day a
+ * sixth exercise exists.
+ *
+ * This gate knew `===` and `startsWith` and reported three live screens as
+ * missing, which is the third time the same blind spot has caught it out. The
+ * rule holds: when a checker matches a name, ask what the indirection for that
+ * name is, and match on that too.
+ */
+const suffixes = [...routing.matchAll(/section\.endsWith\('([a-z0-9-]+)'\)/g)].map((m) => m[1]);
+
 // ── SECTIONS REACHED THROUGH A LOOKUP ──────────────────────────────────────
 // The three Communication domain pages used to be three `section === '...'`
 // branches and are now one branch over a map, because they differ only in
@@ -39,7 +54,9 @@ for (const table of routing.matchAll(/Record<string,[^>]*>\s*=\s*\{([\s\S]*?)\}/
 }
 
 const missing = RESULTS_SECTIONS.filter(
-  (id) => !exact.has(id) && !prefixes.some((p) => id.startsWith(p)));
+  (id) => !exact.has(id)
+    && !prefixes.some((p) => id.startsWith(p))
+    && !suffixes.some((x) => id.endsWith(x)));
 
 if (missing.length) {
   console.error('[check-results-coverage] sections the server sends and the app cannot draw:');

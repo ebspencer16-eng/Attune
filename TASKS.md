@@ -49,8 +49,8 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Decision |
 |--|--|
-| O239 | **Vercel has the whole site behind a security challenge, and only you can lift it.** Every request to attune-relationships.com, the API included, is answering 403 with a page titled "Vercel Security Checkpoint" instead of the thing that was asked for. The app shows "Something went wrong" because that is what it gets. This is not the deploy: the same endpoints answered normally an hour before, and the code that changed runs correctly when I run it here. It is Vercel's Attack Challenge Mode, which sits in the project's dashboard under Settings, Security, and it is almost certainly on because of me: I probed those endpoints several dozen times this afternoon timing the dashboard, and restarted the app in the simulator repeatedly, which is exactly the shape of traffic it exists to stop. **To turn it off:** vercel.com, the Attune project, Settings, Security, Attack Challenge Mode, toggle off. It may also lapse on its own within a few hours. Worth knowing either way, because if it ever switches on while customers are using the app, this is what it looks like from their side and there is nothing in the app that can tell them so. |
-| O238 | **The "What It Is For" scale is labelled with an axis it does not measure. This one needs your words, and probably Carolina's read.** You were right to distrust it. Here is what I found. Five of the six intimacy aspects are labelled with the axis their questions run along: Frequency is "Less often / More often" and its questions ask how often; Adventurousness is "Prefers the familiar / Wants novelty" and its questions ask about novelty. What It Is For is labelled "Release and play / Closeness and connection", and its two scored questions are "when you're emotionally disconnected, physical intimacy tends to" (off the table / how we reconnect) and "what does intimacy most mean in your marriage now" (still working that out / a primary way we stay close). Neither of those measures release or play. Both run from less connection-oriented to more. So a low average means "intimacy is not where we reconnect, and I am still working out what it means", and it is drawn at the end of the track that says "Release and play". That is how your answer about reconnecting after conflict came out looking like a statement about fun. The one question that does ask about release and play is the multi-select, and it has no position on a scale, so it contributes nothing to the mark. **What I need from you:** two short pole labels for that track that describe what is actually measured. Something in the shape of "Still working it out" to "A primary way we stay close", in your words. Change the poles and the page is honest; change the questions instead and it is a scoring change, which is a bigger decision and Carolina's to weigh in on. I have not guessed at either. |
+| O239 | **The security challenge is already gone, and there is probably nothing to find.** It lifted on its own about twenty minutes after it started, and the API has answered normally since. That is why you cannot see the toggle: Vercel only shows Attack Challenge Mode while it is relevant, and on current plans it lives under the project's **Firewall** tab rather than Settings, as *Attack Challenge Mode* in the right-hand panel. If it is not there, it is off. Nothing to do unless the app starts answering "Something went wrong" across the board again, and if it does, that tab is where to look first. |
+
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
@@ -68,11 +68,24 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 20 September is built and sitting in section 3.
-One thing came out of it that needs you rather than me: O238.
+The batch of 21 September, recorded in full before any of it was built.
 
 | # | Task |
 |--|--|
+| **The table of contents** |  |
+| O240 | **Group the exercises under a heading of their own.** "In TOC-type menu, maybe there's a section called exercise results and the exercises are indented and italicised? Just to provide some visual variation?" |
+| O241 | **The menu wears Attune's colours, not the sections'.** "Menu should just be attune colors, the only exercise colors should be the icons to the left of the exercise names." So the row washes go; the icon is the only coloured thing. |
+| O242 | **The dropdown arrows again.** "Dropdown arrows on the menu should be larger." They were enlarged once and are still too small. |
+| **The couple map** |  |
+| O243 | **The caption moves and changes weight.** "placement calculated based on 10 dimension scores should be italicized and small below the 'your couple map' eyebrow." So it sits under the eyebrow rather than under the map. |
+| O244 | **No individual type labels on the map.** "No ind type labels in the couple map on storycards or couple type page." The four quadrant names come off both surfaces' maps. |
+| **Moving through Insights** |  |
+| O245 | **The section line follows you.** "Top line nav should move as you move through the insights, current tab should always be centered." |
+| **Cover pages** |  |
+| O246 | **A cover page per exercise.** "I think there should be a cover page for each exercise with that exercise's color as a tinted gradient on cream, then that same bg persists through the exercise's section behind the tiles." |
+| O247 | **The overview pages change with them.** "Because we will have the cover pages, the overview pages should only say overview at the top and should also have a count in the top right (1/4)." So the overview joins the numbered set rather than sitting outside it. |
+| **Relationship Reflection** |  |
+| O248 | **Ghost tiles, and legible type.** "Rel Relf detailed pages need to be adjusted, I want ghost tiles instead of white and I need the text to be visible against the bg." |
 
 ## 3. For you to review
 
@@ -90,10 +103,7 @@ any order; work through them however suits.
 
 | # | Review |
 |--|--|
-| R200 | **Notes has a ground of its own.** Warm at the top through the orange, settling into the indigo at the bottom, so the tiles and the tag rows sit on something rather than on flat cream. It is the same wash the other tabs use, with a second colour added underneath; tell me if it wants to be stronger. |
 | R210 | **The Insights nav, rebuilt.** A landing page of coloured bands, one per section, in the website's own colours. Opening one closes the others and lists its pages. Inside a page: a hamburger top left that drops the same menu, a line saying Section: page, and back and forward at the foot. The two rows of chips are gone. Nothing you read changed, only how you get to it. |
-| R211 | **Results are ready now opens the storycards**, and the landing page is where they end. The Insights tab on its own still opens the menu. |
-| R212 | **Home.** The tile is a pane of glass rather than a cream box, with white type and each icon in its own disc. The greeting is bigger and further from the lockup, which is what was clashing: they were both bold Playfair in white, forty points apart. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
 | R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
 | R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. |
@@ -129,6 +139,9 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| R212 | Home: the glass tile and the greeting |
+| R211 | Results are ready opens the storycards |
+| R200 | Notes has a ground of its own |
 | R203 | The home tile is a ghost bubble |
 | R202 | Sharing says Attune Relationships, with the lockup as the thumbnail |
 | R198 | "Yours to explore" is now "Resources" |

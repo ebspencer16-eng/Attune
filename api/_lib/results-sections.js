@@ -28,14 +28,32 @@ import { INTIMACY_DIMENSIONS } from '../_intimacy-questions.js';
 import { COMM_DOMAINS } from './tags.js';
 import { SECTION_GROUNDS, groundFor, groundLocations, groundForCategory } from './section-grounds.js';
 
+/**
+ * The cover page each exercise section opens on. See `cover` in resultsNav.
+ *
+ * Listed here as well as built there because this is the list the anchor
+ * validator reads: a section id the validator does not know refuses every note
+ * anchored to it, silently, which is how Conflict Patterns went a release
+ * without being annotatable.
+ */
+export const COVER_SECTIONS = ['comm-cover', 'exp-cover', 'reflection-cover', 'intimacy-cover', 'conflict-cover'];
+
+/*
+ * ── THE ORDER HERE IS THE ORDER THE NAV WALKS ─────────────────────────────
+ * check-results-nav holds these two to the same sequence, and it caught the
+ * covers being listed as a block at the top while the nav visits each one just
+ * before its own section's overview. Worth keeping: this list decides what
+ * "the next page" means, and a list in a different order from the nav is a
+ * next button that skips.
+ */
 export const RESULTS_SECTIONS = [
   'highlights',
   'couple-type',
 
-  'comm-overview', 'comm-inner', 'comm-connection', 'comm-hard',
+  'comm-cover', 'comm-overview', 'comm-inner', 'comm-connection', 'comm-hard',
 
   // Conversations are numbered by position, matching how App.jsx builds them.
-  'exp-overview',
+  'exp-cover', 'exp-overview',
   // Six, not five: Life & Values is a category a reader navigates to, and
   // building this from the responsibility list alone is what made the
   // website's link to it fall through to the storycards.
@@ -44,17 +62,17 @@ export const RESULTS_SECTIONS = [
   // Ellie: "App and site both show a detailed page for rel relf called action
   // plan. Remove that page from both web and app." The action plan itself stays;
   // it is on the at-a-glance page, where a reader sees it without a detour.
-  'reflection-overview', 'reflection-ratings', 'reflection-story',
+  'reflection-cover', 'reflection-overview', 'reflection-ratings', 'reflection-story',
 
   // Ellie: "Remove conversations worth having from intimacy section on app and
   // site." Its list is the at-a-glance page's action plan, which a reader
   // meets without a detour, and the six dimension pages each carry their own
   // question. The page repeated both.
-  'intimacy-overview',
+  'intimacy-cover', 'intimacy-overview',
   ...INTIMACY_DIMENSIONS.map(d => `intimacy-${d.id}`),
 
   // The four that the old regex silently refused.
-  'conflict-overview', 'conflict-snapshot', 'conflict-patterns', 'conflict-wrote',
+  'conflict-cover', 'conflict-overview', 'conflict-snapshot', 'conflict-patterns', 'conflict-wrote',
 
   'what-comes-next',
 ];
@@ -93,26 +111,30 @@ export const RESULTS_SECTIONS = [
  */
 export const PAGE_TITLES = {
   /**
-   * Ellie: page titles "should read 'Expectations Overview' rather than just
-   * 'Expectations'". Every overview page names its section and then says which
-   * of that section's pages it is, which is what the rest of them do.
+   * Ellie, first: page titles "should read 'Expectations Overview' rather than
+   * just 'Expectations'". Then, once the cover pages existed: "Because we will
+   * have the cover pages, the overview pages should only say overview at the
+   * top and should also have a count in the top right (1/4)."
+   *
+   * Which is right: the cover carries the exercise's name two taps earlier, so
+   * repeating it here is the section's name printed twice in a row.
    */
-  'comm-overview': 'Communication Styles Overview',
+  'comm-overview': 'Overview',
   /**
    * Ellie: the Physical Intimacy at-a-glance hero "should have the hero read
    * physical intimacy expectations". Both surfaces led with the couple's two
    * names there, which does not say what the page is.
    */
-  'intimacy-overview': 'Physical Intimacy Expectations Overview',
-  'exp-overview': 'Expectations Overview',
-  'conflict-overview': 'Conflict Patterns Overview',
+  'intimacy-overview': 'Overview',
+  'exp-overview': 'Overview',
+  'conflict-overview': 'Overview',
   'reflection-ratings': 'How you each view the relationship',
   /**
    * Ellie: the at-a-glance title "should read Relationship Reflection". It
    * led with the couple's two names, which is what every glance page used to
    * do and what the other four have stopped doing.
    */
-  'reflection-overview': 'Relationship Reflection Overview',
+  'reflection-overview': 'Overview',
 };
 
 /**
@@ -148,6 +170,11 @@ export const PAGE_COPY = {
 export const RESULTS_SECTION_LABELS = {
   'highlights': 'Highlights',
   'couple-type': 'Couple Type',
+  'comm-cover': 'Communication Styles',
+  'exp-cover': 'Expectations',
+  'reflection-cover': 'Relationship Reflection',
+  'intimacy-cover': 'Physical Intimacy Expectations',
+  'conflict-cover': 'Conflict Patterns',
   'comm-overview': 'Communication',
   'comm-inner': 'Internal Processing',
   'comm-connection': 'How You Connect',
@@ -280,6 +307,27 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
   });
 
   /**
+   * The page a section opens on.
+   *
+   * ── WHY A COVER ───────────────────────────────────────────────────────
+   * Ellie: "I think there should be a cover page for each exercise with that
+   * exercise's color as a tinted gradient on cream, then that same bg persists
+   * through the exercise's section behind the tiles."
+   *
+   * It carries the exercise's name and nothing else. Nothing new is written on
+   * it: the name is the registry's and the ground is the section's, and a
+   * cover that introduced a section in fresh prose would be a page of copy
+   * nobody had approved.
+   *
+   * It is also what makes the count honest. With a cover in front of it the
+   * overview is one page of the set rather than a thing outside the set, which
+   * is why the counts below include it and exclude this.
+   */
+  const cover = (groupId, label) => ({
+    id: `${groupId}-cover`, label, cover: true,
+  });
+
+  /**
    * A detail page painted with its section's own ground.
    *
    * Takes the overview's id rather than a colour, so a section that is
@@ -296,6 +344,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     {
       id: 'comm', shortLabel: 'Comms', ...fromExercise('ex1', 'Communication'),
       children: [
+        cover('comm', fromExercise('ex1', 'Communication').label),
         glance('comm-overview'),
         ...COMM_DOMAINS.map(d => ({ id: `comm-${d.id}`, label: d.label, color: d.color })),
       ],
@@ -303,6 +352,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     {
       id: 'exp', ...fromExercise('ex2', 'Expectations'),
       children: [
+        cover('exp', fromExercise('ex2', 'Expectations').label),
         glance('exp-overview'),
         ...EXPECTATIONS_CATEGORIES.map((cat, i) => ({
           id: `exp-convo-${i}`, label: cat.label, color: '#10B981',
@@ -318,6 +368,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     groups.push({
       id: 'reflection', shortLabel: 'Rel. Refl.', ...fromExercise('ex3', 'Relationship Reflection'),
       children: [
+        cover('reflection', fromExercise('ex3', 'Relationship Reflection').label),
         glance('reflection-overview'),
         /**
          * Ellie: "Rel Relf detailed pages can't be cream tiles. Match them to
@@ -337,6 +388,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     groups.push({
       id: 'intimacy', shortLabel: 'Intimacy', ...fromExercise('intimacy', 'Physical Intimacy'),
       children: [
+        cover('intimacy', fromExercise('intimacy', 'Physical Intimacy').label),
         glance('intimacy-overview'),
         ...INTIMACY_DIMENSIONS.map(d => ({ id: `intimacy-${d.id}`, label: d.label })),
       ],
@@ -347,6 +399,7 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
     groups.push({
       id: 'conflict', shortLabel: 'Conflict', ...fromExercise('conflict', 'Conflict Patterns'),
       children: [
+        cover('conflict', fromExercise('conflict', 'Conflict Patterns').label),
         glance('conflict-overview'),
         { id: 'conflict-snapshot', label: 'Your Conflict Snapshot', ...detail('conflict-overview') },
         { id: 'conflict-patterns', label: 'Your Patterns', ...detail('conflict-overview') },

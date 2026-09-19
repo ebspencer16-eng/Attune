@@ -144,6 +144,16 @@ const INK_QUIET = c.onDarkMuted;
 /** A panel on a coloured ground, and its edge. */
 const PANEL = 'rgba(255,255,255,0.10)';
 const PANEL_EDGE = 'rgba(255,255,255,0.22)';
+/**
+ * A band inside a ghost panel: its header or its footer.
+ *
+ * Ellie: "I want ghost tiles instead of white and I need the text to be
+ * visible against the bg." Three panels on the Relationship Reflection pages
+ * were still cream with dark type on them, left over from when those pages
+ * were cream themselves. A cream band on a green gradient is the one thing on
+ * the page that looks like a mistake, and the words on it were unreadable.
+ */
+const PANEL_BAND = 'rgba(255,255,255,0.16)';
 
 /** How big the floating page arrows are. */
 const ARROW = 46;
@@ -468,10 +478,44 @@ export default function Results({
    * premium one has eight and they do not. All or none, because a line mixing
    * "Expectations" with "Rel. Refl." reads as a typo rather than as a choice.
    */
+  /**
+   * The section line, and where each of its entries sits.
+   *
+   * A width as well as an x, because centring needs the middle of the entry
+   * rather than its left edge, and these are names of very different lengths.
+   */
+  const navRow = useRef<ScrollView>(null);
+  const navX = useRef<Record<string, { x: number; width: number }>>({});
+  const navWidth = useRef(0);
+  const centreNav = useCallback(() => {
+    const id = groupOf(sectionId)?.id;
+    const at = id ? navX.current[id] : null;
+    if (!at || !navWidth.current) return;
+    navRow.current?.scrollTo({
+      x: Math.max(0, at.x + at.width / 2 - navWidth.current / 2),
+      animated: true,
+    });
+  }, [sectionId]);
+
+  // Also when the page changes, not only when an entry is laid out: moving
+  // between two pages of one section never re-lays the row out.
+  useEffect(() => { centreNav(); }, [centreNav]);
+
   const shortNav = groups.length > 5;
 
   const step = (() => {
-    const kids = (activeGroup?.children || []).filter((ch) => !ch.glance);
+    /**
+     * ── WHAT IS COUNTED ────────────────────────────────────────────────────
+     * Ellie, first: "1/3 marks" on the detail pages, and the overview was not
+     * one of them. Then, once the covers existed: "the overview pages should
+     * only say overview at the top and should also have a count in the top
+     * right (1/4)."
+     *
+     * So the overview is one of the set now and the cover is not. That is the
+     * right way round: the cover is the door, and a door is not one of four
+     * rooms.
+     */
+    const kids = (activeGroup?.children || []).filter((ch) => !ch.cover);
     const i = kids.findIndex((ch) => ch.id === section);
     return i >= 0 && kids.length > 1 ? { index: i + 1, total: kids.length } : null;
   })();
@@ -700,11 +744,32 @@ export default function Results({
             couple has: at five or fewer there is room for the whole name, and
             past that every one of them shortens together, because a row where
             two are abbreviated and three are not reads as a mistake. */}
-        <EdgeFadedRow ground={Palette.warm} gap={0} contentContainerStyle={{ alignItems: 'center' }}>
+        <EdgeFadedRow
+          ref={navRow}
+          ground={Palette.warm}
+          gap={0}
+          onLayout={(e) => { navWidth.current = e.nativeEvent.layout.width; centreNav(); }}
+          contentContainerStyle={{ alignItems: 'center' }}>
           {groups.map((g, i) => {
             const on = g.id === activeGroup?.id;
             return (
-              <View key={g.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                key={g.id}
+                /* ── THE LINE FOLLOWS YOU ────────────────────────────────
+                   Ellie: "Top line nav should move as you move through the
+                   insights, current tab should always be centered."
+
+                   Each entry reports where it is and how wide it is as it is
+                   laid out, and the row scrolls so the middle of the current
+                   one is the middle of the window. Measured rather than
+                   counted: the names are different lengths and abbreviate
+                   together, so nothing here can be worked out from an index. */
+                onLayout={(e) => {
+                  const { x, width } = e.nativeEvent.layout;
+                  navX.current[g.id] = { x, width };
+                  if (g.id === activeGroup?.id) centreNav();
+                }}
+                style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {i > 0 ? (
                   <Text style={{ ...Type.small, fontSize: 11, color: c.border }}>{'  \u2022  '}</Text>
                 ) : null}
@@ -760,6 +825,9 @@ export default function Results({
         <SectionBody
           section={section}
           step={step}
+          /* The cover's title is the nav entry's own label, which is the
+             exercise's full name from the registry. */
+          coverTitle={navEntry?.label || ''}
           /* The active nav group's colour, which the server sends. Sections
              that need their own accent take it from here rather than writing
              a second hex next to the website's. */
@@ -919,13 +987,15 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, step, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, step, coverTitle, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
 }: {
   section: string;
   /** Which of its section's detail pages this is, from the nav. */
   step: { index: number; total: number } | null;
+  /** What a cover page is called: the nav entry's own label. */
+  coverTitle: string;
   /** The server's heading for a page, and the strings inside it that both
       surfaces print. Passed down rather than reached for, so a page that does
       not take a title cannot quietly invent one. */
@@ -990,6 +1060,25 @@ function SectionBody({
       />
     );
   }
+  /**
+   * ── THE COVER ───────────────────────────────────────────────────────────
+   * Ellie: "there should be a cover page for each exercise with that
+   * exercise's color as a tinted gradient on cream, then that same bg persists
+   * through the exercise's section behind the tiles."
+   *
+   * Matched on the suffix rather than on a list of five ids: the server builds
+   * these from the exercise registry, so a sixth exercise would arrive with a
+   * cover the app had never heard of, and a list is how that becomes a blank
+   * page. check-results-coverage fails the build on a section the app cannot
+   * draw, and this is what stops it being five cases.
+   *
+   * It carries the section's name and nothing else. Anything more would be
+   * copy, and copy is Ellie's.
+   */
+  if (section.endsWith('-cover')) {
+    return <Cover title={coverTitle} accent={accent || c.accent} />;
+  }
+
   if (section === 'couple-type') {
     return (
       <CoupleType
@@ -2286,11 +2375,11 @@ function ReflectionRatings({ data, step = null, ground = null, groundStops = nul
             {data.admired.you === data.admired.them ? (
               <View
                 style={{
-                  marginTop: Spacing.sm, backgroundColor: '#EDFAF5',
-                  borderColor: '#10b98130', borderWidth: 1,
+                  marginTop: Spacing.sm, backgroundColor: PANEL_BAND,
+                  borderColor: PANEL_EDGE, borderWidth: 1,
                   borderRadius: Radius.md, padding: Spacing.md,
                 }}>
-                <Text style={{ ...Type.small, fontWeight: '600', color: '#047857' }}>
+                <Text style={{ ...Type.small, fontWeight: '600', color: Palette.white }}>
                   You picked the same quality, without conferring.
                 </Text>
               </View>
@@ -2551,7 +2640,7 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
                     backgroundColor: PANEL, borderColor: PANEL_EDGE, borderWidth: 1,
                     borderRadius: Radius.lg, marginBottom: Spacing.md, overflow: 'hidden',
                   }}>
-                  <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: Palette.warm, borderBottomColor: PANEL_EDGE, borderBottomWidth: 1 }}>
+                  <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: PANEL_BAND, borderBottomColor: PANEL_EDGE, borderBottomWidth: 1 }}>
                     <Text style={{ ...Type.cardTitle, color: Palette.white }}>{w.question}</Text>
                   </View>
 
@@ -2585,7 +2674,7 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
                       style={{
                         flexDirection: 'row', gap: Spacing.sm,
                         paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                        backgroundColor: Palette.warm, borderTopColor: PANEL_EDGE, borderTopWidth: 1,
+                        backgroundColor: PANEL_BAND, borderTopColor: PANEL_EDGE, borderTopWidth: 1,
                       }}>
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: YOU_COLOR, marginTop: 2 }}>
                         {label}
@@ -3204,6 +3293,26 @@ function CoupleType({ results, you, them, title }: {
           Your couple map
         </Text>
 
+        {/* ── THE SMALL PRINT, UNDER THE EYEBROW ────────────────────────────
+            Ellie: "placement calculated based on 10 dimension scores should be
+            italicized and small below the 'your couple map' eyebrow."
+
+            It used to sit under the map, where it read as a conclusion drawn
+            from what you had just looked at. Under the eyebrow it reads as
+            what it is: a note on how the thing below was worked out, before
+            you look at it. */}
+        {(results.content?.mapCaption || []).map((para, i) => (
+          <Text
+            key={i}
+            style={{
+              ...Type.small, fontSize: 12, lineHeight: 17,
+              fontStyle: 'italic', color: c.textMuted,
+              marginBottom: Spacing.sm,
+            }}>
+            {para}
+          </Text>
+        ))}
+
         {/* The map. It was missing entirely: the positions were in the payload
             and nothing drew them.
 
@@ -3219,23 +3328,6 @@ function CoupleType({ results, you, them, title }: {
           bName={results.content?.names?.b || 'Your partner'}
           quadrants={results.content?.mapQuadrants}
         />
-
-        {/* How the map is worked out, and a warning about expecting a
-            particular answer. Ellie's copy, from api/_axes.js by way of the
-            payload. The website has printed it under its map all along; the
-            app printed nothing, because the words lived inline in the
-            website's source. Small, because it is small print. */}
-        {(results.content?.mapCaption || []).map((para, i, all) => (
-          <Text
-            key={i}
-            style={{
-              ...Type.small, fontSize: 12, lineHeight: 17, color: c.textMuted,
-              marginTop: i === 0 ? Spacing.md : Spacing.sm,
-              marginBottom: i === all.length - 1 ? 0 : 0,
-            }}>
-            {para}
-          </Text>
-        ))}
 
         {/* block: couple-type/axes
 
@@ -3445,6 +3537,31 @@ function CoupleType({ results, you, them, title }: {
           </View>
         ) : null}
     </PageTile>
+  );
+}
+
+/**
+ * The page a section opens on.
+ *
+ * ── WHY IT IS A WHOLE SCREEN AND NOT A TILE ───────────────────────────────
+ * Every other page in the results sits in a tile, and this one deliberately
+ * does not. A cover is the one page with nothing to read on it: it is the
+ * moment between choosing a section and being in it. A tile would make it look
+ * like a page whose contents had failed to load.
+ *
+ * The ground is the wash the tab is already painting in this section's colour,
+ * so the cover and the pages behind it are the same background. That is the
+ * half of Ellie's ask that is easy to miss: "then that same bg persists
+ * through the exercise's section behind the tiles."
+ */
+function Cover({ title, accent }: { title: string; accent: string }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xxl }}>
+      <View style={{ width: 54, height: 3, borderRadius: 2, backgroundColor: accent, marginBottom: Spacing.xl }} />
+      {/* not markable: the section's own name, which is a label rather than a
+          finding. A mark anchored to it would follow the word, not the page. */}
+      <Text style={{ ...Type.hero, color: c.textStrong, textAlign: 'center' }}>{title}</Text>
+    </View>
   );
 }
 

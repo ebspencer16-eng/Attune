@@ -2011,19 +2011,19 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
         <line x1={midX} y1={cy0} x2={midX} y2={cy1} stroke="#C8C0B8" strokeWidth="1"/>
         <line x1={cx0} y1={midY} x2={cx1} y2={midY} stroke="#C8C0B8" strokeWidth="1"/>
 
-        {/* ── QUADRANT LABELS (letter + name, corner) ── */}
-        {/* W: top-left */}
-        <text x={cx0 + 14} y={cy0 + 22} fontSize="15" fontWeight="800" fill={QC.W} fontFamily="Georgia,serif" opacity="0.95">W</text>
-        <text x={cx0 + 14} y={cy0 + 38} fontSize="11.5" fontWeight="700" fill={QC.W} fontFamily="Arial" opacity="0.8">{QN.W}</text>
-        {/* X: top-right */}
-        <text x={cx1 - 14} y={cy0 + 22} fontSize="15" fontWeight="800" fill={QC.X} fontFamily="Georgia,serif" textAnchor="end" opacity="0.95">X</text>
-        <text x={cx1 - 14} y={cy0 + 38} fontSize="11.5" fontWeight="700" fill={QC.X} fontFamily="Arial" textAnchor="end" opacity="0.8">{QN.X}</text>
-        {/* Y: bottom-left */}
-        <text x={cx0 + 14} y={cy1 - 24} fontSize="15" fontWeight="800" fill={QC.Y} fontFamily="Georgia,serif" opacity="0.95">Y</text>
-        <text x={cx0 + 14} y={cy1 - 10} fontSize="11.5" fontWeight="700" fill={QC.Y} fontFamily="Arial" opacity="0.8">{QN.Y}</text>
-        {/* Z: bottom-right */}
-        <text x={cx1 - 14} y={cy1 - 24} fontSize="15" fontWeight="800" fill={QC.Z} fontFamily="Georgia,serif" textAnchor="end" opacity="0.95">Z</text>
-        <text x={cx1 - 14} y={cy1 - 10} fontSize="11.5" fontWeight="700" fill={QC.Z} fontFamily="Arial" textAnchor="end" opacity="0.8">{QN.Z}</text>
+        {/* ── NO QUADRANT NAMES ──────────────────────────────────────────
+            Ellie: "No ind type labels in the couple map on storycards or
+            couple type page."
+
+            The four corners carried an individual type each, The Initiator,
+            The Anchor, The Feeler, The Protector. This product's subject is
+            the gap between two people, and four named boxes invite each of
+            them to read their own corner and stop. The quadrant tints stay:
+            they say the map has regions without telling anyone which one they
+            are.
+
+            QN is still used by the tag placement below, which nudges a name
+            tag clear of a corner. It stays for that. */}
 
         {/* ── AXIS LABELS ── */}
         {/* Vertical axis: Engage (top) / Withdraw (bottom) */}
