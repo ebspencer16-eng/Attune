@@ -90,6 +90,17 @@ const YOU_COLOR = Palette.orange;
 // Palette.indigo. The app used ink, so the same two people were orange and
 // blue on the site and orange and black here.
 const THEM_COLOR = Palette.indigo;
+/**
+ * The same blue, lifted for the dark grounds.
+ *
+ * Ellie: "Adjust text coloring when you change tile color so that text is
+ * visible." #1B5FE8 is the website's partner colour and it is right on cream
+ * and right as a filled dot anywhere. As ten point type on the navy tiles it
+ * is not readable at all, which is how the partner's name on Side by Side came
+ * to be the one label on the page nobody could read. Filled shapes keep the
+ * brand blue; type on a dark ground takes this.
+ */
+const THEM_ON_DARK = '#8FB4FF';
 
 const c = Colors.light;
 
@@ -666,7 +677,11 @@ export default function Results({
     return (
       <View style={{ flex: 1 }}>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg }}>
-          <Text style={{ ...Type.hero, color: c.textStrong }}>Your results</Text>
+          {/* White: this heading is the one page of the results experience
+              that sits on the Insights tab's orange ground rather than on
+              cream. Every other page under it is on the wash and keeps the
+              ink. */}
+          <Text style={{ ...Type.hero, color: Palette.white }}>Your results</Text>
         </View>
         {/* ── IN A TILE, LIKE EVERY OTHER PAGE ─────────────────────────
             Ellie: "Please make the insights nav landing in a tile like the
@@ -2370,7 +2385,7 @@ function ReflectionRatings({ data, step = null, ground = null, groundStops = nul
 
   return (
     <PageTile ground={ground} locations={groundStops}>
-        <StepCount step={step} />
+        <StepCount step={step} onDark />
         <ReflectionHead page={data.pages?.ratings} />
         {/* block: reflection-ratings/scales */}
 
@@ -2405,7 +2420,7 @@ function ReflectionRatings({ data, step = null, ground = null, groundStops = nul
             <View style={{ flexDirection: 'row', gap: Spacing.md }}>
               {[
                 { from: data.names.you, about: data.names.them, val: data.admired.you, col: YOU_COLOR },
-                { from: data.names.them, about: data.names.you, val: data.admired.them, col: THEM_COLOR },
+                { from: data.names.them, about: data.names.you, val: data.admired.them, col: THEM_ON_DARK },
               ].map((x) => (
                 <View
                   key={x.from}
@@ -2674,7 +2689,7 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
   const label = data.promptLabel || 'Talk about it';
   return (
     <PageTile ground={ground} locations={groundStops}>
-        <StepCount step={step} />
+        <StepCount step={step} onDark />
         <ReflectionHead page={data.pages?.story} />
 
         {/* ── THE CONFLICT PAGE'S LAYOUT ────────────────────────────────
@@ -2723,7 +2738,7 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
 
                   {[
                     { name: data.names.you, words: w.you, col: YOU_COLOR },
-                    { name: data.names.them, words: w.them, col: THEM_COLOR },
+                    { name: data.names.them, words: w.them, col: THEM_ON_DARK },
                   ].map((side) => (
                     <View
                       key={side.name}
@@ -2852,10 +2867,10 @@ function PriorityPair({ you, them, yours, theirs, note }: {
 
         {/* Right: their partner's order. */}
         <View style={{ flex: 1 }}>
-          <Eyebrow color={THEM_COLOR}>{them}</Eyebrow>
+          <Eyebrow color={THEM_ON_DARK}>{them}</Eyebrow>
           {theirs.map((item, i) => (
             <View key={item} style={{ height: ROW, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: THEM_COLOR, opacity: 0.6 }}>
+              <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: THEM_ON_DARK, opacity: 0.8 }}>
                 {`#${i + 1}`}
               </Text>
               <Text numberOfLines={1} style={{ ...Type.small, color: c.text }}>{item}</Text>
@@ -3627,7 +3642,16 @@ function Cover({ title, accent, icon, onStart }: {
   title: string; accent: string; icon?: string | null; onStart?: () => void;
 }) {
   return (
-    <View style={{ flex: 1, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.lg }}>
+    /* The buffer she asked for, and at the bottom it has to clear the tab
+       bar as well: a frame whose bottom line runs underneath the tab bar
+       reads as the bar sitting on top of the page rather than as a frame. */
+    <View
+      style={{
+        flex: 1,
+        paddingHorizontal: Spacing.lg,
+        paddingTop: Spacing.lg,
+        paddingBottom: BottomTabInset + Spacing.lg,
+      }}>
       {/* ── THE FRAME ─────────────────────────────────────────────────────
           Ellie: "No gradient line under the title but maybe a gradient line
           running in a rounded rectangle around the edge of the page (but still

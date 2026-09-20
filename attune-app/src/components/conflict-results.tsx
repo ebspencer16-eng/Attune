@@ -732,7 +732,17 @@ function Wrote({ data, ground = null, groundStops = null, step = null }: {
 function SnapshotCell({ name, text, own = false }: { name: string; text: string; own?: boolean }) {
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ ...Type.eyebrow, fontSize: 9, color: own ? accentBlue : c.textMuted, marginBottom: Spacing.xs }}>
+      {/* ── THE NAME IS ON THE GHOST, NOT ON THE PILL ──────────────────
+          Ellie: "Adjust text coloring when you change tile color so that text
+          is visible." The pills keep their light grounds and their dark type.
+          The two names sit above them, directly on a ghost panel over the
+          section's blue, and they were still the blue and the grey the pills
+          use, which on that ground is barely a colour at all. */}
+      <Text
+        style={{
+          ...Type.eyebrow, fontSize: 9, marginBottom: Spacing.xs,
+          color: own ? '#BFD4FF' : 'rgba(255,255,255,0.72)',
+        }}>
         {name}
       </Text>
       <View

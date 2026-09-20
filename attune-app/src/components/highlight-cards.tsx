@@ -655,26 +655,55 @@ function Card({
             screen, top left is the attune orange gradient and bottom right is
             the attune navy gradient."
 
-            Drawn as one square rotated forty-five degrees and pinned to the
-            bottom right corner, which is the only way to get a hard diagonal
-            edge without an SVG library, and this project has none. The square
-            is bigger than the card's diagonal so its own corners never come
-            into view. The orange is the card's ground underneath. */}
-        {card.kind === 'admired' ? (
-          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-            <LinearGradient
-              colors={[Palette.indigo, '#1B2A5E']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{
-                position: 'absolute',
-                width: (w + h) * 1.1, height: (w + h) * 1.1,
-                right: -(w + h) * 0.05, bottom: -(w + h) * 0.55,
-                transform: [{ rotate: '-45deg' }],
-              }}
-            />
-          </View>
-        ) : null}
+            Drawn as one square rotated forty-five degrees, which is the only
+            way to get a hard diagonal edge without an SVG library, and this
+            project has none. The orange is the card's ground underneath.
+
+            The first version put the square in the bottom right corner by eye
+            and got the other diagonal: the divide ran from the top left corner
+            down to the bottom right, so the orange was the top RIGHT and the
+            navy the bottom LEFT. Both halves were on the wrong side of the
+            line she asked for, and the name in the top left sat across both of
+            them.
+
+            So the placement is derived rather than nudged. Rotating a square
+            by -45 degrees turns its top edge into a line running up and to the
+            right, with the square itself covering everything below and right
+            of that line, which is the navy half. The square is then placed so
+            that edge passes through the card's bottom left corner: its centre
+            has to sit at (0, h) plus half a side along the inward normal
+            (0.7071, 0.7071), and `left`/`top` are that centre less half a
+            side. Hence the 0.14645, which is 0.5 - 0.35355 and nothing else.
+
+            SIDE is twice the card's perimeter-ish so the square's own corners
+            are always far outside the card. */}
+        {card.kind === 'admired' ? (() => {
+          const SIDE = (w + h) * 2;
+          return (
+            <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+              <LinearGradient
+                colors={[Palette.indigo, '#2A3C86', '#16224F']}
+                /* The square's own diagonal, rotated back by 45 degrees, runs
+                   left to right in the card's space. But the square is several
+                   times the card's width, so without locations the card sees a
+                   sliver of the ramp and the navy reads as one flat blue. The
+                   stops are pinned to the slice the card actually covers,
+                   which is from the square's left inset to one card width
+                   further along it. */
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                locations={[0.14645, 0.14645 + (w / SIDE) / 2, 0.14645 + w / SIDE]}
+                style={{
+                  position: 'absolute',
+                  width: SIDE, height: SIDE,
+                  left: -0.14645 * SIDE,
+                  top: h - 0.14645 * SIDE,
+                  transform: [{ rotate: '-45deg' }],
+                }}
+              />
+            </View>
+          );
+        })() : null}
 
         {/* The stripe across the top. It is on the website's opener and it is
             the first thing anyone sees of this product. */}

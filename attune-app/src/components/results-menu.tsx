@@ -118,6 +118,30 @@ export default function ResultsMenu({
 
   const big = density === 'page';
 
+  /**
+   * ── ONE LEFT EDGE, DERIVED ────────────────────────────────────────────
+   * Ellie: "I want exercise results title to be listed left-aligned with
+   * highlights and couple type, and I want the content in that section
+   * indented further right than that."
+   *
+   * Highlights and Couple Type carry no icon, but they keep the icon's width
+   * so their labels line up with the exercises'. That means the left edge of a
+   * top-level LABEL is the row's padding plus the icon column plus the gap,
+   * not the row's padding. The heading was set to the row's padding, which is
+   * why it hung out to the left of the two names it was meant to match.
+   *
+   * These three are the same number four places apart, so they are computed
+   * once here: the heading, the exercise rows' icons, and the sub-pages all
+   * read off ICON_COL rather than restating 24 + 24 + 16.
+   */
+  const ICON_COL = big ? 24 : 20;
+  /** Where a top-level label starts, and so where the heading starts. */
+  const LABEL_LEFT = Spacing.xl + ICON_COL + Spacing.lg;
+  /** The exercises step in: their icons sit on the heading's edge. */
+  const EXERCISE_LEFT = LABEL_LEFT;
+  /** Their pages line up under their name. */
+  const CHILD_LEFT = EXERCISE_LEFT + ICON_COL + Spacing.lg;
+
   return (
     <ScrollView
       /* No bottom inset of its own: on the landing page the tile provides the
@@ -159,7 +183,8 @@ export default function ResultsMenu({
                 style={{
                   paddingTop: big ? Spacing.md : Spacing.sm,
                   paddingBottom: Spacing.xs,
-                  paddingHorizontal: Spacing.xl,
+                  paddingLeft: LABEL_LEFT,
+                  paddingRight: Spacing.xl,
                   borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
                 }}>
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
@@ -207,9 +232,13 @@ export default function ResultsMenu({
                    the icon should be indented and the text should come after
                    that." The whole row moves in, icon first, rather than the
                    label moving away from its icon. */
-                paddingLeft: isExercise ? Spacing.xl + Spacing.lg : Spacing.xl,
+                paddingLeft: isExercise ? EXERCISE_LEFT : Spacing.xl,
                 paddingRight: Spacing.xl,
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
+                /* The indent costs the label width, and Physical Intimacy
+                   Expectations is the longest label in the product. The
+                   exercises close the gap between icon and name to buy some of
+                   it back. */
+                flexDirection: 'row', alignItems: 'center', gap: isExercise ? Spacing.md : Spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
                 borderTopColor: c.border,
                 backgroundColor: isOpen ? Palette.warm : 'transparent',
@@ -247,7 +276,7 @@ export default function ResultsMenu({
                   its own. */}
               <View
                 style={{
-                  width: big ? 24 : 20,
+                  width: ICON_COL,
                   alignItems: 'center', justifyContent: 'center',
                 }}>
                 {icon ? (
@@ -267,7 +296,21 @@ export default function ResultsMenu({
                   the longest label in the product and it now fits on one line
                   on the narrowest phone this app supports. */}
               <Text
-                numberOfLines={1}
+                /**
+                 * ── TWO LINES RATHER THAN AN ELLIPSIS ────────────────────
+                 * Ellie: "Text should be slightly smaller so that nothing
+                 * trails off." Sizing alone cannot promise that: the indent
+                 * she asked for takes about forty points of width, and the
+                 * narrowest phone this app supports is twenty-seven points
+                 * narrower again than the one it is being read on. A size that
+                 * fits here is an ellipsis there.
+                 *
+                 * So the exercises may wrap. One long name taking a second
+                 * line costs twenty points of a menu with two hundred spare,
+                 * and nothing trails off on any device. The top-level rows are
+                 * short and stay on one line.
+                 */
+                numberOfLines={isExercise ? 2 : 1}
                 style={{
                   ...Type.cardTitle,
                   fontFamily: Fonts.display,
@@ -288,8 +331,8 @@ export default function ResultsMenu({
                    * once the indent has taken its width: Physical Intimacy
                    * Expectations is twenty-nine characters and has to fit.
                    */
-                  fontSize: big ? (isExercise ? 15 : 16) : 15,
-                  lineHeight: Math.ceil((big ? 16 : 15) * 1.41),
+                  fontSize: big ? (isExercise ? 14 : 16) : 14,
+                  lineHeight: Math.ceil((big ? (isExercise ? 14 : 16) : 14) * 1.41),
                   color: c.textStrong,
                   flex: 1,
                 }}>
@@ -329,7 +372,7 @@ export default function ResultsMenu({
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
                         paddingVertical: big ? Spacing.sm + 1 : Spacing.sm,
-                        paddingLeft: Spacing.xl + Spacing.lg + (big ? 38 : 30) + Spacing.lg,
+                        paddingLeft: CHILD_LEFT,
                         paddingRight: Spacing.xl,
                         borderTopWidth: 1, borderTopColor: c.border,
                       }}>

@@ -234,7 +234,22 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
      * own height, which is what a design review needs: the fold is not where
      * the page ends.
      */
-    async screenshot({ fullPage = false } = {}) {
+    async screenshot({ fullPage = false, transparent = false } = {}) {
+      /**
+       * ── A TRANSPARENT CAPTURE NEEDS TELLING TWICE ────────────────────────
+       * Setting `background: transparent` on the page is not enough: Chrome
+       * paints its own default white behind the document, and the capture gets
+       * that. The override has to be asked for through the protocol.
+       *
+       * Found by generating the two lockup marks and shipping them with a
+       * white rectangle baked in behind them, which on a cream page is a white
+       * box next to the wordmark on every screen.
+       */
+      if (transparent) {
+        await send('Emulation.setDefaultBackgroundColorOverride', {
+          color: { r: 0, g: 0, b: 0, a: 0 },
+        });
+      }
       let clip;
       if (fullPage) {
         const size = await send('Runtime.evaluate', {
@@ -246,8 +261,10 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
       }
       const shot = await send('Page.captureScreenshot', {
         format: 'png',
+        ...(transparent ? { captureBeyondViewport: false } : {}),
         ...(clip ? { clip, captureBeyondViewport: true } : {}),
       });
+      if (transparent) await send('Emulation.setDefaultBackgroundColorOverride', {});
       return shot.data;
     },
 

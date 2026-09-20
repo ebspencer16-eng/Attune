@@ -35,7 +35,7 @@ import ReflectionExercise from '@/components/reflection-exercise';
 import IntimacyExercise from '@/components/intimacy-exercise';
 import SignIn from '@/components/sign-in';
 import {
-  Colors, MaxContentWidth, Palette, Radius, Spacing, StatusColor, Type,
+  Colors, MaxContentWidth, OrangeGround, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
 import TabScreen from '@/components/tab-screen';
@@ -289,7 +289,7 @@ export default function InsightsScreen() {
           maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
         }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="rgba(255,255,255,0.7)" />
         }>
         {/* ── BEFORE THERE ARE RESULTS ───────────────────────────────────
             Ellie: "Ensure that when exercises are unfinished, insights page
@@ -300,10 +300,13 @@ export default function InsightsScreen() {
             Her line, word for word. The page it sits on is the same orange
             ground the landing menu is on, so the tab looks like one place
             whether or not the results exist yet. */}
-        <Text style={{ ...Type.hero, color: c.textStrong }}>
+        {/* White, because the ground under it is the orange rather than the
+            cream. This is the rule she has now asked for four times: when a
+            surface changes colour, the type on it moves with it. */}
+        <Text style={{ ...Type.hero, color: Palette.white }}>
           Insights generate once your exercises are complete
         </Text>
-        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
+        <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
           {/* Both branches were written in the app. The first named the partner,
               the second counted what was left, and neither is in Ellie's
               lines. Two of hers, from the shared module. */}
@@ -333,7 +336,10 @@ function Shell({ children, tint }: { children: React.ReactNode; tint?: string | 
      Expectations reads blue and Physical Intimacy reads rose whichever of
      their pages you are on. It is behind the tile rather than in it, which
      costs nothing in legibility: nothing is read on it. */
-  return <TabScreen tint={tint || Palette.orange} second={tint ? undefined : Palette.clay}>{children}</TabScreen>;
+  /* A section page keeps the cream and takes its own colour into the wash.
+     The landing, and every waiting state, is the orange ground itself. */
+  if (tint) return <TabScreen tint={tint}>{children}</TabScreen>;
+  return <TabScreen groundColors={OrangeGround}>{children}</TabScreen>;
 }
 
 /**

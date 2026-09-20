@@ -21,6 +21,7 @@
  */
 
 import { View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BrandHeader from '@/components/brand-header';
@@ -30,7 +31,7 @@ import { Colors } from '@/constants/attune-theme';
 const c = Colors.light;
 
 export default function TabScreen({
-  children, ground = 'cream', tint, second,
+  children, ground = 'cream', tint, second, groundColors,
 }: {
   children: React.ReactNode;
   /** 'cream' takes the wash and the ink lockup; 'blue' takes neither. */
@@ -39,12 +40,38 @@ export default function TabScreen({
   tint?: string;
   /** A second colour in the opposite corner, for a page that wants both. */
   second?: string;
+  /**
+   * ── A SATURATED GROUND, NOT A WASH ──────────────────────────────────
+   * Ellie: "The home page is the attune blue, please try making the landing
+   * page for insights the attune orange. Similar gradient as the home page
+   * has please."
+   *
+   * A wash is cream with a colour in the corner, which is what the Learn and
+   * Notes tabs want and what the Insights landing had. It is not what the home
+   * screen is: that is a two-shade gradient of one hue, edge to edge, with
+   * everything on it in white. Given a pair here, this paints that instead,
+   * takes the light lockup, and the page on it is read on colour.
+   *
+   * It is a prop rather than a third `ground` value because the colours belong
+   * to the tab: OrangeGround for Insights, BlueGround for home, and nothing
+   * here has to know which is which.
+   */
+  groundColors?: readonly [string, string];
 }) {
-  const blue = ground === 'blue';
+  const painted = !!groundColors;
+  const blue = ground === 'blue' || painted;
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: blue ? 'transparent' : c.background }}
+      style={{ flex: 1, backgroundColor: painted ? groundColors[0] : blue ? 'transparent' : c.background }}
       edges={['top']}>
+      {painted ? (
+        <LinearGradient
+          colors={[...groundColors]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.9, y: 1 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+      ) : null}
       {blue ? null : <PageWash tint={tint} second={second} />}
       <BrandHeader tone={blue ? 'light' : 'ink'} />
       <View style={{ flex: 1 }}>{children}</View>

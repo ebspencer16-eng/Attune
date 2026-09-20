@@ -96,7 +96,7 @@ try {
     await browser.goto(`data:text/html;base64,${Buffer.from(page(src)).toString('base64')}`);
     // fullPage, because Chrome's viewport is not the document; the icon
     // builder learned that with a square that came back 1024 by 937.
-    const png = Buffer.from(await browser.screenshot({ fullPage: true, omitBackground: true }), 'base64');
+    const png = Buffer.from(await browser.screenshot({ fullPage: true, transparent: true }), 'base64');
     if (png.length < 1000) throw new Error(`${name} came back ${png.length} bytes, which is not an image`);
     writeFileSync(`${ROOT}attune-app/assets/images/${name}.png`, png);
     console.log(`[build-mark-variants] ${name}.png written, ${png.length} bytes.`);

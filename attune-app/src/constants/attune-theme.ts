@@ -64,6 +64,19 @@ export const Palette = {
 export const BlueGround = ['#1B2A5E', '#2F55C4'] as const;
 
 /**
+ * The Insights tab's ground, which is the same idea in the brand orange.
+ *
+ * Ellie: "The home page is the attune blue, please try making the landing page
+ * for insights the attune orange. Similar gradient as the home page has
+ * please."
+ *
+ * Two shades of one hue, dark corner to light, exactly as BlueGround is. It is
+ * here rather than in insights.tsx so the two grounds stay one decision: if the
+ * home screen's blue is ever restyled, the thing to match is a line away.
+ */
+export const OrangeGround = ['#C2410C', '#E8673A'] as const;
+
+/**
  * Section accents. Used consistently and never decoratively: a colour on this
  * app means "this belongs to that section", so borrowing one for emphasis
  * breaks the only signal it carries.
