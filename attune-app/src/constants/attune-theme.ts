@@ -61,7 +61,12 @@ export const Palette = {
  * Conflict. Results grounds come from api/_lib/section-grounds.js by way of
  * the payload now, and nothing in results reads this.
  */
-export const BlueGround = ['#1B2A5E', '#2F55C4'] as const;
+/* Softened once, alongside the orange: Ellie, of the Insights ground, "Can we
+   do a slightly softer orange", and then of this one, "Can we soften the blue
+   gradient on the homepage, just like we did for the orange on insights."
+   Same move, the same amount: each stop a shade lighter and a shade less
+   saturated. */
+export const BlueGround = ['#2A3A6E', '#4A6CD4'] as const;
 
 /**
  * The Insights tab's ground, which is the same idea in the brand orange.

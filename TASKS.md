@@ -53,12 +53,6 @@ CLAUDE.md, so anything new sits here until you do.
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
 
-### Write this
-
-| # | Copy gap |
-|--|--|
-| C1 | **One short line, for a note whose words have moved.** This comes out of O320. A note is stored with a copy of the words it was made on; the words live on the server. When that copy is edited, or the paragraph is one the app no longer draws, the note is still yours and still on that page, and nothing on the page can point at it. The app now knows when that has happened, which is the hard half. What it cannot do is say so, because saying so is a sentence a customer reads and those are yours. The shape: one line, shown once at the foot of a results page, naming that there is a note here whose words have changed, and tappable to open it. Something like "A note you left here no longer matches the words on this page" is the length and the job, not a suggestion. Until it exists the app stays silent in that case, which is today's behaviour and is not worse than it was. |
-
 ### Answer these
 
 **Nothing waiting.** Q11 is answered: any page, and it is R214.
@@ -72,7 +66,25 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The four from 20 September are built and are in section 3.
+The batch of 20 September, recorded in full before any of it was built.
+
+| # | Task |
+|--|--|
+| **Chrome and gesture** |  |
+| O321 | **The mark on the loading screens is too small.** "when we show loading pages we include the mark logo, I like that, but it needs to be larger." |
+| O322 | **A dropdown shuts when you leave the page.** "I was on one insights page and clicked to the next one and the side by side dropdown was already opened. Dropdowns should always close when you leave the page." The disclosure keeps its own open state and the two pages render the same component in the same place, so React hands the second page the first page's state. |
+| O323 | **Swipe between insights pages.** "On insights pages we should be able to swipe to get to the next or previous page." The arrows already know what next and previous are; this is the same move on a gesture. |
+| O331 | **Delete her test note.** Her answer to C1: "so my example note referenced text that had been deleted? In that case I just need you to delete the test note since I can't." C1 is withdrawn with it, on her call: "This won't be an issue in the future since we won't delete prose once we are live." |
+| **Physical Intimacy: her words, in the exercise and in the results, on both surfaces** |  |
+| O324 | **"When you turn your partner down" is rewritten, including for people who have already answered.** Her copy: the question becomes "When you turn your partner down, you" and the two answers become "Worry about how it lands" and "Assume they don't take it personally". And: "Change this for users who have already taken it as well, they mean the same thing this is just more clear." Single-select intimacy answers are stored as the label itself, so the old labels have to keep resolving or every existing answer to this question reads as unanswered. |
+| O325 | **"When your partner suggests something new" takes new poles.** Her copy: "Need assurance first" and "Are eager". |
+| O326 | **"Your appetite for trying new things" takes new poles.** Her copy: "Is minimal, I prefer what I know works" and "Is strong, I want a lot of novelty". |
+| O327 | **"How do novelty and routine balance for you now" comes out.** "it's repetitive." A question leaving the exercise is the same shape as a section being renamed: anything anchored to it has to keep resolving. |
+| **The website** |  |
+| O328 | **Physical Intimacy detail pages on the site align with the app**, and no Side by Side dropdown in any exercise section is split by dimension. "On website, physical intimacy detailed pages look different. Please align with app. Please also ensure that side by side dropdowns on site view are not separated by dimension in any exercise results section." |
+| **Design** |  |
+| O329 | **Soften the home screen's blue**, the way the Insights orange was softened. |
+| O330 | **Redesign four screens: home, the Insights landing and its menu, Learn, and Notes.** "I want clean, engaging, branded interfaces", with five reference images. What is in them, so the brief does not get lost: very large tight-set headlines against a soft two-colour gradient ground; white cards with generous radius floating on that ground; horizontal scrolling shelves of real objects rather than lists of rows; small counted pills for filters; one warm accent used for the single action on a screen; and a floating tab bar. The ones she picked are all light, spacious and typographic, with colour in the ground rather than in the components. |
 
 ## 3. For you to review
 
@@ -88,19 +100,11 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The four from 20 September first.
+**Nothing waiting on your eye here** since you cleared the 20 September four.
+The next batch will land in this table.
 
 | # | Review |
 |--|--|
-| O317 | **A glow behind the home tile's icons.** The cover pages' trick at this scale: rings of the same orange, each too faint for its own edge to be findable. A peak and a count with the alpha solved from them, so the count can change without the glow getting brighter. A disabled row has none: it is not there to pop. |
-| O318 | **The final three are italic.** PlayfairDisplay-BoldItalic is bundled now, which is all those three needed: they are set in the display face, and the file was the only thing missing. Bold Italic rather than Regular Italic, because the display face is only ever drawn at Bold here. |
-| O319 | **The left bubble is outlined in white.** On the dark variant of the mark only, which is the one the orange landing and the home screen draw. On cream the gradient fill already has an edge. Generated from public/favicon.svg, so it is the mark that changed rather than a copy of it. |
-| O320 | **A page can account for every mark anchored to it, and now says so when it cannot.** "That keeps happening" deserved more than the instance, so: the marker mechanism works on that page, proved by making a mark there and watching it appear. Your note is on Internal Processing and is unplaced, meaning nothing on the page holds the words it was made on. There are at least three ordinary ways for that to happen and the page could not tell any of them from "no marks here". Every block now reports what it drew, and anything left over is a mark the reader cannot see. The first thing that reads the answer: a shut disclosure opens itself when the page has an unplaced mark, which is exactly the case that page has, since its "Side by side responses" section is closed by default and its paragraphs are not rendered while it is. check-mark-reach.mjs runs the rule over seven fixtures and was planted against five ways, all caught. **There is a copy gap behind this one: see section 1.** |
-| O300 | **The home icons are orange.** |
-
-| # | Review |
-|--|--|
-| R210 | **The Insights nav, rebuilt.** A landing page of coloured bands, one per section, in the website's own colours. Opening one closes the others and lists its pages. Inside a page: a hamburger top left that drops the same menu, a line saying Section: page, and back and forward at the foot. The two rows of chips are gone. Nothing you read changed, only how you get to it. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
 | R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
 | R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. |
@@ -136,6 +140,12 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| O317 | **A glow behind the home tile's icons.** The cover pages' trick at this scale: rings of the same orange, each too faint for its own edge to be findable. A peak and a count with the alpha solved from them, so the count can change without the glow getting brighter. A disabled row has none: it is not there to pop. |
+| O318 | **The final three are italic.** PlayfairDisplay-BoldItalic is bundled now, which is all those three needed: they are set in the display face, and the file was the only thing missing. Bold Italic rather than Regular Italic, because the display face is only ever drawn at Bold here. |
+| O319 | **The left bubble is outlined in white.** On the dark variant of the mark only, which is the one the orange landing and the home screen draw. On cream the gradient fill already has an edge. Generated from public/favicon.svg, so it is the mark that changed rather than a copy of it. |
+| O320 | **A page can account for every mark anchored to it, and now says so when it cannot.** "That keeps happening" deserved more than the instance, so: the marker mechanism works on that page, proved by making a mark there and watching it appear. Your note is on Internal Processing and is unplaced, meaning nothing on the page holds the words it was made on. There are at least three ordinary ways for that to happen and the page could not tell any of them from "no marks here". Every block now reports what it drew, and anything left over is a mark the reader cannot see. The first thing that reads the answer: a shut disclosure opens itself when the page has an unplaced mark, which is exactly the case that page has, since its "Side by side responses" section is closed by default and its paragraphs are not rendered while it is. check-mark-reach.mjs runs the rule over seven fixtures and was planted against five ways, all caught. **There is a copy gap behind this one: see section 1.** |
+| O300 | **The home icons are orange.** |
+| R210 | **The Insights nav, rebuilt.** A landing page of coloured bands, one per section, in the website's own colours. Opening one closes the others and lists its pages. Inside a page: a hamburger top left that drops the same menu, a line saying Section: page, and back and forward at the foot. The two rows of chips are gone. Nothing you read changed, only how you get to it. |
 | O313 | **The home icons are brighter.** The brand orange is made for cream; inside a ghost tile on the navy it lost most of its contrast. |
 | O316 | **Every italic in the app was upright, and now none of them are.** Not something you asked for; found while doing O303. iOS does not slant a registered typeface on request, it draws the upright face and reports nothing, and DM Sans was bundled without its italics. So eighteen places asked for italic and got none, including three you had asked for by name: the map caption, the Side by Side quotes, and the Try prompts. Both DM Sans italic faces are bundled now and those fifteen places name the face rather than the flag. Three are still upright and cannot be fixed the same way: they are Playfair, which is bundled Bold only. Say the word and I will add that file too. |
 | O303 | **The menu, four changes.** No hairlines. A bullet on Highlights, Couple Type, Exercise results and What Comes Next, sitting in the column the exercises' icons use, so the four names and the five icons share one left edge. The pages inside a dropdown are italic and the rows are tighter. |

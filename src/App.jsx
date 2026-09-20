@@ -59,7 +59,7 @@ function useContent() {
   const version = React.useContext(ContentContext);
   return React.useMemo(() => contentFor(version), [version]);
 }
-import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, INTIMACY_DOMAINS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips } from "../api/_intimacy-questions.js";
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, INTIMACY_DOMAINS, summarizeIntimacy, intimacyDimensionPositions, intimacyDimensionSkips, intimacyOption, optionText } from "../api/_intimacy-questions.js";
 
 // Proposal B master switch. Off = comms exercise, scoring, and results are unchanged.
 // Flip to true only after the full partner-view flow is verified end-to-end.
@@ -2348,6 +2348,7 @@ function IntimacyDomainPage({
           {rows.map(r => (
             <IntimacyResponseBreakdown
               key={r.id}
+              flat
               dim={r.id}
               myAnswers={myAnswers}
               partnerAnswers={partnerAnswers}
@@ -2391,22 +2392,42 @@ function IntimacyTrack({ left, right, mine, theirs, userName, partnerName }) {
   );
 }
 
-function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partnerName, variant = "premarital" }) {
+function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, partnerName, variant = "premarital", flat = false }) {
   const qs = (INTIMACY_QUESTIONS || []).filter(q => q.dimension === dim && q.kind !== "selfref");
-  const valOf = (q, ans) => { if (ans == null) return null; const o = q.options.find(x => x.label === ans); return (o && o.value != null) ? o.value : null; };
+  /* Through intimacyOption, so an answer given under a wording that has since
+     been changed still resolves. Matching on `label` alone meant the app drew
+     an answer the website quietly dropped, which is two readings of one row. */
+  const valOf = (q, ans) => { if (ans == null) return null; const o = intimacyOption(q, ans); return (o && o.value != null) ? o.value : null; };
   const rows = qs.map(q => {
     const opts = q.options.filter(o => o.value != null).slice().sort((a, b) => a.value - b.value);
     const lo = opts[0], hi = opts[opts.length - 1];
-    return { q, text: q[variant] || q.premarital || q.topic || "", lo: (lo && lo.label) || "", hi: (hi && hi.label) || "", a: valOf(q, myAnswers && myAnswers[q.id]), b: valOf(q, partnerAnswers && partnerAnswers[q.id]) };
+    /* optionText, not `label`. The label is storage; the two ends of this bar
+       are read by a person, and a reworded option has to say here what it said
+       while they were answering it. See api/_intimacy-questions.js. */
+    return { q, text: q[variant] || q.premarital || q.topic || "", lo: optionText(lo, variant), hi: optionText(hi, variant), a: valOf(q, myAnswers && myAnswers[q.id]), b: valOf(q, partnerAnswers && partnerAnswers[q.id]) };
   }).filter(r => r.a != null || r.b != null);
   if (!rows.length) return null;
   const pct = v => Math.max(5, Math.min(95, v * 100));
   const UC = "#E8673A", PC = "#6C7FFF";
   const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   const label = (INTIMACY_DIMENSIONS.find(x => x.id === dim) || {}).label || "";
+  /* ── FLAT, INSIDE A DROPDOWN ─────────────────────────────────────────
+     Ellie: "ensure that side by side dropdowns on site view are not separated
+     by dimension in any exercise results section."
+
+     A domain page's dropdown calls this once per aspect, so the reader met
+     three bordered cards with three headings inside one control that had
+     already named the section. The app draws one list. `flat` drops the card
+     and the heading so the three stack into one, and the headed form stays for
+     the one place that is not inside a dropdown. */
+  const wrap = flat
+    ? { marginTop: "1.6rem" }
+    : { marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" };
   return (
-    <div style={{ marginTop: "1rem", background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "1.2rem 1.5rem", border: "1px solid rgba(255,255,255,0.14)" }}>
-      <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.35rem", fontFamily: BFONT }}>{label + " questions, side by side"}</div>
+    <div style={wrap}>
+      {flat ? null : (
+        <div style={{ fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.9)", fontWeight: 700, marginBottom: "1.35rem", fontFamily: BFONT }}>{label + " questions, side by side"}</div>
+      )}
       <div style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
         {rows.map(({ q, text, lo, hi, a, b }) => {
           const close = a != null && b != null && Math.abs(pct(a) - pct(b)) < 9;

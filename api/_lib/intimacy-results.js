@@ -35,7 +35,7 @@ import {
   INTIMACY_DIMENSIONS, INTIMACY_DOMAINS,
   INTIMACY_QUESTIONS,
   summarizeIntimacy,
-  intimacyDimensionSkips, intimacyOption } from '../_intimacy-questions.js';
+  intimacyDimensionSkips, intimacyOption, optionText } from '../_intimacy-questions.js';
 import {
   INTIMACY_RESULTS_PROSE, TALK_ABOUT_IT, INTIMACY_LEAD, INTIMACY_ALL_ALIGNED,
 } from '../_intimacy-results-prose.js';
@@ -176,7 +176,9 @@ function questionPicks(dimensionId, answersMine, answersTheirs, variant) {
       .filter((v) => v != null)
       .map((v) => opts.find((o) => o.value === v) || intimacyOption(q, v))
       .filter((o) => o && o.value != null)
-      .map((o) => o.label);
+      /* What the reader saw when they picked it, not the storage label. See
+         optionText in _intimacy-questions.js. */
+      .map((o) => optionText(o, variant));
   };
 
   return INTIMACY_QUESTIONS
@@ -212,8 +214,11 @@ function questionRows(dimensionId, answersMine, answersTheirs, variant) {
       return {
         id: q.id,
         text: q[variant] || q.premarital || q.topic || '',
-        low: scored[0]?.label || '',
-        high: scored[scored.length - 1]?.label || '',
+        /* The two ends, in the wording this variant shows. These read
+           `label` and so ignored every reworded option, which is how the
+           exercise and the results page came to say different things. */
+        low: optionText(scored[0], variant),
+        high: optionText(scored[scored.length - 1], variant),
         you: positionOf(q, answersMine?.[q.id]),
         them: positionOf(q, answersTheirs?.[q.id]),
       };

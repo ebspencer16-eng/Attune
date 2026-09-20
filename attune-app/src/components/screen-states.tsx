@@ -51,7 +51,11 @@ export function ScreenLoading({ label = 'Loading', onDark }: { label?: string; o
         source={onDark
           ? require('@/assets/images/attune-mark-dark.png')
           : require('@/assets/images/attune-mark.png')}
-        style={{ width: 44, height: 44 * (onDark ? 76 / 103 : 64 / 88), opacity: onDark ? 0.9 : 0.5, marginBottom: Spacing.xl }}
+        /* Ellie: "when we show loading pages we include the mark logo, I like
+           that, but it needs to be larger." Half again, which puts it at about
+           the size the lockup's own mark is in a header rather than a third of
+           it. */
+        style={{ width: 68, height: 68 * (onDark ? 76 / 103 : 64 / 88), opacity: onDark ? 0.9 : 0.55, marginBottom: Spacing.xl }}
         resizeMode="contain"
       />
       <ActivityIndicator color={onDark ? Palette.white : c.accentQuiet} />

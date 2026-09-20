@@ -144,14 +144,40 @@ export const INTIMACY_QUESTIONS = [
   {
     id: 'iq_init_turndown', dimension: 'initiating', kind: 'scale',
     topic: 'Being turned down',
-    premarital: 'When you turn your partner down, you expect that you will want them to',
-    married: 'When you turn your partner down, you want them to',
+    /**
+     * Ellie, 20 September: "'When you turn your partner down, you want them
+     * to' should change to 'When you turn your partner down, you' then answer
+     * choices should be 'Worry about how it lands' and 'Assume they don't take
+     * it personally'. Change this for users who have already taken it as well,
+     * they mean the same thing this is just more clear."
+     *
+     * Her two, on the two ends. `label` is untouched, which is what makes the
+     * second half of that sentence true: the label is what a stored answer
+     * says, so changing the words a reader sees and leaving the label alone
+     * means every answer already given still resolves, with no alias and no
+     * migration. See the note on `premarital`/`married` under iq_adv_suggest.
+     *
+     * The stem no longer says "want them to", so the three middle options are
+     * now describing the wrong person. "Check in lightly" still reads after
+     * "you"; the other two do not, and they are hers to rewrite. Named as C2
+     * in TASKS.md rather than written here.
+     */
+    premarital: 'When you turn your partner down, you expect that you will',
+    married: 'When you turn your partner down, you',
     options: [
-      { label: 'Not take it personally and let it pass', value: 1.0 },
+      {
+        label: 'Not take it personally and let it pass', value: 1.0,
+        premarital: "Assume they don't take it personally",
+        married: "Assume they don't take it personally",
+      },
       { label: 'Check in lightly', value: 0.75 },
       { label: 'Read it how they read it', value: 0.5 },
       { label: 'Reassure me it’s okay', value: 0.25 },
-      { label: "I'd worry about how it lands", value: 0.0 },
+      {
+        label: "I'd worry about how it lands", value: 0.0,
+        premarital: 'Worry about how it lands',
+        married: 'Worry about how it lands',
+      },
       PNS,
     ],
   },
@@ -252,12 +278,23 @@ export const INTIMACY_QUESTIONS = [
     topic: 'Appetite for novelty',
     premarital: 'You expect that, for you, your appetite for trying new things',
     married: 'Your appetite for trying new things',
+    /* Ellie: the poles are "Is minimal, I prefer what I know works" and "Is
+       strong, I want a lot of novelty". Display only, so every answer already
+       given still resolves. */
     options: [
-      { label: 'I want a lot of novelty', value: 1.0 },
+      {
+        label: 'I want a lot of novelty', value: 1.0,
+        premarital: 'Is strong, I want a lot of novelty',
+        married: 'Is strong, I want a lot of novelty',
+      },
       { label: 'I lean adventurous', value: 0.75 },
       { label: 'Somewhere in the middle', value: 0.5 },
       { label: 'I lean toward the familiar', value: 0.25 },
-      { label: 'I prefer what I know works', value: 0.0 },
+      {
+        label: 'I prefer what I know works', value: 0.0,
+        premarital: 'Is minimal, I prefer what I know works',
+        married: 'Is minimal, I prefer what I know works',
+      },
       PNS,
     ],
   },
@@ -274,21 +311,8 @@ export const INTIMACY_QUESTIONS = [
       { label: 'Be open', value: 0.75, premarital: 'Would be open', married: 'Are open' },
       { label: 'Depend on what it is', value: 0.5, premarital: 'Would weigh what it is', married: 'Weigh what it is' },
       { label: 'Be cautious', value: 0.25, premarital: 'Would be cautious', married: 'Are cautious' },
-      { label: 'Need real reassurance first', value: 0.0, premarital: 'Would need real reassurance first', married: 'Need real reassurance first' },
-      PNS,
-    ],
-  },
-  {
-    id: 'iq_adv_balance', dimension: 'adventure', kind: 'scale',
-    topic: 'Novelty vs routine',
-    premarital: 'How do you expect novelty and routine to balance over a long marriage?',
-    married: 'How do novelty and routine balance for you now?',
-    options: [
-      { label: 'Novelty matters more to me', value: 1.0 },
-      { label: 'It matters somewhat', value: 0.75 },
-      { label: 'Neutral', value: 0.5 },
-      { label: 'Routine matters more to me', value: 0.25 },
-      { label: 'I value the tried and true strongly', value: 0.0 },
+      /* Ellie: the low pole is "Need assurance first". */
+      { label: 'Need real reassurance first', value: 0.0, premarital: 'Would need assurance first', married: 'Need assurance first' },
       PNS,
     ],
   },
@@ -414,6 +438,9 @@ export const RETIRED_QUESTIONS = {
   // Ellie, 22 September: "Remove 'what does intimacy most mean in your
   // marriage now' question from exercise and results."
   iq_mean_hope: 'removed at Ellie\'s request, 22 September',
+  // Ellie, 20 September: "Remove the 'how do novelty and routine balance for
+  // you now' question, it's repetitive."
+  iq_adv_balance: 'removed at Ellie\'s request, 20 September, as repetitive',
 };
 
 export const RETIRED_OPTION_LABELS = {
@@ -428,6 +455,30 @@ export const RETIRED_OPTION_LABELS = {
     'Depend on the day': 'Help, depending on the day',
   },
 };
+
+/**
+ * What an option says to a reader, in this variant.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * An option has a `label`, which is what a stored answer says and what the
+ * scoring reads, and it may have a `premarital` and a `married` wording, which
+ * are what a person sees. That split is how a question can be reworded without
+ * orphaning every answer already given to it, and Ellie asked for exactly that
+ * on 20 September: "Change this for users who have already taken it as well."
+ *
+ * It was only half wired. The exercise read the variant wording; the results
+ * read `label` for the two poles of every row and for every multi-select pick.
+ * So a reworded option would have said one thing while answering and another
+ * thing on the results page, which is the shape this codebase keeps failing
+ * in. Both go through here now.
+ *
+ * @param {{label: string, premarital?: string, married?: string}} o
+ * @param {'premarital'|'married'} variant
+ */
+export function optionText(o, variant) {
+  if (!o) return '';
+  return o[variant] || o.label;
+}
 
 /**
  * The option a stored answer refers to, current wording or retired.

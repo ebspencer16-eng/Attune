@@ -29,6 +29,8 @@ import StepCount from '@/components/step-count';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotation-context';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
@@ -655,6 +657,22 @@ export default function Results({
   const prev = at > 0 ? order[at - 1] : null;
   const next = at >= 0 && at < order.length - 1 ? order[at + 1] : null;
 
+  /**
+   * Swipe left for the next page, right for the previous one.
+   *
+   * Reads `prev` and `next` rather than working them out again, so the
+   * gesture and the two arrows can never disagree about where they go.
+   * `runOnJS` because the handler runs on the UI thread and setting React
+   * state from there is the one thing it may not do.
+   */
+  const pageSwipe = useMemo(() => Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-15, 15])
+    .onEnd((e) => {
+      if (e.translationX < -60 && next) runOnJS(rememberSection)(next);
+      else if (e.translationX > 60 && prev) runOnJS(rememberSection)(prev);
+    }), [prev, next, rememberSection]);
+
   /** The label of a section id, wherever it sits in the nav. */
   const labelOf = (id: string): string => {
     for (const g of groups) {
@@ -816,6 +834,18 @@ export default function Results({
         </EdgeFadedRow>
       </View>
 
+      {/* ── SWIPE BETWEEN PAGES ───────────────────────────────────────
+          Ellie: "On insights pages we should be able to swipe to get to the
+          next or previous page."
+
+          The same two destinations the floating arrows use, so there is one
+          answer to what next and previous mean. A horizontal pan, gated so the
+          page still scrolls and text can still be selected: it has to travel
+          twenty points sideways before it takes over, and it gives up outright
+          if it has travelled fifteen points vertically first. Without those
+          two the gesture would eat every vertical scroll on the tallest pages
+          in the product. */}
+      <GestureDetector gesture={pageSwipe}>
       <View style={{ flex: 1 }}>
         {/* ── THE GROUND IS THE TAB'S, NOT THIS VIEW'S ─────────────────
             Ellie: "Insights bg feels segmented - can you make the bg
@@ -841,7 +871,18 @@ export default function Results({
           onChanged={(note) => setNotes((prev) => prev.map((n) => (n.id === note.id ? note : n)))}
           /* The words the Notes tab sent us to, when it sent us. */
           focus={focusMark}>
+        {/* ── A NEW PAGE IS A NEW SUBTREE ──────────────────────────────
+            Ellie: "I was on one insights page and clicked to the next one and
+            the side by side dropdown was already opened. Dropdowns should
+            always close when you leave the page."
+
+            Two pages of a section render the same components in the same
+            places, so React treats them as one instance and hands the second
+            page the first page's state: a shut disclosure, a scroll position,
+            anything local. Keying on the section is what tells it they are
+            different pages. */}
         <SectionBody
+          key={section}
           section={section}
           step={step}
           /* The cover's title is the nav entry's own label, which is the
@@ -880,6 +921,7 @@ export default function Results({
         />
         </AnnotationProvider>
       </View>
+      </GestureDetector>
 
       {/* ── BACK AND FORWARD ──────────────────────────────────────────────
           Ellie, first: "we need to add the back and forward arrows at the
