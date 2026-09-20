@@ -53,6 +53,12 @@ CLAUDE.md, so anything new sits here until you do.
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
 
+### Write this
+
+| # | Copy gap |
+|--|--|
+| C2 | **Two middle answers to the turn-down question.** From O324. The stem is now "When you turn your partner down, you", so the five answers have to describe what *you* do. Your two ends do: "Worry about how it lands" and "Assume they don't take it personally". Of the three in between, "Check in lightly" still reads. These two do not, because they were written to follow "you want them to": **"Read it how they read it"** and **"Reassure me it's okay"**. Two short phrases, each starting with a verb in the second person, sitting between worrying about it and assuming it is fine. Send me the two and I will swap them in; the old wordings stay recorded, so nobody's existing answer moves. |
+
 ### Answer these
 
 **Nothing waiting.** Q11 is answered: any page, and it is R214.
@@ -66,25 +72,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-The batch of 20 September, recorded in full before any of it was built.
-
-| # | Task |
-|--|--|
-| **Chrome and gesture** |  |
-| O321 | **The mark on the loading screens is too small.** "when we show loading pages we include the mark logo, I like that, but it needs to be larger." |
-| O322 | **A dropdown shuts when you leave the page.** "I was on one insights page and clicked to the next one and the side by side dropdown was already opened. Dropdowns should always close when you leave the page." The disclosure keeps its own open state and the two pages render the same component in the same place, so React hands the second page the first page's state. |
-| O323 | **Swipe between insights pages.** "On insights pages we should be able to swipe to get to the next or previous page." The arrows already know what next and previous are; this is the same move on a gesture. |
-| O331 | **Delete her test note.** Her answer to C1: "so my example note referenced text that had been deleted? In that case I just need you to delete the test note since I can't." C1 is withdrawn with it, on her call: "This won't be an issue in the future since we won't delete prose once we are live." |
-| **Physical Intimacy: her words, in the exercise and in the results, on both surfaces** |  |
-| O324 | **"When you turn your partner down" is rewritten, including for people who have already answered.** Her copy: the question becomes "When you turn your partner down, you" and the two answers become "Worry about how it lands" and "Assume they don't take it personally". And: "Change this for users who have already taken it as well, they mean the same thing this is just more clear." Single-select intimacy answers are stored as the label itself, so the old labels have to keep resolving or every existing answer to this question reads as unanswered. |
-| O325 | **"When your partner suggests something new" takes new poles.** Her copy: "Need assurance first" and "Are eager". |
-| O326 | **"Your appetite for trying new things" takes new poles.** Her copy: "Is minimal, I prefer what I know works" and "Is strong, I want a lot of novelty". |
-| O327 | **"How do novelty and routine balance for you now" comes out.** "it's repetitive." A question leaving the exercise is the same shape as a section being renamed: anything anchored to it has to keep resolving. |
-| **The website** |  |
-| O328 | **Physical Intimacy detail pages on the site align with the app**, and no Side by Side dropdown in any exercise section is split by dimension. "On website, physical intimacy detailed pages look different. Please align with app. Please also ensure that side by side dropdowns on site view are not separated by dimension in any exercise results section." |
-| **Design** |  |
-| O329 | **Soften the home screen's blue**, the way the Insights orange was softened. |
-| O330 | **Redesign four screens: home, the Insights landing and its menu, Learn, and Notes.** "I want clean, engaging, branded interfaces", with five reference images. What is in them, so the brief does not get lost: very large tight-set headlines against a soft two-colour gradient ground; white cards with generous radius floating on that ground; horizontal scrolling shelves of real objects rather than lists of rows; small counted pills for filters; one warm accent used for the single action on a screen; and a floating tab bar. The ones she picked are all light, spacious and typographic, with colour in the ground rather than in the components. |
+**Nothing open.** The batch of 20 September is built and is in section 3.
 
 ## 3. For you to review
 
@@ -100,11 +88,21 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-**Nothing waiting on your eye here** since you cleared the 20 September four.
-The next batch will land in this table.
+The batch of 20 September.
 
 | # | Review |
 |--|--|
+| O321 | **The loading mark is half again as large.** |
+| O322 | **A dropdown cannot arrive already open.** Two pages of a section render the same components in the same places, so React treated them as one instance and handed the second page the first page's state. The page is keyed on its section now, which also means a page always opens at the top. |
+| O323 | **Swipe left and right between pages.** It reads the same two destinations the arrows use, so the gesture and the arrows cannot disagree. It has to travel twenty points sideways before it takes over and gives up if it has gone fifteen points vertically first, so scrolling and selecting text both still work. |
+| O324 | **"When you turn your partner down, you", with your two answers.** Display only: the storage label is untouched, which is what makes "change this for users who have already taken it as well" true without moving a single stored answer. **Two of the three middle answers now describe the wrong person and are yours to rewrite: see C2 in section 1.** |
+| O325 | **"Need assurance first" and "Are eager".** |
+| O326 | **"Is minimal, I prefer what I know works" and "Is strong, I want a lot of novelty".** |
+| O327 | **The novelty and routine question is out**, retired rather than deleted, so answers already given to it stay in the row. |
+| O328 | **The site's intimacy pages.** The dropdown was three bordered cards with three headings inside one control that had already named the section; it is one list now, as the app draws it. Two real bugs came out with it: the site drew both ends of every bar from the storage label rather than the reader's wording, and it matched stored answers on the label alone, so an answer given under a wording that had since changed was drawn on a phone and silently dropped on a laptop. |
+| O329 | **The home blue is softened**, the same amount the Insights orange was. |
+| O331 | **Your test note is deleted.** Its anchor was "sharing thoughts aloud. Whether energy, expression tendencies, or needs regarding reassurance are aligned", a sentence no longer on that page. The copy-edit cause, confirmed rather than inferred. |
+| O330 | **The redesign.** Four screens, one language, described in the message rather than here. Home is the screen I moved least and the message says why. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
 | R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
 | R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. |

@@ -48,7 +48,7 @@ import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import { ResultsScroll } from '@/components/results-scroll';
 import {
-  BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BottomTabInset, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 /**
@@ -699,7 +699,7 @@ export default function Results({
               that sits on the Insights tab's orange ground rather than on
               cream. Every other page under it is on the wash and keeps the
               ink. */}
-          <Text style={{ ...Type.hero, color: Palette.white }}>Your results</Text>
+          <Text style={{ ...Type.display, color: Palette.white }}>Your results</Text>
         </View>
         {/* ── IN A TILE, LIKE EVERY OTHER PAGE ─────────────────────────
             Ellie: "Please make the insights nav landing in a tile like the
@@ -707,7 +707,20 @@ export default function Results({
             one screen that is pure navigation the only screen in the section
             with a different shape. Same inset and radius as the pages it
             leads to, and the bands keep their full width inside it. */}
-        <PageTile padding={0}>
+        {/* ── THE MENU FLOATS ──────────────────────────────────────────
+            A white card with the radius the four redesigned tabs share, on
+            the tab's orange. PageTile's hairline is right for a page being
+            read side by side, which is the argument in page-tile.tsx, and
+            this is not one of those: it is the way in, on a coloured ground,
+            and every reference Ellie sent puts that on a card that floats. */}
+        <View
+          style={{
+            marginHorizontal: Spacing.lg,
+            backgroundColor: Palette.white,
+            borderRadius: Radius.card,
+            overflow: 'hidden',
+            ...Lift,
+          }}>
           {/* ── HIGHLIGHTS IS NOT OFFERED THE FIRST TIME ─────────────────
               Ellie: "When a user clicks explore full results and sees the
               menu, the menu should exclude highlights (it makes it look like
@@ -725,7 +738,7 @@ export default function Results({
             current={null}
             onOpenSection={rememberSection}
           />
-        </PageTile>
+        </View>
       </View>
     );
   }

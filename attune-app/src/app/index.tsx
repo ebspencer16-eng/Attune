@@ -485,7 +485,11 @@ export default function HomeScreen() {
               screen that is entirely the brand colour had a rectangle of
               something else sitting on it. See components/ghost-tile.tsx for
               what draws it. */}
+          {/* The radius the four tabs now share. Ellie's references all round
+              their cards generously and let them sit off the edges of the
+              ground; a tight corner reads as a panel. */}
           <GhostTile
+            radius={Radius.card}
             style={{
               marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
               paddingVertical: Spacing.xs,

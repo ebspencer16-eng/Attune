@@ -38,7 +38,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, BlueGround, Colors, Fonts, inputType, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  AccentFallback, AccentFor, BlueGround, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -434,7 +434,7 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.body, color: c.accent, lineHeight: 22 }}>{'\u2039'}</Text>
               <Text style={{ ...Type.small, fontWeight: '600', color: c.accent }}>Back to Learn</Text>
             </Pressable>
-            <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
+            <Text style={{ ...Type.display, color: c.textStrong, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
               {openShelf}
             </Text>
             {inShelf.map((post) => (
@@ -467,7 +467,7 @@ export default function ResourcesScreen() {
               eyebrow text." So the sections carry the page rather than a title
               above them repeating the tab's own name. */}
           {/* Ellie: "Rename 'yours to explore' section to 'Resources'." */}
-          <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>
+          <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>
             Resources
           </Text>
           {owned.length ? (
@@ -522,14 +522,14 @@ export default function ResourcesScreen() {
                 Every other section of this tab is named by a hero above it and
                 this one named itself inside its own tile, which made it the one
                 block on the page whose label sat in a different place. */}
-            <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>
+            <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>
               Insight of the day
             </Text>
             <LinearGradient
               colors={[...BlueGround]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 1 }}
-              style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
+              style={{ borderRadius: Radius.card, padding: Spacing.xl, ...Lift }}>
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
               </Text>
@@ -559,7 +559,7 @@ export default function ResourcesScreen() {
 
         <View style={{ marginTop: Spacing.xxl }}>
           <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-            <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>In Practice</Text>
+            <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>In Practice</Text>
           </View>
 
           {posts.length ? (
@@ -598,8 +598,16 @@ export default function ResourcesScreen() {
                 </View>
 
                 <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl }}>
+                  {/* ── COUNTED ──────────────────────────────────────────
+                      Straight out of the reference she sent: "All 23 · Design
+                      10 · Fantasy 5". A filter that says how much is behind it
+                      is a filter someone can choose without tapping it first,
+                      and the numbers are the ones the screen already has. */}
                   {([['all', 'All'], ['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
                     const on = list === key;
+                    const n = key === 'all' ? posts.length
+                      : key === 'saved' ? posts.filter((p) => p.saved).length
+                        : posts.filter((p) => p.read).length;
                     return (
                       <Pressable
                         accessibilityRole="button"
@@ -609,12 +617,21 @@ export default function ResourcesScreen() {
                         style={{
                           paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                           borderRadius: Radius.pill,
-                          backgroundColor: on ? c.accent : c.surface,
-                          borderColor: on ? c.accent : c.border, borderWidth: 1,
+                          backgroundColor: on ? c.accent : Palette.white,
+                          ...(on ? {} : Lift),
                         }}>
-                        <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
-                          {label}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+                          <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+                            {label}
+                          </Text>
+                          <Text
+                            style={{
+                              ...Type.small, fontSize: 11, fontWeight: '700',
+                              color: on ? 'rgba(255,255,255,0.75)' : c.accentQuiet,
+                            }}>
+                            {n}
+                          </Text>
+                        </View>
                       </Pressable>
                     );
                   })}
@@ -758,26 +775,39 @@ function OwnedTile({ item, onOpen }: { item: Item; onOpen: (key: string) => void
    * a sign-in form rather than an empty page when the browser has no session.
    */
   return (
+    /* ── A CARD, NOT A DOT ────────────────────────────────────────────
+       Ellie's reference apps put a row of tools in soft rounded tiles with
+       the name inside the tile, not a circle with a word under it. A circle
+       with a word under it is the iOS home screen's shape, which is why the
+       row read as three app icons rather than three things this product
+       gives you. Same colour, same icon, in the shape the rest of this
+       redesign uses. */
     <Pressable
       accessibilityRole="button"
       onPress={() => onOpen(item.key)}
-      style={{ alignItems: 'center', width: 84 }}>
+      style={{
+        flex: 1, minWidth: 96,
+        backgroundColor: Palette.white,
+        borderRadius: Radius.card,
+        paddingVertical: Spacing.lg, paddingHorizontal: Spacing.md,
+        alignItems: 'flex-start', gap: Spacing.md,
+        ...Lift,
+      }}>
       <View
         style={{
-          width: 64, height: 64, borderRadius: 32,
+          width: 40, height: 40, borderRadius: Radius.lg,
           backgroundColor: color + '1A',
-          borderColor: color + '33', borderWidth: 1,
           alignItems: 'center', justifyContent: 'center',
         }}>
         <SymbolView
           name={(ICON[item.key] || 'square.grid.2x2') as never}
-          size={26}
+          size={22}
           tintColor={color}
-          style={{ width: 28, height: 28 }}
+          style={{ width: 24, height: 24 }}
         />
       </View>
       {/* One word. The catalogue's own short name, from the server. */}
-      <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textStrong, marginTop: Spacing.sm }}>
+      <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textStrong }}>
         {item.short || item.label}
       </Text>
     </Pressable>
@@ -945,9 +975,13 @@ function PostCard({
         if (post.external) { Linking.openURL(post.external); return; }
         onOpenPost(post.id);
       }}
+      /* Radius and a soft shadow rather than a hairline: the cards in every
+         one of her references float on the ground rather than being drawn on
+         it. `Lift` is shared, so these cannot drift from the tool tiles. */
       style={{
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-        borderRadius: Radius.lg, overflow: 'hidden', marginBottom: Spacing.md,
+        backgroundColor: Palette.white,
+        borderRadius: Radius.card, overflow: 'hidden', marginBottom: Spacing.lg,
+        ...Lift,
       }}>
       <View style={{ height: 132, backgroundColor: ground, justifyContent: 'space-between' }}>
         {post.hero_image ? (

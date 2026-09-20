@@ -63,7 +63,7 @@ import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType,
+  BottomTabInset, Colors, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -455,7 +455,7 @@ export default function NotesScreen() {
                 fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: tagColor(openTag) }} />}
                 style={{ width: 24, height: 24 }}
               />
-              <Text style={{ ...Type.hero, color: c.textStrong, flex: 1 }}>{openTag.name}</Text>
+              <Text style={{ ...Type.display, color: c.textStrong, flex: 1 }}>{openTag.name}</Text>
             </View>
             {inTag.length ? (
               <Tile>
@@ -504,7 +504,7 @@ export default function NotesScreen() {
         }>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ ...Type.hero, color: c.textStrong }}>Notes</Text>
+            <Text style={{ ...Type.display, color: c.textStrong }}>Notes</Text>
             {/* Writing a note is the only thing this screen creates, so it gets
                 one plain control rather than a floating button that covers the
                 last card in the list. */}
@@ -1001,8 +1001,9 @@ function TagList({
       {ordered.length ? (
       <View
         style={{
-          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-          borderRadius: Radius.lg, overflow: 'hidden',
+          backgroundColor: Palette.white,
+          borderRadius: Radius.card, overflow: 'hidden',
+          ...Lift,
         }}>
         {ordered.map((t, i) => {
           const st = stats.get(t.id) || { count: 0, latest: 0 };
@@ -1205,10 +1206,15 @@ function Tile({ children, accent }: { children: React.ReactNode; accent?: string
    * its results tiles.
    */
   return (
+    /* Radius and a lift rather than a hairline, the same as the cards on
+       Learn. Ellie's references all put content on a card that floats on a
+       coloured ground; a one-pixel border is the other language. The accent
+       stripe stays: it is the only thing saying which section a note is on. */
     <View
       style={{
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-        borderRadius: Radius.lg, overflow: 'hidden',
+        backgroundColor: Palette.white,
+        borderRadius: Radius.card, overflow: 'hidden',
+        ...Lift,
         ...(accent ? { borderLeftColor: accent, borderLeftWidth: 4 } : null),
       }}>
       {children}
@@ -1364,9 +1370,10 @@ function NoteCard({
         // The whole card is the thing that is new, and a card that looks
         // different is findable while scrolling, which is when someone is
         // looking for it.
-        borderColor: unread ? c.accent : c.border,
-        borderWidth: unread ? 1.5 : 1,
-        borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+        borderColor: unread ? c.accent : 'transparent',
+        borderWidth: unread ? 1.5 : 0,
+        borderRadius: Radius.card, padding: Spacing.lg, marginBottom: Spacing.lg,
+        ...Lift,
       }}>
       {unread ? (
         <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.accent, marginBottom: Spacing.sm }}>

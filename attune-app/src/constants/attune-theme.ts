@@ -274,6 +274,20 @@ export function inputType(t: {
  * so swapping a font cannot quietly start clipping.
  */
 export const Type = {
+  /**
+   * ── THE LINE A TAB OPENS WITH ─────────────────────────────────────────
+   * Ellie, with five reference apps: "I want clean, engaging, branded
+   * interfaces." Every one of them opens on a headline two or three times the
+   * size of the body and lets it own the top of the screen. Ours opened at
+   * thirty, which is a heading rather than a headline.
+   *
+   * 54 over 38 is 1.42, a hair above Playfair Bold's own line box of 1.41.
+   * Tighter than that clips the face, which is why these are not set as
+   * tight as the grotesques in her references: a high-contrast serif carries
+   * its leading with it. check-font-line-boxes.mjs holds every role here to
+   * the number in the font file.
+   */
+  display: { fontFamily: Fonts.display, fontSize: 38, lineHeight: 54, fontWeight: '700' },
   hero: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 43, fontWeight: '700' },
   title: { fontFamily: Fonts.display, fontSize: 22, lineHeight: 32, fontWeight: '700' },
   cardTitle: { fontFamily: Fonts.bodyBold, fontSize: 16, lineHeight: 22, fontWeight: '700' },
@@ -292,7 +306,27 @@ export const Spacing = {
   xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48,
 } as const;
 
-export const Radius = { sm: 8, md: 12, lg: 14, xl: 18, pill: 999 } as const;
+export const Radius = { sm: 8, md: 12, lg: 14, xl: 18, pill: 999, card: 26 } as const;
+
+/**
+ * A card that sits ON a ground rather than in a list.
+ *
+ * Every one of Ellie's reference apps does the same thing: a soft coloured
+ * ground, and white cards floating on it with a generous radius and a shadow
+ * soft enough that you read it as depth rather than as a border. A hairline
+ * would be the other language, and it is the one the app had.
+ *
+ * One constant rather than four copies, because these four screens are meant
+ * to look like one product and the way they stop is by being tuned
+ * separately.
+ */
+export const Lift = {
+  shadowColor: '#2A1B10',
+  shadowOpacity: 0.10,
+  shadowRadius: 20,
+  shadowOffset: { width: 0, height: 10 },
+  elevation: 4,
+} as const;
 
 export const MaxContentWidth = 640;
 export const BottomTabInset = 84;
