@@ -30,6 +30,9 @@ export function withAlpha(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
+/** What the two corners fall away to. Neutral, not the app's warm cream. */
+const CORNER_SETTLE = '#EFEFEF';
+
 export default function PageWash({ tint, second, corners = false }: {
   /**
    * The colour in the corner. The brand orange by default.
@@ -76,10 +79,16 @@ export default function PageWash({ tint, second, corners = false }: {
             The corners are stronger, and the ground under them is white rather
             than warm cream, because a warm ground is what was taking the edge
             off them: a bright hue over a cream is a muted hue. */}
+        {/* ── AND IT SETTLES TO GREY ─────────────────────────────────
+            The reference's two corners fall away to a flat neutral grey about
+            a third of the way down, and that grey is the rest of the page. It
+            settled to the app's warm cream here, so the lower two thirds was a
+            different colour from the picture: the corners were right and the
+            page under them was not. */}
         <LinearGradient
-          colors={[Palette.white, Palette.cream]}
+          colors={[Palette.white, CORNER_SETTLE]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 0.5 }}
+          end={{ x: 0, y: 0.38 }}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         />
         {/* Top left, falling to the right and down. */}

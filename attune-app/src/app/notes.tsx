@@ -683,7 +683,10 @@ export default function NotesScreen() {
                 <Text
                   style={{
                     fontFamily: Fonts.bodyBold, fontSize: 20, lineHeight: 29,
-                    fontWeight: '700', color: c.text, marginTop: Spacing.md,
+                    /* Grey, as the reference's is. The label above it is the
+                       dark half; this was near-black, which made the card two
+                       emphatic lines rather than a label and a meaning. */
+                    fontWeight: '700', color: c.textMuted, marginTop: Spacing.md,
                   }}>
                   {word.definition}
                 </Text>

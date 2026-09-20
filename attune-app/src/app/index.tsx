@@ -508,13 +508,34 @@ export default function HomeScreen() {
             {/* The small row under the headline. In the reference it is a
                 word with a thin rule under it, which is what separates it from
                 the headline above without another size change. */}
-            <View style={{ marginTop: Spacing.lg, marginBottom: Spacing.xl, alignSelf: 'flex-end', alignItems: 'flex-end' }}>
-              <Text style={{ ...Type.body, color: c.textMuted }}>
-                {data.greeting}
-              </Text>
-              <View
-                style={{ height: 1, marginTop: Spacing.sm, backgroundColor: c.border }}
-              />
+            {/* The reference's small row ends in a circular arrow. Ours opens
+                the settings sheet, which is the only thing on this screen that
+                is a destination rather than a card: the profile control in the
+                row above is the same action, and two of it is better than a
+                button that does nothing. */}
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
+                marginTop: Spacing.lg, marginBottom: Spacing.xl,
+              }}>
+              <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                <Text style={{ ...Type.body, color: c.textMuted }}>
+                  {data.greeting}
+                </Text>
+                <View style={{ height: 1, marginTop: Spacing.sm, alignSelf: 'stretch', backgroundColor: c.border }} />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Your profile and settings"
+                onPress={() => setSettingsOpen(true)}
+                hitSlop={10}
+                style={{
+                  width: 36, height: 36, borderRadius: 18,
+                  borderWidth: 1, borderColor: c.border,
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                <Text style={{ ...Type.body, color: c.textMuted }}>{'\u2192'}</Text>
+              </Pressable>
             </View>
 
             {/* The tile is outside this padded column, because it runs to
@@ -1078,18 +1099,22 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
           opacity: dim ? 0.55 : 1,
           backgroundColor: Palette.white,
           borderRadius: Radius.card,
-          padding: Spacing.md,
+          overflow: 'hidden',
           ...Lift,
         }}>
         {/* The picture. A tint of the accent behind the glyph rather than a
             photograph: this product has no artwork, and a grey rectangle
             waiting for one reads as an image that failed to load. */}
+        {/* ── THE PICTURE FILLS THE TOP ──────────────────────────────
+            In the reference the photograph runs to the card's own edges and
+            the title sits under it. Ours was inset inside the card's padding,
+            which turns a picture into a thumbnail with a frame. The card
+            clips, so the picture takes its top corners and nothing else. */}
         <View
           style={{
-            width: '100%', aspectRatio: 1.15, borderRadius: Radius.xl,
+            width: '100%', aspectRatio: 1.25,
             backgroundColor: TILE_FILL,
             alignItems: 'center', justifyContent: 'center',
-            marginBottom: Spacing.md,
           }}>
           <SymbolView
             name={item.icon as never}
@@ -1102,17 +1127,22 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
         {/* Title, a hairline, then one small line. That is the reference's
             own card: the rule is what makes the second line read as a note
             about the first rather than as more of the same sentence. */}
-        <Text numberOfLines={2} style={{ ...Type.cardTitle, color: c.textStrong }}>
-          {item.title}
-        </Text>
-        {item.body ? (
-          <>
-            <View style={{ height: 1, backgroundColor: c.border, marginVertical: Spacing.md }} />
-            <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, lineHeight: 19 }}>
-              {item.body}
-            </Text>
-          </>
-        ) : null}
+        {/* The title, a rule, then two small lines, which is the reference's
+            own card. The padding lives here rather than on the card, so the
+            picture above can reach the edges. */}
+        <View style={{ padding: Spacing.md }}>
+          <Text numberOfLines={2} style={{ ...Type.cardTitle, color: c.textStrong }}>
+            {item.title}
+          </Text>
+          {item.body ? (
+            <>
+              <View style={{ height: 1, backgroundColor: c.border, marginVertical: Spacing.md }} />
+              <Text numberOfLines={2} style={{ ...Type.small, fontSize: 12, color: c.textMuted, lineHeight: 17 }}>
+                {item.body}
+              </Text>
+            </>
+          ) : null}
+        </View>
       </View>
     </Pressable>
   );

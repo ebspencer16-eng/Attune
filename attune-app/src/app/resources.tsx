@@ -79,6 +79,8 @@ export default function ResourcesScreen() {
    */
   const [query, setQuery] = useState('');
   const [list, setList] = useState<'all' | 'saved' | 'read'>('all');
+  /** Which shelf the row on the coloured ground has narrowed to, if any. */
+  const [shelf, setShelf] = useState<string | null>(null);
   /** Which shelf is open as a page of its own, if any. */
   const [openShelf, setOpenShelf] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
@@ -349,6 +351,9 @@ export default function ResourcesScreen() {
   const inList = list === 'all'
     ? inCategory
     : inCategory.filter((p) => (list === 'saved' ? p.saved : p.read));
+  /* And the shelf row on the coloured ground, which is a second question and
+     narrows what the one above it left. */
+  const inShelf = shelf ? inList.filter((p) => p.category === shelf) : inList;
   /**
    * Every word typed has to appear somewhere in the post's terms, so two words
    * narrow rather than widen. Matching on the start of a word rather than the
@@ -375,10 +380,10 @@ export default function ResourcesScreen() {
       .toLowerCase().split(/[^a-z0-9']+/);
     return terms.filter((t) => words.some((w) => w.startsWith(t))).length;
   };
-  const everyTerm = terms.length ? inList.filter((p) => score(p) === terms.length) : inList;
+  const everyTerm = terms.length ? inShelf.filter((p) => score(p) === terms.length) : inShelf;
   const found = !terms.length || everyTerm.length
     ? everyTerm
-    : inList.filter((p) => score(p) > 0).sort((a, b) => score(b) - score(a));
+    : inShelf.filter((p) => score(p) > 0).sort((a, b) => score(b) - score(a));
   const visible = sortPosts(found, sort);
 
   // All, then whatever shelves the server says exist.
@@ -452,7 +457,7 @@ export default function ResourcesScreen() {
    * Searching or picking a list is a question with an answer, so it gets one
    * list of answers. Browsing is a shelf at a time.
    */
-  const narrowing = terms.length > 0 || list !== 'all';
+  const narrowing = terms.length > 0 || list !== 'all' || !!shelf;
 
   /**
    * The four most-read pieces, for the sheet's preview grid.
@@ -574,6 +579,56 @@ export default function ResourcesScreen() {
           </View>
         ) : null}
 
+        {/* ── THE FILTER ROW, ON THE COLOUR ──────────────────────────────
+            The reference has one of these between its shelf and its panel:
+            four words, each with a small count, the chosen one dark and the
+            rest grey. Ours counts the shelves, which come from the server with
+            their own names, so it is a real filter and no word here was
+            invented. Tapping one narrows In Practice to that shelf; tapping it
+            again lets go.
+
+            `shelf` is the only new state on this screen and it sits beside
+            `list` rather than replacing it: they are different questions, one
+            about what you have done with a piece and one about what it is
+            about, and a reader may want both. */}
+        {categories.length ? (
+          <View
+            style={{
+              flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg,
+              paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl,
+              maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
+            }}>
+            {categories.map((cat) => {
+              const on = shelf === cat;
+              const n = posts.filter((p) => p.category === cat).length;
+              return (
+                <Pressable
+                  key={cat}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  hitSlop={8}
+                  onPress={() => setShelf(on ? null : cat)}
+                  style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
+                  <Text
+                    style={{
+                      ...Type.small, fontWeight: '700',
+                      color: on ? c.textStrong : c.textMuted,
+                    }}>
+                    {cat}
+                  </Text>
+                  <Text
+                    style={{
+                      ...Type.small, fontSize: 11, fontWeight: '700',
+                      color: on ? c.accent : c.accentQuiet, marginTop: 1,
+                    }}>
+                    {n}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
+
         {/* ── THE SHEET ──────────────────────────────────────────────────
             Ellie: "Can the learn page have the layout/design of the image with
             the books, with a gradient page bg that lists the resources and the
@@ -605,14 +660,9 @@ export default function ResourcesScreen() {
             shadowColor: '#2A1B10', shadowOpacity: 0.12,
             shadowRadius: 24, shadowOffset: { width: 0, height: -10 },
           }}>
-          {/* The grab handle the reference draws at the top of its panel. Not
-              a control: it is what says this thing came up from below. */}
-          <View
-            style={{
-              alignSelf: 'center', width: 44, height: 5, borderRadius: 3,
-              backgroundColor: c.border, marginBottom: Spacing.lg,
-            }}
-          />
+          {/* No grab handle: the reference's panel does not have one, and a
+              handle on something that cannot be dragged is a control that
+              lies. */}
           {/* ── THE SHEET'S HEAD, PART FOR PART ────────────────────────
               The reference's panel has four things stacked on its left and a
               two by two grid on its right, and Ellie named what each of ours

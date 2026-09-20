@@ -63,6 +63,8 @@ CLAUDE.md, so anything new sits here until you do.
 | C3 | **The word list, and four definitions.** From O334. You named four words and said "etc.", so the four are in `api/_words.js` with a definition each, written in your house style as a first pass. They are mine, which makes them the only words in the app that are. Two things I need: your eye on those four, and however many more words you want in the rotation. One line each, present tense. Adding one is one entry in that file and no app build. |
 | C4 | **Six strings on the new surfaces.** The journal's placeholder, its empty line and its failure line; the journal card's two subtitles; and "Word in use" above the definition. All placeholders in your house style, all named at the bottom of their files so they are findable. "Jump back in" and "Shared with me" are yours already, from your message. |
 
+| C5 | **The three controls at the foot of the Luxury screen.** From O370. That reference ends with a dark pill carrying an icon and a word, and two circular buttons beside it. It is the one block in all three screenshots with nothing in our product to put in it: every action it could hold is already in the tab bar or on a card above it, and a second row of navigation is a worse screen that merely looks more like the picture. Three things I need if you want it: what the pill does and what it says, and what the two circles do. My own view is that it should stay out and the page should end on the two cards. |
+
 ### Answer these
 
 **Nothing waiting.** Q11 is answered: any page, and it is R214.
@@ -76,7 +78,8 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The evening batch of 20 September is built and is in section 3.
+**Nothing open.** The seven from the screenshot pass are built and are in
+section 3.
 
 ## 3. For you to review
 
@@ -92,10 +95,17 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The evening batch of 20 September first.
+The screenshot pass first.
 
 | # | Review |
 |--|--|
+| O364 | **Learn has the counted filter row on the colour**, between the insight tile and the panel, which the books screen has and ours did not. It counts the shelves, whose names come from the server, so it is a real filter and no word in it was invented. It wraps to two lines where the reference's fits on one, because our shelf names are sentences and its genres are words. |
+| O365 | **No grab handle on the panel.** The reference has none, and a handle on something that cannot be dragged is a control that lies. |
+| O366 | **The Notes ground settles to a neutral grey.** The two corners were right and the page under them was not: it fell away to the app's warm cream, so the lower two thirds was a different colour from the picture. |
+| O367 | **The meaning is grey.** The label above it is the dark half. It was near-black, which made that card two emphatic lines rather than a label and a meaning. |
+| O368 | **The home card's picture fills the top of the card**, edge to edge, with the padding moved onto the text under it. Inset inside the card's own padding, a picture is a thumbnail in a frame. |
+| O369 | **The circular arrow at the right of the greeting row.** It opens settings, which is the only destination on that screen; the profile control above it is the same action, and two of it is better than a button that does nothing. |
+| O370 | **The control row is still out, and this time it is a question rather than an omission: C5 in section 1.** Every action it could hold is already in the tab bar or on a card above it, and a second row of navigation is a worse screen that merely looks more like the picture. My recommendation is in C5. |
 | O347 | **Cream at the top, blue along the foot.** |
 | O348 | **One tile, edge to edge, that vanishes upward.** Its fill is a gradient that is nothing at the top and the page's own cream by ninety points down, which is what "vanishes as it goes up" is. The shadow comes from a separate opaque panel underneath, because iOS casts no shadow from a view whose background is a gradient: the gradient is a child, not a fill. |
 | O349 | **Four squares, barely there.** Three per cent of the ink, two points apart, eight from each edge, and each holds its own name at its foot. |
