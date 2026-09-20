@@ -67,7 +67,13 @@ export default function BrandHeader({
         source={tone === 'light'
           ? require('@/assets/images/attune-mark-dark.png')
           : require('@/assets/images/attune-mark-light.png')}
-        style={{ width: 34, height: 34 * (64 / 88) }}
+        /* 103 by 76 is the mark's own viewBox in public/favicon.svg, so the
+           box this draws into is the artwork's shape and `contain` has nothing
+           to letterbox. It was 64 over 88, which was the old PNG's aspect, and
+           the generated files are not that shape: the mark was drawn at two
+           thirds of its height inside a box built for a wider picture. Ellie:
+           "Mark in the lockup shrunk, please revert to the larger size." */
+        style={{ width: 34, height: 34 * (76 / 103) }}
         resizeMode="contain"
       />
       <Text style={{ ...Type.title, fontSize: 19, lineHeight: 26, color }}>

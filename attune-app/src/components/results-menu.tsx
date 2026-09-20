@@ -179,14 +179,26 @@ export default function ResultsMenu({
                 Couple Type, and the five exercises step in from it. It was the
                 other way round: the heading was indented with them. */}
             {firstExercise ? (
+              /* ── A BULLET, AND NO RULE ─────────────────────────────────
+                 Ellie: "Can we please remove hairline dividers, put a bullet
+                 to the left of highlights, couple type, exercise results, and
+                 what comes next."
+
+                 The bullet sits in the icon column, which is why the heading's
+                 padding drops back to the row's: the words stay exactly where
+                 they were, on the same edge as Highlights, and the dot takes
+                 the space the exercises' icons take. */
               <View
                 style={{
                   paddingTop: big ? Spacing.md : Spacing.sm,
                   paddingBottom: Spacing.xs,
-                  paddingLeft: LABEL_LEFT,
+                  paddingLeft: Spacing.xl,
                   paddingRight: Spacing.xl,
-                  borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+                  flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 }}>
+                <View style={{ width: ICON_COL, alignItems: 'center', justifyContent: 'center' }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: c.accentQuiet }} />
+                </View>
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
               </View>
             ) : null}
@@ -239,8 +251,9 @@ export default function ResultsMenu({
                    exercises close the gap between icon and name to buy some of
                    it back. */
                 flexDirection: 'row', alignItems: 'center', gap: isExercise ? Spacing.md : Spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: c.border,
+                /* No rule between rows. Ellie asked for the hairlines to go;
+                   the open section is still marked, by its ground and by the
+                   colour down the left edge of its pages. */
                 backgroundColor: isOpen ? Palette.warm : 'transparent',
               }}>
               {/* ── NO WASH ─────────────────────────────────────────────────
@@ -287,7 +300,13 @@ export default function ResultsMenu({
                     fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />}
                     style={{ width: big ? 21 : 18, height: big ? 21 : 18 }}
                   />
-                ) : null}
+                ) : (
+                  /* Highlights, Couple Type and What Comes Next. The column was
+                     held empty so their names lined up with the exercises';
+                     it holds the bullet now, which is the same alignment with
+                     something in it. */
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: c.accentQuiet }} />
+                )}
               </View>
               {/* ── NOT A HERO ───────────────────────────────────────────
                   Ellie: "Landing page shouldn't all be in the hero text, it
@@ -371,15 +390,24 @@ export default function ResultsMenu({
                       onPress={() => onOpenSection(ch.id)}
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                        paddingVertical: big ? Spacing.sm + 1 : Spacing.sm,
+                        /* Ellie: "minimize vertical spacing in dropdowns". A
+                           list of four or five short names does not need a
+                           row height built for a title. */
+                        paddingVertical: big ? Spacing.xs + 1 : Spacing.xs,
                         paddingLeft: CHILD_LEFT,
                         paddingRight: Spacing.xl,
-                        borderTopWidth: 1, borderTopColor: c.border,
                       }}>
                       <Text
                         numberOfLines={1}
                         style={{
                           ...Type.small,
+                          /* Ellie: "italicize text in dropdown lists". These
+                             are set in the system font, which has a real
+                             italic face; the row titles above them are
+                             Playfair, which is bundled Bold only and draws
+                             nothing at all when asked to slant. That is why
+                             the exercises themselves are still upright. */
+                          fontFamily: Fonts.bodyItalic,
                           fontWeight: on ? '700' : '400',
                           color: on ? color : c.text,
                           flex: 1,

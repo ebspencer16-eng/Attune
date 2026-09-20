@@ -94,9 +94,23 @@ try {
     ['attune-mark-dark', darkVariant(svg)],
   ]) {
     await browser.goto(`data:text/html;base64,${Buffer.from(page(src)).toString('base64')}`);
-    // fullPage, because Chrome's viewport is not the document; the icon
-    // builder learned that with a square that came back 1024 by 937.
-    const png = Buffer.from(await browser.screenshot({ fullPage: true, transparent: true }), 'base64');
+    /**
+     * An explicit box, not fullPage.
+     *
+     * fullPage measures the document, and the document is never narrower than
+     * the window, so these came back 485 by 228 with 176 points of transparent
+     * padding on the right. Nothing showed it: a PNG viewer draws transparent
+     * as nothing. The app showed it, because `contain` fits the canvas rather
+     * than the artwork, so the mark in the lockup was drawn at two thirds of
+     * the size it had been and Ellie asked for the larger one back.
+     *
+     * W and H are the mark's own viewBox times three, so this asks for exactly
+     * the picture and the file's aspect is the artwork's aspect.
+     */
+    const png = Buffer.from(
+      await browser.screenshot({ box: { width: W, height: H }, transparent: true }),
+      'base64',
+    );
     if (png.length < 1000) throw new Error(`${name} came back ${png.length} bytes, which is not an image`);
     writeFileSync(`${ROOT}attune-app/assets/images/${name}.png`, png);
     console.log(`[build-mark-variants] ${name}.png written, ${png.length} bytes.`);

@@ -512,7 +512,12 @@ export type NextStepGroup = {
   section: string;
   /** The section's own colour, for the card's left edge. */
   color?: string;
-  items: { title: string; body: string | null; say: string | null }[];
+  /**
+   * `quote` is someone's own words, set apart from the sentence that
+   * introduces them so it can be italicised. Only the reflection group sends
+   * it; see api/_lib/what-comes-next.js.
+   */
+  items: { title: string; quote?: string | null; body: string | null; say: string | null }[];
 };
 
 export type ExpectationsSummary = {

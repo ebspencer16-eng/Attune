@@ -38,7 +38,9 @@ import {
   ANNOTATION_COLORS, DEFAULT_ANNOTATION_COLOR, annotationColor,
   type AnnotationKind,
 } from '@/constants/annotations';
-import { Colors, Radius, Spacing, Type, Palette } from '@/constants/attune-theme';
+import {
+  Colors, Fonts, Palette, Radius, Spacing, Type,
+} from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -177,7 +179,7 @@ export default function AnnotationSheet({
               backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.lg,
             }}>
-            <Text style={{ ...Type.body, color: c.text, fontStyle: 'italic' }}>{sentence}</Text>
+            <Text style={{ ...Type.body, color: c.text, fontFamily: Fonts.bodyItalic }}>{sentence}</Text>
           </View>
 
           {error ? (

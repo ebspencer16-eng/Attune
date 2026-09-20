@@ -299,6 +299,8 @@ export default function IntimacyExercise({
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
           {splitInstruction(questionText).text}
           {splitInstruction(questionText).instruction ? (
+            /* Upright in practice: inside Type.title, which is Playfair, and
+               only the Bold face is bundled. */
             <Text style={{ fontStyle: 'italic' }}>{`\n${splitInstruction(questionText).instruction}`}</Text>
           ) : null}
         </Text>

@@ -427,7 +427,7 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
           questions are sentences and a phone has no room for a 1.6fr column. */}
       {/* block: conflict-snapshot/openings */}
       <View style={{ ...card }}>
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Conflict</Text>
+        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.88)', marginBottom: Spacing.md }}>Conflict</Text>
 
         {content.snapshotRows.map((row, i) => {
           const chips = content.openingChips[row.id];
@@ -467,7 +467,7 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
             ever rendered: a sentence the website does not have, written in the
             app, which is the thing Ellie asked not to happen. */}
         {/* block: conflict-snapshot/repair */}
-        <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.md }}>Repair</Text>
+        <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.88)', marginBottom: Spacing.md }}>Repair</Text>
         {/* The website's own heading for these two columns. The app said
             "What Ellie wants", which drops who it is wanted from and that the
             list is in order, both of which are the point of a ranking. */}

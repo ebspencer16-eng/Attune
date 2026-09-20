@@ -197,7 +197,9 @@ export default function InsightsScreen() {
     showFirstSection();
   }, []));
 
-  if (loading) return <Shell><ScreenLoading label={LOADING.insights} /></Shell>;
+  /* onDark: this Shell is the brand orange, not cream. See the note on
+     ScreenLoading. */
+  if (loading) return <Shell><ScreenLoading label={LOADING.insights} onDark /></Shell>;
 
   if (error?.kind === 'unauthorized') {
     return (

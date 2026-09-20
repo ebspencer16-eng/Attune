@@ -258,6 +258,19 @@ const SENDOFF_GROUND: Ground = [Palette.orange, '#9B5DE5', Palette.indigo];
 /** The alignment card: the home screen's own blue, with a sunrise over it. */
 const STAT_PAIR_GROUND: Ground = ['#1B2A5E', '#24357A', '#2F55C4'];
 
+/**
+ * The sunrise, as a peak and a count rather than a per-ring number.
+ *
+ * Stacking n layers of alpha a comes to 1 - (1 - a)^n, so the per-ring alpha
+ * is that solved backwards. 0.773 is what twenty-six rings at 0.055 came to,
+ * and the brightness was right; what Ellie could see was the steps between
+ * them. Raising the count alone would have made it brighter as well as
+ * smoother, which is why the peak is the number that is written down.
+ */
+const SUNRISE_RINGS = 56;
+const SUNRISE_PEAK = 0.773;
+const SUNRISE_ALPHA = (1 - (1 - SUNRISE_PEAK) ** (1 / SUNRISE_RINGS)).toFixed(4);
+
 function typeGround(accent?: string | null): Ground {
   if (!accent) return ground('type');
   return [`${accent}CC`, `${accent}66`, '#14102E'];
@@ -628,12 +641,23 @@ function Card({
             screen's glow uses: many circles, each so faint its own edge is
             below the threshold an eye can find, stacked so the alpha builds
             toward the middle. Linear radii and a constant per-ring alpha give
-            a cumulative falloff, which is a radial gradient. */}
+            a cumulative falloff, which is a radial gradient.
+
+            ── FAINTER, AND MANY MORE OF THEM ─────────────────────────────
+            Ellie: "the sunrise effect looks great except that I can see the
+            lines eminating, but I want it to look much more blended."
+
+            Twenty-six rings at five and a half per cent each is a five and a
+            half per cent step at every edge, and that is above the threshold.
+            The peak is kept, because the brightness was right; it is reached
+            in SUNRISE_RINGS steps instead, and the per-ring alpha is solved
+            from the peak rather than typed, so changing the count cannot
+            quietly change how bright the sunrise is. */}
         {card.kind === 'stat-pair' ? (
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
-              {Array.from({ length: 26 }, (_, i) => {
-                const size = w * 1.6 * (1 - i / 26);
+              {Array.from({ length: SUNRISE_RINGS }, (_, i) => {
+                const size = w * 1.6 * (1 - i / SUNRISE_RINGS);
                 return (
                   <View
                     key={i}
@@ -641,7 +665,7 @@ function Card({
                       position: 'absolute',
                       bottom: -w * 0.45,
                       width: size, height: size, borderRadius: size / 2,
-                      backgroundColor: 'rgba(232,103,58,0.055)',
+                      backgroundColor: `rgba(232,103,58,${SUNRISE_ALPHA})`,
                     }}
                   />
                 );
@@ -676,9 +700,34 @@ function Card({
             side. Hence the 0.14645, which is 0.5 - 0.35355 and nothing else.
 
             SIDE is twice the card's perimeter-ish so the square's own corners
-            are always far outside the card. */}
+            are always far outside the card.
+
+            ── AND IT PASSES THROUGH THE MIDDLE ───────────────────────────
+            Ellie: "the blue and orange are currently very uneven. Can we make
+            those 50/50 (move the diagonal split up a lot)."
+
+            The edge ran through the bottom left corner, which put about four
+            fifths of the card in the orange. Any straight line through a
+            rectangle's centre cuts it into two equal halves, whatever its
+            angle, so the fix is the centre point and nothing else: the
+            geometry below is unchanged except for which point the edge is
+            made to pass through. */}
         {card.kind === 'admired' ? (() => {
           const SIDE = (w + h) * 2;
+          /**
+           * Where the card sits along the square's own gradient.
+           *
+           * The square is several times the card's width, so without this the
+           * card sees a sliver of the ramp and the navy reads as one flat
+           * blue. The stops have to follow the square: moving it to the centre
+           * for the 50/50 split shifted the card's slice by half a card width,
+           * which clamped most of the visible half to the first colour and
+           * turned the navy bright. Derived from LEFT rather than written down
+           * so the next time the placement moves, this moves with it.
+           */
+          const LEFT = w / 2 - 0.14645 * SIDE;
+          const FROM = -LEFT / SIDE;
+          const SPAN = w / SIDE;
           return (
             <View pointerEvents="none" style={StyleSheet.absoluteFill}>
               <LinearGradient
@@ -692,12 +741,12 @@ function Card({
                    further along it. */
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                locations={[0.14645, 0.14645 + (w / SIDE) / 2, 0.14645 + w / SIDE]}
+                locations={[FROM, FROM + SPAN / 2, FROM + SPAN]}
                 style={{
                   position: 'absolute',
                   width: SIDE, height: SIDE,
-                  left: -0.14645 * SIDE,
-                  top: h - 0.14645 * SIDE,
+                  left: LEFT,
+                  top: h / 2 - 0.14645 * SIDE,
                   transform: [{ rotate: '-45deg' }],
                 }}
               />
@@ -775,11 +824,21 @@ function Body({ card, onDone, map, w }: {
           <Text style={[S.amp, { marginVertical: Spacing.xs }]}>&</Text>
           <Text style={[S.hero, { textAlign: 'center' }]}>{card.names?.them}</Text>
           <Rule />
-          {/* Ellie: "Widen margins so that use insights to learn and grow
-              together fit on one line." 260 broke her second line in two; the
-              card is 320 wide at its narrowest, so this is the measure with
-              the padding still on it. */}
-          <Text style={[S.body, { textAlign: 'center', maxWidth: 300 }]}>{card.body}</Text>
+          {/* ── HER SECOND LINE, ON ONE LINE ──────────────────────────
+              Ellie, twice: "Widen margins so that use insights to learn and
+              grow together fit on one line", and then "Widen margin on
+              storycard 1 so that 'use insights to learn and grow together'
+              fits on one row."
+
+              300 was a flat number, and it never bound: the card's own padding
+              is forty points a side, so on this phone the line had 256 points
+              whatever the maxWidth said, and 300 was simply never reached.
+
+              A share of the card instead, which is what everything else on
+              these cards is measured in, and wide enough to step outside the
+              padding. The type scales with the card too, so the line fits at
+              every width rather than at the one it was measured on. */}
+          <Text style={[S.body, { textAlign: 'center', width: w * 0.92 }]}>{card.body}</Text>
           <Text style={[S.footer, { marginTop: Spacing.xxl }]}>{card.footer}</Text>
         </View>
       );
@@ -968,13 +1027,19 @@ function Body({ card, onDone, map, w }: {
        * that rule in a file that cannot see a profile.
        */
       return (
-        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+        /* Ellie: "move the text so it isn't so close to the corners of the
+           card." Inset from the top and the bottom as well as pulled in from
+           the side each sentence is aligned to, so neither reads as having
+           been pushed into a corner. */
+        <View style={{ flex: 1, justifyContent: 'space-between', paddingVertical: Spacing.xl }}>
           {(card.rows || []).slice(0, 2).map((r, i) => (
             <View
               key={r.name}
               style={{
-                maxWidth: '78%',
+                maxWidth: '74%',
                 alignSelf: i === 0 ? 'flex-start' : 'flex-end',
+                paddingLeft: i === 0 ? 0 : Spacing.md,
+                paddingRight: i === 0 ? Spacing.md : 0,
               }}>
               <Text
                 style={[
@@ -995,7 +1060,7 @@ function Body({ card, onDone, map, w }: {
           <Text style={[S.bodyMd, { marginTop: Spacing.md }]}>{card.title}</Text>
           <Text style={[S.statMid, { textAlign: 'center', marginTop: Spacing.sm }]}>{card.value}</Text>
           {card.body ? (
-            <Text style={[S.bodyMd, { textAlign: 'center', marginTop: Spacing.xl, fontStyle: 'italic', maxWidth: 280 }]}>
+            <Text style={[S.bodyMd, { textAlign: 'center', marginTop: Spacing.xl, fontFamily: Fonts.bodyItalic, maxWidth: 280 }]}>
               {card.body}
             </Text>
           ) : null}
@@ -1012,6 +1077,9 @@ function Body({ card, onDone, map, w }: {
               backgroundColor: `${WHITE}0.1)`, borderColor: `${WHITE}0.22)`, borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.xl, marginTop: Spacing.md,
             }}>
+            {/* Still upright, and this line is the reason: the quote role is
+                Playfair, which is bundled Bold only. DM Sans has its italic
+                faces now and Playfair does not, so this one waits on a file. */}
             <Text style={[S.quote, { fontStyle: 'italic', textAlign: 'center' }]}>
               {card.quote}
             </Text>

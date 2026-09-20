@@ -38,7 +38,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, BlueGround, Colors, MaxContentWidth, Palette, SectionColor, Radius, Spacing, Type, inputType,
+  AccentFallback, AccentFor, BlueGround, Colors, Fonts, inputType, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -534,7 +534,7 @@ export default function ResourcesScreen() {
                 {home.research.body}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, marginTop: Spacing.lg }}>
-                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic', flex: 1 }}>
+                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic, flex: 1 }}>
                   {home.research.source}
                 </Text>
                 {/* Ellie: "I want a share button on the insight of the day tile

@@ -234,7 +234,7 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
      * own height, which is what a design review needs: the fold is not where
      * the page ends.
      */
-    async screenshot({ fullPage = false, transparent = false } = {}) {
+    async screenshot({ fullPage = false, transparent = false, box = null } = {}) {
       /**
        * ── A TRANSPARENT CAPTURE NEEDS TELLING TWICE ────────────────────────
        * Setting `background: transparent` on the page is not enough: Chrome
@@ -251,7 +251,20 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
         });
       }
       let clip;
-      if (fullPage) {
+      /**
+       * ── A BOX, WHEN THE PAGE IS THE PICTURE ──────────────────────────────
+       * `fullPage` measures documentElement.scrollWidth, which is never
+       * narrower than the window, so a 309 point page in a wider window comes
+       * back 485 wide with the rest transparent. That is invisible in a PNG
+       * viewer and very visible in the app: React Native's `contain` fits the
+       * whole canvas, padding included, so the lockup's mark was drawn at two
+       * thirds of its size with empty space either side of it.
+       *
+       * When the caller knows the size it wants, it says so.
+       */
+      if (box) {
+        clip = { x: 0, y: 0, width: box.width, height: box.height, scale: 1 };
+      } else if (fullPage) {
         const size = await send('Runtime.evaluate', {
           expression: `JSON.stringify({ w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight })`,
           returnByValue: true,

@@ -41,8 +41,7 @@ import BrandHeader from '@/components/brand-header';
 import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghost-tile';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BlueGround, BottomTabInset, Colors, MaxContentWidth, Palette, Radius,
-  Spacing, Type,
+  BlueGround, BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -847,7 +846,7 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
       </Text>
       <Text
         style={{
-          ...Type.small, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic',
+          ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic,
           marginTop: Spacing.lg, textAlign: 'right',
         }}>
         {finding.source}
@@ -917,7 +916,12 @@ function TileRow({
       <SymbolView
         name={icon as never}
         size={21}
-        tintColor={disabled ? GhostInkQuiet : Palette.orange}
+        /* Ellie: "The orange is hard to see, can we make it brighter?" The
+           brand orange is made to sit on cream; inside a ghost tile on the
+           navy it loses most of its contrast. This is that orange lifted for
+           the dark ground, the same move the partner's blue made on the
+           results tiles. */
+        tintColor={disabled ? GhostInkQuiet : '#FF8F5E'}
         style={{ width: 23, height: 23 }}
       />
       <View style={{ flex: 1 }}>

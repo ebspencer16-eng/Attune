@@ -66,8 +66,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 23 September is built, and all thirty-two of
-it is in section 3 waiting on your eye.
+**Nothing open.** The batch of 24 September is built and is in section 3.
 
 ## 3. For you to review
 
@@ -83,42 +82,36 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The batch of 23 September, all thirty-two of them, first.
+The batch of 24 September first, then the batch of 23 September.
 
 | # | Review |
 |--|--|
+| O303 | **The menu, four changes.** No hairlines. A bullet on Highlights, Couple Type, Exercise results and What Comes Next, sitting in the column the exercises' icons use, so the four names and the five icons share one left edge. The pages inside a dropdown are italic and the rows are tighter. |
+| O304 | **A softer orange.** #C2410C was a burnt orange and read as the loudest ground in the app; both stops are a shade lighter and a shade less saturated. |
+| O305 | **Storycard 1 fits.** Both her lines sit on one row each. The 300-point maxWidth never bound: the card's own padding left 256 points whatever it said, so the measure is a share of the card now, which also means it holds at every phone width rather than the one it was measured on. And yes, the eyebrow went up with everything else, by more than the rest; it is up again here since you asked. |
+| O306 | **Card 6 is even.** Any straight line through a rectangle's centre halves it, so the split is the centre point and nothing else. The text is inset from the corners. Moving the square shifted which slice of the gradient the card could see and turned the navy bright; the stops are derived from the placement now, so the next time it moves they move with it. |
+| O307 | **Card 4.** "Your communication styles are", on one line. Your two labels, word for word. And the sunrise is fifty-six rings rather than twenty-six, each far fainter: the peak brightness is unchanged and written down as a number, so the count can change again without the sunrise getting brighter. |
+| O308 | **The cover icon and glow.** Larger and lighter: `weight` is a separate control from `size`, and asking for a bigger symbol alone would have made the strokes heavier. The glow is fifty-two rings over a wider field at half the peak, so it is a tint rather than a disc. |
+| O309 | **The ratings page takes the Comms treatment.** The track is the same white the Slider on every communication page uses; the single label when you both land on the same answer was the cream page's ink, which on the green was not readable at all. |
+| O310 | **Conflict and Repair are legible.** Those two eyebrows were the muted clay the cream pages use, on a ghost panel over the section's blue. |
+| O311 | **Talk about it is white.** That page runs navy to green, so no single accent is right on all of it. |
+| O312 | **What Comes Next italicises the words.** The sentence is two fields now, who and what they wrote, because a renderer cannot find the join in one string without restating the rule that put it there. |
+| O313 | **The home icons are brighter.** The brand orange is made for cream; inside a ghost tile on the navy it lost most of its contrast. |
+| O314 | **The mark is its old size.** It was not a size change. The two generated marks came back 485 by 228 with 176 points of transparent padding on the right, because a full-page capture is never narrower than the window, and React Native's `contain` fits the canvas rather than the picture. Nothing showed it: a PNG viewer draws transparent as nothing. The capture asks for an exact box now, and the lockup's box is the mark's own 103 by 76. |
+| O315 | **Card 3 is your four, in your order.** Emotional Expression, Communicating Needs, Conflict Style, Feedback. It used to pick four by spread, which meant no two couples saw the same card. |
+| O316 | **Every italic in the app was upright, and now none of them are.** Not something you asked for; found while doing O303. iOS does not slant a registered typeface on request, it draws the upright face and reports nothing, and DM Sans was bundled without its italics. So eighteen places asked for italic and got none, including three you had asked for by name: the map caption, the Side by Side quotes, and the Try prompts. Both DM Sans italic faces are bundled now and those fifteen places name the face rather than the flag. Three are still upright and cannot be fixed the same way: they are Playfair, which is bundled Bold only. Say the word and I will add that file too. |
 | O271 | **"Exercise results" sits with Highlights, and its contents sit inside it.** The heading now starts on the same left edge as the Highlights and Couple Type labels, and the five exercises step in from it: their icons sit on that edge and their names come after. One number, derived once, feeds all three indents. The longest label may now take two lines rather than trailing off, which is what stops it truncating on a narrower phone than the one I tested on. |
-| O272 | **The icons lost their dots.** Coloured glyph, nothing behind it. |
-| O273 | **The whole menu fits one screen** with the dropdowns shut. Screenshotted to confirm it. |
 | O274 | **The Insights landing is the Attune orange.** Not a wash on cream any more: the same shape the home screen's blue is, a two-shade gradient edge to edge with the lockup and the hero in white and the menu in a white tile on it. The two grounds are one decision, `BlueGround` and `OrangeGround` a line apart. This is the item I am least sure you will like at full strength; if it is too much, the dial is those two hex values. |
-| O275 | **The unfinished state.** Your hero line word for word, on the same orange, with the exercise status table under it. |
 | O276 | **The storycard type is up about a tenth**, every role, from the shared scale both surfaces read. |
-| O277 | **Card 2's axis labels.** Large and white now, and the four individual type names came off the map, which is what was crowding them. |
-| O278 | **Card 3's poles are beside the rows**, left and right, not underneath. |
 | O279 | **Card 6, rebuilt.** Diagonal from the bottom left to the top right, orange above it, navy below, a whole sentence in each corner, all Playfair. The first attempt got the other diagonal; the placement is derived from the corner it has to pass through now rather than nudged into place. |
-| O280 | **Tapping the left third goes back.** The last card does not advance on tap, because it has its own button. |
 | O281 | **Card 4, redesigned.** Attune blue, a circular orange glow rising from the bottom middle, "Ellie and Preston's communication styles are" over "90% aligned", then the one strength and where you differ. The explore line is gone. |
-| O282 | **The Physical Intimacy storycard is gone.** |
-| O283 | **Card 8 lost its "as you explore your results" paragraph.** |
-| O284 | **The last card** is the full orange-to-blue gradient with one white button in the middle. |
-| O285 | **Highlights is not offered the first time** you reach the menu from the cards. It is there every time after. |
-| O286 | **The page arrows** have a hairline edge and a shadow, so they read as glass on a white tile rather than as a hole in it. |
 | O287 | **The covers.** Large icon, no circle, a glow of the section's colour behind it. No line under the title. A gradient hairline in a rounded rectangle around the page, inset from the screen, and it clears the tab bar at the foot rather than running under it. |
-| O288 | **Every non-cover page has its count**, top right. |
 | O289 | **The hero is level with the count.** The count used to be a full-width row above the hero, so it pushed every hero down and could never be beside it. It takes no height at all now, which also means every hero on every page starts in the same place. |
 | O290 | **The Overall and How you feel right now tiles are ghost.** |
 | O291 | **Your Conflict Snapshot** is ghost, with the spacing tightened. The two names above the pills were still the pill colours, which on that ground were barely colours; they are light now. |
-| O292 | **Your Patterns** is ghost and the type on it is legible. |
-| O293 | **And the type follows the tile.** Two more found while doing it: the partner's brand blue is unreadable as small type on the navy tiles, so type on a dark ground now takes a lifted blue while filled dots keep the brand one; and the Insights waiting screens went white with the ground. |
 | O294 | **The opacity is flipped on Side by Side.** The quotes carry the panel; the question and the prompt sit on the ground with nothing behind them. |
-| O295 | **And it takes the Conflict page's layout.** No outer card per pair. An orange eyebrow with a hairline running off to the right of it, level with the middle of the words; the question as a heading; the two quotes under it; the prompt in orange below. |
 | O296 | **What Comes Next quotes them.** "Ellie wrote: [what you wrote]" and the same for Preston. It is built on the way out of the results, so it reaches couples whose results were written months ago rather than only new ones. |
-| O297 | **The greeting fits one line** for names of ordinary length. |
-| O298 | **Insight of the day is a hero on Learn**, and the tile under it lost its eyebrow. |
-| O299 | **The home icons are out of their circles.** |
 | O300 | **The home icons are orange.** |
-| O301 | **The mark on home is the inverse**, the right bubble on white. |
-| O302 | **The mark everywhere else is ghost**, the left heart cut out so the page shows through it rather than painted white. |
 
 | # | Review |
 |--|--|
@@ -158,6 +151,26 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| O272 | **The icons lost their dots.** Coloured glyph, nothing behind it.
+| O273 | **The whole menu fits one screen** with the dropdowns shut. Screenshotted to confirm it.
+| O275 | **The unfinished state.** Your hero line word for word, on the same orange, with the exercise status table under it.
+| O277 | **Card 2's axis labels.** Large and white now, and the four individual type names came off the map, which is what was crowding them.
+| O278 | **Card 3's poles are beside the rows**, left and right, not underneath.
+| O280 | **Tapping the left third goes back.** The last card does not advance on tap, because it has its own button.
+| O282 | **The Physical Intimacy storycard is gone.**
+| O283 | **Card 8 lost its "as you explore your results" paragraph.**
+| O284 | **The last card** is the full orange-to-blue gradient with one white button in the middle.
+| O285 | **Highlights is not offered the first time** you reach the menu from the cards. It is there every time after.
+| O286 | **The page arrows** have a hairline edge and a shadow, so they read as glass on a white tile rather than as a hole in it.
+| O288 | **Every non-cover page has its count**, top right.
+| O292 | **Your Patterns** is ghost and the type on it is legible.
+| O293 | **And the type follows the tile.** Two more found while doing it: the partner's brand blue is unreadable as small type on the navy tiles, so type on a dark ground now takes a lifted blue while filled dots keep the brand one; and the Insights waiting screens went white with the ground.
+| O295 | **And it takes the Conflict page's layout.** No outer card per pair. An orange eyebrow with a hairline running off to the right of it, level with the middle of the words; the question as a heading; the two quotes under it; the prompt in orange below.
+| O297 | **The greeting fits one line** for names of ordinary length.
+| O298 | **Insight of the day is a hero on Learn**, and the tile under it lost its eyebrow.
+| O299 | **The home icons are out of their circles.**
+| O301 | **The mark on home is the inverse**, the right bubble on white.
+| O302 | **The mark everywhere else is ghost**, the left heart cut out so the page shows through it rather than painted white.
 | O239 | The Vercel security challenge, and where the toggle lives |
 | R212 | Home: the glass tile and the greeting |
 | R211 | Results are ready opens the storycards |

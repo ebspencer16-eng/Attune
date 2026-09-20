@@ -270,6 +270,8 @@ export default function Exercise({
           <Text style={{ ...Type.title, color: c.textStrong }}>
             {item.text.split(/(your partner)/i).map((seg, i) => (
               /^your partner$/i.test(seg)
+                /* Upright in practice: this sits inside Type.title, which is
+                   Playfair, and only the Bold face is bundled. */
                 ? <Text key={i} style={{ fontStyle: 'italic' }}>{seg}</Text>
                 : seg
             ))}

@@ -34,7 +34,9 @@ import { SymbolView } from 'expo-symbols';
 
 import { deleteNote, shareNote, updateNote, type Note, type Tag } from '@/api/client';
 import { annotationColor } from '@/constants/annotations';
-import { Colors, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
+import {
+  Colors, Fonts, Palette, Radius, Spacing, Type,
+} from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -195,7 +197,7 @@ export default function MarkSheet({
             <Text
               style={{
                 ...Type.body, color: note.body ? c.text : c.textMuted,
-                fontStyle: 'italic', marginTop: Spacing.lg, lineHeight: 25,
+                fontFamily: Fonts.bodyItalic, marginTop: Spacing.lg, lineHeight: 25,
               }}>
               {note.body || `A ${kind.toLowerCase()} with nothing written under it.`}
             </Text>

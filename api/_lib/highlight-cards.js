@@ -51,11 +51,28 @@ const CONVO_GAP = 1.5;
 /**
  * Which dimensions the communication card shows.
  *
- * Five, spread across the range rather than the five closest, so the card
- * shows a relationship rather than a highlight reel. Same selection as the
- * website: the closest, the furthest, and three spaced between them.
+ * ── NAMED, NOT COMPUTED ───────────────────────────────────────────────────
+ * Ellie: "On storycard 3, change the featured dimensions to emotional
+ * expression, communicating needs, conflict style, and feedback, in that
+ * order."
+ *
+ * It used to pick five by spread: the closest, the furthest, and three spaced
+ * between them, which meant the card showed a different four dimensions for
+ * every couple and no couple could compare their card with anyone's. These
+ * four, in her order, for everybody.
+ *
+ * The spread is kept as the fallback, and only as the fallback: a couple whose
+ * payload is missing one of the four gets a full card of whatever it does
+ * have rather than a card with a hole in it. That happens if the engine's keys
+ * ever change, which is the case the fallback is for.
  */
-function peekDimensions(sortedByGap) {
+const CARD_DIMENSIONS = ['expression', 'needs', 'conflict', 'feedback'];
+
+function peekDimensions(scored, sortedByGap) {
+  const byKey = new Map(scored.map((d) => [d.key, d]));
+  const named = CARD_DIMENSIONS.map((k) => byKey.get(k)).filter(Boolean);
+  if (named.length === CARD_DIMENSIONS.length) return named;
+
   const n = sortedByGap.length;
   if (n <= 5) return sortedByGap;
   return [0, Math.round(n * 0.25), Math.round(n * 0.5), Math.round(n * 0.72), n - 1]
@@ -132,7 +149,7 @@ export function highlightCards({
     body: 'Explore your full results to learn what this looks like for the two of you.',
   });
 
-  const peek = peekDimensions(byGap);
+  const peek = peekDimensions(scored, byGap);
   if (peek.length) {
     cards.push({
       id: 'comm-sliders', kind: 'dimensions', tone: 'deep-blue',
@@ -152,7 +169,11 @@ export function highlightCards({
   if (scored.length) {
     cards.push({
       id: 'comm-align', kind: 'stat-pair', tone: 'green',
-      lead: `${you} and ${them}'s communication styles are`,
+      /* Ellie: "it should say 'your' rather than Ellie and Preston. I think it
+         will fit on one line now." Two names and a possessive is also the one
+         line on the card that changes length with the couple, so the type had
+         to be sized for the longest pair of names anyone might have. */
+      lead: 'Your communication styles are',
       stat: `${commAlignPct}%`,
       statLabel: 'aligned',
       // The colours come with the call-outs, from storycard-style.js, because
@@ -164,9 +185,12 @@ export function highlightCards({
        * different approaches: [dimension], and remove the line starting with
        * explore your results."
        */
+      /* Relabelled, in her words: "change 'one strength' to 'Shared approaches
+         to:' and 'where you have different approaches' to 'Different mindsets
+         about:'." The colons are hers and are kept. */
       callouts: [
-        { label: 'One strength', value: closest?.label || null, ...CALLOUT_TONES.tune },
-        { label: 'Where you have different approaches', value: widest?.label || null, ...CALLOUT_TONES.diverge },
+        { label: 'Shared approaches to:', value: closest?.label || null, ...CALLOUT_TONES.tune },
+        { label: 'Different mindsets about:', value: widest?.label || null, ...CALLOUT_TONES.diverge },
       ],
     });
   }

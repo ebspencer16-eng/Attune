@@ -14,7 +14,7 @@
 
 import { ActivityIndicator, Image, Linking, Pressable, Text, View } from 'react-native';
 import type { ApiError } from '@/api/client';
-import { Colors, MaxContentWidth, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -30,7 +30,7 @@ function Centre({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ScreenLoading({ label = 'Loading' }: { label?: string }) {
+export function ScreenLoading({ label = 'Loading', onDark }: { label?: string; onDark?: boolean }) {
   return (
     <Centre>
       {/* ── THE MARK, WHILE IT WAITS ──────────────────────────────────────
@@ -40,13 +40,22 @@ export function ScreenLoading({ label = 'Loading' }: { label?: string }) {
           A spinner on cream is the same spinner every app has. The mark above
           it, quietly, makes the wait the product's own without adding anything
           anyone has to read. */}
+      {/* ── AND IT FOLLOWS THE GROUND ─────────────────────────────────
+          Ellie: "Adjust text coloring when you change tile color so that text
+          is visible." The Insights tab is the brand orange now rather than
+          cream, and this screen is what someone looks at first on it: the
+          muted clay spinner and the grey label were both close enough to the
+          orange to be almost nothing. Two literal requires, because the
+          bundler resolves these at build time and cannot follow a variable. */}
       <Image
-        source={require('@/assets/images/attune-mark.png')}
-        style={{ width: 44, height: 44 * (64 / 88), opacity: 0.5, marginBottom: Spacing.xl }}
+        source={onDark
+          ? require('@/assets/images/attune-mark-dark.png')
+          : require('@/assets/images/attune-mark.png')}
+        style={{ width: 44, height: 44 * (onDark ? 76 / 103 : 64 / 88), opacity: onDark ? 0.9 : 0.5, marginBottom: Spacing.xl }}
         resizeMode="contain"
       />
-      <ActivityIndicator color={c.accentQuiet} />
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg }}>{label}</Text>
+      <ActivityIndicator color={onDark ? Palette.white : c.accentQuiet} />
+      <Text style={{ ...Type.small, color: onDark ? 'rgba(255,255,255,0.85)' : c.textMuted, marginTop: Spacing.lg }}>{label}</Text>
     </Centre>
   );
 }

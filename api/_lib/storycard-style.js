@@ -66,7 +66,7 @@ import { LINE_BOX, minLineHeight } from './font-metrics.js';
  */
 export const CARD_TYPE = {
   /** The label above everything: YOUR RESULTS, THE NUMBER, and so on. */
-  eyebrow:   { size: 0.64, family: 'body', weight: 700, track: 0.32, alpha: 0.40, upper: true },
+  eyebrow:   { size: 0.70, family: 'body', weight: 700, track: 0.32, alpha: 0.40, upper: true },
   /** The couple's names on the opener. The biggest thing on any card. */
   names:     { size: [2.6, 7, 3.8], family: 'display', weight: 700, track: -0.03, lh: 0.92, alpha: 1 },
   /** The ampersand between them. */
@@ -113,9 +113,9 @@ export const CARD_TYPE = {
   /** The same, one step down, on the cards that are only a figure. */
   statLabelSm: { size: 1.1, family: 'body', weight: 500, alpha: 0.8 },
   /** The eyebrow on the figure cards, a size up from the call-out label. */
-  eyebrowMd: { size: 0.64, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
+  eyebrowMd: { size: 0.70, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
   /** The intimacy card's eyebrow, which takes that card's own colour. */
-  eyebrowTint: { size: 0.61, family: 'body', weight: 700, track: 0.28, alpha: 0.85, upper: true },
+  eyebrowTint: { size: 0.67, family: 'body', weight: 700, track: 0.28, alpha: 0.85, upper: true },
   /** The middle figure size, used by the intimacy card. */
   statMid:   { size: [3.5, 12, 5.5], family: 'display', weight: 700, track: -0.04, lh: 1, alpha: 1 },
   /** Body copy on the cards that carry a paragraph. */

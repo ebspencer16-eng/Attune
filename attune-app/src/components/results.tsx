@@ -46,7 +46,7 @@ import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import { ResultsScroll } from '@/components/results-scroll';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 /**
@@ -1793,7 +1793,7 @@ function ExpectationRowView({
                 <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.sm }}>
                   {EXPERIENCED_LABEL}
                 </Text>
-                <Prose style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic' }}>{side.lived}</Prose>
+                <Prose style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic }}>{side.lived}</Prose>
               </>
             ) : null}
           </View>
@@ -2326,7 +2326,7 @@ function WrittenPair({
           pair since this page existed; the app printed the two answers and
           stopped, which is the half that does the work. */}
       {prompt ? (
-        <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', marginTop: Spacing.sm, lineHeight: 19 }}>
+        <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontFamily: Fonts.bodyItalic, marginTop: Spacing.sm, lineHeight: 19 }}>
           {prompt}
         </Text>
       ) : null}
@@ -2581,7 +2581,16 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
             13 points the communication rows use. */}
         <View style={{ flex: 1, paddingHorizontal: 13 }}>
           <View style={{ height: BAR_ROW, justifyContent: 'center' }}>
-            <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border }}>
+            {/* ── THE TRACK, AS THE COMMS PAGES DRAW IT ─────────────────
+                Ellie: "please change the bar colors and font colors to match
+                comms detailed pages." c.border is a hairline made for cream;
+                on this page's green it is a dark line. The Slider on every
+                communication page uses this white at eighteen per cent, so
+                this is that value, and if it changes there it should change
+                here: there is no way to share it without moving both rows
+                into one component, which is a bigger change than she asked
+                for and worth doing on its own. */}
+            <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: 'rgba(255,255,255,0.18)' }}>
               {r.gapSteps > 0 ? (
                 <View
                   style={{
@@ -2594,16 +2603,23 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
             </View>
             <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(names.you)} dy={dyYou} />
             <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(names.them)} dy={dyThem} />
+            {/* The marks keep the brand blue: they are filled shapes with a
+                white initial on them, which reads at any size on any ground.
+                It is only type that has to move. */}
           </View>
 
           {/* Each answer under its own mark. */}
           <View style={{ height: 30, marginTop: 2 }}>
+            {/* One label when both landed on the same answer, and it was the
+                cream page's ink, which on the green is not readable at all.
+                The partner's takes the lifted blue for the same reason the
+                names on Side by Side do. */}
             {together ? (
-              <DotLabel pct={r.you.pct} text={r.you.label} color={c.text} />
+              <DotLabel pct={r.you.pct} text={r.you.label} color={Palette.white} />
             ) : (
               <>
                 <DotLabel pct={r.you.pct} text={r.you.label} color={YOU_COLOR} />
-                <DotLabel pct={r.them.pct} text={r.them.label} color={THEM_COLOR} />
+                <DotLabel pct={r.them.pct} text={r.them.label} color={THEM_ON_DARK} />
               </>
             )}
           </View>
@@ -2752,7 +2768,7 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: side.col, marginBottom: Spacing.xs }}>
                         {side.name}
                       </Text>
-                      <Prose style={{ ...Type.body, color: Palette.white, fontStyle: 'italic', lineHeight: 24 }}>
+                      <Prose style={{ ...Type.body, color: Palette.white, fontFamily: Fonts.bodyItalic, lineHeight: 24 }}>
                         {`\u201C${side.words}\u201D`}
                       </Prose>
                     </View>
@@ -2764,12 +2780,22 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
                       api/_lib/reflection-prompts.js. In the orange, as asked,
                       and with nothing behind it so the quotes stay the loudest
                       thing in the group. */}
+                  {/* ── WHITE, BECAUSE THE GROUND MOVES ──────────────────
+                      Ellie: "as the bg turns green the orange gets hard to
+                      see. Please change the talk about it text to white."
+
+                      This page's ground runs from navy at the top to green at
+                      the foot, so one colour cannot be right everywhere on it.
+                      The orange was legible where the page starts and gone by
+                      the time it ends. White holds on both. The eyebrow stays
+                      orange: it is two words at nine point and it is the label
+                      rather than the sentence. */}
                   {w.prompt ? (
                     <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs }}>
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: Palette.orange, marginTop: 2 }}>
                         {label}
                       </Text>
-                      <Text style={{ ...Type.small, color: Palette.orange, flex: 1, lineHeight: 20 }}>
+                      <Text style={{ ...Type.small, color: Palette.white, flex: 1, lineHeight: 20 }}>
                         {w.prompt}
                       </Text>
                     </View>
@@ -3040,7 +3066,7 @@ function NextGroup({
   label, color, items, onOpen,
 }: {
   label: string; color: string;
-  items: { title: string; body?: string | null; say?: string | null }[];
+  items: { title: string; quote?: string | null; body?: string | null; say?: string | null }[];
   onOpen: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -3080,11 +3106,16 @@ function NextGroup({
                   none here either. */}
               <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong, lineHeight: 19 }}>
                 {item.title}
+                {/* Nested rather than a second block, so "Ellie wrote:" and
+                    what Ellie wrote stay one sentence that wraps as one. */}
+                {item.quote ? (
+                  <Text style={{ fontWeight: '400', fontFamily: Fonts.bodyItalic }}>{` ${item.quote}`}</Text>
+                ) : null}
               </Text>
               {item.say ? (
                 <View style={{ flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.xs }}>
                   <Text style={{ ...Type.eyebrow, fontSize: 9, color, marginTop: 3 }}>Try</Text>
-                  <Text style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', flex: 1, lineHeight: 19 }}>
+                  <Text style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic, flex: 1, lineHeight: 19 }}>
                     {item.say}
                   </Text>
                 </View>
@@ -3399,7 +3430,7 @@ function CoupleType({ results, you, them, title }: {
             key={i}
             style={{
               ...Type.small, fontSize: 12, lineHeight: 17,
-              fontStyle: 'italic', color: c.textMuted,
+              fontFamily: Fonts.bodyItalic, color: c.textMuted,
               marginBottom: Spacing.sm,
             }}>
             {para}
@@ -3612,7 +3643,7 @@ function CoupleType({ results, you, them, title }: {
                     backgroundColor: `${tipColor}14`, borderColor: `${tipColor}3D`, borderWidth: 1,
                     paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
                   }}>
-                  <Prose style={{ ...Type.body, fontStyle: 'italic', color: c.text }}>
+                  <Prose style={{ ...Type.body, fontFamily: Fonts.bodyItalic, color: c.text }}>
                     {`\u201C${interp(tip.phraseTry, you, them)}\u201D`}
                   </Prose>
                 </View>
@@ -3638,6 +3669,18 @@ function CoupleType({ results, you, them, title }: {
  * half of Ellie's ask that is easy to miss: "then that same bg persists
  * through the exercise's section behind the tiles."
  */
+/**
+ * The cover's glow: a field, a count, and the peak it comes to.
+ *
+ * n layers of alpha a stack to 1 - (1 - a)^n, so the per-ring alpha is that
+ * solved backwards. The peak is the number worth writing down, because it is
+ * the one Ellie reacted to: 0.68 read as a disc, 0.34 reads as a tint.
+ */
+const GLOW_SIZE = 196;
+const GLOW_RINGS = 52;
+const GLOW_PEAK = 0.34;
+const GLOW_ALPHA = 1 - (1 - GLOW_PEAK) ** (1 / GLOW_RINGS);
+
 function Cover({ title, accent, icon, onStart }: {
   title: string; accent: string; icon?: string | null; onStart?: () => void;
 }) {
@@ -3681,10 +3724,24 @@ function Cover({ title, accent, icon, onStart }: {
               The glow is the home screen's trick again: many rings, each too
               faint for its own edge to be findable, stacked so the alpha
               builds toward the middle. One translucent circle would be a
-              circle, which is the thing she asked to get rid of. */}
-          <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center' }}>
-            {Array.from({ length: 22 }, (_, i) => {
-              const size = 150 * (1 - i / 22);
+              circle, which is the thing she asked to get rid of.
+
+              ── EXCEPT IT STILL LOOKED LIKE ONE ──────────────────────────
+              Ellie, seeing it: "can we make the icons a little larger but with
+              thinner lines, and can we make the glow more subtle, like a tint
+              that disperses gently? Right now it looks like a circle."
+
+              Twenty-two rings at five per cent is a five per cent step at
+              every edge, and the outermost of those steps is a visible circle
+              against the cream. Three changes: many more rings so no single
+              edge is findable, a lower peak so it is a tint rather than a
+              disc, and a wider field so it fades out well before it stops.
+
+              The alpha is solved from the peak, so the count can change
+              without changing how strong the glow is. */}
+          <View style={{ width: GLOW_SIZE, height: GLOW_SIZE, alignItems: 'center', justifyContent: 'center' }}>
+            {Array.from({ length: GLOW_RINGS }, (_, i) => {
+              const size = GLOW_SIZE * (1 - i / GLOW_RINGS);
               return (
                 <View
                   key={i}
@@ -3692,17 +3749,22 @@ function Cover({ title, accent, icon, onStart }: {
                   style={{
                     position: 'absolute',
                     width: size, height: size, borderRadius: size / 2,
-                    backgroundColor: withAlpha(accent, 0.05),
+                    backgroundColor: withAlpha(accent, GLOW_ALPHA),
                   }}
                 />
               );
             })}
+            {/* Larger and lighter: `weight` is what makes an SF Symbol's
+                strokes thinner, and it is a different control from `size`.
+                Asking for a bigger symbol alone makes the lines heavier too,
+                which is the opposite of what she asked for. */}
             <SymbolView
               name={(icon || 'sparkles') as never}
-              size={64}
+              size={78}
+              weight="light"
               tintColor={accent}
               fallback={<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: accent }} />}
-              style={{ width: 70, height: 70 }}
+              style={{ width: 86, height: 86 }}
             />
           </View>
 

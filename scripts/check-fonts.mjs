@@ -48,7 +48,19 @@ const norm = (s) => (s || '').replace(/\s+/g, '');
 
 // ── 2. No generic families ─────────────────────────────────────────────────
 const GENERIC = ['ui-serif', 'ui-sans-serif', 'system-ui', 'serif', 'sans-serif', 'monospace', 'System'];
-const fontsBlock = theme.slice(theme.indexOf('export const Fonts'), theme.indexOf('} as const;', theme.indexOf('export const Fonts')));
+const fontsBlockRaw = theme.slice(theme.indexOf('export const Fonts'), theme.indexOf('} as const;', theme.indexOf('export const Fonts')));
+/**
+ * Comments stripped before anything reads this.
+ *
+ * The scan below is `: 'family'`, which is also the shape of a sentence about
+ * a family. A note explaining that `fontStyle: 'italic'` does nothing on a
+ * registered face made this gate report a missing font called italic. A gate
+ * that reads its own documentation as code is matching too much, and the safe
+ * direction is to narrow it to the declarations.
+ */
+const fontsBlock = fontsBlockRaw
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/\/\/[^\n]*/g, '');
 for (const g of GENERIC) {
   if (!new RegExp(`['"]${g}['"]`).test(fontsBlock)) continue;
   problems.push(

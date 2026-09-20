@@ -37,7 +37,7 @@ import ScreenFrame from '@/components/screen-frame';
 import { AnnotationProvider, Prose } from '@/components/annotation-context';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type,
+  BottomTabInset, Colors, Fonts, MaxContentWidth, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -67,7 +67,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
           marginTop: Spacing.lg, paddingLeft: Spacing.lg,
           borderLeftColor: accent, borderLeftWidth: 3,
         }}>
-        <Prose style={{ ...Type.body, color: c.text, fontStyle: 'italic', lineHeight: 26 }}>{t}</Prose>
+        <Prose style={{ ...Type.body, color: c.text, fontFamily: Fonts.bodyItalic, lineHeight: 26 }}>{t}</Prose>
       </View>
     );
   }
@@ -101,7 +101,7 @@ function Block({ block, accent }: { block: PostBlock; accent: string }) {
         {/* A research claim cites its work. An article that cites its sources
             on the website and not here is two different articles. */}
         {block.source ? (
-          <Text style={{ ...Type.small, color: c.textMuted, fontStyle: 'italic', marginTop: Spacing.sm }}>
+          <Text style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic, marginTop: Spacing.sm }}>
             {block.source}
           </Text>
         ) : null}

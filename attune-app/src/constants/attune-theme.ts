@@ -74,7 +74,11 @@ export const BlueGround = ['#1B2A5E', '#2F55C4'] as const;
  * here rather than in insights.tsx so the two grounds stay one decision: if the
  * home screen's blue is ever restyled, the thing to match is a line away.
  */
-export const OrangeGround = ['#C2410C', '#E8673A'] as const;
+/* Softened once: Ellie, of the first version, "Can we do a slightly softer
+   orange". #C2410C is a burnt orange and read as the loudest ground in the
+   app. These are the same two positions a shade lighter and a shade less
+   saturated. */
+export const OrangeGround = ['#CB5A33', '#F09763'] as const;
 
 /**
  * Section accents. Used consistently and never decoratively: a colour on this
@@ -206,6 +210,19 @@ export const Fonts = {
   bodyMedium: 'DMSansMedium',
   bodySemiBold: 'DMSansSemiBold',
   bodyBold: 'DMSansBold',
+  /**
+   * ── ITALIC IS A FAMILY HERE ───────────────────────────────────────────
+   * Not `fontStyle: 'italic'`. iOS synthesises nothing for a registered
+   * family: asking a named font to slant draws the upright face and reports
+   * no error, which is why every italic in this app was silently upright
+   * until these two files were bundled. Anything that wants italic names one
+   * of these instead.
+   *
+   * Playfair is still Bold-only and still cannot be italic. That one is a
+   * missing file, not a missing flag, and the same fix would work.
+   */
+  bodyItalic: 'DMSansItalic',
+  bodyBoldItalic: 'DMSansBoldItalic',
 } as const;
 
 /**

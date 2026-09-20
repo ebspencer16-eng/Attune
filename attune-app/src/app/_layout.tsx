@@ -53,6 +53,14 @@ export default function TabLayout() {
     DMSansMedium: require('../../assets/fonts/DMSans-Medium.ttf'),
     DMSansSemiBold: require('../../assets/fonts/DMSans-SemiBold.ttf'),
     DMSansBold: require('../../assets/fonts/DMSans-Bold.ttf'),
+    /* ── THE ITALICS ARE FACES, NOT A FLAG ───────────────────────────────
+       iOS does not slant a registered family on request: `fontStyle: 'italic'`
+       on a named font draws the upright face and reports no error. Eighteen
+       places in this app asked for italic and every one of them was upright,
+       including three Ellie had asked for by name. So the faces are bundled,
+       and the type scale names them. */
+    DMSansItalic: require('../../assets/fonts/DMSans-Italic.ttf'),
+    DMSansBoldItalic: require('../../assets/fonts/DMSans-BoldItalic.ttf'),
   });
 
   if (!fontsReady && !fontError) return null;

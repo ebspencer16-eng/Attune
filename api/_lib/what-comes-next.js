@@ -167,9 +167,24 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
      * content. Their own words, unedited, which is the whole point of the two
      * rows being here.
      */
+    /**
+     * ── AND THE WORDS ARE THEIR OWN FIELD ─────────────────────────────────
+     * Ellie: "can the text of what we wrote be italicized? Like 'Ellie wrote:
+     * Be nicer' and be nicer would be italicized".
+     *
+     * Which means the sentence has two halves that are set differently, and a
+     * renderer cannot find the join in one string without restating the rule
+     * that put it there. So the server splits it: `title` is who, `quote` is
+     * what they wrote. The app draws the quote in italic inside the title's
+     * line, so it still reads as one sentence.
+     *
+     * The website builds its own items for this group, client-side, which
+     * check-what-comes-next.mjs says out loud that it does not cover. This
+     * changes the app only, and that is the surface she is reading.
+     */
     const items = [];
-    if (commitment.you) items.push({ title: `${you} wrote: ${commitment.you}`, body: null, say: null });
-    if (commitment.them) items.push({ title: `${them} wrote: ${commitment.them}`, body: null, say: null });
+    if (commitment.you) items.push({ title: `${you} wrote:`, quote: commitment.you, body: null, say: null });
+    if (commitment.them) items.push({ title: `${them} wrote:`, quote: commitment.them, body: null, say: null });
     groups.push({
       id: 'reflection',
       color: '#10B981',
