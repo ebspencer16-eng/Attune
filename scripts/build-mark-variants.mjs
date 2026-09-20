@@ -70,16 +70,29 @@ function lightVariant(src) {
   );
 }
 
-/** The right bubble filled white rather than left clear. It already is. */
+/** The right bubble filled white, and the left bubble outlined in white. */
 function darkVariant(src) {
   /**
    * The right bubble is already `fill="white"`, which is what she asked the
    * home screen to have. What makes the dark variant is the LEFT heart: it is
-   * white at 0.93 and on navy that reads correctly, so this file is the mark
-   * as drawn. It exists as its own file rather than reusing attune-mark.png so
-   * that changing one page's lockup cannot silently change the other's.
+   * white at 0.93 and on a dark ground that reads correctly.
+   *
+   * ── AND THE LEFT BUBBLE IS OUTLINED ───────────────────────────────────
+   * Ellie: "On insights landing, with the orange background, please outline
+   * the left bubble in the lockup's mark in white."
+   *
+   * The left bubble is a filled gradient and nothing else, so on the orange
+   * its own orange end has almost no edge: the bubble dissolves into the page
+   * and the mark reads as one bubble and a heart. A white stroke gives it the
+   * same edge the right bubble gets from its gradient outline, and it is the
+   * dark variant only, because on cream the fill already has an edge.
+   *
+   * 2.2 is the right bubble's stroke width, so the two edges match.
    */
-  return src;
+  return src.replace(
+    '<path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#fg)"/>',
+    '<path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#fg)" stroke="white" stroke-width="2.2" stroke-linejoin="round"/>',
+  );
 }
 
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8"><style>

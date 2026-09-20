@@ -36,7 +36,7 @@ import type { ApiError, IntimacyQuestionSet } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import { ExerciseComplete, ExerciseEyebrow, ExerciseNav, exerciseColor, ExerciseOpening } from '@/components/exercise-chrome';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
 import PageWash from '@/components/page-wash';
@@ -299,9 +299,9 @@ export default function IntimacyExercise({
         <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xl }}>
           {splitInstruction(questionText).text}
           {splitInstruction(questionText).instruction ? (
-            /* Upright in practice: inside Type.title, which is Playfair, and
-               only the Bold face is bundled. */
-            <Text style={{ fontStyle: 'italic' }}>{`\n${splitInstruction(questionText).instruction}`}</Text>
+            /* The display face's italic: this is inside Type.title, which is
+               Playfair. */
+            <Text style={{ fontFamily: Fonts.displayItalic }}>{`\n${splitInstruction(questionText).instruction}`}</Text>
           ) : null}
         </Text>
 

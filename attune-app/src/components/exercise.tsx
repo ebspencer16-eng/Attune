@@ -30,7 +30,7 @@ import {
   ExerciseComplete, ExerciseEyebrow, ExerciseNav, ExerciseOpening, exerciseColor,
 } from '@/components/exercise-chrome';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
 import PageWash from '@/components/page-wash';
@@ -270,9 +270,9 @@ export default function Exercise({
           <Text style={{ ...Type.title, color: c.textStrong }}>
             {item.text.split(/(your partner)/i).map((seg, i) => (
               /^your partner$/i.test(seg)
-                /* Upright in practice: this sits inside Type.title, which is
-                   Playfair, and only the Bold face is bundled. */
-                ? <Text key={i} style={{ fontStyle: 'italic' }}>{seg}</Text>
+                /* The display face's italic, named rather than asked for.
+                   This sits inside Type.title, which is Playfair. */
+                ? <Text key={i} style={{ fontFamily: Fonts.displayItalic }}>{seg}</Text>
                 : seg
             ))}
           </Text>

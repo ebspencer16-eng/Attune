@@ -39,6 +39,7 @@ import { forgetLastSection, showResultsFromStart } from '@/components/results';
 import { forgetLastSeen, keepLastSeen, lastSeen } from '@/api/last-seen';
 import BrandHeader from '@/components/brand-header';
 import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghost-tile';
+import { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
   BlueGround, BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, Spacing, Type,
@@ -882,6 +883,20 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
  * SF Symbols rather than drawn glyphs: they are already how the tab bar is
  * built, they respect Dynamic Type, and they are the platform's own.
  */
+/**
+ * The home tile's icon, and the glow behind it.
+ *
+ * Same shape as the cover pages': a field, a ring count, and the peak the
+ * stack comes to, with the per-ring alpha solved from the peak so the count
+ * can change without changing how bright it is. The field is wider than the
+ * glyph so it fades out well before it stops.
+ */
+const ICON_ORANGE = '#FF8F5E';
+const ICON_GLOW_SIZE = 44;
+const ICON_GLOW_RINGS = 24;
+const ICON_GLOW_PEAK = 0.30;
+const ICON_GLOW_ALPHA = 1 - (1 - ICON_GLOW_PEAK) ** (1 / ICON_GLOW_RINGS);
+
 function TileRow({
   icon, title, body, disabled, first, onPress,
 }: {
@@ -913,17 +928,45 @@ function TileRow({
           answer is the same in both places: the icon carries the colour and
           nothing sits behind it. Orange on the glass is the brand's accent
           doing the work the disc was doing. */}
-      <SymbolView
-        name={icon as never}
-        size={21}
-        /* Ellie: "The orange is hard to see, can we make it brighter?" The
-           brand orange is made to sit on cream; inside a ghost tile on the
-           navy it loses most of its contrast. This is that orange lifted for
-           the dark ground, the same move the partner's blue made on the
-           results tiles. */
-        tintColor={disabled ? GhostInkQuiet : '#FF8F5E'}
-        style={{ width: 23, height: 23 }}
-      />
+      {/* ── AND A GLOW BEHIND IT ──────────────────────────────────────
+          Ellie: "can we add a little glow behind the icons to make them pop
+          even more?"
+
+          The cover pages' trick, at this scale: rings of the same orange, each
+          too faint for its own edge to be findable, stacked so the alpha
+          builds toward the middle. A single translucent circle would be a
+          disc, which is the thing she asked to get rid of on this tile twice.
+
+          The alpha is solved from the peak, so the ring count can change
+          without the glow getting brighter. A disabled row has no glow: it is
+          not there to pop. */}
+      <View style={{ width: 23, height: 23, alignItems: 'center', justifyContent: 'center' }}>
+        {disabled ? null : Array.from({ length: ICON_GLOW_RINGS }, (_, i) => {
+          const size = ICON_GLOW_SIZE * (1 - i / ICON_GLOW_RINGS);
+          return (
+            <View
+              key={i}
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                width: size, height: size, borderRadius: size / 2,
+                backgroundColor: withAlpha(ICON_ORANGE, ICON_GLOW_ALPHA),
+              }}
+            />
+          );
+        })}
+        <SymbolView
+          name={icon as never}
+          size={21}
+          /* Ellie: "The orange is hard to see, can we make it brighter?" The
+             brand orange is made to sit on cream; inside a ghost tile on the
+             navy it loses most of its contrast. This is that orange lifted for
+             the dark ground, the same move the partner's blue made on the
+             results tiles. */
+          tintColor={disabled ? GhostInkQuiet : ICON_ORANGE}
+          style={{ width: 23, height: 23 }}
+        />
+      </View>
       <View style={{ flex: 1 }}>
         <Text style={{ ...Type.cardTitle, color: GhostInk }}>{title}</Text>
         {body ? (

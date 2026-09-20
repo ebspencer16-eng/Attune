@@ -1077,10 +1077,9 @@ function Body({ card, onDone, map, w }: {
               backgroundColor: `${WHITE}0.1)`, borderColor: `${WHITE}0.22)`, borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.xl, marginTop: Spacing.md,
             }}>
-            {/* Still upright, and this line is the reason: the quote role is
-                Playfair, which is bundled Bold only. DM Sans has its italic
-                faces now and Playfair does not, so this one waits on a file. */}
-            <Text style={[S.quote, { fontStyle: 'italic', textAlign: 'center' }]}>
+            {/* Playfair's italic, by name. `fontStyle` draws nothing on a
+                registered family; the face is bundled now. */}
+            <Text style={[S.quote, { fontFamily: Fonts.displayItalic, textAlign: 'center' }]}>
               {card.quote}
             </Text>
           </View>

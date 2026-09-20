@@ -22,7 +22,7 @@
  * sentence is gone is simply not drawn rather than drawn in the wrong place.
  */
 
-import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { scrollIntoResultsView } from '@/components/results-scroll';
@@ -32,6 +32,7 @@ import { annotationColor } from '@/constants/annotations';
 import { Palette } from '@/constants/attune-theme';
 import AnnotationSheet from '@/components/annotation-sheet';
 import MarkSheet from '@/components/mark-sheet';
+import { marksIn, unplacedMarks } from '@/constants/mark-reach';
 import { deleteNote, type Note, type Tag } from '@/api/client';
 
 type Ctx = {
@@ -63,6 +64,19 @@ type Ctx = {
   openMark: (id: string) => void;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
+  /**
+   * A block reporting which marks it drew.
+   *
+   * See constants/mark-reach.ts. Every rendered block claims what it holds,
+   * and what nothing claims is a mark the reader cannot see.
+   */
+  claim: (ids: string[]) => void;
+  /**
+   * Whether this page has a mark no block has claimed, once the page has had
+   * a chance to render. False before that, so nothing reacts to the empty
+   * moment before the first block reports.
+   */
+  unplaced: boolean;
   /**
    * The words this screen was opened to land on, when it was opened from a
    * note. The paragraph holding them scrolls itself into view once.
@@ -106,7 +120,7 @@ function textIsLight(style: StyleProp<TextStyle>): boolean {
 
 const AnnotationCtx = createContext<Ctx>({
   marks: [], select: () => {}, remove: () => {}, openMark: () => {},
-  enabled: false, focus: null,
+  enabled: false, focus: null, claim: () => {}, unplaced: false,
 });
 
 export function useAnnotations() {
@@ -122,7 +136,7 @@ export function useAnnotations() {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, remove, openMark, enabled, focus } = useAnnotations();
+  const { marks, select, remove, openMark, enabled, focus, claim } = useAnnotations();
   const text = children || '';
   if (!enabled || !text) return <Text style={style}>{text}</Text>;
 
@@ -141,7 +155,10 @@ export function Prose({
    * long the text is, and it is not hit-testable: it is a sign, not a control.
    * Tapping it would be a second way to open something the text already opens.
    */
-  const mine = marks.filter((m) => text.includes(m.text));
+  /* The rule lives in constants/mark-reach.ts so a gate can execute it. It
+     was inline here, which meant nothing could check that a mark anchored to
+     this page had been drawn anywhere on it. */
+  const mine = marksIn(text, marks);
   /**
    * What the margin has to announce.
    *
@@ -166,6 +183,18 @@ export function Prose({
    * else here. A paragraph that does not hold them does nothing at all, which
    * is most of them.
    */
+  /* ── AND IT REPORTS WHAT IT DREW ──────────────────────────────────────
+     So the page can tell the difference between "no marks here" and "a mark
+     is here and nothing on screen is holding it". Ellie: "That keeps
+     happening, we need to make sure the icons don't randomly vanish."
+
+     Keyed on the ids rather than the array, because `mine` is a fresh array
+     every render and this would otherwise loop. */
+  const mineIds = mine.map((m) => m.id).join(',');
+  useEffect(() => {
+    if (mineIds) claim(mineIds.split(','));
+  }, [mineIds, claim]);
+
   const holdsFocus = !!focus && text.includes(focus);
   const scrolled = useRef(false);
   const block = useRef<View | null>(null);
@@ -360,8 +389,62 @@ export function AnnotationProvider({
       tagged: (n.tagIds?.length || 0) > 0,
     })), [notes, section, anchorType]);
 
+  /**
+   * ── THE REGISTER ──────────────────────────────────────────────────────
+   * Which marks a block on this page has drawn.
+   *
+   * A ref rather than state for the set itself, because a block claiming what
+   * it already claimed must not cause a render. The counter is the state, and
+   * it only moves when something new arrives.
+   *
+   * `settled` is what stops this reading as "everything is unplaced" during
+   * the first paint: a child's effect runs before its parent's, so by the time
+   * this provider's effect fires every block that rendered has already
+   * reported. Anything still missing at that point really is missing.
+   */
+  const placed = useRef<Set<string>>(new Set());
+  const [, bump] = useState(0);
+
+  const claim = useCallback((ids: string[]) => {
+    let added = false;
+    for (const id of ids) {
+      if (placed.current.has(id)) continue;
+      placed.current.add(id);
+      added = true;
+    }
+    if (added) bump((n) => n + 1);
+  }, []);
+
+  /**
+   * A new set of marks is a new page's worth of questions, so the register is
+   * emptied. At render rather than in an effect: a child's effect runs before
+   * its parent's, so the blocks rendering with the new marks have already
+   * claimed by the time a parent effect would fire, and emptying it there
+   * would throw those claims away.
+   */
+  const markIds = marks.map((m) => m.id).join(',');
+  const asked = useRef<string | null>(null);
+  if (asked.current !== markIds && asked.current !== null) placed.current = new Set();
+
+  /**
+   * And `settled` is a ref compared against the current question rather than
+   * state fed by its own effect. The effect only records which set of marks
+   * has been asked about; the bump is what makes the value below recompute.
+   */
+  const settledFor = useRef<string | null>(null);
+  useEffect(() => {
+    asked.current = markIds;
+    settledFor.current = markIds;
+    bump((n) => n + 1);
+  }, [markIds]);
+
+  const settled = settledFor.current === markIds;
+  const unplaced = settled && unplacedMarks(marks, placed.current).length > 0;
+
   const value = useMemo<Ctx>(() => ({
     marks,
+    claim,
+    unplaced,
     select: (text: string, action: MarkAction) => setSelected({ text, action }),
     /**
      * Off the screen first, then off the server.
@@ -379,7 +462,7 @@ export function AnnotationProvider({
     openMark: setOpenId,
     enabled: true,
     focus,
-  }), [marks, onRemoved, focus]);
+  }), [marks, onRemoved, focus, claim, unplaced]);
 
   /**
    * The row behind the mark the reader tapped.

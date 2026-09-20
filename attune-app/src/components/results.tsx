@@ -29,7 +29,7 @@ import StepCount from '@/components/step-count';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
-import { AnnotationProvider, Prose } from '@/components/annotation-context';
+import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotation-context';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
   CommsPlan, HighlightCard, IntimacyDomain, IntimacyResults, NextStepGroup,
@@ -4005,6 +4005,29 @@ function SideBySide({
  */
 function Disclosure({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  /**
+   * ── AND IT OPENS ITSELF FOR A MARK IT MIGHT BE HIDING ─────────────────
+   * Ellie: "Not seeing the icon on the internal processing page that marks
+   * where my note is. That keeps happening, we need to make sure the icons
+   * don't randomly vanish."
+   *
+   * A mark is drawn by the paragraph that holds its words. A paragraph inside
+   * a shut disclosure is not rendered at all, so a mark made in here is
+   * invisible and so is any sign that it exists. Internal Processing has one
+   * of these and it is where her note was.
+   *
+   * `unplaced` is the page saying it has a mark that nothing on screen has
+   * claimed. See constants/mark-reach.ts. It is not specific to this control,
+   * which is the point: whatever the reason the mark could not be placed, the
+   * answer from here is the same, open and let the reader see everything.
+   */
+  const { unplaced } = useAnnotations();
+  const opened = useRef(false);
+  useEffect(() => {
+    if (!unplaced || opened.current) return;
+    opened.current = true;
+    setOpen(true);
+  }, [unplaced]);
   return (
     <View
       style={{

@@ -61,6 +61,10 @@ export default function TabLayout() {
        and the type scale names them. */
     DMSansItalic: require('../../assets/fonts/DMSans-Italic.ttf'),
     DMSansBoldItalic: require('../../assets/fonts/DMSans-BoldItalic.ttf'),
+    /* Ellie: "italicize the final 3." Those three are set in Playfair, which
+       was bundled Bold only, so they were the three that could not be fixed by
+       naming a face. Now they can. */
+    PlayfairDisplayItalic: require('../../assets/fonts/PlayfairDisplay-BoldItalic.ttf'),
   });
 
   if (!fontsReady && !fontError) return null;

@@ -223,6 +223,13 @@ export const Fonts = {
    */
   bodyItalic: 'DMSansItalic',
   bodyBoldItalic: 'DMSansBoldItalic',
+  /**
+   * Playfair's italic, which is its Bold Italic: the display face is only ever
+   * drawn at Bold here, so a Regular Italic would be a second weight nothing
+   * asks for. Named for the same reason the DM Sans italics are: `fontStyle`
+   * does nothing to a registered family.
+   */
+  displayItalic: 'PlayfairDisplayItalic',
 } as const;
 
 /**
