@@ -31,7 +31,7 @@ import { Colors } from '@/constants/attune-theme';
 const c = Colors.light;
 
 export default function TabScreen({
-  children, ground = 'cream', tint, second, groundColors,
+  children, ground = 'cream', tint, second, groundColors, corners,
 }: {
   children: React.ReactNode;
   /** 'cream' takes the wash and the ink lockup; 'blue' takes neither. */
@@ -57,6 +57,8 @@ export default function TabScreen({
    * here has to know which is which.
    */
   groundColors?: readonly [string, string];
+  /** Both wash colours from the top corners. See PageWash. */
+  corners?: boolean;
 }) {
   const painted = !!groundColors;
   const blue = ground === 'blue' || painted;
@@ -72,7 +74,7 @@ export default function TabScreen({
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         />
       ) : null}
-      {blue ? null : <PageWash tint={tint} second={second} />}
+      {blue ? null : <PageWash tint={tint} second={second} corners={corners} />}
       <BrandHeader tone={blue ? 'light' : 'ink'} />
       <View style={{ flex: 1 }}>{children}</View>
     </SafeAreaView>

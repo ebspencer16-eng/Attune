@@ -735,6 +735,14 @@ export type HomeResponse = {
     deepLink?: string;
   } | null;
   /** One research finding a day, with its citation. From api/_research.js. */
+  /**
+   * Today's word, and what it means.
+   *
+   * From api/_words.js. The Notes tab draws it as a dictionary entry; the copy
+   * is on the server for the same reason the research finding is, so there is
+   * one copy of every word a customer reads.
+   */
+  word?: { id: string; word: string; part: string; definition: string } | null;
   research?: { id: string; title: string; body: string; source: string };
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];

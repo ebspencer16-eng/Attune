@@ -38,7 +38,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, BlueGround, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  AccentFallback, AccentFor, BlueGround, BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -457,7 +457,7 @@ export default function ResourcesScreen() {
   return (
     <Shell>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: Spacing.xxxl }}
+        contentContainerStyle={{ paddingBottom: 0 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
@@ -557,7 +557,39 @@ export default function ResourcesScreen() {
           </View>
         ) : null}
 
-        <View style={{ marginTop: Spacing.xxl }}>
+        {/* ── THE SHEET ──────────────────────────────────────────────────
+            Ellie: "Can the learn page have the layout/design of the image with
+            the books, with a gradient page bg that lists the resources and the
+            insight, then what looks like a tab pulling up over the page down
+            below with the in practice articles?"
+
+            So everything above sits on the ground, and the reading is a panel
+            that comes up over it: a large radius on the top two corners only,
+            the full width, and no bottom at all, because in the reference it
+            runs off the end of the screen rather than finishing. The shadow
+            points upward so the ground reads as being behind it.
+
+            It cannot be a separate scroll view. Two scrolling surfaces on one
+            screen is the control that makes a phone feel like it is fighting
+            you, and this one only has to look like it lifts. */}
+        <View
+          style={{
+            marginTop: Spacing.xxxl,
+            backgroundColor: Palette.white,
+            borderTopLeftRadius: 34, borderTopRightRadius: 34,
+            paddingTop: Spacing.xxl,
+            paddingBottom: BottomTabInset + Spacing.xxxl,
+            shadowColor: '#2A1B10', shadowOpacity: 0.12,
+            shadowRadius: 24, shadowOffset: { width: 0, height: -10 },
+          }}>
+          {/* The grab handle the reference draws at the top of its panel. Not
+              a control: it is what says this thing came up from below. */}
+          <View
+            style={{
+              alignSelf: 'center', width: 44, height: 5, borderRadius: 3,
+              backgroundColor: c.border, marginBottom: Spacing.xl,
+            }}
+          />
           <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
             <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>In Practice</Text>
           </View>
@@ -722,7 +754,13 @@ function Shell({ children }: { children: React.ReactNode }) {
      The wash the other tabs use, in the two ends of the brand: the indigo
      coming down from the top right and the orange up from the bottom left.
      Learn was the one tab with no ground at all. */
-  return <TabScreen tint={Palette.indigo} second={Palette.orange}>{children}</TabScreen>;
+  /* ── AND BOTH COLOURS FROM THE TOP ────────────────────────────────
+     The books reference is one coloured ground at the top of the screen with
+     a white panel coming up over it. A wash with a colour at the top right
+     and another at the bottom left cannot do that: the bottom half is where
+     the panel goes. Both at the top, as on Notes, so the ground is a sky and
+     the sheet is what sits on it. */
+  return <TabScreen tint={Palette.indigo} second={Palette.orange} corners>{children}</TabScreen>;
 }
 
 type Item = CatalogueItem;

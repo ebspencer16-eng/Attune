@@ -59,6 +59,9 @@ CLAUDE.md, so anything new sits here until you do.
 |--|--|
 | C2 | **Two middle answers to the turn-down question.** From O324. The stem is now "When you turn your partner down, you", so the five answers have to describe what *you* do. Your two ends do: "Worry about how it lands" and "Assume they don't take it personally". Of the three in between, "Check in lightly" still reads. These two do not, because they were written to follow "you want them to": **"Read it how they read it"** and **"Reassure me it's okay"**. Two short phrases, each starting with a verb in the second person, sitting between worrying about it and assuming it is fine. Send me the two and I will swap them in; the old wordings stay recorded, so nobody's existing answer moves. |
 
+| C3 | **The word list, and four definitions.** From O334. You named four words and said "etc.", so the four are in `api/_words.js` with a definition each, written in your house style as a first pass. They are mine, which makes them the only words in the app that are. Two things I need: your eye on those four, and however many more words you want in the rotation. One line each, present tense. Adding one is one entry in that file and no app build. |
+| C4 | **Six strings on the new surfaces.** The journal's placeholder, its empty line and its failure line; the journal card's two subtitles; and "Word in use" above the definition. All placeholders in your house style, all named at the bottom of their files so they are findable. "Jump back in" and "Shared with me" are yours already, from your message. |
+
 ### Answer these
 
 **Nothing waiting.** Q11 is answered: any page, and it is R214.
@@ -72,7 +75,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 20 September is built and is in section 3.
+**Nothing open.** The second batch of 20 September is built and is in section 3.
 
 ## 3. For you to review
 
@@ -88,10 +91,19 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The batch of 20 September.
+The second batch of 20 September first.
 
 | # | Review |
 |--|--|
+| O332 | **Learn is the books layout.** Both wash colours come from the top, so the ground is a sky rather than two stains at opposite ends, and the resources and the insight sit on it. In Practice is a white sheet with a thirty-four point radius on its top two corners only, a grab handle, and no bottom edge: it runs off the end of the screen the way the reference's does. One scroll view, not two. |
+| O333 | **The Notes gradient comes from both top corners**, orange on the left and indigo on the right, meeting across the top and gone by halfway down. |
+| O334 | **A word of the day, as a dictionary entry.** Part of speech, then the word very large, then the meaning in a second, quieter card, which is what makes it read as an entry rather than a heading with a paragraph. The copy is on the server in `api/_words.js`, so it is one copy and you can change it without an app build. **See C3.** |
+| O335 | **Jump back in and Shared with me, side by side, then the tags.** Your two names. A peek rather than a list: the two most recent of each, one line apiece, with a count of what is behind them. |
+| O336 | **Home is the Luxury layout.** The lockup at headline size where the reference has its own name, the greeting at the size of the small line under it, four quick links, and the two cards low on the page in the glass material. The row at the top draws the profile control alone now: two lockups on one screen is the same thing twice. The insight of the day is no longer on home, because that layout has no room for it; it is one of the four quick links and it is still a hero on Learn. |
+| O337 | **Four quick links:** Insight of the day, Action plan, Highlights, Journal. |
+| O338 | **Always two prompts**, cut from the priority engine's own order in one place rather than by three conditionals that could each independently be true. The icon from the old row is the card's picture. |
+| O339 | **The relationship journal.** The composer is the first thing on the screen rather than behind a plus: the fewest taps between thinking of something and having written it is none. Each entry carries the date and time it was written, from the row. An entry is a note anchored to its day, so there is no new table and no migration; the server's anchor validator had to learn the type, because an anchor it does not know is refused on write and the entry is simply never saved. |
+| O340 | **It opens with the phone's passcode**, and that is verified rather than assumed: the prompt came up in the simulator. **It needs a new TestFlight build to work on your phone.** expo-local-authentication is a native module and cannot arrive over the air, so on the build you have now the journal opens without asking. It says which of the two it is doing on the card. |
 | O321 | **The loading mark is half again as large.** |
 | O322 | **A dropdown cannot arrive already open.** Two pages of a section render the same components in the same places, so React treated them as one instance and handed the second page the first page's state. The page is keyed on its section now, which also means a page always opens at the top. |
 | O323 | **Swipe left and right between pages.** It reads the same two destinations the arrows use, so the gesture and the arrows cannot disagree. It has to travel twenty points sideways before it takes over and gives up if it has gone fifteen points vertically first, so scrolling and selecting text both still work. |

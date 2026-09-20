@@ -204,6 +204,25 @@ export function isValidAnchor(type, key) {
       return RESPONSIBILITY_CATEGORIES.some(c => key.startsWith(c.id + ':'));
     case 'intimacy_dimension':
       return INTIMACY_DIMENSIONS.some(d => d.id === key);
+    /**
+     * ── THE RELATIONSHIP JOURNAL ──────────────────────────────────────
+     * Ellie: "I want to build a 'relationship journal' into the notes
+     * section that is kind of a running diary."
+     *
+     * An entry is a note like any other, anchored to the day it was
+     * written. No new table and no migration: the one thing it needs is
+     * for this validator to know the type, because an anchor this does not
+     * recognise is rejected on write and the entry is simply never saved.
+     * That is how Conflict Patterns went a release without being
+     * annotatable, a few cases above.
+     *
+     * The key is an ISO date. Checked rather than waved through, so a
+     * client sending a timestamp or a title cannot quietly create a second
+     * shape of journal entry that nothing groups correctly.
+     */
+    case 'journal':
+      return /^\d{4}-\d{2}-\d{2}$/.test(key);
+
     case 'post':
       return key.length > 0 && key.length <= 200;
 

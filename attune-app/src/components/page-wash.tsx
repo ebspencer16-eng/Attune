@@ -30,7 +30,7 @@ export function withAlpha(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
-export default function PageWash({ tint, second }: {
+export default function PageWash({ tint, second, corners = false }: {
   /**
    * The colour in the corner. The brand orange by default.
    *
@@ -50,8 +50,56 @@ export default function PageWash({ tint, second }: {
    * and the notes on it stay black on near-white.
    */
   second?: string;
+  /**
+   * ── BOTH COLOURS FROM THE TOP ─────────────────────────────────────────
+   * Ellie, of the Notes tab: "Can the gradient bg on the notes page have the
+   * same format as the one on the exploring minds screenshot? With both colors
+   * coming from the top corners of the screen?"
+   *
+   * The default wash puts one colour in the top right and the other coming up
+   * from the bottom left, so the page is tinted at two opposite ends. The
+   * reference does something different: both colours start at the top, one in
+   * each corner, meet across the top edge and fall away to near-white by a
+   * third of the way down. The page below that is quiet, which is what makes
+   * the top read as a sky rather than as two stains.
+   */
+  corners?: boolean;
 } = {}) {
   const hue = tint || Palette.orange;
+  if (corners) {
+    return (
+      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        {/* The ground the two corners sit on. Warm at the very top so the
+            colours have something to sit in, and the app's cream below. */}
+        <LinearGradient
+          colors={[Palette.warm, Palette.cream]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 0.55 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+        {/* Top left, falling to the right and down. */}
+        <LinearGradient
+          colors={[withAlpha(hue, 0.42), withAlpha(hue, 0.13), withAlpha(hue, 0)]}
+          locations={[0, 0.3, 0.62]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.85, y: 0.55 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+        {/* Top right, falling to the left and down. The two meet across the
+            top edge rather than at a seam, because each fades to nothing
+            before it reaches the other's corner. */}
+        {second ? (
+          <LinearGradient
+            colors={[withAlpha(second, 0.38), withAlpha(second, 0.12), withAlpha(second, 0)]}
+            locations={[0, 0.3, 0.62]}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0.15, y: 0.55 }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+        ) : null}
+      </View>
+    );
+  }
   return (
     <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <LinearGradient

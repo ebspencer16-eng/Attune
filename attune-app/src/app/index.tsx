@@ -39,6 +39,9 @@ import { forgetLastSection, showResultsFromStart } from '@/components/results';
 import { forgetLastSeen, keepLastSeen, lastSeen } from '@/api/last-seen';
 import BrandHeader from '@/components/brand-header';
 import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghost-tile';
+import { BRAND_NAME } from '@/components/brand-header';
+import { showSection } from '@/components/results';
+import { showJournal } from '@/app/notes';
 import { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
@@ -307,10 +310,50 @@ export default function HomeScreen() {
   }
   if (!data) return <Shell><ScreenLoading /></Shell>;
 
-  // The engine returns up to three more. The tile shows one: Ellie asked for
-  // one other action item, and a tile with five rows is the list this screen
-  // was rebuilt to stop being. The rest stay reachable from their own tabs.
-  const alsoWaiting = (data.secondary ?? [])[0] || null;
+  /**
+   * ── ALWAYS TWO ─────────────────────────────────────────────────────────
+   * Ellie: "currently 2-3 items, but let's just do 2 always that populate
+   * based on the prioritized list we have."
+   *
+   * The engine's own order, taken from the top: the primary, then whatever it
+   * put next, then the pick-up row it always has one of. Cut to two here,
+   * once, so "always two" is a slice rather than three conditionals that can
+   * each independently be true or not.
+   *
+   * The icon comes with each one, because it is the label: the rows lost their
+   * uppercase captions long ago and the glyph is what says why a card is
+   * there. A pick-up row has two states and two icons, which the server
+   * decides.
+   */
+  const prompts: PromptItem[] = [
+    data.primary && {
+      key: 'primary', icon: 'star.fill' as const,
+      title: data.primary.title, body: data.primary.body,
+      disabled: !!data.primary.disabled,
+      onPress: () => open(data.primary as HomeCard),
+    },
+    (data.secondary ?? [])[0] && {
+      key: 'secondary', icon: 'checklist' as const,
+      title: (data.secondary ?? [])[0].title, body: (data.secondary ?? [])[0].body,
+      disabled: !!(data.secondary ?? [])[0].disabled,
+      onPress: () => open((data.secondary ?? [])[0]),
+    },
+    data.pickUp && {
+      key: 'pickup',
+      icon: data.pickUp.kind === 'discover' ? 'text.book.closed' : 'square.and.pencil',
+      title: data.pickUp.title, body: data.pickUp.preview,
+      disabled: false,
+      onPress: () => open(data.pickUp as unknown as HomeCard),
+    },
+  ].filter(Boolean).slice(0, 2) as PromptItem[];
+
+  /** Where a quick link goes. Four destinations that all already exist. */
+  const goQuick = (q: QuickLinkItem) => {
+    if (q.id === 'insight') { router.push('/resources'); return; }
+    if (q.id === 'journal') { showJournal(); router.push('/notes'); return; }
+    showSection(q.section as string);
+    router.push('/insights');
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: BlueGround[0] }}>
@@ -330,8 +373,12 @@ export default function HomeScreen() {
             position across all screens." So it sits outside the scroll view
             here exactly as TabScreen puts it on the other three: same element,
             same padding, and it does not slide away when the page moves. */}
+        {/* The lockup is the page's first line now, at headline size. This
+            row draws the profile control alone: two lockups on one screen is
+            the same thing said twice. */}
         <BrandHeader
           tone="light"
+          lockup={false}
           right={(
             <Pressable
               onPress={() => setSettingsOpen(true)}
@@ -397,158 +444,99 @@ export default function HomeScreen() {
                 brand colour. Settings keeps the row: it is where account
                 deletion lives, which App Review has to be able to find
                 without being told where it is. */}
-            {/* ── HELLO, AND THE WAY OUT ──────────────────────────────────
-                The greeting sits on the top line now, with the profile control
-                opposite it, because it was below a row that held nothing but a
-                Settings pill: the first thing on the screen was a button, and
-                the greeting had been pushed down the page to make room for it.
+            {/* ── THE LOCKUP IS THE HEADLINE ─────────────────────────────
+                Ellie: "Instead of luxury, have that be a large lockup with
+                logo and attune relationships, then where they have the random
+                text line... let's add our 'welcome back' line in the same size
+                as on this reference image."
 
-                Ellie also could not find it. The pill sat under the simulator's
-                own gear icon, and "Settings" in a bordered pill reads as
-                preferences rather than as the place your account lives. A
-                profile glyph in the corner is where people look for that. */}
+                So the screen opens the way the reference she sent opens: the
+                product's own name at headline size with the mark beside it,
+                and one quiet line under it. The row above draws the profile
+                control alone, because two lockups on one screen is the same
+                thing said twice. */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.lg }}>
+              <Image
+                source={require('@/assets/images/attune-mark-dark.png')}
+                style={{ width: 58, height: 58 * (76 / 103) }}
+                resizeMode="contain"
+              />
+              <Text style={{ ...Type.display, color: Palette.white, flex: 1 }}>
+                {BRAND_NAME}
+              </Text>
+            </View>
 
-            {/* ── HELLO, THEN THE FINDING ────────────────────────────────
-                The greeting sits under the profile row. The finding is centred
-                in everything below it, which is the space between the greeting
-                and the tile.
-
-                They were one centred group, which put the finding directly
-                under the greeting with the rest of the blue empty beneath.
-                Ellie: "move the insight of the day section (and associated
-                glow) further down to be centered between the greeting and the
-                tile below." The glow comes with it: it is drawn inside the
-                finding, not positioned against the screen. */}
-            {/* ── THE GREETING IS NOT A SECOND LOCKUP ────────────────────
-                Ellie: "the lockup clashes with the welcome back message right
-                below since they're like the same size."
-
-                They were 19 point and 30, both bold Playfair in white, forty
-                points apart. Close enough in texture to read as two titles
-                arguing rather than as furniture and a voice.
-
-                Only one of them can move. The lockup sits in the same place on
-                every screen, which she asked for and which is the point of it,
-                so the greeting is what changes: bigger, and with room above it
-                so the two are not a stack. Playfair is bundled in Bold alone,
-                so the separation has to come from size and air rather than
-                from a lighter weight. */}
+            {/* The greeting, at the size of the small line under the
+                reference's headline. It was the headline itself; the lockup
+                is the headline now, and a second thing that size beside it
+                was the exact clash Ellie reported the last time these two
+                were close in weight. */}
             <Text
               style={{
-                ...Type.hero,
-                /* ── ONE LINE, MORE OFTEN ─────────────────────────────────
-                   Ellie: "I like the look of the home page much more when the
-                   welcome line fits in one line. I know we can't guarantee
-                   that since some users will have long names, but can we
-                   shrink the font a bit so that it doesn't cut often?"
-
-                   Thirty-two rather than thirty-eight. "Good evening, Ellie"
-                   is nineteen characters and "Good afternoon, Cassandra" is
-                   twenty-five, which is the longest greeting the clock and a
-                   reasonable name can make; both fit on one line at this size
-                   on the narrowest phone the app supports. It cannot be
-                   guaranteed, and it is not: the line still wraps rather than
-                   truncating, because a cut-off name is worse than two lines. */
-                fontSize: 32, lineHeight: 46,
-                color: Palette.white, marginTop: Spacing.xxl,
+                ...Type.body, color: 'rgba(255,255,255,0.72)',
+                marginTop: Spacing.lg, marginBottom: Spacing.xxl,
               }}>
               {data.greeting}
             </Text>
-            {/* The mark that was under the greeting is gone: the lockup at
-                the top of every screen carries it now, and two of them on one
-                screen is the same thing said twice. */}
-            {/* ── CENTRED IN WHAT IS LEFT ────────────────────────────────
-                Ellie: "no matter where the bottom tile is, the insight of the
-                day and bg mark is centered between the bottom of the line on
-                top and the top of the tile."
 
-                It already took the space under the greeting, but it also
-                carried a bottom padding, which pushed the centre of the
-                finding up by half of it. The block ends where the tile starts,
-                so with nothing padding it the middle of this is the middle of
-                that gap, whatever the tile below is holding. The mark comes
-                with it: the glow is drawn inside the finding rather than
-                positioned against the screen. */}
-            <View style={{ flex: 1, justifyContent: 'center' }}>
-              {data.research ? <ResearchNote finding={data.research} /> : null}
+            {/* ── FOUR WAYS IN ───────────────────────────────────────────
+                Ellie: "Instead of the 4 rounded squares above the two main
+                ones, let's add quick links to insight of the day, action plan
+                (what comes next page), insights highlights, and relationship
+                journal."
+
+                Four rounded squares in a row, as the reference has them, each
+                landing somewhere that already exists. */}
+            <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xxl }}>
+              {QUICK_LINKS.map((q) => (
+                <QuickLink key={q.id} item={q} onGo={() => goQuick(q)} />
+              ))}
             </View>
           </View>
 
-          {/* ── THE TILE ─────────────────────────────────────────────────
-              One container, not three cards. Everything the product is asking
-              for lives here, which is what lets the blue above it stay quiet. */}
-          {/* ── A PANE, NOT A BOX ────────────────────────────────────────
-              Ellie: "instead of the tile being cream, can it be a little ghost
-              bubble with a transluscent feel? White text and icons."
+          {/* ── WHAT HAPPENED, BEFORE WHAT IS NEXT ────────────────────────
+              Unread alerts, newest first, at most five and usually none. They
+              are the one thing on this screen the reader could not have known:
+              a partner finishing, a note shared, an account deleted. They keep
+              the glass tile they have always had, above the two cards, so the
+              cards can be only the two prompts Ellie asked them to be. */}
+          {alerts.length ? (
+            <GhostTile
+              radius={Radius.card}
+              style={{
+                marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
+                paddingVertical: Spacing.xs, marginBottom: Spacing.lg,
+              }}>
+              {alerts.map((a, i) => (
+                <TileRow
+                  key={a.id}
+                  icon="bell.badge.fill"
+                  title={a.title}
+                  body={a.body}
+                  first={i === 0}
+                  onPress={() => openAlert(a)}
+                />
+              ))}
+            </GhostTile>
+          ) : null}
 
-              The cream stopped the blue dead at its top edge, so the one
-              screen that is entirely the brand colour had a rectangle of
-              something else sitting on it. See components/ghost-tile.tsx for
-              what draws it. */}
-          {/* The radius the four tabs now share. Ellie's references all round
-              their cards generously and let them sit off the edges of the
-              ground; a tight corner reads as a panel. */}
-          <GhostTile
-            radius={Radius.card}
-            style={{
-              marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
-              paddingVertical: Spacing.xs,
-            }}>
-            {/* ── WHAT HAPPENED, ABOVE WHAT IS NEXT ───────────────────────
-                Unread alerts, newest first, at most five and usually none.
-                They sit above the prompt because they are the one thing on
-                this screen the reader could not have known: a partner
-                finishing, a note shared with them, an account deleted. The
-                prompt underneath is still there when they are gone. */}
-            {alerts.map((a, i) => (
-              <TileRow
-                key={a.id}
-                icon="bell.badge.fill"
-                title={a.title}
-                body={a.body}
-                first={i === 0}
-                onPress={() => openAlert(a)}
-              />
+          {/* ── THE TWO PROMPTS ──────────────────────────────────────────
+              Ellie: "the two boxes with images for each of the two things
+              you're prompted with (currently in the bottom tile, and currently
+              2-3 items, but let's just do 2 always that populate based on the
+              prioritized list we have, we can use the icons from the current
+              bars as the image in the shape's rounded square)."
+
+              Two, always: the priority engine's own order, taken from the top.
+              `prompts` is where that list is cut, so "always two" is one line
+              rather than three conditionals that can each be true. Still the
+              glass material and still low on the page, which she asked for by
+              name: "the same glass-effect tile with the shading down low." */}
+          <View style={{ flexDirection: 'row', gap: Spacing.lg, paddingHorizontal: Spacing.lg }}>
+            {prompts.map((p) => (
+              <PromptCard key={p.key} item={p} onPress={p.onPress} />
             ))}
-
-            {data.primary ? (
-              <TileRow
-                icon="star.fill"
-                title={data.primary.title}
-                body={data.primary.body}
-                disabled={!!data.primary.disabled}
-                first={!alerts.length}
-                onPress={() => open(data.primary)}
-              />
-            ) : null}
-
-            {alsoWaiting ? (
-              <TileRow
-                icon="checklist"
-                title={alsoWaiting.title}
-                body={alsoWaiting.body}
-                disabled={!!alsoWaiting.disabled}
-                onPress={() => open(alsoWaiting)}
-              />
-            ) : null}
-
-            {/* One row, two states, both decided by the server. See
-                api/_lib/pick-up.js: a note to return to, or the newest In
-                Practice post when there is none. */}
-            {data.pickUp ? (
-              <TileRow
-                /* The row has two states and had one icon. A pencil over
-                   "Explore something new" said write, on a row offering
-                   something to read. The icon is the only thing carrying the
-                   label since the labels came off, so it has to follow the
-                   state the server chose. */
-                icon={data.pickUp.kind === 'discover' ? 'text.book.closed' : 'square.and.pencil'}
-                title={data.pickUp.title}
-                body={data.pickUp.preview}
-                onPress={() => open(data.pickUp as unknown as HomeCard)}
-              />
-            ) : null}
-          </GhostTile>
+          </View>
 
           {/* The reminder did not go. Said here rather than on the row,
               because the row is back at the top of the tile by the time this
@@ -900,6 +888,122 @@ const ICON_GLOW_SIZE = 44;
 const ICON_GLOW_RINGS = 24;
 const ICON_GLOW_PEAK = 0.30;
 const ICON_GLOW_ALPHA = 1 - (1 - ICON_GLOW_PEAK) ** (1 / ICON_GLOW_RINGS);
+
+/**
+ * ── THE FOUR QUICK LINKS ──────────────────────────────────────────────────
+ * Ellie named all four and where each goes: "quick links to insight of the
+ * day, action plan (what comes next page), insights highlights, and
+ * relationship journal."
+ *
+ * The labels are hers. They are longer than the one-word labels the reference
+ * uses, so the tile gives them two lines rather than cutting them: a truncated
+ * label on a control is worse than a taller row.
+ */
+export type QuickLinkItem = {
+  id: 'insight' | 'plan' | 'highlights' | 'journal';
+  label: string;
+  icon: string;
+  /** For the two that land in the results, which page. */
+  section?: string;
+};
+
+const QUICK_LINKS: QuickLinkItem[] = [
+  { id: 'insight', label: 'Insight of the day', icon: 'lightbulb' },
+  { id: 'plan', label: 'Action plan', icon: 'flag', section: 'what-comes-next' },
+  { id: 'highlights', label: 'Highlights', icon: 'sparkles', section: 'highlights' },
+  { id: 'journal', label: 'Journal', icon: 'book.closed' },
+];
+
+function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={item.label}
+      onPress={onGo}
+      style={{ flex: 1, alignItems: 'center', gap: Spacing.sm }}>
+      <GhostTile
+        radius={Radius.xl}
+        style={{ width: '100%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <SymbolView
+          name={item.icon as never}
+          size={22}
+          tintColor={ICON_ORANGE}
+          fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: ICON_ORANGE }} />}
+          style={{ width: 24, height: 24 }}
+        />
+      </GhostTile>
+      <Text
+        numberOfLines={2}
+        style={{
+          ...Type.small, fontSize: 11, lineHeight: 15,
+          color: GhostInkQuiet, textAlign: 'center',
+        }}>
+        {item.label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** One of the two things the priority engine is asking for. */
+export type PromptItem = {
+  key: string;
+  icon: string;
+  title: string;
+  body?: string | null;
+  disabled: boolean;
+  onPress: () => void;
+};
+
+/**
+ * ── A CARD, NOT A ROW ─────────────────────────────────────────────────────
+ * Ellie: "the two boxes with images for each of the two things you're prompted
+ * with... we can use the icons from the current bars as the image in the
+ * shape's rounded square."
+ *
+ * So the icon that used to sit at the start of a row is the card's picture: a
+ * rounded square filling the top of the card, with the title under it. Same
+ * glass material the tile had, because she asked for that by name.
+ */
+function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }) {
+  const dim = item.disabled;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: dim }}
+      disabled={dim}
+      onPress={onPress}
+      style={{ flex: 1 }}>
+      <GhostTile radius={Radius.card} style={{ padding: Spacing.lg, opacity: dim ? 0.55 : 1 }}>
+        {/* The picture. A tint of the accent behind the glyph rather than a
+            photograph: this product has no artwork, and a grey rectangle
+            waiting for one reads as an image that failed to load. */}
+        <View
+          style={{
+            width: '100%', aspectRatio: 1.35, borderRadius: Radius.xl,
+            backgroundColor: 'rgba(255,255,255,0.12)',
+            alignItems: 'center', justifyContent: 'center',
+            marginBottom: Spacing.lg,
+          }}>
+          <SymbolView
+            name={item.icon as never}
+            size={34}
+            tintColor={dim ? GhostInkQuiet : ICON_ORANGE}
+            fallback={<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: ICON_ORANGE }} />}
+            style={{ width: 36, height: 36 }}
+          />
+        </View>
+        <Text numberOfLines={2} style={{ ...Type.cardTitle, color: GhostInk }}>
+          {item.title}
+        </Text>
+        {item.body ? (
+          <Text numberOfLines={2} style={{ ...Type.small, color: GhostInkQuiet, marginTop: Spacing.xs, lineHeight: 19 }}>
+            {item.body}
+          </Text>
+        ) : null}
+      </GhostTile>
+    </Pressable>
+  );
+}
 
 function TileRow({
   icon, title, body, disabled, first, onPress,

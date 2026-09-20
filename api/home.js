@@ -24,6 +24,7 @@ import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
 import { researchOfTheDay } from './_research.js';
+import { wordOfTheDay } from './_words.js';
 import { pickUp } from './_lib/pick-up.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
@@ -347,6 +348,10 @@ export default async function handler(req) {
       // api/_research.js so they cannot drift from the website's Our Purpose
       // page, which says the same three things.
       research: researchOfTheDay(),
+      /* The word the Notes tab defines today. Same shape and the same reason
+         as the research finding: the copy lives on the server so it is one
+         copy and so Ellie can change it without an app build. */
+      word: wordOfTheDay(),
       /**
        * The home screen's third row: a note to return to, or the newest In
        * Practice post when there is none. Two states, decided server-side so

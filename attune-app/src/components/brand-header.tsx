@@ -21,9 +21,21 @@ const c = Colors.light;
 export const BRAND_NAME = 'Attune Relationships';
 
 export default function BrandHeader({
-  tone = 'ink', right,
+  tone = 'ink', right, lockup = true,
 }: {
   tone?: 'ink' | 'light';
+  /**
+   * ── ONE MARK PER SCREEN ───────────────────────────────────────────────
+   * The home screen now opens on the lockup at headline size, because Ellie
+   * asked for it where the reference she sent has its own name: "Instead of
+   * luxury, have that be a large lockup with logo and attune relationships."
+   *
+   * Two lockups on one screen is the same thing said twice, so home draws the
+   * row for its profile control alone and the lockup as the page's first
+   * line. Every other screen is unchanged, which is what keeps it in the same
+   * place everywhere it is furniture.
+   */
+  lockup?: boolean;
   /**
    * One control at the end of the row.
    *
@@ -34,6 +46,21 @@ export default function BrandHeader({
   right?: React.ReactNode;
 }) {
   const color = tone === 'light' ? 'rgba(255,255,255,0.85)' : c.textStrong;
+  if (!lockup) {
+    /* The row still exists, and at the same height, so the page under it
+       starts where every other page starts. */
+    return (
+      <View
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
+          minHeight: 34,
+          paddingTop: Spacing.sm, paddingBottom: Spacing.md,
+          paddingHorizontal: Spacing.xl,
+        }}>
+        {right}
+      </View>
+    );
+  }
   return (
     <View
       style={{

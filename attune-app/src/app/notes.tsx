@@ -49,12 +49,13 @@ import {
   createNote, createTag, deleteNote, deleteTag, fetchHome, fetchNotes, fetchPosts,
   fetchResults, fetchTags, openSharedNote, purgeTag, restoreTag, shareNote, updateNote,
 } from '@/api/client';
-import type { ApiError, Note, Tag } from '@/api/client';
+import type { ApiError, HomeResponse, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
 import { showSection } from '@/components/results';
 import { showPost } from '@/app/resources';
 import SignIn from '@/components/sign-in';
+import Journal, { lockAvailable } from '@/components/journal';
 import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
@@ -63,7 +64,7 @@ import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BottomTabInset, Colors, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -80,6 +81,21 @@ const SHOW_ALL_LIMIT = 10;
 
 /** A note plus the two things the list has to know that the row itself does not. */
 type Row = { note: Note; readOnly: boolean };
+
+/**
+ * Open the journal from another tab.
+ *
+ * Same one-slot handle the results screen and the post reader use: home's
+ * quick link sets it and pushes to this tab, and this screen picks it up on
+ * mount if it got there first.
+ */
+let pendingJournal = false;
+let openJournalHandle: (() => void) | null = null;
+
+export function showJournal() {
+  pendingJournal = true;
+  openJournalHandle?.();
+}
 
 export default function NotesScreen() {
   useScreenTime('notes');
@@ -98,6 +114,18 @@ export default function NotesScreen() {
   const [postTitles, setPostTitles] = useState<Record<string, string>>({});
   const [resultsVersion, setResultsVersion] = useState<number | null>(null);
   const [partnerName, setPartnerName] = useState<string | null>(null);
+  /** Today's word and its definition, from the server. See api/_words.js. */
+  const [word, setWord] = useState<HomeResponse['word']>(null);
+  /** Whether the journal is open over this screen. */
+  const [journalOpen, setJournalOpen] = useState(pendingJournal);
+
+  /* The other half of showJournal: if home set the flag while this tab was
+     already mounted, nothing would have re-rendered without this. */
+  useEffect(() => {
+    openJournalHandle = () => setJournalOpen(true);
+    if (pendingJournal) setJournalOpen(true);
+    return () => { openJournalHandle = null; };
+  }, []);
   const [partnerLinked, setPartnerLinked] = useState(false);
 
   const [error, setError] = useState<ApiError | null>(null);
@@ -193,6 +221,9 @@ export default function NotesScreen() {
       setTagPlaceholder(t.data.tagPlaceholder || 'Add a tag');
     }
     if (h.ok) {
+      /* The word this tab defines today, from api/_words.js by way of
+         /api/home. Copy lives on the server so it is one copy. */
+      setWord(h.data.word ?? null);
       setPartnerName(h.data.partnerName ?? null);
       setPartnerLinked(!!h.data.state?.partnerLinked);
     }
@@ -522,98 +553,120 @@ export default function NotesScreen() {
         </View>
 
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          {/* ── 1. PICK UP WHERE YOU LEFT OFF ──────────────────────────────
-              Ellie: "the top tile to be 'pick up where you left off' with 3
-              rows each with a sneak peek of recent notes/highlights/tags,
-              organized from most recent to least recent."
+          {/* ── THE WORD OF THE DAY ────────────────────────────────────────
+              Ellie: "Maybe we could even do the dictionary definition tiles
+              and include the dictionary definition of a different word every
+              day (intentional, connection, growth, expectations, etc.)."
 
-              Three, from everything of the reader's own: a note, a highlight
-              and an underline are all things they left somewhere, and a stream
-              that showed only one kind would be a stream about storage rather
-              than about them. */}
-          {/* The heading stays when there is nothing under it. Ellie: "Even
-              though I don't have anything in those sections yet, I want to see
-              the formatting with a nothing here yet message in those
-              sections." A section that appears only once it has contents also
-              hides what the screen is for from the person who has not started
-              yet, which is exactly the person who needs telling. */}
-          <Section title="Pick up where you left off">
-          {mineRecent.length ? (
-            <>
-              <Tile accent={c.accent}>
-                {(showAllMine ? mineRecent.slice(0, SHOW_ALL_LIMIT) : mineRecent.slice(0, 3)).map((note, i) => (
-                  <MarkRow
-                    key={note.id}
-                    note={note}
-                    source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
-                    first={i === 0}
-                    onPress={() => openWhereItLives(note)}
-                  />
-                ))}
-              </Tile>
-              {mineRecent.length > 3 ? (
-                <More
-                  label={showAllMine ? 'Show fewer' : `All ${Math.min(mineRecent.length, SHOW_ALL_LIMIT)}`}
-                  onPress={() => setShowAllMine((v) => !v)}
-                />
-              ) : null}
-            </>
-          ) : (
-            <Blank body="Write a note or highlight something in your results to get started. The last three things you left turn up here, most recent first." />
-          )}
-          </Section>
+              The reference she sent is a dictionary entry: the part of speech
+              small at the top, the word very large under it, and the meaning
+              in a second, quieter card below. Two cards rather than one,
+              because that is what makes it read as an entry and a usage note
+              rather than as a heading with a paragraph.
 
-          {/* ── 2. WHAT YOUR PARTNER SENT ──────────────────────────────────
-              Ellie: "2 or 3 most recent show, but then there's an arrow to see
-              all the ones your partner has sent you... Would like something
-              designating which of these are unread or unopened."
+              The copy is on the server, in api/_words.js, for the same reason
+              the research finding is: one copy of every word a customer
+              reads, and Ellie can change it without an app build. */}
+          {word ? (
+            <View style={{ marginBottom: Spacing.xxl }}>
+              <View
+                style={{
+                  backgroundColor: Palette.white, borderRadius: Radius.card,
+                  paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl, ...Lift,
+                }}>
+                <Text style={{ ...Type.body, color: c.textMuted }}>{word.part}</Text>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={{ ...Type.display, color: c.textStrong, marginTop: Spacing.xs }}>
+                  {word.word}
+                </Text>
+              </View>
+              <View
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: Radius.card,
+                  paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl,
+                  marginTop: Spacing.md,
+                }}>
+                <Text style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic }}>
+                  {WORD_IN_USE}
+                </Text>
+                <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs, lineHeight: 24 }}>
+                  {word.definition}
+                </Text>
+              </View>
+            </View>
+          ) : null}
 
-              Unread is a real fact now rather than a guess: opened_at on the
-              row, set the first time this reader opens one. Before migration
-              057 that column does not exist and every note reads as unread,
-              which is the safe direction: it draws attention to something that
-              is there rather than hiding something that is. */}
-          <Section
-            title={partner ? `From ${partner}` : 'Shared with you'}
-            badge={unopenedCount || undefined}>
-          {sharedRecent.length ? (
-            <>
-              {(showAllShared ? sharedRecent : sharedRecent.slice(0, 3)).map((note) => (
-                <NoteCard
-                  key={note.id}
-                  note={note}
-                  tags={tags}
-                  source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
-                  moved={hasMoved(note, resultsVersion)}
-                  author={partner}
-                  readOnly
-                  unread={!note.opened_at}
-                  // Opening marks it read. Fired without awaiting: the mark is
-                  // bookkeeping and must never stand between someone and the
-                  // thing they tapped.
-                  onPress={() => { markOpened(note); }}
-                />
-              ))}
-              {sharedRecent.length > 3 ? (
-                <More
-                  label={showAllShared ? 'Show fewer' : `All ${sharedRecent.length}`}
-                  onPress={() => setShowAllShared((v) => !v)}
-                />
-              ) : null}
-            </>
-          ) : (
-            <Blank
-              body={partner
-                ? `Nothing shared with you yet. When ${partner} shares a note it turns up here, and the unread ones are marked.`
-                : 'Nothing shared with you yet. When your partner shares a note it turns up here, and the unread ones are marked.'}
+          {/* ── THE JOURNAL ────────────────────────────────────────────────
+              Ellie: "I want to build a 'relationship journal' into the notes
+              section that is kind of a running diary." One card, because it
+              is one place: the entries live behind it. */}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setJournalOpen(true)}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
+              backgroundColor: Palette.white, borderRadius: Radius.card,
+              padding: Spacing.lg, marginBottom: Spacing.xxl, ...Lift,
+            }}>
+            <View
+              style={{
+                width: 44, height: 44, borderRadius: Radius.lg,
+                backgroundColor: `${c.accent}1A`,
+                alignItems: 'center', justifyContent: 'center',
+              }}>
+              <SymbolView
+                name={'book.closed' as never}
+                size={22}
+                tintColor={c.accent}
+                fallback={<Text style={{ ...Type.body, color: c.accent }}>{'\u2022'}</Text>}
+                style={{ width: 24, height: 24 }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{JOURNAL_TITLE}</Text>
+              <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
+                {lockAvailable ? JOURNAL_LOCKED : JOURNAL_OPEN}
+              </Text>
+            </View>
+            <Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>
+          </Pressable>
+
+          {/* ── TWO PEEKS, SIDE BY SIDE ────────────────────────────────────
+              Ellie: "then below have jump back in and shared with me sneak
+              peeks side by side then the tag list below."
+
+              Her two names, and a peek rather than a list: the most recent
+              two of each, one line apiece, with the full list a tap away in
+              the same place it always was. Two narrow columns cannot hold
+              three rows of wrapped prose, and a peek that scrolls is not a
+              peek. */}
+          <View style={{ flexDirection: 'row', gap: Spacing.lg, marginBottom: Spacing.xxl }}>
+            <Peek
+              title={JUMP_BACK_IN}
+              count={mineRecent.length}
+              empty={PEEK_MINE_EMPTY}
+              rows={mineRecent.slice(0, 2).map((n) => ({
+                id: n.id,
+                text: peekText(n),
+                onPress: () => openWhereItLives(n),
+              }))}
             />
-          )}
-          </Section>
+            <Peek
+              title={SHARED_WITH_ME}
+              count={sharedRecent.length}
+              badge={unopenedCount || undefined}
+              empty={PEEK_SHARED_EMPTY}
+              rows={sharedRecent.slice(0, 2).map((n) => ({
+                id: n.id,
+                text: peekText(n),
+                unread: !n.opened_at,
+                onPress: () => { markOpened(n); },
+              }))}
+            />
+          </View>
 
-          {/* ── 3. TAGS ────────────────────────────────────────────────────
-              The add field, then this person's own tags, in rows, with the
-              sort Ellie asked for. Drawn even when the list is empty, because
-              the list starting empty is the point: the field is how it fills. */}
           <TagList
             tags={tags}
             notes={[...mineRecent, ...sharedRecent]}
@@ -629,6 +682,16 @@ export default function NotesScreen() {
       </ScrollView>
 
       <Flash message={flash} />
+
+      {/* Over the screen rather than a route of its own: it is a part of this
+          tab, and a route would put it in the tab bar's history. */}
+      {journalOpen ? (
+        <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setJournalOpen(false)}>
+          <View style={{ flex: 1, backgroundColor: c.background }}>
+            <Journal onClose={() => { pendingJournal = false; setJournalOpen(false); }} />
+          </View>
+        </Modal>
+      ) : null}
 
       {editing ? (
         <Editor
@@ -648,7 +711,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   /* Ellie: "Give notes screen a colored bg. Something branded." The brand's
      two colours, one in each corner, at a tenth each: the same pair the
      website draws its rules with. */
-  return <TabScreen tint={Palette.orange} second={Palette.indigo}>{children}</TabScreen>;
+  return <TabScreen tint={Palette.orange} second={Palette.indigo} corners>{children}</TabScreen>;
 }
 
 /**
@@ -693,6 +756,91 @@ function leadLine(body: string): string {
  * somewhere and what your partner sent you are different things to come back
  * to, and only one of them can be unread.
  */
+/**
+ * One of the two sneak peeks.
+ *
+ * A column, not a list: the most recent two, one line each, and the count so
+ * the reader knows what is behind it. Tapping a line opens that thing where it
+ * lives, which is what the full-width sections did.
+ */
+function Peek({
+  title, rows, count, empty, badge,
+}: {
+  title: string;
+  rows: { id: string; text: string; unread?: boolean; onPress: () => void }[];
+  count: number;
+  empty: string;
+  badge?: number;
+}) {
+  return (
+    <View
+      style={{
+        flex: 1, backgroundColor: Palette.white, borderRadius: Radius.card,
+        padding: Spacing.lg, ...Lift,
+      }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.md }}>
+        <Text numberOfLines={2} style={{ ...Type.eyebrow, color: c.accentQuiet, flex: 1 }}>{title}</Text>
+        {badge ? (
+          <View
+            style={{
+              minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 4,
+              alignItems: 'center', justifyContent: 'center', backgroundColor: c.accent,
+            }}>
+            <Text style={{ fontSize: 10, lineHeight: 13, fontWeight: '700', color: Palette.white }}>{badge}</Text>
+          </View>
+        ) : null}
+      </View>
+      {rows.length ? rows.map((r, i) => (
+        <Pressable
+          key={r.id}
+          accessibilityRole="button"
+          onPress={r.onPress}
+          style={{
+            paddingVertical: Spacing.sm,
+            borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+          }}>
+          <Text
+            numberOfLines={2}
+            style={{
+              ...Type.small, lineHeight: 19,
+              color: r.unread ? c.textStrong : c.text,
+              fontWeight: r.unread ? '700' : '400',
+            }}>
+            {r.text}
+          </Text>
+        </Pressable>
+      )) : (
+        <Text style={{ ...Type.small, color: c.textMuted, lineHeight: 19 }}>{empty}</Text>
+      )}
+      {count > rows.length ? (
+        <Text style={{ ...Type.small, fontSize: 11, color: c.accentQuiet, marginTop: Spacing.sm }}>
+          {`+${count - rows.length}`}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/** The one line a peek shows for a note: what it says, or what it was left on. */
+function peekText(n: Note) {
+  return (n.title || n.body || n.anchor_context || '').trim();
+}
+
+/**
+ * ── THE STRINGS ON THIS SCREEN ────────────────────────────────────────────
+ * Ellie named the two peeks herself, so those two are hers word for word. The
+ * rest are placeholders in her house style and are flagged in TASKS.md: every
+ * word a customer reads is hers.
+ */
+const JUMP_BACK_IN = 'Jump back in';
+const SHARED_WITH_ME = 'Shared with me';
+const WORD_IN_USE = 'Word in use';
+const JOURNAL_TITLE = 'Relationship journal';
+const JOURNAL_LOCKED = 'Locked with your passcode';
+const JOURNAL_OPEN = 'A running diary, just for you';
+const PEEK_MINE_EMPTY = 'Nothing yet. Notes and highlights turn up here.';
+const PEEK_SHARED_EMPTY = 'Nothing shared with you yet.';
+
 function Section({
   title, badge, children,
 }: { title: string; badge?: number; children: React.ReactNode }) {
