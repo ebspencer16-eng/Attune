@@ -164,7 +164,18 @@ type TypeSpec = {
  */
 function t(role: string, cardWidth: number, over?: Partial<TypeSpec>): Record<string, unknown> {
   const base = SC.type?.[role];
-  if (!base) return {};
+  /**
+   * ── LEGIBLE WITHOUT THE SCALE ─────────────────────────────────────────
+   * The comment on SC.type says t() falls back for that one render. It did
+   * not: it returned nothing at all, so a card drawn before a payload arrived
+   * was fourteen point BLACK on a navy ground. Nobody saw it because the reel
+   * only ever renders after /api/results, and the insight card opening from
+   * the home screen is the first thing that does not.
+   *
+   * This is not a second scale, which is what this file's header is about. It
+   * is one colour, so a card that is early is readable rather than invisible.
+   */
+  if (!base) return { color: '#FFFFFF' };
   const spec = over ? { ...base, ...over } : base;
   const px = Array.isArray(spec.size)
     ? Math.min(Math.max(spec.size[0] * 16, (spec.size[1] / 100) * cardWidth), spec.size[2] * 16)
@@ -303,6 +314,77 @@ function shareTextFor(card: HighlightCard | undefined) {
   // The address is passed to the sheet as a link now rather than pasted on the
   // end here, so iOS builds a preview card from it instead of guessing.
   return [...new Set(lines)].join('\n\n');
+}
+
+/**
+ * The insight of the day, as a card.
+ *
+ * ── WHY IT IS BUILT HERE ──────────────────────────────────────────────────
+ * Ellie: "If a person clicks insight of the day can they see a full storycard
+ * with the insight of the day? Also if you click on the tile on learn you
+ * should see the full size storycard."
+ *
+ * Two surfaces want the same card, so neither of them builds it: they ask for
+ * it here, in the file that already knows what a card is. A second place that
+ * assembled one from a finding is a second storycard renderer, which is the
+ * thing this file's own header is about.
+ *
+ * `quote` is the kind, because that is what a finding is: a sentence in a
+ * panel with a label over it and a source under it.
+ */
+export function insightCard(
+  finding: { title?: string; body: string; source: string },
+  label: string,
+): HighlightCard {
+  return {
+    id: 'insight-of-the-day',
+    kind: 'quote',
+    tone: 'night',
+    eyebrow: label,
+    quote: finding.body,
+    body: finding.source,
+  } as HighlightCard;
+}
+
+/**
+ * One card, full size, over whatever opened it.
+ *
+ * The reel's own sizing, so this is the same card at the same proportions a
+ * person sees in Highlights rather than a second idea of how big a card is.
+ */
+export function StoryCard({ card, onClose, style }: {
+  card: HighlightCard;
+  onClose: () => void;
+  /**
+   * How a card is set, from the payload. Without it every role falls back to
+   * the colour below and nothing else, which is legible and is not the
+   * website's card. /api/home carries it for exactly this reason.
+   */
+  style?: Partial<typeof SC> | null;
+}) {
+  if (style) SC = { ...SC, ...style };
+  const [box, setBox] = useState({ width: Dimensions.get('window').width, height: 0 });
+  const cardW = Math.min(box.width - Spacing.lg * 2, box.height ? box.height * SC.ratio : 9999);
+  const cardH = cardW / SC.ratio;
+  return (
+    <Modal visible animationType="fade" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: '#0B0918' }}
+        onLayout={(e) => setBox({
+          width: e.nativeEvent.layout.width,
+          height: e.nativeEvent.layout.height - 96,
+        })}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={12}>
+            <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>{'\u2039  Close'}</Text>
+          </Pressable>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Card card={card} onDone={onClose} w={cardW} h={cardH} active />
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
 }
 
 export default function HighlightCards({
@@ -1083,6 +1165,14 @@ function Body({ card, onDone, map, w }: {
               {card.quote}
             </Text>
           </View>
+          {/* The citation, when there is one. A claim about research with no
+              source on it is the one thing this product must not print, and
+              the insight of the day is exactly that kind of claim. */}
+          {card.body ? (
+            <Text style={[S.footer, { textAlign: 'center', marginTop: Spacing.lg }]}>
+              {card.body}
+            </Text>
+          ) : null}
         </View>
       );
 

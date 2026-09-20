@@ -78,8 +78,30 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The seven from the screenshot pass are built and are in
-section 3.
+Her line first, because it is the point: "we shouldn't have to go back and
+forth this many times when I gave you screenshots of templates I want you to
+emulate and clear instructions for what content to plug into these formats."
+She is right. Two of these are things I changed away from a state that was
+already correct, and one is an instruction I applied to the wrong element.
+
+| # | Task |
+|--|--|
+| **Home** |  |
+| O371 | **The lockup is centred and on one line.** |
+| O372 | **The welcome message is left-aligned**, and the hairline under it is short and left-aligned. |
+| O373 | **The four squares' icons are larger, centred, and sit in the middle of the space above the label.** |
+| O374 | **The four labels are two lines, centred, and slightly up.** Her names for them: Insight of the day, Action plan, **Results highlights**, **Relationship journal**. The last two are renames. |
+| O375 | **Insight becomes a brain and Action plan becomes a stoplight.** Highlights and Journal stay. |
+| O376 | **The two picture tiles take the Luxury template exactly: a white box holding a rounded SQUARE image with the text under it.** Mine has the image filling the whole top half of the tile, which is what I changed it to last round and is wrong. Placeholder pictures: an open door for results, a couple at a screen for the budget. |
+| O377 | **The big tile has a rounded bottom that ends above the tab bar, with the shading, and the blue spills upward through its lower half.** The blue is on the page behind it today; in the reference it is inside the tile. The two large cards carry a border. |
+| O378 | **Insight of the day opens a full storycard**, from home and from the tile on Learn. |
+| **Learn** |  |
+| O379 | **Take the grey section row under the insight tile out.** I added it last round to match the books screen; she does not want it. |
+| O380 | **In Practice is not hidden.** The sheet comes up to sit under the insight tile rather than a screen below it. |
+| **Notes** |  |
+| O381 | **"Connection" is not Playfair.** Large bold body. This was her instruction last round and I applied it to the definition instead, so the definition also reverts to what it was. |
+| O382 | **Recent, Shared, Journal and Tags are not Playfair.** |
+| O383 | **Their counts sit in a circle**, as the counts on the books screen do. |
 
 ## 3. For you to review
 

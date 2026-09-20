@@ -743,6 +743,8 @@ export type HomeResponse = {
    * one copy of every word a customer reads.
    */
   word?: { id: string; word: string; part: string; definition: string } | null;
+  /** How a storycard is set, for the insight card this tab can open. */
+  storycardStyle?: Record<string, unknown> | null;
   research?: { id: string; title: string; body: string; source: string };
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];

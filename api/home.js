@@ -25,6 +25,7 @@ import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
 import { researchOfTheDay } from './_research.js';
 import { wordOfTheDay } from './_words.js';
+import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
@@ -352,6 +353,17 @@ export default async function handler(req) {
          as the research finding: the copy lives on the server so it is one
          copy and so Ellie can change it without an app build. */
       word: wordOfTheDay(),
+      /**
+       * How a storycard is set.
+       *
+       * The insight of the day opens as a full card from the home screen and
+       * from Learn, and neither of those calls /api/results, which is where
+       * this used to be the only copy. Without it the card renders with no
+       * type scale at all: black fourteen point on a navy ground, legible to
+       * nobody. Same constant as the results payload sends, so the two cannot
+       * disagree about how a card is set.
+       */
+      storycardStyle: STORYCARD_STYLE,
       /**
        * The home screen's third row: a note to return to, or the newest In
        * Practice post when there is none. Two states, decided server-side so

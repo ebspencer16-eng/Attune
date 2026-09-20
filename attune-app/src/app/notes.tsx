@@ -634,10 +634,23 @@ export default function NotesScreen() {
                     />
                   </Pressable>
                 </View>
+                {/* ── THE WORD, IN THE BODY FACE ────────────────────────
+                    Ellie: "I asked for the 'Connection' text to not be playfair
+                    display anymore but it still is. you changed the word in use
+                    body text instead."
+
+                    She is right: the instruction was about this line and I
+                    applied it to the definition. This is DM Sans at its bold
+                    weight, set large, which is also what the reference's word
+                    is: a heavy grotesque, not a serif. */}
                 <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  style={{ ...Type.display, color: c.textStrong, marginTop: Spacing.md, marginBottom: Spacing.lg }}>
+                  style={{
+                    fontFamily: Fonts.bodyBold, fontSize: 46, lineHeight: 58,
+                    fontWeight: '700', color: c.textStrong,
+                    marginTop: Spacing.md, marginBottom: Spacing.lg,
+                  }}>
                   {word.word}
                 </Text>
               </View>
@@ -680,14 +693,10 @@ export default function NotesScreen() {
                     and a different font from the hero font. Maybe just large
                     and bold body font." The hero face is Playfair; this is DM
                     Sans at its bold weight, two sizes up from body. */}
-                <Text
-                  style={{
-                    fontFamily: Fonts.bodyBold, fontSize: 20, lineHeight: 29,
-                    /* Grey, as the reference's is. The label above it is the
-                       dark half; this was near-black, which made the card two
-                       emphatic lines rather than a label and a meaning. */
-                    fontWeight: '700', color: c.textMuted, marginTop: Spacing.md,
-                  }}>
+                {/* Back to body type. It was made large and bold by an
+                    instruction that was about the word above, not this. Grey,
+                    which the reference's is. */}
+                <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>
                   {word.definition}
                 </Text>
               </View>
@@ -725,12 +734,28 @@ export default function NotesScreen() {
                 hitSlop={10}
                 onPress={() => (key === 'journal' ? setJournalOpen(true) : setOpenList(key))}
                 style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
-                <Text style={{ ...Type.title, fontSize: 19, lineHeight: 26, color: c.textStrong }}>
+                {/* Ellie: "recent, shared, journal, and tags should not be
+                    playfair display." The body face, at the weight the
+                    reference's row uses. */}
+                <Text
+                  style={{
+                    fontFamily: Fonts.bodyBold, fontSize: 15, lineHeight: 21,
+                    fontWeight: '700', color: c.textStrong,
+                  }}>
                   {label}
                 </Text>
-                <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.accent, marginTop: 2 }}>
-                  {n}
-                </Text>
+                {/* Ellie: "Can the count next to the tag be in a circle like
+                    the counts on the book screenshot page?" */}
+                <View
+                  style={{
+                    minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4,
+                    backgroundColor: c.accent,
+                    alignItems: 'center', justifyContent: 'center',
+                  }}>
+                  <Text style={{ fontSize: 10, lineHeight: 13, fontWeight: '700', color: Palette.white }}>
+                    {n}
+                  </Text>
+                </View>
               </Pressable>
             ))}
           </View>

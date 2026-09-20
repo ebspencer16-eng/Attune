@@ -39,13 +39,14 @@ import { forgetLastSection, showResultsFromStart } from '@/components/results';
 import { forgetLastSeen, keepLastSeen, lastSeen } from '@/api/last-seen';
 import BrandHeader from '@/components/brand-header';
 import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghost-tile';
+import { insightCard, StoryCard } from '@/components/highlight-cards';
 import { BRAND_NAME } from '@/components/brand-header';
 import { showSection } from '@/components/results';
 import { showJournal } from '@/app/notes';
 import PageWash, { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BlueGround, BottomTabInset, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BlueGround, BottomTabInset, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -91,6 +92,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** Whether the insight of the day is open as a full card. */
+  const [insightOpen, setInsightOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const loadingRef = useRef(false);
@@ -349,7 +352,10 @@ export default function HomeScreen() {
 
   /** Where a quick link goes. Four destinations that all already exist. */
   const goQuick = (q: QuickLinkItem) => {
-    if (q.id === 'insight') { router.push('/resources'); return; }
+    /* Ellie: "If a person clicks insight of the day can they see a full
+       storycard with the insight of the day?" It opens here rather than
+       sending someone to Learn to find it. */
+    if (q.id === 'insight') { if (data.research) setInsightOpen(true); return; }
     if (q.id === 'journal') { showJournal(); router.push('/notes'); return; }
     showSection(q.section as string);
     router.push('/insights');
@@ -378,12 +384,13 @@ export default function HomeScreen() {
           cream at the top." It was the other way up, both colours falling out
           of the top corners, which is the Notes tab's ground and not this
           reference's. The reference carries its colour along the foot. */}
+      {/* The page is cream. The blue lives inside the tile now, which is
+          where the reference has it. */}
       <LinearGradient
         pointerEvents="none"
-        colors={[Palette.cream, Palette.cream, withAlpha(Palette.indigo, 0.16)]}
-        locations={[0, 0.42, 1]}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
+        colors={[Palette.white, Palette.cream]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 0.6 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
@@ -484,7 +491,7 @@ export default function HomeScreen() {
             <View
               style={{
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                marginTop: Spacing.lg, justifyContent: 'flex-end',
+                marginTop: Spacing.lg, justifyContent: 'center',
               }}>
               {/* The cream variant, because the page is cream now. The
                   inverse one Ellie asked for on home was for the navy; the
@@ -492,10 +499,19 @@ export default function HomeScreen() {
                   that the mark takes the ground it is on. */}
               <Image
                 source={require('@/assets/images/attune-mark-light.png')}
-                style={{ width: 58, height: 58 * (76 / 103) }}
+                style={{ width: 40, height: 40 * (76 / 103) }}
                 resizeMode="contain"
               />
-              <Text style={{ ...Type.display, color: c.textStrong, flex: 1, textAlign: 'right' }}>
+              {/* Ellie: "Attune relationships lockup should be centered and fit
+                  on one line." Twenty-six rather than thirty-eight, which is
+                  what "Attune Relationships" with the mark beside it needs to
+                  hold one line on the narrowest phone this app supports. */}
+              <Text
+                numberOfLines={1}
+                style={{
+                  ...Type.display, fontSize: 26, lineHeight: 37,
+                  color: c.textStrong,
+                }}>
                 {BRAND_NAME}
               </Text>
             </View>
@@ -518,11 +534,13 @@ export default function HomeScreen() {
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 marginTop: Spacing.lg, marginBottom: Spacing.xl,
               }}>
-              <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              {/* Ellie: "Welcome message should be left-aligned. Hairline
+                  divider should be short and left-aligned." */}
+              <View style={{ flex: 1, alignItems: 'flex-start' }}>
                 <Text style={{ ...Type.body, color: c.textMuted }}>
                   {data.greeting}
                 </Text>
-                <View style={{ height: 1, marginTop: Spacing.sm, alignSelf: 'stretch', backgroundColor: c.border }} />
+                <View style={{ height: 1, width: 56, marginTop: Spacing.sm, backgroundColor: c.border }} />
               </View>
               <Pressable
                 accessibilityRole="button"
@@ -561,14 +579,44 @@ export default function HomeScreen() {
               shadow is drawn by a separate opaque panel underneath rather than
               by this, because iOS casts no shadow from a view whose background
               is a gradient: the gradient is a child, not a fill. */}
-          <View style={{ marginTop: Spacing.xl }}>
+          {/* ── THE TILE'S OWN BOTTOM ────────────────────────────────────
+              Ellie: "I want that rounded bottom with the same shading effect
+              and same blue hue that spills upward through the bottom half of
+              the tile."
+
+              Three things, and all three were on the page rather than on the
+              tile. It ENDS now, above the tab bar, with a large radius on its
+              two bottom corners and a shadow under them; and the blue is
+              painted inside it, rising from its own foot through its lower
+              half, rather than on the ground behind it. The top still fades to
+              nothing, which is the other half of what she asked for. */}
+          <View
+            style={{
+              marginTop: Spacing.xl,
+              marginBottom: BottomTabInset + Spacing.lg,
+              borderBottomLeftRadius: TILE_RADIUS,
+              borderBottomRightRadius: TILE_RADIUS,
+            }}>
             <View
               pointerEvents="none"
               style={{
                 position: 'absolute', left: 0, right: 0, top: TILE_FADE, bottom: 0,
                 backgroundColor: Palette.cream,
-                shadowColor: '#1B2A5E', shadowOpacity: 0.16,
-                shadowRadius: 24, shadowOffset: { width: 0, height: 10 },
+                borderBottomLeftRadius: TILE_RADIUS,
+                borderBottomRightRadius: TILE_RADIUS,
+                shadowColor: '#1B2A5E', shadowOpacity: 0.20,
+                shadowRadius: 26, shadowOffset: { width: 0, height: 12 },
+              }}
+            />
+            <LinearGradient
+              pointerEvents="none"
+              colors={[withAlpha(Palette.indigo, 0), withAlpha(Palette.indigo, 0.20)]}
+              start={{ x: 0.3, y: 0.35 }}
+              end={{ x: 0.7, y: 1 }}
+              style={{
+                position: 'absolute', left: 0, right: 0, top: TILE_FADE, bottom: 0,
+                borderBottomLeftRadius: TILE_RADIUS,
+                borderBottomRightRadius: TILE_RADIUS,
               }}
             />
             <LinearGradient
@@ -667,6 +715,14 @@ export default function HomeScreen() {
 
       {feedbackOpen ? (
         <Feedback onDone={() => setFeedbackOpen(false)} />
+      ) : null}
+
+      {insightOpen && data?.research ? (
+        <StoryCard
+          card={insightCard(data.research, INSIGHT_TITLE)}
+          style={data.storycardStyle as never}
+          onClose={() => setInsightOpen(false)}
+        />
       ) : null}
 
       {settingsOpen ? (
@@ -999,6 +1055,8 @@ const ICON_ORANGE = '#FF8F5E';
 const TILE_FILL = '#F1EEE9';
 /** How far the big tile takes to stop being transparent, in points. */
 const TILE_FADE = 90;
+/** The radius on the tile's two bottom corners. */
+const TILE_RADIUS = 36;
 /** The four squares' fill. Three per cent of the ink: present, barely. */
 const SQUARE_FILL = 'rgba(14,11,7,0.045)';
 const ICON_GLOW_SIZE = 44;
@@ -1025,11 +1083,39 @@ export type QuickLinkItem = {
 };
 
 const QUICK_LINKS: QuickLinkItem[] = [
-  { id: 'insight', label: 'Insight of the day', icon: 'lightbulb' },
-  { id: 'plan', label: 'Action plan', icon: 'flag', section: 'what-comes-next' },
-  { id: 'highlights', label: 'Highlights', icon: 'sparkles', section: 'highlights' },
-  { id: 'journal', label: 'Journal', icon: 'book.closed' },
+  /* Ellie: "insight should be a brain, action plan should be a stoplight,
+     highlights and journal are fine." SF Symbols has a brain and has no
+     traffic light, so that one is drawn: see Stoplight below. */
+  { id: 'insight', label: 'Insight of the day', icon: 'brain' },
+  { id: 'plan', label: 'Action plan', icon: 'stoplight', section: 'what-comes-next' },
+  { id: 'highlights', label: 'Results highlights', icon: 'sparkles', section: 'highlights' },
+  { id: 'journal', label: 'Relationship journal', icon: 'book.closed' },
 ];
+
+/**
+ * A stoplight, drawn.
+ *
+ * SF Symbols has no traffic light, and the other three icons here are its
+ * line-weight glyphs, so this is that: a rounded outline at the same stroke
+ * with three lamps in it. The lamps are the section colours the app already
+ * uses rather than a red, amber and green it does not have anywhere else.
+ */
+function Stoplight() {
+  const LAMP = [SectionColor.conflict, Palette.clay, SectionColor.reflection];
+  return (
+    <View
+      style={{
+        width: 22, height: 32, borderRadius: 7,
+        borderWidth: 1.8, borderColor: c.accent,
+        alignItems: 'center', justifyContent: 'space-evenly',
+        paddingVertical: 3,
+      }}>
+      {LAMP.map((colour) => (
+        <View key={colour} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colour }} />
+      ))}
+    </View>
+  );
+}
 
 function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
   return (
@@ -1040,6 +1126,16 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
        So the fill is three per cent of the ink rather than a tone of its own,
        the icon sits at the top and the label at the foot of the same square,
        and nothing is drawn under it. */
+    /* ── THE ICON IN THE MIDDLE, THE NAME ON TWO LINES ────────────────
+       Ellie: "Icons in the 4 smaller tiles should be larger, centered, and
+       middle-aligned in the space above the text. Text in 4 boxes should be
+       split to two lines and should be centered in the tile and moved up
+       slightly."
+
+       So the square is two rows: the icon centred in everything above the
+       label, and the label centred under it on two lines, lifted off the
+       bottom edge. `width: '70%'` on the label is what makes it break into
+       two: giving it the whole tile puts "Action plan" on one. */
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={item.label}
@@ -1047,18 +1143,28 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
       style={{
         flex: 1, aspectRatio: 0.92, borderRadius: Radius.lg,
         backgroundColor: SQUARE_FILL,
-        padding: Spacing.sm, justifyContent: 'space-between',
+        paddingTop: Spacing.sm, paddingBottom: Spacing.md,
+        paddingHorizontal: Spacing.xs, alignItems: 'center',
       }}>
-      <SymbolView
-        name={item.icon as never}
-        size={20}
-        tintColor={c.accent}
-        fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.accent }} />}
-        style={{ width: 22, height: 22 }}
-      />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        {item.icon === 'stoplight' ? (
+          <Stoplight />
+        ) : (
+          <SymbolView
+            name={item.icon as never}
+            size={30}
+            tintColor={c.accent}
+            fallback={<View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: c.accent }} />}
+            style={{ width: 32, height: 32 }}
+          />
+        )}
+      </View>
       <Text
         numberOfLines={2}
-        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: c.textMuted }}>
+        style={{
+          ...Type.small, fontSize: 11, lineHeight: 14,
+          color: c.textMuted, textAlign: 'center', width: '78%',
+        }}>
         {item.label}
       </Text>
     </Pressable>
@@ -1094,43 +1200,43 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
       disabled={dim}
       onPress={onPress}
       style={{ flex: 1 }}>
+      {/* ── A WHITE BOX HOLDING A ROUNDED SQUARE ────────────────────────
+          Ellie: "I want white boxes holding rounded square images with the
+          text under it, right now the image takes up the full top half of the
+          tile rather than being its own rounded square."
+
+          She is right and it is my own doing: it was inset a week ago and I
+          changed it to fill the card's top, which is not what that reference
+          does. A white box, a square picture inside it with its own radius,
+          the text under it. And a hairline, which she asked for in the same
+          breath: "The two larger tiles within that one also have a border."
+
+          The pictures are drawn placeholders from scripts/build-card-art.mjs.
+          Two literal requires, because the bundler resolves these at build
+          time and cannot follow a variable. */}
       <View
         style={{
           opacity: dim ? 0.55 : 1,
           backgroundColor: Palette.white,
           borderRadius: Radius.card,
-          overflow: 'hidden',
+          borderWidth: 1, borderColor: c.border,
+          padding: Spacing.sm,
           ...Lift,
         }}>
-        {/* The picture. A tint of the accent behind the glyph rather than a
-            photograph: this product has no artwork, and a grey rectangle
-            waiting for one reads as an image that failed to load. */}
-        {/* ── THE PICTURE FILLS THE TOP ──────────────────────────────
-            In the reference the photograph runs to the card's own edges and
-            the title sits under it. Ours was inset inside the card's padding,
-            which turns a picture into a thumbnail with a frame. The card
-            clips, so the picture takes its top corners and nothing else. */}
-        <View
-          style={{
-            width: '100%', aspectRatio: 1.25,
-            backgroundColor: TILE_FILL,
-            alignItems: 'center', justifyContent: 'center',
-          }}>
-          <SymbolView
-            name={item.icon as never}
-            size={34}
-            tintColor={dim ? c.textMuted : c.accent}
-            fallback={<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: c.accent }} />}
-            style={{ width: 36, height: 36 }}
+        {/* The square is the container, not the Image. An Image with a
+            percentage width and an aspectRatio takes its own intrinsic size
+            instead and grows past the card; a View with the ratio and the
+            picture filling it is the shape that holds. */}
+        <View style={{ width: '100%', aspectRatio: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
+          <Image
+            source={item.key === 'primary'
+              ? require('@/assets/images/card-results.png')
+              : require('@/assets/images/card-budget.png')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
           />
         </View>
-        {/* Title, a hairline, then one small line. That is the reference's
-            own card: the rule is what makes the second line read as a note
-            about the first rather than as more of the same sentence. */}
-        {/* The title, a rule, then two small lines, which is the reference's
-            own card. The padding lives here rather than on the card, so the
-            picture above can reach the edges. */}
-        <View style={{ padding: Spacing.md }}>
+        <View style={{ paddingHorizontal: Spacing.xs, paddingTop: Spacing.md, paddingBottom: Spacing.xs }}>
           <Text numberOfLines={2} style={{ ...Type.cardTitle, color: c.textStrong }}>
             {item.title}
           </Text>

@@ -29,6 +29,7 @@ import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/cl
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
+import { insightCard, StoryCard } from '@/components/highlight-cards';
 import Checklist from '@/components/checklist';
 import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
@@ -79,8 +80,6 @@ export default function ResourcesScreen() {
    */
   const [query, setQuery] = useState('');
   const [list, setList] = useState<'all' | 'saved' | 'read'>('all');
-  /** Which shelf the row on the coloured ground has narrowed to, if any. */
-  const [shelf, setShelf] = useState<string | null>(null);
   /** Which shelf is open as a page of its own, if any. */
   const [openShelf, setOpenShelf] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
@@ -99,6 +98,8 @@ export default function ResourcesScreen() {
    */
   const [openTool_, setOpenTool] = useState<string | null>(null);
   const [openPost, setOpenPost] = useState<string | null>(pendingPost);
+  /** Whether the insight of the day is open as a full card. */
+  const [insightOpen, setInsightOpen] = useState(false);
   /**
    * The reader's own marks and tags, for marking inside an article.
    *
@@ -351,9 +352,7 @@ export default function ResourcesScreen() {
   const inList = list === 'all'
     ? inCategory
     : inCategory.filter((p) => (list === 'saved' ? p.saved : p.read));
-  /* And the shelf row on the coloured ground, which is a second question and
-     narrows what the one above it left. */
-  const inShelf = shelf ? inList.filter((p) => p.category === shelf) : inList;
+  const inShelf = inList;
   /**
    * Every word typed has to appear somewhere in the post's terms, so two words
    * narrow rather than widen. Matching on the start of a word rather than the
@@ -457,7 +456,7 @@ export default function ResourcesScreen() {
    * Searching or picking a list is a question with an answer, so it gets one
    * list of answers. Browsing is a shelf at a time.
    */
-  const narrowing = terms.length > 0 || list !== 'all' || !!shelf;
+  const narrowing = terms.length > 0 || list !== 'all';
 
   /**
    * The four most-read pieces, for the sheet's preview grid.
@@ -544,13 +543,20 @@ export default function ResourcesScreen() {
                 eyebrow in the tile itself." It was an eyebrow inside the tile
                 once and she asked for the hero; the reference has no heading
                 over this block at all, so it goes back inside. */}
+            {/* Ellie: "if you click on the tile on learn you should see the
+                full size storycard." The same card the home screen's quick
+                link opens, built by the file that knows what a card is. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open the insight of the day"
+              onPress={() => setInsightOpen(true)}>
             <LinearGradient
               colors={[...BlueGround]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 1 }}
               style={{ borderRadius: Radius.card, padding: Spacing.xl, ...Lift }}>
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
-                Insight of the day
+                {INSIGHT_OF_THE_DAY}
               </Text>
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
@@ -576,56 +582,7 @@ export default function ResourcesScreen() {
                 />
               </View>
             </LinearGradient>
-          </View>
-        ) : null}
-
-        {/* ── THE FILTER ROW, ON THE COLOUR ──────────────────────────────
-            The reference has one of these between its shelf and its panel:
-            four words, each with a small count, the chosen one dark and the
-            rest grey. Ours counts the shelves, which come from the server with
-            their own names, so it is a real filter and no word here was
-            invented. Tapping one narrows In Practice to that shelf; tapping it
-            again lets go.
-
-            `shelf` is the only new state on this screen and it sits beside
-            `list` rather than replacing it: they are different questions, one
-            about what you have done with a piece and one about what it is
-            about, and a reader may want both. */}
-        {categories.length ? (
-          <View
-            style={{
-              flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg,
-              paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl,
-              maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
-            }}>
-            {categories.map((cat) => {
-              const on = shelf === cat;
-              const n = posts.filter((p) => p.category === cat).length;
-              return (
-                <Pressable
-                  key={cat}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: on }}
-                  hitSlop={8}
-                  onPress={() => setShelf(on ? null : cat)}
-                  style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
-                  <Text
-                    style={{
-                      ...Type.small, fontWeight: '700',
-                      color: on ? c.textStrong : c.textMuted,
-                    }}>
-                    {cat}
-                  </Text>
-                  <Text
-                    style={{
-                      ...Type.small, fontSize: 11, fontWeight: '700',
-                      color: on ? c.accent : c.accentQuiet, marginTop: 1,
-                    }}>
-                    {n}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            </Pressable>
           </View>
         ) : null}
 
@@ -871,6 +828,14 @@ export default function ResourcesScreen() {
           )}
         </View>
       </ScrollView>
+
+      {insightOpen && home?.research ? (
+        <StoryCard
+          card={insightCard(home.research, INSIGHT_OF_THE_DAY)}
+          style={home.storycardStyle as never}
+          onClose={() => setInsightOpen(false)}
+        />
+      ) : null}
     </Shell>
   );
 }
@@ -901,7 +866,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 /** The books reference's ground, in this product's blue rather than its own. */
 /** How much air is left above the sheet. The reference's panel starts about
  *  two thirds of the way down its screen; everything above it is the ground. */
-const SHEET_PEEK = 120;
+const SHEET_PEEK = 28;
+
+/** The label on the insight, here and on the card it opens. */
+const INSIGHT_OF_THE_DAY = 'Insight of the day';
 
 const LEARN_GROUND = ['#C9D2F2', '#E6E3F0'] as const;
 
