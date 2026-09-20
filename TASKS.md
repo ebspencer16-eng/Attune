@@ -78,30 +78,8 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-Her line first, because it is the point: "we shouldn't have to go back and
-forth this many times when I gave you screenshots of templates I want you to
-emulate and clear instructions for what content to plug into these formats."
-She is right. Two of these are things I changed away from a state that was
-already correct, and one is an instruction I applied to the wrong element.
-
-| # | Task |
-|--|--|
-| **Home** |  |
-| O371 | **The lockup is centred and on one line.** |
-| O372 | **The welcome message is left-aligned**, and the hairline under it is short and left-aligned. |
-| O373 | **The four squares' icons are larger, centred, and sit in the middle of the space above the label.** |
-| O374 | **The four labels are two lines, centred, and slightly up.** Her names for them: Insight of the day, Action plan, **Results highlights**, **Relationship journal**. The last two are renames. |
-| O375 | **Insight becomes a brain and Action plan becomes a stoplight.** Highlights and Journal stay. |
-| O376 | **The two picture tiles take the Luxury template exactly: a white box holding a rounded SQUARE image with the text under it.** Mine has the image filling the whole top half of the tile, which is what I changed it to last round and is wrong. Placeholder pictures: an open door for results, a couple at a screen for the budget. |
-| O377 | **The big tile has a rounded bottom that ends above the tab bar, with the shading, and the blue spills upward through its lower half.** The blue is on the page behind it today; in the reference it is inside the tile. The two large cards carry a border. |
-| O378 | **Insight of the day opens a full storycard**, from home and from the tile on Learn. |
-| **Learn** |  |
-| O379 | **Take the grey section row under the insight tile out.** I added it last round to match the books screen; she does not want it. |
-| O380 | **In Practice is not hidden.** The sheet comes up to sit under the insight tile rather than a screen below it. |
-| **Notes** |  |
-| O381 | **"Connection" is not Playfair.** Large bold body. This was her instruction last round and I applied it to the definition instead, so the definition also reverts to what it was. |
-| O382 | **Recent, Shared, Journal and Tags are not Playfair.** |
-| O383 | **Their counts sit in a circle**, as the counts on the books screen do. |
+**Nothing open.** The thirteen from the correction pass are built and are in
+section 3.
 
 ## 3. For you to review
 
@@ -117,10 +95,23 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The screenshot pass first.
+The correction pass first.
 
 | # | Review |
 |--|--|
+| O371 | **The lockup is centred and on one line**, at twenty-six rather than thirty-eight, which is what "Attune Relationships" with the mark beside it needs to hold one line on the narrowest phone. |
+| O372 | **The welcome message is left, and the hairline under it is short and left.** |
+| O373 | **The icons are larger and centred in the space above the label.** |
+| O374 | **The labels are two lines, centred, lifted off the bottom.** Results highlights and Relationship journal are your names for those two. |
+| O375 | **A brain and a stoplight.** SF Symbols has the brain; it has no traffic light, so that one is drawn at the same stroke weight with the section colours as its lamps. |
+| O376 | **A white box holding a rounded square picture with the text under it**, and a border on both cards. This one was mine: it was inset a week ago and I changed it to fill the card's top, which is not what that reference does. |
+| O377 | **The tile ends above the tab bar with a rounded bottom, a shadow, and the blue spilling up through its lower half from inside it.** All three of those were on the page rather than on the tile. |
+| O378 | **The insight opens as a full storycard**, from home and from the tile on Learn. It is built in the file that already knows what a card is, so there is no second storycard renderer. Two things came out of building it: the quote card now draws its source, because a claim about research with no citation is the one thing this product must not print; and `t()` returned NOTHING when the type scale had not arrived, so a card drawn before a results payload was fourteen point black on navy. The scale is on /api/home now, and `t()` is at least legible without it. |
+| O379 | **The grey section row under the insight tile is gone.** |
+| O380 | **In Practice sits under the insight tile** rather than a screen below it. |
+| O381 | **"Connection" is large bold DM Sans, and the definition is back to body type.** The instruction was about the word and I applied it to the definition. |
+| O382 | **Recent, Shared, Journal and Tags are the body face.** |
+| O383 | **Their counts sit in circles.** |
 | O364 | **Learn has the counted filter row on the colour**, between the insight tile and the panel, which the books screen has and ours did not. It counts the shelves, whose names come from the server, so it is a real filter and no word in it was invented. It wraps to two lines where the reference's fits on one, because our shelf names are sentences and its genres are words. |
 | O365 | **No grab handle on the panel.** The reference has none, and a handle on something that cannot be dragged is a control that lies. |
 | O366 | **The Notes ground settles to a neutral grey.** The two corners were right and the page under them was not: it fell away to the app's warm cream, so the lower two thirds was a different colour from the picture. |
