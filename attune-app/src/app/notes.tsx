@@ -41,6 +41,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable,
+  Share,
   RefreshControl, ScrollView, Switch, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -574,11 +575,38 @@ export default function NotesScreen() {
                   backgroundColor: Palette.white, borderRadius: Radius.card,
                   paddingVertical: Spacing.xxl, paddingHorizontal: Spacing.xl, ...Lift,
                 }}>
-                <Text style={{ ...Type.body, color: c.textMuted }}>{word.part}</Text>
+                {/* ── THE ENTRY'S TOP LINE ──────────────────────────────
+                    The reference puts the part of speech small and grey at the
+                    left and a round control opposite it, then the word very
+                    large under both with air beneath it. The control is a
+                    speaker there, which this product has nothing to say
+                    through; sharing the word is a real thing it can do and
+                    needs no words on the button. */}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ ...Type.body, color: c.textMuted, flex: 1 }}>{word.part}</Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Share the word ${word.word}`}
+                    hitSlop={10}
+                    onPress={() => Share.share({ message: `${word.word} \u00b7 ${word.definition}` })}
+                    style={{
+                      width: 34, height: 34, borderRadius: 17,
+                      backgroundColor: Palette.warm,
+                      alignItems: 'center', justifyContent: 'center',
+                    }}>
+                    <SymbolView
+                      name={'square.and.arrow.up' as never}
+                      size={15}
+                      tintColor={c.textMuted}
+                      fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{'\u2191'}</Text>}
+                      style={{ width: 17, height: 17 }}
+                    />
+                  </Pressable>
+                </View>
                 <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  style={{ ...Type.display, color: c.textStrong, marginTop: Spacing.xs }}>
+                  style={{ ...Type.display, color: c.textStrong, marginTop: Spacing.md, marginBottom: Spacing.lg }}>
                   {word.word}
                 </Text>
               </View>
@@ -593,10 +621,18 @@ export default function NotesScreen() {
                   paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl,
                   marginTop: Spacing.sm,
                 }}>
-                <Text style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic }}>
+                {/* The label is the dark, emphatic half and the meaning is the
+                    quiet one. Mine had them exactly the wrong way round: a
+                    muted label over full-strength ink, which reads as a
+                    paragraph with a caption rather than as a usage note. */}
+                <Text
+                  style={{
+                    ...Type.body, fontFamily: Fonts.bodyBoldItalic,
+                    color: c.textStrong,
+                  }}>
                   {WORD_IN_USE}
                 </Text>
-                <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.xs, lineHeight: 24 }}>
+                <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 26 }}>
                   {word.definition}
                 </Text>
               </View>

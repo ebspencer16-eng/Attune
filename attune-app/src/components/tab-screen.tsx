@@ -31,7 +31,7 @@ import { Colors } from '@/constants/attune-theme';
 const c = Colors.light;
 
 export default function TabScreen({
-  children, ground = 'cream', tint, second, groundColors, corners,
+  children, ground = 'cream', tint, second, groundColors, corners, groundTone = 'light',
 }: {
   children: React.ReactNode;
   /** 'cream' takes the wash and the ink lockup; 'blue' takes neither. */
@@ -59,6 +59,15 @@ export default function TabScreen({
   groundColors?: readonly [string, string];
   /** Both wash colours from the top corners. See PageWash. */
   corners?: boolean;
+  /**
+   * What colour the lockup takes over a painted ground.
+   *
+   * The Insights orange is dark enough for white. The books reference Ellie
+   * sent for Learn is a light lavender with black type on it, which is a
+   * painted ground that still wants ink. Two different answers, so it is a
+   * prop rather than a consequence of `groundColors` being set.
+   */
+  groundTone?: 'ink' | 'light';
 }) {
   const painted = !!groundColors;
   const blue = ground === 'blue' || painted;
@@ -67,7 +76,11 @@ export default function TabScreen({
       style={{ flex: 1, backgroundColor: painted ? groundColors[0] : blue ? 'transparent' : c.background }}
       edges={['top']}>
       {painted ? (
+        /* Not hit-testable, the same as PageWash: an absolutely positioned
+           sibling covering the whole frame has no business taking a touch
+           from the page on top of it. */
         <LinearGradient
+          pointerEvents="none"
           colors={[...groundColors]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.9, y: 1 }}
@@ -75,7 +88,7 @@ export default function TabScreen({
         />
       ) : null}
       {blue ? null : <PageWash tint={tint} second={second} corners={corners} />}
-      <BrandHeader tone={blue ? 'light' : 'ink'} />
+      <BrandHeader tone={painted ? groundTone : blue ? 'light' : 'ink'} />
       <View style={{ flex: 1 }}>{children}</View>
     </SafeAreaView>
   );

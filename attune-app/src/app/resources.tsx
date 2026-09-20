@@ -557,47 +557,17 @@ export default function ResourcesScreen() {
           </View>
         ) : null}
 
-        {/* ── THE SHEET ──────────────────────────────────────────────────
-            Ellie: "Can the learn page have the layout/design of the image with
-            the books, with a gradient page bg that lists the resources and the
-            insight, then what looks like a tab pulling up over the page down
-            below with the in practice articles?"
+        {/* ── THE FILTERS SIT ON THE COLOUR ──────────────────────────────
+            Ellie: "The all, saved, read, and search bar should be above the
+            bottom tile just like the all, design, fantasy, and mystery in the
+            screenshot."
 
-            So everything above sits on the ground, and the reading is a panel
-            that comes up over it: a large radius on the top two corners only,
-            the full width, and no bottom at all, because in the reference it
-            runs off the end of the screen rather than finishing. The shadow
-            points upward so the ground reads as being behind it.
-
-            It cannot be a separate scroll view. Two scrolling surfaces on one
-            screen is the control that makes a phone feel like it is fighting
-            you, and this one only has to look like it lifts. */}
-        <View
-          style={{
-            marginTop: Spacing.xxxl,
-            backgroundColor: Palette.white,
-            borderTopLeftRadius: 34, borderTopRightRadius: 34,
-            /* Ellie: "decrease the white space above in practice in the bottom
-               tile on learn." */
-            paddingTop: Spacing.md,
-            paddingBottom: BottomTabInset + Spacing.xxxl,
-            shadowColor: '#2A1B10', shadowOpacity: 0.12,
-            shadowRadius: 24, shadowOffset: { width: 0, height: -10 },
-          }}>
-          {/* The grab handle the reference draws at the top of its panel. Not
-              a control: it is what says this thing came up from below. */}
-          <View
-            style={{
-              alignSelf: 'center', width: 44, height: 5, borderRadius: 3,
-              backgroundColor: c.border, marginBottom: Spacing.lg,
-            }}
-          />
-          <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-            <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>In Practice</Text>
-          </View>
-
-          {posts.length ? (
-            <>
+            In that reference the counted pills are the last thing on the
+            coloured ground and the white panel starts under them, so they read
+            as choosing what the panel holds rather than as part of it. They
+            were inside the sheet, under its heading, which is the other way
+            round. Nothing about them changed but where they are. */}
+        {posts.length ? (
               <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
                 {/* Search first, then the two lists, then the shelves. Someone
                     who knows what they are looking for should not have to walk
@@ -671,7 +641,97 @@ export default function ResourcesScreen() {
                   })}
                 </View>
               </View>
+        ) : null}
 
+        {/* ── THE SHEET ──────────────────────────────────────────────────
+            Ellie: "Can the learn page have the layout/design of the image with
+            the books, with a gradient page bg that lists the resources and the
+            insight, then what looks like a tab pulling up over the page down
+            below with the in practice articles?"
+
+            So everything above sits on the ground, and the reading is a panel
+            that comes up over it: a large radius on the top two corners only,
+            the full width, and no bottom at all, because in the reference it
+            runs off the end of the screen rather than finishing. The shadow
+            points upward so the ground reads as being behind it.
+
+            It cannot be a separate scroll view. Two scrolling surfaces on one
+            screen is the control that makes a phone feel like it is fighting
+            you, and this one only has to look like it lifts. */}
+        <View
+          style={{
+            marginTop: Spacing.xxxl,
+            backgroundColor: Palette.white,
+            borderTopLeftRadius: 34, borderTopRightRadius: 34,
+            /* Ellie: "decrease the white space above in practice in the bottom
+               tile on learn." */
+            paddingTop: Spacing.md,
+            paddingBottom: BottomTabInset + Spacing.xxxl,
+            shadowColor: '#2A1B10', shadowOpacity: 0.12,
+            shadowRadius: 24, shadowOffset: { width: 0, height: -10 },
+          }}>
+          {/* The grab handle the reference draws at the top of its panel. Not
+              a control: it is what says this thing came up from below. */}
+          <View
+            style={{
+              alignSelf: 'center', width: 44, height: 5, borderRadius: 3,
+              backgroundColor: c.border, marginBottom: Spacing.lg,
+            }}
+          />
+          {/* ── THE SHEET OPENS IN TWO COLUMNS ─────────────────────────
+              Ellie: "I also want the in practice hero on the left of the
+              bottom tile with article previews visible on the right just like
+              the screenshot."
+
+              In that reference the panel's left half is the heading and a
+              large number, and its right half is a grid of covers running off
+              the edge. So: the heading and the count on the left, four
+              previews on the right. The four are the newest, which is the
+              order this screen already sorts by, so nothing here decides what
+              is interesting. The number is a count rather than a word, which
+              is the one thing on this block that is not Ellie's to write. */}
+          <View
+            style={{
+              flexDirection: 'row', gap: Spacing.lg,
+              paddingLeft: Spacing.xl, paddingRight: Spacing.lg,
+              maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
+              marginBottom: Spacing.xxl,
+            }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...Type.display, color: c.textStrong }}>In Practice</Text>
+              <Text
+                style={{
+                  ...Type.display, fontSize: 52, lineHeight: 74,
+                  color: c.accent, marginTop: Spacing.sm,
+                }}>
+                {posts.length}
+              </Text>
+            </View>
+            <View style={{ width: '50%', flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+              {posts.slice(0, 4).map((post) => (
+                <Pressable
+                  key={post.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={post.title}
+                  onPress={() => { if (post.external) { Linking.openURL(post.external); return; } setOpenPost(post.id); }}
+                  style={{ width: '47%', aspectRatio: 0.78 }}>
+                  <View
+                    style={{
+                      flex: 1, borderRadius: Radius.lg, overflow: 'hidden',
+                      backgroundColor: `${CARD_TINTS[Math.max(0, categories.indexOf(post.category || '')) % CARD_TINTS.length]}2e`,
+                      padding: Spacing.sm, justifyContent: 'flex-end',
+                    }}>
+                    <Text numberOfLines={3} style={{ ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '700', color: c.textStrong }}>
+                      {post.title}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {posts.length ? (
+            <>
               {narrowing ? (
                 /* One list, because this is an answer to a question. */
                 <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
@@ -762,8 +822,17 @@ function Shell({ children }: { children: React.ReactNode }) {
      and another at the bottom left cannot do that: the bottom half is where
      the panel goes. Both at the top, as on Notes, so the ground is a sky and
      the sheet is what sits on it. */
-  return <TabScreen tint={Palette.indigo} second={Palette.orange} corners>{children}</TabScreen>;
+  /* ── A FULL COLOUR, NOT A WASH ────────────────────────────────────
+     Ellie: "I want learn page to match that books screenshot, with the full
+     color bg page." That reference is a lavender ground from edge to edge
+     with black type on it, not cream with a tint in the corners. So this is a
+     painted ground that keeps the ink: light enough to read on, saturated
+     enough that the white sheet coming up over it is a different surface. */
+  return <TabScreen groundColors={LEARN_GROUND} groundTone="ink">{children}</TabScreen>;
 }
+
+/** The books reference's ground, in this product's blue rather than its own. */
+const LEARN_GROUND = ['#C9D2F2', '#E6E3F0'] as const;
 
 type Item = CatalogueItem;
 

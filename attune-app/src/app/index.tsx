@@ -42,10 +42,10 @@ import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghos
 import { BRAND_NAME } from '@/components/brand-header';
 import { showSection } from '@/components/results';
 import { showJournal } from '@/app/notes';
-import { withAlpha } from '@/components/page-wash';
+import PageWash, { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BlueGround, BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BlueGround, BottomTabInset, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -356,17 +356,24 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: BlueGround[0] }}>
+    /* ── CREAM, WITH THE BLUE COMING OFF THE TOP ──────────────────────
+       Ellie: "should be cream with blue tinted hues, like the luxury page."
+
+       That reference is a near-white page with a cool tint falling out of the
+       top corners, not a coloured screen. So this stops painting the navy and
+       takes the same ground the other three tabs have, with the brand indigo
+       in both corners.
+
+       Everything on it turns over with it. White type and a glass pane only
+       work on a dark ground: on cream the pane is invisible and the type is
+       gone. The tiles are white cards with the shared lift, and the ink is the
+       ink every other cream page uses. */
+    <View style={{ flex: 1, backgroundColor: c.background }}>
       {/* The ground. Two shades of one blue, from BlueGround, which the results
           glance paints its lead panel with. Monochrome on purpose: the three
           hue version of this screen was the app inventing a palette the site
           does not have. */}
-      <LinearGradient
-        colors={[...BlueGround]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.9, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
+      <PageWash tint={Palette.indigo} second={Palette.indigo} corners />
 
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         {/* Ellie: "I want the lockup in the top to be at the exact same
@@ -377,7 +384,7 @@ export default function HomeScreen() {
             row draws the profile control alone: two lockups on one screen is
             the same thing said twice. */}
         <BrandHeader
-          tone="light"
+          tone="ink"
           lockup={false}
           right={(
             <Pressable
@@ -389,12 +396,12 @@ export default function HomeScreen() {
               <SymbolView
                 name="person.crop.circle"
                 size={28}
-                tintColor={Palette.white}
+                tintColor={c.textStrong}
                 fallback={(
                   <View
                     style={{
                       width: 28, height: 28, borderRadius: 14, borderWidth: 1.5,
-                      borderColor: 'rgba(255,255,255,0.7)',
+                      borderColor: c.border,
                     }}
                   />
                 )}
@@ -413,7 +420,7 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => { setRefreshing(true); load(); }}
-              tintColor="rgba(255,255,255,0.7)"
+              tintColor={c.accentQuiet}
             />
           }>
           {/* ── ON THE BLUE ──────────────────────────────────────────────
@@ -461,12 +468,16 @@ export default function HomeScreen() {
                 control alone, because two lockups on one screen is the same
                 thing said twice. */}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.lg }}>
+              {/* The cream variant, because the page is cream now. The
+                  inverse one Ellie asked for on home was for the navy; the
+                  rule underneath it is the same one it always was, which is
+                  that the mark takes the ground it is on. */}
               <Image
-                source={require('@/assets/images/attune-mark-dark.png')}
+                source={require('@/assets/images/attune-mark-light.png')}
                 style={{ width: 58, height: 58 * (76 / 103) }}
                 resizeMode="contain"
               />
-              <Text style={{ ...Type.display, color: Palette.white, flex: 1 }}>
+              <Text style={{ ...Type.display, color: c.textStrong, flex: 1 }}>
                 {BRAND_NAME}
               </Text>
             </View>
@@ -480,17 +491,30 @@ export default function HomeScreen() {
                 word with a thin rule under it, which is what separates it from
                 the headline above without another size change. */}
             <View style={{ marginTop: Spacing.lg, marginBottom: Spacing.xl, alignSelf: 'flex-start' }}>
-              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.78)' }}>
+              <Text style={{ ...Type.body, color: c.textMuted }}>
                 {data.greeting}
               </Text>
               <View
-                style={{
-                  height: 1, marginTop: Spacing.sm,
-                  backgroundColor: 'rgba(255,255,255,0.35)',
-                }}
+                style={{ height: 1, marginTop: Spacing.sm, backgroundColor: c.border }}
               />
             </View>
 
+            {/* ── ONE TILE BEHIND BOTH BLOCKS ───────────────────────────
+                Ellie: "Home should have that additional tile behind the ones
+                I'm seeing now."
+
+                In the reference the four squares and the two cards sit inside
+                one panel rather than loose on the page, which is what gives
+                that screen its edges. So this is that panel: the page's own
+                near-white, a generous radius, and the shared lift, with both
+                blocks inside it. */}
+            <View
+              style={{
+                backgroundColor: Palette.white,
+                borderRadius: Radius.card + 6,
+                padding: Spacing.lg,
+                ...Lift,
+              }}>
             {/* ── FOUR WAYS IN ───────────────────────────────────────────
                 Ellie: "Instead of the 4 rounded squares above the two main
                 ones, let's add quick links to insight of the day, action plan
@@ -504,50 +528,44 @@ export default function HomeScreen() {
                 <QuickLink key={q.id} item={q} onGo={() => goQuick(q)} />
               ))}
             </View>
-          </View>
 
-          {/* ── WHAT HAPPENED, BEFORE WHAT IS NEXT ────────────────────────
-              Unread alerts, newest first, at most five and usually none. They
-              are the one thing on this screen the reader could not have known:
-              a partner finishing, a note shared, an account deleted. They keep
-              the glass tile they have always had, above the two cards, so the
-              cards can be only the two prompts Ellie asked them to be. */}
-          {alerts.length ? (
-            <GhostTile
-              radius={Radius.card}
-              style={{
-                marginHorizontal: Spacing.lg, paddingHorizontal: Spacing.lg,
-                paddingVertical: Spacing.xs, marginBottom: Spacing.lg,
-              }}>
-              {alerts.map((a, i) => (
-                <TileRow
-                  key={a.id}
-                  icon="bell.badge.fill"
-                  title={a.title}
-                  body={a.body}
-                  first={i === 0}
-                  onPress={() => openAlert(a)}
-                />
+            {/* ── WHAT HAPPENED, BEFORE WHAT IS NEXT ──────────────────────
+                Unread alerts, newest first, at most five and usually none.
+                They are the one thing on this screen the reader could not have
+                known: a partner finishing, a note shared, an account deleted.
+                Inside the tile with everything else, above the two cards, so
+                the cards can be only the two prompts Ellie asked them to be. */}
+            {alerts.length ? (
+              <View style={{ marginBottom: Spacing.lg }}>
+                {alerts.map((a, i) => (
+                  <TileRow
+                    key={a.id}
+                    icon="bell.badge.fill"
+                    title={a.title}
+                    body={a.body}
+                    first={i === 0}
+                    onPress={() => openAlert(a)}
+                  />
+                ))}
+              </View>
+            ) : null}
+
+            {/* ── THE TWO PROMPTS ────────────────────────────────────────
+                Ellie: "the two boxes with images for each of the two things
+                you're prompted with... let's just do 2 always that populate
+                based on the prioritized list we have, we can use the icons
+                from the current bars as the image in the shape's rounded
+                square."
+
+                Two, always: the priority engine's own order, taken from the
+                top. `prompts` is where that list is cut, so "always two" is a
+                slice rather than three conditionals that can each be true. */}
+            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+              {prompts.map((p) => (
+                <PromptCard key={p.key} item={p} onPress={p.onPress} />
               ))}
-            </GhostTile>
-          ) : null}
-
-          {/* ── THE TWO PROMPTS ──────────────────────────────────────────
-              Ellie: "the two boxes with images for each of the two things
-              you're prompted with (currently in the bottom tile, and currently
-              2-3 items, but let's just do 2 always that populate based on the
-              prioritized list we have, we can use the icons from the current
-              bars as the image in the shape's rounded square)."
-
-              Two, always: the priority engine's own order, taken from the top.
-              `prompts` is where that list is cut, so "always two" is one line
-              rather than three conditionals that can each be true. Still the
-              glass material and still low on the page, which she asked for by
-              name: "the same glass-effect tile with the shading down low." */}
-          <View style={{ flexDirection: 'row', gap: Spacing.lg, paddingHorizontal: Spacing.lg }}>
-            {prompts.map((p) => (
-              <PromptCard key={p.key} item={p} onPress={p.onPress} />
-            ))}
+            </View>
+            </View>
           </View>
 
           {/* The reminder did not go. Said here rather than on the row,
@@ -555,13 +573,13 @@ export default function HomeScreen() {
               renders and a message inside it would be attached to a card that
               now says something else. */}
           {nudgeFailed ? (
-            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>
+            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>
               That reminder did not send. Pull down and try again.
             </Text>
           ) : null}
 
           {error ? (
-            <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>
+            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.lg, paddingHorizontal: Spacing.xl }}>
               Showing what we last loaded. Pull down to refresh.
             </Text>
           ) : null}
@@ -896,6 +914,10 @@ function ResearchNote({ finding }: { finding: NonNullable<HomeResponse['research
  * glyph so it fades out well before it stops.
  */
 const ICON_ORANGE = '#FF8F5E';
+/** The pale square behind a quick link's icon and behind a prompt's picture.
+ *  One constant, because the reference uses one tone for both and two numbers
+ *  a hundred lines apart is how they stop being the same tone. */
+const TILE_FILL = '#F1EEE9';
 const ICON_GLOW_SIZE = 44;
 const ICON_GLOW_RINGS = 24;
 const ICON_GLOW_PEAK = 0.30;
@@ -933,22 +955,28 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
       accessibilityLabel={item.label}
       onPress={onGo}
       style={{ flex: 1, alignItems: 'center', gap: Spacing.sm }}>
-      <GhostTile
-        radius={Radius.xl}
-        style={{ width: '100%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center' }}>
+      {/* A pale square with a thin icon in it, which is what the reference
+          has: four of them in a row, the tile light against the panel rather
+          than a different colour from it. */}
+      <View
+        style={{
+          width: '100%', aspectRatio: 1, borderRadius: Radius.xl,
+          backgroundColor: TILE_FILL,
+          alignItems: 'center', justifyContent: 'center',
+        }}>
         <SymbolView
           name={item.icon as never}
           size={22}
-          tintColor={ICON_ORANGE}
-          fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: ICON_ORANGE }} />}
+          tintColor={c.accent}
+          fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.accent }} />}
           style={{ width: 24, height: 24 }}
         />
-      </GhostTile>
+      </View>
       <Text
         numberOfLines={2}
         style={{
           ...Type.small, fontSize: 11, lineHeight: 15,
-          color: GhostInkQuiet, textAlign: 'center',
+          color: c.textMuted, textAlign: 'center',
         }}>
         {item.label}
       </Text>
@@ -985,40 +1013,40 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
       disabled={dim}
       onPress={onPress}
       style={{ flex: 1 }}>
-      <GhostTile radius={Radius.card} style={{ padding: Spacing.lg, opacity: dim ? 0.55 : 1 }}>
+      <View style={{ opacity: dim ? 0.55 : 1 }}>
         {/* The picture. A tint of the accent behind the glyph rather than a
             photograph: this product has no artwork, and a grey rectangle
             waiting for one reads as an image that failed to load. */}
         <View
           style={{
-            width: '100%', aspectRatio: 1.35, borderRadius: Radius.xl,
-            backgroundColor: 'rgba(255,255,255,0.12)',
+            width: '100%', aspectRatio: 1.15, borderRadius: Radius.xl,
+            backgroundColor: TILE_FILL,
             alignItems: 'center', justifyContent: 'center',
-            marginBottom: Spacing.lg,
+            marginBottom: Spacing.md,
           }}>
           <SymbolView
             name={item.icon as never}
             size={34}
-            tintColor={dim ? GhostInkQuiet : ICON_ORANGE}
-            fallback={<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: ICON_ORANGE }} />}
+            tintColor={dim ? c.textMuted : c.accent}
+            fallback={<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: c.accent }} />}
             style={{ width: 36, height: 36 }}
           />
         </View>
         {/* Title, a hairline, then one small line. That is the reference's
             own card: the rule is what makes the second line read as a note
             about the first rather than as more of the same sentence. */}
-        <Text numberOfLines={2} style={{ ...Type.cardTitle, color: GhostInk }}>
+        <Text numberOfLines={2} style={{ ...Type.cardTitle, color: c.textStrong }}>
           {item.title}
         </Text>
         {item.body ? (
           <>
-            <View style={{ height: 1, backgroundColor: GhostRule, marginVertical: Spacing.md }} />
-            <Text numberOfLines={2} style={{ ...Type.small, color: GhostInkQuiet, lineHeight: 19 }}>
+            <View style={{ height: 1, backgroundColor: c.border, marginVertical: Spacing.md }} />
+            <Text numberOfLines={2} style={{ ...Type.small, color: c.textMuted, lineHeight: 19 }}>
               {item.body}
             </Text>
           </>
         ) : null}
-      </GhostTile>
+      </View>
     </Pressable>
   );
 }
@@ -1040,7 +1068,7 @@ function TileRow({
       disabled={disabled}
       style={{
         paddingVertical: Spacing.lg,
-        borderTopWidth: first ? 0 : 1, borderTopColor: GhostRule,
+        borderTopWidth: first ? 0 : 1, borderTopColor: c.border,
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
         opacity: disabled ? 0.5 : 1,
       }}>
@@ -1066,21 +1094,12 @@ function TileRow({
           The alpha is solved from the peak, so the ring count can change
           without the glow getting brighter. A disabled row has no glow: it is
           not there to pop. */}
+      {/* ── NO GLOW ON CREAM ──────────────────────────────────────────
+          The glow was for a bright icon inside a glass tile on the navy, where
+          it made the icon pop. On a near-white page it is a smudge: light
+          against light. The icon carries itself here. The constants stay, with
+          this note, because the ground is the reason and grounds change. */}
       <View style={{ width: 23, height: 23, alignItems: 'center', justifyContent: 'center' }}>
-        {disabled ? null : Array.from({ length: ICON_GLOW_RINGS }, (_, i) => {
-          const size = ICON_GLOW_SIZE * (1 - i / ICON_GLOW_RINGS);
-          return (
-            <View
-              key={i}
-              pointerEvents="none"
-              style={{
-                position: 'absolute',
-                width: size, height: size, borderRadius: size / 2,
-                backgroundColor: withAlpha(ICON_ORANGE, ICON_GLOW_ALPHA),
-              }}
-            />
-          );
-        })}
         <SymbolView
           name={icon as never}
           size={21}
@@ -1089,19 +1108,19 @@ function TileRow({
              navy it loses most of its contrast. This is that orange lifted for
              the dark ground, the same move the partner's blue made on the
              results tiles. */
-          tintColor={disabled ? GhostInkQuiet : ICON_ORANGE}
+          tintColor={disabled ? c.textMuted : c.accent}
           style={{ width: 23, height: 23 }}
         />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ ...Type.cardTitle, color: GhostInk }}>{title}</Text>
+        <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{title}</Text>
         {body ? (
-          <Text numberOfLines={1} style={{ ...Type.small, color: GhostInkQuiet, marginTop: 2 }}>
+          <Text numberOfLines={1} style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
             {body}
           </Text>
         ) : null}
       </View>
-      {!disabled ? <Text style={{ ...Type.body, color: GhostInkQuiet }}>{'\u203A'}</Text> : null}
+      {!disabled ? <Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text> : null}
     </Pressable>
   );
 }
