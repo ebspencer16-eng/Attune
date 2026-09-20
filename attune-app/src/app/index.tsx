@@ -434,11 +434,16 @@ export default function HomeScreen() {
               bottom-pinned one are both pushing against the thing holding
               them. Centring the pair is the change that actually moves them,
               and it moves them toward each other, which is what was asked. */}
-          <View
-            style={{
-              flexGrow: 1, minHeight: topHeight,
-              paddingHorizontal: Spacing.xl,
-            }}>
+          {/* ── PACKED FROM THE TOP ──────────────────────────────────────
+              Ellie: "I want you to look at the referenced screenshots as
+              templates... build the format to match the screenshots exactly."
+
+              The reference stacks its five blocks one under the next with
+              nothing between them. This had flexGrow and a minimum height, so
+              the two cards were pushed to the bottom of the screen and a third
+              of the page was empty blue. The blocks were right and the spacing
+              was what made it read as a different screen. */}
+          <View style={{ paddingHorizontal: Spacing.xl }}>
             {/* The wordmark is gone. It named the app to someone already
                 inside it, on the one screen where the whole ground is the
                 brand colour. Settings keeps the row: it is where account
@@ -471,13 +476,20 @@ export default function HomeScreen() {
                 is the headline now, and a second thing that size beside it
                 was the exact clash Ellie reported the last time these two
                 were close in weight. */}
-            <Text
-              style={{
-                ...Type.body, color: 'rgba(255,255,255,0.72)',
-                marginTop: Spacing.lg, marginBottom: Spacing.xxl,
-              }}>
-              {data.greeting}
-            </Text>
+            {/* The small row under the headline. In the reference it is a
+                word with a thin rule under it, which is what separates it from
+                the headline above without another size change. */}
+            <View style={{ marginTop: Spacing.lg, marginBottom: Spacing.xl, alignSelf: 'flex-start' }}>
+              <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.78)' }}>
+                {data.greeting}
+              </Text>
+              <View
+                style={{
+                  height: 1, marginTop: Spacing.sm,
+                  backgroundColor: 'rgba(255,255,255,0.35)',
+                }}
+              />
+            </View>
 
             {/* ── FOUR WAYS IN ───────────────────────────────────────────
                 Ellie: "Instead of the 4 rounded squares above the two main
@@ -487,7 +499,7 @@ export default function HomeScreen() {
 
                 Four rounded squares in a row, as the reference has them, each
                 landing somewhere that already exists. */}
-            <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xxl }}>
+            <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xl }}>
               {QUICK_LINKS.map((q) => (
                 <QuickLink key={q.id} item={q} onGo={() => goQuick(q)} />
               ))}
@@ -992,13 +1004,19 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
             style={{ width: 36, height: 36 }}
           />
         </View>
+        {/* Title, a hairline, then one small line. That is the reference's
+            own card: the rule is what makes the second line read as a note
+            about the first rather than as more of the same sentence. */}
         <Text numberOfLines={2} style={{ ...Type.cardTitle, color: GhostInk }}>
           {item.title}
         </Text>
         {item.body ? (
-          <Text numberOfLines={2} style={{ ...Type.small, color: GhostInkQuiet, marginTop: Spacing.xs, lineHeight: 19 }}>
-            {item.body}
-          </Text>
+          <>
+            <View style={{ height: 1, backgroundColor: GhostRule, marginVertical: Spacing.md }} />
+            <Text numberOfLines={2} style={{ ...Type.small, color: GhostInkQuiet, lineHeight: 19 }}>
+              {item.body}
+            </Text>
+          </>
         ) : null}
       </GhostTile>
     </Pressable>

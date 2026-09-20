@@ -577,7 +577,9 @@ export default function ResourcesScreen() {
             marginTop: Spacing.xxxl,
             backgroundColor: Palette.white,
             borderTopLeftRadius: 34, borderTopRightRadius: 34,
-            paddingTop: Spacing.xxl,
+            /* Ellie: "decrease the white space above in practice in the bottom
+               tile on learn." */
+            paddingTop: Spacing.md,
             paddingBottom: BottomTabInset + Spacing.xxxl,
             shadowColor: '#2A1B10', shadowOpacity: 0.12,
             shadowRadius: 24, shadowOffset: { width: 0, height: -10 },
@@ -587,7 +589,7 @@ export default function ResourcesScreen() {
           <View
             style={{
               alignSelf: 'center', width: 44, height: 5, borderRadius: 3,
-              backgroundColor: c.border, marginBottom: Spacing.xl,
+              backgroundColor: c.border, marginBottom: Spacing.lg,
             }}
           />
           <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>

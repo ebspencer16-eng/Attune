@@ -45,7 +45,6 @@ CLAUDE.md, so anything new sits here until you do.
 | # | Migration |
 |--|--|
 
-| M-073 | **073_journal_anchor.sql. The journal cannot save an entry until you run this.** `notes.anchor_type` carries a list of allowed values in the database, written a year before the journal existed, and Postgres refuses any row with a type that is not on it. I found this by writing an entry rather than by reading the code: the app said "That entry did not save", which is true and says nothing. The migration widens the list by one value. It is safe to run twice and rewrites nothing. Everything else in this batch works now. |
 
 ### Decide these
 
@@ -77,7 +76,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The second batch of 20 September is built and is in section 3.
+**Nothing open.** The three from 20 September are built and are in section 3.
 
 ## 3. For you to review
 
@@ -93,10 +92,13 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The second batch of 20 September first.
+The three from 20 September first.
 
 | # | Review |
 |--|--|
+| O341 | **Home, block for block.** The blocks were already right; the spacing was what made it read as a different screen. `flexGrow` was pushing the two cards to the bottom and leaving a third of the page empty, and the reference stacks its five blocks one under the next with nothing between them. The greeting takes the rule under it that the reference's small row has, and each card is now an image, a title, a hairline and one small line, which is the reference's own card: the rule is what makes the second line read as a note about the first. |
+| O342 | **Notes, block for block.** Three things were wrong against the template. The usage card was a lighter white than the card above it, so the two read as one card with a seam; it is grey now, darker than the entry, as the reference has it. The two side-by-side blocks were below the journal and the reference puts its pair above its one full-width card, so they have swapped. And the journal card ended in a chevron where the reference ends in a filled pill. The glyph is in the pill rather than a word, because a word on it is a string a customer reads. |
+| O343 | **Less air above In Practice.** |
 | O332 | **Learn is the books layout.** Both wash colours come from the top, so the ground is a sky rather than two stains at opposite ends, and the resources and the insight sit on it. In Practice is a white sheet with a thirty-four point radius on its top two corners only, a grab handle, and no bottom edge: it runs off the end of the screen the way the reference's does. One scroll view, not two. |
 | O333 | **The Notes gradient comes from both top corners**, orange on the left and indigo on the right, meeting across the top and gone by halfway down. |
 | O334 | **A word of the day, as a dictionary entry.** Part of speech, then the word very large, then the meaning in a second, quieter card, which is what makes it read as an entry rather than a heading with a paragraph. The copy is on the server in `api/_words.js`, so it is one copy and you can change it without an app build. **See C3.** |
@@ -104,7 +106,7 @@ The second batch of 20 September first.
 | O336 | **Home is the Luxury layout.** The lockup at headline size where the reference has its own name, the greeting at the size of the small line under it, four quick links, and the two cards low on the page in the glass material. The row at the top draws the profile control alone now: two lockups on one screen is the same thing twice. The insight of the day is no longer on home, because that layout has no room for it; it is one of the four quick links and it is still a hero on Learn. |
 | O337 | **Four quick links:** Insight of the day, Action plan, Highlights, Journal. |
 | O338 | **Always two prompts**, cut from the priority engine's own order in one place rather than by three conditionals that could each independently be true. The icon from the old row is the card's picture. |
-| O339 | **The relationship journal. It needs migration 073 before an entry will save: see section 1.** The composer is the first thing on the screen rather than behind a plus: the fewest taps between thinking of something and having written it is none. Each entry carries the date and time it was written, from the row. An entry is a note anchored to its day, so there is no new table and no migration; the server's anchor validator had to learn the type, because an anchor it does not know is refused on write and the entry is simply never saved. |
+| O339 | **The relationship journal.** Migration 073 is run, so entries save. The composer is the first thing on the screen rather than behind a plus: the fewest taps between thinking of something and having written it is none. Each entry carries the date and time it was written, from the row. An entry is a note anchored to its day, so there is no new table and no migration; the server's anchor validator had to learn the type, because an anchor it does not know is refused on write and the entry is simply never saved. |
 | O340 | **It opens with the phone's passcode**, and that is verified rather than assumed: the prompt came up in the simulator. **It needs a new TestFlight build to work on your phone.** expo-local-authentication is a native module and cannot arrive over the air, so on the build you have now the journal opens without asking. It says which of the two it is doing on the card. |
 | O321 | **The loading mark is half again as large.** |
 | O322 | **A dropdown cannot arrive already open.** Two pages of a section render the same components in the same places, so React treated them as one instance and handed the second page the first page's state. The page is keyed on its section now, which also means a page always opens at the top. |

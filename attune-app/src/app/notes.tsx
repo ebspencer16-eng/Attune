@@ -572,7 +572,7 @@ export default function NotesScreen() {
               <View
                 style={{
                   backgroundColor: Palette.white, borderRadius: Radius.card,
-                  paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl, ...Lift,
+                  paddingVertical: Spacing.xxl, paddingHorizontal: Spacing.xl, ...Lift,
                 }}>
                 <Text style={{ ...Type.body, color: c.textMuted }}>{word.part}</Text>
                 <Text
@@ -582,11 +582,16 @@ export default function NotesScreen() {
                   {word.word}
                 </Text>
               </View>
+              {/* ── DARKER THAN THE CARD ABOVE IT ────────────────────────
+                  In the reference the entry is white and the usage note under
+                  it is a grey card, which is what makes the second one read as
+                  a footnote to the first. This was a lighter white than the
+                  card above, so the two read as one card with a seam. */}
               <View
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: Radius.card,
+                  backgroundColor: '#EFEAE3', borderRadius: Radius.card,
                   paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl,
-                  marginTop: Spacing.md,
+                  marginTop: Spacing.sm,
                 }}>
                 <Text style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic }}>
                   {WORD_IN_USE}
@@ -597,6 +602,40 @@ export default function NotesScreen() {
               </View>
             </View>
           ) : null}
+
+          {/* ── TWO PEEKS, SIDE BY SIDE ────────────────────────────────────
+              Ellie: "then below have jump back in and shared with me sneak
+              peeks side by side then the tag list below."
+
+              Her two names, and a peek rather than a list: the most recent
+              two of each, one line apiece, with the full list a tap away in
+              the same place it always was. Two narrow columns cannot hold
+              three rows of wrapped prose, and a peek that scrolls is not a
+              peek. */}
+          <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg }}>
+            <Peek
+              title={JUMP_BACK_IN}
+              count={mineRecent.length}
+              empty={PEEK_MINE_EMPTY}
+              rows={mineRecent.slice(0, 2).map((n) => ({
+                id: n.id,
+                text: peekText(n),
+                onPress: () => openWhereItLives(n),
+              }))}
+            />
+            <Peek
+              title={SHARED_WITH_ME}
+              count={sharedRecent.length}
+              badge={unopenedCount || undefined}
+              empty={PEEK_SHARED_EMPTY}
+              rows={sharedRecent.slice(0, 2).map((n) => ({
+                id: n.id,
+                text: peekText(n),
+                unread: !n.opened_at,
+                onPress: () => { markOpened(n); },
+              }))}
+            />
+          </View>
 
           {/* ── THE JOURNAL ────────────────────────────────────────────────
               Ellie: "I want to build a 'relationship journal' into the notes
@@ -630,42 +669,19 @@ export default function NotesScreen() {
                 {lockAvailable ? JOURNAL_LOCKED : JOURNAL_OPEN}
               </Text>
             </View>
-            <Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>
+            {/* The reference's bottom card ends in a filled accent pill, not
+                a chevron. The glyph inside it rather than a word, because a
+                word on it would be a string a customer reads and those are
+                Ellie's. */}
+            <View
+              style={{
+                width: 34, height: 34, borderRadius: 17,
+                backgroundColor: c.accent,
+                alignItems: 'center', justifyContent: 'center',
+              }}>
+              <Text style={{ ...Type.cardTitle, color: Palette.white }}>{'\u203A'}</Text>
+            </View>
           </Pressable>
-
-          {/* ── TWO PEEKS, SIDE BY SIDE ────────────────────────────────────
-              Ellie: "then below have jump back in and shared with me sneak
-              peeks side by side then the tag list below."
-
-              Her two names, and a peek rather than a list: the most recent
-              two of each, one line apiece, with the full list a tap away in
-              the same place it always was. Two narrow columns cannot hold
-              three rows of wrapped prose, and a peek that scrolls is not a
-              peek. */}
-          <View style={{ flexDirection: 'row', gap: Spacing.lg, marginBottom: Spacing.xxl }}>
-            <Peek
-              title={JUMP_BACK_IN}
-              count={mineRecent.length}
-              empty={PEEK_MINE_EMPTY}
-              rows={mineRecent.slice(0, 2).map((n) => ({
-                id: n.id,
-                text: peekText(n),
-                onPress: () => openWhereItLives(n),
-              }))}
-            />
-            <Peek
-              title={SHARED_WITH_ME}
-              count={sharedRecent.length}
-              badge={unopenedCount || undefined}
-              empty={PEEK_SHARED_EMPTY}
-              rows={sharedRecent.slice(0, 2).map((n) => ({
-                id: n.id,
-                text: peekText(n),
-                unread: !n.opened_at,
-                onPress: () => { markOpened(n); },
-              }))}
-            />
-          </View>
 
           <TagList
             tags={tags}
@@ -775,8 +791,11 @@ function Peek({
   return (
     <View
       style={{
-        flex: 1, backgroundColor: Palette.white, borderRadius: Radius.card,
-        padding: Spacing.lg, ...Lift,
+        /* Tall and generously padded, which is the shape of the two buttons
+           the reference puts side by side here. */
+        flex: 1, minHeight: 132,
+        backgroundColor: Palette.white, borderRadius: Radius.card,
+        paddingVertical: Spacing.xl, paddingHorizontal: Spacing.lg, ...Lift,
       }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.md }}>
         <Text numberOfLines={2} style={{ ...Type.eyebrow, color: c.accentQuiet, flex: 1 }}>{title}</Text>
