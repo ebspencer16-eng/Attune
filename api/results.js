@@ -839,6 +839,11 @@ export default async function handler(req) {
         reflection,
         intimacy,
         ex2: { mine: me.ex2_answers, theirs: partner?.ex2_answers },
+        /* The admired card says "most admired for HER steadiness", which needs
+           a possessive, which needs a pronoun. pronounForm falls back to
+           they/them; a wrong guess misgenders a real person on a card built to
+           be shown to someone. */
+        pronouns: { you: me.pronouns || null, them: partner?.pronouns || null },
       }),
 
       /**

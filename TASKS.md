@@ -66,10 +66,49 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The batch of 22 September is built and sitting in section 3.
+The batch of 23 September, recorded in full before any of it was built.
 
 | # | Task |
 |--|--|
+| **The table of contents** |  |
+| O271 | **"Exercise results" sits with Highlights, and its contents sit inside it.** "I want exercise results title to be listed left-aligned with highlights and couple type, and I want the content in that section indented further right than that." So the heading is flush with the top-level rows and the five exercises step in from it. |
+| O272 | **The icons lose their dots.** "I also don't know why the icons are now in dots, I don't want that." Coloured icon, no disc behind it. |
+| O273 | **The whole menu fits one screen with the dropdowns shut.** "there is way too much vertical space right now." |
+| O274 | **The Insights landing is the Attune orange.** "The home page is the attune blue, please try making the landing page for insights the attune orange. Similar gradient as the home page has please." |
+| **Before results exist** |  |
+| O275 | **The unfinished state.** "Ensure that when exercises are unfinished, insights page hero says 'Insights generate once your exercises are complete' and the orange page shows the exercise status table instead of the insights menu." Her hero line, word for word. |
+| **The storycards** |  |
+| O276 | **All of the type is too small.** "Text on storycards is too small." |
+| O277 | **Card 2's axis labels.** "Axis labels on storycard 2 are way too small and very low contrast, I need to be able to read them." |
+| O278 | **Card 3's poles move beside the rows.** "I want pole labels on the left and right of the rows on storycard 3, not below like they currently are." |
+| O279 | **Card 6, rebuilt.** "Diagonal divide from bottom left to top right of the screen, top left is the attune orange gradient and bottom right is the attune navy gradient. Top left says ellie is most admired for her steadiness. Bottom right says preston is most admired for his patience. All text in playfair display." |
+| O280 | **Tap the left to go back.** "On storycards, if I tap the left hand side of the page I want it to go back a page." |
+| O281 | **Card 4, redesigned.** "I'd like the page to be attune blue gradient, and have a 'sunrise' effect with a circular, attune-orange glow from the bottom middle of the page. Hero on the top should say 'Your communication styles are' then underneath should say '90% aligned'. then it should say one strength: [dimension] and where you have different approaches: [dimension], and remove the line starting with explore your results." |
+| O282 | **Remove the Physical Intimacy storycard.** |
+| O283 | **Remove the "as you explore your results" paragraph from card 8.** |
+| O284 | **The last card.** "full page should be the attune gradient orange to blue, large button in the middle that says explore your full results." |
+| O285 | **Highlights is not in the menu the first time.** "When a user clicks explore full results and sees the menu, the menu should exclude highlights (it makes it look like they should start with highlights even though that's what they just did). So just start with couple type, then the next time they see the menu, highlights will be listed as well." |
+| **Chrome** |  |
+| O286 | **The page arrows on a white tile.** "the previous and next arrows are hard to see. Can we make those circles have the glass effect with some shading?" |
+| O287 | **The covers again.** "Maybe a large icon not in a circle but with a colored glow behind it? No gradient line under the title but maybe a gradient line running in a rounded rectangle around the edge of the page (but still with a buffer so not at the edge of the screen)." |
+| O288 | **Every page that is not a cover has a count.** "Comms overview page doesn't have a page count in the top right - please ensure every page that's not a cover page has this." |
+| O289 | **The hero sits level with the count.** "Too much space above the hero on comms detailed pages. Hero heading should be top-aligned with the page count text, and should be consistent across all insights pages." |
+| **Tiles that are still white** |  |
+| O290 | **The overall tile and the How you feel right now tile.** "Change the overall tile and the how you feel right now tile to be ghost tiles like comms pages rather than white bg tiles." |
+| O291 | **Your Conflict Snapshot.** "Too much white space in the tiles on the your conflict snapshot tiles. Can we make those tiles ghost not white and fix spacing." |
+| O292 | **Your Patterns.** "Please make tiles on your patterns page ghost tiles not white tiles. Text on your patterns page tiles is currently invisible." |
+| O293 | **And the type follows the tile.** "Adjust text coloring when you change tile color so that text is visible." A rule rather than a list, because this is the fourth time in four days that a tile changed colour and the type on it did not. |
+| **Relationship Reflection, Side by Side** |  |
+| O294 | **Flip which layer is opaque.** "can we flip which sections are more opaque and which are more transluscent? I want the quotes to stand out more than the questions and suggested convo starters." |
+| O295 | **And take the Conflict page's layout.** "I'd rather the side by side for rel relf pages design matches the what you each wrote from conflict design. Can we do that layout but then do an eyebrow with a hairline divider (divider middle-aligned vertically with the text and starts right after the text ends)? section eyebrow and dividing lines can be orange. Try this prompt can be in orange under each question and responses." |
+| O296 | **What Comes Next quotes them.** "Rel Relf action items in the what comes next page just say 'Ellie wrote' and 'Preston wrote' but I want them to say 'Ellie wrote: [insert what I wrote]' then 'Preston wrote: [insert what Preston wrote]'." |
+| **Home and Learn** |  |
+| O297 | **The greeting on one line.** "I like the look of the home page much more when the welcome line fits in one line. I know we can't guarantee that since some users will have long names, but can we shrink the font a bit so that it doesn't cut often?" |
+| O298 | **Insight of the day as a hero on Learn.** "Add insight of the day as a hero and remove the eyebrow from the insight tile on the learn tab." |
+| O299 | **Home icons out of their circles.** |
+| O300 | **Home icons orange, not white.** |
+| O301 | **The mark on home is inverse.** "the bubble on the right should have a white bg not ghost." |
+| O302 | **The mark everywhere else is ghost.** "the heart in the left bubble should be transparent not white." |
 
 ## 3. For you to review
 

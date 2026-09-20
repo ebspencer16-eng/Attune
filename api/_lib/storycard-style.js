@@ -52,31 +52,43 @@ import { LINE_BOX, minLineHeight } from './font-metrics.js';
  * `alpha` is the white the text is drawn in, so neither surface writes an
  * rgba string of its own. `track` is em, `lh` is a multiplier.
  */
+/*
+ * ── A STEP UP, EVERYWHERE ─────────────────────────────────────────────────
+ * Ellie: "Text on storycards is too small."
+ *
+ * Every role that carries words moved up by roughly a tenth. The two big
+ * figures did not: they are already the largest thing on their cards and
+ * growing them would push a three-character percentage into two lines.
+ *
+ * The scale is shared, so this moves both surfaces at once, which is the
+ * point of it being one table. check-storycard-type runs the two renderers
+ * against each other and would say so if only one had moved.
+ */
 export const CARD_TYPE = {
   /** The label above everything: YOUR RESULTS, THE NUMBER, and so on. */
-  eyebrow:   { size: 0.55, family: 'body', weight: 700, track: 0.32, alpha: 0.40, upper: true },
+  eyebrow:   { size: 0.64, family: 'body', weight: 700, track: 0.32, alpha: 0.40, upper: true },
   /** The couple's names on the opener. The biggest thing on any card. */
   names:     { size: [2.6, 7, 3.8], family: 'display', weight: 700, track: -0.03, lh: 0.92, alpha: 1 },
   /** The ampersand between them. */
   amp:       { size: [1.82, 4.9, 2.66], family: 'display', weight: 700, lh: 0.92, alpha: 0.45 },
   /** A card's headline. */
-  title:     { size: [1.45, 4.8, 1.9], family: 'display', weight: 700, track: -0.02, lh: 1.12, alpha: 1 },
+  title:     { size: [1.58, 5.2, 2.05], family: 'display', weight: 700, track: -0.02, lh: 1.12, alpha: 1 },
   /** The couple-type card's headline, which sits above a map and runs longer. */
-  titleSm:   { size: [1.3, 4.4, 1.65], family: 'display', weight: 700, track: -0.015, lh: 1.15, alpha: 1 },
+  titleSm:   { size: [1.42, 4.8, 1.8], family: 'display', weight: 700, track: -0.015, lh: 1.15, alpha: 1 },
   /** The big figure on a stat card. */
   stat:      { size: [3.75, 13, 5.25], family: 'display', weight: 700, track: -0.04, lh: 0.9, alpha: 1 },
   /** The bigger figure, on the card that is only a figure. */
   statBig:   { size: [4.5, 14, 7], family: 'display', weight: 700, track: -0.05, lh: 0.85, alpha: 1 },
   /** The sentence under a headline. Light, and the app had it at regular. */
-  body:      { size: 0.88, family: 'body', weight: 300, lh: 1.7, alpha: 0.60 },
+  body:      { size: 1.02, family: 'body', weight: 300, lh: 1.7, alpha: 0.60 },
   /** The same, one step down, where a card has more to say. */
-  bodySm:    { size: 0.78, family: 'body', weight: 300, lh: 1.6, alpha: 0.60 },
+  bodySm:    { size: 0.9, family: 'body', weight: 300, lh: 1.6, alpha: 0.60 },
   /** A line that names something rather than explaining it. */
-  lead:      { size: 0.94, family: 'body', weight: 400, alpha: 0.85 },
+  lead:      { size: 1.08, family: 'body', weight: 400, alpha: 0.85 },
   /** A call-out tile's label. */
-  calloutLabel: { size: 0.50, family: 'body', weight: 700, track: 0.18, alpha: 1, upper: true },
+  calloutLabel: { size: 0.62, family: 'body', weight: 700, track: 0.18, alpha: 1, upper: true },
   /** A call-out tile's value. */
-  calloutValue: { size: 1.25, family: 'display', weight: 700, alpha: 1 },
+  calloutValue: { size: 1.4, family: 'display', weight: 700, alpha: 1 },
   /** The wordmark, bottom left. */
   /* Measured off the website, not guessed from the app: 0.75rem, white, and
      the app had it at 0.875rem in a 0.55 white. A wordmark is the one thing on
@@ -86,44 +98,44 @@ export const CARD_TYPE = {
      on the person's own colour. It is a size like any other, so it comes from
      here: the app had it written into the component, which is how the two
      surfaces stopped agreeing about everything else on these cards. */
-  mark:      { size: 0.5, family: 'body', weight: 700, lh: 1, alpha: 1 },
-  wordmark:  { size: 0.75, family: 'display', weight: 700, alpha: 1 },
+  mark:      { size: 0.58, family: 'body', weight: 700, lh: 1, alpha: 1 },
+  wordmark:  { size: 0.82, family: 'display', weight: 700, alpha: 1 },
   /** The address, bottom right. */
   /* Also measured: 0.52rem, regular weight, tracked 0.12em, lowercase. The
      app had it bold at 0.5 tracked 0.075. */
-  siteLabel: { size: 0.52, family: 'body', weight: 400, track: 0.12, alpha: 0.35, lower: true },
+  siteLabel: { size: 0.6, family: 'body', weight: 400, track: 0.12, alpha: 0.35, lower: true },
   /** The button at the end of the last card. */
-  cta:       { size: 0.85, family: 'body', weight: 700, track: 0.05, alpha: 1 },
+  cta:       { size: 0.96, family: 'body', weight: 700, track: 0.05, alpha: 1 },
   /** A sentence that introduces a figure. Card 3. */
-  leadLg:    { size: 0.92, family: 'body', weight: 400, lh: 1.45, alpha: 0.72 },
+  leadLg:    { size: 1.06, family: 'body', weight: 400, lh: 1.45, alpha: 0.72 },
   /** What a figure means, under it. Card 3. */
-  statLabel: { size: 1.05, family: 'body', weight: 500, alpha: 0.72 },
+  statLabel: { size: 1.15, family: 'body', weight: 500, alpha: 0.72 },
   /** The same, one step down, on the cards that are only a figure. */
-  statLabelSm: { size: 1, family: 'body', weight: 500, alpha: 0.8 },
+  statLabelSm: { size: 1.1, family: 'body', weight: 500, alpha: 0.8 },
   /** The eyebrow on the figure cards, a size up from the call-out label. */
-  eyebrowMd: { size: 0.55, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
+  eyebrowMd: { size: 0.64, family: 'body', weight: 700, track: 0.28, alpha: 0.45, upper: true },
   /** The intimacy card's eyebrow, which takes that card's own colour. */
-  eyebrowTint: { size: 0.52, family: 'body', weight: 700, track: 0.28, alpha: 0.85, upper: true },
+  eyebrowTint: { size: 0.61, family: 'body', weight: 700, track: 0.28, alpha: 0.85, upper: true },
   /** The middle figure size, used by the intimacy card. */
   statMid:   { size: [3.5, 12, 5.5], family: 'display', weight: 700, track: -0.04, lh: 1, alpha: 1 },
   /** Body copy on the cards that carry a paragraph. */
-  bodyMd:    { size: 0.82, family: 'body', weight: 300, lh: 1.65, alpha: 0.6 },
+  bodyMd:    { size: 0.95, family: 'body', weight: 300, lh: 1.65, alpha: 0.6 },
   /** Body copy where the card is already busy. */
-  bodyLg:    { size: 0.85, family: 'body', weight: 300, lh: 1.65, alpha: 0.55 },
+  bodyLg:    { size: 0.98, family: 'body', weight: 300, lh: 1.65, alpha: 0.55 },
   /** A label above a list, tracked wider than the call-out's. */
-  listLabel: { size: 0.55, family: 'body', weight: 700, track: 0.16, lh: 1.6, alpha: 0.5, upper: true },
+  listLabel: { size: 0.64, family: 'body', weight: 700, track: 0.16, lh: 1.6, alpha: 0.5, upper: true },
   /** A quoted line, set in the display face at reading size. */
-  quote:     { size: [1.1, 3.2, 1.3], family: 'display', weight: 400, lh: 1.55, alpha: 1 },
+  quote:     { size: [1.25, 3.6, 1.5], family: 'display', weight: 400, lh: 1.55, alpha: 1 },
   /** The largest headline, on the last card. */
-  titleLg:   { size: [1.6, 4.4, 2.15], family: 'display', weight: 700, lh: 1.2, alpha: 1 },
+  titleLg:   { size: [1.72, 4.8, 2.3], family: 'display', weight: 700, lh: 1.2, alpha: 1 },
   /** The headline on the two-up cards. */
-  titleMd:   { size: [1.5, 5, 2], family: 'display', weight: 700, lh: 1.15, alpha: 1 },
+  titleMd:   { size: [1.62, 5.4, 2.15], family: 'display', weight: 700, lh: 1.15, alpha: 1 },
   /** A small caption under a headline. */
-  caption:   { size: 0.72, family: 'body', weight: 400, alpha: 0.6 },
+  caption:   { size: 0.84, family: 'body', weight: 400, alpha: 0.6 },
   /** The second line on the sendoff, quieter than the button. */
-  ctaAlt:    { size: 0.78, family: 'body', weight: 600, track: 0.04, alpha: 0.75 },
+  ctaAlt:    { size: 0.9, family: 'body', weight: 600, track: 0.04, alpha: 0.75 },
   /** Tap to begin, and the like. */
-  footer:    { size: 0.52, family: 'body', weight: 700, track: 0.22, alpha: 0.28, upper: true },
+  footer:    { size: 0.6, family: 'body', weight: 700, track: 0.22, alpha: 0.28, upper: true },
 };
 
 /** The reference width these sizes were drawn at: the website's card. */

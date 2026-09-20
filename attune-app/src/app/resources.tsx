@@ -515,14 +515,21 @@ export default function ResourcesScreen() {
             app has. It is what stops this tab reading as a list of lists. */}
         {home?.research ? (
           <View style={{ paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+            {/* ── THE SECTION IS NAMED ON THE PAGE ───────────────────────
+                Ellie: "Add insight of the day as a hero and remove the eyebrow
+                from the insight tile on the learn tab."
+
+                Every other section of this tab is named by a hero above it and
+                this one named itself inside its own tile, which made it the one
+                block on the page whose label sat in a different place. */}
+            <Text style={{ ...Type.hero, color: c.textStrong, marginBottom: Spacing.lg }}>
+              Insight of the day
+            </Text>
             <LinearGradient
               colors={[...BlueGround]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 1 }}
               style={{ borderRadius: Radius.xl, padding: Spacing.xl }}>
-              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.55)', marginBottom: Spacing.md }}>
-                Insight of the day
-              </Text>
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
               </Text>

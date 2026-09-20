@@ -45,7 +45,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, SafeAreaView,
-  ScrollView, Text, View,
+  ScrollView, StyleSheet, Text, View,
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -236,6 +236,27 @@ function ground(tone: string): Ground {
   if (isGround(sent)) return sent;
   return TONES[tone] || TONES.night;
 }
+
+/**
+ * The orange half of the admired card, which is the card's own ground.
+ *
+ * The navy half is a rotated square laid over it. Two gradients rather than
+ * one so the divide is a hard edge: a single gradient between the two hues
+ * would be a blend, and Ellie asked for a divide.
+ */
+const ADMIRED_GROUND: Ground = ['#F08A4B', Palette.orange, '#C2410C'];
+
+/**
+ * The last card: the brand's two ends, orange into blue.
+ *
+ * Ellie: "full page should be the attune gradient orange to blue". The same
+ * pair the storycard rule and the email header run between, so the reel closes
+ * on the colours it opened with.
+ */
+const SENDOFF_GROUND: Ground = [Palette.orange, '#9B5DE5', Palette.indigo];
+
+/** The alignment card: the home screen's own blue, with a sunrise over it. */
+const STAT_PAIR_GROUND: Ground = ['#1B2A5E', '#24357A', '#2F55C4'];
 
 function typeGround(accent?: string | null): Ground {
   if (!accent) return ground('type');
@@ -457,12 +478,28 @@ function Reel({
         style={{ flex: 1 }}>
         {cards.map((card, i) => (
           <Pressable
-      accessibilityRole="button"
+            accessibilityRole="button"
             key={card.id}
-            // Tapping advances, the way the website's cards do. The last card
-            // has its own button instead, because tapping into nothing is how
-            // someone decides the thing is broken.
-            onPress={() => (i === cards.length - 1 ? onDone() : goTo(i + 1))}
+            /**
+             * ── WHICH SIDE WAS TAPPED ──────────────────────────────────────
+             * Ellie: "On storycards, if I tap the left hand side of the page I
+             * want it to go back a page."
+             *
+             * Which is how every story reel works, and the app only went
+             * forward. A third of the width is the back half: it has to be
+             * clearly a side rather than a sliver, and it has to leave the
+             * middle to the card, where the buttons on the first and last card
+             * are.
+             *
+             * The last card does not advance on tap. Tapping into nothing is
+             * how someone decides a thing is broken, and it has its own button.
+             */
+            onPress={(e) => {
+              const backward = e.nativeEvent.locationX < width / 3;
+              if (backward) { goTo(i - 1); return; }
+              if (i === cards.length - 1) return;
+              goTo(i + 1);
+            }}
             style={{ width, alignItems: 'center', justifyContent: 'flex-start' }}>
             <Card card={card} onDone={onDone} w={cardW} h={cardH} active={i === index} shotRef={refFor(i)} map={map} />
           </Pressable>
@@ -547,7 +584,17 @@ function Card({
 }) {
   const tone = card.kind === 'couple-type'
     ? typeGround(card.accent)
-    : ground(card.tone);
+    /* The admired card's ground is the orange half of its diagonal; the navy
+       half is laid over it below. */
+    : card.kind === 'admired'
+      ? ADMIRED_GROUND
+      : card.kind === 'sendoff'
+        ? SENDOFF_GROUND
+        /* The alignment card is the brand blue now, with the sunrise over it.
+           It was green, which belonged to nothing. */
+        : card.kind === 'stat-pair'
+          ? STAT_PAIR_GROUND
+          : ground(card.tone);
 
   // The entrance the website gives every card: up and in, once, on arrival.
   // An instant swap is what made the app's reel feel like a carousel of
@@ -574,6 +621,61 @@ function Card({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1, borderRadius: Radius.xl, overflow: 'hidden' }}>
+        {/* ── THE SUNRISE ON THE ALIGNMENT CARD ────────────────────────
+            Ellie asked for "a circular, attune-orange glow from the bottom
+            middle of the page". React Native has no radial gradient and this
+            project has no SVG library, so it is the same trick the home
+            screen's glow uses: many circles, each so faint its own edge is
+            below the threshold an eye can find, stacked so the alpha builds
+            toward the middle. Linear radii and a constant per-ring alpha give
+            a cumulative falloff, which is a radial gradient. */}
+        {card.kind === 'stat-pair' ? (
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+              {Array.from({ length: 26 }, (_, i) => {
+                const size = w * 1.6 * (1 - i / 26);
+                return (
+                  <View
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      bottom: -w * 0.45,
+                      width: size, height: size, borderRadius: size / 2,
+                      backgroundColor: 'rgba(232,103,58,0.055)',
+                    }}
+                  />
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
+
+        {/* ── THE DIAGONAL ON THE ADMIRED CARD ─────────────────────────
+            Ellie: "Diagonal divide from bottom left to top right of the
+            screen, top left is the attune orange gradient and bottom right is
+            the attune navy gradient."
+
+            Drawn as one square rotated forty-five degrees and pinned to the
+            bottom right corner, which is the only way to get a hard diagonal
+            edge without an SVG library, and this project has none. The square
+            is bigger than the card's diagonal so its own corners never come
+            into view. The orange is the card's ground underneath. */}
+        {card.kind === 'admired' ? (
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <LinearGradient
+              colors={[Palette.indigo, '#1B2A5E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                position: 'absolute',
+                width: (w + h) * 1.1, height: (w + h) * 1.1,
+                right: -(w + h) * 0.05, bottom: -(w + h) * 0.55,
+                transform: [{ rotate: '-45deg' }],
+              }}
+            />
+          </View>
+        ) : null}
+
         {/* The stripe across the top. It is on the website's opener and it is
             the first thing anyone sees of this product. */}
         {card.kind === 'opener' ? (
@@ -681,6 +783,11 @@ function Body({ card, onDone, map, w }: {
                 bName={map.bName}
                 quadrants={map.quadrants}
                 size={Math.round(w * CARD_MAP_PCT)}
+                /* Ellie: the axis labels were "way too small and very low
+                   contrast" here. The map is drawn on cream on the couple type
+                   page and on a dark gradient on this card, and it had one
+                   label colour for both. */
+                onDark
               />
             </View>
           ) : null}
@@ -724,16 +831,24 @@ function Body({ card, onDone, map, w }: {
             return (
               <View key={d.key} style={{ marginBottom: Spacing.lg }}>
                 <Text style={[S.label, { marginBottom: Spacing.xs }]}>{d.label}</Text>
-                {/* Tall enough for a staggered pair: the marks move up and down
-                    off the line, and a 20 point row clipped them. */}
-                <View style={{ height: 34, justifyContent: 'center' }}>
-                  <View style={{ height: 6, borderRadius: 3, backgroundColor: `${WHITE}0.12)` }} />
-                  <Dot value={d.a} colour={SC.people.you} label={sameInitial ? '' : you} dy={dyYou} w={w} />
-                  <Dot value={d.b} colour={SC.people.them} label={sameInitial ? '' : them} dy={dyThem} w={w} />
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
-                  <Text style={S.small}>{d.left}</Text>
-                  <Text style={S.small}>{d.right}</Text>
+                {/* ── THE POLES SIT EITHER SIDE ──────────────────────────
+                    Ellie: "I want pole labels on the left and right of the rows
+                    on storycard 3, not below like they currently are."
+
+                    Which is also how the results pages draw the same thing, so
+                    the card and the page a reader opens next now agree. The
+                    track is tall enough for a staggered pair: the marks step up
+                    and down off the line and a short row clipped them. */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  <Text style={[S.small, { width: 76, textAlign: 'right' }]} numberOfLines={2}>
+                    {d.left}
+                  </Text>
+                  <View style={{ flex: 1, height: 34, justifyContent: 'center' }}>
+                    <View style={{ height: 6, borderRadius: 3, backgroundColor: `${WHITE}0.12)` }} />
+                    <Dot value={d.a} colour={SC.people.you} label={sameInitial ? '' : you} dy={dyYou} w={w} />
+                    <Dot value={d.b} colour={SC.people.them} label={sameInitial ? '' : them} dy={dyThem} w={w} />
+                  </View>
+                  <Text style={[S.small, { width: 76 }]} numberOfLines={2}>{d.right}</Text>
                 </View>
               </View>
             );
@@ -753,6 +868,16 @@ function Body({ card, onDone, map, w }: {
     }
 
     case 'stat-pair':
+      /**
+       * ── THE SUNRISE ────────────────────────────────────────────────────
+       * Ellie: "I'd like the page to be attune blue gradient, and have a
+       * 'sunrise' effect with a circular, attune-orange glow from the bottom
+       * middle of the page."
+       *
+       * The glow is drawn by the card face, so it reaches the edges; see the
+       * note there. This is the content: the lead, the figure, and the two
+       * call-outs under it in her words.
+       */
       return (
         <View>
           <Text style={[S.leadLg, { textAlign: 'center' }]}>{card.lead}</Text>
@@ -797,19 +922,37 @@ function Body({ card, onDone, map, w }: {
       );
 
     case 'admired':
+      /**
+       * ── A DIAGONAL, NOT TWO CARDS ──────────────────────────────────────
+       * Ellie: "Diagonal divide from bottom left to top right of the screen,
+       * top left is the attune orange gradient and bottom right is the attune
+       * navy gradient. Top left says ellie is most admired for her steadiness.
+       * Bottom right says preston is most admired for his patience. All text in
+       * playfair display."
+       *
+       * The two grounds are drawn by the card face itself rather than here, so
+       * they reach the edges: see `admiredGrounds` below. This lays the two
+       * sentences into the two halves, each pulled toward its own corner.
+       *
+       * The sentences arrive whole, with the possessive already resolved from
+       * each person's pronouns. Building them here would be a second copy of
+       * that rule in a file that cannot see a profile.
+       */
       return (
-        <View>
-          <Text style={[S.title, { marginBottom: Spacing.xl }]}>{card.title}</Text>
-          {(card.rows || []).map((r) => (
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+          {(card.rows || []).slice(0, 2).map((r, i) => (
             <View
               key={r.name}
               style={{
-                backgroundColor: `${WHITE}0.06)`, borderColor: `${WHITE}0.12)`, borderWidth: 1,
-                borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
+                maxWidth: '78%',
+                alignSelf: i === 0 ? 'flex-start' : 'flex-end',
               }}>
-              <Text style={S.caption}>{r.name} is most admired for</Text>
-              <Text style={[S.titleMd, { marginTop: Spacing.xs }]}>
-                {(r.admired || '').toLowerCase()}
+              <Text
+                style={[
+                  S.titleMd,
+                  { textAlign: i === 0 ? 'left' : 'right' },
+                ]}>
+                {r.line || `${r.name} is most admired for ${(r.admired || '').toLowerCase()}`}
               </Text>
             </View>
           ))}
@@ -848,22 +991,28 @@ function Body({ card, onDone, map, w }: {
       );
 
     case 'sendoff':
+      /**
+       * ── THE LAST CARD IS THE BUTTON ────────────────────────────────────
+       * Ellie: "Change final storycard. full page should be the attune
+       * gradient orange to blue, large button in the middle that says explore
+       * your full results."
+       *
+       * So the two sentences that were here are gone and the card is one
+       * thing. The gradient is the card's own ground, from SENDOFF_GROUND; the
+       * button is white on it, because a coloured button on a coloured ground
+       * is two colours arguing and this is the one control in the whole reel.
+       */
       return (
-        <View style={{ alignItems: 'center' }}>
-          <Rule />
-          <Text style={[S.titleLg, { textAlign: 'center' }]}>{card.title}</Text>
-          <Text style={[S.bodyLg, { textAlign: 'center', marginTop: Spacing.md, marginBottom: Spacing.xxl }]}>
-            {card.body}
-          </Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Pressable
-      accessibilityRole="button"
+            accessibilityRole="button"
             onPress={onDone}
             style={{
-              backgroundColor: c.accent, borderRadius: Radius.md,
-              paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl, width: '100%',
+              backgroundColor: Palette.white, borderRadius: Radius.pill,
+              paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xxl,
               alignItems: 'center',
             }}>
-            <Text style={[t('cta', w), { color: Palette.white }]}>
+            <Text style={[t('cta', w), { color: Palette.ink }]}>
               {card.cta}
             </Text>
           </Pressable>

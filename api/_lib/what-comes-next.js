@@ -158,9 +158,18 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
    */
   const commitment = (reflection?.written || []).find((w) => w.key === 'a6');
   if (commitment && (commitment.you || commitment.them)) {
+    /**
+     * Ellie: "I want them to say 'Ellie wrote: [insert what I wrote]' then
+     * 'Preston wrote: [insert what Preston wrote]'."
+     *
+     * The words go in the title rather than under it, because this page is
+     * read as a list of headings and the body was the half carrying the
+     * content. Their own words, unedited, which is the whole point of the two
+     * rows being here.
+     */
     const items = [];
-    if (commitment.you) items.push({ title: `${you} wrote`, body: commitment.you, say: null });
-    if (commitment.them) items.push({ title: `${them} wrote`, body: commitment.them, say: null });
+    if (commitment.you) items.push({ title: `${you} wrote: ${commitment.you}`, body: null, say: null });
+    if (commitment.them) items.push({ title: `${them} wrote: ${commitment.them}`, body: null, say: null });
     groups.push({
       id: 'reflection',
       color: '#10B981',

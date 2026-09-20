@@ -45,8 +45,28 @@ export default function BrandHeader({
           the font of the website top left 'Attune', not in the body text it
           currently uses." The website sets that in Playfair at 700, which is
           this app's display face: Type.title, one size down. */}
+      {/* ── TWO MARKS, ONE LOCKUP ───────────────────────────────────────
+          Ellie: "Mark in lockup on home page should be inverse, so the bubble
+          on the right should have a white bg not ghost", and "Mark in lockup
+          on other pages should be ghost bg not white bg, so the heart in the
+          left bubble should be transparent not white."
+
+          Both are the same observation from two sides. The mark is drawn for a
+          white page: a filled left bubble with a white heart, and an outlined
+          right bubble with a white fill behind its heart. On the navy the
+          right bubble's white fill is a solid box where a ghost should be; on
+          cream the left bubble's white heart is the one pure white thing on
+          the screen.
+
+          Two files, both generated from public/favicon.svg by
+          scripts/build-mark-variants.mjs, so neither can drift into a
+          different logo. Two literal requires rather than one built path,
+          because the bundler resolves these at build time and cannot follow a
+          variable. */}
       <Image
-        source={require('@/assets/images/attune-mark.png')}
+        source={tone === 'light'
+          ? require('@/assets/images/attune-mark-dark.png')
+          : require('@/assets/images/attune-mark-light.png')}
         style={{ width: 34, height: 34 * (64 / 88) }}
         resizeMode="contain"
       />

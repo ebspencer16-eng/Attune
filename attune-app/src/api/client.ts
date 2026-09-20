@@ -204,7 +204,19 @@ export type HighlightCard = {
   /** Colours come with the call-outs: on that card the colour is the meaning. */
   callouts?: { label: string; value: string | null; color?: string; tint?: string; border?: string }[];
   rings?: { label: string; pct: number; color?: string }[];
-  rows?: { name: string; admired: string | null }[];
+  rows?: {
+    name: string;
+    admired: string | null;
+    /**
+     * The whole sentence, possessive resolved.
+     *
+     * "Ellie is most admired for her steadiness" needs a pronoun, and a
+     * pronoun needs a profile. Built on the server beside pronounForm, which
+     * falls back to they/them; the app assembling it would be a second copy of
+     * that rule in a file that cannot see a profile.
+     */
+    line?: string | null;
+  }[];
   dimensions?: { key: string; label: string; left: string | null; right: string | null; a: number | null; b: number | null }[];
 };
 

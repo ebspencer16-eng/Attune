@@ -435,7 +435,21 @@ export default function HomeScreen() {
                 from a lighter weight. */}
             <Text
               style={{
-                ...Type.hero, fontSize: 38, lineHeight: 54,
+                ...Type.hero,
+                /* ── ONE LINE, MORE OFTEN ─────────────────────────────────
+                   Ellie: "I like the look of the home page much more when the
+                   welcome line fits in one line. I know we can't guarantee
+                   that since some users will have long names, but can we
+                   shrink the font a bit so that it doesn't cut often?"
+
+                   Thirty-two rather than thirty-eight. "Good evening, Ellie"
+                   is nineteen characters and "Good afternoon, Cassandra" is
+                   twenty-five, which is the longest greeting the clock and a
+                   reasonable name can make; both fit on one line at this size
+                   on the narrowest phone the app supports. It cannot be
+                   guaranteed, and it is not: the line still wraps rather than
+                   truncating, because a cut-off name is worse than two lines. */
+                fontSize: 32, lineHeight: 46,
                 color: Palette.white, marginTop: Spacing.xxl,
               }}>
               {data.greeting}
@@ -890,28 +904,22 @@ function TileRow({
         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
         opacity: disabled ? 0.5 : 1,
       }}>
-      {/* ── THE ICON SITS IN SOMETHING ─────────────────────────────────
-          A glyph floating at the left edge of a row, above another glyph, above
-          another, is a list of bullet points. Every app Ellie sent as a
-          reference puts its row icons inside a soft disc, and the reason it
-          works is that the disc gives the row a left edge and a rhythm without
-          a rule or a border.
+      {/* ── THE ICON, BARE AND ORANGE ─────────────────────────────────
+          Ellie: "Icons on home page should not be in circles", and "Icons on
+          home page should be orange not white."
 
-          The icon was orange, which was right on cream and is the one colour
-          that disappears on this blue. It is white in a white wash now. */}
-      <View
-        style={{
-          width: 38, height: 38, borderRadius: 19,
-          backgroundColor: 'rgba(255,255,255,0.16)',
-          alignItems: 'center', justifyContent: 'center',
-        }}>
-        <SymbolView
-          name={icon as never}
-          size={19}
-          tintColor={disabled ? GhostInkQuiet : GhostInk}
-          style={{ width: 21, height: 21 }}
-        />
-      </View>
+          The disc was added when this tile became glass, to stop a row of
+          glyphs reading as bullet points. It reads as dots instead, which she
+          has now said about this tile and about the Insights menu, so the
+          answer is the same in both places: the icon carries the colour and
+          nothing sits behind it. Orange on the glass is the brand's accent
+          doing the work the disc was doing. */}
+      <SymbolView
+        name={icon as never}
+        size={21}
+        tintColor={disabled ? GhostInkQuiet : Palette.orange}
+        style={{ width: 23, height: 23 }}
+      />
       <View style={{ flex: 1 }}>
         <Text style={{ ...Type.cardTitle, color: GhostInk }}>{title}</Text>
         {body ? (

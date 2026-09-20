@@ -23,6 +23,7 @@ import { COUPLE_TYPES } from '../_couple-types.js';
 import { overallExpectationsPct } from './expectations-alignment.js';
 import { CALLOUT_TONES, RING_COLORS, statColor } from './storycard-style.js';
 import { commAlignmentPct, selfGap } from './comm-alignment.js';
+import { pronounForm } from './role-tokens.js';
 
 /**
  * The one conversation, chosen by the widest communication gap.
@@ -76,6 +77,8 @@ export const OPENER_BODY = 'Built from your independent answers\nUse insights to
 
 export function highlightCards({
   dimensions = [], coupleTypeId, names, expectations, reflection, intimacy, ex2,
+  /** Each partner's pronouns, for the one card that needs a possessive. */
+  pronouns = null,
 }) {
   const you = names?.you || 'You';
   const them = names?.them || 'Your partner';
@@ -155,11 +158,16 @@ export function highlightCards({
       // The colours come with the call-outs, from storycard-style.js, because
       // on this card the colour is the meaning: two tiles carrying a dimension
       // name each, and nothing else saying which is the close one.
+      /**
+       * ── ELLIE'S WORDS FOR THE TWO CALL-OUTS ───────────────────────────
+       * "then it should say one strength: [dimension] and where you have
+       * different approaches: [dimension], and remove the line starting with
+       * explore your results."
+       */
       callouts: [
-        { label: "Where you're most in tune", value: closest?.label || null, ...CALLOUT_TONES.tune },
-        { label: 'Where you diverge most', value: widest?.label || null, ...CALLOUT_TONES.diverge },
+        { label: 'One strength', value: closest?.label || null, ...CALLOUT_TONES.tune },
+        { label: 'Where you have different approaches', value: widest?.label || null, ...CALLOUT_TONES.diverge },
       ],
-      body: 'Explore your results to see what each of these means, with guidance built for the two of you.',
     });
   }
 
@@ -203,48 +211,66 @@ export function highlightCards({
   }
 
   if (reflection?.admired?.you || reflection?.admired?.them) {
+    /**
+     * ── THE ADMIRED CARD, AS A DIAGONAL ───────────────────────────────────
+     * Ellie: "Diagonal divide from bottom left to top right of the screen, top
+     * left is the attune orange gradient and bottom right is the attune navy
+     * gradient. Top left says ellie is most admired for her steadiness. Bottom
+     * right says preston is most admired for his patience."
+     *
+     * The sentence is built here rather than in the renderer because it needs
+     * a possessive, and a possessive needs a pronoun. `pronounForm` falls back
+     * to they/them, which is the form that is never wrong about a person.
+     * Building it in the app would mean a second copy of that rule.
+     */
     cards.push({
       id: 'reflection', kind: 'admired', tone: 'violet',
-      title: 'What you admire in each other',
+      /**
+       * The pronouns do not ride along. They are what builds the sentence, not
+       * something a card draws, and check-storycard-fields is right to refuse
+       * a field the app never reads: a value on a card that nothing shows is a
+       * card that reads differently on the two products.
+       */
       rows: [
-        { name: you, admired: reflection.admired.them },
-        { name: them, admired: reflection.admired.you },
-      ].filter((r) => r.admired),
+        { name: you, admired: reflection.admired.them, pn: pronouns?.you || null },
+        { name: them, admired: reflection.admired.you, pn: pronouns?.them || null },
+      ]
+        .filter((r) => r.admired)
+        .map((r) => ({
+          name: r.name,
+          admired: r.admired,
+          line: `${r.name} is most admired for ${pronounForm(r.pn, 'pos')} ${String(r.admired).toLowerCase()}`,
+        })),
     });
   }
 
-  // The intimacy card: the dimension they are closest on if there is one,
-  // otherwise the one they are furthest apart on. Never both, and never a
-  // number, because this card is read over someone's shoulder on a sofa.
-  const intimacyPick = intimacy?.dimensions?.length
-    ? ([...intimacy.dimensions].filter((d) => d.state === 'aligned')[0]
-      || [...intimacy.dimensions].filter((d) => d.distancePct != null)
-        .sort((a, b) => (b.distancePct ?? 0) - (a.distancePct ?? 0))[0])
-    : null;
-  if (intimacyPick) {
-    cards.push({
-      id: 'intimacy', kind: 'named-dimension', tone: 'rose',
-      eyebrow: 'Physical Intimacy',
-      title: intimacyPick.state === 'aligned'
-        ? 'Where you already agree'
-        : 'Worth talking about',
-      value: intimacyPick.label,
-      body: intimacyPick.prompt || null,
-    });
-  }
+  /*
+   * ── THE PHYSICAL INTIMACY CARD IS GONE ────────────────────────────────
+   * Ellie: "Remove the physical intimacy storycard." These cards are made to
+   * be shown to someone over a shoulder, and that is the argument for taking
+   * it out rather than for having had it: the section is read, not shared.
+   */
 
   const convoDim = widest && widest.gap > CONVO_GAP ? widest.key : null;
   cards.push({
     id: 'conversation', kind: 'quote', tone: 'indigo',
-    lead: "As you explore your results, you'll learn more about your unique dynamic and unlock guidance tailored to the two of you.",
+    /* Ellie: "Remove 'as you explore your results' paragraph from storycard
+       8." The card is a question to ask each other; a paragraph above it about
+       what else the results contain is the product talking over it. */
     eyebrow: `One conversation worth having for ${you} & ${them}`,
     quote: (convoDim && CONVO_PROMPTS[convoDim]) || CONVO_FALLBACK,
   });
 
+  /**
+   * ── THE LAST CARD IS ONE THING ────────────────────────────────────────
+   * Ellie: "full page should be the attune gradient orange to blue, large
+   * button in the middle that says explore your full results."
+   *
+   * The two sentences that were here are gone with the redesign. The button's
+   * words are hers and are the only copy left on it.
+   */
   cards.push({
     id: 'sendoff', kind: 'sendoff', tone: 'night',
-    title: 'We hope you continue to grow together throughout your Attune experience.',
-    body: 'Your full results are ready whenever you are.',
     cta: 'Explore your full results',
   });
 

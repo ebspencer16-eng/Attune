@@ -48,13 +48,15 @@ const SIDE = 22;
 const AXIS = { left: 'Open', right: 'Guarded', top: 'Engage', bottom: 'Withdraw' };
 
 export default function CoupleMap({
-  a, b, aName, bName, quadrants, size: fixedSize,
+  a, b, aName, bName, quadrants, size: fixedSize, onDark,
 }: {
   a: PersonResults | null;
   b: PersonResults | null;
   aName: string;
   bName: string;
   quadrants?: Quadrant[];
+  /** Drawn on a storycard rather than on the cream page. */
+  onDark?: boolean;
   size?: number;
 }) {
   const { width } = useWindowDimensions();
@@ -87,16 +89,36 @@ export default function CoupleMap({
   const A = { x: xOf(pa.open), y: yOf(pa.engage), color: colourOf(a), name: aName };
   const B = { x: xOf(pb.open), y: yOf(pb.engage), color: colourOf(b), name: bName };
 
-  const label = { ...Type.small, fontSize: 10, letterSpacing: 0.6, fontWeight: '700' as const };
+  /**
+   * ── THE SAME MAP ON TWO GROUNDS ────────────────────────────────────────
+   * Ellie: "Axis labels on storycard 2 are way too small and very low
+   * contrast, I need to be able to read them."
+   *
+   * This component is drawn twice: on the couple type page, which is cream,
+   * and on a storycard, which is a dark gradient. It had one label colour, the
+   * page's muted brown, which on the card is about two to one. And ten points
+   * is small on a page and smaller on something made to be looked at on
+   * someone else's phone.
+   *
+   * So the card asks for `onDark` and gets white at four fifths and a larger
+   * size. The page is unchanged.
+   */
+  const label = {
+    ...Type.small,
+    fontSize: onDark ? 12 : 10,
+    letterSpacing: onDark ? 1 : 0.6,
+    fontWeight: '700' as const,
+  };
+  const labelInk = onDark ? 'rgba(255,255,255,0.8)' : c.textMuted;
 
   return (
     <View style={{ alignItems: 'center', marginTop: Spacing.sm }}>
-      <Text style={{ ...label, color: c.textMuted, marginBottom: Spacing.xs }}>
+      <Text style={{ ...label, color: labelInk, marginBottom: Spacing.xs }}>
         {AXIS.top.toUpperCase()}
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <SideLabel text={AXIS.left.toUpperCase()} side="left" height={size} />
+        <SideLabel text={AXIS.left.toUpperCase()} side="left" height={size} onDark={onDark} />
       <View style={{ width: size, height: size, borderRadius: Radius.lg, overflow: 'hidden' }}>
         {/* Four quadrants, in the server's order: W X Y Z. */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: size, height: size }}>
@@ -169,13 +191,13 @@ export default function CoupleMap({
           </View>
         ))}
       </View>
-        <SideLabel text={AXIS.right.toUpperCase()} side="right" height={size} />
+        <SideLabel text={AXIS.right.toUpperCase()} side="right" height={size} onDark={onDark} />
       </View>
 
       {/* Withdraw alone under the map. Open and Guarded are on their sides in
           the margins, so the bottom row is the foot of the vertical axis
           rather than three labels that look like they belong to one axis. */}
-      <Text style={{ ...label, color: c.textMuted, marginTop: Spacing.xs }}>
+      <Text style={{ ...label, color: labelInk, marginTop: Spacing.xs }}>
         {AXIS.bottom.toUpperCase()}
       </Text>
 
@@ -192,14 +214,19 @@ export default function CoupleMap({
  * Left reads bottom to top and right reads top to bottom, which is the
  * convention for a chart's vertical margins and keeps both facing outward.
  */
-function SideLabel({ text, side, height }: { text: string; side: 'left' | 'right'; height: number }) {
+function SideLabel({ text, side, height, onDark }: {
+  text: string; side: 'left' | 'right'; height: number; onDark?: boolean;
+}) {
   return (
     <View style={{ width: SIDE, height, alignItems: 'center', justifyContent: 'center' }}>
       <Text
         numberOfLines={1}
         style={{
-          ...Type.small, fontSize: 10, letterSpacing: 0.6, fontWeight: '700',
-          color: Colors.light.textMuted,
+          ...Type.small,
+          fontSize: onDark ? 12 : 10,
+          letterSpacing: onDark ? 1 : 0.6,
+          fontWeight: '700',
+          color: onDark ? 'rgba(255,255,255,0.8)' : Colors.light.textMuted,
           width: height,
           textAlign: 'center',
           transform: [{ rotate: side === 'left' ? '-90deg' : '90deg' }],

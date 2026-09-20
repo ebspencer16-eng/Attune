@@ -197,6 +197,15 @@ let lastSection: string | null = null;
 export const MENU_SECTION = '__menu';
 
 /**
+ * Whether the reader reached the menu straight off the storycards.
+ *
+ * Only true for the one visit that follows them, which is the whole of what
+ * Ellie asked for: "the next time they see the menu, highlights will be listed
+ * as well." Read once and cleared by the menu that used it.
+ */
+let cameFromHighlights = false;
+
+/**
  * Forget where the last reader was.
  *
  * `lastSection` is module state, so it outlives a sign-out. Without this the
@@ -651,6 +660,9 @@ export default function Results({
    * to from here and nothing to page through: it is the way in.
    */
   if (section === MENU_SECTION) {
+    /* Read once. The next visit to this menu lists Highlights again. */
+    const hideHighlights = cameFromHighlights;
+    cameFromHighlights = false;
     return (
       <View style={{ flex: 1 }}>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg }}>
@@ -663,8 +675,20 @@ export default function Results({
             with a different shape. Same inset and radius as the pages it
             leads to, and the bands keep their full width inside it. */}
         <PageTile padding={0}>
+          {/* ── HIGHLIGHTS IS NOT OFFERED THE FIRST TIME ─────────────────
+              Ellie: "When a user clicks explore full results and sees the
+              menu, the menu should exclude highlights (it makes it look like
+              they should start with highlights even though that's what they
+              just did). So just start with couple type, then the next time
+              they see the menu, highlights will be listed as well."
+
+              `seenHighlights` is set when the cards hand over, and it is
+              module state for the same reason `lastSection` is: it has to
+              survive this screen unmounting behind a tab bar. It is not
+              persisted, so a fresh launch offers Highlights again, which is
+              right: the reason to hide it is that they just watched it. */}
           <ResultsMenu
-            groups={groups}
+            groups={groups.filter((g) => !(g.id === 'highlights' && hideHighlights))}
             current={null}
             onOpenSection={rememberSection}
           />
@@ -866,6 +890,17 @@ export default function Results({
           style={{
             position: 'absolute', left: Spacing.lg, bottom: BottomTabInset + Spacing.md,
             width: ARROW, height: ARROW,
+            /* ── SHADING ────────────────────────────────────────────────
+               Ellie: "On white tiles, like the couple type page, the previous
+               and next arrows are hard to see. Can we make those circles have
+               the glass effect with some shading?"
+
+               Glass over white is white, so the circle disappeared and the
+               chevron floated. A hairline and a soft drop give it an edge on
+               the one ground where the material cannot provide one. */
+            borderWidth: 1, borderColor: 'rgba(14,11,7,0.10)',
+            shadowColor: '#0E0B07', shadowOpacity: 0.16,
+            shadowRadius: 10, shadowOffset: { width: 0, height: 3 },
           }}>
           <Pressable
             accessibilityRole="button"
@@ -890,6 +925,9 @@ export default function Results({
           style={{
             position: 'absolute', right: Spacing.lg, bottom: BottomTabInset + Spacing.md,
             width: ARROW, height: ARROW,
+            borderWidth: 1, borderColor: 'rgba(14,11,7,0.10)',
+            shadowColor: '#0E0B07', shadowOpacity: 0.16,
+            shadowRadius: 10, shadowOffset: { width: 0, height: 3 },
           }}>
           <Pressable
             accessibilityRole="button"
@@ -1031,12 +1069,13 @@ function SectionBody({
           /* Ellie: "after the storycard highlights, full results should start
              with the landing page." It used to drop the reader on Couple Type,
              which is the next card's subject rather than the way in. */
-          onDone={() => onGoToSection(MENU_SECTION)}
+          onDone={() => { cameFromHighlights = true; onGoToSection(MENU_SECTION); }}
         />
       );
     }
     return (
       <Glance
+        step={step}
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         title={pageTitle('comm-overview', 'Communication Styles')}
         placementsLabel={pageCopy('commPlacements', 'Overview')}
@@ -1081,6 +1120,7 @@ function SectionBody({
   if (section === 'comm-overview') {
     return (
       <Glance
+        step={step}
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         plan={commsPlan} ground={ground} groundStops={groundStops}
         title={pageTitle('comm-overview', 'Communication Styles')}
@@ -1116,6 +1156,7 @@ function SectionBody({
   if (section === 'exp-overview') {
     return (
       <ExpectationsOverview
+        step={step}
         ground={ground} groundStops={groundStops}
         summary={expectations} you={you} them={them}
         title={pageTitle('exp-overview', 'Expectations')}
@@ -1149,14 +1190,14 @@ function SectionBody({
     return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} />;
   }
 
-  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} />;
+  if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} step={step} />;
   if (section === 'reflection-ratings') return <ReflectionRatings data={reflection} step={step} ground={ground} groundStops={groundStops} />;
   if (section === 'reflection-story') return <ReflectionStory data={reflection} step={step} ground={ground} groundStops={groundStops} />;
   // The reflection action plan had a page of its own on both surfaces. Ellie
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
 
-  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} placementsLabel={pageCopy('commPlacements', 'Overview')} ground={ground} groundStops={groundStops} />;
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} placementsLabel={pageCopy('commPlacements', 'Overview')} ground={ground} groundStops={groundStops} step={step} />;
   if (section.startsWith('intimacy-')) {
     const domain = intimacy?.domains?.find((d) => d.section === section) ?? null;
     return (
@@ -1206,8 +1247,7 @@ function SectionBody({
 }
 
 function ExpectationsOverview({
-  summary, you, them, ground, groundStops, title = 'Expectations',
-}: {
+  summary, you, them, ground, groundStops, title = 'Expectations', step = null }: {
   summary: ExpectationsSummary | null; you: string; them: string;
   /** The page's gradient and its stops, from the results nav. */
   ground?: string[] | null;
@@ -1216,6 +1256,9 @@ function ExpectationsOverview({
   /** Ellie: the page led with the couple's names, which does not say what the
       page is. From the server, so both surfaces cannot title it differently. */
   title?: string;
+  /* Ellie: "please ensure every page that's not a cover page has this".
+     The overviews are pages of the set now, so they are numbered too. */
+  step?: { index: number; total: number } | null;
 }) {
   if (!summary) {
     return (
@@ -1251,6 +1294,7 @@ function ExpectationsOverview({
     /* Dark, like the website's Expectations landing page, and in a tile,
        because it is a page you take in at once. See PageTile. */
     <PageTile ground={ground} locations={groundStops}>
+      <StepCount step={step} onDark />
       <>
           <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
 
@@ -1771,7 +1815,7 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
   );
 }
 
-function IntimacyOverview({ data, you, them, title, placementsLabel, ground, groundStops }: {
+function IntimacyOverview({ data, you, them, title, placementsLabel, ground, groundStops, step = null }: {
   data: IntimacyResults | null; you: string; them: string;
   /** The page's heading, from the server's pageTitles. */
   title: string;
@@ -1780,6 +1824,9 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
   /** The page's gradient and its stops, from the results nav. */
   ground?: string[] | null;
   groundStops?: number[] | null;
+  /* Ellie: "please ensure every page that's not a cover page has this".
+     The overviews are pages of the set now, so they are numbered too. */
+  step?: { index: number; total: number } | null;
 }) {
   if (!data) {
     return <Waiting title="Physical Intimacy" body={WAITING.LOCKED_BY_THEM} />;
@@ -1791,6 +1838,7 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
     /* Dark rose, which is the website's ground for this section, in the tile
        every at-a-glance page takes. */
     <PageTile ground={ground} locations={groundStops}>
+      <StepCount step={step} onDark />
       <>
         {/* Ellie: the hero "should have the hero read physical intimacy
             expectations", and the line under it about how things are now is
@@ -2081,13 +2129,16 @@ function ReflectionWaiting() {
   );
 }
 
-function ReflectionOverview({ data, title, ground, groundStops }: {
+function ReflectionOverview({ data, title, ground, groundStops, step = null }: {
   data: ReflectionResults | null;
   /** The page's heading, from the server's pageTitles. */
   title: string;
   /** The page's gradient and its stops, from the results nav. */
   ground?: string[] | null;
   groundStops?: number[] | null;
+  /* Ellie: "please ensure every page that's not a cover page has this".
+     The overviews are pages of the set now, so they are numbered too. */
+  step?: { index: number; total: number } | null;
 }) {
   if (!data) return <ReflectionWaiting />;
   /**
@@ -2108,6 +2159,7 @@ function ReflectionOverview({ data, title, ground, groundStops }: {
 
   return (
     <PageTile ground={ground} locations={groundStops}>
+      <StepCount step={step} onDark />
       <>
         {/* Ellie: the title "should read Relationship Reflection" and the line
             under it goes. It led with the two names and then a sentence saying
@@ -2425,19 +2477,24 @@ function RatedTile({ label, rows, names }: {
 }) {
   return (
     <View style={{ marginBottom: Spacing.xl }}>
-      <Eyebrow color={SectionColor.reflection}>{label}</Eyebrow>
+      {/* ── GHOST, NOT WHITE ───────────────────────────────────────────
+          Ellie: "Change the overall tile and the how you feel right now tile
+          to be ghost tiles like comms pages rather than white bg tiles." These
+          two were white cards left from when this page was cream, and the page
+          is a green gradient now. Same panel every other dark page uses. */}
+      <Eyebrow color={'rgba(255,255,255,0.8)'}>{label}</Eyebrow>
       <View
         style={{
-          backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
+          backgroundColor: PANEL, borderColor: PANEL_EDGE, borderWidth: 1,
           borderRadius: Radius.lg, paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
         }}>
         {rows.map((r, i) => (
           <View
             key={r.key}
             style={{
-              paddingTop: i === 0 ? 0 : Spacing.lg,
-              marginTop: i === 0 ? 0 : Spacing.lg,
-              borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+              paddingTop: i === 0 ? 0 : Spacing.md,
+              marginTop: i === 0 ? 0 : Spacing.md,
+              borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
             }}>
             <RatedRow r={r} names={names} />
           </View>
@@ -2465,6 +2522,9 @@ function RatedTile({ label, rows, names }: {
  * When the two marks land on the same point there is one label, not two on top
  * of each other, and it names both people.
  */
+/* Light, because the tile it sits in is a ghost panel on a green gradient.
+   Ellie: "Adjust text coloring when you change tile color so that text is
+   visible." */
 function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; them: string } }) {
   const [loPct, hiPct] = [Math.min(r.you.pct, r.them.pct), Math.max(r.you.pct, r.them.pct)];
   const tone = r.gapSteps === 0 ? '#10b981' : r.gapSteps === 1 ? SectionColor.reflection : YOU_COLOR;
@@ -2481,12 +2541,12 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
    */
   const pole = {
     ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '600' as const,
-    color: c.textMuted, width: 74,
+    color: INK_QUIET, width: 74,
   };
 
   return (
     <View>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong, marginBottom: Spacing.md }}>{r.short || r.question}</Text>
+      <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md }}>{r.short || r.question}</Text>
       {/* ── THE POLES SIT LEVEL WITH THE BAR ───────────────────────────
           Ellie: "pole labels on how you each rated should be middle aligned
           with the bar itself."
@@ -2617,74 +2677,84 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
         <StepCount step={step} />
         <ReflectionHead page={data.pages?.story} />
 
-        {/* ── GROUPED, AS THE WEBSITE GROUPS IT ────────────────────────────
-            The website prints these under four headings: Milestones, How
-            We're Doing, Looking Forward, What Matters. The app listed every
-            answer flat, so ten pairs arrived as one undifferentiated scroll
-            with nothing saying what any of them was about.
+        {/* ── THE CONFLICT PAGE'S LAYOUT ────────────────────────────────
+            Ellie: "I'd rather the side by side for rel relf pages design
+            matches the what you each wrote from conflict design. Can we do
+            that layout but then do an eyebrow with a hairline divider (divider
+            middle-aligned vertically with the text and starts right after the
+            text ends)? section eyebrow and dividing lines can be orange. Try
+            this prompt can be in orange under each question and responses."
 
-            The headings were typed inside src/App.jsx, which is why: the
-            grouping lived somewhere the app could not read. They arrive as
-            data.storyCategories now, in the website's order.
+            So: no outer card per pair. The question is a heading on the page,
+            the two answers are quote cards under it, and the prompt runs
+            underneath in the orange. Each category gets an eyebrow with a
+            hairline running off to the right of it.
 
-            A category with no answered pairs is skipped rather than printed
-            empty. A question neither of them answered is already absent from
-            `written`, so an empty heading would be a heading over nothing. */}
+            And the opacity is flipped. Ellie: "I want the quotes to stand out
+            more than the questions and suggested convo starters." The quotes
+            were in the faintest panel on the page with the question and the
+            prompt in the strong ones. It is the other way round now: the
+            quotes carry the panel, and the question and the prompt sit on the
+            ground with nothing behind them.
+
+            The headings were typed inside src/App.jsx, which is why the app
+            once listed every answer flat: the grouping lived somewhere the app
+            could not read. They arrive as data.storyCategories now, in the
+            website's order. A category with no answered pairs is skipped. */}
         {/* block: reflection-story/groups */}
         {(data.storyCategories || []).map((cat) => {
           const inCat = data.written.filter((w) => w.category === cat);
           if (!inCat.length) return null;
           return (
-            <View key={cat} style={{ marginBottom: Spacing.lg }}>
-              <Eyebrow color={SectionColor.reflection}>{cat}</Eyebrow>
+            <View key={cat} style={{ marginBottom: Spacing.xxl }}>
+              {/* The eyebrow, and a hairline that starts where the words stop
+                  and runs to the edge, level with the middle of them. */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.lg }}>
+                <Text style={{ ...Type.eyebrow, color: Palette.orange }}>{cat}</Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: Palette.orange, opacity: 0.55 }} />
+              </View>
+
               {/* block: reflection-story/pairs */}
               {inCat.map((w) => (
-                <View
-                  key={w.key}
-                  style={{
-                    backgroundColor: PANEL, borderColor: PANEL_EDGE, borderWidth: 1,
-                    borderRadius: Radius.lg, marginBottom: Spacing.md, overflow: 'hidden',
-                  }}>
-                  <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: PANEL_BAND, borderBottomColor: PANEL_EDGE, borderBottomWidth: 1 }}>
-                    <Text style={{ ...Type.cardTitle, color: Palette.white }}>{w.question}</Text>
-                  </View>
+                <View key={w.key} style={{ marginBottom: Spacing.xl }}>
+                  <Prose style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md, lineHeight: 22 }}>
+                    {w.question}
+                  </Prose>
 
                   {[
                     { name: data.names.you, words: w.you, col: YOU_COLOR },
                     { name: data.names.them, words: w.them, col: THEM_COLOR },
-                  ].map((side, i) => (
+                  ].map((side) => (
                     <View
                       key={side.name}
                       style={{
-                        paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                        borderBottomColor: PANEL_EDGE, borderBottomWidth: i === 0 ? 1 : 0,
+                        backgroundColor: 'rgba(255,255,255,0.16)',
+                        borderColor: 'rgba(255,255,255,0.28)', borderWidth: 1,
+                        borderRadius: Radius.md,
+                        paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md,
+                        marginBottom: Spacing.md,
                       }}>
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: side.col, marginBottom: Spacing.xs }}>
                         {side.name}
                       </Text>
-                      <Prose style={{ ...Type.body, color: INK, fontStyle: 'italic', lineHeight: 24 }}>
-                        {`"${side.words}"`}
+                      <Prose style={{ ...Type.body, color: Palette.white, fontStyle: 'italic', lineHeight: 24 }}>
+                        {`\u201C${side.words}\u201D`}
                       </Prose>
                     </View>
                   ))}
 
                   {/* ── THE QUESTION UNDER THE PAIR ──────────────────────
                       Two answers side by side do not need a verdict, they need
-                      something to do with having read them. The website has
-                      printed one under every pair since this page existed; the
-                      app printed the answers and stopped, which is the half
-                      that does the work. From api/_lib/reflection-prompts.js. */}
+                      something to do with having read them. From
+                      api/_lib/reflection-prompts.js. In the orange, as asked,
+                      and with nothing behind it so the quotes stay the loudest
+                      thing in the group. */}
                   {w.prompt ? (
-                    <View
-                      style={{
-                        flexDirection: 'row', gap: Spacing.sm,
-                        paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                        backgroundColor: PANEL_BAND, borderTopColor: PANEL_EDGE, borderTopWidth: 1,
-                      }}>
-                      <Text style={{ ...Type.eyebrow, fontSize: 9, color: YOU_COLOR, marginTop: 2 }}>
+                    <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs }}>
+                      <Text style={{ ...Type.eyebrow, fontSize: 9, color: Palette.orange, marginTop: 2 }}>
                         {label}
                       </Text>
-                      <Text style={{ ...Type.small, color: INK, flex: 1, lineHeight: 20 }}>
+                      <Text style={{ ...Type.small, color: Palette.orange, flex: 1, lineHeight: 20 }}>
                         {w.prompt}
                       </Text>
                     </View>
@@ -3142,8 +3212,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
 
 function Glance({
   results, you, them, viewer, wideGap, plan = null, ground, groundStops,
-  title = 'Communication Styles', placementsLabel = 'Overview',
-}: {
+  title = 'Communication Styles', placementsLabel = 'Overview', step = null }: {
   results: CoupleResults; you: string; them: string; viewer: 'a' | 'b';
   wideGap: number | null; plan?: CommsPlan | null;
   /** The page's gradient and its stops, from the results nav. */
@@ -3152,6 +3221,9 @@ function Glance({
 
   /** From the server, so the two surfaces cannot title the page differently. */
   title?: string; placementsLabel?: string;
+  /* Ellie: "please ensure every page that's not a cover page has this".
+     The overviews are pages of the set now, so they are numbered too. */
+  step?: { index: number; total: number } | null;
 }) {
   const type = results.content?.coupleType;
   const dims = results.content?.dimensions ?? [];
@@ -3173,6 +3245,7 @@ function Glance({
        brand orange. Both now come from api/_lib/section-grounds.js by way of
        the results nav. */
     <PageTile ground={ground} locations={groundStops}>
+      <StepCount step={step} onDark />
       <>
           {/* block: comm-overview/couple-type-lead */}
           {/* Ellie: "Title should be 'Communication Styles'. Remove the couple
@@ -3554,63 +3627,82 @@ function Cover({ title, accent, icon, onStart }: {
   title: string; accent: string; icon?: string | null; onStart?: () => void;
 }) {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xxl }}>
-      {/* ── LOUDER ───────────────────────────────────────────────────────
-          Ellie: "Cover pages need to be redone, they need to be louder and
-          more branded. More visually interesting."
+    <View style={{ flex: 1, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.lg }}>
+      {/* ── THE FRAME ─────────────────────────────────────────────────────
+          Ellie: "No gradient line under the title but maybe a gradient line
+          running in a rounded rectangle around the edge of the page (but still
+          with a buffer so not at the edge of the screen)."
 
-          The first version was a rule, a name and a lot of cream. This gives
-          the page something to look at: the section's own icon at size, in its
-          own colour, on a disc of the same colour; the name under it; and the
-          brand's gradient rule the storycards use, so a cover looks like it
-          came from the same product as the cards. */}
-      <View
-        style={{
-          width: 108, height: 108, borderRadius: 54,
-          backgroundColor: withAlpha(accent, 0.12),
-          borderWidth: 1, borderColor: withAlpha(accent, 0.3),
-          alignItems: 'center', justifyContent: 'center',
-          marginBottom: Spacing.xl,
-        }}>
-        <SymbolView
-          name={(icon || 'sparkles') as never}
-          size={46}
-          tintColor={accent}
-          fallback={<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: accent }} />}
-          style={{ width: 50, height: 50 }}
-        />
-      </View>
-
-      {/* not markable: the section's own name, which is a label rather than a
-          finding. A mark anchored to it would follow the word, not the page. */}
-      <Text style={{ ...Type.hero, color: c.textStrong, textAlign: 'center' }}>{title}</Text>
-
-      {/* The brand's own rule, orange into indigo, the one the storycards
-          carry under the couple's names. */}
+          A gradient border is not a thing React Native can draw, so it is a
+          gradient rectangle with the page laid on top of it, inset by a point
+          and a half. That is the standard way to get one and it is why the
+          inner view carries the cream: without it the gradient would show
+          through everything. */}
       <LinearGradient
-        colors={[Palette.orange, Palette.indigo]}
+        colors={[Palette.orange, '#9B5DE5', Palette.indigo]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={{ width: 72, height: 3, borderRadius: 2, marginTop: Spacing.lg }}
-      />
-
-      {/* ── AND A WAY IN ─────────────────────────────────────────────────
-          Ellie: "Cover pages should have a 'get started' or 'see insights'
-          button that brings you to the overview page for that section - just
-          to make the nav super clear." Her words, the second of the two. */}
-      {onStart ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onStart}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1, borderRadius: Radius.xl + 8, padding: 1.5 }}>
+        <View
           style={{
-            marginTop: Spacing.xxl,
-            backgroundColor: accent,
-            borderRadius: Radius.pill,
-            paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
+            flex: 1, borderRadius: Radius.xl + 7,
+            backgroundColor: Palette.cream,
+            alignItems: 'center', justifyContent: 'center',
+            paddingHorizontal: Spacing.xxl,
           }}>
-          <Text style={{ ...Type.cardTitle, color: Palette.white }}>See insights</Text>
-        </Pressable>
-      ) : null}
+          {/* ── THE ICON, AND ITS GLOW ──────────────────────────────────
+              Ellie: "Maybe a large icon not in a circle but with a colored
+              glow behind it?"
+
+              The glow is the home screen's trick again: many rings, each too
+              faint for its own edge to be findable, stacked so the alpha
+              builds toward the middle. One translucent circle would be a
+              circle, which is the thing she asked to get rid of. */}
+          <View style={{ width: 150, height: 150, alignItems: 'center', justifyContent: 'center' }}>
+            {Array.from({ length: 22 }, (_, i) => {
+              const size = 150 * (1 - i / 22);
+              return (
+                <View
+                  key={i}
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    width: size, height: size, borderRadius: size / 2,
+                    backgroundColor: withAlpha(accent, 0.05),
+                  }}
+                />
+              );
+            })}
+            <SymbolView
+              name={(icon || 'sparkles') as never}
+              size={64}
+              tintColor={accent}
+              fallback={<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: accent }} />}
+              style={{ width: 70, height: 70 }}
+            />
+          </View>
+
+          {/* not markable: the section's own name, which is a label rather than
+              a finding. A mark anchored to it would follow the word. */}
+          <Text style={{ ...Type.hero, color: c.textStrong, textAlign: 'center', marginTop: Spacing.lg }}>
+            {title}
+          </Text>
+
+          {onStart ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onStart}
+              style={{
+                marginTop: Spacing.xxl,
+                backgroundColor: accent,
+                borderRadius: Radius.pill,
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
+              }}>
+              <Text style={{ ...Type.cardTitle, color: Palette.white }}>See insights</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      </LinearGradient>
     </View>
   );
 }

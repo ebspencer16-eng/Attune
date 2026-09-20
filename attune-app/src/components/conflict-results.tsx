@@ -753,12 +753,15 @@ function SnapshotCell({ name, text, own = false }: { name: string; text: string;
 // Chip, a dot and a name against a value, drew the snapshot before it became
 // a table. Nothing uses that shape now.
 
+/* Light: this column lives in the Snapshot page's repair tile, which is a
+   ghost panel on the section's dark gradient. Ellie: "Adjust text coloring
+   when you change tile color so that text is visible." */
 function RepairColumn({ title, items, accent }: {
   title: string; items: string[]; accent?: string;
 }) {
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, marginBottom: Spacing.sm }}>
+      <Text style={{ ...Type.eyebrow, fontSize: 9, color: INK_QUIET, marginBottom: Spacing.sm }}>
         {title}
       </Text>
       {/* The rank in the section's colour, hanging beside the item rather than
@@ -766,11 +769,11 @@ function RepairColumn({ title, items, accent }: {
           makes the column read as an order rather than a list. */}
       {(items || []).slice(0, 3).map((item, i) => (
         <View key={item} style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm }}>
-          <Text style={{ ...Type.small, fontWeight: '700', color: accent || c.textStrong }}>{i + 1}</Text>
-          <Text style={{ ...Type.small, color: c.text, flex: 1 }}>{item}</Text>
+          <Text style={{ ...Type.small, fontWeight: '700', color: accent || Palette.white }}>{i + 1}</Text>
+          <Text style={{ ...Type.small, color: INK, flex: 1 }}>{item}</Text>
         </View>
       ))}
-      {!items?.length ? <Text style={{ ...Type.small, color: c.textMuted }}>Not answered.</Text> : null}
+      {!items?.length ? <Text style={{ ...Type.small, color: INK_QUIET }}>Not answered.</Text> : null}
     </View>
   );
 }
@@ -865,9 +868,29 @@ const pad = {
   maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
 } as const;
 
+/**
+ * A card on a Conflict page.
+ *
+ * ── IT IS A GHOST NOW ─────────────────────────────────────────────────────
+ * Ellie: "Too much white space in the tiles on the your conflict snapshot
+ * tiles. Can we make those tiles ghost not white and fix spacing", and
+ * "Please make tiles on your patterns page ghost tiles not white tiles. Text
+ * on your patterns page tiles is currently invisible."
+ *
+ * Both are one thing: the three detail pages moved onto the section's dark
+ * gradient, the type in them was turned white, and this shared card stayed
+ * white. So every tile was white with white words in it.
+ *
+ * The padding drops a step with it. Sixteen points inside a card on a page
+ * that is itself inside a tile is two insets doing the same job.
+ */
 const card = {
-  backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-  borderRadius: Radius.lg, padding: Spacing.lg,
+  backgroundColor: 'rgba(255,255,255,0.10)',
+  borderColor: 'rgba(255,255,255,0.22)',
+  borderWidth: 1,
+  borderRadius: Radius.lg,
+  paddingVertical: Spacing.md,
+  paddingHorizontal: Spacing.lg,
 } as const;
 
 /** The same card on the glance screen's dark ground, as the website draws it. */

@@ -291,7 +291,18 @@ export default function InsightsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
-        <Text style={{ ...Type.hero, color: c.textStrong }}>Your exercises</Text>
+        {/* ── BEFORE THERE ARE RESULTS ───────────────────────────────────
+            Ellie: "Ensure that when exercises are unfinished, insights page
+            hero says 'Insights generate once your exercises are complete' and
+            the orange page shows the exercise status table instead of the
+            insights menu."
+
+            Her line, word for word. The page it sits on is the same orange
+            ground the landing menu is on, so the tab looks like one place
+            whether or not the results exist yet. */}
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
+          Insights generate once your exercises are complete
+        </Text>
         <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
           {/* Both branches were written in the app. The first named the partner,
               the second counted what was left, and neither is in Ellie's
@@ -306,6 +317,14 @@ export default function InsightsScreen() {
 }
 
 function Shell({ children, tint }: { children: React.ReactNode; tint?: string | null }) {
+  /* ── THE TAB'S OWN COLOUR ──────────────────────────────────────────────
+     Ellie: "The home page is the attune blue, please try making the landing
+     page for insights the attune orange. Similar gradient as the home page
+     has please."
+
+     So the default is the orange, and a results page still overrides it with
+     its section's colour. The landing menu, the exercise table and every
+     waiting state are on the orange, which is what makes the tab one place. */
   /* ── VISUAL COHESION, PER SECTION ──────────────────────────────────────
      Ellie: "What can we do to create some visual cohesion for each section?
      Maybe a bg tint in the gradient?"
@@ -314,7 +333,7 @@ function Shell({ children, tint }: { children: React.ReactNode; tint?: string | 
      Expectations reads blue and Physical Intimacy reads rose whichever of
      their pages you are on. It is behind the tile rather than in it, which
      costs nothing in legibility: nothing is read on it. */
-  return <TabScreen tint={tint || undefined}>{children}</TabScreen>;
+  return <TabScreen tint={tint || Palette.orange} second={tint ? undefined : Palette.clay}>{children}</TabScreen>;
 }
 
 /**

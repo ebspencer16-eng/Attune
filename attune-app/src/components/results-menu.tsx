@@ -146,11 +146,19 @@ export default function ResultsMenu({
 
         return (
           <View key={g.id}>
+            {/* ── THE HEADING IS A TOP-LEVEL ROW ──────────────────────────
+                Ellie: "I want exercise results title to be listed
+                left-aligned with highlights and couple type, and I want the
+                content in that section indented further right than that."
+
+                So the heading sits on the same left edge as Highlights and
+                Couple Type, and the five exercises step in from it. It was the
+                other way round: the heading was indented with them. */}
             {firstExercise ? (
               <View
                 style={{
-                  paddingTop: big ? Spacing.lg : Spacing.md,
-                  paddingBottom: Spacing.sm,
+                  paddingTop: big ? Spacing.md : Spacing.sm,
+                  paddingBottom: Spacing.xs,
                   paddingHorizontal: Spacing.xl,
                   borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
                 }}>
@@ -190,7 +198,11 @@ export default function ResultsMenu({
                */
               onPress={() => onOpenSection(kids.length ? kids[0].id : g.id)}
               style={{
-                paddingVertical: big ? Spacing.lg : Spacing.md,
+                /* Ellie: "I also want the full menu to fit on one screen when
+                   the dropdowns aren't open, there is way too much vertical
+                   space right now." Nine rows and a heading at sixteen points
+                   of padding each is more than a phone has. */
+                paddingVertical: big ? Spacing.sm + 2 : Spacing.sm,
                 /* Ellie: "Further indent the exercise results in the menu,
                    the icon should be indented and the text should come after
                    that." The whole row moves in, icon first, rather than the
@@ -227,12 +239,16 @@ export default function ResultsMenu({
                   a tenth, with the icon in it at full strength. It is the same
                   shape the home tile's rows use, so the two screens read as
                   one product rather than two lists. */}
+              {/* ── NO DISC ─────────────────────────────────────────────────
+                  Ellie: "I also don't know why the icons are now in dots, I
+                  don't want that." The disc was added the day before to put
+                  colour on a menu she had just asked to make quieter, which
+                  was solving the wrong half. The icon carries the colour on
+                  its own. */}
               <View
                 style={{
-                  width: big ? 38 : 30, height: big ? 38 : 30, borderRadius: big ? 19 : 15,
+                  width: big ? 24 : 20,
                   alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: icon ? withAlpha(color, 0.12) : 'transparent',
-                  borderWidth: icon ? 1 : 0, borderColor: withAlpha(color, 0.26),
                 }}>
                 {icon ? (
                   <SymbolView
@@ -272,8 +288,8 @@ export default function ResultsMenu({
                    * once the indent has taken its width: Physical Intimacy
                    * Expectations is twenty-nine characters and has to fit.
                    */
-                  fontSize: big ? (isExercise ? 15.5 : 17) : 15,
-                  lineHeight: Math.ceil((big ? 17 : 15) * 1.41),
+                  fontSize: big ? (isExercise ? 15 : 16) : 15,
+                  lineHeight: Math.ceil((big ? 16 : 15) * 1.41),
                   color: c.textStrong,
                   flex: 1,
                 }}>
@@ -312,7 +328,7 @@ export default function ResultsMenu({
                       onPress={() => onOpenSection(ch.id)}
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                        paddingVertical: big ? Spacing.md : Spacing.sm + 2,
+                        paddingVertical: big ? Spacing.sm + 1 : Spacing.sm,
                         paddingLeft: Spacing.xl + Spacing.lg + (big ? 38 : 30) + Spacing.lg,
                         paddingRight: Spacing.xl,
                         borderTopWidth: 1, borderTopColor: c.border,
