@@ -45,6 +45,8 @@ CLAUDE.md, so anything new sits here until you do.
 | # | Migration |
 |--|--|
 
+| M-073 | **073_journal_anchor.sql. The journal cannot save an entry until you run this.** `notes.anchor_type` carries a list of allowed values in the database, written a year before the journal existed, and Postgres refuses any row with a type that is not on it. I found this by writing an entry rather than by reading the code: the app said "That entry did not save", which is true and says nothing. The migration widens the list by one value. It is safe to run twice and rewrites nothing. Everything else in this batch works now. |
+
 ### Decide these
 
 | # | Decision |
@@ -102,7 +104,7 @@ The second batch of 20 September first.
 | O336 | **Home is the Luxury layout.** The lockup at headline size where the reference has its own name, the greeting at the size of the small line under it, four quick links, and the two cards low on the page in the glass material. The row at the top draws the profile control alone now: two lockups on one screen is the same thing twice. The insight of the day is no longer on home, because that layout has no room for it; it is one of the four quick links and it is still a hero on Learn. |
 | O337 | **Four quick links:** Insight of the day, Action plan, Highlights, Journal. |
 | O338 | **Always two prompts**, cut from the priority engine's own order in one place rather than by three conditionals that could each independently be true. The icon from the old row is the card's picture. |
-| O339 | **The relationship journal.** The composer is the first thing on the screen rather than behind a plus: the fewest taps between thinking of something and having written it is none. Each entry carries the date and time it was written, from the row. An entry is a note anchored to its day, so there is no new table and no migration; the server's anchor validator had to learn the type, because an anchor it does not know is refused on write and the entry is simply never saved. |
+| O339 | **The relationship journal. It needs migration 073 before an entry will save: see section 1.** The composer is the first thing on the screen rather than behind a plus: the fewest taps between thinking of something and having written it is none. Each entry carries the date and time it was written, from the row. An entry is a note anchored to its day, so there is no new table and no migration; the server's anchor validator had to learn the type, because an anchor it does not know is refused on write and the entry is simply never saved. |
 | O340 | **It opens with the phone's passcode**, and that is verified rather than assumed: the prompt came up in the simulator. **It needs a new TestFlight build to work on your phone.** expo-local-authentication is a native module and cannot arrive over the air, so on the build you have now the journal opens without asking. It says which of the two it is doing on the card. |
 | O321 | **The loading mark is half again as large.** |
 | O322 | **A dropdown cannot arrive already open.** Two pages of a section render the same components in the same places, so React treated them as one instance and handed the second page the first page's state. The page is keyed on its section now, which also means a page always opens at the top. |
