@@ -34,7 +34,19 @@ const problems = [];
 for (const file of sources(SRC)) {
   const src = readFileSync(file, 'utf8');
   const rel = file.pathname.slice(file.pathname.indexOf('attune-app/'));
-  for (const m of src.matchAll(/useEffect\(\(\) => \{(.*?)\n {2}\}, \[([^\]]*)\]\);/gs)) {
+  /**
+   * ── A ONE-LINE EFFECT IS STILL AN EFFECT ─────────────────────────────
+   * This required a newline and exactly two spaces before the closing brace,
+   * which is what a multi-line effect at the top level of a component looks
+   * like. An effect written on one line matched nothing, so the regex ran past
+   * it to the next hook's dependency array and reported that one's deps
+   * against this one's body: a false positive, and a one-line effect that
+   * really did feed itself would have been invisible.
+   *
+   * Non-greedy to the FIRST `}, [ ... ]);`, whatever is in front of it. That
+   * is narrower than what it replaces, not wider: it can only stop sooner.
+   */
+  for (const m of src.matchAll(/useEffect\(\(\) => \{([\s\S]*?)\}, \[([^\]]*)\]\);/g)) {
     const [, body, deps] = m;
     for (const dep of deps.split(',').map(d => d.trim()).filter(Boolean)) {
       // A dependency that is not plain state cannot be matched this way, and

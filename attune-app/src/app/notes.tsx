@@ -56,7 +56,7 @@ import ScreenFrame from '@/components/screen-frame';
 import { showSection } from '@/components/results';
 import { showPost } from '@/app/resources';
 import SignIn from '@/components/sign-in';
-import Journal, { lockAvailable } from '@/components/journal';
+import Journal, { JOURNAL_ANCHOR, lockAvailable } from '@/components/journal';
 import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
@@ -119,6 +119,8 @@ export default function NotesScreen() {
   const [word, setWord] = useState<HomeResponse['word']>(null);
   /** Whether the journal is open over this screen. */
   const [journalOpen, setJournalOpen] = useState(pendingJournal);
+  /** Which of the three list pages is open over this screen, if any. */
+  const [openList, setOpenList] = useState<'recent' | 'shared' | 'tags' | null>(null);
 
   /* The other half of showJournal: if home set the flag while this tab was
      already mounted, nothing would have re-rendered without this. */
@@ -407,6 +409,32 @@ export default function NotesScreen() {
     (a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at),
   ), [shared]);
 
+  /**
+   * How many journal entries there are.
+   *
+   * From the anchored list, by anchor type, which is the same rule the journal
+   * itself reads by. It is not a second definition of what an entry is: both
+   * ask JOURNAL_ANCHOR. Reading the loose list instead is the mistake
+   * check-annotation-source.mjs exists for.
+   */
+  const journalCount = useMemo(
+    () => annotations.filter((n) => n.anchor_type === JOURNAL_ANCHOR).length,
+    [annotations],
+  );
+
+  /**
+   * Everything the reader has left, minus the journal.
+   *
+   * A journal entry is a note with an anchor, so it arrives in the same list
+   * as every highlight and every mark. It has its own page and its own count;
+   * leaving it in Recent as well would show the same thing in two places and
+   * make both counts wrong about what they are counting.
+   */
+  const recentMarks = useMemo(
+    () => mineRecent.filter((n) => n.anchor_type !== JOURNAL_ANCHOR),
+    [mineRecent],
+  );
+
   /** How many of the partner's notes this reader has not opened. */
   const unopenedCount = useMemo(
     () => sharedRecent.filter((n) => !n.opened_at).length,
@@ -570,10 +598,13 @@ export default function NotesScreen() {
               reads, and Ellie can change it without an app build. */}
           {word ? (
             <View style={{ marginBottom: Spacing.xxl }}>
+              {/* The entry sits over the usage note, which is what lets the
+                  one below tuck under it. */}
               <View
                 style={{
                   backgroundColor: Palette.white, borderRadius: Radius.card,
-                  paddingVertical: Spacing.xxl, paddingHorizontal: Spacing.xl, ...Lift,
+                  paddingVertical: Spacing.xxl, paddingHorizontal: Spacing.xl,
+                  zIndex: 2, ...Lift,
                 }}>
                 {/* ── THE ENTRY'S TOP LINE ──────────────────────────────
                     The reference puts the part of speech small and grey at the
@@ -615,11 +646,24 @@ export default function NotesScreen() {
                   it is a grey card, which is what makes the second one read as
                   a footnote to the first. This was a lighter white than the
                   card above, so the two read as one card with a seam. */}
+              {/* ── IT DROPS OUT FROM BEHIND THE ENTRY ───────────────────
+                  Ellie: "Word in use tile should drop down from the word tile.
+                  Just like the screenshot page, the top of the tile should be
+                  hidden behind the word tile, and there should be shading
+                  behind the word in use tile."
+
+                  So a negative margin puts its top under the card above, the
+                  padding puts the text back below that overlap, and it carries
+                  its own shadow, which is what makes the overlap read as depth
+                  rather than as a mistake. */}
               <View
                 style={{
                   backgroundColor: '#EFEAE3', borderRadius: Radius.card,
-                  paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl,
-                  marginTop: Spacing.sm,
+                  paddingTop: Spacing.xxl + Spacing.md,
+                  paddingBottom: Spacing.xl, paddingHorizontal: Spacing.xl,
+                  marginTop: -Spacing.xxl,
+                  shadowColor: '#2A1B10', shadowOpacity: 0.10,
+                  shadowRadius: 16, shadowOffset: { width: 0, height: 8 },
                 }}>
                 {/* The label is the dark, emphatic half and the meaning is the
                     quiet one. Mine had them exactly the wrong way round: a
@@ -632,108 +676,136 @@ export default function NotesScreen() {
                   }}>
                   {WORD_IN_USE}
                 </Text>
-                <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 26 }}>
+                {/* Ellie: "Text in the definition tile should be much larger
+                    and a different font from the hero font. Maybe just large
+                    and bold body font." The hero face is Playfair; this is DM
+                    Sans at its bold weight, two sizes up from body. */}
+                <Text
+                  style={{
+                    fontFamily: Fonts.bodyBold, fontSize: 20, lineHeight: 29,
+                    fontWeight: '700', color: c.text, marginTop: Spacing.md,
+                  }}>
                   {word.definition}
                 </Text>
               </View>
             </View>
           ) : null}
 
-          {/* ── TWO PEEKS, SIDE BY SIDE ────────────────────────────────────
-              Ellie: "then below have jump back in and shared with me sneak
-              peeks side by side then the tag list below."
+          {/* ── FOUR LINKS, EACH TO ITS OWN PAGE ───────────────────────
+              Ellie: "Instead of the different tiles, just like the row above
+              the autumn reads tile on the book design screenshot, let's use a
+              row of 4 words (links) with a count, and each one should open to
+              their own page."
 
-              Her two names, and a peek rather than a list: the most recent
-              two of each, one line apiece, with the full list a tap away in
-              the same place it always was. Two narrow columns cannot hold
-              three rows of wrapped prose, and a peek that scrolls is not a
-              peek. */}
-          <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg }}>
-            <Peek
-              title={JUMP_BACK_IN}
-              count={mineRecent.length}
-              empty={PEEK_MINE_EMPTY}
-              rows={mineRecent.slice(0, 2).map((n) => ({
-                id: n.id,
-                text: peekText(n),
-                onPress: () => openWhereItLives(n),
-              }))}
-            />
-            <Peek
-              title={SHARED_WITH_ME}
-              count={sharedRecent.length}
-              badge={unopenedCount || undefined}
-              empty={PEEK_SHARED_EMPTY}
-              rows={sharedRecent.slice(0, 2).map((n) => ({
-                id: n.id,
-                text: peekText(n),
-                unread: !n.opened_at,
-                onPress: () => { markOpened(n); },
-              }))}
-            />
+              That row is the shape: a word, its count beside it, four across,
+              nothing drawn around them. The three sections that used to be
+              stacked down this page are pages of their own now, and the
+              journal joins them rather than sitting in a card by itself.
+
+              Recent is capped at ten, which she asked for and which is also
+              what the page behind it shows. */}
+          <View
+            style={{
+              flexDirection: 'row', justifyContent: 'space-between',
+              alignItems: 'flex-start', marginTop: Spacing.xxl,
+            }}>
+            {([
+              ['recent', 'Recent', Math.min(recentMarks.length, 10)],
+              ['shared', 'Shared', sharedRecent.length],
+              ['journal', 'Journal', journalCount],
+              ['tags', 'Tags', tags.filter((t) => !t.deleted_at).length],
+            ] as const).map(([key, label, n]) => (
+              <Pressable
+                key={key}
+                accessibilityRole="button"
+                accessibilityLabel={`${label}, ${n}`}
+                hitSlop={10}
+                onPress={() => (key === 'journal' ? setJournalOpen(true) : setOpenList(key))}
+                style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
+                <Text style={{ ...Type.title, fontSize: 19, lineHeight: 26, color: c.textStrong }}>
+                  {label}
+                </Text>
+                <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.accent, marginTop: 2 }}>
+                  {n}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
-          {/* ── THE JOURNAL ────────────────────────────────────────────────
-              Ellie: "I want to build a 'relationship journal' into the notes
-              section that is kind of a running diary." One card, because it
-              is one place: the entries live behind it. */}
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setJournalOpen(true)}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
-              backgroundColor: Palette.white, borderRadius: Radius.card,
-              padding: Spacing.lg, marginBottom: Spacing.xxl, ...Lift,
-            }}>
-            <View
-              style={{
-                width: 44, height: 44, borderRadius: Radius.lg,
-                backgroundColor: `${c.accent}1A`,
-                alignItems: 'center', justifyContent: 'center',
-              }}>
-              <SymbolView
-                name={'book.closed' as never}
-                size={22}
-                tintColor={c.accent}
-                fallback={<Text style={{ ...Type.body, color: c.accent }}>{'\u2022'}</Text>}
-                style={{ width: 24, height: 24 }}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{JOURNAL_TITLE}</Text>
-              <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-                {lockAvailable ? JOURNAL_LOCKED : JOURNAL_OPEN}
-              </Text>
-            </View>
-            {/* The reference's bottom card ends in a filled accent pill, not
-                a chevron. The glyph inside it rather than a word, because a
-                word on it would be a string a customer reads and those are
-                Ellie's. */}
-            <View
-              style={{
-                width: 34, height: 34, borderRadius: 17,
-                backgroundColor: c.accent,
-                alignItems: 'center', justifyContent: 'center',
-              }}>
-              <Text style={{ ...Type.cardTitle, color: Palette.white }}>{'\u203A'}</Text>
-            </View>
-          </Pressable>
-
-          <TagList
-            tags={tags}
-            notes={[...mineRecent, ...sharedRecent]}
-            sort={tagSort}
-            onChangeSort={setTagSort}
-            placeholder={tagPlaceholder}
-            onAdd={addTag}
-            onOpen={setOpenTag}
-            onPurge={purgeTagForGood}
-            onRestore={restoreTagFromArchive}
-          />
         </View>
       </ScrollView>
 
       <Flash message={flash} />
+
+      {/* ── THE THREE LIST PAGES ────────────────────────────────────────
+          Ellie: "each one should open to their own page." These were sections
+          stacked down the Notes tab; they are pages behind their own link now.
+          Over the screen rather than routes of their own, for the reason the
+          journal is: they belong to this tab, and a route would put them in
+          the tab bar's history. */}
+      {openList ? (
+        <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpenList(null)}>
+          <View style={{ flex: 1, backgroundColor: c.background }}>
+            <ScrollView contentContainerStyle={{ padding: Spacing.xl, paddingBottom: Spacing.xxxl }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.xl }}>
+                <Text style={{ ...Type.display, color: c.textStrong, flex: 1 }}>
+                  {openList === 'recent' ? 'Recent' : openList === 'shared' ? 'Shared' : 'Tags'}
+                </Text>
+                <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => setOpenList(null)} hitSlop={12}>
+                  <Text style={{ ...Type.title, color: c.textMuted }}>{'\u2715'}</Text>
+                </Pressable>
+              </View>
+
+              {/* Recent: up to ten, which is the number on the link. */}
+              {openList === 'recent' ? (
+                recentMarks.length ? (
+                  <Tile accent={c.accent}>
+                    {recentMarks.slice(0, SHOW_ALL_LIMIT).map((note, i) => (
+                      <MarkRow
+                        key={note.id}
+                        note={note}
+                        source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                        first={i === 0}
+                        onPress={() => { setOpenList(null); openWhereItLives(note); }}
+                      />
+                    ))}
+                  </Tile>
+                ) : <Blank body={PEEK_MINE_EMPTY} />
+              ) : null}
+
+              {openList === 'shared' ? (
+                sharedRecent.length ? sharedRecent.map((note) => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    tags={tags}
+                    source={note.anchor_type ? resolveAnchor(note, anchorCtx) : null}
+                    moved={hasMoved(note, resultsVersion)}
+                    author={partner}
+                    readOnly
+                    unread={!note.opened_at}
+                    onPress={() => { markOpened(note); }}
+                  />
+                )) : <Blank body={PEEK_SHARED_EMPTY} />
+              ) : null}
+
+              {openList === 'tags' ? (
+                <TagList
+                  tags={tags}
+                  notes={[...mineRecent, ...sharedRecent]}
+                  sort={tagSort}
+                  onChangeSort={setTagSort}
+                  placeholder={tagPlaceholder}
+                  onAdd={addTag}
+                  onOpen={(t) => { setOpenList(null); setOpenTag(t); }}
+                  onPurge={purgeTagForGood}
+                  onRestore={restoreTagFromArchive}
+                />
+              ) : null}
+            </ScrollView>
+          </View>
+        </Modal>
+      ) : null}
 
       {/* Over the screen rather than a route of its own: it is a part of this
           tab, and a route would put it in the tab bar's history. */}

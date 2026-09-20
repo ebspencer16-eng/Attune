@@ -71,15 +71,20 @@ export default function PageWash({ tint, second, corners = false }: {
       <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         {/* The ground the two corners sit on. Warm at the very top so the
             colours have something to sit in, and the app's cream below. */}
+        {/* Ellie: "Orange and blue should be brighter in the top corners, I
+            want it to feel brighter and more crisp like the screenshot image."
+            The corners are stronger, and the ground under them is white rather
+            than warm cream, because a warm ground is what was taking the edge
+            off them: a bright hue over a cream is a muted hue. */}
         <LinearGradient
-          colors={[Palette.warm, Palette.cream]}
+          colors={[Palette.white, Palette.cream]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 0.55 }}
+          end={{ x: 0, y: 0.5 }}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         />
         {/* Top left, falling to the right and down. */}
         <LinearGradient
-          colors={[withAlpha(hue, 0.42), withAlpha(hue, 0.13), withAlpha(hue, 0)]}
+          colors={[withAlpha(hue, 0.62), withAlpha(hue, 0.18), withAlpha(hue, 0)]}
           locations={[0, 0.3, 0.62]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.85, y: 0.55 }}
@@ -90,7 +95,7 @@ export default function PageWash({ tint, second, corners = false }: {
             before it reaches the other's corner. */}
         {second ? (
           <LinearGradient
-            colors={[withAlpha(second, 0.38), withAlpha(second, 0.12), withAlpha(second, 0)]}
+            colors={[withAlpha(second, 0.58), withAlpha(second, 0.16), withAlpha(second, 0)]}
             locations={[0, 0.3, 0.62]}
             start={{ x: 1, y: 0 }}
             end={{ x: 0.15, y: 0.55 }}

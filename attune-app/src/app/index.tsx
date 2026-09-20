@@ -373,7 +373,19 @@ export default function HomeScreen() {
           glance paints its lead panel with. Monochrome on purpose: the three
           hue version of this screen was the app inventing a palette the site
           does not have. */}
-      <PageWash tint={Palette.indigo} second={Palette.indigo} corners />
+      {/* ── CREAM ABOVE, BLUE BELOW ──────────────────────────────────
+          Ellie: "The page should have the blue tint at the bottom and be only
+          cream at the top." It was the other way up, both colours falling out
+          of the top corners, which is the Notes tab's ground and not this
+          reference's. The reference carries its colour along the foot. */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={[Palette.cream, Palette.cream, withAlpha(Palette.indigo, 0.16)]}
+        locations={[0, 0.42, 1]}
+        start={{ x: 0.2, y: 0 }}
+        end={{ x: 0.8, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
 
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         {/* Ellie: "I want the lockup in the top to be at the exact same
@@ -467,7 +479,13 @@ export default function HomeScreen() {
                 and one quiet line under it. The row above draws the profile
                 control alone, because two lockups on one screen is the same
                 thing said twice. */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.lg }}>
+            {/* Ellie: "Lockup should not be left-aligned, should be moved to
+                the right." */}
+            <View
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+                marginTop: Spacing.lg, justifyContent: 'flex-end',
+              }}>
               {/* The cream variant, because the page is cream now. The
                   inverse one Ellie asked for on home was for the navy; the
                   rule underneath it is the same one it always was, which is
@@ -477,7 +495,7 @@ export default function HomeScreen() {
                 style={{ width: 58, height: 58 * (76 / 103) }}
                 resizeMode="contain"
               />
-              <Text style={{ ...Type.display, color: c.textStrong, flex: 1 }}>
+              <Text style={{ ...Type.display, color: c.textStrong, flex: 1, textAlign: 'right' }}>
                 {BRAND_NAME}
               </Text>
             </View>
@@ -490,7 +508,7 @@ export default function HomeScreen() {
             {/* The small row under the headline. In the reference it is a
                 word with a thin rule under it, which is what separates it from
                 the headline above without another size change. */}
-            <View style={{ marginTop: Spacing.lg, marginBottom: Spacing.xl, alignSelf: 'flex-start' }}>
+            <View style={{ marginTop: Spacing.lg, marginBottom: Spacing.xl, alignSelf: 'flex-end', alignItems: 'flex-end' }}>
               <Text style={{ ...Type.body, color: c.textMuted }}>
                 {data.greeting}
               </Text>
@@ -499,22 +517,8 @@ export default function HomeScreen() {
               />
             </View>
 
-            {/* ── ONE TILE BEHIND BOTH BLOCKS ───────────────────────────
-                Ellie: "Home should have that additional tile behind the ones
-                I'm seeing now."
-
-                In the reference the four squares and the two cards sit inside
-                one panel rather than loose on the page, which is what gives
-                that screen its edges. So this is that panel: the page's own
-                near-white, a generous radius, and the shared lift, with both
-                blocks inside it. */}
-            <View
-              style={{
-                backgroundColor: Palette.white,
-                borderRadius: Radius.card + 6,
-                padding: Spacing.lg,
-                ...Lift,
-              }}>
+            {/* The tile is outside this padded column, because it runs to
+                both edges of the page. See below. */}
             {/* ── FOUR WAYS IN ───────────────────────────────────────────
                 Ellie: "Instead of the 4 rounded squares above the two main
                 ones, let's add quick links to insight of the day, action plan
@@ -523,7 +527,53 @@ export default function HomeScreen() {
 
                 Four rounded squares in a row, as the reference has them, each
                 landing somewhere that already exists. */}
-            <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xl }}>
+          </View>
+
+          {/* ── THE TILE, EDGE TO EDGE, FADING UPWARD ────────────────────
+              Ellie: "I want a large tile that goes all the way to the edges of
+              the page, and vanishes as it goes up the page. There should be
+              shading behind the tile on the bottom."
+
+              So it has no side margins and no top edge: its fill is a gradient
+              that is nothing at the top and the page's own cream by a third of
+              the way down, which is what "vanishes as it goes up" is. The
+              shadow is drawn by a separate opaque panel underneath rather than
+              by this, because iOS casts no shadow from a view whose background
+              is a gradient: the gradient is a child, not a fill. */}
+          <View style={{ marginTop: Spacing.xl }}>
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute', left: 0, right: 0, top: TILE_FADE, bottom: 0,
+                backgroundColor: Palette.cream,
+                shadowColor: '#1B2A5E', shadowOpacity: 0.16,
+                shadowRadius: 24, shadowOffset: { width: 0, height: 10 },
+              }}
+            />
+            <LinearGradient
+              pointerEvents="none"
+              colors={['rgba(255,253,249,0)', Palette.cream]}
+              locations={[0, 1]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={{ position: 'absolute', left: 0, right: 0, top: 0, height: TILE_FADE }}
+            />
+
+            {/* ── FOUR SQUARES, ALMOST TOUCHING ──────────────────────────
+                Ellie: "the four boxes should be barely visible, and have
+                barely any space between them. They should almost reach the
+                edge of the page on both sides. The text should be inside of
+                the squares."
+
+                So: the faintest fill the ground will hold, two points apart,
+                eight points from each edge, and the label sits in the square's
+                own bottom left rather than under it. */}
+            <View
+              style={{
+                flexDirection: 'row', gap: 2,
+                paddingHorizontal: Spacing.sm,
+                paddingTop: Spacing.xl,
+              }}>
               {QUICK_LINKS.map((q) => (
                 <QuickLink key={q.id} item={q} onGo={() => goQuick(q)} />
               ))}
@@ -536,7 +586,7 @@ export default function HomeScreen() {
                 Inside the tile with everything else, above the two cards, so
                 the cards can be only the two prompts Ellie asked them to be. */}
             {alerts.length ? (
-              <View style={{ marginBottom: Spacing.lg }}>
+              <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg }}>
                 {alerts.map((a, i) => (
                   <TileRow
                     key={a.id}
@@ -560,11 +610,19 @@ export default function HomeScreen() {
                 Two, always: the priority engine's own order, taken from the
                 top. `prompts` is where that list is cut, so "always two" is a
                 slice rather than three conditionals that can each be true. */}
-            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+            {/* ── EACH PROMPT IN ITS OWN WHITE TILE ──────────────────────
+                Ellie: "The two action prompts on the homepage should be in
+                their own white tiles like the two on the luxury page
+                example." They were drawn straight onto the panel. */}
+            <View
+              style={{
+                flexDirection: 'row', gap: Spacing.md,
+                paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl,
+                paddingBottom: Spacing.xl,
+              }}>
               {prompts.map((p) => (
                 <PromptCard key={p.key} item={p} onPress={p.onPress} />
               ))}
-            </View>
             </View>
           </View>
 
@@ -918,6 +976,10 @@ const ICON_ORANGE = '#FF8F5E';
  *  One constant, because the reference uses one tone for both and two numbers
  *  a hundred lines apart is how they stop being the same tone. */
 const TILE_FILL = '#F1EEE9';
+/** How far the big tile takes to stop being transparent, in points. */
+const TILE_FADE = 90;
+/** The four squares' fill. Three per cent of the ink: present, barely. */
+const SQUARE_FILL = 'rgba(14,11,7,0.045)';
 const ICON_GLOW_SIZE = 44;
 const ICON_GLOW_RINGS = 24;
 const ICON_GLOW_PEAK = 0.30;
@@ -950,34 +1012,32 @@ const QUICK_LINKS: QuickLinkItem[] = [
 
 function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
   return (
+    /* ── BARELY THERE, AND IT HOLDS ITS OWN NAME ─────────────────────
+       Ellie: "the four boxes should be barely visible, and have barely any
+       space between them... The text should be inside of the squares."
+
+       So the fill is three per cent of the ink rather than a tone of its own,
+       the icon sits at the top and the label at the foot of the same square,
+       and nothing is drawn under it. */
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={item.label}
       onPress={onGo}
-      style={{ flex: 1, alignItems: 'center', gap: Spacing.sm }}>
-      {/* A pale square with a thin icon in it, which is what the reference
-          has: four of them in a row, the tile light against the panel rather
-          than a different colour from it. */}
-      <View
-        style={{
-          width: '100%', aspectRatio: 1, borderRadius: Radius.xl,
-          backgroundColor: TILE_FILL,
-          alignItems: 'center', justifyContent: 'center',
-        }}>
-        <SymbolView
-          name={item.icon as never}
-          size={22}
-          tintColor={c.accent}
-          fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.accent }} />}
-          style={{ width: 24, height: 24 }}
-        />
-      </View>
+      style={{
+        flex: 1, aspectRatio: 0.92, borderRadius: Radius.lg,
+        backgroundColor: SQUARE_FILL,
+        padding: Spacing.sm, justifyContent: 'space-between',
+      }}>
+      <SymbolView
+        name={item.icon as never}
+        size={20}
+        tintColor={c.accent}
+        fallback={<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.accent }} />}
+        style={{ width: 22, height: 22 }}
+      />
       <Text
         numberOfLines={2}
-        style={{
-          ...Type.small, fontSize: 11, lineHeight: 15,
-          color: c.textMuted, textAlign: 'center',
-        }}>
+        style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: c.textMuted }}>
         {item.label}
       </Text>
     </Pressable>
@@ -1013,7 +1073,14 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
       disabled={dim}
       onPress={onPress}
       style={{ flex: 1 }}>
-      <View style={{ opacity: dim ? 0.55 : 1 }}>
+      <View
+        style={{
+          opacity: dim ? 0.55 : 1,
+          backgroundColor: Palette.white,
+          borderRadius: Radius.card,
+          padding: Spacing.md,
+          ...Lift,
+        }}>
         {/* The picture. A tint of the accent behind the glyph rather than a
             photograph: this product has no artwork, and a grey rectangle
             waiting for one reads as an image that failed to load. */}

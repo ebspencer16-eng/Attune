@@ -12,7 +12,7 @@
  * rejects for. Tapping one opens the site in the browser.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
@@ -454,6 +454,19 @@ export default function ResourcesScreen() {
    */
   const narrowing = terms.length > 0 || list !== 'all';
 
+  /**
+   * The four most-read pieces, for the sheet's preview grid.
+   *
+   * `reads` is on the payload: the server counts post_reads rows, which is the
+   * first key of its own Featured sort, so this cannot disagree with the
+   * website about what is popular. Ties fall back to the order the server
+   * already sent, which is stable.
+   */
+  const mostRead = useMemo<PostSummary[]>(
+    () => posts.slice().sort((a, b) => (b.reads || 0) - (a.reads || 0)).slice(0, 4),
+    [posts],
+  );
+
   return (
     <Shell>
       <ScrollView
@@ -522,14 +535,18 @@ export default function ResourcesScreen() {
                 Every other section of this tab is named by a hero above it and
                 this one named itself inside its own tile, which made it the one
                 block on the page whose label sat in a different place. */}
-            <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>
-              Insight of the day
-            </Text>
+            {/* Ellie: "Remove insight of the day hero, add it back as an
+                eyebrow in the tile itself." It was an eyebrow inside the tile
+                once and she asked for the hero; the reference has no heading
+                over this block at all, so it goes back inside. */}
             <LinearGradient
               colors={[...BlueGround]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 1 }}
               style={{ borderRadius: Radius.card, padding: Spacing.xl, ...Lift }}>
+              <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
+                Insight of the day
+              </Text>
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
               </Text>
@@ -557,92 +574,6 @@ export default function ResourcesScreen() {
           </View>
         ) : null}
 
-        {/* ── THE FILTERS SIT ON THE COLOUR ──────────────────────────────
-            Ellie: "The all, saved, read, and search bar should be above the
-            bottom tile just like the all, design, fantasy, and mystery in the
-            screenshot."
-
-            In that reference the counted pills are the last thing on the
-            coloured ground and the white panel starts under them, so they read
-            as choosing what the panel holds rather than as part of it. They
-            were inside the sheet, under its heading, which is the other way
-            round. Nothing about them changed but where they are. */}
-        {posts.length ? (
-              <View style={{ paddingHorizontal: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-                {/* Search first, then the two lists, then the shelves. Someone
-                    who knows what they are looking for should not have to walk
-                    past four shelves to ask for it. */}
-                <View
-                  style={{
-                    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-                    backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-                    borderRadius: Radius.pill, paddingHorizontal: Spacing.lg,
-                    marginBottom: Spacing.lg,
-                  }}>
-                  <SymbolView
-                    name={'magnifyingglass' as never}
-                    size={15}
-                    tintColor={c.textMuted}
-                    fallback={<Text style={{ color: c.textMuted }}>{'\u2315'}</Text>}
-                  />
-                  <TextInput
-                    value={query}
-                    onChangeText={setQuery}
-                    placeholder="Search a topic"
-                    placeholderTextColor={c.textMuted}
-                    returnKeyType="search"
-                    clearButtonMode="while-editing"
-                    /* Ellie: "Text cuts off on bottom in the in practice
-                       search tab." Type.body carries a line height set for
-                       paragraphs, and a single-line input clips its descenders
-                       against it. inputType strips that, which is what it is
-                       for: every other field in the app already uses it. */
-                    style={{ ...inputType(Type.body), color: c.text, flex: 1, paddingVertical: Spacing.md }}
-                  />
-                </View>
-
-                <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl }}>
-                  {/* ── COUNTED ──────────────────────────────────────────
-                      Straight out of the reference she sent: "All 23 · Design
-                      10 · Fantasy 5". A filter that says how much is behind it
-                      is a filter someone can choose without tapping it first,
-                      and the numbers are the ones the screen already has. */}
-                  {([['all', 'All'], ['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
-                    const on = list === key;
-                    const n = key === 'all' ? posts.length
-                      : key === 'saved' ? posts.filter((p) => p.saved).length
-                        : posts.filter((p) => p.read).length;
-                    return (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: on }}
-                        key={key}
-                        onPress={() => setList(key)}
-                        style={{
-                          paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
-                          borderRadius: Radius.pill,
-                          backgroundColor: on ? c.accent : Palette.white,
-                          ...(on ? {} : Lift),
-                        }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
-                          <Text style={{ ...Type.small, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
-                            {label}
-                          </Text>
-                          <Text
-                            style={{
-                              ...Type.small, fontSize: 11, fontWeight: '700',
-                              color: on ? 'rgba(255,255,255,0.75)' : c.accentQuiet,
-                            }}>
-                            {n}
-                          </Text>
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-        ) : null}
-
         {/* ── THE SHEET ──────────────────────────────────────────────────
             Ellie: "Can the learn page have the layout/design of the image with
             the books, with a gradient page bg that lists the resources and the
@@ -660,7 +591,11 @@ export default function ResourcesScreen() {
             you, and this one only has to look like it lifts. */}
         <View
           style={{
-            marginTop: Spacing.xxxl,
+            /* Ellie: "In practice should peek the same amount as the autumn
+               reads section of the example screenshot." In that screenshot the
+               panel's top edge sits about two thirds of the way down, so the
+               colour above it is most of the screen. */
+            marginTop: SHEET_PEEK,
             backgroundColor: Palette.white,
             borderTopLeftRadius: 34, borderTopRightRadius: 34,
             /* Ellie: "decrease the white space above in practice in the bottom
@@ -678,50 +613,120 @@ export default function ResourcesScreen() {
               backgroundColor: c.border, marginBottom: Spacing.lg,
             }}
           />
-          {/* ── THE SHEET OPENS IN TWO COLUMNS ─────────────────────────
-              Ellie: "I also want the in practice hero on the left of the
-              bottom tile with article previews visible on the right just like
-              the screenshot."
+          {/* ── THE SHEET'S HEAD, PART FOR PART ────────────────────────
+              The reference's panel has four things stacked on its left and a
+              two by two grid on its right, and Ellie named what each of ours
+              says: the two pills are Saved and Read, the heading is In
+              Practice, the line under it is Featured publications, and where
+              the reference puts a large number she asked for the search.
+              Then a caret, because that panel is the bottom of the screen and
+              nothing else says it moves.
 
-              In that reference the panel's left half is the heading and a
-              large number, and its right half is a grid of covers running off
-              the edge. So: the heading and the count on the left, four
-              previews on the right. The four are the newest, which is the
-              order this screen already sorts by, so nothing here decides what
-              is interesting. The number is a count rather than a word, which
-              is the one thing on this block that is not Ellie's to write. */}
+              The pills toggle rather than select: there are two of them and
+              three states, so tapping the one that is on is how you get back
+              to all of it. */}
           <View
             style={{
               flexDirection: 'row', gap: Spacing.lg,
               paddingLeft: Spacing.xl, paddingRight: Spacing.lg,
               maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
-              marginBottom: Spacing.xxl,
             }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...Type.display, color: c.textStrong }}>In Practice</Text>
-              <Text
-                style={{
-                  ...Type.display, fontSize: 52, lineHeight: 74,
-                  color: c.accent, marginTop: Spacing.sm,
-                }}>
-                {posts.length}
+              <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg }}>
+                {([['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
+                  const on = list === key;
+                  const n = key === 'saved'
+                    ? posts.filter((p) => p.saved).length
+                    : posts.filter((p) => p.read).length;
+                  return (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                      key={key}
+                      onPress={() => setList(on ? 'all' : key)}
+                      style={{
+                        flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+                        paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.md,
+                        borderRadius: Radius.pill,
+                        backgroundColor: on ? c.accent : Palette.warm,
+                      }}>
+                      <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+                        {label}
+                      </Text>
+                      <Text
+                        style={{
+                          ...Type.small, fontSize: 11, fontWeight: '700',
+                          color: on ? 'rgba(255,255,255,0.75)' : c.accentQuiet,
+                        }}>
+                        {n}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Text style={{ ...Type.display, fontSize: 30, lineHeight: 42, color: c.textStrong }}>
+                In Practice
               </Text>
+              <Text style={{ ...Type.display, fontSize: 24, lineHeight: 34, color: c.textMuted, marginBottom: Spacing.lg }}>
+                Featured publications
+              </Text>
+
+              {/* Where the reference has its number. Ellie: "add the search bar
+                  with 'Search articles' in grey text that disappears once you
+                  start to type", which is what a placeholder is. */}
+              <View
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                  backgroundColor: Palette.warm,
+                  borderRadius: Radius.pill, paddingHorizontal: Spacing.md,
+                }}>
+                <SymbolView
+                  name={'magnifyingglass' as never}
+                  size={14}
+                  tintColor={c.textMuted}
+                  fallback={<Text style={{ color: c.textMuted }}>{'\u2315'}</Text>}
+                />
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="Search articles"
+                  placeholderTextColor={c.textMuted}
+                  returnKeyType="search"
+                  clearButtonMode="while-editing"
+                  /* inputType, not Type.body: a single-line field clips its
+                     descenders against a line height set for paragraphs. */
+                  style={{ ...inputType(Type.small), color: c.text, flex: 1, paddingVertical: Spacing.sm + 2 }}
+                />
+              </View>
             </View>
-            <View style={{ width: '50%', flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
-              {posts.slice(0, 4).map((post) => (
+
+            {/* ── THE FOUR MOST READ ─────────────────────────────────────
+                Ellie: "The 4 tiles should be the 4 highest-read articles."
+                `reads` is on the payload already: the server counts the rows
+                in post_reads, which is also what its own Featured sort uses,
+                so this cannot disagree with the website about what is
+                popular.
+
+                "Sneak peek article tiles should fit the full name of the
+                article, not cut them off", so the tile is sized by its title
+                rather than the title cut to the tile: no numberOfLines, and
+                the height comes from the text. */}
+            <View style={{ width: '48%', flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
+              {mostRead.map((post) => (
                 <Pressable
                   key={post.id}
                   accessibilityRole="button"
                   accessibilityLabel={post.title}
                   onPress={() => { if (post.external) { Linking.openURL(post.external); return; } setOpenPost(post.id); }}
-                  style={{ width: '47%', aspectRatio: 0.78 }}>
+                  style={{ width: '47%' }}>
                   <View
                     style={{
-                      flex: 1, borderRadius: Radius.lg, overflow: 'hidden',
+                      borderRadius: Radius.lg, overflow: 'hidden', minHeight: 96,
                       backgroundColor: `${CARD_TINTS[Math.max(0, categories.indexOf(post.category || '')) % CARD_TINTS.length]}2e`,
                       padding: Spacing.sm, justifyContent: 'flex-end',
                     }}>
-                    <Text numberOfLines={3} style={{ ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '700', color: c.textStrong }}>
+                    <Text style={{ ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '700', color: c.textStrong }}>
                       {post.title}
                     </Text>
                   </View>
@@ -729,6 +734,18 @@ export default function ResourcesScreen() {
               ))}
             </View>
           </View>
+
+          {/* The caret. Ellie: "add a carrot arrow downwards at the bottom of
+              that so that it's clear the user can scroll down." Not a control:
+              tapping a hint about scrolling and having it scroll is a second
+              way to do something the finger already does. */}
+          <Text
+            style={{
+              ...Type.title, color: c.border, textAlign: 'center',
+              marginTop: Spacing.lg, marginBottom: Spacing.xl,
+            }}>
+            {'\u2304'}
+          </Text>
 
           {posts.length ? (
             <>
@@ -832,6 +849,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 /** The books reference's ground, in this product's blue rather than its own. */
+/** How much air is left above the sheet. The reference's panel starts about
+ *  two thirds of the way down its screen; everything above it is the ground. */
+const SHEET_PEEK = 120;
+
 const LEARN_GROUND = ['#C9D2F2', '#E6E3F0'] as const;
 
 type Item = CatalogueItem;

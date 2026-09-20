@@ -36,11 +36,13 @@
  * lock that silently is not there is worse than no lock: it is a promise.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
   Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { SymbolView } from 'expo-symbols';
 
 import { createNote, deleteNote, fetchNotes, type Note } from '@/api/client';
@@ -96,6 +98,55 @@ export function writtenAt(iso: string | null | undefined) {
   return `${date} at ${time}`;
 }
 
+/**
+ * The heading over a day's entries.
+ *
+ * Ellie: "Should be able to scroll up and read past 'posts' that are tagged
+ * with their date." So the date is a heading over the day rather than a line
+ * on every entry, which is how a diary reads and is also how the scrubber has
+ * something to scroll to.
+ */
+export function dayHeading(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const today = new Date();
+  const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+  const yesterday = new Date(today.getTime() - 86400000);
+  if (same(d, today)) return 'Today';
+  if (same(d, yesterday)) return 'Yesterday';
+  return d.toLocaleDateString(undefined, {
+    weekday: 'long', month: 'long', day: 'numeric',
+    ...(d.getFullYear() === today.getFullYear() ? {} : { year: 'numeric' }),
+  });
+}
+
+/** The short label the scrubber shows while it is being dragged. */
+export function scrubLabel(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Entries in one day's bucket, newest day first.
+ *
+ * Its own function with no imports so it can be reasoned about and, if it ever
+ * earns one, gated. The key is the day the entry was WRITTEN, from created_at,
+ * not the anchor: the anchor is what the server validates and the timestamp is
+ * the fact.
+ */
+export function byDay<T extends { created_at?: string | null }>(rows: T[]) {
+  const out: { key: string; iso: string; rows: T[] }[] = [];
+  for (const r of rows) {
+    const iso = r.created_at || '';
+    const key = iso.slice(0, 10);
+    const last = out[out.length - 1];
+    if (last && last.key === key) last.rows.push(r);
+    else out.push({ key, iso, rows: [r] });
+  }
+  return out;
+}
+
 export default function Journal({ onClose }: { onClose: () => void }) {
   /**
    * Locked until the phone says otherwise, and only when it can be asked.
@@ -112,6 +163,25 @@ export default function Journal({ onClose }: { onClose: () => void }) {
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const asked = useRef(false);
+
+  /** Ellie: "should be able to search entries by word/phrase." */
+  const [query, setQuery] = useState('');
+
+  /**
+   * ── THE SCRUBBER ──────────────────────────────────────────────────────
+   * Ellie: "should be able to scroll to specific date like snapchat scroll
+   * that shows month and date."
+   *
+   * A column down the right edge. Dragging it picks a day by position and
+   * scrolls to that day's heading; the label beside the finger says which day
+   * it has landed on. It needs three things: where each day's heading sits in
+   * the scroll view, the scroll view itself, and how tall the column is.
+   */
+  const scroller = useRef<ScrollView>(null);
+  const offsets = useRef<Record<string, number>>({});
+  const [scrubAt, setScrubAt] = useState<number | null>(null);
+  const [scrubbing, setScrubbing] = useState<string | null>(null);
+  const railHeight = useRef(1);
 
   const unlock = useCallback(async () => {
     if (!localAuth) { setUnlocked(true); return; }
@@ -178,7 +248,9 @@ export default function Journal({ onClose }: { onClose: () => void }) {
     setLoading(false);
   }, []);
 
-  useEffect(() => { if (unlocked) load(); }, [unlocked, load]);
+  useEffect(() => {
+    if (unlocked) load();
+  }, [unlocked, load]);
 
   const add = async () => {
     const body = draft.trim();
@@ -198,6 +270,43 @@ export default function Journal({ onClose }: { onClose: () => void }) {
     setDraft('');
     setEntries((prev) => [res.data.note, ...prev]);
   };
+
+  /**
+   * What the page shows: the entries that match, in days.
+   *
+   * The search is a plain case-insensitive substring over the entry's own
+   * words. Not a ranked search: this is one person's diary, and the thing they
+   * are looking for is a phrase they wrote.
+   */
+  const days = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const rows = q ? entries.filter((n) => (n.body || '').toLowerCase().includes(q)) : entries;
+    return byDay(rows);
+  }, [entries, query]);
+
+  /** Drag the rail: pick the day at that height and go to it. */
+  const goToDay = useCallback((fraction: number) => {
+    if (!days.length) return;
+    const i = Math.max(0, Math.min(days.length - 1, Math.round(fraction * (days.length - 1))));
+    const day = days[i];
+    setScrubbing(day.iso);
+    const y = offsets.current[day.key];
+    if (y != null) scroller.current?.scrollTo({ y: Math.max(0, y - 12), animated: false });
+  }, [days]);
+
+  const scrub = useMemo(() => Gesture.Pan()
+    .onBegin((e) => {
+      runOnJS(setScrubAt)(e.y);
+      runOnJS(goToDay)(e.y / Math.max(1, railHeight.current));
+    })
+    .onUpdate((e) => {
+      runOnJS(setScrubAt)(e.y);
+      runOnJS(goToDay)(e.y / Math.max(1, railHeight.current));
+    })
+    .onFinalize(() => {
+      runOnJS(setScrubAt)(null);
+      runOnJS(setScrubbing)(null);
+    }), [goToDay]);
 
   const remove = (note: Note) => {
     Alert.alert('Delete this entry?', 'This cannot be undone.', [
@@ -294,39 +403,90 @@ export default function Journal({ onClose }: { onClose: () => void }) {
           </View>
         </View>
 
+        {/* ── SEARCH ────────────────────────────────────────────────────
+            Ellie: "should be able to search entries by word/phrase." Under the
+            composer rather than over it, because writing is what this screen
+            is for and finding is what it is for afterwards. Hidden until there
+            is something to search. */}
+        {entries.length ? (
+          <View
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+              backgroundColor: Palette.warm, borderRadius: Radius.pill,
+              paddingHorizontal: Spacing.md, marginTop: Spacing.xl,
+            }}>
+            <SymbolView
+              name={'magnifyingglass' as never}
+              size={14}
+              tintColor={c.textMuted}
+              fallback={<Text style={{ color: c.textMuted }}>{'⌕'}</Text>}
+            />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder={SEARCH}
+              placeholderTextColor={c.textMuted}
+              returnKeyType="search"
+              clearButtonMode="while-editing"
+              style={{ ...inputType(Type.small), color: c.text, flex: 1, paddingVertical: Spacing.sm + 2 }}
+            />
+          </View>
+        ) : null}
+
         {loading ? (
           <ActivityIndicator color={c.accentQuiet} style={{ marginTop: Spacing.xxl }} />
         ) : failed ? (
           <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xxl }}>{FAILED}</Text>
-        ) : entries.length ? (
-          entries.map((n) => (
+        ) : days.length ? (
+          /* ── A DAY AT A TIME ────────────────────────────────────────
+             Ellie: "Should be able to scroll up and read past posts that are
+             tagged with their date." The date is a heading over the day rather
+             than a line on every entry, which is how a diary reads and is what
+             gives the rail something to scroll to. Each heading's position is
+             recorded on layout, because measuring it is the only way to know:
+             guessing from a row height drifts the moment one entry is longer
+             than another. */
+          days.map((day) => (
             <View
-              key={n.id}
-              style={{
-                backgroundColor: Palette.white, borderRadius: Radius.card,
-                padding: Spacing.lg, marginTop: Spacing.lg, ...Lift,
-              }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
-                <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.accentQuiet, flex: 1 }}>
-                  {writtenAt(n.created_at)}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Delete this entry"
-                  onPress={() => remove(n)}
-                  hitSlop={10}>
-                  <SymbolView
-                    name={'trash' as never}
-                    size={14}
-                    tintColor={c.textMuted}
-                    fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{'✕'}</Text>}
-                    style={{ width: 16, height: 16 }}
-                  />
-                </Pressable>
-              </View>
-              <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm, lineHeight: 25 }}>
-                {n.body}
+              key={day.key}
+              onLayout={(e) => { offsets.current[day.key] = e.nativeEvent.layout.y; }}>
+              <Text
+                style={{
+                  ...Type.eyebrow, color: c.accentQuiet,
+                  marginTop: Spacing.xxl, marginBottom: Spacing.sm,
+                }}>
+                {dayHeading(day.iso)}
               </Text>
+              {day.rows.map((n) => (
+                <View
+                  key={n.id}
+                  style={{
+                    backgroundColor: Palette.white, borderRadius: Radius.card,
+                    padding: Spacing.lg, marginTop: Spacing.md, ...Lift,
+                  }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
+                    <Text style={{ ...Type.eyebrow, fontSize: 9, color: c.textMuted, flex: 1 }}>
+                      {writtenAt(n.created_at)}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Delete this entry"
+                      onPress={() => remove(n)}
+                      hitSlop={10}>
+                      <SymbolView
+                        name={'trash' as never}
+                        size={14}
+                        tintColor={c.textMuted}
+                        fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{'✕'}</Text>}
+                        style={{ width: 16, height: 16 }}
+                      />
+                    </Pressable>
+                  </View>
+                  <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm, lineHeight: 25 }}>
+                    {n.body}
+                  </Text>
+                </View>
+              ))}
             </View>
           ))
         ) : (
@@ -335,13 +495,65 @@ export default function Journal({ onClose }: { onClose: () => void }) {
               ...Type.small, color: c.textMuted, marginTop: Spacing.xxl,
               fontFamily: Fonts.bodyItalic, textAlign: 'center', lineHeight: 22,
             }}>
-            {EMPTY}
+            {query.trim() ? NO_MATCH : EMPTY}
           </Text>
         )}
       </ScrollView>
+
+      {/* ── THE RAIL ───────────────────────────────────────────────────
+          Ellie: "should be able to scroll to specific date like snapchat
+          scroll that shows month and date."
+
+          A column of ticks down the right edge, one per day, and a label that
+          follows the finger saying which day it has landed on. Only drawn when
+          there is more than one day to move between: a scrubber over a single
+          day is a control that cannot do anything.
+
+          It is not a scroll bar. It does not follow the scroll position,
+          because a thing that both follows and leads fights the finger; it is
+          a way to jump, and it appears only while it is being used. */}
+      {days.length > 1 ? (
+        <GestureDetector gesture={scrub}>
+          <View
+            onLayout={(e) => { railHeight.current = e.nativeEvent.layout.height; }}
+            style={{
+              position: 'absolute', right: 0, top: RAIL_INSET, bottom: RAIL_INSET,
+              width: 34, alignItems: 'center', justifyContent: 'space-between',
+              paddingVertical: Spacing.sm,
+            }}>
+            {days.map((d) => (
+              <View
+                key={d.key}
+                style={{
+                  width: scrubbing === d.iso ? 14 : 8, height: 2, borderRadius: 1,
+                  backgroundColor: scrubbing === d.iso ? c.accent : c.border,
+                }}
+              />
+            ))}
+          </View>
+        </GestureDetector>
+      ) : null}
+
+      {/* The label, beside the finger. */}
+      {scrubAt != null && scrubbing ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute', right: 40, top: RAIL_INSET + scrubAt - 16,
+            backgroundColor: c.textStrong, borderRadius: Radius.pill,
+            paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+          }}>
+          <Text style={{ ...Type.small, fontWeight: '700', color: Palette.white }}>
+            {scrubLabel(scrubbing)}
+          </Text>
+        </View>
+      ) : null}
     </KeyboardAvoidingView>
   );
 }
+
+/** How far the rail sits from the top and bottom of the screen. */
+const RAIL_INSET = 120;
 
 /**
  * ── THE THREE STRINGS ─────────────────────────────────────────────────────
@@ -350,5 +562,7 @@ export default function Journal({ onClose }: { onClose: () => void }) {
  * placeholders in her house style until she replaces them.
  */
 const PLACEHOLDER = 'Write about today';
+const SEARCH = 'Search your entries';
+const NO_MATCH = 'Nothing here matches that.';
 const EMPTY = 'Nothing here yet. The first entry is usually the hardest one.';
 const FAILED = 'Your journal could not be loaded. Pull down to try again.';

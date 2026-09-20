@@ -76,7 +76,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The three from 20 September are built and are in section 3.
+**Nothing open.** The evening batch of 20 September is built and is in section 3.
 
 ## 3. For you to review
 
@@ -92,10 +92,27 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The newest three from 20 September first.
+The evening batch of 20 September first.
 
 | # | Review |
 |--|--|
+| O347 | **Cream at the top, blue along the foot.** |
+| O348 | **One tile, edge to edge, that vanishes upward.** Its fill is a gradient that is nothing at the top and the page's own cream by ninety points down, which is what "vanishes as it goes up" is. The shadow comes from a separate opaque panel underneath, because iOS casts no shadow from a view whose background is a gradient: the gradient is a child, not a fill. |
+| O349 | **Four squares, barely there.** Three per cent of the ink, two points apart, eight from each edge, and each holds its own name at its foot. |
+| O350 | **Each prompt in its own white tile.** |
+| O351 | **The lockup and the greeting are right-aligned.** |
+| O352 | **Insight of the day is an eyebrow inside its own tile again.** |
+| O353 | **The sheet peeks the way the reference's panel does**, its top edge about two thirds of the way down. |
+| O354 | **The sheet's left column, part for part.** Saved and Read as counted pills, In Practice, Featured publications, the search with your placeholder, and a caret under it. The pills toggle rather than select: two pills and three states, so tapping the one that is on is how you get back to all of it. |
+| O355 | **The four previews are the four most-read, and they fit their titles.** `reads` was already on the payload, counted from post_reads by the same server code the website's Featured sort uses, so this cannot disagree with the site about what is popular. |
+| O356 | **Brighter, crisper corners.** Stronger hues, and white rather than warm cream under them: a bright colour over a warm ground is a muted colour, which was half of why they read soft. |
+| O357 | **The definition is large bold DM Sans**, not the display face. |
+| O358 | **The usage tile drops out from behind the entry**, with its own shadow, which is what makes the overlap read as depth rather than as a mistake. |
+| O359 | **A plain grey arrow on the journal row.** |
+| O360 | **Four counted links, each to its own page.** Recent, Shared, Journal, Tags. Recent leaves the journal out: an entry is a note with an anchor, so it arrives in the same list as every highlight, and counting it in both places would make both counts wrong about what they are counting. |
+| O361 | **Past entries, under the day they were written.** Today and Yesterday by name, everything else by its date. |
+| O362 | **Search your entries.** A plain case-insensitive match over what you wrote: this is one person's diary, and the thing they are looking for is a phrase they wrote. |
+| O363 | **A rail down the right edge.** One tick per day; drag it and a label follows your finger saying which day it has landed on, and the page goes there. It appears only when there is more than one day to move between. **I could not see it working: it needs entries on two different days and I can only write today's.** The parts are verified separately, the day grouping and the offsets it reads. |
 | O344 | **Home is the Luxury page's ground and its panel.** Cream with the brand blue falling out of both top corners, and everything on it turned over with it: white type and a glass pane only work on a dark ground, so the tiles are white cards with the shared lift and the ink is the ink every other cream page uses. The four quick links, the alerts and the two cards all sit inside one panel now, as they do in the reference. The mark is the cream variant, because the page is cream: the inverse one you asked for on home was for the navy, and the rule under it was always that the mark takes the ground it is on. |
 | O345 | **The dictionary tiles are the reference's format.** The entry has the part of speech small and grey at the left with a round control opposite it, then the word large with air beneath. The control is a share: the reference's is a speaker, which this product has nothing to say through, and sharing the word is a real thing it can do with no word on the button. The card under it had the emphasis exactly the wrong way round, a muted label over full-strength ink; it is a dark bold italic label over a grey meaning now, which is what makes it a usage note rather than a paragraph with a caption. |
 | O346 | **Learn is the books screen.** A painted lavender ground from edge to edge rather than a wash, and it keeps the ink: that reference is a light colour with black type, so `groundTone` is a prop rather than something inferred from the ground being painted. The search and the three counted pills are the last thing on the colour, above the sheet, so they read as choosing what the sheet holds. The sheet opens in two columns: the heading and the count on the left, four previews on the right, and the shelves under them. |
