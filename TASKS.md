@@ -78,29 +78,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-| # | Task |
-|--|--|
-| **The insight card** |  |
-| O398 | **The quote is not italic.** "Italicized playfair display is hard to read." |
-| **Learn** |  |
-| O399 | **The sheet ends after the four featured articles**, and there is more air between the insight tile and it. |
-| O400 | **All three tools are listed for everyone**, with her names: **Build a budget tool**, **Practical checklist**, **Personalized workbook**. One a person does not own is greyed, and tapping it says "You don't own this" with a **See more details** button to the add-ons on the site. |
-| O401 | **More space at the top, under the lockup.** |
-| O402 | **The ground is more saturated**, more branded than it is now. |
-| **Notes** |  |
-| O403 | **The plus button at the top right comes out.** |
-| O404 | **Recent and Shared side by side again**, two rows of peek each, with an arrow to the full list. Under them a button to write a journal entry, and under that the tags table with its filters as it was. |
-| O405 | **Less white space in the noun box.** |
-| O406 | **The top corners are louder**, as bright as the Exploring Minds screenshot. |
-| **Home** |  |
-| O407 | **The ground behind the tile is a truer Attune blue**, and the tile is cream with the blue tint fading as it rises. |
-| O408 | **The four icons' outlines are grey.** |
-| O409 | **The two card pictures become what the In Practice cards use:** a shaded square with the Attune mark in the bottom right. The drawn ones go. |
-| **Insights** |  |
-| O410 | **The menu sits lower on the page.** |
-| O411 | **The ground's colours are brighter and bolder.** |
-| **In Practice** |  |
-| O412 | **The four featured tiles are grey, not coloured.** |
+**Nothing open.** The sixteen from this pass are built and are in section 3.
 
 ## 3. For you to review
 
@@ -116,10 +94,25 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The polish pass first.
+This pass first.
 
 | # | Review |
 |--|--|
+| O398 | **The insight quote is upright.** |
+| O399 | **The sheet cuts off after the four featured articles**, with more air above it. The grid is the tallest thing in the sheet, so it is what decides where the cut falls: the tiles are shorter and the cut follows. |
+| O400 | **All three tools, for everyone, with your names.** One you do not own is dimmed and opens "You don't own this" with See more details, which leaves the app: the app does not sell, and check-app-does-not-sell.mjs holds it to that. The names are on the server, because `short` is read by this tile and nothing else, so there is one copy and you can change them without a build. The "explore more resources" link is gone with it: every tile is its own way there now. |
+| O401 | **More space under the lockup on Learn.** |
+| O402 | **A more saturated ground**, twice as far from white as the first attempt. |
+| O403 | **No plus on Notes.** |
+| O404 | **Recent and Shared side by side, two rows each with an arrow to the full list; a journal button under them; the tags table under that**, with its sort and its add field exactly as it was. |
+| O405 | **Less white space in the noun box.** |
+| O406 | **The corners are loud.** Nearly full strength at the corner, falling away fast, on white rather than warm cream: a bright hue over a cream is a muted hue, which was most of why two earlier attempts read soft. |
+| O407 | **The ground behind the tile is the brand's indigo**, and the tile is cream with the blue coming up through it and fading as it rises. |
+| O408 | **The four icons are grey.** |
+| O409 | **The card pictures are the In Practice placeholder**: a tinted square with the mark in the corner. The drawn door and piggy bank are deleted, and so is the script that made them. |
+| O410 | **The Insights menu sits lower**, which is also what lets the colour above it be seen. |
+| O411 | **Brighter on Insights too**, and the second colour is the indigo rather than the clay: clay against orange is one colour twice. |
+| O412 | **The four featured tiles are one grey.** The shelves' colours are on the full cards below, where they mean which shelf; four of them in a grid was a palette rather than a signal. |
 | O384 | **The lockup is back at the top in its usual place**, and the welcome message is the page's hero again, with no rule under it. |
 | O385 | **Action plan is a signpost**, a post with a plate pointing each way. SF Symbols' signposts all point one direction and sit inside a shape, so this one is drawn at the same stroke as the three glyphs beside it, the way the stoplight was. |
 | O386 | **The bottom of the tile is defined.** A hairline along the curve as well as the shadow: a shadow is the space beside an edge and not the edge, which is why more shadow alone was not doing it. |

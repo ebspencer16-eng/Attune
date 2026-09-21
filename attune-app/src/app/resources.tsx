@@ -434,7 +434,9 @@ export default function ResourcesScreen() {
     return (
       <Shell>
         <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
-          <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          {/* Ellie: "Leave more space up top on the learn tab below the
+            lockup." */}
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxxl + Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Back to Learn"
@@ -738,7 +740,11 @@ export default function ResourcesScreen() {
                   style={{ width: '47%' }}>
                   <View
                     style={{
-                      borderRadius: Radius.lg, overflow: 'hidden', minHeight: 110,
+                      /* Sized so two rows of them clear the tab bar: Ellie,
+                         "Pull that tile down so that it cuts off after the 4
+                         featured articles." The grid is the tallest thing in
+                         the sheet, so it is what decides where the cut is. */
+                      borderRadius: Radius.lg, overflow: 'hidden', minHeight: 88,
                       /* Ellie: "Featured publications should be grey tiles not
                          colored." The shelves' colours are on the full cards
                          below, where they mean which shelf; four of them in a
@@ -958,7 +964,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 /** The books reference's ground, in this product's blue rather than its own. */
 /** How much air is left above the sheet. The reference's panel starts about
  *  two thirds of the way down its screen; everything above it is the ground. */
-const SHEET_PEEK = 56;
+const SHEET_PEEK = 48;
 
 /** The label on the insight, here and on the card it opens. */
 /** The four featured previews' ground. One tone, not four. */

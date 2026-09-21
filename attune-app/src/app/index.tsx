@@ -1064,7 +1064,7 @@ const QUICK_LINKS: QuickLinkItem[] = [
 function Signpost() {
   const plate = {
     height: 8, borderRadius: 2,
-    borderWidth: 1.6, borderColor: c.accent,
+    borderWidth: 1.6, borderColor: QUICK_INK,
   } as const;
   return (
     <View style={{ width: 32, height: 32, alignItems: 'center' }}>
