@@ -93,7 +93,7 @@ export default function PageWash({ tint, second, corners = false }: {
         />
         {/* Top left, falling to the right and down. */}
         <LinearGradient
-          colors={[withAlpha(hue, 0.62), withAlpha(hue, 0.18), withAlpha(hue, 0)]}
+          colors={[withAlpha(hue, 0.95), withAlpha(hue, 0.30), withAlpha(hue, 0)]}
           locations={[0, 0.3, 0.62]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.85, y: 0.55 }}
@@ -104,7 +104,7 @@ export default function PageWash({ tint, second, corners = false }: {
             before it reaches the other's corner. */}
         {second ? (
           <LinearGradient
-            colors={[withAlpha(second, 0.58), withAlpha(second, 0.16), withAlpha(second, 0)]}
+            colors={[withAlpha(second, 0.92), withAlpha(second, 0.28), withAlpha(second, 0)]}
             locations={[0, 0.3, 0.62]}
             start={{ x: 1, y: 0 }}
             end={{ x: 0.15, y: 0.55 }}

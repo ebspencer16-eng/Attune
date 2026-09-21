@@ -1213,9 +1213,12 @@ function Body({ card, onDone, map, w }: {
               backgroundColor: `${WHITE}0.1)`, borderColor: `${WHITE}0.22)`, borderWidth: 1,
               borderRadius: Radius.lg, padding: Spacing.xl, marginTop: Spacing.md,
             }}>
-            {/* Playfair's italic, by name. `fontStyle` draws nothing on a
-                registered family; the face is bundled now. */}
-            <Text style={[S.quote, { fontFamily: Fonts.displayItalic, textAlign: 'center' }]}>
+            {/* Upright, not italic. Ellie: "Italicized playfair display is
+                hard to read." The face is bundled and it works; a high
+                contrast serif set italic at this size is simply harder to
+                read than the same serif upright, and this card is a paragraph
+                rather than a pull quote. */}
+            <Text style={[S.quote, { textAlign: 'center' }]}>
               {card.quote}
             </Text>
           </View>

@@ -563,25 +563,10 @@ export default function NotesScreen() {
           />
         }>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            {/* No page hero. See the note on Learn: the tab bar names the
-                tab and the lockup names the product. The row stays, because
-                the control that writes a note lives in it. */}
-            <View style={{ flex: 1 }} />
-            {/* Writing a note is the only thing this screen creates, so it gets
-                one plain control rather than a floating button that covers the
-                last card in the list. */}
-            <Pressable
-              onPress={() => setEditing('new')}
-              hitSlop={10}
-              accessibilityLabel="Write a note"
-              style={{
-                width: 36, height: 36, borderRadius: Radius.pill,
-                backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center',
-              }}>
-              <Text style={{ color: Palette.white, fontSize: 22, lineHeight: 26, fontWeight: '400' }}>+</Text>
-            </Pressable>
-          </View>
+          {/* No page hero and no plus. Ellie: "Remove the plus button in the
+              top right of the notes page." Writing is what the journal button
+              below is for, and a mark is made on the words it belongs to
+              rather than from a button on this screen. */}
         </View>
 
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
@@ -605,8 +590,10 @@ export default function NotesScreen() {
                   one below tuck under it. */}
               <View
                 style={{
+                  /* Ellie: "Less white space on the noun box with the
+                     dictionary definition." */
                   backgroundColor: Palette.white, borderRadius: Radius.card,
-                  paddingVertical: Spacing.xxl, paddingHorizontal: Spacing.xl,
+                  paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl,
                   zIndex: 2, ...Lift,
                 }}>
                 {/* ── THE ENTRY'S TOP LINE ──────────────────────────────
@@ -652,7 +639,7 @@ export default function NotesScreen() {
                   style={{
                     fontFamily: Fonts.bodyBold, fontSize: 46, lineHeight: 58,
                     fontWeight: '700', color: c.textStrong,
-                    marginTop: Spacing.md, marginBottom: Spacing.lg,
+                    marginTop: Spacing.xs, marginBottom: Spacing.sm,
                   }}>
                   {word.word}
                 </Text>
@@ -675,9 +662,9 @@ export default function NotesScreen() {
               <View
                 style={{
                   backgroundColor: '#EFEAE3', borderRadius: Radius.card,
-                  paddingTop: Spacing.xxl + Spacing.md,
-                  paddingBottom: Spacing.xl, paddingHorizontal: Spacing.xl,
-                  marginTop: -Spacing.xxl,
+                  paddingTop: Spacing.xl + Spacing.md,
+                  paddingBottom: Spacing.lg, paddingHorizontal: Spacing.xl,
+                  marginTop: -Spacing.xl,
                   /* Ellie: "Add shading behind the word in use tile so that
                      there's more contrast." Deeper and tighter, so the card
                      above it reads as sitting on top of this rather than
@@ -710,72 +697,89 @@ export default function NotesScreen() {
             </View>
           ) : null}
 
-          {/* ── FOUR LINKS, EACH TO ITS OWN PAGE ───────────────────────
-              Ellie: "Instead of the different tiles, just like the row above
-              the autumn reads tile on the book design screenshot, let's use a
-              row of 4 words (links) with a count, and each one should open to
-              their own page."
+          {/* ── TWO PEEKS, SIDE BY SIDE ────────────────────────────────────
+              Ellie: "Side by side tiles for recent and shared, each of which
+              fit 2 rows with a sneak peek of recent marks / shared, and have
+              arrows to view full list."
 
-              That row is the shape: a word, its count beside it, four across,
-              nothing drawn around them. The three sections that used to be
-              stacked down this page are pages of their own now, and the
-              journal joins them rather than sitting in a card by itself.
+              Two rows each, one line apiece, and an arrow in the corner that
+              opens the page behind it. The count moved onto the arrow's row,
+              because a peek that shows two of nine should say nine somewhere.
+          */}
+          <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xxl }}>
+            <Peek
+              title={JUMP_BACK_IN}
+              count={recentMarks.length}
+              empty={PEEK_MINE_EMPTY}
+              onAll={() => setOpenList('recent')}
+              rows={recentMarks.slice(0, 2).map((n) => ({
+                id: n.id,
+                text: peekText(n),
+                onPress: () => openWhereItLives(n),
+              }))}
+            />
+            <Peek
+              title={SHARED_WITH_ME}
+              count={sharedRecent.length}
+              badge={unopenedCount || undefined}
+              empty={PEEK_SHARED_EMPTY}
+              onAll={() => setOpenList('shared')}
+              rows={sharedRecent.slice(0, 2).map((n) => ({
+                id: n.id,
+                text: peekText(n),
+                unread: !n.opened_at,
+                onPress: () => { markOpened(n); },
+              }))}
+            />
+          </View>
 
-              Recent is capped at ten, which she asked for and which is also
-              what the page behind it shows. */}
-          <View
+          {/* ── AND A WAY INTO THE JOURNAL ─────────────────────────────────
+              Ellie: "Below those, a button to write an entry in your
+              relationship journal." A button rather than a card: it is one
+              action, and the entries behind it are the journal's own screen. */}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setJournalOpen(true)}
             style={{
-              flexDirection: 'row', justifyContent: 'space-between',
-              alignItems: 'flex-start', marginTop: Spacing.xxl,
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+              gap: Spacing.sm, marginTop: Spacing.lg,
+              backgroundColor: c.accent, borderRadius: Radius.pill,
+              paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl,
             }}>
-            {([
-              ['recent', 'Recent', Math.min(recentMarks.length, 10)],
-              ['shared', 'Shared', sharedRecent.length],
-              ['journal', 'Journal', journalCount],
-              ['tags', 'Tags', tags.filter((t) => !t.deleted_at).length],
-            ] as const).map(([key, label, n]) => (
-              <Pressable
-                key={key}
-                accessibilityRole="button"
-                accessibilityLabel={`${label}, ${n}`}
-                hitSlop={10}
-                onPress={() => (key === 'journal' ? setJournalOpen(true) : setOpenList(key))}
-                /* Ellie: "Please make the recent, shared, journal, and tags
-                   buttons so that users know to click on them." Four words in
-                   a row look like a heading; a pill with an edge looks like
-                   something to press. */
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
-                  backgroundColor: Palette.white,
-                  borderRadius: Radius.pill,
-                  borderWidth: 1, borderColor: c.border,
-                  paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
-                  ...Lift,
-                }}>
-                {/* Ellie: "recent, shared, journal, and tags should not be
-                    playfair display." The body face, at the weight the
-                    reference's row uses. */}
-                <Text
-                  style={{
-                    fontFamily: Fonts.bodyBold, fontSize: 13, lineHeight: 18,
-                    fontWeight: '700', color: c.textStrong,
-                  }}>
-                  {label}
-                </Text>
-                {/* Ellie: "Can the count next to the tag be in a circle like
-                    the counts on the book screenshot page?" */}
-                <View
-                  style={{
-                    minWidth: 17, height: 17, borderRadius: 9, paddingHorizontal: 4,
-                    backgroundColor: c.accent,
-                    alignItems: 'center', justifyContent: 'center',
-                  }}>
-                  <Text style={{ fontSize: 10, lineHeight: 13, fontWeight: '700', color: Palette.white }}>
-                    {n}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
+            <SymbolView
+              name={'square.and.pencil' as never}
+              size={15}
+              tintColor={Palette.white}
+              fallback={<Text style={{ ...Type.small, color: Palette.white }}>{'✎'}</Text>}
+              style={{ width: 17, height: 17 }}
+            />
+            <Text style={{ ...Type.cardTitle, fontSize: 15, color: Palette.white }}>
+              {WRITE_ENTRY}
+            </Text>
+            {journalCount ? (
+              <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.75)' }}>
+                {journalCount}
+              </Text>
+            ) : null}
+          </Pressable>
+
+          {/* ── AND THE TAGS, AS THEY WERE ─────────────────────────────────
+              Ellie: "below that the table of tags with the filters and things
+              the way we had it before." The same component, with the same
+              sort control and the same add field; it was behind a link for one
+              round and it is back on the page. */}
+          <View style={{ marginTop: Spacing.xxl }}>
+            <TagList
+              tags={tags}
+              notes={[...mineRecent, ...sharedRecent]}
+              sort={tagSort}
+              onChangeSort={setTagSort}
+              placeholder={tagPlaceholder}
+              onAdd={addTag}
+              onOpen={setOpenTag}
+              onPurge={purgeTagForGood}
+              onRestore={restoreTagFromArchive}
+            />
           </View>
 
         </View>
@@ -934,13 +938,15 @@ function leadLine(body: string): string {
  * lives, which is what the full-width sections did.
  */
 function Peek({
-  title, rows, count, empty, badge,
+  title, rows, count, empty, badge, onAll,
 }: {
   title: string;
   rows: { id: string; text: string; unread?: boolean; onPress: () => void }[];
   count: number;
   empty: string;
   badge?: number;
+  /** Ellie: "have arrows to view full list." The page behind the peek. */
+  onAll: () => void;
 }) {
   return (
     <View
@@ -985,11 +991,24 @@ function Peek({
       )) : (
         <Text style={{ ...Type.small, color: c.textMuted, lineHeight: 19 }}>{empty}</Text>
       )}
-      {count > rows.length ? (
-        <Text style={{ ...Type.small, fontSize: 11, color: c.accentQuiet, marginTop: Spacing.sm }}>
-          {`+${count - rows.length}`}
-        </Text>
-      ) : null}
+      {/* The arrow, and what is behind it. Always drawn, because the page it
+          opens exists whether or not this peek has anything in it. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${title}, see all ${count}`}
+        onPress={onAll}
+        hitSlop={8}
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
+          gap: Spacing.xs, marginTop: Spacing.sm,
+        }}>
+        {count ? (
+          <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: c.accentQuiet }}>
+            {count}
+          </Text>
+        ) : null}
+        <Text style={{ ...Type.body, color: c.accent }}>{'\u2192'}</Text>
+      </Pressable>
     </View>
   );
 }
@@ -1005,7 +1024,8 @@ function peekText(n: Note) {
  * rest are placeholders in her house style and are flagged in TASKS.md: every
  * word a customer reads is hers.
  */
-const JUMP_BACK_IN = 'Jump back in';
+const JUMP_BACK_IN = 'Recent';
+const WRITE_ENTRY = 'Write a journal entry';
 const SHARED_WITH_ME = 'Shared with me';
 const WORD_IN_USE = 'Word in use';
 const JOURNAL_TITLE = 'Relationship journal';

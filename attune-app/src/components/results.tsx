@@ -697,8 +697,12 @@ export default function Results({
         {/* No page hero. Ellie: "Remove 'Resources', 'Your results', and
             'notes' Page heroes." The menu under it names every section it
             leads to; a heading over that said only that this is the place you
-            already tapped to get to. */}
-        <View style={{ height: Spacing.lg }} />
+            already tapped to get to.
+
+            The space where it was is kept and then some: "Move insights menu
+            lower on the page." The ground's colour is at the top, so the menu
+            starting under it is what lets the colour be seen. */}
+        <View style={{ height: Spacing.xxxl + Spacing.xl }} />
         {/* ── IN A TILE, LIKE EVERY OTHER PAGE ─────────────────────────
             Ellie: "Please make the insights nav landing in a tile like the
             other insights pages." The bands ran edge to edge, which made the

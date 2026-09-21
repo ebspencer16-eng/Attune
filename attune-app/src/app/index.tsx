@@ -330,19 +330,19 @@ export default function HomeScreen() {
    */
   const prompts: PromptItem[] = [
     data.primary && {
-      key: 'primary', icon: 'star.fill' as const,
+      key: 'primary', icon: 'star.fill' as const, tint: CARD_TINT_A,
       title: data.primary.title, body: data.primary.body,
       disabled: !!data.primary.disabled,
       onPress: () => open(data.primary as HomeCard),
     },
     (data.secondary ?? [])[0] && {
-      key: 'secondary', icon: 'checklist' as const,
+      key: 'secondary', icon: 'checklist' as const, tint: CARD_TINT_B,
       title: (data.secondary ?? [])[0].title, body: (data.secondary ?? [])[0].body,
       disabled: !!(data.secondary ?? [])[0].disabled,
       onPress: () => open((data.secondary ?? [])[0]),
     },
     data.pickUp && {
-      key: 'pickup',
+      key: 'pickup', tint: CARD_TINT_A,
       icon: data.pickUp.kind === 'discover' ? 'text.book.closed' : 'square.and.pencil',
       title: data.pickUp.title, body: data.pickUp.preview,
       disabled: false,
@@ -384,13 +384,21 @@ export default function HomeScreen() {
           cream at the top." It was the other way up, both colours falling out
           of the top corners, which is the Notes tab's ground and not this
           reference's. The reference carries its colour along the foot. */}
-      {/* The page is cream. The blue lives inside the tile now, which is
-          where the reference has it. */}
+      {/* ── THE GROUND IS THE BLUE ───────────────────────────────────
+          Ellie: "I want bg of home page (behind the tile) to be a truer attune
+          blue, then I want the tile to be cream with the blue tint fading as
+          it goes up."
+
+          So the page is the brand's indigo and the tile is what sits on it:
+          cream at its foot with the blue coming through, fading out as it
+          rises. The top of the page stays pale, because the lockup and the
+          greeting are read on it in ink. */}
       <LinearGradient
         pointerEvents="none"
-        colors={[Palette.white, Palette.cream]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 0.6 }}
+        colors={[Palette.white, withAlpha(Palette.indigo, 0.35), Palette.indigo]}
+        locations={[0, 0.45, 1]}
+        start={{ x: 0.2, y: 0 }}
+        end={{ x: 0.8, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
@@ -549,10 +557,11 @@ export default function HomeScreen() {
                 shadowRadius: 16, shadowOffset: { width: 0, height: 10 },
               }}
             />
+            {/* The blue coming up through the cream, fading as it rises. */}
             <LinearGradient
               pointerEvents="none"
-              colors={[withAlpha(Palette.indigo, 0), withAlpha(Palette.indigo, 0.20)]}
-              start={{ x: 0.3, y: 0.35 }}
+              colors={[withAlpha(Palette.indigo, 0), withAlpha(Palette.indigo, 0.30)]}
+              start={{ x: 0.3, y: 0.2 }}
               end={{ x: 0.7, y: 1 }}
               style={{
                 position: 'absolute', left: 0, right: 0, top: TILE_FADE, bottom: 0,
@@ -1000,6 +1009,15 @@ const TILE_FADE = 90;
 const TILE_RADIUS = 36;
 /** The four squares' fill. Three per cent of the ink: present, barely. */
 const SQUARE_FILL = 'rgba(14,11,7,0.045)';
+/** The four quick links' icons. Grey, which Ellie asked for by name. */
+const QUICK_INK = '#8A8178';
+/**
+ * The two card grounds. The same two tints In Practice puts behind an article
+ * with no artwork, at the same strength, so a placeholder on this screen and a
+ * placeholder on that one are the same placeholder.
+ */
+const CARD_TINT_A = '#F7E8E0';
+const CARD_TINT_B = '#E4E9F7';
 const ICON_GLOW_SIZE = 44;
 const ICON_GLOW_RINGS = 24;
 const ICON_GLOW_PEAK = 0.30;
@@ -1057,7 +1075,7 @@ function Signpost() {
       <View
         style={{
           position: 'absolute', top: 3, bottom: 0, left: 15,
-          width: 1.8, backgroundColor: c.accent,
+          width: 1.8, backgroundColor: QUICK_INK,
         }}
       />
     </View>
@@ -1093,6 +1111,10 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
         paddingTop: Spacing.sm, paddingBottom: Spacing.md,
         paddingHorizontal: Spacing.xs, alignItems: 'center',
       }}>
+      {/* Ellie: "I want the icon outlines to be grey in the 4 tiles on the
+          homepage." Above the conditional, not inside it: a callback's return
+          position takes one expression, and a JSX comment there does not
+          compile. CLAUDE.md names this one. */}
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         {item.icon === 'signpost' ? (
           <Signpost />
@@ -1100,8 +1122,8 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
           <SymbolView
             name={item.icon as never}
             size={30}
-            tintColor={c.accent}
-            fallback={<View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: c.accent }} />}
+            tintColor={QUICK_INK}
+            fallback={<View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: QUICK_INK }} />}
             style={{ width: 32, height: 32 }}
           />
         )}
@@ -1122,6 +1144,8 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
 export type PromptItem = {
   key: string;
   icon: string;
+  /** The picture's ground. One of the shelf tints In Practice already uses. */
+  tint: string;
   title: string;
   body?: string | null;
   disabled: boolean;
@@ -1170,17 +1194,27 @@ function PromptCard({ item, onPress }: { item: PromptItem; onPress: () => void }
           padding: Spacing.sm,
           ...Lift,
         }}>
-        {/* The square is the container, not the Image. An Image with a
-            percentage width and an aspectRatio takes its own intrinsic size
-            instead and grows past the card; a View with the ratio and the
-            picture filling it is the shape that holds. */}
-        <View style={{ width: '100%', aspectRatio: 1, borderRadius: Radius.lg, overflow: 'hidden' }}>
+        {/* ── THE SAME PLACEHOLDER IN PRACTICE USES ────────────────────
+            Ellie: "I don't like the AI images on the home page. Please do for
+            those rounded squares what we did for the article pictures on in
+            practice, just a shaded square with an attune logo in the bottom
+            right."
+
+            So this is that: a tinted ground with the mark sitting quietly in
+            the corner. An article card without artwork has looked like this
+            for weeks and looks deliberate rather than broken, which is the
+            whole argument for it. The drawn door and piggy bank are gone. */}
+        <View
+          style={{
+            width: '100%', aspectRatio: 1, borderRadius: Radius.lg,
+            overflow: 'hidden', backgroundColor: item.tint,
+            justifyContent: 'flex-end', alignItems: 'flex-end',
+            padding: Spacing.sm,
+          }}>
           <Image
-            source={item.key === 'primary'
-              ? require('@/assets/images/card-results.png')
-              : require('@/assets/images/card-budget.png')}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="cover"
+            source={require('@/assets/images/attune-mark-light.png')}
+            style={{ width: 34, height: 34 * (76 / 103), opacity: 0.5 }}
+            resizeMode="contain"
           />
         </View>
         <View style={{ paddingHorizontal: Spacing.xs, paddingTop: Spacing.md, paddingBottom: Spacing.xs }}>

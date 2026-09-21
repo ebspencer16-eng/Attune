@@ -18,7 +18,7 @@ import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import {
-  Image, Linking, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
+  Image, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -100,6 +100,8 @@ export default function ResourcesScreen() {
   const [openPost, setOpenPost] = useState<string | null>(pendingPost);
   /** Whether the insight of the day is open as a full card. */
   const [insightOpen, setInsightOpen] = useState(false);
+  /** The tool whose "you don't own this" sheet is open, if any. */
+  const [locked, setLocked] = useState<Item | null>(null);
   /**
    * The reader's own marks and tags, for marking inside an article.
    *
@@ -343,6 +345,10 @@ export default function ResourcesScreen() {
   // new was added.
   const catalogue = (home?.catalogue ?? []).filter((r) => r.kind !== 'exercise');
   const owned = catalogue.filter((r) => ownedKeys.has(r.key));
+  /* Every tool the catalogue has, owned or not: the Learn row lists all of
+     them and dims the ones this reader does not have. Named `toolTiles`
+     because `tools` is already the tool-data payload on this screen. */
+  const toolTiles = catalogue.filter((r) => r.kind === 'tool');
 
   // Posts carry `category` when the author set one. Anything uncategorised
   // still shows under All, so a missing field never hides a piece.
@@ -428,7 +434,7 @@ export default function ResourcesScreen() {
     return (
       <Shell>
         <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
-          <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Back to Learn"
@@ -488,41 +494,35 @@ export default function ResourcesScreen() {
               'notes' Page heroes." The tab bar already says which tab this is
               and the lockup already says which product; a third label above
               them was the page naming itself twice. */}
-          {owned.length ? (
-            <>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
-                {owned.map((r) => <OwnedTile key={r.key} item={r} onOpen={openTool} />)}
-              </View>
-              {workbookNote ? (
-                <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
-                  {workbookNote}
-                </Text>
-              ) : null}
-            </>
-          ) : null}
+          {/* ── ALL THREE, OWNED OR NOT ───────────────────────────────────
+              Ellie: "List these 3 for everyone and grey out the tile if the
+              user doesn't own it. If they click it, have a pop up that says
+              'You don't own this' then a button to 'See more details' that
+              takes you to the site add ons."
 
-          {/* ── ONLY WHEN THERE IS MORE ────────────────────────────────────
-              Ellie: "I shouldn't have an explore more resources arrow if I own
-              all the resources."
+              So the row is the catalogue's tools, not the reader's. A tile
+              they do not own is dimmed and says so rather than being absent:
+              a resource that is invisible until you buy it cannot be the
+              reason anyone buys it. The link that used to sit under this row
+              is gone with it, because every tile is now its own way there.
 
-              She is right and it was worse than redundant: it is a link to the
-              offerings page, so a customer who has bought everything was being
-              pointed at a shop with nothing in it for them. Derived from the
-              catalogue the server already sends rather than from a count, so a
-              new resource appearing makes the link come back on its own. */}
-          {owned.length < catalogue.length ? (
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel="Explore more resources on the website"
-            onPress={() => Linking.openURL(`${SITE}/offerings`)}
-            hitSlop={8}
-            style={{
-              alignSelf: 'flex-end', marginTop: Spacing.lg,
-              flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
-            }}>
-            <Text style={{ ...Type.small, color: c.textMuted }}>Explore more resources</Text>
-            <Text style={{ ...Type.small, color: c.textMuted }}>{'\u2192'}</Text>
-          </Pressable>
+              `tools` filters the catalogue by kind, so a fourth tool arriving
+              on the server appears here on its own. */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
+            {toolTiles.map((r) => (
+              <OwnedTile
+                key={r.key}
+                item={r}
+                owned={ownedKeys.has(r.key)}
+                onOpen={openTool}
+                onLocked={() => setLocked(r)}
+              />
+            ))}
+          </View>
+          {workbookNote ? (
+            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md }}>
+              {workbookNote}
+            </Text>
           ) : null}
         </View>
 
@@ -739,7 +739,11 @@ export default function ResourcesScreen() {
                   <View
                     style={{
                       borderRadius: Radius.lg, overflow: 'hidden', minHeight: 110,
-                      backgroundColor: `${CARD_TINTS[Math.max(0, categories.indexOf(post.category || '')) % CARD_TINTS.length]}2e`,
+                      /* Ellie: "Featured publications should be grey tiles not
+                         colored." The shelves' colours are on the full cards
+                         below, where they mean which shelf; four of them in a
+                         grid up here was a palette rather than a signal. */
+                      backgroundColor: TILE_GREY,
                       padding: Spacing.sm, justifyContent: 'flex-end',
                     }}>
                     {/* Ellie: "Please include the bookmark option in the top
@@ -774,10 +778,13 @@ export default function ResourcesScreen() {
               that so that it's clear the user can scroll down." Not a control:
               tapping a hint about scrolling and having it scroll is a second
               way to do something the finger already does. */}
+          {/* Ellie: "Pull that tile down so that it cuts off after the 4
+              featured articles." The caret is the last thing above the fold
+              now rather than a screen below it. */}
           <Text
             style={{
               ...Type.title, color: c.border, textAlign: 'center',
-              marginTop: Spacing.lg, marginBottom: Spacing.xl,
+              marginTop: Spacing.md, marginBottom: Spacing.lg,
             }}>
             {'\u2304'}
           </Text>
@@ -872,6 +879,48 @@ export default function ResourcesScreen() {
         }}
       />
 
+      {/* ── YOU DO NOT OWN THIS ────────────────────────────────────────
+          Ellie: "If they click it, have a pop up that says 'You don't own
+          this' then a button to 'See more details' that takes you to the site
+          add ons." Her words on both.
+
+          The button leaves the app, which is deliberate and is the rule this
+          product is built on: the app does not sell. See
+          check-app-does-not-sell.mjs. */}
+      {locked ? (
+        <Modal visible transparent animationType="fade" onRequestClose={() => setLocked(null)}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={() => setLocked(null)}
+            style={{ flex: 1, backgroundColor: 'rgba(14,11,7,0.4)', alignItems: 'center', justifyContent: 'center', padding: Spacing.xl }}>
+            <View
+              style={{
+                width: '100%', maxWidth: 340,
+                backgroundColor: Palette.white, borderRadius: Radius.card,
+                padding: Spacing.xl, alignItems: 'center', gap: Spacing.lg,
+                ...Lift,
+              }}>
+              <Text style={{ ...Type.title, color: c.textStrong, textAlign: 'center' }}>
+                {NOT_YOURS}
+              </Text>
+              <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center' }}>
+                {locked.short || locked.label}
+              </Text>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => { const key = locked.key; setLocked(null); Linking.openURL(`${SITE}/offerings?add=${key}`); }}
+                style={{
+                  backgroundColor: c.accent, borderRadius: Radius.pill,
+                  paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
+                }}>
+                <Text style={{ ...Type.cardTitle, color: Palette.white }}>{SEE_MORE}</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Modal>
+      ) : null}
+
       {insightOpen && home?.research ? (
         <StoryCard
           card={insightCard(home.research, INSIGHT_OF_THE_DAY)}
@@ -909,15 +958,23 @@ function Shell({ children }: { children: React.ReactNode }) {
 /** The books reference's ground, in this product's blue rather than its own. */
 /** How much air is left above the sheet. The reference's panel starts about
  *  two thirds of the way down its screen; everything above it is the ground. */
-const SHEET_PEEK = 6;
+const SHEET_PEEK = 56;
 
 /** The label on the insight, here and on the card it opens. */
+/** The four featured previews' ground. One tone, not four. */
+const TILE_GREY = '#EFECE7';
+
 const INSIGHT_OF_THE_DAY = 'Insight of the day';
 
-/* Ellie: "Make sure the learn page bg is an attune-branded blue, but light
-   like this is good." The lavender was a colour this product does not have.
-   These two are Palette.indigo lightened, so the tab is the brand's blue. */
-const LEARN_GROUND = ['#C3D2F5', '#E4EAF8'] as const;
+/** Her two lines on the sheet a locked tool opens. */
+const NOT_YOURS = "You don't own this";
+const SEE_MORE = 'See more details';
+
+/* Ellie: "Make sure the learn page bg is an attune-branded blue", and then
+   "I changed my mind, I want the bg of the learn tab to be more saturated, I
+   want it to feel more branded than it does right now." Palette.indigo
+   lightened, twice as far as the first attempt. */
+const LEARN_GROUND = ['#9DB4F0', '#CFD9F5'] as const;
 
 type Item = CatalogueItem;
 
@@ -954,7 +1011,13 @@ const ICON: Record<string, string> = {
  * The blurb is gone rather than shortened. A sentence explaining a thing you
  * already own is the least useful sentence on the page.
  */
-function OwnedTile({ item, onOpen }: { item: Item; onOpen: (key: string) => void }) {
+function OwnedTile({ item, owned, onOpen, onLocked }: {
+  item: Item;
+  /** Whether this reader has it. A tile they do not own is dimmed and says so. */
+  owned: boolean;
+  onOpen: (key: string) => void;
+  onLocked: () => void;
+}) {
   const color = AccentFor[item.key] ?? AccentFallback;
   /**
    * It opens the thing, in the app where the app has it.
@@ -978,13 +1041,16 @@ function OwnedTile({ item, onOpen }: { item: Item; onOpen: (key: string) => void
        redesign uses. */
     <Pressable
       accessibilityRole="button"
-      onPress={() => onOpen(item.key)}
+      accessibilityState={{ disabled: !owned }}
+      accessibilityLabel={owned ? item.short || item.label : `${item.short || item.label}, not yours yet`}
+      onPress={() => (owned ? onOpen(item.key) : onLocked())}
       style={{
         flex: 1, minWidth: 96,
         backgroundColor: Palette.white,
         borderRadius: Radius.card,
         paddingVertical: Spacing.lg, paddingHorizontal: Spacing.md,
         alignItems: 'flex-start', gap: Spacing.md,
+        opacity: owned ? 1 : 0.5,
         ...Lift,
       }}>
       <View
@@ -996,12 +1062,12 @@ function OwnedTile({ item, onOpen }: { item: Item; onOpen: (key: string) => void
         <SymbolView
           name={(ICON[item.key] || 'square.grid.2x2') as never}
           size={22}
-          tintColor={color}
+          tintColor={owned ? color : c.textMuted}
           style={{ width: 24, height: 24 }}
         />
       </View>
       {/* One word. The catalogue's own short name, from the server. */}
-      <Text numberOfLines={1} style={{ ...Type.small, fontWeight: '700', color: c.textStrong }}>
+      <Text numberOfLines={2} style={{ ...Type.small, fontWeight: '700', color: c.textStrong, lineHeight: 17 }}>
         {item.short || item.label}
       </Text>
     </Pressable>

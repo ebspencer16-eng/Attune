@@ -350,7 +350,11 @@ function Shell({ children, tint }: { children: React.ReactNode; tint?: string | 
      corners, the same shape Notes and Learn use, and everything on it goes
      back to ink. */
   if (tint) return <TabScreen tint={tint}>{children}</TabScreen>;
-  return <TabScreen tint={Palette.orange} second={Palette.clay} corners>{children}</TabScreen>;
+  /* Ellie: "I want the colors on the insights landing bg to also be
+     brighter/bolder." The two corners are the shared wash, which is as loud as
+     Notes' now; the second colour is the brand indigo rather than the clay,
+     because clay against orange is one colour twice. */
+  return <TabScreen tint={Palette.orange} second={Palette.indigo} corners>{children}</TabScreen>;
 }
 
 /**

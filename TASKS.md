@@ -78,8 +78,29 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The fourteen from the polish pass are built and are in
-section 3.
+| # | Task |
+|--|--|
+| **The insight card** |  |
+| O398 | **The quote is not italic.** "Italicized playfair display is hard to read." |
+| **Learn** |  |
+| O399 | **The sheet ends after the four featured articles**, and there is more air between the insight tile and it. |
+| O400 | **All three tools are listed for everyone**, with her names: **Build a budget tool**, **Practical checklist**, **Personalized workbook**. One a person does not own is greyed, and tapping it says "You don't own this" with a **See more details** button to the add-ons on the site. |
+| O401 | **More space at the top, under the lockup.** |
+| O402 | **The ground is more saturated**, more branded than it is now. |
+| **Notes** |  |
+| O403 | **The plus button at the top right comes out.** |
+| O404 | **Recent and Shared side by side again**, two rows of peek each, with an arrow to the full list. Under them a button to write a journal entry, and under that the tags table with its filters as it was. |
+| O405 | **Less white space in the noun box.** |
+| O406 | **The top corners are louder**, as bright as the Exploring Minds screenshot. |
+| **Home** |  |
+| O407 | **The ground behind the tile is a truer Attune blue**, and the tile is cream with the blue tint fading as it rises. |
+| O408 | **The four icons' outlines are grey.** |
+| O409 | **The two card pictures become what the In Practice cards use:** a shaded square with the Attune mark in the bottom right. The drawn ones go. |
+| **Insights** |  |
+| O410 | **The menu sits lower on the page.** |
+| O411 | **The ground's colours are brighter and bolder.** |
+| **In Practice** |  |
+| O412 | **The four featured tiles are grey, not coloured.** |
 
 ## 3. For you to review
 

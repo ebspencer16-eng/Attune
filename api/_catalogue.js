@@ -63,6 +63,11 @@ export const PHYSICAL_PRICES = { core: 124, newlywed: 174, anniversary: 174, pre
  * is one edit and the catalogue cannot disagree with what a customer is
  * charged.
  */
+/**
+ * `short` is the app's Learn tile and nothing else reads it, which is why
+ * Ellie's names for the three tools live here rather than in a lookup inside
+ * the app: one copy, and she can change them without a build.
+ */
 export const CATALOGUE = [
   {
     key: 'conflict', short: 'Conflict', kind: 'exercise',
@@ -83,19 +88,19 @@ export const CATALOGUE = [
     price: ADDON_PRICES.reflection,
   },
   {
-    key: 'budget', short: 'Budget', kind: 'tool',
+    key: 'budget', short: 'Build a budget tool', kind: 'tool',
     label: 'Build a Budget',
     blurb: 'A shared budget, built together.',
     price: ADDON_PRICES.budget,
   },
   {
-    key: 'checklist', short: 'Checklist', kind: 'tool',
+    key: 'checklist', short: 'Practical checklist', kind: 'tool',
     label: 'Starting Out',
     blurb: 'The practical list for setting up a life.',
     price: ADDON_PRICES.checklist,
   },
   {
-    key: 'workbook', short: 'Workbook', kind: 'tool',
+    key: 'workbook', short: 'Personalized workbook', kind: 'tool',
     label: 'Your Workbook',
     blurb: 'Built from your answers.',
     price: ADDON_PRICES.workbookDigital,
