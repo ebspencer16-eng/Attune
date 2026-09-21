@@ -484,9 +484,10 @@ export default function ResourcesScreen() {
               eyebrow text." So the sections carry the page rather than a title
               above them repeating the tab's own name. */}
           {/* Ellie: "Rename 'yours to explore' section to 'Resources'." */}
-          <Text style={{ ...Type.display, color: c.textStrong, marginBottom: Spacing.lg }}>
-            Resources
-          </Text>
+          {/* No page hero. Ellie: "Remove 'Resources', 'Your results', and
+              'notes' Page heroes." The tab bar already says which tab this is
+              and the lockup already says which product; a third label above
+              them was the page naming itself twice. */}
           {owned.length ? (
             <>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
@@ -614,8 +615,9 @@ export default function ResourcesScreen() {
                tile on learn." */
             paddingTop: Spacing.md,
             paddingBottom: BottomTabInset + Spacing.xxxl,
-            shadowColor: '#2A1B10', shadowOpacity: 0.12,
-            shadowRadius: 24, shadowOffset: { width: 0, height: -10 },
+            /* Ellie: "Add some shading on the learn page bottom tile." */
+            shadowColor: '#1B2A5E', shadowOpacity: 0.22,
+            shadowRadius: 22, shadowOffset: { width: 0, height: -8 },
           }}>
           {/* No grab handle: the reference's panel does not have one, and a
               handle on something that cannot be dragged is a control that
@@ -675,7 +677,14 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.display, fontSize: 30, lineHeight: 42, color: c.textStrong }}>
                 In Practice
               </Text>
-              <Text style={{ ...Type.display, fontSize: 24, lineHeight: 34, color: c.textMuted, marginBottom: Spacing.lg }}>
+              {/* Ellie: "Make featured publications text smaller, not playfair
+                  display." The body face, at a size that reads as a line under
+                  the heading rather than a second heading. */}
+              <Text
+                style={{
+                  ...Type.body, fontFamily: Fonts.bodyMedium,
+                  color: c.textMuted, marginBottom: Spacing.lg,
+                }}>
                 Featured publications
               </Text>
 
@@ -729,10 +738,29 @@ export default function ResourcesScreen() {
                   style={{ width: '47%' }}>
                   <View
                     style={{
-                      borderRadius: Radius.lg, overflow: 'hidden', minHeight: 96,
+                      borderRadius: Radius.lg, overflow: 'hidden', minHeight: 110,
                       backgroundColor: `${CARD_TINTS[Math.max(0, categories.indexOf(post.category || '')) % CARD_TINTS.length]}2e`,
                       padding: Spacing.sm, justifyContent: 'flex-end',
                     }}>
+                    {/* Ellie: "Please include the bookmark option in the top
+                        right of the 4 featured publications." The same control
+                        the full cards carry, in the same corner, so saving is
+                        one gesture wherever a piece is shown. */}
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: !!post.saved }}
+                      accessibilityLabel={post.saved ? `Remove ${post.title} from saved` : `Save ${post.title}`}
+                      hitSlop={8}
+                      onPress={() => toggleSave(post)}
+                      style={{ position: 'absolute', top: Spacing.xs, right: Spacing.xs, padding: 4 }}>
+                      <SymbolView
+                        name={(post.saved ? 'bookmark.fill' : 'bookmark') as never}
+                        size={13}
+                        tintColor={post.saved ? c.accent : c.textMuted}
+                        fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{post.saved ? '\u2605' : '\u2606'}</Text>}
+                        style={{ width: 15, height: 15 }}
+                      />
+                    </Pressable>
                     <Text style={{ ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '700', color: c.textStrong }}>
                       {post.title}
                     </Text>
@@ -829,6 +857,21 @@ export default function ResourcesScreen() {
         </View>
       </ScrollView>
 
+      {/* ── THE PAGE FADES AT THE FOOT ─────────────────────────────────
+          Ellie: "Please also show an arrow or show the bottom of the content
+          fading out so that the user knows to scroll down." Both: the caret is
+          inside the sheet and this is over the last few points of it, so the
+          content runs under the tab bar rather than stopping at it. Not
+          hit-testable: it is a sign, not a lid. */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={['rgba(255,255,255,0)', Palette.white]}
+        style={{
+          position: 'absolute', left: 0, right: 0,
+          bottom: 0, height: BottomTabInset + Spacing.lg,
+        }}
+      />
+
       {insightOpen && home?.research ? (
         <StoryCard
           card={insightCard(home.research, INSIGHT_OF_THE_DAY)}
@@ -866,12 +909,15 @@ function Shell({ children }: { children: React.ReactNode }) {
 /** The books reference's ground, in this product's blue rather than its own. */
 /** How much air is left above the sheet. The reference's panel starts about
  *  two thirds of the way down its screen; everything above it is the ground. */
-const SHEET_PEEK = 28;
+const SHEET_PEEK = 6;
 
 /** The label on the insight, here and on the card it opens. */
 const INSIGHT_OF_THE_DAY = 'Insight of the day';
 
-const LEARN_GROUND = ['#C9D2F2', '#E6E3F0'] as const;
+/* Ellie: "Make sure the learn page bg is an attune-branded blue, but light
+   like this is good." The lavender was a colour this product does not have.
+   These two are Palette.indigo lightened, so the tab is the brand's blue. */
+const LEARN_GROUND = ['#C3D2F5', '#E4EAF8'] as const;
 
 type Item = CatalogueItem;
 

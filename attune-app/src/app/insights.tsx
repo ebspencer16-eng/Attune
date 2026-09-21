@@ -199,7 +199,7 @@ export default function InsightsScreen() {
 
   /* onDark: this Shell is the brand orange, not cream. See the note on
      ScreenLoading. */
-  if (loading) return <Shell><ScreenLoading label={LOADING.insights} onDark /></Shell>;
+  if (loading) return <Shell><ScreenLoading label={LOADING.insights} /></Shell>;
 
   if (error?.kind === 'unauthorized') {
     return (
@@ -291,7 +291,7 @@ export default function InsightsScreen() {
           maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
         }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="rgba(255,255,255,0.7)" />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
         {/* ── BEFORE THERE ARE RESULTS ───────────────────────────────────
             Ellie: "Ensure that when exercises are unfinished, insights page
@@ -305,10 +305,10 @@ export default function InsightsScreen() {
         {/* White, because the ground under it is the orange rather than the
             cream. This is the rule she has now asked for four times: when a
             surface changes colour, the type on it moves with it. */}
-        <Text style={{ ...Type.hero, color: Palette.white }}>
+        <Text style={{ ...Type.hero, color: c.textStrong }}>
           Insights generate once your exercises are complete
         </Text>
-        <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.82)', marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
+        <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, marginBottom: Spacing.xl }}>
           {/* Both branches were written in the app. The first named the partner,
               the second counted what was left, and neither is in Ellie's
               lines. Two of hers, from the shared module. */}
@@ -340,8 +340,17 @@ function Shell({ children, tint }: { children: React.ReactNode; tint?: string | 
      costs nothing in legibility: nothing is read on it. */
   /* A section page keeps the cream and takes its own colour into the wash.
      The landing, and every waiting state, is the orange ground itself. */
+  /* ── CREAM, WITH THE BRAND BEHIND THE TILE ────────────────────────
+     Ellie: "Now the bg of the insights page feels out of place. Maybe just
+     cream with attune gradient shading behind the tile?"
+
+     She is right: the other three tabs are cream pages with colour in the
+     ground, and this one was a painted orange screen, which made it the odd
+     tab rather than the bright one. The orange and the clay come off the top
+     corners, the same shape Notes and Learn use, and everything on it goes
+     back to ink. */
   if (tint) return <TabScreen tint={tint}>{children}</TabScreen>;
-  return <TabScreen groundColors={OrangeGround}>{children}</TabScreen>;
+  return <TabScreen tint={Palette.orange} second={Palette.clay} corners>{children}</TabScreen>;
 }
 
 /**

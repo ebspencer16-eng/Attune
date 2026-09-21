@@ -564,7 +564,10 @@ export default function NotesScreen() {
         }>
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ ...Type.display, color: c.textStrong }}>Notes</Text>
+            {/* No page hero. See the note on Learn: the tab bar names the
+                tab and the lockup names the product. The row stays, because
+                the control that writes a note lives in it. */}
+            <View style={{ flex: 1 }} />
             {/* Writing a note is the only thing this screen creates, so it gets
                 one plain control rather than a floating button that covers the
                 last card in the list. */}
@@ -675,8 +678,12 @@ export default function NotesScreen() {
                   paddingTop: Spacing.xxl + Spacing.md,
                   paddingBottom: Spacing.xl, paddingHorizontal: Spacing.xl,
                   marginTop: -Spacing.xxl,
-                  shadowColor: '#2A1B10', shadowOpacity: 0.10,
-                  shadowRadius: 16, shadowOffset: { width: 0, height: 8 },
+                  /* Ellie: "Add shading behind the word in use tile so that
+                     there's more contrast." Deeper and tighter, so the card
+                     above it reads as sitting on top of this rather than
+                     beside it. */
+                  shadowColor: '#2A1B10', shadowOpacity: 0.22,
+                  shadowRadius: 14, shadowOffset: { width: 0, height: 10 },
                 }}>
                 {/* The label is the dark, emphatic half and the meaning is the
                     quiet one. Mine had them exactly the wrong way round: a
@@ -733,13 +740,24 @@ export default function NotesScreen() {
                 accessibilityLabel={`${label}, ${n}`}
                 hitSlop={10}
                 onPress={() => (key === 'journal' ? setJournalOpen(true) : setOpenList(key))}
-                style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
+                /* Ellie: "Please make the recent, shared, journal, and tags
+                   buttons so that users know to click on them." Four words in
+                   a row look like a heading; a pill with an edge looks like
+                   something to press. */
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+                  backgroundColor: Palette.white,
+                  borderRadius: Radius.pill,
+                  borderWidth: 1, borderColor: c.border,
+                  paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
+                  ...Lift,
+                }}>
                 {/* Ellie: "recent, shared, journal, and tags should not be
                     playfair display." The body face, at the weight the
                     reference's row uses. */}
                 <Text
                   style={{
-                    fontFamily: Fonts.bodyBold, fontSize: 15, lineHeight: 21,
+                    fontFamily: Fonts.bodyBold, fontSize: 13, lineHeight: 18,
                     fontWeight: '700', color: c.textStrong,
                   }}>
                   {label}
@@ -748,7 +766,7 @@ export default function NotesScreen() {
                     the counts on the book screenshot page?" */}
                 <View
                   style={{
-                    minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4,
+                    minWidth: 17, height: 17, borderRadius: 9, paddingHorizontal: 4,
                     backgroundColor: c.accent,
                     alignItems: 'center', justifyContent: 'center',
                   }}>

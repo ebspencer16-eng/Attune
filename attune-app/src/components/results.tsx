@@ -694,13 +694,11 @@ export default function Results({
     cameFromHighlights = false;
     return (
       <View style={{ flex: 1 }}>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.lg }}>
-          {/* White: this heading is the one page of the results experience
-              that sits on the Insights tab's orange ground rather than on
-              cream. Every other page under it is on the wash and keeps the
-              ink. */}
-          <Text style={{ ...Type.display, color: Palette.white }}>Your results</Text>
-        </View>
+        {/* No page hero. Ellie: "Remove 'Resources', 'Your results', and
+            'notes' Page heroes." The menu under it names every section it
+            leads to; a heading over that said only that this is the place you
+            already tapped to get to. */}
+        <View style={{ height: Spacing.lg }} />
         {/* ── IN A TILE, LIKE EVERY OTHER PAGE ─────────────────────────
             Ellie: "Please make the insights nav landing in a tile like the
             other insights pages." The bands ran edge to edge, which made the

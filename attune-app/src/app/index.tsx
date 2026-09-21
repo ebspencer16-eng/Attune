@@ -399,12 +399,15 @@ export default function HomeScreen() {
             position across all screens." So it sits outside the scroll view
             here exactly as TabScreen puts it on the other three: same element,
             same padding, and it does not slide away when the page moves. */}
-        {/* The lockup is the page's first line now, at headline size. This
-            row draws the profile control alone: two lockups on one screen is
-            the same thing said twice. */}
+        {/* ── THE LOCKUP IS FURNITURE AGAIN ───────────────────────────
+            Ellie: "Let's add the lockup back to the homepage on top in the
+            same spot it is on the other pages. Make the page's hero the
+            welcome message like it used to be."
+
+            So this row is what it is everywhere else, and the greeting below
+            it carries the page. */}
         <BrandHeader
           tone="ink"
-          lockup={false}
           right={(
             <Pressable
               onPress={() => setSettingsOpen(true)}
@@ -475,89 +478,19 @@ export default function HomeScreen() {
                 brand colour. Settings keeps the row: it is where account
                 deletion lives, which App Review has to be able to find
                 without being told where it is. */}
-            {/* ── THE LOCKUP IS THE HEADLINE ─────────────────────────────
-                Ellie: "Instead of luxury, have that be a large lockup with
-                logo and attune relationships, then where they have the random
-                text line... let's add our 'welcome back' line in the same size
-                as on this reference image."
-
-                So the screen opens the way the reference she sent opens: the
-                product's own name at headline size with the mark beside it,
-                and one quiet line under it. The row above draws the profile
-                control alone, because two lockups on one screen is the same
-                thing said twice. */}
-            {/* Ellie: "Lockup should not be left-aligned, should be moved to
-                the right." */}
-            <View
+            {/* ── HELLO, AS THE PAGE'S OWN LINE ────────────────────────
+                The welcome message is the hero again. No rule under it: Ellie,
+                "We can remove that hairline dash under the welcome message
+                now." It was there to stand in for the reference's underlined
+                tab word, and the lockup above it does that job now. */}
+            <Text
               style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-                marginTop: Spacing.lg, justifyContent: 'center',
+                ...Type.display, color: c.textStrong,
+                marginTop: Spacing.xl, marginBottom: Spacing.xxl,
               }}>
-              {/* The cream variant, because the page is cream now. The
-                  inverse one Ellie asked for on home was for the navy; the
-                  rule underneath it is the same one it always was, which is
-                  that the mark takes the ground it is on. */}
-              <Image
-                source={require('@/assets/images/attune-mark-light.png')}
-                style={{ width: 40, height: 40 * (76 / 103) }}
-                resizeMode="contain"
-              />
-              {/* Ellie: "Attune relationships lockup should be centered and fit
-                  on one line." Twenty-six rather than thirty-eight, which is
-                  what "Attune Relationships" with the mark beside it needs to
-                  hold one line on the narrowest phone this app supports. */}
-              <Text
-                numberOfLines={1}
-                style={{
-                  ...Type.display, fontSize: 26, lineHeight: 37,
-                  color: c.textStrong,
-                }}>
-                {BRAND_NAME}
-              </Text>
-            </View>
+              {data.greeting}
+            </Text>
 
-            {/* The greeting, at the size of the small line under the
-                reference's headline. It was the headline itself; the lockup
-                is the headline now, and a second thing that size beside it
-                was the exact clash Ellie reported the last time these two
-                were close in weight. */}
-            {/* The small row under the headline. In the reference it is a
-                word with a thin rule under it, which is what separates it from
-                the headline above without another size change. */}
-            {/* The reference's small row ends in a circular arrow. Ours opens
-                the settings sheet, which is the only thing on this screen that
-                is a destination rather than a card: the profile control in the
-                row above is the same action, and two of it is better than a
-                button that does nothing. */}
-            <View
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
-                marginTop: Spacing.lg, marginBottom: Spacing.xl,
-              }}>
-              {/* Ellie: "Welcome message should be left-aligned. Hairline
-                  divider should be short and left-aligned." */}
-              <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                <Text style={{ ...Type.body, color: c.textMuted }}>
-                  {data.greeting}
-                </Text>
-                <View style={{ height: 1, width: 56, marginTop: Spacing.sm, backgroundColor: c.border }} />
-              </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Your profile and settings"
-                onPress={() => setSettingsOpen(true)}
-                hitSlop={10}
-                style={{
-                  width: 36, height: 36, borderRadius: 18,
-                  borderWidth: 1, borderColor: c.border,
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                <Text style={{ ...Type.body, color: c.textMuted }}>{'\u2192'}</Text>
-              </Pressable>
-            </View>
-
-            {/* The tile is outside this padded column, because it runs to
-                both edges of the page. See below. */}
             {/* ── FOUR WAYS IN ───────────────────────────────────────────
                 Ellie: "Instead of the 4 rounded squares above the two main
                 ones, let's add quick links to insight of the day, action plan
@@ -604,8 +537,16 @@ export default function HomeScreen() {
                 backgroundColor: Palette.cream,
                 borderBottomLeftRadius: TILE_RADIUS,
                 borderBottomRightRadius: TILE_RADIUS,
-                shadowColor: '#1B2A5E', shadowOpacity: 0.20,
-                shadowRadius: 26, shadowOffset: { width: 0, height: 12 },
+                /* Ellie: "Please make the bottom of the tile more defined on
+                   the homepage, more contrast for it." A deeper, tighter
+                   shadow so the edge is an edge rather than a haze, and a
+                   hairline under the curve itself, which is what actually
+                   draws the line: a shadow is the space beside an edge and
+                   not the edge. */
+                borderBottomWidth: 1,
+                borderColor: 'rgba(27,42,94,0.14)',
+                shadowColor: '#1B2A5E', shadowOpacity: 0.30,
+                shadowRadius: 16, shadowOffset: { width: 0, height: 10 },
               }}
             />
             <LinearGradient
@@ -1083,36 +1024,42 @@ export type QuickLinkItem = {
 };
 
 const QUICK_LINKS: QuickLinkItem[] = [
-  /* Ellie: "insight should be a brain, action plan should be a stoplight,
-     highlights and journal are fine." SF Symbols has a brain and has no
-     traffic light, so that one is drawn: see Stoplight below. */
+  /* Ellie: "insight should be a brain", then "Change action plan icon on home
+     page to be one of those street signs where there are arrow signs on either
+     side of the post." SF Symbols has a brain; the signpost is drawn, for the
+     same reason the stoplight before it was. */
   { id: 'insight', label: 'Insight of the day', icon: 'brain' },
-  { id: 'plan', label: 'Action plan', icon: 'stoplight', section: 'what-comes-next' },
+  { id: 'plan', label: 'Action plan', icon: 'signpost', section: 'what-comes-next' },
   { id: 'highlights', label: 'Results highlights', icon: 'sparkles', section: 'highlights' },
   { id: 'journal', label: 'Relationship journal', icon: 'book.closed' },
 ];
 
 /**
- * A stoplight, drawn.
+ * A signpost, drawn.
  *
- * SF Symbols has no traffic light, and the other three icons here are its
- * line-weight glyphs, so this is that: a rounded outline at the same stroke
- * with three lamps in it. The lamps are the section colours the app already
- * uses rather than a red, amber and green it does not have anywhere else.
+ * Ellie: "one of those street signs where there are arrow signs on either side
+ * of the post." So: a post, and two plates pointing opposite ways, one above
+ * the other. SF Symbols' signposts all point one way and sit inside a shape;
+ * this is the crossroads sign she described. Drawn at the same stroke weight
+ * as the three glyphs beside it so the row reads as one set.
  */
-function Stoplight() {
-  const LAMP = [SectionColor.conflict, Palette.clay, SectionColor.reflection];
+function Signpost() {
+  const plate = {
+    height: 8, borderRadius: 2,
+    borderWidth: 1.6, borderColor: c.accent,
+  } as const;
   return (
-    <View
-      style={{
-        width: 22, height: 32, borderRadius: 7,
-        borderWidth: 1.8, borderColor: c.accent,
-        alignItems: 'center', justifyContent: 'space-evenly',
-        paddingVertical: 3,
-      }}>
-      {LAMP.map((colour) => (
-        <View key={colour} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colour }} />
-      ))}
+    <View style={{ width: 32, height: 32, alignItems: 'center' }}>
+      {/* the two plates, pointing opposite ways */}
+      <View style={{ ...plate, width: 18, alignSelf: 'flex-start', marginTop: 5 }} />
+      <View style={{ ...plate, width: 18, alignSelf: 'flex-end', marginTop: 3 }} />
+      {/* the post, behind and below them */}
+      <View
+        style={{
+          position: 'absolute', top: 3, bottom: 0, left: 15,
+          width: 1.8, backgroundColor: c.accent,
+        }}
+      />
     </View>
   );
 }
@@ -1147,8 +1094,8 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
         paddingHorizontal: Spacing.xs, alignItems: 'center',
       }}>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {item.icon === 'stoplight' ? (
-          <Stoplight />
+        {item.icon === 'signpost' ? (
+          <Signpost />
         ) : (
           <SymbolView
             name={item.icon as never}

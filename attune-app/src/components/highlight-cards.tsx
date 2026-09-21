@@ -68,8 +68,7 @@ export type MapData = {
   quadrants?: { code: string; name: string; color: string; fill: string }[];
 };
 import {
-  BottomTabInset, Colors, Palette, Radius, Spacing, Type,
-  Fonts,
+  BlueGround, BottomTabInset, Colors, Fonts, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -278,6 +277,15 @@ const STAT_PAIR_GROUND: Ground = ['#1B2A5E', '#24357A', '#2F55C4'];
  * them. Raising the count alone would have made it brighter as well as
  * smoother, which is why the peak is the number that is written down.
  */
+/**
+ * The white glow, as a peak and a count, the same way the sunrise is written.
+ * Solving the per-ring alpha from the peak is what stops a change to the
+ * count quietly changing how bright it is.
+ */
+const GLOW_RINGS = 40;
+const GLOW_PEAK = 0.30;
+const GLOW_ALPHA = (1 - (1 - GLOW_PEAK) ** (1 / GLOW_RINGS)).toFixed(4);
+
 const SUNRISE_RINGS = 56;
 const SUNRISE_PEAK = 0.773;
 const SUNRISE_ALPHA = (1 - (1 - SUNRISE_PEAK) ** (1 / SUNRISE_RINGS)).toFixed(4);
@@ -340,6 +348,12 @@ export function insightCard(
     id: 'insight-of-the-day',
     kind: 'quote',
     tone: 'night',
+    /* The home screen's own blue, and its glow. Ellie: "The insight of the day
+       storycard should be the blue gradient full page with the glow behind the
+       quote like it used to be on the homepage." Both are carried on the card
+       rather than decided inside the renderer. */
+    ground: [BlueGround[0], BlueGround[1], BlueGround[1]],
+    glow: true,
     eyebrow: label,
     quote: finding.body,
     body: finding.source,
@@ -677,7 +691,14 @@ function Card({
   shotRef?: React.RefObject<View | null>;
   map?: MapData | null;
 }) {
-  const tone = card.kind === 'couple-type'
+  /* A card may carry its own ground, and that wins. The insight of the day
+     does, because Ellie asked for the home screen's blue behind it rather than
+     one of the eight tones the results use, and a special case keyed on its id
+     inside this renderer would be a second place deciding what a card is. */
+  const own = (card as { ground?: string[] }).ground;
+  const tone = own?.length === 3
+    ? (own as Ground)
+    : card.kind === 'couple-type'
     ? typeGround(card.accent)
     /* The admired card's ground is the orange half of its diagonal; the navy
        half is laid over it below. */
@@ -748,6 +769,39 @@ function Card({
                       bottom: -w * 0.45,
                       width: size, height: size, borderRadius: size / 2,
                       backgroundColor: `rgba(232,103,58,${SUNRISE_ALPHA})`,
+                    }}
+                  />
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
+
+        {/* ── A GLOW, WHEN THE CARD ASKS FOR ONE ───────────────────────
+            Ellie, of the insight card: "should be the blue gradient full page
+            with the glow behind the quote like it used to be on the
+            homepage."
+
+            The home screen's own trick, which this file already uses twice:
+            many rings, each too faint for its own edge to be findable,
+            stacked so the alpha builds toward the middle. Centred rather than
+            rising from the foot, because what it is behind is in the middle
+            of the card.
+
+            Asked for by the card rather than by its kind, so nothing here has
+            to know which card is which. */}
+        {(card as { glow?: boolean }).glow ? (
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              {Array.from({ length: GLOW_RINGS }, (_, i) => {
+                const size = w * 1.5 * (1 - i / GLOW_RINGS);
+                return (
+                  <View
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      width: size, height: size, borderRadius: size / 2,
+                      backgroundColor: `rgba(255,255,255,${GLOW_ALPHA})`,
                     }}
                   />
                 );

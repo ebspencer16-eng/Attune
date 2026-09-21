@@ -65,7 +65,7 @@ const DOOR = `
   <path d="M28 132 L140 132" stroke="${INK}" stroke-opacity="0.22" stroke-width="2"/>
 </svg>`;
 
-/** Two people, side by side, at a screen. */
+/** A piggy bank, with coins dropping in. */
 const BUDGET = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
   <defs>
@@ -75,20 +75,36 @@ const BUDGET = `
     </linearGradient>
   </defs>
   <rect width="160" height="160" fill="url(#g2)"/>
-  <!-- the screen -->
-  <rect x="46" y="38" width="68" height="46" rx="4" fill="#FFFFFF" stroke="${INK}" stroke-opacity="0.5" stroke-width="2.4"/>
-  <path d="M74 84 L86 84 L88 94 L72 94 Z" fill="#FFFFFF" stroke="${INK}" stroke-opacity="0.5" stroke-width="2.4" stroke-linejoin="round"/>
-  <path d="M56 94 L104 94" stroke="${INK}" stroke-opacity="0.5" stroke-width="2.4" stroke-linecap="round"/>
-  <!-- a rising line on it -->
-  <path d="M54 72 L68 60 L80 66 L106 46" fill="none" stroke="${INDIGO}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- two heads and shoulders, turned toward each other -->
-  <circle cx="44" cy="108" r="9" fill="${ORANGE}"/>
-  <path d="M28 132 a16 16 0 0 1 32 0 Z" fill="${ORANGE}"/>
-  <circle cx="116" cy="108" r="9" fill="${INDIGO}"/>
-  <path d="M100 132 a16 16 0 0 1 32 0 Z" fill="${INDIGO}"/>
-  <!-- smiles -->
-  <path d="M40 110 q4 3.5 8 0" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M112 110 q4 3.5 8 0" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- three coins on their way down, the nearest one about to land -->
+  <g stroke="${INK}" stroke-opacity="0.45" stroke-width="1.6">
+    <circle cx="78" cy="22" r="8" fill="#FFD9A8"/>
+    <circle cx="96" cy="40" r="6.5" fill="#FFD9A8"/>
+    <circle cx="70" cy="46" r="5.5" fill="#FFD9A8"/>
+  </g>
+
+  <!-- the body -->
+  <path d="M40 92
+           a30 26 0 0 1 30 -26 h14
+           a30 26 0 0 1 30 26
+           a30 26 0 0 1 -30 26 h-14
+           a30 26 0 0 1 -30 -26 Z"
+        fill="${ORANGE}"/>
+  <!-- the snout -->
+  <ellipse cx="119" cy="92" rx="9" ry="8" fill="${ORANGE}"/>
+  <circle cx="117" cy="90" r="1.8" fill="#FFFFFF" fill-opacity="0.85"/>
+  <circle cx="122" cy="93" r="1.8" fill="#FFFFFF" fill-opacity="0.85"/>
+  <!-- an ear -->
+  <path d="M84 66 L96 60 L92 72 Z" fill="${ORANGE}"/>
+  <!-- the eye -->
+  <circle cx="102" cy="84" r="2.6" fill="#FFFFFF"/>
+  <!-- the slot -->
+  <rect x="66" y="70" width="24" height="4.5" rx="2.2" fill="#FFFFFF" fill-opacity="0.9"/>
+  <!-- legs -->
+  <rect x="54" y="114" width="10" height="12" rx="3" fill="${ORANGE}"/>
+  <rect x="94" y="114" width="10" height="12" rx="3" fill="${ORANGE}"/>
+  <!-- the ground line -->
+  <path d="M36 128 L128 128" stroke="${INK}" stroke-opacity="0.2" stroke-width="2"/>
 </svg>`;
 
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8"><style>

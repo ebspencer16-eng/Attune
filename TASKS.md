@@ -78,7 +78,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The thirteen from the correction pass are built and are in
+**Nothing open.** The fourteen from the polish pass are built and are in
 section 3.
 
 ## 3. For you to review
@@ -95,10 +95,24 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-The correction pass first.
+The polish pass first.
 
 | # | Review |
 |--|--|
+| O384 | **The lockup is back at the top in its usual place**, and the welcome message is the page's hero again, with no rule under it. |
+| O385 | **Action plan is a signpost**, a post with a plate pointing each way. SF Symbols' signposts all point one direction and sit inside a shape, so this one is drawn at the same stroke as the three glyphs beside it, the way the stoplight was. |
+| O386 | **The bottom of the tile is defined.** A hairline along the curve as well as the shadow: a shadow is the space beside an edge and not the edge, which is why more shadow alone was not doing it. |
+| O387 | **A piggy bank with coins dropping in.** |
+| O388 | **The insight card is the blue gradient with the glow behind the quote.** Both are carried on the card rather than decided inside the renderer, so nothing in that file has to know which card is which. |
+| O389 | **The sheet moved up and the page fades at the foot**, under the tab bar, with the caret above it. |
+| O390 | **A bookmark on each of the four featured publications**, the same control the full cards carry, in the same corner. |
+| O391 | **Shading on the sheet.** |
+| O392 | **The ground is the brand's blue, lightened.** It was a lavender, which is a colour this product does not have. |
+| O393 | **Featured publications is smaller and in the body face.** |
+| O394 | **Deeper shading behind the word-in-use tile**, so the card above reads as sitting on top of it rather than beside it. |
+| O395 | **Recent, Shared, Journal and Tags are pills with an edge.** Four words in a row look like a heading. |
+| O396 | **Insights is cream with the brand coming off the top corners**, the same ground the other three tabs have. A painted orange screen made it the odd tab rather than the bright one. |
+| O397 | **No page heroes on Learn, Insights or Notes.** The tab bar names the tab and the lockup names the product; a third label was the page naming itself twice. |
 | O371 | **The lockup is centred and on one line**, at twenty-six rather than thirty-eight, which is what "Attune Relationships" with the mark beside it needs to hold one line on the narrowest phone. |
 | O372 | **The welcome message is left, and the hairline under it is short and left.** |
 | O373 | **The icons are larger and centred in the space above the label.** |
