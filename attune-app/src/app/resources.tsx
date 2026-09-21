@@ -39,7 +39,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, BlueGround, BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  AccentFallback, AccentFor, BlueGround, BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, TabTopInset, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -436,7 +436,7 @@ export default function ResourcesScreen() {
         <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
           {/* Ellie: "Leave more space up top on the learn tab below the
             lockup." */}
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxxl + Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: TabTopInset, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Back to Learn"
@@ -533,8 +533,12 @@ export default function ResourcesScreen() {
             homescreen gradient". The same finding the home screen opens with,
             and the same ground, which is the one piece of strong colour this
             app has. It is what stops this tab reading as a list of lists. */}
+        {/* ── A BANNER, NOT A TILE ────────────────────────────────────
+            Ellie: "Make insight of the day a full banner across the learn
+            page, not a tile." So no side margins and no radius: it runs from
+            edge to edge and the colour meets the page's own at both ends. */}
         {home?.research ? (
-          <View style={{ paddingHorizontal: Spacing.xl, marginTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+          <View style={{ marginTop: Spacing.xxl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
             {/* ── THE SECTION IS NAMED ON THE PAGE ───────────────────────
                 Ellie: "Add insight of the day as a hero and remove the eyebrow
                 from the insight tile on the learn tab."
@@ -557,7 +561,7 @@ export default function ResourcesScreen() {
               colors={[...BlueGround]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 1 }}
-              style={{ borderRadius: Radius.card, padding: Spacing.xl, ...Lift }}>
+              style={{ paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl, ...Lift }}>
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
                 {INSIGHT_OF_THE_DAY}
               </Text>
@@ -642,7 +646,12 @@ export default function ResourcesScreen() {
               paddingLeft: Spacing.xl, paddingRight: Spacing.lg,
               maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
             }}>
-            <View style={{ flex: 1 }}>
+            {/* Ellie: "Search articles bar should be bottom aligned with the
+                bottom 2 featured articles." The column is as tall as the grid
+                beside it and the search is pushed to its foot, so the two
+                bottom edges are the same line whatever the titles do. */}
+            <View style={{ flex: 1, justifyContent: 'space-between' }}>
+              <View>
               <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg }}>
                 {([['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
                   const on = list === key;
@@ -685,10 +694,11 @@ export default function ResourcesScreen() {
               <Text
                 style={{
                   ...Type.body, fontFamily: Fonts.bodyMedium,
-                  color: c.textMuted, marginBottom: Spacing.lg,
+                  color: c.textMuted,
                 }}>
                 Featured publications
               </Text>
+              </View>
 
               {/* Where the reference has its number. Ellie: "add the search bar
                   with 'Search articles' in grey text that disappears once you

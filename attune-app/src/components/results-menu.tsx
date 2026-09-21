@@ -96,6 +96,17 @@ export const GROUP_ICON: Record<string, string> = {
 
 const ICON_FALLBACK = 'circle';
 
+/**
+ * The mark beside a top-level row, and beside the exercises' heading.
+ *
+ * Ellie: "Change bullets on insights menu to arrows." A dot says "one of a
+ * list"; an arrow says "this goes somewhere", which is what every row here
+ * does. One component, because the two places that draw it must not drift.
+ */
+function Arrow() {
+  return <Text style={{ ...Type.body, color: c.accentQuiet, lineHeight: 18 }}>{'\u203A'}</Text>;
+}
+
 export default function ResultsMenu({
   groups, current, onOpenSection, density = 'page',
 }: {
@@ -197,7 +208,7 @@ export default function ResultsMenu({
                   flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 }}>
                 <View style={{ width: ICON_COL, alignItems: 'center', justifyContent: 'center' }}>
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: c.accentQuiet }} />
+                  <Arrow />
                 </View>
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
               </View>
@@ -303,9 +314,9 @@ export default function ResultsMenu({
                 ) : (
                   /* Highlights, Couple Type and What Comes Next. The column was
                      held empty so their names lined up with the exercises';
-                     it holds the bullet now, which is the same alignment with
+                     it holds the arrow now, which is the same alignment with
                      something in it. */
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: c.accentQuiet }} />
+                  <Arrow />
                 )}
               </View>
               {/* ── NOT A HERO ───────────────────────────────────────────

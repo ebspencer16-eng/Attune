@@ -82,8 +82,10 @@ export default function TabScreen({
         <LinearGradient
           pointerEvents="none"
           colors={[...groundColors]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.9, y: 1 }}
+          /* Top right to bottom left, which is the diagonal Ellie named for
+             Insights and reads the same way on Learn. */
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         />
       ) : null}

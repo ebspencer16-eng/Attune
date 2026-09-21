@@ -720,6 +720,10 @@ export default function Results({
             marginHorizontal: Spacing.lg,
             backgroundColor: Palette.white,
             borderRadius: Radius.card,
+            /* Ellie: "Outline insights menu in orange." A hairline in the
+               brand's own accent, which is also the only colour on this page
+               now that the ground is one diagonal of it. */
+            borderWidth: 1.5, borderColor: c.accent,
             overflow: 'hidden',
             ...Lift,
           }}>

@@ -65,7 +65,7 @@ import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
+  BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, TabTopInset, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -562,14 +562,14 @@ export default function NotesScreen() {
             tintColor={c.accentQuiet}
           />
         }>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
-          {/* No page hero and no plus. Ellie: "Remove the plus button in the
-              top right of the notes page." Writing is what the journal button
-              below is for, and a mark is made on the words it belongs to
-              rather than from a button on this screen. */}
-        </View>
+        {/* No page hero and no plus. Ellie: "Remove the plus button in the top
+            right of the notes page." Writing is what the journal button below
+            is for, and a mark is made on the words it belongs to rather than
+            from a button on this screen.
 
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+            TabTopInset is shared with Learn, so the word tile here and the
+            tools row there start on the same line. */}
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: TabTopInset, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           {/* ── THE WORD OF THE DAY ────────────────────────────────────────
               Ellie: "Maybe we could even do the dictionary definition tiles
               and include the dictionary definition of a different word every
@@ -661,7 +661,18 @@ export default function NotesScreen() {
                   rather than as a mistake. */}
               <View
                 style={{
-                  backgroundColor: '#EFEAE3', borderRadius: Radius.card,
+                  /* Ellie: "I can see the top rounded corners on the word in
+                     use tile, but I don't want to be able to. I want it to
+                     extend cleanly behind the growth tile."
+
+                     Square at the top, rounded at the foot. Both cards are the
+                     same width, so the grey one's rounded top corners were
+                     showing in the notch either side of the white one's
+                     rounded bottom corners. A straight edge has nothing to
+                     show there. */
+                  backgroundColor: '#EFEAE3',
+                  borderBottomLeftRadius: Radius.card,
+                  borderBottomRightRadius: Radius.card,
                   paddingTop: Spacing.xl + Spacing.md,
                   paddingBottom: Spacing.lg, paddingHorizontal: Spacing.xl,
                   marginTop: -Spacing.xl,

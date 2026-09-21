@@ -393,12 +393,17 @@ export default function HomeScreen() {
           cream at its foot with the blue coming through, fading out as it
           rises. The top of the page stays pale, because the lockup and the
           greeting are read on it in ink. */}
+      {/* Ellie: "No blue up top on the home page, it should be cream at the
+          top but you've added another blue gradient." The middle stop was a
+          third of the way to indigo at 45 per cent of the page, which put blue
+          behind the greeting. Cream holds to past halfway now and the colour
+          is the bottom of the screen, which is where she put it. */}
       <LinearGradient
         pointerEvents="none"
-        colors={[Palette.white, withAlpha(Palette.indigo, 0.35), Palette.indigo]}
-        locations={[0, 0.45, 1]}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
+        colors={[Palette.cream, Palette.cream, Palette.indigo]}
+        locations={[0, 0.58, 1]}
+        start={{ x: 0.3, y: 0 }}
+        end={{ x: 0.7, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
@@ -1053,31 +1058,59 @@ const QUICK_LINKS: QuickLinkItem[] = [
 ];
 
 /**
- * A signpost, drawn.
+ * A signpost, drawn. Second version.
  *
  * Ellie: "one of those street signs where there are arrow signs on either side
- * of the post." So: a post, and two plates pointing opposite ways, one above
- * the other. SF Symbols' signposts all point one way and sit inside a shape;
- * this is the crossroads sign she described. Drawn at the same stroke weight
- * as the three glyphs beside it so the row reads as one set.
+ * of the post", and then "Redo the action plan icon on the home page, same
+ * thing, but version 2.0."
+ *
+ * The first was two outlined rectangles, which at thirty points read as two
+ * bars rather than as signs. These are solid plates with a pointed end, which
+ * is the shape that says "sign": the point is what makes it an arrow rather
+ * than a label, and outline strokes at this size cannot carry a point.
+ *
+ * The triangle is made from borders, which is the only way React Native draws
+ * one without an SVG library: a view with no size, two transparent edges and
+ * one coloured, is a triangle pointing away from the coloured edge.
  */
 function Signpost() {
-  const plate = {
-    height: 8, borderRadius: 2,
-    borderWidth: 1.6, borderColor: QUICK_INK,
-  } as const;
-  return (
-    <View style={{ width: 32, height: 32, alignItems: 'center' }}>
-      {/* the two plates, pointing opposite ways */}
-      <View style={{ ...plate, width: 18, alignSelf: 'flex-start', marginTop: 5 }} />
-      <View style={{ ...plate, width: 18, alignSelf: 'flex-end', marginTop: 3 }} />
-      {/* the post, behind and below them */}
+  const PLATE_W = 13;
+  const PLATE_H = 8;
+  const TIP = 5;
+
+  const plate = (pointsRight: boolean, top: number) => (
+    <View
+      style={{
+        position: 'absolute', top,
+        flexDirection: pointsRight ? 'row' : 'row-reverse',
+        ...(pointsRight ? { left: 14 } : { right: 14 }),
+        alignItems: 'center',
+      }}>
+      <View style={{ width: PLATE_W, height: PLATE_H, backgroundColor: QUICK_INK }} />
       <View
         style={{
-          position: 'absolute', top: 3, bottom: 0, left: 15,
-          width: 1.8, backgroundColor: QUICK_INK,
+          width: 0, height: 0,
+          borderTopWidth: PLATE_H / 2, borderBottomWidth: PLATE_H / 2,
+          borderTopColor: 'transparent', borderBottomColor: 'transparent',
+          ...(pointsRight
+            ? { borderLeftWidth: TIP, borderLeftColor: QUICK_INK }
+            : { borderRightWidth: TIP, borderRightColor: QUICK_INK }),
         }}
       />
+    </View>
+  );
+
+  return (
+    <View style={{ width: 32, height: 32 }}>
+      {/* the post, from the top plate down to the ground */}
+      <View
+        style={{
+          position: 'absolute', top: 4, bottom: 2, left: 15,
+          width: 2, backgroundColor: QUICK_INK,
+        }}
+      />
+      {plate(true, 5)}
+      {plate(false, 16)}
     </View>
   );
 }

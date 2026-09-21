@@ -320,6 +320,17 @@ export const Radius = { sm: 8, md: 12, lg: 14, xl: 18, pill: 999, card: 26 } as 
  * to look like one product and the way they stop is by being tuned
  * separately.
  */
+/**
+ * Where a tab's first block starts, under the lockup.
+ *
+ * Ellie: "Please bump the resources tiles down to be top aligned with the
+ * growth noun dictionary definition tile on the notes page." Two tabs lining
+ * up across a tab switch is the kind of thing that is true on the day it is
+ * set and false a week later, because it is two numbers in two files. One
+ * number, read by both.
+ */
+export const TabTopInset = 48;
+
 export const Lift = {
   shadowColor: '#2A1B10',
   shadowOpacity: 0.10,

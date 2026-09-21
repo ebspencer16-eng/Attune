@@ -78,7 +78,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The sixteen from this pass are built and are in section 3.
+**Nothing open.** The nine from this pass are built and are in section 3.
 
 ## 3. For you to review
 
@@ -94,10 +94,19 @@ any order; work through them however suits.
 
 ### Design, and whether it looks right
 
-This pass first.
+The newest pass first.
 
 | # | Review |
 |--|--|
+| O413 | **Cream at the top of home.** The middle stop of that gradient was a third of the way to indigo at 45 per cent of the page, which put blue behind the greeting. The cream holds past halfway now. |
+| O414 | **The word-in-use tile runs cleanly behind the word tile.** Square at the top, rounded at the foot: both cards are the same width, so its rounded top corners were showing in the notch either side of the white card's rounded bottom ones. |
+| O415 | **The Learn tools row and the Notes word tile start on the same line**, from one shared number. Two tabs lining up across a tab switch is exactly the thing that is true the day it is set and false a week later, because it is two numbers in two files. |
+| O416 | **The search sits on the foot of the lower two tiles.** The column is as tall as the grid and the search is pushed to its bottom, so the two edges are the same line whatever the titles do. |
+| O417 | **The Insights menu is outlined in orange.** |
+| O418 | **Orange into cream, top right to bottom left.** No blue. |
+| O419 | **Arrows, not bullets.** A dot says "one of a list"; an arrow says "this goes somewhere", which is what every row there does. |
+| O420 | **The signpost, version two.** The first was two outlined bars, which at thirty points read as two bars. These are solid plates with a pointed end, and the point is what makes it a sign rather than a label; an outline at that size cannot carry a point. |
+| O421 | **Insight of the day is a banner across Learn**, edge to edge, no radius. |
 | O398 | **The insight quote is upright.** |
 | O399 | **The sheet cuts off after the four featured articles**, with more air above it. The grid is the tallest thing in the sheet, so it is what decides where the cut falls: the tiles are shorter and the cut follows. |
 | O400 | **All three tools, for everyone, with your names.** One you do not own is dimmed and opens "You don't own this" with See more details, which leaves the app: the app does not sell, and check-app-does-not-sell.mjs holds it to that. The names are on the server, because `short` is read by this tile and nothing else, so there is one copy and you can change them without a build. The "explore more resources" link is gone with it: every tile is its own way there now. |
