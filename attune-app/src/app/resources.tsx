@@ -487,7 +487,15 @@ export default function ResourcesScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
 
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
+        {/* Ellie: "Please move the resource tiles down so there's more of a
+            buffer at the top of the learn page", and before that, "bump the
+            resources tiles down to be top aligned with the growth noun
+            dictionary definition tile on the notes page".
+
+            TabTopInset is that alignment, shared with Notes. It was on the
+            shelf page below and not on this one, so the number existed, the
+            comment next to it said the two tabs lined up, and they did not. */}
+        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: TabTopInset, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
           {/* Ellie: "I want the section labels on that page to be hero text not
               eyebrow text." So the sections carry the page rather than a title
               above them repeating the tab's own name. */}

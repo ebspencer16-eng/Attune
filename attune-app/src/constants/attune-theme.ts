@@ -328,8 +328,21 @@ export const Radius = { sm: 8, md: 12, lg: 14, xl: 18, pill: 999, card: 26 } as 
  * up across a tab switch is the kind of thing that is true on the day it is
  * set and false a week later, because it is two numbers in two files. One
  * number, read by both.
+ *
+ * And then: "Please move the resource tiles down so there's more of a buffer
+ * at the top of the learn page. There's white space below the 4 in practice
+ * featured articles so we can push everything down and it'll be fine."
+ *
+ * Which found that Learn was never reading this. The constant was added for
+ * exactly this alignment and it went on the shelf page, the one behind a
+ * section arrow, while the Learn tab itself kept a paddingTop of Spacing.sm.
+ * So the two tabs were forty points apart the whole time, and the note above
+ * saying they line up from one number was describing a page nobody opens.
+ *
+ * The Learn tab reads it now, which is both halves of what she asked: the
+ * tiles move down, and they land where the Notes tab's word tile already is.
  */
-export const TabTopInset = 48;
+export const TabTopInset = 60;
 
 export const Lift = {
   shadowColor: '#2A1B10',

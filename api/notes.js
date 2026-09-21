@@ -33,7 +33,7 @@
 export const config = { runtime: 'edge' };
 
 import { jsonBody } from './_lib/http.js';
-import { isValidAnchor, standardTags, TAG_SUGGESTIONS, TAG_PLACEHOLDER } from './_lib/tags.js';
+import { isValidAnchor, JOURNAL_ANCHOR, standardTags, TAG_SUGGESTIONS, TAG_PLACEHOLDER } from './_lib/tags.js';
 import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
 import { recordNotification } from './_lib/notifications.js';
@@ -319,6 +319,19 @@ export default async function handler(req) {
       }
 
       const shared = body.visibility === 'shared';
+      /**
+       * ── A JOURNAL ENTRY CANNOT BE CREATED SHARED ────────────────────────
+       * Ellie: "Please make sure the journal entries are saved appropriately
+       * and privately."
+       *
+       * The app sends visibility 'private' for every entry, and that is a
+       * claim about a client rather than a rule. This is the rule. The same
+       * refusal sits on the share action below, so neither the way in nor the
+       * way after it can make a diary readable by a partner.
+       */
+      if (shared && anchorType === JOURNAL_ANCHOR) {
+        return json({ ok: false, error: 'a journal entry is private' }, 400);
+      }
       if (shared && !coupleKey) {
         // Sharing with nobody is a silent no-op that looks like success.
         return json({ ok: false, error: 'no partner linked to share with' }, 400);
@@ -423,6 +436,27 @@ export default async function handler(req) {
       if (action === 'share') {
         const shared = body.visibility === 'shared';
         if (shared && !coupleKey) return json({ ok: false, error: 'no partner linked to share with' }, 400);
+        /**
+         * ── A JOURNAL ENTRY CANNOT BE SHARED ──────────────────────────
+         * Ellie: "Please make sure the journal entries are saved
+         * appropriately and privately."
+         *
+         * The app has no control that would share one, which is true and is
+         * not a guarantee: it is the absence of a button, and a button is one
+         * commit away. This is the guarantee. A diary is the most private
+         * thing in this product and the rule belongs where the row is
+         * written, not where it is drawn.
+         *
+         * Read from the row rather than from the request, so a client cannot
+         * claim an entry is something else.
+         */
+        if (shared) {
+          const look = await rest(`${scope}&select=anchor_type`, { headers: svc });
+          const [row] = await look.json().catch(() => []);
+          if (row?.anchor_type === JOURNAL_ANCHOR) {
+            return json({ ok: false, error: 'a journal entry is private' }, 400);
+          }
+        }
         patch.visibility = shared ? 'shared' : 'private';
         patch.couple_key = shared ? coupleKey : null;
       } else {

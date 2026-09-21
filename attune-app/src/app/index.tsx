@@ -1014,8 +1014,14 @@ const TILE_FADE = 90;
 const TILE_RADIUS = 36;
 /** The four squares' fill. Three per cent of the ink: present, barely. */
 const SQUARE_FILL = 'rgba(14,11,7,0.045)';
-/** The four quick links' icons. Grey, which Ellie asked for by name. */
-const QUICK_INK = '#8A8178';
+/**
+ * The four quick links' icons. Grey, which Ellie asked for by name, and then:
+ * "Please change the grey used for the icons on the homepage to a warmer
+ * grey." The old one was #8A8178, which is a grey with a hint of warmth in it;
+ * this has the same lightness and three times the distance between its red and
+ * its blue, so it sits with the cream ground rather than on top of it.
+ */
+const QUICK_INK = '#8F8071';
 /**
  * The two card grounds. The same two tints In Practice puts behind an article
  * with no artwork, at the same strength, so a placeholder on this screen and a

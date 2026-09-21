@@ -27,6 +27,7 @@ import { researchOfTheDay } from './_research.js';
 import { wordOfTheDay } from './_words.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
+import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -211,6 +212,20 @@ export default async function handler(req) {
     try {
       const nRes = await fetch(
         `${supabaseUrl}/rest/v1/notes?owner_id=eq.${me.id}`
+        /**
+         * ── NOT THE JOURNAL ──────────────────────────────────────────────
+         * pick-up.js says it itself: "the home screen is the most
+         * over-the-shoulder place in it". The row quotes ninety characters of
+         * whatever was written last, and a diary entry is the one thing in
+         * this product that must not appear on a screen someone else can
+         * glance at. So the journal is excluded here rather than trimmed
+         * later.
+         *
+         * The `or` is needed because a plain note's anchor_type is NULL, and
+         * `not.eq` drops NULLs: filtering the journal out with it would empty
+         * the row for everyone who writes ordinary notes.
+         */
+        + `&or=(anchor_type.is.null,anchor_type.neq.${JOURNAL_ANCHOR})`
         + '&select=title,body,anchor_context&order=updated_at.desc&limit=1',
         { headers: svc });
       lastNote = (await nRes.json().catch(() => []))?.[0] || null;

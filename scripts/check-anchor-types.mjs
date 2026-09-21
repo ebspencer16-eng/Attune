@@ -26,6 +26,20 @@
  * types are read out of its switch. Then both directions: a type in one and
  * not the other is a failure either way round.
  *
+ * ── AND A CASE LABEL IS NOT ALWAYS A STRING ───────────────────────────────
+ * `case JOURNAL_ANCHOR:` is the same case as `case 'journal':`, and a scanner
+ * looking for quoted labels sees the first as nothing at all. That happened
+ * the day the journal's anchor became a shared constant: this gate reported
+ * that the column allowed a type the validator refused, about a validator that
+ * had never stopped accepting it.
+ *
+ * That is this codebase's own rule pointed back at it. Deriving the string
+ * from one constant is right; it just means the scanner has to resolve the
+ * derivation too. So an identifier case label is looked up among the module's
+ * own string constants, and, separately, every type the column allows is put
+ * through the real isValidAnchor with a key of its own shape. The second pass
+ * is the one that cannot be fooled by how a case is written.
+ *
  * Reading SQL with a regex is usually the wrong tool. It is the right one here
  * because there is no other way to know what the live column allows without a
  * database, and the alternative is what was already in place, which is nothing.
@@ -39,6 +53,10 @@
  */
 
 import { readFileSync, readdirSync } from 'node:fs';
+import { isValidAnchor } from '../api/_lib/tags.js';
+import { DIM_KEYS } from '../api/_type-engine.js';
+import { RESPONSIBILITY_CATEGORIES } from '../api/_questions.js';
+import { INTIMACY_DIMENSIONS } from '../api/_intimacy-questions.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const MIGRATIONS = `${ROOT}supabase/migrations/`;
@@ -78,14 +96,66 @@ if (!sqlTypes || !sqlTypes.size) {
 const tags = readFileSync(`${ROOT}api/_lib/tags.js`, 'utf8');
 const fn = tags.slice(tags.indexOf('export function isValidAnchor'));
 const body = fn.slice(0, fn.indexOf('\n}'));
-const jsTypes = new Set([...body.matchAll(/case\s+'([a-z_]+)'\s*:/g)].map((m) => m[1]));
+
+/** Module-level string constants, so an identifier case label can be resolved. */
+const CONSTANTS = new Map(
+  [...tags.matchAll(/(?:export\s+)?const\s+([A-Z][A-Z0-9_]*)\s*=\s*'([a-z_]+)'/g)]
+    .map((m) => [m[1], m[2]]),
+);
+
+const jsTypes = new Set();
+for (const m of body.matchAll(/case\s+('([a-z_]+)'|[A-Za-z_$][\w$]*)\s*:/g)) {
+  if (m[2]) { jsTypes.add(m[2]); continue; }
+  const resolved = CONSTANTS.get(m[1]);
+  if (resolved) { jsTypes.add(resolved); continue; }
+  problems.push(
+    `isValidAnchor has a case on '${m[1]}', which is not a string and is not a\n`
+    + '      string constant in this module. This gate cannot tell what type that\n'
+    + '      case accepts, and a gate that has lost its subject must not pass.',
+  );
+}
 
 if (!jsTypes.size) {
   console.error('[check-anchor-types] no cases found in isValidAnchor; refusing to pass.');
   process.exit(1);
 }
 
-// ── 3. Both directions ─────────────────────────────────────────────────────
+// ── 3. And the validator itself, asked rather than read ───────────────────
+/**
+ * A key of the right shape for each type, so the switch can be exercised.
+ * Every type the column allows must be accepted with one of these; a type this
+ * map does not know is a type nobody has thought about here, which is itself
+ * the thing to catch.
+ */
+const SAMPLE = {
+  results_dimension: Object.keys(DIM_KEYS)[0],
+  results_section: 'conflict-overview',
+  results_question: Object.values(DIM_KEYS).flat()[0],
+  expectations_item: `${RESPONSIBILITY_CATEGORIES[0].id}:0`,
+  intimacy_dimension: INTIMACY_DIMENSIONS[0].id,
+  post: 'a-post-slug',
+  post_block: 'a-post-slug#b3',
+  journal: '2026-09-20',
+};
+for (const t of sqlTypes) {
+  const key = SAMPLE[t];
+  if (key === undefined) {
+    problems.push(
+      `the column's CHECK allows '${t}' and this gate has no sample key for it.\n`
+      + '      Add one, so the validator can be asked rather than read.',
+    );
+    continue;
+  }
+  if (!isValidAnchor(t, key)) {
+    problems.push(
+      `the column's CHECK allows '${t}' and isValidAnchor('${t}', '${key}') is false.\n`
+      + '      Nothing can ever write one, and anything already stored under it\n'
+      + '      is unreachable by every surface that resolves an anchor.',
+    );
+  }
+}
+
+// ── 4. Both directions ─────────────────────────────────────────────────────
 for (const t of jsTypes) {
   if (!sqlTypes.has(t)) {
     problems.push(

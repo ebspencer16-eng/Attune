@@ -186,6 +186,20 @@ export function reseedPlan(existing, { ownsIntimacy = false } = {}) {
  * Checked on write, because a bad anchor is invisible until someone opens the
  * note months later and it points at nothing.
  */
+/**
+ * The anchor type a journal entry carries.
+ *
+ * Named here rather than typed in three files, because three of them care:
+ * the validator below, the share guard in api/notes.js that refuses to make
+ * one public, and the admin count of how often the journal is used. A string
+ * literal in each is the failure this codebase is organised against.
+ *
+ * The app has its own copy in components/journal.tsx, which an Expo project
+ * cannot avoid: it cannot import from api/. check-journal-privacy.mjs holds
+ * the two to each other.
+ */
+export const JOURNAL_ANCHOR = 'journal';
+
 export function isValidAnchor(type, key) {
   if (!type && !key) return true; // a standalone note
   if (!type || !key) return false;
@@ -220,7 +234,7 @@ export function isValidAnchor(type, key) {
      * client sending a timestamp or a title cannot quietly create a second
      * shape of journal entry that nothing groups correctly.
      */
-    case 'journal':
+    case JOURNAL_ANCHOR:
       return /^\d{4}-\d{2}-\d{2}$/.test(key);
 
     case 'post':

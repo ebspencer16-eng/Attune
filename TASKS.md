@@ -78,7 +78,7 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.** The nine from this pass are built and are in section 3.
+**Nothing open.**
 
 ## 3. For you to review
 
@@ -98,9 +98,12 @@ The newest pass first.
 
 | # | Review |
 |--|--|
+| O422 | **More air at the top of Learn**, and the two tabs actually line up now. Asking for this found that the Learn tab was never reading the shared number: it went on the shelf page behind a section arrow, and the tab itself kept its own padding, so the two were forty points apart while the note beside the number said they matched. Learn reads it now, and the number went up, so the tiles start fifty points lower than they did. The white space under the four featured articles is where it came from. |
+| O423 | **A warmer grey on the home icons.** Same lightness, three times the distance between the red and the blue, so it sits with the cream rather than on it. |
+| O426 | **The menu arrows are visible.** They were a text character at fifteen points in a column of sixteen-to-nineteen-point icons, which is why they read as a smudge. They are an icon now, at the size of the icons beside them, in the ink colour rather than the quiet one. |
 | O413 | **Cream at the top of home.** The middle stop of that gradient was a third of the way to indigo at 45 per cent of the page, which put blue behind the greeting. The cream holds past halfway now. |
 | O414 | **The word-in-use tile runs cleanly behind the word tile.** Square at the top, rounded at the foot: both cards are the same width, so its rounded top corners were showing in the notch either side of the white card's rounded bottom ones. |
-| O415 | **The Learn tools row and the Notes word tile start on the same line**, from one shared number. Two tabs lining up across a tab switch is exactly the thing that is true the day it is set and false a week later, because it is two numbers in two files. |
+| O415 | **The Learn tools row and the Notes word tile start on the same line**, from one shared number. Two tabs lining up across a tab switch is exactly the thing that is true the day it is set and false a week later, because it is two numbers in two files. Correction, found while doing O422: this was not true when I wrote it. The shared number was applied to the wrong Learn page. It is true now, measured on both tabs. |
 | O416 | **The search sits on the foot of the lower two tiles.** The column is as tall as the grid and the search is pushed to its bottom, so the two edges are the same line whatever the titles do. |
 | O417 | **The Insights menu is outlined in orange.** |
 | O418 | **Orange into cream, top right to bottom left.** No blue. |
@@ -227,6 +230,7 @@ receive a notification from Apple's servers.
 
 | # | Review |
 |--|--|
+| O425 | **The journal slicer, on the Explore page.** Two new fields under Engagement: "Journal use", with your three buckets, and "Journal entries (all time)", banded. Open Explore, slice anything by Journal use, and tell me whether the buckets are the cut you wanted. The rate is entries in the last thirty days, because "3x/mo" is a rate: someone who wrote forty entries last year and stopped is not a regular user, and a raw total would say they were. |
 | R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
 
 
@@ -522,6 +526,7 @@ build.
 
 | Verified | By |
 |--|--|
+| A journal entry cannot be shared, cannot reach the home screen, and is not readable on an admin page | `check-journal-privacy.mjs`, planted eleven ways. The server refuses to create one shared and refuses to share an existing one, deciding from the stored row rather than from the request; /api/home's pick-up row excludes the journal from its query; both admin readers select who and when and no column that holds writing; and a new file that reads the notes table fails the build until someone decides what it does about the journal. That last one found a fourth reader the day it was written |
 | What Comes Next collects the same six sections on both surfaces | the server had five and not the same five: Conflict but no Communication, while the website had Communication and no Conflict. `check-what-comes-next.mjs`, planted |
 | The payload carries nothing either surface leaves undrawn | protocols and widest were the last two; both are consumed where they are used now, and `check-app-draws-payload.mjs` has an empty exemption list |
 | The six values neither surface drew are no longer computed or sent | gone from the payload, the app's types and the one test that asserted on one |

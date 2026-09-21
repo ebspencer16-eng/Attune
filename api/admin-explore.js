@@ -19,6 +19,8 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
+import { JOURNAL_ANCHOR } from './_lib/tags.js';
+import { JOURNAL_BUCKETS, JOURNAL_VOLUME_BANDS, journalBucket, journalUseByOwner, journalVolumeBand } from './_lib/journal-use.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
 // partner_session and never created a full profile).
 function typeFromEx1(ans){
@@ -288,6 +290,27 @@ function buildCatalog(fbCatOptions) {
   for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale', poleLow: (FB_POLES[k]||[])[0], poleHigh: (FB_POLES[k]||[])[1] });
   for (const k of Object.keys(FB_CAT)) f.push({ key: k, label: FB_CAT[k], group: 'Beta feedback survey', kind: 'cat', options: ((fbCatOptions && fbCatOptions[k]) || []).map((v) => ({ v, label: v })) });
   f.push({ key: 'fb_nps', label: 'Feedback \u00b7 NPS (raw 0\u201310)', group: 'Beta feedback survey', kind: 'cat', options: Array.from({ length: 11 }, (_, i) => ({ v: String(i), label: String(i) })) });
+  /**
+   * ── THE JOURNAL, AS A RATE ──────────────────────────────────────────
+   * Ellie: "I want a slicer variable for never used journal, uses <3x/mo, or
+   * uses 3x+/mo." The three buckets come from api/_lib/journal-use.js so the
+   * boundaries are written once, and the raw count rides beside it because a
+   * bucket nobody can check is a bucket nobody trusts.
+   *
+   * Nothing anyone wrote reaches this page: the query behind it asks for
+   * owner_id and created_at.
+   */
+  f.push({
+    key: 'journal_use', label: 'Journal use', group: 'Engagement', kind: 'cat',
+    options: [JOURNAL_BUCKETS.never, JOURNAL_BUCKETS.light, JOURNAL_BUCKETS.regular]
+      .map((v) => ({ v, label: v })),
+    ordinal: true, poleLow: JOURNAL_BUCKETS.never, poleHigh: JOURNAL_BUCKETS.regular,
+  });
+  f.push({
+    key: 'journal_entries', label: 'Journal entries (all time)', group: 'Engagement', kind: 'cat',
+    options: JOURNAL_VOLUME_BANDS.map((v) => ({ v, label: v })),
+    ordinal: true, poleLow: JOURNAL_VOLUME_BANDS[0], poleHigh: JOURNAL_VOLUME_BANDS[JOURNAL_VOLUME_BANDS.length - 1],
+  });
   return f;
 }
 
@@ -312,6 +335,22 @@ export default async function handler(req) {
     try { const _ps = await admin.from('partner_sessions').select('invite_code, ex1_answers'); partnerSessions = _ps.data || []; } catch (e) {}
     const sessByInvite = new Map();
     for (const sx of partnerSessions) { if (sx && sx.invite_code && sx.ex1_answers) sessByInvite.set(sx.invite_code, sx); }
+
+    /**
+     * How often each person writes in the journal.
+     *
+     * owner_id and created_at only. A body must never reach an admin page, so
+     * the select is the guarantee rather than a promise further down: there is
+     * nothing in this variable to leak.
+     */
+    let journalByOwner = new Map();
+    try {
+      const { data: jRows = [] } = await admin
+        .from('notes')
+        .select('owner_id, created_at')
+        .eq('anchor_type', JOURNAL_ANCHOR);
+      journalByOwner = journalUseByOwner(jRows);
+    } catch (e) { /* the column arrives with migration 073; before it, nobody has entries. */ }
 
     // Beta survey responses, keyed by respondent profile id, for the join below.
     const surveyByRespondent = {};
@@ -437,6 +476,11 @@ export default async function handler(req) {
       if (!row.gender && partnerId && profileById[partnerId]?.partner_pronouns) {
         const g = genderFromPronoun(profileById[partnerId].partner_pronouns);
         if (g) row.gender = g;
+      }
+      {
+        const use = journalByOwner.get(p.id) || { ever: 0, recent: 0 };
+        row.journal_use = journalBucket(use);
+        row.journal_entries = journalVolumeBand(use.ever);
       }
       const survey = surveyByRespondent[p.id];
       if (survey) {

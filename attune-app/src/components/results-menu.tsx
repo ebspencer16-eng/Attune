@@ -103,8 +103,35 @@ const ICON_FALLBACK = 'circle';
  * list"; an arrow says "this goes somewhere", which is what every row here
  * does. One component, because the two places that draw it must not drift.
  */
-function Arrow() {
-  return <Text style={{ ...Type.body, color: c.accentQuiet, lineHeight: 18 }}>{'\u203A'}</Text>;
+/**
+ * ── AND IT HAS TO BE SEEN ───────────────────────────────────────────────
+ * Ellie: "Make the arrows on the insights menu visible, I can hardly see them
+ * on the left side of the menu."
+ *
+ * It was a \u203a set in body text: a 15pt hairline glyph from a text font,
+ * sitting in a column whose other occupants are 16 to 19pt SF Symbols in a
+ * section colour. Next to those it read as a smudge.
+ *
+ * So it is a symbol now, at the size the icons beside it are drawn, with a
+ * semibold weight and the ink colour rather than the quiet one. The fallback
+ * keeps the character, scaled up, for anything without SF Symbols.
+ */
+function Arrow({ big = false }: { big?: boolean }) {
+  const size = big ? 19 : 16;
+  return (
+    <SymbolView
+      name={'chevron.right' as never}
+      size={size}
+      weight="semibold"
+      tintColor={c.text}
+      fallback={(
+        <Text style={{ ...Type.body, fontSize: size + 9, lineHeight: size + 9, color: c.text }}>
+          {'\u203A'}
+        </Text>
+      )}
+      style={{ width: size + 2, height: size + 2 }}
+    />
+  );
 }
 
 export default function ResultsMenu({
@@ -316,7 +343,7 @@ export default function ResultsMenu({
                      held empty so their names lined up with the exercises';
                      it holds the arrow now, which is the same alignment with
                      something in it. */
-                  <Arrow />
+                  <Arrow big={big} />
                 )}
               </View>
               {/* ── NOT A HERO ───────────────────────────────────────────
