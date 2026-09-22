@@ -139,6 +139,24 @@ for (const rel of files) {
   // The origin written as its own value: a bare origin, no path after it.
   lines.forEach((line, i) => {
     if (/^\s*(\/\/|\*|<!--)/.test(line)) return;                 // a comment describing it
+    /**
+     * ── THE SAME EXEMPTION AS THE APEX CHECK ABOVE ──────────────────────
+     * A canonical tag, an og:url and a JSON-LD "url" have to carry a
+     * hostname: they are addresses given to a crawler, in a static file that
+     * cannot import anything. The apex branch above has said so since it was
+     * written, and this branch never did.
+     *
+     * Nobody noticed because the two branches match different spellings. The
+     * JSON-LD blocks in home.html named the apex, so the apex branch saw them
+     * and excused them, and this branch, which matches only the www form, did
+     * not see them at all. Rewriting those lines to keep the www, which is
+     * what check-published-urls.mjs is about, made this branch fire on lines
+     * the file had already decided were allowed.
+     *
+     * One rule, two branches, and which one applied depended on how the URL
+     * was typed. That is this codebase's own failure inside one of its gates.
+     */
+    if (rel.startsWith('public/') && SEO.test(line)) return;
     if (!/['"`]https:\/\/www\.attune-relationships\.com['"`]/.test(line)) return;
     copies.push(`${rel}:${i + 1}`);
   });

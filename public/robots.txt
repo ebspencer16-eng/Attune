@@ -8,4 +8,4 @@ Disallow: /checkout
 Disallow: /feedback
 Disallow: /workbook-render
 
-Sitemap: https://attune-relationships.com/sitemap.xml
+Sitemap: https://www.attune-relationships.com/sitemap.xml
