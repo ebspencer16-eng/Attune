@@ -39,7 +39,7 @@ import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  AccentFallback, AccentFor, BlueGround, BottomTabInset, Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, TabTopInset, Type,
+  AccentFallback, AccentFor, BottomTabInset, Colors, Fonts, inputType, Lift, LearnGround, MaxContentWidth, Palette, Radius, SectionColor, Spacing, TabTopInset, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -80,6 +80,8 @@ export default function ResourcesScreen() {
    */
   const [query, setQuery] = useState('');
   const [list, setList] = useState<'all' | 'saved' | 'read'>('all');
+  /** The tab's own scroll, so a repeat tab press can take it back to the top. */
+  const scroller = useRef<ScrollView>(null);
   /** Which shelf is open as a page of its own, if any. */
   const [openShelf, setOpenShelf] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
@@ -87,6 +89,7 @@ export default function ResourcesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>(ALL);
   const [sort, setSort] = useState<PostSort>('featured');
+
   const [error, setError] = useState<ApiError | null>(null);
 
   /**
@@ -308,6 +311,22 @@ export default function ResourcesScreen() {
     setOpenPost(null);
     setOpenTool(null);
     setCategory(ALL);
+    /**
+     * Ellie: "If I am in the in practice page and tap learn tab again I want
+     * it to bring me back to learn landing so that in practice is only a
+     * peek."
+     *
+     * Two things were missing. The shelf page, opened by a section's arrow,
+     * was not in this list at all, so tapping Learn from inside one did
+     * nothing at all. And the sheet is not a route: it is the bottom of this
+     * tab's own scroll, so getting back to the landing means getting back to
+     * the top of the page. Closing a screen that was never open would not have
+     * done it.
+     */
+    setOpenShelf(null);
+    setQuery('');
+    setList('all');
+    scroller.current?.scrollTo({ y: 0, animated: true });
   }, []));
 
   if (loading) return <Shell><ScreenLoading label={LOADING.resources} /></Shell>;
@@ -430,10 +449,14 @@ export default function ResourcesScreen() {
    * tab: this page is one shelf and nothing else.
    */
   if (openShelf) {
-    const inShelf = posts.filter((p) => p.category === openShelf);
+    const onShelf = posts.filter((p) => p.category === openShelf);
+    const shown = sortPosts(
+      list === 'all' ? onShelf : onShelf.filter((p) => (list === 'saved' ? p.saved : p.read)),
+      sort,
+    );
     return (
       <Shell>
-        <ScrollView contentContainerStyle={{ paddingBottom: Spacing.xxxl }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.xxxl }}>
           {/* Ellie: "Leave more space up top on the learn tab below the
             lockup." */}
         <View style={{ paddingHorizontal: Spacing.xl, paddingTop: TabTopInset, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center' }}>
@@ -443,15 +466,104 @@ export default function ResourcesScreen() {
               onPress={() => setOpenShelf(null)}
               hitSlop={12}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingVertical: Spacing.sm }}>
-              <Text style={{ ...Type.body, color: c.accent, lineHeight: 22 }}>{'\u2039'}</Text>
-              <Text style={{ ...Type.small, fontWeight: '600', color: c.accent }}>Back to Learn</Text>
+              <Text style={{ ...Type.body, color: Palette.white, lineHeight: 22 }}>{'\u2039'}</Text>
+              <Text style={{ ...Type.small, fontWeight: '600', color: Palette.white }}>Back to Learn</Text>
             </Pressable>
-            <Text style={{ ...Type.display, color: c.textStrong, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
+            {/* ── THE HERO IS WHITE ───────────────────────────────────────
+                Ellie: "The hero text needs to be white."
+
+                It was the ink colour, written for a page that used to sit on
+                cream. The ground under it is the Learn blue now, so the name of
+                the shelf was the one thing on this screen being read against a
+                colour it was not chosen for. */}
+            <Text style={{ ...Type.display, color: Palette.white, marginTop: Spacing.sm, marginBottom: Spacing.lg }}>
               {openShelf}
             </Text>
-            {inShelf.map((post) => (
-              <PostCard key={post.id} post={post} shelves={categories} onOpenPost={setOpenPost} onToggleSave={toggleSave} />
-            ))}
+
+            {/* ── THE CONTROLS SIT OVER THE TABLE ─────────────────────────
+                Ellie: "There should be a saved/read toggle above each table and
+                a sort button."
+
+                The same two pills the sheet carries, counting this shelf rather
+                than the whole feed, and the same sort menu. Both components, so
+                the shelf page and the sheet cannot end up with two ideas of
+                what Saved means. */}
+            <ListPills over={onShelf} list={list} onChange={setList} />
+            <PillMenu
+              label="Change how articles are sorted"
+              prefix="Sort by: "
+              value={sort}
+              options={POST_SORTS}
+              onChange={setSort}
+            />
+
+            {/* ── A TABLE, NOT A STACK OF CARDS ───────────────────────────
+                Ellie: "The articles should be in a table with rows like the
+                insights nav table... Table should list article name and read
+                time."
+
+                So one white card holding rows, the shape the Insights menu
+                uses: the name on the left, the number on the right, a hairline
+                between rows and none under the last. A shelf is a list of
+                titles to choose from, and a column of cards makes eleven of
+                them a scroll rather than a list. */}
+            <View
+              style={{
+                backgroundColor: Palette.white, borderRadius: Radius.card,
+                overflow: 'hidden', ...Lift,
+              }}>
+              {shown.length ? shown.map((post, i) => (
+                <Pressable
+                  key={post.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={post.title}
+                  onPress={() => { if (post.external) { Linking.openURL(post.external); return; } setOpenPost(post.id); }}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
+                    paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                    borderTopWidth: i ? 1 : 0, borderTopColor: c.border,
+                  }}>
+                  <Text
+                    style={{
+                      ...Type.cardTitle, fontSize: 15, lineHeight: 21,
+                      color: c.textStrong, flex: 1,
+                    }}>
+                    {post.title}
+                  </Text>
+                  {/* The read time, where the Insights menu puts its caret. A
+                      piece with none shows nothing rather than a zero: a
+                      missing number is not a nought-minute article. */}
+                  {post.read_minutes ? (
+                    <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
+                      {`${post.read_minutes} min`}
+                    </Text>
+                  ) : null}
+                  {/* Saving from the table, the same control the cards carry. */}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: !!post.saved }}
+                    accessibilityLabel={post.saved ? `Remove ${post.title} from saved` : `Save ${post.title}`}
+                    hitSlop={10}
+                    onPress={() => toggleSave(post)}>
+                    <SymbolView
+                      name={(post.saved ? 'bookmark.fill' : 'bookmark') as never}
+                      size={14}
+                      tintColor={post.saved ? c.accent : c.textMuted}
+                      fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{post.saved ? '\u2605' : '\u2606'}</Text>}
+                      style={{ width: 16, height: 16 }}
+                    />
+                  </Pressable>
+                </Pressable>
+              )) : (
+                <Text style={{ ...Type.body, color: c.textMuted, padding: Spacing.lg }}>
+                  {list === 'saved'
+                    ? 'Nothing saved on this shelf yet.'
+                    : list === 'read'
+                      ? 'Nothing read on this shelf yet.'
+                      : 'Nothing on this shelf yet.'}
+                </Text>
+              )}
+            </View>
           </View>
         </ScrollView>
       </Shell>
@@ -482,6 +594,7 @@ export default function ResourcesScreen() {
   return (
     <Shell>
       <ScrollView
+        ref={scroller}
         contentContainerStyle={{ paddingBottom: 0 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
@@ -640,9 +753,24 @@ export default function ResourcesScreen() {
             shadowColor: '#1B2A5E', shadowOpacity: 0.22,
             shadowRadius: 22, shadowOffset: { width: 0, height: -8 },
           }}>
-          {/* No grab handle: the reference's panel does not have one, and a
-              handle on something that cannot be dragged is a control that
-              lies. */}
+          {/* ── AND THEN A GRAB LINE AFTER ALL ─────────────────────────
+              Ellie: "Add an orange line above the in practice peek on the learn
+              tab that shows users that they can pull up on that tile."
+
+              It was left off because the reference panel has none and because
+              a handle on something that cannot be dragged is a control that
+              lies. Both halves of that have changed: the sheet does move, by
+              scrolling, and the caret at the foot of the peek was doing this
+              job from the wrong end of the block. A line at the top is the
+              thing every sheet on a phone uses, and it is the first thing the
+              eye reaches rather than the last. */}
+          <View
+            pointerEvents="none"
+            style={{
+              alignSelf: 'center', width: 44, height: 4, borderRadius: 2,
+              backgroundColor: c.accent, marginBottom: Spacing.md,
+            }}
+          />
           {/* ── THE SHEET'S HEAD, PART FOR PART ────────────────────────
               The reference's panel has four things stacked on its left and a
               two by two grid on its right, and Ellie named what each of ours
@@ -667,38 +795,7 @@ export default function ResourcesScreen() {
                 bottom edges are the same line whatever the titles do. */}
             <View style={{ flex: 1, justifyContent: 'space-between' }}>
               <View>
-              <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg }}>
-                {([['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
-                  const on = list === key;
-                  const n = key === 'saved'
-                    ? posts.filter((p) => p.saved).length
-                    : posts.filter((p) => p.read).length;
-                  return (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: on }}
-                      key={key}
-                      onPress={() => setList(on ? 'all' : key)}
-                      style={{
-                        flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
-                        paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.md,
-                        borderRadius: Radius.pill,
-                        backgroundColor: on ? c.accent : Palette.warm,
-                      }}>
-                      <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
-                        {label}
-                      </Text>
-                      <Text
-                        style={{
-                          ...Type.small, fontSize: 11, fontWeight: '700',
-                          color: on ? 'rgba(255,255,255,0.75)' : c.accentQuiet,
-                        }}>
-                        {n}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
+              <ListPills over={posts} list={list} onChange={setList} />
 
               <Text style={{ ...Type.display, fontSize: 30, lineHeight: 42, color: c.textStrong }}>
                 In Practice
@@ -820,6 +917,41 @@ export default function ResourcesScreen() {
             {'\u2304'}
           </Text>
 
+          {/* ── FILTER AND SORT, UNDER THE PEEK ────────────────────────
+              Ellie: "Add filter and sort buttons below the 4 featured article
+              to sort all the rest of the content in that tile. I don't want
+              those buttons visible on the peek on the learn page."
+
+              Below the caret, which is the line the peek ends on, so neither
+              is on screen until the sheet has been pulled up. Both are the
+              same component: a pill with a menu under it.
+
+              The filter's options are the shelves the server sent, so this
+              cannot offer a shelf that does not exist or miss one that does. */}
+          {posts.length ? (
+            <View
+              style={{
+                flexDirection: 'row', gap: Spacing.md, flexWrap: 'wrap',
+                paddingHorizontal: Spacing.xl,
+                maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
+              }}>
+              <PillMenu
+                label="Narrow the articles to one shelf"
+                prefix="Filter: "
+                value={category}
+                options={shelves.map((s) => ({ key: s, label: s }))}
+                onChange={setCategory}
+              />
+              <PillMenu
+                label="Change how articles are sorted"
+                prefix="Sort by: "
+                value={sort}
+                options={POST_SORTS}
+                onChange={setSort}
+              />
+            </View>
+          ) : null}
+
           {posts.length ? (
             <>
               {narrowing ? (
@@ -851,7 +983,13 @@ export default function ResourcesScreen() {
                  * is not drawn, which is why this maps over what is there
                  * rather than over the four names.
                  */
-                categories.map((shelf) => {
+                /* The filter above narrows to one shelf. It reads `category`,
+                   the state that has been in this file all along and that
+                   `inCategory` above already filters the searched list with:
+                   the chips that used to set it came off the page a while back
+                   and nothing has set it since. One filter, two places it is
+                   applied, rather than a second one added beside it. */
+                categories.filter((shelf) => category === ALL || shelf === category).map((shelf) => {
                   const inShelf = sortPosts(posts.filter((post) => post.category === shelf), sort);
                   if (!inShelf.length) return null;
                   return (
@@ -986,13 +1124,20 @@ function Shell({ children }: { children: React.ReactNode }) {
      the lockup takes the light tone. Nothing else is written straight onto it:
      the tools are white cards, the insight is white type, and the sheet is its
      own surface. */
-  return <TabScreen groundColors={BlueGround} groundTone="light">{children}</TabScreen>;
+  return <TabScreen groundColors={LearnGround} groundTone="light">{children}</TabScreen>;
 }
 
 /** The books reference's ground, in this product's blue rather than its own. */
-/** How much air is left above the sheet. The reference's panel starts about
- *  two thirds of the way down its screen; everything above it is the ground. */
-const SHEET_PEEK = 48;
+/**
+ * How much air is left above the sheet.
+ *
+ * The reference's panel starts about two thirds of the way down its screen;
+ * everything above it is the ground. It was 48, and came down by exactly the
+ * height of the grab line Ellie asked for plus its margin, so the peek shows
+ * the same four articles and the same search bar it did before the line was
+ * added rather than pushing the search under the tab bar.
+ */
+const SHEET_PEEK = 32;
 
 /** The label on the insight, here and on the card it opens. */
 /** The four featured previews' ground. One tone, not four. */
@@ -1017,9 +1162,12 @@ const SEE_MORE = 'See more details';
  * stops being a block of strong colour on a page of weak colour: the page is
  * the strong colour and the insight is written on it.
  *
- * There is no LEARN_GROUND any more on purpose. A constant here holding a copy
- * of BlueGround's two values is the thing this codebase keeps getting wrong;
- * the tab reads the shared pair.
+ * And then softer, which is LearnGround in attune-theme.ts: the same two stops
+ * moved a fifth of the way to white, computed from BlueGround rather than
+ * typed, so "the same blue, softer" stays true if the blue is ever retuned.
+ *
+ * There is no LEARN_GROUND constant in this file on purpose. Two hex values
+ * here is the thing this codebase keeps getting wrong.
  */
 
 type Item = CatalogueItem;
@@ -1171,15 +1319,84 @@ function sortPosts(list: PostSummary[], sort: PostSort): PostSummary[] {
   }
 }
 
-/** The dropdown itself, the same shape as the one on the Notes tag list. */
-function SortControl({ value, onChange }: { value: PostSort; onChange: (v: PostSort) => void }) {
+/**
+ * The Saved and Read pills.
+ *
+ * Two of them and three states, so tapping the one that is on is how you get
+ * back to all of it. `over` is the list the counts are taken from, which is
+ * the sheet's whole feed in one place and one shelf in the other: a Saved
+ * count of nine on a shelf holding two of them is a count about a different
+ * page.
+ */
+function ListPills({
+  over, list, onChange,
+}: {
+  over: PostSummary[];
+  list: 'all' | 'saved' | 'read';
+  onChange: (v: 'all' | 'saved' | 'read') => void;
+}) {
+  return (
+    <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg }}>
+      {([['saved', 'Saved'], ['read', 'Read']] as const).map(([key, label]) => {
+        const on = list === key;
+        const n = key === 'saved'
+          ? over.filter((p) => p.saved).length
+          : over.filter((p) => p.read).length;
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            key={key}
+            onPress={() => onChange(on ? 'all' : key)}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+              paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.md,
+              borderRadius: Radius.pill,
+              backgroundColor: on ? c.accent : Palette.warm,
+            }}>
+            <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: on ? Palette.white : c.textMuted }}>
+              {label}
+            </Text>
+            <Text
+              style={{
+                ...Type.small, fontSize: 11, fontWeight: '700',
+                color: on ? 'rgba(255,255,255,0.75)' : c.accentQuiet,
+              }}>
+              {n}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/**
+ * A pill with a menu under it. The shape the Notes tag list uses.
+ *
+ * One component for both controls on this page, because Ellie asked for
+ * "filter and sort buttons" and two popups written separately is two popups
+ * that drift: the second one gets a different padding, or a different way of
+ * showing which row is on, and the pair stops reading as a pair.
+ */
+function PillMenu<T extends string>({
+  prefix, value, options, onChange, label,
+}: {
+  /** What the pill says before the current value. */
+  prefix: string;
+  value: T;
+  options: { key: T; label: string }[];
+  onChange: (v: T) => void;
+  /** For a screen reader, which cannot read a pill's prefix as a purpose. */
+  label: string;
+}) {
   const [open, setOpen] = useState(false);
-  const current = POST_SORTS.find((o) => o.key === value)?.label || '';
+  const current = options.find((o) => o.key === value)?.label || '';
   return (
     <View style={{ marginBottom: Spacing.md }}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Change how articles are sorted"
+        accessibilityLabel={label}
         onPress={() => setOpen((v) => !v)}
         style={{
           flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, alignSelf: 'flex-start',
@@ -1187,7 +1404,7 @@ function SortControl({ value, onChange }: { value: PostSort; onChange: (v: PostS
           borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
           backgroundColor: c.surface,
         }}>
-        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{`Sort by: ${current}`}</Text>
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{`${prefix}${current}`}</Text>
         <Text style={{ color: c.textMuted, fontSize: 10 }}>{open ? '\u25B4' : '\u25BE'}</Text>
       </Pressable>
 
@@ -1210,7 +1427,7 @@ function SortControl({ value, onChange }: { value: PostSort; onChange: (v: PostS
             shadowColor: Palette.ink, shadowOpacity: 0.12, shadowRadius: 12,
             shadowOffset: { width: 0, height: 6 }, elevation: 4,
           }}>
-          {POST_SORTS.map((o) => (
+          {options.map((o) => (
             <Pressable
               key={o.key}
               accessibilityRole="button"

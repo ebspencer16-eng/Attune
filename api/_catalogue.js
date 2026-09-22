@@ -87,6 +87,25 @@ export const CATALOGUE = [
     blurb: 'Where you have been, and where next.',
     price: ADDON_PRICES.reflection,
   },
+  /**
+   * ── THE THREE TOOLS, IN ELLIE'S ORDER ───────────────────────────────────
+   * "On learn, reorder the resource tiles. First should be personalized
+   * workbook, next build a budget, next 'Merging lives checklist' if that
+   * fits."
+   *
+   * Reordered here rather than sorted in the app, because this list is the
+   * order things are offered in and a second order held in a screen is the
+   * failure this repo is organised against. The three tools are contiguous, so
+   * this moves them relative to each other and nowhere else: the exercises
+   * above are untouched, and every surface that lists the tools now lists them
+   * in this order, which is the point of there being one list.
+   */
+  {
+    key: 'workbook', short: 'Personalized workbook', kind: 'tool',
+    label: 'Your Workbook',
+    blurb: 'Built from your answers.',
+    price: ADDON_PRICES.workbookDigital,
+  },
   {
     key: 'budget', short: 'Build a budget tool', kind: 'tool',
     label: 'Build a Budget',
@@ -94,16 +113,13 @@ export const CATALOGUE = [
     price: ADDON_PRICES.budget,
   },
   {
-    key: 'checklist', short: 'Practical checklist', kind: 'tool',
+    /* Ellie named this one in the same message. `short` is the app's tile and
+       nothing else reads it, so "Starting Out" is still what the tool calls
+       itself everywhere it is sold. */
+    key: 'checklist', short: 'Merging lives checklist', kind: 'tool',
     label: 'Starting Out',
     blurb: 'The practical list for setting up a life.',
     price: ADDON_PRICES.checklist,
-  },
-  {
-    key: 'workbook', short: 'Personalized workbook', kind: 'tool',
-    label: 'Your Workbook',
-    blurb: 'Built from your answers.',
-    price: ADDON_PRICES.workbookDigital,
   },
 ];
 

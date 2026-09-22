@@ -189,7 +189,17 @@ export function dayHeading(iso: string) {
 export function scrubLabel(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  /**
+   * Ellie: "The user grabs the side bar on the right and when they do it shows
+   * a tab with the month and year, then changes as you drag down so that you
+   * can quickly see where you are in the timeline."
+   *
+   * Month and year, in her words. It said "Sep 21" before, which is the right
+   * label for finding a day and the wrong one for finding a place in a
+   * timeline: a diary two years old has three Septembers in it and the day
+   * number does not say which.
+   */
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 }
 
 /**
@@ -593,7 +603,23 @@ export default function Journal({ onClose }: { onClose: () => void }) {
                       />
                     </Pressable>
                   </View>
-                  <Text style={{ ...Type.body, color: c.text, marginTop: Spacing.sm, lineHeight: 25 }}>
+                  {/* ── AN ENTRY IS SET IN ITALIC ──────────────────────
+                      Ellie: "Journal entries should save with italicized
+                      text."
+
+                      Fonts.bodyItalic, not fontStyle. iOS draws the upright
+                      face for `fontStyle: 'italic'` on a registered family and
+                      reports no error, which is how eighteen places in this app
+                      asked for italic and every one of them was upright. Italic
+                      is a family here.
+
+                      The website sets the same entries the same way, and
+                      check-notes-parity holds the two surfaces to each other. */}
+                  <Text
+                    style={{
+                      ...Type.body, fontFamily: Fonts.bodyItalic,
+                      color: c.text, marginTop: Spacing.sm, lineHeight: 25,
+                    }}>
                     {n.body}
                   </Text>
                 </View>

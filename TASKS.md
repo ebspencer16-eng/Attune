@@ -78,7 +78,18 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.**
+| # | Task |
+|--|--|
+| O433 | **A grab line over the In Practice peek.** An orange bar at the top of the sheet saying it pulls up. The sheet had a caret once and it came out; this is the other half of the same problem, and a line is what every sheet on a phone uses. |
+| O434 | **Journal entries are italic.** On both surfaces, and italic is a family here rather than a flag: iOS draws the upright face for `fontStyle: 'italic'` on a named family and reports no error. `Fonts.bodyItalic`. |
+| O435 | **The Snapchat rail.** Yes, I know the one. It is built and it is on the journal already: a column down the right edge, dragged with a finger, scrolling to a day. What her description adds is the label: it has to show the month and the year and change as the finger moves. Check what it actually says today before changing anything. |
+| O436 | **The four top-level labels move left on the Insights menu.** Highlights, Couple Type, Exercise results and What Comes Next. They sit at the icon column's right edge, which is where they were put so they lined up with the exercises' names; moving them left means changing what they line up with, so decide that deliberately rather than nudging a number. |
+| O437 | **Reorder the Learn tools:** personalized workbook, build a budget, then the checklist, which she has named "Merging lives checklist" if it fits the tile. The order and the names are both on the server, which is why this needs no build. |
+| O438 | **The shelf page, four changes.** White hero. The articles in a table with rows like the Insights nav. A saved / read toggle above each table and a sort button. Each row carries the article's name and its read time. |
+| O439 | **Filter and sort under the four featured articles**, for the rest of the content in that tile, and not on the peek. So the controls appear once the sheet is up and not before. |
+| O440 | **Tapping Learn while reading an In Practice post goes back to Learn.** The tab is the way out, which is what a tab bar means everywhere else on a phone: pressing the tab you are already on returns to the top of it. |
+| O441 | **A softer Learn ground.** Still Attune blue. |
+| O442 | **A scan for bugs, breaks and anything that saves data.** Open-ended, so it needs a method rather than a look: sweep the deployed surfaces from outside with curl, run every gate, and read every write path for what happens when it fails. Report what is found rather than fixing quietly. |
 
 
 ## 3. For you to review

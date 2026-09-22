@@ -743,7 +743,10 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
    */
   const Entry = ({ entry }) => (
     <div style={card}>
-      <div style={{ fontSize: '0.88rem', color: C.text, fontFamily: BFONT, lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>
+      {/* Ellie: "Journal entries should save with italicized text." The app
+          sets the same rows in DM Sans Italic; here the browser can slant the
+          face itself, which is the one thing iOS will not do. */}
+      <div style={{ fontSize: '0.88rem', color: C.text, fontFamily: BFONT, lineHeight: 1.65, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>
         {entry.body}
       </div>
       <div style={{

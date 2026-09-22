@@ -154,10 +154,25 @@ export default function ResultsMenu({
    * read off ICON_COL rather than restating 24 + 24 + 16.
    */
   const ICON_COL = big ? 24 : 20;
-  /** Where a top-level label starts, and so where the heading starts. */
-  const LABEL_LEFT = Spacing.xl + ICON_COL + Spacing.lg;
-  /** The exercises step in: their icons sit on the heading's edge. */
-  const EXERCISE_LEFT = LABEL_LEFT;
+  /**
+   * ── AND THEN THE FOUR MOVED OUT TO THE EDGE ─────────────────────────────
+   * Ellie: "On insights menu, pull highlights, couple type, exercise results,
+   * and what comes next text further left."
+   *
+   * They sat at Spacing.xl + ICON_COL + Spacing.lg, because the column held an
+   * arrow and, before that, a dot. The arrows came out one round ago, so those
+   * four labels have been indented past an empty box ever since, and the four
+   * of them are exactly the four she named.
+   *
+   * They start at the row's own padding now. What they line up with has
+   * changed on purpose: it used to be the exercises' icons, and it is now the
+   * page's left edge, which is what the heading over them is for. The
+   * exercises are unmoved, so the indent still reads as one level of nesting
+   * rather than two things at slightly different lefts.
+   */
+  const LABEL_LEFT = Spacing.xl;
+  /** The exercises step in, by the width the top level no longer spends. */
+  const EXERCISE_LEFT = Spacing.xl + ICON_COL + Spacing.lg;
   /** Their pages line up under their name. */
   const CHILD_LEFT = EXERCISE_LEFT + ICON_COL + Spacing.lg;
 
@@ -215,7 +230,6 @@ export default function ResultsMenu({
                   paddingRight: Spacing.xl,
                   flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 }}>
-                <View style={{ width: ICON_COL }} />
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
               </View>
             ) : null}
@@ -304,12 +318,17 @@ export default function ResultsMenu({
                   colour on a menu she had just asked to make quieter, which
                   was solving the wrong half. The icon carries the colour on
                   its own. */}
+              {/* The column is drawn only where something goes in it. It was
+                  held empty on the other three so their names lined up with
+                  the exercises'; they line up with the page's edge now, and an
+                  empty box in front of them is the indent she asked me to take
+                  out. */}
+              {icon ? (
               <View
                 style={{
                   width: ICON_COL,
                   alignItems: 'center', justifyContent: 'center',
                 }}>
-                {icon ? (
                   <SymbolView
                     name={icon as never}
                     size={big ? 19 : 16}
@@ -317,8 +336,8 @@ export default function ResultsMenu({
                     fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />}
                     style={{ width: big ? 21 : 18, height: big ? 21 : 18 }}
                   />
-                ) : null}
               </View>
+              ) : null}
               {/* ── NOT A HERO ───────────────────────────────────────────
                   Ellie: "Landing page shouldn't all be in the hero text, it
                   feels too loud/bold", and "Text should be slightly smaller so

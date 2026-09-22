@@ -69,6 +69,36 @@ export const Palette = {
 export const BlueGround = ['#2A3A6E', '#4A6CD4'] as const;
 
 /**
+ * One colour, lightened toward white by a fraction.
+ *
+ * Here rather than in a screen because a ground that is "the same blue, softer"
+ * has to stay the same blue when the blue changes. Typing two lighter hex
+ * values into a tab file is a second copy of a colour, and a second copy of a
+ * colour drifts the first time someone tunes the first one.
+ */
+const lighten = (hex: string, t: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  const up = (v: number) => Math.round(v + (255 - v) * t);
+  return `#${[(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    .map((v) => up(v).toString(16).padStart(2, '0')).join('')}`;
+};
+
+/**
+ * The Learn tab's ground.
+ *
+ * Ellie: "Learn bg should just be the bg of the insight of the day banner
+ * extended to fill the page", and then "Please make the learn tab bg slightly
+ * softer. Still attune blue."
+ *
+ * So it is BlueGround, lightened. Not a different blue: the same two stops,
+ * moved a fifth of the way to white, which keeps the hue exactly and takes the
+ * weight out. The insight is still written straight onto it, so this is also
+ * what that block is read against, and white type still clears it at the dark
+ * end.
+ */
+export const LearnGround = [lighten(BlueGround[0], 0.2), lighten(BlueGround[1], 0.2)] as const;
+
+/**
  * The Insights tab's ground, which is the same idea in the brand orange.
  *
  * Ellie: "The home page is the attune blue, please try making the landing page
