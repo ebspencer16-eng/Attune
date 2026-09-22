@@ -97,42 +97,23 @@ export const GROUP_ICON: Record<string, string> = {
 const ICON_FALLBACK = 'circle';
 
 /**
- * The mark beside a top-level row, and beside the exercises' heading.
+ * ── AND THEN NO MARK AT ALL ───────────────────────────────────────────────
+ * Ellie: "Change bullets on insights menu to arrows", then "Make the arrows on
+ * the insights menu visible, I can hardly see them on the left side of the
+ * menu", and then, once they were: "No arrows on the left of insights menu."
  *
- * Ellie: "Change bullets on insights menu to arrows." A dot says "one of a
- * list"; an arrow says "this goes somewhere", which is what every row here
- * does. One component, because the two places that draw it must not drift.
+ * Which is the sequence making the point. The arrows were a hairline text
+ * character among sixteen-point symbols, so what she was looking at was not an
+ * arrow, it was a smudge she could not read. Drawn properly, at the size of
+ * the icons beside them, they turned out to be three heavy chevrons stacked
+ * down the left of a page whose other job is to be quiet.
+ *
+ * So the column is empty again for the three rows that carry no icon. It is
+ * still there, and still ICON_COL wide, because that width is what keeps
+ * Highlights, Couple Type and What Comes Next in line with the exercises'
+ * names. An empty column is doing work; a removed one would unpick the
+ * alignment four places below.
  */
-/**
- * ── AND IT HAS TO BE SEEN ───────────────────────────────────────────────
- * Ellie: "Make the arrows on the insights menu visible, I can hardly see them
- * on the left side of the menu."
- *
- * It was a \u203a set in body text: a 15pt hairline glyph from a text font,
- * sitting in a column whose other occupants are 16 to 19pt SF Symbols in a
- * section colour. Next to those it read as a smudge.
- *
- * So it is a symbol now, at the size the icons beside it are drawn, with a
- * semibold weight and the ink colour rather than the quiet one. The fallback
- * keeps the character, scaled up, for anything without SF Symbols.
- */
-function Arrow({ big = false }: { big?: boolean }) {
-  const size = big ? 19 : 16;
-  return (
-    <SymbolView
-      name={'chevron.right' as never}
-      size={size}
-      weight="semibold"
-      tintColor={c.text}
-      fallback={(
-        <Text style={{ ...Type.body, fontSize: size + 9, lineHeight: size + 9, color: c.text }}>
-          {'\u203A'}
-        </Text>
-      )}
-      style={{ width: size + 2, height: size + 2 }}
-    />
-  );
-}
 
 export default function ResultsMenu({
   groups, current, onOpenSection, density = 'page',
@@ -234,9 +215,7 @@ export default function ResultsMenu({
                   paddingRight: Spacing.xl,
                   flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 }}>
-                <View style={{ width: ICON_COL, alignItems: 'center', justifyContent: 'center' }}>
-                  <Arrow />
-                </View>
+                <View style={{ width: ICON_COL }} />
                 <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
               </View>
             ) : null}
@@ -338,13 +317,7 @@ export default function ResultsMenu({
                     fallback={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />}
                     style={{ width: big ? 21 : 18, height: big ? 21 : 18 }}
                   />
-                ) : (
-                  /* Highlights, Couple Type and What Comes Next. The column was
-                     held empty so their names lined up with the exercises';
-                     it holds the arrow now, which is the same alignment with
-                     something in it. */
-                  <Arrow big={big} />
-                )}
+                ) : null}
               </View>
               {/* ── NOT A HERO ───────────────────────────────────────────
                   Ellie: "Landing page shouldn't all be in the hero text, it

@@ -168,6 +168,16 @@ const ARROW = 46;
 const COMMS_PROTOCOL_LIMIT = 3;
 
 /**
+ * The Insights menu's ground.
+ *
+ * Ellie: "Remove orange outline behind insights menu, and replace with orange
+ * shading." Ten per cent of Palette.orange over white, written out rather than
+ * mixed at runtime so it can be read here and checked against the ground it
+ * sits on.
+ */
+const MENU_TINT = '#FDF0EB';
+
+/**
  * Why a section someone owns cannot open yet.
  *
  * Mapped from the server's own reason rather than inferred, so the app never
@@ -718,12 +728,18 @@ export default function Results({
         <View
           style={{
             marginHorizontal: Spacing.lg,
-            backgroundColor: Palette.white,
+            /* Ellie: "Outline insights menu in orange", and then "Remove
+               orange outline behind insights menu, and replace with orange
+               shading."
+
+               So the accent moved from the edge into the fill. A hairline
+               draws a box around the menu; a wash puts the menu on the brand's
+               own colour, which is what the rest of this page is doing. It is
+               ten per cent of the accent over white, which is light enough
+               that the section names keep their contrast and dark enough to
+               read as orange against the cream half of the ground. */
+            backgroundColor: MENU_TINT,
             borderRadius: Radius.card,
-            /* Ellie: "Outline insights menu in orange." A hairline in the
-               brand's own accent, which is also the only colour on this page
-               now that the ground is one diagonal of it. */
-            borderWidth: 1.5, borderColor: c.accent,
             overflow: 'hidden',
             ...Lift,
           }}>

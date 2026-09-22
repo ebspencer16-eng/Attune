@@ -200,6 +200,16 @@ export function reseedPlan(existing, { ownsIntimacy = false } = {}) {
  */
 export const JOURNAL_ANCHOR = 'journal';
 
+/**
+ * Whether a note row is a journal entry.
+ *
+ * Every surface that reads /api/notes has to split the anchored list the same
+ * way: entries belong in the journal and must not appear among the marks. One
+ * function so that is one decision, and so a reader of a list can see which
+ * half it is holding.
+ */
+export const isJournalEntry = (note) => note?.anchor_type === JOURNAL_ANCHOR;
+
 export function isValidAnchor(type, key) {
   if (!type && !key) return true; // a standalone note
   if (!type || !key) return false;

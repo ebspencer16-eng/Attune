@@ -716,8 +716,13 @@ export default function NotesScreen() {
               Two rows each, one line apiece, and an arrow in the corner that
               opens the page behind it. The count moved onto the arrow's row,
               because a peek that shows two of nine should say nine somewhere.
+
+              Ellie: "Less vertical blank space between word in use tile and
+              recent/shared with me tiles." Halved. The word tile is a block
+              with its own weight and these two are the next block, not a new
+              chapter, so the gap between them was reading as a page break.
           */}
-          <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xxl }}>
+          <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.lg }}>
             <Peek
               title={JUMP_BACK_IN}
               count={recentMarks.length}
@@ -778,8 +783,11 @@ export default function NotesScreen() {
               Ellie: "below that the table of tags with the filters and things
               the way we had it before." The same component, with the same
               sort control and the same add field; it was behind a link for one
-              round and it is back on the page. */}
-          <View style={{ marginTop: Spacing.xxl }}>
+              round and it is back on the page.
+
+              Ellie: "and then less space between journal entry button and tags
+              table." Halved, the same as the gap above. */}
+          <View style={{ marginTop: Spacing.lg }}>
             <TagList
               tags={tags}
               notes={[...mineRecent, ...sharedRecent]}

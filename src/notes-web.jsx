@@ -41,6 +41,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ANNOTATION_COLORS, DEFAULT_ANNOTATION_COLOR } from '../api/_lib/annotations.js';
+import { JOURNAL_ANCHOR, isJournalEntry } from '../api/_lib/tags.js';
+import { JOURNAL_COPY } from '../api/_lib/journal-copy.js';
 
 const HFONT = "'Playfair Display', Georgia, serif";
 const BFONT = "'DM Sans', -apple-system, system-ui, sans-serif";
@@ -99,6 +101,19 @@ const post = (payload) => call('/api/notes', {
   body: JSON.stringify(payload),
 });
 
+/**
+ * Every action /api/notes takes, from the website.
+ *
+ * Ellie: "Ensure that site mirrors app notes functionality." The three tag
+ * actions at the bottom were in the app's client and not in this one, so a tag
+ * archived on a phone could be seen here and not undone here. Those three are
+ * the archive: deleteTag puts a tag in it, restoreTag takes it back out, and
+ * purgeTag is the one that cannot be undone.
+ *
+ * check-notes-parity.mjs reads the action list out of api/notes.js and holds
+ * both surfaces to it, so the next action added to the endpoint fails the
+ * build until both clients know about it or it is exempted here with a reason.
+ */
 export const notesApi = {
   list: () => call('/api/notes?action=list'),
   tags: () => call('/api/notes?action=tags'),
@@ -108,6 +123,9 @@ export const notesApi = {
   remove: (id) => post({ action: 'delete', id }),
   createTag: (name) => post({ action: 'createTag', name }),
   open: (id) => post({ action: 'open', id }),
+  deleteTag: (id) => post({ action: 'deleteTag', id }),
+  restoreTag: (id) => post({ action: 'restoreTag', id }),
+  purgeTag: (id) => post({ action: 'purgeTag', id }),
 };
 
 /* ══ MARKING THE RESULTS ═══════════════════════════════════════════════════ */
@@ -540,6 +558,12 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [newTag, setNewTag] = useState('');
+  /** The journal's composer and its search. See the block below. */
+  const [entryDraft, setEntryDraft] = useState('');
+  const [entryBusy, setEntryBusy] = useState(false);
+  const [entryQuery, setEntryQuery] = useState('');
+  /** The tag archive is shut on arrival, the same as the app's. */
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const load = useCallback(async () => {
     const [n, t] = await Promise.all([notesApi.list(), notesApi.tags()]);
@@ -560,16 +584,57 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
 
   useEffect(() => { load(); }, [load]);
 
+  /**
+   * ── THE ANCHORED LIST IS TWO LISTS ──────────────────────────────────────
+   * /api/notes returns `annotations`: every row with an anchor. Marks on a
+   * results page are anchored to the section; journal entries are anchored to
+   * the day they were written. Both arrive here.
+   *
+   * Before this split, every journal entry written on the phone turned up on
+   * this page under "From your results", grouped under a heading that was the
+   * raw ISO date, with a Share control on it that the server now refuses. A
+   * diary, filed as a reading history.
+   *
+   * isJournalEntry comes from api/_lib/tags.js, next to the anchor itself, so
+   * the two halves of this split cannot drift from the thing they split on.
+   */
+  const marks = useMemo(() => annotations.filter((a) => !isJournalEntry(a)), [annotations]);
+  const entries = useMemo(
+    () => annotations.filter(isJournalEntry)
+      .slice()
+      .sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || ''))),
+    [annotations],
+  );
+
   /** Marks grouped by the page they sit on, in the order that page appears. */
   const bySection = useMemo(() => {
     const map = new Map();
-    for (const a of annotations) {
+    for (const a of marks) {
       const key = a.anchor_key || 'elsewhere';
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(a);
     }
     return [...map.entries()];
-  }, [annotations]);
+  }, [marks]);
+
+  /**
+   * The journal, a day at a time, filtered by the search.
+   *
+   * The same shape the app's journal draws: a date heading over the entries
+   * written that day, newest first. The anchor key IS the day, which is what
+   * it is for, so nothing here has to parse a timestamp to group by.
+   */
+  const entryDays = useMemo(() => {
+    const q = entryQuery.trim().toLowerCase();
+    const hits = q ? entries.filter((n) => (n.body || '').toLowerCase().includes(q)) : entries;
+    const map = new Map();
+    for (const n of hits) {
+      const key = n.anchor_key || (n.created_at || '').slice(0, 10) || 'undated';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(n);
+    }
+    return [...map.entries()];
+  }, [entries, entryQuery]);
 
   const add = async () => {
     const text = draft.trim();
@@ -603,6 +668,62 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
     setAnnotations((l) => l.filter((n) => n.id !== note.id));
   };
 
+  /**
+   * ── AN ENTRY IS A NOTE, WRITTEN PRIVATE ─────────────────────────────────
+   * The same write the app makes: anchored to today, visibility private. The
+   * server refuses a shared one either way, which is check-journal-privacy,
+   * but a surface that asked for one would be a surface that failed to save.
+   */
+  const addEntry = async () => {
+    const text = entryDraft.trim();
+    if (!text) return;
+    setEntryBusy(true);
+    const res = await notesApi.create({
+      body: text,
+      kind: 'note',
+      anchorType: JOURNAL_ANCHOR,
+      anchorKey: new Date().toISOString().slice(0, 10),
+      visibility: 'private',
+    });
+    setEntryBusy(false);
+    if (!res.ok) { setFailed('That did not save. Try again.'); return; }
+    setEntryDraft('');
+    load();
+  };
+
+  /** The two halves of the tag list. deleted_at is the archive. */
+  const live = useMemo(() => tags.filter((t) => !t.deleted_at), [tags]);
+  const archived = useMemo(() => tags.filter((t) => t.deleted_at), [tags]);
+
+  const reloadTags = async () => {
+    const t = await notesApi.tags();
+    if (t.ok) setTags(t.data.tags || []);
+  };
+
+  const archiveTag = async (tag) => {
+    const res = await notesApi.deleteTag(tag.id);
+    if (!res.ok) { setFailed('That tag did not move to the archive. Try again.'); return; }
+    reloadTags();
+  };
+
+  /* No confirmation: restoring is the reversible one, and a dialog in front of
+     an action you can simply do again teaches people to tap through dialogs.
+     The app's own reasoning, in its own file. */
+  const unarchiveTag = async (tag) => {
+    const res = await notesApi.restoreTag(tag.id);
+    if (!res.ok) { setFailed('That tag did not restore. Try again.'); return; }
+    reloadTags();
+  };
+
+  const purgeTagForGood = async (tag) => {
+    // The browser's own confirm, and Ellie's words, the same as deleting a note.
+    // eslint-disable-next-line no-alert
+    if (!window.confirm('Are you sure? This action cannot be undone.')) return;
+    const res = await notesApi.purgeTag(tag.id);
+    if (!res.ok) { setFailed('That tag did not delete. Try again.'); return; }
+    reloadTags();
+  };
+
   const addTag = async () => {
     const name = newTag.trim();
     if (!name) return;
@@ -612,6 +733,35 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
     const t = await notesApi.tags();
     if (t.ok) setTags(t.data.tags || []);
   };
+
+  /**
+   * ── AN ENTRY IS NOT A NOTE ON THE PAGE ──────────────────────────────────
+   * It carries a time and a delete and nothing else. No Share control, because
+   * the server refuses to share one and a button that always errors is worse
+   * than no button; no "Open the page", because the page a journal entry is
+   * anchored to is a date rather than a section, and nothing opens.
+   */
+  const Entry = ({ entry }) => (
+    <div style={card}>
+      <div style={{ fontSize: '0.88rem', color: C.text, fontFamily: BFONT, lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>
+        {entry.body}
+      </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '0.9rem', marginTop: '0.7rem',
+        fontSize: '0.7rem', color: C.muted, fontFamily: BFONT,
+      }}>
+        <span>
+          {new Date(entry.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+        </span>
+        <button
+          type="button"
+          onClick={() => remove(entry)}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: C.muted, fontFamily: BFONT, fontSize: '0.7rem', marginLeft: 'auto' }}>
+          Delete
+        </button>
+      </div>
+    </div>
+  );
 
   const Note = ({ note, readOnly = false }) => (
     <div style={card}>
@@ -743,6 +893,66 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
               </div>
             ) : null}
 
+            {/* ── THE JOURNAL ──────────────────────────────────────────
+                Ellie: "Ensure that site mirrors app notes functionality."
+
+                The journal was in the app and not here, so an entry written on
+                a phone could not be read on a laptop, and the same rows were
+                being drawn on this page as results marks with an ISO date for
+                a heading. It is the same endpoint, the same anchor and the
+                same private write; the copy comes from api/_lib/journal-copy.js
+                so the two surfaces say one thing. */}
+            <div style={{ marginBottom: '2.5rem' }}>
+              <div style={eyebrow}>Journal</div>
+              <div style={{ ...card, marginBottom: '1rem' }}>
+                <textarea
+                  value={entryDraft}
+                  onChange={(e) => setEntryDraft(e.target.value)}
+                  placeholder={JOURNAL_COPY.placeholder}
+                  rows={3}
+                  style={{
+                    width: '100%', border: 'none', outline: 'none', resize: 'vertical',
+                    fontFamily: BFONT, fontSize: '0.88rem', color: C.text,
+                    lineHeight: 1.65, background: 'transparent',
+                  }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Primary label="Save" onClick={addEntry} busy={entryBusy} />
+                </div>
+              </div>
+
+              {/* Hidden until there is something to search, the same as the
+                  app: a search field over nothing is a control that lies. */}
+              {entries.length ? (
+                <input
+                  value={entryQuery}
+                  onChange={(e) => setEntryQuery(e.target.value)}
+                  placeholder={JOURNAL_COPY.search}
+                  style={{
+                    width: '100%', border: `1px solid ${C.stone}`, borderRadius: 999,
+                    padding: '0.45rem 0.9rem', fontFamily: BFONT, fontSize: '0.8rem',
+                    color: C.text, background: C.white, marginBottom: '0.9rem',
+                  }}
+                />
+              ) : null}
+
+              {entryDays.length ? entryDays.map(([day, rows]) => (
+                <div key={day} style={{ marginBottom: '1.25rem' }}>
+                  <div style={{
+                    fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+                    color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: '0.5rem',
+                  }}>
+                    {whenWritten(rows[0]?.created_at) || day}
+                  </div>
+                  {rows.map((n) => <Entry key={n.id} entry={n} />)}
+                </div>
+              )) : (
+                <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT }}>
+                  {entryQuery.trim() ? JOURNAL_COPY.noMatch : JOURNAL_COPY.empty}
+                </p>
+              )}
+            </div>
+
             {notes.length ? (
               <div style={{ marginBottom: '2.5rem' }}>
                 <div style={eyebrow}>Yours</div>
@@ -764,23 +974,79 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
             <div>
               <div style={eyebrow}>Tags</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.8rem' }}>
-                {tags.filter((t) => !t.deleted_at).map((t) => (
+                {live.map((t) => (
                   <span
                     key={t.id}
                     style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
                       padding: '0.35rem 0.8rem', borderRadius: 999,
                       border: `1px solid ${C.stone}`, background: C.white,
                       fontSize: '0.75rem', color: C.text, fontFamily: BFONT,
                     }}>
                     {t.name}
+                    {/* Ellie, of the app: "When I delete a tag I want it to go
+                        into an archive". The same two steps here: this one is
+                        recoverable, and the archive below holds the one that
+                        is not. */}
+                    <button
+                      type="button"
+                      aria-label={`Archive ${t.name}`}
+                      onClick={() => archiveTag(t)}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: C.muted, fontFamily: BFONT, fontSize: '0.8rem', lineHeight: 1 }}>
+                      {'\u00d7'}
+                    </button>
                   </span>
                 ))}
-                {!tags.filter((t) => !t.deleted_at).length ? (
+                {!live.length ? (
                   <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: BFONT }}>
                     No tags yet.
                   </span>
                 ) : null}
               </div>
+
+              {/* ── THE ARCHIVE ──────────────────────────────────────────
+                  Shut on arrival, and only there at all once something is in
+                  it. Restore is reversible and asks nothing; the other one is
+                  the only control on this page that cannot be taken back, so
+                  it asks in the words Ellie wrote for it. */}
+              {archived.length ? (
+                <div style={{ marginBottom: '0.8rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setArchiveOpen((o) => !o)}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: C.muted, fontFamily: BFONT, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    {`Archive (${archived.length})`}
+                  </button>
+                  {archiveOpen ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.6rem' }}>
+                      {archived.map((t) => (
+                        <span
+                          key={t.id}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.55rem',
+                            padding: '0.35rem 0.8rem', borderRadius: 999,
+                            border: `1px dashed ${C.stone}`, background: 'transparent',
+                            fontSize: '0.75rem', color: C.muted, fontFamily: BFONT,
+                          }}>
+                          {t.name}
+                          <button
+                            type="button"
+                            onClick={() => unarchiveTag(t)}
+                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: C.clay, fontFamily: BFONT, fontSize: '0.7rem', fontWeight: 700 }}>
+                            Restore
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => purgeTagForGood(t)}
+                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: C.muted, fontFamily: BFONT, fontSize: '0.7rem' }}>
+                            Delete
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   value={newTag}

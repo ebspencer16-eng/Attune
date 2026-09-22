@@ -34,6 +34,31 @@
  * then the require below throws and `lockAvailable` is false, and the journal
  * opens without asking. That is stated out loud rather than hidden, because a
  * lock that silently is not there is worse than no lock: it is a promise.
+ *
+ * ── AND THE WAY THE PROMISE WAS BROKEN ────────────────────────────────────
+ * Ellie: "I put in an incorrect password into the simulator (journal asked for
+ * expo password) and it still let me in."
+ *
+ * She did, and it did. The whole of unlock() sat inside one try, and the catch
+ * opened the journal. That catch was written for one case, a build where the
+ * module resolves as JavaScript but is not in the binary, where opening is the
+ * only behaviour that is not a dead end. But it also caught a real, answered,
+ * rejected authentication, and treated a wrong passcode exactly like a missing
+ * module.
+ *
+ * So the two are now separated by when they happen rather than by what they
+ * throw. The probe runs first, on its own: if asking the phone anything at all
+ * fails, this build has no lock and the journal opens, which is the documented
+ * state. Once the probe has answered, the phone is present and every later
+ * outcome is the phone's answer. A throw is a refusal, a false is a refusal,
+ * and a refusal keeps the screen locked.
+ *
+ * ── AND WHAT A SIMULATOR CAN AND CANNOT TELL YOU ──────────────────────────
+ * Nothing here can be proved in a simulator. A simulator has no passcode and
+ * no enrolled face, so the honest answer for it is "this device cannot be
+ * asked", and the journal opens on it by design. Ellie's wrong password is
+ * evidence about the old catch, not about a phone. The lock itself needs a
+ * TestFlight build, because the module is native, and that is in TASKS.md.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -61,7 +86,13 @@ const c = Colors.light;
 type LocalAuth = {
   hasHardwareAsync: () => Promise<boolean>;
   isEnrolledAsync: () => Promise<boolean>;
-  authenticateAsync: (o: Record<string, unknown>) => Promise<{ success: boolean }>;
+  /**
+   * 0 none, 1 a passcode, 2 or 3 a biometric. The one call that answers the
+   * question this screen is actually asking, which is not "does this phone
+   * have Face ID" but "can this phone be asked for anything at all".
+   */
+  getEnrolledLevelAsync?: () => Promise<number>;
+  authenticateAsync: (o: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
 };
 
 let localAuth: LocalAuth | null = null;
@@ -73,6 +104,40 @@ try {
 }
 
 export const lockAvailable = !!localAuth;
+
+/**
+ * ── WHAT EACH OUTCOME MEANS, IN ONE FUNCTION ──────────────────────────────
+ * The bug Ellie found was not in any of the calls. It was in which outcomes
+ * were treated as the same outcome: a native module that is not in the binary
+ * and a passcode typed wrongly both arrived as a throw, and one catch opened
+ * the journal for both.
+ *
+ * So the mapping is a function rather than a shape spread through a callback,
+ * and unlock() below calls it rather than deciding again. That is what lets
+ * check-journal-lock.mjs run this exact code and assert that nothing except a
+ * genuine success, or a device that cannot be asked at all, ever opens it.
+ *
+ * `probe` is 'failed' when asking the phone anything threw, and otherwise the
+ * enrolled level: 0 for a device with no passcode and nothing enrolled, more
+ * for one that can be asked. `auth` is the answer to the prompt, or 'threw'.
+ */
+export type LockOutcome = 'open' | 'open-unlockable' | 'locked';
+
+export function lockDecision(
+  { probe, auth }: { probe: 'failed' | number; auth?: { success: boolean } | 'threw' },
+): LockOutcome {
+  /* No module in this binary. A locked screen whose button can never succeed
+     is a door with no key, and the journal is already behind an account this
+     phone is signed in to. */
+  if (probe === 'failed') return 'open';
+  /* No passcode, nothing enrolled: a simulator, or a phone someone has chosen
+     not to lock. Nothing to ask, and the screen says so. */
+  if (!probe) return 'open-unlockable';
+  /* From here the phone is present and answering, so every answer is its
+     answer. A throw is a refusal and so is a false. */
+  if (auth === 'threw' || !auth) return 'locked';
+  return auth.success ? 'open' : 'locked';
+}
 
 /** An entry is a note anchored to the day it was written. */
 export const JOURNAL_ANCHOR = 'journal';
@@ -157,6 +222,14 @@ export default function Journal({ onClose }: { onClose: () => void }) {
    */
   const [unlocked, setUnlocked] = useState(!lockAvailable);
   const [checking, setChecking] = useState(false);
+  /** The phone was asked and said no. The screen stays shut and says so. */
+  const [refused, setRefused] = useState(false);
+  /**
+   * Whether this device can be asked at all. Only ever set to false, by the
+   * probe, so the screen can be honest about a phone with no passcode rather
+   * than claiming a lock it never applied.
+   */
+  const [lockable, setLockable] = useState(true);
   const [entries, setEntries] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
@@ -186,38 +259,52 @@ export default function Journal({ onClose }: { onClose: () => void }) {
   const unlock = useCallback(async () => {
     if (!localAuth) { setUnlocked(true); return; }
     setChecking(true);
+    setRefused(false);
+
+    /**
+     * ── STEP ONE: CAN THIS PHONE BE ASKED AT ALL ───────────────────────
+     * Its own try, and the only one that opens the journal on a throw.
+     *
+     * expo-local-authentication resolves as JavaScript the moment it is in
+     * package.json and throws on the first native call in any binary built
+     * before it was added, which is the dev client and every build so far.
+     * The require above cannot tell those apart; this can, and it can tell
+     * them apart from a passcode being typed wrongly, which is the thing the
+     * old single try could not.
+     */
+    let probe: 'failed' | number;
     try {
-      const hardware = await localAuth.hasHardwareAsync();
-      const enrolled = await localAuth.isEnrolledAsync();
-      /* A phone with no passcode set cannot be asked for one. Opening is the
-         only behaviour that is not a dead end, and it is no less private than
-         the rest of the app, which this phone is already signed in to. */
-      if (!hardware && !enrolled) { setUnlocked(true); return; }
-      const res = await localAuth.authenticateAsync({
-        promptMessage: 'Open your relationship journal',
-        /* Face ID first, the passcode as the fallback, which is what "apple
-           can do the open with phone passcode" describes. */
-        disableDeviceFallback: false,
-        cancelLabel: 'Not now',
-      });
-      if (res.success) setUnlocked(true);
+      probe = localAuth.getEnrolledLevelAsync
+        ? await localAuth.getEnrolledLevelAsync()
+        : ((await localAuth.hasHardwareAsync()) && (await localAuth.isEnrolledAsync()) ? 2 : 0);
     } catch {
-      /**
-       * ── A MODULE THAT IS THERE AND NOT LINKED ──────────────────────────
-       * expo-local-authentication resolves as JavaScript the moment it is in
-       * package.json, and throws on the first native call in any binary built
-       * before it was added, which is every build today and the dev client.
-       * The require above cannot tell those apart; this can.
-       *
-       * Opening is the only behaviour that is not a dead end. A locked screen
-       * whose unlock button can never succeed is worse than no lock: it is a
-       * door with no key, and the journal is already behind an account this
-       * phone is signed in to.
-       */
-      setUnlocked(true);
-    } finally {
-      setChecking(false);
+      probe = 'failed';
     }
+
+    /**
+     * ── STEP TWO: THE PHONE'S ANSWER, WHATEVER IT IS ───────────────────
+     * Only asked when there is something to ask. Face ID first and the
+     * passcode as the fallback, which is what she asked for: "Can we do sign
+     * in with phone passcode on the actual app?"
+     */
+    let auth: { success: boolean } | 'threw' | undefined;
+    if (probe !== 'failed' && probe) {
+      try {
+        auth = await localAuth.authenticateAsync({
+          promptMessage: 'Open your relationship journal',
+          disableDeviceFallback: false,
+          cancelLabel: 'Not now',
+        });
+      } catch {
+        auth = 'threw';
+      }
+    }
+
+    const outcome = lockDecision({ probe, auth });
+    if (outcome === 'open-unlockable') setLockable(false);
+    if (outcome === 'locked') setRefused(true);
+    else setUnlocked(true);
+    setChecking(false);
   }, []);
 
   // Asked once, on open, rather than behind a button nobody wants to press.
@@ -332,6 +419,13 @@ export default function Journal({ onClose }: { onClose: () => void }) {
           fallback={<View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: c.textMuted }} />}
           style={{ width: 36, height: 36 }}
         />
+        {/* ── THE REFUSAL IS SAID OUT LOUD ────────────────────────────
+            A wrong passcode used to open the journal. It now does not, and a
+            screen that simply sits there after a failed Face ID reads as a
+            broken button rather than as a locked door. */}
+        {refused ? (
+          <Text style={{ ...Type.small, color: c.textMuted, textAlign: 'center' }}>{REFUSED}</Text>
+        ) : null}
         {checking ? <ActivityIndicator color={c.accentQuiet} /> : (
           <Pressable
             accessibilityRole="button"
@@ -340,7 +434,9 @@ export default function Journal({ onClose }: { onClose: () => void }) {
               backgroundColor: c.accent, borderRadius: Radius.pill,
               paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
             }}>
-            <Text style={{ ...Type.cardTitle, color: Palette.white }}>Unlock</Text>
+            <Text style={{ ...Type.cardTitle, color: Palette.white }}>
+              {refused ? TRY_AGAIN : UNLOCK}
+            </Text>
           </Pressable>
         )}
         <Pressable accessibilityRole="button" onPress={onClose} hitSlop={12}>
@@ -367,6 +463,21 @@ export default function Journal({ onClose }: { onClose: () => void }) {
             <Text style={{ ...Type.title, color: c.textMuted }}>{'✕'}</Text>
           </Pressable>
         </View>
+
+        {/* ── AND IF THERE IS NOTHING TO LOCK IT WITH, SAY SO ────────────
+            The probe found no passcode and nothing enrolled, so the journal
+            opened without asking. That is the right behaviour and the wrong
+            thing to leave silent: a lock that is quietly absent is a promise,
+            which is the note at the top of this file. */}
+        {!lockable ? (
+          <Text
+            style={{
+              ...Type.small, color: c.textMuted, marginTop: Spacing.sm,
+              fontFamily: Fonts.bodyItalic,
+            }}>
+            {NO_LOCK}
+          </Text>
+        ) : null}
 
         {/* ── THE COMPOSER IS THE FIRST THING ────────────────────────────
             "make it super easy to add entries." So the field is open on the
@@ -566,3 +677,14 @@ const SEARCH = 'Search your entries';
 const NO_MATCH = 'Nothing here matches that.';
 const EMPTY = 'Nothing here yet. The first entry is usually the hardest one.';
 const FAILED = 'Your journal could not be loaded. Pull down to try again.';
+const UNLOCK = 'Unlock';
+const TRY_AGAIN = 'Try again';
+/** Shown when the phone was asked and said no. A placeholder, like the rest. */
+const REFUSED = 'That did not unlock it.';
+/**
+ * Shown on the journal itself when the phone has no passcode and nothing
+ * enrolled, so there is nothing to lock it with. A placeholder, like the rest:
+ * it is the one sentence on this screen that makes a promise about privacy,
+ * and Ellie writes those.
+ */
+const NO_LOCK = 'This phone has no passcode, so the journal opens without one.';

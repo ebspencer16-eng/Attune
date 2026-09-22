@@ -2163,6 +2163,9 @@ const GrowIcons = {
   guide: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
   talk: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>,
   library: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+  // A closed notebook with a marker in it. Notes and the journal, which the
+  // dashboard had no way into at all until Ellie asked for one.
+  notes: c => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17h14"/><path d="M12 3v7l2.5-1.8L17 10V3"/></svg>,
 };
 
 
@@ -14542,6 +14545,26 @@ export default function App() {
                       title="The full library"
                       sub="Guides on communication, conflict, and growing together."
                       cta="Explore →" href="/practice?from=app" />
+                    {/* ── NOTES, WHICH NOTHING LINKED TO ───────────────────
+                        Ellie: "Ensure that site mirrors app notes
+                        functionality. Maybe section 3 of dashboard on site
+                        could have the content from learn and notes on the
+                        app?"
+
+                        The Notes page has existed here for a while and the
+                        only way to reach it was to type ?view=notes into the
+                        address bar: nothing on any screen set the view. So the
+                        app had a Notes tab and the website had a Notes page
+                        nobody could find, which is the same product disagreeing
+                        with itself about whether a feature exists.
+
+                        It goes in section 3 because that is where she put it,
+                        and because that section is already the tools and the
+                        reading: the two things the app's Learn tab holds. */}
+                    <GrowSquare color="#1B5FE8" icon={GrowIcons.notes("#1B5FE8")}
+                      title="Your notes and journal"
+                      sub="Everything you have marked, everything you have written, and your journal."
+                      cta="Open →" onClick={() => setView("notes")} />
                   </div>
 
                   {/* Add-ons — separate, quieter, never mixed with what you own */}

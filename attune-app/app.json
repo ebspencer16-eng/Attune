@@ -146,7 +146,8 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "CFBundleDisplayName": "Attune"
+        "CFBundleDisplayName": "Attune",
+        "NSFaceIDUsageDescription": "Attune asks for Face ID before it opens your relationship journal."
       },
       "config": {
         "usesNonExemptEncryption": false

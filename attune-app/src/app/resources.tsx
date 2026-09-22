@@ -565,11 +565,18 @@ export default function ResourcesScreen() {
               accessibilityRole="button"
               accessibilityLabel="Open the insight of the day"
               onPress={() => setInsightOpen(true)}>
-            <LinearGradient
-              colors={[...BlueGround]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0.9, y: 1 }}
-              style={{ paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl, ...Lift }}>
+            {/* ── AND THEN NOT A BANNER EITHER ───────────────────────
+                Ellie: "That way insight of the day isn't in a tile and the
+                blue gradient becomes the bg."
+
+                So this block paints nothing. It was a band of BlueGround laid
+                over a lighter blue page; the page is BlueGround now, and a
+                second copy of the same gradient on top of it would draw a seam
+                rather than a banner. No shadow either: a shadow is what a
+                surface casts onto the one behind it, and there is only one
+                surface here. */}
+            <View
+              style={{ paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl }}>
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
                 {INSIGHT_OF_THE_DAY}
               </Text>
@@ -596,7 +603,7 @@ export default function ResourcesScreen() {
                   url={SITE}
                 />
               </View>
-            </LinearGradient>
+            </View>
             </Pressable>
           </View>
         ) : null}
@@ -973,10 +980,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   /* ── A FULL COLOUR, NOT A WASH ────────────────────────────────────
      Ellie: "I want learn page to match that books screenshot, with the full
      color bg page." That reference is a lavender ground from edge to edge
-     with black type on it, not cream with a tint in the corners. So this is a
-     painted ground that keeps the ink: light enough to read on, saturated
-     enough that the white sheet coming up over it is a different surface. */
-  return <TabScreen groundColors={LEARN_GROUND} groundTone="ink">{children}</TabScreen>;
+     with black type on it, not cream with a tint in the corners.
+
+     The ground is the insight's blue now, which is dark at the top corner, so
+     the lockup takes the light tone. Nothing else is written straight onto it:
+     the tools are white cards, the insight is white type, and the sheet is its
+     own surface. */
+  return <TabScreen groundColors={BlueGround} groundTone="light">{children}</TabScreen>;
 }
 
 /** The books reference's ground, in this product's blue rather than its own. */
@@ -994,11 +1004,23 @@ const INSIGHT_OF_THE_DAY = 'Insight of the day';
 const NOT_YOURS = "You don't own this";
 const SEE_MORE = 'See more details';
 
-/* Ellie: "Make sure the learn page bg is an attune-branded blue", and then
-   "I changed my mind, I want the bg of the learn tab to be more saturated, I
-   want it to feel more branded than it does right now." Palette.indigo
-   lightened, twice as far as the first attempt. */
-const LEARN_GROUND = ['#9DB4F0', '#CFD9F5'] as const;
+/**
+ * Ellie: "Make sure the learn page bg is an attune-branded blue", then "I
+ * changed my mind, I want the bg of the learn tab to be more saturated, I want
+ * it to feel more branded than it does right now", and then, having seen the
+ * insight banner sitting on it: "Learn bg should just be the bg of the insight
+ * of the day banner extended to fill the page. That way insight of the day
+ * isn't in a tile and the blue gradient becomes the bg."
+ *
+ * So it is BlueGround, which is what the banner was painted with, rather than
+ * a lighter blue of its own. One fewer colour in the app, and the insight
+ * stops being a block of strong colour on a page of weak colour: the page is
+ * the strong colour and the insight is written on it.
+ *
+ * There is no LEARN_GROUND any more on purpose. A constant here holding a copy
+ * of BlueGround's two values is the thing this codebase keeps getting wrong;
+ * the tab reads the shared pair.
+ */
 
 type Item = CatalogueItem;
 
