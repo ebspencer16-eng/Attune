@@ -84,7 +84,9 @@ export const RESULTS_SECTIONS = [
   // Six, not five: Life & Values is a category a reader navigates to, and
   // building this from the responsibility list alone is what made the
   // website's link to it fall through to the storycards.
-  ...EXPECTATIONS_CATEGORIES.map((_, i) => `exp-convo-${i}`),
+  // The id comes from the category rather than from its place in the list, so
+  // reordering the pages does not rename them. See EXPECTATIONS_CATEGORIES.
+  ...EXPECTATIONS_CATEGORIES.map((cat) => cat.section),
 
   // Ellie: "App and site both show a detailed page for rel relf called action
   // plan. Remove that page from both web and app." The action plan itself stays;
@@ -207,7 +209,7 @@ export const RESULTS_SECTION_LABELS = {
   'comm-connection': 'How You Connect',
   'comm-hard': 'When Things Get Hard',
   'exp-overview': 'Expectations',
-  ...Object.fromEntries(EXPECTATIONS_CATEGORIES.map((cat, i) => [`exp-convo-${i}`, cat.label])),
+  ...Object.fromEntries(EXPECTATIONS_CATEGORIES.map((cat) => [cat.section, cat.label])),
   'reflection-overview': 'Relationship Reflection',
   'reflection-ratings': 'How You Each Rated',
   'reflection-story': 'Side by Side',
@@ -389,8 +391,8 @@ export function resultsNav({ hasReflection = false, intimacyReady = false, confl
       children: [
         cover('exp', fromExercise('ex2', 'Expectations').label),
         glance('exp-overview'),
-        ...EXPECTATIONS_CATEGORIES.map((cat, i) => ({
-          id: `exp-convo-${i}`, label: cat.label, color: '#10B981',
+        ...EXPECTATIONS_CATEGORIES.map((cat) => ({
+          id: cat.section, label: cat.label, color: '#10B981',
           // Each conversation page is on its own category's colour. They were
           // all on the one violet, on both surfaces.
           ground: groundForCategory(cat.color), groundStops: groundLocations('exp-detail'),

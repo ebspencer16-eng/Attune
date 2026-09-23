@@ -112,10 +112,20 @@ ok('two agreements, two differences', summary.aligned === 2 && summary.differenc
 // surface drew it, so Ellie asked for it to stop being sent. The two counts
 // it was derived from are checked on the line above, and they are what the
 // surfaces actually use.
+/**
+ * By kind rather than by position.
+ *
+ * These two sliced the array: the responsibilities were the first five and the
+ * life rows were the last one. Ellie: "Please move life and values to be the
+ * first expectations page in the results flow", and both assertions became
+ * assertions about where a category sits rather than about what is in it.
+ */
+const lifeBucket = summary.categories.find((c) => c.rows.every((r) => r.kind === 'life'));
+const respBuckets = summary.categories.filter((c) => c !== lifeBucket);
 ok('the responsibility half is one and one',
-  summary.categories.slice(0, 5).flatMap((c) => c.rows).filter((r) => r.aligned).length === 1);
+  respBuckets.flatMap((c) => c.rows).filter((r) => r.aligned).length === 1);
 ok('the life half is one and one',
-  summary.categories.at(-1).rows.filter((r) => r.aligned).length === 1);
+  lifeBucket.rows.filter((r) => r.aligned).length === 1);
 // One bucket per NAVIGABLE screen, which is six: the five responsibility
 // categories and Life & Values. This asserted RESPONSIBILITY_CATEGORIES.length,
 // which is the input to scoring rather than the list a reader navigates, and
@@ -124,26 +134,38 @@ ok('the life half is one and one',
 // Values fell through to the storycards, and the app was never offered the
 // page at all.
 ok('one bucket per conversation screen', summary.categories.length === EXPECTATIONS_CATEGORIES.length);
-ok('the last bucket is Life & Values', summary.categories.at(-1)?.label === 'Life & Values');
+// Ellie: "Please move life and values to be the first expectations page in the
+// results flow." First, and it is the order of this list that decides, so this
+// is where that order is held rather than in a screen.
+ok('the first bucket is Life & Values', summary.categories[0]?.label === 'Life & Values');
 ok('Life & Values navigates to a section that exists',
-  isResultsSection(summary.categories.at(-1)?.section));
+  isResultsSection(lifeBucket?.section));
 // Against LIFE_QUESTIONS rather than a `life` array on the payload. That array
 // was removed: it held the same rows as this bucket, and sending both is what
 // put two Life & Values dropdowns on the app's Expectations page.
 ok('Life & Values carries the life rows, not an empty bucket',
-  summary.categories.at(-1)?.rows.length > 0
-  && summary.categories.at(-1)?.rows.every((r) => r.kind === 'life'));
+  lifeBucket?.rows.length > 0 && lifeBucket?.rows.every((r) => r.kind === 'life'));
 ok('the payload no longer carries a second copy of the life rows',
   !('life' in summary));
 ok('a responsibility bucket carries no life rows',
-  summary.categories[0].rows.every((r) => r.kind === 'responsibility'));
-ok('buckets carry the section id the app navigates to',
-  summary.categories[0].section === 'exp-convo-0');
+  respBuckets.every((c) => c.rows.every((r) => r.kind === 'responsibility')));
+/**
+ * The id is the category's, not the bucket's place in the list.
+ *
+ * This asserted categories[0].section === 'exp-convo-0', which was true only
+ * while the two were the same number. Every bucket is checked against the
+ * category it came from instead, which is the thing that has to hold: a mark
+ * is anchored by this string, so it may not follow a page around the flow.
+ */
+ok('buckets carry their own category\'s section id, whatever the order',
+  summary.categories.every((c, i) => c.section === EXPECTATIONS_CATEGORIES[i].section));
+ok('Life & Values keeps the id it has always had', lifeBucket?.section === 'exp-convo-5');
+const household = summary.categories.find((c) => c.label === cat.label);
 ok('the disagreement names two different people',
-  summary.categories[0].rows.find((r) => !r.aligned)?.you === 'Ellie'
-  && summary.categories[0].rows.find((r) => !r.aligned)?.them === 'Preston');
+  household.rows.find((r) => !r.aligned)?.you === 'Ellie'
+  && household.rows.find((r) => !r.aligned)?.them === 'Preston');
 ok('unanswered items are absent rather than blank',
-  summary.categories[0].answered === 2 && cat.items.length > 2);
+  household.answered === 2 && cat.items.length > 2);
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

@@ -186,6 +186,21 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
         kind: 'responsibility',
         category: cat.label,
         categoryIndex,
+        /**
+         * ── AND THE CATEGORY'S OWN NAME FOR ITSELF ──────────────────────
+         * categoryIndex is a position in RESPONSIBILITY_CATEGORIES. The page
+         * that shows these rows picks them out of EXPECTATIONS_CATEGORIES,
+         * which is a different list, and the two agreed only because the five
+         * responsibilities happened to sit first in the same order in both.
+         *
+         * Ellie: "Please move life and values to be the first expectations
+         * page in the results flow." That is one line in the second list, and
+         * it would have made every category page show another category's
+         * rows, silently, with nothing to see in a diff.
+         *
+         * An id cannot drift out of step with itself.
+         */
+        categoryId: cat.id,
         item: substName(item, you, them),
         /**
          * The answer as the results show it.
@@ -265,13 +280,23 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
    * A life row has no categoryIndex, because it is not in a responsibility
    * category. It is selected by kind instead.
    */
-  const categories = EXPECTATIONS_CATEGORIES.map((cat, i) => {
+  const categories = EXPECTATIONS_CATEGORIES.map((cat) => {
     const inCat = cat.kind === 'life'
       ? rows.filter((r) => r.kind === 'life')
-      : rows.filter((r) => r.categoryIndex === i);
+      : rows.filter((r) => r.categoryId === cat.id);
     return {
-      // The id the app navigates to and notes anchor against.
-      section: 'exp-convo-' + i,
+      /**
+       * The id the app navigates to and notes anchor against.
+       *
+       * From the category rather than from where it sits in the list. It used
+       * to be the loop's index, so the order of the pages and the identity of
+       * a page were the same number: reordering them renamed all six, and a
+       * mark anchored to exp-convo-3 would have been left pointing at whatever
+       * moved into third place. See EXPECTATIONS_CATEGORIES, where the number
+       * is pinned to the category so the order can change and the anchors
+       * cannot.
+       */
+      section: cat.section,
       label: cat.label,
       // The category's own colour, so the app draws the same tile the website
       // does rather than painting all six in one section colour.

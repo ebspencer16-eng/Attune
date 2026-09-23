@@ -316,10 +316,45 @@ const EXPECTATION_CATEGORY_COLORS = {
   life: '#9B5DE5',
 };
 
+/**
+ * ── THE SECTION ID IS IDENTITY, THE ARRAY IS ORDER ────────────────────────
+ * A category's results page is `exp-convo-N`, and N used to be where the
+ * category sat in the array below. That made two different things one number:
+ * which page this is, and where it comes in the flow.
+ *
+ * Ellie: "Please move life and values to be the first expectations page in the
+ * results flow." Reordering the array renamed all six pages, and a note
+ * anchored to a results section is anchored by exactly that name, so every
+ * mark anyone had made on an Expectations page would have been left pointing
+ * at whichever category had moved into its place.
+ *
+ * So the number is pinned to the category and the array is free to be reordered
+ * whenever she asks. These six numbers are the order the pages happened to be
+ * in when the ids were first minted, and they are not to be changed. Nothing
+ * here needs a migration precisely because they do not move: every mark anyone
+ * has made on an Expectations page still names the category it was made on.
+ *
+ * A new category takes the next unused number, 6, wherever in the flow it goes.
+ * check-expectations-order.mjs holds this map and fails the build if a number
+ * moves, and says why.
+ */
+const EXPECTATION_SECTION_NUMBERS = {
+  household: 0,
+  financial: 1,
+  career: 2,
+  emotional: 3,
+  extended_family: 4,
+  life: 5,
+};
+
+/**
+ * ── LIFE & VALUES COMES FIRST ─────────────────────────────────────────────
+ * Ellie's order, from her message of 22 September. It reads better as the way
+ * in: what the two of you want out of a life is the frame the five practical
+ * categories sit inside, and it was the page nobody reached because it was
+ * last.
+ */
 export const EXPECTATIONS_CATEGORIES = [
-  ...RESPONSIBILITY_CATEGORIES.map((cat) => ({
-    ...cat, kind: 'responsibility', color: EXPECTATION_CATEGORY_COLORS[cat.id],
-  })),
   {
     id: 'life',
     label: LIFE_CATEGORY_LABEL,
@@ -327,4 +362,7 @@ export const EXPECTATIONS_CATEGORIES = [
     items: LIFE_QUESTIONS.map((q) => q.text),
     color: EXPECTATION_CATEGORY_COLORS.life,
   },
-];
+  ...RESPONSIBILITY_CATEGORIES.map((cat) => ({
+    ...cat, kind: 'responsibility', color: EXPECTATION_CATEGORY_COLORS[cat.id],
+  })),
+].map((cat) => ({ ...cat, section: `exp-convo-${EXPECTATION_SECTION_NUMBERS[cat.id]}` }));

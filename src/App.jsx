@@ -6515,7 +6515,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       children: [
         { id: "exp-overview", label: "Overview" },
         { id: "exp-detail-header", label: "Detailed results", isDomainHeader: true, color: "#10B981" },
-        ...FIXED_CATS.map((fc, ci) => ({ id: `exp-convo-${ci}`, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
+        ...FIXED_CATS.map((fc) => ({ id: fc.section, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
       ]
     },
     ...(hasAnniversary ? [{
@@ -6632,7 +6632,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "comm-overview",
     ...UR_DOMAINS.map(g => `comm-${g.id}`),
     "exp-overview",
-    ...FIXED_CATS.map((_, ci) => `exp-convo-${ci}`),
+    ...FIXED_CATS.map((fc) => fc.section),
     ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story"] : []),
     ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DOMAINS.map(d => `intimacy-${d.id}`)] : []),
     ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
@@ -6660,7 +6660,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return g ? g.label : (DIM_META[key]?.label || id);
     }
     if (id === "exp-overview") return "Expectations Overview";
-    if (id.startsWith("exp-convo-")) { const ci = parseInt(id.replace("exp-convo-","")); return FIXED_CATS[ci]?.label || id; }
+    // By section id, not by the number in it. The number is the category's own
+    // and stopped being its place in the flow when Life & Values moved first.
+    if (id.startsWith("exp-convo-")) return FIXED_CATS.find(fc => fc.section === id)?.label || id;
     if (id === "reflection-overview") return "Reflection Overview";
     if (id === "reflection-ratings") return "How You Each Rated";
     if (id === "reflection-story") return "Side by Side";
@@ -7094,7 +7096,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   if (section.startsWith("exp")) {
     const expSection = section === "exp-overview" ? "overview"
       : section === "exp-action-plan" ? "overview"
-      : section.startsWith("exp-convo-") ? `convo-${section.replace("exp-convo-", "")}`
+      // The step is the page's place in the flow; the section id is the
+      // category's own. They were the same number until Life & Values moved to
+      // the front, and reading one as the other put every page one off.
+      : section.startsWith("exp-convo-") ? `convo-${Math.max(0, FIXED_CATS.findIndex(fc => fc.section === section))}`
       : "overview";
     return (
       <Layout accent="#1B5FE8" noPrevNext={true}>
@@ -7111,7 +7116,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           onGoBack={() => go(UR_DOMAINS.length ? `comm-${UR_DOMAINS[UR_DOMAINS.length - 1].id}` : "comm-overview")}
           onExternalGo={s => {
             if (s === 0) go("exp-overview");
-            else if (typeof s === "string" && s.startsWith("convo-")) go("exp-" + s);
+            // `convo-N` is a step inside ExpectationsResults, which counts in
+            // the order the pages are read. The route it becomes is the
+            // category's own section id, which does not.
+            else if (typeof s === "string" && s.startsWith("convo-")) {
+              const fc = FIXED_CATS[parseInt(s.split("-")[1])];
+              if (fc) go(fc.section);
+            }
           }}
         />
       </Layout>
@@ -15721,7 +15732,7 @@ export default function App() {
               } else if (inExp) {
                 subnav = [
                   { label: "Overview", id: "exp-overview" },
-                  ...FIXED_CATS.map((fc, ci) => ({ label: fc.label, id: `exp-convo-${ci}` })),
+                  ...FIXED_CATS.map((fc) => ({ label: fc.label, id: fc.section })),
                 ];
               } else if (inIntim) {
                 subnav = [
