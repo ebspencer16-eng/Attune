@@ -111,7 +111,24 @@ export default function InsightsScreen() {
     const run = ++runRef.current;
     const current = () => runRef.current === run;
     try {
-      const res = await fetchHome();
+      /**
+       * ── BOTH AT ONCE, NOT ONE AFTER THE OTHER ───────────────────────────
+       * Ellie: "Pages take a long time to load in the test flight app."
+       *
+       * This screen asked /api/home, waited for the answer, and only then
+       * asked /api/results. Two serial round trips before the slowest page in
+       * the product can draw anything, on a connection where each one is the
+       * cost. They do not depend on each other: home says whether results are
+       * ready and results says the same thing itself, so the second request
+       * was waiting on an answer it also contains.
+       *
+       * They go together now and the results are used only if home agrees they
+       * are ready. What that costs is one call for a couple who have not both
+       * finished, which the comment below was right to avoid and wrong about
+       * the size of: /api/results answers a not-ready couple from the gate,
+       * without computing anything.
+       */
+      const [res, r] = await Promise.all([fetchHome(), fetchResults()]);
       if (!current()) return;
       if (res.ok) { setHome(res.data); setError(null); }
       else { setError(res.error); }
@@ -138,11 +155,8 @@ export default function InsightsScreen() {
         return;
       }
 
-      // Only asked for once the server says there is something to ask for.
-      // Fetching results before both partners finish returns a not-ready
-      // payload this screen has no use for, on a call that is not free.
-      const r = await fetchResults();
-      if (!current()) return;
+      // Used only once the server says there is something to use. The request
+      // itself went out with the one above.
       if (r.ok) setResults(r.data);
     } finally {
       // In a finally so a thrown request cannot leave the guard stuck on,

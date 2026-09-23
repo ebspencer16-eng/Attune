@@ -32,6 +32,7 @@ const c = Colors.light;
 
 export default function TabScreen({
   children, ground = 'cream', tint, second, groundColors, corners, groundTone = 'light',
+  markOutline = true,
 }: {
   children: React.ReactNode;
   /** 'cream' takes the wash and the ink lockup; 'blue' takes neither. */
@@ -68,6 +69,8 @@ export default function TabScreen({
    * prop rather than a consequence of `groundColors` being set.
    */
   groundTone?: 'ink' | 'light';
+  /** Passed to the lockup. See BrandHeader: it is a decision per ground. */
+  markOutline?: boolean;
 }) {
   const painted = !!groundColors;
   const blue = ground === 'blue' || painted;
@@ -90,7 +93,7 @@ export default function TabScreen({
         />
       ) : null}
       {blue ? null : <PageWash tint={tint} second={second} corners={corners} />}
-      <BrandHeader tone={painted ? groundTone : blue ? 'light' : 'ink'} />
+      <BrandHeader tone={painted ? groundTone : blue ? 'light' : 'ink'} markOutline={markOutline} />
       <View style={{ flex: 1 }}>{children}</View>
     </SafeAreaView>
   );

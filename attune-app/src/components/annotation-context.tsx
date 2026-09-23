@@ -27,7 +27,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle } fro
 import { SymbolView } from 'expo-symbols';
 import { scrollIntoResultsView } from '@/components/results-scroll';
 
-import Annotatable, { type Mark, type MarkAction } from '@/components/annotatable';
+import Annotatable, { clearSelectionAt, type Mark, type MarkAction } from '@/components/annotatable';
 import { annotationColor } from '@/constants/annotations';
 import { Palette } from '@/constants/attune-theme';
 import AnnotationSheet from '@/components/annotation-sheet';
@@ -475,7 +475,28 @@ export function AnnotationProvider({
 
   return (
     <AnnotationCtx.Provider value={value}>
-      {children}
+      {/* ── A TAP ANYWHERE ENDS A SELECTION ─────────────────────────────
+          Ellie: "if I have text selected but then I tap somewhere else on the
+          screen, it should de-select."
+
+          Capture rather than a Pressable, and it always returns false, so this
+          takes nothing: it watches every touch that begins anywhere in the
+          results and never becomes the responder. A Pressable wrapping the
+          page would have swallowed every press underneath it, which is a worse
+          bug than the one being fixed.
+
+          Capture runs from the root down, so this sees the touch before the
+          toolbar does and cannot ask the toolbar whether it was the target.
+          That is why clearSelectionAt takes coordinates: the toolbar registers
+          where it is and a touch inside it is left alone. */}
+      <View
+        style={{ flex: 1 }}
+        onStartShouldSetResponderCapture={(e) => {
+          clearSelectionAt(e.nativeEvent.pageX, e.nativeEvent.pageY);
+          return false;
+        }}>
+        {children}
+      </View>
       {openNote ? (
         <MarkSheet
           note={openNote}

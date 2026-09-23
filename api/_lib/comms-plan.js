@@ -155,16 +155,38 @@ export function commsActionPlan({ feedback, copy }) {
       ? { title: null, body: advice }
       : { title: aligned?.title || null, body: aligned?.body || null };
 
+    /**
+     * ── AND NO EXTRA LINE ON THE HARD DOMAIN ────────────────────────────
+     * There used to be a `reflect` field here, one sentence, added only to
+     * `hard`. The website drew it, the app did not, Ellie noticed the app was
+     * missing it, and it was added there too.
+     *
+     * Then: "The comms overview 'when things get hard' action item for site
+     * and web includes a prompt, but that prompt isn't present on the detailed
+     * page on either site or web. Please remove the prompt from the overview
+     * page everywhere."
+     *
+     * She is right, and the reason is the one this codebase is organised
+     * around. The overview's job is to say, in one tile, what the page behind
+     * it says at length. A sentence that appears only in the summary is a
+     * summary of something that does not exist: a reader who follows it
+     * through to When Things Get Hard finds no prompt there, and has to decide
+     * which of the two screens is the product.
+     *
+     * Matching it onto the detail page would have been the other fix and the
+     * worse one: the detail page is three orientation bars and a side-by-side,
+     * with no place a standing instruction belongs, and every action this
+     * product gives already lives on What Comes Next.
+     *
+     * check-action-tile-fields.mjs holds every field this function emits to
+     * being drawn on both surfaces, so the next one cannot arrive on one.
+     */
     return {
       domain: domain.id,
       label: domain.label,
       color: domain.color,
       dim: lead.dim,
       ...base,
-      // The website adds this one line to the hardest of the three domains.
-      ...(domain.id === 'hard'
-        ? { reflect: "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one." }
-        : {}),
     };
   }).filter(Boolean);
 }

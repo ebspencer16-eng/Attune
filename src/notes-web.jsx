@@ -743,12 +743,28 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
    */
   const Entry = ({ entry }) => (
     <div style={card}>
+      {/* ── A QUOTE THIS ENTRY WAS KEPT FOR ──────────────────────────
+          anchor_context is the words the entry was made on: the insight of the
+          day, saved from its own page in the app. Above the reader's own
+          writing and set apart from it, the same way the app draws it, so an
+          entry kept on a phone reads the same on a laptop. */}
+      {entry.anchor_context ? (
+        <div style={{
+          fontSize: '0.86rem', color: C.muted, fontFamily: BFONT, lineHeight: 1.6,
+          fontStyle: 'italic', borderLeft: `2px solid ${C.accent}`, paddingLeft: '0.7rem',
+          marginBottom: '0.6rem', whiteSpace: 'pre-wrap',
+        }}>
+          {entry.anchor_context}
+        </div>
+      ) : null}
       {/* Ellie: "Journal entries should save with italicized text." The app
           sets the same rows in DM Sans Italic; here the browser can slant the
           face itself, which is the one thing iOS will not do. */}
-      <div style={{ fontSize: '0.88rem', color: C.text, fontFamily: BFONT, lineHeight: 1.65, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>
-        {entry.body}
-      </div>
+      {entry.body ? (
+        <div style={{ fontSize: '0.88rem', color: C.text, fontFamily: BFONT, lineHeight: 1.65, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>
+          {entry.body}
+        </div>
+      ) : null}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '0.9rem', marginTop: '0.7rem',
         fontSize: '0.7rem', color: C.muted, fontFamily: BFONT,

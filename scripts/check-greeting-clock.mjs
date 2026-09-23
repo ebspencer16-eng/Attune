@@ -55,10 +55,41 @@ if (!/searchParams\.get\(['"]tzOffset['"]\)/.test(endpoint)) {
   problems.push('api/home.js never reads tzOffset off the request.');
 }
 
-// 3. The app has to send one.
-const fetchHome = client.slice(client.indexOf('export function fetchHome'));
-const fetchBody = fetchHome.slice(0, fetchHome.indexOf('\n}'));
-if (!/getTimezoneOffset\s*\(\s*\)/.test(fetchBody) || !/tzOffset=/.test(fetchBody)) {
+/**
+ * 3. The app has to send one.
+ *
+ * Through whatever fetchHome calls, not only from inside fetchHome itself.
+ * This read the body of `export function fetchHome` and nothing else, so the
+ * day the request was moved into a helper behind a single-flight window, the
+ * offset was still being sent on every call and this reported that it was not.
+ *
+ * A gate matching on a literal name is blind to anything reached through one
+ * more hop, which is what the rest of this repo is built out of. So the
+ * function's own body is read, and so is the body of anything it calls that is
+ * declared in the same file.
+ *
+ * Comments are stripped first. The doc comment above the call explains what
+ * getTimezoneOffset() returns, so a version of this that read the raw text
+ * passed a plant that replaced the call with a constant: it was matching the
+ * sentence describing the code rather than the code. check-fonts.mjs was
+ * reading its own documentation the same way once.
+ */
+const stripComments = (t) => t.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
+const fnBody = (name) => {
+  const at = client.search(new RegExp(`(?:export\\s+)?function ${name}\\b`));
+  if (at < 0) return '';
+  const rest = client.slice(at);
+  const end = rest.indexOf('\n}');
+  return stripComments(end < 0 ? rest : rest.slice(0, end));
+};
+const fetchBody = (() => {
+  const own = fnBody('fetchHome');
+  const called = [...own.matchAll(/\b([a-z][A-Za-z0-9_]*)\s*\(/g)].map((m) => m[1]);
+  return own + called.map(fnBody).join('\n');
+})();
+if (!fetchBody) {
+  problems.push('fetchHome() is no longer declared in the app client; refusing to pass.');
+} else if (!/getTimezoneOffset\s*\(\s*\)/.test(fetchBody) || !/tzOffset=/.test(fetchBody)) {
   problems.push(
     'fetchHome() does not send the device\'s timezone offset, so the server falls\n'
     + '      back to UTC and every reader outside it gets the wrong greeting.');

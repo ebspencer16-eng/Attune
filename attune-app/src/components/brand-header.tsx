@@ -21,9 +21,22 @@ const c = Colors.light;
 export const BRAND_NAME = 'Attune Relationships';
 
 export default function BrandHeader({
-  tone = 'ink', right, lockup = true,
+  tone = 'ink', right, lockup = true, markOutline = true,
 }: {
   tone?: 'ink' | 'light';
+  /**
+   * Whether the dark mark's left bubble carries its white outline.
+   *
+   * Ellie asked for that outline on the Insights landing, where the bubble's
+   * own orange end dissolves into the orange ground, and asked for it off on
+   * Learn, where the blue already gives the fill an edge. Which ground wants
+   * it is a judgement about a colour rather than a rule that can be derived,
+   * so it is set where the ground is set and nowhere else.
+   *
+   * Only meaningful when `tone` is 'light': the cream mark has no outline to
+   * turn off.
+   */
+  markOutline?: boolean;
   /**
    * ── ONE MARK PER SCREEN ───────────────────────────────────────────────
    * The home screen now opens on the lockup at headline size, because Ellie
@@ -92,7 +105,9 @@ export default function BrandHeader({
           variable. */}
       <Image
         source={tone === 'light'
-          ? require('@/assets/images/attune-mark-dark.png')
+          ? (markOutline
+            ? require('@/assets/images/attune-mark-dark.png')
+            : require('@/assets/images/attune-mark-dark-plain.png'))
           : require('@/assets/images/attune-mark-light.png')}
         /* 103 by 76 is the mark's own viewBox in public/favicon.svg, so the
            box this draws into is the artwork's shape and `contain` has nothing

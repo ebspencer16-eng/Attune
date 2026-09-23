@@ -83,8 +83,29 @@ const TOOLBAR: { action: MarkAction; icon: string; label: string }[] = [
   { action: 'share', icon: 'paperplane', label: 'Share' },
 ];
 
-/** How long a press must be held before this takes the gesture from the scroll. */
-const HOLD_MS = 450;
+/**
+ * How long a press must be held before this takes the gesture from the scroll.
+ *
+ * Ellie, of a real phone rather than the simulator: "the select text is
+ * finicky, it was taking a bunch of tries to select when I was trying
+ * earlier."
+ *
+ * 450 was chosen against a synthetic press, which is perfectly still for
+ * exactly as long as it is asked to be. A thumb is not: it lands, settles and
+ * drifts, and every millisecond of the wait is another chance for the scroll
+ * view to read the drift as a scroll and take the gesture. Shortening the wait
+ * shortens the window in which that can happen.
+ *
+ * 320 rather than something shorter because the wait is also what keeps a
+ * paragraph scrollable: a press that becomes a selection too eagerly makes the
+ * page feel stuck. iOS's own long press is 500 with a generous slop this
+ * cannot set from JavaScript, which is the real difference and the reason this
+ * is a partial fix rather than a certain one.
+ *
+ * It cannot be judged in a simulator, because a synthetic press never wobbles.
+ * That is the honest limit on this change and it is written in TASKS.md.
+ */
+const HOLD_MS = 320;
 
 /**
  * Which style properties belong to the words, and which to the paragraph.
@@ -182,6 +203,50 @@ function markBox(mark: Mark | undefined) {
   };
 }
 
+/**
+ * ── ONE SELECTION AT A TIME, AND A TAP ANYWHERE ENDS IT ───────────────────
+ * Ellie: "In the app, if I have text selected but then I tap somewhere else on
+ * the screen, it should de-select. Remove the x from the toolbar."
+ *
+ * The ✕ existed because nothing else dismissed a selection: every paragraph is
+ * its own Annotatable with its own state, and a tap on the page belongs to
+ * whatever is under it, which is usually nothing at all.
+ *
+ * So the paragraph that currently holds a selection registers itself here, and
+ * the provider watches every touch that starts anywhere inside the results and
+ * clears it. That also fixes a second thing nobody had asked about: selecting
+ * in one paragraph used to leave the previous paragraph's selection painted,
+ * because neither knew about the other.
+ *
+ * The toolbar is the exception, and it has to be, because a touch that starts
+ * on a toolbar button would otherwise clear the selection before the button's
+ * press could use it. It registers its own rectangle in window coordinates and
+ * a touch inside it is left alone. Measured rather than assumed: the toolbar
+ * moves with the selection, so its position is not something this file knows.
+ */
+type Rect = { x: number; y: number; w: number; h: number };
+let active: { owner: object; clear: () => void; rect: Rect | null } | null = null;
+
+/**
+ * Drop the standing selection, unless the touch landed on its toolbar.
+ *
+ * Coordinates are optional: called with none, it clears unconditionally, which
+ * is what a new selection starting elsewhere wants.
+ */
+export function clearSelectionAt(pageX?: number, pageY?: number) {
+  const a = active;
+  if (!a) return;
+  if (pageX != null && pageY != null && a.rect) {
+    const { x, y, w, h } = a.rect;
+    /* The same slop the buttons take, so the edge of a button is not a miss
+       that dismisses the thing the finger was reaching for. */
+    const pad = 8;
+    if (pageX >= x - pad && pageX <= x + w + pad && pageY >= y - pad && pageY <= y + h + pad) return;
+  }
+  active = null;
+  a.clear();
+}
+
 export default function Annotatable({
   text, style, marks = [], onSelect, onRemove, onMarkTops,
 }: {
@@ -275,11 +340,19 @@ export default function Annotatable({
     return best;
   };
 
+  /** This paragraph's identity in the registry above. Stable, and never read. */
+  const ownerId = useRef({}).current;
+
   const clear = () => {
+    if (active?.owner === ownerId) active = null;
     setAnchor(null);
     setHead(null);
     setSettled(false);
   };
+  /* The gestures are built once and close over the first `clear`; this is what
+     lets the registry compare identities across renders. */
+  const clearRef = useRef(clear);
+  clearRef.current = clear;
 
   /**
    * ── WHY THIS IS NOT A PANRESPONDER ────────────────────────────────────────
@@ -319,6 +392,9 @@ export default function Annotatable({
     .onStart((e) => {
       const i = wordAt(e.x, e.y);
       if (i == null) return;
+      /* Whatever was selected before, wherever it was, is over. */
+      clearSelectionAt();
+      active = { owner: ownerId, clear: () => clearRef.current(), rect: null };
       setSettled(false);
       setAnchor(i);
       setHead(i);
@@ -352,7 +428,6 @@ export default function Annotatable({
       return cache.get(action) as ReturnType<typeof Gesture.Tap>;
     };
   }, [onSelect]);
-  const cancelTap = useMemo(() => Gesture.Tap().runOnJS(true).onEnd(() => clear()), []);
 
   if (!onSelect || !tokens.length) return <Text style={style}>{text}</Text>;
 
@@ -478,6 +553,15 @@ export default function Annotatable({
             shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 10,
             shadowOffset: { width: 0, height: 4 }, elevation: 6,
           }}
+          /* Where it is on the screen, so a touch that lands on it is not read
+             as a tap somewhere else. measureInWindow rather than the layout
+             event's own numbers: those are relative to the parent, and the
+             touch this is compared against is in window coordinates. */
+          onLayout={(e) => {
+            e.currentTarget.measureInWindow((x, y, w, h) => {
+              if (active) active.rect = { x, y, w, h };
+            });
+          }}
 >
           {/* ── WHY THESE ARE NOT PRESSABLES ──────────────────────────
               A Pressable here never fired. The toolbar sits over the words,
@@ -529,14 +613,6 @@ export default function Annotatable({
                 </Text>
               )}
             />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Cancel"
-            onPress={clear}
-            hitSlop={6}
-            style={{ paddingLeft: Spacing.sm, paddingRight: Spacing.md, paddingVertical: Spacing.sm }}>
-            <Text style={{ ...Type.small, color: c.textMuted }}>✕</Text>
           </Pressable>
         </View>
       ) : null}

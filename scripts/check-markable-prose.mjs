@@ -49,6 +49,29 @@
 // cards. The reason lives in the file rather than in this list so that whoever
 // next edits a card reads it there.
 //
+// ── WHICH TYPE ROLES COUNT AS PROSE ────────────────────────────────────────
+// It was Type.body alone. Ellie: "It's not letting me select text in overview
+// pages. Please make any text select-able (not nav text but anything on results
+// pages, cover pages, etc.)"
+//
+// She is describing a rule this gate had drawn too narrowly. The overview pages
+// carry their findings at Type.small and their headings at Type.hero and
+// Type.title, so the rule reached none of them and the gate was green about a
+// page where nothing could be selected. Type.cardTitle is the same story one
+// size down.
+//
+// Type.eyebrow is deliberately not on the list. Eyebrows are the labels above
+// a block, they are written in the component rather than sent by the server,
+// and a mark anchored to the word "OVERVIEW" points at every page that has one.
+// That is also the nav text she excluded, in the one place it is styled.
+//
+// Widening a matcher is not the safe direction, so this was done by reading
+// what it newly flags rather than by assuming: the sites it caught in the
+// results renderer are the findings, and the ones it should not have caught are
+// ranks, dashes, carets, counts and truncated rows, each exempted with its own
+// reason rather than by loosening the rule back.
+const ROLES = ['body', 'small', 'title', 'hero', 'cardTitle'];
+
 // ── STYLE ALIASES ──────────────────────────────────────────────────────────
 // Matching the literal `...Type.body` inside the tag was not enough. The
 // storycards define `const body = { ...Type.body, ... }` once and then write
@@ -174,11 +197,12 @@ for (const rel of FILES) {
    * `...Type.body` out loud while still meaning it.
    */
   const aliases = new Set();
-  for (const m of src.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*\{\s*\.\.\.Type\.body\b/g)) {
+  for (const m of src.matchAll(new RegExp(`\\bconst\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*\\{\\s*\\.\\.\\.Type\\.(?:${ROLES.join('|')})\\b`, 'g'))) {
     aliases.add(m[1]);
   }
+  const roleRe = new RegExp(`\\.\\.\\.Type\\.(?:${ROLES.join('|')})\\b`);
   const isBodyTag = (tag) => {
-    if (/\.\.\.Type\.body\b/.test(tag)) return true;
+    if (roleRe.test(tag)) return true;
     for (const a of aliases) {
       // style={alias} or style={[alias, ...]}
       if (new RegExp(`style=\\{\\[?\\s*${a}\\b`).test(tag)) return true;
@@ -209,10 +233,27 @@ for (const rel of FILES) {
      * sentences and a sentence wraps. Reading only the line above found the
      * last line of every multi-line exemption, which is its terminator, and
      * concluded there was no exemption there.
+     *
+     * ── AND PAST THE LINE THE LANGUAGE WILL NOT LET IT SIT ON ───────────
+     * A JSX comment cannot go in a conditional's return position. These do
+     * not compile:
+     *
+     *     {n > 0 ? (
+     *       {/* not markable: ... *\/}     <- no
+     *       <Text>{bullet}</Text>
+     *
+     * So for a Text that is the whole of a branch, the only place the reason
+     * can be written is above the conditional. Refusing to look there would
+     * make the escape hatch unusable exactly where it is needed, which is the
+     * mistake the line-comment-only first draft of this gate already made
+     * once. Only an opener is stepped over: `? (`, `&& (`, `) : (` and a bare
+     * `(`. Anything else stops the walk, so a comment two elements up still
+     * does not count as an exemption for this one.
      */
+    const OPENER = /^(?:\(|\)*\s*[?:]\s*\(|.*(?:\?|&&)\s*\()$/;
     const before = src.slice(0, open).split('\n');
     let i = before.length - 2;
-    while (i >= 0 && !before[i].trim()) i -= 1;
+    while (i >= 0 && (!before[i].trim() || OPENER.test(before[i].trim()))) i -= 1;
     let comment = '';
     if (i >= 0) {
       const line = before[i].trim();

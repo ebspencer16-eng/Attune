@@ -543,44 +543,78 @@ export default function HomeScreen() {
               borderBottomLeftRadius: TILE_RADIUS,
               borderBottomRightRadius: TILE_RADIUS,
             }}>
+            {/* ── ONE CREAM PANEL, NOT A PANEL THAT BEGINS PART WAY DOWN ──
+                It used to start at TILE_FADE, with a gradient above it fading
+                transparent to cream, so the tile's top edge disappeared into
+                the page. That was solving a problem the page does not have:
+                the ground is pure cream until well past halfway, and a cream
+                panel on cream is already invisible. What it cost was a seam.
+
+                Ellie: "The very light blue gradient on the home page tile cuts
+                off abruptly part way through the four quick access tiles. It's
+                visible behind relationship journal tile. I want this gradient
+                to fade out very naturally rather than be cut off cleanly."
+
+                Measured rather than guessed: a column down the right margin
+                read 255,253,249 at 328 points and 243,245,248 at 332, which is
+                five per cent of indigo arriving in a single row. The blue
+                layer began at the same line this panel did, so it started at a
+                level instead of at nothing, and the fade above it ended in
+                opaque cream, which drew the line.
+
+                Both layers run the whole height of the tile now and the blue
+                does the fading itself. */}
             <View
               pointerEvents="none"
               style={{
-                position: 'absolute', left: 0, right: 0, top: TILE_FADE, bottom: 0,
+                position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
                 backgroundColor: Palette.cream,
                 borderBottomLeftRadius: TILE_RADIUS,
                 borderBottomRightRadius: TILE_RADIUS,
-                /* Ellie: "Please make the bottom of the tile more defined on
-                   the homepage, more contrast for it." A deeper, tighter
-                   shadow so the edge is an edge rather than a haze, and a
-                   hairline under the curve itself, which is what actually
-                   draws the line: a shadow is the space beside an edge and
-                   not the edge. */
+              }}
+            />
+            {/* ── THE BLUE, RISING OUT OF NOTHING ────────────────────────
+                Three stops rather than two, and the first two are the same
+                colour at zero alpha, so the top half of the tile is not a
+                faint wash: it is nothing at all, and the rise begins where the
+                stops say it does rather than where the layer's top edge is.
+                A gradient that starts at its container's edge always starts at
+                a value; one that carries its own transparent run does not. */}
+            <LinearGradient
+              pointerEvents="none"
+              colors={[
+                withAlpha(Palette.indigo, 0),
+                withAlpha(Palette.indigo, 0),
+                withAlpha(Palette.indigo, 0.30),
+              ]}
+              locations={[0, 0.42, 1]}
+              start={{ x: 0.3, y: 0 }}
+              end={{ x: 0.7, y: 1 }}
+              style={{
+                position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+                borderBottomLeftRadius: TILE_RADIUS,
+                borderBottomRightRadius: TILE_RADIUS,
+              }}
+            />
+            {/* ── AND THE BOTTOM EDGE, WHICH IS ITS OWN THING ────────────
+                Ellie: "Please make the bottom of the tile more defined on the
+                homepage, more contrast for it." The shadow and the hairline
+                were on the cream panel, so they were an edge on every side of
+                it, including a top edge in the middle of the quick links. They
+                are on a strip pinned to the foot now: the only edge the tile
+                has is the one she asked to see. */}
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute', left: 0, right: 0, bottom: 0, height: TILE_RADIUS * 2,
+                backgroundColor: 'transparent',
+                borderBottomLeftRadius: TILE_RADIUS,
+                borderBottomRightRadius: TILE_RADIUS,
                 borderBottomWidth: 1,
                 borderColor: 'rgba(27,42,94,0.14)',
                 shadowColor: '#1B2A5E', shadowOpacity: 0.30,
                 shadowRadius: 16, shadowOffset: { width: 0, height: 10 },
               }}
-            />
-            {/* The blue coming up through the cream, fading as it rises. */}
-            <LinearGradient
-              pointerEvents="none"
-              colors={[withAlpha(Palette.indigo, 0), withAlpha(Palette.indigo, 0.30)]}
-              start={{ x: 0.3, y: 0.2 }}
-              end={{ x: 0.7, y: 1 }}
-              style={{
-                position: 'absolute', left: 0, right: 0, top: TILE_FADE, bottom: 0,
-                borderBottomLeftRadius: TILE_RADIUS,
-                borderBottomRightRadius: TILE_RADIUS,
-              }}
-            />
-            <LinearGradient
-              pointerEvents="none"
-              colors={['rgba(255,253,249,0)', Palette.cream]}
-              locations={[0, 1]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={{ position: 'absolute', left: 0, right: 0, top: 0, height: TILE_FADE }}
             />
 
             {/* ── FOUR SQUARES, ALMOST TOUCHING ──────────────────────────
@@ -675,6 +709,11 @@ export default function HomeScreen() {
       {insightOpen && data?.research ? (
         <StoryCard
           card={insightCard(data.research, INSIGHT_TITLE)}
+          /* Ellie: "there should be a button on the insight of the day page
+             that allows users to save this to relationship journal." The words
+             kept are the finding itself with its source under it, which is
+             what the card shows and what makes it worth keeping. */
+          journal={`${data.research.body}\n\n${data.research.source}`}
           style={data.storycardStyle as never}
           onClose={() => setInsightOpen(false)}
         />
@@ -1008,8 +1047,6 @@ const ICON_ORANGE = '#FF8F5E';
  *  One constant, because the reference uses one tone for both and two numbers
  *  a hundred lines apart is how they stop being the same tone. */
 const TILE_FILL = '#F1EEE9';
-/** How far the big tile takes to stop being transparent, in points. */
-const TILE_FADE = 90;
 /** The radius on the tile's two bottom corners. */
 const TILE_RADIUS = 36;
 /** The four squares' fill. Three per cent of the ink: present, barely. */

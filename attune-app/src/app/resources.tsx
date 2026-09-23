@@ -30,6 +30,7 @@ import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } fr
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
 import { insightCard, StoryCard } from '@/components/highlight-cards';
+import { SaveToJournal } from '@/components/journal';
 import Checklist from '@/components/checklist';
 import TabScreen from '@/components/tab-screen';
 import PageWash from '@/components/page-wash';
@@ -103,6 +104,8 @@ export default function ResourcesScreen() {
   const [openPost, setOpenPost] = useState<string | null>(pendingPost);
   /** Whether the insight of the day is open as a full card. */
   const [insightOpen, setInsightOpen] = useState(false);
+  /** Whether the save-to-journal sheet is up for the insight of the day. */
+  const [keepingInsight, setKeepingInsight] = useState(false);
   /** The tool whose "you don't own this" sheet is open, if any. */
   const [locked, setLocked] = useState<Item | null>(null);
   /**
@@ -703,6 +706,25 @@ export default function ResourcesScreen() {
                 {/* Ellie: "I want a share button on the insight of the day tile
                     on learn tab." The finding and where it came from, which is
                     the whole of what the tile says. */}
+                {/* Ellie: "This should also be an option on the share button
+                    from the insights page." Beside it rather than inside it:
+                    the share control opens the phone's own sheet, which this
+                    app does not get to add a row to, and a menu in front of a
+                    menu is two taps to do what one did. */}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Save the insight of the day to your relationship journal"
+                  onPress={() => setKeepingInsight(true)}
+                  hitSlop={8}
+                  style={{
+                    borderRadius: Radius.pill, borderWidth: 1,
+                    borderColor: 'rgba(255,255,255,0.35)',
+                    paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.md,
+                  }}>
+                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.9)' }}>
+                    {KEEP_INSIGHT}
+                  </Text>
+                </Pressable>
                 <ShareButton
                   tone="light"
                   label="Share"
@@ -902,20 +924,18 @@ export default function ResourcesScreen() {
             </View>
           </View>
 
-          {/* The caret. Ellie: "add a carrot arrow downwards at the bottom of
-              that so that it's clear the user can scroll down." Not a control:
-              tapping a hint about scrolling and having it scroll is a second
-              way to do something the finger already does. */}
-          {/* Ellie: "Pull that tile down so that it cuts off after the 4
-              featured articles." The caret is the last thing above the fold
-              now rather than a screen below it. */}
-          <Text
-            style={{
-              ...Type.title, color: c.border, textAlign: 'center',
-              marginTop: Spacing.md, marginBottom: Spacing.lg,
-            }}>
-            {'\u2304'}
-          </Text>
+          {/* ── THE CARET IS GONE ──────────────────────────────────────
+              Ellie asked for it: "add a carrot arrow downwards at the bottom of
+              that so that it's clear the user can scroll down." And then, once
+              the grab line was at the top: "Remove down arrow below the 4
+              featured articles on in practice, the orange bar up top is doing
+              the work."
+
+              She is right, and the reason is worth keeping. Two hints about
+              one gesture is not twice as clear: it is a page telling you the
+              same thing in two voices, and the second one is at the bottom of
+              the block it is describing, which is the wrong end to be told
+              from. */}
 
           {/* ── FILTER AND SORT, UNDER THE PEEK ────────────────────────
               Ellie: "Add filter and sort buttons below the 4 featured article
@@ -1090,9 +1110,21 @@ export default function ResourcesScreen() {
         </Modal>
       ) : null}
 
+      {keepingInsight && home?.research ? (
+        <SaveToJournal
+          quote={`${home.research.body}\n\n${home.research.source}`}
+          onClose={() => setKeepingInsight(false)}
+        />
+      ) : null}
+
       {insightOpen && home?.research ? (
         <StoryCard
           card={insightCard(home.research, INSIGHT_OF_THE_DAY)}
+          /* Ellie: "there should be a button on the insight of the day page
+             that allows users to save this to relationship journal." The words
+             kept are the finding itself with its source under it, which is
+             what the card shows and what makes it worth keeping. */
+          journal={`${home.research.body}\n\n${home.research.source}`}
           style={home.storycardStyle as never}
           onClose={() => setInsightOpen(false)}
         />
@@ -1124,7 +1156,15 @@ function Shell({ children }: { children: React.ReactNode }) {
      the lockup takes the light tone. Nothing else is written straight onto it:
      the tools are white cards, the insight is white type, and the sheet is its
      own surface. */
-  return <TabScreen groundColors={LearnGround} groundTone="light">{children}</TabScreen>;
+  /* Ellie: "Remove the white outline around the left bubble on the mark on the
+     learn page's lockup." It is on for the Insights orange, where she asked for
+     it, and off here: on this blue the bubble's fill already has an edge, so
+     the ring was an outline around a shape that did not need one. */
+  return (
+    <TabScreen groundColors={LearnGround} groundTone="light" markOutline={false}>
+      {children}
+    </TabScreen>
+  );
 }
 
 /** The books reference's ground, in this product's blue rather than its own. */
@@ -1148,6 +1188,8 @@ const INSIGHT_OF_THE_DAY = 'Insight of the day';
 /** Her two lines on the sheet a locked tool opens. */
 const NOT_YOURS = "You don't own this";
 const SEE_MORE = 'See more details';
+/** The control beside Share on the insight banner. A placeholder, like the rest. */
+const KEEP_INSIGHT = 'Save';
 
 /**
  * Ellie: "Make sure the learn page bg is an attune-branded blue", then "I

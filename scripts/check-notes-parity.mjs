@@ -210,6 +210,34 @@ for (const d of DRAWERS) {
   }
 }
 
+/**
+ * The quote on a journal entry, drawn on both surfaces.
+ *
+ * Ellie: "there should be a button on the insight of the day page that allows
+ * users to save this to relationship journal. It should save nicely in a tile
+ * with the quote and the user can add commentary about it."
+ *
+ * The quote is kept in `anchor_context`, the column that already means "the
+ * words this was made on", and the reader's commentary is the body. That is
+ * two halves of one tile, and a surface that draws only the body shows an
+ * entry that is blank, or a paragraph of commentary about something invisible.
+ *
+ * Checked on the drawers rather than on the writers, because the write is one
+ * call in one place and the drawing is what has to agree.
+ */
+for (const [who, file] of [
+  ['the website', `${ROOT}src/notes-web.jsx`],
+  ['the app', `${ROOT}attune-app/src/components/journal.tsx`],
+]) {
+  const src = readFileSync(file, 'utf8');
+  if (!/anchor_context/.test(src)) {
+    fails.push(`${who} draws a journal entry without its quote. An entry saved`
+      + ' from the insight of the day keeps the quote in anchor_context and the'
+      + " reader's own words in the body; a surface that draws only the body"
+      + ' shows a blank tile, or commentary about nothing.');
+  }
+}
+
 if (fails.length) {
   console.error('\n check-notes-parity: the two surfaces do not reach the same Notes.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);

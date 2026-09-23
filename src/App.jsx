@@ -3753,7 +3753,6 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
                 {item.title && <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>}
                 <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, lineHeight: 1.6 }}>{item.body}</div>
-                {item.reflect && <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.6, marginTop: "0.5rem", fontStyle: "italic", borderLeft: `2px solid ${item.color}55`, paddingLeft: "0.7rem" }}>{item.reflect}</div>}
               </div>
             ))}
           </div>

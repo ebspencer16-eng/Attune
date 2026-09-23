@@ -177,15 +177,40 @@ for (const [what, body] of CREATE_CASES) {
   }
 }
 
-/** The control. A private entry must still save, or the gate proves nothing. */
+/**
+ * The control. A private entry must still save, or the gate proves nothing.
+ *
+ * With a quote on it, because that is the shape the insight of the day is kept
+ * in: the quote in anchor_context and the reader's own words in the body.
+ * Ellie: "It should save nicely in a tile with the quote and the user can add
+ * commentary about it." Both halves have to reach the row, so both are checked
+ * in the body the endpoint actually posted rather than in what it answered.
+ */
 {
-  const body = { action: 'create', anchorType: JOURNAL_ANCHOR, anchorKey: '2026-09-20', body: SECRET, visibility: 'private' };
+  const QUOTE = 'It is rarely incompatibility that creates friction.';
+  const body = {
+    action: 'create', anchorType: JOURNAL_ANCHOR, anchorKey: '2026-09-20',
+    body: SECRET, anchorContext: QUOTE, visibility: 'private',
+  };
   const { out, calls: c } = await run(notes, post(body), (u, init) =>
-    (init?.method === 'POST' ? [{ id: NOTE_ID, owner_id: ME, body: SECRET, anchor_type: JOURNAL_ANCHOR, visibility: 'private' }] : []));
+    (init?.method === 'POST' ? [{ id: NOTE_ID, owner_id: ME, body: SECRET, anchor_context: QUOTE, anchor_type: JOURNAL_ANCHOR, visibility: 'private' }] : []));
   if (out?.ok === false || !wroteNotes(c)) {
     fails.push('/api/notes refused a PRIVATE journal entry, or never wrote it.'
       + ' The refusals above are then meaningless: they would pass on an'
       + ' endpoint that refuses everything. ' + JSON.stringify(out).slice(0, 200));
+  } else {
+    const written = c.find((x) => /\/rest\/v1\/notes/.test(x.url) && x.method === 'POST');
+    const row = JSON.parse(written?.body || '{}');
+    if (row.anchor_context !== QUOTE) {
+      fails.push('/api/notes dropped the quote from a journal entry. It was sent'
+        + ' as anchorContext and the row was written without anchor_context, so'
+        + ' an insight saved to the journal would come back as a comment about'
+        + ' nothing.');
+    }
+    if (row.body !== SECRET) {
+      fails.push("/api/notes dropped the reader's own words from a journal entry"
+        + ' that carried a quote.');
+    }
   }
 }
 

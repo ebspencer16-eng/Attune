@@ -178,6 +178,17 @@ const COMMS_PROTOCOL_LIMIT = 3;
 const MENU_TINT = '#FDF0EB';
 
 /**
+ * What a column shows when that partner chose nothing.
+ *
+ * An element rather than a branch in the JSX, because a JSX comment cannot sit
+ * in a conditional's return position and this one needs the exemption comment
+ * that check-markable-prose asks for. Out here it is an ordinary statement and
+ * the reason can be written on the line above it.
+ */
+// not markable: a dash standing in for an answer nobody gave.
+const NO_ANSWER = <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.45)' }}>{'\u2014'}</Text>;
+
+/**
  * Why a section someone owns cannot open yet.
  *
  * Mapped from the server's own reason rather than inferred, so the app never
@@ -842,6 +853,7 @@ export default function Results({
                   if (g.id === activeGroup?.id) centreNav();
                 }}
                 style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {/* not markable: a bullet between two counts. */}
                 {i > 0 ? (
                   <Text style={{ ...Type.small, fontSize: 11, color: c.border }}>{'  \u2022  '}</Text>
                 ) : null}
@@ -853,6 +865,7 @@ export default function Results({
                   /* Straight to the section's overview, which is its first
                      page, or to the section itself when it has no pages. */
                   onPress={() => rememberSection(g.children?.length ? g.children[0].id : g.id)}>
+                  {/* not markable: the section nav, which Ellie excluded by name. */}
                   <Text
                     numberOfLines={1}
                     style={{
@@ -1388,7 +1401,7 @@ function ExpectationsOverview({
     <PageTile ground={ground} locations={groundStops}>
       <StepCount step={step} onDark />
       <>
-          <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
+          <Prose style={{ ...Type.hero, color: Palette.white }}>{title}</Prose>
 
           <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
             <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)' }}>
@@ -1421,9 +1434,9 @@ function ExpectationsOverview({
                 const bar = pct >= 80 ? '#10b981' : pct >= 50 ? '#F5B841' : '#E8673A';
                 return (
                   <View key={cat.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                    <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 104 }}>
+                    <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 104 }}>
                       {cat.label}
-                    </Text>
+                    </Prose>
                     <View style={{ flex: 1, height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                       <View style={{ width: `${pct}%`, height: 6, backgroundColor: bar, borderRadius: 999 }} />
                     </View>
@@ -1447,9 +1460,9 @@ function ExpectationsOverview({
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.sm }}>
                 Conversations to have
               </Text>
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.62)', marginBottom: Spacing.md, lineHeight: 19 }}>
+              <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.62)', marginBottom: Spacing.md, lineHeight: 19 }}>
                 {`${gaps.length} topic${gaps.length !== 1 ? 's' : ''} where your assumptions differ, across ${conversations.length} area${conversations.length !== 1 ? 's' : ''}. Open an area to see its full list.`}
-              </Text>
+              </Prose>
               <View style={{ gap: Spacing.md }}>
                 {conversations.map((cat) => (
                   <CategoryDrawer
@@ -1511,6 +1524,7 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
           backgroundColor: 'rgba(255,255,255,0.09)',
         }}>
         <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.95)', flex: 1 }}>{label}</Text>
+        {/* not markable: a count of topics the app computes from the list it just drew. */}
         <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.75)' }}>
           {`${items.length} topic${items.length !== 1 ? 's' : ''}`}
         </Text>
@@ -1534,7 +1548,7 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
                   backgroundColor: 'rgba(255,255,255,0.12)',
                 }}
               />
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.88)', flex: 1, lineHeight: 19 }}>{it}</Text>
+              <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.88)', flex: 1, lineHeight: 19 }}>{it}</Prose>
             </View>
           ))}
         </View>
@@ -1598,7 +1612,7 @@ function ExpectationsConversation({
     <PageTile ground={stops} locations={groundStops}>
           <StepCount step={position ?? null} onDark />
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-            <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{bucket.label}</Text>
+            <Prose style={{ ...Type.title, color: Palette.white, flex: 1 }}>{bucket.label}</Prose>
             {/* The count moved to the top left, where Ellie asked for it and
                 where every other detail page now carries it. */}
           </View>
@@ -1691,9 +1705,9 @@ function ExpectationsConversation({
                     paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                     borderTopColor: `${accent}20`, borderTopWidth: i === 0 ? 0 : 1,
                   }}>
-                  <Text style={{ ...Type.small, fontSize: 11, color: c.text, width: CONVO_COL.item, paddingRight: Spacing.sm, lineHeight: 15 }}>
+                  <Prose style={{ ...Type.small, fontSize: 11, color: c.text, width: CONVO_COL.item, paddingRight: Spacing.sm, lineHeight: 15 }}>
                     {row.item}
-                  </Text>
+                  </Prose>
                   <ConversationCell value={lived ? row.youExperienced : row.you} muted={lived} tint={c.textStrong} />
                   <ConversationCell value={lived ? row.themExperienced : row.them} muted={lived} tint={c.textMuted} />
                 </View>
@@ -1719,6 +1733,7 @@ function ExpectationsConversation({
                   borderBottomColor: ALIGNED_BORDER, borderBottomWidth: 1,
                 }}>
                 <Text style={{ ...Type.eyebrow, color: ALIGNED_ACCENT, flex: 1 }}>Already aligned</Text>
+                {/* not markable: a count of items the app computes from the list it just drew. */}
                 <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
                   {`${matched.length} item${matched.length !== 1 ? 's' : ''}`}
                 </Text>
@@ -1731,11 +1746,11 @@ function ExpectationsConversation({
                     paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                     borderTopColor: ALIGNED_BORDER, borderTopWidth: i === 0 ? 0 : 1,
                   }}>
-                  <Text style={{ ...Type.small, fontSize: 12, color: ALIGNED_TEXT, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
+                  <Prose style={{ ...Type.small, fontSize: 12, color: ALIGNED_TEXT, flex: 1.6, paddingRight: Spacing.sm, lineHeight: 17 }}>
                     {row.item}
-                  </Text>
+                  </Prose>
                   <View style={{ flex: 1 }}>
-                    <Text
+                    <Prose
                       style={{
                         ...Type.small, fontSize: 12, fontWeight: '600',
                         color: ALIGNED_TEXT, textAlign: 'center',
@@ -1743,15 +1758,15 @@ function ExpectationsConversation({
                         paddingVertical: 2, paddingHorizontal: 4,
                       }}>
                       {row.you || '\u2014'}
-                    </Text>
+                    </Prose>
                   </View>
                 </View>
               ))}
               {!gaps.length ? (
                 <View style={{ paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, borderTopColor: ALIGNED_BORDER, borderTopWidth: 1 }}>
-                  <Text style={{ ...Type.small, fontSize: 12, color: ALIGNED_ACCENT }}>
+                  <Prose style={{ ...Type.small, fontSize: 12, color: ALIGNED_ACCENT }}>
                     {`Fully aligned here. You and ${them} are on the same page across all ${matched.length} item${matched.length !== 1 ? 's' : ''}.`}
-                  </Text>
+                  </Prose>
                 </View>
               ) : null}
             </View>
@@ -1768,7 +1783,7 @@ function ConversationCell({
   value, muted, tint,
 }: { value?: string | null; muted?: boolean; tint: string }) {
   return (
-    <Text
+    <Prose
       style={{
         ...Type.small, fontSize: 11, fontWeight: muted ? '600' : '700',
         fontStyle: muted ? 'italic' : 'normal',
@@ -1776,7 +1791,7 @@ function ConversationCell({
         width: CONVO_COL.person, textAlign: 'center', lineHeight: 15,
       }}>
       {value || '\u2014'}
-    </Text>
+    </Prose>
   );
 }
 
@@ -1839,9 +1854,9 @@ function ExpectationRowView({
         backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
         borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
       }}>
-      <Text style={{ ...Type.cardTitle, color: c.textStrong }}>{row.item}</Text>
+      <Prose style={{ ...Type.cardTitle, color: c.textStrong }}>{row.item}</Prose>
       {row.prompt ? (
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{row.prompt}</Text>
+        <Prose style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{row.prompt}</Prose>
       ) : null}
 
       {/* ── FOUR VALUES, NOT TWO ────────────────────────────────────────
@@ -1861,12 +1876,14 @@ function ExpectationRowView({
         ].map((side) => (
           <View key={side.name} style={{ flex: 1 }}>
             <Text style={{ ...Type.eyebrow, color: side.tint }}>{side.name}</Text>
+            {/* not markable: a column heading, written here rather than sent. */}
             <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.xs }}>
               {EXPECTS_LABEL}
             </Text>
             <Prose style={{ ...Type.body, color: c.text }}>{side.expects}</Prose>
             {side.lived ? (
               <>
+                {/* not markable: a column heading, written here rather than sent. */}
                 <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.sm }}>
                   {EXPERIENCED_LABEL}
                 </Text>
@@ -1897,6 +1914,7 @@ function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
       <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border, overflow: 'hidden' }}>
         <View style={{ width: `${Math.max(3, pct)}%`, height: 6, backgroundColor: c.accentQuiet }} />
       </View>
+      {/* not markable: a three-way state label the app picks, not a finding. */}
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
         {state === 'aligned' ? 'Close together'
           : state === 'discuss' ? 'Somewhat apart'
@@ -1937,7 +1955,7 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
             gone. Both surfaces led with the two names, which does not say what
             the page is, and the line came in four variants nobody had asked
             for. The title is the server's, so neither surface can drift. */}
-        <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
+        <Prose style={{ ...Type.hero, color: Palette.white }}>{title}</Prose>
 
           {/* One panel, a row per dimension, each partner on the track. The app
               drew a card per dimension carrying one distance bar, which is a
@@ -1968,14 +1986,15 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
             <View style={{ gap: Spacing.sm }}>
               {data.dimensions.map((d) => (
                 <View key={d.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                  <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 100, lineHeight: 15 }}>
+                  <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 100, lineHeight: 15 }}>
                     {d.label}
-                  </Text>
+                  </Prose>
                   <View style={{ flex: 1, height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.12)', overflow: 'hidden' }}>
                     {d.alignedPct != null ? (
                       <View style={{ width: `${d.alignedPct}%`, height: 6, borderRadius: 999, backgroundColor: alignedTone(d.alignedPct) }} />
                     ) : null}
                   </View>
+                  {/* not markable: a percentage, or a dash when there is none. */}
                   <Text
                     style={{
                       ...Type.small, fontSize: 11, fontWeight: '700', width: 46, textAlign: 'right',
@@ -2027,6 +2046,7 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
                   {/* The website's card: "Talk about frequency" and the
                       question under it, rather than the dimension's name as a
                       label. */}
+                  {/* not markable: the label on a button, built from the dimension name. */}
                   <Text style={{ ...Type.cardTitle, color: Palette.white }}>
                     {`Talk about ${d.label.toLowerCase()}`}
                   </Text>
@@ -2073,9 +2093,9 @@ function IntimacyDomainView({
   return (
     <PageTile ground={ground}>
       <StepCount step={step} onDark />
-      <Text style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
+      <Prose style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
         {domain.label}
-      </Text>
+      </Prose>
 
       {/* ── ONE PANEL, ONE ROW PER ASPECT ────────────────────────────────
           The Communication pages' "Overall orientation" panel, with intimacy's
@@ -2106,6 +2126,7 @@ function IntimacyDomainView({
                 <View key={q.id}>
                   {[{ name: you, list: q.you }, { name: them, list: q.them }].map((side) => (
                     <View key={side.name} style={{ marginTop: Spacing.sm }}>
+                      {/* not markable: whose column this is. A name, not a finding. */}
                       <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
                         {side.name}
                       </Text>
@@ -2119,11 +2140,10 @@ function IntimacyDomainView({
                               backgroundColor: 'rgba(255,255,255,0.10)',
                               paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
                             }}>
+                            {/* not markable: an axis label the app supplies. */}
                             <Text style={{ ...Type.small, color: Palette.white }}>{label}</Text>
                           </View>
-                        )) : (
-                          <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.45)' }}>{'\u2014'}</Text>
-                        )}
+                        )) : NO_ANSWER}
                       </View>
                     </View>
                   ))}
@@ -2256,7 +2276,7 @@ function ReflectionOverview({ data, title, ground, groundStops, step = null }: {
         {/* Ellie: the title "should read Relationship Reflection" and the line
             under it goes. It led with the two names and then a sentence saying
             what the four ratings below it already say. */}
-        <Text style={{ ...Type.hero, color: Palette.white }}>{title}</Text>
+        <Prose style={{ ...Type.hero, color: Palette.white }}>{title}</Prose>
 
         {/* block: reflection-overview/ratings */}
         {rows.length ? (
@@ -2278,13 +2298,14 @@ function ReflectionOverview({ data, title, ground, groundStops, step = null }: {
             </Text>
             {rows.map((r) => (
               <View key={r.key} style={{ marginBottom: Spacing.sm }}>
-                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.85)', fontWeight: '500', marginBottom: 2 }}>
+                <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.85)', fontWeight: '500', marginBottom: 2 }}>
                   {r.short || r.question}
-                </Text>
+                </Prose>
                 {/* Two rows of filled steps rather than two marks on a track.
                     It is the website's drawing of the same numbers, and it
                     reads at a glance, which is the name of the page. */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
                   <Text
                     numberOfLines={2}
                     style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.72)', width: 62, textAlign: 'right', lineHeight: 12 }}>
@@ -2305,6 +2326,7 @@ function ReflectionOverview({ data, title, ground, groundStops, step = null }: {
                       </View>
                     ))}
                   </View>
+                  {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
                   <Text
                     numberOfLines={2}
                     style={{ ...Type.small, fontSize: 9, color: 'rgba(255,255,255,0.72)', width: 62, lineHeight: 12 }}>
@@ -2317,6 +2339,7 @@ function ReflectionOverview({ data, title, ground, groundStops, step = null }: {
               {[{ n: data.names.you, col: YOU_COLOR }, { n: data.names.them, col: THEM_COLOR }].map((x) => (
                 <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
                   <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: x.col }} />
+                  {/* not markable: a count beside a bar. */}
                   <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{x.n}</Text>
                 </View>
               ))}
@@ -2403,9 +2426,9 @@ function WrittenPair({
           pair since this page existed; the app printed the two answers and
           stopped, which is the half that does the work. */}
       {prompt ? (
-        <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontFamily: Fonts.bodyItalic, marginTop: Spacing.sm, lineHeight: 19 }}>
+        <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.7)', fontFamily: Fonts.bodyItalic, marginTop: Spacing.sm, lineHeight: 19 }}>
           {prompt}
-        </Text>
+        </Prose>
       ) : null}
     </>
   );
@@ -2424,11 +2447,11 @@ function ReflectionHead({ page }: { page?: { title: string; sub?: string } | nul
   if (!page?.title) return null;
   return (
     <View style={{ marginBottom: Spacing.lg }}>
-      <Text style={{ ...Type.title, color: Palette.white }}>{page.title}</Text>
+      <Prose style={{ ...Type.title, color: Palette.white }}>{page.title}</Prose>
       {page.sub ? (
-        <Text style={{ ...Type.small, color: INK_QUIET, marginTop: Spacing.sm, lineHeight: 19 }}>
+        <Prose style={{ ...Type.small, color: INK_QUIET, marginTop: Spacing.sm, lineHeight: 19 }}>
           {page.sub}
-        </Text>
+        </Prose>
       ) : null}
     </View>
   );
@@ -2516,6 +2539,7 @@ function ReflectionRatings({ data, step = null, ground = null, groundStops = nul
                   <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.8)', marginBottom: Spacing.xs }}>
                     {x.from} admires
                   </Text>
+                  {/* not markable: a number, with its subject in the line under it. */}
                   <Text style={{ ...Type.cardTitle, color: Palette.white }}>{x.val}</Text>
                   <Text style={{ ...Type.small, color: INK_QUIET, marginTop: 2 }}>in {x.about}</Text>
                 </View>
@@ -2638,7 +2662,7 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
 
   return (
     <View>
-      <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md }}>{r.short || r.question}</Text>
+      <Prose style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.md }}>{r.short || r.question}</Prose>
       {/* ── THE POLES SIT LEVEL WITH THE BAR ───────────────────────────
           Ellie: "pole labels on how you each rated should be middle aligned
           with the bar itself."
@@ -2732,6 +2756,7 @@ function DotLabel({ pct, text, color }: { pct: number; text: string; color: stri
         position: 'absolute', left: `${pct}%`, marginLeft: -50, width: 100,
         alignItems: align,
       }}>
+      {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
       <Text
         numberOfLines={2}
         style={{
@@ -2872,9 +2897,9 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
                       <Text style={{ ...Type.eyebrow, fontSize: 9, color: Palette.orange, marginTop: 2 }}>
                         {label}
                       </Text>
-                      <Text style={{ ...Type.small, color: Palette.white, flex: 1, lineHeight: 20 }}>
+                      <Prose style={{ ...Type.small, color: Palette.white, flex: 1, lineHeight: 20 }}>
                         {w.prompt}
-                      </Text>
+                      </Prose>
                     </View>
                   ) : null}
                 </View>
@@ -2938,7 +2963,9 @@ function PriorityPair({ you, them, yours, theirs, note }: {
           <Eyebrow color={YOU_COLOR}>{you}</Eyebrow>
           {yours.map((item, i) => (
             <View key={item} style={{ height: ROW, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
               <Text numberOfLines={1} style={{ ...Type.small, color: c.text, textAlign: 'right' }}>{item}</Text>
+              {/* not markable: a rank number the app generates. */}
               <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: YOU_COLOR, opacity: 0.6 }}>
                 {`#${i + 1}`}
               </Text>
@@ -2973,9 +3000,12 @@ function PriorityPair({ you, them, yours, theirs, note }: {
           <Eyebrow color={THEM_ON_DARK}>{them}</Eyebrow>
           {theirs.map((item, i) => (
             <View key={item} style={{ height: ROW, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              {/* not markable: a rank number the app generates, not a finding. */}
               <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: THEM_ON_DARK, opacity: 0.8 }}>
                 {`#${i + 1}`}
               </Text>
+              {/* not markable: numberOfLines truncates, and Prose lays words
+                  out itself, so it cannot honour a line limit. */}
               <Text numberOfLines={1} style={{ ...Type.small, color: c.text }}>{item}</Text>
             </View>
           ))}
@@ -2984,7 +3014,7 @@ function PriorityPair({ you, them, yours, theirs, note }: {
 
       {note ? (
         <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, borderTopColor: c.border, borderTopWidth: 1, backgroundColor: Palette.warm }}>
-          <Text style={{ ...Type.small, color: c.textMuted, lineHeight: 18 }}>{note}</Text>
+          <Prose style={{ ...Type.small, color: c.textMuted, lineHeight: 18 }}>{note}</Prose>
         </View>
       ) : null}
     </View>
@@ -3161,7 +3191,9 @@ function NextGroup({
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           gap: Spacing.sm, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
         }}>
+        {/* not markable: the header of a collapsible section, which is a control. */}
         <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{label}</Text>
+        {/* not markable: a count of what is inside that section. */}
         <Text style={{ ...Type.small, color: c.textMuted }}>
           {`${items.length} item${items.length !== 1 ? 's' : ''}`}
         </Text>
@@ -3192,15 +3224,16 @@ function NextGroup({
               {item.say ? (
                 <View style={{ flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.xs }}>
                   <Text style={{ ...Type.eyebrow, fontSize: 9, color, marginTop: 3 }}>Try</Text>
-                  <Text style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic, flex: 1, lineHeight: 19 }}>
+                  <Prose style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic, flex: 1, lineHeight: 19 }}>
                     {item.say}
-                  </Text>
+                  </Prose>
                 </View>
               ) : null}
             </View>
           ))}
           <Pressable
       accessibilityRole="button" onPress={onOpen} style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+            {/* not markable: the label on a button, built here rather than sent. */}
             <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
               {`Open ${label} \u2192`}
             </Text>
@@ -3214,6 +3247,8 @@ function NextGroup({
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
     <PageTile>
+        {/* not markable: the heading of a waiting screen, gone when the
+            partner answers, so a mark on it would outlive its words. */}
         <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
         {/* not markable: the app saying a section is not ready, not a finding.
             It is gone the moment the partner answers, so a mark anchored to it
@@ -3306,6 +3341,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
      * trade to leave silent, so check-dimension-order.mjs measures it.
      */
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26 }}>
+      {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
       <Text
         numberOfLines={1}
         style={{ ...Type.small, fontSize: 11, lineHeight: 14, color: 'rgba(255,255,255,0.65)', width: GLANCE_LABEL_W }}>
@@ -3375,9 +3411,9 @@ function Glance({
               type header and description line below, that info was just
               covered on the couple type page." The title comes from the
               server's pageTitles, so the website cannot say something else. */}
-          <Text style={{ ...Type.hero, color: Palette.white }}>
+          <Prose style={{ ...Type.hero, color: Palette.white }}>
             {title}
-          </Text>
+          </Prose>
 
           {dims.length ? (
             <View style={{ marginTop: Spacing.xl }}>
@@ -3390,6 +3426,7 @@ function Glance({
                   {[{ n: you, col: GLANCE_YOU }, { n: them, col: GLANCE_THEM }].map((x) => (
                     <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
                       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: x.col }} />
+                      {/* not markable: a count beside a bar. */}
                       <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{x.n}</Text>
                     </View>
                   ))}
@@ -3423,23 +3460,14 @@ function Glance({
                   }}>
                   <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.95)' }}>{tile.label}</Text>
                   {tile.title ? (
-                    <Text style={{ ...Type.small, fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginTop: Spacing.xs }}>
+                    <Prose style={{ ...Type.small, fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginTop: Spacing.xs }}>
                       {tile.title}
-                    </Text>
+                    </Prose>
                   ) : null}
                   {tile.body ? (
-                    <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.6)', marginTop: Spacing.xs, lineHeight: 20 }}>
+                    <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.6)', marginTop: Spacing.xs, lineHeight: 20 }}>
                       {tile.body}
-                    </Text>
-                  ) : null}
-                  {/* Ellie: "our third action plan item has an additional note on
-                      the site that isn't included on the app." It arrives on the
-                      payload and nothing drew it, so the hardest domain's tile was
-                      missing the one line that says what to do with it. */}
-                  {tile.reflect ? (
-                    <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.72)', marginTop: Spacing.sm, lineHeight: 20 }}>
-                      {tile.reflect}
-                    </Text>
+                    </Prose>
                   ) : null}
                 </View>
               ))}
@@ -3486,9 +3514,9 @@ function CoupleType({ results, you, them, title }: {
             read as different pages while both claimed the same six blocks.
 
             The line is the website's, word for word. */}
-        <Text style={{ ...Type.hero, color: c.textStrong }}>
+        <Prose style={{ ...Type.hero, color: c.textStrong }}>
           {title}
-        </Text>
+        </Prose>
 
         <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xl, marginBottom: Spacing.xs }}>
           Your couple map
@@ -3503,7 +3531,7 @@ function CoupleType({ results, you, them, title }: {
             what it is: a note on how the thing below was worked out, before
             you look at it. */}
         {(results.content?.mapCaption || []).map((para, i) => (
-          <Text
+          <Prose
             key={i}
             style={{
               ...Type.small, fontSize: 12, lineHeight: 17,
@@ -3511,7 +3539,7 @@ function CoupleType({ results, you, them, title }: {
               marginBottom: Spacing.sm,
             }}>
             {para}
-          </Text>
+          </Prose>
         ))}
 
         {/* The map. It was missing entirely: the positions were in the payload
@@ -3551,7 +3579,7 @@ function CoupleType({ results, you, them, title }: {
           {(results.content?.axes || []).map((ax) => (
             <View key={ax.id} style={{ flex: 1, borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.sm }}>
               <Text style={{ ...Type.eyebrow, color: ax.color, marginBottom: Spacing.xs }}>{ax.label}</Text>
-              <Text style={{ ...Type.small, color: c.text }}>{ax.desc}</Text>
+              <Prose style={{ ...Type.small, color: c.text }}>{ax.desc}</Prose>
             </View>
           ))}
         </View>
@@ -3573,13 +3601,15 @@ function CoupleType({ results, you, them, title }: {
           .map((p) => (
             <View key={p.name} style={{ ...card(), marginBottom: Spacing.sm, borderTopColor: p.color, borderTopWidth: 4 }}>
               <Text style={{ ...Type.eyebrow, color: p.color }}>{p.name}</Text>
-              <Text style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>{p.typeName}</Text>
+              <Prose style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>{p.typeName}</Prose>
               <Prose style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Prose>
               <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
                 {p.rows.map((r) => (
                   <View key={r.axis}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                      {/* not markable: a row label in a key. */}
                       <Text style={{ ...Type.small, color: c.textMuted }}>{r.label}</Text>
+                      {/* not markable: the value in a key, beside its label. */}
                       <Text style={{ ...Type.small, color: p.color, fontWeight: '600' }}>{r.value}</Text>
                     </View>
                     {/* The bar is the same 0..1 the website draws, so a reader
@@ -3619,6 +3649,7 @@ function CoupleType({ results, you, them, title }: {
           {/* The watermark. Positioned rather than laid out, so it cannot
               push the name around when a type name is long, and clipped by
               the tile's overflow like the website's is. */}
+          {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
           <Text
             pointerEvents="none"
             numberOfLines={1}
@@ -3629,9 +3660,9 @@ function CoupleType({ results, you, them, title }: {
             }}>
             {(type.name || '').replace(/^The /, '')}
           </Text>
-          <Text style={{ ...Type.hero, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }}>
+          <Prose style={{ ...Type.hero, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }}>
             {type.name}
-          </Text>
+          </Prose>
           <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.9)', fontWeight: '500', marginTop: Spacing.sm }}>
             {interp(type.tagline, you, them)}
           </Prose>
@@ -3847,9 +3878,9 @@ function Cover({ title, accent, icon, onStart }: {
 
           {/* not markable: the section's own name, which is a label rather than
               a finding. A mark anchored to it would follow the word. */}
-          <Text style={{ ...Type.hero, color: c.textStrong, textAlign: 'center', marginTop: Spacing.lg }}>
+          <Prose style={{ ...Type.hero, color: c.textStrong, textAlign: 'center', marginTop: Spacing.lg }}>
             {title}
-          </Text>
+          </Prose>
 
           {onStart ? (
             <Pressable
@@ -3899,9 +3930,9 @@ function Domain({
           <StepCount step={step} onDark />
           {/* No exercise-name eyebrow. "Communication" over a page already
               reached from a tab called Comms is a label on a label. */}
-          <Text style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
+          <Prose style={{ ...Type.title, color: Palette.white, marginBottom: Spacing.md }}>
             {title}
-          </Text>
+          </Prose>
 
           {/* The paragraph the website opens every domain page with. The app
               had none, because the words were inline in src/App.jsx and had
@@ -4045,7 +4076,7 @@ function SideBySide({
                     <Text style={{ fontSize: 7, fontWeight: '800', color: Palette.white }}>{it.ini}</Text>
                   ) : null}
                 </View>
-                <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{it.text}</Text>
+                <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{it.text}</Prose>
               </View>
             ))}
           </View>
@@ -4199,9 +4230,9 @@ function SbsQuestion({
 
   return (
     <View>
-      <Text style={{ ...Type.small, fontWeight: '600', color: Palette.white, marginBottom: Spacing.sm, lineHeight: 19 }}>
+      <Prose style={{ ...Type.small, fontWeight: '600', color: Palette.white, marginBottom: Spacing.sm, lineHeight: 19 }}>
         {row.text}
-      </Text>
+      </Prose>
       {/* ── THE ROW REACHES THE TILE EDGE ──────────────────────────────
           Widening the labels took its width out of the bar, and the bar is
           the thing being read. Ellie: "I don't want the bars any more narrow
@@ -4226,6 +4257,7 @@ function SbsQuestion({
             <SbsDot pct={pThem} dy={dyThem} color={P} label={pInit} />
           </View>
         </View>
+        {/* not markable: the right-hand pole of a scale, which is a scale label. */}
         <Text style={pole}>{row.right}</Text>
       </View>
     </View>
@@ -4324,6 +4356,7 @@ function Slider({
           ).map(([name, colour]) => (
             <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colour }} />
+              {/* not markable: whose bar this is. A name, not a finding. */}
               <Text style={{ ...Type.small, fontSize: 11, color: onDark ? 'rgba(255,255,255,0.6)' : c.textMuted }}>{name}</Text>
             </View>
           ))}
@@ -4374,6 +4407,7 @@ function SliderRow({
           own heading, so a second copy of it over the bar is the page saying
           the same word twice. An empty Text still takes a line, so it is not
           drawn rather than drawn empty. */}
+      {/* not markable: a legend label. */}
       {label ? (
         <Text style={{ ...Type.small, fontWeight: '700', color: onDark ? Palette.white : c.textStrong }}>{label}</Text>
       ) : null}
@@ -4384,6 +4418,7 @@ function SliderRow({
         <View style={{ flex: 1, paddingHorizontal: 13 }}>
           <Slider you={you} them={them} youName={youName} themName={themName} onDark={onDark} />
         </View>
+        {/* not markable: the right-hand pole of a scale. */}
         <Text style={pole}>{right}</Text>
       </View>
     </View>
@@ -4488,6 +4523,7 @@ function Legend({ you, them }: { you: string; them: string }) {
               {initial(name)}
             </Text>
           </View>
+          {/* not markable: whose row this is. A name, not a finding. */}
           <Text style={{ ...Type.small, color: c.textMuted }}>{name}</Text>
         </View>
       ))}

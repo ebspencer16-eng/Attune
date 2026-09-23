@@ -242,9 +242,9 @@ function Glance({ data, title, ground, groundStops }: {
         {/* Ellie: "Conflict: should be titled 'Conflict Styles'". The page led
             with the couple's names on both surfaces, which does not say what
             the page is. From the server, so neither can drift. */}
-        <Text style={{ ...Type.hero, color: Palette.white }}>
+        <Prose style={{ ...Type.hero, color: Palette.white }}>
           {title}
-        </Text>
+        </Prose>
 
         {/* block: conflict-overview/overall */}
         {overalls.length ? (
@@ -263,10 +263,11 @@ function Glance({ data, title, ground, groundStops }: {
             {overalls.map((r) => (
               <View key={r.name} style={{ marginBottom: Spacing.md }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: Spacing.xs }}>
+                  {/* not markable: whose answer this is. A name, not a finding. */}
                   <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{r.name}</Text>
-                  <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.8)' }}>
+                  <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.8)' }}>
                     {labels[r.value as number] || ''}
-                  </Text>
+                  </Prose>
                 </View>
                 {/* The bar carries the answer's own colour rather than white:
                     the five answers run from "we work it out" to "it goes
@@ -301,9 +302,9 @@ function Glance({ data, title, ground, groundStops }: {
           <Text style={{ ...Type.eyebrow, fontSize: 9, color: GLANCE_LABEL }}>
             Your action plan
           </Text>
-          <Text style={{ ...Type.small, fontSize: 11, fontWeight: '600', color: PRIVATE_RED }}>
+          <Prose style={{ ...Type.small, fontSize: 11, fontWeight: '600', color: PRIVATE_RED }}>
             {content.copy.glancePrivate || '*private to you'}
-          </Text>
+          </Prose>
         </View>
         {worth.length ? (
           <View style={{ gap: Spacing.md }}>
@@ -319,9 +320,10 @@ function Glance({ data, title, ground, groundStops }: {
                       stays on the Patterns detail page, where a card sits alone
                       under its own bar. */}
                   <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'baseline', gap: Spacing.md }}>
+                    {/* not markable: the name of the pattern this bar measures, which is a label. */}
                     <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{titleFor(p.key)}</Text>
                   </View>
-                  <Text style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xs }}>{action.title}</Text>
+                  <Prose style={{ ...Type.cardTitle, color: Palette.white, marginTop: Spacing.xs }}>{action.title}</Prose>
                   <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)', marginTop: Spacing.xs }}>{action.body}</Prose>
                 </View>
               );
@@ -330,9 +332,9 @@ function Glance({ data, title, ground, groundStops }: {
         ) : (
           <View style={darkCard}>
             {content.noActionNeeded?.title ? (
-              <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.xs }}>
+              <Prose style={{ ...Type.cardTitle, color: Palette.white, marginBottom: Spacing.xs }}>
                 {content.noActionNeeded.title}
-              </Text>
+              </Prose>
             ) : null}
             <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>
               {content.noActionNeeded?.body || content.copy.allClear || ''}
@@ -382,7 +384,7 @@ function PageHead({
         {/* White, because the three Conflict detail pages moved onto the
             section's own gradient. The same miss as ReflectionHead: the panels
             below were converted and the heading above them was not. */}
-        <Text style={{ ...Type.title, color: Palette.white, flex: 1 }}>{title}</Text>
+        <Prose style={{ ...Type.title, color: Palette.white, flex: 1 }}>{title}</Prose>
         {/* ── NO BADGE ON THE DETAIL PAGES ────────────────────────────────
             Ellie: "Remove shared pill from conflict snapshot page and just for
             you pill on your patterns page."
@@ -444,6 +446,7 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
                 marginTop: i === 0 ? 0 : Spacing.md,
                 borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
               }}>
+              {/* not markable: a row label above the two answers it introduces. */}
               <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>{row.label}</Text>
               <View style={{ flexDirection: 'row', gap: Spacing.md }}>
                 <SnapshotCell name={names.you} text={chipText(chips, mine)} own />
@@ -499,9 +502,9 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
             doubling: a margin above the rule and a padding below it. */}
         {you.strength || partner?.strength ? (
           <View style={{ marginTop: Spacing.md, borderTopColor: PANEL_EDGE, borderTopWidth: 1, paddingTop: Spacing.md }}>
-            <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>
+            <Prose style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>
               {content.resetQuestion}
-            </Text>
+            </Prose>
             {/* The website puts these two in the same pills as the rows
                 above, side by side. They were the old dot-and-name rows, which
                 is the shape the snapshot table has just left behind. */}
@@ -594,13 +597,15 @@ function Patterns({
                 marginTop: i === 0 ? 0 : Spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
               }}>
+              {/* not markable: the name of a pattern, which labels the block under it. */}
               <Text style={{ ...Type.cardTitle, color: Palette.white }}>{titleFor(p.key)}</Text>
               {definition ? (
-                <Text style={{ ...Type.small, color: INK_QUIET, marginTop: 2 }}>{definition}</Text>
+                <Prose style={{ ...Type.small, color: INK_QUIET, marginTop: 2 }}>{definition}</Prose>
               ) : null}
 
               {/* Frequency named above the bar, in the bar's own colour, so the
                   colour is never the only thing carrying the meaning. */}
+              {/* not markable: a band label the app picks from the score. */}
               <Text style={{ ...Type.small, color, fontWeight: '700', textAlign: 'right', marginTop: Spacing.md }}>
                 {label}
               </Text>
@@ -630,7 +635,7 @@ function Patterns({
                     {adviceLabel}
                   </Text>
                   {v >= 2 && advice.title ? (
-                    <Text style={{ ...Type.cardTitle, color: Palette.white, marginBottom: 2 }}>{advice.title}</Text>
+                    <Prose style={{ ...Type.cardTitle, color: Palette.white, marginBottom: 2 }}>{advice.title}</Prose>
                   ) : null}
                   <Prose style={{ ...Type.body, color: INK }}>{advice.body || ''}</Prose>
                 </View>
@@ -752,9 +757,9 @@ function SnapshotCell({ name, text, own = false }: { name: string; text: string;
           borderColor: own ? `${accentBlue}33` : c.border, borderWidth: 1,
           borderRadius: Radius.pill, paddingVertical: 5, paddingHorizontal: Spacing.md,
         }}>
-        <Text style={{ ...Type.small, fontWeight: '600', color: own ? accentBlue : c.textMuted }}>
+        <Prose style={{ ...Type.small, fontWeight: '600', color: own ? accentBlue : c.textMuted }}>
           {text}
-        </Text>
+        </Prose>
       </View>
     </View>
   );
@@ -779,8 +784,9 @@ function RepairColumn({ title, items, accent }: {
           makes the column read as an order rather than a list. */}
       {(items || []).slice(0, 3).map((item, i) => (
         <View key={item} style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm }}>
+          {/* not markable: a step number the app generates. */}
           <Text style={{ ...Type.small, fontWeight: '700', color: accent || Palette.white }}>{i + 1}</Text>
-          <Text style={{ ...Type.small, color: INK, flex: 1 }}>{item}</Text>
+          <Prose style={{ ...Type.small, color: INK, flex: 1 }}>{item}</Prose>
         </View>
       ))}
       {!items?.length ? <Text style={{ ...Type.small, color: INK_QUIET }}>Not answered.</Text> : null}

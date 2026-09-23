@@ -42,14 +42,15 @@
  * these are the one part of results meant to be shown to someone else.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, SafeAreaView,
   ScrollView, StyleSheet, Text, View,
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
@@ -57,6 +58,10 @@ import type { HighlightCard, PersonResults } from '@/api/client';
 import { SITE_URL } from '@/api/client';
 import ShareButton from '@/components/share-button';
 import CoupleMap from '@/components/couple-map';
+import { SaveToJournal } from '@/components/journal';
+
+/** The control that keeps a quote. A placeholder in Ellie's house style. */
+const KEEP_LABEL = 'Save to journal';
 import { ResultsScroll } from '@/components/results-scroll';
 
 /** What the couple type card needs to draw the same map the website's does. */
@@ -366,9 +371,48 @@ export function insightCard(
  * The reel's own sizing, so this is the same card at the same proportions a
  * person sees in Highlights rather than a second idea of how big a card is.
  */
-export function StoryCard({ card, onClose, style }: {
+/**
+ * ── SWIPE DOWN TO LEAVE ───────────────────────────────────────────────────
+ * Ellie: "If I'm in the insight of the day page and I swipe down it should
+ * take me out of that page. Same with the highlights clickthrough, swiping
+ * down should take you to the insights menu."
+ *
+ * Both screens are full-screen cards over the page that opened them, which is
+ * the one shape on a phone where a downward swipe means "put this back". They
+ * each had a Close in the corner and nothing else, and a corner is the hardest
+ * place on a large phone to reach with the hand holding it.
+ *
+ * `failOffsetX` is what keeps this off the deck's own gesture: the highlights
+ * are a horizontally swiping reel, so a drag that has moved sideways at all is
+ * a card change and never a dismissal. `activeOffsetY` asks for a real
+ * downward intent rather than the first pixel of one, so a fingertip settling
+ * before a horizontal swipe does not throw the page away.
+ */
+function SwipeDown({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+  const gesture = Gesture.Pan()
+    .activeOffsetY(24)
+    .failOffsetX([-14, 14])
+    .onEnd((e) => {
+      /* Distance or speed, either one. A short flick and a long slow drag are
+         both somebody putting the card down. */
+      if (e.translationY > 90 || e.velocityY > 900) runOnJS(onClose)();
+    });
+  return <GestureDetector gesture={gesture}>{children}</GestureDetector>;
+}
+
+export function StoryCard({ card, onClose, style, journal }: {
   card: HighlightCard;
   onClose: () => void;
+  /**
+   * The words to keep, when this card is one a reader can keep.
+   *
+   * Ellie: "there should be a button on the insight of the day page that
+   * allows users to save this to relationship journal." Only the insight has
+   * one: a highlight card is a picture of the reader's own results, which are
+   * already theirs and already on a page they can mark. A quote from somebody
+   * else's book is the thing that goes away.
+   */
+  journal?: string | null;
   /**
    * How a card is set, from the payload. Without it every role falls back to
    * the colour below and nothing else, which is legible and is not the
@@ -378,25 +422,55 @@ export function StoryCard({ card, onClose, style }: {
 }) {
   if (style) SC = { ...SC, ...style };
   const [box, setBox] = useState({ width: Dimensions.get('window').width, height: 0 });
+  const [keeping, setKeeping] = useState(false);
   const cardW = Math.min(box.width - Spacing.lg * 2, box.height ? box.height * SC.ratio : 9999);
   const cardH = cardW / SC.ratio;
   return (
     <Modal visible animationType="fade" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <SwipeDown onClose={onClose}>
       <SafeAreaView
         style={{ flex: 1, backgroundColor: '#0B0918' }}
         onLayout={(e) => setBox({
           width: e.nativeEvent.layout.width,
           height: e.nativeEvent.layout.height - 96,
         })}>
-        <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.md }}>
+        <View
+          style={{
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+            paddingHorizontal: Spacing.xl, paddingTop: Spacing.md,
+          }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={12}>
             <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>{'\u2039  Close'}</Text>
           </Pressable>
+          {journal ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Save this to your relationship journal"
+              onPress={() => setKeeping(true)}
+              hitSlop={12}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+                borderRadius: Radius.pill, borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.35)',
+                paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+              }}>
+              {/* Type.small, not the eyebrow. Uppercase with tracking made
+                  "Save to journal" wider than the corner it sits in and the
+                  label was cut to "SAVE TO JOU". */}
+              <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.9)' }}>
+                {KEEP_LABEL}
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
+        {keeping && journal ? (
+          <SaveToJournal quote={journal} onClose={() => setKeeping(false)} />
+        ) : null}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Card card={card} onDone={onClose} w={cardW} h={cardH} active />
         </View>
       </SafeAreaView>
+      </SwipeDown>
     </Modal>
   );
 }
@@ -513,6 +587,7 @@ function Reel({
   if (!cards.length) return null;
 
   return (
+    <SwipeDown onClose={onClose}>
     <View
       style={{ flex: 1, backgroundColor: '#0B0918' }}
       onLayout={(e) => setBox({
@@ -661,6 +736,7 @@ function Reel({
         </Round>
       </View>
     </View>
+    </SwipeDown>
   );
 }
 

@@ -234,8 +234,10 @@ export type CommsPlan = {
     dim: string;
     title: string | null;
     body: string | null;
-    /** Only on the hardest domain, matching the website. */
-    reflect?: string;
+    /* No `reflect`. It was one sentence on the hardest domain only, on a
+       summary tile whose page never carried it. Removed from the server and
+       from both renderers; check-action-tile-fields.mjs holds the three to
+       each other. */
   }[];
   /**
    * The "this week" protocols are not here any more. The app draws them where
@@ -943,8 +945,30 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
   }
 }
 
-/** The landing screen, in one call. */
-export function fetchHome() {
+/**
+ * ── FOUR TABS, ONE REQUEST ────────────────────────────────────────────────
+ * Ellie: "Pages take a long time to load in the test flight app."
+ *
+ * Measured rather than guessed. All four tabs mount when the app starts, and
+ * three of them call /api/home: Home, Insights and Notes. That is three
+ * identical round trips for one answer, every launch and every return from the
+ * background, before any of them can draw. Insights then waits for its answer
+ * before asking for results at all, so the slowest screen in the product was
+ * two serial trips behind a queue of three.
+ *
+ * So calls that overlap share one. A request already in flight is handed to
+ * whoever asks next, and the answer is held for a moment afterwards, because
+ * the second and third tabs mount milliseconds after the first rather than at
+ * the same instant.
+ *
+ * Deliberately short. This is not a cache of the home screen: it is a window
+ * in which simultaneous callers count as one caller. Pull to refresh, a tab
+ * coming into focus a second later, and every later load all go to the server.
+ */
+const HOME_SHARE_MS = 1500;
+let homeShared: { at: number; promise: ReturnType<typeof requestHome> } | null = null;
+
+function requestHome() {
   /**
    * The reader's clock goes with the request.
    *
@@ -956,6 +980,18 @@ export function fetchHome() {
    */
   const tzOffset = new Date().getTimezoneOffset();
   return request<HomeResponse & { ok: true }>(`/api/home?tzOffset=${tzOffset}`);
+}
+
+/** The landing screen, in one call. */
+export function fetchHome() {
+  const now = Date.now();
+  if (homeShared && now - homeShared.at < HOME_SHARE_MS) return homeShared.promise;
+  const promise = requestHome();
+  homeShared = { at: now, promise };
+  /* A failure is never shared: three tabs should not all inherit one dropped
+     request, and the next of them to ask should get a real attempt. */
+  promise.then((r) => { if (!r.ok && homeShared?.promise === promise) homeShared = null; });
+  return promise;
 }
 
 /**

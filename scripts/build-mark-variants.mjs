@@ -18,9 +18,24 @@
  *
  * So there are two files:
  *
- *   attune-mark-light.png   for the cream pages: the left heart cut out
- *                           rather than painted, so the page shows through it
- *   attune-mark-dark.png    for the navy: the right bubble filled white
+ *   attune-mark-light.png       for the cream pages: the left heart cut out
+ *                               rather than painted, so the page shows through
+ *   attune-mark-dark.png        for the navy: the right bubble filled white,
+ *                               and the left bubble outlined in white
+ *   attune-mark-dark-plain.png  the same, without that outline
+ *
+ * The third exists because the outline was asked for on one dark ground and
+ * asked off on another. Ellie, of the Insights landing: "please outline the
+ * left bubble in the lockup's mark in white", because on the orange the
+ * bubble's own orange end dissolves into the page. And then, of Learn: "Remove
+ * the white outline around the left bubble on the mark on the learn page's
+ * lockup", because on the blue the fill already has an edge and the ring is
+ * just a ring.
+ *
+ * It is the source SVG untouched: darkVariant's only edit is the stroke, so
+ * "dark without the outline" is the mark as drawn. Which ground gets which is
+ * a decision per screen rather than a rule, so it is a prop on BrandHeader and
+ * not something computed here.
  *
  * ── WHY GENERATED ─────────────────────────────────────────────────────────
  * Same argument as the app icon and the share card. Both are composed from
@@ -105,6 +120,7 @@ try {
   for (const [name, src] of [
     ['attune-mark-light', lightVariant(svg)],
     ['attune-mark-dark', darkVariant(svg)],
+    ['attune-mark-dark-plain', svg],
   ]) {
     await browser.goto(`data:text/html;base64,${Buffer.from(page(src)).toString('base64')}`);
     /**

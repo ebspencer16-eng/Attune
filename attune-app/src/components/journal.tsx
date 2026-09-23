@@ -63,7 +63,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
+  ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform,
   Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -220,6 +220,102 @@ export function byDay<T extends { created_at?: string | null }>(rows: T[]) {
     else out.push({ key, iso, rows: [r] });
   }
   return out;
+}
+
+/**
+ * ── KEEPING A QUOTE, WITH SOMETHING OF YOUR OWN UNDER IT ──────────────────
+ * Ellie: "Though you shouldn't be able to add a note to an insight of the day,
+ * there should be a button on the insight of the day page that allows users to
+ * save this to relationship journal. It should save nicely in a tile with the
+ * quote and the user can add commentary about it. That way, they can see that
+ * quote in the future."
+ *
+ * An entry with a quote on it is still an entry: same table, same anchor, same
+ * private write. What is new is where the quote goes, and it goes in
+ * `anchor_context`, which is the column that already means "the words this was
+ * made on". Putting it in the body instead would blur the two halves the tile
+ * is meant to separate, and a search for a phrase would find the quote as
+ * often as it found anything the reader wrote.
+ *
+ * The commentary is optional. Saving a quote with nothing under it is a
+ * perfectly good thing to want, and an empty body is what a note with no words
+ * already is everywhere else in this product.
+ */
+export function SaveToJournal({ quote, onClose }: { quote: string; onClose: (saved: boolean) => void }) {
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    const res = await createNote({
+      body: note.trim(),
+      anchorType: JOURNAL_ANCHOR,
+      anchorKey: journalDay(),
+      anchorContext: quote,
+      visibility: 'private',
+    });
+    setBusy(false);
+    if (!res.ok) { setFailed(true); return; }
+    onClose(true);
+  };
+
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={() => onClose(false)}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Close"
+        onPress={() => onClose(false)}
+        style={{ flex: 1, backgroundColor: 'rgba(14,11,7,0.45)', justifyContent: 'flex-end' }}>
+        {/* The sheet itself swallows the press that would close it. */}
+        <Pressable
+          onPress={() => {}}
+          style={{
+            backgroundColor: Palette.cream,
+            borderTopLeftRadius: Radius.card, borderTopRightRadius: Radius.card,
+            padding: Spacing.xl, paddingBottom: Spacing.xxxl, gap: Spacing.md,
+          }}>
+          <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{SAVE_TITLE}</Text>
+          {/* The quote as it will be kept, so nobody saves something they have
+              not read. Italic, the same as an entry's own words. */}
+          <Text
+            style={{
+              ...Type.body, fontFamily: Fonts.bodyItalic, color: c.text,
+              borderLeftWidth: 2, borderLeftColor: c.accent,
+              paddingLeft: Spacing.md, lineHeight: 24,
+            }}>
+            {quote}
+          </Text>
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder={SAVE_PLACEHOLDER}
+            placeholderTextColor={c.textMuted}
+            multiline
+            style={{
+              ...inputType(Type.body), color: c.text, minHeight: 84,
+              backgroundColor: Palette.white, borderRadius: Radius.md,
+              padding: Spacing.md, textAlignVertical: 'top',
+            }}
+          />
+          {failed ? (
+            <Text style={{ ...Type.small, color: c.accent }}>{SAVE_FAILED}</Text>
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            disabled={busy}
+            onPress={save}
+            style={{
+              alignSelf: 'flex-end', backgroundColor: c.accent, borderRadius: Radius.pill,
+              paddingVertical: Spacing.sm + 2, paddingHorizontal: Spacing.xl,
+              opacity: busy ? 0.6 : 1,
+            }}>
+            <Text style={{ ...Type.cardTitle, fontSize: 15, color: Palette.white }}>{SAVE_ACTION}</Text>
+          </Pressable>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
 }
 
 export default function Journal({ onClose }: { onClose: () => void }) {
@@ -615,13 +711,32 @@ export default function Journal({ onClose }: { onClose: () => void }) {
 
                       The website sets the same entries the same way, and
                       check-notes-parity holds the two surfaces to each other. */}
-                  <Text
-                    style={{
-                      ...Type.body, fontFamily: Fonts.bodyItalic,
-                      color: c.text, marginTop: Spacing.sm, lineHeight: 25,
-                    }}>
-                    {n.body}
-                  </Text>
+                  {/* ── A QUOTE THIS ENTRY WAS MADE ON ────────────────
+                      anchor_context is the words the entry was kept for: the
+                      insight of the day, saved from its own page. Drawn above
+                      the reader's own writing and set apart from it, because
+                      the tile's whole job is to keep the two separable months
+                      later. An entry written straight into the journal has
+                      none and shows none. */}
+                  {n.anchor_context ? (
+                    <Text
+                      style={{
+                        ...Type.body, fontFamily: Fonts.bodyItalic, color: c.textMuted,
+                        borderLeftWidth: 2, borderLeftColor: c.accent,
+                        paddingLeft: Spacing.md, marginTop: Spacing.sm, lineHeight: 24,
+                      }}>
+                      {n.anchor_context}
+                    </Text>
+                  ) : null}
+                  {n.body ? (
+                    <Text
+                      style={{
+                        ...Type.body, fontFamily: Fonts.bodyItalic,
+                        color: c.text, marginTop: Spacing.sm, lineHeight: 25,
+                      }}>
+                      {n.body}
+                    </Text>
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -703,6 +818,14 @@ const SEARCH = 'Search your entries';
 const NO_MATCH = 'Nothing here matches that.';
 const EMPTY = 'Nothing here yet. The first entry is usually the hardest one.';
 const FAILED = 'Your journal could not be loaded. Pull down to try again.';
+/**
+ * The four strings on the save sheet. Placeholders in Ellie's house style,
+ * named here so they are findable, and listed in TASKS.md as part of C4.
+ */
+const SAVE_TITLE = 'Keep this in your journal';
+const SAVE_PLACEHOLDER = 'What it made you think';
+const SAVE_ACTION = 'Save';
+const SAVE_FAILED = 'That did not save. Try again in a moment.';
 const UNLOCK = 'Unlock';
 const TRY_AGAIN = 'Try again';
 /** Shown when the phone was asked and said no. A placeholder, like the rest. */
