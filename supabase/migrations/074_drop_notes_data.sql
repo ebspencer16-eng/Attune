@@ -1,0 +1,40 @@
+-- Drop profiles.notes_data.
+--
+-- ── WHAT IT WAS ─────────────────────────────────────────────────────────────
+-- The website's first Notes screen: three textareas, one shared and one each,
+-- kept in the browser and flushed to this column under a line that said
+-- "auto-saved". Added in migration 012.
+--
+-- ── WHY IT GOES ─────────────────────────────────────────────────────────────
+-- Notes was rebuilt against /api/notes, which has its own table with its own
+-- row-level policies, and the old screen stopped being rendered. Nothing
+-- noticed. The column went on being read into localStorage on every sign-in
+-- and written by a debounce nobody could trigger, and the words in it were on
+-- no screen in the product. Found by the sweep in O442 and reported as D7.
+--
+-- Ellie: "the only notes that have been written so far are my tests. We can
+-- delete them if that's what you're talking about."
+--
+-- ── WHAT THIS DELETES ───────────────────────────────────────────────────────
+-- Everything anyone typed into that screen. It is not recoverable afterwards,
+-- and that is the decision she made with the sentence above: the only rows
+-- with anything in them are her own tests.
+--
+-- Nothing else reads this column. The code that did was removed in the same
+-- commit, so running this against an older deploy is safe: that code only ever
+-- read the column into a browser and wrote it back.
+--
+-- ── SEE WHAT YOU ARE ABOUT TO LOSE ──────────────────────────────────────────
+-- Run this first if you want to look before dropping. It counts rows with
+-- something in them and shows nothing of what they say:
+--
+--   select count(*) as rows_with_notes
+--   from public.profiles
+--   where notes_data is not null
+--     and notes_data::text not in ('null', '{}', '{"partner1":"","partner2":"","shared":""}');
+--
+-- ── SAFE TO RUN TWICE ───────────────────────────────────────────────────────
+-- IF EXISTS, so a second run is not an error.
+
+alter table public.profiles
+  drop column if exists notes_data;

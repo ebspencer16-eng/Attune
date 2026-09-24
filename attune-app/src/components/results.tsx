@@ -1845,86 +1845,6 @@ const CONVO_COL = { item: '34%', person: '33%' } as const;
 const EXPECTS_LABEL = 'Expects';
 const EXPERIENCED_LABEL = 'Experienced';
 
-function ExpectationRowView({
-  row, you, them,
-}: { row: ExpectationRow; you: string; them: string }) {
-  return (
-    <View
-      style={{
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-        borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md,
-      }}>
-      <Prose style={{ ...Type.cardTitle, color: c.textStrong }}>{row.item}</Prose>
-      {row.prompt ? (
-        <Prose style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{row.prompt}</Prose>
-      ) : null}
-
-      {/* ── FOUR VALUES, NOT TWO ────────────────────────────────────────
-          The website's table carries Expects and Experienced for each person.
-          The app drew the two Expects, so half of what the exercise asked
-          about this responsibility was collected and never shown. Ellie: "web
-          shows convos to have with more columns. App needs to show that as
-          well."
-
-          Stacked per person rather than as four columns: four columns on a
-          phone is two words a line. The pairing is the same, and each label
-          says which is which. */}
-      <View style={{ flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.md }}>
-        {[
-          { name: you, expects: row.you, lived: row.youExperienced, tint: c.accentQuiet },
-          { name: them, expects: row.them, lived: row.themExperienced, tint: c.textMuted },
-        ].map((side) => (
-          <View key={side.name} style={{ flex: 1 }}>
-            <Text style={{ ...Type.eyebrow, color: side.tint }}>{side.name}</Text>
-            {/* not markable: a column heading, written here rather than sent. */}
-            <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.xs }}>
-              {EXPECTS_LABEL}
-            </Text>
-            <Prose style={{ ...Type.body, color: c.text }}>{side.expects}</Prose>
-            {side.lived ? (
-              <>
-                {/* not markable: a column heading, written here rather than sent. */}
-                <Text style={{ ...Type.small, fontSize: 10, color: c.textMuted, marginTop: Spacing.sm }}>
-                  {EXPERIENCED_LABEL}
-                </Text>
-                <Prose style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic }}>{side.lived}</Prose>
-              </>
-            ) : null}
-          </View>
-        ))}
-      </View>
-
-    </View>
-  );
-}
-
-/**
- * How far apart, said without a verdict.
- *
- * Four states, and none of them is a grade. "Different" is the interesting one
- * on a page about sex, not the bad one, and the colours reflect that: a single
- * quiet accent throughout rather than a run from green to red. A couple
- * reading that they are red on Frequency has been told something about
- * themselves that the exercise never measured.
- */
-function DistanceBar({ pct, state }: { pct: number | null; state: string }) {
-  if (pct == null) return null;
-  return (
-    <View style={{ marginTop: Spacing.md }}>
-      <View style={{ height: 6, borderRadius: Radius.pill, backgroundColor: c.border, overflow: 'hidden' }}>
-        <View style={{ width: `${Math.max(3, pct)}%`, height: 6, backgroundColor: c.accentQuiet }} />
-      </View>
-      {/* not markable: a three-way state label the app picks, not a finding. */}
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>
-        {state === 'aligned' ? 'Close together'
-          : state === 'discuss' ? 'Somewhat apart'
-          : state === 'different' ? 'Furthest apart'
-          : 'Not answered'}
-      </Text>
-    </View>
-  );
-}
-
 function IntimacyOverview({ data, you, them, title, placementsLabel, ground, groundStops, step = null }: {
   data: IntimacyResults | null; you: string; them: string;
   /** The page's heading, from the server's pageTitles. */
@@ -4506,29 +4426,6 @@ function Marker({ pct, color, label, dy = 0 }: {
  */
 function markerNudge(a: number, b: number): [number, number] {
   return Math.abs(a - b) < CLOSE_PCT ? [-STAGGER, STAGGER] : [0, 0];
-}
-
-/** Who the two marks are. Without it the initials are a puzzle. */
-function Legend({ you, them }: { you: string; them: string }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: Spacing.lg, marginBottom: Spacing.md }}>
-      {[[you, YOU_COLOR], [them, THEM_COLOR]].map(([name, color]) => (
-        <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
-          <View
-            style={{
-              width: 16, height: 16, borderRadius: Radius.pill, backgroundColor: color,
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-            <Text style={{ fontSize: 8, lineHeight: 10, fontWeight: '700', color: Palette.white }}>
-              {initial(name)}
-            </Text>
-          </View>
-          {/* not markable: whose row this is. A name, not a finding. */}
-          <Text style={{ ...Type.small, color: c.textMuted }}>{name}</Text>
-        </View>
-      ))}
-    </View>
-  );
 }
 
 const initial = (name: string) => (name || '?').trim().charAt(0).toUpperCase();

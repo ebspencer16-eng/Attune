@@ -240,7 +240,7 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_ex1_prior', 'attune_ex2_prior', 'attune_ex3_prior',
   'attune_partner_session', 'attune_live_session',
   'attune_order', 'attune_portrait', 'attune_budget',
-  'attune_checklist', 'attune_notes', 'attune_app_banner_dismissed',
+  'attune_checklist', 'attune_app_banner_dismissed',
   'attune_conflict', 'attune_conflict_progress',
   'attune_intimacy', 'attune_intimacy_progress',
   'attune_workbook_ready', 'attune_workbook_blob',
@@ -2458,18 +2458,6 @@ function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, p
     </div>
   );
 }
-// Measures a label so it can be placed without overlapping its neighbour or
-// spilling past the bar. Canvas measurement, with a character-count fallback
-// for environments without one.
-function _dlWidth(lines, fontPx) {
-  try {
-    if (!_dlMeasCtx) { _dlMeasCtx = document.createElement("canvas").getContext("2d"); }
-    _dlMeasCtx.font = fontPx + "px 'DM Sans', sans-serif";
-    return Math.max.apply(null, lines.map(l => _dlMeasCtx.measureText(String(l)).width));
-  } catch (e) { return Math.max.apply(null, lines.map(l => String(l).length)) * fontPx * 0.55; }
-}
-
-
 // Per-question side-by-side for one domain. Each row is the question as it was
 // asked, its two options either side of a narrow bar, and one dot per partner
 // showing where they put themselves. Each partner's Part 2 answer about the
@@ -3485,15 +3473,6 @@ function resolveRoleTokens(str, myS, partS, userName, partnerName, userPronouns 
 }
 
 
-
-// {LO} / {HI} name the partner at each end of the dimension being discussed.
-function interpDimAction(text, userName, partnerName, fb) {
-  if (!fb) return String(text || "").replace(/\{LO\}/g, userName).replace(/\{HI\}/g, partnerName);
-  const userIsLow = (fb.myScore ?? 3) <= (fb.partScore ?? 3);
-  const lo = userIsLow ? userName : partnerName;
-  const hi = userIsLow ? partnerName : userName;
-  return String(text || "").replace(/\{LO\}/g, lo).replace(/\{HI\}/g, hi);
-}
 
 // How far each partner's Part 2 read of the other is from what that person
 // actually said. Positive means they placed their partner further toward the B
@@ -5142,77 +5121,6 @@ function RevealStat({ label, value, font }) {
     <div>
       <div style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: C.muted, fontFamily: font.body, fontWeight: 600, marginBottom: "0.25rem" }}>{label}</div>
       <div style={{ fontFamily: font.display, fontSize: "1.4rem", fontWeight: 700, color: C.ink }}>{value}</div>
-    </div>
-  );
-}
-
-// ======================================================
-// OUR NOTES -- private conversation log
-// ======================================================
-function NotesView({ userName, partnerName, notesState, setNotesState, onBack }) {
-  const font = { display: HFONT, body: BFONT };
-  const [tab, setTab] = useState("shared");
-  const tabs = [
-    { id: "shared", label: "Shared Notes", emoji: "🤝", desc: "Things you want to remember together" },
-    { id: "partner1", label: userName + "'s Notes", emoji: "👤", desc: "Your private reflections" },
-    { id: "partner2", label: partnerName + "'s Notes", emoji: "👤", desc: partnerName + "'s private reflections" },
-  ];
-  const prompts = [
-    "What surprised you most from the results?",
-    "Where do you feel most aligned?",
-    "What conversation do you most want to have?",
-    "What did you learn about yourself?",
-    "What do you want to revisit in a few months?",
-  ];
-  return (
-    <div style={{ padding: "2.5rem 2rem", maxWidth: 680, margin: "0 auto" }}>
-      <button onClick={onBack} style={{ background: "transparent", border: "none", color: C.muted, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, padding: 0, marginBottom: "1.75rem" }}>← Back</button>
-      <div style={{ marginBottom: "2rem" }}>
-        <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: font.body, marginBottom: "0.4rem" }}>Your private notebook</div>
-        <h1 style={{ fontFamily: font.display, fontSize: "1.9rem", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>Our Notes</h1>
-        <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7 }}>Log reflections, things you want to come back to, and conversations you've had. Saved to this device only.</p>
-      </div>
-
-      {/* Tab bar */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            style={{ background: tab === t.id ? "#10b981" : C.warm, border: tab === t.id ? "1.5px solid #10b981" : "1.5px solid " + C.stone, color: tab === t.id ? "white" : C.muted, padding: "0.45rem 1rem", borderRadius: 999, fontSize: "0.72rem", fontWeight: tab === t.id ? 700 : 500, cursor: "pointer", fontFamily: font.body, transition: "all .15s", display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            <span>{t.emoji}</span> {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Note area */}
-      <div style={{ background: C.warm, border: "1.5px solid " + C.stone, borderRadius: 16, padding: "1.5rem", marginBottom: "1.5rem" }}>
-        <p style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body, marginBottom: "0.75rem" }}>{tabs.find(t => t.id === tab)?.desc}</p>
-        <textarea
-          value={notesState[tab]}
-          onChange={e => setNotesState(prev => ({ ...prev, [tab]: e.target.value }))}
-          placeholder={"Start writing..."}
-          style={{ width: "100%", minHeight: 220, background: "white", border: "1.5px solid " + C.stone, borderRadius: 10, padding: "1rem", fontSize: "0.85rem", color: C.text, fontFamily: font.body, lineHeight: 1.75, resize: "vertical", outline: "none", boxSizing: "border-box" }}
-          onFocus={e => e.target.style.borderColor = "#10b981"}
-          onBlur={e => e.target.style.borderColor = C.stone}
-        />
-        <div style={{ fontSize: "0.65rem", color: C.muted, fontFamily: font.body, marginTop: "0.5rem", textAlign: "right" }}>
-          {notesState[tab]?.length > 0 ? `${notesState[tab].length} characters · auto-saved` : "Nothing written yet"}
-        </div>
-      </div>
-
-      {/* Conversation prompts */}
-      <div style={{ background: "linear-gradient(135deg, rgba(16,185,129,.05), rgba(16,185,129,.02))", border: "1px solid rgba(16,185,129,.2)", borderRadius: 14, padding: "1.25rem" }}>
-        <div style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "0.85rem" }}>Prompts to get you started</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {prompts.map((p, i) => (
-            <button key={i} onClick={() => setNotesState(prev => ({ ...prev, [tab]: prev[tab] ? prev[tab] + "\n\n" + p + "\n" : p + "\n" }))}
-              style={{ background: "white", border: "1px solid rgba(16,185,129,.2)", borderRadius: 8, padding: "0.6rem 0.85rem", fontSize: "0.78rem", color: C.text, fontFamily: font.body, cursor: "pointer", textAlign: "left", transition: "all .15s" }}
-              onMouseEnter={e => { e.target.style.borderColor = "#10b981"; e.target.style.background = "rgba(16,185,129,.04)"; }}
-              onMouseLeave={e => { e.target.style.borderColor = "rgba(16,185,129,.2)"; e.target.style.background = "white"; }}>
-              + {p}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -9685,11 +9593,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
     } else if (read.ok) {
       try { localStorage.removeItem('attune_checklist'); } catch {}
     }
-    if (profile?.notes_data) {
-      try { localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data)); } catch {}
-    } else {
-      try { localStorage.removeItem('attune_notes'); } catch {}
-    }
     // The workbook is persisted on the profile as well as the order, so comp
     // accounts (which have no order row) restore it on any device exactly like
     // paid ones. Whichever source has it wins; the order is checked first.
@@ -12006,7 +11909,6 @@ export default function App() {
   // mutations land on the right profile row.
   useEffect(() => {
     _checklistAccountIdRef.current = account?.id || null;
-    _notesAccountIdRef.current = account?.id || null;
   }, [account?.id]);
 
   useEffect(() => {
@@ -12380,8 +12282,6 @@ export default function App() {
               else if (read.ok)                localStorage.removeItem('attune_budget');
               if (profile?.checklist_data)     localStorage.setItem('attune_checklist', JSON.stringify(profile.checklist_data));
               else if (read.ok)                localStorage.removeItem('attune_checklist');
-              if (profile?.notes_data)         localStorage.setItem('attune_notes', JSON.stringify(profile.notes_data));
-              else                             localStorage.removeItem('attune_notes');
               if (profile?.intimacy_data)      { localStorage.setItem('attune_intimacy', JSON.stringify(profile.intimacy_data)); setIntimacyData(profile.intimacy_data); }
               // Same as intimacy: written on completion, so it has to come back
               // on hydration or the answers do not survive a device change or a
@@ -13179,38 +13079,21 @@ export default function App() {
       return raw ? JSON.parse(raw) : null; // { variant, answers, completedAt }
     } catch { return null; }
   });
-  const [notesState, _setNotesState] = useState(() => {
-    // Hydrate from localStorage. The Notes view labels this "auto-saved",
-    // so it really must persist. Without this the user's notes are lost on
-    // every refresh. Cross-device hydration happens in the sign-in flow.
-    try {
-      const raw = localStorage.getItem('attune_notes');
-      return raw ? JSON.parse(raw) : { partner1: "", partner2: "", shared: "" };
-    } catch {
-      return { partner1: "", partner2: "", shared: "" };
-    }
-  });
-  const _notesAccountIdRef = useRef(null);
-  const _notesSaveTimerRef = useRef(null);
-  const setNotesState = (next) => {
-    _setNotesState(prev => {
-      const value = typeof next === 'function' ? next(prev) : next;
-      try { localStorage.setItem('attune_notes', JSON.stringify(value)); } catch {}
-      // Debounce Supabase writes — typing 50 characters shouldn't fire 50
-      // network calls. 1.5s after the last keystroke flushes to server.
-      const aid = _notesAccountIdRef.current;
-      if (aid) {
-        if (_notesSaveTimerRef.current) clearTimeout(_notesSaveTimerRef.current);
-        _notesSaveTimerRef.current = setTimeout(async () => {
-          try {
-            const { supabase: sb, hasSupabase } = await import('./supabase.js');
-            if (hasSupabase()) await saveProfileData(sb, aid, { notes_data: value }, 'notes');
-          } catch {}
-        }, 1500);
-      }
-      return value;
-    });
-  };
+  /**
+   * ── THE OLD NOTEBOOK IS GONE ────────────────────────────────────────────
+   * There was a `notesState` here: three textareas, Shared, yours and your
+   * partner's, kept in localStorage and flushed to a `notes_data` column on
+   * the profile, under a line that said "auto-saved".
+   *
+   * The screen that drew it stopped being rendered when Notes was rebuilt
+   * against /api/notes, and nothing noticed, so the column went on being
+   * hydrated into the browser on every sign-in and written by a debounce
+   * nobody could trigger. Found by the sweep in O442.
+   *
+   * Ellie: "the only notes that have been written so far are my tests. We can
+   * delete them if that's what you're talking about." So the state, the view,
+   * the localStorage key and the column all go. Migration 074 drops the column.
+   */
   // Auto-open auth if ?signup=1 in URL (comes from checkout success redirect)
   const _urlSignup = params.get('signup') === '1';
   const _urlSignin = params.get('signin') === '1';

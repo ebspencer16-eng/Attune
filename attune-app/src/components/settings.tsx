@@ -398,15 +398,6 @@ function Sheet({
   );
 }
 
-function Bullet({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs }}>
-      <Text style={{ ...Type.body, color: c.textMuted }}>{'•'}</Text>
-      <Text style={{ ...Type.body, color: c.text, flex: 1 }}>{children}</Text>
-    </View>
-  );
-}
-
 function Row({ label, onPress, last }: { label: string; onPress: () => void; last?: boolean }) {
   return (
     <Pressable

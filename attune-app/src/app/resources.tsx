@@ -924,6 +924,12 @@ export default function ResourcesScreen() {
             </View>
           </View>
 
+          {/* Ellie, approving the caret's removal: "add a little space below
+              the four featured articles." The caret was carrying that gap as
+              its own margins, so taking it out closed the peek up against the
+              controls under it. */}
+          <View style={{ height: Spacing.lg }} />
+
           {/* ── THE CARET IS GONE ──────────────────────────────────────
               Ellie asked for it: "add a carrot arrow downwards at the bottom of
               that so that it's clear the user can scroll down." And then, once
