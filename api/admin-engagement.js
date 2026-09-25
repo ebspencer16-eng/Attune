@@ -315,7 +315,7 @@ function engagementFromEvents(events, { profiles, notes, tags, noteTags, reads, 
   const RESOURCE_VIEWS = [
     { key: 'app:workbook', label: 'Workbook' },
     { key: 'app:budget', label: 'Shared Budget' },
-    { key: 'app:checklist', label: 'Starting Out checklist' },
+    { key: 'app:checklist', label: 'Merging lives checklist' },
   ];
 
   const timePerPage = {

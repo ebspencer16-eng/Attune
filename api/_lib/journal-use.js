@@ -94,6 +94,48 @@ export function journalVolumeBand(ever = 0) {
   return JOURNAL_VOLUME_BANDS[5];
 }
 
+/**
+ * How many days in a row someone has written, counting back from today.
+ *
+ * ── WHAT ELLIE ASKED FOR ──────────────────────────────────────────────────
+ * "Is there a little 7 in the 'write a journal entry' button? Let's remove
+ * that and instead have a '0 day streak' that adjusts as people consistently
+ * write."
+ *
+ * The 7 was how many entries exist, which is a number that only goes up and
+ * says nothing about whether the habit is alive.
+ *
+ * ── YESTERDAY STILL COUNTS ────────────────────────────────────────────────
+ * A streak survives the day it is on. Someone who wrote every day last week
+ * and has not written yet this morning has a streak of seven, not nought:
+ * breaking it at midnight would tell people their habit ended while they were
+ * asleep. It breaks when a whole day passes with nothing in it.
+ *
+ * `days` is the set of ISO days that have an entry, which is exactly what the
+ * anchor key of a journal entry is. `today` is the reader's own day, passed in
+ * rather than read from a clock, because the server's midnight is not theirs.
+ */
+export function journalStreak(days, today) {
+  const have = new Set(days || []);
+  if (!have.size || !today) return 0;
+
+  const at = Date.parse(`${today}T00:00:00Z`);
+  if (!Number.isFinite(at)) return 0;
+  const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+
+  /* Start on today if it has an entry, otherwise on yesterday. If neither
+     does, a day has passed with nothing in it and the streak is over. */
+  let cursor = at;
+  if (!have.has(iso(cursor))) {
+    cursor -= 86400000;
+    if (!have.has(iso(cursor))) return 0;
+  }
+
+  let n = 0;
+  while (have.has(iso(cursor))) { n += 1; cursor -= 86400000; }
+  return n;
+}
+
 /** The whole product's number, for a line on the engagement page. */
 export function journalTotals(byOwner) {
   let people = 0;

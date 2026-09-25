@@ -1,5 +1,5 @@
 /**
- * The Starting Out checklist: what a couple has to actually do after a wedding.
+ * The Merging Lives checklist: what a couple has to actually do after a wedding.
  *
  * ── WHY THIS IS NOT IN src/App.jsx ────────────────────────────────────────
  * It was. Two hundred and eleven lines of it, which meant the app could not
@@ -245,7 +245,7 @@ export const CHECKLIST_AREAS = [
  * computed per surface. Nothing else is assembled.
  */
 export const CHECKLIST_COPY = {
-  title: 'Starting Out Checklist',
+  title: 'Merging Lives Checklist',
   intro: "The real-world logistics of merging your lives. Tap the arrow next to each item for a bit more context. Check things off as you go, no rush, just a clear picture of what's done and what's next.",
   howItWorks: 'Tap a box once to mark it done. Tap again to mark it not applicable. Tap a third time to clear it.',
   progress: 'complete',

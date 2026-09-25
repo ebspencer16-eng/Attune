@@ -35,7 +35,7 @@ export const LOADING = {
   profile: 'Loading your profile',
   /** The budget tool. */
   budget: 'Loading your budget',
-  /** The Starting Out checklist. */
+  /** The Merging Lives checklist. */
   checklist: 'Loading your checklist',
   /** Profile setup and the feedback form, both waiting on their copy. */
   moment: 'One moment',

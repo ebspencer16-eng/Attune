@@ -189,11 +189,6 @@
   .section-label h2{font-family:var(--hfont);font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.25rem}
   .section-label p{font-size:.82rem;color:var(--muted)}
 
-  /* gift context bar */
-  .gift-bar{max-width:min(1120px,calc(100% - 2.5rem));margin-left:auto;margin-right:auto;box-sizing:border-box;background:linear-gradient(135deg,#FFF0EB,#EEEFFF);border:1px solid var(--stone);border-radius:14px;padding:var(--s-lg) var(--s-xl);display:flex;align-items:center;gap:var(--s-md);margin:0 var(--s-3xl) var(--s-xl);margin-left:auto;margin-right:auto}
-  .gift-bar p{font-size:.83rem;color:var(--text);line-height:1.55}
-  .gift-bar p strong{color:var(--ink)}
-  .gift-bar-icon{width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(14,11,7,.07)}
 
   /* CORE PACKAGE SECTION, below packages */
   .core-section{padding:0 var(--s-3xl) 6rem}
@@ -490,7 +485,6 @@
     /* === MISC INLINE PADDING === */
     [style*="padding:var(--s-md) 2.25rem var(--s-xl)"]{padding:.65rem 1.1rem 1rem!important}
 
-    /* === GIFT CONTEXT BAR === */
   }
 
   .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
@@ -568,15 +562,22 @@
   </div>
 </div>
 
-<!-- GIFT CONTEXT BAR -->
-<div class="gift-bar" id="gift" style="margin-top:var(--s-3xl);">
-  <div class="gift-bar-icon">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A66534" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg>
-  </div>
-</div>
-
 <!-- PACKAGE OVERVIEW TILES -->
-<div class="pkg-overview">
+<!--
+  Ellie: "On marketing site packages page, the give as a gift text is gone but
+  tile and icon still exist above the package side-by-side tiles. Remove that
+  lingering tile though."
+
+  It was a bordered bar with a gift icon in it and nothing else: the sentence
+  beside the icon had been removed and the box it lived in had not, so the page
+  opened with an empty tile above the packages.
+
+  id="gift" moves here rather than going with it. Six "Give it as a gift" links
+  on five pages point at /offerings#gift, and a fragment that names nothing
+  drops the reader at the top of the page with no sign of what they clicked
+  for. The packages are what those links are for, so that is where they land.
+-->
+<div class="pkg-overview" id="gift">
   <div class="pov-tile" onclick="scrollToPkg('#pkg-core')" style="cursor:pointer">
     <div class="pov-name">The Attune Assessment</div>
     <div class="pov-price">$89</div>
@@ -982,7 +983,7 @@ document.addEventListener('click', function(e) {
   var RESOURCES = [
     { key:'workbook',  name:'Personalized Workbook',  desc:'Built from your answers. Prompts, exercises, and space to write.', price:'$19' },
     { key:'budget',    name:'Build a Budget',         desc:'A guided worksheet for building a shared budget together.', price:'$20' },
-    { key:'checklist', name:'Starting Out Checklist', desc:'The practical list for couples setting up a life together.', price:'$20' }
+    { key:'checklist', name:'Merging Lives Checklist', desc:'The practical list for couples setting up a life together.', price:'$20' }
   ];
 
   function tile(it) {
@@ -1033,7 +1034,7 @@ document.addEventListener('click', function(e) {
     ['Conflict patterns exercise',          byAddon('conflict')],
     ['Personalized workbook',               byAddon('workbook')],
     ['Build a budget tool',                 byAddon('budget')],
-    ['Starting out checklist',              byAddon('checklist')],
+    ['Merging lives checklist',              byAddon('checklist')],
     ['Personalized action plan',            ALL],
     ['Lifetime digital access',             ALL],
     ['Full access in the Attune app',       ALL]

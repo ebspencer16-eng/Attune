@@ -474,8 +474,8 @@ const PACKAGES = {
     id: 'newlywed', name: 'Starting Out Collection', badge: 'Starting Out',
     digitalPrice: 139, physicalPrice: 174,
     price: 139, priceLabel: 'from $139', format: 'physical',
-    tags: ['Digital · instant access', 'Communication & expectations', 'Starting Out Checklist', 'Couple type + map'],
-    physicalTags: ['Digital + physical gift box', 'Communication & expectations', 'Starting Out Checklist', 'Personalized QR card'],
+    tags: ['Digital · instant access', 'Communication & expectations', 'Merging Lives Checklist', 'Couple type + map'],
+    physicalTags: ['Digital + physical gift box', 'Communication & expectations', 'Merging Lives Checklist', 'Personalized QR card'],
   },
   anniversary: {
     id: 'anniversary', name: 'Relationship Reflection', badge: 'Anniversary',
@@ -826,7 +826,7 @@ function persistOrderComplete(orderNum) {
     const meta = _promptKey === 'workbook'
       ? { title: 'Add Personalized Workbook', price: '+$19', desc: 'Conversation prompts and guided exercises built from your joint results. Digital, delivered with your results.' + (PHYSICAL_ENABLED ? ' Switch to a printed copy in your cart.' : '') }
       : _promptKey === 'checklist'
-      ? { title: 'Add Starting Out Checklist', price: '+$20', desc: 'Finances, name changes, insurance, estate basics. Seven categories of real-world logistics to work through together.' }
+      ? { title: 'Add Merging Lives Checklist', price: '+$20', desc: 'Finances, name changes, insurance, estate basics. Seven categories of real-world logistics to work through together.' }
       : { title: 'Add Physical Intimacy Expectations', price: '+$20', desc: 'A private set of questions about physical intimacy, answered independently and compared side by side. Covers frequency, initiating, comfort, communication, and more. Premarital and already-married versions.' };
     document.getElementById('addonPromptTitle').textContent = meta.title;
     document.getElementById('addonPromptPrice').textContent = meta.price;
@@ -1076,7 +1076,7 @@ function renderSummary() {
     if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
     if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: 20 });
     if (g.item.addons.conflict)   addonLines.push({ label: 'Conflict Patterns', price: 40 });
-    if (g.item.addons.checklist)  addonLines.push({ label: 'Starting Out Checklist', price: 20 });
+    if (g.item.addons.checklist)  addonLines.push({ label: 'Merging Lives Checklist', price: 20 });
     for (const a of addonLines) {
       rows += `
       <div class="co-card-detail" style="padding-left:.7rem;box-shadow:inset 3px 0 0 #F0E1CE">
@@ -1647,7 +1647,7 @@ async function handleSubmit(e) {
       if (it.addons.budget)     lineItems.push({ label: 'Shared Budgeting Activity', price: 20 });
       if (it.addons.intimacy)   lineItems.push({ label: 'Physical Intimacy Expectations', price: 20 });
       if (it.addons.conflict)   lineItems.push({ label: 'Conflict Patterns', price: 40 });
-      if (it.addons.checklist)  lineItems.push({ label: 'Starting Out Checklist', price: 20 });
+      if (it.addons.checklist)  lineItems.push({ label: 'Merging Lives Checklist', price: 20 });
       const itemSubtotal = lineItems.reduce((sum, l) => sum + l.price, 0);
       fetch('/api/send-order-email', {
         method: 'POST',

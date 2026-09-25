@@ -1,5 +1,5 @@
 /**
- * The Starting Out checklist, in the app.
+ * The Merging Lives checklist, in the app.
  *
  * ── WHAT THIS IS AND IS NOT ───────────────────────────────────────────────
  * It is the website's checklist, on a phone. Every word on it, including the

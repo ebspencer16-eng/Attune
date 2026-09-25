@@ -102,7 +102,7 @@ import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES } from "../api/_exercises.js";
 import { CATALOGUE } from "../api/_catalogue.js";
-// The Starting Out checklist, moved out so the app can read it too.
+// The Merging lives checklist, moved out so the app can read it too.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
 // The budget tool, moved out so the app can read it too.
 import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY, bNum, bFmt, computeReveal } from "../api/_budget.js";
@@ -1471,6 +1471,25 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: "0.25rem", fontFamily: BFONT }}>Physical Intimacy Expectations</p>
       <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: BFONT }}>{dimMeta?.label}</p>
       <p style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 400, color: C.ink, lineHeight: 1.45, marginBottom: "1.5rem" }}>{(() => { const t = (framing || "").trim(); return /[?.!:]$/.test(t) ? t : t + ":"; })()}</p>
+
+      {/* ── THE TWO ENDS, WHEN THERE ARE TWO ENDS ──────────────────────────
+          Ellie: "Can we make this question and answer option setup the same as
+          the comms exercises where the poles are A and B and there's 5 options
+          to show how closely you align with either pole?"
+
+          Side by side and lettered, the way Exercise 1 sets out its own poles,
+          and for the same reason: neither end reads as the first or the better
+          one. A question with no poles draws nothing here. */}
+      {q.a && q.b ? (
+        <div style={{ display: "flex", gap: "0.6rem", marginBottom: "1.1rem" }}>
+          {[["A", q.a], ["B", q.b]].map(([letter, text]) => (
+            <div key={letter} style={{ flex: 1, background: C.white, border: `1px solid ${C.stone}`, borderRadius: 12, padding: "0.75rem 0.9rem" }}>
+              <div style={{ fontSize: "0.6rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.clay, fontWeight: 700, fontFamily: BFONT, marginBottom: "0.3rem" }}>{letter}</div>
+              <div style={{ fontSize: "0.82rem", color: C.text, fontFamily: BFONT, lineHeight: 1.5 }}>{text}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {q.options.map(o => {
@@ -4539,7 +4558,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
 }
 
 // ======================================================
-// STARTING OUT CHECKLIST
+// MERGING LIVES CHECKLIST
 // ======================================================
 // Starting Out (newlywed) checklist.
 // Items are objects: { text, description, links? }.
@@ -4551,7 +4570,7 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
 // Finances is second since it involves decisions that shape later steps.
 
 
-// Stylized line icons for the Starting Out checklist section headers, matching
+// Stylized line icons for the Merging lives checklist section headers, matching
 // the site's lucide-style stroke set. Replaces the emoji glyphs.
 function ChecklistIcon({ id, color = "#7A6753", size = 22 }) {
   const p = {
@@ -4569,7 +4588,7 @@ function ChecklistIcon({ id, color = "#7A6753", size = 22 }) {
   );
 }
 
-function StartingOutChecklist({ userName, partnerName, onBack, checklistState, setChecklistState }) {
+function MergingLivesChecklist({ userName, partnerName, onBack, checklistState, setChecklistState }) {
   const totalItems = CHECKLIST_AREAS.reduce((s, a) => s + a.items.length, 0);
   const checkedCount = Object.values(checklistState).filter(v => v === true || v === 'na').length;
   const pct = Math.round((checkedCount / totalItems) * 100);
@@ -8395,7 +8414,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </a>
               )}
 
-              {/* Starting Out Checklist */}
+              {/* Merging Lives Checklist */}
               {/* Keep growing lists what they do NOT have. The owned branch
                   used to render here too, so a reader who already had the tool
                   saw it under a heading that frames everything below it as
@@ -11084,7 +11103,7 @@ function PackagesModal({ currentPkg, onClose, onPick, onPickAddon }) {
       tagline: "Everything in Assessment + the logistics of merging lives.",
       description: "Adds a bonus budget exercise and a practical checklist for name changes, finances, insurance, and estate basics.",
       color: "#E8673A",
-      features: ["Everything in Assessment", "Starting Out checklist", "Build a budget exercise"],
+      features: ["Everything in Assessment", "Merging lives checklist", "Build a budget exercise"],
     },
     {
       id: "anniversary",
@@ -14735,7 +14754,7 @@ export default function App() {
                     </div>
                   </div>
                   )}
-                  {/* Starting Out checklist upsell — hidden if they already own it */}
+                  {/* Merging lives checklist upsell — hidden if they already own it */}
                   {!pkg.hasChecklist && (
                     <div onClick={() => setUpsellModal({ product: "checklist", cartAdded: false })}
                       style={{ marginTop: "1rem", textAlign: "left", background: "#FFF8F5", border: "1.5px solid rgba(232,103,58,.25)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
@@ -14853,7 +14872,7 @@ export default function App() {
 
         {/* ── CHECKLIST: Starting Out ── */}
         {view === "checklist" && pkg.hasChecklist && (
-          <StartingOutChecklist userName={userName} partnerName={partnerName} onBack={() => setView("home")} checklistState={checklistState} setChecklistState={setChecklistState} />
+          <MergingLivesChecklist userName={userName} partnerName={partnerName} onBack={() => setView("home")} checklistState={checklistState} setChecklistState={setChecklistState} />
         )}
 
         {/* ── BUDGET TOOL: Premium ── */}
@@ -15106,7 +15125,7 @@ export default function App() {
           const pkgInfo = pkgConfig[demoPkg] || pkgConfig.core;
           const PACKAGE_FEATURES = {
             core:        { name: "The Attune Assessment", color: "#E8673A", features: ["Communication exercise", "Expectations exercise", "Full joint results", "Couple type profile"] },
-            newlywed:    { name: "Starting Out Collection", color: "#E8673A", features: ["Everything in Assessment", "Starting Out checklist", "Partner comparison deep-dives"] },
+            newlywed:    { name: "Starting Out Collection", color: "#E8673A", features: ["Everything in Assessment", "Merging lives checklist", "Partner comparison deep-dives"] },
             anniversary: { name: "Relationship Reflection", color: "#1B5FE8", features: ["Everything in Assessment", "Relationship reflection exercise", "Anniversary-specific prompts"] },
             premium:     { name: "Attune Premium", color: "#3B5BDB", features: ["Everything in Assessment", "Relationship Reflection", "Shared budget", "Physical intimacy", "Personalized workbook"] },
           };

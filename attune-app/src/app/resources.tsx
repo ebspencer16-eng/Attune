@@ -18,7 +18,7 @@ import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import {
-  Image, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
+  ActivityIndicator, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
 } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -120,6 +120,8 @@ export default function ResourcesScreen() {
   const [partnerName, setPartnerName] = useState('your partner');
   const [tools, setTools] = useState<ToolData | null>(null);
   const [workbookNote, setWorkbookNote] = useState<string | null>(null);
+  /** Which tool is opening, so its tile can say the tap was heard. */
+  const [busyTool, setBusyTool] = useState<string | null>(null);
 
   // The workbook is a file, so the tab needs to know whether it exists before
   // a tap. Fetched alongside everything else rather than on press: a tap that
@@ -175,50 +177,84 @@ export default function ResourcesScreen() {
     return true;
   };
 
+  /**
+   * ── THE READY FILE FIRST, THE BUILDER LAST ────────────────────────────────
+   * Ellie: "I clicked the workbook and it didn't seem like anything happened,
+   * then I abandoned the effort and only then did the browser open and say
+   * 'Building your workbook...'"
+   *
+   * That is this function's order, and the order was backwards. It called
+   * openWorkbook() first, which fetches the whole payload, packs it into a
+   * query string and hands the browser a URL tens of kilobytes long, and only
+   * if that failed did it look for the file that was already built. So a tap
+   * paid for a round trip, a giant URL and a browser rendering a PDF from
+   * scratch, every time, with a built workbook sitting unused.
+   *
+   * A file that exists is opened immediately. Nothing else is tried first.
+   *
+   * The two slower paths are still here, in the order they should be reached:
+   * ask the server to build one, and only if that fails hand the browser the
+   * payload to draw itself. The last is a real fallback for a couple whose
+   * server build cannot run, and it is where the long URL belongs.
+   *
+   * ── AND THE TAP IS ACKNOWLEDGED ──────────────────────────────────────────
+   * Ellie: "Need the button to grey out or something so the user knows their
+   * click worked." `busyTool` dims the tile and shows a spinner in it, and it
+   * is set before the first await rather than after it, because the whole
+   * complaint is about what happens in the seconds before anything returns.
+   */
   const openTool = async (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
-    if (key === 'workbook') {
-      // If the load failed there is no url and no copy, and the old code
-      // answered a tap by setting the note to null, which renders nothing.
-      // Ask again on the tap instead.
-      if (await openWorkbook()) return;
-      let wb = tools?.workbook;
-      if (!wb) {
-        const r = await fetchToolData();
-        if (r.ok) { setTools(r.data); wb = r.data.workbook; }
-      }
-      /**
-       * The file, for anyone whose page could not be built.
-       *
-       * The page needs both partners' answers; the .docx is already on the
-       * order for a couple who bought it, so it is still the fallback rather
-       * than a dead end.
-       */
-      if (wb?.url) { Linking.openURL(wb.url); return; }
+    if (key !== 'workbook') { Linking.openURL(`${SITE}/app?view=${key}`); return; }
 
-      /**
-       * ── ASK FOR IT, RATHER THAN WAITING FOR SOMETHING ELSE TO ──────────
-       * Ellie: "My workbook still says building your workbook check back
-       * shortly. This should build as soon as results unlock and should be
-       * ready for users to click immediately."
-       *
-       * It is built when results unlock now, which fixes it for every couple
-       * from here on. It does nothing for a couple whose results opened months
-       * ago, which is every couple that exists today. So a tap on a workbook
-       * that is not there asks for one and waits: it takes a few seconds and
-       * the tile says what is happening.
-       */
+    setBusyTool('workbook');
+    try {
+      /* 1. The file, if there is one. This is the whole of the happy path and
+         it is one openURL with no network in front of it. */
+      let wb = tools?.workbook;
+      if (wb?.url) { await Linking.openURL(wb.url); return; }
+
+      /* 2. It may have been built since this screen loaded. One cheap read
+            before committing to anything slow. */
+      const fresh = await fetchToolData();
+      if (fresh.ok) { setTools(fresh.data); wb = fresh.data.workbook; }
+      if (wb?.url) { await Linking.openURL(wb.url); return; }
+
+      /* 3. Ask the server for one. It is built when results unlock, so this is
+            for a couple whose results opened before that was true. */
       setWorkbookNote(wb?.copy.generating || null);
       const made = await buildWorkbook();
       if (made.ok && made.data.url) {
         setWorkbookNote(null);
         const again = await fetchToolData();
         if (again.ok) setTools(again.data);
-        Linking.openURL(made.data.url);
+        await Linking.openURL(made.data.url);
+        return;
       }
-      return;
+
+      /* 4. Last: the browser draws it from the payload. */
+      if (await openWorkbook()) { setWorkbookNote(null); return; }
+      setWorkbookNote(wb?.copy.generating || tools?.workbook?.copy.generating || null);
+    } catch {
+      /**
+       * ── NOTHING ESCAPES THIS ─────────────────────────────────────────────
+       * Ellie: "there's an error banner on the bottom with a red 3 then
+       * 'Uncaught (in promise, id:2) Error: Unable t...'"
+       *
+       * That is an unhandled rejection, and this function was the only thing
+       * on the screen that could produce one: it is async, it is called
+       * straight from an onPress, and every branch in it awaited a
+       * Linking.openURL. iOS rejects that call rather than throwing anywhere a
+       * handler could see, and a URL carrying the entire workbook payload is
+       * exactly the kind it rejects.
+       *
+       * A red counter in the corner of a beta tester's screen is a broken app,
+       * whatever the cause. The tile says what happened instead.
+       */
+      setWorkbookNote(tools?.workbook?.copy.generating || null);
+    } finally {
+      setBusyTool(null);
     }
-    Linking.openURL(`${SITE}/app?view=${key}`);
   };
   /**
    * Saved on the screen first, then on the server.
@@ -331,6 +367,26 @@ export default function ResourcesScreen() {
     setList('all');
     scroller.current?.scrollTo({ y: 0, animated: true });
   }, []));
+
+  /**
+   * ── EVERY HOOK, BEFORE EVERY RETURN ─────────────────────────────────────
+   * This useMemo sat below five early returns: the loading screen, the
+   * checklist, the article reader, the budget and the shelf page. React
+   * counts hooks by call order, so opening any one of those rendered one
+   * hook fewer than the render before it, and React threw "Rendered more
+   * hooks than during the previous render".
+   *
+   * It was found by opening the Learn tab after an unrelated edit and getting
+   * a full-screen red error naming this line. It is a real crash, not a
+   * development artefact: every route out of this screen went through it.
+   *
+   * The rule has no exceptions and this is the only place in the file that
+   * broke it.
+   */
+  const mostRead = useMemo<PostSummary[]>(
+    () => posts.slice().sort((a, b) => (b.reads || 0) - (a.reads || 0)).slice(0, 4),
+    [posts],
+  );
 
   if (loading) return <Shell><ScreenLoading label={LOADING.resources} /></Shell>;
 
@@ -581,19 +637,6 @@ export default function ResourcesScreen() {
    */
   const narrowing = terms.length > 0 || list !== 'all';
 
-  /**
-   * The four most-read pieces, for the sheet's preview grid.
-   *
-   * `reads` is on the payload: the server counts post_reads rows, which is the
-   * first key of its own Featured sort, so this cannot disagree with the
-   * website about what is popular. Ties fall back to the order the server
-   * already sent, which is stable.
-   */
-  const mostRead = useMemo<PostSummary[]>(
-    () => posts.slice().sort((a, b) => (b.reads || 0) - (a.reads || 0)).slice(0, 4),
-    [posts],
-  );
-
   return (
     <Shell>
       <ScrollView
@@ -640,6 +683,7 @@ export default function ResourcesScreen() {
                 key={r.key}
                 item={r}
                 owned={ownedKeys.has(r.key)}
+                busy={busyTool === r.key}
                 onOpen={openTool}
                 onLocked={() => setLocked(r)}
               />
@@ -1182,8 +1226,18 @@ function Shell({ children }: { children: React.ReactNode }) {
  * height of the grab line Ellie asked for plus its margin, so the peek shows
  * the same four articles and the same search bar it did before the line was
  * added rather than pushing the search under the tab bar.
+ *
+ * And then down again: "Give me just a tiny bit of buffer on the in practice
+ * tab below where the featured publications tiles meet the bottom nav, I'd
+ * like for there to be a little white space above the bottom nav, they're
+ * touching now and it looks like an error."
+ *
+ * The whole sheet moves up rather than the tiles getting shorter, because the
+ * tiles are sized by their own titles: she asked for the full name of an
+ * article to fit, so the grid's height is the longest title's and is not a
+ * number to tune. Twenty points of sheet buys twenty points of white.
  */
-const SHEET_PEEK = 32;
+const SHEET_PEEK = 12;
 
 /** The label on the insight, here and on the card it opens. */
 /** The four featured previews' ground. One tone, not four. */
@@ -1253,10 +1307,20 @@ const ICON: Record<string, string> = {
  * The blurb is gone rather than shortened. A sentence explaining a thing you
  * already own is the least useful sentence on the page.
  */
-function OwnedTile({ item, owned, onOpen, onLocked }: {
+function OwnedTile({ item, owned, busy = false, onOpen, onLocked }: {
   item: Item;
   /** Whether this reader has it. A tile they do not own is dimmed and says so. */
   owned: boolean;
+  /**
+   * This tile is opening.
+   *
+   * Ellie: "Need the button to grey out or something so the user knows their
+   * click worked." The workbook can take seconds before anything appears, and
+   * a tile that looks identical during those seconds reads as a tap that
+   * missed, which is what she did: she tapped, saw nothing, and gave up before
+   * the browser opened.
+   */
+  busy?: boolean;
   onOpen: (key: string) => void;
   onLocked: () => void;
 }) {
@@ -1283,8 +1347,9 @@ function OwnedTile({ item, owned, onOpen, onLocked }: {
        redesign uses. */
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: !owned }}
+      accessibilityState={{ disabled: !owned || busy, busy }}
       accessibilityLabel={owned ? item.short || item.label : `${item.short || item.label}, not yours yet`}
+      disabled={busy}
       onPress={() => (owned ? onOpen(item.key) : onLocked())}
       style={{
         flex: 1, minWidth: 96,
@@ -1292,7 +1357,7 @@ function OwnedTile({ item, owned, onOpen, onLocked }: {
         borderRadius: Radius.card,
         paddingVertical: Spacing.lg, paddingHorizontal: Spacing.md,
         alignItems: 'flex-start', gap: Spacing.md,
-        opacity: owned ? 1 : 0.5,
+        opacity: busy ? 0.55 : owned ? 1 : 0.5,
         ...Lift,
       }}>
       <View
@@ -1301,12 +1366,18 @@ function OwnedTile({ item, owned, onOpen, onLocked }: {
           backgroundColor: color + '1A',
           alignItems: 'center', justifyContent: 'center',
         }}>
-        <SymbolView
-          name={(ICON[item.key] || 'square.grid.2x2') as never}
-          size={22}
-          tintColor={owned ? color : c.textMuted}
-          style={{ width: 24, height: 24 }}
-        />
+        {/* A spinner in the icon's own place, so the tile does not change
+            shape while it waits and the row does not reflow under a finger. */}
+        {busy ? (
+          <ActivityIndicator color={color} />
+        ) : (
+          <SymbolView
+            name={(ICON[item.key] || 'square.grid.2x2') as never}
+            size={22}
+            tintColor={owned ? color : c.textMuted}
+            style={{ width: 24, height: 24 }}
+          />
+        )}
       </View>
       {/* One word. The catalogue's own short name, from the server. */}
       <Text numberOfLines={2} style={{ ...Type.small, fontWeight: '700', color: c.textStrong, lineHeight: 17 }}>

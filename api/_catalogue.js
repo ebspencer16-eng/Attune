@@ -114,10 +114,10 @@ export const CATALOGUE = [
   },
   {
     /* Ellie named this one in the same message. `short` is the app's tile and
-       nothing else reads it, so "Starting Out" is still what the tool calls
+       nothing else reads it. Both now say Merging Lives, which is what the tool calls
        itself everywhere it is sold. */
     key: 'checklist', short: 'Merging lives checklist', kind: 'tool',
-    label: 'Starting Out',
+    label: 'Merging Lives Checklist',
     blurb: 'The practical list for setting up a life.',
     price: ADDON_PRICES.checklist,
   },

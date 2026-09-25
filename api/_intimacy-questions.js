@@ -162,21 +162,55 @@ export const INTIMACY_QUESTIONS = [
      * "you"; the other two do not, and they are hers to rewrite. Named as C2
      * in TASKS.md rather than written here.
      */
-    premarital: 'When you turn your partner down, you expect that you will',
-    married: 'When you turn your partner down, you',
+    /**
+     * ── AND THEN IT BECAME AN A TO B SCALE ──────────────────────────────
+     * Ellie, asked whether the two middle answers still needed rewriting:
+     * "Can we make this question and answer option setup the same as the comms
+     * exercises where the poles are A and B and there's 5 options to show how
+     * closely you align with either pole?"
+     *
+     * Which answers the copy gap by removing it. Five hand-written behaviours
+     * have no middle to write: "Read it how they read it" and "Reassure me
+     * it's okay" were unwritable because there is no third behaviour between
+     * worrying and not worrying. Two poles and five steps has a middle by
+     * construction, and it is the shape the comms exercise already uses, so a
+     * reader meets one kind of scale rather than two.
+     *
+     * ── NOBODY'S ANSWER MOVED ───────────────────────────────────────────
+     * `label` is what is stored, and not one of them changed. The five values
+     * did not change either, so a stored answer scores exactly as it did. What
+     * changed is the words on screen and the order they appear in, which is
+     * the same mechanism as the rewordings above and is why this needed no
+     * migration. check-answer-labels.mjs holds that.
+     *
+     * A is the worrying end because the options now run A to B and the scale
+     * reads left to right. The old list ran the other way, which is why the
+     * order of `options` is reversed here and the values are not.
+     */
+    a: 'Worry about how it lands.',
+    b: "Assume they don't take it personally.",
+    premarital: 'When you turn your partner down, you expect that you will:',
+    married: 'When you turn your partner down, you tend to:',
     options: [
       {
-        label: 'Not take it personally and let it pass', value: 1.0,
-        premarital: "Assume they don't take it personally",
-        married: "Assume they don't take it personally",
-      },
-      { label: 'Check in lightly', value: 0.75 },
-      { label: 'Read it how they read it', value: 0.5 },
-      { label: 'Reassure me it’s okay', value: 0.25 },
-      {
         label: "I'd worry about how it lands", value: 0.0,
-        premarital: 'Worry about how it lands',
-        married: 'Worry about how it lands',
+        premarital: 'Strongly A', married: 'Strongly A',
+      },
+      {
+        label: 'Reassure me it’s okay', value: 0.25,
+        premarital: 'Mostly A', married: 'Mostly A',
+      },
+      {
+        label: 'Read it how they read it', value: 0.5,
+        premarital: 'In the middle', married: 'In the middle',
+      },
+      {
+        label: 'Check in lightly', value: 0.75,
+        premarital: 'Mostly B', married: 'Mostly B',
+      },
+      {
+        label: 'Not take it personally and let it pass', value: 1.0,
+        premarital: 'Strongly B', married: 'Strongly B',
       },
       PNS,
     ],

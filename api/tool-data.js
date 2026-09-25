@@ -1,5 +1,5 @@
 /**
- * The two tools' saved state: Starting Out and Build a Budget.
+ * The two tools' saved state: the Merging Lives Checklist and Build a Budget.
  *
  *   GET  /api/tool-data              → { ok, checklist, budget, owned }
  *   POST /api/tool-data { tool, data } → { ok }

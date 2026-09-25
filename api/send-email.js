@@ -173,7 +173,7 @@ function resultsViewedEmail({ toName, partnerName, coupleType, portalUrl, hasRef
       desc: 'A third exercise. Shared history, the moments that shaped you, and where you are pointed. Side-by-side insights and an action plan.' },
     { owned: !!hasBudget,     name: 'Build a Budget tool',     icon: '💰', price: '+$20', bg: '#FFF8F5',
       desc: 'Map what each of you values spending on and where your instincts differ. Adds context to your expectations results.' },
-    { owned: !!hasChecklist,  name: 'Starting Out Checklist',  icon: '✓', price: '+$20', bg: '#FDF8F3',
+    { owned: !!hasChecklist,  name: 'Merging Lives Checklist',  icon: '✓', price: '+$20', bg: '#FDF8F3',
       desc: 'A practical guide to starting your life together. Names, finances, household logistics.' },
   ];
 

@@ -42,7 +42,7 @@ CLAUDE.md, so anything new sits here until you do.
 
 | # | Migration |
 |--|--|
-| M074 | **`supabase/migrations/074_drop_notes_data.sql`.** From D7. Drops `profiles.notes_data`, the column behind the website's first Notes screen: three textareas kept in the browser and flushed to the profile under a line that said "auto-saved". The screen stopped being rendered when Notes was rebuilt, and the column went on being read into every browser on sign-in and written by a debounce nobody could reach. You: "the only notes that have been written so far are my tests. We can delete them if that's what you're talking about." **This deletes what is in it and cannot be undone.** The file carries a one-line query at the top that counts how many rows have anything in them, if you want to look before you drop. The code that read and wrote it is already gone, so the order does not matter. |
+| M075 | **`supabase/migrations/075_reset_two_couples.sql`.** Resets Aspen and Ryan and Lanae and Spencer: every exercise answer cleared, and all five exercises plus all three tools granted to each of the four accounts. Written against the two resets that went wrong, so read its header before running it: it says what it clears, what it deliberately does not, and how to check afterwards that all four are genuinely at the start line. |
 
 
 ### Decide these
@@ -57,10 +57,14 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Write this
 
+**C2 is closed**, by her own answer to it: "Can we make this question and
+answer option setup the same as the comms exercises where the poles are A and B
+and there's 5 options to show how closely you align with either pole?" The two
+middle answers were unwritable because five hand-written behaviours have no
+middle. A scale has one by construction.
+
 | # | Copy gap |
 |--|--|
-| C2 | **Still open, and here is exactly what it reads like.** You asked whether this is a non-issue now. It is not. The stem is "When you turn your partner down, you" and the five answers below it run: "Assume they don't take it personally", "Check in lightly", "Read it how they read it", "Reassure me it's okay", "Worry about how it lands". Read the middle two after that stem. The third says you read your own turn-down the way your partner reads it, which is a sentence about the wrong person, and the fourth says you reassure yourself. Both were written to follow "you want them to", which the stem no longer says. The ends are yours and they work. I need two short phrases to sit between "check in lightly" and "worry about how it lands", each starting with a verb in the second person. Stored answers do not move whatever you choose: the label is what is saved and only the words on screen change. Say the word and I will draft two the way I drafted the fifty, and you review them the same way.
-
 | C3 | **Fifty words, written and waiting on you.** You: "Build 50 words to start, build a review doc for me." `WORDS-REVIEW.md` in the repo root, one row per word, generated from `api/_words.js` rather than typed, so a word changed in one is changed in both and the document cannot quietly describe a previous version of the product. Four of them are yours; forty-six are mine. Three useful answers per row, and a whole column of "fine" is one of them: cut the word, keep the word and send me your sentence, or tell me a word that is missing. Seven are the harder half of a relationship (rupture, conflict, withdrawal, escalation, resentment, contempt, defensiveness) and are the easiest to cut if a card saying "contempt" over breakfast is not the tone you want. |
 
 
@@ -77,7 +81,19 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.**
+| # | Task |
+|--|--|
+| O456 | **The turn-down question becomes an A/B scale.** Ellie: "Can we make this question and answer option setup the same as the comms exercises where the poles are A and B and there's 5 options to show how closely you align with either pole?" That answers C2 by removing it: the two middle answers were unwritable because a five-item list of behaviours has no middle. Two poles and five steps has one by construction. The thing to protect is every answer already given: the label is what is stored, so the new options have to keep the old labels or record the old ones as retired. See `check-answer-labels.mjs`. |
+| O457 | **The workbook is built before it is asked for**, and the button says it heard you. Three parts, from R173. The click looks like nothing happened, because the browser opens late and the page then says "Building your workbook". The build should start the moment both partners finish, so the page opens on a file that already exists. And if a waiting page is ever shown it has to be quick and carry a large Attune mark. Measure what the build actually costs before assuming where the time goes. |
+| O458 | **An error banner in the app**: a red 3 and "Uncaught (in promise, id:2) Error: Unable t...". An unhandled rejection, which means something is awaited nowhere. Find the throw rather than adding a catch. |
+| O459 | **White space above the bottom nav on Learn.** The featured publication tiles touch the tab bar and it reads as a mistake. |
+| O460 | **Fifty insights of the day**, the same shape as the fifty words: written by me, generated into a review document, and read alongside the words when she reviews them. |
+| O461 | **The journal rail, still not visible.** O435 was reported as done and she still cannot see it. It draws only when there is more than one day of entries, which was written down and is not what she was told when it was handed over. Check that condition against what her journal actually holds before changing anything. |
+| O462 | **A streak on the journal button, not a count.** The 7 is how many entries exist. She wants "0 day streak", counting consecutive days written, and it has to start at nought rather than being hidden when it is nought. |
+| O463 | **A gift tile with no words in it** on the packages page, left above the side-by-side package tiles when its copy was removed. The tile and its icon go. |
+| O464 | **The checklist is called "Merging lives checklist" everywhere**: packages, quick checkout, checkout, and anywhere else it is named. One name, and a check so it cannot come apart again. |
+| O465 | **Two couples reset cleanly.** Aspen and Ryan, Lanae and Spencer: answers cleared, all five exercises and all three tools granted to each of four accounts. One partner will use the site and one the app. The last two resets produced errors and roadblocks, so the job is not the SQL, it is finding what those roadblocks were and making sure this reset does not leave them. |
+| O466 | **Sweeps, repeatedly, for a beta with one partner on each surface.** Not a look. Each round needs a method: what is being checked, how, and what would count as a failure. The pairing is the thing to aim at, because it is the path least travelled: everything either partner does has to be visible to the other from a different surface. |
 
 
 ## 3. For you to review
@@ -98,7 +114,6 @@ The newest pass first.
 
 | # | Review |
 |--|--|
-| O445 | **The prompt is off the overview, on both surfaces.** You are right that it was the inconsistency rather than the sentence: the overview's job is to say in one tile what the page behind it says at length, and a sentence that appears only in the summary is a summary of something that does not exist. Matching it onto the detail page would have been the other fix and the worse one, since that page is three orientation bars and a side-by-side with nowhere a standing instruction belongs. Worth knowing how it got there: the website drew it, the app did not, you reported the app missing a line, and it was added to the app. Both surfaces then agreed with each other and neither agreed with the page. |
 | O435 | **The rail says the month and the year.** It said "Sep 21" before, which is the right label for finding a day and the wrong one for finding a place in a timeline. It draws once there is more than one day of entries, so you will not see it until tomorrow. |
 | R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
 | R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
@@ -149,6 +164,7 @@ receive a notification from Apple's servers.
 | C4 | **Thirteen strings on the new surfaces, approved as written.** The journal's placeholder, empty line and failure line; the journal card's two subtitles; "Word in use"; the two on the lock; the four on the save sheet; and the control that opens it. They were mine, standing in, and they are yours now. |
 | C5 | **The three controls at the foot of the Luxury screen stay out.** You: "Keep them out." Which was my own view of it: every action that row could hold is already in the tab bar or on a card above it, and a second row of navigation is a worse screen that merely looks more like the picture. |
 | D8 | **Eight components that were defined and never drawn are gone**: `PrimaryCard` and `ResearchNote` on the home screen, `Bullet` in Settings, `ExpectationRowView`, `DistanceBar` and `Legend` in results, and `interpDimAction` and `_dlWidth` on the website. Two hundred and eighty-nine lines. Nothing referenced any of them before or after, and every gate still passes. |
+| O445 | **The prompt is off the overview, on both surfaces.** You are right that it was the inconsistency rather than the sentence: the overview's job is to say in one tile what the page behind it says at length, and a sentence that appears only in the summary is a summary of something that does not exist. Matching it onto the detail page would have been the other fix and the worse one, since that page is three orientation bars and a side-by-side with nowhere a standing instruction belongs. Worth knowing how it got there: the website drew it, the app did not, you reported the app missing a line, and it was added to the app. Both surfaces then agreed with each other and neither agreed with the page. |
 | O453 | **Life & Values opens the Expectations flow**, on both surfaces, followed by Household, Financial, Career & Work, Emotional Labor and Extended Family. What it looked like was one line. Two things underneath it were not. First, a category's page id was its position in that list, and a note anchored to a results page is anchored by exactly that string, so reordering would have left every mark anyone has made on an Expectations page pointing at whichever category moved into its place: filed on the Notes tab under the wrong heading and unplaceable on the page it opened. The id is now the category's own and stays with it, so nothing moved and no migration was needed. Second, the page picked its rows by comparing its place in that list to an index into a different list; they agreed only because the five responsibilities happened to come first in both, so every page would have shown another category's rows, silently. Rows carry their category's id now. |
 | O443 | **The caret under the four featured articles is gone.** Two hints about one gesture is a page saying the same thing in two voices, and the second one was at the bottom of the block it described. |
 | O444 | **The home tile's blue fades out of nothing.** Measured before it was changed: a column down the right margin read 255,253,249 at 328 points and 243,245,248 at 332, which is five per cent of indigo arriving in a single row. The blue layer began on the same line the cream panel did, so it started at a level rather than at nothing, and the fade above it ended in opaque cream, which drew the line. Both layers run the whole height now and the blue does its own fading. The shadow moved to a strip at the foot, so the tile's only edge is the one you asked to see. |

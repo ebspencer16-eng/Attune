@@ -400,7 +400,7 @@ async function handleWebhook(req) {
       if (meta.addonIntimacy === '1')  includedItems.push('Physical Intimacy Expectations');
       if (meta.addonReflection === '1') includedItems.push('Relationship Reflection');
       if (meta.addonBudget === '1')    includedItems.push('Build a Budget tool');
-      if (meta.addonChecklist === '1') includedItems.push('Starting Out Checklist');
+      if (meta.addonChecklist === '1') includedItems.push('Merging Lives Checklist');
       const includedRow = includedItems.length ? `
             <tr>
               <td style="padding:.65rem 1rem;font-weight:700;border-top:1px solid #E8DDD0;vertical-align:top;">Included</td>

@@ -305,6 +305,32 @@ export default function IntimacyExercise({
           ) : null}
         </Text>
 
+        {/* ── THE TWO ENDS, WHEN THERE ARE TWO ENDS ────────────────────
+            Ellie: "Can we make this question and answer option setup the same
+            as the comms exercises where the poles are A and B and there's 5
+            options to show how closely you align with either pole?"
+
+            Side by side and lettered rather than numbered, which is the comms
+            exercise's own arrangement and its own reason: neither end reads as
+            the first one or the better one. A question with no poles draws
+            nothing here. */}
+        {item.a && item.b ? (
+          <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: Spacing.md, marginTop: Spacing.lg }}>
+            {([['A', item.a], ['B', item.b]] as const).map(([letter, text]) => (
+              <View
+                key={letter}
+                style={{
+                  flex: 1, backgroundColor: Palette.white, borderRadius: Radius.md,
+                  borderColor: c.border, borderWidth: 1,
+                  paddingVertical: Spacing.md, paddingHorizontal: Spacing.md, gap: Spacing.xs,
+                }}>
+                <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>{letter}</Text>
+                <Text style={{ ...Type.small, color: c.text, lineHeight: 19 }}>{text}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
         <View style={{ marginTop: Spacing.lg, gap: Spacing.sm }}>
           {item.options.map((o) => {
             const declining = o.value === null;

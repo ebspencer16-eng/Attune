@@ -45,6 +45,8 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { transform } from 'esbuild';
+import { journalStreak } from '../api/_lib/journal-use.js';
 import { JOURNAL_ANCHOR } from '../api/_lib/tags.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -235,6 +237,69 @@ for (const [who, file] of [
       + ' from the insight of the day keeps the quote in anchor_context and the'
       + " reader's own words in the body; a surface that draws only the body"
       + ' shows a blank tile, or commentary about nothing.');
+  }
+}
+
+/**
+ * The streak, computed the same way on both sides.
+ *
+ * Ellie asked for a day streak on the journal button. The arithmetic is in
+ * api/_lib/journal-use.js, which an Expo project cannot import, so the app
+ * carries its own copy. Two copies of a rule is the failure this repo is
+ * about, and the way out when a bundler boundary makes one copy impossible is
+ * to run both and compare, which is what check-budget-mirror does for the
+ * budget and check-card-type-clipping does for the card scale.
+ *
+ * The app's is lifted out of the TSX by brace depth and stripped of its types,
+ * so what runs here is the copy that ships. It throws rather than passing if
+ * it cannot find the function.
+ */
+{
+  const src = readFileSync(`${ROOT}attune-app/src/components/journal.tsx`, 'utf8');
+  const at = src.indexOf('export function journalStreak(');
+  if (at < 0) {
+    fails.push('attune-app/src/components/journal.tsx no longer exports'
+      + ' journalStreak, so this gate cannot run the copy that ships. A gate'
+      + ' that has lost its subject must not report success.');
+  } else {
+    let depth = 0; let end = -1; let seen = false;
+    for (let i = src.indexOf('{', src.indexOf(')', at)); i < src.length; i += 1) {
+      if (src[i] === '{') { depth += 1; seen = true; } else if (src[i] === '}') {
+        depth -= 1; if (seen && depth === 0) { end = i + 1; break; }
+      }
+    }
+    if (end < 0) throw new Error('cannot find the end of journalStreak in journal.tsx');
+    const { code } = await transform(src.slice(at, end).replace(/^export\s+/, ''), { loader: 'ts' });
+    const appStreak = new Function(`${code}; return journalStreak;`)();
+
+    /**
+     * Day patterns, not random input. Each one is a thing that happens: an
+     * unbroken run, a run that ended yesterday, a run with a hole in it, a
+     * reader who wrote once a week ago, and today on its own.
+     */
+    const TODAY = '2026-09-25';
+    const d = (n) => new Date(Date.parse(`${TODAY}T00:00:00Z`) - n * 86400000).toISOString().slice(0, 10);
+    const CASES = [
+      ['nothing written', []],
+      ['today only', [d(0)]],
+      ['yesterday only, which still counts', [d(1)]],
+      ['the day before yesterday, which does not', [d(2)]],
+      ['three days up to today', [d(0), d(1), d(2)]],
+      ['three days ending yesterday', [d(1), d(2), d(3)]],
+      ['today, then a gap', [d(0), d(2), d(3)]],
+      ['a week unbroken', [d(0), d(1), d(2), d(3), d(4), d(5), d(6)]],
+      ['out of order, which a Set does not care about', [d(2), d(0), d(1)]],
+      ['a duplicate day', [d(0), d(0), d(1)]],
+    ];
+    for (const [what, days] of CASES) {
+      const server = journalStreak(days, TODAY);
+      const app = appStreak(days, TODAY);
+      if (server !== app) {
+        fails.push(`the journal streak disagrees on ${what}: the server says`
+          + ` ${server} and the app says ${app}. One of them is telling someone`
+          + ' their habit is longer or shorter than it is.');
+      }
+    }
   }
 }
 

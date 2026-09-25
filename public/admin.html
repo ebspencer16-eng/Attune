@@ -1076,7 +1076,7 @@
   <div class="ux-cardlabel" style="font-size:.62rem;">2 · Add-ons</div>
   <div class="ux-card" style="margin-bottom:1.9rem;">
     <div class="ux-row">
-      <a class="ux-link" href="/app?demo=newlywed&view=checklist" target="_blank" rel="noopener">Starting Out Checklist ↗</a>
+      <a class="ux-link" href="/app?demo=newlywed&view=checklist" target="_blank" rel="noopener">Merging Lives Checklist ↗</a>
       <a class="ux-link" href="/app?demo=newlywed&view=budget" target="_blank" rel="noopener">Shared Budget ↗</a>
     </div>
   </div>
@@ -3430,7 +3430,7 @@ window.computeBetaSIM = function(R){
     aha: [],
     interestAvg: [
       {l:'Relationship Reflection exercise',v:0},{l:'Physical Intimacy Expectations',v:0},
-      {l:'Starting Out Checklist',v:0},{l:'Build a Budget experience',v:0},
+      {l:'Merging Lives Checklist',v:0},{l:'Build a Budget experience',v:0},
     ],
     completion: [],
     concerns: [],
@@ -3465,7 +3465,7 @@ window.computeBetaSIM = function(R){
     SIM.aha = distPct('ahaMarker');
     SIM.concerns = multiPct('concerns');
     // Interest grid: one column (interest 1-5) per row; show avg as a 0-100 bar.
-    const INTEREST_ROWS = ['Relationship Reflection exercise','Physical Intimacy Expectations','Starting Out Checklist','Build a Budget experience'];
+    const INTEREST_ROWS = ['Relationship Reflection exercise','Physical Intimacy Expectations','Merging Lives Checklist','Build a Budget experience'];
     SIM.interestAvg = INTEREST_ROWS.map((l, ri) => { const vals = R.map(s => s.interestGrid && s.interestGrid['r'+ri+'_c0']).filter(Number.isFinite); const a = vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : 0; return { l, v: Math.round(a/5*100) }; });
     // Open-text feeds from real answers.
     const feed = (f, extra) => R.filter(s => s[f] && String(s[f]).trim()).map(s => ({ text: String(s[f]).trim(), name: 'Anonymous', ...(extra ? extra(s) : {}) }));

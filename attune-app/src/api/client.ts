@@ -1799,6 +1799,15 @@ export type IntimacyQuestionSet = {
     kind: 'scale' | 'selfref' | 'multi';
     topic: string;
     text: string;
+    /**
+     * The two ends, when a question is set out as a scale between them.
+     *
+     * Ellie asked for the turn-down question to read the way the comms
+     * exercise does: an A pole, a B pole and five steps. A question without
+     * poles sends null and the screen draws nothing extra.
+     */
+    a?: string | null;
+    b?: string | null;
     /** Both wordings, so answering the framing question needs no second fetch. */
     texts?: { premarital: string; married: string };
     options: {

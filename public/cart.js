@@ -36,7 +36,7 @@ const ADDON_PRICES = {
   workbookPrint:   39,
   reflection:      40,   // The Relationship Reflection exercise
   budget:          20,   // Build a Budget / Budgeting Activity
-  checklist:       20,   // Starting Out Checklist
+  checklist:       20,   // Merging Lives Checklist
   intimacy:        20,   // Physical Intimacy Expectations exercise
   conflict:        40,   // Conflict Patterns exercise
 };
@@ -47,7 +47,7 @@ const ADDON_META = {
   conflict:   { title: 'Conflict Patterns',                    desc: 'A look at your conflict patterns, answered independently' },
   intimacy:   { title: 'Physical Intimacy Expectations', desc: 'A private exercise on what you each expect' },
   budget:     { title: 'Shared Budgeting Activity',  desc: 'Build a shared budget together' },
-  checklist:  { title: 'Starting Out Checklist',     desc: 'Merging lives, finances, logistics' },
+  checklist:  { title: 'Merging Lives Checklist',     desc: 'Merging lives, finances, logistics' },
   reflection: { title: 'Relationship Reflection',    desc: 'Exercise on experiences that shaped you' },
 };
 // What each package already bundles, so it isn't offered again as a paid add-on.

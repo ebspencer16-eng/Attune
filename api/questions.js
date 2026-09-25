@@ -366,6 +366,16 @@ export default async function handler(req) {
           topic: q.topic,
           text: q[variant] || q.text || q.premarital,
           /**
+           * The two ends, when a question has them.
+           *
+           * Ellie asked for the turn-down question to be set out the way the
+           * comms exercise is: an A pole, a B pole and five steps between. A
+           * question without poles sends nulls and the screens draw nothing
+           * extra, so this is additive rather than a second question shape.
+           */
+          a: q.a || null,
+          b: q.b || null,
+          /**
            * Both wordings, because the app may be about to ask the framing
            * question and needs the other set the moment it is answered. Eleven
            * of the eighteen differ; the rest are the same sentence twice,

@@ -56,7 +56,7 @@ import ScreenFrame from '@/components/screen-frame';
 import { showSection } from '@/components/results';
 import { showPost } from '@/app/resources';
 import SignIn from '@/components/sign-in';
-import Journal, { JOURNAL_ANCHOR, lockAvailable } from '@/components/journal';
+import Journal, { JOURNAL_ANCHOR, journalDay, journalStreak, lockAvailable } from '@/components/journal';
 import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
@@ -410,17 +410,32 @@ export default function NotesScreen() {
   ), [shared]);
 
   /**
-   * How many journal entries there are.
+   * ── HOW MANY DAYS IN A ROW, NOT HOW MANY ENTRIES ────────────────────────
+   * Ellie: "Is there a little 7 in the 'write a journal entry' button? Let's
+   * remove that and instead have a '0 day streak' that adjusts as people
+   * consistently write."
+   *
+   * It was the count of entries, which is a number that only goes up and says
+   * nothing about whether the habit is alive. A streak says both: it is the
+   * thing people keep, and it is the thing they notice breaking.
    *
    * From the anchored list, by anchor type, which is the same rule the journal
    * itself reads by. It is not a second definition of what an entry is: both
    * ask JOURNAL_ANCHOR. Reading the loose list instead is the mistake
    * check-annotation-source.mjs exists for.
+   *
+   * The day comes from the entry's anchor key, which is the day it was written
+   * on in the writer's own timezone. Parsing created_at here would be the
+   * server's midnight rather than theirs.
    */
-  const journalCount = useMemo(
-    () => annotations.filter((n) => n.anchor_type === JOURNAL_ANCHOR).length,
+  const journalDays = useMemo(
+    () => annotations
+      .filter((n) => n.anchor_type === JOURNAL_ANCHOR)
+      .map((n) => n.anchor_key)
+      .filter((k): k is string => !!k),
     [annotations],
   );
+  const streak = useMemo(() => journalStreak(journalDays, journalDay()), [journalDays]);
 
   /**
    * Everything the reader has left, minus the journal.
@@ -772,11 +787,12 @@ export default function NotesScreen() {
             <Text style={{ ...Type.cardTitle, fontSize: 15, color: Palette.white }}>
               {WRITE_ENTRY}
             </Text>
-            {journalCount ? (
-              <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.75)' }}>
-                {journalCount}
-              </Text>
-            ) : null}
+            {/* Always drawn, including at nought. "0 day streak" is the thing
+                she asked for by name, and a counter that only appears once you
+                are already doing it cannot be what gets you started. */}
+            <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.75)' }}>
+              {`${streak} day streak`}
+            </Text>
           </Pressable>
 
           {/* ── AND THE TAGS, AS THEY WERE ─────────────────────────────────

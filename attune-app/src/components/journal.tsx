@@ -142,6 +142,40 @@ export function lockDecision(
 /** An entry is a note anchored to the day it was written. */
 export const JOURNAL_ANCHOR = 'journal';
 
+/**
+ * How many days in a row someone has written, counting back from today.
+ *
+ * Ellie: "Is there a little 7 in the 'write a journal entry' button? Let's
+ * remove that and instead have a '0 day streak' that adjusts as people
+ * consistently write."
+ *
+ * A streak survives the day it is on: someone who wrote every day last week
+ * and has not written yet this morning has a streak of seven, not nought.
+ * Breaking it at midnight would tell people their habit ended while they slept.
+ *
+ * The same function is `journalStreak` in api/_lib/journal-use.js, which an
+ * Expo project cannot import. check-notes-parity.mjs runs both over the same
+ * day patterns and fails the build on any disagreement.
+ */
+export function journalStreak(days: string[], today: string): number {
+  const have = new Set(days || []);
+  if (!have.size || !today) return 0;
+
+  const at = Date.parse(`${today}T00:00:00Z`);
+  if (!Number.isFinite(at)) return 0;
+  const iso = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+
+  let cursor = at;
+  if (!have.has(iso(cursor))) {
+    cursor -= 86400000;
+    if (!have.has(iso(cursor))) return 0;
+  }
+
+  let n = 0;
+  while (have.has(iso(cursor))) { n += 1; cursor -= 86400000; }
+  return n;
+}
+
 /** Today, as the anchor key the server validates: four, two and two. */
 export function journalDay(d = new Date()) {
   const p = (n: number) => String(n).padStart(2, '0');
@@ -761,6 +795,14 @@ export default function Journal({ onClose }: { onClose: () => void }) {
           there is more than one day to move between: a scrubber over a single
           day is a control that cannot do anything.
 
+          Ellie, after it was reported done: "O435. still not seeing this." Two
+          reasons, and only one of them was a bug. Her journal held a single
+          day, so the condition below was correctly hiding it, and nobody had
+          told her that is what it does. And the ticks were a hairline in the
+          border colour, so even with two days there was nothing to see. The
+          second is fixed; the first is stated out loud in TASKS.md instead of
+          being softened by drawing a scrubber that cannot scrub.
+
           It is not a scroll bar. It does not follow the scroll position,
           because a thing that both follows and leads fights the finger; it is
           a way to jump, and it appears only while it is being used. */}
@@ -777,8 +819,21 @@ export default function Journal({ onClose }: { onClose: () => void }) {
               <View
                 key={d.key}
                 style={{
-                  width: scrubbing === d.iso ? 14 : 8, height: 2, borderRadius: 1,
-                  backgroundColor: scrubbing === d.iso ? c.accent : c.border,
+                  /* ── IT HAS TO BE FINDABLE ──────────────────────────────
+                     Ellie, twice: "Make the arrows... visible", and then of
+                     this, "still not seeing this". The ticks were eight points
+                     by two in the border colour, which on cream is a hairline
+                     nobody would think to put a thumb on. A control you cannot
+                     see is a control that does not exist.
+
+                     Wider, taller, and in the quiet accent rather than the
+                     border, so the column reads as a thing down the edge of
+                     the page. The one under the finger is wider still and in
+                     the full accent. */
+                  width: scrubbing === d.iso ? 20 : 14,
+                  height: 3, borderRadius: 1.5,
+                  backgroundColor: scrubbing === d.iso ? c.accent : c.accentQuiet,
+                  opacity: scrubbing === d.iso ? 1 : 0.55,
                 }}
               />
             ))}
