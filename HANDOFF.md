@@ -1799,3 +1799,54 @@ compares the two rather than trusting the note that says they agree.
 **Where to pick up.** R66 to R72. R66 is the one to try first, in the
 simulator: click and hold about half a second, keep the button down, drag,
 release.
+
+## 24 September 2026, written because the machine may go away
+
+Ellie: "My computer just broke. Can we continue coding work from here for the
+time being, or do you need a laptop?"
+
+Everything is committed and pushed, the tree is clean, and the OTA update is
+out on commit 0971bc9. Nothing is stranded. This note exists because the next
+session may start on a different machine, or not on a Mac at all.
+
+**What needs a Mac, and it is only two things.** The iOS simulator, which is
+the only way the app gets checked by eye, and `eas build` / `eas submit`, which
+need Ellie's Expo and Apple logins. Everything else runs anywhere: the gates,
+the website build, the migrations as files. If you are working without a
+simulator, say so in the report every time rather than handing over something
+unverified and quiet about it.
+
+**Two migrations are waiting on her**, 073 and 074, and both are run in the
+Supabase SQL editor, which is a website. A phone browser is enough, so these
+are not blocked by the machine. 074 drops `profiles.notes_data` and deletes
+what is in it; the file carries a query at the top that counts the rows with
+anything in them.
+
+**C2 is open and was asked about.** She asked whether the turn-down question
+had been fixed. It has not. Under the stem "When you turn your partner down,
+you", the middle two answers still read as though the stem said "you want them
+to": one says you read your own turn-down the way your partner reads it, the
+other says you reassure yourself. Two short phrases are needed, each starting
+with a verb in the second person. She has not said whether she wants to write
+them or wants a draft.
+
+**C3 is drafted and waiting on her eye.** Fifty words in `api/_words.js`, four
+hers and forty-six mine. `WORDS-REVIEW.md` is generated from that file and
+committed, so she can read it on a phone. Do not edit that document: edit the
+words and run `node scripts/build-words-review.mjs`.
+
+**One discrepancy in the approvals, unresolved.** She approved "O455", which
+does not exist; the highest id is O453. O445 is the plausible typo and it was
+left in section 3 rather than recorded as verified. Do not move it on a guess.
+
+**Thirteen items in section 3 have not been reviewed**, all from the last two
+rounds. Two of them say out loud what could not be verified: the save-to-journal
+sheet was never seen on screen, because the simulator stopped accepting
+ordinary presses four times in a row, and the shorter selection hold cannot be
+judged anywhere but a real phone.
+
+**The simulator's press-death is worth planning around.** It is already in
+CLAUDE.md. What this week added: it also comes back after a restart if the
+Simulator window does not have focus, so `osascript -e 'tell application
+"Simulator" to activate'` before a click is part of the procedure, not a
+flourish.
