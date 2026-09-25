@@ -13,6 +13,7 @@
  */
 
 import { ActivityIndicator, Image, Linking, Pressable, Text, View } from 'react-native';
+import { openExternal } from '@/api/open-external';
 import type { ApiError } from '@/api/client';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
 
@@ -108,7 +109,7 @@ export function ScreenError({
   // do that thing.
   const needsWebsite = error.kind === 'not_found' && /profile/i.test(error.detail || '');
   const press = needsWebsite
-    ? () => Linking.openURL('https://www.attune-relationships.com/app')
+    ? () => openExternal('https://www.attune-relationships.com/app')
     : error.kind === 'unauthorized' ? onSignIn || onRetry : onRetry;
 
   return (

@@ -24,6 +24,7 @@ import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { openExternal } from '@/api/open-external';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -184,7 +185,7 @@ export default function HomeScreen() {
      */
     if (card.action === 'nudge') { sendNudge(); return; }
     const target = card.app;
-    if (target?.external) { Linking.openURL(target.external); return; }
+    if (target?.external) { openExternal(target.external); return; }
     if (target?.route) {
       // Checked against the routes that exist before pushing.
       //
@@ -231,7 +232,7 @@ export default function HomeScreen() {
     // A path-shaped deepLink is a page of its own; a query-shaped one is a view
     // inside the portal. The one builder turned '/feedback' into '/appfeedback'.
     if (card.deepLink) {
-      Linking.openURL(card.deepLink.startsWith('/?')
+      openExternal(card.deepLink.startsWith('/?')
         ? `${SITE}/app${card.deepLink.slice(1)}`
         : `${SITE}${card.deepLink}`);
     }

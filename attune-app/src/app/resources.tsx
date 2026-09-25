@@ -20,6 +20,7 @@ import { useTabReset } from '@/hooks/use-tab-reset';
 import {
   ActivityIndicator, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
 } from 'react-native';
+import { openExternal } from '@/api/open-external';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -173,7 +174,7 @@ export default function ResourcesScreen() {
      * rather than a sheet inside the app, because this ends in a PDF the phone
      * displays, saves and prints, and that is the browser's own job.
      */
-    await Linking.openURL(`${SITE}/workbook-render?data=${data}&auto=1`);
+    await openExternal(`${SITE}/workbook-render?data=${data}&auto=1`);
     return true;
   };
 
@@ -205,20 +206,20 @@ export default function ResourcesScreen() {
    */
   const openTool = async (key: string) => {
     if (IN_APP.includes(key)) { setOpenTool(key); return; }
-    if (key !== 'workbook') { Linking.openURL(`${SITE}/app?view=${key}`); return; }
+    if (key !== 'workbook') { openExternal(`${SITE}/app?view=${key}`); return; }
 
     setBusyTool('workbook');
     try {
       /* 1. The file, if there is one. This is the whole of the happy path and
          it is one openURL with no network in front of it. */
       let wb = tools?.workbook;
-      if (wb?.url) { await Linking.openURL(wb.url); return; }
+      if (wb?.url) { await openExternal(wb.url); return; }
 
       /* 2. It may have been built since this screen loaded. One cheap read
             before committing to anything slow. */
       const fresh = await fetchToolData();
       if (fresh.ok) { setTools(fresh.data); wb = fresh.data.workbook; }
-      if (wb?.url) { await Linking.openURL(wb.url); return; }
+      if (wb?.url) { await openExternal(wb.url); return; }
 
       /* 3. Ask the server for one. It is built when results unlock, so this is
             for a couple whose results opened before that was true. */
@@ -228,7 +229,7 @@ export default function ResourcesScreen() {
         setWorkbookNote(null);
         const again = await fetchToolData();
         if (again.ok) setTools(again.data);
-        await Linking.openURL(made.data.url);
+        await openExternal(made.data.url);
         return;
       }
 
@@ -576,7 +577,7 @@ export default function ResourcesScreen() {
                   key={post.id}
                   accessibilityRole="button"
                   accessibilityLabel={post.title}
-                  onPress={() => { if (post.external) { Linking.openURL(post.external); return; } setOpenPost(post.id); }}
+                  onPress={() => { if (post.external) { openExternal(post.external); return; } setOpenPost(post.id); }}
                   style={{
                     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
                     paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
@@ -924,7 +925,7 @@ export default function ResourcesScreen() {
                   key={post.id}
                   accessibilityRole="button"
                   accessibilityLabel={post.title}
-                  onPress={() => { if (post.external) { Linking.openURL(post.external); return; } setOpenPost(post.id); }}
+                  onPress={() => { if (post.external) { openExternal(post.external); return; } setOpenPost(post.id); }}
                   style={{ width: '47%' }}>
                   <View
                     style={{
@@ -1148,7 +1149,7 @@ export default function ResourcesScreen() {
               </Text>
               <Pressable
                 accessibilityRole="link"
-                onPress={() => { const key = locked.key; setLocked(null); Linking.openURL(`${SITE}/offerings?add=${key}`); }}
+                onPress={() => { const key = locked.key; setLocked(null); openExternal(`${SITE}/offerings?add=${key}`); }}
                 style={{
                   backgroundColor: c.accent, borderRadius: Radius.pill,
                   paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
@@ -1614,7 +1615,7 @@ function PostCard({
          * only set when a body did not come through. Reading is marked by the
          * reader, on open, not here.
          */
-        if (post.external) { Linking.openURL(post.external); return; }
+        if (post.external) { openExternal(post.external); return; }
         onOpenPost(post.id);
       }}
       /* Radius and a soft shadow rather than a hairline: the cards in every

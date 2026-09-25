@@ -21,6 +21,7 @@ import * as Updates from 'expo-updates';
 import {
   ActivityIndicator, Linking, Modal, Pressable, ScrollView, Text, TextInput, View,
 } from 'react-native';
+import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
@@ -88,11 +89,14 @@ function AdminRow() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Open the admin"
+      /* .catch rather than a try, because this is not awaited: the handler
+         starts the browser and returns. A rejection with nobody listening is
+         what put an error banner on the bottom of the app. */
       onPress={() => openBrowserAsync(`${SITE}/admin`, {
         presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
         toolbarColor: c.background,
         controlsColor: c.accent,
-      })}
+      }).catch((e) => console.warn('[settings] admin would not open', e))}
       style={{
         marginTop: Spacing.xxl, flexDirection: 'row', alignItems: 'center',
         justifyContent: 'space-between', gap: Spacing.md,
@@ -248,8 +252,8 @@ export default function Settings({
 
       <View style={{ ...card(), marginTop: Spacing.xl }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Privacy</Text>
-        <Row label="Privacy policy and terms" onPress={() => Linking.openURL(`${SITE}/legal`)} />
-        <Row label="Your privacy choices" onPress={() => Linking.openURL(`${SITE}/privacy-choices`)} last />
+        <Row label="Privacy policy and terms" onPress={() => openExternal(`${SITE}/legal`)} />
+        <Row label="Your privacy choices" onPress={() => openExternal(`${SITE}/privacy-choices`)} last />
       </View>
 
       <ExerciseStatus />
@@ -293,7 +297,7 @@ export default function Settings({
               This permanently deletes your account and your answers. It cannot be undone.{' '}
               <Text
                 style={{ color: c.accentQuiet, textDecorationLine: 'underline' }}
-                onPress={() => Linking.openURL(`${SITE}/legal#privacy`)}>
+                onPress={() => openExternal(`${SITE}/legal#privacy`)}>
                 What is deleted
               </Text>
               .
