@@ -138,7 +138,28 @@ export function Prose({
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
   const { marks, select, remove, openMark, enabled, focus, claim } = useAnnotations();
   const text = children || '';
-  if (!enabled || !text) return <Text style={style}>{text}</Text>;
+  /**
+   * ── EVERY HOOK RUNS, EVEN WHEN THIS DRAWS A PLAIN TEXT ──────────────────
+   * The early return used to be here, on the line above the first of five
+   * hooks. So a Prose with no text, or one outside the provider, ran five
+   * hooks fewer than one with text, and React counts hooks by call order:
+   * anything that made a paragraph go from empty to filled, or the other way,
+   * threw "Rendered more hooks than during the previous render" over the whole
+   * screen.
+   *
+   * It had been survivable because nine paragraphs were Prose and most of them
+   * always had words. Forty-one more sites were converted on 22 September,
+   * including several whose text is a field that is often absent, which is the
+   * shape that trips it.
+   *
+   * Found by check-hook-order.mjs, written after the same mistake was found by
+   * hand in resources.tsx.
+   *
+   * The work below is cheap on an empty paragraph: marksIn finds nothing,
+   * every list is empty, and the effect does nothing. So the plain branch is
+   * taken at the end rather than at the start.
+   */
+  const plain = !enabled || !text;
 
   /**
    * ── THE MARGIN MARKER ────────────────────────────────────────────────────
@@ -213,6 +234,12 @@ export function Prose({
    * wrong sentence.
    */
   const [markTops, setMarkTops] = useState<Map<string, number> | null>(null);
+
+  /* Every hook above has run. Now the plain case, which is a Prose with no
+     words or one outside the provider. See the note at the top of this
+     function for why it is here rather than where it reads better. */
+  if (plain) return <Text style={style}>{text}</Text>;
+
   const body = (
     <Annotatable
       text={text}

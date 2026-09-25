@@ -23,7 +23,16 @@ import { isAdminAddress } from './_lib/admins.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
-import { researchOfTheDay } from './_research.js';
+/**
+ * The insight of the day comes from api/_insights.js, which is fifty of them.
+ *
+ * Ellie: "Build a list of 50 insights of the day to rotate through." It was
+ * three, from api/_research.js, which is the three written for the Our Purpose
+ * page and held word for word against it by check-research.mjs. Those three
+ * are the first three of the fifty, with the same ids and the same sentences,
+ * so a reader who meets one here and then reads the page finds it unchanged.
+ */
+import { insightOfTheDay } from './_insights.js';
 import { wordOfTheDay } from './_words.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
@@ -363,7 +372,7 @@ export default async function handler(req) {
       // home screen carries it; the copy and the citation live in
       // api/_research.js so they cannot drift from the website's Our Purpose
       // page, which says the same three things.
-      research: researchOfTheDay(),
+      research: insightOfTheDay(),
       /* The word the Notes tab defines today. Same shape and the same reason
          as the research finding: the copy lives on the server so it is one
          copy and so Ellie can change it without an app build. */
