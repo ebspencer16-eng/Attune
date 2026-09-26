@@ -45,7 +45,18 @@ const problems = [];
 // ── Run the anonymiser ────────────────────────────────────────────────────
 const src = read('api/results.js');
 const start = src.indexOf('const DEPARTED =');
-const end = src.indexOf('\nfunction withContent(');
+/**
+ * The next function down, whether or not it is exported.
+ *
+ * This looked for '\nfunction withContent(' exactly, and the day withContent
+ * gained a named export so another check could run it, this one lost its end
+ * marker and refused to pass. It was right to refuse rather than to guess,
+ * which is the behaviour worth keeping; what was wrong is that a slice of a
+ * file was anchored on a keyword that has nothing to do with the thing being
+ * sliced.
+ */
+const endAt = src.search(/\n(?:export\s+)?function withContent\(/);
+const end = endAt;
 if (start < 0 || end < 0 || end < start) {
   console.error('[check-results-survive-deletion] cannot find anonymizePartner in api/results.js.');
   console.error('  Refusing to pass: this gate tests behaviour, and it has nothing to run.');

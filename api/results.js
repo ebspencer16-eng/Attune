@@ -62,7 +62,8 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), { status
  * because these rows were written by older versions of this engine and a read
  * path that assumes the current shape will throw on the oldest couples.
  */
-function withLabels(results) {
+/** Exported alongside withContent, for the same reason. */
+export function withLabels(results) {
   if (!results || !Array.isArray(results.rankedGaps)) return results;
   return {
     ...results,
@@ -141,7 +142,17 @@ function anonymizePartner(payload, viewerSide) {
   return clone;
 }
 
-function withContent(results, viewer, contentVersion, pronouns = {}) {
+/**
+ * Exported so a check can run it.
+ *
+ * check-frozen-results.mjs serves a stored row with one field missing at a
+ * time, because that is what an old frozen row is: results are never
+ * recomputed, so a couple who finished before a field existed is served for
+ * ever without it. Lifting this out of the file by brace depth would have
+ * worked and would have been a copy of two hundred lines; a named export is
+ * the same function.
+ */
+export function withContent(results, viewer, contentVersion, pronouns = {}) {
   if (!results) return results;
 
   // ── ROLE TOKENS, RESOLVED ON THE WAY OUT ─────────────────────────────────
