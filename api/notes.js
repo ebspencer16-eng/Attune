@@ -388,11 +388,20 @@ export default async function handler(req) {
       }
       const created = (await r.json().catch(() => []))?.[0] || null;
 
+      /* The note exists by here, so a failed tag write is not a failed create.
+         It is still not a success: the note would arrive in the Notes tab under
+         no heading, which is where an untagged note is hardest to find again. */
+      let createdTags = true;
       if (created && Array.isArray(body.tagIds) && body.tagIds.length) {
-        await rest('note_tags', {
+        const add = await rest('note_tags', {
           method: 'POST', headers: { ...jsonHeaders, Prefer: 'return=minimal,resolution=ignore-duplicates' },
           body: JSON.stringify(body.tagIds.map(t => ({ note_id: created.id, tag_id: t }))),
         });
+        if (!add.ok) {
+          createdTags = false;
+          console.warn('[notes] a note was created and its tags were not:',
+            (await add.text().catch(() => '')).slice(0, 200));
+        }
       }
       // Created already shared, which is the other way a note reaches a
       // partner. Same rule as the share action below, so both routes into a
@@ -410,7 +419,10 @@ export default async function handler(req) {
         });
       }
 
-      return json({ ok: true, note: created });
+      /* tagsSaved: false means the note is there and its tags are not. Not an
+         error, because the writing is saved and that is what someone would be
+         upset to lose, but the client is told rather than left to assume. */
+      return json({ ok: true, note: created, tagsSaved: createdTags });
     }
 
     if (action === 'update' || action === 'share' || action === 'delete') {
@@ -512,20 +524,50 @@ export default async function handler(req) {
         });
       }
 
-      // Tags could only ever be set when a note was created, so there was no
-      // way to add or remove one afterwards. Replaced wholesale rather than
-      // diffed: the client sends the set it wants, which is what a chip picker
-      // produces, and a diff would need the client to know what is already
-      // there and be right about it.
+      /**
+       * Tags could only ever be set when a note was created, so there was no
+       * way to add or remove one afterwards. The client sends the set it wants,
+       * which is what a chip picker produces, rather than a diff it would have
+       * to be right about.
+       *
+       * ── ADD FIRST, THEN REMOVE WHAT IS LEFT OVER ──────────────────────────
+       * This deleted every tag on the note and then inserted the wanted set.
+       * Two requests, no transaction, and neither result looked at. So a failed
+       * insert left the note with no tags at all and the endpoint answered
+       * ok: true, with body.tagIds echoed back, so the app drew the tags it had
+       * asked for until something reloaded. Tags are how the Notes tab is
+       * organised; losing all of them silently is worse than not saving one.
+       *
+       * Inverted: insert the wanted set, then delete only what is not in it. A
+       * failure at any point now leaves a superset, never an empty set, so the
+       * worst case is a tag that should have gone and is still there. And both
+       * results are checked, because an ok that is not true is the thing that
+       * made this invisible.
+       */
+      let tagsSaved = true;
       if (action === 'update' && Array.isArray(body.tagIds)) {
-        await rest(`note_tags?note_id=eq.${noteId}`, { method: 'DELETE', headers: svc });
-        if (body.tagIds.length) {
-          await rest('note_tags', {
+        const wanted = body.tagIds.map((t) => String(t));
+        if (wanted.length) {
+          const add = await rest('note_tags', {
             method: 'POST',
             headers: { ...jsonHeaders, Prefer: 'return=minimal,resolution=ignore-duplicates' },
-            body: JSON.stringify(body.tagIds.map(t => ({ note_id: body.id, tag_id: t }))),
+            body: JSON.stringify(wanted.map((t) => ({ note_id: rows[0].id, tag_id: t }))),
           });
+          if (!add.ok) tagsSaved = false;
         }
+        if (tagsSaved) {
+          // Postgrest's not.in takes a parenthesised list. An empty wanted set
+          // skips the filter entirely and removes them all, which is what
+          // clearing every chip means.
+          const keep = wanted.length
+            ? `&tag_id=not.in.(${wanted.map((t) => encodeURIComponent(t)).join(',')})`
+            : '';
+          const drop = await rest(`note_tags?note_id=eq.${noteId}${keep}`, { method: 'DELETE', headers: svc });
+          if (!drop.ok) tagsSaved = false;
+        }
+      }
+      if (!tagsSaved) {
+        return json({ ok: false, error: 'the note saved and its tags did not' }, 500);
       }
       return json({ ok: true, note: { ...rows[0], tagIds: body.tagIds ?? undefined } });
     }

@@ -44,6 +44,7 @@
 import { launch } from './_lib/browser.mjs';
 import { PERSONALITY_QUESTIONS } from '../api/_questions.js';
 import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
+import { EXERCISES as REGISTRY } from '../api/_exercises.js';
 
 // `vite preview` binds to localhost, which resolves to ::1 first on macOS, so
 // a default of 127.0.0.1 was refused on the only machine this has to run on.
@@ -77,12 +78,48 @@ const INTIMACY_ANSWERS = INTIMACY_QUESTIONS.length;
 // a synthetic click in this harness, so a run stalls at question 7 of 18. The
 // screens work by hand; this is a harness gap, not a product bug, and it is
 // flagged rather than silently skipped so nobody reads a pass as coverage.
-const EXERCISES = {
-  exercise1: { pkg: 'core',    key: 'attune_ex1',      progress: 'attune_ex1_progress',      min: EX1_ANSWERS, label: 'Communication' },
-  exercise2: { pkg: 'core',    key: 'attune_ex2',      progress: 'attune_ex2_progress',      min: 12, label: 'Expectations' },
-  exercise3: { pkg: 'premium', key: 'attune_ex3',      progress: 'attune_ex3_progress',      min: 8,  label: 'Relationship Reflection' },
-  intimacy:  { pkg: 'premium', key: 'attune_intimacy', progress: 'attune_intimacy_progress', min: INTIMACY_ANSWERS, label: 'Physical Intimacy', known: 'multi-select screens need a real pointer; stalls at Q7' },
+/**
+ * Which exercises this drives, from the registry.
+ *
+ * ── WHY IT IS NOT A LIST HERE ANY MORE ────────────────────────────────────
+ * It was one, and it held four of the five. Conflict Patterns was absent
+ * entirely, and the run ended by printing "4 exercises completed and stored
+ * correctly", which is a precise number that sounds counted. Nobody questioned
+ * it, including me. Conflict Patterns is the one add-on exercise, every beta
+ * account owns it, and its answers are paragraphs rather than taps, so it was
+ * the least covered and the most expensive to get wrong.
+ *
+ * The local map was even called EXERCISES, shadowing the name of the registry
+ * that already knows the answer.
+ *
+ * Two things are genuinely the harness's own and stay here: which package to
+ * open the browser as, and how many stored answers count as finished. Anything
+ * in the registry without an entry is a loud failure rather than a silent
+ * omission, which is the whole difference between this version and the last.
+ */
+const TUNING = {
+  ex1:      { pkg: 'core',    min: EX1_ANSWERS },
+  ex2:      { pkg: 'core',    min: 12 },
+  ex3:      { pkg: 'premium', min: 8 },
+  intimacy: { pkg: 'premium', min: INTIMACY_ANSWERS, known: 'multi-select screens need a real pointer; stalls at Q7' },
+  conflict: { pkg: 'premium', min: 8 },
 };
+
+const EXERCISES = {};
+for (const e of REGISTRY) {
+  const t = TUNING[e.key];
+  if (!t) {
+    console.error(`[check-exercise-flow] api/_exercises.js has ${e.key} (${e.label})`
+      + ' and this harness has no entry for it, so a run would report a clean pass'
+      + ' over an exercise it never opened. Add a pkg and a min to TUNING, or a'
+      + ' `known` saying why it cannot be driven.');
+    process.exit(1);
+  }
+  EXERCISES[e.view] = {
+    pkg: t.pkg, min: t.min, known: t.known,
+    key: e.localKey, progress: e.progressKey, label: e.label,
+  };
+}
 
 // Controls that move forward. Matching on the verb alone was not enough: the
 // last screen of Expectations part 1 is labelled "ALL DONE →", which starts
