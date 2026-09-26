@@ -883,8 +883,11 @@ function syncProgressCrossDevice(exerciseNum, answers) {
   if (!exerciseNum || !answers) return;
   // Debounce by exercise so each exercise has its own pending write
   const key = `ex${exerciseNum}`;
-  if (_progressSyncTimers[key]) clearTimeout(_progressSyncTimers[key]);
-  _progressSyncTimers[key] = setTimeout(async () => {
+  if (_progressSyncTimers[key]) clearTimeout(_progressSyncTimers[key].timer);
+  /* The work, kept beside its timer so flushProgressSync below can run it
+     early. clearTimeout does not run a callback, so a flush that only cleared
+     the timer would throw the write away rather than hurry it. */
+  const run = async () => {
     try {
       const acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
       if (!acct?.id) return; // No user yet, pure localStorage mode
@@ -905,7 +908,48 @@ function syncProgressCrossDevice(exerciseNum, answers) {
     } catch (e) {
       console.warn('[Attune] progress cross-device sync failed:', e);
     }
-  }, 1500);
+  };
+  _progressSyncTimers[key] = { run, timer: setTimeout(() => {
+    delete _progressSyncTimers[key];
+    run();
+  }, 1500) };
+}
+
+/**
+ * ── FLUSH THE PENDING SYNC WHEN THE TAB GOES AWAY ─────────────────────────
+ * The debounce above waits a second and a half so quick question navigation
+ * does not hammer the endpoint, which is right. What it also means is that the
+ * last second and a half of answers exists only in this browser: switching to
+ * a phone, or coming back on another machine, resumes from before them.
+ *
+ * localStorage is still the primary record and still holds them, so this is
+ * not lost work in the ordinary case. It is lost work in exactly the case this
+ * sync exists for.
+ *
+ * Fired on the tab being hidden rather than on it closing. `pagehide` is the
+ * only event iOS reliably delivers on a close and it is too late to await a
+ * fetch; hiding happens on every tab switch, every app switch and immediately
+ * before a close, and there is time. A fetch that does not finish costs
+ * nothing: the timer it replaced would not have finished either.
+ *
+ * sendBeacon would survive the close and cannot carry an Authorization header,
+ * and /api/save-exercise needs one. That is the whole reason this is a fetch
+ * on hide rather than a beacon on unload.
+ */
+function flushProgressSync() {
+  for (const key of Object.keys(_progressSyncTimers)) {
+    const pending = _progressSyncTimers[key];
+    if (!pending) continue;
+    clearTimeout(pending.timer);
+    delete _progressSyncTimers[key];
+    pending.run();
+  }
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushProgressSync();
+  });
 }
 
 // -- EXERCISE 2 --
@@ -11948,8 +11992,15 @@ export default function App() {
   }, [view, highlightsSeen]);
 
   // ── Warn before closing mid-exercise ────────────────────────────────────────
+  //
+  // From the registry rather than from a list written here. This named three
+  // views, and there are five exercises: someone halfway through Conflict
+  // Patterns or Physical Intimacy could close the tab with no warning at all,
+  // which is the two exercises where an answer is a paragraph rather than a
+  // number. EXERCISES carries each one's view, so a sixth exercise is covered
+  // the day it exists.
   useEffect(() => {
-    const inExercise = view === "exercise1" || view === "exercise2" || view === "exercise3";
+    const inExercise = EXERCISES.some((e) => e.view === view);
     if (!inExercise) return;
     const handler = (e) => {
       e.preventDefault();
