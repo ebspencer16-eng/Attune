@@ -28,7 +28,7 @@
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from '../_questions.js';
 import { INTIMACY_QUESTIONS } from '../_intimacy-questions.js';
 import { conflictQuestionsInOrder } from '../_conflict-questions.js';
-import { REFLECTION_QUESTIONS } from '../_anniversary-questions.js';
+import { ANNIVERSARY_QUESTIONS } from '../_anniversary-questions.js';
 
 /** How many questions each exercise asks, from the question sets themselves. */
 export function questionCount(key) {
@@ -37,7 +37,23 @@ export function questionCount(key) {
     case 'ex1': return PERSONALITY_QUESTIONS.length * 2;
     case 'ex2': return LIFE_QUESTIONS.length
       + RESPONSIBILITY_CATEGORIES.reduce((n, c) => n + c.items.length, 0);
-    case 'ex3': return (REFLECTION_QUESTIONS || []).length;
+    /**
+     * ── NOT REFLECTION_QUESTIONS, WHICH IS A DIFFERENT LIST ─────────────────
+     * This read REFLECTION_QUESTIONS, which is five. The exercise asks fourteen:
+     * ANNIVERSARY_QUESTIONS is what /api/questions serves and what both screens
+     * walk through. REFLECTION_QUESTIONS is derived from ANALYTICS_TEXT, a subset
+     * for the admin explorer, and its only other caller is admin-explore.js.
+     *
+     * So a person nine questions into Relationship Reflection was shown "9 of 5".
+     * The status row is the one thing this module exists for.
+     *
+     * Two plausible names for two different lists, in the same file, one of them
+     * a subset of the other: the same shape as /api/notes answering with both
+     * `notes` and `annotations` and the results page reading the wrong one.
+     * Nothing tells you which you took. check-question-counts.mjs now compares
+     * this against what the endpoint actually serves.
+     */
+    case 'ex3': return (ANNIVERSARY_QUESTIONS || []).length;
     case 'intimacy': return INTIMACY_QUESTIONS.length;
     case 'conflict': return conflictQuestionsInOrder().length;
     default: return 0;

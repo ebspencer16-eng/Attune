@@ -40,7 +40,28 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
-**Nothing waiting.** 075 is run.
+**One read-only query, when you have two minutes.** Paste
+`supabase/diagnostics/migrations-actually-run.sql` into the SQL editor. It writes
+nothing; it only asks which of ten migrations this database has actually had.
+
+The reason it exists: ten places in the server say in a comment that they are
+tolerant of a particular migration not having been run, and quietly do less when
+the column or table is missing. That tolerance is right, because a behind schema
+should degrade rather than error. It also means a behind schema is invisible, and
+what goes quiet is not small: highlights and underlines cannot be saved at all,
+nothing records that anyone consented to anything, and someone whose partner
+deleted their account is shown a waiting screen forever instead of their own
+results. You have run 075, and these are numbered in order, so my expectation is
+that every row says PRESENT. Two minutes to know rather than assume, before
+testers are in it.
+
+I could not run the query myself: there is no Postgres on this machine. A parser
+accepts it as valid Postgres, which is not the same as the server accepting it. If
+it does have a syntax error you will see it immediately and it costs one paste,
+because the file only reads.
+
+**Nothing waiting.** 075 is run, and the query above is a check rather than a
+migration.
 
 | # | Migration |
 |--|--|
@@ -92,6 +113,7 @@ sooner.
 | O473 | **Cross-device resume only works one way.** Start an exercise in the app, open the website, and it begins again at question one. The reverse works: the app reads `ex{N}_progress` from the server. The website reads its progress from that browser's own storage and never asks the server, so the only thing it can resume is itself. Not a drift, a gap: the website was built before there was an app to hand anything over to. The fix is a read on the way in and a decision about which is newer when both exist, which is the part worth doing carefully. |
 | O474 | **Only Communication results are frozen.** A couple's stored row holds the Communication scoring and is served back exactly as written, which is the promise. Expectations, Physical Intimacy, Relationship Reflection and Conflict Patterns are recomputed from the raw answers on every request. So a change to how those four are scored, or to the words they are built from, changes what a couple who finished last year sees, while Communication does not move. Nothing is wrong today because those four are deterministic and the code has not changed under anyone. It is a promise kept in one place out of five, and closing it properly means storing the other four, which is a migration. |
 | O475 | **A column written by one surface and read by nothing.** The website records `ex3_version` on every Reflection completion; `/api/save-exercise`, which is what the app completes through, does not. Nothing anywhere reads it. The comment beside it in `api/_anniversary-questions.js` says it exists "so answers can later be" compared across versions of the questions, which was never built. Either the app should write it too or the column and the comment should go, and which depends on whether you ever want that comparison. |
+| O477 | **Two sentences on the website still describe a two or three exercise product.** Found next to the "Exercise 05" bug and left alone because they are words rather than digits. The dashboard's opening line reads "Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations. Exercise 03 captures your relationship story", which omits Conflict Patterns and Physical Intimacy for anyone who owns them. And the Partner B onboarding header reads "Exercise 01 of 03", where the total counts the core exercises and not the add-ons. The second may be right as it stands: that flow walks a new partner through Communication and Expectations and hands the rest to the dashboard, so "of 03" might be describing the sequence rather than the package. **Both are your copy**, so I have named them rather than rewritten them. The first needs a sentence that does not enumerate; the second needs you to tell me whether the total means this sitting or everything they own. |
 | O476 | **The website leaves a stale progress blob behind.** Finishing an exercise on the website writes the answers and does not clear `ex{N}_progress`; the app clears it. Harmless: every reader prefers finished answers over a progress blob, and there is a check on that. It means the column cannot be read as "someone is part-way through this" without also asking whether they finished, which is a trap for the next thing that reads it. |
 
 
@@ -588,6 +610,8 @@ build.
 
 | Verified | By |
 |--|--|
+| A progress total is counted from the list the exercise actually asks | `check-question-counts.mjs`, planted eight ways. Relationship Reflection's status row read "N of 5" while the exercise asks fourteen: the total came from `REFLECTION_QUESTIONS`, a five-question subset derived for the admin explorer, and the exercise walks `ANNIVERSARY_QUESTIONS`. Two plausible names for two lists in one file, one a subset of the other, and nothing telling you which you took. Anybody past the fifth question saw a total smaller than where they were. The gate calls `/api/questions` for each exercise and counts what it serves, rather than adding the modules up a second time; Expectations is excluded by shape, not by name, because it has no flat list |
+| Nobody is shown a number for an exercise they did not buy | `check-exercise-numbers.mjs`, planted seven ways. Two screens said "Exercise 05" for Conflict Patterns: the intro every customer reads before answering it, and the screen saying they are done. Five is its place in the registry, and premium bundles four exercises, so every premium customer read a number for two exercises they never bought. The rule was already written down in CLAUDE.md and in a comment beside the dashboard tile, which has always counted correctly; nothing connected them. The gate derives which numbers are safe to type by running `ownedExercises` over every package shape: Communication is always 01, Expectations always 02 and Reflection always 03, so those may be typed, while Physical Intimacy is 03 or 04 and Conflict Patterns 03, 04 or 05, so those cannot. A sixth exercise changes what it allows with no edit to it. One plant passed, removing the import while leaving the call, and it is `check-server-undefined` that catches that: it named the line while `vite build` exited 0, which I verified rather than assumed |
 | A note cannot lose every tag on it while being told it saved | `check-tag-write-order.mjs`, planted six ways. Rewriting a note's tags deleted every tag and then inserted the wanted set, two requests with no transaction and neither result looked at, so a failed insert left the note with no tags and the endpoint answered ok with the tags echoed back for the app to draw. Inverted: add first, then remove only what is not wanted, so a failure leaves a tag too many rather than none. The gate runs the handler against a stubbed network and fails the insert, because the rule is about order and order is not visible in a read |
 | Every exercise in the registry is actually driven to completion by the smoke | `check-exercise-flow.mjs`. It held a hardcoded list of four, itself called EXERCISES, shadowing the registry that already knew there were five. Conflict Patterns was absent entirely and the run printed "4 exercises completed and stored correctly", a precise number that sounds counted. It is the one add-on exercise, every beta account owns it, and its answers are paragraphs rather than taps, so it was the least covered and the most expensive to get wrong. The set comes from api/_exercises.js now and an exercise with no entry is a loud failure |
 | A partly answered Communication exercise survives moving from the website to the app | `check-progress-shape.mjs`, planted eight ways. The column holds two shapes, because the website wrote `{ answers, idx }` and the app wrote the answers alone, and `/api/questions` handed the blob to the app raw: the wrapper arrived as the answers map, nothing matched a question, the exercise reopened at question one, and finishing from there stored the wrapper in `ex1_answers` for the engine to score. The home screen's count was right the whole time, because it came through the reader that unwrapped. Two plants did not apply at all, which reads as a blind gate rather than as nothing planted, so both were rerun with the needle asserted |

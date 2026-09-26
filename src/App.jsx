@@ -100,7 +100,7 @@ import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
-import { EXERCISES } from "../api/_exercises.js";
+import { EXERCISES, ownedExercises } from "../api/_exercises.js";
 import { CATALOGUE } from "../api/_catalogue.js";
 // The Merging lives checklist, moved out so the app can read it too.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
@@ -1572,7 +1572,18 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
 // others. Its questions ask someone to admit to contempt and stonewalling, so
 // the framing before them, and the absence of any "which of you is worse"
 // comparison, is doing real work. Nothing here is scored against the partner.
-export function ConflictExercise({ userName = "You", partnerName = "your partner", onComplete, fresh = false }) {
+/**
+ * ── WHY THE NUMBER IS A PROP ──────────────────────────────────────────────
+ * Exercise numbering is positional over what a couple OWNS, so the nth exercise
+ * they bought is 0n. This screen said "Exercise 05", which is the registry's
+ * own order, and premium bundles four exercises: every premium customer opening
+ * Conflict Patterns read a number for two exercises they had never bought.
+ *
+ * The rule was already written down twice, in CLAUDE.md and in a comment beside
+ * the dashboard tile that gets it right. This component cannot work it out,
+ * because it does not know the package, so it is told.
+ */
+export function ConflictExercise({ userName = "You", partnerName = "your partner", onComplete, fresh = false, num = null }) {
   const PROGRESS_KEY = 'attune_conflict_progress';
   const hydrate = () => { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null'); } catch { return null; } };
   const saved = fresh ? null : hydrate();
@@ -1625,7 +1636,7 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
   if (phase === 'intro') return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05 · Conflict Patterns</div>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{num ? `Exercise ${num} · Conflict Patterns` : "Conflict Patterns"}</div>
       <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>{conflictIntro.title}</h2>
       {conflictIntro.body.map(para => (
         <p key={para.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.75rem" }}>
@@ -14953,6 +14964,21 @@ export default function App() {
         {view === "conflict" && pkg.hasConflict && (() => {
           const myDone = !!(conflictData?.completedAt);
 
+          /**
+           * Which exercise this is, to this couple.
+           *
+           * Positional over what they own, so the nth exercise they bought is
+           * 0n. Both screens below said "Exercise 05", which is the registry's
+           * own order: premium bundles four exercises, so every premium
+           * customer read a number for two they had never bought. The
+           * dashboard tile beside this has always got it right and carries the
+           * rule in a comment; these two did not read it.
+           *
+           * ownedExercises is the function that already knows, from the same
+           * registry the tile counts through, rather than a third count here.
+           */
+          const _conflictNum = ownedExercises(pkg).find((e) => e.key === 'conflict')?.num || null;
+
           const persist = (payload) => {
             const record = { ...payload, completedAt: Date.now() };
             setConflictData(record);
@@ -14981,7 +15007,7 @@ export default function App() {
           if (myDone) {
             return (
               <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>Exercise 05</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{`Exercise ${_conflictNum}`}</div>
                 <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>You're done.</h2>
                 <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
                   Your results open when you and {partnerName} have both finished everything, the same as the other exercises. What you said about your own patterns stays private to you either way.
@@ -14991,7 +15017,7 @@ export default function App() {
             );
           }
           return <ConflictExercise
-            userName={userName} partnerName={partnerName} fresh={_previewFresh}
+            userName={userName} partnerName={partnerName} fresh={_previewFresh} num={_conflictNum}
             onComplete={(payload) => { persist(payload); setView("home"); }}
           />;
         })()}
