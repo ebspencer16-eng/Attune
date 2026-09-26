@@ -81,7 +81,17 @@ My list. Things to build or fix, none of them waiting on you.
 
 When you send me a list, or when a sweep turns something up, it appears here.
 
-**Nothing open.**
+These four came out of the data-saving sweep. None of them is losing anyone's
+work today; each is a place where two things that should agree are kept in step
+by hand. **Nothing here needs an answer from you** unless you want one of them
+sooner.
+
+| # | Open |
+|--|--|
+| O473 | **Cross-device resume only works one way.** Start an exercise in the app, open the website, and it begins again at question one. The reverse works: the app reads `ex{N}_progress` from the server. The website reads its progress from that browser's own storage and never asks the server, so the only thing it can resume is itself. Not a drift, a gap: the website was built before there was an app to hand anything over to. The fix is a read on the way in and a decision about which is newer when both exist, which is the part worth doing carefully. |
+| O474 | **Only Communication results are frozen.** A couple's stored row holds the Communication scoring and is served back exactly as written, which is the promise. Expectations, Physical Intimacy, Relationship Reflection and Conflict Patterns are recomputed from the raw answers on every request. So a change to how those four are scored, or to the words they are built from, changes what a couple who finished last year sees, while Communication does not move. Nothing is wrong today because those four are deterministic and the code has not changed under anyone. It is a promise kept in one place out of five, and closing it properly means storing the other four, which is a migration. |
+| O475 | **A column written by one surface and read by nothing.** The website records `ex3_version` on every Reflection completion; `/api/save-exercise`, which is what the app completes through, does not. Nothing anywhere reads it. The comment beside it in `api/_anniversary-questions.js` says it exists "so answers can later be" compared across versions of the questions, which was never built. Either the app should write it too or the column and the comment should go, and which depends on whether you ever want that comparison. |
+| O476 | **The website leaves a stale progress blob behind.** Finishing an exercise on the website writes the answers and does not clear `ex{N}_progress`; the app clears it. Harmless: every reader prefers finished answers over a progress blob, and there is a check on that. It means the column cannot be read as "someone is part-way through this" without also asking whether they finished, which is a trap for the next thing that reads it. |
 
 
 ## 3. For you to review
@@ -577,6 +587,11 @@ build.
 
 | Verified | By |
 |--|--|
+| A partly answered Communication exercise survives moving from the website to the app | `check-progress-shape.mjs`, planted eight ways. The column holds two shapes, because the website wrote `{ answers, idx }` and the app wrote the answers alone, and `/api/questions` handed the blob to the app raw: the wrapper arrived as the answers map, nothing matched a question, the exercise reopened at question one, and finishing from there stored the wrapper in `ex1_answers` for the engine to score. The home screen's count was right the whole time, because it came through the reader that unwrapped. Two plants did not apply at all, which reads as a blind gate rather than as nothing planted, so both were rerun with the needle asserted |
+| Closing an exercise or the budget writes what is on the screen | `check-unmount-flush.mjs`, planted eleven ways. The screens save on advance, and Close, the tab bar and a swipe are not advance, so a typed paragraph was gone with no error. Two plants passed and both are written into the file: deleting the baseline guard from the cleanup left the gate green because the word still appeared where the ref is declared, and `void fn.current(value)` passed because `latest.current` still appeared a line above it. That second one is the stale closure itself, in the one place it matters, and TypeScript accepts it |
+| All five exercises warn before the browser tab closes on them, and the pending cross-device write is flushed | `check-unsaved-warning.mjs`, planted five ways. The guard named three views as literals and there are five exercises, so Conflict Patterns and Physical Intimacy, the two where an answer is a paragraph, had no warning at all. Its own first version tested the event names as bare substrings and passed two plants, because `xbeforeunload` still contains `beforeunload` |
+| A progress save cannot un-finish a finished exercise | `check-progress-not-destructive.mjs`, planted three ways. Every write replaced the whole record for Conflict Patterns and Physical Intimacy, so reopening a finished one and answering a single question wrote a record with no completion over it, and took the couple's results readiness with it |
+| A frozen results row still renders when it is missing fields the code now expects | `check-frozen-results.mjs`, planted two ways. It serves a stored row with each top-level field deleted in turn, because that is what a row written last year is |
 | Both surfaces can join an invite and neither loses half a couple | `check-invite-path.mjs`, planted five ways. Two passed and both are written into the file: the identifier was matched where the value should have been, and it cannot see one of two routes to a capability being disabled while the other still works |
 | No hook in the app sits below an early return | `check-hook-order.mjs`, planted three ways. It found two, one of them on every results paragraph. Its own first version reported a pure string helper as calling a hook, because it did not recognise `const X = forwardRef(function X(` as a new scope |
 | A native call that can reject is caught | `check-native-rejections.mjs`, planted three ways. Eleven were not. It names eight calls rather than demanding a try everywhere, because a gate satisfied by a hundred empty catches is worse than no gate |
