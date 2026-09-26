@@ -41,6 +41,7 @@ import {
   CONFLICT_REQUIRED,
 } from './_conflict-questions.js';
 import { ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION } from './_anniversary-questions.js';
+import { progressAnswers } from './_lib/exercise-progress.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -61,8 +62,24 @@ const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, header
  * completedAt. A flat one keeps finished answers and in-progress answers apart,
  * and finished wins: someone who completed an exercise and opened it again
  * should see what they actually submitted, not a stale partial save.
+ *
+ * ── THE COLUMN HOLDS TWO SHAPES, AND THIS READ ONE ────────────────────────
+ * The website writes ex1_progress as { answers, idx } and ex2/ex3_progress as
+ * the bare answers. The app writes the bare answers throughout. This handed
+ * the blob straight to the app, so someone who began Communication on the
+ * website and opened the app was given `{ answers: {...}, idx: 12 }` AS their
+ * answers map: nothing matched a question, the exercise reopened at question
+ * one, and the next save wrote that shape back. Finishing from there stores it
+ * in ex1_answers, which the type engine scores as almost nothing.
+ *
+ * progressAnswers is the one unwrapper, in the module that already had it and
+ * already got this right for the status row.
  */
-async function savedAnswers(exercise, profile) {
+/* Exported so check-progress-shape.mjs can run it over both shapes the column
+   holds, rather than describing what it ought to do with them. The bug it is
+   guarding against was invisible to any reading of this function: it looked
+   correct, and was, for the shape its author had in mind. */
+export async function savedAnswers(exercise, profile) {
   if (!profile) return null;
   if (exercise.shape === 'record') {
     const record = profile[exercise.column];
@@ -71,7 +88,7 @@ async function savedAnswers(exercise, profile) {
   }
   const done = profile[exercise.column];
   if (done && Object.keys(done).length) return { answers: done, completedAt: null, complete: true };
-  const partial = profile[`${exercise.key}_progress`];
+  const partial = progressAnswers(profile[`${exercise.key}_progress`]);
   if (partial && Object.keys(partial).length) return { answers: partial, completedAt: null, complete: false };
   return null;
 }

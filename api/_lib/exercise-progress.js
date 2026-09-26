@@ -44,8 +44,29 @@ export function questionCount(key) {
   }
 }
 
-/** The answers inside a progress blob, whichever client wrote it. */
-function answersIn(blob) {
+/**
+ * The answers inside a progress blob, whichever client wrote it.
+ *
+ * ── WHY IT IS EXPORTED ────────────────────────────────────────────────────
+ * Because there was a second reader of this column that did not unwrap, and
+ * the two disagreeing lost a whole exercise.
+ *
+ * api/questions.js hands the app its resume point. It read the column raw, so
+ * a website-written ex1 blob arrived at the app as its answers map: an object
+ * whose only keys are `answers` and `idx`. Every real answer was dropped, the
+ * exercise restarted at question one, and the next save wrote that shape back.
+ * Finish in the app from there and ex1_answers holds `{ answers: {...}, idx: 12 }`,
+ * which the type engine scores as almost nothing.
+ *
+ * The status row was right the whole time, because it came through here. One
+ * column, two readers, one of them unwrapping: the failure this codebase is
+ * organised against, in a place nobody had looked because the column was
+ * believed to hold one shape.
+ *
+ * check-progress-shape.mjs runs every reader over every shape a writer
+ * produces.
+ */
+export function progressAnswers(blob) {
   if (!blob || typeof blob !== 'object') return null;
   if (blob.answers && typeof blob.answers === 'object') return blob.answers;
   // The app writes the answers alone. Anything with an `idx` and no `answers`
@@ -66,7 +87,7 @@ export function progressFor(profile, exercise) {
     : !!(done && Object.keys(done).length);
   if (finished) return { started: false, answered: total, total };
 
-  const answers = answersIn(profile?.[`${exercise.key}_progress`]);
+  const answers = progressAnswers(profile?.[`${exercise.key}_progress`]);
   const answered = countAnswers(answers);
   return { started: answered > 0, answered, total };
 }

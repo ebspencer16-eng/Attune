@@ -3366,8 +3366,13 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
       // user's saved progress in the same browser.
       if (!fresh) {
         try { localStorage.setItem('attune_ex1_progress', JSON.stringify({ answers: updated, idx: nextIdx })); } catch {}
-        // And sync to server so resume works cross-device (debounced)
-        syncProgressCrossDevice(1, { answers: updated, idx: nextIdx });
+        /* And sync to server so resume works cross-device (debounced).
+           The ANSWERS, not { answers, idx }. localStorage above keeps the idx
+           because this browser resumes from it; the server copy is read by the
+           app, which finds its own place from the first unanswered question, and
+           handing it the wrapper made the wrapper look like the answers. Two of
+           the three exercises here already sent the bare answers. */
+        syncProgressCrossDevice(1, updated);
       }
     } else {
       // Clear progress cache — final result goes to attune_ex1 (done by onComplete)
