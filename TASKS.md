@@ -48,10 +48,9 @@ CLAUDE.md, so anything new sits here until you do.
 
 ### Decide these
 
-**Nothing waiting.** D9 is decided and built.
-
 | # | Decision |
 |--|--|
+| D10 | **Your beta testers will read three yellow "TODO, needs a lawyer" boxes.** Found by sweeping for placeholder markers in shipping code. `/legal` is live and carries them, plus an effective date reading "TODO before publishing", and they are styled as visible callouts rather than hidden. The page is linked from the site footer and from Settings in the app, so it is one tap from a tester. This is not mine to write and the TODOs are honest: they mark the paragraphs a lawyer has to settle. What you decide is what a tester should see in the meantime. Three ways: leave them, which is truthful and reads as unfinished; hide them, which makes the page look complete when it is not, and is the one I would not do; or replace the three boxes and the date with one line at the top saying this is a beta and the final wording is with a lawyer. My view is the third, and the line is yours to write. |
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
