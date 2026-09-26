@@ -214,28 +214,6 @@ export function writtenAt(iso: string | null | undefined) {
   return `${date} at ${time}`;
 }
 
-/**
- * The heading over a day's entries.
- *
- * Ellie: "Should be able to scroll up and read past 'posts' that are tagged
- * with their date." So the date is a heading over the day rather than a line
- * on every entry, which is how a diary reads and is also how the scrubber has
- * something to scroll to.
- */
-export function dayHeading(iso: string) {
-  const d = localDay(iso);
-  if (!d) return '';
-  const today = new Date();
-  const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
-  const yesterday = new Date(today.getTime() - 86400000);
-  if (same(d, today)) return 'Today';
-  if (same(d, yesterday)) return 'Yesterday';
-  return d.toLocaleDateString(undefined, {
-    weekday: 'long', month: 'long', day: 'numeric',
-    ...(d.getFullYear() === today.getFullYear() ? {} : { year: 'numeric' }),
-  });
-}
-
 /** The short label the scrubber shows while it is being dragged. */
 export function scrubLabel(iso: string) {
   const d = localDay(iso);
@@ -723,25 +701,26 @@ export default function Journal({ onClose }: { onClose: () => void }) {
         ) : failed ? (
           <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xxl }}>{FAILED}</Text>
         ) : days.length ? (
-          /* ── A DAY AT A TIME ────────────────────────────────────────
+          /* ── A DAY AT A TIME, WITHOUT SAYING SO TWICE ───────────────
              Ellie: "Should be able to scroll up and read past posts that are
-             tagged with their date." The date is a heading over the day rather
-             than a line on every entry, which is how a diary reads and is what
-             gives the rail something to scroll to. Each heading's position is
-             recorded on layout, because measuring it is the only way to know:
-             guessing from a row height drifts the moment one entry is longer
-             than another. */
+             tagged with their date", and then, once every entry carried its own
+             correct stamp: "I don't want the heading per day, I just want the
+             line at the top of each entry's tile to be correct. Seems like
+             those are correct, just remove the per-day eyebrows, they're
+             repetitive."
+
+             She is right. The heading was the date and so is the first line of
+             every tile under it, so a day with one entry said its date twice,
+             ten points apart.
+
+             The GROUPING stays, and this is the thing to know before touching
+             it: the rail scrolls to a day by the position recorded here, on the
+             group rather than on the heading. Flattening this into one list
+             would take the rail with it, and she has just approved the rail. */
           days.map((day) => (
             <View
               key={day.key}
               onLayout={(e) => { offsets.current[day.key] = e.nativeEvent.layout.y; }}>
-              <Text
-                style={{
-                  ...Type.eyebrow, color: c.accentQuiet,
-                  marginTop: Spacing.xxl, marginBottom: Spacing.sm,
-                }}>
-                {dayHeading(day.iso)}
-              </Text>
               {day.rows.map((n) => (
                 <View
                   key={n.id}

@@ -1372,6 +1372,46 @@ export function fetchProfileSetupCopy() {
  * Creating a profile is not the same as editing one; the server refuses if a
  * row already exists.
  */
+/**
+ * ── JOINING AN INVITE, FROM THE APP ───────────────────────────────────────
+ * Ellie: "Build the invite step into the app."
+ *
+ * There was none. The app never called /api/partner-sync and createProfile
+ * could not send a code, so someone invited who installed the app first made
+ * an unlinked account and had no way to find their partner from the phone.
+ * Everything the website does to join an invite is two calls, and they are
+ * these.
+ *
+ * ── LOOK IT UP BEFORE ASKING FOR ANYTHING ELSE ────────────────────────────
+ * A code that does not resolve is worth saying so about immediately, before
+ * someone fills in a form. This returns who invited them, which is also what
+ * lets the setup screen prefill their partner's name rather than asking for a
+ * name it already knows.
+ */
+export function lookUpInvite(code: string) {
+  return request<{
+    ok: true;
+    found: boolean;
+    inviter?: { id: string; name: string | null; pkg: string | null; alreadyLinked: boolean };
+  }>(`/api/partner-sync?inviteCode=${encodeURIComponent(code.trim().toUpperCase())}`);
+}
+
+/**
+ * Link this account to the invite.
+ *
+ * Called after the profile exists, because the server checks that the id being
+ * linked has a profile row. The bearer token goes with it: partner-sync accepts
+ * either a token whose user is this account or a match on the address the
+ * invite was sent to, and the app always has the token.
+ */
+export function joinInvite(code: string, myUserId: string) {
+  return request<{ ok: true }>('/api/partner-sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'link', inviteCode: code.trim().toUpperCase(), partnerBId: myUserId }),
+  });
+}
+
 export function createProfile(input: {
   name: string; partnerName: string; partnerEmail?: string;
   pronouns?: string; partnerPronouns?: string;
@@ -1379,8 +1419,17 @@ export function createProfile(input: {
   // accepted long before anything sent them.
   ageRange?: string; relationshipStatus?: string; relationshipLength?: string;
   children?: string; signupSource?: string;
+  /**
+   * The invite this account is joining, if it is joining one.
+   *
+   * /api/create-profile has accepted both of these since long before anything
+   * sent them. The link itself is a second call, because partner-sync needs
+   * the profile to exist first; this is what puts the code on the row so the
+   * admin and the digest can tell an invitee from a buyer.
+   */
+  inviteCode?: string; joinedViaInvite?: boolean;
 }) {
-  return request<{ ok: true; created?: boolean; existed?: boolean }>('/api/create-profile', {
+  return request<{ ok: true; created?: boolean; existed?: boolean; userId?: string }>('/api/create-profile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),

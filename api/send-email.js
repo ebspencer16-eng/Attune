@@ -20,6 +20,8 @@ import { jsonBody } from './_lib/http.js';
 import { guardMailOrigin } from './_lib/origin.js';
 import { SITE_URL } from './_lib/site.js';
 import { unsubscribeUrl } from './_lib/email-footer.js';
+/* Whether there is an app to tell anyone to download. See partnerInviteEmail. */
+import { APP_LIVE } from './_lib/flags.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -83,6 +85,28 @@ ${bodyHtml}
 
 function partnerInviteEmail({ fromName, toName, inviteUrl }, userId = null) {
   const name = toName || "there";
+  /**
+   * ── THE APP, ONCE THERE IS AN APP TO DOWNLOAD ─────────────────────────
+   * Ellie: "The 'your partner has invited you to attune' email instructs the
+   * partner to download the app, right? If not, adjust that."
+   *
+   * It did not, and it must not yet: APP_LIVE is false and APP_STORE_URL still
+   * ends in idPENDING, so an invitee told to download the app would go looking
+   * for something that is not in the store. That is the same reason the order
+   * email's app line is behind this flag, written there in the same words.
+   *
+   * The line is written and off. Flipping APP_LIVE in api/_lib/flags.js turns
+   * it on here, in the order email and on every page at once, which is what
+   * that flag is for.
+   *
+   * The link is unchanged either way. It is a website URL today and becomes a
+   * universal link when the app ships, so the same button opens the app for
+   * anyone who has it and the browser for anyone who does not. An invitee is
+   * never sent to a dead end.
+   */
+  const appLine = APP_LIVE
+    ? `<p style="font-size:0.85rem;">Attune is an app as well. Download it and the button above opens straight into it, or carry on in your browser if you would rather.</p>`
+    : '';
   return {
     subject: `${fromName} invited you to take Attune`,
     html: layout(`
@@ -91,6 +115,7 @@ function partnerInviteEmail({ fromName, toName, inviteUrl }, userId = null) {
       <p>${fromName} completed their Attune exercises and wants to see your results together. Attune maps how you each communicate, what you expect from each other, and where you're already aligned.</p>
       <p>Your answers are private until both of you are done. Results unlock the moment you finish.</p>
       <div class="btn-wrap"><a href="${inviteUrl}" class="btn">Start my exercises →</a></div>
+      ${appLine}
       <div class="divider"></div>
       <p style="font-size:0.78rem;color:#8C7A68;">Takes about 25 minutes total. No right answers. Just yours.</p>
     `),

@@ -201,7 +201,12 @@ export default async function handler(req) {
     .maybeSingle();
 
   if (existing) {
-    return new Response(JSON.stringify({ ok: true, existed: true }), { status: 200, headers: CORS });
+    /* The id goes back with the answer. The app has no Supabase client and
+       therefore no way to know its own user id, and joining an invite needs
+       one: /api/partner-sync links a specific profile. It is the caller's own
+       id, derived from the token they just sent, so this tells them nothing
+       they did not already prove. */
+    return new Response(JSON.stringify({ ok: true, existed: true, userId }), { status: 200, headers: CORS });
   }
 
   const { error } = await admin.from('profiles').insert(profile);
@@ -222,5 +227,5 @@ export default async function handler(req) {
   // setting up an account they have paid for.
   await recordConsent({ email: authEmail, userId, source: 'account_creation' });
 
-  return new Response(JSON.stringify({ ok: true, created: true }), { status: 200, headers: CORS });
+  return new Response(JSON.stringify({ ok: true, created: true, userId }), { status: 200, headers: CORS });
 }
