@@ -8,7 +8,7 @@
 
 export const NOTIFICATION_TRIGGERS = {
   "partner_finished": [
-    "api/save-exercise.js:246"
+    "api/save-exercise.js:271"
   ],
   "partner_nudged_you": [
     "api/partner-nudge.js:96"

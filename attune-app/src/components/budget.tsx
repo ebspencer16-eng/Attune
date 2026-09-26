@@ -87,6 +87,30 @@ export default function Budget({ onClose }: { onClose: () => void }) {
     if (r.ok) savedRef.current = body;
   }, []);
 
+  /**
+   * ── AND A SAVE ON THE WAY OUT ───────────────────────────────────────────
+   * Every number here was written on the field's own onBlur, which is correct
+   * for moving between fields and is not enough for leaving.
+   *
+   * Typing into a field and then tapping the back arrow, or the Learn tab,
+   * unmounts this screen. iOS does not promise a TextInput's blur before an
+   * unmount, so the last thing typed was simply gone: no error, no warning,
+   * and the number was back to its old value next time the tool was opened.
+   * The Done button did save first; the back arrow and the tab bar did not,
+   * and those are the two ways most people leave a screen.
+   *
+   * A flush on unmount covers every exit at once, including the ones nobody
+   * has thought of yet. It is cheap and idempotent: save returns immediately
+   * when nothing has changed since the last write.
+   *
+   * The state is read from a ref rather than closed over, or the cleanup would
+   * capture whatever the state was when the effect was created, which is the
+   * empty budget.
+   */
+  const latest = useRef(state);
+  latest.current = state;
+  useEffect(() => () => { void save(latest.current); }, [save]);
+
   const put = (patch: Partial<BudgetState>) => setState((p) => ({ ...p, ...patch }));
 
   if (loading) return <ScreenFrame onBack={onClose} backLabel="Learn"><ScreenLoading label={LOADING.budget} /></ScreenFrame>;
@@ -134,7 +158,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <ScreenFrame onBack={onClose} backLabel="Learn">
+    <ScreenFrame onBack={() => { void save(state); onClose(); }} backLabel="Learn">
     <ScrollView
       style={{ flex: 1, backgroundColor: c.background }}
       keyboardShouldPersistTaps="handled"

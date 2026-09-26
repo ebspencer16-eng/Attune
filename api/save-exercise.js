@@ -153,7 +153,32 @@ export default async function handler(req) {
     // conflict_answers, a column that does not exist, so this fallback would
     // have failed exactly when it was needed most: after the direct write had
     // already been blocked.
+    //
+    // ── A PROGRESS SAVE MAY NOT UN-FINISH AN EXERCISE ──────────────────────
+    // A record-shaped exercise is finished when its record carries a
+    // completedAt, and the whole record is replaced by every write, including
+    // a mid-exercise one. So reopening a finished Conflict Patterns or
+    // Physical Intimacy and answering one question wrote a record with no
+    // completedAt over the top: the exercise silently went back to unfinished,
+    // and with it the couple's readiness for results.
+    //
+    // Every other save in this product is additive or explicit. This one was
+    // destructive by omission, which is the shape that does not show up in a
+    // diff. It is not reachable from the app's own navigation today, because
+    // the priority engine only ever points at an exercise nobody has finished,
+    // but a deep link with ?exercise=conflict is enough and nothing stops one.
+    //
+    // So a save that says it is progress keeps whatever completion is already
+    // stored. Finishing still sets a new completedAt, and a retake still
+    // replaces the answers: what cannot happen is losing a completion nobody
+    // asked to lose.
     updates[spec.column] = answers;
+    if (isProgress && answers && typeof answers === 'object' && !answers.completedAt) {
+      const { data: existing } = await admin
+        .from('profiles').select(spec.column).eq('id', resolvedUserId).maybeSingle();
+      const was = existing?.[spec.column]?.completedAt;
+      if (was) updates[spec.column] = { ...answers, completedAt: was };
+    }
   } else if (isProgress) {
     updates[`${exercise}_progress`] = answers;
   } else {
