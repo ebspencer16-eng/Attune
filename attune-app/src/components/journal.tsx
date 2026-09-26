@@ -183,6 +183,23 @@ export function journalDay(d = new Date()) {
 }
 
 /**
+ * A day key, read back as that day in the reader's own timezone.
+ *
+ * `new Date('2026-09-22')` is UTC midnight, which west of UTC is the evening of
+ * the 21st, so a heading built from it named the wrong day for every reader in
+ * the Americas. Parsed into local parts instead, which is the inverse of
+ * journalDay and the only reading that round-trips.
+ */
+function localDay(key: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(key || '');
+  if (!m) {
+    const d = new Date(key);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+
+/**
  * When an entry was written, as one line.
  *
  * Ellie asked for the date and the time, so both, in the phone's own locale
@@ -206,8 +223,8 @@ export function writtenAt(iso: string | null | undefined) {
  * something to scroll to.
  */
 export function dayHeading(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
+  const d = localDay(iso);
+  if (!d) return '';
   const today = new Date();
   const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
   const yesterday = new Date(today.getTime() - 86400000);
@@ -221,8 +238,8 @@ export function dayHeading(iso: string) {
 
 /** The short label the scrubber shows while it is being dragged. */
 export function scrubLabel(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
+  const d = localDay(iso);
+  if (!d) return '';
   /**
    * Ellie: "The user grabs the side bar on the right and when they do it shows
    * a tab with the month and year, then changes as you drag down so that you
@@ -248,7 +265,24 @@ export function byDay<T extends { created_at?: string | null }>(rows: T[]) {
   const out: { key: string; iso: string; rows: T[] }[] = [];
   for (const r of rows) {
     const iso = r.created_at || '';
-    const key = iso.slice(0, 10);
+    /**
+     * ── THE READER'S DAY, NOT THE SERVER'S ────────────────────────────────
+     * This was `iso.slice(0, 10)`, which is the UTC date inside the timestamp.
+     * Every entry's own stamp under it is drawn with toLocaleDateString, which
+     * is the reader's date. West of UTC those are different numbers for the
+     * whole evening, so an entry written at 7:41pm in Mountain Time was filed
+     * under tomorrow and shown as today, and the heading disagreed with every
+     * line beneath it.
+     *
+     * Seen on screen: a heading reading TUESDAY, SEPTEMBER 22 with four
+     * entries stamped September 21 under it.
+     *
+     * journalDay is the same function that writes an entry's anchor, so the
+     * heading, the stamp, the anchor and the streak now all mean one thing by
+     * "a day".
+     */
+    const when = iso ? new Date(iso) : null;
+    const key = when && !Number.isNaN(when.getTime()) ? journalDay(when) : '';
     const last = out[out.length - 1];
     if (last && last.key === key) last.rows.push(r);
     else out.push({ key, iso, rows: [r] });
@@ -792,21 +826,27 @@ export default function Journal({ onClose }: { onClose: () => void }) {
 
           A column of ticks down the right edge, one per day, and a label that
           follows the finger saying which day it has landed on. Only drawn when
-          there is more than one day to move between: a scrubber over a single
-          day is a control that cannot do anything.
+          there is at least one day in it.
 
-          Ellie, after it was reported done: "O435. still not seeing this." Two
-          reasons, and only one of them was a bug. Her journal held a single
-          day, so the condition below was correctly hiding it, and nobody had
-          told her that is what it does. And the ticks were a hairline in the
-          border colour, so even with two days there was nothing to see. The
-          second is fixed; the first is stated out loud in TASKS.md instead of
-          being softened by drawing a scrubber that cannot scrub.
+          It was "more than one day", and that was wrong for the reason Ellie
+          kept running into: she reported it missing three times, and each time
+          the answer was that her journal held a single day, which is not an
+          answer she can act on. The rail is a position indicator as much as a
+          jump control, and on one day it still does the thing she asked for,
+          which is to show the month and the year while a thumb is on it.
+
+          Ellie, three times: "still not seeing this." Two reasons, and neither
+          of them was something she could have known. Her journal held a single
+          day, so the condition was hiding it; and the ticks were a hairline in
+          the border colour, so even with two days there would have been nothing
+          to see. Both are fixed rather than explained: a control that is
+          invisible on the most common state of a new journal is a control that
+          does not exist.
 
           It is not a scroll bar. It does not follow the scroll position,
           because a thing that both follows and leads fights the finger; it is
           a way to jump, and it appears only while it is being used. */}
-      {days.length > 1 ? (
+      {days.length ? (
         <GestureDetector gesture={scrub}>
           <View
             onLayout={(e) => { railHeight.current = e.nativeEvent.layout.height; }}

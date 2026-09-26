@@ -940,7 +940,12 @@ const QUICK_LINKS: QuickLinkItem[] = [
      side of the post." SF Symbols has a brain; the signpost is drawn, for the
      same reason the stoplight before it was. */
   { id: 'insight', label: 'Insight of the day', icon: 'brain' },
-  { id: 'plan', label: 'Action plan', icon: 'signpost', section: 'what-comes-next' },
+  /* Ellie: "Change 'Action plan' to 'Action plans' and split that into 2 lines
+     to match the other quick access tiles on the app home page." Plural, and
+     the break is written into the label rather than left to the wrap: at this
+     width "Action plans" fits on one line, so it would have been the only tile
+     of the four sitting on a single line. */
+  { id: 'plan', label: 'Action\nplans', icon: 'signpost', section: 'what-comes-next' },
   { id: 'highlights', label: 'Results highlights', icon: 'sparkles', section: 'highlights' },
   { id: 'journal', label: 'Relationship journal', icon: 'book.closed' },
 ];

@@ -40,9 +40,10 @@ Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
 I deliver migrations and you run them. That is deliberate and it is in
 CLAUDE.md, so anything new sits here until you do.
 
+**Nothing waiting.** 075 is run.
+
 | # | Migration |
 |--|--|
-| M075 | **`supabase/migrations/075_reset_two_couples.sql`.** Resets Aspen and Ryan and Lanae and Spencer: every exercise answer cleared, and all five exercises plus all three tools granted to each of the four accounts. Written against the two resets that went wrong, so read its header before running it: it says what it clears, what it deliberately does not, and how to check afterwards that all four are genuinely at the start line. |
 
 
 ### Decide these
@@ -102,11 +103,13 @@ The newest pass first.
 
 | # | Review |
 |--|--|
-| O456 | **The turn-down question is an A-to-B scale**, on both surfaces, laid out the way the comms exercise lays out its own poles. A is "Worry about how it lands", B is "Assume they don't take it personally", and five steps sit between them. Not one stored label changed, so nobody's answer moved and nothing needed a migration. This closes C2: the two middle answers were unwritable because five hand-written behaviours have no middle, and a scale has one by construction. |
+| O468 | **The peek is the same on every phone now.** You were right that it was a dimensions problem, and the number to fix turned out not to be where the sheet starts. The sheet sat a fixed distance below the content above it, and that content is the same height on every phone, so a 15 Pro Max's extra 58 points all went to showing more sheet. It is computed from three measurements now: how tall the page is on this phone, how tall the peek is, and how tall the content above it is. Measured on a 17 Pro and a 17 Pro Max: thirty-one points of white above the tab bar on both, and the same four articles showing. |
+| O469 | **"Action plans", on two lines.** The break is written into the label rather than left to the wrap, because at that width the plural still fits on one line and it would have been the only tile of the four sitting on a single line. |
+| O470 | **The journal's day headings disagreed with the entries under them.** Found while checking the rail: a heading reading TUESDAY, SEPTEMBER 22 with four entries stamped September 21 beneath it. The grouping read the UTC date out of the timestamp and every entry's own stamp was drawn in your timezone, so west of UTC they are different numbers for the whole evening and anything written after six was filed under tomorrow. The heading, the stamp, the anchor and the streak now all mean one thing by "a day". |
 | O467 | **A little more space below the four featured articles**, which you asked for when approving O443. The caret was carrying that gap in its own margins, so taking it out closed the peek up against the controls under it. |
 | O459 | **White space above the bottom nav on Learn.** Twenty points, bought by moving the whole sheet up rather than shortening the tiles: you asked for a full article title to fit, so the grid's height is the longest title's and is not a number to tune. |
 | O462 | **A day streak on the journal button**, drawn at nought as well, because a counter that only appears once you are already doing it cannot be what gets you started. It survives the day it is on: writing every day last week and not yet this morning is a streak of seven, not nought. |
-| O461 | **The rail's ticks are visible.** Two things were wrong and only one was a bug: your journal held a single day, so the rail was correctly hidden and nobody had told you that is what it does. And the ticks were a hairline in the border colour, so even with two days there was nothing to see. **It appears once you have entries on two different days**, which for you means after your next entry. |
+| O461 | **The rail shows with one day, not two.** You reported it three times and each time the answer was that your journal held a single day, which is not an answer you can act on. It draws whenever there is anything in the journal now: on one day it still does the thing you described, which is to show the month and year while your thumb is on it. The ticks were also a hairline in the border colour, so even with two days there would have been nothing to see. **What I could not capture:** the label only exists while a finger is down, and the simulator's synthetic drag releases before a screenshot lands. The ticks I can show you; the label you will have to drag. |
 | O463 | **The empty gift tile is gone.** Its anchor moved to the packages rather than going with it: six "Give it as a gift" links on five pages point at that fragment, and a fragment that names nothing drops the reader at the top of the page with no sign of what they clicked for. |
 | O464 | **It is the Merging Lives Checklist in all twenty-four places it was named**, including the checkout tags, both add-on prompts, the cart, the receipt email and the Stripe line items. The Starting Out **Collection** is a package and is untouched. |
 | O460 | **Fifty insights of the day**, in `INSIGHTS-REVIEW.md` beside the words. One thing to read carefully: every source named is real and every sentence above one is ours, not a quotation. If a claim looks wrong, say cut rather than soften. |
@@ -161,6 +164,7 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| O456 | **The turn-down question is an A-to-B scale**, on both surfaces, laid out the way the comms exercise lays out its own poles. A is "Worry about how it lands", B is "Assume they don't take it personally", and five steps sit between them. Not one stored label changed, so nobody's answer moved and nothing needed a migration. This closes C2: the two middle answers were unwritable because five hand-written behaviours have no middle, and a scale has one by construction. |
 | C4 | **Thirteen strings on the new surfaces, approved as written.** The journal's placeholder, empty line and failure line; the journal card's two subtitles; "Word in use"; the two on the lock; the four on the save sheet; and the control that opens it. They were mine, standing in, and they are yours now. |
 | C5 | **The three controls at the foot of the Luxury screen stay out.** You: "Keep them out." Which was my own view of it: every action that row could hold is already in the tab bar or on a card above it, and a second row of navigation is a worse screen that merely looks more like the picture. |
 | D8 | **Eight components that were defined and never drawn are gone**: `PrimaryCard` and `ResearchNote` on the home screen, `Bullet` in Settings, `ExpectationRowView`, `DistanceBar` and `Legend` in results, and `interpDimAction` and `_dlWidth` on the website. Two hundred and eighty-nine lines. Nothing referenced any of them before or after, and every gate still passes. |

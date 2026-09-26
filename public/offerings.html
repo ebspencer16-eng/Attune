@@ -301,7 +301,7 @@
     .cmp thead th{font-size:.72rem}
   }
   /* PACKAGE OVERVIEW TILES */
-  .pkg-overview{max-width:1120px;margin:0 auto var(--s-3xl);padding:0 var(--s-3xl);display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-md)}
+  .pkg-overview{max-width:1120px;margin:var(--s-3xl) auto var(--s-3xl);padding:0 var(--s-3xl);display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-md)}
   .pov-tile{background:white;border:1.5px solid var(--stone);border-top:3px solid var(--stone);border-radius:16px;padding:1.4rem var(--s-lg);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:var(--s-xs)}
   .pov-tile:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,11,7,.08)}
   .pov-tile:hover{border-color:var(--orange)}
@@ -564,6 +564,11 @@
 
 <!-- PACKAGE OVERVIEW TILES -->
 <!--
+  The top margin is the gap the gift bar used to hold. Ellie, on its removal:
+  "Tile is gone, confirmed, but now there is no buffer between the top banner
+  and the top of the package tiles." The bar carried margin-top: var(--s-3xl)
+  as an inline style, so taking it out took the page's breathing room with it.
+
   Ellie: "On marketing site packages page, the give as a gift text is gone but
   tile and icon still exist above the package side-by-side tiles. Remove that
   lingering tile though."

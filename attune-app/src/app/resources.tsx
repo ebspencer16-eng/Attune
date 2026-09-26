@@ -123,6 +123,36 @@ export default function ResourcesScreen() {
   const [workbookNote, setWorkbookNote] = useState<string | null>(null);
   /** Which tool is opening, so its tile can say the tap was heard. */
   const [busyTool, setBusyTool] = useState<string | null>(null);
+  /**
+   * ── THE PEEK IS A PROPORTION, NOT A NUMBER ──────────────────────────────
+   * Ellie: "On the simulator on my laptop this looks right, but on my phone the
+   * in practice section peeks wayyy more and I even see the top of the getting
+   * started article tiles. Not sure why the dimensions are different, but my
+   * phone is longer than the simulator. I want the formatting to have the same
+   * look and feel regardless of phone size."
+   *
+   * The sheet sat a fixed number of points below the content above it. That
+   * content is the same height on every phone, so on a taller screen the sheet
+   * still started at the same place and simply had more room underneath: a 15
+   * Pro Max is 58 points taller than the simulator she was looking at, and all
+   * 58 went to showing more sheet.
+   *
+   * So the number to fix is not where the sheet STARTS. It is how much of it
+   * shows. These two measurements are what make that possible: how tall the
+   * page is on this phone, and how tall the sheet's head is. The gap above the
+   * sheet is then whatever is left over, which is different on every phone and
+   * is exactly the point.
+   */
+  const [scrollH, setScrollH] = useState(0);
+  const [headH, setHeadH] = useState(0);
+  /**
+   * How tall everything above the sheet is: the tools row and the insight.
+   *
+   * Derived from the sheet's own y inside the scroll content, minus whatever
+   * gap was applied when that was measured. It does not depend on the gap, so
+   * this settles after one extra layout rather than chasing itself.
+   */
+  const [aboveH, setAboveH] = useState(0);
 
   // The workbook is a file, so the tab needs to know whether it exists before
   // a tap. Fetched alongside everything else rather than on press: a tap that
@@ -384,6 +414,36 @@ export default function ResourcesScreen() {
    * The rule has no exceptions and this is the only place in the file that
    * broke it.
    */
+  /**
+   * Where the sheet starts, so that the same amount of it shows on any phone.
+   *
+   * The peek is the grab line plus the head: the two pills, the In Practice
+   * heading, the search and the four featured articles. Everything below that
+   * is meant to be off the screen until someone pulls up, so the gap above the
+   * sheet is whatever is left of the page once the peek and the tab bar have
+   * taken their share.
+   *
+   * ── WHY THERE IS A FLOOR AND A CEILING ────────────────────────────────
+   * The floor keeps the sheet below the insight on a short phone, where the
+   * arithmetic would otherwise want a negative gap and pull the sheet up over
+   * the content above it. The ceiling stops a very tall phone from pushing it
+   * so far down that the page looks empty. Between them, every phone shows the
+   * same peek.
+   *
+   * Until both measurements have arrived this is the old fixed number, which
+   * is one frame on first paint and never seen again.
+   */
+  const sheetTop = (() => {
+    if (!scrollH || !headH || !aboveH) return SHEET_PEEK;
+    const peek = headH + GRAB_LINE_H + Spacing.md + PEEK_CLEARANCE;
+    /* The gap is what is left of the page once the content above the sheet and
+       the peek itself have taken their share. marginTop is measured from the
+       bottom of that content, not from the top of the screen, which is why
+       aboveH is in here: leaving it out put the sheet 220 points below a block
+       that was already 560 tall, and the peek went off the bottom. */
+    return Math.min(SHEET_TOP_MAX, Math.max(SHEET_PEEK, scrollH - peek - aboveH));
+  })();
+
   const mostRead = useMemo<PostSummary[]>(
     () => posts.slice().sort((a, b) => (b.reads || 0) - (a.reads || 0)).slice(0, 4),
     [posts],
@@ -643,6 +703,10 @@ export default function ResourcesScreen() {
       <ScrollView
         ref={scroller}
         contentContainerStyle={{ paddingBottom: 0 }}
+        /* How tall the page actually is on this phone. Measured rather than
+           derived from the window, because the lockup and the safe area sit
+           above this and their heights are not this file's business. */
+        onLayout={(e) => setScrollH(e.nativeEvent.layout.height)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.accentQuiet} />
         }>
@@ -804,12 +868,25 @@ export default function ResourcesScreen() {
             screen is the control that makes a phone feel like it is fighting
             you, and this one only has to look like it lifts. */}
         <View
+          onLayout={(e) => {
+            /* Where the content above ends. The applied gap is taken back off,
+               so this is the same number whatever the gap currently is, which
+               is what stops it oscillating. A point of slack because layout
+               rounds. */
+            const above = Math.max(0, e.nativeEvent.layout.y - sheetTop);
+            if (Math.abs(above - aboveH) > 1) setAboveH(above);
+          }}
           style={{
             /* Ellie: "In practice should peek the same amount as the autumn
                reads section of the example screenshot." In that screenshot the
                panel's top edge sits about two thirds of the way down, so the
-               colour above it is most of the screen. */
-            marginTop: SHEET_PEEK,
+               colour above it is most of the screen.
+
+               Computed from this phone rather than typed, so the peek shows the
+               same thing on every one of them. See the note on scrollH. Until
+               all three measurements have arrived it falls back to the old
+               fixed number, which is one frame on first paint. */
+            marginTop: sheetTop,
             backgroundColor: Palette.white,
             borderTopLeftRadius: 34, borderTopRightRadius: 34,
             /* Ellie: "decrease the white space above in practice in the bottom
@@ -851,6 +928,10 @@ export default function ResourcesScreen() {
               three states, so tapping the one that is on is how you get back
               to all of it. */}
           <View
+            /* The peek is this block plus the grab line above it. Measured, so
+               a longer article title changes the peek's height and the gap
+               above it adjusts rather than the tiles being cut off. */
+            onLayout={(e) => setHeadH(e.nativeEvent.layout.height)}
             style={{
               flexDirection: 'row', gap: Spacing.lg,
               paddingLeft: Spacing.xl, paddingRight: Spacing.lg,
@@ -1239,6 +1320,39 @@ function Shell({ children }: { children: React.ReactNode }) {
  * number to tune. Twenty points of sheet buys twenty points of white.
  */
 const SHEET_PEEK = 12;
+
+/** The grab line's own height, so the peek's arithmetic can account for it. */
+const GRAB_LINE_H = 4;
+
+/**
+ * White space between the foot of the peek and the tab bar.
+ *
+ * Ellie: "Give me just a tiny bit of buffer on the in practice tab below where
+ * the featured publications tiles meet the bottom nav, I'd like for there to be
+ * a little white space above the bottom nav, they're touching now and it looks
+ * like an error."
+ *
+ * It was bought by moving the whole sheet up by a fixed twenty points, which
+ * worked on one phone. It is part of the peek's own height now, so it is the
+ * same white on every phone.
+ */
+const PEEK_CLEARANCE = BottomTabInset + Spacing.xl;
+
+/**
+ * How far down the sheet may ever start.
+ *
+ * The arithmetic below already pins the sheet relative to the BOTTOM of the
+ * page, so it cannot drift on a tall phone: a taller screen buys a bigger gap
+ * above, which is the ground showing more, which is right. This is only a stop
+ * against something the size of an iPad, where the ground would become the
+ * whole page.
+ *
+ * It was 220 and that was too low: it bound on a 15 Pro Max, so the peek there
+ * ended forty-five points above the tab bar against thirty-one on a 17 Pro.
+ * Both looked fine and they were not the same, and the same is what was asked
+ * for. Measured on both after raising it.
+ */
+const SHEET_TOP_MAX = 420;
 
 /** The label on the insight, here and on the card it opens. */
 /** The four featured previews' ground. One tone, not four. */
