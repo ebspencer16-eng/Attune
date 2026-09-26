@@ -1850,3 +1850,43 @@ CLAUDE.md. What this week added: it also comes back after a restart if the
 Simulator window does not have focus, so `osascript -e 'tell application
 "Simulator" to activate'` before a click is part of the procedure, not a
 flourish.
+
+## 25 September 2026, before the beta
+
+Everything Ellie sent is built and pushed. Section 2 is empty, section 1 holds
+two decisions and one copy gap, and the two couples are reset and granted.
+
+**What the sweeps found, in the order they found it.** Each round had a method,
+and the method is the part worth reusing:
+
+1. Every deployed endpoint from outside. Fifty-eight, signed out. No 5xx.
+2. Hooks below an early return. Two, one of them on every results paragraph.
+3. Native calls that can reject with nothing catching them. Eleven.
+4. `.slice(0, 10)` on a timestamp. Two, and the second was cross-surface: the
+   website filed a journal entry under the UTC day and the app under the local
+   one, so the same couple writing at the same moment landed on different days.
+5. What the two surfaces write differently. The beta digest counted a finished
+   exercise by a flag only the app sets.
+6. The path the beta actually takes, one partner per surface. The app had no
+   invite step at all, which is now built.
+7. Placeholder markers in shipping code. /legal carries three visible
+   "TODO, needs a lawyer" boxes, one tap from a tester. D10.
+
+**Three rounds found nothing**, and that is worth recording so nobody repeats
+them from scratch: fixed widths that could overflow a 375 point phone (every
+number is a maxWidth or an hscroll child), client results dropped on the floor
+(request() never rejects, so fire-and-forget is safe), and console noise in a
+shipped bundle (all eleven are server-side).
+
+**A flaky check, now less flaky.** `check-static-render` failed once on
+/resources.html at 97 characters, on a machine carrying two simulators and
+Metro; the page served 44KB and rendered fully when asked again. Load averages
+were in the twenties. It gives a short page one more go with a longer wait now
+and prints SLOW rather than FAIL when the retry succeeds. A check that fails
+sometimes teaches you to re-run rather than to look, which is most of the way
+to a check nobody reads.
+
+**Where to pick up.** D10 and C4 are Ellie's. The next sweep rounds I would run
+are the notification round trip across surfaces (raised on one, read on the
+other) and the app's behaviour on a genuinely empty account, which is what all
+four testers now are.

@@ -65,23 +65,51 @@ page.on('console', (m) => {
   errors.push('console: ' + m.text.slice(0, 200));
 });
 
-let failed = 0;
-for (const p of pages) {
+/**
+ * ── A SECOND LOOK BEFORE FAILING ──────────────────────────────────────────
+ * The wait below is a fixed 1.1 seconds, which is generous on an idle machine
+ * and not always enough on a busy one. /resources.html failed once at 97
+ * characters, on a machine carrying two simulators and a Metro server, and
+ * served 44KB and rendered fully the moment it was asked again.
+ *
+ * A check that fails sometimes is nearly as bad as one that fails always:
+ * both teach you to re-run rather than to look. So a page that comes up short
+ * is given one more go with a longer wait, and the retry is printed. A page
+ * that needed the retry is still worth knowing about; a page that fails twice
+ * is a page that is broken.
+ */
+async function draw(p, waitMs) {
   errors.length = 0;
   await page.goto(BASE + p);
-  await page.wait(1100);
+  await page.wait(waitMs);
   const chars = await page.evaluate(() => (document.body.innerText || '').trim().length);
+  return { chars, bad: errors.slice() };
+}
 
-  if (!errors.length && chars >= 200) continue;
+let failed = 0;
+let retried = 0;
+for (const p of pages) {
+  let r = await draw(p, 1100);
+  if (r.bad.length || r.chars < 200) {
+    retried += 1;
+    r = await draw(p, 3000);
+    if (!r.bad.length && r.chars >= 200) {
+      console.error(`  SLOW  ${p}  (needed a second look; the machine is busy)`);
+      continue;
+    }
+  }
+  if (!r.bad.length && r.chars >= 200) continue;
   failed += 1;
-  console.error(`  FAIL  ${p}${chars < 200 ? `  (only ${chars} characters on the page)` : ''}`);
-  for (const e of errors.slice(0, 3)) console.error(`        ${e}`);
+  console.error(`  FAIL  ${p}${r.chars < 200 ? `  (only ${r.chars} characters on the page, twice)` : ''}`);
+  for (const e of r.bad.slice(0, 3)) console.error(`        ${e}`);
 }
 
 if (failed) {
-  console.error(`\n[check-static-render] ${failed} of ${pages.length} static pages failed.`);
+  console.error(`\n[check-static-render] ${failed} of ${pages.length} static pages failed`
+    + `${retried ? `, ${retried} after a second look` : ''}.`);
   process.exit(1);
 }
 
-console.log(`[check-static-render] ${pages.length} static pages render clean.`);
+console.log(`[check-static-render] ${pages.length} static pages render clean`
+  + `${retried ? `, ${retried} of them only on a second look` : ''}.`);
 process.exit(0);
