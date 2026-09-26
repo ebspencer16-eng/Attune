@@ -95,6 +95,29 @@ export function journalVolumeBand(ever = 0) {
 }
 
 /**
+ * Which day an entry belongs to, in the writer's own timezone.
+ *
+ * ── WHY NOT toISOString().slice(0, 10) ────────────────────────────────────
+ * Because that is the UTC date. West of UTC it is tomorrow's date for the
+ * whole evening, so an entry written at seven in Mountain Time is filed under
+ * the next day while every stamp the reader sees says today.
+ *
+ * The website was doing exactly that when it wrote an entry, and the app was
+ * using local parts, so the same couple writing at the same moment on two
+ * surfaces filed their entries under two different days. One of them would
+ * then have had a streak the other did not. Found by sweeping for
+ * `.slice(0, 10)` on a timestamp after the app's own day headings turned out
+ * to disagree with the entries under them.
+ *
+ * check-notes-parity.mjs runs this against the app's copy over a set of
+ * moments either side of midnight.
+ */
+export function journalDayKey(d = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
  * How many days in a row someone has written, counting back from today.
  *
  * ── WHAT ELLIE ASKED FOR ──────────────────────────────────────────────────

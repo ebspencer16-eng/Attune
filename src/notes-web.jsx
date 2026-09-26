@@ -43,6 +43,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ANNOTATION_COLORS, DEFAULT_ANNOTATION_COLOR } from '../api/_lib/annotations.js';
 import { JOURNAL_ANCHOR, isJournalEntry } from '../api/_lib/tags.js';
 import { JOURNAL_COPY } from '../api/_lib/journal-copy.js';
+import { journalDayKey } from '../api/_lib/journal-use.js';
 
 const HFONT = "'Playfair Display', Georgia, serif";
 const BFONT = "'DM Sans', -apple-system, system-ui, sans-serif";
@@ -629,7 +630,13 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
     const hits = q ? entries.filter((n) => (n.body || '').toLowerCase().includes(q)) : entries;
     const map = new Map();
     for (const n of hits) {
-      const key = n.anchor_key || (n.created_at || '').slice(0, 10) || 'undated';
+      /* The anchor is the day, and it is already local. The fallback is for a
+         row written before the anchor carried one; it reads the timestamp the
+         same way the app's headings do rather than taking the UTC date out of
+         the string. */
+      const key = n.anchor_key
+        || (n.created_at ? journalDayKey(new Date(n.created_at)) : '')
+        || 'undated';
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(n);
     }
@@ -682,7 +689,11 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
       body: text,
       kind: 'note',
       anchorType: JOURNAL_ANCHOR,
-      anchorKey: new Date().toISOString().slice(0, 10),
+      /* The writer's own day, not UTC. toISOString().slice(0, 10) is tomorrow
+         for the whole evening west of UTC, and the app files entries by local
+         parts, so the two surfaces disagreed about which day the same moment
+         belonged to. */
+      anchorKey: journalDayKey(),
       visibility: 'private',
     });
     setEntryBusy(false);

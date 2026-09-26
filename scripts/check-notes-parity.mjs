@@ -46,7 +46,7 @@
 
 import { readFileSync } from 'node:fs';
 import { transform } from 'esbuild';
-import { journalStreak } from '../api/_lib/journal-use.js';
+import { journalDayKey, journalStreak } from '../api/_lib/journal-use.js';
 import { JOURNAL_ANCHOR } from '../api/_lib/tags.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -254,6 +254,34 @@ for (const [who, file] of [
  * so what runs here is the copy that ships. It throws rather than passing if
  * it cannot find the function.
  */
+/**
+ * Lift a function out of the app's TSX and make it callable.
+ *
+ * By brace depth, past the parameter list, stripped of its types. What runs
+ * here is then the copy that ships rather than a description of it, which is
+ * the only arrangement worth having when a bundler boundary forces two copies.
+ */
+async function liftFn(src, signature) {
+  const at = src.indexOf(signature);
+  if (at < 0) return null;
+  let parens = 0; let bodyAt = -1;
+  for (let i = src.indexOf('(', at); i < src.length; i += 1) {
+    if (src[i] === '(') parens += 1;
+    else if (src[i] === ')') { parens -= 1; if (parens === 0) { bodyAt = src.indexOf('{', i); break; } }
+  }
+  if (bodyAt < 0) return null;
+  let depth = 0; let end = -1; let seen = false;
+  for (let i = bodyAt; i < src.length; i += 1) {
+    if (src[i] === '{') { depth += 1; seen = true; } else if (src[i] === '}') {
+      depth -= 1; if (seen && depth === 0) { end = i + 1; break; }
+    }
+  }
+  if (end < 0) return null;
+  const name = signature.replace(/^export\s+function\s+/, '').replace(/\($/, '');
+  const { code } = await transform(src.slice(at, end).replace(/^export\s+/, ''), { loader: 'ts' });
+  return new Function(`${code}; return ${name};`)();
+}
+
 {
   const src = readFileSync(`${ROOT}attune-app/src/components/journal.tsx`, 'utf8');
   const at = src.indexOf('export function journalStreak(');
@@ -291,6 +319,41 @@ for (const [who, file] of [
       ['out of order, which a Set does not care about', [d(2), d(0), d(1)]],
       ['a duplicate day', [d(0), d(0), d(1)]],
     ];
+    /**
+     * And which day a moment belongs to, which is the input to all of the
+     * above. The website writes an entry's anchor with journalDayKey and the
+     * app writes it with journalDay; the same moment has to produce the same
+     * key or one partner's entry lands on a different day from the other's.
+     *
+     * The moments below are the ones that break it: an evening west of UTC,
+     * where the UTC date has already rolled over, and a morning east of it,
+     * where it has not yet.
+     */
+    const dayAt = await liftFn(src, 'export function journalDay(');
+    if (!dayAt) {
+      fails.push('journal.tsx no longer exports journalDay, so this gate cannot'
+        + ' compare the two surfaces\' idea of a day.');
+    } else {
+      const appDay = dayAt;
+      const MOMENTS = [
+        ['an evening that is already tomorrow in UTC', new Date(2026, 8, 21, 19, 41)],
+        ['just before local midnight', new Date(2026, 8, 21, 23, 59)],
+        ['just after local midnight', new Date(2026, 8, 22, 0, 1)],
+        ['a morning', new Date(2026, 8, 22, 9, 43)],
+        ['noon on the first of a month', new Date(2026, 9, 1, 12, 0)],
+        ['the last minute of a year', new Date(2026, 11, 31, 23, 59)],
+      ];
+      for (const [what, when] of MOMENTS) {
+        const server = journalDayKey(when);
+        const app = appDay(when);
+        if (server !== app) {
+          fails.push(`the two surfaces file ${what} under different days: the`
+            + ` website says ${server} and the app says ${app}. The same couple`
+            + ' writing at the same moment would land on two different days.');
+        }
+      }
+    }
+
     for (const [what, days] of CASES) {
       const server = journalStreak(days, TODAY);
       const app = appStreak(days, TODAY);

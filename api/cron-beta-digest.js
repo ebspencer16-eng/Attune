@@ -15,6 +15,10 @@
 export const config = { runtime: 'edge' };
 
 import { safeError } from './_lib/http.js';
+/* Completion is whether there are answers, which is the rule the results gate
+   and /api/home both use. Reading a flag only one surface writes is what made
+   this digest undercount everyone on the website. */
+import { EXERCISES, isExerciseDone } from './_exercises.js';
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -47,7 +51,7 @@ export default async function handler(req) {
 
   try {
     const [profQ, ordersQ, psQ] = await Promise.all([
-      admin.from('profiles').select('id, created_at, partner_profile_id, invite_code, joined_via_invite, is_comp, ex1_completed, ex2_completed, ex3_completed, ex1_answers, ex2_answers'),
+      admin.from('profiles').select('id, created_at, partner_profile_id, invite_code, joined_via_invite, is_comp, ex3_completed, ex1_answers, ex2_answers, ex3_answers'),
       admin.from('orders').select('order_num, created_at, total, pkg_key, is_physical, addon_reflection, addon_budget, addon_checklist, addon_intimacy, addon_workbook').order('created_at', { ascending: false }).limit(2000),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
@@ -66,9 +70,31 @@ export default async function handler(req) {
 
     // ── Activation funnel ──
     const started = profiles.filter(p => hasAnswers(p.ex1_answers) || hasAnswers(p.ex2_answers)).length;
-    const ex1Done = profiles.filter(p => p.ex1_completed).length;
-    const ex2Done = profiles.filter(p => p.ex2_completed).length;
-    const ex3Done = profiles.filter(p => p.ex3_completed).length;
+    /**
+     * ── DONE MEANS THERE ARE ANSWERS ────────────────────────────────────
+     * These read ex1_completed and ex2_completed, which only one surface
+     * writes: /api/save-exercise sets the flag for every exercise, and the
+     * website saves the answers without it. So a couple doing the exercises on
+     * the website counted as nought and a couple doing them in the app counted
+     * as two, in a digest Ellie reads to judge how the beta is going. It would
+     * have understated the funnel for exactly the half of the beta that is on
+     * the website.
+     *
+     * Found by sweeping for what the two surfaces write differently, ahead of
+     * a beta with one partner on each.
+     *
+     * isExerciseDone is the same rule /api/home and the results gate use, so
+     * this now counts what those two count. ex3_completed is still read
+     * because Relationship Reflection is retakeable and the flag is what says
+     * a run finished; its answers survive a retake being started.
+     */
+    const done = (p, key) => isExerciseDone(
+      EXERCISES.find(e => e.key === key),
+      p[EXERCISES.find(e => e.key === key).column],
+    );
+    const ex1Done = profiles.filter(p => done(p, 'ex1')).length;
+    const ex2Done = profiles.filter(p => done(p, 'ex2')).length;
+    const ex3Done = profiles.filter(p => p.ex3_completed || done(p, 'ex3')).length;
 
     // ── Invites ──
     const invitedTotal = buyers.filter(p => p.invite_code).length;
