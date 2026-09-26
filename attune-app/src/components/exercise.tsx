@@ -35,6 +35,7 @@ import {
 import { WAITING } from '@/constants/waiting';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
+import { useFlushOnUnmount } from '@/hooks/use-flush-on-unmount';
 
 const c = Colors.light;
 
@@ -127,6 +128,19 @@ export default function Exercise({
     setSaveFailed(!res.ok);
     return res.ok;
   }, [exerciseKey, set]);
+
+  /**
+   * ── AND ON THE WAY OUT ──────────────────────────────────────────────────
+   * persist runs on advance. Close, the tab bar and a swipe are not advance, so
+   * whatever was on the last question when someone left was never written: no
+   * error, no warning, and the question blank again next time. See
+   * use-flush-on-unmount.ts.
+   *
+   * Skipped once the exercise is finished, because the completion save has
+   * already run and a progress save after it is a request that changes nothing.
+   */
+  useFlushOnUnmount(answers, (a) => persist(a, false),
+    { ready: !loading, when: !done });
 
   if (loading) return <Shell onClose={onClose}><ScreenLoading label={LOADING.exercise} /></Shell>;
   if (error) {

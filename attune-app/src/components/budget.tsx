@@ -32,6 +32,7 @@ import {
 import { bFmt, computeReveal } from '@/constants/budget';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
+import { useFlushOnUnmount } from '@/hooks/use-flush-on-unmount';
 import { LOADING } from '@/constants/loading-copy';
 import {
   BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type, inputType,
@@ -107,9 +108,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
    * capture whatever the state was when the effect was created, which is the
    * empty budget.
    */
-  const latest = useRef(state);
-  latest.current = state;
-  useEffect(() => () => { void save(latest.current); }, [save]);
+  useFlushOnUnmount(state, save, { ready: !loading });
 
   const put = (patch: Partial<BudgetState>) => setState((p) => ({ ...p, ...patch }));
 

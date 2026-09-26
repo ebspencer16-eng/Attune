@@ -27,54 +27,12 @@
 // It does not check that the message is true, or that a retry happens. Those
 // are the save path's job. This only checks that a failure is not silent.
 
-import { readFileSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { writingScreens } from './_lib/app-writers.mjs';
 
-const ROOT = new URL('..', import.meta.url).pathname;
-const DIR = join(ROOT, 'attune-app/src');
-
-const files = [];
-(function walk(d) {
-  for (const f of readdirSync(d)) {
-    const p = join(d, f);
-    if (statSync(p).isDirectory()) walk(p);
-    else if (/\.tsx$/.test(p)) files.push(p);
-  }
-})(DIR);
-
-/**
- * Every function in the client that writes something a person typed.
- *
- * Derived by name: a client function called save*, create* or update* that
- * posts a body is a writer. Reads (fetch*, list*) and receipts (markPostRead,
- * openSharedNote) are not: nobody loses work when a read fails.
- */
-const client = readFileSync(join(ROOT, 'attune-app/src/api/client.ts'), 'utf8');
-const WRITERS = [...new Set(
-  [...client.matchAll(/export (?:async )?function ((?:save|create|update)[A-Z]\w*)\s*\(/g)].map((m) => m[1]),
-)];
-
-/**
- * The one this gate was written for has to be on the list.
- *
- * It was not. `saveExercise` is declared `export async function`, the pattern
- * only allowed `export function`, and the derived list came back with five
- * writers and none of them the original. The gate went green while covering
- * five fewer screens than the version it replaced, which is the exact failure
- * this file was written to prevent, pointed at itself.
- *
- * A count is not enough to catch that, so the name is asserted.
- */
-if (!WRITERS.includes('saveExercise')) {
-  console.error('[check-save-feedback] saveExercise is not in the derived writer list; refusing to pass.');
-  console.error(`  found: ${WRITERS.join(', ') || '(none)'}`);
-  process.exit(1);
-}
-if (WRITERS.length < 5) {
-  console.error(`[check-save-feedback] only found ${WRITERS.length} writers in the client; refusing to pass.`);
-  process.exit(1);
-}
-const CALLS = new RegExp(`\\b(${WRITERS.join('|')})\\s*\\(`);
+/* Which screens write, and which client functions count as writing, come from
+   _lib/app-writers.mjs. check-unmount-flush asks a different question about the
+   same set of screens, and two copies of the derivation would drift. */
+const { writers: WRITERS, screens: SCREENS } = writingScreens('check-save-feedback');
 
 const problems = [];
 let checked = 0;
@@ -110,13 +68,8 @@ function reportsFailure(src) {
   return false;
 }
 
-for (const file of files) {
-  const src = readFileSync(file, 'utf8');
-  if (!CALLS.test(src)) continue;
-  // The client module declares them; it does not call them on anyone's behalf.
-  if (file.endsWith('client.ts')) continue;
+for (const { rel, src } of SCREENS) {
   checked += 1;
-  const rel = file.replace(ROOT, '');
 
   if (!INSPECTS.test(src)) {
     problems.push(
@@ -130,11 +83,6 @@ for (const file of files) {
       `${rel} notices a failed write and tells nobody.\n`
       + '      An Alert, or a state named for the failure and rendered somewhere.');
   }
-}
-
-if (!checked) {
-  console.error('[check-save-feedback] found no screens that write; refusing to pass.');
-  process.exit(1);
 }
 
 if (problems.length) {
