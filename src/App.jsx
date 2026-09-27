@@ -125,7 +125,7 @@ import { CATEGORY_INTRO } from "../api/_lib/category-intros.js";
 import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis.js";
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
 import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
-import { groundForDimension, intimacyActionPlan } from "../api/_lib/intimacy-results.js";
+import { groundForDimension, intimacyActionPlan, intimacyAllAlignedNote } from "../api/_lib/intimacy-results.js";
 // The fixed page gradients, one copy for both surfaces: the app receives the
 // same stops on the results nav. See api/_lib/section-grounds.js.
 import { gradientCss, groundForCategory, ALIGNED_PANEL } from "../api/_lib/section-grounds.js";
@@ -7606,13 +7606,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 // six on a phone. Ellie asked for three, and for them to be
                 // the same three.
                 const items = intimacyActionPlan(intimacySummary?.dimSummary || []);
+                /* No plan, and the reason is worth saying: agreeing is not the
+                   same as having said it out loud. This line used to be on
+                   Conversations Worth Having, which is gone.
+
+                   WHEN it may be said is intimacyAllAlignedNote's decision, not
+                   this page's. An empty action plan is not the same thing as
+                   agreeing: a couple who skipped every question have an empty
+                   plan too, and this page told them they line up across the
+                   board. The app reads the same answer out of the results
+                   payload, so fixing it there fixed one of the two surfaces and
+                   left this one saying it. */
+                const allAligned = intimacyAllAlignedNote(intimacySummary?.dimSummary || []);
                 if (!items.length) {
-                  // No plan, and the reason is worth saying: agreeing is not
-                  // the same as having said it out loud. This line used to be
-                  // on Conversations Worth Having, which is gone.
+                  if (!allAligned) return null;
                   return (
                     <div style={{ marginBottom: "1rem", background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${ROSE}`, borderRadius: 12, padding: "0.9rem 1.1rem" }}>
-                      <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{INTIMACY_ALL_ALIGNED}</p>
+                      <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontFamily: BFONT, lineHeight: 1.6, margin: 0 }}>{allAligned}</p>
                     </div>
                   );
                 }

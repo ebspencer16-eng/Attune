@@ -459,12 +459,14 @@ async function runOne(name) {
 const only = process.argv[2];
 const names = only ? [only] : Object.keys(EXERCISES);
 let failed = 0;
+const knownGaps = [];
 for (const name of names) {
   const r = await runOne(name);
   const cfg = EXERCISES[name];
   if (r.ok) {
     console.log(`  ok    ${name.padEnd(10)} ${cfg.label.padEnd(24)} ${r.stored.doneCount} answers stored`);
   } else if (cfg.known) {
+    knownGaps.push(name);
     console.log(`  KNOWN ${name.padEnd(10)} ${cfg.label.padEnd(24)} not driveable: ${cfg.known}`);
   } else {
     failed++;
@@ -478,4 +480,20 @@ if (failed) {
   console.error(`\n[check-exercise-flow] ${failed} of ${names.length} exercises did not complete.`);
   process.exit(1);
 }
-console.log(`\n[check-exercise-flow] ${names.length} exercises completed and stored correctly.`);
+/**
+ * What actually happened, not how many were asked for.
+ *
+ * This said "${names.length} exercises completed and stored correctly", which
+ * counted the known gaps as completions: with two exercises the driver cannot get
+ * through, it printed "5 exercises completed and stored correctly". A precise
+ * number that sounds counted, for something nobody counted, which is how this file
+ * came to be driving four of five in the first place.
+ */
+const drove = names.length - knownGaps.length;
+console.log(`\n[check-exercise-flow] ${drove} of ${names.length} exercises driven to`
+  + ` completion and stored correctly.`
+  + (knownGaps.length
+    ? ` ${knownGaps.length} the driver cannot get through, listed above as KNOWN`
+      + ` (${knownGaps.join(', ')}); those are harness gaps, and the exercises`
+      + ' themselves are unchecked here rather than passing.'
+    : ''));

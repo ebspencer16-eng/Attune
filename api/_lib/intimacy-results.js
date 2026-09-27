@@ -227,6 +227,38 @@ function questionRows(dimensionId, answersMine, answersTheirs, variant) {
     .filter((r) => r.you != null || r.them != null);
 }
 
+/**
+ * The across-the-board line, or nothing.
+ *
+ * ── WHY IT IS A FUNCTION AND NOT A CONDITION AT EACH CALLER ───────────────
+ * Because it was a condition at each caller, and they did not agree, and only one
+ * of them was fixed.
+ *
+ * Both surfaces show this line and each decided for itself when to. The app reads
+ * allAlignedNote out of the results payload, which this module builds. The website
+ * computes its own intimacy summary in src/App.jsx and printed the line whenever
+ * the action plan came back empty. A couple who skipped every question have an
+ * empty action plan, so fixing the payload fixed the app and left the website
+ * saying the same untrue thing.
+ *
+ * ── THE RULE ──────────────────────────────────────────────────────────────
+ * "You line up across the board" is a claim about the whole board. Every
+ * dimension has to be aligned. Not "nothing is misaligned", which is what an
+ * unanswered exercise looks like, and not "some are aligned", which is what
+ * answering two of six looks like.
+ *
+ * An unanswered question is not agreement. Each dimension already says so on its
+ * own page; this is the only line that summarises them.
+ *
+ * @param dimSummary summarizeIntimacy(...).dimSummary, which carries one entry
+ *        per dimension in the registry, each with a state.
+ */
+export function intimacyAllAlignedNote(dimSummary) {
+  const states = (dimSummary || []).map((d) => d.state);
+  if (states.length !== INTIMACY_DIMENSIONS.length) return null;
+  return states.every((st) => st === 'aligned') ? INTIMACY_ALL_ALIGNED : null;
+}
+
 export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
   const answersMine = mine?.answers || mine || null;
   const answersTheirs = theirs?.answers || theirs || null;
@@ -436,9 +468,7 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
      * who pick the middle option throughout come out aligned on all six and still
      * get the line, which is the case it exists for.
      */
-    allAlignedNote: (dimensions.length && dimensions.every((d) => d.state === 'aligned'))
-      ? INTIMACY_ALL_ALIGNED
-      : null,
+    allAlignedNote: intimacyAllAlignedNote(summary.dimSummary),
     dimensions,
     /**
      * The action plan on the at-a-glance page: three, furthest apart first.

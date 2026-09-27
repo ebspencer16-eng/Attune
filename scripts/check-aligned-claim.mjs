@@ -47,10 +47,12 @@
  * dimensions it examined rather than asserting a number.
  */
 
-import { intimacyResults } from '../api/_lib/intimacy-results.js';
-import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from '../api/_intimacy-questions.js';
+import { readFileSync } from 'node:fs';
+import { intimacyResults, intimacyAllAlignedNote } from '../api/_lib/intimacy-results.js';
+import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS, summarizeIntimacy } from '../api/_intimacy-questions.js';
 import { INTIMACY_ALL_ALIGNED } from '../api/_intimacy-results-prose.js';
 
+const ROOT = new URL('..', import.meta.url).pathname;
 const fails = [];
 
 /** An answer set that picks the nth option of every question. */
@@ -122,6 +124,70 @@ for (const c of cases) {
     fails.push(`allAlignedNote is set to something other than INTIMACY_ALL_ALIGNED`
       + ` when ${c.what}. Results copy comes from api/, and a second string here`
       + ' would be a second copy of it.');
+  }
+}
+
+/**
+ * ── AND THE OTHER SURFACE, WHICH IS THE HALF THAT WAS STILL WRONG ─────────
+ * The first version of this gate ran intimacyResults and nothing else, so it
+ * proved the app right and said nothing about the website. The website does not
+ * read allAlignedNote: it computes its own intimacy summary in src/App.jsx and
+ * printed the line whenever the action plan came back empty. A couple who skipped
+ * every question have an empty plan, so the fix reached one surface of two and
+ * this gate reported success about it.
+ *
+ * That is the exact failure the card-clipping check had, passing while pointing at
+ * the half that was already correct. So the decision is one exported function now,
+ * and this holds the website to calling it rather than deciding for itself.
+ */
+const appSrc = readFileSync(`${ROOT}src/App.jsx`, 'utf8');
+const at = appSrc.indexOf('intimacyActionPlan(intimacySummary?.dimSummary');
+if (at < 0) {
+  console.error('[check-aligned-claim] cannot find the website\'s intimacy action'
+    + ' plan block in src/App.jsx. Refusing to pass: this gate covers two surfaces'
+    + ' and has lost one of them.');
+  process.exit(1);
+}
+const block = appSrc.slice(at, at + 1600);
+if (!/intimacyAllAlignedNote\(/.test(block)) {
+  fails.push('src/App.jsx decides for itself when to print the across-the-board'
+    + ' line, instead of asking intimacyAllAlignedNote. An empty action plan is not'
+    + ' agreement: a couple who skipped every question have an empty plan too, and'
+    + ' this is where they were told they line up across the board.');
+}
+/**
+ * The note has to gate the box, not just fill it.
+ *
+ * Deleting the guard was planted and passed: the block still asked
+ * intimacyAllAlignedNote and still rendered its value, so with a null answer React
+ * drew the tinted callout with nothing inside it. Not the false claim any more, but
+ * an empty bordered box on the page of a couple who skipped the exercise.
+ */
+if (/\{allAligned\}/.test(block)
+    && !/(!allAligned\)\s*return|allAligned\s*\?|allAligned\s*&&)/.test(block)) {
+  fails.push('src/App.jsx renders the across-the-board note without checking that'
+    + ' there is one, so when there is not, the callout is drawn empty: a tinted box'
+    + ' with a rose border and no sentence in it. Return null when the note is null.');
+}
+if (/\{INTIMACY_ALL_ALIGNED\}/.test(block)) {
+  fails.push('src/App.jsx renders INTIMACY_ALL_ALIGNED directly, so the sentence'
+    + ' appears whenever this block is reached rather than when it is true. Render'
+    + " intimacyAllAlignedNote's return value, which is null when it is not.");
+}
+
+/**
+ * Both surfaces, over the same couple, must agree about whether the line appears.
+ * Run rather than compared by eye, because that is the only version of this check
+ * that a refactor cannot quietly walk around.
+ */
+for (const c of cases) {
+  const server = intimacyResults({ mine: c.mine, theirs: c.theirs, variant: 'premarital' });
+  const summary = summarizeIntimacy(c.mine.answers, c.theirs.answers);
+  const website = intimacyAllAlignedNote(summary.dimSummary);
+  if ((server?.allAlignedNote ?? null) !== (website ?? null)) {
+    fails.push(`the two surfaces disagree when ${c.what}: the payload says`
+      + ` ${JSON.stringify(server?.allAlignedNote ?? null)} and the website's own`
+      + ` reckoning says ${JSON.stringify(website ?? null)}. One couple, two answers.`);
   }
 }
 
