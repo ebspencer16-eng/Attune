@@ -502,6 +502,22 @@ real browser alone. `pkill -f 'Google Chrome for Testing'` does not match them
 on this machine. Worth suspecting first when a browser check stops producing
 output.
 
+**`npm run check` drives Chrome too, so do not run it beside `npm run smoke`.**
+Four checks in `npm run check` launch a browser. Starting the smoke and then
+running the check produces two Chromes competing on a machine already at load
+average five, and the smoke stops producing output part-way down the section
+list: exactly the hang signature above, from a cause that is nobody's bug. It
+cost twenty-five minutes and a kill before the penny dropped.
+
+Run one at a time. If the smoke has gone quiet, check `uptime` and
+`pgrep -f 'remote-debugging-port' | wc -l` before suspecting the code. Note that
+`pgrep -c` is not a flag on macOS: it errors, and `pgrep -fc x || echo 0` then
+prints a confident zero, which is worse than no count. Use `| wc -l`.
+
+**`vite preview` binds `localhost`, not `127.0.0.1`.** `scripts/smoke.mjs` says
+so in a comment and it is still the easiest half-hour to lose: curl to
+127.0.0.1:4173 returns 000 while the server is serving perfectly.
+
 **`git checkout --` has now destroyed uncommitted work five times.** Four
 were noted before; the fifth was today, undoing a planted bug in
 `attune-app/src/api/client.ts` and taking an hour of unrelated edits in the
