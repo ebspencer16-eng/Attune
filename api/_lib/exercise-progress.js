@@ -26,6 +26,7 @@
  */
 
 import { PERSONALITY_QUESTIONS, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from '../_questions.js';
+import { asksChildhood } from './expectations-page.js';
 import { INTIMACY_QUESTIONS } from '../_intimacy-questions.js';
 import { conflictQuestionsInOrder } from '../_conflict-questions.js';
 import { ANNIVERSARY_QUESTIONS } from '../_anniversary-questions.js';
@@ -35,8 +36,35 @@ export function questionCount(key) {
   switch (key) {
     // Every question twice: once about yourself, once about your partner.
     case 'ex1': return PERSONALITY_QUESTIONS.length * 2;
+    /**
+     * ── EXPECTATIONS ASKS EVERY ITEM TWICE, AND THIS COUNTED IT ONCE ────────
+     * This was the life questions plus one per responsibility item, which is 32.
+     * The exercise asks 53: every item is asked twice, once about how you split
+     * it now and once about how it was growing up, plus the childhood structure
+     * question that opens part two.
+     *
+     * So somebody who had answered the whole thing and not yet pressed finish
+     * was shown "37 of 32". Measured by running progressFor over a complete
+     * answer set rather than by reading, because the shape is nested and the
+     * arithmetic is not visible in either half on its own.
+     *
+     * ── AND WHICH CATEGORIES ASK THE SECOND TIME ────────────────────────────
+     * Not every one does: Extended Family asks only about now. The first version
+     * of this fix read `c.asksChildhood` off the category and got 53, four too
+     * many, because that flag does not exist on the category. /api/questions adds
+     * it, from asksChildhood() in expectations-page.js, which is the function
+     * both surfaces already use to decide whether to draw the row.
+     *
+     * The check caught it: a complete answer set reported 49 of 53. Which is the
+     * argument for a behavioural gate over a comment, made against the person
+     * who had just written the comment.
+     */
     case 'ex2': return LIFE_QUESTIONS.length
-      + RESPONSIBILITY_CATEGORIES.reduce((n, c) => n + c.items.length, 0);
+      // now, and growing up, per item
+      + RESPONSIBILITY_CATEGORIES.reduce((n, c) => n + c.items.length, 0)
+      + RESPONSIBILITY_CATEGORIES.reduce((n, c) => n + (asksChildhood(c.id) ? c.items.length : 0), 0)
+      // the one question that opens part two
+      + 1;
     /**
      * ── NOT REFLECTION_QUESTIONS, WHICH IS A DIFFERENT LIST ─────────────────
      * This read REFLECTION_QUESTIONS, which is five. The exercise asks fourteen:
@@ -120,10 +148,21 @@ export function progressFor(profile, exercise) {
  * One level deep and no further, because that is the only shape that exists.
  * A value that is itself a map counts as the number of answers inside it.
  */
+/**
+ * Keys that hold a refinement of an answer rather than an answer.
+ *
+ * Choosing "Both of us" on a responsibility opens a follow-up asking which kind
+ * of both, and that lives under bothDetail. It is not a question anybody is asked
+ * unless they answered a particular way, so counting it made the number of
+ * answers exceed the number of questions for anyone who chose Both a few times.
+ */
+const REFINEMENTS = new Set(['bothDetail', 'childhoodBothDetail']);
+
 function countAnswers(answers) {
   if (!answers || typeof answers !== 'object') return 0;
   let n = 0;
-  for (const v of Object.values(answers)) {
+  for (const [key, v] of Object.entries(answers)) {
+    if (REFINEMENTS.has(key)) continue;
     if (v == null || v === '') continue;
     if (Array.isArray(v)) { if (v.length) n += 1; continue; }
     if (typeof v === 'object') {

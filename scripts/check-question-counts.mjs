@@ -50,7 +50,7 @@ process.env.SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'stub-ser
 process.env.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'stub-anon-key';
 
 const { EXERCISES } = await import('../api/_exercises.js');
-const { questionCount } = await import('../api/_lib/exercise-progress.js');
+const { questionCount, progressFor } = await import('../api/_lib/exercise-progress.js');
 const { default: handler } = await import('../api/questions.js');
 
 const USER = '11111111-1111-4111-8111-111111111111';
@@ -105,8 +105,64 @@ for (const e of EXERCISES) {
    * not questions: Communication sends fifty-one items and asks fifty.
    */
   if (!Array.isArray(payload.items)) {
-    skipped.push(`${e.key} (no flat item list; it sends `
-      + `${Object.keys(payload).filter((k) => Array.isArray(payload[k])).join(', ')})`);
+    /**
+     * Expectations has no flat list: five arrays, because the screen is five
+     * parts with two grids in it. So the comparison is the other invariant, and
+     * it is the one that caught this exercise's own version of the bug.
+     *
+     * A complete answer set must land exactly on the total. Its total counted
+     * every responsibility item once, and the exercise asks each of them twice,
+     * once about how the two of them split it now and once about how it was
+     * growing up, plus the question that opens part two. So somebody who had
+     * answered all of it and not yet pressed finish read "37 of 32".
+     *
+     * The blob below is built from the endpoint's own arrays. It is a fixture,
+     * not a second implementation of the total: it says what a finished
+     * Expectations looks like, and questionCount still has to agree with it.
+     * What it cannot check is the nesting itself, which is written down in
+     * attune-app/src/components/expectations.tsx and in the website, and is the
+     * one part of this exercise a check does not reach.
+     */
+    const complete = {};
+    if (Array.isArray(payload.lifeQuestions)) {
+      complete.life = Object.fromEntries(payload.lifeQuestions.map((q) => [q.id, 'an answer']));
+    }
+    if (Array.isArray(payload.categories)) {
+      complete.responsibilities = {};
+      complete.childhood = {};
+      for (const c of payload.categories) {
+        for (const item of c.items || []) {
+          const key = `${c.id}__${item.key ?? item.id ?? item}`;
+          complete.responsibilities[key] = 'Both of us';
+          if (c.asksChildhood !== false) complete.childhood[key] = 'Both';
+        }
+      }
+      /* The refinement a "Both" answer opens. Present on every item here, which
+         is the case that made the old count overshoot. */
+      complete.bothDetail = { ...complete.responsibilities };
+      complete.childhoodBothDetail = { ...complete.childhood };
+    }
+    if (Array.isArray(payload.childhoodStructures) && payload.childhoodStructures.length) {
+      complete.childhoodStructure = payload.childhoodStructures[0].id;
+    }
+
+    if (!Object.keys(complete).length) {
+      skipped.push(`${e.key} (no flat item list and nothing to build a complete`
+        + ` answer set from; it sends ${Object.keys(payload).filter((k) => Array.isArray(payload[k])).join(', ')})`);
+      continue;
+    }
+
+    const p = progressFor({ [e.column]: null, [`${e.key}_progress`]: complete }, e);
+    compared += 1;
+    if (p.answered !== p.total) {
+      fails.push(`a fully answered ${e.label} reports ${p.answered} of ${p.total}.`
+        + (p.answered > p.total
+          ? ' A progress row that counts past its own total is showing a number nobody'
+            + ' can make sense of, and it happens to whoever answers everything and'
+            + ' closes the screen before pressing finish.'
+          : ' The total counts questions the exercise does not ask, so it can never'
+            + ' be reached.'));
+    }
     continue;
   }
   const served = payload.items.filter((i) => !i.__partBreak).length;
