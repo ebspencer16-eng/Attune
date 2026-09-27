@@ -409,12 +409,36 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
      * lines are still in api/_intimacy-results-prose.js, unsent.
      */
     /**
-     * Set only when nothing is misaligned, which is when the conversations
-     * page needs to say why it is still showing a list.
+     * Set only when nothing is misaligned, which is when the conversations page
+     * needs to say why it is still showing a list.
+     *
+     * ── AND ONLY WHEN SOMETHING IS ACTUALLY ALIGNED ─────────────────────────
+     * Every question in this exercise is skippable, on purpose: the forward
+     * button says "Skip" when nothing is chosen, and the endpoint sends no
+     * required ids. So both partners can finish it having answered none of it.
+     *
+     * This asked whether anything was misaligned. Nothing was, because nothing
+     * was answered, so a couple who skipped the whole exercise was told "You
+     * line up across the board." The product asserting agreement from no data,
+     * in the most sensitive section it has.
+     *
+     * Each dimension was already honest about it on its own: state 'unspoken',
+     * reason 'both_skipped', and a body saying neither of them put a number to
+     * it. Only the page-level line was wrong, and it was wrong because "nothing
+     * disagrees" and "everything agrees" are not the same claim.
+     *
+     * Stated as the copy states it. "You line up across the board" is a claim
+     * about the whole board, so every dimension has to be aligned, not merely
+     * none of them misaligned. Answering two dimensions and skipping four also
+     * used to produce it, which was the same overclaim one step smaller.
+     *
+     * Verified by search rather than by argument: over the answer space, a couple
+     * who pick the middle option throughout come out aligned on all six and still
+     * get the line, which is the case it exists for.
      */
-    allAlignedNote: dimensions.some((d) => d.state === 'discuss' || d.state === 'different')
-      ? null
-      : INTIMACY_ALL_ALIGNED,
+    allAlignedNote: (dimensions.length && dimensions.every((d) => d.state === 'aligned'))
+      ? INTIMACY_ALL_ALIGNED
+      : null,
     dimensions,
     /**
      * The action plan on the at-a-glance page: three, furthest apart first.

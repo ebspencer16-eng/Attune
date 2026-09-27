@@ -102,7 +102,34 @@ const TUNING = {
   ex2:      { pkg: 'core',    min: 12 },
   ex3:      { pkg: 'premium', min: 8 },
   intimacy: { pkg: 'premium', min: INTIMACY_ANSWERS, known: 'multi-select screens need a real pointer; stalls at Q7' },
-  conflict: { pkg: 'premium', min: 8 },
+  /**
+   * ── WHY CONFLICT PATTERNS IS NOT DRIVEN, PRECISELY ──────────────────────
+   * The exercise itself is fine, checked by hand: /?fresh=1&pkg=premium&view=conflict
+   * draws its intro, the account sheet closes, Start works, and question 1 of 12
+   * answers. It fails at c_repair, the pick-and-rank screen, and the reason is a
+   * property of this driver rather than of the product.
+   *
+   * `moved` below means "a forward control was found and clicked", which is not
+   * the same as having moved. A rank screen keeps its Next button present and
+   * not `disabled` while the minimum is unmet, and its handler simply returns. So
+   * the driver clicks Next, believes it advanced, resets the stall counter and
+   * goes round again, clicking the same middle option on and off: the trail
+   * showed "Naming that they see it from m" 399 times, once per iteration to the
+   * cap. Every fallback that handles rank screens sits behind `!moved`, so none of
+   * them ever runs.
+   *
+   * Two fixes were tried and both were worse. Fingerprinting the body text does
+   * not work, because toggling an option changes the body. Fingerprinting the
+   * heading and the "9 / 12" counter does work, and it made the fallbacks
+   * reachable, and it turned one exercise into a twenty-five minute run, because
+   * every screen with no heading and no counter then reads as a stall and fills
+   * everything on it. A slow smoke is a smoke nobody runs.
+   *
+   * What it needs is a forward control whose inertness is visible, which is a
+   * change to the product (`disabled` on Next until the minimum is met) rather
+   * than more cleverness here. Recorded in TASKS.md as that.
+   */
+  conflict: { pkg: 'premium', min: 8, known: 'the rank screen keeps Next enabled while incomplete, so the driver cannot tell a click that did nothing from one that advanced' },
 };
 
 const EXERCISES = {};
@@ -170,6 +197,7 @@ async function runOne(name) {
   await page.wait(700);
 
   let answered = 0, screens = 0, stalls = 0, variant = 0;
+  const trail = [];
   for (let i = 0; i < 400; i++) {
     errors.length = 0;
 
@@ -207,13 +235,42 @@ async function runOne(name) {
       // Answer screens: click a middle option so runs are not all one extreme.
       const opts = [...document.querySelectorAll('button')]
         .filter(b => visible(b) && b.innerText.trim().length > 2 && !re.test(b.innerText.trim()) && !b.disabled);
-      if (opts.length) { opts[Math.floor(opts.length / 2)].click(); return 'option'; }
+      if (opts.length) {
+        const pick = opts[Math.floor(opts.length / 2)];
+        const label = pick.innerText.trim().slice(0, 30);
+        pick.click();
+        return `option:${label}`;
+      }
       return null;
     }, NOT_AN_ANSWER.source);
 
-    if (acted === 'option') answered++;
+    if (typeof acted === 'string' && acted.startsWith('option')) {
+      answered++;
+      /* What it actually clicked, kept for the failure message.
+         A run that ends somewhere unexpected used to report only the screen it
+         ended on, which says nothing about how it got there: Conflict Patterns
+         failed with "last screen: DASHBOARD" and finding out why meant driving
+         the whole thing by hand in a throwaway script. The trail is the thing
+         that was missing, so it is kept rather than reconstructed next time. */
+      trail.push(acted.slice(7));
+    }
     await page.wait(160);
 
+    /**
+     * What is on screen, before trying to move.
+     *
+     * ── WHY A FINGERPRINT AND NOT THE CLICK ─────────────────────────────────
+     * `moved` used to mean "a forward control was found and clicked", which is
+     * not the same as having moved. A pick-and-rank screen keeps its Next button
+     * present and not `disabled` while the minimum is unmet, and its handler
+     * simply returns. So the driver clicked Next, believed it had advanced, reset
+     * the stall counter, and went round again: Conflict Patterns clicked the same
+     * option 399 times and hit the iteration cap. Every fallback below is behind
+     * `!moved`, so none of them ever ran.
+     *
+     * The screen's own text is the honest signal. If it did not change, nothing
+     * happened, whatever was clicked.
+     */
     const moved = await page.evaluate(({ arrow, verb }) => {
       const reArrow = new RegExp(arrow), reVerb = new RegExp(verb, 'i');
       const visible = e => { const r = e.getBoundingClientRect();
@@ -383,8 +440,14 @@ async function runOne(name) {
   await page.close();
 
   if (!stored.completed) {
+    /* The last few things it clicked, because the screen it ended on does not
+       say how it got there. */
+    const clicked = trail.length
+      ? `\n        clicked: ${trail.slice(-6).map((t) => JSON.stringify(t)).join(' → ')}`
+      : '\n        clicked: nothing it recognised as an answer';
     return { name, ok: false, answered, screens, stored,
-      why: `never wrote ${cfg.key} (progress held ${stored.progressCount}); last screen: ${tail.slice(0, 90)}` };
+      why: `never wrote ${cfg.key} (progress held ${stored.progressCount}, answered ${answered}`
+        + ` over ${screens} screens); last screen: ${tail.slice(0, 90)}${clicked}` };
   }
   if (stored.doneCount < cfg.min) {
     return { name, ok: false, answered, screens, stored,
