@@ -27,6 +27,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { savePost, insightShareText } from '@/api/client';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
+import { lastSeen } from '@/api/last-seen';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
@@ -314,28 +315,79 @@ export default function ResourcesScreen() {
   const [postsFailed, setPostsFailed] = useState(false);
 
   const loadingRef = useRef(false);
+  /**
+   * ── FIVE REQUESTS, AND THE SCREEN USED TO WAIT FOR ALL OF THEM ───────────
+   * Ellie: "the learn tab spun for about 30 secs, then showed a 'something went
+   * wrong' error that said 'this is on our end...' then went away after about a
+   * minute."
+   *
+   * This was one `await Promise.all` over five requests, so the tab showed a
+   * spinner until the slowest of them answered, and every one of the five is a
+   * serverless function that is cold if nobody has called it for an hour. All
+   * four tabs mount at launch, so on a cold start five cold functions are asked
+   * for at once and the reader watches the worst of them. Then the error: only
+   * the first of the five sets it, so one slow answer failing put the whole tab
+   * into an error state while the other four had already arrived. It "went away"
+   * because focusing the tab loads again and the functions were warm by then.
+   *
+   * Each request now lands on its own. The tab stops being a spinner as soon as
+   * the one it cannot draw without has arrived, and the rest fill in behind it,
+   * which is what they already do on a refresh.
+   *
+   * The last two are for marking inside an article: this reader's own marks, so
+   * they paint on the words, and their tags, so the sheet can offer them.
+   * Fetched here rather than when an article opens, because a reader who
+   * long-presses a sentence should not wait on two requests to find out whether
+   * the gesture did anything. Neither blocks the tab.
+   */
   const load = useCallback(async () => {
     loadingRef.current = true;
-    // The last two are for marking inside an article: this reader's own marks,
-    // so they paint on the words, and their tags, so the sheet can offer them.
-    // Fetched here rather than when an article opens, because a reader who
-    // long-presses a sentence should not wait on two requests to find out
-    // whether the gesture did anything.
-    const [h, p, t, n, g] = await Promise.all([
-      fetchHome(), fetchPosts(), fetchToolData(), fetchNotes(), fetchTags(),
-    ]);
-    if (h.ok) { setHome(h.data); setError(null); setPartnerName(h.data.partnerName || 'your partner'); }
-    else setError(h.error);
-    if (t.ok) setTools(t.data);
-    if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); setPostsFailed(false); }
-    else setPostsFailed(true);
-    // A failed read here costs marking, not the tab, so it is not an error
-    // state: the articles still open and still read.
-    if (n.ok) setNotes([...n.data.notes, ...n.data.annotations]);
-    if (g.ok) setTags(g.data.tags);
+
+    const home = fetchHome().then((h) => {
+      if (h.ok) { setHome(h.data); setError(null); setPartnerName(h.data.partnerName || 'your partner'); }
+      else setError(h.error);
+      /* The tab is drawable once this is in. Everything else is a section of it. */
+      setLoading(false);
+    });
+
+    const rest = [
+      fetchPosts().then((p) => {
+        if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); setPostsFailed(false); }
+        else setPostsFailed(true);
+      }),
+      fetchToolData().then((t) => { if (t.ok) setTools(t.data); }),
+      // A failed read here costs marking, not the tab, so it is not an error
+      // state: the articles still open and still read.
+      fetchNotes().then((n) => { if (n.ok) setNotes([...n.data.notes, ...n.data.annotations]); }),
+      fetchTags().then((g) => { if (g.ok) setTags(g.data.tags); }),
+    ];
+
+    /* Refreshing is the pull gesture, and it should not stop spinning until
+       everything it was pulling for has actually landed. */
+    await Promise.all([home, ...rest]);
     setLoading(false);
     setRefreshing(false);
     loadingRef.current = false;
+  }, []);
+
+  /**
+   * ── AND THE SCREEN BEFORE THE NETWORK ───────────────────────────────────
+   * The home tab keeps its last payload and draws it on mount while the request
+   * runs behind it, which is why it is simply there on any launch after the
+   * first. Learn asks for the same /api/home payload and did not, so it paid the
+   * cold start every time.
+   *
+   * `cur ?? seen` rather than a plain set: if the request won the race, the fresh
+   * answer is already on screen and must not be replaced by an older one.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    lastSeen<HomeResponse>('home').then((seen) => {
+      if (cancelled || !seen) return;
+      setHome((cur) => cur ?? seen);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => { load(); }, [load]);

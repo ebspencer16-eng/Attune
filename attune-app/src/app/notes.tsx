@@ -201,7 +201,22 @@ export default function NotesScreen() {
     // Three calls that are always needed. Tags are fetched for the person's own
     // list and for the labels an annotation is read through, which arrive on
     // the same response.
-    const [n, t, h] = await Promise.all([fetchNotes(), fetchTags(), fetchHome()]);
+    /**
+     * ── THE TAB DRAWS WHEN THE NOTES ARRIVE ─────────────────────────────────
+     * These were awaited together, so the tab was a spinner until the slowest of
+     * three serverless functions answered, all of them cold on a first launch.
+     * Ellie met the same shape on Learn: "the learn tab spun for about 30 secs,
+     * then showed a 'something went wrong' error... then went away after about a
+     * minute."
+     *
+     * All three still go out at once. What changed is that this screen is the
+     * notes, so it waits for those and lets the other two land behind: the tags
+     * are for the chip picker and the home payload is for the partner's name,
+     * and neither is worth a spinner.
+     */
+    const tagsSoon = fetchTags();
+    const homeSoon = fetchHome();
+    const n = await fetchNotes();
 
     if (!n.ok) {
       setError(n.error);
@@ -216,6 +231,10 @@ export default function NotesScreen() {
     setError(null);
     setNotes(n.data.notes);
     setAnnotations(n.data.annotations);
+    /* Drawable now. The tags and the partner's name fill in behind. */
+    setLoading(false);
+    const t = await tagsSoon;
+    const h = await homeSoon;
     setShared(n.data.sharedWithMe);
     if (t.ok) {
       setTags(t.data.tags);

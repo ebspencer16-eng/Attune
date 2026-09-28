@@ -128,10 +128,28 @@ export default function InsightsScreen() {
        * the size of: /api/results answers a not-ready couple from the gate,
        * without computing anything.
        */
-      const [res, r] = await Promise.all([fetchHome(), fetchResults()]);
+      /**
+       * ── THE TAB DRAWS WHEN HOME ARRIVES, NOT WHEN BOTH DO ─────────────────
+       * These were awaited together, so the screen was a spinner until the
+       * slower of the two answered, and both are serverless functions that are
+       * cold if nobody has called them for an hour. Ellie met the same shape on
+       * Learn: "the learn tab spun for about 30 secs, then showed a 'something
+       * went wrong' error... then went away after about a minute."
+       *
+       * Both requests still go out at once, which was always the point. What
+       * changed is that the screen stops waiting on the one it can draw without.
+       * Results fills in behind, which is what the branch below already assumes:
+       * it renders from `home` and only reaches for `results` once the server has
+       * said there is something to use.
+       */
+      const resultsSoon = fetchResults();
+      const res = await fetchHome();
       if (!current()) return;
       if (res.ok) { setHome(res.data); setError(null); }
       else { setError(res.error); }
+      setLoading(false);
+      const r = await resultsSoon;
+      if (!current()) return;
 
       // ── WHY THIS DOES NOT CLEAR RESULTS ON FAILURE ──────────────────────
       // It used to be `setResults(r.ok ? r.data : null)`, with a plain
