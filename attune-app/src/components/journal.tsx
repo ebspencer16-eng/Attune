@@ -338,9 +338,15 @@ export function SaveToJournal({ quote, onClose }: { quote: string; onClose: (sav
             placeholder={SAVE_PLACEHOLDER}
             placeholderTextColor={c.textMuted}
             multiline
+            /* Ellie: "the text box on that pop up is hard to see on my
+               simulator, not enough contrast to tell it's a text box." White on
+               the sheet's cream is a two per cent difference, so the only thing
+               marking the field was its corner radius. A hairline in the same
+               token every card uses is what says "you can type here". */
             style={{
               ...inputType(Type.body), color: c.text, minHeight: 84,
               backgroundColor: Palette.white, borderRadius: Radius.md,
+              borderWidth: 1, borderColor: c.border,
               padding: Spacing.md, textAlignVertical: 'top',
             }}
           />
@@ -897,7 +903,7 @@ const FAILED = 'Your journal could not be loaded. Pull down to try again.';
  * named here so they are findable, and listed in TASKS.md as part of C4.
  */
 const SAVE_TITLE = 'Keep this in your journal';
-const SAVE_PLACEHOLDER = 'What it made you think';
+const SAVE_PLACEHOLDER = 'Add commentary';
 const SAVE_ACTION = 'Save';
 const SAVE_FAILED = 'That did not save. Try again in a moment.';
 const UNLOCK = 'Unlock';

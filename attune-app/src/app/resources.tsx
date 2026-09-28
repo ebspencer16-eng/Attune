@@ -1260,6 +1260,10 @@ export default function ResourcesScreen() {
              kept are the finding itself with its source under it, which is
              what the card shows and what makes it worth keeping. */
           journal={insightShareText(home.research)}
+          /* Ellie: "Save to journal and share buttons should be in the bottom
+             right of the screen, below the card." Share sends the same words
+             that get kept, which is the card in front of them. */
+          share={insightShareText(home.research)}
           style={home.storycardStyle as never}
           onClose={() => setInsightOpen(false)}
         />

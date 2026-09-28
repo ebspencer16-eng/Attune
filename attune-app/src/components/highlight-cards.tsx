@@ -400,7 +400,7 @@ function SwipeDown({ onClose, children }: { onClose: () => void; children: React
   return <GestureDetector gesture={gesture}>{children}</GestureDetector>;
 }
 
-export function StoryCard({ card, onClose, style, journal }: {
+export function StoryCard({ card, onClose, style, journal, share }: {
   card: HighlightCard;
   onClose: () => void;
   /**
@@ -413,6 +413,8 @@ export function StoryCard({ card, onClose, style, journal }: {
    * else's book is the thing that goes away.
    */
   journal?: string | null;
+  /** What Share sends. Only the insight of the day has one. */
+  share?: string | null;
   /**
    * How a card is set, from the payload. Without it every role falls back to
    * the colour below and nothing else, which is legible and is not the
@@ -442,32 +444,54 @@ export function StoryCard({ card, onClose, style, journal }: {
           <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={12}>
             <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)' }}>{'\u2039  Close'}</Text>
           </Pressable>
-          {journal ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Save this to your relationship journal"
-              onPress={() => setKeeping(true)}
-              hitSlop={12}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
-                borderRadius: Radius.pill, borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.35)',
-                paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
-              }}>
-              {/* Type.small, not the eyebrow. Uppercase with tracking made
-                  "Save to journal" wider than the corner it sits in and the
-                  label was cut to "SAVE TO JOU". */}
-              <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.9)' }}>
-                {KEEP_LABEL}
-              </Text>
-            </Pressable>
-          ) : null}
         </View>
         {keeping && journal ? (
           <SaveToJournal quote={journal} onClose={() => setKeeping(false)} />
         ) : null}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Card card={card} onDone={onClose} w={cardW} h={cardH} active />
+          {/* Ellie: "Save to journal and share buttons should be in the bottom
+              right of the screen, below the card, on the insight of the day."
+              Keeping sat beside Close in the top bar, which put the two things
+              you might do with a card at opposite ends of the screen from the
+              card. Width is tied to the card's, so the row ends where the card
+              ends rather than at the screen's edge. */}
+          {journal || share ? (
+            <View
+              style={{
+                width: cardW, flexDirection: 'row', justifyContent: 'flex-end',
+                alignItems: 'center', gap: Spacing.lg, marginTop: Spacing.lg,
+              }}>
+              {share ? (
+                <ShareButton
+                  tone="light"
+                  accessibilityLabel="Share the insight of the day"
+                  message={share}
+                  url={SITE_URL}
+                />
+              ) : null}
+              {journal ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Save this to your relationship journal"
+                  onPress={() => setKeeping(true)}
+                  hitSlop={12}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+                    borderRadius: Radius.pill, borderWidth: 1,
+                    borderColor: 'rgba(255,255,255,0.35)',
+                    paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+                  }}>
+                  {/* Type.small, not the eyebrow. Uppercase with tracking made
+                      "Save to journal" wider than the corner it sat in and the
+                      label was cut to "SAVE TO JOU". */}
+                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.9)' }}>
+                    {KEEP_LABEL}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
         </View>
       </SafeAreaView>
       </SwipeDown>
