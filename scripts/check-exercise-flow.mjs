@@ -126,7 +126,7 @@ const TUNING = {
    * works, question one answers, and Next on the ranking is correctly disabled
    * until all six are placed.
    */
-  conflict: { pkg: 'premium', min: 8, known: 'the driver cannot complete the six-item ranking on the repair question; the exercise itself is fine and was checked by hand' },
+  conflict: { pkg: 'premium', min: 8, known: 'the driver reaches the six-item ranking and cannot complete it; the misidentified button that used to stop it is fixed, and the exercise itself is fine and was checked by hand' },
 };
 
 const EXERCISES = {};
@@ -288,7 +288,26 @@ async function runOne(name) {
       const btns = [...document.querySelectorAll('button')]
         .filter(b => visible(b) && !b.disabled && !/^←/.test(b.innerText.trim()));
       // A finishing control wins over a plain Next.
-      const finish = btns.find(b => /(finish|all done|complete|submit|see )/i.test(b.innerText.trim()));
+      /**
+       * ── A FINISHING CONTROL, NOT A SENTENCE CONTAINING ONE OF ITS WORDS ───
+       * This was /(finish|all done|complete|submit|see )/i, unanchored, and the
+       * trailing `see ` matched an ANSWER: Conflict Patterns' ranking question
+       * offers "Naming that they see it from my side". So on that screen the
+       * driver's forward step picked an option, clicked it, and reported that it
+       * had moved. The ranking toggled on and off four hundred times and every
+       * fallback that handles a ranking sits behind `!moved`, so none of them
+       * ever ran.
+       *
+       * I diagnosed this twice from the code and was wrong both times, and the
+       * answer took one probe that printed which button the rule picked and why.
+       * Nothing is different about that exercise: it is an option whose words
+       * happen to contain a word the driver was looking for.
+       *
+       * Anchored to the start of the label, and `see` narrowed to the phrase it
+       * was for. A control is named by what it says, not by containing a verb
+       * somewhere in the middle of a sentence.
+       */
+      const finish = btns.find(b => /^(finish|all done|complete|submit|see (your )?results)\b/i.test(b.innerText.trim()));
       const b = finish || btns.find(x => reArrow.test(x.innerText.trim())) || btns.find(x => reVerb.test(x.innerText.trim()));
       if (!b) return false;
       b.click();
