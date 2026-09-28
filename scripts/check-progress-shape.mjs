@@ -32,9 +32,20 @@
  * Not the app's own writes, which go through /api/save-exercise and are stored
  * verbatim; that endpoint's shape is checked by check-progress-not-destructive.
  *
- * Not the website resuming from the app. It cannot: the website reads progress
- * from localStorage and never from the server, so cross-device resume is
- * one-way. That is a gap, not a drift, and it is recorded as one.
+ * ── AND THE OTHER DIRECTION, WHICH USED TO BE MISSING ─────────────────────
+ * The website read progress from this browser's storage and never from the
+ * server, so resume worked app to website and not back: someone who stopped in
+ * the app and opened a laptop began again at question one, with their answers
+ * sitting on the server the whole time.
+ *
+ * It hydrates now, and the rule is checked here because it is a judgement rather
+ * than a detail. Progress only grows inside an exercise, so the copy with more
+ * answers is the later one and it wins. A timestamp is the obvious tiebreak and
+ * the wrong one: the last write is not the furthest along when someone opens an
+ * old tab.
+ *
+ * Both shapes have to be unwrapped before they are counted, or a wrapped blob
+ * counts as two answers, `answers` and `idx`, and loses to anything at all.
  */
 
 import { readFileSync } from 'node:fs';
@@ -134,8 +145,42 @@ for (const f of readers) {
   });
 }
 
-/** And no writer may hand the sync a wrapper. */
+/**
+ * The website hydrates from the server, and counts both shapes before deciding.
+ */
 const app = readFileSync(`${ROOT}src/App.jsx`, 'utf8');
+const hydrate = app.indexOf('PART-WAY THROUGH, FROM WHICHEVER DEVICE GOT FURTHEST');
+if (hydrate < 0) {
+  fails.push('src/App.jsx does not hydrate ex{N}_progress from the profile, so'
+    + ' someone who stopped part-way through in the app and opened the website'
+    + ' begins again at question one while their answers sit on the server.');
+} else {
+  const block = app.slice(hydrate, hydrate + 2600);
+  if (!/\bprogressKey\b/.test(block) || !/EXERCISES/.test(block)) {
+    fails.push('the hydration does not walk EXERCISES for its progress keys, so it'
+      + ' is a hand-written list of the exercises that resume.');
+  }
+  /* The COMPARISON, not the helper. Replacing the condition with `true` was
+     planted and passed, because countAnswers is still defined a few lines above
+     it. A guard is matched by what it compares. */
+  if (!/countAnswers\((?:[^()]|\([^()]*\))*\)\s*>\s*countAnswers\(/.test(block)) {
+    fails.push('the hydration does not compare how far along each copy is, so it'
+      + ' either always takes the server or always takes this browser. Either way'
+      + ' one of them loses work: the server wins and an unsynced answer typed here'
+      + ' goes, or this browser wins and the phone that got further is ignored.');
+  }
+  if (!/blob\.answers/.test(block)) {
+    fails.push('the hydration counts a progress blob without unwrapping it. A'
+      + ' website-written ex1 blob then counts as two answers, `answers` and `idx`,'
+      + ' and loses to anything at all.');
+  }
+  if (!new RegExp('\\[ex\\.column\\]').test(block)) {
+    fails.push('the hydration does not skip an exercise that is already finished,'
+      + ' so a stale progress blob can be restored over a completed one.');
+  }
+}
+
+/** And no writer may hand the sync a wrapper. */
 for (const m of app.matchAll(/syncProgressCrossDevice\(\s*(\d+)\s*,\s*([^)]*)\)/g)) {
   if (/^\s*\{/.test(m[2])) {
     fails.push(`src/App.jsx hands syncProgressCrossDevice an object literal for`

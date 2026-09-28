@@ -9677,6 +9677,58 @@ function AuthModal({ mode, onClose, onSuccess }) {
       if (profile?.ex3_answers) localStorage.setItem('attune_ex3', JSON.stringify(profile.ex3_answers));
       else if (read.ok) localStorage.removeItem('attune_ex3');
     } catch {}
+    /**
+     * ── PART-WAY THROUGH, FROM WHICHEVER DEVICE GOT FURTHEST ────────────────
+     * Cross-device resume only worked one way. The app reads ex{N}_progress from
+     * the server, so stopping on a laptop and carrying on in the app picked up
+     * where you left off. The website read its progress from this browser's own
+     * storage and never asked, so the reverse began again at question one: the
+     * answers were on the server the whole time and nothing here looked at them.
+     *
+     * The same hydration every other column gets, with one rule on top. Progress
+     * only grows inside an exercise, so the copy with more answers in it is the
+     * later one, and it wins. That is a real question rather than a detail: a
+     * timestamp would be the obvious tiebreak and it is the wrong one, because
+     * the last write is not the furthest along when someone opens an old tab.
+     *
+     * Reading is where both shapes meet. The website stores { answers, idx } and
+     * the app stores the answers alone, so both are unwrapped before they are
+     * counted, the same way api/_lib/exercise-progress.js does it on the server.
+     * The wrapper is kept when this browser's copy wins, because the idx is what
+     * it resumes from.
+     */
+    try {
+      const unwrap = (blob) => {
+        if (!blob || typeof blob !== 'object') return null;
+        if (blob.answers && typeof blob.answers === 'object') return blob.answers;
+        if ('idx' in blob) return null;
+        return blob;
+      };
+      const countAnswers = (a) => {
+        if (!a || typeof a !== 'object') return 0;
+        let n = 0;
+        for (const v of Object.values(a)) {
+          if (v == null || v === '') continue;
+          if (Array.isArray(v)) { if (v.length) n += 1; continue; }
+          if (typeof v === 'object') { n += Object.values(v).filter((x) => x != null && x !== '').length; continue; }
+          n += 1;
+        }
+        return n;
+      };
+      for (const ex of EXERCISES) {
+        if (!ex.progressKey || ex.shape === 'record') continue;
+        const server = profile?.[`${ex.key}_progress`];
+        if (!server) continue;
+        // A finished exercise is not in progress, whatever is left in the column.
+        if (profile?.[ex.column] && Object.keys(profile[ex.column]).length) continue;
+        let local = null;
+        try { local = JSON.parse(localStorage.getItem(ex.progressKey) || 'null'); } catch { local = null; }
+        if (countAnswers(unwrap(server)) > countAnswers(unwrap(local))) {
+          localStorage.setItem(ex.progressKey, JSON.stringify(server));
+        }
+      }
+    } catch {}
+
     // Prior-completion snapshots (for retake comparison). These exist only
     // when the user has re-taken an exercise. Stored in localStorage so
     // the retake comparison card can render without a round-trip.
