@@ -25,12 +25,32 @@
  * exercises come from api/_exercises.js, so a new one is covered the day it is
  * added rather than the day someone remembers this file.
  *
- * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The sign-in path in the other component, which writes storage and then hands
- * the account up; the hydration effect reads storage after that, so the order
- * is already right and the setters are not in scope there anyway. And it says
- * nothing about the partner's answers, which are a different shape and a
- * quieter failure: a column that reads Pending for a moment.
+ * ── THE EXCLUSION THAT WAS WRONG ──────────────────────────────────────────
+ * This file used to say, here, that the sign-in path did not need covering:
+ * "it writes storage and then hands the account up; the hydration effect reads
+ * storage after that, so the order is already right and the setters are not in
+ * scope there anyway."
+ *
+ * The first clause was an assumption and it was false. Nothing reads storage
+ * again after mount. So signing in on a browser with nothing cached wrote the
+ * answers to storage, handed the account up, and left the dashboard rendering
+ * against the state it started with: exercise incomplete, results locked, right
+ * again after a refresh.
+ *
+ * Ellie hit it and reported the same symptom a second time: "my ex1 shows as
+ * incomplete. This cannot keep happening, fix it." She was right that it was the
+ * same bug. It was in the one place this check had been told to ignore.
+ *
+ * The second clause was true and is the reason the fix is where it is: AuthModal
+ * has no setters, so the parent pulls storage into state the moment the modal
+ * hands back, and that call is what is checked below.
+ *
+ * A gate's stated exclusions are load-bearing. This one was a guess written in
+ * the voice of a decision.
+ *
+ * ── WHAT IT STILL DOES NOT COVER ──────────────────────────────────────────
+ * The partner's answers, which are a different shape and a quieter failure: a
+ * column that reads Pending for a moment.
  */
 
 import { readFileSync } from 'node:fs';
@@ -68,6 +88,60 @@ for (const e of EXERCISES) {
   }
 }
 
+/**
+ * And the sign-in handoff.
+ *
+ * AuthModal writes storage and calls onSuccess. Every handler for it has to pull
+ * that into state, because nothing else will: the setters are initialised at
+ * mount and never read storage again.
+ */
+const handlers = [...src.matchAll(/onSuccess=\{\(acct\) => \{([\s\S]*?)\n        \}\}/g)];
+if (!handlers.length) {
+  console.error('[check-answer-hydration] cannot find AuthModal\'s onSuccess handlers'
+    + ' in src/App.jsx. Refusing to pass: this is the path Ellie hit twice.');
+  process.exit(1);
+}
+for (const h of handlers) {
+  if (!/restoreAnswersIntoState\(\)/.test(h[1])) {
+    const n = src.slice(0, h.index).split('\n').length;
+    fails.push(`src/App.jsx:${n} signs someone in without pulling their answers into`
+      + ' state. AuthModal has just written them to storage, and nothing reads storage'
+      + ' after mount, so the dashboard draws against the state it started with and'
+      + ' says an exercise is unfinished.');
+  }
+}
+
+/**
+ * And the restorer has to restore.
+ *
+ * Checking only that it is called was planted against and passed: gutting the
+ * body left every call site intact. A function is checked by what it does.
+ */
+const body = src.match(/const restoreAnswersIntoState = \(\) => \{([\s\S]*?)\n  \};/);
+if (!body) {
+  fails.push('restoreAnswersIntoState is not defined, so the sign-in handlers call'
+    + ' nothing and the answers stay in storage.');
+} else {
+  if (!/EXERCISES/.test(body[1])) {
+    fails.push('restoreAnswersIntoState does not walk EXERCISES, so it is a'
+      + ' hand-written list and the next exercise will be left out of it, which is'
+      + ' how the first version of this fix covered three of five.');
+  }
+  if (!/localStorage\.getItem/.test(body[1])) {
+    fails.push('restoreAnswersIntoState never reads storage, so there is nothing for'
+      + ' it to put into state.');
+  }
+  /* The setter has to be reached by what was read. Matching `set(` alone passed a
+     plant that wrapped it in `if (false)`, which is the fifth time this session a
+     gate has been defeated by a constant guard rather than by deleting anything. */
+  if (!/(if\s*\(\s*raw\s*\)\s*set\(|raw\s*&&\s*set\()/.test(body[1])) {
+    fails.push('restoreAnswersIntoState does not call a setter with what it read.'
+      + ' Either it never sets, or the set sits behind something other than the'
+      + ' value it just loaded, and the dashboard still draws against its mount'
+      + ' state.');
+  }
+}
+
 if (!checked) {
   fails.push('no profile restore of exercise answers was found in App at all, which means this gate is looking in the wrong place');
 }
@@ -80,4 +154,5 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log(`[check-answer-hydration] ${checked} profile restores in App, every one of them reaching state as well as storage.`);
+console.log(`[check-answer-hydration] ${checked} profile restores in App and`
+  + ` ${handlers.length} sign-in handoffs, every one of them reaching state as well as storage.`);

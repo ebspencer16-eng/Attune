@@ -445,6 +445,26 @@ Two similar names for two halves of one answer is the same shape as two copies
 of a rule: nothing tells you which one you took. `check-annotation-source.mjs`
 holds every caller of `fetchNotes()` to reading the anchored list.
 
+**The two ways a gate gets defeated without deleting anything.** Six gates
+written in one session each passed a plant on the first attempt, and every one
+failed the same two ways.
+
+*Matching a name instead of what follows it.* `/payloadForCouple/` matches
+`payloadForCoupleX`. `/beforeunload/` matches `xbeforeunload`. `/countAnswers/`
+matches a file where the helper is still defined and the comparison is gone.
+`/latest\.current/` matches a cleanup that reads it on one line and hands the
+stale closure to the save on the next. Match the name with its call, its quotes,
+or the argument it is given.
+
+*Disabling a branch with a constant.* `if (false)` leaves every string, every
+helper and every identifier exactly where it was, so any check that asks whether
+something APPEARS still passes. `check-ab-scale` found this first and it has
+recurred five times since. A guard is checked by what it compares.
+
+So when a plant passes, the question is not "is this gate blind" but "did I
+change what the gate reads, or only what it does". Both are worth planting, every
+time.
+
 **A plant that changed nothing proves nothing.** Nine more gates were planted
 against afterwards and all nine held, but three of those runs reported a
 clean pass on the first try because the string being replaced was not in the

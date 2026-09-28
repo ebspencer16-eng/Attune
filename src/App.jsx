@@ -13375,6 +13375,44 @@ export default function App() {
       return raw ? JSON.parse(raw) : null; // { variant, answers, completedAt }
     } catch { return null; }
   });
+
+  /**
+   * Pull every exercise's answers out of storage and into state.
+   *
+   * ── THE BUG THIS IS FOR, TWICE ──────────────────────────────────────────
+   * Ellie, the first time: "when I hard refreshed, my dashboard showed my ex1 as
+   * incomplete. I refreshed again and it went away and I could access results."
+   * And again, after signing in on the web: "my ex1 shows as incomplete. This
+   * cannot keep happening, fix it."
+   *
+   * Two places restore answers from the server. The one inside the dashboard's
+   * own load was fixed the first time and sets state as well as storage. The one
+   * in AuthModal, which runs when you SIGN IN, only ever wrote storage.
+   *
+   * These setters are initialised from localStorage at mount and never again, so
+   * a sign-in on a browser that had nothing cached rendered the dashboard against
+   * the state it started with: no answers, exercise incomplete, results locked.
+   * A refresh then reads the storage AuthModal filled and everything is right,
+   * which is exactly the shape she described both times.
+   *
+   * So the modal keeps writing storage, because it has no setters, and this runs
+   * the moment it hands back. Derived from EXERCISES so a sixth one cannot be
+   * left out of it, which is how the first fix came to cover three of five.
+   */
+  const restoreAnswersIntoState = () => {
+    const setters = {
+      ex1: setEx1State, ex2: setEx2State, ex3: setEx3State,
+      intimacy: setIntimacyData, conflict: setConflictData,
+    };
+    for (const ex of EXERCISES) {
+      const set = setters[ex.key];
+      if (!set) continue;
+      try {
+        const raw = localStorage.getItem(ex.localKey);
+        if (raw) set(JSON.parse(raw));
+      } catch { /* a bad blob is not worth failing a sign-in over */ }
+    }
+  };
   /**
    * ── THE OLD NOTEBOOK IS GONE ────────────────────────────────────────────
    * There was a `notesState` here: three textareas, Shared, yours and your
@@ -14148,6 +14186,10 @@ export default function App() {
           };
           setAccount(enriched);
           saveAccount(enriched);
+          /* AuthModal has just written this person's answers to storage. Nothing
+             reads storage again after mount, so without this the dashboard draws
+             against the state it started with and says an exercise is unfinished. */
+          restoreAnswersIntoState();
           _gateDone();
         }}
       />
@@ -16152,6 +16194,9 @@ export default function App() {
           };
           setAccount(enriched);
           saveAccount(enriched);
+          /* Same reason as the other sign-in handler: AuthModal has just written
+             the answers to storage and nothing reads storage after mount. */
+          restoreAnswersIntoState();
           setShowAuth(false);
           // Strip signup param from URL so refresh doesn't re-open modal
           const _clean = new URL(window.location.href);
