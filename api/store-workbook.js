@@ -1,8 +1,9 @@
 /**
  * POST /api/store-workbook
  *
- * Generates the personalized workbook as a .docx, uploads it to
- * Supabase Storage, and returns a signed download URL valid for 7 days.
+ * Renders the personalized workbook as a PDF through the same page the website
+ * prints, uploads it to Supabase Storage, and returns a signed download URL
+ * valid for 7 days.
  *
  * Called automatically when both partners complete exercises.
  * Also callable from the admin dashboard to regenerate.
@@ -121,23 +122,56 @@ export default async function handler(req, res) {
     body = { ...built, ...body };
   }
 
-  // Generate the docx by calling the existing workbook generator.
-  // We send the admin key so the auth/payment gate inside generate-workbook
-  // is bypassed for this server-to-server call (the user's payment was
-  // already verified before reaching this endpoint).
-  let docxBuffer;
+  /**
+   * ── ONE WORKBOOK, AND IT IS THE ONE ON THE WEBSITE ────────────────────────
+   * Ellie: "the downloaded workbook I'm peeking on the simulator does not have
+   * the same look and feel as the workbook we've built online. This is very
+   * important to me and you've drifted before, please use the script that
+   * already exists to build the workbook as it's already been approved rather
+   * than in a different format or visual."
+   *
+   * She is right and this endpoint was the drift. It called
+   * /api/generate-workbook, which assembles a .docx out of the `docx` package:
+   * a different document, in a different format, with none of the design of
+   * public/workbook-render.html, which is the workbook the website prints and
+   * the one that was approved. The app opens whatever file this stores first,
+   * so the fast path handed a tester the wrong document every time.
+   *
+   * /api/generate-pdf is the approved builder. It renders workbook-render
+   * through Browserless with the same options a customer gets on the website.
+   *
+   * ── WHEN BROWSERLESS IS NOT CONFIGURED ────────────────────────────────────
+   * Nothing is stored. generate-pdf falls back to the .docx generator when it
+   * has no token, and taking that fallback here would store the wrong document
+   * again under a different name. Storing nothing is what the app already knows
+   * how to handle: no file means it hands the payload to the browser, which
+   * draws the same page with html2pdf. Slower, and the right workbook.
+   */
+  let pdfBuffer;
   const siteUrl = SITE_URL;
+  if (!process.env.BROWSERLESS_TOKEN) {
+    console.warn('[store-workbook] no BROWSERLESS_TOKEN, so no file is stored and'
+      + ' the browser will draw the workbook from the same page instead.');
+    return res.status(200).json({ ok: true, url: null, filename: null, reason: 'no_pdf_renderer' });
+  }
   try {
     const genHeaders = { 'Content-Type': 'application/json' };
     if (process.env.ADMIN_API_KEY) genHeaders['X-Admin-Key'] = process.env.ADMIN_API_KEY;
-    const genRes = await fetch(`${siteUrl}/api/generate-workbook`, {
+    const genRes = await fetch(`${siteUrl}/api/generate-pdf`, {
       method: 'POST',
       headers: genHeaders,
       body: JSON.stringify(body),
     });
     if (!genRes.ok) throw new Error(`Workbook generation failed: ${genRes.status}`);
+    const type = genRes.headers.get('content-type') || '';
+    if (!/application\/pdf/i.test(type)) {
+      /* generate-pdf redirects to the .docx generator when it has no token, and
+         a redirect followed here would put that document in storage wearing a
+         .pdf name. Refuse rather than store the wrong thing. */
+      throw new Error(`expected a pdf and got ${type || 'no content type'}`);
+    }
     const arrayBuf = await genRes.arrayBuffer();
-    docxBuffer = Buffer.from(arrayBuf);
+    pdfBuffer = Buffer.from(arrayBuf);
   } catch (e) {
     console.error('[store-workbook] generation error:', e);
     return res.status(502).json({ error: safeError('store-workbook', e, 'Workbook generation failed.') });
@@ -146,17 +180,17 @@ export default async function handler(req, res) {
   const p1 = (body.userName || 'PartnerA').replace(/\s+/g, '_');
   const p2 = (body.partnerName || 'PartnerB').replace(/\s+/g, '_');
   const orderId = body.orderId || `${p1}_${p2}_${Date.now()}`;
-  const filename = `Attune_Workbook_${p1}_and_${p2}.docx`;
+  const filename = `Attune_Workbook_${p1}_and_${p2}.pdf`;
   const storagePath = `workbooks/${orderId}/${filename}`;
 
   if (!supabaseUrl || !serviceKey) {
-    // No Supabase — return the docx directly as base64 with a data URL
-    console.warn('[store-workbook] No Supabase configured — returning base64');
+    // No Supabase — return the pdf directly as base64 with a data URL
+    console.warn('[store-workbook] No Supabase configured, returning base64');
     return res.status(200).json({
       ok: true,
       filename,
-      base64: docxBuffer.toString('base64'),
-      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      base64: pdfBuffer.toString('base64'),
+      contentType: 'application/pdf',
     });
   }
 
@@ -167,12 +201,12 @@ export default async function handler(req, res) {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'Content-Type': 'application/pdf',
           'apikey': serviceKey,
           'Authorization': `Bearer ${serviceKey}`,
           'x-upsert': 'true',
         },
-        body: docxBuffer,
+        body: pdfBuffer,
       }
     );
 
