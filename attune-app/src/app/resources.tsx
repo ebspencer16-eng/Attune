@@ -502,6 +502,27 @@ export default function ResourcesScreen() {
     return Math.min(SHEET_TOP_MAX, Math.max(SHEET_PEEK, scrollH - peek - aboveH));
   })();
 
+  /**
+   * ── THE INSIGHT SITS IN THE MIDDLE OF WHAT IS LEFT ──────────────────────
+   * Ellie: "Insight of the day is not middle aligned between the resource tiles
+   * and the in practice peek on my phone, it should auto-realign each day
+   * depending on the height of the insight and associated citation."
+   *
+   * All of the leftover height went into the sheet's marginTop, which is the gap
+   * BELOW the insight, so the insight hung under the tiles with everything spare
+   * beneath it. Half of that gap moves above it instead, which centres it in the
+   * band between the tiles and the peek.
+   *
+   * It re-centres on its own for exactly the reason she asks for: `aboveH` is
+   * measured from the laid-out content, so a two line quotation with a citation
+   * under it makes `aboveH` bigger, `sheetTop` smaller, and the insight moves up
+   * by half the difference. Nothing here knows how tall today's insight is and
+   * nothing needs to.
+   *
+   * Zero until both measurements have arrived, which is one frame.
+   */
+  const insightLift = sheetTop > SHEET_PEEK ? Math.round((sheetTop - SHEET_PEEK) / 2) : 0;
+
   const mostRead = useMemo<PostSummary[]>(
     () => posts.slice().sort((a, b) => (b.reads || 0) - (a.reads || 0)).slice(0, 4),
     [posts],
@@ -862,7 +883,14 @@ export default function ResourcesScreen() {
                 surface casts onto the one behind it, and there is only one
                 surface here. */}
             <View
-              style={{ paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl }}>
+              style={{
+                paddingVertical: Spacing.xl,
+                paddingHorizontal: Spacing.xl,
+                /* Half the spare height, so the insight is centred between the
+                   tiles above and the peek below rather than hung under the
+                   tiles with all of the gap beneath it. See insightLift. */
+                marginTop: insightLift,
+              }}>
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
                 {INSIGHT_OF_THE_DAY}
               </Text>
