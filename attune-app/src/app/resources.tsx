@@ -469,7 +469,10 @@ export default function ResourcesScreen() {
     );
   }
   if (error && !home) {
-    return <Shell><ScreenError error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;
+    /* tone="light": this tab is painted edge to edge in the insight's blue, and
+       the error's ink colours are unreadable on it. Ellie: "Hero 'Something went
+       wrong' text on the learn page's blue bg should be white not black." */
+    return <Shell><ScreenError tone="light" error={error} onRetry={() => { setLoading(true); load(); }} /></Shell>;
   }
 
   // The server tells us what is owned. If the field is absent, everything shows

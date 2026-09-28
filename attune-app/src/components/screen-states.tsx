@@ -83,9 +83,27 @@ export function needsProfileSetup(error: ApiError | null): boolean {
   return !!error && error.kind === 'not_found' && /profile/i.test(error.detail || '');
 }
 
+/**
+ * @param tone which ground this is drawn on.
+ *
+ * ── WHY IT IS A PROP ──────────────────────────────────────────────────────
+ * Ellie: "Hero 'Something went wrong' text on the learn page's blue bg should be
+ * white not black."
+ *
+ * Every error on every screen used the ink colours, which are right on cream and
+ * unreadable on a painted ground. Learn is painted edge to edge in the insight's
+ * blue, so the one screen most likely to be showing an error was the one that
+ * could not be read.
+ *
+ * It is a prop rather than something read from context because TabScreen already
+ * takes `groundTone` as a decision per ground, and a second mechanism saying the
+ * same thing is how the two drift. check-error-contrast holds every caller under
+ * a light ground to passing it.
+ */
 export function ScreenError({
-  error, onRetry, onSignIn,
-}: { error: ApiError; onRetry?: () => void; onSignIn?: () => void }) {
+  error, onRetry, onSignIn, tone = 'ink',
+}: { error: ApiError; onRetry?: () => void; onSignIn?: () => void; tone?: 'ink' | 'light' }) {
+  const onLight = tone === 'light';
   const copy =
     error.kind === 'offline'
       ? { title: 'No connection', body: "You're offline. This will load as soon as you're back.", action: 'Try again' }
@@ -119,11 +137,11 @@ export function ScreenError({
           is working. */}
       <AttuneMark />
 
-      <Text style={{ ...Type.title, color: c.textStrong, textAlign: 'center' }}>{copy.title}</Text>
+      <Text style={{ ...Type.title, color: onLight ? Palette.white : c.textStrong, textAlign: 'center' }}>{copy.title}</Text>
       <Text
         style={{
-          ...Type.body, color: c.textMuted, textAlign: 'center',
-          marginTop: Spacing.sm, maxWidth: 320,
+          ...Type.body, color: onLight ? 'rgba(255,255,255,0.78)' : c.textMuted,
+          textAlign: 'center', marginTop: Spacing.sm, maxWidth: 320,
         }}>
         {copy.body}
       </Text>

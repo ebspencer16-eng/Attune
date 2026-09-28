@@ -715,6 +715,11 @@ export default function HomeScreen() {
              kept are the finding itself with its source under it, which is
              what the card shows and what makes it worth keeping. */
           journal={insightShareText(data.research)}
+          /* Ellie: "Not seeing share at the bottom right on the quick access
+             insight of the day card, just save to journal." The card opened from
+             Learn got it and this one did not, because they are two call sites of
+             the same component and only one was changed. */
+          share={insightShareText(data.research)}
           style={data.storycardStyle as never}
           onClose={() => setInsightOpen(false)}
         />

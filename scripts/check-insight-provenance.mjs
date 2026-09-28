@@ -42,7 +42,10 @@
  * it. That is a deliberate absence rather than a missing field.
  */
 
+import { readFileSync } from 'node:fs';
 import { INSIGHTS, insightOfTheDay } from '../api/_insights.js';
+
+const ROOT = new URL('..', import.meta.url).pathname;
 
 const fails = [];
 const KINDS = new Set(['ours', 'quote']);
@@ -121,10 +124,52 @@ for (let day = 0; day < INSIGHTS.length; day += 1) {
     fails.push(`the payload for "${p.id}" carries an attribution (${JSON.stringify(p.source || p.url)})`
       + ' for one of our own sentences. Nobody said it but us.');
   }
+  if (entry.kind === 'quote' && !/^\u201c[\s\S]*\u201d$/.test(p.body)) {
+    fails.push(`the quotation "${p.id}" is not sent in quotation marks. Ellie: "I`
+      + ' want the format to be direct quotes in quotation marks, with the citation'
+      + ' below." Three surfaces draw this and one shares it as text, so the marks'
+      + ' are put on once, here, rather than by each of them.');
+  }
+  if (entry.kind === 'ours' && /^\u201c/.test(p.body)) {
+    fails.push(`"${p.id}" is one of our own sentences and is sent in quotation`
+      + ' marks, which makes it look like something somebody said.');
+  }
   if (entry.kind === 'quote' && !p.source) {
     fails.push(`the payload for the quotation "${p.id}" carries no attribution, so`
       + " it is shown as the product's own words. That is the same error pointing"
       + ' the other way, and it is the one a fix for the first easily introduces.');
+  }
+}
+
+/**
+ * Both surfaces open the same card the same way.
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * Ellie: "Not seeing share at the bottom right on the quick access insight of the
+ * day card, just save to journal." The card opened from Learn had Share and the
+ * one on the home screen did not, because they are two call sites of one
+ * component and only one was changed. Nothing failed: the card rendered, it just
+ * offered one control instead of two.
+ *
+ * The same shape as the insight's own citation, one layer out, so it is checked
+ * beside it rather than in a file of its own.
+ */
+const CARD_SITES = ['attune-app/src/app/index.tsx', 'attune-app/src/app/resources.tsx'];
+for (const f of CARD_SITES) {
+  const src = readFileSync(`${ROOT}${f}`, 'utf8');
+  const at = src.indexOf('insightCard(');
+  if (at < 0) {
+    fails.push(`${f} no longer opens the insight of the day, so one of the two ways`
+      + ' into it is gone.');
+    continue;
+  }
+  const block = src.slice(Math.max(0, at - 400), at + 900);
+  for (const [prop, what] of [['journal', 'Save to journal'], ['share', 'Share']]) {
+    if (!new RegExp(`${prop}=\\{`).test(block)) {
+      fails.push(`${f} opens the insight of the day without ${prop}, so ${what} is`
+        + ' missing from that card. The other surface has it, which is exactly how'
+        + ' this was reported.');
+    }
   }
 }
 

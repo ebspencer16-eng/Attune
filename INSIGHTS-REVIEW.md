@@ -4,8 +4,8 @@ Generated from `api/_insights.js` by `scripts/build-insights-review.mjs`. Do
 not edit this file. Change an insight in `api/_insights.js` and run the
 script, or tell me the change and I will make it.
 
-**52 insights**, one a day, so the list comes round about every
-7.4 weeks. 3 are quotations and 49 are ours.
+**55 insights**, one a day, so the list comes round about every
+7.9 weeks. 6 are quotations and 49 are ours.
 
 ## What changed, and why you are seeing two tables
 
@@ -58,7 +58,10 @@ so you can check the wording yourself.
 |--|--|--|--|
 | Q1 | That ‘magic ratio’ is 5 to 1. This means that for every negative interaction during conflict, a stable and happy marriage has five (or more) positive interactions. | Kyle Benson, The Gottman Institute | [read it](https://www.gottman.com/blog/the-magic-relationship-ratio-according-science/) |
 | Q2 | A bid is any attempt from one partner to another for attention, affirmation, affection, or any other positive connection. | Zach Brittle, The Gottman Institute | [read it](https://www.gottman.com/blog/turn-toward-instead-of-away/) |
-| Q3 | Contempt is the single greatest predictor of divorce. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
+| Q3 | Their research revealed that discussions will end on the same note they begin. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/softening-startup/) |
+| Q4 | Stonewalling occurs when the listener withdraws from the interaction, shuts down, and simply stops responding to their partner. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
+| Q5 | The third horseman is defensiveness, and it is typically a response to criticism. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
+| Q6 | Contempt is the single greatest predictor of divorce. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
 
 ## Ours
 

@@ -87,6 +87,30 @@ export const INSIGHTS = [
   },
   {
     kind: 'quote',
+    id: 'q-startup',
+    body: 'Their research revealed that discussions will end on the same note they begin.',
+    author: 'Dr. Ellie Wilde',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/softening-startup/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-stonewalling',
+    body: 'Stonewalling occurs when the listener withdraws from the interaction, shuts down, and simply stops responding to their partner.',
+    author: 'Dr. Ellie Wilde',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-defensiveness',
+    body: 'The third horseman is defensiveness, and it is typically a response to criticism.',
+    author: 'Dr. Ellie Wilde',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+  },
+  {
+    kind: 'quote',
     id: 'q-contempt',
     body: 'Contempt is the single greatest predictor of divorce.',
     author: 'Dr. Ellie Wilde',
@@ -200,9 +224,22 @@ export const INSIGHTS = [
 export function insightOfTheDay(now = new Date()) {
   const day = Math.floor(now.getTime() / 86400000);
   const pick = INSIGHTS[day % INSIGHTS.length];
+  /**
+   * ── A QUOTATION LOOKS LIKE ONE ──────────────────────────────────────────
+   * Ellie: "I want the format to be direct quotes in quotation marks, with the
+   * citation below."
+   *
+   * So the marks are put on here rather than by each surface. Two screens draw
+   * this and a third shares it as text, and three places deciding how to punctuate
+   * a quotation is three places to get it wrong. Curly marks, because the body
+   * itself contains straight ones in places and the two should not collide.
+   *
+   * Our own sentences are not quotations and take no marks and no citation.
+   */
+  const quoted = pick.kind === 'quote' ? `\u201c${pick.body}\u201d` : pick.body;
   return {
     id: pick.id,
-    body: pick.body,
+    body: quoted,
     kind: pick.kind,
     source: pick.kind === 'quote' ? `${pick.author}, ${pick.work}` : '',
     url: pick.kind === 'quote' ? pick.url : '',
