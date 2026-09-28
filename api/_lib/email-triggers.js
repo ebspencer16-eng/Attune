@@ -9,8 +9,8 @@
 export const EMAIL_TRIGGERS = {
   "partner_invite": [
     "src/App.jsx:10010",
-    "src/App.jsx:15480",
-    "src/App.jsx:16233",
+    "src/App.jsx:15507",
+    "src/App.jsx:16260",
     "src/App.jsx:2978",
     "src/App.jsx:9589",
     "src/App.jsx:9691"

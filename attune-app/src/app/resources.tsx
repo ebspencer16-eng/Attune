@@ -25,7 +25,7 @@ import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchWorkbookView, savePost, insightShareText } from '@/api/client';
+import { savePost, insightShareText } from '@/api/client';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
@@ -175,38 +175,26 @@ export default function ResourcesScreen() {
    * hands off to the website.
    */
   /**
-   * ── THE WORKBOOK IS THE WEBSITE'S PAGE ──────────────────────────────────
-   * Ellie: "This does not look like the workbook we render on the site. Please
-   * use the exact same pdf builder."
+   * ── THERE ARE THREE WORKBOOK BUILDERS AND ONLY ONE IS THE WORKBOOK ──────
+   * A function here used to open public/workbook-render.html with the payload,
+   * and let the browser draw the PDF. Before that it converted the .docx. Both
+   * were wrong, and Ellie has now said so three times, most recently: "On my
+   * phone this doesn't look anything like the builder we built a long time ago,
+   * with the full bleed front page... The one we built looked like an editorial
+   * magazine."
    *
-   * She was right. What I had built converted the .docx into a PDF of its own,
-   * which is a second renderer: the thing this codebase is organised against,
-   * and it looked like it. public/workbook-render.html is the workbook the
-   * website draws and prints, and it has been there all along.
+   * The one she means is the Python and Playwright service: scripts/
+   * build_workbook.py renders the HTML, scripts/render_workbook.mjs prints it,
+   * Dockerfile.workbook containerises the two, and /api/store-workbook-pdf posts
+   * to it. The website has called that endpoint all along. The app called
+   * /api/store-workbook, which builds something else, and the only reason it did
+   * is that store-workbook would accept a user id and store-workbook-pdf wanted
+   * a payload the app does not have. That difference is now gone.
    *
-   * So the app opens that page, full screen and in the app's own colours, with
-   * the payload from /api/workbook-view. It zooms, it prints, and it saves as
-   * a PDF through the share sheet, all of which is the phone's own. There is
-   * one workbook and one renderer.
+   * So there is no local rendering path here at all. buildWorkbook() asks the
+   * service, and a failure says so rather than drawing a different document,
+   * because a different document looks finished and a missing one does not.
    */
-  const openWorkbook = async () => {
-    const view = await fetchWorkbookView();
-    if (!view.ok) { setWorkbookNote(tools?.workbook?.copy.generating || null); return false; }
-    const data = encodeURIComponent(JSON.stringify(view.data));
-    /**
-     * ── THE BROWSER BUILDS IT, AS IT DOES FOR THE WEBSITE ─────────────────
-     * Ellie: "the pdf generater opens in the browser. That's fine, let's just
-     * have it do that and open the same pdf as the website in the browser."
-     *
-     * So the app opens the website's workbook page with ?auto=1 and the
-     * browser builds the file the moment it is drawn, with the same builder
-     * and the same options a customer gets on the website. The system browser
-     * rather than a sheet inside the app, because this ends in a PDF the phone
-     * displays, saves and prints, and that is the browser's own job.
-     */
-    await openExternal(`${SITE}/workbook-render?data=${data}&auto=1`);
-    return true;
-  };
 
   /**
    * ── THE READY FILE FIRST, THE BUILDER LAST ────────────────────────────────
@@ -214,19 +202,21 @@ export default function ResourcesScreen() {
    * then I abandoned the effort and only then did the browser open and say
    * 'Building your workbook...'"
    *
-   * That is this function's order, and the order was backwards. It called
-   * openWorkbook() first, which fetches the whole payload, packs it into a
-   * query string and hands the browser a URL tens of kilobytes long, and only
-   * if that failed did it look for the file that was already built. So a tap
-   * paid for a round trip, a giant URL and a browser rendering a PDF from
+   * That is this function's order, and the order was backwards. It rendered the
+   * workbook in the browser first, which fetches the whole payload, packs it
+   * into a query string and hands the browser a URL tens of kilobytes long, and
+   * only if that failed did it look for the file that was already built. So a
+   * tap paid for a round trip, a giant URL and a browser rendering a PDF from
    * scratch, every time, with a built workbook sitting unused.
    *
    * A file that exists is opened immediately. Nothing else is tried first.
    *
-   * The two slower paths are still here, in the order they should be reached:
-   * ask the server to build one, and only if that fails hand the browser the
-   * payload to draw itself. The last is a real fallback for a couple whose
-   * server build cannot run, and it is where the long URL belongs.
+   * The remaining path is to ask the service to build one. The browser-rendering
+   * step below it is gone: it drew the wrong document. See the note above.
+   *
+   * What is left is to ask the service to build one. If that fails, the tile
+   * says the workbook is still being made, which is true and is the only honest
+   * thing to show.
    *
    * ── AND THE TAP IS ACKNOWLEDGED ──────────────────────────────────────────
    * Ellie: "Need the button to grey out or something so the user knows their
@@ -263,8 +253,24 @@ export default function ResourcesScreen() {
         return;
       }
 
-      /* 4. Last: the browser draws it from the payload. */
-      if (await openWorkbook()) { setWorkbookNote(null); return; }
+      /**
+       * ── AND NOTHING ELSE ─────────────────────────────────────────────────
+       * There used to be a fourth step here: hand the payload to the browser
+       * and let it draw the workbook from /workbook-render. It came out of
+       * Ellie asking for the PDF to open in the browser, and it was the wrong
+       * page. There are three workbook builders in this repo and only one is
+       * the workbook: the Python and Playwright service behind
+       * /api/store-workbook-pdf, which is what the website has always used and
+       * what she approved.
+       *
+       * Ellie, three times, most recently: "On my phone this doesn't look
+       * anything like the builder we built a long time ago, with the full bleed
+       * front page... The one we built looked like an editorial magazine."
+       *
+       * So a failed build says so and stops. Drawing a different document is
+       * worse than drawing none, because none is visibly missing and a
+       * different one looks finished.
+       */
       setWorkbookNote(wb?.copy.generating || tools?.workbook?.copy.generating || null);
     } catch {
       /**

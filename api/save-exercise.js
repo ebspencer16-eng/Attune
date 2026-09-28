@@ -332,7 +332,7 @@ async function makeWorkbook({ me, pkg }) {
     return;
   }
   try {
-    const r = await fetch(`${SITE_URL}/api/store-workbook`, {
+    const r = await fetch(`${SITE_URL}/api/store-workbook-pdf`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
       body: JSON.stringify({ userId: me.id }),

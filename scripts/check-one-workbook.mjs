@@ -1,95 +1,97 @@
 #!/usr/bin/env node
 /**
- * Every workbook a customer opens is the page the website prints.
+ * There is one workbook, and it is the one the PDF service renders.
  *
- * ── THE DRIFT, TWICE ──────────────────────────────────────────────────────
- * CLAUDE.md records the first time: a .docx was converted to HTML, then to a
- * PDF, with a font pipeline built for it, while public/workbook-render.html had
- * been there the whole time. Ellie: "This does not look like the workbook we
- * render on the site. Please use the exact same pdf builder."
+ * ── THREE BUILDERS, AND I PICKED WRONG TWICE ──────────────────────────────
+ * This repo contains three things that will produce a workbook:
  *
- * It happened again, quieter. /api/store-workbook built its file by calling
- * /api/generate-workbook, which assembles a .docx out of the `docx` package. The
- * app opens whatever file that stored, first, before anything else, because that
- * is its fast path. So the workbook a tester saw on a phone was a different
- * document in a different format with none of the design of the page that was
- * approved, and the website was printing the right one the whole time.
+ *   1. scripts/build_workbook.py, printed by scripts/render_workbook.mjs with
+ *      Playwright, containerised by Dockerfile.workbook, reached through
+ *      /api/store-workbook-pdf. Full bleed cover, editorial layout.
+ *      THIS IS THE WORKBOOK.
+ *   2. public/workbook-render.html, printed by /api/generate-pdf via
+ *      Browserless. A simpler page.
+ *   3. api/generate-workbook.js, a .docx assembled with the `docx` package.
  *
- * Ellie, again: "the downloaded workbook I'm peeking on the simulator does not
- * have the same look and feel as the workbook we've built online. This is very
- * important to me and you've drifted before, please use the script that already
- * exists."
+ * The website has called (1) all along. The app called (3), then I changed it to
+ * (2) and wrote a gate saying (2) was correct. Both were wrong, and Ellie has
+ * now told me three times: "On my phone this doesn't look anything like the
+ * builder we built a long time ago, with the full bleed front page... The one we
+ * built looked like an editorial magazine. This has happened before in my claude
+ * chats, please locate the correct builder."
  *
- * Twice is a pattern, and a pattern needs a gate rather than a third apology.
+ * The previous version of this file is the worst kind of gate: specific,
+ * confident, about exactly this, and aimed at the wrong half. It would have kept
+ * the app on the wrong document for as long as it passed.
+ *
+ * ── WHY THE APP WAS ON THE WRONG ONE ──────────────────────────────────────
+ * Not taste. /api/store-workbook accepted a user id and assembled the payload on
+ * the server; /api/store-workbook-pdf wanted the payload the website builds in
+ * the browser, which the app does not have. So the app used the endpoint that
+ * would take what it had. That difference is gone: store-workbook-pdf assembles
+ * from a user id too, using the same builder store-workbook used.
  *
  * ── WHAT THIS CHECKS ──────────────────────────────────────────────────────
- * Nothing a customer can open is built by the .docx generator. That means
- * store-workbook renders through the PDF builder, and the app never reaches for
- * generate-workbook at all.
- *
- * And the honest fallback: when there is no PDF renderer configured,
- * store-workbook stores nothing rather than storing the .docx under a .pdf name.
- * generate-pdf redirects to the .docx generator when it has no token, so a
- * response that is followed without checking its type is the exact shape this
- * drift takes.
+ * Every path a customer can take to a workbook ends at the PDF service. The app
+ * asks for it through /api/store-workbook-pdf and has no renderer of its own.
+ * The server-side trigger, which fires when a couple's results open, asks the
+ * same endpoint. And the service's own pieces are all present, because the thing
+ * that makes this builder easy to lose is that it lives in four files with no
+ * import edge between them and the rest of the codebase.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The .docx generator itself, which stays. The website offers it as a download
- * on its own workbook page and that is a customer choosing a Word file on
- * purpose, not a surface quietly serving a different document. What is forbidden
- * is a path that ends in a .docx while the customer asked for the workbook.
+ * The .docx generator stays. The website offers it as its own download and that
+ * is a customer choosing a Word file on purpose.
  *
- * Not what the PDF looks like. check-workbook-view holds the page to the payload
- * both surfaces send, and a rendered page cannot be compared here.
+ * public/workbook-render.html stays too. It is what /api/workbook-view serves
+ * and the website's own print path, and check-workbook-view holds it to its
+ * callers. What is forbidden is the APP reaching for it, because the app's
+ * workbook is the PDF.
+ *
+ * Whether the service is deployed. WORKBOOK_SERVICE_URL is an environment
+ * variable on Vercel and a check cannot read it. What it can do is make sure
+ * nothing silently substitutes another document when the service is missing,
+ * which is the failure that produced this whole mess.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const fails = [];
+const bare = (src) => src.split('\n').filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l)).join('\n');
 
-const store = readFileSync(`${ROOT}api/store-workbook.js`, 'utf8');
-const code = store.split('\n').filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l)).join('\n');
-
-/** The file it stores comes from the PDF builder. */
-if (!/\/api\/generate-pdf/.test(code)) {
-  fails.push('api/store-workbook.js does not call /api/generate-pdf. That is the'
-    + ' builder that renders public/workbook-render.html, which is the workbook the'
-    + ' website prints and the one that was approved.');
-}
-if (/\/api\/generate-workbook\b/.test(code)) {
-  fails.push('api/store-workbook.js calls /api/generate-workbook, the .docx'
-    + ' generator. The app opens the file this stores before it tries anything'
-    + ' else, so that is the document a tester gets, and it is not the one on the'
-    + ' website. This is the drift Ellie has reported twice.');
-}
-
-/**
- * And it refuses to store anything it cannot confirm is a PDF.
- *
- * Matched on the GUARD, not on the presence of the words. The first version asked
- * whether BROWSERLESS_TOKEN and application/pdf appeared anywhere in the file,
- * and both plants passed: replacing each condition with `false` leaves every
- * string exactly where it was. Disabling a branch with a constant is the way this
- * check would actually be defeated, so it is the way it is tested.
- */
-if (!/if\s*\(\s*!process\.env\.BROWSERLESS_TOKEN\s*\)/.test(code)) {
-  fails.push('api/store-workbook.js does not refuse to run when no PDF renderer is'
-    + ' configured. Without one, generate-pdf redirects to the .docx generator, and'
-    + ' storing what comes back puts that document in storage wearing a .pdf name.');
-}
-if (!/if\s*\(\s*!\/application\\\/pdf\/i\.test\(\s*type\s*\)\s*\)/.test(code)) {
-  fails.push('api/store-workbook.js does not test the content type of what it'
-    + ' received against application/pdf before storing it. A redirect to the .docx'
-    + ' generator answers 200 with a Word file, and nothing about that response says'
-    + ' it is the wrong document.');
-}
-if (/\.docx`/.test(code)) {
-  fails.push('api/store-workbook.js still names its file .docx.');
+/** The service's four pieces. Lose one and the workbook cannot be built at all. */
+const PIECES = [
+  ['scripts/build_workbook.py', 'renders the workbook HTML, cover and all'],
+  ['scripts/render_workbook.mjs', 'prints that HTML to PDF with Playwright'],
+  ['scripts/service.mjs', 'the HTTP service the two run behind'],
+  ['Dockerfile.workbook', 'builds the container they are deployed in'],
+];
+for (const [f, what] of PIECES) {
+  if (!existsSync(`${ROOT}${f}`)) {
+    fails.push(`${f} is missing. It ${what}, and it is part of the only builder`
+      + ' that produces the workbook Ellie approved. Nothing in api/ imports it, so'
+      + ' nothing else would notice it had gone.');
+  }
 }
 
-/** The app must not reach for the .docx generator on any path. */
+/** The endpoint that reaches it. */
+const endpoint = bare(readFileSync(`${ROOT}api/store-workbook-pdf.js`, 'utf8'));
+if (!/WORKBOOK_SERVICE_URL/.test(endpoint)) {
+  fails.push('api/store-workbook-pdf.js no longer posts to the workbook service.');
+}
+/* Matched on the CALL. Renaming it to payloadForCoupleX was planted and passed,
+   because the substring survives. This session has now made that mistake in four
+   separate gates, so it is worth stating once more: a name is matched with what
+   follows it. */
+if (!/payloadForCouple\(/.test(endpoint)) {
+  fails.push('api/store-workbook-pdf.js cannot assemble a payload from a user id.'
+    + ' That is the only reason the app ever used a different endpoint, and a'
+    + ' different endpoint is a different document.');
+}
+
+/** Every customer path ends there. */
 const appFiles = [];
 (function walk(d) {
   for (const f of readdirSync(d)) {
@@ -99,31 +101,42 @@ const appFiles = [];
   }
 })(join(ROOT, 'attune-app/src'));
 
+let appAsks = false;
 for (const f of appFiles) {
   const src = readFileSync(f, 'utf8');
   src.split('\n').forEach((line, i) => {
     if (/^\s*(\*|\/\/)/.test(line)) return;
+    const at = `${f.replace(ROOT, '')}:${i + 1}`;
+    if (/store-workbook-pdf/.test(line)) appAsks = true;
+    if (/['"`]\/api\/store-workbook['"`]/.test(line)) {
+      fails.push(`${at} asks /api/store-workbook, which builds a different document.`
+        + ' The workbook is /api/store-workbook-pdf.');
+    }
     if (/generate-workbook/.test(line)) {
-      fails.push(`${f.replace(ROOT, '')}:${i + 1} reaches for the .docx generator.`
-        + ' The app opens the stored PDF, or hands the payload to the browser to'
-        + ' draw the same page. It never builds a Word file.'
-        + `\n      ${line.trim().slice(0, 120)}`);
+      fails.push(`${at} reaches for the .docx generator.`);
+    }
+    if (/workbook-render/.test(line)) {
+      fails.push(`${at} opens the website's print page. That is a second renderer`
+        + ' and it is not the workbook: it has no full bleed cover and none of the'
+        + ' editorial layout. The app asks the service for a PDF.');
     }
   });
 }
+if (!appAsks) {
+  fails.push('no app file asks /api/store-workbook-pdf, so the app has no way to'
+    + ' get the workbook at all.');
+}
 
-/** The page everything is supposed to render still exists. */
-try {
-  const page = readFileSync(`${ROOT}public/workbook-render.html`, 'utf8');
-  if (!/workbook-ready/.test(page)) {
-    fails.push('public/workbook-render.html has no .workbook-ready marker, which is'
-      + ' what generate-pdf waits for before printing. Without it the PDF is'
-      + ' whatever had loaded when the timeout fired.');
-  }
-} catch {
-  console.error('[check-one-workbook] public/workbook-render.html is missing. That'
-    + ' page IS the workbook. Refusing to pass.');
-  process.exit(1);
+/** And the trigger that builds one the moment a couple's results open. */
+const save = bare(readFileSync(`${ROOT}api/save-exercise.js`, 'utf8'));
+if (/\/api\/store-workbook['"`]/.test(save)) {
+  fails.push('api/save-exercise.js builds the workbook through /api/store-workbook'
+    + ' when a couple finishes, so the file waiting for them is the wrong document'
+    + ' before they ever tap anything.');
+}
+if (!/store-workbook-pdf/.test(save)) {
+  fails.push('api/save-exercise.js no longer builds a workbook when a couple\'s'
+    + ' results open, so nothing is ready when they go looking for it.');
 }
 
 if (fails.length) {
@@ -131,6 +144,6 @@ if (fails.length) {
   for (const f of fails) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
-console.log('[check-one-workbook] the stored file is rendered from'
-  + ' public/workbook-render.html through the PDF builder, nothing is stored when'
-  + ' there is no renderer, and the app never reaches for the .docx generator.');
+console.log('[check-one-workbook] the workbook is the PDF service: its four pieces'
+  + ' are present, the app and the completion trigger both ask'
+  + ' /api/store-workbook-pdf, and nothing in the app renders one itself.');

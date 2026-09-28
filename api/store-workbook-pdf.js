@@ -22,6 +22,7 @@
 import { capabilitiesFor } from './_lib/ownership.js';
 
 import { payloadToCouple } from './_couple-shape.js';
+import { payloadForCouple } from './_lib/workbook-couple.js';
 import { safeError } from './_lib/http.js';
 
 export const config = { runtime: 'nodejs' };
@@ -107,6 +108,31 @@ export default async function handler(req, res) {
 
   if (!serviceUrl || !serviceSecret) {
     return res.status(500).json({ error: 'PDF service not configured (WORKBOOK_SERVICE_URL / WORKBOOK_SERVICE_SECRET)' });
+  }
+
+  /**
+   * ── THE APP HAS NO PAYLOAD TO SEND ──────────────────────────────────────
+   * The website builds one in the browser, out of state it already holds, and
+   * posts it. The app holds none of that: it knows a user id and nothing else,
+   * which is why it was calling /api/store-workbook, the endpoint that assembles
+   * the payload on the server from the couple's answers.
+   *
+   * That is the whole reason the app has never had the right workbook. The two
+   * endpoints differed in what they would accept, so the app used the one that
+   * took a user id, and that one builds a different document. Ellie has reported
+   * it three times.
+   *
+   * So this takes either. A body that carries scores is the website's payload; a
+   * body that carries only a user id is assembled here from the same source
+   * /api/store-workbook uses, and both end at the same renderer.
+   */
+  if (!body?.scores && !body?.partnerScores) {
+    const forUser = isAdminCall ? body?.userId : authedUserId;
+    if (!forUser) return res.status(400).json({ error: 'nothing to build from' });
+    if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Server not configured' });
+    const built = await payloadForCouple({ supabaseUrl, serviceKey, userId: forUser });
+    if (!built) return res.status(409).json({ error: 'not enough answers for a workbook yet' });
+    body = { ...built, ...body };
   }
 
   // ── Transform App.jsx payload → COUPLE shape the Python builder expects ──

@@ -13570,8 +13570,35 @@ export default function App() {
       });
       const data = await resp.json().catch(() => null);
       if (!resp.ok || !data?.url) {
+        /**
+         * ── SAY WHICH FAILURE IT WAS ──────────────────────────────────────
+         * Ellie: "I went to get the workbook but saw a download failed
+         * message. Refreshed and tried again with the same result."
+         *
+         * "Please try again" is the wrong advice for three of the four things
+         * that can go wrong here, and trying again is exactly what she did,
+         * twice. The workbook is rendered by an external service, so the
+         * failures are: the service is not configured, it did not answer, it
+         * answered with an error, or the couple has not finished enough of the
+         * exercises to build one.
+         *
+         * The server already distinguishes them and says so in `error`. That
+         * was being thrown away and replaced with one sentence. Only the
+         * transient case gets "try again" now, and the rest say what is
+         * actually wrong, because two of them are settings rather than
+         * accidents and no amount of retrying fixes a missing environment
+         * variable.
+         */
+        const why = String(data?.error || '');
         console.warn('[Attune] workbook download failed:', resp.status, data);
-        showToast('Workbook download failed. Please try again.');
+        showToast(
+          /not configured/i.test(why)
+            ? 'The workbook service is not switched on yet. This is on us, not you.'
+          : /not enough answers/i.test(why)
+            ? 'There is not enough here to build a workbook yet. Finish the exercises and it will be ready.'
+          : resp.status >= 500 || resp.status === 0
+            ? 'The workbook service did not answer. Give it a minute and try again.'
+            : 'Workbook download failed. Please try again.');
         return;
       }
       setOrder(prev => {

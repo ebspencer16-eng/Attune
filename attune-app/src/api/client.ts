@@ -1671,7 +1671,7 @@ export function nudgePartner() {
  * it generates a document and uploads it, so the screen that calls it says so.
  */
 export function buildWorkbook() {
-  return request<{ ok: true; url: string | null; filename: string }>('/api/store-workbook', {
+  return request<{ ok: true; url: string | null; filename: string }>('/api/store-workbook-pdf', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
