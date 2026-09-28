@@ -25,7 +25,7 @@ import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchWorkbookView, savePost } from '@/api/client';
+import { fetchWorkbookView, savePost, insightShareText } from '@/api/client';
 import { fetchHome, fetchNotes, fetchPosts, fetchTags, SITE_URL } from '@/api/client';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
@@ -809,8 +809,11 @@ export default function ResourcesScreen() {
                 {home.research.body}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, marginTop: Spacing.lg }}>
+                {/* Only a quotation has someone to cite. Most insights are the
+                    product's own sentence, and a name under one of those reads as
+                    that person having said it. See api/_insights.js. */}
                 <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic, flex: 1 }}>
-                  {home.research.source}
+                  {home.research.source || ''}
                 </Text>
                 {/* Ellie: "I want a share button on the insight of the day tile
                     on learn tab." The finding and where it came from, which is
@@ -843,7 +846,7 @@ export default function ResourcesScreen() {
                      everywhere else, which is right for a storycard and for a
                      link; this one is a named thing and says which. */
                   title="Insight of the day"
-                  message={`${home.research.body}\n\n${home.research.source}`}
+                  message={insightShareText(home.research)}
                   url={SITE}
                 />
               </View>
@@ -1244,7 +1247,7 @@ export default function ResourcesScreen() {
 
       {keepingInsight && home?.research ? (
         <SaveToJournal
-          quote={`${home.research.body}\n\n${home.research.source}`}
+          quote={insightShareText(home.research)}
           onClose={() => setKeepingInsight(false)}
         />
       ) : null}
@@ -1256,7 +1259,7 @@ export default function ResourcesScreen() {
              that allows users to save this to relationship journal." The words
              kept are the finding itself with its source under it, which is
              what the card shows and what makes it worth keeping. */
-          journal={`${home.research.body}\n\n${home.research.source}`}
+          journal={insightShareText(home.research)}
           style={home.storycardStyle as never}
           onClose={() => setInsightOpen(false)}
         />

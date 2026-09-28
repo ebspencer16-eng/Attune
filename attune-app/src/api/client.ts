@@ -1929,6 +1929,22 @@ export function fetchExpectations() {
  * object are done when they have keys; record-shaped ones are done only when
  * completedAt is set, which is why partial saves must leave it off.
  */
+/**
+ * The insight of the day, as one block of text to share or to keep.
+ *
+ * ── WHY IT IS A FUNCTION ──────────────────────────────────────────────────
+ * Four places built this by hand as `${body}\n\n${source}`. Most insights are
+ * the product's own sentence and have nobody to cite, so source is an empty
+ * string and all four printed a body followed by two blank lines. One of them
+ * would have printed the word "undefined" the day the field stopped being sent.
+ *
+ * The citation belongs to a quotation and to nothing else. See api/_insights.js.
+ */
+export function insightShareText(r: { body: string; source?: string | null }) {
+  const cite = (r.source || '').trim();
+  return cite ? `${r.body}\n\n${cite}` : r.body;
+}
+
 export async function saveExercise(input: {
   exercise: string;
   answers: Record<string, unknown>;

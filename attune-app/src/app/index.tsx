@@ -30,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
-import { fetchHome, markNotificationRead, nudgePartner, SITE_URL } from '@/api/client';
+import { fetchHome, markNotificationRead, nudgePartner, SITE_URL, insightShareText } from '@/api/client';
 import type { ApiError, HomeAlert, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
@@ -714,7 +714,7 @@ export default function HomeScreen() {
              that allows users to save this to relationship journal." The words
              kept are the finding itself with its source under it, which is
              what the card shows and what makes it worth keeping. */
-          journal={`${data.research.body}\n\n${data.research.source}`}
+          journal={insightShareText(data.research)}
           style={data.storycardStyle as never}
           onClose={() => setInsightOpen(false)}
         />
