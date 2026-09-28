@@ -83,9 +83,37 @@ export async function getOrComputeResults({ db, aId, bId, aAnswers, bAnswers, aN
       reason: null,
       frozenAt: stored.frozen_at || stored.computed_at || null,
       computedUnderVersion: stored.version,
-      // The copy this couple's results should render from. Not the current
-      // one: that is the point.
-      contentVersion: stored.content_version ?? CONTENT_VERSION,
+      /**
+       * ── THE COPY IS CURRENT; THE SCORES ARE NOT ─────────────────────────
+       * This returned the version stamped on the row, so a couple read the copy
+       * as it was the day they finished and a typo fixed afterwards never
+       * reached them.
+       *
+       * Ellie: "I want formatting changes and prose adjustments to be applied
+       * even for couples who have already taken their assessments, but responses
+       * and scoring/backend calculations should persist from the time the
+       * couples took the assessment. If we catch a typo I want to be able to fix
+       * it in the future, but if we change typing weights I don't want that to
+       * affect users who have already gotten their results."
+       *
+       * So the two halves are split. `version` above is still the row's, so the
+       * engine that produced these scores is the engine they keep, and changing
+       * a weight moves nobody. This is current, so a correction reaches
+       * everybody the moment it is published.
+       *
+       * content_version is still written when a row is computed. It is a record
+       * of what a couple first read, which is worth keeping and is no longer
+       * what they are served.
+       *
+       * ── WHAT THIS COSTS, SAID PLAINLY ───────────────────────────────────
+       * A mark is anchored by the text it was made on. Editing a sentence in
+       * api/ now orphans every highlight and note anyone made on that sentence,
+       * including couples who finished last year, where before they were held
+       * on their own frozen copy. That is the price of the correction reaching
+       * them and it is worth knowing before a copy edit, not after.
+       * check-mark-reach.mjs is what reports an anchored mark nothing draws.
+       */
+      contentVersion: CONTENT_VERSION,
       stale: stored.version !== RESULTS_VERSION,
     };
   }
