@@ -48,6 +48,7 @@ import { jsonBody } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 
 import { EXERCISES, EXERCISE_COLUMNS } from './_exercises.js';
+import { ANNIVERSARY_VERSION } from './_anniversary-questions.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
 import { recordNotification } from './_lib/notifications.js';
@@ -187,6 +188,20 @@ export default async function handler(req) {
     updates[`${exercise}_completed_at`] = completedAt || new Date().toISOString();
     // Clear the progress slot now that the exercise is complete
     updates[`${exercise}_progress`] = null;
+    /**
+     * ── WHICH VERSION OF THE QUESTIONS THIS ANSWER SET WAS GIVEN UNDER ──────
+     * Only the website wrote ex3_version, so every Relationship Reflection
+     * finished in the app left it null. Nothing reads it yet, which is why the
+     * gap was invisible.
+     *
+     * Ellie, on whether to keep the column: "I will want to build options for
+     * users to revisit and retake each exercise, and be able to compare
+     * results." That is what it is for. Comparing two answer sets across a
+     * change to the questions is wrong without knowing which questions each set
+     * answered, and the version cannot be recovered afterwards. So it is written
+     * now, by both surfaces, rather than backfilled later from nothing.
+     */
+    if (exercise === 'ex3') updates.ex3_version = ANNIVERSARY_VERSION;
   }
 
   const { error: updateErr } = await admin

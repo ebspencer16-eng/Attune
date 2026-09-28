@@ -802,8 +802,42 @@ async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answer
     console.warn('[Attune] retake check failed, writing without snapshot:', e);
   }
 
-  // Build the patch
-  const patch = { [col]: answers, ...extraPatch };
+  /**
+   * Build the patch.
+   *
+   * ── AND CLEAR THE PROGRESS SLOT ─────────────────────────────────────────
+   * A finished exercise is not in progress. This left ex{N}_progress holding
+   * whatever was last saved mid-exercise, where /api/save-exercise clears it, so
+   * the same column meant two different things depending on which surface
+   * finished the exercise.
+   *
+   * Nothing was broken by it: every reader prefers finished answers over a
+   * progress blob, and there is a check on that. It is a trap for the next thing
+   * that reads the column, which would reasonably take a value there as "someone
+   * is part-way through this".
+   */
+  /**
+   * ── AND THE COMPLETION FLAGS, WHICH ONLY THE APP USED TO WRITE ──────────
+   * /api/save-exercise sets ex{N}_completed and ex{N}_completed_at on every
+   * completion. This set them for ex3 only, through extraPatch at two call
+   * sites, so whether a finished exercise was flagged as finished depended on
+   * which surface the person used.
+   *
+   * It was already costing something: the beta digest counted completions from
+   * those flags and had to be taught to fall back to the answers, which is a
+   * workaround for two writers disagreeing rather than a fix. Both write the
+   * same set now, and check-completion-fields holds them to it.
+   *
+   * extraPatch still comes last, so ex3_version and anything else a caller adds
+   * is unaffected.
+   */
+  const patch = {
+    [col]: answers,
+    [`ex${exerciseNum}_progress`]: null,
+    [`ex${exerciseNum}_completed`]: true,
+    [`ex${exerciseNum}_completed_at`]: new Date().toISOString(),
+    ...extraPatch,
+  };
   if (existingAnswers) {
     patch[priorCol] = existingAnswers;
     patch[priorAt]  = new Date().toISOString();
@@ -3320,7 +3354,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
         <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>
-          Exercise 01 of 02 &middot; {userName} &amp; {partnerName}
+          {userName} &amp; {partnerName}
         </p>
         <p style={{ fontFamily: font.display, fontSize: "clamp(1.6rem, 5vw, 2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.25rem" }}>
           {ex1Intro.title}
@@ -10752,9 +10786,12 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 700, color: 'white', lineHeight: 1.1, marginBottom: '1.25rem' }}>
           {hasReflection ? 'Three' : 'Two'} exercises.<br/>Your answers are yours alone.
         </div>
-        <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.75, marginBottom: '2.5rem', maxWidth: 380, margin: '0 auto 2.5rem' }}>
-          {`Exercise 01 covers how you communicate and connect. Exercise 02 maps your expectations.${hasReflection ? ' Exercise 03 captures your relationship story.' : ''} ${hasReflection ? 'They take' : 'Both take'} about 15 minutes. Answer honestly. Your partner won't see your individual answers.`}
-        </p>
+        {/* The sentence that used to sit here enumerated exercises 01, 02 and
+            03 and described a product with two or three of them. Ellie: "I'm
+            fine to just remove these 2 pieces of prose rather than adjust
+            them." The three tiles below it already say what each exercise is,
+            so the paragraph was a second telling that could go out of date on
+            its own. */}
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
           {[{ num: '01', title: 'Communication', color: '#E8673A', desc: (PARTNER_VIEW_ENABLED ? PERSONALITY_QUESTIONS.length * 2 : PERSONALITY_QUESTIONS.length) + ' questions · 10 dimensions' }, { num: '02', title: 'Expectations', color: '#1B5FE8', desc: 'Responsibilities & life' }, ...(hasReflection ? [{ num: '03', title: 'Relationship Reflection', color: '#7C3AED', desc: 'Your story together' }] : [])].map(e => (
             <div key={e.num} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${e.color}33`, borderRadius: 14, padding: '1.1rem 1.4rem', textAlign: 'left', minWidth: 160 }}>
@@ -10785,7 +10822,6 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg1)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
-          <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 01 of {hasReflection ? '03' : '02'}</span>
         </div>
         <Exercise01Flow userName={account.name} partnerName={account.partnerName} onComplete={handleEx1Done} skipIntro={true} />
       </div>
@@ -10799,7 +10835,6 @@ function PartnerBExerciseFlow({ account, onComplete }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
           <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg2)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
-          <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: "'DM Sans', sans-serif", marginLeft: '0.5rem' }}>· Exercise 02 of {hasReflection ? '03' : '02'}</span>
         </div>
         <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} isAnniversary={["married","remarried"].includes(account.buyerRelationshipStatus || account.relationshipStatus)} />
       </div>
