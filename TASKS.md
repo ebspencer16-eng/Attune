@@ -72,6 +72,7 @@ migration.
 | # | Decision |
 |--|--|
 | O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
+| R12 | **No action needed until the lawyer comes back.** The Privacy Policy and the Terms carried "Effective date: TODO before publishing" and now carry the beta note instead, so nothing on the page is a placeholder a tester can read. What is still yours is the real effective date on each, once the wording is settled. Tell me the two dates and I will set them; the consent version is a hash of the documents, so it moves with them on its own and nobody has to remember to bump anything. |
 | O482 | **No action needed until the app is in the App Store. Raised so it is not forgotten**, which you asked for when you approved O472. The partner invite email has a line telling the invitee to download the app. It is written and switched off, because `APP_LIVE` is false and the store URL still ends in `idPENDING`, so an invitee told to download it would find nothing. Flipping that one flag turns it on here, in the order email and on every page at once. It is the same flag as O1 below, and this row exists so the email is remembered as part of flipping it rather than discovered afterwards. |
 | O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
 | O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
@@ -120,7 +121,6 @@ last batch it is quoted in the row, so I cannot drift from it.
 | O457 | **The workbook the app opens must be the one the website prints.** You: "This is very important to me and you've drifted before, please use the script that already exists." `public/workbook-render.html` is the workbook, and `check-workbook-view.mjs` holds its two callers to the same payload. Whatever the app is opening does not look like it, so either it is not going through that page or its payload is short. Finding out which is the first job. |
 | O481 | **The Explore page's slicers, everywhere in admin.** You: "Add this to every slicer in admin, not just the explore page." |
 | O460 | **The fifty insights, rebuilt from real quotations.** You: "The insight of the day today reads as SO AI. 'Three questions sit under most of it' makes NO sense. I would rather just use direct quotes from these publications, can you organize those and cite them accurately?" Agreed, and the offending line is mine. My answer to "are we allowed to do that" is in the message this came with: short quotations with attribution are ordinary practice, and I will only use quotations I can point at a real source for. The ones I cannot verify will not go in, and I would rather hand you forty I can stand behind than fifty I cannot. |
-| D10 | **The beta line on /legal**, replacing the three TODO boxes and the placeholder date. You: "Replace the boxes and date and just say the beta and needs lawyer thing." Written by me since you handed it back, and yours to change once it is live. |
 
 ## 3. For you to review
 
@@ -153,7 +153,6 @@ The newest pass first.
 |--|--|
 | R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
 | R11 | **Terms of service.** |
-| R12 | **The effective dates on both**, which still read "TODO before publishing". Only you can set them. |
 
 ### Behaviour, which has to be used rather than looked at
 
@@ -177,6 +176,7 @@ receive a notification from Apple's servers.
 
 | Verified by you | What |
 |--|--|
+| D10 | **The three TODO boxes and the two placeholder dates are off /legal.** You: "Replace the boxes and date and just say the beta and needs lawyer thing." One note now opens the Privacy Policy and the Terms: Attune is in beta, the page describes what we do with your information today and we follow it, a lawyer is settling the final wording, and it will be posted with an effective date when it is. The three boxes said what a lawyer still has to decide, which is true and is not a thing to put in front of a tester. The words are mine because you handed this back, so they are yours to change. The consent version is a hash of the two documents rather than a date, so it moved with this edit on its own and every consent recorded from now refers to the new text. |
 | O471 | **The journal's per-day headings are gone.** Each tile carries its own correct line and that is the only date on the screen now. The grouping stays, invisibly, because the rail scrolls to a day by the position of the group rather than of the heading, and taking the grouping out would take the rail with it. |
 | O468 | **The peek is the same on every phone now.** You were right that it was a dimensions problem, and the number to fix turned out not to be where the sheet starts. The sheet sat a fixed distance below the content above it, and that content is the same height on every phone, so a 15 Pro Max's extra 58 points all went to showing more sheet. It is computed from three measurements now: how tall the page is on this phone, how tall the peek is, and how tall the content above it is. Measured on a 17 Pro and a 17 Pro Max: thirty-one points of white above the tab bar on both, and the same four articles showing. |
 | O469 | **"Action plans", on two lines.** The break is written into the label rather than left to the wrap, because at that width the plural still fits on one line and it would have been the only tile of the four sitting on a single line. |

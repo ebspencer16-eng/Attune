@@ -103,33 +103,20 @@ const TUNING = {
   ex3:      { pkg: 'premium', min: 8 },
   intimacy: { pkg: 'premium', min: INTIMACY_ANSWERS, known: 'multi-select screens need a real pointer; stalls at Q7' },
   /**
-   * ── WHY CONFLICT PATTERNS IS NOT DRIVEN, PRECISELY ──────────────────────
-   * The exercise itself is fine, checked by hand: /?fresh=1&pkg=premium&view=conflict
-   * draws its intro, the account sheet closes, Start works, and question 1 of 12
-   * answers. It fails at c_repair, the pick-and-rank screen, and the reason is a
-   * property of this driver rather than of the product.
+   * ── WHY CONFLICT PATTERNS USED TO STALL ─────────────────────────────────
+   * On its repair question, which asks for six options to be put in order. The
+   * first diagnosis was wrong and is worth recording as wrong: I said the Next
+   * button stayed enabled while the minimum was unmet, and it does not. It is
+   * disabled, on both surfaces, and always was. I checked the page before
+   * changing anything and found `disabled: true` on it.
    *
-   * `moved` below means "a forward control was found and clicked", which is not
-   * the same as having moved. A rank screen keeps its Next button present and
-   * not `disabled` while the minimum is unmet, and its handler simply returns. So
-   * the driver clicks Next, believes it advanced, resets the stall counter and
-   * goes round again, clicking the same middle option on and off: the trail
-   * showed "Naming that they see it from m" 399 times, once per iteration to the
-   * cap. Every fallback that handles rank screens sits behind `!moved`, so none of
-   * them ever runs.
-   *
-   * Two fixes were tried and both were worse. Fingerprinting the body text does
-   * not work, because toggling an option changes the body. Fingerprinting the
-   * heading and the "9 / 12" counter does work, and it made the fallbacks
-   * reachable, and it turned one exercise into a twenty-five minute run, because
-   * every screen with no heading and no counter then reads as a stall and fills
-   * everything on it. A slow smoke is a smoke nobody runs.
-   *
-   * What it needs is a forward control whose inertness is visible, which is a
-   * change to the product (`disabled` on Next until the minimum is met) rather
-   * than more cleverness here. Recorded in TASKS.md as that.
+   * The actual cause is that a ranking REORDERS as you click. A chosen item
+   * moves up into the ranked list and clicking a ranked item takes it back out,
+   * so the driver's index into the button list pointed at a different option
+   * every pass, and it put the same item in and out four hundred times. The
+   * fallback clicks by label now and never clicks the same label twice.
    */
-  conflict: { pkg: 'premium', min: 8, known: 'the rank screen keeps Next enabled while incomplete, so the driver cannot tell a click that did nothing from one that advanced' },
+  conflict: { pkg: 'premium', min: 8 },
 };
 
 const EXERCISES = {};
@@ -342,12 +329,17 @@ async function runOne(name) {
         continue;
       }
 
+      /* Labels this fallback has already clicked on this screen. A ranking
+         reorders as you click, so the only stable handle on an option is its
+         text. Reset per screen, below, when the run moves on. */
+      const rankClicked = [];
+
       // Pick-and-rank screens (the Relationship Reflection priorities) keep the
       // forward control inert until enough items are chosen, and choosing one
       // reveals reorder controls rather than advancing. Keep adding until the
       // control comes alive.
-      for (let k = 0; k < 6; k++) {
-        const added = await page.evaluate(({ notAnswer, idx }) => {
+      for (let k = 0; k < 14; k++) {
+        const added = await page.evaluate(({ notAnswer, clicked }) => {
           const re = new RegExp(notAnswer, 'i');
           const visible = e => { const r = e.getBoundingClientRect();
         if (!(r.width > 0 && r.height > 0 && r.top > 95)) return false;
@@ -369,13 +361,27 @@ async function runOne(name) {
           if (chip.length) { chip[0].click(); return true; }
           // Multi-selects toggle, so clicking the same option repeatedly turns
           // it on and off forever. Advance through distinct options instead.
+          /**
+           * ── BY LABEL, NOT BY INDEX ────────────────────────────────────────
+           * A ranking reorders itself as you click: a chosen item moves into the
+           * ranked list above the remaining ones, and clicking a ranked item
+           * takes it back out. So opts[3] is a different option on every pass,
+           * and driving by index put the same item in and out of the ranking
+           * four hundred times without ever finishing it.
+           *
+           * Conflict Patterns' repair question is six options that all have to
+           * be ranked. Clicking each label once, and never twice, completes it.
+           */
           const opts = [...document.querySelectorAll('button')].filter(b =>
             visible(b) && !b.disabled && b.innerText.trim().length > 2 && !re.test(b.innerText.trim()));
-          if (!opts.length || idx >= opts.length) return false;
-          opts[idx].click();
-          return true;
-        }, { notAnswer: NOT_AN_ANSWER.source, idx: k });
+          const fresh = opts.filter(b => !clicked.includes(b.innerText.trim()));
+          if (!fresh.length) return false;
+          const label = fresh[0].innerText.trim();
+          fresh[0].click();
+          return label;
+        }, { notAnswer: NOT_AN_ANSWER.source, clicked: rankClicked });
         if (!added) break;
+        rankClicked.push(added);
         await page.wait(160);
         const nowMoved = await page.evaluate(() => {
           const visible = e => { const r = e.getBoundingClientRect();
