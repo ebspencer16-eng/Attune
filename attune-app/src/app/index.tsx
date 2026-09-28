@@ -23,7 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
-import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { openExternal } from '@/api/open-external';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -65,14 +65,10 @@ const APP_ROUTES = new Set(['/', '/insights', '/resources', '/notes']);
 export default function HomeScreen() {
   useScreenTime('home');
   const router = useRouter();
-  // Where the tile starts. Just over half the screen, so the reading has the
-  // top of the page and the tile sits in the lower half without being pinned
-  // to the bottom, which would leave a band of blue under it on a tall phone.
-  // A floor, not a fixed height. The blue block grows to fill whatever the tile
-  // leaves, so the tile always sits just above the tab bar whether it has two
-  // rows or three, and the reading gets the rest. A fixed height put the third
-  // row underneath the tab bar on the day a third row first existed.
-  const topHeight = useWindowDimensions().height * 0.38;
+  /* The tile used to be positioned from a proportion of the screen height. That
+     constant was computed here and used by nothing, so the design it described
+     was never in force and the slack collected under the tile instead. It is done
+     with layout now: see marginTop: 'auto' on the tile below. */
   /**
    * ── THE SCREEN BEFORE THE NETWORK ───────────────────────────────────────
    * Ellie: "When I open the testflight attune app, it takes a long time to
@@ -539,7 +535,26 @@ export default function HomeScreen() {
               nothing, which is the other half of what she asked for. */}
           <View
             style={{
-              marginTop: Spacing.xl,
+              /**
+               * ── THE SLACK GOES ABOVE THE TILE, NOT BELOW IT ──────────────
+               * Ellie: "my cell view has way more blue at the bottom than the
+               * simulator. Please adjust every page, view, etc. on the app so
+               * that dimensions are the same on every phone screen."
+               *
+               * The content container is flexGrow: 1 and nothing claimed the
+               * extra height, so all of it collected after the last child and
+               * the band of blue under the tile grew with the phone. The
+               * gradient's stops are proportional and always were, which is why
+               * this read as a colour problem and was a layout one.
+               *
+               * `marginTop: 'auto'` takes the slack and puts it above, so the
+               * tile sits just above the tab bar on every screen and the reading
+               * gets the extra room instead. That is the design this file
+               * already described at `topHeight`, a proportion of the screen
+               * height that was computed and never used by anything.
+               */
+              marginTop: 'auto',
+              paddingTop: Spacing.xl,
               marginBottom: BottomTabInset + Spacing.lg,
               borderBottomLeftRadius: TILE_RADIUS,
               borderBottomRightRadius: TILE_RADIUS,
