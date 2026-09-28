@@ -72,6 +72,22 @@ function strip(text) {
     if (ch === '"' || ch === "'" || ch === '`') {
       let j = i + 1;
       while (j < text.length && !(text[j] === ch && text[j - 1] !== '\\')) j += 1;
+      /**
+       * ── AN APOSTROPHE IN JSX TEXT IS NOT A STRING ──────────────────────────
+       * src/App.jsx has bare apostrophes in rendered text: `I'm {p1}` is a
+       * button's label, not a quote. Treating one as a string opener swallows
+       * everything to the next apostrophe, hundreds of lines away, and every
+       * quote after it pairs up wrongly. The damage is invisible until the
+       * parity happens to shift: deleting one paragraph elsewhere in the file
+       * made this scan lose all three setInterval calls at once, and the gate
+       * refused to pass on code nobody had touched.
+       *
+       * A quote and a double quote never span a line in this file; a template
+       * literal often does. So a ' or " with no partner on its own line is text,
+       * and is left alone.
+       */
+      const sameLine = ch === '`' || text.slice(i, j + 1).indexOf('\n') === -1;
+      if (!sameLine) { out += ch; i += 1; continue; }
       out += text.slice(i, j + 1).replace(/[^\n]/g, ' ');
       i = j + 1;
       continue;
