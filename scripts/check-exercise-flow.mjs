@@ -110,13 +110,23 @@ const TUNING = {
    * disabled, on both surfaces, and always was. I checked the page before
    * changing anything and found `disabled: true` on it.
    *
-   * The actual cause is that a ranking REORDERS as you click. A chosen item
-   * moves up into the ranked list and clicking a ranked item takes it back out,
-   * so the driver's index into the button list pointed at a different option
-   * every pass, and it put the same item in and out four hundred times. The
-   * fallback clicks by label now and never clicks the same label twice.
+   * The actual cause is in this driver and is not yet found. A ranking REORDERS
+   * as you click: a chosen item moves up into the ranked list and clicking a
+   * ranked item takes it back out, so an index into the button list points at a
+   * different option every pass. The pick-and-rank fallback clicks by label now
+   * and never clicks the same label twice, which should complete a six-item
+   * ranking in six passes, and it did not change the outcome: the trail still
+   * shows one label clicked four hundred times, from the ANSWER step rather than
+   * from the fallback. So `moved` is coming back true on that screen and the
+   * fallbacks behind `!moved` never run, and what is enabled there that looks
+   * like a forward control is the thing to find next.
+   *
+   * Recording it as unfinished rather than guessing again. The product is fine
+   * and was checked by hand: the intro draws, the account sheet closes, Start
+   * works, question one answers, and Next on the ranking is correctly disabled
+   * until all six are placed.
    */
-  conflict: { pkg: 'premium', min: 8 },
+  conflict: { pkg: 'premium', min: 8, known: 'the driver cannot complete the six-item ranking on the repair question; the exercise itself is fine and was checked by hand' },
 };
 
 const EXERCISES = {};

@@ -4773,6 +4773,7 @@ const QX_CROSS = [
   { key: 'gender', label: 'Gender' }, { key: 'age_range', label: 'Age range' },
   { key: 'relationship_status', label: 'Relationship status' }, { key: 'relationship_length', label: 'Time together' },
   { key: 'children', label: 'Children' }, { key: 'signup_source', label: 'How they found us' },
+  { key: 'journal_use', label: 'Journal use' }, { key: 'journal_entries', label: 'Journal entries' },
   { key: 'pkg', label: 'Package' },
   { key: 'alignment_group', label: 'Aligned / Misaligned' },
   { key: 'understanding_group', label: 'In tune / Misunderstood' },
@@ -4830,6 +4831,13 @@ const SLICE_DIMS = [
   { key:'understanding_group', label:'In tune / Misunderstood' },
   { key:'type', label:'Individual type' }, { key:'axisEngage', label:'Engage / Withdraw' },
   { key:'axisOpen', label:'Open / Guarded' }, { key:'couple_type', label:'Couple type' }, { key:'pkg', label:'Package' },
+  /* Ellie: "Add this to every slicer in admin, not just the explore page."
+     SLICE_DIMS is what every tile slicer on every page offers, so the journal
+     buckets belong here rather than being added tile by tile. The rows already
+     carried both fields: the cube behind all of this IS /api/admin-explore, so
+     the Explore page and every slicer read the same respondent. Nothing anyone
+     wrote is in them; the query behind them asks for owner_id and created_at. */
+  { key:'journal_use', label:'Journal use' }, { key:'journal_entries', label:'Journal entries' },
 ];
 const SLICE_ORDER = {
   age_range:['18-24','25-34','35-44','45-54','55+'],
@@ -4841,6 +4849,10 @@ const SLICE_ORDER = {
   type:['W','X','Y','Z'], axisEngage:['Engage','Withdraw'], axisOpen:['Open','Guarded'],
   couple_type:['WW','XX','YY','ZZ','WX','WY','WZ','XY','XZ','YZ'],
   pkg:['core','newlywed','anniversary','premium'],
+  /* Ordered by use rather than by name, the same order the Explore page gives
+     them, which comes from api/_lib/journal-use.js. */
+  journal_use:['Never used','Under 3 a month','3 or more a month'],
+  journal_entries:['0','1','2','3–5','6–10','11+'],
 };
 const TYPE_SLICE_LABELS = { W:'W · Initiator', X:'X · Anchor', Y:'Y · Feeler', Z:'Z · Protector' };
 function sliceLabel(key, v){ if(key==='type') return TYPE_SLICE_LABELS[v]||v; if(key==='couple_type') return (typeof CT_NAMES!=='undefined'&&CT_NAMES[v])?CT_NAMES[v]:v; return qxPretty(key, v); }
