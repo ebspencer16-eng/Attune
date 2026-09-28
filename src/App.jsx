@@ -10803,11 +10803,15 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
 
         {!existing && (
         <div style={{ marginBottom: "1rem" }}>
+          {/* From ABOUT_YOU, which this file already imports and which the app
+              also renders. Both sentences were typed here as well, and the two
+              had already drifted: this said "Tell us about yourself" while the
+              module, and the app, said "yourselves". */}
           <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", padding: "0.65rem 0 0.2rem" }}>
-            Tell us about yourself
+            {ABOUT_YOU.title}
           </div>
           <p style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.6, marginBottom: "0.9rem", marginTop: "0.3rem" }}>
-            Helps us understand who Attune serves. Responses are kept separately from names and emails, and only ever used in aggregate.
+            {ABOUT_YOU.why}
           </p>
           {[
             { k: "ageRange", label: "Your age range", opts: [["", "Prefer not to say"], ["18-24", "18–24"], ["25-34", "25–34"], ["35-44", "35–44"], ["45-54", "45–54"], ["55+", "55 or older"]] },
