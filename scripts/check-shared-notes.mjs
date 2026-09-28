@@ -6,16 +6,25 @@
 
 import { readFileSync } from 'fs';
 
-// Lifted from api/notes.js rather than rewritten, so this checks the real rule.
-// If the endpoint changes how a couple key is built, this changes with it or
-// stops compiling, instead of quietly testing something that is no longer true.
+/**
+ * The real rule, imported rather than rewritten.
+ *
+ * This used to lift the one-liner out of api/notes.js by regex, because that was
+ * where it lived and a second copy here would have been a second rule. It is a
+ * module now, shared with the couple's tools, so it is imported. Same intent: if
+ * the way a couple key is built ever changes, this changes with it rather than
+ * quietly testing something that is no longer true.
+ */
+import { coupleKeyOf } from '../api/_lib/couple-key.js';
+
+/* And the endpoint still has to be the thing that uses it. Importing a module
+   the server no longer calls would test a rule nothing enforces. */
 const notesSrc = readFileSync(new URL('../api/notes.js', import.meta.url), 'utf8');
-const keyLine = /const coupleKeyOf = ([^;]+);/.exec(notesSrc);
-if (!keyLine) {
-  console.error('[check-shared-notes] coupleKeyOf not found in api/notes.js');
+if (!/coupleKeyOf\(/.test(notesSrc)) {
+  console.error('[check-shared-notes] api/notes.js does not call coupleKeyOf, so'
+    + ' whatever it files shared notes under is not what this checks.');
   process.exit(1);
 }
-const coupleKeyOf = new Function(`return ${keyLine[1]}`)();
 
 let fails = 0;
 const ok = (n, c) => { console.log((c ? '  ok    ' : '  FAIL  ') + n); if (!c) fails++; };

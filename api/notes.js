@@ -38,12 +38,11 @@ import { isValidAnnotation } from './_lib/annotations.js';
 import { RESULTS_SECTION_LABELS } from './_lib/results-sections.js';
 import { recordNotification } from './_lib/notifications.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
+import { coupleKeyOf } from './_lib/couple-key.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
 
-/** Canonical couple key, so both partners compute the same string. */
-const coupleKeyOf = (a, b) => [a, b].sort().join(':');
 
 /** Note and tag ids are uuids. Anything else is a malformed request. */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

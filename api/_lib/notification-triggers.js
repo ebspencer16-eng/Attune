@@ -8,14 +8,14 @@
 
 export const NOTIFICATION_TRIGGERS = {
   "partner_finished": [
-    "api/save-exercise.js:271"
+    "api/save-exercise.js:286"
   ],
   "partner_nudged_you": [
     "api/partner-nudge.js:96"
   ],
   "partner_shared": [
-    "api/notes.js:412",
-    "api/notes.js:517"
+    "api/notes.js:411",
+    "api/notes.js:516"
   ],
   "partner_deleted": [
     "api/delete-account.js:336"

@@ -44,8 +44,14 @@ ok('an array is refused too', /Array\.isArray\(data\)/.test(src));
 ok('there is a size limit', /MAX_BYTES/.test(src) && /413/.test(src));
 
 // ── Reading ────────────────────────────────────────────────────────────────
+/* The value moved from the caller's own profile to the couple's shared row when
+   the two tools became one each between them, migration 076. What has to stay
+   true is the shape of the answer: null when it is not theirs, so a surface can
+   tell "nothing saved" from "not yours" by asking `owned` rather than guessing
+   from a missing key. */
 ok('a tool that is not owned reads back null, not absent',
-  /caps\.ownsChecklist \? \(profile\.checklist_data \|\| null\) : null/.test(src));
+  /checklist: caps\.ownsChecklist \? [\w.]+ : null/.test(src)
+  && /budget: caps\.ownsBudget \? [\w.]+ : null/.test(src));
 ok('the checklist content is only sent to someone who owns it',
   /areas: caps\.ownsChecklist \?/.test(src));
 ok('the budget content is only sent to someone who owns it',

@@ -61,7 +61,10 @@ with checks (migration, object, kind, degraded) as (
      'App and website engagement cannot be told apart. The page says so.'),
     ('066_tag_bin',
      'tags.deleted_at', 'column',
-     'A deleted tag comes straight back, because there is nowhere to put it.')
+     'A deleted tag comes straight back, because there is nowhere to put it.'),
+    ('076_couple_tools',
+     'couple_tools', 'table',
+     'The Shared Budget and the checklist go back to being one each. Both partners still see their own, neither sees the other, and nothing says so.')
 )
 select
   c.migration,

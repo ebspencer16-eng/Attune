@@ -785,6 +785,68 @@ async function saveProfileData(sb, accountId, patch, label) {
   return res;
 }
 
+/**
+ * Save a shared tool, through the one endpoint that owns it.
+ *
+ * ── WHY NOT A PROFILE WRITE ───────────────────────────────────────────────
+ * The Shared Budget and the Merging Lives Checklist are one per couple, not one
+ * each. Ellie: "One partner checking something off should show on both partners'
+ * checklists, same with budget inputs. This structure should persist regardless
+ * of where the users are accessing the resources (app or site)."
+ *
+ * The couple's row is keyed by a pair of profile ids, which a browser has no
+ * business working out and no permission to write, so /api/tool-data does it.
+ * That endpoint is also what the app has always used, so there is one writer for
+ * both surfaces rather than a direct write here and an endpoint there.
+ *
+ * Returns whether it saved, so a caller can say so. The old path reported a
+ * failure through saveProfileData's toast; this returns the same answer.
+ */
+async function saveSharedTool(tool, data) {
+  try {
+    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+    if (!hasSupabase()) return false;
+    const { data: { session } } = await sb.auth.getSession();
+    const headers = { 'Content-Type': 'application/json' };
+    if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+    const res = await fetch('/api/tool-data', {
+      method: 'POST', headers, body: JSON.stringify({ tool, data }),
+    });
+    if (!res.ok) throw new Error(`tool-data ${res.status}`);
+    const body = await res.json().catch(() => null);
+    if (!body?.ok) throw new Error(body?.error || 'save refused');
+    return true;
+  } catch (e) {
+    console.warn(`[Attune] ${tool} save failed:`, e);
+    try { window.__attune_sync_failed = true; } catch {}
+    const t = (typeof window !== 'undefined' && window.__attuneShowToast) || null;
+    if (t) t("Saved on this device. We'll sync when you're back online.");
+    return false;
+  }
+}
+
+/**
+ * Tell the server which field this person has open, so their partner can see it.
+ *
+ * Ellie: "The budget should show your partner's icon or something in a text box
+ * if they're currently editing that figure." Fire and forget: a lost stamp costs
+ * a marker nobody sees, and the server treats one more than a few seconds old as
+ * nobody anyway.
+ */
+async function markEditing(field) {
+  try {
+    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+    if (!hasSupabase()) return;
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) return;
+    await fetch('/api/tool-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ tool: 'budget', editing: field || '' }),
+    });
+  } catch { /* a courtesy, never a blocker */ }
+}
+
 async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answers, extraPatch = {}) {
   if (!sb || !accountId || !exerciseNum || !answers) return { error: new Error('bad args') };
   const col     = `ex${exerciseNum}_answers`;
@@ -4833,6 +4895,40 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
   const [dirty, setDirty]           = useState(false);
   const [saveStatus, setSaveStatus] = useState("idle"); // 'idle' | 'saving' | 'saved'
 
+  /**
+   * Which fields the partner has open, polled while this screen is up.
+   *
+   * Ellie: "The budget should show your partner's icon or something in a text
+   * box if they're currently editing that figure."
+   *
+   * A poll rather than a live channel, because the app deliberately carries no
+   * realtime client and this has to work the same on both surfaces. Six seconds
+   * against a server window of twelve, so a marker appears within one cycle of
+   * the partner arriving and clears within one of them leaving. It stops when
+   * the tab is hidden: nobody is watching a marker on a screen they cannot see.
+   */
+  const [partnerEditing, setPartnerEditing] = useState({});
+  useEffect(() => {
+    if (!accountId) return undefined;
+    let stopped = false;
+    const read = async () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session?.access_token) return;
+        const r = await fetch('/api/tool-data', { headers: { Authorization: `Bearer ${session.access_token}` } });
+        if (!r.ok) return;
+        const b = await r.json().catch(() => null);
+        if (!stopped && b?.ok) setPartnerEditing(b.editing || {});
+      } catch { /* a marker nobody sees is the cost of a failed poll */ }
+    };
+    read();
+    const iv = setInterval(read, 6000);
+    return () => { stopped = true; clearInterval(iv); };
+  }, [accountId]);
+
   // Mark dirty whenever the user changes anything
   const markDirty = () => { if (!dirty) setDirty(true); if (saveStatus === 'saved') setSaveStatus('idle'); };
   const setIncome  = (who, v) => { setIncomes(x => ({ ...x, [who]: v })); markDirty(); };
@@ -4851,10 +4947,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
     setBudgetState(snapshot);
     try { localStorage.setItem('attune_budget', JSON.stringify(snapshot)); } catch {}
     if (accountId) {
-      try {
-        const { supabase: sb, hasSupabase } = await import('./supabase.js');
-        if (hasSupabase()) await saveProfileData(sb, accountId, { budget_data: snapshot }, 'budget');
-      } catch {}
+      await saveSharedTool('budget', snapshot);
     }
     setDirty(false);
     setSaveStatus("saved");
@@ -4867,15 +4960,34 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
   const hasExpenses = rev.sharedExpenses > 0 || rev.uPersonal > 0 || rev.pPersonal > 0 || rev.goalsMonthly > 0;
   const showReveal  = hasIncome && hasExpenses;
 
-  // Number input — currency format, responsive to keyboard + mobile numeric
-  const numInput = (value, onChange, placeholder = "0", w = 130) => (
-    <div style={{ display: "flex", alignItems: "center", gap: 4, background: "white", border: "1.5px solid " + C.stone, borderRadius: 8, padding: "0.35rem 0.65rem", width: w }}>
+  /**
+   * Number input, currency format, responsive to keyboard and mobile numeric.
+   *
+   * ── AND WHO ELSE IS IN IT ─────────────────────────────────────────────────
+   * Ellie: "The budget should show your partner's icon or something in a text
+   * box if they're currently editing that figure." `field` names the box, the
+   * focus is reported, and a dot appears in any box the partner has open. The
+   * field id has to mean the same thing on both surfaces or the marker lands on
+   * the wrong box; check-shared-tools holds them to one list.
+   */
+  const numInput = (value, onChange, placeholder = "0", w = 130, field = null) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 4, background: "white", border: "1.5px solid " + (field && partnerEditing[field] ? C.accent : C.stone), borderRadius: 8, padding: "0.35rem 0.65rem", width: w, position: "relative" }}>
       <span style={{ color: C.muted, fontFamily: font.body, fontSize: "0.82rem" }}>$</span>
       <input
         type="text" inputMode="decimal" value={value || ""} onChange={e => onChange(e.target.value)}
+        onFocus={field ? () => markEditing(field) : undefined}
+        onBlur={field ? () => markEditing('') : undefined}
         placeholder={placeholder}
         style={{ border: "none", outline: "none", background: "transparent", fontFamily: font.body, fontSize: "0.88rem", color: C.ink, width: "100%", padding: 0 }}
       />
+      {field && partnerEditing[field] ? (
+        <span
+          title={`${partnerName || 'Your partner'} is editing this`}
+          aria-label={`${partnerName || 'Your partner'} is editing this`}
+          style={{ position: "absolute", right: -7, top: -7, width: 16, height: 16, borderRadius: "50%", background: C.accent, color: "white", fontSize: "0.58rem", fontWeight: 700, fontFamily: font.body, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid white" }}>
+          {(partnerName || 'P').trim().charAt(0).toUpperCase()}
+        </span>
+      ) : null}
     </div>
   );
 
@@ -4927,7 +5039,7 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
           {[userName, partnerName].map((name, i) => (
             <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0", borderTop: i === 0 ? "none" : "1px solid " + C.stone + "40" }}>
               <span style={{ fontSize: "0.9rem", color: C.ink, fontFamily: font.body, fontWeight: 500 }}>{name}</span>
-              {numInput(incomes[name], v => setIncome(name, v), "0", 140)}
+              {numInput(incomes[name], v => setIncome(name, v), "0", 140, `income:${name}`)}
             </div>
           ))}
         </div>
@@ -13231,10 +13343,7 @@ export default function App() {
     const aid = _checklistAccountIdRef.current;
     if (aid) {
       (async () => {
-        try {
-          const { supabase: sb, hasSupabase } = await import('./supabase.js');
-          if (hasSupabase()) await saveProfileData(sb, aid, { checklist_data: value }, 'checklist');
-        } catch {}
+        await saveSharedTool('checklist', value);
       })();
     }
   };

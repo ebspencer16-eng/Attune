@@ -26,7 +26,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import {
-  fetchToolData, saveToolData,
+  fetchToolData, saveToolData, markEditing,
   type ApiError, type BudgetCategoryPayload, type BudgetCopy, type BudgetState,
 } from '@/api/client';
 import { bFmt, computeReveal } from '@/constants/budget';
@@ -35,8 +35,7 @@ import ScreenFrame from '@/components/screen-frame';
 import { useFlushOnUnmount } from '@/hooks/use-flush-on-unmount';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type, inputType,
-} from '@/constants/attune-theme';
+  BottomTabInset, Colors, MaxContentWidth, Radius, Spacing, Type, inputType, Palette} from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -109,6 +108,27 @@ export default function Budget({ onClose }: { onClose: () => void }) {
    * empty budget.
    */
   useFlushOnUnmount(state, save, { ready: !loading });
+  /**
+   * Which fields the partner has open, polled while this screen is up.
+   *
+   * A poll rather than a live channel: the app deliberately carries no realtime
+   * client, which is written down in api/auth.ts, and the website has to do the
+   * same thing the same way. Six seconds against a server window of twelve, so a
+   * marker appears within one cycle of them arriving and clears within one of
+   * them leaving.
+   */
+  const [partnerEditing, setPartnerEditing] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    let stopped = false;
+    const read = async () => {
+      const r = await fetchToolData();
+      if (!stopped && r.ok) setPartnerEditing((r.data.editing as Record<string, boolean>) || {});
+    };
+    void read();
+    const iv = setInterval(() => { void read(); }, 6000);
+    return () => { stopped = true; clearInterval(iv); };
+  }, []);
+
 
   const put = (patch: Partial<BudgetState>) => setState((p) => ({ ...p, ...patch }));
 
@@ -128,25 +148,53 @@ export default function Budget({ onClose }: { onClose: () => void }) {
   const essentials = cats.filter((x) => x.group === 'essentials');
   const discretionary = cats.filter((x) => x.group !== 'essentials');
 
-  const money = (label: string, value: string, onChange: (v: string) => void) => (
-    <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm }}>
-      <Text style={{ ...Type.small, color: c.text, flex: 1 }}>{label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChange}
-        onBlur={() => save(state)}
-        keyboardType="decimal-pad"
-        placeholder="0"
-        placeholderTextColor={c.textMuted}
-        style={{
-          ...inputType, color: c.textStrong, textAlign: 'right',
-          minWidth: 96, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
-          borderColor: c.border, borderWidth: 1, borderRadius: Radius.md,
-          backgroundColor: c.surface,
-        }}
-      />
-    </View>
-  );
+  /**
+   * One figure, and whoever else has it open.
+   *
+   * Ellie: "The budget should show your partner's icon or something in a text
+   * box if they're currently editing that figure." The focus is reported, the
+   * box takes the accent border while they are in it, and their initial sits on
+   * the corner. `field` has to name the same box on both surfaces or the marker
+   * lands on the wrong one, which check-shared-tools holds them to.
+   */
+  const money = (label: string, value: string, onChange: (v: string) => void, field?: string) => {
+    const theirs = !!(field && partnerEditing[field]);
+    return (
+      <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm }}>
+        <Text style={{ ...Type.small, color: c.text, flex: 1 }}>{label}</Text>
+        <View>
+          <TextInput
+            value={value}
+            onChangeText={onChange}
+            onFocus={field ? () => { void markEditing(field); } : undefined}
+            onBlur={() => { if (field) void markEditing(''); save(state); }}
+            keyboardType="decimal-pad"
+            placeholder="0"
+            placeholderTextColor={c.textMuted}
+            style={{
+              ...inputType, color: c.textStrong, textAlign: 'right',
+              minWidth: 96, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md,
+              borderColor: theirs ? c.accent : c.border, borderWidth: 1, borderRadius: Radius.md,
+              backgroundColor: c.surface,
+            }}
+          />
+          {theirs ? (
+            <View
+              accessibilityLabel={`${them} is editing this`}
+              style={{
+                position: 'absolute', top: -7, right: -7, width: 18, height: 18,
+                borderRadius: 9, backgroundColor: c.accent, alignItems: 'center',
+                justifyContent: 'center', borderWidth: 2, borderColor: c.background,
+              }}>
+              <Text style={{ ...Type.small, fontSize: 10, fontWeight: '700', color: Palette.white }}>
+                {(them || 'P').trim().charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </View>
+    );
+  };
 
   const section = (title: string, intro: string, children: React.ReactNode) => (
     <View style={{ marginTop: Spacing.xxl }}>
@@ -214,6 +262,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             who,
             state.incomes?.[who] || '',
             (v) => put({ incomes: { ...(state.incomes || {}), [who]: v } }),
+            `income:${who}`,
           ))}
 
           <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginTop: Spacing.lg, marginBottom: Spacing.xs }}>

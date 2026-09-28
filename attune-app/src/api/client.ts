@@ -1317,6 +1317,12 @@ export type ToolData = {
    */
   budgetNames: { you: string; them: string };
   /**
+   * Which budget fields the PARTNER has open right now, keyed by field id. Never
+   * includes the reader, and a stamp the server considers stale is simply absent.
+   * See api/tool-data.js.
+   */
+  editing?: Record<string, boolean>;
+  /**
    * The workbook is a generated file, not a screen. Null when unowned; url is
    * null while it is still being made.
    */
@@ -1523,6 +1529,23 @@ export function fetchToolData() {
  * Returns the result rather than a boolean so a screen can tell a refused
  * write (not in your package) from a failed one, and say the right thing.
  */
+/**
+ * Say which budget field this person has open, so their partner can be shown.
+ *
+ * Ellie: "The budget should show your partner's icon or something in a text box
+ * if they're currently editing that figure."
+ *
+ * Fire and forget. A lost stamp costs a marker nobody sees, and the server reads
+ * one more than a few seconds old as nobody anyway, because a phone going to
+ * sleep sends no blur. Pass an empty string on the way out of a field.
+ */
+export function markEditing(field: string) {
+  return request<{ ok: true }>('/api/tool-data', {
+    method: 'POST',
+    body: JSON.stringify({ tool: 'budget', editing: field }),
+  });
+}
+
 export function saveToolData(tool: 'checklist' | 'budget', data: unknown) {
   return request<{ ok: true }>('/api/tool-data', {
     method: 'POST',
