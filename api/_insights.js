@@ -104,7 +104,9 @@ export const INSIGHTS = [
   {
     kind: 'quote',
     id: 'q-defensiveness',
-    body: 'The third horseman is defensiveness, and it is typically a response to criticism.',
+    /* Also verbatim now. The previous sentence was stitched from a heading and
+       a summary and appears nowhere on the page. */
+    body: 'Defensiveness will only escalate the conflict if the critical spouse does not back down or apologize. This is because defensiveness is really a way of blaming your partner, and it won\u2019t allow for healthy conflict management.',
     author: 'Dr. Ellie Wilde',
     work: 'The Gottman Institute',
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
@@ -112,10 +114,110 @@ export const INSIGHTS = [
   {
     kind: 'quote',
     id: 'q-contempt',
-    body: 'Contempt is the single greatest predictor of divorce.',
+    /* Verbatim, checked against the page on 29 September 2026. It used to read
+       "Contempt is the single greatest predictor of divorce", which is a fair
+       summary of the research and is not a sentence anyone wrote. A paraphrase
+       inside quotation marks under a named author is a claim about what that
+       person said. */
+    body: 'Contempt is the worst of the four horsemen. It is the number one predictor of divorce, but it can be defeated.',
     author: 'Dr. Ellie Wilde',
     work: 'The Gottman Institute',
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+  },
+
+  /* ── TEN MORE, ADDED 29 SEPTEMBER 2026 ──────────────────────────────────
+     Ellie: "I would rather just use direct quotes from these publications,
+     can you organize those and cite them accurately?"
+
+     Every one pulled from the page itself rather than recalled, and every one
+     held to the page by check-quotes-verbatim.mjs, which was written because
+     two of the first six turned out to be paraphrases wearing quotation marks.
+
+     All from The Gottman Institute, which is not a preference. It is the only
+     source behind these insights that publishes in full, for free, at a stable
+     url. The books and the journal articles the rest are drawn from cannot be
+     quoted this way because nothing could check the wording afterwards, and an
+     unverifiable citation is the thing being fixed here. See TASKS.md: whether
+     to quote more widely than one publisher is Ellie's call. */
+  {
+    kind: 'quote',
+    id: 'q-conflict-is-normal',
+    body: 'All relationships, even the most successful ones, have conflict.',
+    author: 'The Gottman Institute',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-how-managed',
+    body: 'Fortunately, our research shows that it’s not the appearance of conflict, but rather how it’s managed that predicts the success or failure of a relationship.',
+    author: 'The Gottman Institute',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-manage-not-resolve',
+    body: 'We say “manage” conflict rather than “resolve,” because relationship conflict is natural and has functional, positive aspects that provide opportunities for growth and understanding.',
+    author: 'The Gottman Institute',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-complaint-vs-criticism',
+    body: 'A complaint focuses on a specific behavior, but criticism attacks a person’s very character.',
+    author: 'The Gottman Institute',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-defensiveness-defined',
+    body: 'Defensiveness is defined as self-protection in the form of righteous indignation or innocent victimhood in attempt to ward off a perceived attack.',
+    author: 'The Gottman Institute',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-flooding',
+    body: 'It usually happens when you’re feeling flooded or emotionally overwhelmed, so your reaction is to shut down, stop talking, and disengage.',
+    author: 'The Gottman Institute',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-sixty-nine',
+    body: 'John Gottman’s research found that 69% of problems in a relationship are unsolvable.',
+    author: 'Marni Feuerman',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-unsolvable',
+    body: 'Trying to solve unsolvable problems is counterproductive, and no couple will ever completely eliminate them.',
+    author: 'Marni Feuerman',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-discussing-them',
+    body: 'However, discussing them is constructive and provides a positive opportunity for understanding and growth.',
+    author: 'Marni Feuerman',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-in-dialogue',
+    body: 'Being in dialogue, the preferred status, is when the couple has learned to accept their differences on that topic even though minor arguments arise occasionally.',
+    author: 'Marni Feuerman',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
   },
 
   // ── The three that also appear on public/purpose.html ────────────────────
@@ -241,7 +343,12 @@ export function insightOfTheDay(now = new Date()) {
     id: pick.id,
     body: quoted,
     kind: pick.kind,
-    source: pick.kind === 'quote' ? `${pick.author}, ${pick.work}` : '',
+    /* An institute that publishes unsigned is its own author, and "The Gottman
+       Institute, The Gottman Institute" is what naming both gives you. When the
+       two are the same the citation is the one name. */
+    source: pick.kind === 'quote'
+      ? (pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`)
+      : '',
     url: pick.kind === 'quote' ? pick.url : '',
   };
 }
