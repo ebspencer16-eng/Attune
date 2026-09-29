@@ -126,7 +126,7 @@ const TUNING = {
    * works, question one answers, and Next on the ranking is correctly disabled
    * until all six are placed.
    */
-  conflict: { pkg: 'premium', min: 8, known: 'the driver reaches the six-item ranking and cannot complete it; the misidentified button that used to stop it is fixed, and the exercise itself is fine and was checked by hand' },
+  conflict: { pkg: 'premium', min: 8 },
 };
 
 const EXERCISES = {};
@@ -155,7 +155,37 @@ const FORWARD_VERB = /(^|\s)(finish|all done|done|complete|submit|see (your )?re
 // Reflection opens an account sheet over its intro, so these are on screen
 // before the first question. Clicking one takes the run out of the exercise
 // entirely, which is how it used to end on a sign-up form.
-const NOT_AN_ANSWER = /^(←|→|next|back|continue|start|begin|finish|all done|done|complete|submit|sign up|sign in|create account|continue with|dashboard|see )/i;
+/**
+ * Controls that are never an answer.
+ *
+ * ── AND THE CONSENT BANNER ────────────────────────────────────────────────
+ * Accept and Decline were missing, so the cookie banner counted as a group of
+ * answers on every screen of every exercise. On most screens that cost two
+ * pointless clicks. On Conflict Patterns' ranking it cost the exercise: the
+ * grid-fill fallback groups options by their parent, found two groups (the six
+ * options and the banner), and a count above one makes it `continue`, so the
+ * pick-and-rank fallback underneath it never ran. The ranking was toggled on and
+ * off four hundred times instead.
+ *
+ * Measured rather than reasoned: a probe printed groups=2 sizes=[6,2] on that
+ * screen, and the second group was Decline and Accept.
+ *
+ * No answer in the product starts with either word. Checked, across all 261
+ * answer texts in the five exercises, rather than assumed.
+ *
+ * ── AND THE VERBS ARE WHOLE WORDS ─────────────────────────────────────────
+ * They were prefixes, so `complete` matched Physical Intimacy's answer
+ * "Completely at ease" and the driver refused to click it. That exercise has
+ * been marked as not driveable with the reason "multi-select screens need a real
+ * pointer; stalls at Q7", which was a guess: this is an option it would not
+ * touch. Same root as Conflict Patterns, in the opposite direction. One pattern
+ * claimed an answer as a control, the other refused an answer for looking like
+ * one.
+ *
+ * A word boundary fixes both. The arrows keep their own alternative because a
+ * boundary after a non-word character does not mean what it looks like.
+ */
+const NOT_AN_ANSWER = /^(?:←|→)|^(?:next|back|continue|start|begin|finish|all done|done|complete|submit|sign up|sign in|create account|dashboard|see|accept|decline)\b/i;
 
 async function runOne(name) {
   const cfg = EXERCISES[name];
@@ -403,9 +433,20 @@ async function runOne(name) {
            */
           const opts = [...document.querySelectorAll('button')].filter(b =>
             visible(b) && !b.disabled && b.innerText.trim().length > 2 && !re.test(b.innerText.trim()));
-          const fresh = opts.filter(b => !clicked.includes(b.innerText.trim()));
+          /**
+           * ── AN ITEM'S LABEL CHANGES WHEN IT IS RANKED ────────────────────
+           * A placed item is drawn with its position in front of it, so
+           * "Suggesting a pause" becomes "4\nSuggesting a pause". Remembering
+           * the raw text meant the placed version looked like a label this pass
+           * had not seen, so it was clicked again, which takes it back out. The
+           * trail showed "4\nSuggesting a pause" over and over.
+           *
+           * The position is what changed, so the position is what is stripped.
+           */
+          const nameOf = (b) => b.innerText.trim().replace(/^\d+\s*/, '');
+          const fresh = opts.filter(b => !clicked.includes(nameOf(b)));
           if (!fresh.length) return false;
-          const label = fresh[0].innerText.trim();
+          const label = nameOf(fresh[0]);
           fresh[0].click();
           return label;
         }, { notAnswer: NOT_AN_ANSWER.source, clicked: rankClicked });
