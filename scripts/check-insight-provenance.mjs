@@ -49,7 +49,21 @@ const ROOT = new URL('..', import.meta.url).pathname;
 
 const fails = [];
 const KINDS = new Set(['ours', 'quote']);
-const CITE_FIELDS = ['author', 'work', 'url'];
+/**
+ * ── WHAT A CITATION HAS TO CARRY ──────────────────────────────────────────
+ * Always an author and a publication. Then one of two ways for a reader to
+ * check it:
+ *
+ *   a url, for something published on a page, or
+ *   an edition and a page number, for something published in a book.
+ *
+ * Ellie: "I would rather quote from books than sites anyways." A book is the
+ * better source and it is the harder one to hold, because no check can open it.
+ * What a page number does is make the claim checkable by a person in a minute
+ * rather than checkable in principle by nobody, which is the state the six
+ * original quotations were in when two of them turned out to be paraphrases.
+ */
+const CITE_FIELDS = ['author', 'work'];
 
 if (!Array.isArray(INSIGHTS) || INSIGHTS.length < 10) {
   console.error(`[check-insight-provenance] found ${INSIGHTS?.length ?? 0} insights.`
@@ -73,6 +87,19 @@ for (const i of INSIGHTS) {
         fails.push(`${at} is a quotation with no ${f}. Someone else's words need`
           + ' saying whose, where they were published, and where they can be read.');
       }
+    }
+
+    /* One of the two ways to be checkable, and not neither. */
+    const hasUrl = !!String(i.url || '').trim();
+    const hasPage = !!String(i.edition || '').trim() && !!String(i.page || '').trim();
+    if (!hasUrl && !hasPage) {
+      fails.push(`${at} is a quotation nobody can check. Give it a url, or an`
+        + ' edition and a page so a person can open the book at the right place.'
+        + ' A quotation with neither is a claim about what someone said resting on'
+        + ' nothing, which is exactly how "Contempt is the single greatest predictor'
+        + ' of divorce" came to sit under a researcher\'s name.');
+    }
+    {
     }
     if (i.url && !/^https:\/\//.test(i.url)) {
       fails.push(`${at} cites ${i.url}, which is not a link a reader can open.`);
@@ -186,6 +213,9 @@ if (fails.length) {
   for (const f of [...new Set(fails)]) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
-console.log(`[check-insight-provenance] ${quotes} quotations, each with an author, a`
-  + ` publication and a link; ${ours} of our own sentences, none of them attributed to`
-  + ' anyone, and no basis field reaches a customer.');
+const onPages = INSIGHTS.filter((i) => i.kind === 'quote' && String(i.url || '').trim()).length;
+const inBooks = quotes - onPages;
+console.log(`[check-insight-provenance] ${quotes} quotations, each with an author and a`
+  + ` publication: ${onPages} linked to a page, ${inBooks} to an edition and a page number;`
+  + ` ${ours} of our own sentences, none of them attributed to anyone, and no basis field`
+  + ' reaches a customer.');

@@ -92,9 +92,28 @@ const textOf = (html) => flatten(
 
 const wrong = [];
 const unreachable = [];
+/**
+ * Quotations from books, which no check can open.
+ *
+ * Ellie: "I would rather quote from books than sites anyways." She is right
+ * that they are the better source, and they are the ones this file is blind to,
+ * so they are counted and named in the summary rather than skipped silently. A
+ * run that verified six of twenty must not read like a run that verified
+ * twenty; that is the whole lesson of the docs check that reported eighteen
+ * failures until nobody read it.
+ *
+ * check-insight-provenance is what makes them checkable by a person: a book
+ * quotation has to carry an edition and a page number, so opening it at the
+ * right place takes a minute.
+ */
+const inBooks = [];
 let verified = 0;
 
 for (const q of quotes) {
+  if (!String(q.url || '').trim()) {
+    inBooks.push(`${q.id}: ${q.author}, ${q.work} (${q.edition}), p. ${q.page}`);
+    continue;
+  }
   let html;
   try {
     const res = await fetch(q.url, {
@@ -145,7 +164,18 @@ if (wrong.length) {
   process.exit(1);
 }
 
-const parts = [`${verified} of ${quotes.length} quotations found verbatim on the page they cite`];
-if (unreachable.length) parts.push(`${unreachable.length} could not be reached, so they were not checked`);
+const onPages = quotes.length - inBooks.length;
+const parts = [`${verified} of ${onPages} quotations with a url found verbatim on the page they cite`];
+if (unreachable.length) {
+  parts.push(unreachable.length === 1
+    ? '1 could not be reached, so it was not checked'
+    : `${unreachable.length} could not be reached, so they were not checked`);
+}
+if (inBooks.length) {
+  parts.push(inBooks.length === 1
+    ? '1 is from a book and cannot be checked from here at all'
+    : `${inBooks.length} are from books and cannot be checked from here at all`);
+}
 console.log(`[check-quotes-verbatim] ${parts.join('; ')}.`);
 for (const u of unreachable) console.log(`  unchecked  ${u}`);
+for (const b of inBooks) console.log(`  by hand    ${b}`);

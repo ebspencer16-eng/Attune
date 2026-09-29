@@ -323,6 +323,15 @@ export const INSIGHTS = [
  * attribution field on it: a real citation for a quotation, and empty for our
  * own sentence, because our own sentence has no one to cite.
  */
+/** "Author, Work" for a page; "Author, Work (edition), p. N" for a book. */
+function citation(pick) {
+  const who = pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;
+  const edition = String(pick.edition || '').trim();
+  const page = String(pick.page || '').trim();
+  if (!edition || !page) return who;
+  return `${who} (${edition}), p. ${page}`;
+}
+
 export function insightOfTheDay(now = new Date()) {
   const day = Math.floor(now.getTime() / 86400000);
   const pick = INSIGHTS[day % INSIGHTS.length];
@@ -343,12 +352,19 @@ export function insightOfTheDay(now = new Date()) {
     id: pick.id,
     body: quoted,
     kind: pick.kind,
-    /* An institute that publishes unsigned is its own author, and "The Gottman
-       Institute, The Gottman Institute" is what naming both gives you. When the
-       two are the same the citation is the one name. */
-    source: pick.kind === 'quote'
-      ? (pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`)
-      : '',
+    /**
+     * The citation under a quotation.
+     *
+     * An institute that publishes unsigned is its own author, and "The Gottman
+     * Institute, The Gottman Institute" is what naming both gives you. When the
+     * two are the same the citation is the one name.
+     *
+     * A quotation from a book carries its edition and the page it is on, because
+     * that is the only way a reader, or Ellie, or Carolina, can check it: nothing
+     * automated can open a book. A quotation from a page carries neither and is
+     * checked by check-quotes-verbatim instead.
+     */
+    source: pick.kind === 'quote' ? citation(pick) : '',
     url: pick.kind === 'quote' ? pick.url : '',
   };
 }
