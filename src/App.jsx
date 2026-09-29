@@ -102,6 +102,10 @@ import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES, ownedExercises } from "../api/_exercises.js";
 import { sarahEx1, sarahEx2, jamesEx1, jamesEx2 } from "../api/_lib/demo-couple.js";
+/* The demo's four archetypes, which are what the demo path actually types
+   from. See that file: Sarah and James supply the names and the other
+   exercises, and these supply Exercise 1. */
+import { ARCHETYPE_EX1, demoWithPartnerView, DEMO_COUPLE_TYPES, normaliseDemoType } from "../api/_lib/demo-archetypes.js";
 import { CATALOGUE } from "../api/_catalogue.js";
 // The Merging lives checklist, moved out so the app can read it too.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
@@ -177,32 +181,7 @@ const RENDERABLE_VIEWS = new Set([
 // engine (verified against api/_type-engine.js: W/X/Y/Z each land exactly).
 // Used only in demo mode (?demo=...) to drive the results/workbook couple-type
 // picker. Keyed to the current DIM_KEYS question ids.
-const _ENGAGE   = { cf1:1, cf2:1, cf3:1, st1:5, rp2:1, rp3:1, rp6:1, en4:5, en6:5, ls1:5, ls3:5 };
-const _WITHDRAW = { cf1:5, cf2:5, cf3:5, st1:1, rp2:5, rp3:5, rp6:5, en4:1, en6:1, ls1:1, ls3:1 };
-const _OPEN     = { ex6:5, ex7:5, ex8:5, rs1:1, rs3:1, fb5:5, fb2:5, nd1:1, nd5:1, bd1:5, bd3:5, bd4:5, lv1:1, lv2:1 };
-const _GUARDED  = { ex6:1, ex7:1, ex8:1, rs1:5, rs3:5, fb5:1, fb2:1, nd1:5, nd5:5, bd1:1, bd3:1, bd4:1, lv1:5, lv2:5 };
-const ARCHETYPE_EX1 = {
-  W: { ..._ENGAGE,   ..._OPEN },     // Initiator: engage + open
-  X: { ..._ENGAGE,   ..._GUARDED },  // Anchor:    engage + guarded
-  Y: { ..._WITHDRAW, ..._OPEN },     // Feeler:    withdraw + open
-  Z: { ..._WITHDRAW, ..._GUARDED },  // Protector: withdraw + guarded
-};
 const TYPE_LABEL = { W: 'Initiator', X: 'Anchor', Y: 'Feeler', Z: 'Protector' };
-// Demo only: give each archetype a partner-view of the OTHER archetype so demo mode
-// exercises the Proposal B blend + self-vs-partner view. Perception is modeled as
-// a slightly muted read of the partner's real orientation (compressed toward center).
-function demoWithPartnerView(selfArch, otherArch) {
-  if (!PARTNER_VIEW_ENABLED || !selfArch || !otherArch) return selfArch;
-  const out = { ...selfArch };
-  // Demo: this person's view of the other = a muted read of the other's real answers,
-  // stored per-question as pv_<qid> to match the real two-part exercise.
-  for (const [qid, val] of Object.entries(otherArch)) {
-    if (val != null && !isNaN(val)) out['pv_' + qid] = 3 + (Number(val) - 3) * 0.6;
-  }
-  return out;
-}
-// The 10 canonical couple pairings (match COUPLE_TYPE_DATA keys).
-const DEMO_COUPLE_TYPES = ['WW', 'WX', 'WY', 'WZ', 'XX', 'XY', 'XZ', 'YY', 'YZ', 'ZZ'];
 
 
 // ── Mobile detection hook ─────────────────────────────────────────────────────
@@ -11711,13 +11690,7 @@ export default function App() {
   const _demoParam = params.get("demo"); // ?demo=anniversary bypasses localStorage
   // Demo couple-type picker: ?type=WY (or the on-screen picker) selects which
   // pairing the demo renders. Sarah = first letter, James = second.
-  const _demoTypeRaw = (params.get("type") || "").toUpperCase().replace(/[^WXYZ]/g, "");
-  const _demoTypeInit = (() => {
-    if (_demoTypeRaw.length !== 2) return 'WY';
-    const o = 'WXYZ';
-    const sorted = [..._demoTypeRaw].sort((a, b) => o.indexOf(a) - o.indexOf(b)).join('');
-    return DEMO_COUPLE_TYPES.includes(sorted) ? sorted : 'WY';
-  })();
+  const _demoTypeInit = normaliseDemoType(params.get("type"));
   const [demoType, setDemoType] = React.useState(_demoTypeInit);
   const _orderPkg = (() => { try { const o = JSON.parse(localStorage.getItem('attune_order') || 'null'); return o?.pkgKey || null; } catch { return null; } })();
   const _accountPkg = (() => { try { const a = JSON.parse(localStorage.getItem('attune_account') || 'null'); return a?.pkg || null; } catch { return null; } })();

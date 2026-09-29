@@ -265,11 +265,31 @@ export function withContent(results, viewer, contentVersion, pronouns = {}) {
   });
 
   /**
-   * The words each dimension gets, the same ones the website shows.
+   * The words each dimension gets. Nothing reads them.
    *
-   * `aligned` when the two landed close together, `shift` when they did not.
-   * Only ever one of the two, chosen by the threshold rather than by whoever
-   * is rendering, so both surfaces make the same call.
+   * ── WHAT THIS COMMENT USED TO SAY, AND WHY IT WAS WORTH CORRECTING ──────
+   * "The same ones the website shows... chosen by the threshold rather than by
+   * whoever is rendering, so both surfaces make the same call." None of that is
+   * true any more, and it cost an hour of chasing a divergence that does not
+   * exist: it reads as a description of the live path, so the obvious next
+   * thought is that the website disagrees with it, when in fact the website is
+   * not looking at it at all.
+   *
+   * They were added in 897bff6b so the app would stop saying "One of your wider
+   * differences" and show the aligned line or the shift instead. Eleven days
+   * later 0b0eee75 rebuilt the communication pages around one tile per domain,
+   * and that tile comes from api/_lib/comms-plan.js on both surfaces. These two
+   * fields have been sent on every payload since and drawn by nobody.
+   *
+   * They also use a different threshold from the tile that did replace them:
+   * ALIGNMENT_THRESHOLD is 1.5 with no middle band, where comms-plan has a
+   * strength line at 0.75 and a note between. So this is a second answer to the
+   * same question, which is the shape this codebase keeps getting wrong, and it
+   * is only harmless because it is unread.
+   *
+   * Left in place rather than deleted: removing a field from a payload is a
+   * decision about an interface, and it is in TASKS.md as one. The comment is
+   * the part that was actively dangerous.
    *
    * Names are substituted here because getDimShift writes the sentence around
    * whichever of the two sits lower on the scale. Which of them is the reader
