@@ -4590,12 +4590,13 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
             </div>
           </div>
         </div>
-        <p style={{ fontSize: "0.66rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "0.6rem" }}>Your story is captured</p>
         <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.85rem", lineHeight: 1.1 }}>{exerciseComplete("ex3").title}</p>
-        <p style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, marginBottom: "2rem", lineHeight: 1.7, maxWidth: 420, margin: "0 auto 2rem" }}>
-          You named the moments, the shifts, and the things you hope for. When {partnerName} finishes {partnerPossAbs}, you'll see where your stories overlap and where you each saw something the other didn't.
-        </p>
-        <button onClick={() => { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); }} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.95rem 2.5rem", fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700, boxShadow: "0 6px 20px rgba(16,185,129,0.28)" }}>View My Results →</button>
+        {/* From api/_lib/exercise-complete.js, the same module the app draws.
+            Ellie: "I would rather them match the app's setup." */}
+        {exerciseComplete("ex3").body.map((line) => (
+          <p key={line.slice(0, 24)} style={{ fontSize: "0.95rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, maxWidth: 420, margin: "0 auto 2rem" }}>{line}</p>
+        ))}
+        <button onClick={() => { try { localStorage.removeItem('attune_ex3_progress'); } catch {} ; onComplete(answers); }} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.95rem 2.5rem", fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700, boxShadow: "0 6px 20px rgba(16,185,129,0.28)" }}>{exerciseComplete("ex3").cta}</button>
       </div>
     );
   }
@@ -14755,24 +14756,19 @@ export default function App() {
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
                   <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>{exerciseComplete("ex1").title}</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#4CAF50", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your communication profile is mapped</p>
-                  {/* Body copy prioritizes the next concrete action:
-                      - If they haven't done Ex2 → tell them that's next
-                      - Else if waiting on partner → say so
-                      - Else (both done) → results */}
-                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{
-                    !ex2Answers
-                      ? ("Next up: Exercise 2. Your expectations, about 15 minutes.")
-                      : bothDone
-                        ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".")
-                        : ("When " + partnerName + " finishes, you'll unlock your couple type and learn what that means for the two of you.")
-                  }</p>
+                                    {/* The ending comes from api/_lib/exercise-complete.js, which is
+                      what the app draws. Ellie: "I would rather them match the app's
+                      setup." It used to be three sentences chosen by whether the next
+                      exercise was done and whether the partner had finished, and a
+                      button that changed with them, so the same moment read three ways
+                      here and a fourth way in the app. */}
+                  {exerciseComplete("ex1").body.map((line) => (
+                    <p key={line.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{line}</p>
+                  ))}
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    {!ex2Answers
-                      ? <button onClick={() => setView("exercise2")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>Start Exercise 2 →</button>
-                      : bothDone
-                        ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
-                        : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
-                    }
+                    {/* One button, the app's word. `exercises` is this site's version of
+                        the app's Insights tab: the page that lists them. */}
+                    <button onClick={() => setView("exercises")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>{exerciseComplete("ex1").cta}</button>
                   </div>
                   {/* Workbook upsell — hidden if they already own it */}
                   {!pkg.hasWorkbook && (
@@ -14830,21 +14826,19 @@ export default function App() {
               ? <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
                   <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>{exerciseComplete("ex2").title}</p>
-                  <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your expectations are recorded</p>
-                  <p style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "0.75rem", lineHeight: 1.75 }}>That took honesty. Most couples don't have these conversations until they have to.</p>
-                  <p style={{ fontSize: "0.88rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{bothDone ? ("Your results are ready. Explore them on your own or together with " + partnerName + ".") : ("When " + partnerName + " finishes all exercises, you'll unlock your couple type and learn what that means for the two of you.")}</p>
+                  {/* The ending comes from api/_lib/exercise-complete.js, which is
+                      what the app draws. Ellie: "I would rather them match the app's
+                      setup." It used to be three sentences chosen by whether the next
+                      exercise was done and whether the partner had finished, and a
+                      button that changed with them, so the same moment read three ways
+                      here and a fourth way in the app. */}
+                  {exerciseComplete("ex2").body.map((line) => (
+                    <p key={line.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{line}</p>
+                  ))}
                   <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    
-                    {bothDone
-                      ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
-                      : partnerSyncing
-                        ? <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", color: C.muted, fontFamily: font.body, fontSize: "0.78rem" }}>
-                            <style>{`@keyframes attuneBtnSpin{to{transform:rotate(360deg)}}`}</style>
-                            <span style={{ width: 14, height: 14, border: "2px solid " + C.stone, borderTopColor: C.clay, borderRadius: "50%", display: "inline-block", animation: "attuneBtnSpin 0.7s linear infinite" }} />
-                            Preparing your results...
-                          </div>
-                        : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
-                    }
+                    {/* One button, the app's word. `exercises` is this site's version of
+                        the app's Insights tab: the page that lists them. */}
+                    <button onClick={() => setView("exercises")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>{exerciseComplete("ex2").cta}</button>
                   </div>
                   {/* Workbook upsell — hidden if they already own it */}
                   {!pkg.hasWorkbook && (
@@ -14950,12 +14944,14 @@ export default function App() {
               <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                 <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
                 <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>{exerciseComplete("ex3").title}</p>
-                <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#10b981", fontWeight: 700, fontFamily: font.body, marginBottom: "1.5rem" }}>Your relationship story is captured</p>
+                {/* The ending comes from api/_lib/exercise-complete.js, which is what
+                    the app draws. Ellie: "I would rather them match the app's setup."
+                    The eyebrow and the two-way button went with the other four. */}
+                {exerciseComplete("ex3").body.map((line) => (
+                  <p key={line.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "2rem", lineHeight: 1.75 }}>{line}</p>
+                ))}
                 <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                  {bothDone
-                    ? <button onClick={() => setView("results")} style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.6rem 1.75rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 600 }}>See Your Results →</button>
-                    : <button onClick={() => setView("home")} style={{ background: "#2d2250", color: "white", border: "none", padding: "0.6rem 1.5rem", fontSize: "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8 }}>Back to Dashboard →</button>
-                  }
+                  <button onClick={() => setView("exercises")} style={{ background: "linear-gradient(135deg, #1B5FE8, #3B3A8A)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>{exerciseComplete("ex3").cta}</button>
                 </div>
               </div>
             ) : (

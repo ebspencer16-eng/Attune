@@ -582,49 +582,39 @@ async function runOne(name) {
      * warns about, and a static scan cannot tell a rendered string from one in a
      * branch nobody takes.
      *
-     * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────
-     * Communication Styles, Expectations and Relationship Reflection. Their
-     * website completion screens are not the app's minimal page: they carry an
-     * upsell, a line that changes on whether the partner has finished, and a
-     * button that goes on to the next exercise or to results rather than back.
-     * Their names come from the module, which is checked above and statically.
-     * ebb0b8a4 says so and says why: "Rewriting those into the
-     * app's minimal page would be a downgrade she did not ask for; the only
-     * difference left is the button word, which is in TASKS.md as hers to
-     * settle."
-     *
-     * That is a decision, not a gap, and a gate must not quietly overturn one.
-     * It is named here rather than detected, because detecting it would mean
-     * reading "does this screen use the module's cta", and a screen that stopped
-     * using it would then drop out of scope silently, which is the exact defeat
-     * this file exists to prevent. Naming it means removing conflict or intimacy
-     * from the module fails loudly instead.
-     *
-     * The button word is back in TASKS.md. When Ellie settles it, delete the
-     * exercise from this set rather than widening anything.
-     *
-     * So this half covers two of five screens, and the static check above covers
-     * the names on all five. Saying which is which matters more than the number:
-     * "all five completion screens are checked" would be true and would mean
-     * something this does not do.
+     * ── IT USED TO COVER THREE OF FIVE ───────────────────────────────────
+     * Communication Styles, Expectations and Relationship Reflection kept their
+     * own prose and buttons by ebb0b8a4's decision, and this checked only their
+     * titles. Ellie settled it the other way: "I would rather them match the
+     * app's setup." All five now render the module whole, so the exemption set
+     * is gone rather than empty. An exemption nobody needs is one somebody
+     * reaches for at the moment a real regression starts failing, which is the
+     * same lesson as the `known` field this file used to carry.
      */
-    const OWN_PROSE = new Set(['ex1', 'ex2', 'ex3']);
     const expected = exerciseComplete(cfg.regKey);
-    const whole = !OWN_PROSE.has(cfg.regKey);
     const finishedNow = await page.evaluate(({ title, body, cta, whole: full }) => {
       const text = document.body.innerText;
       if (!text.includes(title)) return false;
       /* The title is the module's on every completion screen, minimal or not,
          and reaching this line has already proved it. */
       if (!full) return true;
+      /**
+       * textContent, not innerText.
+       *
+       * The website sets `text-transform: uppercase` on these buttons and
+       * innerText reports what CSS renders, so the module's "Back to insights"
+       * came back as "BACK TO INSIGHTS" and three exercises failed on a
+       * difference that is not one. The module owns the words and the
+       * stylesheet owns how they are set; this checks the words.
+       */
       const b = [...document.querySelectorAll('button')]
-        .find((x) => x.innerText.trim() === cta);
+        .find((x) => (x.textContent || '').trim() === cta);
       if (!b) return { missing: `a button reading "${cta}"` };
       const absent = body.filter((line) => !text.includes(line));
       if (absent.length) return { missing: `the line "${absent[0]}"` };
       b.click();
       return true;
-    }, { ...expected, whole });
+    }, { ...expected, whole: true });
     if (finishedNow && finishedNow.missing) {
       await page.close();
       return {

@@ -33,6 +33,8 @@ const TTL = 3600;
  * @returns {Promise<string|null>} a fresh signed URL, or null if there is no
  * file, no credentials, or storage refuses.
  */
+import { isWorkbookFile } from './workbook-format.js';
+
 export async function freshWorkbookUrl({ supabaseUrl, serviceKey, orderNum }) {
   if (!supabaseUrl || !serviceKey || !orderNum) return null;
   const headers = {
@@ -52,8 +54,22 @@ export async function freshWorkbookUrl({ supabaseUrl, serviceKey, orderNum }) {
       }),
     });
     if (!listRes.ok) return null;
+    /**
+     * The newest workbook, not the newest file.
+     *
+     * This took the first name it found, and the folder holds more than one
+     * kind of document: the old builder wrote a .docx into the same folder the
+     * PDF builder writes to, despite a comment in that file claiming they were
+     * kept apart. So a couple with an old Word file and no PDF was handed the
+     * Word file, and Ellie was: "it still downloaded the docx version".
+     *
+     * A file that is not a workbook is not a workbook. Returning null here puts
+     * the surface into its not-ready state, which is the honest one, rather than
+     * into a download of the wrong document. A missing workbook is visibly
+     * missing; the wrong one looks finished.
+     */
     const files = await listRes.json().catch(() => []);
-    const newest = Array.isArray(files) ? files.find((f) => f?.name) : null;
+    const newest = Array.isArray(files) ? files.find((f) => isWorkbookFile(f?.name)) : null;
     if (!newest) return null;
 
     const signRes = await fetch(

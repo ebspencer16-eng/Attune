@@ -45,7 +45,6 @@ import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
 import { DIM_META } from './_workbook-content.js';
 import { DIM_KEYS, AXIS_CONFIG } from './_type-engine.js';
 import { ALIGNMENT_THRESHOLD } from './_lib/results.js';
-import { alignedAdvice, getDimShift } from './_lib/dimension-copy.js';
 import { contentFor } from './_content/index.js';
 import { COUPLE_TYPES } from './_couple-types.js';
 import { DOMAIN_OF, DOMAIN_LABEL } from './_lib/tags.js';
@@ -265,58 +264,25 @@ export function withContent(results, viewer, contentVersion, pronouns = {}) {
   });
 
   /**
-   * The words each dimension gets. Nothing reads them.
+   * ── TWO FIELDS THAT USED TO BE COMPUTED HERE ────────────────────────────
+   * `content.dimensions[].aligned` and `.shift`, a sentence per dimension.
    *
-   * ── WHAT THIS COMMENT USED TO SAY, AND WHY IT WAS WORTH CORRECTING ──────
-   * "The same ones the website shows... chosen by the threshold rather than by
-   * whoever is rendering, so both surfaces make the same call." None of that is
-   * true any more, and it cost an hour of chasing a divergence that does not
-   * exist: it reads as a description of the live path, so the obvious next
-   * thought is that the website disagrees with it, when in fact the website is
-   * not looking at it at all.
-   *
-   * They were added in 897bff6b so the app would stop saying "One of your wider
+   * Added in 897bff6b so the app would stop saying "One of your wider
    * differences" and show the aligned line or the shift instead. Eleven days
    * later 0b0eee75 rebuilt the communication pages around one tile per domain,
-   * and that tile comes from api/_lib/comms-plan.js on both surfaces. These two
-   * fields have been sent on every payload since and drawn by nobody.
+   * and that tile comes from api/_lib/comms-plan.js on both surfaces. They were
+   * sent on every payload from then until now and drawn by nobody.
    *
-   * They also use a different threshold from the tile that did replace them:
-   * ALIGNMENT_THRESHOLD is 1.5 with no middle band, where comms-plan has a
-   * strength line at 0.75 and a note between. So this is a second answer to the
-   * same question, which is the shape this codebase keeps getting wrong, and it
-   * is only harmless because it is unread.
+   * They also answered "is this dimension a gap" on a different threshold from
+   * the tile that replaced them: ALIGNMENT_THRESHOLD at 1.5 with no middle band,
+   * against comms-plan's strength line at 0.75 and a note between. A second
+   * answer to a question the product already answers, which is the shape of
+   * almost every serious bug here, and harmless only because it was unread.
    *
-   * Left in place rather than deleted: removing a field from a payload is a
-   * decision about an interface, and it is in TASKS.md as one. The comment is
-   * the part that was actively dangerous.
-   *
-   * Names are substituted here because getDimShift writes the sentence around
-   * whichever of the two sits lower on the scale. Which of them is the reader
-   * does not change the sentence.
+   * Removed at Ellie's word, "Fine to delete these". Recorded rather than
+   * silently dropped so the next person to want a per-dimension sentence knows
+   * this existed, why it went, and which module to read instead.
    */
-  const nameA = a?.name || 'Your partner';
-  const nameB = b?.name || 'Your partner';
-
-  /**
-   * The copy this couple's results were stamped with, not whatever is current.
-   *
-   * This passed null, which contentFor reads as "use the newest version". That
-   * is exactly what the version stamp exists to prevent: a couple who finished
-   * under v1 must keep reading v1 until someone deliberately republishes them,
-   * or a note written against a sentence points at a sentence that changed.
-   *
-   * Invisible today because only v1 exists. It would have become a silent
-   * disagreement between the app and the website the day v2 shipped, with the
-   * website right and the app wrong.
-   */
-  const copy = contentFor(contentVersion ?? null);
-  for (const d of dimensions) {
-    if (d.a == null || d.b == null) continue;
-    const wide = d.gap != null && d.gap >= ALIGNMENT_THRESHOLD.gap;
-    d.aligned = wide ? null : alignedAdvice(d.key, d.a, d.b, copy);
-    d.shift = wide ? getDimShift(d.key, d.a, d.b, nameA, nameB, copy) : null;
-  }
 
   return {
     ...results,
@@ -730,6 +696,16 @@ export default async function handler(req) {
      * the app's version of that page had one section fewer than the website's.
      */
     const commsPlan = (() => {
+      /**
+       * The copy this couple's results were stamped with, not whatever is
+       * current. Passing null makes contentFor return the newest version, which
+       * is what the stamp exists to prevent: a couple who finished under v1 has
+       * to keep reading v1 until someone republishes them deliberately, or a
+       * note written against a sentence starts pointing at a different one.
+       *
+       * Invisible while only v1 exists, and a silent disagreement between the
+       * app and the website the day v2 ships.
+       */
       const copy = contentFor(contentVersion ?? null);
       const feedback = personalityFeedback({
         dimensions: displayed.content?.dimensions || [],

@@ -1,8 +1,10 @@
+import { WORKBOOK_EXT } from './workbook-format.js';
+
 /**
  * The two things a surface says about the workbook.
  *
  * ── WHY A MODULE FOR TWO LINES ────────────────────────────────────────────
- * Because there are two surfaces now. The workbook is a generated .docx, and
+ * Because there are two surfaces now. The workbook is a generated PDF, and
  * the app's Resources tab has to say the same thing about it that the
  * dashboard does: here it is, or it is coming. Both sentences were inline in
  * src/App.jsx, which is how the app would have ended up with its own wording
@@ -35,8 +37,14 @@ export const WORKBOOK_COPY = {
   generating: 'Building your workbook. Check back shortly.',
 };
 
-/** The name the file is saved under, on either surface. */
+/**
+ * The name the file is saved under, on either surface.
+ *
+ * The extension is read rather than typed. It said `.docx` here while the
+ * builder wrote a PDF, so a workbook downloaded under a Word extension and the
+ * two statements of the same fact had already disagreed.
+ */
 export function workbookFileName(you, them) {
   const clean = (n) => String(n || '').trim().replace(/[^\w-]+/g, '_') || 'partner';
-  return `Attune_Workbook_${clean(you)}_and_${clean(them)}.docx`;
+  return `Attune_Workbook_${clean(you)}_and_${clean(them)}.${WORKBOOK_EXT}`;
 }

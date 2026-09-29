@@ -21,6 +21,7 @@
 
 import { capabilitiesFor } from './_lib/ownership.js';
 
+import { WORKBOOK_EXT, WORKBOOK_MIME } from './_lib/workbook-format.js';
 import { payloadToCouple } from './_couple-shape.js';
 import { payloadForCouple } from './_lib/workbook-couple.js';
 import { safeError } from './_lib/http.js';
@@ -172,8 +173,15 @@ export default async function handler(req, res) {
   const p1 = (body.userName || 'PartnerA').replace(/\s+/g, '_');
   const p2 = (body.partnerName || 'PartnerB').replace(/\s+/g, '_');
   const orderId = body.orderId || `${p1}_${p2}_${Date.now()}`;
-  const filename = `Attune_Workbook_${p1}_and_${p2}.pdf`;
-  // Different folder than docx so both can coexist while we transition
+  const filename = `Attune_Workbook_${p1}_and_${p2}.${WORKBOOK_EXT}`;
+  /**
+   * The same folder the .docx builder writes to, which a comment here used to
+   * deny: it said "different folder than docx so both can coexist while we
+   * transition", and both have always been `workbooks/<orderId>/`. They coexist
+   * by sharing a folder, and for a while the reader got whichever was newest,
+   * which for every couple was the Word file. The format is what tells them
+   * apart now; see _lib/workbook-format.js.
+   */
   const storagePath = `workbooks/${orderId}/${filename}`;
 
   if (!supabaseUrl || !serviceKey) {
@@ -184,7 +192,7 @@ export default async function handler(req, res) {
       ok: true,
       filename,
       base64: pdfBuffer.toString('base64'),
-      contentType: 'application/pdf',
+      contentType: WORKBOOK_MIME,
     });
   }
 
@@ -195,7 +203,7 @@ export default async function handler(req, res) {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/pdf',
+          'Content-Type': WORKBOOK_MIME,
           'apikey': serviceKey,
           'Authorization': `Bearer ${serviceKey}`,
           'x-upsert': 'true',
