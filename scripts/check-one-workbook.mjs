@@ -127,6 +127,24 @@ if (!appAsks) {
     + ' get the workbook at all.');
 }
 
+/**
+ * And nothing anywhere asks the .docx-storing endpoint.
+ *
+ * /api/store-workbook has no callers at all now: the app moved to the PDF
+ * service and the website's Word download goes straight to /api/generate-workbook.
+ * It is left in place rather than deleted, because deleting a live URL is Ellie's
+ * call, and it is held to having no callers because a third plausible endpoint is
+ * most of why the wrong workbook shipped three times.
+ */
+for (const rel of ['src/App.jsx', 'api/save-exercise.js', 'api/home.js', 'api/tool-data.js']) {
+  let src;
+  try { src = bare(readFileSync(`${ROOT}${rel}`, 'utf8')); } catch { continue; }
+  if (/['"`]\/api\/store-workbook['"`]/.test(src)) {
+    fails.push(`${rel} calls /api/store-workbook, which stores a document built by`
+      + ' the .docx generator. Nothing should: the workbook is the PDF service.');
+  }
+}
+
 /** And the trigger that builds one the moment a couple's results open. */
 const save = bare(readFileSync(`${ROOT}api/save-exercise.js`, 'utf8'));
 if (/\/api\/store-workbook['"`]/.test(save)) {
