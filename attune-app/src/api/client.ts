@@ -1737,7 +1737,10 @@ export type QuestionItem = {
 
 export type ExpectationsSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /* `resultsGroup` is which results chapter this exercise becomes. The server
+     reads it off api/_exercises.js; it is what lets the opening page wear the
+     same mark that chapter's cover wears, without the app owning the mapping. */
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string; resultsGroup?: string | null };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   /** The screen that closes it, from api/_lib/exercise-complete.js. */
@@ -1783,7 +1786,10 @@ export type SavedAnswers = {
 
 export type QuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /* `resultsGroup` is which results chapter this exercise becomes. The server
+     reads it off api/_exercises.js; it is what lets the opening page wear the
+     same mark that chapter's cover wears, without the app owning the mapping. */
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string; resultsGroup?: string | null };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   /** The screen that closes it, from api/_lib/exercise-complete.js. */
@@ -1815,7 +1821,10 @@ export function fetchQuestions(exercise: string) {
  */
 export type ReflectionQuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /* `resultsGroup` is which results chapter this exercise becomes. The server
+     reads it off api/_exercises.js; it is what lets the opening page wear the
+     same mark that chapter's cover wears, without the app owning the mapping. */
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string; resultsGroup?: string | null };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   /** The screen that closes it, from api/_lib/exercise-complete.js. */
@@ -1846,7 +1855,10 @@ export type ReflectionQuestionSet = {
  */
 export type IntimacyQuestionSet = {
   saved: SavedAnswers;
-  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /* `resultsGroup` is which results chapter this exercise becomes. The server
+     reads it off api/_exercises.js; it is what lets the opening page wear the
+     same mark that chapter's cover wears, without the app owning the mapping. */
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string; resultsGroup?: string | null };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   /** The screen that closes it, from api/_lib/exercise-complete.js. */
@@ -2153,7 +2165,10 @@ export type ConflictQuestionSet = {
    * is what reads the answers back and calls them complete or not.
    */
   requiredIds: string[];
-  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string };
+  /* `resultsGroup` is which results chapter this exercise becomes. The server
+     reads it off api/_exercises.js; it is what lets the opening page wear the
+     same mark that chapter's cover wears, without the app owning the mapping. */
+  exercise: { key: string; label: string; fullLabel?: string; shape: 'answers' | 'record'; view: string; resultsGroup?: string | null };
   /** The screen that opens this exercise, from api/_lib/exercise-intro.js. */
   intro?: { title: string; body: string[]; note?: string | null; cta: string } | null;
   /** The screen that closes it, from api/_lib/exercise-complete.js. */

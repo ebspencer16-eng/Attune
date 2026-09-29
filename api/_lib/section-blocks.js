@@ -118,6 +118,25 @@ export const ORDER_ENFORCED = new Set([
 ]);
 
 export const SECTION_BLOCKS = {
+  /**
+   * ── THE CHAPTER COVER ───────────────────────────────────────────────────
+   * Ellie: "Mirror cover pages for exercises and results on both web and app."
+   *
+   * One key rather than five, because there is one cover page and five chapters
+   * open on it. Every other key here is a section id; this is a page shape, and
+   * saying so once is more honest than five identical entries that could drift
+   * apart.
+   *
+   * The mark is not a block. It is the chapter's glyph, and a reader who could
+   * not see it would not be missing anything they were told. The frame is,
+   * because without it this is not a cover; so are the name and the way in.
+   */
+  cover: [
+    { id: 'frame', note: 'The gradient rule around the page, which is what makes it a cover.' },
+    { id: 'title', note: "The chapter's name." },
+    { id: 'start', note: 'The one way in, to that chapter\u2019s overview.' },
+  ],
+
   // Split deliberately. `groups` is on both surfaces and is enforced;
   // `keep-growing` is in PLANNED because the app cannot draw it yet. The unit
   // of adoption is a block, not a page, so a section can be half adopted

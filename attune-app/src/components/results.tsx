@@ -41,6 +41,7 @@ import type {
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import ResultsMenu, { GROUP_ICON } from '@/components/results-menu';
+import { CoverPage } from '@/components/cover-page';
 import EdgeFadedRow from '@/components/edge-faded-row';
 import GhostTile from '@/components/ghost-tile';
 import { withAlpha } from '@/components/page-wash';
@@ -1208,6 +1209,7 @@ function SectionBody({
         title={coverTitle}
         accent={accent || c.accent}
         icon={coverIcon}
+        startLabel={pageCopy('coverStart', 'See insights')}
         onStart={() => onGoToSection(section.replace('-cover', '-overview'))}
       />
     );
@@ -3704,120 +3706,48 @@ function CoupleType({ results, you, them, title }: {
  * solved backwards. The peak is the number worth writing down, because it is
  * the one Ellie reacted to: 0.68 read as a disc, 0.34 reads as a tint.
  */
-const GLOW_SIZE = 196;
-const GLOW_RINGS = 52;
-const GLOW_PEAK = 0.34;
-const GLOW_ALPHA = 1 - (1 - GLOW_PEAK) ** (1 / GLOW_RINGS);
-
-function Cover({ title, accent, icon, onStart }: {
+/**
+ * A results chapter's cover.
+ *
+ * The frame, the glow and the mark are CoverPage, which the exercises open on
+ * too. Ellie: "Mirror cover pages for exercises and results on both web and
+ * app." What is left here is what a chapter puts inside it.
+ */
+function Cover({ title, accent, icon, onStart, startLabel }: {
   title: string; accent: string; icon?: string | null; onStart?: () => void;
+  /* From the server's PAGE_COPY, so the website's cover says the same word. */
+  startLabel: string;
 }) {
   return (
-    /* The buffer she asked for, and at the bottom it has to clear the tab
-       bar as well: a frame whose bottom line runs underneath the tab bar
-       reads as the bar sitting on top of the page rather than as a frame. */
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: Spacing.lg,
-        paddingTop: Spacing.lg,
-        paddingBottom: BottomTabInset + Spacing.lg,
-      }}>
-      {/* ── THE FRAME ─────────────────────────────────────────────────────
-          Ellie: "No gradient line under the title but maybe a gradient line
-          running in a rounded rectangle around the edge of the page (but still
-          with a buffer so not at the edge of the screen)."
+    /* The bottom line has to clear the tab bar: a frame whose edge runs
+       underneath it reads as the bar sitting on top of the page. */
+    <CoverPage accent={accent} icon={icon} bottomInset={BottomTabInset + Spacing.lg}>
+      {/* block: cover/frame */}
+      {/* block: cover/title */}
+      {/* not markable: the section's own name, which is a label rather than a
+          finding. A mark anchored to it would follow the word. */}
+      <Prose style={{ ...Type.hero, color: c.textStrong, textAlign: 'center', marginTop: Spacing.lg }}>
+        {title}
+      </Prose>
 
-          A gradient border is not a thing React Native can draw, so it is a
-          gradient rectangle with the page laid on top of it, inset by a point
-          and a half. That is the standard way to get one and it is why the
-          inner view carries the cream: without it the gradient would show
-          through everything. */}
-      <LinearGradient
-        colors={[Palette.orange, '#9B5DE5', Palette.indigo]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ flex: 1, borderRadius: Radius.xl + 8, padding: 1.5 }}>
-        <View
+      {onStart ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onStart}
           style={{
-            flex: 1, borderRadius: Radius.xl + 7,
-            backgroundColor: Palette.cream,
-            alignItems: 'center', justifyContent: 'center',
-            paddingHorizontal: Spacing.xxl,
+            marginTop: Spacing.xxl,
+            backgroundColor: accent,
+            borderRadius: Radius.pill,
+            paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
           }}>
-          {/* ── THE ICON, AND ITS GLOW ──────────────────────────────────
-              Ellie: "Maybe a large icon not in a circle but with a colored
-              glow behind it?"
-
-              The glow is the home screen's trick again: many rings, each too
-              faint for its own edge to be findable, stacked so the alpha
-              builds toward the middle. One translucent circle would be a
-              circle, which is the thing she asked to get rid of.
-
-              ── EXCEPT IT STILL LOOKED LIKE ONE ──────────────────────────
-              Ellie, seeing it: "can we make the icons a little larger but with
-              thinner lines, and can we make the glow more subtle, like a tint
-              that disperses gently? Right now it looks like a circle."
-
-              Twenty-two rings at five per cent is a five per cent step at
-              every edge, and the outermost of those steps is a visible circle
-              against the cream. Three changes: many more rings so no single
-              edge is findable, a lower peak so it is a tint rather than a
-              disc, and a wider field so it fades out well before it stops.
-
-              The alpha is solved from the peak, so the count can change
-              without changing how strong the glow is. */}
-          <View style={{ width: GLOW_SIZE, height: GLOW_SIZE, alignItems: 'center', justifyContent: 'center' }}>
-            {Array.from({ length: GLOW_RINGS }, (_, i) => {
-              const size = GLOW_SIZE * (1 - i / GLOW_RINGS);
-              return (
-                <View
-                  key={i}
-                  pointerEvents="none"
-                  style={{
-                    position: 'absolute',
-                    width: size, height: size, borderRadius: size / 2,
-                    backgroundColor: withAlpha(accent, GLOW_ALPHA),
-                  }}
-                />
-              );
-            })}
-            {/* Larger and lighter: `weight` is what makes an SF Symbol's
-                strokes thinner, and it is a different control from `size`.
-                Asking for a bigger symbol alone makes the lines heavier too,
-                which is the opposite of what she asked for. */}
-            <SymbolView
-              name={(icon || 'sparkles') as never}
-              size={78}
-              weight="light"
-              tintColor={accent}
-              fallback={<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: accent }} />}
-              style={{ width: 86, height: 86 }}
-            />
-          </View>
-
-          {/* not markable: the section's own name, which is a label rather than
-              a finding. A mark anchored to it would follow the word. */}
-          <Prose style={{ ...Type.hero, color: c.textStrong, textAlign: 'center', marginTop: Spacing.lg }}>
-            {title}
-          </Prose>
-
-          {onStart ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={onStart}
-              style={{
-                marginTop: Spacing.xxl,
-                backgroundColor: accent,
-                borderRadius: Radius.pill,
-                paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
-              }}>
-              <Text style={{ ...Type.cardTitle, color: Palette.white }}>See insights</Text>
-            </Pressable>
-          ) : null}
-        </View>
-      </LinearGradient>
-    </View>
+          {/* block: cover/start */}
+          {/* not markable: the word on a button. A mark anchored to a control
+              would follow the control rather than sit on a sentence, and there
+              is nothing here to think about. */}
+          <Text style={{ ...Type.cardTitle, color: Palette.white }}>{startLabel}</Text>
+        </Pressable>
+      ) : null}
+    </CoverPage>
   );
 }
 

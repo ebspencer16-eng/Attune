@@ -905,11 +905,26 @@ export default async function handler(req) {
        * had written its own, and they had drifted.
        */
       pageTitles: PAGE_TITLES,
-      pageCopy: {
-        commPlacements: PAGE_COPY.commPlacements,
-        expectationsTip: PAGE_COPY.expectationsTip(me.name || 'You', partner?.name || 'your partner'),
-        coupleTypeTitle: PAGE_COPY.coupleTypeTitle(me.name || 'You', partner?.name || 'your partner'),
-      },
+      /**
+       * Every string in PAGE_COPY, not a list of three.
+       *
+       * This named its three keys by hand, so a fourth added to the module
+       * reached the website and never reached the app, and the app would fall
+       * back to whatever string was typed into its own renderer. That is the
+       * failure this file is full of, one key at a time. `coverStart` was the
+       * fourth.
+       *
+       * The entries that take the two names are functions; everything else is a
+       * string. Calling with (you, them) is the one shape they have, and a
+       * function wanting anything else would come back with the wrong sentence
+       * rather than an error, so it is stated here rather than assumed.
+       */
+      pageCopy: Object.fromEntries(Object.entries(PAGE_COPY).map(([key, value]) => [
+        key,
+        typeof value === 'function'
+          ? value(me.name || 'You', partner?.name || 'your partner')
+          : value,
+      ])),
     });
   } catch (e) {
     console.error('[results] failed:', e);

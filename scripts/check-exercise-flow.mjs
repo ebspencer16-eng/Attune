@@ -47,6 +47,7 @@ import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
 import { readFileSync } from 'node:fs';
 import { EXERCISES as REGISTRY } from '../api/_exercises.js';
 import { exerciseComplete } from '../api/_lib/exercise-complete.js';
+import { exerciseIntro } from '../api/_lib/exercise-intro.js';
 
 // `vite preview` binds to localhost, which resolves to ::1 first on macOS, so
 // a default of 127.0.0.1 was refused on the only machine this has to run on.
@@ -251,6 +252,34 @@ async function runOne(name) {
     if (x) x.click();
   });
   await page.wait(500);
+
+  /**
+   * ── THE OPENING PAGE IS A COVER ─────────────────────────────────────────
+   * Ellie: "Mirror cover pages for exercises and results on both web and app."
+   *
+   * The app opens every exercise on CoverPage, the same component its results
+   * chapters use. The website's five openings were five hand-built columns, so
+   * this checks the two things that make one a cover rather than a page: the
+   * gradient rule around it, and the exercise's own title from
+   * api/_lib/exercise-intro.js, which is the module the app is served through
+   * /api/questions.
+   *
+   * Read off the rendered page rather than the source, because the frame is a
+   * background on a div and a source scan cannot tell a component that is used
+   * from one that is imported.
+   */
+  const intro = exerciseIntro(cfg.regKey, { partner: 'your partner' });
+  const opening = await page.evaluate((title) => {
+    const text = document.body.innerText || '';
+    if (!text.includes(title)) return `the opening page does not say "${title}"`;
+    const framed = [...document.querySelectorAll('div')]
+      .some((d) => /linear-gradient\(135deg, rgb\(232, 103, 58\)/.test(getComputedStyle(d).backgroundImage));
+    return framed ? null : 'the opening page is not inside a cover: nothing on it carries the gradient frame';
+  }, intro.title);
+  if (opening) {
+    await page.close();
+    return { name, ok: false, why: `${cfg.label}: ${opening}.` };
+  }
 
   // Entry screen.
   await page.evaluate(() => {

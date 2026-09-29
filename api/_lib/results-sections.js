@@ -182,6 +182,22 @@ export const PAGE_COPY = {
    * back to the reader two inches under it.
    */
   commPlacements: 'Overview',
+  /**
+   * The one control on a chapter's cover page.
+   *
+   * ── WHY IT IS HERE AND NOT IN THE SCREEN ────────────────────────────────
+   * It was `<Text>See insights</Text>` inside the app's results.tsx, which was
+   * fine while the app was the only surface with cover pages. Ellie: "Mirror
+   * cover pages for exercises and results on both web and app." The moment the
+   * website draws the same page, a word typed into one renderer is a word the
+   * other has to guess, and that is how "Back to dashboard" and "Back to
+   * insights" came to be two endings for one exercise.
+   *
+   * The cover carries the chapter's name and this. Everything else on it would
+   * be copy, and copy is Ellie's.
+   */
+  coverStart: 'See insights',
+
   /** The tip tiles on an expectations conversation page. Takes both names. */
   expectationsTip: (you, them) => `A tip for ${you} and ${them}`,
   /**

@@ -90,7 +90,7 @@ import { availableSections as availableResultsSections, PAGE_TITLES as SC_TITLES
  * a laptop and the other way round. See src/notes-web.jsx.
  */
 import { NotesView as ConnectedNotesView, ResultsMarkingLayer, notesApi } from "./notes-web.jsx";
-import { RESULTS_SECTION_LABELS } from "../api/_lib/results-sections.js";
+import { RESULTS_SECTION_LABELS, COVER_SECTIONS } from "../api/_lib/results-sections.js";
 // The reflection question set, moved out of this file so the app can reach
 // it too. See api/_anniversary-questions.js.
 import {
@@ -1077,9 +1077,13 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
   // The opening page, from the module both surfaces read.
   const ex2Intro = exerciseIntro("ex2", { partner: partnerName });
   if (phase === "intro") return (
-    <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
+      {/* The cover, with this page's contents inside it. The two package
+          variants keep their own wording and the timing line stays: both are
+          things this page says that the others do not. */}
+      <CoverCard accent="#1B5FE8" minHeight="auto">
       <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 . What You Expect</p>
       <h2 style={{ fontFamily: font.display, fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>
         {ex2Intro.title}
@@ -1108,13 +1112,12 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           }
         </p>
       ) : null}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: ("1px solid " + (C.stone)), paddingTop: "1.5rem" }}>
-        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body }}>{isRevisited ? "~10 minutes · life questions only" : "~15 minutes · 2 parts"}</p>
-        <button onClick={() => setPhase("life")}
-          style={{ background: "#1B5FE8", color: "white", border: "none", padding: "0.9rem 2.25rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>
-          {ex2Intro.cta} →
-        </button>
-      </div>
+      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginTop: "1.5rem", marginBottom: 0 }}>{isRevisited ? "~10 minutes · life questions only" : "~15 minutes · 2 parts"}</p>
+      <button onClick={() => setPhase("life")}
+        style={{ marginTop: "1.5rem", background: "#1B5FE8", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.8rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 999, fontWeight: 700 }}>
+        {ex2Intro.cta}
+      </button>
+      </CoverCard>
     </div>
   );
 
@@ -1503,21 +1506,12 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
 
   // ── INTRO ──
   if (phase === 'intro') return (
-    <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
-      <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{exerciseNumber ? `Exercise 0${exerciseNumber} · ` : ""}Physical Intimacy Expectations</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>{intimacyIntro.title}</h2>
-      {intimacyIntro.body.map(para => (
-        <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.text, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1rem" }}>
-          {para}
-        </p>
-      ))}
-      <div style={{ marginBottom: "1rem" }} />
-      <button onClick={() => setPhase(lockedVariant ? 'questions' : 'branch')}
-        style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
-        {intimacyIntro.cta} →
-      </button>
-    </div>
+    <ExerciseCover
+      accent={accent}
+      eyebrow={`${exerciseNumber ? `Exercise 0${exerciseNumber} · ` : ""}Physical Intimacy Expectations`}
+      intro={intimacyIntro}
+      onBegin={() => setPhase(lockedVariant ? 'questions' : 'branch')}
+    />
   );
 
   // The one question that sets the wording for both of them.
@@ -1715,20 +1709,12 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
 
   // ── INTRO ─────────────────────────────────────────────────────────────────
   if (phase === 'intro') return (
-    <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem" }}>
-      <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{num ? `Exercise ${num} · Conflict Patterns` : "Conflict Patterns"}</div>
-      <h2 style={{ fontFamily: HFONT, fontSize: "1.7rem", fontWeight: 700, color: C.ink, lineHeight: 1.2, marginBottom: "1rem" }}>{conflictIntro.title}</h2>
-      {conflictIntro.body.map(para => (
-        <p key={para.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginBottom: "1.75rem" }}>
-          {para}
-        </p>
-      ))}
-      <button onClick={() => setPhase('questions')}
-        style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: BFONT, cursor: "pointer" }}>
-        {conflictIntro.cta} →
-      </button>
-    </div>
+    <ExerciseCover
+      accent={accent}
+      eyebrow={num ? `Exercise ${num} · Conflict Patterns` : "Conflict Patterns"}
+      intro={conflictIntro}
+      onBegin={() => setPhase('questions')}
+    />
   );
 
   // ── DONE ──────────────────────────────────────────────────────────────────
@@ -3254,6 +3240,77 @@ function generatePersonalityFeedback(myS, partS, userName, partnerName, content)
   });
 }
 
+/**
+ * The page anything opens on: a results chapter, or an exercise.
+ *
+ * ── WHY ONE COMPONENT ─────────────────────────────────────────────────────
+ * Ellie: "Mirror cover pages for exercises and results on both web and app."
+ *
+ * The app draws both from one CoverPage. This is its counterpart, so the
+ * website is not a second opinion about what a cover looks like: a gradient
+ * rule around a cream card, the chapter's mark over a glow, and whatever the
+ * page puts under it.
+ *
+ * The glow is many faint rings rather than one translucent disc, which is what
+ * Ellie asked for after seeing the first attempt: "can we make the glow more
+ * subtle, like a tint that disperses gently? Right now it looks like a circle."
+ * A radial gradient is the browser's version of the app's stack of rings.
+ *
+ * Every word on it comes from a caller, and every caller takes its words from a
+ * module both surfaces read. Nothing here is copy.
+ */
+function CoverCard({ accent, icon = "\u25C9", children, minHeight = "min(72vh, 620px)" }) {
+  return (
+    <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
+      <div style={{
+        borderRadius: 25, background: C.cream, minHeight,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        padding: "3rem 2rem", textAlign: "center",
+      }}>
+        <div style={{
+          width: 132, height: 132, borderRadius: "50%", display: "flex",
+          alignItems: "center", justifyContent: "center", marginBottom: "1.75rem", flexShrink: 0,
+          background: `radial-gradient(circle, ${accent}22 0%, ${accent}14 35%, ${accent}08 55%, transparent 72%)`,
+        }}>
+          <span style={{ fontSize: "3.2rem", color: accent, lineHeight: 1 }}>{icon}</span>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * An exercise's opening page, which is a cover with the exercise's own words in
+ * it. The words are api/_lib/exercise-intro.js, which is what the app is served
+ * through /api/questions, so the two surfaces open an exercise identically.
+ */
+function ExerciseCover({ accent, eyebrow, intro, onBegin }) {
+  return (
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem" }}>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <CoverCard accent={accent}>
+        {eyebrow ? (
+          <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: accent, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{eyebrow}</div>
+        ) : null}
+        <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.5rem, 4vw, 2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.2, margin: 0, maxWidth: 420 }}>{intro.title}</h2>
+        {intro.body.map(para => (
+          <p key={para.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.7, marginTop: "1.25rem", marginBottom: 0, maxWidth: 420 }}>
+            {para}
+          </p>
+        ))}
+        {intro.note ? (
+          <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.6, marginTop: "1.5rem", marginBottom: 0, maxWidth: 420 }}>{intro.note}</p>
+        ) : null}
+        <button onClick={onBegin}
+          style={{ marginTop: "2.25rem", background: accent, color: "white", border: "none", borderRadius: 999, padding: "0.85rem 2.25rem", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: BFONT, cursor: "pointer" }}>
+          {intro.cta}
+        </button>
+      </CoverCard>
+    </div>
+  );
+}
+
 // ── OVERALL PAIRING LABEL ────────────────────────────────────────────────────
 function overallPairingLabel(avgGap) {
   if (avgGap <= 0.75) return "Highly aligned";
@@ -3404,9 +3461,15 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
   // ── Combined intro (Exercise 01 + 02 preview) — matches Partner B copy ─
   if (phase === 'intro') {
     return (
-      <div style={{ maxWidth: 520, margin: "0 auto", padding: "3rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
+        {/* The cover, with this page's own contents inside it. Ellie: "Mirror
+            cover pages for exercises and results on both web and app." The two
+            preview tiles stay: they say what the next twenty minutes hold,
+            which is content rather than chrome, and nothing asked for them to
+            go. */}
+        <CoverCard accent="#E8673A" minHeight="auto">
         <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: font.body, marginBottom: "1rem" }}>
           {userName} &amp; {partnerName}
         </p>
@@ -3431,9 +3494,10 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
           ))}
         </div>
         <button onClick={() => setPhase('questions')}
-          style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.9rem 2.25rem", fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 12, fontWeight: 700 }}>
-          {ex1Intro.cta} →
+          style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.8rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 999, fontWeight: 700 }}>
+          {ex1Intro.cta}
         </button>
+        </CoverCard>
       </div>
     );
   }
@@ -4555,25 +4619,28 @@ function AnniversaryExercise({ userName, partnerName, onComplete, onBack, partne
   // resumed sessions skip straight to questions.
   if (phase === 'intro') {
     return (
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem 2rem", animation: "fadeIn 0.5s ease" }}>
         <link href={FONT_LINK} rel="stylesheet" />
         <style>{'@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}'}</style>
-        <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 03 · Our Relationship Story</p>
-        <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem" }}>
-          {ex3Intro.title}
-        </p>
-        {ex3Intro.body.map(para => (
-          <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1rem" }}>
-            {para}
+        {/* The cover, keeping this page's timing line. */}
+        <CoverCard accent="#10b981" minHeight="auto">
+          <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 03 · Our Relationship Story</p>
+          <p style={{ fontFamily: font.display, fontSize: "1.8rem", fontWeight: 700, color: C.ink, lineHeight: 1.15, marginBottom: "1.25rem", maxWidth: 420 }}>
+            {ex3Intro.title}
           </p>
-        ))}
-        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.75rem", letterSpacing: "0.05em" }}>
-          ~10 minutes
-        </p>
-        <button onClick={() => setPhase('questions')}
-          style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.85rem 2rem", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 10, fontWeight: 600 }}>
-          {ex3Intro.cta} →
-        </button>
+          {ex3Intro.body.map(para => (
+            <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1rem", maxWidth: 420 }}>
+              {para}
+            </p>
+          ))}
+          <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: 0, letterSpacing: "0.05em" }}>
+            ~10 minutes
+          </p>
+          <button onClick={() => setPhase('questions')}
+            style={{ marginTop: "1.75rem", background: "linear-gradient(135deg, #10b981, #059669)", color: "white", border: "none", padding: "0.85rem 2.25rem", fontSize: "0.8rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 999, fontWeight: 700 }}>
+            {ex3Intro.cta}
+          </button>
+        </CoverCard>
       </div>
     );
   }
@@ -6686,11 +6753,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div key={sec.id}>
             <button onClick={() => {
               if (sec.children) {
-                if (sec.id === "comm") { setCommExpanded(e => !e); if (!commExpanded) go("comm-overview"); }
-                else if (sec.id === "exp") { setExpExpanded(e => !e); if (!expExpanded) go("exp-overview"); }
-                else if (sec.id === "reflection") { setReflExpanded(e => !e); if (!reflExpanded) go("reflection-overview"); }
-                else if (sec.id === "intimacy") { setIntimExpanded(e => !e); if (!intimExpanded) go("intimacy-overview"); }
-                else if (sec.id === "conflict") { setConflictExpanded(e => !e); if (!conflictExpanded) go("conflict-overview"); }
+                /* Opening a chapter lands on its cover, which is the app's
+                   behaviour: its nav row goes to the group's first child and the
+                   first child is the cover. Before covers existed here this went
+                   straight to the overview, so the five cover pages were
+                   reachable only by a bookmark and nobody ever saw one. */
+                const first = COVER_SECTIONS.includes(`${sec.id}-cover`) ? `${sec.id}-cover` : `${sec.id}-overview`;
+                if (sec.id === "comm") { setCommExpanded(e => !e); if (!commExpanded) go(first); }
+                else if (sec.id === "exp") { setExpExpanded(e => !e); if (!expExpanded) go(first); }
+                else if (sec.id === "reflection") { setReflExpanded(e => !e); if (!reflExpanded) go(first); }
+                else if (sec.id === "intimacy") { setIntimExpanded(e => !e); if (!intimExpanded) go(first); }
+                else if (sec.id === "conflict") { setConflictExpanded(e => !e); if (!conflictExpanded) go(first); }
               } else { go(sec.id); }
             }} data-nav-active={section === sec.id ? "true" : undefined} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
               <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#7A6753" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
@@ -6837,6 +6910,69 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       </div>
     </div>
   );
+
+  /*
+   * ── PAGE: A CHAPTER COVER ───────────────────────────────────────────────
+   * Ellie: "Mirror cover pages for exercises and results on both web and app."
+   *
+   * The app has had these since 87f0e273 and the website never did, so
+   * `comm-cover` fell through to the comms prefix and drew the overview again,
+   * character for character, while `reflection-cover` and `intimacy-cover`
+   * matched no branch at all and drew an empty column. Nobody had landed on one
+   * because this sidebar did not offer them; the app's nav comes from the
+   * server, which does.
+   *
+   * The app's page, in this file's materials: a gradient rule around a cream
+   * card, the chapter's mark, its name, and one control. The title comes from
+   * RESULTS_SECTION_LABELS and the word on the button from the server's
+   * PAGE_COPY (SC_COPY here), both of which the app reads too, so neither surface is choosing
+   * its own wording. Everything else here is layout.
+   */
+  if (section.endsWith("-cover")) {
+    const group = sidebarSections.find((x) => x.id === section.replace("-cover", ""));
+    const accent = group?.color || coupleType?.color || "#E8673A";
+    return (
+      <Layout accent={accent} noPrevNext>
+        {/* block: cover/frame */}
+        <div style={{ padding: "1.5rem 0.5rem" }}>
+          <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
+            <div style={{
+              borderRadius: 25, background: C.cream, minHeight: "min(72vh, 620px)",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              padding: "3rem 2rem", textAlign: "center",
+            }}>
+              {/* The glow is many faint rings rather than one translucent disc,
+                  because a single circle is the thing she asked to get rid of:
+                  "can we make the glow more subtle, like a tint that disperses
+                  gently? Right now it looks like a circle." */}
+              <div style={{
+                width: 132, height: 132, borderRadius: "50%", display: "flex",
+                alignItems: "center", justifyContent: "center", marginBottom: "2rem",
+                background: `radial-gradient(circle, ${accent}22 0%, ${accent}14 35%, ${accent}08 55%, transparent 72%)`,
+              }}>
+                <span style={{ fontSize: "3.2rem", color: accent, lineHeight: 1 }}>{group?.icon || "◉"}</span>
+              </div>
+              {/* block: cover/title */}
+              <h1 style={{ fontFamily: font.display, fontSize: "clamp(1.7rem, 4vw, 2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, margin: 0, maxWidth: 460 }}>
+                {RESULTS_SECTION_LABELS[section] || group?.label || ""}
+              </h1>
+              {/* block: cover/start */}
+              <button
+                onClick={() => go(section.replace("-cover", "-overview"))}
+                style={{
+                  marginTop: "2.25rem", background: accent, color: "white", border: "none",
+                  borderRadius: 999, padding: "0.85rem 2.25rem", fontSize: "0.8rem",
+                  fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                  fontFamily: font.body, cursor: "pointer",
+                }}>
+                {SC_COPY.coverStart}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   // ── PAGE: HIGHLIGHTS ─────────────────────────────────────────────────────────
   if (section === "highlights") {

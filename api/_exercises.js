@@ -63,6 +63,17 @@ export const EXERCISES = [
   {
     order: 1, key: 'ex1', color: '#E8673A', inApp: true, label: 'Communication',
     /**
+     * Which results chapter this exercise becomes.
+     *
+     * The two lists have always lined up and nothing said so, so every surface
+     * that needed to get from an exercise to its chapter, or to the chapter's
+     * mark, worked it out again. The app's GROUP_ICON is keyed by chapter, and
+     * an exercise's cover page needs that mark: without this the mapping would
+     * have been written out a third time, in a file that cannot import the
+     * second.
+     */
+    resultsGroup: 'comm',
+    /**
      * What to call it where there is room for its whole name.
      *
      * Ellie, of the exercise's own eyebrow: "please change the eyebrow to say
@@ -82,24 +93,28 @@ export const EXERCISES = [
   },
   {
     order: 2, key: 'ex2', color: '#1B5FE8', inApp: true, label: 'Expectations',
+    resultsGroup: 'exp',
     column: 'ex2_answers', shape: 'answers',
     localKey: 'attune_ex2', progressKey: 'attune_ex2_progress',
     view: 'exercise2', capability: null, partnerField: 'ex2', selfOnly: false,
   },
   {
     order: 3, key: 'ex3', color: '#10B981', inApp: true, label: 'Relationship Reflection',
+    resultsGroup: 'reflection',
     column: 'ex3_answers', shape: 'answers',
     localKey: 'attune_ex3', progressKey: 'attune_ex3_progress',
     view: 'exercise3', capability: 'hasAnniversary', partnerField: 'ex3', selfOnly: false,
   },
   {
     order: 4, key: 'intimacy', color: '#B5546E', inApp: true, label: 'Physical Intimacy Expectations',
+    resultsGroup: 'intimacy',
     column: 'intimacy_data', shape: 'record',
     localKey: 'attune_intimacy', progressKey: 'attune_intimacy_progress',
     view: 'intimacy', capability: 'hasIntimacy', partnerField: 'intimacy', selfOnly: false,
   },
   {
     order: 5, key: 'conflict', color: '#1B5FE8', inApp: true, label: 'Conflict Patterns',
+    resultsGroup: 'conflict',
     column: 'conflict_data', shape: 'record',
     localKey: 'attune_conflict', progressKey: 'attune_conflict_progress',
     view: 'conflict', capability: 'hasConflict', partnerField: 'conflict', selfOnly: true,

@@ -148,6 +148,7 @@ export default function ReflectionExercise({
           exerciseKey="ex3"
           label={set.exercise.fullLabel || set.exercise.label}
           intro={set.intro}
+          resultsGroup={set.exercise?.resultsGroup ?? null}
           onBegin={() => setOpening(false)}
         />
       </Shell>

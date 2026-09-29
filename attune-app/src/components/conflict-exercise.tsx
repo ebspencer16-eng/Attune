@@ -134,6 +134,7 @@ export default function ConflictExercise({
           exerciseKey="conflict"
           label={set.exercise.fullLabel || set.exercise.label}
           intro={set.intro}
+          resultsGroup={set.exercise?.resultsGroup ?? null}
           onBegin={() => setIntro(false)}
         />
       </Shell>

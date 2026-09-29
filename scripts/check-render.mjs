@@ -22,7 +22,7 @@
 import { readFileSync } from 'fs';
 
 import { launch } from './_lib/browser.mjs';
-import { RESULTS_SECTIONS } from '../api/_lib/results-sections.js';
+import { RESULTS_SECTIONS, COVER_SECTIONS, RESULTS_SECTION_LABELS, PAGE_COPY } from '../api/_lib/results-sections.js';
 import { conflictDemo } from '../api/_lib/conflict-demo.js';
 
 const BASE = process.env.BASE || 'http://localhost:4173';
@@ -145,7 +145,31 @@ for (const section of SECTIONS) {
   // footer, so the column is not empty: it comes to ~290 characters of nav
   // links and nothing else. Every real section is several times that. 600 sits
   // well clear of both.
-  const empty = text.trim().length < 600;
+  /**
+   * ── A COVER IS SHORT ON PURPOSE ─────────────────────────────────────────
+   * Ellie: "Mirror cover pages for exercises and results on both web and app."
+   * A chapter cover is a mark, a name and one control, which comes to about
+   * five hundred characters including the nav. Judging it by length would call
+   * every one of them empty, and the length rule is what reported two of them
+   * as "no demo data" for months while they rendered nothing at all.
+   *
+   * So a cover is judged by what it has to carry: the chapter's name, from
+   * RESULTS_SECTION_LABELS, and the one word on its button, from PAGE_COPY.
+   * Both come from the modules the app reads, so this also fails if the two
+   * surfaces stop agreeing about either.
+   */
+  const isCover = COVER_SECTIONS.includes(section);
+  const coverMissing = isCover
+    ? await page.evaluate(({ want, cta }) => {
+      const el = document.querySelector('[data-results-scroll]');
+      if (!el) return 'no results column at all';
+      const h1 = el.querySelector('h1');
+      if (!h1 || h1.innerText.trim() !== want) return `no heading reading "${want}" (found ${JSON.stringify(h1 ? h1.innerText.trim() : null)})`;
+      const hasCta = [...el.querySelectorAll('button')].some((b) => (b.textContent || '').trim() === cta);
+      return hasCta ? null : `no button reading "${cta}"`;
+    }, { want: RESULTS_SECTION_LABELS[section] || '', cta: PAGE_COPY.coverStart })
+    : null;
+  const empty = !isCover && text.trim().length < 600;
   // A section this couple cannot reach now redirects to highlights rather than
   // rendering blank, so a length check alone would call it clean. Ask where we
   // actually landed.
@@ -157,6 +181,7 @@ for (const section of SECTIONS) {
   const problems = [
     ...errors,
     ...(leaks.length ? ['leaked: ' + leaks.slice(0, 4).join(', ')] : []),
+    ...(coverMissing ? [`cover page: ${coverMissing}`] : []),
   ];
   if (problems.length) {
     failed++;

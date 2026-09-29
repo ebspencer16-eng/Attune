@@ -257,6 +257,7 @@ export default function Expectations({
           exerciseKey="ex2"
           label={set.exercise.fullLabel || set.exercise.label}
           intro={set.intro}
+          resultsGroup={set.exercise?.resultsGroup ?? null}
           onBegin={() => setOpening(false)}
         />
       </Shell>

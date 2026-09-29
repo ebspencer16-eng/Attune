@@ -44,6 +44,31 @@ import { ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION } from './_anniversary-quest
 import { progressAnswers } from './_lib/exercise-progress.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
 
+/**
+ * What a surface needs to know about an exercise, as one object.
+ *
+ * ── WHY A FUNCTION ────────────────────────────────────────────────────────
+ * This literal was written out at five of the payload sites below, each naming
+ * the same four fields, and only the first had grown `view`. Adding
+ * `resultsGroup` by hand would have meant five edits and the certainty that the
+ * sixth field goes on four of them. The registry knows what an exercise is;
+ * this decides which of that a client is told.
+ */
+function exerciseDescriptor(exercise) {
+  return {
+    key: exercise.key,
+    label: exercise.label,
+    fullLabel: exercise.fullLabel || exercise.label,
+    shape: exercise.shape,
+    /* Screen time is filed under the website's key ('app:exercise1') rather
+       than under a second name for the same exercise. */
+    view: exercise.view,
+    /* Which results chapter this becomes, so the app's opening page can wear
+       the mark that chapter's cover wears. */
+    resultsGroup: exercise.resultsGroup,
+  };
+}
+
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
 
@@ -155,7 +180,7 @@ export default async function handler(req) {
         // view rides along so the app can file screen time under the same key
         // the website uses ('app:exercise1'), rather than inventing a second
         // name for the same exercise.
-        exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape, view: exercise.view },
+        exercise: exerciseDescriptor(exercise),
         // The screen that opens this exercise, the same words the website
         // opens it with. See api/_lib/exercise-intro.js.
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
@@ -186,7 +211,7 @@ export default async function handler(req) {
 
       return json({
         ok: true,
-        exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
+        exercise: exerciseDescriptor(exercise),
         // The screen that opens this exercise, the same words the website
         // opens it with. See api/_lib/exercise-intro.js.
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
@@ -260,7 +285,7 @@ export default async function handler(req) {
       // says it is rather than keeping a map of which id is which shape.
       return json({
         ok: true,
-        exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
+        exercise: exerciseDescriptor(exercise),
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
         // The screen that closes it, from api/_lib/exercise-complete.js.
         complete: exerciseComplete(exercise.key),
@@ -296,7 +321,7 @@ export default async function handler(req) {
        */
       return json({
         ok: true,
-        exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
+        exercise: exerciseDescriptor(exercise),
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
         // The screen that closes it, from api/_lib/exercise-complete.js.
         complete: exerciseComplete(exercise.key),
@@ -364,7 +389,7 @@ export default async function handler(req) {
 
       return json({
         ok: true,
-        exercise: { key: exercise.key, label: exercise.label, fullLabel: exercise.fullLabel || exercise.label, shape: exercise.shape },
+        exercise: exerciseDescriptor(exercise),
         intro: exerciseIntro(exercise.key, { partner: (profile?.partner_name || '').trim() || 'your partner' }),
         // The screen that closes it, from api/_lib/exercise-complete.js.
         complete: exerciseComplete(exercise.key),

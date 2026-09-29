@@ -213,6 +213,7 @@ export default function IntimacyExercise({
           exerciseKey="intimacy"
           label={set.exercise.fullLabel || set.exercise.label}
           intro={set.intro}
+          resultsGroup={set.exercise?.resultsGroup ?? null}
           onBegin={() => setOpening(false)}
         />
       </Shell>

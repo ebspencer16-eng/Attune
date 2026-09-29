@@ -17,6 +17,8 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import {
   AccentFallback, AccentFor, Colors, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
+import { CoverPage } from '@/components/cover-page';
+import { GROUP_ICON } from '@/components/results-menu';
 
 const c = Colors.light;
 
@@ -123,40 +125,60 @@ export type ExerciseIntro = {
  * them, which is two products rather than one. The words come from the server
  * so they cannot be a third version: api/_lib/exercise-intro.js.
  */
+/**
+ * The page an exercise opens on.
+ *
+ * ── IT IS A COVER NOW ─────────────────────────────────────────────────────
+ * Ellie: "Mirror cover pages for exercises and results on both web and app."
+ *
+ * It was a plain centred column: eyebrow, title, prose, button. The results
+ * chapters had a cover with a gradient frame and a large glowing mark, and an
+ * exercise is the other half of the same pair, so it opens on the same page
+ * now. The frame, the glow and the mark are CoverPage, shared with the results
+ * cover rather than built twice.
+ *
+ * `resultsGroup` comes from the server, which reads it off the registry. The
+ * mark an exercise wears is the mark its results chapter wears, and neither
+ * surface works that mapping out for itself.
+ *
+ * It scrolls, which the results cover does not: an exercise's opening prose is
+ * two or three sentences and a note, and a chapter's is its name.
+ */
 export function ExerciseOpening({
-  exerciseKey, label, intro, onBegin,
+  exerciseKey, label, intro, onBegin, resultsGroup = null,
 }: {
   exerciseKey?: string | null;
   label: string;
   intro: ExerciseIntro;
   onBegin: () => void;
+  resultsGroup?: string | null;
 }) {
   const tint = exerciseColor(exerciseKey);
   return (
-    <ScrollView
-      contentContainerStyle={{
-        padding: Spacing.xl, paddingBottom: Spacing.xxxl, flexGrow: 1, justifyContent: 'center',
-      }}>
-      <Text style={{ ...Type.eyebrow, color: tint }}>{label}</Text>
-      <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.md }}>{intro.title}</Text>
+    /* Opened over the whole screen rather than under the tab bar, so there is
+       no bar for the frame to clear. */
+    <CoverPage accent={tint} icon={resultsGroup ? GROUP_ICON[resultsGroup] : null} scroll>
+      <Text style={{ ...Type.eyebrow, color: tint, marginTop: Spacing.lg, textAlign: 'center' }}>{label}</Text>
+      <Text style={{ ...Type.hero, color: c.textStrong, marginTop: Spacing.md, textAlign: 'center' }}>{intro.title}</Text>
       {intro.body.map((para) => (
-        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg, lineHeight: 24 }}>
+        <Text key={para.slice(0, 24)} style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.lg, lineHeight: 24, textAlign: 'center' }}>
           {para}
         </Text>
       ))}
       {intro.note ? (
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl }}>{intro.note}</Text>
+        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xl, textAlign: 'center' }}>{intro.note}</Text>
       ) : null}
       <Pressable
         accessibilityRole="button"
         onPress={onBegin}
         style={{
-          marginTop: Spacing.xxl, borderRadius: Radius.md, paddingVertical: Spacing.lg,
+          marginTop: Spacing.xxl, borderRadius: Radius.pill,
+          paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
           alignItems: 'center', backgroundColor: tint,
         }}>
-        <Text style={{ ...Type.small, color: Palette.white, fontWeight: '700' }}>{intro.cta}</Text>
+        <Text style={{ ...Type.cardTitle, color: Palette.white }}>{intro.cta}</Text>
       </Pressable>
-    </ScrollView>
+    </CoverPage>
   );
 }
 

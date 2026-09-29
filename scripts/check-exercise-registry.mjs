@@ -17,6 +17,7 @@
 // The rule: any place that enumerates three or more exercise identifiers must
 // derive them. A block naming some but not all is the exact shape of the bug.
 
+import { COVER_SECTIONS } from '../api/_lib/results-sections.js';
 import { readFileSync } from 'fs';
 import { EXERCISES, EXERCISE_COLUMNS, EXERCISE_LOCAL_KEYS, PARTNER_SESSION_FIELDS } from '../api/_exercises.js';
 
@@ -113,6 +114,31 @@ for (const file of FILES) {
     if (present.length < 3) continue;             // not an exercise-handling file
     const missing = group.items.filter(k => !present.includes(k));
     if (missing.length) problems.push({ file, group: group.name, missing });
+  }
+}
+
+/**
+ * ── EVERY EXERCISE NAMES A CHAPTER THAT EXISTS ────────────────────────────
+ * `resultsGroup` is how a surface gets from an exercise to the results chapter
+ * it becomes, and therefore to that chapter's mark and cover. The two lists
+ * had always lined up with nothing saying so, so each surface worked it out
+ * again; naming it in the registry only helps if the name is real.
+ *
+ * A chapter renamed in results-sections.js and not here fails the build rather
+ * than drawing an exercise cover with no mark on it.
+ */
+{
+  const chapters = new Set(COVER_SECTIONS.map((id) => id.replace('-cover', '')));
+  for (const e of EXERCISES) {
+    if (!e.resultsGroup) {
+      problems.push({ file: 'api/_exercises.js', group: e.key, missing: ['resultsGroup'] });
+    } else if (!chapters.has(e.resultsGroup)) {
+      problems.push({
+        file: 'api/_exercises.js',
+        group: `${e.key} names the chapter "${e.resultsGroup}"`,
+        missing: [`no such chapter. The ones that exist are ${[...chapters].join(', ')}`],
+      });
+    }
   }
 }
 
