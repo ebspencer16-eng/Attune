@@ -121,10 +121,15 @@ Existing single sources of truth:
 building. They exist because each one caught a real bug that shipped.
 
 `npm run smoke` builds, serves, and then does three things in whatever Chrome
-is installed: renders every results section and every view of the app (30 and
-13), renders all 40 static pages including checkout, and drives every exercise
-to its completion screen. It takes several minutes, which is why it is not part
-of `npm run check`.
+is installed: renders every results section and every view of the app, renders
+every static page including checkout, and drives every exercise to its
+completion screen. All five drive now, which was three until the driver learned
+to ignore a consent banner, to anchor its idea of a finish button, and to leave
+a ranked item where it put it. It takes several minutes, which is why it is not
+part of `npm run check`.
+
+The counts in that sentence used to be written out here and had gone stale, so
+they are not any more. The run prints them.
 
 The section list derives from `RESULTS_SECTIONS`. It was once a hardcoded list
 asking for `exp-convo-5`, and there have only ever been five expectations
@@ -480,6 +485,79 @@ agreement gate is a second copy, not a different value.
 So assert the edit landed. `assert needle in s` before writing, and if a gate
 passes under a plant, check the file changed before concluding anything about
 the gate.
+
+**A plant can land and still prove nothing, if the test cannot sample it.**
+Two plants against `check-feedback-mirror` passed on their first run and both
+were the gate's fault rather than the code's.
+
+The rule is a pair of thresholds at 0.75 and 1.5. The gate swept scores in
+quarter steps, so when the plant moved the website's threshold to 0.80 there
+was no sample point anywhere between the two values and nothing changed. The
+needle was present, the file was different, the gate was blind. Sweeping a
+round grid over a rule made of thresholds tests everywhere except the only
+places that matter: choose the inputs either side of each line, by a hundredth,
+rather than sweeping and hoping to land on one.
+
+The second is worse and quieter. The gate lifted the website's copy of the ten
+dimension labels and passed those same labels to the server's copy as its
+input. So changing a label on the website changed both sides together, every
+sentence that names one compared against itself, and the comparison was
+vacuous. **When a gate compares two implementations, each one's data has to come
+from its own side.** A fixture shared between them turns a comparison into an
+assertion that a function equals itself.
+
+**A gate that nothing runs is not a gate.** Two were sitting in `scripts/`
+connected to nothing: `check-section-aliases`, which stops a page rename making
+every mark on that page invisible, and `check-tab-reset`, which Ellie asked for
+by name after finding the gesture on one tab and not the others. Both passed.
+Neither had ever been in `package.json`; `git log -S` on the name finds no
+commit that added or removed it. They were written, they were right, and for
+months they proved nothing. `check-gates-run.mjs` fails the build on a
+`check-*.mjs` that neither `npm run check` nor the smoke names.
+
+**An escape hatch nobody needs is one somebody will use.**
+`check-exercise-flow` let an exercise carry a sentence saying why it could not
+be driven; the run printed KNOWN beside it and exited 0, counting it as a
+completion. That is how the file reported "5 exercises completed and stored
+correctly" while driving three. Both excuses turned out to be wrong about their
+own exercise, because an excuse written from reading the code is a guess and
+once written it stops anyone looking. All five drive now and the field is gone
+rather than unused: the hatch is what someone reaches for at the moment a real
+regression starts failing.
+
+**A comment that describes a dead path is worse than no comment.**
+`content.dimensions[].shift` carried "the same ones the website shows... so both
+surfaces make the same call". Nothing reads those two fields. They were added
+for the app and orphaned eleven days later by a redesign, and they use a
+different threshold from the tile that replaced them. Because the comment read
+as a description of the live path, the obvious next thought was that the website
+disagreed with it, and an hour went into chasing a divergence that does not
+exist. Prose beside code is not checked by anything, so when a path dies, the
+sentence describing it is the part that goes on doing damage.
+
+**Check the quotation against the page.** Six were organised under
+"direct quotes from these publications, cited accurately". Two were not
+quotations. The product showed "Contempt is the single greatest predictor of
+divorce" under a researcher's byline, and that page says "Contempt is the worst
+of the four horsemen. It is the number one predictor of divorce, but it can be
+defeated." Both were fair readings and neither was a sentence anyone wrote.
+`check-insight-provenance` had said in its own header that the wording "can be
+checked by a person", and nobody was ever going to be that person.
+`check-quotes-verbatim.mjs` opens the url, and reports a page it could not reach
+separately from a page that contradicts us, because a machine with no route out
+is not evidence about a quotation.
+
+**Two surfaces agreeing is not the same as the payload being read.** Chasing
+whether the website's results composition matches the server's turned up four
+apparent divergences and every one dissolved under measurement: a couple type
+that differed because the demo path types from four archetypes rather than from
+the demo couple, so I had compared two different couples; blended scores against
+self-report, where all three call sites use self-report; two thresholds that
+belong to two different fields; and couple-type prose the website drops, which
+the app drops identically and which `git log -S` shows was retired at Ellie's
+ask. What the exercise did find is prose the server ships that neither surface
+renders. The question to ask of a payload field is not only "do both surfaces
+agree about it" but "does either one draw it".
 
 **Where the holes actually were.** Of the gates audited so far, the ones with
 holes all matched on a literal name or a single shape. The ones that run the
