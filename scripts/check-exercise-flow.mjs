@@ -44,7 +44,9 @@
 import { launch } from './_lib/browser.mjs';
 import { PERSONALITY_QUESTIONS } from '../api/_questions.js';
 import { INTIMACY_QUESTIONS } from '../api/_intimacy-questions.js';
+import { readFileSync } from 'node:fs';
 import { EXERCISES as REGISTRY } from '../api/_exercises.js';
+import { exerciseComplete } from '../api/_lib/exercise-complete.js';
 
 // `vite preview` binds to localhost, which resolves to ::1 first on macOS, so
 // a default of 127.0.0.1 was refused on the only machine this has to run on.
@@ -101,30 +103,48 @@ const TUNING = {
   ex1:      { pkg: 'core',    min: EX1_ANSWERS },
   ex2:      { pkg: 'core',    min: 12 },
   ex3:      { pkg: 'premium', min: 8 },
-  intimacy: { pkg: 'premium', min: INTIMACY_ANSWERS, known: 'multi-select screens need a real pointer; stalls at Q7' },
+  /**
+   * ── WHY PHYSICAL INTIMACY USED TO STALL ─────────────────────────────────
+   * It never started. The old note here said "multi-select screens need a real
+   * pointer; stalls at Q7", which was a guess written from reading the questions,
+   * and it was wrong in the way a guess usually is: it described a plausible
+   * failure late in a flow that had never reached its first screen.
+   *
+   * Physical Intimacy is an add-on, not part of any package, so `hasIntimacy` is
+   * false under every value `pkg` can take, premium included. `view === "intimacy"
+   * && pkg.hasIntimacy` is therefore false, and the branch renders nothing: four
+   * kilobytes of chrome around an empty main element. The driver saw no buttons,
+   * reported no screens, and read exactly like an exercise that stalls.
+   *
+   * `grant` is the dev flag that turns the add-on on, set before the page loads.
+   * If that flag is ever renamed this fails loudly with zero screens rather than
+   * passing, which is the only reason naming it here is safe.
+   */
+  intimacy: { pkg: 'premium', min: INTIMACY_ANSWERS, grant: 'attune_dev_intimacy' },
   /**
    * ── WHY CONFLICT PATTERNS USED TO STALL ─────────────────────────────────
-   * On its repair question, which asks for six options to be put in order. The
-   * first diagnosis was wrong and is worth recording as wrong: I said the Next
-   * button stayed enabled while the minimum was unmet, and it does not. It is
-   * disabled, on both surfaces, and always was. I checked the page before
-   * changing anything and found `disabled: true` on it.
+   * Three separate limitations in this driver, stacked on one exercise's
+   * screens. Worth recording because the first two diagnoses were both wrong and
+   * both were written from reading the code rather than from watching it run.
    *
-   * The actual cause is in this driver and is not yet found. A ranking REORDERS
-   * as you click: a chosen item moves up into the ranked list and clicking a
-   * ranked item takes it back out, so an index into the button list points at a
-   * different option every pass. The pick-and-rank fallback clicks by label now
-   * and never clicks the same label twice, which should complete a six-item
-   * ranking in six passes, and it did not change the outcome: the trail still
-   * shows one label clicked four hundred times, from the ANSWER step rather than
-   * from the fallback. So `moved` is coming back true on that screen and the
-   * fallbacks behind `!moved` never run, and what is enabled there that looks
-   * like a forward control is the thing to find next.
+   * Wrong once: "the Next button stays enabled while the minimum is unmet". It is
+   * disabled, on both surfaces, and always was.
    *
-   * Recording it as unfinished rather than guessing again. The product is fine
-   * and was checked by hand: the intro draws, the account sheet closes, Start
-   * works, question one answers, and Next on the ranking is correctly disabled
-   * until all six are placed.
+   * Wrong twice: "a ranking reorders as you click, so an index points at a
+   * different option each pass". True of the widget, and not what was happening.
+   *
+   * What it actually was, found by printing which button the forward rule picked:
+   *   1. The cookie consent banner's buttons passed the answer filter, so the
+   *      driver "answered" the banner and never looked at the question.
+   *   2. `finish` matched unanchored, so "Notice how it connects..." read as a
+   *      finish control and the run ended on a question.
+   *   3. Items already placed in the ranked list were clicked again, taking them
+   *      back out, so six placements never accumulated.
+   *
+   * None of it was specific to this exercise, which was Ellie's actual worry:
+   * nothing about Conflict Patterns' code is different. It has a consent banner
+   * over it, long option labels, and a ranking, and this driver could not handle
+   * any of the three.
    */
   conflict: { pkg: 'premium', min: 8 },
 };
@@ -135,13 +155,17 @@ for (const e of REGISTRY) {
   if (!t) {
     console.error(`[check-exercise-flow] api/_exercises.js has ${e.key} (${e.label})`
       + ' and this harness has no entry for it, so a run would report a clean pass'
-      + ' over an exercise it never opened. Add a pkg and a min to TUNING, or a'
-      + ' `known` saying why it cannot be driven.');
+      + ' over an exercise it never opened. Add a pkg and a min to TUNING.');
     process.exit(1);
   }
   EXERCISES[e.view] = {
-    pkg: t.pkg, min: t.min, known: t.known,
-    key: e.localKey, progress: e.progressKey, label: e.label,
+    pkg: t.pkg, min: t.min,
+    /* `key` is the browser's storage key, which is what the stored-answer check
+       reads. `regKey` is the registry's own id, which is what the shared copy
+       modules are keyed by. They are different strings and confusing them gets
+       you undefined rather than an error. */
+    key: e.localKey, regKey: e.key, progress: e.progressKey, label: e.label,
+    grant: t.grant,
   };
 }
 
@@ -198,6 +222,18 @@ async function runOne(name) {
     if (m.type === 'error' && !/403|404|Failed to load resource/.test(m.text)) errors.push(m.text);
   });
 
+  /**
+   * An add-on has to be granted before the page reads it, and it is read during
+   * the first render, so this is a load of the origin purely to reach its
+   * localStorage. `fresh=1` does not clear storage (it only declines to hydrate
+   * answers from it), so the flag survives the navigation that follows.
+   */
+  if (cfg.grant) {
+    await page.goto(`${BASE}/`);
+    await page.wait(400);
+    await page.evaluate((k) => { try { localStorage.setItem(k, '1'); } catch { /* private mode */ } }, cfg.grant);
+  }
+
   await page.goto(`${BASE}/?fresh=1&pkg=${cfg.pkg}&view=${name}`);
   await page.wait(1400);
 
@@ -224,6 +260,11 @@ async function runOne(name) {
   await page.wait(700);
 
   let answered = 0, screens = 0, stalls = 0, variant = 0;
+  /* Set when the loop has read the module's title off the completion screen.
+     The two minimal screens are clicked through, which navigates away from it,
+     so the post-loop reading below would find an empty page and call that a
+     missing title. */
+  let titleConfirmed = false;
   const trail = [];
   for (let i = 0; i < 400; i++) {
     errors.length = 0;
@@ -259,9 +300,24 @@ async function runOne(name) {
         }
         return 'text';
       }
-      // Answer screens: click a middle option so runs are not all one extreme.
+      /**
+       * Answer screens: click a middle option so runs are not all one extreme.
+       *
+       * ── EXCEPT SOMETHING ALREADY CHOSEN ─────────────────────────────────
+       * A ranking draws a placed item with its position in front of it, and
+       * clicking a placed item takes it back out. This step runs once per pass
+       * and picks the middle of what it can see, so on a ranking it spent every
+       * pass removing whichever item happened to be in the middle: the trail
+       * showed "4\nSuggesting a pause" over and over, and the run ended with
+       * 1181 clicks across 9 screens.
+       *
+       * A leading position is what marks an item as placed. No answer anywhere
+       * in the product starts with a digit, checked across all 261 of them, so
+       * this excludes placed items and nothing else.
+       */
       const opts = [...document.querySelectorAll('button')]
-        .filter(b => visible(b) && b.innerText.trim().length > 2 && !re.test(b.innerText.trim()) && !b.disabled);
+        .filter(b => visible(b) && b.innerText.trim().length > 2 && !re.test(b.innerText.trim()) && !b.disabled
+          && !/^\d/.test(b.innerText.trim()));
       if (opts.length) {
         const pick = opts[Math.floor(opts.length / 2)];
         const label = pick.innerText.trim().slice(0, 30);
@@ -340,9 +396,15 @@ async function runOne(name) {
       const finish = btns.find(b => /^(finish|all done|complete|submit|see (your )?results)\b/i.test(b.innerText.trim()));
       const b = finish || btns.find(x => reArrow.test(x.innerText.trim())) || btns.find(x => reVerb.test(x.innerText.trim()));
       if (!b) return false;
+      const label = b.innerText.trim().slice(0, 30);
       b.click();
-      return true;
+      return label;
     }, { arrow: FORWARD_ARROW.source, verb: FORWARD_VERB.source });
+    /* What it pressed to move on, in the trail beside what it answered. The
+       answer trail is what found the misidentified button; this is the other
+       half, and a run that leaves the exercise without finishing is exactly the
+       case neither half alone can explain. */
+    if (typeof moved === 'string') trail.push(`→ ${moved}`);
 
     await page.wait(300);
 
@@ -480,6 +542,107 @@ async function runOne(name) {
       }
     }
 
+    /**
+     * ── THE COMPLETION SCREEN, AND ITS ONE BUTTON ───────────────────────────
+     * An exercise ends on a screen that says it is finished and offers a single
+     * control. Pressing that control is what calls onComplete, and onComplete is
+     * what writes the answers, so a run that stops here has done the whole
+     * exercise and saved none of it.
+     *
+     * The driver refused to press it. The button reads "Back to insights", and
+     * anything starting with "back" is in NOT_AN_ANSWER because a back button is
+     * not an answer. So it reached the end of Conflict Patterns, found nothing it
+     * was willing to click, stalled three times and gave up, and the failure said
+     * "never wrote attune_conflict", which reads like the exercise never ran.
+     *
+     * The title and the button both come from api/_lib/exercise-complete.js,
+     * which both surfaces render, so the screen is recognised by asking that
+     * module rather than by matching words. A sixth exercise is covered the day
+     * it has an entry there.
+     */
+    /**
+     * ── THE COMPLETION SCREEN IS CHECKED HERE, NOT IN A GATE OF ITS OWN ────
+     * api/_lib/exercise-complete.js is the one home for what a finished
+     * exercise says, and the app renders it whole: /api/questions serves it as
+     * `set.complete` and exercise-chrome.tsx draws the three fields.
+     *
+     * The website's two minimal screens had typed their own. Both ended on a
+     * button reading "Back to dashboard" where the module, and so the app, said
+     * "Back to insights", and Conflict Patterns rendered the common footer in
+     * place of its own last line, the one promising that a person's patterns
+     * stay private. Same screen, two surfaces, two different endings.
+     *
+     * check-copy-has-one-home cannot see that: it forbids a sentence that has a
+     * home being TYPED AGAIN somewhere, and these were different sentences,
+     * which is the quieter half of the same failure.
+     *
+     * It is asserted here, on the rendered page, because this driver is already
+     * standing on that screen having got there the way a person does. A second
+     * harness to reach the same screen is the mirrored-fixture mistake CLAUDE.md
+     * warns about, and a static scan cannot tell a rendered string from one in a
+     * branch nobody takes.
+     *
+     * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────
+     * Communication Styles, Expectations and Relationship Reflection. Their
+     * website completion screens are not the app's minimal page: they carry an
+     * upsell, a line that changes on whether the partner has finished, and a
+     * button that goes on to the next exercise or to results rather than back.
+     * Their names come from the module, which is checked above and statically.
+     * ebb0b8a4 says so and says why: "Rewriting those into the
+     * app's minimal page would be a downgrade she did not ask for; the only
+     * difference left is the button word, which is in TASKS.md as hers to
+     * settle."
+     *
+     * That is a decision, not a gap, and a gate must not quietly overturn one.
+     * It is named here rather than detected, because detecting it would mean
+     * reading "does this screen use the module's cta", and a screen that stopped
+     * using it would then drop out of scope silently, which is the exact defeat
+     * this file exists to prevent. Naming it means removing conflict or intimacy
+     * from the module fails loudly instead.
+     *
+     * The button word is back in TASKS.md. When Ellie settles it, delete the
+     * exercise from this set rather than widening anything.
+     *
+     * So this half covers two of five screens, and the static check above covers
+     * the names on all five. Saying which is which matters more than the number:
+     * "all five completion screens are checked" would be true and would mean
+     * something this does not do.
+     */
+    const OWN_PROSE = new Set(['ex1', 'ex2', 'ex3']);
+    const expected = exerciseComplete(cfg.regKey);
+    const whole = !OWN_PROSE.has(cfg.regKey);
+    const finishedNow = await page.evaluate(({ title, body, cta, whole: full }) => {
+      const text = document.body.innerText;
+      if (!text.includes(title)) return false;
+      /* The title is the module's on every completion screen, minimal or not,
+         and reaching this line has already proved it. */
+      if (!full) return true;
+      const b = [...document.querySelectorAll('button')]
+        .find((x) => x.innerText.trim() === cta);
+      if (!b) return { missing: `a button reading "${cta}"` };
+      const absent = body.filter((line) => !text.includes(line));
+      if (absent.length) return { missing: `the line "${absent[0]}"` };
+      b.click();
+      return true;
+    }, { ...expected, whole });
+    if (finishedNow && finishedNow.missing) {
+      await page.close();
+      return {
+        name,
+        ok: false,
+        why: `the completion screen for ${cfg.label} does not say what`
+          + ` api/_lib/exercise-complete.js says. Missing: ${finishedNow.missing}.`
+          + ' That module is what the app shows, so the two surfaces are ending the'
+          + ' same exercise on different words.',
+      };
+    }
+    if (finishedNow) {
+      titleConfirmed = true;
+      trail.push(`\u2713 ${expected.cta}`);
+      await page.wait(400);
+      break;
+    }
+
     if (errors.length) {
       await page.close();
       return { name, ok: false, why: 'threw: ' + errors[0].slice(0, 120), answered };
@@ -513,13 +676,43 @@ async function runOne(name) {
   const tail = await page.evaluate(() =>
     document.body.innerText.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 4).join(' | '));
 
+  /**
+   * ── AND THE NAME IS READ OFF THE SCREEN, NOT OFF THE SOURCE ─────────────
+   * The static check below proves src/App.jsx CALLS exerciseComplete for every
+   * key. It cannot prove the call is what renders. Planted against, it passed
+   * this:
+   *
+   *     {false && exerciseComplete("ex1").title}Communication Styles exercise complete
+   *
+   * which is the second of the two defeats CLAUDE.md records: disabling a branch
+   * with a constant leaves every string in place, and a scanner looking for a
+   * name finds it sitting in dead code. The first version of this gate reported
+   * a clean pass on exactly the bug it was written for.
+   *
+   * So the rendered page has to carry the module's title, on all five screens,
+   * whatever shape the rest of the screen is. Read here rather than in the loop
+   * because inside the loop an absent title means "not finished yet" and out
+   * here it means the screen is wrong.
+   */
+  const shouldSay = exerciseComplete(cfg.regKey).title;
+  const saysIt = titleConfirmed
+    || await page.evaluate((t) => document.body.innerText.includes(t), shouldSay);
+  if (!saysIt) {
+    await page.close();
+    return { name, ok: false, answered, screens, stored,
+      why: `finished ${cfg.label} and the screen never said "${shouldSay}", which is`
+        + ' what api/_lib/exercise-complete.js calls it and therefore what the app'
+        + ' says. The name on this screen is a hand-typed copy, or the call that'
+        + ' should render it is in a branch nothing takes.' };
+  }
+
   await page.close();
 
   if (!stored.completed) {
     /* The last few things it clicked, because the screen it ended on does not
        say how it got there. */
     const clicked = trail.length
-      ? `\n        clicked: ${trail.slice(-6).map((t) => JSON.stringify(t)).join(' → ')}`
+      ? `\n        last: ${trail.slice(-10).map((t) => JSON.stringify(t)).join(', ')}`
       : '\n        clicked: nothing it recognised as an answer';
     return { name, ok: false, answered, screens, stored,
       why: `never wrote ${cfg.key} (progress held ${stored.progressCount}, answered ${answered}`
@@ -532,18 +725,57 @@ async function runOne(name) {
   return { name, ok: true, answered, screens, stored };
 }
 
+/**
+ * ── EVERY COMPLETION SCREEN READS THE MODULE FOR ITS NAME ─────────────────
+ * Before any browser starts, because this is a fact about the source and the
+ * driver below cannot see it.
+ *
+ * The website has five completion screens. Two are the app's minimal page and
+ * are checked on the rendered page below. The other three are richer by
+ * decision: an upsell, a line that changes on whether the partner has finished,
+ * a button that goes to results. ebb0b8a4 kept their prose deliberately and set
+ * the boundary at the name: "The website's completion screens take the title
+ * and keep their own prose and buttons."
+ *
+ * Four of the five did. Communication Styles typed its own, "Communication
+ * Styles exercise complete", against the module's "Communication Styles
+ * complete", and the two had already drifted by a word. Nothing could see it:
+ * check-copy-has-one-home forbids a sentence with a home being typed AGAIN, and
+ * a sentence that is merely DIFFERENT is invisible to it, which is the quieter
+ * half of the same failure and the one that produced this.
+ *
+ * So the rule is a derivation, not a string match: the screen has to call
+ * exerciseComplete for its own key. A hand-typed title that happens to match
+ * today would pass a text comparison and drift tomorrow.
+ *
+ * Deleting a screen fails this rather than passing it, which is the point: a
+ * gate that has lost its subject must never report success.
+ */
+{
+  const app = readFileSync(`${new URL('..', import.meta.url).pathname}src/App.jsx`, 'utf8');
+  const orphans = REGISTRY
+    .map((e) => e.key)
+    .filter((k) => !app.includes(`exerciseComplete("${k}")`) && !app.includes(`exerciseComplete('${k}')`));
+  if (orphans.length) {
+    console.error(`\n[check-exercise-flow] ${orphans.length} completion screen(s) in`
+      + ` src/App.jsx do not take their name from api/_lib/exercise-complete.js:`
+      + ` ${orphans.join(', ')}.\n\n  The module is what the app shows. A title typed`
+      + ' out beside it is a second copy of a name that the registry already owns,'
+      + ' and it drifts: Communication Styles said "exercise complete" where the'
+      + ' module said "complete", on the same screen, for months.\n\n  Render'
+      + ' {exerciseComplete("<key>").title} rather than the words.\n');
+    process.exit(1);
+  }
+}
+
 const only = process.argv[2];
 const names = only ? [only] : Object.keys(EXERCISES);
 let failed = 0;
-const knownGaps = [];
 for (const name of names) {
   const r = await runOne(name);
   const cfg = EXERCISES[name];
   if (r.ok) {
     console.log(`  ok    ${name.padEnd(10)} ${cfg.label.padEnd(24)} ${r.stored.doneCount} answers stored`);
-  } else if (cfg.known) {
-    knownGaps.push(name);
-    console.log(`  KNOWN ${name.padEnd(10)} ${cfg.label.padEnd(24)} not driveable: ${cfg.known}`);
   } else {
     failed++;
     console.error(`  FAIL  ${name.padEnd(10)} ${cfg.label}`);
@@ -557,19 +789,21 @@ if (failed) {
   process.exit(1);
 }
 /**
- * What actually happened, not how many were asked for.
+ * ── WHY THERE IS NO LONGER A WAY TO EXCUSE AN EXERCISE ────────────────────
+ * There used to be a `known` field: an exercise could carry a sentence saying
+ * why the driver could not get through it, and the run printed KNOWN beside it
+ * and exited 0. Two exercises sat behind it, and the summary line counted them
+ * as completions, so this file reported "5 exercises completed and stored
+ * correctly" while driving three.
  *
- * This said "${names.length} exercises completed and stored correctly", which
- * counted the known gaps as completions: with two exercises the driver cannot get
- * through, it printed "5 exercises completed and stored correctly". A precise
- * number that sounds counted, for something nobody counted, which is how this file
- * came to be driving four of five in the first place.
+ * Both of those sentences turned out to be wrong about their own exercise. One
+ * blamed a multi-select widget on a flow that never rendered a screen; the other
+ * blamed a ranking on three limitations in this driver. An excuse written from
+ * reading the code is a guess, and once written it stops anyone looking.
+ *
+ * All five drive now, so the field is gone rather than unused. An unused escape
+ * hatch is the thing someone reaches for at the moment a real regression starts
+ * failing, which is exactly when it must not be there.
  */
-const drove = names.length - knownGaps.length;
-console.log(`\n[check-exercise-flow] ${drove} of ${names.length} exercises driven to`
-  + ` completion and stored correctly.`
-  + (knownGaps.length
-    ? ` ${knownGaps.length} the driver cannot get through, listed above as KNOWN`
-      + ` (${knownGaps.join(', ')}); those are harness gaps, and the exercises`
-      + ' themselves are unchecked here rather than passing.'
-    : ''));
+console.log(`\n[check-exercise-flow] ${names.length} of ${names.length} exercises`
+  + ' driven to completion and stored correctly.');

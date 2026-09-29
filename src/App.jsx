@@ -1573,12 +1573,17 @@ export function IntimacyExercise({ userName = "You", partnerName = "your partner
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>✓</div>
       <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>{exerciseComplete("intimacy").title}</h2>
-      <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
-        Your answers are saved. When {partnerName} finishes too, your comparison unlocks on your dashboard.
-      </p>
+      {/* Same module as the title above it. This sentence was written out here
+          instead, so the app and the website said different things on the same
+          screen. */}
+      {exerciseComplete("intimacy").body.map((line) => (
+        <p key={line.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+          {line}
+        </p>
+      ))}
       <button onClick={() => onComplete?.({ variant, answers })}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
-        Back to dashboard
+        {exerciseComplete("intimacy").cta}
       </button>
     </div>
   );
@@ -1752,12 +1757,19 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "3rem 1rem", textAlign: "center" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <h2 style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, color: C.ink, marginBottom: "0.75rem" }}>{exerciseComplete("conflict").title}</h2>
-      <p style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
-        {WAITING.EXERCISE_FOOTER}
-      </p>
+      {/* From api/_lib/exercise-complete.js, which both surfaces render. The
+          title came from there and the body and the button did not, so the app
+          said "Your patterns stay private to you, always" and this said the
+          generic line about results unlocking. On Conflict Patterns of all
+          exercises, where the private half IS the promise. */}
+      {exerciseComplete("conflict").body.map((line) => (
+        <p key={line.slice(0, 24)} style={{ fontSize: "0.9rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.65, marginBottom: "2rem" }}>
+          {line}
+        </p>
+      ))}
       <button onClick={() => onComplete?.({ answers })}
         style={{ background: accent, color: "white", border: "none", borderRadius: 12, padding: "0.9rem 1.75rem", fontSize: "0.9rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer" }}>
-        Back to dashboard
+        {exerciseComplete("conflict").cta}
       </button>
     </div>
   );
@@ -14768,7 +14780,7 @@ export default function App() {
             {ex1Answers
               ? <div style={{ textAlign: "center", padding: "4rem 1rem 3rem", maxWidth: 440, margin: "0 auto" }}>
                   <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8673A, #1B5FE8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.8rem" }}>✓</div>
-                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>Communication Styles exercise complete</p>
+                  <p style={{ fontFamily: font.display, fontSize: "2rem", fontWeight: 700, color: C.ink, marginBottom: "0.5rem", lineHeight: 1.1 }}>{exerciseComplete("ex1").title}</p>
                   <p style={{ fontSize: "0.78rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#4CAF50", fontWeight: 700, fontFamily: font.body, marginBottom: "1.25rem" }}>Your communication profile is mapped</p>
                   {/* Body copy prioritizes the next concrete action:
                       - If they haven't done Ex2 → tell them that's next
