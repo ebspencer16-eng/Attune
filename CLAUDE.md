@@ -559,6 +559,59 @@ ask. What the exercise did find is prose the server ships that neither surface
 renders. The question to ask of a payload field is not only "do both surfaces
 agree about it" but "does either one draw it".
 
+**An app fix is not delivered until an update is published.** Ellie, on three
+app fixes: "Not seeing any difference here on my phone. I've cleared the app 4
+times." She was right and clearing was never going to help. The last update on
+the production channel was ten app commits earlier, so none of them was on her
+phone, and I had been reporting them as done on evidence from a simulator.
+
+Ask Expo rather than reasoning about it. The update server is public and answers
+in one curl:
+
+    curl -s -D - -o /dev/null -H "expo-platform: ios" \
+      -H "expo-runtime-version: 1.0.0" -H "expo-channel-name: production" \
+      -H "expo-protocol-version: 1" -H "accept: multipart/mixed" \
+      https://u.expo.dev/<projectId>
+
+`createdAt` in the manifest is when the running bundle was published; compare it
+against `git log --since` over `attune-app/src`. Publishing needs her Expo
+account, so the useful thing to hand her is the one command and the count of
+commits she cannot see. Settings, at the bottom of the app, shows the running
+bundle's date, which is how she can answer "am I on the latest" herself.
+
+Two launches, not one: the update downloads in the background on the first and
+runs on the second, which is why repeated force-quits look like nothing is
+happening.
+
+**Serving the newest file is not serving the right file.** Ellie: "it still
+downloaded the docx version". Both workbook builders write into
+`workbooks/<orderNum>/`, despite a comment claiming they were kept apart, and
+the link builder listed that folder and signed whatever was newest. For every
+couple that was the Word file, because no PDF had ever been built. One column
+recording a result without recording which builder made it.
+
+When two producers write to one place, the format is part of the identity. It
+lives in `api/_lib/workbook-format.js` now and the link is only ever minted over
+a file of that format; anything else answers null, which puts the surface into
+its not-ready state. A missing workbook is visibly missing and the wrong one
+looks finished.
+
+**innerText reports what CSS renders.** The website sets `text-transform:
+uppercase` on its buttons, so a gate comparing a button against the copy module
+saw "BACK TO INSIGHTS" against "Back to insights" and failed three exercises on
+a difference that was not one. Use `textContent` when comparing words: the
+module owns the wording and the stylesheet owns how it is set. The same trap
+caught a probe of mine an hour later, so it is worth knowing twice.
+
+**Before asking her a question, search the repo for her own earlier words.** I
+had a question drafted asking which two screens "section 2" and "section 3"
+meant, and the answer was sitting in a comment in `src/App.jsx`, quoting her
+from a previous round: "Maybe section 3 of dashboard on site could have the
+content from learn and notes on the app?" Her instructions are quoted all over
+this codebase, deliberately, and `grep` over them answers a surprising share of
+what looks like it needs asking. Asking a question she has already answered
+spends her attention twice.
+
 **Where the holes actually were.** Of the gates audited so far, the ones with
 holes all matched on a literal name or a single shape. The ones that run the
 code and compare the answers, `check-alignment-rule` over 81 answer pairs,
