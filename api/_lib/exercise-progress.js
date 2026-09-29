@@ -158,7 +158,7 @@ export function progressFor(profile, exercise) {
  */
 const REFINEMENTS = new Set(['bothDetail', 'childhoodBothDetail']);
 
-function countAnswers(answers) {
+export function countAnswers(answers) {
   if (!answers || typeof answers !== 'object') return 0;
   let n = 0;
   for (const [key, v] of Object.entries(answers)) {

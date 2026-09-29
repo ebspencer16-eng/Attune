@@ -747,7 +747,10 @@ export type HomeResponse = {
   word?: { id: string; word: string; part: string; definition: string } | null;
   /** How a storycard is set, for the insight card this tab can open. */
   storycardStyle?: Record<string, unknown> | null;
-  research?: { id: string; title: string; body: string; source: string };
+  /* `label` is what to call it, sent with it so both surfaces agree; `url`
+     is where a quotation can be read. Optional because a payload cached
+     from before either existed still has to render. */
+  research?: { id: string; title: string; body: string; source: string; label?: string; url?: string };
   /** Flat list of add-on keys this person owns, derived server-side. */
   owned?: string[];
   /** Everything purchasable. Keys match `owned`, so the two intersect directly. */

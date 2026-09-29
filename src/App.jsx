@@ -34,6 +34,11 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
+/* One insight a day, the same one the app shows, from one module. */
+import { insightOfTheDay, INSIGHT_EYEBROW } from "../api/_insights.js";
+/* The one counter for how far through an exercise someone is. /api/home uses
+   it to tell the app; the dashboard table uses it to draw the same ring. */
+import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
 import { exerciseComplete } from "../api/_lib/exercise-complete.js";
 import { framingQuestion } from "../api/_lib/intimacy-framing.js";
 import { PART_TWO } from "../api/_lib/part-two.js";
@@ -13997,6 +14002,32 @@ export default function App() {
   const ex3InProgress = !ex3Answers && _hasProgress('attune_ex3_progress', p => Object.keys(p.answers || {}).length > 0);
   const inProgressFor = (viewId) => viewId === 'exercise1' ? ex1InProgress : viewId === 'exercise2' ? ex2InProgress : viewId === 'exercise3' ? ex3InProgress : false;
 
+  /**
+   * How far through an exercise someone is, as the app shows it.
+   *
+   * ── WHY IT READS THE SERVER'S COUNTER ───────────────────────────────────
+   * Ellie: "section 2 on site should look like the insights menu". The app's
+   * status table draws a ring that fills as an exercise is answered, and this
+   * table drew a flat dot: done, started, or nothing. Started is the state a
+   * ring is for, because "you are eleven questions into fifty" is the thing
+   * that gets someone back into it.
+   *
+   * The counting is api/_lib/exercise-progress.js, which is what /api/home uses
+   * to tell the app the same numbers. Counting here instead would be a second
+   * answer to "how many have they answered", and it would be wrong in the way
+   * that module records: Expectations saves five maps rather than one, so the
+   * obvious count returns five however much anyone has done.
+   */
+  const progressCountFor = (exKey) => {
+    const total = questionCount(exKey);
+    try {
+      const raw = localStorage.getItem(`attune_${exKey}_progress`);
+      if (!raw) return { answered: 0, total };
+      return { answered: countAnswers(progressAnswers(JSON.parse(raw))), total };
+    } catch { return { answered: 0, total }; }
+  };
+
+
   // Partner B "waiting/ready" poll. Declared here, BEFORE any early return,
   // so the hook count stays constant across renders. (Previously this lived
   // lower down after several conditional returns, which changed the number of
@@ -14574,9 +14605,42 @@ export default function App() {
                         ...(pkg.hasConflict ? [{ key: "conflict", label: "Conflict patterns", viewId: "conflict", myDone: !!(conflictData?.completedAt), myInProgress: false, partnerDone: !!(partnerSession?.conflict?.completedAt) }] : []),
                       ].map((r, i) => ({ ...r, num: String(i + 1).padStart(2, "0") }));
                       const COLS = "minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr)";
-                      const dot = (done, inProgress) => (
-                        <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.56rem", color: "white", background: done ? "#059669" : inProgress ? "#A66534" : "#D4C0A8", fontWeight: 700 }}>{done ? "✓" : inProgress ? "·" : ""}</span>
-                      );
+                      /**
+                       * ── THE APP'S RING ───────────────────────────────────
+                       * Ellie: "section 2 on site should look like the insights
+                       * menu."
+                       *
+                       * The app draws how far through an exercise you are and
+                       * this drew a dot: green for done, amber for started,
+                       * grey for not. Started covers one question answered and
+                       * forty-nine, which is the difference between "I will
+                       * come back to that" and "I am nearly there".
+                       *
+                       * A conic gradient is the browser's version of the two
+                       * rotated half-circles the app has to build by hand,
+                       * which is the one place this is easier here. Same size,
+                       * same colours, same tick when it is done.
+                       *
+                       * A started exercise never draws an empty ring: below
+                       * about a twentieth the arc is too short to read as
+                       * progress and the whole thing reads as not started, so
+                       * it floors at a sliver. The number beside it is what is
+                       * exact; the ring is the glance.
+                       */
+                      const dot = (done, inProgress, answered = 0, total = 0) => {
+                        const frac = done ? 1
+                          : (inProgress && total > 0) ? Math.max(0.05, Math.min(1, answered / total))
+                          : 0;
+                        const ring = done ? "#059669" : "#A66534";
+                        if (!done && !inProgress) {
+                          return <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-block", background: "#D4C0A8" }} />;
+                        }
+                        return (
+                          <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: `conic-gradient(${ring} ${frac * 360}deg, #E8DDD0 0deg)` }}>
+                            <span style={{ width: 11, height: 11, borderRadius: "50%", background: done ? ring : "#FFFDF9", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "white", fontWeight: 700 }}>{done ? "✓" : ""}</span>
+                          </span>
+                        );
+                      };
                       const hCell = { padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 0.8rem", fontSize: isMobile ? "0.74rem" : "0.8rem", color: "#0E0B07", fontFamily: BFONT, fontWeight: 700, borderLeft: "1px solid #F0E9E0", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
                       const stCell = { padding: isMobile ? "0.8rem 0.4rem" : "0.85rem 0.7rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.35rem", borderLeft: "1px solid #F0E9E0" };
                       return (
@@ -14601,7 +14665,16 @@ export default function App() {
                                   style={{ ...stCell, cursor: clickable ? "pointer" : "default", transition: "background .15s" }}
                                   onMouseEnter={clickable ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
                                   onMouseLeave={clickable ? (e => e.currentTarget.style.background = "transparent") : undefined}>
-                                  {dot(r.myDone, r.myInProgress)}
+                                  {(() => {
+                                    /* The registry is what maps a view to an
+                                       exercise; this table's own `key` is a
+                                       display id ("comm", "refl") and matching
+                                       on it would be a sixth name for the same
+                                       five things. */
+                                    const exKey = EXERCISES.find(e => e.view === r.viewId)?.key;
+                                    const p = (r.myInProgress && exKey) ? progressCountFor(exKey) : { answered: 0, total: 0 };
+                                    return dot(r.myDone, r.myInProgress, p.answered, p.total);
+                                  })()}
                                   <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#A66534", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume →" : "Start →"}</span>
                                 </div>
                                 {/* Partner column — status only */}
@@ -14723,6 +14796,41 @@ export default function App() {
                       sub="Everything you have marked, everything you have written, and your journal."
                       cta="Open →" onClick={() => setView("notes")} />
                   </div>
+
+                  {/* ── THE INSIGHT OF THE DAY ────────────────────────────
+                      Ellie: "section 3 on dashboard should look like learn page
+                      but also link to notes".
+
+                      The Learn tab is three things: the tools, the reading, and
+                      one insight a day across the top of them. This section had
+                      the first two and the website had no insight of the day
+                      anywhere at all, which is the piece that makes the app's
+                      tab feel like somewhere to arrive rather than a menu.
+
+                      Same source, api/_insights.js, so the two surfaces show
+                      the same one on the same day: the id is the day number
+                      modulo the list, and nothing about it is per-device. The
+                      quotation marks and the citation are put on by the module,
+                      not here, for the same reason. */}
+                  {(() => {
+                    const insight = insightOfTheDay();
+                    if (!insight) return null;
+                    return (
+                      <div style={{ marginTop: "1.5rem", background: "linear-gradient(135deg, #1E1A35, #2A2450)", borderRadius: 18, padding: isMobile ? "1.5rem 1.35rem" : "2rem 2.25rem" }}>
+                        <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+                          {INSIGHT_EYEBROW}
+                        </div>
+                        <p style={{ fontSize: isMobile ? "1rem" : "1.1rem", lineHeight: 1.6, color: "white", fontFamily: BFONT, fontWeight: 400, margin: 0 }}>
+                          {insight.body}
+                        </p>
+                        {insight.source ? (
+                          <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontStyle: "italic", marginTop: "1rem", marginBottom: 0 }}>
+                            {insight.source}
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
 
                   {/* Add-ons — separate, quieter, never mixed with what you own */}
                   {(!hasWorkbookOrder || !pkg.hasIntimacy) && (

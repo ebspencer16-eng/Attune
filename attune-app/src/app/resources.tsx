@@ -892,7 +892,7 @@ export default function ResourcesScreen() {
                 marginTop: insightLift,
               }}>
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
-                {INSIGHT_OF_THE_DAY}
+                {home.research.label || INSIGHT_OF_THE_DAY}
               </Text>
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
@@ -1343,7 +1343,7 @@ export default function ResourcesScreen() {
 
       {insightOpen && home?.research ? (
         <StoryCard
-          card={insightCard(home.research, INSIGHT_OF_THE_DAY)}
+          card={insightCard(home.research, home.research?.label || INSIGHT_OF_THE_DAY)}
           /* Ellie: "there should be a button on the insight of the day page
              that allows users to save this to relationship journal." The words
              kept are the finding itself with its source under it, which is
@@ -1454,6 +1454,11 @@ const SHEET_TOP_MAX = 420;
 /** The four featured previews' ground. One tone, not four. */
 const TILE_GREY = '#EFECE7';
 
+/**
+ * The fallback only. The label comes from the server with the insight now, so
+ * the dashboard and this tab cannot end up calling it two things; this is what a
+ * payload cached from before that field existed still renders.
+ */
 const INSIGHT_OF_THE_DAY = 'Insight of the day';
 
 /** Her two lines on the sheet a locked tool opens. */

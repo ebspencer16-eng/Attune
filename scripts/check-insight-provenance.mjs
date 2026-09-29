@@ -43,7 +43,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { INSIGHTS, insightOfTheDay } from '../api/_insights.js';
+import { INSIGHTS, insightOfTheDay, INSIGHT_EYEBROW } from '../api/_insights.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -213,6 +213,34 @@ if (fails.length) {
   for (const f of [...new Set(fails)]) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
+/**
+ * ── THE LABEL, WHICH BOTH SURFACES SHOW ───────────────────────────────────
+ * The app keeps a literal as its fallback, for a payload cached from before the
+ * server sent one. A fallback that says something different from the module is
+ * the drift it exists to survive, printed on screen.
+ */
+{
+  const app = readFileSync(`${ROOT}attune-app/src/app/resources.tsx`, 'utf8');
+  const m = app.match(/const INSIGHT_OF_THE_DAY = '([^']*)';/);
+  if (!m) {
+    fails.push("attune-app's resources.tsx no longer declares INSIGHT_OF_THE_DAY."
+      + ' Either it reads the label from the payload alone, in which case delete this'
+      + ' assertion with it, or the name changed. Refusing to guess.');
+  } else if (m[1] !== INSIGHT_EYEBROW) {
+    fails.push(`the app calls the insight ${JSON.stringify(m[1])} and api/_insights.js`
+      + ` calls it ${JSON.stringify(INSIGHT_EYEBROW)}. The dashboard reads the module and`
+      + ' the app falls back to its own copy, so those two strings are one label written'
+      + ' twice.');
+  }
+}
+
+if (fails.length) {
+  console.error('[check-insight-provenance] a name sits under words that are not that'
+    + " person's:");
+  for (const f of fails) console.error(`  ✗ ${f}`);
+  process.exit(1);
+}
+
 const onPages = INSIGHTS.filter((i) => i.kind === 'quote' && String(i.url || '').trim()).length;
 const inBooks = quotes - onPages;
 console.log(`[check-insight-provenance] ${quotes} quotations, each with an author and a`

@@ -323,6 +323,15 @@ export const INSIGHTS = [
  * attribution field on it: a real citation for a quotation, and empty for our
  * own sentence, because our own sentence has no one to cite.
  */
+/**
+ * What the insight is called on both surfaces.
+ *
+ * It was a constant in the app's resources.tsx and nowhere else, which was fine
+ * while the app was the only surface showing one. The dashboard shows it now,
+ * so a label typed in two places is two labels waiting to disagree.
+ */
+export const INSIGHT_EYEBROW = 'Insight of the day';
+
 /** "Author, Work" for a page; "Author, Work (edition), p. N" for a book. */
 function citation(pick) {
   const who = pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;
@@ -352,6 +361,8 @@ export function insightOfTheDay(now = new Date()) {
     id: pick.id,
     body: quoted,
     kind: pick.kind,
+    /* Sent so the app reads the same label rather than keeping its own. */
+    label: INSIGHT_EYEBROW,
     /**
      * The citation under a quotation.
      *
