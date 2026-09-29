@@ -163,12 +163,32 @@ for (const section of SECTIONS) {
     console.error(`  FAIL  ${section}`);
     for (const p of problems.slice(0, 3)) console.error(`        ${p.slice(0, 160)}`);
   } else if (redirected || empty) {
-    // Not a failure: the section exists but the demo has no answers for it, so
-    // there is nothing to render and nothing to check. Reported loudly rather
-    // than silently passed, because a section that can never be seen in demo
-    // is also a section nobody has visually reviewed.
+    /**
+     * Not a failure, and it has to say WHICH not-a-failure.
+     *
+     * This line read "no demo data" for every short page, and for two of them
+     * that was false and had been for a while. reflection-cover and
+     * intimacy-cover are not short of answers: src/App.jsx has no branch for a
+     * -cover section at all, so the results column renders nothing and what is
+     * measured is the marketing footer underneath it. A reason invented by the
+     * reporter is the check:docs failure in miniature. Eighteen generators
+     * "failed" for a year because the message never separated broken from
+     * unavailable, and nobody read the line again after the first week.
+     *
+     * The three lengths are far enough apart to tell apart. A real section is
+     * thousands of characters. A section with no demo answers still draws the
+     * results shell and its nav, around 290. A section with no renderer draws no
+     * column at all and leaves only the site footer, around 250.
+     */
     skipped.push(section);
-    console.log(`  SKIP  ${section}  (${redirected ? 'not available for this package, redirected to ' + landed : 'no demo data — ' + text.trim().length + ' chars'})`);
+    const why = redirected
+      ? `not available for this package, redirected to ${landed}`
+      : text.trim().length < 300
+        ? `nothing rendered — ${text.trim().length} chars, less than the empty results`
+          + ' shell, so this is a section the website has no renderer for rather than one'
+          + ' the demo has no answers for'
+        : `no demo data — ${text.trim().length} chars`;
+    console.log(`  SKIP  ${section}  (${why})`);
   } else {
     console.log(`  ok    ${section}`);
   }
@@ -231,4 +251,9 @@ if (failed || viewFailed) {
 }
 console.log(`\n[check-render] ${SECTIONS.length - skipped.length} of ${SECTIONS.length} sections and ${VIEWS.length - bounced.length} of ${VIEWS.length} other views rendered clean (${TYPE}, ${PKG}).`);
 if (bounced.length) console.log(`[check-render] sent back to home, not rendered: ${bounced.join(', ')}`);
-if (skipped.length) console.log(`[check-render] skipped, no demo data: ${skipped.join(', ')}`);
+if (skipped.length) {
+  /* Not "no demo data": the per-section lines above say which reason applied to
+     each, and asserting one of them here for all of them is how the wrong reason
+     stood against two of these for months. */
+  console.log(`[check-render] not checked, for the reasons given above: ${skipped.join(', ')}`);
+}
