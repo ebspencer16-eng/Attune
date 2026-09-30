@@ -199,3 +199,57 @@ export function gradientCss(id) {
   const [from, mid, to] = g.stops;
   return `linear-gradient(${g.angle}deg, ${from}, ${mid} ${g.mid}%, ${to})`;
 }
+
+/**
+ * ── THE FOUR TAB GROUNDS ──────────────────────────────────────────────────
+ * The colour each of the app's tabs is painted in. Home is the Attune blue,
+ * Insights the orange, and Learn a lighter blue than Home.
+ *
+ * Ellie: "The home page is the attune blue, please try making the landing page
+ * for insights the attune orange. Similar gradient as the home page has
+ * please." And, of Learn: "Learn bg should just be the bg of the insight of the
+ * day banner."
+ *
+ * ── WHY THEY ARE HERE AND NOT ONLY IN THE APP ─────────────────────────────
+ * They were only in attune-app/src/constants/attune-theme.ts, which was right
+ * while these were four screens of an app. Ellie: "I want the site to use some
+ * of the design elements we've built for the app (section 2 on site should look
+ * like the insights menu, section 3 on dashboard should look like learn page
+ * but also link to notes)." The moment the website paints the same grounds, a
+ * hex typed in two places is two designs that drift.
+ *
+ * An Expo project cannot import from api/, so the app keeps its own constants
+ * and check-tab-grounds.mjs holds the two to each other. That is the same
+ * arrangement as the card sizer and the budget arithmetic: share what can be
+ * shared, and gate what cannot.
+ *
+ * `lighten` is repeated from the app's theme for the same reason, and the gate
+ * compares the results rather than the source, so the two implementations only
+ * have to agree about the answer.
+ */
+const lighten = (hex, t) => {
+  const n = parseInt(hex.slice(1), 16);
+  const up = (v) => Math.round(v + (255 - v) * t);
+  return `#${[(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    .map((v) => up(v).toString(16).padStart(2, '0')).join('')}`;
+};
+
+const BLUE_GROUND = ['#2A3A6E', '#4A6CD4'];
+
+export const TAB_GROUNDS = {
+  /** Home. The blue the dashboard has always been. */
+  home: BLUE_GROUND,
+  /** Insights, and therefore the exercises: the brand orange, softened once. */
+  insights: ['#CB5A33', '#F09763'],
+  /** Learn, which is Home's blue lifted a fifth toward white. */
+  learn: [lighten(BLUE_GROUND[0], 0.2), lighten(BLUE_GROUND[1], 0.2)],
+};
+
+/**
+ * A tab's ground as CSS, dark corner to light, which is how the app draws it:
+ * `start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}` is a 135 degree sweep.
+ */
+export function tabGradientCss(tab) {
+  const g = TAB_GROUNDS[tab];
+  return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : null;
+}

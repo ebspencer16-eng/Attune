@@ -26,9 +26,25 @@
  * fine when the end is where you want it and it is a bug the rest of the time,
  * and the difference is exactly what changes between phones.
  *
- * So a container that grows has to say: `justifyContent` on the container, or a
- * child taking the slack with `marginTop: 'auto'` or `flex: 1`. Any of the three
- * is an answer. None of them is the shape that produced this.
+ * So a container that grows has to say where the difference goes: `justifyContent`
+ * on the container, or a child taking the slack with `marginTop: 'auto'`,
+ * `flex: 1` or `flexGrow: 1`.
+ *
+ * ── AN ANSWER IS NOT THE SAME AS A GOOD ANSWER ────────────────────────────
+ * The home screen answered with `marginTop: 'auto'`, this passed, and Ellie
+ * reported the same bug again: "the blue section on my phone is way larger than
+ * on the simulator's home page. I thought we fixed this?"
+ *
+ * Pinning the last child to the bottom moves the gap above it rather than
+ * removing it, and on a screen whose ground is a gradient an empty band reads
+ * the same wherever it sits. She had already rejected that shape in an earlier
+ * round, when blocks pushed to the bottom left "a third of the page empty blue".
+ *
+ * The answer that removes the gap rather than relocating it is a child that
+ * GROWS into it, so the leftover ends up inside something rather than on the
+ * page's own background. This still accepts all four, because which one is
+ * right depends on the screen and that judgement is not a check's to make. What
+ * it can do is say so here, where the next person reads it.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Fixed element sizes. A 132 point card is 132 points on every phone and that is
@@ -100,14 +116,17 @@ for (const f of files) {
     const body = raw
       .replace(/\/\*[\s\S]*?\*\//g, ' ')
       .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
-    if (/marginTop:\s*'auto'/.test(body) || /\bflex:\s*1\b/.test(body)) continue;
+    if (/marginTop:\s*'auto'/.test(body) || /\bflex:\s*1\b/.test(body)
+      || /\bflexGrow:\s*1\b/.test(body)) continue;
 
     fails.push(`${rel}:${line} grows its content to fill the screen and never says`
       + ' where the spare height goes, so all of it collects after the last child'
       + ' and the gap at the bottom grows with the phone. That is what Ellie saw as'
       + ' "way more blue at the bottom than the simulator". Say it: justifyContent'
-      + " on the container, or marginTop: 'auto' or flex: 1 on the child that should"
-      + ' take the slack.');
+      + " on the container, or marginTop: 'auto', flex: 1 or flexGrow: 1 on the child"
+      + ' that should take it. Prefer the one that GROWS: pinning a child to the bottom'
+      + ' moves the gap above it rather than removing it, which is how that bug came'
+      + ' back a second time.');
   }
 }
 

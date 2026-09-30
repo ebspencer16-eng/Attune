@@ -612,6 +612,36 @@ this codebase, deliberately, and `grep` over them answers a surprising share of
 what looks like it needs asking. Asking a question she has already answered
 spends her attention twice.
 
+**TASKS.md is updated before the work, not after it.** Ellie: "Every single time
+I send a message, your first step should be updating tasks.md with DETAILED
+action items for yourself. Then, work through the list, then, adjust the tasks.md
+file appropriately and send it back to me for my responsibilities."
+
+That process was already written in the file, in those three steps, and I had not
+been following it. Working first and recording afterwards is how an item gets
+recorded as whatever it turned into rather than as what she asked for.
+
+**Design and copy belong in section 3, never section 4.** Section 4 is "done and
+verified", and what verifies a row there is a check. Nothing can check whether a
+screen looks right, so a design pass filed there is a pass nobody will ever
+look at.
+
+This is how a whole request disappeared. She asked for the dashboard's section 2
+to look like the app's Insights tab and section 3 to look like the Learn tab. I
+added a progress ring and an insight card, filed it in section 4 as done and
+verified, and she found out it had not happened by looking at the site: "Not only
+are those not done, but they never appeared in tasks as open or ready for review.
+This is not ok."
+
+Two failures at once, and the second is worse. Under-delivering is visible and
+gets corrected. Filing something as verified takes it off both of our lists.
+
+**"Make it look like X" is not "add one element from X".** The ring and the card
+were both real improvements and neither was the request. When an instruction
+names a thing to mirror, go and read that thing, list what makes it recognisable,
+and do those. For a screen that is usually the ground, the type on it, and the
+shape of the blocks, in that order of what a person notices.
+
 **Where the holes actually were.** Of the gates audited so far, the ones with
 holes all matched on a literal name or a single shape. The ones that run the
 code and compare the answers, `check-alignment-rule` over 81 answer pairs,

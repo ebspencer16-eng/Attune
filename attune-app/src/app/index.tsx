@@ -547,13 +547,31 @@ export default function HomeScreen() {
                * gradient's stops are proportional and always were, which is why
                * this read as a colour problem and was a layout one.
                *
-               * `marginTop: 'auto'` takes the slack and puts it above, so the
-               * tile sits just above the tab bar on every screen and the reading
-               * gets the extra room instead. That is the design this file
-               * already described at `topHeight`, a proportion of the screen
-               * height that was computed and never used by anything.
+               * ── AND `marginTop: 'auto'` WAS THE WRONG ANSWER ──────────
+               * It moved the gap rather than removing it. The slack went above
+               * the panel instead of below it, so a taller phone got a band of
+               * empty blue between the greeting and the panel rather than under
+               * it, and Ellie reported the same thing again: "the blue section
+               * on my phone is way larger than on the simulator's home page. I
+               * thought we fixed this?"
+               *
+               * She had already rejected this shape once, in her own words about
+               * an earlier version of this screen: the blocks were pushed to the
+               * bottom and "a third of the page was empty blue". Pinning the
+               * panel to the bottom is that, upside down.
+               *
+               * The panel grows into the spare height instead. The blocks pack
+               * from the top the way she asked, the panel starts where the
+               * reading ends, and whatever is left over is inside the panel and
+               * therefore cream. There is no empty blue on any phone height,
+               * which is the thing being complained about both times; a taller
+               * phone gets a taller panel, which is what scaling looks like.
+               *
+               * flexGrow rather than flex, because `flex: 1` also sets
+               * flexShrink and would squeeze the panel on a short screen, where
+               * the reading above it is what should give way.
                */
-              marginTop: 'auto',
+              flexGrow: 1,
               paddingTop: Spacing.xl,
               marginBottom: BottomTabInset + Spacing.lg,
               borderBottomLeftRadius: TILE_RADIUS,

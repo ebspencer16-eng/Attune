@@ -1,196 +1,57 @@
 # Tasks
 
-Four sections, and they hand work back and forth.
-
-**1. Needs you** is everything blocked on you: a migration to run, a credential
-to supply, a decision to make, a question to answer. Nothing here moves until
-you touch it, so it goes first.
-
-**2. Open** is my list. Things to build or fix, none of them waiting on you.
-
-**3. For you to review** is the softer half of your list: things built and
-working that I cannot confirm on my own, because they need an eye or a phone.
-Looking at them is the whole job.
-
-**4. Done and verified** is the record, with the evidence for each line.
-
-The difference between 1 and 3 is whether anything is blocked. A migration that
-has not run means a column is missing and a chart is empty; an unreviewed
-design means nothing at all until you dislike it. Section 1 used to hold only
-my questions, which is why three migrations sat in section 3 where they read
-as optional. They were not.
-
-**A status is a claim and needs evidence.** Section 4 names the check, the
-browser run or your own word. Nothing sits in section 3 that a check could
-have proved instead.
-
----
-
 ## 1. Needs you
 
-Everything here is blocked on something only you can do. A migration I am
-not allowed to run, a credential I do not have, a decision that is yours.
-Nothing in here is waiting on me.
-
-Ids never change, so R28 stays R28 wherever it sits. Tell me "R28 run" or
-"O5 leave it" and I move it on.
-
-### Deploy the workbook service, and nothing can build a PDF until you do
-
-| # | One deployment |
+| # | What I need from you |
 |--|--|
-| O501 | **Both variables are set, you are right, and I owe you a correction: I probed the wrong thing.** I said the service had never been deployed on the strength of a hostname I took out of `scripts/PDF_BUILDER_STEPS.md`, not out of your actual `WORKBOOK_SERVICE_URL`. That was a guess wearing a measurement's clothes. **What I can tell from your symptom**: the website's message picks itself from what the server says, and "did not answer" is a different branch from "not configured", so the variables being set is consistent with what you saw. **The most likely cause, and it is fixed either way**: that endpoint had no `maxDuration`, so Vercel gave it about ten seconds, and it has to wake a sleeping service and print a forty-page document inside that. It now has sixty, the ceiling on the smallest plan, with its own timeout just under so a slow service reports as slow rather than the whole function dying silently. **Two things from you.** Redeploy the site so the new limit takes effect, which happens on its own with the next push. And open the hostname in `WORKBOOK_SERVICE_URL` in a browser and tell me what it says: if it is `attune-workbook.onrender.com` then that host really does answer with Render's "no service here", which I have now checked twice a day apart, and the service needs redeploying rather than debugging. |
-
-### Publish an app update, and nothing app-side reaches you until you do
-
-| # | One command |
-|--|--|
-| O498 | **Your command worked. An update was published on 30 September at 19:47 UTC**, which I confirmed by asking Expo's update server what it is serving rather than by asking you. The previous one was 26 September, and every commit in this batch predates it, so the bundle it published carries all of them. **So the question is no longer whether it published, it is whether your phone has fetched it**, and there is one line that answers that: Settings, at the very bottom, shows "Updated" and a date. Tell me what it says. If it reads 30 September the update is on your phone and "no difference" means something else, which is a different and more interesting problem. If it still reads 26 September, the download has not completed: an update arrives in the background on one launch and runs on the next, so it needs two full opens with a few seconds in between, not four quick ones. |
-
-### Run these in the SQL editor
-
-I deliver migrations and you run them. That is deliberate and it is in
-CLAUDE.md, so anything new sits here until you do.
-
-**One read-only query, when you have two minutes.** Paste
-`supabase/diagnostics/migrations-actually-run.sql` into the SQL editor. It writes
-nothing; it only asks which of ten migrations this database has actually had.
-
-The reason it exists: ten places in the server say in a comment that they are
-tolerant of a particular migration not having been run, and quietly do less when
-the column or table is missing. That tolerance is right, because a behind schema
-should degrade rather than error. It also means a behind schema is invisible, and
-what goes quiet is not small: highlights and underlines cannot be saved at all,
-nothing records that anyone consented to anything, and someone whose partner
-deleted their account is shown a waiting screen forever instead of their own
-results. You have run 075, and these are numbered in order, so my expectation is
-that every row says PRESENT. Two minutes to know rather than assume, before
-testers are in it.
-
-I could not run the query myself: there is no Postgres on this machine. A parser
-accepts it as valid Postgres, which is not the same as the server accepting it. If
-it does have a syntax error you will see it immediately and it costs one paste,
-because the file only reads.
-
-**Nothing waiting.** 076 is run and saved, so the Shared Budget and the Merging
-Lives Checklist are now one each between you rather than one per person.
-
-| # | Migration |
-|--|--|
-
-
-### Decide these
-
-| # | Decision |
-|--|--|
-| O499 | **I searched, and the honest answer is that the books are reachable but not checkable. One small thing from you unlocks all of it.** You: "There must be websites or somewhere that you can find relevant quotes from published books. Please search the full internet." Seven routes, and what each gave: **Google Books** searches the exact text of real scans and is precisely the right tool, but the public quota is exhausted without an API key, and **a key is free and takes about three minutes to create**. **archive.org** holds scans of Hold Me Tight and the rest, and gates search-inside on lending titles (403). **Sue Johnson's own site** hosts a real excerpt with page numbers, as a PDF this machine has no tooling to read. **Publishers** have no excerpt pages for these titles. **Goodreads** has hundreds of quotations, typed in by readers and often wrong, and verifying against one would only confirm someone's typing. **Wikiquote** has no page for any of these authors. **Edited magazine and institute pages** work, which is where all eighteen of the current quotations come from. **What I need is one of two things.** A Google Books API key, and I can verify a passage against the actual scanned page and cite the book properly. Or passages from you or Carolina with a page number, and the mechanism for those is already built and gated. Without one of them I would be typing researchers' words from memory, which is the exact thing that put a paraphrase under a byline last week. |
-| O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. |
-| R12 | **No action needed until the lawyer comes back.** The Privacy Policy and the Terms carried "Effective date: TODO before publishing" and now carry the beta note instead, so nothing on the page is a placeholder a tester can read. What is still yours is the real effective date on each, once the wording is settled. Tell me the two dates and I will set them; the consent version is a hash of the documents, so it moves with them on its own and nobody has to remember to bump anything. |
-| O482 | **No action needed until the app is in the App Store. Raised so it is not forgotten**, which you asked for when you approved O472. The partner invite email has a line telling the invitee to download the app. It is written and switched off, because `APP_LIVE` is false and the store URL still ends in `idPENDING`, so an invitee told to download it would find nothing. Flipping that one flag turns it on here, in the order email and on every page at once. It is the same flag as O1 below, and this row exists so the email is remembered as part of flipping it rather than discovered afterwards. |
-| O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. |
-| O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. |
-
-### Write this
-
-**C2 is closed**, by her own answer to it: "Can we make this question and
-answer option setup the same as the comms exercises where the poles are A and B
-and there's 5 options to show how closely you align with either pole?" The two
-middle answers were unwritable because five hand-written behaviours have no
-middle. A scale has one by construction.
-
-| # | Copy gap |
-|--|--|
-| C3 | **Fifty words, written and waiting on you.** You: "Build 50 words to start, build a review doc for me." `WORDS-REVIEW.md` in the repo root, one row per word, generated from `api/_words.js` rather than typed, so a word changed in one is changed in both and the document cannot quietly describe a previous version of the product. Four of them are yours; forty-six are mine. Three useful answers per row, and a whole column of "fine" is one of them: cut the word, keep the word and send me your sentence, or tell me a word that is missing. Seven are the harder half of a relationship (rupture, conflict, withdrawal, escalation, resentment, contempt, defensiveness) and are the easiest to cut if a card saying "contempt" over breakfast is not the tone you want. |
-
-
-### Answer these
-
-**Nothing waiting.** Q11 is answered: any page, and it is R214.
-
-| # | Question |
-|--|--|
+| O501 | **Open a browser, paste the value of `WORKBOOK_SERVICE_URL`, and tell me what comes back.** Where to find it: vercel.com, the Attune project, Settings, Environment Variables, find `WORKBOOK_SERVICE_URL`, click the eye to reveal it, copy it. Paste it into a new browser tab and press enter. **Three things it can say, and each means something different.** Plain text reading "Not Found" means nothing is deployed at that address and the service has to be created again. A pause of up to a minute and then anything at all means it is asleep but alive, which the sixty-second limit I set today is for. "Method Not Allowed", or a JSON error, means it is running and healthy, because it only accepts the kind of request the server sends it. Paste me whichever you get. **Also**: the new limit needs a redeploy to take effect, which any push does, and I have pushed today. |
+| O498 | **Publish again when you want to look at this batch.** `cd attune-app` then `npm run testflight:update`. It pulls first and writes its own message now, which were the two ways it went quietly wrong before. Then open the app twice, and Settings at the bottom shows the date of what you are actually running. |
+| O499 | **Create a Google Books API key and paste it to me.** 1. Go to console.cloud.google.com and sign in. 2. Top left, click the project dropdown, then "New Project". Name it `attune-books`, click Create, and wait for it to switch to that project. 3. In the search bar at the top type `Books API`, open "Google Books API", and click Enable. 4. Left menu: APIs & Services, then Credentials. 5. Click "Create Credentials" at the top and choose "API key". 6. It shows the key. Copy it and paste it to me. **You can stop there.** Restricting the key is optional and I will walk you through it if you want. It is free up to a thousand lookups a day and a quotation costs about one. **What it buys**: I can search the exact text of the real scanned books, so a quotation can be checked against the page it is on and cited properly, and then all 49 of our own sentences can be retired the way you asked. |
+| O7 | **Nothing to do unless you want to change it. Answer when you have a view.** Every page has a hidden tag telling Google which address is the real one, and all thirty-odd of them say `attune-relationships.com` while the site actually serves from `www.attune-relationships.com`. Google follows the redirect, so nothing is broken today. Changing them is a small SEO risk either way, which is why I have not done it on my own: search rankings attach to one address, and moving the tags moves which one. My recommendation is to leave it until closer to launch and then change them all at once. | |
+| R12 | **No action needed until the lawyer comes back.** The Privacy Policy and the Terms carried "Effective date: TODO before publishing" and now carry the beta note instead, so nothing on the page is a placeholder a tester can read. What is still yours is the real effective date on each, once the wording is settled. Tell me the two dates and I will set them; the consent version is a hash of the documents, so it moves with them on its own and nobody has to remember to bump anything. | |
+| O482 | **No action needed until the app is in the App Store. Raised so it is not forgotten**, which you asked for when you approved O472. The partner invite email has a line telling the invitee to download the app. It is written and switched off, because `APP_LIVE` is false and the store URL still ends in `idPENDING`, so an invitee told to download it would find nothing. Flipping that one flag turns it on here, in the order email and on every page at once. It is the same flag as O1 below, and this row exists so the email is remembered as part of flipping it rather than discovered afterwards. | |
+| O1 | **No action needed until the app is in the App Store.** When it is, tell me and I change two lines: `APP_LIVE = true` and the store link. That turns on the download buttons and the app mentions across the site, all of which read from those two lines. | |
+| O16 | **No action needed until the app is in the App Store.** Right, as you say. When it is live, download numbers need an App Store Connect API key, an issuer id and a private key from your Apple developer account, and I will tell you exactly where to click. Two things on the Engagement page are waiting on it and both say so on the page. | |
+| C3 | **Fifty words, written and waiting on you.** You: "Build 50 words to start, build a review doc for me." `WORDS-REVIEW.md` in the repo root, one row per word, generated from `api/_words.js` rather than typed, so a word changed in one is changed in both and the document cannot quietly describe a previous version of the product. Four of them are yours; forty-six are mine. Three useful answers per row, and a whole column of "fine" is one of them: cut the word, keep the word and send me your sentence, or tell me a word that is missing. Seven are the harder half of a relationship (rupture, conflict, withdrawal, escalation, resentment, contempt, defensiveness) and are the easiest to cut if a card saying "contempt" over breakfast is not the tone you want. | |
+| D12 | **Is there any budget or appetite for imagery, of any kind?** Every reference you sent has something made by a person in it: illustration, photography, even a drawn magnifying glass. Attune is type and gradient from the first screen to the last, and I think that, more than any layout, is what reads as generated. The Learn cards already accept artwork and there is none, so every card falls back to a tinted ground with the mark in the corner. It does not have to be photography: six or eight simple drawn marks, one per results section, would carry the whole app. This is the largest single lever available and it is not a code job. Answering it changes what the other design questions are worth. |
+| D13 | **What is the Notes tab for, in a sentence?** You called it boring and you are right: every other tab has a subject and Notes has storage. Three answers I can see, and they build differently. "Everything I marked, so I can find it again" is a library and wants search and filtering. "What we are working on right now" is a worklist and wants the three most recent things and a way to tick one off. "A record of us paying attention to this" is a history and wants dates and volume and the shape of it over time. Two smaller ones behind it: should your partner's shared notes be as prominent as your own, or is it your room with a letterbox in it (it is the second today and does not say so), and is there anything you would want to do from Notes other than read, such as turning a mark into a conversation to have, or sending one over with a question attached. |
+| D14 | **Which direction for the app's colour?** Three alternatives, not a list to pick all of. **A. Sections own the app, not just the results.** A note about Expectations carries blue wherever it appears: in Notes, on the home tile, in Learn. The product feels like five coloured rooms. The cost is that a colour stops meaning "you are here" and starts meaning "this is about that", which is a bigger claim and harder to keep true. **B. One accent, used rarely and always for the same thing.** Cream, ink and the orange, with the orange strictly for "this is the thing to do next". Sections keep colour only inside Insights. The quietest and most confident, and closest to how the website reads; the cost is less colour, not more, which is not what you asked for. **C. Warmth rather than colour.** Keep the palette and change the surfaces: paper grain, a slight tint on the cream, cards with a real edge rather than a hairline. |
 
 ## 2. Open
 
-My list. Things to build or fix, none of them waiting on you.
-
-When you send me a list, or when a sweep turns something up, it appears here.
-
-Everything here is decided and mine to build. Where you gave a decision in your
-last batch it is quoted in the row, so I cannot drift from it.
-
-Everything from your last batch is in section 4 with its evidence. Five things
-came out of that work that are yours rather than mine and are in section 1: the
-button word at the end of an exercise (O491), two dead fields on the results
-payload (O492), how often you want a quotation rather than one of your own lines
-(O493), the five cover pages the app has and the website does not (O494), and
-the fifty words (C3). None of them blocks anything.
-
-| # | Open |
+| # | Mine to build |
 |--|--|
-| O493 | **The mechanism for book quotations is in; the quotations themselves need your answer to O499.** You: "I want every insight to be quotes, I want to retire all AI-generated sentences. I would rather quote from books than sites anyways." A quotation can now cite a book: an edition and a page number instead of a url, and the citation a reader sees becomes "Sue Johnson, Hold Me Tight (2008), p. 42". A quotation with neither a url nor a page fails the build, because a citation nobody can check is how the two paraphrases got in. `check-quotes-verbatim` now says how many it could not open and names them, rather than passing over them in silence. **What I have not done, deliberately**: invented the quotations. Retiring 49 sentences means finding about that many, and I cannot open the books, so anything I wrote from memory would be a researcher's name over words I had reconstructed. That is the exact failure I spent this morning fixing, at fifty times the scale. O499 is the one answer I need. |
+| O490 | **Delete the Word version, blocked on the PDF working (O501). And you should know it is still reachable today.** You: "Once the PDF builder is working properly I want to delete the docx version so that no one accidentally sees it, it looks bad." **This had no row until now, which is my miss.** What is done: the stored-file lookup no longer serves a Word file, so the app and the dashboard offer a workbook or nothing. What is not: the website's workbook page still has a button reading "Download (.docx)" that builds one on the spot, and with the PDF service not answering that button is currently the only way anyone gets a workbook at all. **So there is a choice inside your instruction**: leave it and testers can still meet the version you do not like, or take it out now and nobody gets a workbook until the service is up. Say which. My recommendation is to take it out now, because a missing workbook is visibly missing and a bad one looks finished, and that is the rule we use everywhere else. |
+| O493 | **Every insight becomes a quotation. Waiting on the key in O499.** You: "I want every insight to be quotes, I want to retire all AI-generated sentences. I would rather quote from books than sites anyways." The mechanism is built: a quotation can cite a book by edition and page, the citation reads "Sue Johnson, Hold Me Tight (2008), p. 42", and one that nothing can check fails the build. Eighteen of sixty-seven are quotations today, every one verified against the page it cites. **What the key unlocks**: searching the exact text of real scans, which is the only way I can add book quotations without typing researchers' words from memory. That is what put a paraphrase under a byline last week and I will not do it at scale. |
+| O502 | **Check every screen at two phone sizes and fix whatever moves.** You: "Please adjust every page, view, etc. on the app so that dimensions are the same on every phone screen." I have done the home screen twice and written one gate, and that gate covers five scrolling screens and only the question of where spare height goes. That is not "every page, view, etc." and I should not have let it read as though it were. **The plan**: boot an iPhone 17 Pro and a 17 Pro Max, screenshot every screen on both, compare them for anything that is not proportional, fix it, and turn the comparison into a standing check so this cannot come back a third time. Five tabs and about a dozen screens behind them. |
 
 ## 3. For you to review
 
-Things that are built, shipped and working, that I cannot confirm on my own.
-Design and copy need your eye; the rest needs a phone.
-
-Nothing that a check can prove is in here. Those live in section 4 with the
-name of the check that proves them.
-
-**Ids are stable.** Tell me "R7 verified" or "R7, no, the glow is still too
-subtle" and I move it to section 4 or open it in section 2. They are not in
-any order; work through them however suits.
-
-### Design, and whether it looks right
-
-The newest pass first.
-
-| # | Review |
+| # | Built, needs your eye |
 |--|--|
-| O488 | **The blue band under the home tile no longer grows with the phone.** The gradient's stops are proportions and always were, which is why this read as a colour problem and was a layout one. The scroll content is told to fill the screen and nothing claimed the leftover height, so all of it collected after the last child: a taller phone, a bigger gap. The tile takes the slack now and sits just above the tab bar on every screen, with the reading above it getting the extra room. **That was the design already written in the file**, as a proportion of the screen height that was computed and used by nothing. I scanned every screen for the same shape and the home screen was the only one: the others either centre their content or pin it. `check-screen-slack.mjs` now requires every scrolling screen to say where its spare height goes. It also says what it does not cover: a 132 point card is 132 points on every phone and that is consistency rather than a failure of it. **Worth a look on your phone**, because what I cannot check is whether the new distribution looks right to you. |
-| O457 | **Found it. There are three workbook builders and the app had never used the right one.** `scripts/build_workbook.py` renders the HTML, `scripts/render_workbook.mjs` prints it with Playwright, `Dockerfile.workbook` containerises them and `/api/store-workbook-pdf` posts to the service. Full bleed gradient cover, dot grid, editorial layout: that is the one you are describing, and **the website has called it all along**, which is why the site's version looked right to you and the app's never did. The app called `/api/store-workbook`, which builds a `.docx`, and last week I moved it to `/api/generate-pdf`, which draws a third and simpler page. **The reason was not taste:** store-workbook would accept a user id and assemble the payload on the server, and store-workbook-pdf wanted the payload the website builds in the browser, which the app does not have. So the app used the endpoint that took what it had. That difference is gone. The app and the completion trigger both go to the service now, and the app has no renderer of its own: a failed build says so rather than drawing a different document, because a different document looks finished and a missing one does not. **This needs your eye on a phone**, and it needs M-nothing from you, but see O485: if the service is not configured on Vercel you will get a message saying so rather than a file. |
-| R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. |
-| R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. |
-| R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. |
-| R175 | **Articles can carry an illustration.** The card draws it when a post has one. Until then the ground is tinted by shelf, with the mark in the corner, so a card without a picture looks intentional rather than broken. Adding pictures is a content job: the column is there and the admin accepts it, so the moment you have artwork it appears. |
-| R173 | **The workbook opens in the browser and builds itself.** Your call, and the simpler one: the app opens the website's workbook page with a flag that makes the browser build the PDF straight away, with the same builder and the same options a customer gets on the website. One file, one builder, no server renderer. The page says "Building your workbook" for the second it takes. |
-| R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. |
-
-### Copy, and whether the words are yours
-
-| # | Review |
-|--|--|
-| R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. |
-| R11 | **Terms of service.** |
-
-### Behaviour, which has to be used rather than looked at
-
-You asked whether these have to wait for the App Store. Almost none of them
-do. Each one now opens with what it needs, so you can tell at a glance
-whether it is something you can do this afternoon in the simulator.
-
-The simulator is a real copy of the app: taps, drags, text selection and the
-keyboard all work, with the mouse standing in for a finger. What it cannot do
-is be a phone that has been closed for a day, or have a real Apple ID, or
-receive a notification from Apple's servers.
-
-| # | Review |
-|--|--|
-| O486 | **Built, and not on your phone yet; see O498.** You: "Learn loaded immediately, but I think my cell is seeing an old version." You were right that it is an old version, and Learn loading quickly was the serverless functions happening to be warm rather than this fix, which has never been published. **The Learn tab waited for five requests before drawing anything.** You: "the learn tab spun for about 30 secs, then showed a 'something went wrong' error... then went away after about a minute." One `Promise.all` over five calls, so the tab was a spinner until the slowest answered, and every one is a serverless function that is cold if nobody has called it for an hour. All four tabs mount at launch, so a cold start asks for five cold functions at once and you watch the worst of them. The error was the same cause: only the first of the five set it, so one slow answer failing put the whole tab into an error state while the other four had already arrived, and it went away because focusing the tab loads again and by then everything was warm. Each request lands on its own now, and Learn keeps its last payload the way the home tab already did, so on any launch after the first it is simply there. **The check found the same shape in two more tabs**, Insights and Notes, and both are fixed. **Needs your phone to judge**, because what I can prove is that nothing waits on everything; how fast it feels on a cold start is yours to see. |
-| R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. |
-
+| O497 | **Section 2 and section 3 are on the app's grounds. This is the pass that should have come to you last time and did not.** You: "section 2 on site should look like the insights menu, section 3 on dashboard should look like learn page but also link to notes". **What I did wrong**: I added a progress ring to section 2 and an insight card to section 3, called that mirroring the designs, and filed it in section 4 as done and verified, so it never reached you to look at. Both changes were too small and neither was what you asked for. **What it is now**: section 2 is painted in the app's Insights orange with its heading in white, the way the Insights tab carries the exercise table. Section 3 is painted in the app's Learn blue and carries the tools, the notes card and the insight of the day on it, the way the Learn tab holds them; the insight card lost its own dark ground, which read as a hole once the section around it was blue. The colours come from `api/_lib/section-grounds.js` and `check-tab-grounds.mjs` holds the app's copy to the server's, planted four ways. **Mine to keep going if it is not close enough**: tell me what is off and I will take it further. |
+| O494 | **Cover pages on both surfaces, for the five chapters and the five exercises.** You: "Mirror cover pages for exercises and results on both web and app." **The results covers**: the website had no code for them at all, so two rendered an empty column and `comm-cover` rendered the next page character for character. It draws all five now, and opening a chapter in the sidebar lands on its cover, which is what the app's nav does; before this they were reachable only by a bookmark. **The exercises**: the app opened them on a plain centred column and the website on five hand-built ones. All ten are the cover now, the gradient rule and the glowing mark included. The app has one `CoverPage` drawing both a chapter and an exercise rather than two copies, and the website has one `CoverCard`. **Three things that were written down twice and now are not**: the word on the cover's button, which was typed into the app's renderer and is in the server's `PAGE_COPY`; the mapping from an exercise to its results chapter, which each surface worked out for itself and is now `resultsGroup` on the registry; and the exercise descriptor in `/api/questions`, written out at five payload sites of which only one had grown a `view` field. Held by `check-render` (a cover is judged by its name and its button rather than by length) and `check-exercise-flow` (every opening page carries the frame), planted four ways. **What I kept**: the two exercise-preview tiles on Communication's opening and the timing lines on Expectations and Reflection. They are things those pages say, not chrome, and nothing asked for them to go. | |
+| O491 | **All five completion screens are the app's.** You: "I would rather them match the app's setup." Title, body and one button reading "Back to insights", going to the exercises page, which is this site's version of the app's Insights tab. The three-way body copy and the buttons that changed with it are gone. The exemption set in the gate went with them rather than being left empty. **The upsell tiles under Communication and Expectations are untouched**: taking a revenue surface off a page is not what you asked for, and it is one word from you if you want it. | |
+| O488 | **Fixed a second time, differently, and it needs your eye once you publish.** You: "the blue section on my phone is way larger than on the simulator's home page. I thought we fixed this?" **What I got wrong the first time**: I pinned the cream panel to the bottom, which moved the empty gap above the panel instead of removing it, so a taller phone still showed a growing band of blue, just somewhere else. You had already rejected that shape once, when blocks pushed to the bottom left "a third of the page empty blue". The panel grows into the spare height now, so the reading packs from the top, the panel starts where the reading ends, and anything left over is inside the panel and therefore cream. There is no empty blue at any phone height. The gate that passed the bad fix now says why growing beats pinning. |
+| R195 | **Sign in is on the blue with the lockup.** Built but not seen: forcing that screen with the app signed in turned out to need a plant that broke the root layout, and I would rather tell you that than imply I looked at it. You will see it the first time you sign out, and I will look properly next time the tester needs signing in. | |
+| R190 | **Admin, from Settings.** Only for the addresses in ADMIN_EMAILS, opening inside the app rather than in Safari. Waiting on O209. | |
+| R183 | **Two things I could not tap myself:** the shelf arrows and the Saved/Read pills. My synthetic taps have been landing about sixty points off on that screen all afternoon, which is a known trap in this project and not evidence of anything. The code is straightforward and it builds; please try them and tell me if either does nothing. | |
+| R175 | **Articles can carry an illustration.** The card draws it when a post has one. Until then the ground is tinted by shelf, with the mark in the corner, so a card without a picture looks intentional rather than broken. Adding pictures is a content job: the column is there and the admin accepts it, so the moment you have artwork it appears. | |
+| R173 | **The workbook opens in the browser and builds itself.** Your call, and the simpler one: the app opens the website's workbook page with a flag that makes the browser build the PDF straight away, with the same builder and the same options a customer gets on the website. One file, one builder, no server renderer. The page says "Building your workbook" for the second it takes. | |
+| R2 | **App insights and results.** Every section the website has, drawn the same way: couple type and its map, the storycards, comms, expectations, reflection, intimacy, conflict. 28 sections now: the reflection action plan and Conversations Worth Having were both removed from both surfaces. | |
+| R10 | **Privacy policy.** Everything in it, including the paragraph I wrote about the engagement measurements. | |
+| R11 | **Terms of service.** | |
+| R20 | **A real device, and time.** Sign in, close the app, come back tomorrow. The simulator can do the first two; the point of this one is the third, and a simulator that has been asleep is not a phone that has been in a bag overnight. | |
 
 ## 4. Done and verified
 
 | Verified by you | What |
 |--|--|
+| O457 | **Superseded by O496 and O501, and kept here so the trail survives.** Finding the right builder was correct and was not the whole problem: the app was pointed at it and it has never answered. The stored Word file being served instead is O496; whether anything is deployed at that address is O501. **Found it. There are three workbook builders and the app had never used the right one.** `scripts/build_workbook.py` renders the HTML, `scripts/render_workbook.mjs` prints it with Playwright, `Dockerfile.workbook` containerises them and `/api/store-workbook-pdf` posts to the service. Full bleed gradient cover, dot grid, editorial layout: that is the one you are describing, and **the website has called it all along**, which is why the site's version looked right to you and the app's never did. The app called `/api/store-workbook`, which builds a `.docx`, and last week I moved it to `/api/generate-pdf`, which draws a third and simpler page. **The reason was not taste:** store-workbook would accept a user id and assemble the payload on the server, and store-workbook-pdf wanted the payload the website builds in the browser, which the app does not have. So the app used the endpoint that took what it had. That difference is gone. The app and the completion trigger both go to the service now, and the app has no renderer of its own: a failed build says so rather than drawing a different document, because a different document looks finished and a missing one does not. **This needs your eye on a phone**, and it needs M-nothing from you, but see O485: if the service is not configured on Vercel you will get a message saying so rather than a file. | |
+| O486 | **Approved.** **Built, and not on your phone yet; see O498.** You: "Learn loaded immediately, but I think my cell is seeing an old version." You were right that it is an old version, and Learn loading quickly was the serverless functions happening to be warm rather than this fix, which has never been published. **The Learn tab waited for five requests before drawing anything.** You: "the learn tab spun for about 30 secs, then showed a 'something went wrong' error... then went away after about a minute." One `Promise.all` over five calls, so the tab was a spinner until the slowest answered, and every one is a serverless function that is cold if nobody has called it for an hour. All four tabs mount at launch, so a cold start asks for five cold functions at once and you watch the worst of them. The error was the same cause: only the first of the five set it, so one slow answer failing put the whole tab into an error state while the other four had already arrived, and it went away because focusing the tab loads again and by then everything was warm. Each request lands on its own now, and Learn keeps its last payload the way the home tab already did, so on any launch after the first it is simply there. **The check found the same shape in two more tabs**, Insights and Notes, and both are fixed. **Needs your phone to judge**, because what I can prove is that nothing waits on everything; how fast it feels on a cold start is yours to see. | |
 | O485 | **Approved.** **The failure now says which failure it was.** "Workbook download failed. Please try again" is the wrong advice for three of the four things that can go wrong, and trying again is exactly what you did, twice. The workbook comes from an external service, so it can fail because the service is not configured, because it did not answer, because it answered with an error, or because the couple has not finished enough to build one. The server already told the page which, in `error`, and the page was throwing that away for one sentence. Only the transient case says try again now. **What I could not determine from here:** whether `WORKBOOK_SERVICE_URL` and `WORKBOOK_SERVICE_SECRET` are set on Vercel. The endpoint is behind auth so I cannot probe it. I did find that `BROWSERLESS_TOKEN` is NOT set, because `/api/generate-pdf` answers 503 `PDF renderer not configured` to an unauthenticated call, which is worth knowing on its own: last week's fix routed the app through that endpoint and it would never have produced a file. **Next time you try the workbook, tell me the exact words of the message** and it names the cause. |
-| O497 | **The dashboard's two sections took the app's design, and I did not have to ask which they were.** You: "section 2 on site should look like the insights menu, section 3 on dashboard should look like learn page but also link to notes". I had a question drafted asking which two you meant, then found your own earlier words quoted in the code: "Maybe section 3 of dashboard on site could have the content from learn and notes on the app?" So section 3 is the tools grid, section 2 is the exercise table, and the match is exact both ways: the app's Insights tab **is** its list of exercises and its Learn tab **is** its tools and reading. **Section 2** now draws the app's progress ring instead of a flat dot, so a started exercise shows how far in you are rather than just that you started; eleven of fifty answered draws a ring 79 degrees round, which I measured rather than eyeballed. The counting is `api/_lib/exercise-progress.js`, the same module `/api/home` uses to tell the app, because counting it here would have got Expectations wrong in the way that module already records. **Section 3** now carries the insight of the day, which the website had nowhere at all and which is the thing that makes the app's Learn tab somewhere to arrive rather than a menu. Same module, so both surfaces show the same insight on the same day. Notes was already linked there. The label "Insight of the day" was a literal in the app; it has one home now and a gate holds the app's fallback to it. |
 | O496 | **Found why you got a Word file, and it was not the app.** You: "it still downloaded the docx version". The app has no .docx path; it opens whatever file is stored for your couple, and the lookup took the newest file in the folder without ever asking what kind of file it was. Both builders write into the same folder, despite a comment in the code claiming they were kept apart, so the newest was always the Word one, because **no PDF has ever been built**. The format is one fact now, read by the builder, the file name and the link, and a file that is not a workbook is not offered: you get "Building your workbook. Check back shortly." rather than the wrong document. The file name also ended in `.docx` while the builder wrote a PDF, so the two statements of the format had already disagreed. Held by `check-workbook-format.mjs` over four folders, planted three ways. **Your question, answered: yes, one builder.** The PDF service is the one with the full-bleed cover. The .docx goes the moment the PDF is confirmed on your phone, which is what you asked in O490. |
-| O494 | **Cover pages on both surfaces, for the five chapters and the five exercises.** You: "Mirror cover pages for exercises and results on both web and app." **The results covers**: the website had no code for them at all, so two rendered an empty column and `comm-cover` rendered the next page character for character. It draws all five now, and opening a chapter in the sidebar lands on its cover, which is what the app's nav does; before this they were reachable only by a bookmark. **The exercises**: the app opened them on a plain centred column and the website on five hand-built ones. All ten are the cover now, the gradient rule and the glowing mark included. The app has one `CoverPage` drawing both a chapter and an exercise rather than two copies, and the website has one `CoverCard`. **Three things that were written down twice and now are not**: the word on the cover's button, which was typed into the app's renderer and is in the server's `PAGE_COPY`; the mapping from an exercise to its results chapter, which each surface worked out for itself and is now `resultsGroup` on the registry; and the exercise descriptor in `/api/questions`, written out at five payload sites of which only one had grown a `view` field. Held by `check-render` (a cover is judged by its name and its button rather than by length) and `check-exercise-flow` (every opening page carries the frame), planted four ways. **What I kept**: the two exercise-preview tiles on Communication's opening and the timing lines on Expectations and Reflection. They are things those pages say, not chrome, and nothing asked for them to go. |
 | O492 | **The two dead payload fields are gone.** You: "Fine to delete these." Why they existed and which module to read instead is recorded where they were, so the next person who wants a per-dimension sentence does not re-add them. |
-| O491 | **All five completion screens are the app's.** You: "I would rather them match the app's setup." Title, body and one button reading "Back to insights", going to the exercises page, which is this site's version of the app's Insights tab. The three-way body copy and the buttons that changed with it are gone. The exemption set in the gate went with them rather than being left empty. **The upsell tiles under Communication and Expectations are untouched**: taking a revenue surface off a page is not what you asked for, and it is one word from you if you want it. |
 | O489 | **Approved.** **The insight is centred between the tiles and the peek, and re-centres itself each day.** All the leftover height was going into the gap below it, so it hung under the tiles with the spare space beneath. Half of that moves above it now. It re-centres for exactly the reason you asked: the height of everything above the sheet is measured from the laid-out content, so a two line quotation with a citation under it makes that measurement bigger and the insight moves up by half the difference. Nothing in the code knows how tall today's insight is and nothing needs to. **Worth a look on a day with a long quotation and a day with a short one**, which is the only way to see it working. |
 | O487 | **Approved.** **The error on Learn is white now.** Every error on every screen used the ink colours, which are right on cream and unreadable on a painted ground, and Learn is painted edge to edge in the insight's blue. So the screen you were most likely to meet an error on was the one where the error could not be read. It had gone unnoticed because an error state is the screen nobody looks at on purpose; you met it because the tab took thirty seconds and failed. `check-error-tone.mjs` holds every screen that draws an error to saying which ground it is on, in both directions, since white on cream is the same bug the other way. |
 | O450 | **Approved.** **Share is on the quick access card now.** Two call sites of one component and only one had it. Checked beside the insight's own citation, because it is the same shape one layer out. |
@@ -638,12 +499,7 @@ receive a notification from Apple's servers.
 | R19 | The founders note, as it reads on the page |
 | R21 | Scrolling on insights and results, on a device |
 
-
 ### Verified in code rather than by eye
-
-Everything below was in the old "done, not verified" list and is provable
-without you looking at anything. The check that proves each one runs on every
-build.
 
 | Verified | By |
 |--|--|
@@ -770,7 +626,6 @@ build.
 | In Practice: all 12 articles reach the app | `check-in-practice.mjs` |
 | The app does not sell | `check-app-does-not-sell.mjs` |
 
-
 | # | Task | Verified by |
 |--|--|--|
 | — | `/api/admin-posts` and `/api/admin-presets` had never answered: 500 on every request since the day each shipped | Live, 401 now; `check-runtime-shape.mjs`, 2 plants |
@@ -837,119 +692,18 @@ build.
 
 ---
 
----
-
-## Design: where I think this goes, and what I need from you
-
-You asked for thought partnership rather than another pass, so this is
-questions and options rather than a redesign. It lives here rather than in a
-reply so it survives the session.
-
-### The one thing I believe is doing most of the damage
-
-Every reference you sent has something made by a person in it. The task app has
-illustration. The food app has photography. Even the flat colour-block one has a
-drawn magnifying glass. Attune is type and gradient from the first screen to the
-last, and I think that, more than any layout, is what reads as generated.
-
-The Learn cards already accept artwork and there is none, so every card falls
-back to a tinted ground with the mark in the corner. That is the largest single
-lever available and it is not a code job.
-
-**Question 1.** Is there any budget or appetite for imagery, of any kind? It
-does not have to be photography. A set of six or eight simple drawn marks, one
-per results section, would carry the whole app. Answer this one and it changes
-what the rest of these are worth.
-
-### Questions about Notes, since that is the screen you called boring
-
-Notes is a filing cabinet: a list, a list of tags, an empty state. Every other
-tab has a subject. Notes has storage.
-
-**Question 2.** What is the Notes tab *for*, in a sentence? I can think of three
-answers and they build differently. "Everything I marked, so I can find it
-again" is a library and wants search and filtering. "What we are working on
-right now" is a worklist and wants the three most recent things and a way to
-tick one off. "A record of us paying attention to this" is a history and wants
-dates, volume, and the shape of it over time.
-
-**Question 3.** Should Notes show your partner's shared notes as prominently as
-your own, or is it your room with a letterbox in it? Right now it is the second
-and does not say so.
-
-**Question 4.** Is there anything you would want to *do* from Notes other than
-read? Turn a mark into a conversation to have. Send one to the other person with
-a question attached. Mark one as done.
-
-### Three directions I could take the app's colour, and what each costs
-
-These are alternatives, not a list to pick all of.
-
-**A. Sections own the app, not just the results.** Today the Insights pages
-carry a section's colour and nothing else does. This would mean a note about
-Expectations carries blue wherever it appears: in Notes, on the home tile, in
-Learn. The product would feel like five coloured rooms. Cost: the colours stop
-meaning "you are in this section" and start meaning "this thing is about that
-section", which is a bigger claim and harder to keep true.
-
-**B. One accent, used rarely and always for the same thing.** The opposite:
-cream, ink and the orange, with the orange reserved strictly for "this is the
-thing to do next". Sections keep colour only inside Insights. This is the
-quietest and the most confident, and it is closest to how the website reads.
-Cost: less colour, not more, which is not what you asked for.
-
-**C. Warmth rather than colour.** Keep the palette, change the surfaces: paper
-grain, a slight tint on the cream, cards with a real edge rather than a hairline,
-the display face used at larger sizes in more places. Makes the app feel printed
-instead of drawn. Cost: it is a lot of small changes and none of them will
-screenshot well on their own.
-
-**Question 5.** Which of those three is closest to what you pictured when you
-said "more color and branding"?
-
-### Two smaller things I would do regardless, if you want them
-
-- **A dark tab bar.** The light one is the most generic element on any screen,
-  and every reference you sent has a dark or high-contrast one.
-- **A segmented arc instead of a flat bar** for alignment, like the calorie
-  gauge in the food app. Same number, considerably less stock.
-
-### And one answer to a question you asked
-
-**Did we shrink the font to fit the tiles?** No. The type on every results page
-is the size it was; the tile took its width from the page's own margins, which
-were already there. The only thing that got smaller is the landing page's
-section names, which were hero-sized and are now a shade above body size,
-because you asked for that. Nothing in the results reads smaller than it did.
-
 ## How this is kept
 
-**An approved table comes out.** Ellie: "When I have approved a review point
-for which you built a review table below sec3, please remove the associated
-table as I have already reviewed it." A table that has done its job costs
-review attention on the wrong half of the document, which is the failure the
-tables exist to prevent. The builders are in git history, so the next one is a
-few lines rather than a rewrite.
-
-1. A list arrives. This file is updated first, before any work.
-2. Work happens.
-3. This file is updated again, then handed back for review.
-4. A general ask ("remove all X") gets a search across both surfaces and a
-   gate, not the edits the message happened to name.
-5. Every content change to one surface is mirrored on the other (msg 79).
-6. Anything blocked on Ellie goes in section 1, whatever kind of thing it is.
-   A migration is not a review item: until it runs, a column is missing and a
-   chart is empty. Three of them sat in section 3 reading as optional.
-
----
-
-## The old section 3
-
-Every individual ask from the first 135 messages, 184 of them, lived here as
-its own row. They are all either verified above, folded into a review item, or
-long since shipped and superseded. The full list is in git:
-
-    git show 75e002c:TASKS.md
-
-Nothing was thrown away. It was too long to read, which made it useless as a
-list of what to do next, which is the only thing a task file is for.
+1. A list arrives. This file is updated first, with a detailed action item for
+   every single thing in it, before any work starts.
+2. The work happens.
+3. This file is updated again and handed back, so every row is either mine,
+   yours, or waiting on your eye.
+4. Anything blocked on you goes in section 1, whatever kind of thing it is.
+5. Anything I built that needs looking at goes in section 3, not section 4.
+   Section 4 is for what a check proves. Design and copy are never that.
+6. A general ask gets a search across both surfaces and a gate, not the edits
+   the message happened to name.
+7. Every content change to one surface is mirrored on the other.
+8. Ids never change. "O497 verified" moves it to section 4; "O497, the orange is
+   too loud" moves it back to section 2.

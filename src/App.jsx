@@ -36,6 +36,9 @@ import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_C
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW } from "../api/_insights.js";
+/* The colour each of the app's tabs is painted in, so the dashboard can wear
+   the same two grounds. See api/_lib/section-grounds.js. */
+import { tabGradientCss } from "../api/_lib/section-grounds.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -2234,7 +2237,15 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
 }
 
 // ── Dashboard step header: large gradient step number + title/sub ──────────
-function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
+/**
+ * ── ON CREAM, OR ON A PAINTED GROUND ──────────────────────────────────────
+ * `onDark` moves the type to white. Ellie has asked for this rule four times
+ * in the app and it is the same rule here: when a surface changes colour, the
+ * type on it moves with it. The dashboard's section 2 sits on the orange now,
+ * mirroring the app's Insights tab, and ink on orange is what that rule exists
+ * to prevent.
+ */
+function DashStepHeader({ num, title, sub, active = true, isMobile = false, onDark = false }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
       <div style={{ position: "relative", flexShrink: 0 }}>
@@ -2254,8 +2265,8 @@ function DashStepHeader({ num, title, sub, active = true, isMobile = false }) {
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.65rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
-        <p style={{ fontSize: "0.83rem", color: "#7A6753", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
+        <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.65rem", fontWeight: 700, color: onDark ? "white" : "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
+        <p style={{ fontSize: "0.83rem", color: onDark ? "rgba(255,255,255,0.78)" : "#7A6753", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
       </div>
     </div>
   );
@@ -14589,9 +14600,25 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ════ STEP 1 · COMPLETE YOUR EXERCISES ════ */}
-                <div style={{ marginBottom: "2.5rem" }}>
-                  <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} />
+                {/* ════ STEP 1 · COMPLETE YOUR EXERCISES ════
+                    ── ON THE APP'S ORANGE ────────────────────────────────
+                    Ellie: "section 2 on site should look like the insights
+                    menu". The app's Insights tab is this table, on the brand
+                    orange, with the heading in white on it. It was a white card
+                    on cream here, which is the same inventory and a different
+                    place.
+
+                    The ground comes from api/_lib/section-grounds.js so the two
+                    surfaces paint one colour rather than two hexes that drift;
+                    the app keeps its own constants because Expo cannot import
+                    from api/, and check-tab-grounds holds them equal. */}
+                <div style={{
+                  marginBottom: "2.5rem",
+                  background: tabGradientCss("insights"),
+                  borderRadius: 20,
+                  padding: isMobile ? "1.5rem 1.25rem" : "2rem 1.85rem",
+                }}>
+                  <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} onDark />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {(() => {
                       // Exercises are numbered in sequence, so the intimacy
@@ -14739,8 +14766,22 @@ export default function App() {
                 {/* Uniform square cards. Owned tools first; add-ons in their own
                     block underneath so people who own everything never see an
                     upsell mixed into the things they can actually open. */}
-                <div style={{ marginBottom: "2rem" }}>
-                  <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
+                {/* ── ON THE APP'S LEARN GROUND ──────────────────────────
+                    Ellie: "section 3 on dashboard should look like learn page
+                    but also link to notes". The Learn tab is a painted blue
+                    ground carrying the tools, the insight of the day and the
+                    reading. This section already had the tools and the notes
+                    card; it was on cream, and the insight was a separate dark
+                    tile sitting under it rather than part of the same place.
+
+                    Same ground as the app, from api/_lib/section-grounds.js. */}
+                <div style={{
+                  marginBottom: "2rem",
+                  background: tabGradientCss("learn"),
+                  borderRadius: 20,
+                  padding: isMobile ? "1.5rem 1.25rem" : "2rem 1.85rem",
+                }}>
+                  <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} onDark />
 
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
                     {hasWorkbookOrder && (
@@ -14816,7 +14857,11 @@ export default function App() {
                     const insight = insightOfTheDay();
                     if (!insight) return null;
                     return (
-                      <div style={{ marginTop: "1.5rem", background: "linear-gradient(135deg, #1E1A35, #2A2450)", borderRadius: 18, padding: isMobile ? "1.5rem 1.35rem" : "2rem 2.25rem" }}>
+                      /* No ground of its own any more: the section around it is
+                         the Learn blue, and a darker tile on it read as a hole.
+                         A hairline and a wash is what the app's own insight
+                         block does on that ground. */
+                      <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 18, padding: isMobile ? "1.5rem 1.35rem" : "2rem 2.25rem" }}>
                         <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
                           {INSIGHT_EYEBROW}
                         </div>
