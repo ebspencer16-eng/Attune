@@ -198,9 +198,27 @@ which it does not tell you until it refuses:
 
     npx eas-cli update --branch production --environment production --message "what changed"
 
-There is a short version of that too, which is what I use:
+There is a short version of that too, and it is the one to use:
 
+    cd attune-app
     npm run testflight:update
+
+It now pulls first and writes the message for you, which removes the two ways
+this goes quietly wrong. Publishing sends **whatever is in this folder on your
+machine**, so a checkout that has not been pulled publishes last week's app and
+looks exactly like a publish that worked. And without a message the CLI stops
+and waits for one, which looks like it has hung.
+
+**Then open the app twice.** An update downloads in the background on one launch
+and runs on the next, so the first open after publishing still shows the old
+app. Force-quit it, open it, wait about ten seconds on the home screen, force-
+quit again, open again.
+
+**How to know what your phone is actually running.** Settings, at the very
+bottom, shows the version and a line reading "Updated" with a date. That date is
+when the running JavaScript was published. If it is today's, the phone has the
+new app; if it is older, the download has not finished. It is the only honest
+answer to "am I on the latest", and it beats looking for a change and guessing.
 
 **A change to the native shell:** a new build and a new submit. That is adding
 a library that touches the phone itself, changing the icon or the app's name,

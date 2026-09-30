@@ -50,7 +50,7 @@
     "testflight": "npx eas-cli build --platform ios --profile production",
     "testflight:send": "npx eas-cli submit --platform ios --profile production --latest",
     "testflight:check": "npx eas-cli env:list --environment production",
-    "testflight:update": "npx eas-cli update --branch production --environment production"
+    "testflight:update": "git -C .. pull --ff-only && npx eas-cli update --branch production --environment production --message \"$(git -C .. log -1 --pretty=%s)\""
   },
   "private": true
 }
