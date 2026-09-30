@@ -897,13 +897,31 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
                 {home.research.body}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, marginTop: Spacing.lg }}>
-                {/* Only a quotation has someone to cite. Most insights are the
-                    product's own sentence, and a name under one of those reads as
-                    that person having said it. See api/_insights.js. */}
-                <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic, flex: 1 }}>
-                  {home.research.source || ''}
-                </Text>
+              {/* ── THE CITATION GETS THE WHOLE WIDTH ──────────────────────
+                  Ellie: "The citation line on insight of the day is long since
+                  its margin is narrow. Can we make the citation run the full
+                  width of the insight space and have the save and share buttons
+                  sit below it rather than next to it?"
+
+                  It shared a row with the two controls, so it got whatever width
+                  they left and wrapped two or three times inside a narrow
+                  column. Every insight is a quotation now and a book citation is
+                  author, title, publisher and year, so they are all long.
+
+                  ── AND THE CONTROLS MOVE WITH IT ──────────────────────────
+                  "the placement of the save and share buttons should adapt based
+                  on the length of the citation."
+
+                  They do, and nothing measures anything. The citation is a block
+                  in normal flow and the controls are the next block, so the row
+                  sits under however many lines the citation took. One line
+                  pulls them up, three pushes them down, and a longer citation in
+                  a future edition needs no change here. Measuring the text to
+                  decide would be the same layout with a way to be wrong. */}
+              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic, marginTop: Spacing.lg }}>
+                {home.research.source || ''}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.md }}>
                 {/* Ellie: "I want a share button on the insight of the day tile
                     on learn tab." The finding and where it came from, which is
                     the whole of what the tile says. */}

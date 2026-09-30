@@ -87,7 +87,7 @@ export const INSIGHTS = [
      speaking in a voice it has not earned. They are in git if one of them is
      ever wanted as our own line somewhere that suits it.
 
-     What replaced them is 35 passages from five books, each verified against
+     What replaced them is 31 passages from four books, each verified against
      Google's scan of the book rather than against a transcription of it. The
      pipeline is worth writing down because it is the only honest one available
      here: candidates come from Goodreads, which is typed in by readers and
@@ -95,7 +95,16 @@ export const INSIGHTS = [
      text. An unreliable source and an authoritative verifier give a reliable
      answer; either one alone does not. Candidates were thrown out by that
      check, including one attributed to the wrong author and one that exists
-     only in a Spanish translation. */
+     only in a Spanish translation.
+
+     One more came out after the fact, and not because it was misquoted. Four
+     passages cited Created for Connection, which the volume record shows is
+     subtitled "The Hold Me Tight Guide for Christian Couples". It is an
+     adaptation of a book already quoted here, so nothing was lost by dropping
+     it, and quoting a faith-specific guide is a decision about what this
+     product is rather than a sourcing detail. Ellie chooses that, not the
+     harvester. Verifying a quotation says it is real; it does not say it
+     belongs. */
 
   {
     kind: 'quote',
@@ -277,25 +286,7 @@ export const INSIGHTS = [
     edition: 'Little, Brown Spark 2008',
     volumeId: 'jPLaqKhumPQC',
   },
-  {
-    kind: 'quote',
-    id: 'q-love-like-language',
-    body: 'But love is like a language. If you speak it, it flows more and more easily. If you don\'t, then you start to lose it.',
-    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
-    work: 'Created for Connection',
-    edition: 'Little, Brown Spark 2016',
-    volumeId: 'Xz1UCwAAQBAJ',
-  },
-  {
-    kind: 'quote',
-    id: 'q-loving-connection-only',
-    body: 'Loving connection is the only safety nature ever offers us.',
-    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
-    work: 'Created for Connection',
-    edition: 'Little, Brown Spark 2016',
-    volumeId: 'Xz1UCwAAQBAJ',
-  },
-  {
+      {
     kind: 'quote',
     id: 'q-better-worse-twenty',
     body: 'For better or worse, in the twenty-first century, a love relationship has become the central emotional relationship in most people’s lives. One reason is that we are increasingly living in social isolation.',
@@ -304,16 +295,7 @@ export const INSIGHTS = [
     edition: 'Little, Brown Spark 2008',
     volumeId: 'jPLaqKhumPQC',
   },
-  {
-    kind: 'quote',
-    id: 'q-person-love-most',
-    body: 'For all of us, the person we love most in the world, the one who can send us soaring joyfully into space, is also the person who can send us crashing back to earth.',
-    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
-    work: 'Created for Connection',
-    edition: 'Little, Brown Spark 2016',
-    volumeId: 'Xz1UCwAAQBAJ',
-  },
-  {
+    {
     kind: 'quote',
     id: 'q-generally-love-sharing',
     body: 'Generally in love, sharing even negative emotions, provided they don\'t get out of hand, is more useful than emotional absence.',
@@ -349,16 +331,7 @@ export const INSIGHTS = [
     edition: 'Little, Brown Spark 2008',
     volumeId: 'jPLaqKhumPQC',
   },
-  {
-    kind: 'quote',
-    id: 'q-loss-felt-sense',
-    body: 'Loss of a felt sense of connection with such loved ones is painful and creates a disorienting sense of vulnerability. Disconnection at times of high need can be traumatizing for human beings.',
-    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
-    work: 'Created for Connection',
-    edition: 'Little, Brown Spark 2016',
-    volumeId: 'Xz1UCwAAQBAJ',
-  },
-  {
+    {
     kind: 'quote',
     id: 'q-always-fascinates-child',
     body: 'It always fascinates me that when a child cries we prioritize this signal. We respond. Our children don’t threaten us, and we accept that they are vulnerable and need us. We see them in an attachment frame. But we have been taught not to see adults this way.',
