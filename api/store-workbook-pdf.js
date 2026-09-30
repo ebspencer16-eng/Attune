@@ -26,7 +26,22 @@ import { payloadToCouple } from './_couple-shape.js';
 import { payloadForCouple } from './_lib/workbook-couple.js';
 import { safeError } from './_lib/http.js';
 
-export const config = { runtime: 'nodejs' };
+/**
+ * ── WHY THIS ONE NEEDS LONGER THAN THE DEFAULT ────────────────────────────
+ * Ellie, twice: "The workbook service did not answer, give it a minute and try
+ * again", and the environment variables have been set for months.
+ *
+ * A Vercel Node function defaults to about ten seconds. This one posts to an
+ * external service that starts a headless browser and prints a forty-page
+ * document, and if that service has been idle it has to wake up first, which on
+ * a small host is most of a minute on its own. Ten seconds was never going to be
+ * enough for a cold start plus a render, and the function dying looks exactly
+ * like the service refusing: the page gets a 5xx either way.
+ *
+ * Sixty is the ceiling on the smallest Vercel plan, so it is the honest maximum
+ * to ask for rather than a number chosen to be comfortable.
+ */
+export const config = { runtime: 'nodejs', maxDuration: 60 };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -148,14 +163,42 @@ export default async function handler(req, res) {
   // ── Call the external Python+Playwright service ──────────────────────────
   let pdfBuffer;
   try {
-    const svcRes = await fetch(serviceUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Service-Secret': serviceSecret,
-      },
-      body: JSON.stringify(couple),
-    });
+    /**
+     * Timed out here rather than by the function dying.
+     *
+     * With no signal, an unreachable service holds the connection until Vercel
+     * kills the whole invocation, and a killed invocation cannot say anything.
+     * Stopping a few seconds short leaves room to report which failure this was,
+     * which is the difference between "try again in a minute" and "someone has
+     * to look at the service".
+     *
+     * The host is logged, never the secret. Knowing which host was called is
+     * what tells a stale URL from a service that is down, and that question cost
+     * a day: I probed the hostname from a setup document rather than the one
+     * actually configured, and reported the service as never deployed on the
+     * strength of it.
+     */
+    let svcRes;
+    try {
+      svcRes = await fetch(serviceUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Service-Secret': serviceSecret,
+        },
+        body: JSON.stringify(couple),
+        signal: AbortSignal.timeout(52000),
+      });
+    } catch (e) {
+      const host = (() => { try { return new URL(serviceUrl).host; } catch { return 'an unparseable URL'; } })();
+      const timedOut = e?.name === 'TimeoutError' || /timeout|aborted/i.test(String(e?.message || ''));
+      console.error(`[store-workbook-pdf] ${timedOut ? 'timed out after 52s' : 'could not reach'} ${host}:`, e?.message || e);
+      return res.status(504).json({
+        error: timedOut
+          ? `PDF service at ${host} did not answer within 52 seconds`
+          : `PDF service at ${host} could not be reached`,
+      });
+    }
     if (!svcRes.ok) {
       const errText = await svcRes.text().catch(() => '');
       throw new Error(`Service returned ${svcRes.status}: ${errText.slice(0, 200)}`);

@@ -4,8 +4,8 @@ Generated from `api/_insights.js` by `scripts/build-insights-review.mjs`. Do
 not edit this file. Change an insight in `api/_insights.js` and run the
 script, or tell me the change and I will make it.
 
-**65 insights**, one a day, so the list comes round about every
-9.3 weeks. 16 are quotations and 49 are ours.
+**67 insights**, one a day, so the list comes round about every
+9.6 weeks. 18 are quotations and 49 are ours.
 
 ## What changed, and why you are seeing two tables
 
@@ -62,16 +62,18 @@ so you can check the wording yourself.
 | Q4 | Stonewalling occurs when the listener withdraws from the interaction, shuts down, and simply stops responding to their partner. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
 | Q5 | Defensiveness will only escalate the conflict if the critical spouse does not back down or apologize. This is because defensiveness is really a way of blaming your partner, and it won’t allow for healthy conflict management. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
 | Q6 | Contempt is the worst of the four horsemen. It is the number one predictor of divorce, but it can be defeated. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
-| Q7 | All relationships, even the most successful ones, have conflict. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q8 | Fortunately, our research shows that it’s not the appearance of conflict, but rather how it’s managed that predicts the success or failure of a relationship. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q9 | We say “manage” conflict rather than “resolve,” because relationship conflict is natural and has functional, positive aspects that provide opportunities for growth and understanding. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q10 | A complaint focuses on a specific behavior, but criticism attacks a person’s very character. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q11 | Defensiveness is defined as self-protection in the form of righteous indignation or innocent victimhood in attempt to ward off a perceived attack. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q12 | It usually happens when you’re feeling flooded or emotionally overwhelmed, so your reaction is to shut down, stop talking, and disengage. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q13 | John Gottman’s research found that 69% of problems in a relationship are unsolvable. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
-| Q14 | Trying to solve unsolvable problems is counterproductive, and no couple will ever completely eliminate them. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
-| Q15 | However, discussing them is constructive and provides a positive opportunity for understanding and growth. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
-| Q16 | Being in dialogue, the preferred status, is when the couple has learned to accept their differences on that topic even though minor arguments arise occasionally. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q7 | The principle of building Love Maps is simply this: knowing the little things about your partner’s life creates a strong foundation for your friendship and intimacy. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/) |
+| Q8 | Couples who have detailed love maps of each other’s worlds are far better prepared to cope with stressful events and conflict. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/) |
+| Q9 | All relationships, even the most successful ones, have conflict. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q10 | Fortunately, our research shows that it’s not the appearance of conflict, but rather how it’s managed that predicts the success or failure of a relationship. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q11 | We say “manage” conflict rather than “resolve,” because relationship conflict is natural and has functional, positive aspects that provide opportunities for growth and understanding. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q12 | A complaint focuses on a specific behavior, but criticism attacks a person’s very character. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q13 | Defensiveness is defined as self-protection in the form of righteous indignation or innocent victimhood in attempt to ward off a perceived attack. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q14 | It usually happens when you’re feeling flooded or emotionally overwhelmed, so your reaction is to shut down, stop talking, and disengage. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q15 | John Gottman’s research found that 69% of problems in a relationship are unsolvable. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q16 | Trying to solve unsolvable problems is counterproductive, and no couple will ever completely eliminate them. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q17 | However, discussing them is constructive and provides a positive opportunity for understanding and growth. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q18 | Being in dialogue, the preferred status, is when the couple has learned to accept their differences on that topic even though minor arguments arise occasionally. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
 
 ## Ours
 

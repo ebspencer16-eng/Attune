@@ -125,6 +125,34 @@ export const INSIGHTS = [
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
   },
 
+  /* ── AND TWO MORE, 30 SEPTEMBER ─────────────────────────────────────────
+     Ellie: "There must be websites or somewhere that you can find relevant
+     quotes from published books. Please search the full internet."
+
+     I did, and the result is in TASKS.md rather than here, because it is a
+     finding about what is possible rather than about these two. Short version:
+     the books are reachable but not checkable. Searching inside a real scan is
+     the right tool and it is behind a key we do not have; archive.org gates the
+     lending titles; the one author excerpt that carries page numbers is a PDF
+     this machine cannot read. So these two are from the source that can still
+     be opened and checked. */
+  {
+    kind: 'quote',
+    id: 'q-love-maps',
+    body: 'The principle of building Love Maps is simply this: knowing the little things about your partner’s life creates a strong foundation for your friendship and intimacy.',
+    author: 'Dr. Ellie Wilde',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-love-maps-stress',
+    body: 'Couples who have detailed love maps of each other’s worlds are far better prepared to cope with stressful events and conflict.',
+    author: 'Dr. Ellie Wilde',
+    work: 'The Gottman Institute',
+    url: 'https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/',
+  },
+
   /* ── TEN MORE, ADDED 29 SEPTEMBER 2026 ──────────────────────────────────
      Ellie: "I would rather just use direct quotes from these publications,
      can you organize those and cite them accurately?"
