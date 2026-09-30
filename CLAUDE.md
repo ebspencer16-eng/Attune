@@ -642,6 +642,38 @@ names a thing to mirror, go and read that thing, list what makes it recognisable
 and do those. For a screen that is usually the ground, the type on it, and the
 shape of the blocks, in that order of what a person notices.
 
+**Never ask her to paste a secret.** Ellie: "If you want me to do that in the
+future you have to tell me instead of just saying 'send it to me'." I asked her
+to paste a Google Books key into chat, used it, and then told her it should not
+be in a transcript, which is backwards. The ask is always:
+
+    put it in Vercel as NAME and tell me it is set
+
+and then read it from `process.env` at run time. The one exception is a value
+that is not a credential, like a hostname, and even then the better question is
+usually one she can answer from a dashboard without revealing anything.
+
+**`eas update` publishes the folder, not the branch.** She published twice, the
+Settings date moved both times, and the app on her phone was still days old,
+because the command sends whatever is checked out locally. The pull is in the
+npm script now, which does not help the first time: the script that pulls only
+runs once you have pulled it. So the instruction to hand her is always three
+lines, `git pull` included, and the way to tell whether it worked is the layout
+in front of her rather than the date, which moves either way.
+
+**A JSX comment cannot sit between `{cond && (` and the element**, for the same
+reason it cannot sit between `return (` and the root. This file already said so
+about `return`; the guard form catches people the same way. Put the comment
+above the whole expression.
+
+**When an edit to src/App.jsx goes wrong, restore and replay rather than
+patching the patch.** Two bad insertions into a 15,000-line JSX file cost more
+to unpick than to redo: the second repair removed a `)}` belonging to something
+else and left the tree unbalanced in a different place. Keep a copy before the
+first edit, and when a structural change misfires, go back to that copy and
+re-run the whole sequence as one script with its checks. The script is cheap to
+re-run and reasoning about half-applied JSX is not.
+
 **Where the holes actually were.** Of the gates audited so far, the ones with
 holes all matched on a literal name or a single shape. The ones that run the
 code and compare the answers, `check-alignment-rule` over 81 answer pairs,

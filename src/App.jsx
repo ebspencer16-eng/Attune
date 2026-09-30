@@ -3324,6 +3324,68 @@ function ExerciseCover({ accent, eyebrow, intro, onBegin }) {
   );
 }
 
+/**
+ * The app's tab bar, along the top of the dashboard.
+ *
+ * ── WHY THE SITE HAS ONE NOW ──────────────────────────────────────────────
+ * Ellie: "Maybe we mirror the app on the site, and have the site's dashboard
+ * use the app's bottom nav as the top toolbar, and have every page be exactly
+ * mirrored... That way we lose no content and updates to either site or web are
+ * easy to make."
+ *
+ * That is the argument this codebase is built on: one set of decisions rather
+ * than two. The dashboard was three numbered steps, a spine the app does not
+ * have, so every change to either surface had to be translated first. It is
+ * these four now, in the app's order, and the steps are gone at her word: "yes,
+ * it replaces the step 1, 2, 3 spine".
+ *
+ * Nothing was dropped. The exercises are Insights, the results card is Home the
+ * way the app shows it, the tools and the reading are Learn, and Notes was a
+ * page here that nothing linked to.
+ *
+ * ── WHAT IS DELIBERATELY NOT MIRRORED ─────────────────────────────────────
+ * The exercises keep their own layouts and Insights keeps its left nav, both
+ * because she said so. A phone has one column and a laptop does not, and
+ * copying that would be mirroring the constraint rather than the design.
+ *
+ * At the top rather than the bottom, because a thumb is not the input here.
+ */
+const DASH_TABS = [
+  { id: "home", label: "Home" },
+  { id: "insights", label: "Insights" },
+  { id: "learn", label: "Learn" },
+  { id: "notes", label: "Notes" },
+];
+
+function DashTabs({ active, onChange, isMobile }) {
+  return (
+    <div style={{
+      display: "flex", gap: isMobile ? "0.25rem" : "0.5rem", padding: "0.35rem",
+      background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.18)",
+      borderRadius: 999, marginBottom: 0, width: "fit-content",
+    }}>
+      {DASH_TABS.map((t) => {
+        const on = active === t.id;
+        return (
+          <button key={t.id} onClick={() => onChange(t.id)}
+            aria-current={on ? "page" : undefined}
+            style={{
+              background: on ? "rgba(255,255,255,0.92)" : "transparent",
+              color: on ? "#1E1A35" : "rgba(255,255,255,0.82)",
+              border: "none", borderRadius: 999,
+              padding: isMobile ? "0.5rem 0.8rem" : "0.55rem 1.15rem",
+              fontFamily: BFONT, fontSize: isMobile ? "0.72rem" : "0.78rem",
+              fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+              transition: "background .15s, color .15s",
+            }}>
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── OVERALL PAIRING LABEL ────────────────────────────────────────────────────
 function overallPairingLabel(avgGap) {
   if (avgGap <= 0.75) return "Highly aligned";
@@ -11937,6 +11999,19 @@ export default function App() {
 
   // ── VIEW STATE ────────────────────────────────────────────────────────────
   const [view, setView] = useState(initialView);
+  /**
+   * Which of the app's four sections the dashboard is showing.
+   *
+   * Read from the URL so a link can point at one and a refresh keeps it, the
+   * same way `view` and the results section already work. Home by default,
+   * which is where the app opens.
+   */
+  const [dashTab, setDashTab] = useState(() => {
+    try {
+      const t = new URLSearchParams(window.location.search).get('tab');
+      return DASH_TABS.some((x) => x.id === t) ? t : 'home';
+    } catch { return 'home'; }
+  });
 
   /**
    * How long each view is looked at.
@@ -14428,11 +14503,21 @@ export default function App() {
                     </div>
                   </>
                 )}
+                {/* The app's four sections, on the banner where the ground is dark,
+                    which is where the app draws its own bar. */}
+                <div style={{ padding: isMobile ? "0 1.25rem 1rem" : "0 2rem 1.25rem" }}>
+                  <DashTabs active={dashTab} onChange={setDashTab} isMobile={isMobile} />
+                </div>
               </div>
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
               <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem 3rem" : "2.5rem 2rem 4rem", background: "#FBF8F3" }}>
                 <div style={{ maxWidth: 680, margin: "0 auto" }}>
+                {/* Alerts, profile setup and the couple portrait. These sat above the
+                    three steps and so appeared on every screen; in the app all of it
+                    belongs to Home. */}
+                {dashTab === "home" && (
+                  <>
 
                 {/* Beta tester tile — thank-you + feedback survey CTA (merged; replaces the separate survey prompt for beta testers) */}
                 {isBetaTester && (
@@ -14615,6 +14700,9 @@ export default function App() {
                     tab bar, and a painted block in the middle of the step
                     headers was neither that nor an improvement. See TASKS.md
                     O497. */}
+                  </>
+                )}
+                {dashTab === "insights" && (
                 <div style={{ marginBottom: "2.5rem" }}>
                   <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
@@ -14715,8 +14803,10 @@ export default function App() {
                     })()}
                   </div>
                 </div>
+                )}
 
                 {/* ════ STEP 2 · REVIEW YOUR RESULTS ════ */}
+                {dashTab === "home" && (
                 <div style={{ marginBottom: "2.5rem" }}>
                   <DashStepHeader num="2" title="Review your results" sub={bothDone ? "Your results are ready. Start with the highlights or jump to any section." : "Visible once both of you finish all exercises."} active={bothDone} isMobile={isMobile} />
                   <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
@@ -14759,6 +14849,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
+                )}
 
                 {/* ════ STEP 3 · CONTINUE GROWING TOGETHER ════ */}
                 {/* Uniform square cards. Owned tools first; add-ons in their own
@@ -14773,6 +14864,7 @@ export default function App() {
                     tile sitting under it rather than part of the same place.
 
                     Same ground as the app, from api/_lib/section-grounds.js. */}
+                {dashTab === "learn" && (
                 <div style={{ marginBottom: "2rem" }}>
                   <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
 
@@ -14898,6 +14990,7 @@ export default function App() {
                     </div>
                   )}
                 </div>
+                )}
 
                 </div>
               </div>
@@ -15017,6 +15110,17 @@ export default function App() {
                     </div>
                     <button onClick={() => setView("results")} style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", cursor: "pointer" }}>View Results →</button>
                   </div>
+                )}
+                {/* The app's Notes tab. This page already existed at ?view=notes and
+                    nothing on any screen linked to it. */}
+                {dashTab === "notes" && (
+                  <ConnectedNotesView
+                    userName={userName}
+                    partnerName={partnerName}
+                    sectionLabels={RESULTS_SECTION_LABELS}
+                    onOpenSection={(id) => { setActiveResult(id); setView("results"); }}
+                    onBack={() => setDashTab("home")}
+                  />
                 )}
 
                 {!bothDone && (
