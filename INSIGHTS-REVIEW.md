@@ -4,8 +4,8 @@ Generated from `api/_insights.js` by `scripts/build-insights-review.mjs`. Do
 not edit this file. Change an insight in `api/_insights.js` and run the
 script, or tell me the change and I will make it.
 
-**67 insights**, one a day, so the list comes round about every
-9.6 weeks. 18 are quotations and 49 are ours.
+**53 insights**, one a day, so the list comes round about every
+7.6 weeks. 53 are quotations and 0 are ours.
 
 ## What changed, and why you are seeing two tables
 
@@ -56,24 +56,59 @@ so you can check the wording yourself.
 
 | # | Quotation | Source | Checked |
 |--|--|--|--|
-| Q1 | That ‘magic ratio’ is 5 to 1. This means that for every negative interaction during conflict, a stable and happy marriage has five (or more) positive interactions. | Kyle Benson, The Gottman Institute | [read it](https://www.gottman.com/blog/the-magic-relationship-ratio-according-science/) |
-| Q2 | A bid is any attempt from one partner to another for attention, affirmation, affection, or any other positive connection. | Zach Brittle, The Gottman Institute | [read it](https://www.gottman.com/blog/turn-toward-instead-of-away/) |
-| Q3 | Their research revealed that discussions will end on the same note they begin. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/softening-startup/) |
-| Q4 | Stonewalling occurs when the listener withdraws from the interaction, shuts down, and simply stops responding to their partner. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
-| Q5 | Defensiveness will only escalate the conflict if the critical spouse does not back down or apologize. This is because defensiveness is really a way of blaming your partner, and it won’t allow for healthy conflict management. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
-| Q6 | Contempt is the worst of the four horsemen. It is the number one predictor of divorce, but it can be defeated. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
-| Q7 | The principle of building Love Maps is simply this: knowing the little things about your partner’s life creates a strong foundation for your friendship and intimacy. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/) |
-| Q8 | Couples who have detailed love maps of each other’s worlds are far better prepared to cope with stressful events and conflict. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/) |
-| Q9 | All relationships, even the most successful ones, have conflict. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q10 | Fortunately, our research shows that it’s not the appearance of conflict, but rather how it’s managed that predicts the success or failure of a relationship. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q11 | We say “manage” conflict rather than “resolve,” because relationship conflict is natural and has functional, positive aspects that provide opportunities for growth and understanding. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q12 | A complaint focuses on a specific behavior, but criticism attacks a person’s very character. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q13 | Defensiveness is defined as self-protection in the form of righteous indignation or innocent victimhood in attempt to ward off a perceived attack. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q14 | It usually happens when you’re feeling flooded or emotionally overwhelmed, so your reaction is to shut down, stop talking, and disengage. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
-| Q15 | John Gottman’s research found that 69% of problems in a relationship are unsolvable. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
-| Q16 | Trying to solve unsolvable problems is counterproductive, and no couple will ever completely eliminate them. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
-| Q17 | However, discussing them is constructive and provides a positive opportunity for understanding and growth. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
-| Q18 | Being in dialogue, the preferred status, is when the couple has learned to accept their differences on that topic even though minor arguments arise occasionally. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q1 | In insecure relationships, we disguise our vulnerabilities so our partner never really sees us. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q2 | Curiosity comes out of a sense of safety; rigidity out of being vigilant to threats. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q3 | If you know your loved one is there and will come when you call, you are more confident of your worth, your value. And the world is less intimidating when you have another to count on and know that you are not alone. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q4 | If you have a responsive love partner, you have a secure base in the chaos. If you are emotionally alone, you are in free fall. Having someone you can rely on for connection and support makes healing from trauma easier. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q5 | When we feel safely linked to our partners, we more easily roll with the hurts they inevitably inflict, and we are less likely to be aggressively hostile when we get mad at them. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q6 | Underneath all the distress, partners are asking each other: Can I count on you, depend on you? Are you there for me? Will you respond to me when I need, when I call? Do I matter to you? Am I valued and accepted by you? Do you need me, rely on me? | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q7 | The demand-withdraw pattern is not just a bad habit, it reflects a deeper underlying reality: such couples are starving emotionally. They are losing the source of their emotional sustenance. They feel deprived. And they are desperate to regain that nurturance. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q8 | Friendship fuels the flames of romance because it offers the best protection against feeling adversarial toward your spouse. | John Gottman, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q9 | Human nature dictates that it is virtually impossible to accept advice from someone unless you feel that that person understands you. | John Gottman, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q10 | The point is that neuroses don’t have to ruin a marriage. If you can accommodate each other’s “crazy” side and handle it with caring, affection, and respect, your marriage can thrive. | John Gottman and others, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q11 | Some people leave a marriage literally, by divorcing. Others do so by leading parallel lives together. | John Gottman, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q12 | But in their day-to-day lives, they have hit upon a dynamic that keeps their negative thoughts and feelings about each other (which all couples have) from overwhelming their positive ones. They have what I call an emotionally intelligent marriage. | John Gottman and others, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q13 | Active listening asks couples to perform Olympic-level emotional gymnastics even if their relationship can barely walk. | John Gottman and others, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q14 | I’ve found 94 percent of the time that couples who put a positive spin on their marriage’s history are likely to have a happy future as well. When happy memories are distorted, it’s a sign that the marriage needs help. | John Gottman, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q15 | Although happily married couples may feel driven to distraction at times by their partner’s personality flaws, they still feel that the person they married is worthy of honor and respect. | John Gottman, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q16 | At the heart of the Seven Principles approach is the simple truth that happy marriages are based on a deep friendship. | John Gottman and others, The Seven Principles for Making Marriage Work | [read it](undefined) |
+| Q17 | Perfection is not the price of love. Practice is. We practice how to express our love and how to receive our partner’s love. Love is an action even more than a feeling. It requires intention and attention, a practice we call attunement. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q18 | When we fall in love we are often on our very best behavior. We lead with the healthiest side of ourselves. But as relationships progress, each person gets more real, more transparent, and therefore more vulnerable. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q19 | There is no question that committing to a person can be a terrifying prospect. It means putting all our eggs in one basket. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q20 | The more we can reach out to our partners, the more separate and independent we can be. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q21 | But love is like a language. If you speak it, it flows more and more easily. If you don't, then you start to lose it. | Kenneth Sanderfer and Dr. Sue Johnson, Created for Connection | [read it](undefined) |
+| Q22 | Loving connection is the only safety nature ever offers us. | Kenneth Sanderfer and Dr. Sue Johnson, Created for Connection | [read it](undefined) |
+| Q23 | For better or worse, in the twenty-first century, a love relationship has become the central emotional relationship in most people’s lives. One reason is that we are increasingly living in social isolation. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q24 | For all of us, the person we love most in the world, the one who can send us soaring joyfully into space, is also the person who can send us crashing back to earth. | Kenneth Sanderfer and Dr. Sue Johnson, Created for Connection | [read it](undefined) |
+| Q25 | Generally in love, sharing even negative emotions, provided they don't get out of hand, is more useful than emotional absence. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q26 | The demise of marriages begins with a growing absence of responsive intimate interactions. The conflict comes later. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q27 | The foundation of contented, sustained relationships is the faith that your partner is there for you. | Dr. Sue Johnson, Love Sense | [read it](undefined) |
+| Q28 | Injuries may be forgiven, but they never disappear. Instead, in the best outcome, they become integrated into couples’ attachment stories as demonstrations of renewal and connection. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q29 | Loss of a felt sense of connection with such loved ones is painful and creates a disorienting sense of vulnerability. Disconnection at times of high need can be traumatizing for human beings. | Kenneth Sanderfer and Dr. Sue Johnson, Created for Connection | [read it](undefined) |
+| Q30 | It always fascinates me that when a child cries we prioritize this signal. We respond. Our children don’t threaten us, and we accept that they are vulnerable and need us. We see them in an attachment frame. But we have been taught not to see adults this way. | Dr. Sue Johnson, Hold Me Tight | [read it](undefined) |
+| Q31 | Life takes its toll on all relationships as careers, children, and crises can pull us away from each other. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q32 | When we make our relationship a priority by showing that it’s a priority, we build trust and demonstrate our loyalty far beyond any words we say in our wedding vows. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q33 | If things aren’t going well in their relationship, they voice their concerns to their partner instead of complaining about their partner to someone else. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q34 | The more honest we are, the more we can discover that our partner really loves us for who we are, and not the idealized version of us that shows up when we first begin to date. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q35 | The quality of our closest relationships, more than any other factor, determines our physical health, resistance to disease, and longevity. Satisfying close relationships also improve various dimensions of each partner’s mental health. | John Gottman and others, Eight Dates | [read it](undefined) |
+| Q36 | That ‘magic ratio’ is 5 to 1. This means that for every negative interaction during conflict, a stable and happy marriage has five (or more) positive interactions. | Kyle Benson, The Gottman Institute | [read it](https://www.gottman.com/blog/the-magic-relationship-ratio-according-science/) |
+| Q37 | A bid is any attempt from one partner to another for attention, affirmation, affection, or any other positive connection. | Zach Brittle, The Gottman Institute | [read it](https://www.gottman.com/blog/turn-toward-instead-of-away/) |
+| Q38 | Their research revealed that discussions will end on the same note they begin. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/softening-startup/) |
+| Q39 | Stonewalling occurs when the listener withdraws from the interaction, shuts down, and simply stops responding to their partner. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
+| Q40 | Defensiveness will only escalate the conflict if the critical spouse does not back down or apologize. This is because defensiveness is really a way of blaming your partner, and it won’t allow for healthy conflict management. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
+| Q41 | Contempt is the worst of the four horsemen. It is the number one predictor of divorce, but it can be defeated. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/) |
+| Q42 | The principle of building Love Maps is simply this: knowing the little things about your partner’s life creates a strong foundation for your friendship and intimacy. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/) |
+| Q43 | Couples who have detailed love maps of each other’s worlds are far better prepared to cope with stressful events and conflict. | Dr. Ellie Wilde, The Gottman Institute | [read it](https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/) |
+| Q44 | All relationships, even the most successful ones, have conflict. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q45 | Fortunately, our research shows that it’s not the appearance of conflict, but rather how it’s managed that predicts the success or failure of a relationship. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q46 | We say “manage” conflict rather than “resolve,” because relationship conflict is natural and has functional, positive aspects that provide opportunities for growth and understanding. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q47 | A complaint focuses on a specific behavior, but criticism attacks a person’s very character. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q48 | Defensiveness is defined as self-protection in the form of righteous indignation or innocent victimhood in attempt to ward off a perceived attack. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q49 | It usually happens when you’re feeling flooded or emotionally overwhelmed, so your reaction is to shut down, stop talking, and disengage. | The Gottman Institute, The Gottman Institute | [read it](https://www.gottman.com/blog/the-four-horsemen-the-antidotes/) |
+| Q50 | John Gottman’s research found that 69% of problems in a relationship are unsolvable. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q51 | Trying to solve unsolvable problems is counterproductive, and no couple will ever completely eliminate them. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q52 | However, discussing them is constructive and provides a positive opportunity for understanding and growth. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
+| Q53 | Being in dialogue, the preferred status, is when the couple has learned to accept their differences on that topic even though minor arguments arise occasionally. | Marni Feuerman, The Gottman Institute | [read it](https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/) |
 
 ## Ours
 
@@ -88,52 +123,4 @@ does not find it reworded. Changing one means changing the page too, and
 
 | # | Insight | Drawn from |
 |--|--|--|
-| 1 * | The things that feel too soon to bring up are usually exactly the right things to bring up. Couples who name expectations early stay closer, longer. | Gottman & Silver, The Seven Principles |
-| 2 * | It's rarely incompatibility that creates friction. It's the assumptions each person carries privately (about roles, money, the future) that no one's named yet. | Gottman et al., Journal of Marriage and Family |
-| 3 * | More than attraction, more than compatibility, being genuinely known by your partner is what makes a relationship hold. Attune helps you get there. | Johnson, Hold Me Tight |
-| 4 | How a hard conversation starts predicts how it ends. The first three minutes carry most of the outcome. | Gottman, The Seven Principles |
-| 5 | Every couple argues. What separates the ones who last is how quickly they come back, not how rarely they leave. | Gottman, The Marriage Clinic |
-| 6 | Most of what you disagree about, you will still disagree about in ten years. The work is not solving it. The work is not letting it harden. | Gottman, The Seven Principles |
-| 7 | When your heart rate passes about a hundred, you stop being able to hear. A twenty minute break is not avoidance, it is what makes the rest of the conversation possible. | Gottman & Levenson, Journal of Marriage and Family |
-| 8 | A complaint is about a thing that happened. Criticism is about the person who did it. The same frustration lands completely differently depending on which one you reach for. | Gottman, Why Marriages Succeed or Fail |
-| 9 | Of everything that happens in an argument, contempt is the one that does lasting damage. Eye rolls count. | Gottman, The Seven Principles |
-| 10 | Defensiveness is a way of saying the problem is not mine. It almost never ends the argument and it usually extends it. | Gottman, Why Marriages Succeed or Fail |
-| 11 | One of you moves toward the conflict and one moves away. Neither is the problem. The pattern between you is. | Johnson, Hold Me Tight |
-| 12 | A joke mid-argument, a hand on an arm, a change of tone. These are repair attempts, and whether they get accepted matters more than whether they are graceful. | Gottman, The Seven Principles |
-| 13 | Starting with "you always" gives your partner something to defend instead of something to answer. | Gottman, The Seven Principles |
-| 14 | Most connection is built in seconds, not evenings. A comment about the weather is often a bid for attention. | Gottman, The Relationship Cure |
-| 15 | Couples who stay together turn toward each other most of the time. It is not a grand gesture. It is answering when you are spoken to. | Gottman, The Relationship Cure |
-| 16 | In stable relationships there are about five good moments for every difficult one. The ratio matters more than the total. | Gottman & Levenson, Journal of Marriage and Family |
-| 17 | Couples who can still say what they admire about each other recover from bad weeks faster. | Gottman, The Seven Principles |
-| 18 | Knowing the small current facts of your partner’s life, the name of their difficult colleague, what is worrying them this week, is a better predictor than knowing their history. | Gottman, The Seven Principles |
-| 19 | The small repeated things carry more weight than the rare big ones. A standing Sunday morning outlasts a good holiday. | Doherty, The Intentional Family |
-| 20 | Noticing something and saying it are different events. Only one of them reaches your partner. | Algoe, Social and Personality Psychology Compass |
-| 21 | How you respond to your partner’s good news shapes the relationship more than how you respond to their bad news. | Gable et al., Journal of Personality and Social Psychology |
-| 22 | Doing something new together does more for how you feel about each other than doing something pleasant you have done before. | Aron et al., Journal of Personality and Social Psychology |
-| 23 | Most recurring arguments are not about the thing. They are about whether you matter to each other, asked in a way that is hard to hear. | Johnson, Hold Me Tight |
-| 24 | What looks like anger is often a protest at feeling unreachable. It is a request wearing the wrong clothes. | Johnson, Hold Me Tight |
-| 25 | People take more risks, not fewer, when they have someone steady to come back to. | Feeney, Journal of Personality and Social Psychology |
-| 26 | Depending on each other is not the opposite of being independent. It is what makes being independent possible. | Johnson, Hold Me Tight |
-| 27 | Staying yourself inside a relationship is not distance. It is what gives you something to bring to it. | Schnarch, Passionate Marriage |
-| 28 | Every couple runs on agreements nobody wrote down. Most disappointment is one of them being broken by someone who did not know it existed. | Gottman et al., Journal of Marriage and Family |
-| 29 | What predicts contentment is not an even split. It is both people believing the split is fair. | Carlson et al., Journal of Marriage and Family |
-| 30 | Remembering, planning and noticing are work, and they are the easiest work to be invisible. | Daminger, American Sociological Review |
-| 31 | Couples who talk about money regularly disagree about it as often. They recover from the disagreements faster. | Dew et al., Family Relations |
-| 32 | Keeping count works until the day your count and their count do not match, which is every day. | Gottman, The Seven Principles |
-| 33 | Most arguments about tidiness are arguments about whose standard is the default. Naming the standard is half of it. | Daminger, American Sociological Review |
-| 34 | Being willing to be changed by your partner is one of the few things that reliably predicts how a relationship goes. | Gottman, The Seven Principles |
-| 35 | People change in the direction they are already leaning. Pressure mostly changes how honest they are about it. | Miller & Rollnick, Motivational Interviewing |
-| 36 | The same behaviour reads completely differently depending on the reason you assume. The assumption is usually made before the behaviour. | Bradbury & Fincham, Psychological Bulletin |
-| 37 | Once you expect the worst reading, you start finding it. The evidence does not change. | Weiss, Advances in Family Intervention |
-| 38 | How a couple tells the story of how they met says more about where they are now than about what happened. | Buehlman, Gottman & Katz, Journal of Family Psychology |
-| 39 | A relationship does not need to be extraordinary to be worth staying in. Most of them are built out of ordinary weeks. | Finkel, The All-or-Nothing Marriage |
-| 40 | Wanting sex at different times and for different reasons is the usual case, not a mismatch to be fixed. | Nagoski, Come As You Are |
-| 41 | For a lot of people desire follows closeness rather than starting it. Waiting to feel like it can mean waiting a long time. | Basson, Journal of Sex and Marital Therapy |
-| 42 | How a no is given matters more than how often it is given. | Metz & McCarthy, Enduring Desire |
-| 43 | Couples who can talk about sex report better sex. The talking is not a symptom of it going well, it is part of how it goes well. | Mallory et al., Journal of Sex Research |
-| 44 | Ordinary touch that is not going anywhere makes the touch that is going somewhere easier to reach for. | Jakubiak & Feeney, Personality and Social Psychology Review |
-| 45 | A phone face down on the table still changes the conversation happening over it. | Przybylski & Weinstein, Journal of Social and Personal Relationships |
-| 46 | Most of what arrives in the evening was caused somewhere else. Saying so out loud takes it off your partner. | Neff & Karney, Journal of Personality and Social Psychology |
-| 47 | The couples who do best describe each other as friends before they describe each other as anything else. | Gottman, The Seven Principles |
-| 48 | Beyond the logistics, couples build a private culture: what a holiday is for, what counts as a good week. Most of it is never discussed. | Gottman, The Seven Principles |
-| 49 | A relationship asked to be everything tends to buckle. Other people are not competition for it. | Finkel, The All-or-Nothing Marriage |
+

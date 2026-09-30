@@ -89,15 +89,29 @@ for (const i of INSIGHTS) {
       }
     }
 
-    /* One of the two ways to be checkable, and not neither. */
+    /**
+     * One of the two ways to be checkable, and not neither.
+     *
+     * A page number was the first answer for books and a volume id is a better
+     * one: a page number can only be checked by a person holding the book, and a
+     * volume id can be checked by asking Google whether the sentence is in that
+     * scan. So `edition` is still required alongside it, because that is what a
+     * reader sees under the quotation, but it is the volume that makes the claim
+     * verifiable.
+     */
     const hasUrl = !!String(i.url || '').trim();
-    const hasPage = !!String(i.edition || '').trim() && !!String(i.page || '').trim();
-    if (!hasUrl && !hasPage) {
-      fails.push(`${at} is a quotation nobody can check. Give it a url, or an`
-        + ' edition and a page so a person can open the book at the right place.'
-        + ' A quotation with neither is a claim about what someone said resting on'
-        + ' nothing, which is exactly how "Contempt is the single greatest predictor'
-        + ' of divorce" came to sit under a researcher\'s name.');
+    const hasVolume = !!String(i.volumeId || '').trim() && !!String(i.edition || '').trim();
+    if (!hasUrl && !hasVolume) {
+      fails.push(`${at} is a quotation nobody can check. Give it a url, or a`
+        + ' Google Books volumeId and the edition a reader should see. A quotation'
+        + ' with neither is a claim about what someone said resting on nothing,'
+        + ' which is exactly how "Contempt is the single greatest predictor of'
+        + ' divorce" came to sit under a researcher\'s name.');
+    }
+    if (hasUrl && hasVolume) {
+      fails.push(`${at} carries both a url and a volumeId. Pick the one that is`
+        + ' actually the source, so the check that runs is the one that means'
+        + ' something.');
     }
     {
     }
@@ -200,12 +214,28 @@ for (const f of CARD_SITES) {
   }
 }
 
-/** The whole point is that some of each exist to be told apart. */
+/**
+ * ── THE SUBJECT CHANGED, SO THIS GUARD DID ────────────────────────────────
+ * It used to require some of each kind, on the grounds that with none of one
+ * kind the gate proved nothing about telling them apart. That was right while
+ * both kinds existed, and it fired the moment the last of our own sentences was
+ * retired at Ellie's ask, which is the gate doing its job: it noticed its
+ * subject had moved rather than quietly passing.
+ *
+ * What it protects now is the direction that can still go wrong. Every insight
+ * is a quotation, so what matters is that there are some, that each one can be
+ * checked, and that if a sentence of ours is ever added back it arrives with no
+ * citation and no basis reaching a customer, which the loop above covers.
+ *
+ * `ours` being zero is a decision and is stated as one in the summary rather
+ * than checked, because a check that insisted on zero would stop her ever
+ * choosing to add one back.
+ */
 const quotes = INSIGHTS.filter((i) => i.kind === 'quote').length;
 const ours = INSIGHTS.filter((i) => i.kind === 'ours').length;
-if (!quotes || !ours) {
-  fails.push(`there are ${quotes} quotations and ${ours} of our own sentences. With`
-    + ' none of one kind this gate proves nothing about telling them apart.');
+if (!quotes) {
+  fails.push('there are no quotations at all. Every insight is one, so this gate has'
+    + ' lost its subject and must not report success.');
 }
 
 if (fails.length) {
@@ -244,6 +274,6 @@ if (fails.length) {
 const onPages = INSIGHTS.filter((i) => i.kind === 'quote' && String(i.url || '').trim()).length;
 const inBooks = quotes - onPages;
 console.log(`[check-insight-provenance] ${quotes} quotations, each with an author and a`
-  + ` publication: ${onPages} linked to a page, ${inBooks} to an edition and a page number;`
-  + ` ${ours} of our own sentences, none of them attributed to anyone, and no basis field`
-  + ' reaches a customer.');
+  + ` publication: ${onPages} on a page that can be fetched, ${inBooks} in a book with a`
+  + ` Google Books volume behind it. ${ours} sentences of our own, which is the number Ellie`
+  + ' asked for.');

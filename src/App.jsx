@@ -36,9 +36,6 @@ import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_C
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW } from "../api/_insights.js";
-/* The colour each of the app's tabs is painted in, so the dashboard can wear
-   the same two grounds. See api/_lib/section-grounds.js. */
-import { tabGradientCss } from "../api/_lib/section-grounds.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -14612,13 +14609,14 @@ export default function App() {
                     surfaces paint one colour rather than two hexes that drift;
                     the app keeps its own constants because Expo cannot import
                     from api/, and check-tab-grounds holds them equal. */}
-                <div style={{
-                  marginBottom: "2.5rem",
-                  background: tabGradientCss("insights"),
-                  borderRadius: 20,
-                  padding: isMobile ? "1.5rem 1.25rem" : "2rem 1.85rem",
-                }}>
-                  <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} onDark />
+                {/* The orange ground came out. Ellie, seeing it: "This looks
+                    bad." The right answer is the bigger one she proposed in the
+                    same message, mirroring the app's four sections behind its
+                    tab bar, and a painted block in the middle of the step
+                    headers was neither that nor an improvement. See TASKS.md
+                    O497. */}
+                <div style={{ marginBottom: "2.5rem" }}>
+                  <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} />
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {(() => {
                       // Exercises are numbered in sequence, so the intimacy
@@ -14775,13 +14773,8 @@ export default function App() {
                     tile sitting under it rather than part of the same place.
 
                     Same ground as the app, from api/_lib/section-grounds.js. */}
-                <div style={{
-                  marginBottom: "2rem",
-                  background: tabGradientCss("learn"),
-                  borderRadius: 20,
-                  padding: isMobile ? "1.5rem 1.25rem" : "2rem 1.85rem",
-                }}>
-                  <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} onDark />
+                <div style={{ marginBottom: "2rem" }}>
+                  <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
 
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
                     {hasWorkbookOrder && (
@@ -14857,11 +14850,9 @@ export default function App() {
                     const insight = insightOfTheDay();
                     if (!insight) return null;
                     return (
-                      /* No ground of its own any more: the section around it is
-                         the Learn blue, and a darker tile on it read as a hole.
-                         A hairline and a wash is what the app's own insight
-                         block does on that ground. */
-                      <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 18, padding: isMobile ? "1.5rem 1.35rem" : "2rem 2.25rem" }}>
+                      /* Its own ground again, because the section around it is
+                         cream again. */
+                      <div style={{ marginTop: "1.5rem", background: "linear-gradient(135deg, #1E1A35, #2A2450)", borderRadius: 18, padding: isMobile ? "1.5rem 1.35rem" : "2rem 2.25rem" }}>
                         <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
                           {INSIGHT_EYEBROW}
                         </div>
@@ -15059,36 +15050,13 @@ export default function App() {
                         the app's Insights tab: the page that lists them. */}
                     <button onClick={() => setView("exercises")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>{exerciseComplete("ex1").cta}</button>
                   </div>
-                  {/* Workbook upsell — hidden if they already own it */}
-                  {!pkg.hasWorkbook && (
-                  <div onClick={() => setUpsellModal({ product: "workbook", cartAdded: false })}
-                    style={{ marginTop: "2rem", textAlign: "left", background: "#FFFBF0", border: "1.5px solid rgba(232,103,58,.3)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.6)"}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.3)"}>
-                    <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(232,103,58,0.2)", border: "1.5px solid rgba(232,103,58,0.4)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1A1208", fontFamily: font.body, marginBottom: "0.2rem" }}>Personalized Workbook</div>
-                      <p style={{ fontSize: "0.72rem", color: "#6B5030", fontFamily: font.body, lineHeight: 1.55, margin: "0 0 0.4rem" }}>Guided exercises and conversation prompts built directly from your results.</p>
-                      <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
-                    </div>
-                  </div>
-                  )}
-                  {!pkg.hasAnniversary && (
-                    <div onClick={() => setUpsellModal({ product: "reflection", cartAdded: false })}
-                      style={{ marginTop: "1rem", textAlign: "left", background: "#F0FDF4", border: "1.5px solid rgba(16,185,129,.25)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(16,185,129,.55)"}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(16,185,129,.25)"}>
-                      <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>✦</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: C.ink, fontFamily: font.body, marginBottom: "0.2rem" }}>Relationship Reflection</div>
-                        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, lineHeight: 1.55, margin: "0 0 0.4rem" }}>A third exercise about the moments that shaped your relationship.</p>
-                        <span style={{ fontSize: "0.7rem", color: "#10b981", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  {/* The upsell tiles came out. Ellie: "Remove the upsell from the
+                      site if we don't include it on the app." The app cannot sell at
+                      all, which is why it has none, so the two completion screens are
+                      now the same page on both surfaces: the tick, the name, the line,
+                      one button. The upsells still live on the dashboard and on the
+                      package pages, which are the places built to sell. */}
+                                  </div>
               : <Exercise01Flow userName={userName} partnerName={partnerName} fresh={_previewFresh} onComplete={async (a) => {
                   setEx1State(a);
                   try { localStorage.setItem('attune_ex1', JSON.stringify(a)); } catch {}
@@ -15129,37 +15097,7 @@ export default function App() {
                         the app's Insights tab: the page that lists them. */}
                     <button onClick={() => setView("exercises")} style={{ background: "linear-gradient(135deg, #E8673A, #1B5FE8)", color: "white", border: "none", padding: "0.7rem 1.85rem", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: font.body, borderRadius: 8, fontWeight: 700 }}>{exerciseComplete("ex2").cta}</button>
                   </div>
-                  {/* Workbook upsell — hidden if they already own it */}
-                  {!pkg.hasWorkbook && (
-                  <div onClick={() => setUpsellModal({ product: "workbook", cartAdded: false })}
-                    style={{ marginTop: "2rem", textAlign: "left", background: "#FFFBF0", border: "1.5px solid rgba(232,103,58,.3)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.6)"}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.3)"}>
-                    <div style={{ width: 20, height: 20, borderRadius: 5, background: "rgba(232,103,58,0.2)", border: "1.5px solid rgba(232,103,58,0.4)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1A1208", fontFamily: font.body, marginBottom: "0.2rem" }}>Personalized Workbook</div>
-                      <p style={{ fontSize: "0.72rem", color: "#6B5030", fontFamily: font.body, lineHeight: 1.55, margin: "0 0 0.4rem" }}>Guided exercises and conversation prompts built directly from your results.</p>
-                      <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
-                    </div>
-                  </div>
-                  )}
-                  {/* Merging lives checklist upsell — hidden if they already own it */}
-                  {!pkg.hasChecklist && (
-                    <div onClick={() => setUpsellModal({ product: "checklist", cartAdded: false })}
-                      style={{ marginTop: "1rem", textAlign: "left", background: "#FFF8F5", border: "1.5px solid rgba(232,103,58,.25)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", gap: "0.85rem", alignItems: "flex-start", cursor: "pointer", transition: "border-color 0.15s" }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.55)"}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(232,103,58,.25)"}>
-                      <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>☑</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: C.ink, fontFamily: font.body, marginBottom: "0.2rem" }}>{CHECKLIST_COPY.title}</div>
-                        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, lineHeight: 1.55, margin: "0 0 0.4rem" }}>Name changes, finances, estate basics, and the real-world logistics of building a life together.</p>
-                        <span style={{ fontSize: "0.7rem", color: "#E8673A", fontWeight: 700, fontFamily: font.body }}>See details + add to cart →</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                                  </div>
               : <ExpectationsExercise userName={userName} partnerName={partnerName} onComplete={async (a) => {
                   setEx2State(a);
                   try { localStorage.setItem('attune_ex2', JSON.stringify(a)); } catch {}

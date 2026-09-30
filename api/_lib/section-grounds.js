@@ -219,7 +219,16 @@ export function gradientCss(id) {
  * hex typed in two places is two designs that drift.
  *
  * An Expo project cannot import from api/, so the app keeps its own constants
- * and check-tab-grounds.mjs holds the two to each other. That is the same
+ * and check-tab-grounds.mjs holds the two to each other.
+ *
+ * ── WHO READS THESE TODAY: NOBODY ON THE WEBSITE ──────────────────────────
+ * The dashboard painted two of them for a day and Ellie's answer was "This
+ * looks bad", so they came back out. They are kept because the thing she asked
+ * for instead is the whole app mirrored on the site, four sections behind its
+ * tab bar, and that needs exactly these. Said plainly here because a constant
+ * whose only consumer is a gate is the shape of a dead path, and the honest
+ * version of that is a sentence rather than a deletion and a rewrite. TASKS.md
+ * O497 is the work. That is the same
  * arrangement as the card sizer and the budget arithmetic: share what can be
  * shared, and gate what cannot.
  *

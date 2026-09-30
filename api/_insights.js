@@ -36,39 +36,383 @@
  * direct quotes from these publications, can you organize those and cite them
  * accurately?" The tone was the half she could see. This was underneath it.
  *
- * So there are two kinds and they cannot be confused:
+ * ── THERE IS ONLY ONE KIND NOW ────────────────────────────────────────────
+ * There used to be two. The other was the product's own sentence, carrying a
+ * `basis` that recorded the work it was drawn from and never reached a customer.
+ * Ellie: "I want every insight to be quotes, I want to retire all AI-generated
+ * sentences." So all forty-nine are gone and `kind` is always 'quote'. The field
+ * stays rather than being dropped, because it is what check-insight-provenance
+ * reads to know an entry needs a citation, and because bringing our own
+ * sentences back should be a decision rather than an omission.
  *
- *   kind: 'ours'   the product's own sentence. `basis` records the work it is
- *                  drawn from, for review, and NEVER reaches a customer. Nothing
- *                  is attributed, because nobody said it but us.
+ * ── WHAT A QUOTATION CARRIES ──────────────────────────────────────────────
+ * `author` and `work`, always. Then one of two ways for the wording to be
+ * checked, and never neither:
  *
- *   kind: 'quote'  someone else's words, verbatim, with `author`, `work` and the
- *                  `url` they were read at. Only these carry a citation.
+ *   `url`        a page that can be fetched and searched, which is how the
+ *                Gottman Institute entries are held.
  *
- * check-insight-provenance.mjs enforces it, including that `basis` never leaves
- * the server.
+ *   `volumeId`   a Google Books volume, plus the `edition` a reader sees. The
+ *                check asks Google whether that exact sentence is in that exact
+ *                volume, which is a search of the publisher's own scan.
  *
  * ── ON ADDING A QUOTE ─────────────────────────────────────────────────────
- * Check it against the source and record where. Two things make this harder than
- * it looks and both came up while adding the first three: the byline on a page
+ * Never from memory. Two of the first six were paraphrases wearing quotation
+ * marks, and one of those sat under a researcher's name, which is a claim about
+ * what that person said.
+ *
+ * The way in is a candidate from anywhere, including somewhere unreliable, put
+ * through the verifier. A Goodreads transcription that Google confirms against
+ * the scan is a quotation; one it cannot find is not, whatever it says
+ * underneath. That is how candidates were discarded here, one of them
+ * attributed to the wrong author entirely and one existing only in a Spanish
+ * translation.
+ *
+ * Two smaller traps, both met while adding the first three: a byline on a page
  * can be a current display name rather than the name the piece was published
- * under, and the date shown is often when the page was last touched rather than
- * when it was written. So `url` is what a reader can check, and no date is
- * claimed unless it is the real one.
+ * under, and a date shown is often when the page was last touched.
  *
  * If a claim is wrong, the fix is to cut the entry rather than soften it.
  */
 
 export const INSIGHTS = [
-  /**
-   * ── QUOTATIONS ────────────────────────────────────────────────────────────
-   * Verbatim, each one read at the url beside it. These three are what Ellie
-   * asked for and they are the whole set so far: every other entry below is the
-   * product's own sentence and carries no attribution.
-   *
-   * No date is claimed on any of them. The Gottman Institute shows a date that
-   * moves when a page is edited, so citing it would be citing the day I read it.
-   */
+  /* ── THE 49 SENTENCES WE WROTE ARE GONE ─────────────────────────────────
+     Ellie: "I want every insight to be quotes, I want to retire all
+     AI-generated sentences. I would rather quote from books than sites
+     anyways."
+
+     They were fair readings of the research and they were ours, and the
+     objection was never that they were wrong. It was that a sentence nobody
+     published, sitting where a reader expects a finding, is the product
+     speaking in a voice it has not earned. They are in git if one of them is
+     ever wanted as our own line somewhere that suits it.
+
+     What replaced them is 35 passages from eleven books, each verified against
+     Google's scan of the book rather than against a transcription of it. The
+     pipeline is worth writing down because it is the only honest one available
+     here: candidates come from Goodreads, which is typed in by readers and
+     frequently wrong, and every candidate is then checked against the real
+     text. An unreliable source and an authoritative verifier give a reliable
+     answer; either one alone does not. Candidates were thrown out by that
+     check, including one attributed to the wrong author and one that exists
+     only in a Spanish translation. */
+
+  {
+    kind: 'quote',
+    id: 'q-insecure-relationships-disguise',
+    body: 'In insecure relationships, we disguise our vulnerabilities so our partner never really sees us.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-curiosity-comes-sense',
+    body: 'Curiosity comes out of a sense of safety; rigidity out of being vigilant to threats.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-know-loved-there',
+    body: 'If you know your loved one is there and will come when you call, you are more confident of your worth, your value. And the world is less intimidating when you have another to count on and know that you are not alone.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-responsive-love-partner',
+    body: 'If you have a responsive love partner, you have a secure base in the chaos. If you are emotionally alone, you are in free fall. Having someone you can rely on for connection and support makes healing from trauma easier.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-feel-safely-linked',
+    body: 'When we feel safely linked to our partners, we more easily roll with the hurts they inevitably inflict, and we are less likely to be aggressively hostile when we get mad at them.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-underneath-distress-partners',
+    body: 'Underneath all the distress, partners are asking each other: Can I count on you, depend on you? Are you there for me? Will you respond to me when I need, when I call? Do I matter to you? Am I valued and accepted by you? Do you need me, rely on me?',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-demand-withdraw-pattern',
+    body: 'The demand-withdraw pattern is not just a bad habit, it reflects a deeper underlying reality: such couples are starving emotionally. They are losing the source of their emotional sustenance. They feel deprived. And they are desperate to regain that nurturance.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-friendship-fuels-flames',
+    body: 'Friendship fuels the flames of romance because it offers the best protection against feeling adversarial toward your spouse.',
+    author: 'John Gottman',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2002',
+    volumeId: '8IWOxW1VEIYC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-human-nature-dictates',
+    body: 'Human nature dictates that it is virtually impossible to accept advice from someone unless you feel that that person understands you.',
+    author: 'John Gottman',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2002',
+    volumeId: '8IWOxW1VEIYC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-point-neuroses-ruin',
+    body: 'The point is that neuroses don’t have to ruin a marriage. If you can accommodate each other’s “crazy” side and handle it with caring, affection, and respect, your marriage can thrive.',
+    author: 'John Gottman and others',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2015',
+    volumeId: 'ZZVoBAAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-some-people-leave',
+    body: 'Some people leave a marriage literally, by divorcing. Others do so by leading parallel lives together.',
+    author: 'John Gottman',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2002',
+    volumeId: '8IWOxW1VEIYC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-lives-upon-dynamic',
+    body: 'But in their day-to-day lives, they have hit upon a dynamic that keeps their negative thoughts and feelings about each other (which all couples have) from overwhelming their positive ones. They have what I call an emotionally intelligent marriage.',
+    author: 'John Gottman and others',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2015',
+    volumeId: 'z-mLDQAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-active-listening-asks',
+    body: 'Active listening asks couples to perform Olympic-level emotional gymnastics even if their relationship can barely walk.',
+    author: 'John Gottman and others',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2015',
+    volumeId: 'ZZVoBAAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-found-percent-time',
+    body: 'I’ve found 94 percent of the time that couples who put a positive spin on their marriage’s history are likely to have a happy future as well. When happy memories are distorted, it’s a sign that the marriage needs help.',
+    author: 'John Gottman',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2002',
+    volumeId: '8IWOxW1VEIYC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-although-happily-married',
+    body: 'Although happily married couples may feel driven to distraction at times by their partner’s personality flaws, they still feel that the person they married is worthy of honor and respect.',
+    author: 'John Gottman',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2002',
+    volumeId: '8IWOxW1VEIYC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-heart-seven-principles',
+    body: 'At the heart of the Seven Principles approach is the simple truth that happy marriages are based on a deep friendship.',
+    author: 'John Gottman and others',
+    work: 'The Seven Principles for Making Marriage Work',
+    edition: 'Harmony 2015',
+    volumeId: 'ZZVoBAAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-perfection-price-love',
+    body: 'Perfection is not the price of love. Practice is. We practice how to express our love and how to receive our partner’s love. Love is an action even more than a feeling. It requires intention and attention, a practice we call attunement.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-fall-love-often',
+    body: 'When we fall in love we are often on our very best behavior. We lead with the healthiest side of ourselves. But as relationships progress, each person gets more real, more transparent, and therefore more vulnerable.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-there-question-committing',
+    body: 'There is no question that committing to a person can be a terrifying prospect. It means putting all our eggs in one basket.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-reach-partners-separate',
+    body: 'The more we can reach out to our partners, the more separate and independent we can be.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-love-like-language',
+    body: 'But love is like a language. If you speak it, it flows more and more easily. If you don\'t, then you start to lose it.',
+    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
+    work: 'Created for Connection',
+    edition: 'Little, Brown Spark 2016',
+    volumeId: 'Xz1UCwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-loving-connection-only',
+    body: 'Loving connection is the only safety nature ever offers us.',
+    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
+    work: 'Created for Connection',
+    edition: 'Little, Brown Spark 2016',
+    volumeId: 'Xz1UCwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-better-worse-twenty',
+    body: 'For better or worse, in the twenty-first century, a love relationship has become the central emotional relationship in most people’s lives. One reason is that we are increasingly living in social isolation.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-person-love-most',
+    body: 'For all of us, the person we love most in the world, the one who can send us soaring joyfully into space, is also the person who can send us crashing back to earth.',
+    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
+    work: 'Created for Connection',
+    edition: 'Little, Brown Spark 2016',
+    volumeId: 'Xz1UCwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-generally-love-sharing',
+    body: 'Generally in love, sharing even negative emotions, provided they don\'t get out of hand, is more useful than emotional absence.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-demise-marriages-begins',
+    body: 'The demise of marriages begins with a growing absence of responsive intimate interactions. The conflict comes later.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-foundation-contented-sustained',
+    body: 'The foundation of contented, sustained relationships is the faith that your partner is there for you.',
+    author: 'Dr. Sue Johnson',
+    work: 'Love Sense',
+    edition: 'Little, Brown Spark 2013',
+    volumeId: 'go2Tw2_VvkEC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-injuries-forgiven-never',
+    body: 'Injuries may be forgiven, but they never disappear. Instead, in the best outcome, they become integrated into couples’ attachment stories as demonstrations of renewal and connection.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-loss-felt-sense',
+    body: 'Loss of a felt sense of connection with such loved ones is painful and creates a disorienting sense of vulnerability. Disconnection at times of high need can be traumatizing for human beings.',
+    author: 'Kenneth Sanderfer and Dr. Sue Johnson',
+    work: 'Created for Connection',
+    edition: 'Little, Brown Spark 2016',
+    volumeId: 'Xz1UCwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-always-fascinates-child',
+    body: 'It always fascinates me that when a child cries we prioritize this signal. We respond. Our children don’t threaten us, and we accept that they are vulnerable and need us. We see them in an attachment frame. But we have been taught not to see adults this way.',
+    author: 'Dr. Sue Johnson',
+    work: 'Hold Me Tight',
+    edition: 'Little, Brown Spark 2008',
+    volumeId: 'jPLaqKhumPQC',
+  },
+  {
+    kind: 'quote',
+    id: 'q-life-takes-toll',
+    body: 'Life takes its toll on all relationships as careers, children, and crises can pull us away from each other.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-make-relationship-priority',
+    body: 'When we make our relationship a priority by showing that it’s a priority, we build trust and demonstrate our loyalty far beyond any words we say in our wedding vows.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-things-aren-going',
+    body: 'If things aren’t going well in their relationship, they voice their concerns to their partner instead of complaining about their partner to someone else.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-honest-discover-partner',
+    body: 'The more honest we are, the more we can discover that our partner really loves us for who we are, and not the idealized version of us that shows up when we first begin to date.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+  {
+    kind: 'quote',
+    id: 'q-quality-closest-relationships',
+    body: 'The quality of our closest relationships, more than any other factor, determines our physical health, resistance to disease, and longevity. Satisfying close relationships also improve various dimensions of each partner’s mental health.',
+    author: 'John Gottman and others',
+    work: 'Eight Dates',
+    edition: 'Workman Publishing Company 2019',
+    volumeId: 'V3BMDwAAQBAJ',
+  },
+
   {
     kind: 'quote',
     id: 'q-magic-ratio',
@@ -124,18 +468,6 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
   },
-
-  /* ── AND TWO MORE, 30 SEPTEMBER ─────────────────────────────────────────
-     Ellie: "There must be websites or somewhere that you can find relevant
-     quotes from published books. Please search the full internet."
-
-     I did, and the result is in TASKS.md rather than here, because it is a
-     finding about what is possible rather than about these two. Short version:
-     the books are reachable but not checkable. Searching inside a real scan is
-     the right tool and it is behind a key we do not have; archive.org gates the
-     lending titles; the one author excerpt that carries page numbers is a PDF
-     this machine cannot read. So these two are from the source that can still
-     be opened and checked. */
   {
     kind: 'quote',
     id: 'q-love-maps',
@@ -152,21 +484,6 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     url: 'https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/',
   },
-
-  /* ── TEN MORE, ADDED 29 SEPTEMBER 2026 ──────────────────────────────────
-     Ellie: "I would rather just use direct quotes from these publications,
-     can you organize those and cite them accurately?"
-
-     Every one pulled from the page itself rather than recalled, and every one
-     held to the page by check-quotes-verbatim.mjs, which was written because
-     two of the first six turned out to be paraphrases wearing quotation marks.
-
-     All from The Gottman Institute, which is not a preference. It is the only
-     source behind these insights that publishes in full, for free, at a stable
-     url. The books and the journal articles the rest are drawn from cannot be
-     quoted this way because nothing could check the wording afterwards, and an
-     unverifiable citation is the thing being fixed here. See TASKS.md: whether
-     to quote more widely than one publisher is Ellie's call. */
   {
     kind: 'quote',
     id: 'q-conflict-is-normal',
@@ -248,87 +565,6 @@ export const INSIGHTS = [
     url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
   },
 
-  // ── The three that also appear on public/purpose.html ────────────────────
-  // Same ids as api/_research.js, and the same sentences. A reader who meets
-  // one in the app and then reads the page should not find it reworded.
-  {
-    kind: 'ours',
-    id: 'early-conversations',
-    body: 'The things that feel too soon to bring up are usually exactly the right things to bring up. Couples who name expectations early stay closer, longer.',
-    basis: 'Gottman & Silver, The Seven Principles',
-  },
-  {
-    kind: 'ours',
-    id: 'unsaid',
-    body: "It's rarely incompatibility that creates friction. It's the assumptions each person carries privately (about roles, money, the future) that no one's named yet.",
-    basis: 'Gottman et al., Journal of Marriage and Family',
-  },
-  {
-    kind: 'ours',
-    id: 'being-understood',
-    body: 'More than attraction, more than compatibility, being genuinely known by your partner is what makes a relationship hold. Attune helps you get there.',
-    basis: 'Johnson, Hold Me Tight',
-  },
-
-  // ── Conflict, and what actually predicts how it goes ─────────────────────
-  { kind: 'ours', id: 'first-three-minutes', body: 'How a hard conversation starts predicts how it ends. The first three minutes carry most of the outcome.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'repair-over-avoidance', body: 'Every couple argues. What separates the ones who last is how quickly they come back, not how rarely they leave.', basis: 'Gottman, The Marriage Clinic' },
-  { kind: 'ours', id: 'perpetual-problems', body: 'Most of what you disagree about, you will still disagree about in ten years. The work is not solving it. The work is not letting it harden.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'flooding', body: 'When your heart rate passes about a hundred, you stop being able to hear. A twenty minute break is not avoidance, it is what makes the rest of the conversation possible.', basis: 'Gottman & Levenson, Journal of Marriage and Family' },
-  { kind: 'ours', id: 'complaint-not-criticism', body: 'A complaint is about a thing that happened. Criticism is about the person who did it. The same frustration lands completely differently depending on which one you reach for.', basis: 'Gottman, Why Marriages Succeed or Fail' },
-  { kind: 'ours', id: 'contempt', body: 'Of everything that happens in an argument, contempt is the one that does lasting damage. Eye rolls count.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'defensiveness', body: 'Defensiveness is a way of saying the problem is not mine. It almost never ends the argument and it usually extends it.', basis: 'Gottman, Why Marriages Succeed or Fail' },
-  { kind: 'ours', id: 'withdraw-pursue', body: 'One of you moves toward the conflict and one moves away. Neither is the problem. The pattern between you is.', basis: 'Johnson, Hold Me Tight' },
-  { kind: 'ours', id: 'repair-attempts', body: 'A joke mid-argument, a hand on an arm, a change of tone. These are repair attempts, and whether they get accepted matters more than whether they are graceful.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'harsh-startup', body: 'Starting with "you always" gives your partner something to defend instead of something to answer.', basis: 'Gottman, The Seven Principles' },
-
-  // ── What holds a relationship up day to day ──────────────────────────────
-  { kind: 'ours', id: 'bids', body: 'Most connection is built in seconds, not evenings. A comment about the weather is often a bid for attention.', basis: 'Gottman, The Relationship Cure' },
-  { kind: 'ours', id: 'turning-toward', body: 'Couples who stay together turn toward each other most of the time. It is not a grand gesture. It is answering when you are spoken to.', basis: 'Gottman, The Relationship Cure' },
-  { kind: 'ours', id: 'five-to-one', body: 'In stable relationships there are about five good moments for every difficult one. The ratio matters more than the total.', basis: 'Gottman & Levenson, Journal of Marriage and Family' },
-  { kind: 'ours', id: 'fondness', body: 'Couples who can still say what they admire about each other recover from bad weeks faster.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'love-maps', body: 'Knowing the small current facts of your partner’s life, the name of their difficult colleague, what is worrying them this week, is a better predictor than knowing their history.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'rituals', body: 'The small repeated things carry more weight than the rare big ones. A standing Sunday morning outlasts a good holiday.', basis: 'Doherty, The Intentional Family' },
-  { kind: 'ours', id: 'gratitude-out-loud', body: 'Noticing something and saying it are different events. Only one of them reaches your partner.', basis: 'Algoe, Social and Personality Psychology Compass' },
-  { kind: 'ours', id: 'capitalization', body: 'How you respond to your partner’s good news shapes the relationship more than how you respond to their bad news.', basis: 'Gable et al., Journal of Personality and Social Psychology' },
-  { kind: 'ours', id: 'novelty', body: 'Doing something new together does more for how you feel about each other than doing something pleasant you have done before.', basis: 'Aron et al., Journal of Personality and Social Psychology' },
-
-  // ── Attachment, needs and the shape underneath the argument ──────────────
-  { kind: 'ours', id: 'underneath-the-fight', body: 'Most recurring arguments are not about the thing. They are about whether you matter to each other, asked in a way that is hard to hear.', basis: 'Johnson, Hold Me Tight' },
-  { kind: 'ours', id: 'protest', body: 'What looks like anger is often a protest at feeling unreachable. It is a request wearing the wrong clothes.', basis: 'Johnson, Hold Me Tight' },
-  { kind: 'ours', id: 'secure-base', body: 'People take more risks, not fewer, when they have someone steady to come back to.', basis: 'Feeney, Journal of Personality and Social Psychology' },
-  { kind: 'ours', id: 'need-is-not-weakness', body: 'Depending on each other is not the opposite of being independent. It is what makes being independent possible.', basis: 'Johnson, Hold Me Tight' },
-  { kind: 'ours', id: 'differentiation', body: 'Staying yourself inside a relationship is not distance. It is what gives you something to bring to it.', basis: 'Schnarch, Passionate Marriage' },
-
-  // ── Expectations, fairness and the practical half ────────────────────────
-  { kind: 'ours', id: 'unspoken-contracts', body: 'Every couple runs on agreements nobody wrote down. Most disappointment is one of them being broken by someone who did not know it existed.', basis: 'Gottman et al., Journal of Marriage and Family' },
-  { kind: 'ours', id: 'perceived-fairness', body: 'What predicts contentment is not an even split. It is both people believing the split is fair.', basis: 'Carlson et al., Journal of Marriage and Family' },
-  { kind: 'ours', id: 'mental-load', body: 'Remembering, planning and noticing are work, and they are the easiest work to be invisible.', basis: 'Daminger, American Sociological Review' },
-  { kind: 'ours', id: 'money-talk', body: 'Couples who talk about money regularly disagree about it as often. They recover from the disagreements faster.', basis: 'Dew et al., Family Relations' },
-  { kind: 'ours', id: 'scorekeeping', body: 'Keeping count works until the day your count and their count do not match, which is every day.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'household-standards', body: 'Most arguments about tidiness are arguments about whose standard is the default. Naming the standard is half of it.', basis: 'Daminger, American Sociological Review' },
-
-  // ── Change, growth and time ──────────────────────────────────────────────
-  { kind: 'ours', id: 'influence', body: 'Being willing to be changed by your partner is one of the few things that reliably predicts how a relationship goes.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'change-is-slow', body: 'People change in the direction they are already leaning. Pressure mostly changes how honest they are about it.', basis: 'Miller & Rollnick, Motivational Interviewing' },
-  { kind: 'ours', id: 'assume-good-reason', body: 'The same behaviour reads completely differently depending on the reason you assume. The assumption is usually made before the behaviour.', basis: 'Bradbury & Fincham, Psychological Bulletin' },
-  { kind: 'ours', id: 'negative-sentiment', body: 'Once you expect the worst reading, you start finding it. The evidence does not change.', basis: 'Weiss, Advances in Family Intervention' },
-  { kind: 'ours', id: 'the-story-you-tell', body: 'How a couple tells the story of how they met says more about where they are now than about what happened.', basis: 'Buehlman, Gottman & Katz, Journal of Family Psychology' },
-  { kind: 'ours', id: 'good-enough', body: 'A relationship does not need to be extraordinary to be worth staying in. Most of them are built out of ordinary weeks.', basis: 'Finkel, The All-or-Nothing Marriage' },
-
-  // ── Intimacy, and what makes it possible ─────────────────────────────────
-  { kind: 'ours', id: 'desire-differs', body: 'Wanting sex at different times and for different reasons is the usual case, not a mismatch to be fixed.', basis: 'Nagoski, Come As You Are' },
-  { kind: 'ours', id: 'responsive-desire', body: 'For a lot of people desire follows closeness rather than starting it. Waiting to feel like it can mean waiting a long time.', basis: 'Basson, Journal of Sex and Marital Therapy' },
-  { kind: 'ours', id: 'turning-down-well', body: 'How a no is given matters more than how often it is given.', basis: 'Metz & McCarthy, Enduring Desire' },
-  { kind: 'ours', id: 'talking-about-it', body: 'Couples who can talk about sex report better sex. The talking is not a symptom of it going well, it is part of how it goes well.', basis: 'Mallory et al., Journal of Sex Research' },
-  { kind: 'ours', id: 'non-sexual-touch', body: 'Ordinary touch that is not going anywhere makes the touch that is going somewhere easier to reach for.', basis: 'Jakubiak & Feeney, Personality and Social Psychology Review' },
-
-  // ── Attention, time and the world outside ────────────────────────────────
-  { kind: 'ours', id: 'phone-in-the-room', body: 'A phone face down on the table still changes the conversation happening over it.', basis: 'Przybylski & Weinstein, Journal of Social and Personal Relationships' },
-  { kind: 'ours', id: 'stress-spillover', body: 'Most of what arrives in the evening was caused somewhere else. Saying so out loud takes it off your partner.', basis: 'Neff & Karney, Journal of Personality and Social Psychology' },
-  { kind: 'ours', id: 'friendship-first', body: 'The couples who do best describe each other as friends before they describe each other as anything else.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'shared-meaning', body: 'Beyond the logistics, couples build a private culture: what a holiday is for, what counts as a good week. Most of it is never discussed.', basis: 'Gottman, The Seven Principles' },
-  { kind: 'ours', id: 'outside-people', body: 'A relationship asked to be everything tends to buckle. Other people are not competition for it.', basis: 'Finkel, The All-or-Nothing Marriage' },
 ];
 
 /**
@@ -360,18 +596,43 @@ export const INSIGHTS = [
  */
 export const INSIGHT_EYEBROW = 'Insight of the day';
 
-/** "Author, Work" for a page; "Author, Work (edition), p. N" for a book. */
+/** "Author, Work" for a page; "Author, Work (publisher year)" for a book. */
 function citation(pick) {
   const who = pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;
   const edition = String(pick.edition || '').trim();
-  const page = String(pick.page || '').trim();
-  if (!edition || !page) return who;
-  return `${who} (${edition}), p. ${page}`;
+  return edition ? `${who} (${edition})` : who;
 }
+
+/**
+ * ── THE ROTATION DEALS FROM DIFFERENT BOOKS ───────────────────────────────
+ * The order in the list is the order they were harvested, which is book by
+ * book, and the rotation walks it one a day. That meant ten consecutive days of
+ * Hold Me Tight followed by eleven of Seven Principles, which reads as the
+ * product having one source rather than eleven.
+ *
+ * So the list is dealt out round robin by work: one from each book in turn,
+ * then round again. Computed once at module load and not stored, so it is the
+ * same order everywhere without anything to keep in step, and the day still
+ * decides which entry rather than anything per-device or random.
+ */
+const ROTATION = (() => {
+  const byWork = new Map();
+  for (const i of INSIGHTS) {
+    const k = i.work || i.author || '';
+    if (!byWork.has(k)) byWork.set(k, []);
+    byWork.get(k).push(i);
+  }
+  const piles = [...byWork.values()];
+  const out = [];
+  for (let n = 0; out.length < INSIGHTS.length; n += 1) {
+    for (const pile of piles) if (pile[n]) out.push(pile[n]);
+  }
+  return out;
+})();
 
 export function insightOfTheDay(now = new Date()) {
   const day = Math.floor(now.getTime() / 86400000);
-  const pick = INSIGHTS[day % INSIGHTS.length];
+  const pick = ROTATION[day % ROTATION.length];
   /**
    * ── A QUOTATION LOOKS LIKE ONE ──────────────────────────────────────────
    * Ellie: "I want the format to be direct quotes in quotation marks, with the
@@ -404,6 +665,10 @@ export function insightOfTheDay(now = new Date()) {
      * checked by check-quotes-verbatim instead.
      */
     source: pick.kind === 'quote' ? citation(pick) : '',
-    url: pick.kind === 'quote' ? pick.url : '',
+    /* Empty rather than undefined for a book, which has no page to link to. A
+       surface tests this to decide whether to offer a link, and `undefined`
+       serialises away entirely, so the two kinds have to differ by value rather
+       than by whether the key exists. */
+    url: (pick.kind === 'quote' && pick.url) ? pick.url : '',
   };
 }

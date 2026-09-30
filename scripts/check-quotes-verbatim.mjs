@@ -108,10 +108,87 @@ const unreachable = [];
  */
 const inBooks = [];
 let verified = 0;
+let volumesChecked = 0;
+
+/**
+ * A book quotation, checked against Google's scan of that exact volume.
+ *
+ * This is the same request I make by hand when adding one: the phrase in quotes,
+ * and then look for the cited volume among the results. Google searching its own
+ * scan is as close to opening the book as anything automated gets.
+ *
+ * Without a key the public quota is exhausted within a few calls, so a missing
+ * key is reported as unchecked rather than failing: a machine with no credential
+ * is not evidence about a quotation, the same rule this file already applies to
+ * a page it cannot reach.
+ */
+const BOOKS_KEY = process.env.GOOGLE_BOOKS_KEY || '';
+
+async function inVolume(phrase, title, surname) {
+  const url = 'https://www.googleapis.com/books/v1/volumes?'
+    + new URLSearchParams({ q: `"${phrase}"`, key: BOOKS_KEY, country: 'US' });
+  const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
+  if (!res.ok) return { reached: false, why: `Google answered ${res.status}` };
+  const body = await res.json();
+  const items = body.items || [];
+  /**
+   * Matched on the work and the author, not on one volume id.
+   *
+   * Pinning to the id recorded when the quotation was added looked tighter and
+   * was wrong: Google surfaces different editions of the same book between
+   * calls, so two quotations that verified when they were added failed the next
+   * day against editions of the very book they cite. The id is kept in the entry
+   * as a pointer for a person, and the claim being checked is the one that
+   * matters: these words are in this book by this author.
+   */
+  const want = norm(title);
+  const hit = items.some((it) => {
+    const v = it.volumeInfo || {};
+    const t = norm(v.title || '');
+    const sameWork = t === want || t.startsWith(want) || want.startsWith(t);
+    const authors = (v.authors || []).join(' ').toLowerCase();
+    return sameWork && surname.some((n) => authors.includes(n));
+  });
+  return { reached: true, hit, count: items.length, titles: items.slice(0, 3).map((it) => it.volumeInfo?.title) };
+}
+
+/** Titles vary by subtitle and punctuation between editions; names do not. */
+const norm = (t) => String(t).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
 
 for (const q of quotes) {
   if (!String(q.url || '').trim()) {
-    inBooks.push(`${q.id}: ${q.author}, ${q.work} (${q.edition}), p. ${q.page}`);
+    const where = `${q.id}: ${q.author}, ${q.work} (${q.edition})`;
+    if (!BOOKS_KEY) { inBooks.push(`${where} [no GOOGLE_BOOKS_KEY set]`); continue; }
+    /* The stored body has no display quotation marks on it yet; the outer pair is
+       added on the way out, the same as for a page. */
+    const want = flatten(q.body).replace(/^'|'$/g, '').trim();
+    let out;
+    try {
+      /* Surnames rather than the whole byline: "John Gottman and others" is
+         how a four-author book is cited to a reader and is not what Google
+         returns. */
+      const surnames = String(q.author).replace(/ and others$/, '')
+        .split(/,| and /).map((n) => n.trim().split(/\s+/).pop().toLowerCase())
+        .filter((n) => n.length > 2);
+      out = await inVolume(want, q.work, surnames);
+    } catch (err) {
+      inBooks.push(`${where} [${String(err.message || err).slice(0, 60)}]`);
+      continue;
+    }
+    if (!out.reached) { inBooks.push(`${where} [${out.why}]`); continue; }
+    volumesChecked += 1;
+    if (!out.hit) {
+      wrong.push(
+        `${q.id} is not in the book it cites.\n`
+        + `      shown as : ${want.slice(0, 150)}\n`
+        + `      cited to : ${q.author}, ${q.work} (${q.edition})\n`
+        + `      volume   : ${q.volumeId}\n`
+        + (out.count
+          ? `      Google finds it in ${out.count} volume(s), none of them that book:`
+            + ` ${(out.titles || []).filter(Boolean).join('; ')}`
+          : '      Google finds that sentence in no book at all.'),
+      );
+    }
     continue;
   }
   let html;
@@ -164,8 +241,9 @@ if (wrong.length) {
   process.exit(1);
 }
 
-const onPages = quotes.length - inBooks.length;
+const onPages = quotes.filter((q) => String(q.url || '').trim()).length;
 const parts = [`${verified} of ${onPages} quotations with a url found verbatim on the page they cite`];
+if (volumesChecked) parts.push(`${volumesChecked} found in the Google Books scan of the volume they cite`);
 if (unreachable.length) {
   parts.push(unreachable.length === 1
     ? '1 could not be reached, so it was not checked'
@@ -173,9 +251,9 @@ if (unreachable.length) {
 }
 if (inBooks.length) {
   parts.push(inBooks.length === 1
-    ? '1 is from a book and cannot be checked from here at all'
-    : `${inBooks.length} are from books and cannot be checked from here at all`);
+    ? '1 book quotation could not be checked'
+    : `${inBooks.length} book quotations could not be checked`);
 }
 console.log(`[check-quotes-verbatim] ${parts.join('; ')}.`);
 for (const u of unreachable) console.log(`  unchecked  ${u}`);
-for (const b of inBooks) console.log(`  by hand    ${b}`);
+for (const b of inBooks) console.log(`  unchecked  ${b}`);
