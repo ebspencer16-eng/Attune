@@ -87,7 +87,7 @@ export const INSIGHTS = [
      speaking in a voice it has not earned. They are in git if one of them is
      ever wanted as our own line somewhere that suits it.
 
-     What replaced them is 35 passages from eleven books, each verified against
+     What replaced them is 35 passages from five books, each verified against
      Google's scan of the book rather than against a transcription of it. The
      pipeline is worth writing down because it is the only honest one available
      here: candidates come from Goodreads, which is typed in by readers and
