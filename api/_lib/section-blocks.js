@@ -119,6 +119,23 @@ export const ORDER_ENFORCED = new Set([
 
 export const SECTION_BLOCKS = {
   /**
+   * ── THE HOME SCREEN, WHICH IS NOT A RESULTS SECTION ─────────────────────
+   * Every other key here is a results page. This one is the dashboard, and it
+   * is in this file for the same reason the rest are: Ellie asked for the site
+   * to mirror the app "with regards to content, formatting, and everything
+   * else", and content is the half a check can hold.
+   *
+   * The greeting and the two prompt cards come from /api/home on both surfaces,
+   * so the words cannot drift. What can drift is whether a surface draws them
+   * at all, which is what this is.
+   */
+  'app-home': [
+    { id: 'greeting', note: "The page's own line, from the server's greeting." },
+    { id: 'quick-links', note: 'The four ways in.' },
+    { id: 'prompts', note: 'The two cards the priority engine picked.' },
+  ],
+
+  /**
    * ── THE CHAPTER COVER ───────────────────────────────────────────────────
    * Ellie: "Mirror cover pages for exercises and results on both web and app."
    *

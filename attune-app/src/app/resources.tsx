@@ -921,7 +921,11 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic, marginTop: Spacing.lg }}>
                 {home.research.source || ''}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.md }}>
+              {/* Right edge: Ellie, "move the share and save buttons to the
+                  right rather than the left edge." flex-end rather than a
+                  spacer, so they stay together and stay on the right however
+                  many of them there are. */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: Spacing.md, marginTop: Spacing.md }}>
                 {/* Ellie: "I want a share button on the insight of the day tile
                     on learn tab." The finding and where it came from, which is
                     the whole of what the tile says. */}

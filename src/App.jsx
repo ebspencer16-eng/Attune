@@ -36,6 +36,8 @@ import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_C
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW } from "../api/_insights.js";
+/* The colour each of the app's tabs is painted in. */
+import { tabGradientCss } from "../api/_lib/section-grounds.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -2233,44 +2235,6 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
   );
 }
 
-// ── Dashboard step header: large gradient step number + title/sub ──────────
-/**
- * ── ON CREAM, OR ON A PAINTED GROUND ──────────────────────────────────────
- * `onDark` moves the type to white. Ellie has asked for this rule four times
- * in the app and it is the same rule here: when a surface changes colour, the
- * type on it moves with it. The dashboard's section 2 sits on the orange now,
- * mirroring the app's Insights tab, and ink on orange is what that rule exists
- * to prevent.
- */
-function DashStepHeader({ num, title, sub, active = true, isMobile = false, onDark = false }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.9rem" : "1.25rem", marginBottom: "1.25rem" }}>
-      <div style={{ position: "relative", flexShrink: 0 }}>
-        <div style={{ width: isMobile ? 52 : 64, height: isMobile ? 52 : 64, borderRadius: "50%", background: active ? "linear-gradient(135deg, rgba(232,103,58,0.12), rgba(155,93,229,0.12), rgba(27,95,232,0.12))" : "rgba(200,191,180,0.18)", border: active ? "1.5px solid rgba(155,93,229,0.28)" : "1.5px solid rgba(200,191,180,0.5)" }}>
-          <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display: "block" }}>
-            <defs>
-              <linearGradient id={`dashStepGrad-${num}-${active ? "on" : "off"}`} x1="0" y1="0" x2="1" y2="1">
-                {active
-                  ? (<><stop offset="0%" stopColor="#E8673A" /><stop offset="50%" stopColor="#9B5DE5" /><stop offset="100%" stopColor="#1B5FE8" /></>)
-                  : (<><stop offset="0%" stopColor="#C8BFB4" /><stop offset="100%" stopColor="#B3A693" /></>)}
-              </linearGradient>
-            </defs>
-            <text x="50" y={isMobile ? 64 : 66} textAnchor="middle"
-              fontFamily={HFONT} fontWeight="700" fontSize={isMobile ? 57.5 : 62.5}
-              fill={`url(#dashStepGrad-${num}-${active ? "on" : "off"})`}>{num}</text>
-          </svg>
-        </div>
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.65rem", fontWeight: 700, color: onDark ? "white" : "#0E0B07", lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 0.25rem" }}>{title}</h2>
-        <p style={{ fontSize: "0.83rem", color: onDark ? "rgba(255,255,255,0.78)" : "#7A6753", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: 0 }}>{sub}</p>
-      </div>
-    </div>
-  );
-}
-
-
-
 // Step 3 tile. One shape for everything the couple can pick up next: an icon,
 // a title, a line, and an action. Owned tools carry their product colour; add-ons
 // are quieter and show the price on the action.
@@ -3382,6 +3346,115 @@ function DashTabs({ active, onChange, isMobile }) {
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * The app's Home, on the website.
+ *
+ * ── WHAT "MIRROR" MEANT ───────────────────────────────────────────────────
+ * Ellie: "I want the site pages to mirror the app pages with regards to
+ * content, formatting, and everything else. You can adapt the size of the
+ * content to better-fit a website, but I want the content and look and feel to
+ * be exactly the same."
+ *
+ * The first attempt moved the site's existing blocks behind a tab bar, which
+ * mirrored the navigation and nothing else. Her answer was "This is terrible",
+ * and she was right: the sections were the app's names over the website's
+ * screens.
+ *
+ * So this is the app's screen. The blue ground with cream holding past halfway,
+ * the greeting as the page's own line, four square links, and two prompt cards
+ * on a cream panel. The only thing adapted is width: the links are a row of
+ * four rather than a wrapped grid, and the cards sit side by side with room to
+ * breathe, because a laptop is not a phone. Nothing is added and nothing is
+ * left out.
+ *
+ * The greeting and the two cards come from /api/home, the same payload and the
+ * same priority engine the app draws. See homeFeed above.
+ */
+function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
+  const greeting = feed?.greeting || `Good to see you, ${userName}`;
+  const cards = [feed?.primary, feed?.secondary].filter(Boolean);
+  const QUICK = [
+    { id: "insight", label: "Insight of the day" },
+    { id: "plan", label: "Action plans" },
+    { id: "highlights", label: "Results highlights" },
+    { id: "journal", label: "Relationship journal" },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "1.5rem" : "2rem" }}>
+      {/* block: app-home/greeting */}
+      <h1 style={{
+        fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
+        fontSize: isMobile ? "2rem" : "2.75rem", lineHeight: 1.05, letterSpacing: "-0.02em",
+      }}>
+        {greeting}
+      </h1>
+
+      {/* block: app-home/quick-links */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+        gap: isMobile ? "0.6rem" : "0.85rem",
+      }}>
+        {QUICK.map((q) => (
+          <button key={q.id} onClick={() => onQuick(q.id)}
+            style={{
+              background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.75)",
+              borderRadius: 16, padding: isMobile ? "0.9rem" : "1.1rem",
+              textAlign: "left", cursor: "pointer", fontFamily: BFONT,
+              fontSize: isMobile ? "0.74rem" : "0.8rem", color: "#8F8071",
+              lineHeight: 1.3, minHeight: isMobile ? 84 : 104,
+              display: "flex", alignItems: "flex-end",
+            }}>
+            {q.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── THE CREAM PANEL ────────────────────────────────────────────────
+          Rounded at the top and running off the bottom of the page, which is
+          how the app draws it: the panel is where the page ends rather than a
+          card floating on it. */}
+      {/* block: app-home/prompts */}
+      <div style={{
+        background: C.cream, borderRadius: "22px 22px 0 0",
+        padding: isMobile ? "1.25rem 1rem 2rem" : "1.75rem 1.5rem 2.5rem",
+        marginTop: "auto",
+      }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? "0.85rem" : "1.1rem",
+        }}>
+          {cards.map((card) => (
+            <button key={card.id} onClick={() => onCard(card)}
+              style={{
+                background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
+                padding: isMobile ? "0.85rem" : "1rem", textAlign: "left",
+                cursor: "pointer", fontFamily: BFONT, display: "block",
+              }}>
+              {/* The square an image goes in. Tinted until the artwork exists,
+                  which is what the list in TASKS.md O506 is for. */}
+              <div style={{
+                width: "100%", aspectRatio: "1 / 1", borderRadius: 12,
+                background: card.tint || "#F3E4DE", marginBottom: "0.85rem",
+              }} />
+              <div style={{
+                fontFamily: HFONT, fontSize: isMobile ? "1rem" : "1.1rem", fontWeight: 700,
+                color: C.ink, lineHeight: 1.2, marginBottom: "0.5rem",
+              }}>
+                {card.title}
+              </div>
+              <div style={{ fontSize: "0.82rem", color: C.muted, lineHeight: 1.5 }}>
+                {card.body}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -12006,6 +12079,43 @@ export default function App() {
    * same way `view` and the results section already work. Home by default,
    * which is where the app opens.
    */
+  /**
+   * The dashboard's own payload, from the endpoint the app reads.
+   *
+   * ── WHY THE WEBSITE ASKS THE SERVER NOW ─────────────────────────────────
+   * Ellie: "I want the site pages to mirror the app pages with regards to
+   * content, formatting, and everything else."
+   *
+   * Content first, and that is the half a layout cannot fix. The app's home is
+   * a greeting and two prompt cards chosen by a priority engine in
+   * api/_lib/next-action.js, which weighs twelve cases and picks one. The
+   * website decided what to show with its own conditions, so the two surfaces
+   * could and did recommend different things to the same couple on the same
+   * day.
+   *
+   * One engine, asked by both. Everything else here is how it is drawn.
+   */
+  const [homeFeed, setHomeFeed] = useState(null);
+  useEffect(() => {
+    if (!isLoggedIn) { setHomeFeed(null); return; }
+    let live = true;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (!hasSupabase()) return;
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session?.access_token) return;
+        const res = await fetch('/api/home', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) return;
+        const body = await res.json();
+        if (live && body?.ok) setHomeFeed(body);
+      } catch { /* the dashboard draws without it */ }
+    })();
+    return () => { live = false; };
+  }, [isLoggedIn]);
+
   const [dashTab, setDashTab] = useState(() => {
     try {
       const t = new URLSearchParams(window.location.search).get('tab');
@@ -13621,6 +13731,25 @@ export default function App() {
             ? 'The workbook service is not switched on yet. This is on us, not you.'
           : /not enough answers/i.test(why)
             ? 'There is not enough here to build a workbook yet. Finish the exercises and it will be ready.'
+          /**
+           * ── A 504 SAYS WHICH 504 IT WAS ───────────────────────────────
+           * Ellie: "Doesn't seem like it's timing out after 60secs because
+           * that message shows immediately after clicking workbook."
+           *
+           * Exactly right, and it is the detail that moved this on. The
+           * server distinguishes a service that took too long from one that
+           * could not be reached at all, and names the host in both. This
+           * page was flattening the two into "did not answer", which reads as
+           * slowness and sent her to wait a minute for something that had
+           * already failed.
+           *
+           * The host is in the message because she is the one who can check
+           * it against the Render dashboard, and no secret is in it.
+           */
+          : /could not be reached/i.test(why)
+            ? `${why}. Nothing is listening at that address, so this is a setting rather than a wait.`
+          : /did not answer within/i.test(why)
+            ? `${why}. It is running but slow, so trying again in a minute may work.`
           : resp.status >= 500 || resp.status === 0
             ? 'The workbook service did not answer. Give it a minute and try again.'
             : 'Workbook download failed. Please try again.');
@@ -14511,13 +14640,45 @@ export default function App() {
               </div>
 
               {/* ── CONTENT AREA ─────────────────────────────────────────── */}
-              <div style={{ flex: 1, padding: isMobile ? "1.5rem 1.25rem 3rem" : "2.5rem 2rem 4rem", background: "#FBF8F3" }}>
+              {/* ── EACH SECTION ON THE APP'S OWN GROUND ────────────────
+                  Ellie: "I want the content and look and feel to be exactly the
+                  same." In the app each tab is painted: Home the blue, Insights
+                  the orange, Learn a lighter blue. Notes keeps the cream, as it
+                  does there.
+
+                  The colours come from api/_lib/section-grounds.js so the two
+                  surfaces paint one decision; check-tab-grounds holds the app's
+                  copy of them to the server's. */}
+              <div style={{
+                flex: 1,
+                padding: isMobile ? "1.5rem 1.25rem 0" : "2.5rem 2rem 0",
+                background: dashTab === "notes" ? "#FBF8F3" : tabGradientCss(dashTab),
+                display: "flex", flexDirection: "column",
+              }}>
                 <div style={{ maxWidth: 680, margin: "0 auto" }}>
                 {/* Alerts, profile setup and the couple portrait. These sat above the
                     three steps and so appeared on every screen; in the app all of it
                     belongs to Home. */}
                 {dashTab === "home" && (
                   <>
+                  <AppHome
+                    feed={homeFeed}
+                    isMobile={isMobile}
+                    userName={userName}
+                    onQuick={(id) => {
+                      if (id === "journal") { setDashTab("notes"); return; }
+                      if (id === "insight") { setDashTab("learn"); return; }
+                      setActiveResult(id === "plan" ? "what-comes-next" : "highlights");
+                      setView("results");
+                    }}
+                    onCard={(card) => {
+                      const link = String(card.deepLink || "");
+                      const m = link.match(/[?&]view=([a-z0-9-]+)/i);
+                      if (m && RENDERABLE_VIEWS.has(m[1])) { setView(m[1]); return; }
+                      if (/results/.test(link)) { setView("results"); return; }
+                      setDashTab("insights");
+                    }}
+                  />
 
                 {/* Beta tester tile — thank-you + feedback survey CTA (merged; replaces the separate survey prompt for beta testers) */}
                 {isBetaTester && (
@@ -14704,7 +14865,22 @@ export default function App() {
                 )}
                 {dashTab === "insights" && (
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <DashStepHeader num="1" title="Complete your exercises" sub={WAITING.DASHBOARD} isMobile={isMobile} />
+                  {/* ── THE APP'S OWN HEADING ───────────────────────────────────────
+                      The numbered step headers went with the step spine. This
+                      is the line the app's Insights tab opens with, word for
+                      word, and it is Ellie's: "Ensure that when exercises are
+                      unfinished, insights page hero says 'Insights generate
+                      once your exercises are complete'."
+
+                      White, because the ground under it is the orange. That is
+                      the rule she has asked for in the app four times and it is
+                      the same rule here. */}
+                  <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.5rem" : "1.9rem", fontWeight: 700, color: "white", lineHeight: 1.15, letterSpacing: "-0.02em", margin: "0 0 0.6rem" }}>
+                    {bothDone ? "Your results are ready" : "Insights generate once your exercises are complete"}
+                  </h2>
+                  <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0 0 1.5rem" }}>
+                    {WAITING.DASHBOARD}
+                  </p>
                   <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
                     {(() => {
                       // Exercises are numbered in sequence, so the intimacy
@@ -14808,7 +14984,8 @@ export default function App() {
                 {/* ════ STEP 2 · REVIEW YOUR RESULTS ════ */}
                 {dashTab === "home" && (
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <DashStepHeader num="2" title="Review your results" sub={bothDone ? "Your results are ready. Start with the highlights or jump to any section." : "Visible once both of you finish all exercises."} active={bothDone} isMobile={isMobile} />
+                  {/* No numeral: the results card is the app's, on Home, and the
+                      app does not number its screens. */}
                   <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
                     style={{ width: "100%", marginBottom: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
                     {bothDone ? "Review results →" : "Review results"}
@@ -14866,7 +15043,8 @@ export default function App() {
                     Same ground as the app, from api/_lib/section-grounds.js. */}
                 {dashTab === "learn" && (
                 <div style={{ marginBottom: "2rem" }}>
-                  <DashStepHeader num="3" title="Continue growing together" sub="Tools, sessions, and reading to take this further." isMobile={isMobile} />
+                  {/* The app's Learn tab opens straight onto the tiles, with no
+                      heading over them. */}
 
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
                     {hasWorkbookOrder && (

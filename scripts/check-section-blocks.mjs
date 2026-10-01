@@ -62,6 +62,11 @@ const SURFACES = [
       'attune-app/src/components/highlight-cards.tsx',
       'attune-app/src/components/conflict-results.tsx',
       'attune-app/src/components/couple-map.tsx',
+      /* The home screen, now that the website draws one too. Ellie: "I want the
+         site pages to mirror the app pages with regards to content, formatting,
+         and everything else." The inventory is the half of that a check can
+         hold, and it only holds if this file is read. */
+      'attune-app/src/app/index.tsx',
     ],
   },
 ];

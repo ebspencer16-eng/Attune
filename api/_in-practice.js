@@ -57,7 +57,37 @@ export function shelfFor(a) {
   return SHELF[a.category] || POST_CATEGORIES[0];
 }
 
-export const IN_PRACTICE = [
+/**
+ * The name each section is shown under.
+ *
+ * ── WHY IT IS NOT ON THE ARTICLE ──────────────────────────────────────────
+ * It was. Every row carried its own `categoryLabel`, typed out, and two of the
+ * twelve disagreed with their neighbours: an article filed under `conflict` was
+ * labelled "Getting Started", and the two `understanding` articles were labelled
+ * "Understanding" and "Understanding Each Other". So a reader met one section
+ * wearing two names, and a section wearing another section's name, depending on
+ * which article they happened to open.
+ *
+ * Found while listing the articles for someone to make cover images from, which
+ * is the usual way: a list of a thing is where the thing's inconsistencies show
+ * up.
+ *
+ * ── THERE ARE STILL TWO NAMING SYSTEMS, AND THAT IS ELLIE'S ───────────────
+ * These are not the shelf names. `SHELF` above maps the same categories onto
+ * POST_CATEGORIES, where `conflict` is "When It's Difficult" rather than
+ * "Conflict & Repair". Both appear in the product. Making them one name is a
+ * copy decision and it is in TASKS.md for her; what is fixed here is a section
+ * disagreeing with itself, which is nobody's decision.
+ */
+const CATEGORY_LABEL = {
+  'getting-started': 'Getting Started',
+  conflict: 'Conflict & Repair',
+  understanding: 'Understanding Each Other',
+  'couple-types': 'Couple Types',
+  methodology: 'Methodology',
+};
+
+const IN_PRACTICE_ROWS = [
   {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "getting-started", "categoryLabel": "Getting Started", "title": "How to review your results together", "excerpt": "Some couples open their results immediately; others wait for a quiet moment. Either approach works. What matters is how you do it.", "readMinutes": 6},
   {"slug": "how-to-start-a-hard-conversation", "path": "/practice/how-to-start-a-hard-conversation", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "How to start a hard conversation", "excerpt": "When you find a gap in your results that feels significant, here's a structure that opens things up rather than putting either person on the defensive.", "readMinutes": 7},
   {"slug": "conflict-vs-repair", "path": "/practice/conflict-vs-repair", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "The difference between conflict and repair", "excerpt": "Two people can have compatible conflict styles and completely incompatible repair needs. Most couples have never distinguished these.", "readMinutes": 5},
@@ -80,6 +110,16 @@ export const IN_PRACTICE = [
   {"slug": "for-the-bridge-the-conversation-you-need", "path": "/practice/for-the-bridge-the-conversation-you-need", "category": "couple-types", "categoryLabel": "Couple Types", "title": "For the Bridge: the conversation you need", "readMinutes": 5},
   {"slug": "why-naming-the-pattern-changes-everything", "path": "/practice/why-naming-the-pattern-changes-everything", "category": "couple-types", "categoryLabel": "Couple Types", "title": "Why naming the pattern changes everything", "readMinutes": 4}
 ];
+
+/**
+ * Every article, with its section name derived rather than carried. A row that
+ * still has a `categoryLabel` of its own is ignored, which is what stops the
+ * old shape creeping back one article at a time.
+ */
+export const IN_PRACTICE = IN_PRACTICE_ROWS.map(({ categoryLabel: _ignored, ...row }) => ({
+  ...row,
+  categoryLabel: CATEGORY_LABEL[row.category] || CATEGORY_LABEL['getting-started'],
+}));
 
 /** Newest first is the order practice.html lists them in. */
 export function inPracticeIndex() {

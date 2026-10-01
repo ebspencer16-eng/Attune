@@ -23,7 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
-import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { openExternal } from '@/api/open-external';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -84,6 +84,18 @@ export default function HomeScreen() {
    * milliseconds against a cold start of seconds, so on any launch after the
    * first the dashboard is simply there. See api/last-seen.ts.
    */
+  /**
+   * How much of the screen the reading above the panel takes.
+   *
+   * 0.42 is where the panel sits today on the phone this was tuned against, so
+   * it keeps that composition and gives every other phone the same one rather
+   * than the same number of points. A minimum rather than a fixed height: a
+   * long greeting is allowed to push the panel down, which is the case a fixed
+   * height would crop.
+   */
+  const { height: screenHeight } = useWindowDimensions();
+  const readingHeight = Math.round(screenHeight * 0.42);
+
   const [data, setData] = useState<HomeResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -482,7 +494,27 @@ export default function HomeScreen() {
               the two cards were pushed to the bottom of the screen and a third
               of the page was empty blue. The blocks were right and the spacing
               was what made it read as a different screen. */}
-          <View style={{ paddingHorizontal: Spacing.xl }}>
+          {/* ── THE READING IS A FRACTION OF THE SCREEN, NOT A STACK OF POINTS ──
+              Ellie, four times now, most recently: "Done, but still seeing the
+              spacing issue on my cell."
+
+              Three fixes before this one each moved where the spare height
+              collected: after the last child, then above the panel, then inside
+              it. None of them made the composition scale, which is the thing
+              she actually asked for: "dimensions are the same on every phone
+              screen."
+
+              They cannot be the same while the top of the page is a stack of
+              fixed point heights and the screen is not. The greeting and the
+              quick links come to the same number of points on a 15 Pro Max and
+              an SE, so they occupy a different fraction of each, and everything
+              below them starts in a different place.
+
+              So the reading claims a share of the screen instead. The panel then
+              begins at the same fraction of the way down whatever phone it is
+              on, which is what makes two screenshots look alike. It is also the
+              design this file described at `topHeight` and never used. */}
+          <View style={{ paddingHorizontal: Spacing.xl, minHeight: readingHeight }}>
             {/* The wordmark is gone. It named the app to someone already
                 inside it, on the one screen where the whole ground is the
                 brand colour. Settings keeps the row: it is where account
@@ -498,6 +530,7 @@ export default function HomeScreen() {
                 ...Type.display, color: c.textStrong,
                 marginTop: Spacing.xl, marginBottom: Spacing.xxl,
               }}>
+              {/* block: app-home/greeting */}
               {data.greeting}
             </Text>
 
@@ -666,6 +699,7 @@ export default function HomeScreen() {
                 paddingHorizontal: Spacing.sm,
                 paddingTop: Spacing.xl,
               }}>
+              {/* block: app-home/quick-links */}
               {QUICK_LINKS.map((q) => (
                 <QuickLink key={q.id} item={q} onGo={() => goQuick(q)} />
               ))}
@@ -712,6 +746,7 @@ export default function HomeScreen() {
                 paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl,
                 paddingBottom: Spacing.xl,
               }}>
+              {/* block: app-home/prompts */}
               {prompts.map((p) => (
                 <PromptCard key={p.key} item={p} onPress={p.onPress} />
               ))}
