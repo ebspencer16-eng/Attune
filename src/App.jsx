@@ -3919,6 +3919,46 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
            which is what made this page scroll. */
         flex: "1 1 auto", minHeight: 0, display: "flex", flexDirection: "column",
       }}>
+        {/* ── ALERTS, ABOVE THE CARDS ─────────────────────────────────────
+            Ellie: "Add partner joined as an alert row to app and site."
+
+            The app puts unread alerts at the top of this tile, as rows, and
+            the website had a banner for one of them and nothing for the rest.
+            Same rows, same payload, same place. They stay out of the height
+            the cards are given: an alert is news and the cards are the page.
+
+            `alerts` is the one thing on Home that is not the four links or the
+            two prompts, and it is there because she asked for it by name. */}
+        {(feed?.alerts || []).length ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.75rem", flexShrink: 0 }}>
+            {feed.alerts.slice(0, 3).map((a) => (
+              <button key={a.id} onClick={() => onCard(a)}
+                style={{
+                  display: "flex", alignItems: "flex-start", gap: "0.6rem", width: "100%",
+                  background: "#EEF2FC", border: "1px solid #DCE4F6", borderRadius: 12,
+                  padding: "0.6rem 0.75rem", textAlign: "left", cursor: "pointer",
+                  fontFamily: BFONT,
+                }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+                  style={{ flexShrink: 0, marginTop: 2 }}>
+                  <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                </svg>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>
+                    {a.title}
+                  </span>
+                  {a.body ? (
+                    <span style={{ display: "block", fontSize: "0.76rem", color: C.muted, lineHeight: 1.4 }}>
+                      {a.body}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         {/* Two across, on a phone as well. The app puts them side by side at
             390 points wide and stacking them here was the layout differing from
             the app on the one screen Ellie looks at most. */}

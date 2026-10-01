@@ -34,6 +34,9 @@ const PUSHABLE = {
   // Their partner asked for them, which is a person waiting, not us.
   partner_nudged_you:{ urgency: 9,  quiet: false },
   partner_shared:    { urgency: 8,  quiet: false },
+  // Their partner has arrived. Worth knowing on the phone, but nothing is
+  // unlocked by it yet, so it sits below the one that is.
+  partner_joined:    { urgency: 9,  quiet: false },
   // Something changed that they cannot find out any other way, and that
   // changes what is in the product for them. Quiet: it is not good news and it
   // does not need to arrive with a sound.
@@ -108,6 +111,22 @@ export function notificationFor(kind, { partnerName, partnerPronouns, dimensionL
       return { kind, title: `${them} completed ${pos} exercises`, body: 'Explore your results', deepLink: '/?view=results' };
     case 'partner_nudged_you':
       return { kind, title: `${them} sent you a nudge`, body: 'Complete your exercises to unlock your results', deepLink: '/?view=home' };
+    /**
+     * Their partner accepted the invite and linked.
+     *
+     * Ellie: "Add partner joined as an alert row to app and site."
+     *
+     * It was a banner on the website's dashboard and nothing at all in the app,
+     * so the two surfaces told a couple different things about the same event.
+     * As an alert it reaches both, because both draw the alert list from the
+     * same rows.
+     *
+     * The wording is mine and needs her eye, like the rest of these did: she
+     * read the first set, kept most and rewrote the ones she wanted changed.
+     * Flagged in TASKS.md rather than left to look settled.
+     */
+    case 'partner_joined':
+      return { kind, title: `${them} joined Attune`, body: 'You can both start your exercises now', deepLink: '/?view=home' };
     case 'partner_shared':
       return { kind, title: `${them} shared something with you`, body: dimensionLabel ? `A note on ${dimensionLabel}.` : 'A note from your results.', deepLink: '/?view=notes' };
     /**

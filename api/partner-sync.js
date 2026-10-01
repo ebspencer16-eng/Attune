@@ -35,6 +35,7 @@ import { createClient } from '@supabase/supabase-js';
 export const config = { runtime: 'edge' };
 
 import { safeError, jsonBody } from './_lib/http.js';
+import { recordNotification } from './_lib/notifications.js';
 
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements, computeEntitlements, ORDER_SELECT, PKG_CAPS } from './_lib/entitlements.js';
@@ -266,7 +267,25 @@ async function handlePartnerSync(req) {
         .select('email_opt_in').eq('id', partnerA.id).maybeSingle();
       const optedOut = partnerAProfile && partnerAProfile.email_opt_in === false;
 
-      // partner_joined_notification email retired (email #3 removed).
+      /**
+       * ── THE ALERT, WHICH IS WHAT REPLACED THE EMAIL ───────────────────
+       * Ellie: "Add partner joined as an alert row to app and site."
+       *
+       * The email for this was retired. Nothing took its place, so the one
+       * moment a couple most wants confirming went unannounced on the phone
+       * and was a banner on the website only. An alert row reaches both,
+       * because both read the same rows.
+       *
+       * It goes to Partner A, because Partner B is the one who just did it and
+       * does not need telling. A failure here is logged and nothing else: an
+       * alert that did not get written must not undo a link that did.
+       */
+      await recordNotification({
+        ownerId: partnerA.id,
+        kind: 'partner_joined',
+        subjectId: bId,
+        copy: { partnerName: (partnerBName || '').trim().split(/\s+/)[0] || null },
+      });
     } catch (e) {
       console.warn('[partner-sync] partner_joined notification setup failed:', e);
     }

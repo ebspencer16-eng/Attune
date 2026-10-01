@@ -1097,6 +1097,18 @@ const WRITE_ENTRY = 'Write a journal entry';
 const SHARED_WITH_ME = 'Shared with me';
 const WORD_IN_USE = 'Word in use';
 const JOURNAL_TITLE = 'Relationship journal';
+/**
+ * The app's lock line.
+ *
+ * Its twin is `lockedApp` in api/_lib/journal-copy.js, which is what the
+ * website reads, and check-journal-copy holds the two equal. An Expo project
+ * cannot import from api/, so this is the copy that ships here and the gate is
+ * what stops the two drifting.
+ *
+ * The website's line is different on purpose and lives there as `lockedWeb`: a
+ * web page cannot ask for a phone's passcode, so it asks for the account
+ * password, and one sentence describing both would be wrong on one of them.
+ */
 const JOURNAL_LOCKED = 'Locked with your passcode';
 const JOURNAL_OPEN = 'A running diary, just for you';
 const PEEK_MINE_EMPTY = 'Nothing yet. Notes and highlights turn up here.';

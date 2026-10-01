@@ -406,9 +406,74 @@ for (const f of apiFiles.filter((n) => n.startsWith('admin-') && KNOWN_READERS.h
 
 console.log = realLog;
 
+/**
+ * ── 5. THE WEBSITE'S JOURNAL IS SHUT UNTIL THE PASSWORD IS GIVEN ──────────
+ * Ellie: "the journal isn't even behind a passcode."
+ *
+ * The app has had a lock since she asked for one and the website had none, so
+ * the same entries were two taps away on a phone and on screen on any laptop
+ * already signed in. A web page cannot ask for a device passcode, so the lock
+ * is the account password, verified against Supabase.
+ *
+ * Checked structurally rather than by running it, and the header says so: the
+ * unlock needs a live Supabase session and a real password, neither of which
+ * exists here. What can be checked is that the entries are behind the flag and
+ * that the flag is only ever set by the verifying call. That is narrower than
+ * the app's lock check, which runs the decision, and saying which is which is
+ * the point.
+ */
+{
+  const web = readFileSync(new URL('../src/notes-web.jsx', import.meta.url), 'utf8');
+  const code = web.replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
+
+  if (!/const \[journalOpen, setJournalOpen\] = useState\(false\)/.test(code)) {
+    fails.push('src/notes-web.jsx has no `journalOpen` flag starting false, which is the'
+      + ' website\'s journal lock. Refusing to pass: a gate that has lost its subject must'
+      + ' never report success.');
+  }
+
+  /* Every place the entries are drawn is behind the flag. `entryDays` is the
+     grouped list of what was written; nothing else on the page is. */
+  const draws = [...code.matchAll(/\{([^{}\n]{0,60})entryDays[^\n]*\.map\(/g)];
+  if (!draws.length) {
+    fails.push('src/notes-web.jsx draws no journal entries at all. Refusing to pass: a gate'
+      + ' that has lost its subject must never report success.');
+  }
+  for (const m of draws) {
+    if (!/journalOpen\s*&&/.test(m[1])) {
+      const line = code.slice(0, m.index).split('\n').length;
+      fails.push(`src/notes-web.jsx:${line} draws the journal entries without \`journalOpen &&\``
+        + ' in front of them, so what someone wrote is on screen before the password is given.');
+    }
+  }
+
+  /* And the flag is only ever opened by the call that checks the password. A
+     `setJournalOpen(true)` anywhere else is a lock with the key taped to it. */
+  const opens = [...code.matchAll(/setJournalOpen\(\s*true\s*\)/g)];
+  if (opens.length !== 1) {
+    fails.push(`src/notes-web.jsx opens the journal in ${opens.length} places. There is one`
+      + ' way in and it is the password.');
+  } else {
+    const before = code.slice(0, opens[0].index);
+    const fn = before.lastIndexOf('const unlockJournal');
+    if (fn === -1 || !/signInWithPassword/.test(code.slice(fn, opens[0].index))) {
+      fails.push('src/notes-web.jsx opens the journal somewhere that does not verify the'
+        + ' password with signInWithPassword first.');
+    }
+  }
+
+  /* Not remembered between sessions. A lock whose state is in localStorage is
+     one anybody at the same laptop inherits. */
+  if (/journalOpen[^\n]{0,40}localStorage|localStorage[^\n]{0,60}journalOpen/.test(code)) {
+    fails.push('src/notes-web.jsx stores the journal\'s unlocked state in localStorage, so'
+      + ' the next person at this laptop inherits it. It is a per-tab flag on purpose.');
+  }
+}
+
 if (fails.length) {
   console.error('\n check-journal-privacy: the journal is not private.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
-console.log('✓ check-journal-privacy: the app writes it private, the server refuses to share it either way, the home screen will not quote it, and the admin page reads who and when.');
+console.log('✓ check-journal-privacy: the app writes it private, the server refuses to share it either way, the home screen will not quote it, the admin page reads who and when, and the website keeps the entries behind the account password.');

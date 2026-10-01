@@ -21,6 +21,27 @@
  */
 
 export const JOURNAL_COPY = {
+  /**
+   * ── THE LOCK ──────────────────────────────────────────────────────────
+   * Ellie: "the journal isn't even behind a passcode."
+   *
+   * The app puts the journal behind the phone's own passcode or Face ID. A web
+   * page cannot ask for either, so the website asks for the account password,
+   * which is the only thing it can check and is already what it asks for before
+   * deleting an account.
+   *
+   * `lockedApp` is the app's line and `lockedWeb` is the website's, because the
+   * two mechanisms are genuinely different and one sentence describing both
+   * would be wrong on one of them. Both live here so neither surface writes its
+   * own.
+   *
+   * These two and `unlock` are mine and need her eye. The four below are hers.
+   */
+  lockedApp: 'Locked with your passcode',
+  lockedWeb: 'Locked. Enter your password to read your entries.',
+  unlock: 'Unlock',
+  wrongPassword: 'That password did not match.',
+
   /** The composer. */
   placeholder: 'Write about today',
   /** The search field over past entries. */

@@ -566,6 +566,54 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
   /** The tag archive is shut on arrival, the same as the app's. */
   const [archiveOpen, setArchiveOpen] = useState(false);
 
+  /**
+   * ── THE JOURNAL IS LOCKED ───────────────────────────────────────────────
+   * Ellie: "the journal isn't even behind a passcode."
+   *
+   * The app puts it behind the phone's passcode or Face ID. A web page cannot
+   * ask for either: there is no API for a device passcode, and the browser's
+   * own credential APIs unlock a site, not a section of one.
+   *
+   * What the website can check is the account password, which is what it
+   * already asks for before deleting an account. So the journal is shut until
+   * the password is re-entered, and it stays open for this tab only. Not
+   * remembered anywhere: a lock you can carry between sessions in localStorage
+   * is a lock anyone at the same laptop can open by clearing nothing at all.
+   *
+   * The composer stays available while locked. Writing an entry does not
+   * require reading the old ones, and a diary you cannot add to until you have
+   * authenticated is a diary people stop using.
+   */
+  const [journalOpen, setJournalOpen] = useState(false);
+  const [pw, setPw] = useState('');
+  const [pwBusy, setPwBusy] = useState(false);
+  const [pwError, setPwError] = useState(null);
+
+  const unlockJournal = useCallback(async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!pw.trim()) return;
+    setPwBusy(true);
+    setPwError(null);
+    try {
+      const { supabase: sb, hasSupabase } = await import('./supabase.js');
+      if (!hasSupabase()) { setPwError(JOURNAL_COPY.wrongPassword); return; }
+      const { data: { session } } = await sb.auth.getSession();
+      const email = session?.user?.email;
+      if (!email) { setPwError(JOURNAL_COPY.wrongPassword); return; }
+      /* Verifying the password is signing in with it. The session this returns
+         is the same account, so nothing about the page changes except that the
+         password has been shown to be known. */
+      const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+      if (error) { setPwError(JOURNAL_COPY.wrongPassword); return; }
+      setPw('');
+      setJournalOpen(true);
+    } catch {
+      setPwError(JOURNAL_COPY.wrongPassword);
+    } finally {
+      setPwBusy(false);
+    }
+  }, [pw]);
+
   const load = useCallback(async () => {
     const [n, t] = await Promise.all([notesApi.list(), notesApi.tags()]);
     if (!n.ok) {
@@ -951,9 +999,44 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                 </div>
               </div>
 
+              {/* ── SHUT UNTIL THE PASSWORD IS GIVEN ──────────────────
+                  Everything below this is what someone wrote. The composer
+                  above is not: adding an entry gives nothing away. */}
+              {!journalOpen ? (
+                <form onSubmit={unlockJournal} style={{ ...card, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.muted}
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    <span style={{ fontSize: '0.82rem', color: C.text, fontFamily: BFONT }}>
+                      {JOURNAL_COPY.lockedWeb}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="password"
+                      value={pw}
+                      onChange={(ev) => setPw(ev.target.value)}
+                      autoComplete="current-password"
+                      aria-label={JOURNAL_COPY.lockedWeb}
+                      style={{
+                        flex: 1, border: `1px solid ${C.stone}`, borderRadius: 999,
+                        padding: '0.45rem 0.9rem', fontFamily: BFONT, fontSize: '0.8rem',
+                        color: C.text, background: C.white, minWidth: 0,
+                      }}
+                    />
+                    <Primary label={JOURNAL_COPY.unlock} onClick={unlockJournal} busy={pwBusy} />
+                  </div>
+                  {pwError ? (
+                    <div style={{ fontSize: '0.76rem', color: C.muted, fontFamily: BFONT }}>{pwError}</div>
+                  ) : null}
+                </form>
+              ) : null}
+
               {/* Hidden until there is something to search, the same as the
                   app: a search field over nothing is a control that lies. */}
-              {entries.length ? (
+              {journalOpen && entries.length ? (
                 <input
                   value={entryQuery}
                   onChange={(e) => setEntryQuery(e.target.value)}
@@ -966,7 +1049,7 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                 />
               ) : null}
 
-              {entryDays.length ? entryDays.map(([day, rows]) => (
+              {journalOpen && entryDays.length ? entryDays.map(([day, rows]) => (
                 <div key={day} style={{ marginBottom: '1.25rem' }}>
                   <div style={{
                     fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -976,11 +1059,11 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                   </div>
                   {rows.map((n) => <Entry key={n.id} entry={n} />)}
                 </div>
-              )) : (
+              )) : (journalOpen ? (
                 <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT }}>
                   {entryQuery.trim() ? JOURNAL_COPY.noMatch : JOURNAL_COPY.empty}
                 </p>
-              )}
+              ) : null)}
             </div>
 
             {notes.length ? (
