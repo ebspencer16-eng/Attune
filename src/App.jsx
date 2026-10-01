@@ -3462,6 +3462,148 @@ function DashTabs({ active, onChange, isMobile }) {
  * tiles on the blue. Same twelve articles, so the inventory check passed, and
  * nothing about it looked like the app. Ellie: "neither is content or layout."
  */
+/**
+ * The Insights tab's menu, as the app draws it.
+ *
+ * ── WHAT WAS WRONG ────────────────────────────────────────────────────────
+ * Ellie: "Menu looks bad, doesn't look like app screen at all. this bg is full
+ * bleed and the menu doesn't have the icons or indents. Also, clicked on menu
+ * items and everything took me to the storycards."
+ *
+ * The last one first, because it was a real break: the rows opened
+ * `group.id`, and a group id is not a page. `comm`, `exp`, `reflection`,
+ * `intimacy` and `conflict` are headings over pages called `comm-cover`,
+ * `comm-overview` and so on, so every one of them failed validation and fell
+ * back to Highlights. The app opens `children[0]`, which is the section's cover
+ * page, and so does this now.
+ *
+ * ── THE SHAPE, WHICH IS ALL HERS ──────────────────────────────────────────
+ * "Can we please remove hairline dividers, put a bullet to the left of
+ * highlights, couple type, exercise results, and what comes next." So those
+ * four carry a bullet and sit on the page's own left edge.
+ *
+ * "I want exercise results title to be listed left-aligned with highlights and
+ * couple type, and I want the content in that section indented further right
+ * than that." So the five exercises step in by the width of the bullet column.
+ *
+ * "Maybe only the exercises have icons?" So they do, and nothing else does.
+ *
+ * "the tiles on landing page should just be shaded lightly with the attune
+ * gradient but the icon should match the color of the exercise." The colour is
+ * in the icon and nowhere else.
+ *
+ * The three measurements are computed from one number here for the reason the
+ * app's menu gives: they were 24 + 24 + 16 written out in four places and the
+ * heading ended up on a different left edge from the two names it matches.
+ */
+const NAV_ICON_COL = 24;
+const NAV_GAP = 16;
+
+/** Only the exercises, the way the app has it. Keyed by the server's group id. */
+const NAV_ICONS = {
+  comm: (c) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h7A2.5 2.5 0 0 1 15 7.5v3A2.5 2.5 0 0 1 12.5 13H8l-3 2.5V13A2.5 2.5 0 0 1 3 10.5z" />
+      <path d="M18 9h.5A2.5 2.5 0 0 1 21 11.5v3A2.5 2.5 0 0 1 18.5 17H17l-2.5 2v-2" />
+    </svg>
+  ),
+  exp: (c) => QuickIcons.brain(c),
+  reflection: (c) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H11v15H4.5A1.5 1.5 0 0 1 3 17.5z" />
+      <path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H13v15h6.5a1.5 1.5 0 0 0 1.5-1.5z" />
+    </svg>
+  ),
+  intimacy: (c) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20s-7-4.6-7-9.3A4.2 4.2 0 0 1 12 7.8a4.2 4.2 0 0 1 7 2.9c0 4.7-7 9.3-7 9.3z" />
+    </svg>
+  ),
+  conflict: (c) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21v-7" /><path d="M12 14L6 8V3" /><path d="M12 14l6-6V3" />
+      <path d="M4 3h4v4" /><path d="M20 3h-4v4" />
+    </svg>
+  ),
+};
+
+function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
+  const LABEL_LEFT = 0;
+  const EXERCISE_LEFT = NAV_ICON_COL + NAV_GAP;
+
+  const bullet = (
+    <span aria-hidden="true" style={{
+      width: NAV_ICON_COL, display: "inline-flex", justifyContent: "flex-start",
+      alignItems: "center", flexShrink: 0,
+    }}>
+      <span style={{ width: 5, height: 5, borderRadius: 3, background: "#C8BFB4" }} />
+    </span>
+  );
+
+  return (
+    <div>
+      {groups.map((g, i) => {
+        const kids = g.children || [];
+        const icon = NAV_ICONS[g.id];
+        const isExercise = Boolean(icon);
+        const firstExercise = isExercise && !NAV_ICONS[groups[i - 1]?.id];
+        return (
+          <div key={g.id}>
+            {firstExercise ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: NAV_GAP,
+                paddingTop: isMobile ? "1rem" : "1.25rem", paddingBottom: "0.35rem",
+                paddingLeft: LABEL_LEFT,
+              }}>
+                {bullet}
+                <span style={{
+                  fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase",
+                  color: "#A66534", fontWeight: 700, fontFamily: BFONT,
+                }}>
+                  {eyebrow}
+                </span>
+              </div>
+            ) : null}
+            <button
+              onClick={() => onOpen(kids.length ? kids[0].id : g.id)}
+              aria-label={g.label}
+              style={{
+                display: "flex", alignItems: "center", gap: NAV_GAP, width: "100%",
+                background: "transparent", border: "none", cursor: "pointer",
+                textAlign: "left", fontFamily: HFONT, color: C.ink,
+                paddingTop: isExercise ? "0.6rem" : "0.7rem",
+                paddingBottom: isExercise ? "0.6rem" : "0.7rem",
+                paddingLeft: isExercise ? EXERCISE_LEFT : LABEL_LEFT,
+                paddingRight: 0,
+              }}>
+              {isExercise ? (
+                <span aria-hidden="true" style={{
+                  width: NAV_ICON_COL, display: "inline-flex", alignItems: "center",
+                  justifyContent: "flex-start", flexShrink: 0,
+                }}>
+                  {icon(g.color || "#E8673A")}
+                </span>
+              ) : bullet}
+              <span style={{
+                flex: 1,
+                fontSize: isExercise
+                  ? (isMobile ? "1rem" : "1.1rem")
+                  : (isMobile ? "1.2rem" : "1.35rem"),
+                fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em",
+              }}>
+                {g.label}
+              </span>
+              {kids.length ? (
+                <span aria-hidden="true" style={{ color: "#A8997F", fontSize: "0.68rem", paddingRight: "0.2rem" }}>&#9662;</span>
+              ) : null}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) {
   const [query, setQuery] = useState("");
   /**
@@ -3648,6 +3790,17 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
 function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
   const cards = [feed?.primary, feed?.secondary].filter(Boolean);
   /**
+   * ── THE SHAPE IS THERE BEFORE THE WORDS ARE ─────────────────────────────
+   * Ellie: "Has done the same weird thing each time I open, the formatting
+   * loads then completely changes."
+   *
+   * The two cards come from /api/home, which takes a round trip. Until it
+   * landed this drew the tiles and an empty tile, then the cards arrived and
+   * everything below them moved. Two placeholders hold the same space, so what
+   * changes when the payload lands is the words inside them and nothing else.
+   */
+  const placeholders = feed ? [] : [{ id: "_a" }, { id: "_b" }];
+  /**
    * The app's four, in the app's order, with the app's labels.
    *
    * "Action plans" carries its own line break for the reason the app gives:
@@ -3710,6 +3863,11 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
             style={{
               background: "rgba(14,11,7,0.045)", border: "none",
               borderRadius: 14, aspectRatio: "0.92",
+              /* The app's tile is about 92 points wide on a 390 point screen.
+                 A quarter of a 680px column is 170, which at this aspect comes
+                 to 185 tall and is most of why Home did not fit on a laptop.
+                 Capped, so they stay the size they are on a phone. */
+              maxHeight: 132,
               padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
               fontFamily: BFONT, display: "flex", flexDirection: "column",
               alignItems: "center", justifyContent: "flex-end",
@@ -3752,7 +3910,10 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
         marginLeft: isMobile ? "-1.25rem" : "-2rem",
         marginRight: isMobile ? "-1.25rem" : "-2rem",
         padding: isMobile ? "1.25rem 1.25rem 1.5rem" : "1.75rem 2rem 2rem",
-        marginTop: "auto",
+        /* No `marginTop: auto`. An auto margin absorbs the free space in a flex
+           column, so the tile was told to take what is left and simultaneously
+           given nothing left to take: its own content then set its height and
+           it ran off the bottom of the window. */
         /* Takes what is left and is allowed to give it back. Without
            `minHeight: 0` a flex child refuses to shrink under its content,
            which is what made this page scroll. */
@@ -3766,6 +3927,21 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
           gap: isMobile ? "0.65rem" : "1.1rem",
           flex: "1 1 auto", minHeight: 0,
         }}>
+          {placeholders.map((p) => (
+            <div key={p.id} aria-hidden="true" style={{
+              background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
+              padding: isMobile ? "0.85rem" : "1rem",
+              display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden",
+            }}>
+              <div style={{
+                width: "100%", borderRadius: 12,
+                background: "#F6F1EA", marginBottom: "0.7rem",
+                flex: "1 1 auto", minHeight: 0,
+              }} />
+              <div style={{ height: "1.1rem", borderRadius: 5, background: "#F2EDE6", marginBottom: "0.45rem" }} />
+              <div style={{ height: "0.7rem", borderRadius: 4, background: "#F6F1EA", width: "80%" }} />
+            </div>
+          ))}
           {cards.map((card) => (
             <button key={card.id} onClick={() => onCard(card)}
               style={{
@@ -3781,17 +3957,37 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                   do, because a card whose title is cut off is a card that has
                   stopped working. */}
               <div style={{
-                width: "100%", aspectRatio: "1 / 1", borderRadius: 12,
+                width: "100%", borderRadius: 12,
                 background: card.tint || "#F3E4DE", marginBottom: "0.7rem",
+                /* No aspect-ratio. A definite width plus an aspect makes the
+                   height definite too, and a definite height does not shrink,
+                   whatever flex says: that is why the cards were cut off the
+                   bottom of a short window rather than getting smaller. It
+                   takes what is left and no more. */
                 flex: "1 1 auto", minHeight: 0,
               }} />
+              {/* ── CLAMPED, SO IT ENDS RATHER THAN BEING SLICED ──────────
+                  Ellie, with a screenshot of a laptop window: "Doesn't fit on
+                  one screen." The page is the window now and nothing overflows
+                  it, but on a short window the card had more words than room
+                  and cut one off mid-line, which looks like the page is broken
+                  rather than like a card that is full.
+
+                  Two lines each, ending in an ellipsis. The whole sentence is
+                  on the page the card opens. */}
               <div style={{
                 fontFamily: HFONT, fontSize: isMobile ? "1rem" : "1.1rem", fontWeight: 700,
-                color: C.ink, lineHeight: 1.2, marginBottom: "0.5rem",
+                color: C.ink, lineHeight: 1.2, marginBottom: "0.4rem",
+                display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                overflow: "hidden", flexShrink: 0,
               }}>
                 {card.title}
               </div>
-              <div style={{ fontSize: "0.82rem", color: C.muted, lineHeight: 1.5 }}>
+              <div style={{
+                fontSize: "0.82rem", color: C.muted, lineHeight: 1.45,
+                display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                overflow: "hidden", flexShrink: 0,
+              }}>
                 {card.body}
               </div>
             </button>
@@ -14953,10 +15149,27 @@ export default function App() {
         )}
 
         {view === "home" && isLoggedIn && (
-          <div style={{ display: "flex", minHeight: "100vh", background: "#FBF8F3" }}>
+          /* ── THE DASHBOARD IS THE WINDOW ────────────────────────────────
+             Ellie: "Home page should not be scroll-able", and then, with a
+             screenshot of a desktop window: "Doesn't fit on one screen."
+
+             `minHeight: 100vh` was the old value and it is why. A minimum grows
+             with its content, so the Home tab could ask for 100% of a height
+             that was itself whatever the content came to, and the cards ran off
+             the bottom. An exact height is what gives `height: 100%` inside
+             something to resolve against.
+
+             `dvh` rather than `vh` because a phone browser's toolbars are part
+             of `vh` and not part of what you can see. */
+          <div style={{ display: "flex", height: "100dvh", background: "#FBF8F3" }}>
 
             {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", minWidth: 0 }}>
+            {/* Home does not scroll; Learn and Notes do. The tab decides, rather
+                than the column always scrolling and Home quietly overflowing. */}
+            <div style={{
+              flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0,
+              overflowY: dashTab === "home" ? "hidden" : "auto",
+            }}>
 
               {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: banner only) ── */}
               <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", flexShrink: 0, position: "relative", overflow: "hidden" }}>
@@ -15054,7 +15267,7 @@ export default function App() {
                   surfaces paint one decision; check-tab-grounds holds the app's
                   copy of them to the server's. */}
               <div style={{
-                flex: 1,
+                flex: 1, minHeight: 0,
                 padding: isMobile ? "1.5rem 1.25rem 0" : "2.5rem 2rem 0",
                 /* ── ONE SCREEN OF GROUND, THE WAY THE APP HAS IT ──────
                     The gradient is painted at one viewport height and the rest
@@ -15077,7 +15290,20 @@ export default function App() {
                 backgroundAttachment: "fixed",
                 display: "flex", flexDirection: "column",
               }}>
-                <div style={{ maxWidth: 680, margin: "0 auto" }}>
+                {/* Passes the height through on Home so the tile can claim
+                    what is left. On the other tabs it is the content's height,
+                    because those scroll. */}
+                <div style={{
+                  maxWidth: 680, margin: "0 auto", width: "100%",
+                  /* Home and Insights both fill the window: Home because it
+                     must not scroll, Insights because the app's cream panel is
+                     the screen and the orange is a border round it. Ellie:
+                     "this bg is full bleed". It was, because the panel was only
+                     as tall as its rows and the ground filled the rest. */
+                  ...(dashTab === "home" || dashTab === "insights"
+                    ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }
+                    : {}),
+                }}>
                 {/* Alerts, profile setup and the couple portrait. These sat above the
                     three steps and so appeared on every screen; in the app all of it
                     belongs to Home. */}
@@ -15129,7 +15355,7 @@ export default function App() {
                   </>
                 )}
                 {dashTab === "insights" && (
-                <div style={{ marginBottom: "2.5rem" }}>
+                <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", paddingBottom: isMobile ? "1.25rem" : "2rem" }}>
                   {/* ── NO HERO, NO DESCRIPTION ────────────────────────────
                       Ellie: "No hero and description line", and for the whole
                       dashboard: "There should be NO additional prose as you are
@@ -15148,7 +15374,16 @@ export default function App() {
                       read as a flat orange field is that the app puts its
                       content on a large cream panel with a generous radius, so
                       the orange is a border around it rather than the page. */}
-                  <div style={{ background: "#FDF4EF", borderRadius: 26, overflow: "hidden", padding: isMobile ? "1.25rem 1rem" : "1.75rem 1.5rem" }}>
+                  <div style={{
+                    background: "#FDF4EF", borderRadius: 26,
+                    padding: isMobile ? "1.25rem 1.1rem" : "1.75rem 1.6rem",
+                    /* Fills what is left, so the orange reads as the edge of the
+                       page rather than the page. Scrolls inside itself when the
+                       list is longer than the window, which is the only way a
+                       panel that fills the screen can also hold nine rows on a
+                       short one. */
+                    flex: 1, minHeight: 0, overflowY: "auto",
+                  }}>
                     {/* ── COMPLETE: THE NAV, NOT THE STATUS ────────────────
                         Ellie: "this page should be the exercise status menu
                         only until all exercises are complete, at which point it
@@ -15160,36 +15395,19 @@ export default function App() {
                         from. One source, so a section added to results appears
                         here without anyone remembering to add it. */}
                     {bothDone ? (
-                      <div>
-                        {resultsNav({
+                      <AppInsightsMenu
+                        groups={resultsNav({
                           hasReflection: pkg.hasReflection,
                           intimacyReady: pkg.hasIntimacy,
                           conflictListed: pkg.hasConflict,
-                        }).map((group) => (
-                          <div key={group.id}>
-                            {group.id === "comm" && (
-                              <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, fontFamily: BFONT, margin: "1.25rem 0 0.5rem" }}>
-                                {EXERCISE_RESULTS_EYEBROW}
-                              </div>
-                            )}
-                            <button
-                              onClick={() => { setActiveResult(group.id); setView("results"); }}
-                              style={{
-                                display: "flex", alignItems: "center", gap: "0.75rem", width: "100%",
-                                background: "transparent", border: "none", cursor: "pointer",
-                                padding: group.children ? "0.7rem 0.25rem" : "0.8rem 0.25rem",
-                                textAlign: "left", fontFamily: HFONT,
-                                fontSize: group.children ? (isMobile ? "1rem" : "1.1rem") : (isMobile ? "1.15rem" : "1.3rem"),
-                                fontWeight: 700, color: C.ink, lineHeight: 1.2,
-                              }}>
-                              <span style={{ flex: 1 }}>{group.label}</span>
-                              {group.children ? (
-                                <span style={{ color: "#A8997F", fontSize: "0.7rem" }}>▾</span>
-                              ) : null}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                        })}
+                        isMobile={isMobile}
+                        eyebrow={EXERCISE_RESULTS_EYEBROW}
+                        /* The group's first child, which is its cover page. A
+                           group id is a heading, not a page: opening one was
+                           what sent every row to the storycards. */
+                        onOpen={(sectionId) => { setActiveResult(sectionId); setView("results"); }}
+                      />
                     ) : (() => {
                       // Exercises are numbered in sequence, so the intimacy
                       // exercise reads as 04 (or 03 when there's no reflection),

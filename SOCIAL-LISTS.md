@@ -54,8 +54,8 @@ Every article, under the section it belongs to.
 | Conflict and Repair | Why couples fight about the same things |
 | Understanding Each Other | Five books that change how couples think |
 | Understanding Each Other | What your communication style reveals |
-| Couple Types | What your couple type tells you |
-| Couple Types | For the Bridge: the conversation you need |
-| Couple Types | Why naming the pattern changes everything |
+| Methodology | What your couple type tells you |
+| Methodology | For the Bridge: the conversation you need |
+| Methodology | Why naming the pattern changes everything |
 
 12 articles across 4 sections.

@@ -337,6 +337,15 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
       UX Views
     </a>
+    <div class="sb-section">System</div>
+    <!-- Ellie: "I want to make sure there aren't other empty en vars in my
+         vercel." Vercel shows an empty box for anything marked Sensitive
+         whether or not it holds a value, so the dashboard cannot answer that.
+         The running server can, and this is where she already is signed in. -->
+    <a class="sb-item" onclick="showPage('env'); window.__initEnv && window.__initEnv();">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+      Environment
+    </a>
   </nav>
   <div class="sb-footer">
     <div style="font-size:.6rem;color:var(--dim);margin-bottom:.5rem;font-family:var(--mono);">DATA NOTICE</div>
@@ -1014,6 +1023,25 @@
     <div id="explorer-questions" style="display:flex;flex-direction:column;gap:1.25rem;"></div>
   </div>
 
+
+<!-- ── ENVIRONMENT ────────────────────────────────────────────────────────
+     Which variables the server has a value for. Names and a yes/no, never a
+     value: /api/admin-env returns no part of one and check-env-inventory
+     proves it by running the handler twice with different values and
+     requiring the two answers to be identical. -->
+<div class="page" id="page-env">
+  <div class="page-head">
+    <h1>Environment</h1>
+    <p class="sub">Which settings the live server has a value for. Values are never shown.</p>
+  </div>
+  <div id="envSummary" class="card" style="padding:1rem 1.25rem;margin-bottom:1rem">Loading...</div>
+  <div class="card" style="padding:0">
+    <table class="tbl" id="envTable">
+      <thead><tr><th>Name</th><th>Has a value</th><th>Needed</th><th>What it is for</th></tr></thead>
+      <tbody id="envRows"></tbody>
+    </table>
+  </div>
+</div>
 
 <div class="page" id="page-ux-views">
   <style>
@@ -6770,5 +6798,53 @@ function exportExplorerCSV() {
 }
 
 </script>
+<script>
+/**
+ * The Environment page.
+ *
+ * Reads /api/admin-env with the admin token this page already holds, which is
+ * why it lives here rather than being a URL to visit: opening that endpoint in
+ * a browser tab sends no Authorization header and answers 401, which is what
+ * Ellie saw.
+ */
+window.__initEnv = async function () {
+  var summary = document.getElementById('envSummary');
+  var rows = document.getElementById('envRows');
+  if (!summary || !rows) return;
+  summary.textContent = 'Loading...';
+  rows.innerHTML = '';
+  try {
+    var res = await fetch('/api/admin-env', { headers: window.adminAuthHeaders() });
+    if (!res.ok) {
+      summary.textContent = res.status === 401
+        ? 'Not signed in. Reload this page and enter the admin password.'
+        : ('Could not read the settings (' + res.status + ').');
+      return;
+    }
+    var body = await res.json();
+    var missing = (body.missingRequired || []).length;
+    summary.innerHTML = '<strong style="color:' + (missing ? '#C0392B' : '#1E8449') + '">'
+      + (missing ? 'Action needed' : 'All good') + '</strong> &nbsp; ' + body.summary
+      + (body.missingOptional && body.missingOptional.length
+          ? '<div style="margin-top:.5rem;color:#7A6753;font-size:.85rem">Optional and unset: '
+            + body.missingOptional.join(', ') + '</div>'
+          : '');
+    (body.vars || []).forEach(function (v) {
+      var tr = document.createElement('tr');
+      var alt = (v.alsoAccepts && v.alsoAccepts.length)
+        ? '<div style="color:#8A7A66;font-size:.78rem">or ' + v.alsoAccepts.join(', ') + '</div>' : '';
+      tr.innerHTML = '<td><code>' + v.name + '</code>' + alt + '</td>'
+        + '<td style="color:' + (v.set ? '#1E8449' : (v.required ? '#C0392B' : '#8A7A66')) + ';font-weight:700">'
+        + (v.set ? 'Yes' : 'No') + '</td>'
+        + '<td>' + (v.required ? 'Required' : 'Optional') + '</td>'
+        + '<td style="color:#7A6753">' + (v.note || '') + '</td>';
+      rows.appendChild(tr);
+    });
+  } catch (e) {
+    summary.textContent = 'Could not reach the server.';
+  }
+};
+</script>
+
 </body>
 </html>

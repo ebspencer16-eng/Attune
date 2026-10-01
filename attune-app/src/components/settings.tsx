@@ -436,6 +436,39 @@ function AppVersion() {
     ? Updates.createdAt.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
     : null;
 
+  /**
+   * ── CHECK NOW, RATHER THAN WAITING TWO LAUNCHES ─────────────────────────
+   * Ellie, three times across three days: "Not seeing any difference here on my
+   * phone. I've cleared the app 4 times", "I ran this in terminal but am seeing
+   * no change on my app", "That didn't reach my phone. What do I do to update
+   * the app I'm seeing?"
+   *
+   * Every time, the update was published and correct. expo-updates downloads in
+   * the background on one launch and runs it on the NEXT, so force-quitting and
+   * reopening once shows the old bundle, which looks exactly like the update
+   * never arriving. Clearing the app does not help and never could.
+   *
+   * This asks, downloads and reloads in one press, so there is nothing to time
+   * and nothing to count. It also says when there is nothing to get, which is
+   * the answer that was impossible to obtain before: "you are on the latest"
+   * and "it did not work" looked identical.
+   */
+  const [checking, setChecking] = useState<null | 'checking' | 'none' | 'failed'>(null);
+
+  const checkNow = async () => {
+    setChecking('checking');
+    try {
+      const found = await Updates.checkForUpdateAsync();
+      if (!found.isAvailable) { setChecking('none'); return; }
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    } catch {
+      /* Expo Go and a simulator dev build both throw here, and so does no
+         connection. One message: this is a button, not a diagnostic. */
+      setChecking('failed');
+    }
+  };
+
   return (
     <View style={{ marginTop: Spacing.xxl, alignItems: 'center' }}>
       <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>
@@ -444,6 +477,33 @@ function AppVersion() {
       <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: 2 }}>
         {published ? `Updated ${published}` : 'Development build'}
       </Text>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Check for an update now"
+        onPress={checkNow}
+        disabled={checking === 'checking'}
+        hitSlop={8}
+        style={{
+          marginTop: Spacing.md,
+          paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.lg,
+          borderRadius: Radius.pill, borderWidth: 1, borderColor: c.border,
+        }}>
+        <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: c.textStrong }}>
+          {checking === 'checking' ? 'Checking...' : 'Check for update'}
+        </Text>
+      </Pressable>
+
+      {checking === 'none' ? (
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: Spacing.xs }}>
+          You are on the latest version.
+        </Text>
+      ) : null}
+      {checking === 'failed' ? (
+        <Text style={{ ...Type.small, fontSize: 11, color: c.textMuted, marginTop: Spacing.xs }}>
+          Could not check. This only works in the TestFlight app.
+        </Text>
+      ) : null}
     </View>
   );
 }
