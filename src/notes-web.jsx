@@ -43,7 +43,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ANNOTATION_COLORS, DEFAULT_ANNOTATION_COLOR } from '../api/_lib/annotations.js';
 import { JOURNAL_ANCHOR, isJournalEntry } from '../api/_lib/tags.js';
 import { JOURNAL_COPY } from '../api/_lib/journal-copy.js';
-import { journalDayKey } from '../api/_lib/journal-use.js';
+import { NOTES_COPY } from '../api/_lib/notes-copy.js';
+import { wordOfTheDay } from '../api/_words.js';
+import { journalDayKey, journalStreak } from '../api/_lib/journal-use.js';
 
 const HFONT = "'Playfair Display', Georgia, serif";
 const BFONT = "'DM Sans', -apple-system, system-ui, sans-serif";
@@ -906,15 +908,14 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
           </button>
         ) : null}
 
-        <h1 style={{ fontFamily: HFONT, fontSize: '2rem', fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: '0.5rem' }}>
-          Notes
-        </h1>
-        <p style={{ fontSize: '0.85rem', color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: '2rem' }}>
-          {/* Not "saved to this device only" any more, because it is not true
-              any more: this is the same notebook the app writes to. */}
-          Everything you have marked in your results, and anything you have written,
-          on every device you sign in on.
-        </p>
+        {/* ── NO HEADING, NO DESCRIPTION ────────────────────────────────
+            Ellie, about the dashboard: "There should be NO additional prose as
+            you are reconstructing these pages. I have approved what's on the
+            app and this should mirror that."
+
+            The app's Notes tab opens on the word of the day. The heading and
+            the paragraph under it were written for this page and exist nowhere
+            in the app. */}
 
         {loading ? (
           <p style={{ fontSize: '0.85rem', color: C.muted, fontFamily: BFONT }}>Loading your notes.</p>
@@ -926,6 +927,116 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
 
         {!loading && !failed ? (
           <>
+            {/* ── THE APP'S NOTES TAB, IN ORDER ─────────────────────────
+                Ellie: "the notes page looks nothing like the app's."
+
+                It did not. The same data was here under a column of headings,
+                which is the same information and a different screen. This is
+                the app's composition: the word of the day in a card, two small
+                tiles for Recent and Shared with me, the journal button with the
+                streak beside it, then the tags, then everything else.
+
+                Every word comes from api/_lib/notes-copy.js, which is where the
+                app's own constants now live too, so neither page writes its own
+                version of a label she has already approved. */}
+            {(() => {
+              const w = wordOfTheDay();
+              if (!w) return null;
+              return (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{
+                    background: C.white, borderRadius: '18px 18px 0 0',
+                    padding: '1.25rem 1.4rem 1.5rem',
+                    display: 'flex', alignItems: 'flex-start', gap: '1rem',
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.78rem', color: C.muted, fontFamily: BFONT, marginBottom: '0.3rem' }}>
+                        {w.part}
+                      </div>
+                      <div style={{
+                        fontFamily: HFONT, fontSize: '2.1rem', fontWeight: 700,
+                        color: C.ink, lineHeight: 1.05, letterSpacing: '-0.02em',
+                      }}>
+                        {w.word}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Ellie's label, from the shared module. */}
+                  <div style={{
+                    background: '#F3EFE8', borderRadius: '0 0 18px 18px',
+                    padding: '1rem 1.4rem 1.25rem',
+                  }}>
+                    <div style={{
+                      fontFamily: BFONT, fontSize: '0.86rem', fontWeight: 700,
+                      fontStyle: 'italic', color: C.ink, marginBottom: '0.4rem',
+                    }}>
+                      {NOTES_COPY.wordInUse}
+                    </div>
+                    <div style={{ fontFamily: BFONT, fontSize: '0.92rem', color: C.text, lineHeight: 1.55 }}>
+                      {w.definition}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Two tiles, side by side, each a count and a way in. */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              {[
+                { key: 'mine', label: NOTES_COPY.recent, empty: NOTES_COPY.mineEmpty,
+                  rows: [...notes, ...marks] },
+                { key: 'shared', label: NOTES_COPY.sharedWithMe, empty: NOTES_COPY.sharedEmpty,
+                  rows: shared },
+              ].map((t) => (
+                <div key={t.key} style={{
+                  background: C.white, borderRadius: 18, padding: '1rem 1.1rem 0.9rem',
+                  display: 'flex', flexDirection: 'column', minHeight: 120,
+                }}>
+                  <div style={{
+                    fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+                    color: C.clay, fontWeight: 700, fontFamily: BFONT, marginBottom: '0.5rem',
+                  }}>
+                    {t.label}
+                  </div>
+                  <div style={{ flex: 1, fontSize: '0.84rem', color: C.text, fontFamily: BFONT, lineHeight: 1.45 }}>
+                    {t.rows.length
+                      ? (t.rows[0].title || t.rows[0].body || t.rows[0].anchor_context || '').slice(0, 70)
+                      : t.empty}
+                  </div>
+                  <div style={{ textAlign: 'right', color: C.accent, fontSize: '0.95rem' }} aria-hidden="true">&#8594;</div>
+                </div>
+              ))}
+            </div>
+
+            {/* The journal's own button, with the streak beside it. */}
+            <button
+              type="button"
+              onClick={() => { const el = document.getElementById('attune-journal'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
+                width: '100%', background: C.accent, border: 'none', borderRadius: 999,
+                padding: '0.85rem 1.25rem', cursor: 'pointer', color: C.white,
+                fontFamily: BFONT, fontSize: '0.95rem', fontWeight: 700, marginBottom: '1.75rem',
+              }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              {NOTES_COPY.writeEntry}
+              {/* ── ALWAYS DRAWN, INCLUDING AT NOUGHT ─────────────────────
+                  The app says so in its own comment: "0 day streak" is the
+                  thing that invites the first entry, so it is not hidden when
+                  there is nothing to count.
+
+                  `journalStreak` is in api/_lib/journal-use.js and the app
+                  imports its own copy from journal.tsx for the usual bundler
+                  reason. This reads the shared one directly, so the website is
+                  not a third implementation of the same count. */}
+              <span style={{ fontWeight: 400, opacity: 0.85, fontSize: '0.88rem' }}>
+                {`${journalStreak(entries.map((e) => journalDayKey(new Date(e.created_at))), journalDayKey())} day streak`}
+              </span>
+            </button>
+
             {/* Write one that is not attached to anything. */}
             <div style={{ marginBottom: '2.5rem' }}>
               <div style={eyebrow}>Write something</div>
@@ -980,8 +1091,11 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                 a heading. It is the same endpoint, the same anchor and the
                 same private write; the copy comes from api/_lib/journal-copy.js
                 so the two surfaces say one thing. */}
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={eyebrow}>Journal</div>
+            <div id="attune-journal" style={{ marginBottom: '2.5rem' }}>
+              <div style={eyebrow}>{NOTES_COPY.journalTitle}</div>
+              <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT, margin: '0 0 0.9rem' }}>
+                {NOTES_COPY.journalOpen}
+              </p>
               <div style={{ ...card, marginBottom: '1rem' }}>
                 <textarea
                   value={entryDraft}

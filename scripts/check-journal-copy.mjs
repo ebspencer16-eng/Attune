@@ -33,9 +33,11 @@
 
 import { readFileSync } from 'node:fs';
 import { JOURNAL_COPY } from '../api/_lib/journal-copy.js';
+import { NOTES_COPY } from '../api/_lib/notes-copy.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const APP = `${ROOT}attune-app/src/components/journal.tsx`;
+const NOTES_APP = `${ROOT}attune-app/src/app/notes.tsx`;
 const WEB = `${ROOT}src/notes-web.jsx`;
 
 /** Which named constant in the app holds which key of the shared map. */
@@ -45,6 +47,31 @@ const PAIRS = {
   noMatch: 'NO_MATCH',
   empty: 'EMPTY',
 };
+
+/**
+ * The Notes tab's own words, which live one file over.
+ *
+ * ── WHY THEY ARE HERE AND NOT IN A GATE OF THEIR OWN ──────────────────────
+ * This is the same promise about a different handful of strings, and CLAUDE.md
+ * is explicit that a second fixture mirroring an existing one is the failure
+ * rather than the fix: two gates testing the same thing slightly differently
+ * drift, and the weaker one wins because it is the one that still passes.
+ *
+ * `lockedApp` is in this list too. Its twin `lockedWeb` deliberately is not:
+ * the app locks the journal with the phone's passcode and the website with the
+ * account password, so one sentence for both would be wrong on one of them.
+ */
+const NOTES_PAIRS = {
+  recent: 'JUMP_BACK_IN',
+  sharedWithMe: 'SHARED_WITH_ME',
+  writeEntry: 'WRITE_ENTRY',
+  wordInUse: 'WORD_IN_USE',
+  journalTitle: 'JOURNAL_TITLE',
+  journalOpen: 'JOURNAL_OPEN',
+  mineEmpty: 'PEEK_MINE_EMPTY',
+  sharedEmpty: 'PEEK_SHARED_EMPTY',
+};
+const LOCK_PAIRS = { lockedApp: 'JOURNAL_LOCKED' };
 
 const fails = [];
 const app = readFileSync(APP, 'utf8');
@@ -76,9 +103,57 @@ for (const key of Object.keys(PAIRS)) {
   }
 }
 
+/**
+ * ── THE NOTES TAB'S WORDS, THE SAME WAY ───────────────────────────────────
+ * Read out of attune-app/src/app/notes.tsx by name, compared to the shared
+ * module, and required to be drawn by the website. The last part is what stops
+ * this becoming a list of strings nobody renders.
+ */
+const notesApp = readFileSync(NOTES_APP, 'utf8');
+const readConst = (src, name) => {
+  const m = src.match(new RegExp(`\\bconst ${name} = '((?:[^'\\\\]|\\\\.)*)'`));
+  return m ? m[1].replace(/\\'/g, "'") : null;
+};
+
+for (const [map, pairs, label] of [
+  [NOTES_COPY, NOTES_PAIRS, 'NOTES_COPY'],
+  [JOURNAL_COPY, LOCK_PAIRS, 'JOURNAL_COPY'],
+]) {
+  for (const [key, name] of Object.entries(pairs)) {
+    const got = readConst(notesApp, name);
+    if (got === null) {
+      fails.push(`attune-app/src/app/notes.tsx no longer declares ${name}, which holds the`
+        + ` app's copy of ${label}.${key}. Either the string moved, in which case point this`
+        + ' gate at where it went, or the app stopped saying it. Refusing to skip it: a gate'
+        + ' that has lost half its subject must not report success on the other half.');
+      continue;
+    }
+    if (got !== map[key]) {
+      fails.push(`${label}.${key} differs between the surfaces:\n`
+        + `      app:     ${JSON.stringify(got)}\n`
+        + `      shared:  ${JSON.stringify(map[key])}`);
+    }
+  }
+}
+
+for (const key of Object.keys(NOTES_PAIRS)) {
+  if (!web.includes(`NOTES_COPY.${key}`)) {
+    fails.push(`src/notes-web.jsx never draws NOTES_COPY.${key}. A string in the shared`
+      + ' module that one surface does not render is a string that will be reviewed and'
+      + ' never seen.');
+  }
+}
+if (!web.includes('JOURNAL_COPY.lockedWeb')) {
+  fails.push('src/notes-web.jsx never draws JOURNAL_COPY.lockedWeb, which is the only line'
+    + ' telling someone why their journal is shut.');
+}
+
 if (fails.length) {
   console.error('\n check-journal-copy: the journal says different things on the two surfaces.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
-console.log(`✓ check-journal-copy: ${Object.keys(PAIRS).length} strings, the same on the website and in the app, all four drawn on both.`);
+const total = Object.keys(PAIRS).length + Object.keys(NOTES_PAIRS).length
+  + Object.keys(LOCK_PAIRS).length;
+console.log(`✓ check-journal-copy: ${total} strings across the journal and the Notes tab,`
+  + ' the same on the website and in the app, every one of them drawn on both.');
