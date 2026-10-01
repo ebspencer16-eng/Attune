@@ -4,8 +4,8 @@
 
 | # | What I need from you |
 |--|--|
-| O512 | **Go to `www.attune-relationships.com/admin`, enter the admin password, then click Environment in the left sidebar.** That is the page, not a URL you can open directly: opening `/api/admin-env` in a tab sends no password, which is the unauthorized you saw. It lists every setting, whether it has a value, and flags any required one that is empty. |
-| O516 | **Two alert sentences need your eye.** Partner joined now says "Preston joined Attune" / "You can both start your exercises now". The website's journal lock says "Locked. Enter your password to read your entries." and the button says "Unlock". Mine, not yours. Rewrite any of them. |
+| O512 | **Go to `www.attune-relationships.com/admin`, enter the admin password, then click Environment in the left sidebar.** Opening `/api/admin-env` in a tab sends no password, which is the unauthorized you saw. |
+| O516 | **Three sentences are mine, not yours.** Partner joined says "Preston joined Attune" / "You can both start your exercises now". The web journal lock says "Locked. Enter your password to read your entries." Rewrite any of them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -17,18 +17,19 @@
 
 | # | Mine to build |
 |--|--|
-| O517 | Notes page does not look like the app's. The journal is locked now and the content is right, but the layout is still the website's. Next. |
 | O490 | Delete the .docx workbook. Waiting on the PDF working, which is waiting on O512. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O488 | **Settings now has a Check for update button.** One press asks, downloads and reloads, and says so if you are already current. The update mechanism was never broken: the app downloads on one launch and runs it on the next, which looks exactly like nothing arriving. |
-| O497 | Home fits the window and does not scroll, on a laptop as well; the jump when it loads is gone. Insights menu has the bullets, the indents, the icons and the cream panel, and its rows open the right pages instead of the storycards. Learn has the app's In Practice peek. All four checked against screenshots at three window sizes. |
-| O514 | Partner joined is an alert row on both the app and the site. The app has no welcome back notice and is not getting one. |
-| O515 | Site uses the app's In Practice peek, measured from the sheet's own head rather than a guessed number. |
-| O510 | Methodology, everywhere. |
+| O488 | **Settings has a Check for update button.** One press asks, downloads and reloads, and tells you if you are already current. You need one more manual update to get the button itself. |
+| O497 | Home fits the window and does not scroll on a laptop; no more jump on load. Insights has the bullets, indents, icons and cream panel, and its rows open the right pages. Learn has the app's In Practice peek. |
+| O517 | Notes is the app's Notes tab: word of the day, Recent and Shared with me tiles, the journal button with the streak, then the entries. The journal is behind your account password. |
+| O514 | Partner joined is an alert row on both. No welcome back notice anywhere. |
+| O510 | Methodology, everywhere, and the address is `/practice/methodology` to match. Say if you wanted the address left alone. |
+| O518 | **Four cards on the home screen went nowhere and now do.** Profile setup, the new-publication card and both feedback cards all opened Insights on the site; the budget and checklist cards opened Safari from the app instead of the in-app tool. |
+| O519 | **The post-results survey was unreachable and I broke it.** Removing it from Home removed its only trigger, so five of the admin's feedback charts had stopped collecting. It runs after results now. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
