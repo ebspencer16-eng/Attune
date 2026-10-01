@@ -215,6 +215,37 @@ for (const f of CARD_SITES) {
 }
 
 /**
+ * ── ONE BOOK, ONE CITATION ────────────────────────────────────────────────
+ * The Seven Principles for Making Marriage Work was cited two ways at once:
+ * "John Gottman, Harmony 2002" under nine quotations and "John Gottman and
+ * others, Harmony 2015" under one. Both were true of some edition, and a reader
+ * meeting the same book under two bylines on two days has no way to know that.
+ *
+ * It happened because each quotation took its citation from whichever volume
+ * Google surfaced when that quotation was added, and Google surfaces different
+ * editions on different days. The quotation check already stopped pinning to a
+ * volume id for that reason; this is the same lesson one layer up.
+ *
+ * Found by a sweep rather than by a gate, which is why it is a gate now.
+ */
+{
+  const byWork = new Map();
+  for (const i of INSIGHTS) {
+    if (i.kind !== 'quote' || !i.volumeId) continue;
+    const cite = `${i.author} | ${i.edition}`;
+    if (!byWork.has(i.work)) byWork.set(i.work, new Map());
+    byWork.get(i.work).set(cite, (byWork.get(i.work).get(cite) || 0) + 1);
+  }
+  for (const [work, cites] of byWork) {
+    if (cites.size === 1) continue;
+    const shown = [...cites].map(([c, n]) => `${c} (${n})`).join('  //  ');
+    fails.push(`"${work}" is cited ${cites.size} different ways: ${shown}. Pick the`
+      + ' edition the quotations should be attributed to and use it for all of them.'
+      + ' A reader meeting one book under two bylines cannot tell which is right.');
+  }
+}
+
+/**
  * ── THE SUBJECT CHANGED, SO THIS GUARD DID ────────────────────────────────
  * It used to require some of each kind, on the grounds that with none of one
  * kind the gate proved nothing about telling them apart. That was right while
