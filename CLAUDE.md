@@ -235,6 +235,13 @@ reported them as "very close to orphaned", and they were put back into every
 nav and footer on the strength of that framing. A deliberate retirement was
 undone because the audit measured reachability and never asked intent.
 
+All three are gone now: 1316f378 deleted how-it-works.html, couple-types.html
+and the `/methodology` alias that pointed at the first of them, so a 404 on any
+of the three is the current and correct answer. That sentence above described
+`/methodology` as a live page for weeks after it stopped being one, which is
+this file doing the thing it warns about four paragraphs down: a stale map is
+worse than none, because it is the first thing every session reads.
+
 An audit that only measures the current state cannot tell a gap from a
 decision. When something is missing, the question is not just "should this be
 here" but "was it taken out, and by whom, and why".
