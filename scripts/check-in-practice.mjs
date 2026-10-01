@@ -111,8 +111,18 @@ for (const card of onPage) {
  * article has been written about twice.
  */
 const routes = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+/**
+ * The shelf pages, which are not articles.
+ *
+ * These are the addresses, not the category slugs. The two diverge on purpose
+ * for the fourth shelf: its slug is still `couple-types`, because that string
+ * is stored on post rows and renaming it would be a data migration, while its
+ * address is /practice/methodology, because Ellie asked for the name and then,
+ * about the other shelf, "Change the address and change all of the existing
+ * links, I don't want messy redirects."
+ */
 const CATEGORY_PAGES = new Set(['all', 'getting-started', 'conflict-and-repair',
-  'understanding-each-other', 'couple-types']);
+  'understanding-each-other', 'methodology']);
 const articles = routes.rewrites
   .map((r) => r.source)
   .filter((x) => x.startsWith('/practice/'))

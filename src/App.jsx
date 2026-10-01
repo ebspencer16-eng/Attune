@@ -3031,46 +3031,19 @@ function GiftSignupForm({ myName, theirName, theirEmail, pkg, orderId, onCreateA
 
 // ── PROFILE SETUP TILE ────────────────────────────────────────────────────────
 // Shown on dashboard until user completes profile setup. Per-person.
-function ProfileSetupTile({ account, onSetup, onDismiss }) {
-  // Invitees (Partner B) were already invited by the purchaser, and their name
-  // and pronouns may already be set from the purchaser's setup. Only surface
-  // steps that are genuinely missing, and never ask an invitee to invite a
-  // partner.
-  const isInvitee = !!account?.joinedViaInvite;
-  const allSteps = [
-    { label: "Set your name & pronouns", done: !!(account?.name && account?.pronouns) },
-    { label: "Add your partner's name", done: !!(account?.partnerName) },
-    ...(isInvitee ? [] : [{ label: account?.partnerEmail ? "Partner invited \u2713" : "Invite your partner", done: !!(account?.partnerEmail) }]),
-  ];
-  const steps = allSteps.filter(s => !s.done);
-  // Nothing left to do — render nothing (the dashboard gate also guards this).
-  if (steps.length === 0) return null;
-
-  return (
-    <div style={{ background: 'white', border: '1.5px solid #E8DDD0', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', position: 'relative' }}>
-      <button onClick={onDismiss} aria-label="Dismiss" title="Dismiss" style={{ position: 'absolute', top: 12, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#7A6753', fontSize: '1rem', lineHeight: 1 }}>✕</button>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#E8673A20,#1B5FE820)', border: '1.5px solid #E8DDD0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.1rem' }}>✦</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.25rem', fontFamily: "'DM Sans', sans-serif" }}>Before you start your exercises</div>
-          <div style={{ fontSize: '0.75rem', color: '#7A6753', marginBottom: '1rem', lineHeight: 1.55 }}>Complete your profile so your results are personalized to you.</div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-            {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: s.done ? '#059669' : '#7A6753', background: s.done ? '#ECFDF5' : '#F5F0EC', borderRadius: 99, padding: '0.25rem 0.7rem' }}>
-                <span>{s.done ? '✓' : '·'}</span>
-                <span>{s.label}</span>
-              </div>
-            ))}
-          </div>
-          <button onClick={onSetup} style={{ background: 'linear-gradient(135deg,#E8673A,#1B5FE8)', color: 'white', border: 'none', borderRadius: 9, padding: '0.55rem 1.25rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.04em' }}>
-            Complete setup →
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * ── ProfileSetupTile WAS HERE ─────────────────────────────────────────────
+ * A checklist of the three setup steps, drawn on the dashboard's Home. Ellie
+ * asked for Home to be four quick tiles and two action prompts and nothing
+ * else, so it came out, and nothing else ever rendered it: it sat here fully
+ * written and unreachable, which is the shape d54d7c2 deleted 990 lines of.
+ *
+ * Setting up a profile is not lost with it. The priority engine raises a
+ * "Finish setting up your profile" card at the top of its order, and that card
+ * now resolves to the account page, which carries the name, the pronouns, the
+ * partner's name and the control that edits them. Before this week it resolved
+ * to nothing and opened the Insights tab; see webTargetFor.
+ */
 // ── PORTRAIT SETUP MODAL ─────────────────────────────────────────────────────
 // Minimal modal for setting up couple portrait (avatars + initials).
 function PortraitSetup({ userName, partnerName, existing, onSave, onClose }) {
