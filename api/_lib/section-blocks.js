@@ -135,6 +135,8 @@ export const SECTION_BLOCKS = {
    * list of six articles elsewhere, against the twelve the app is served.
    */
   'app-learn': [
+    { id: 'tools', note: 'The three tools, in the catalogue\'s order, as compact tiles.' },
+    { id: 'insight', note: 'One insight a day, on the ground rather than in a card.' },
     { id: 'reading', note: 'Every In Practice article, from the shared list.' },
   ],
 

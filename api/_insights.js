@@ -569,6 +569,26 @@ export const INSIGHTS = [
  */
 export const INSIGHT_EYEBROW = 'Insight of the day';
 
+/**
+ * The text of a shared insight.
+ *
+ * ── WHY IT IS HERE AND NOT WRITTEN OUT TWICE ──────────────────────────────
+ * The app builds this in attune-app/src/api/client.ts, because an Expo project
+ * cannot import from api/. That is the wall this repo keeps hitting, and the
+ * answer is the same as everywhere else: the rule lives in one place, the other
+ * side keeps a copy, and a gate runs both and compares the answers.
+ * check-insight-share.mjs does that.
+ *
+ * The blank line matters. It is what separates the quotation from the person
+ * who said it when the text lands in a message, and the two surfaces disagreeing
+ * about it would show up as one of them attributing a quotation on the same
+ * line as the quotation.
+ */
+export function insightShareText(r) {
+  const cite = String(r?.source || '').trim();
+  return cite ? `${r.body}\n\n${cite}` : r.body;
+}
+
 /** "Author, Work" for a page; "Author, Work (publisher year)" for a book. */
 function citation(pick) {
   const who = pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;

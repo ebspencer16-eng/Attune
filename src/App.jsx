@@ -35,11 +35,11 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
 import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
-import { insightOfTheDay, INSIGHT_EYEBROW } from "../api/_insights.js";
+import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insights.js";
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE } from "../api/_in-practice.js";
 /* The colour each of the app's tabs is painted in. */
-import { tabGradientCss } from "../api/_lib/section-grounds.js";
+import { tabGradientCss, tabGroundTail } from "../api/_lib/section-grounds.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -2272,6 +2272,67 @@ function GrowSquare({ color = "#9B5DE5", icon, title, sub, cta, onClick, href, d
 }
 
 // Icons for the Step 3 squares.
+/**
+ * The four icons on the app's home quick links, redrawn for the web.
+ *
+ * ── WHY THEY ARE DRAWN AND NOT IMPORTED ───────────────────────────────────
+ * The app uses SF Symbols: `brain`, `sparkles` and `book.closed`, plus a
+ * signpost it draws itself out of views because SF Symbols has no sign. None of
+ * those exist in a browser, so matching them means drawing them.
+ *
+ * Ellie, about the squares they sit in: "Icons in the 4 smaller tiles should be
+ * larger, centered, and middle-aligned in the space above the text", and "I
+ * want the icon outlines to be grey in the 4 tiles on the homepage." So these
+ * are outlines at one weight in one grey, sized to the app's 30 points, and the
+ * square around them is the app's: three per cent of the ink, barely there.
+ *
+ * The signpost is Ellie's second version of it, by name: "one of those street
+ * signs where there are arrow signs on either side of the post", then "same
+ * thing, but version 2.0." Solid plates with a pointed end, because at this
+ * size an outline cannot carry a point and reads as two bars.
+ */
+const QUICK_INK = "#8F8071";
+
+const QuickIcons = {
+  /* Two lobes with a seam down the middle and a fold in each, which is what
+     reads as a brain at thirty points. The first version was one closed path
+     per side and drew as an oval with a line through it. */
+  brain: (c = QUICK_INK) => (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 5.2a2.6 2.6 0 0 0-4.6-.4 2.4 2.4 0 0 0-2.7 3 2.5 2.5 0 0 0-.5 3.9 2.5 2.5 0 0 0 .9 3.8A2.6 2.6 0 0 0 8 19.4a2.5 2.5 0 0 0 4-1.3Z" />
+      <path d="M12 5.2a2.6 2.6 0 0 1 4.6-.4 2.4 2.4 0 0 1 2.7 3 2.5 2.5 0 0 1 .5 3.9 2.5 2.5 0 0 1-.9 3.8A2.6 2.6 0 0 1 16 19.4a2.5 2.5 0 0 1-4-1.3Z" />
+      <path d="M12 5.2v12.9" />
+      <path d="M9.4 8.3c-1 .2-1.6 1-1.6 2M14.6 8.3c1 .2 1.6 1 1.6 2M9 13.6c-.9.2-1.4.8-1.5 1.7M15 13.6c.9.2 1.4.8 1.5 1.7" />
+    </svg>
+  ),
+  /* Two plates with pointed ends on a post. The points are what make them
+     signs rather than labels. */
+  /* The post runs the full height with a plate on each side pointing opposite
+     ways, which is the shape that says "sign" rather than "flag". The first
+     version had both plates starting at the post's centre line and the upper
+     one read as a single flag. */
+  signpost: (c = QUICK_INK) => (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 2.8v18.4" stroke={c} strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M12.6 5.4h5.6l2.1 2.3-2.1 2.3h-5.6z" fill={c} />
+      <path d="M11.4 12.4H5.8L3.7 14.7l2.1 2.3h5.6z" fill={c} />
+    </svg>
+  ),
+  sparkles: (c = QUICK_INK) => (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3.2l1.7 4.6 4.6 1.7-4.6 1.7L12 15.8l-1.7-4.6L5.7 9.5l4.6-1.7z" />
+      <path d="M18.5 15.2l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z" />
+      <path d="M5.6 15.6l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z" />
+    </svg>
+  ),
+  book: (c = QUICK_INK) => (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H18a1 1 0 0 1 1 1v14.5a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 1 5 18V4.5Z" />
+      <path d="M5 16.5A1.5 1.5 0 0 1 6.5 15H19" />
+    </svg>
+  ),
+};
+
 const GrowIcons = {
   workbook: c => (
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -3376,14 +3437,155 @@ function DashTabs({ active, onChange, isMobile }) {
  * The greeting and the two cards come from /api/home, the same payload and the
  * same priority engine the app draws. See homeFeed above.
  */
-function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
+/**
+ * The app's Learn tab, lower half: the sheet that lifts over the ground.
+ *
+ * ── WHY IT IS SHAPED LIKE THIS ────────────────────────────────────────────
+ * Ellie: "Can the learn page have the layout/design of the image with the
+ * books, with a gradient page bg that lists the resources and the insight, then
+ * what looks like a tab pulling up over the page down below with the in
+ * practice articles?"
+ *
+ * So the reading is not a section of the page, it is a panel coming up over it:
+ * a large radius on the top two corners only, full width, and no bottom at all,
+ * because in the reference it runs off the end of the screen rather than
+ * finishing. The grab line is what says it lifts.
+ *
+ * Her words for the inside of it, which the app follows and this now does too:
+ * the two pills are Saved and Read, the heading is In Practice, the line under
+ * it is Featured publications, and "Featured publications should be grey tiles".
+ * The search box says "Search articles" in grey that disappears once you type.
+ *
+ * ── WHAT WAS HERE BEFORE ──────────────────────────────────────────────────
+ * A small caps eyebrow reading "From In Practice" and a grid of translucent
+ * tiles on the blue. Same twelve articles, so the inventory check passed, and
+ * nothing about it looked like the app. Ellie: "neither is content or layout."
+ */
+function AppLearnReading({ articles, isMobile, savedCount, readCount }) {
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const shown = q
+    ? articles.filter((a) => `${a.title} ${a.categoryLabel}`.toLowerCase().includes(q))
+    : articles;
+
+  const pill = (label, n) => (
+    <span style={{
+      background: "#F2EDE6", borderRadius: 999, padding: "0.4rem 0.85rem",
+      fontFamily: BFONT, fontSize: "0.78rem", color: "#6B5B4A", whiteSpace: "nowrap",
+    }}>
+      {label} <span style={{ color: "#A8937B", fontWeight: 700 }}>{n}</span>
+    </span>
+  );
+
+  return (
+    /* block: app-learn/reading */
+    <div data-block="app-learn/reading" style={{
+      marginTop: isMobile ? "2rem" : "2.5rem",
+      marginLeft: isMobile ? "-1.25rem" : "-2rem",
+      marginRight: isMobile ? "-1.25rem" : "-2rem",
+      background: "white", borderRadius: "34px 34px 0 0",
+      padding: isMobile ? "0.9rem 1.25rem 3rem" : "1rem 2rem 3.5rem",
+      boxShadow: "0 -10px 30px rgba(14,11,7,0.10)",
+    }}>
+      {/* Ellie: "Add some shading on the learn page bottom tile." The grab line
+          above it is what makes the panel read as lifted rather than as a box. */}
+      <div style={{
+        width: 46, height: 4, borderRadius: 2, background: "#E8673A",
+        margin: "0 auto 1.1rem",
+      }} />
+
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.1rem" }}>
+        {pill("Saved", savedCount)}
+        {pill("Read", readCount)}
+      </div>
+
+      <h2 style={{
+        fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
+        fontSize: isMobile ? "2rem" : "2.4rem", lineHeight: 1.05, letterSpacing: "-0.02em",
+      }}>
+        In Practice
+      </h2>
+      <p style={{
+        fontFamily: BFONT, fontSize: "0.95rem", color: "#8A7A66",
+        margin: "0.35rem 0 1.1rem",
+      }}>
+        Featured publications
+      </p>
+
+      {/* Ellie: "Search articles bar should be bottom aligned with the..." and
+          "with 'Search articles' in grey text that disappears once you type." */}
+      <label style={{ display: "block", marginBottom: "1.1rem" }}>
+        <span style={{ position: "absolute", left: -9999 }}>Search articles</span>
+        <span style={{
+          display: "flex", alignItems: "center", gap: "0.55rem",
+          background: "#F5F1EA", borderRadius: 999,
+          padding: isMobile ? "0.6rem 1rem" : "0.7rem 1.1rem",
+        }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
+            strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
+          </svg>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search articles"
+            style={{
+              border: "none", background: "transparent", outline: "none",
+              fontFamily: BFONT, fontSize: "0.9rem", color: C.ink, width: "100%",
+            }}
+          />
+        </span>
+      </label>
+
+      <div style={{
+        display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)",
+        gap: "0.6rem",
+      }}>
+        {shown.map((a) => (
+          <a key={a.slug} href={a.path} style={{
+            display: "block", background: "#F2EDE6", borderRadius: 14,
+            padding: "0.85rem 0.9rem", textDecoration: "none", position: "relative",
+            minHeight: 104,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+              style={{ position: "absolute", top: 10, right: 10 }}>
+              <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+            </svg>
+            <span style={{
+              display: "block", fontFamily: BFONT, fontSize: "0.86rem",
+              lineHeight: 1.3, color: C.ink, paddingRight: "1.1rem",
+            }}>
+              {a.title}
+            </span>
+          </a>
+        ))}
+      </div>
+      {!shown.length && (
+        <p style={{ fontFamily: BFONT, fontSize: "0.85rem", color: "#8A7A66", marginTop: "1rem" }}>
+          Nothing matches that.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
   const greeting = feed?.greeting || `Good to see you, ${userName}`;
   const cards = [feed?.primary, feed?.secondary].filter(Boolean);
+  /**
+   * The app's four, in the app's order, with the app's labels.
+   *
+   * "Action plans" carries its own line break for the reason the app gives:
+   * Ellie asked for it "split into 2 lines to match the other quick access
+   * tiles", and at this width it is the only one of the four that would sit on
+   * a single line if left to wrap.
+   */
   const QUICK = [
-    { id: "insight", label: "Insight of the day" },
-    { id: "plan", label: "Action plans" },
-    { id: "highlights", label: "Results highlights" },
-    { id: "journal", label: "Relationship journal" },
+    { id: "insight", label: "Insight of the day", icon: QuickIcons.brain },
+    { id: "plan", label: "Action\nplans", icon: QuickIcons.signpost },
+    { id: "highlights", label: "Results highlights", icon: QuickIcons.sparkles },
+    { id: "journal", label: "Relationship journal", icon: QuickIcons.book },
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "1.5rem" : "2rem" }}>
@@ -3395,41 +3597,80 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
         {greeting}
       </h1>
 
+      {/* ── FOUR ACROSS, BARELY THERE, ICON ABOVE THE NAME ─────────────────
+          Ellie, about these squares in the app: "the four boxes should be
+          barely visible, and have barely any space between them... The text
+          should be inside of the squares", then "Icons in the 4 smaller tiles
+          should be larger, centered, and middle-aligned in the space above the
+          text. Text in 4 boxes should be split to two lines and should be
+          centered in the tile and moved up slightly."
+
+          This was a 2x2 grid of text with no icons at all on a phone-width
+          screen, which is why she said the layout was not the same. It is now
+          the app's: one row of four whatever the width, the app's own fill of
+          three per cent ink, its radius, its aspect, the icon centred in
+          everything above the label and the label centred under it on two
+          lines at 78 per cent of the square. */}
       {/* block: app-home/quick-links */}
       <div data-block="app-home/quick-links" style={{
-        display: "grid",
-        gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
-        gap: isMobile ? "0.6rem" : "0.85rem",
+        display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2,
       }}>
         {QUICK.map((q) => (
           <button key={q.id} onClick={() => onQuick(q.id)}
+            aria-label={q.label.replace("\n", " ")}
             style={{
-              background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.75)",
-              borderRadius: 16, padding: isMobile ? "0.9rem" : "1.1rem",
-              textAlign: "left", cursor: "pointer", fontFamily: BFONT,
-              fontSize: isMobile ? "0.74rem" : "0.8rem", color: "#8F8071",
-              lineHeight: 1.3, minHeight: isMobile ? 84 : 104,
-              display: "flex", alignItems: "flex-end",
+              background: "rgba(14,11,7,0.045)", border: "none",
+              borderRadius: 14, aspectRatio: "0.92",
+              padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
+              fontFamily: BFONT, display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "flex-end",
             }}>
-            {q.label}
+            <span style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {q.icon()}
+            </span>
+            <span style={{
+              fontSize: 11, lineHeight: "14px", color: C.muted,
+              textAlign: "center", width: "78%", whiteSpace: "pre-line",
+            }}>
+              {q.label}
+            </span>
           </button>
         ))}
       </div>
 
-      {/* ── THE CREAM PANEL ────────────────────────────────────────────────
+      {/* ── THE CREAM TILE ─────────────────────────────────────────────────
           Rounded at the top and running off the bottom of the page, which is
-          how the app draws it: the panel is where the page ends rather than a
-          card floating on it. */}
+          how the app draws it: the tile is where the page ends rather than a
+          card floating on it.
+
+          ── EVERYTHING BELOW THE LINKS IS ON IT ──────────────────────────
+          Ellie: "neither is content or layout." In the app, Home is a ground
+          with one cream tile, and everything under the greeting and the four
+          links lives inside it: the alerts, the two prompt cards, all of it.
+          Here the tile held only the two cards and every other block on the
+          dashboard sat straight on the ground, which nobody noticed while the
+          ground was a flat colour. Once it was painted the way the app paints
+          it, the alerts and the step list were reading against indigo.
+
+          So the rest of the Home tab comes in as children and sits on the tile.
+          It runs full width, which is why the side margins are taken back off:
+          the app's tile goes edge to edge. */}
       {/* block: app-home/prompts */}
       <div data-block="app-home/prompts" style={{
         background: C.cream, borderRadius: "22px 22px 0 0",
-        padding: isMobile ? "1.25rem 1rem 2rem" : "1.75rem 1.5rem 2.5rem",
+        marginLeft: isMobile ? "-1.25rem" : "-2rem",
+        marginRight: isMobile ? "-1.25rem" : "-2rem",
+        padding: isMobile ? "1.5rem 1.25rem 3rem" : "2rem 2rem 3.5rem",
         marginTop: "auto",
       }}>
+        {/* Two across, on a phone as well. The app puts them side by side at
+            390 points wide and stacking them here was the layout differing from
+            the app on the one screen Ellie looks at most. */}
         <div style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gap: isMobile ? "0.85rem" : "1.1rem",
+          display: "grid", gridTemplateColumns: "1fr 1fr",
+          gap: isMobile ? "0.65rem" : "1.1rem",
         }}>
           {cards.map((card) => (
             <button key={card.id} onClick={() => onCard(card)}
@@ -3456,6 +3697,15 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
             </button>
           ))}
         </div>
+        {children ? (
+          <div style={{
+            display: "flex", flexDirection: "column",
+            gap: isMobile ? "1rem" : "1.25rem",
+            marginTop: isMobile ? "1.25rem" : "1.5rem",
+          }}>
+            {children}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -14654,7 +14904,25 @@ export default function App() {
               <div style={{
                 flex: 1,
                 padding: isMobile ? "1.5rem 1.25rem 0" : "2.5rem 2rem 0",
+                /* ── ONE SCREEN OF GROUND, THE WAY THE APP HAS IT ──────
+                    The gradient is painted at one viewport height and the rest
+                    of the page is the colour it ends on. Stretched over the
+                    whole content height instead, the home ground held cream for
+                    58 per cent of a long page and the indigo never appeared
+                    above the fold: the same three colours, and not the same
+                    screen. See tabGroundTail. */
                 background: dashTab === "notes" ? "#FBF8F3" : tabGradientCss(dashTab),
+                backgroundColor: dashTab === "notes" ? "#FBF8F3" : tabGroundTail(dashTab),
+                backgroundSize: "100% 100vh",
+                backgroundRepeat: "no-repeat",
+                /* Pinned to the viewport, not to this block. Sized from the
+                    block's own top, the gradient started below the banner and
+                    finished off the bottom of the screen, so the indigo was
+                    never visible at all: the fix for a ground stretched over the
+                    content height, making the same mistake one step smaller.
+                    Fixed is what makes it one screen, which is what it is on a
+                    phone. */
+                backgroundAttachment: "fixed",
                 display: "flex", flexDirection: "column",
               }}>
                 <div style={{ maxWidth: 680, margin: "0 auto" }}>
@@ -14680,7 +14948,8 @@ export default function App() {
                       if (/results/.test(link)) { setView("results"); return; }
                       setDashTab("insights");
                     }}
-                  />
+                  >
+
 
                 {/* Beta tester tile — thank-you + feedback survey CTA (merged; replaces the separate survey prompt for beta testers) */}
                 {isBetaTester && (
@@ -14863,6 +15132,61 @@ export default function App() {
                     tab bar, and a painted block in the middle of the step
                     headers was neither that nor an improvement. See TASKS.md
                     O497. */}
+
+                  {/* ── MOVED IN, NOT COPIED ──────────────────────────────
+                      This was a second `dashTab === "home"` block further down
+                      the file, a sibling of the one above rather than part of
+                      it. Two blocks under one condition is the duplication this
+                      project keeps paying for, and it showed: once Home gained
+                      a cream tile the way the app has one, this half stayed
+                      outside it and went on reading against the indigo.
+
+                      It is the same JSX, moved rather than rewritten. */}
+
+                <div style={{ marginBottom: "2.5rem" }}>
+                  {/* No numeral: the results card is the app's, on Home, and the
+                      app does not number its screens. */}
+                  <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
+                    style={{ width: "100%", marginBottom: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
+                    {bothDone ? "Review results →" : "Review results"}
+                  </button>
+                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0 0 0.85rem", fontFamily: BFONT }}>{WAITING.DASHBOARD}</p>}
+                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
+                    {[
+                      { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
+                      { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
+                      { label: "Communication results", section: "comm-overview", color: "#E8673A" },
+                      { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
+                      ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
+                      ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
+                      ...(pkg.hasConflict ? [{ label: "Conflict patterns results", section: "conflict-overview", color: "#1B5FE8" }] : []),
+                      // Restored: this is the closing section of the results
+                      // experience and had dropped out of the contents.
+                      { label: "What comes next", section: "what-comes-next", color: "#E8673A" },
+                    ].map((r, i, arr) => (
+                      <div key={r.section} onClick={bothDone ? () => {
+                          if (r.section === "highlights") {
+                            // Open the full standalone storycard swipe experience
+                            // (highlightsSeen=false), not the degraded inline version.
+                            setActiveResult("overview"); setHighlightsSeen(false);
+                          } else {
+                            setActiveResult(r.section); setHighlightsSeen(true);
+                          }
+                          setView("results");
+                        } : undefined}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: bothDone ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
+                        onMouseEnter={bothDone ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
+                        onMouseLeave={bothDone ? (e => e.currentTarget.style.background = "white") : undefined}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.7rem", fontSize: "0.84rem", color: bothDone ? "#0E0B07" : "#A8997F", fontFamily: BFONT, fontWeight: 500 }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: bothDone ? r.color : "#D4C0A8" }} />
+                          {r.label}
+                        </span>
+                        <span style={{ fontSize: "0.85rem", color: bothDone ? "#C8BFB4" : "#D4C0A8", flexShrink: 0 }}>{bothDone ? "→" : ""}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                  </AppHome>
                   </>
                 )}
                 {dashTab === "insights" && (
@@ -14984,51 +15308,7 @@ export default function App() {
                 )}
 
                 {/* ════ STEP 2 · REVIEW YOUR RESULTS ════ */}
-                {dashTab === "home" && (
-                <div style={{ marginBottom: "2.5rem" }}>
-                  {/* No numeral: the results card is the app's, on Home, and the
-                      app does not number its screens. */}
-                  <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
-                    style={{ width: "100%", marginBottom: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
-                    {bothDone ? "Review results →" : "Review results"}
-                  </button>
-                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0 0 0.85rem", fontFamily: BFONT }}>{WAITING.DASHBOARD}</p>}
-                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
-                    {[
-                      { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
-                      { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
-                      { label: "Communication results", section: "comm-overview", color: "#E8673A" },
-                      { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
-                      ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
-                      ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
-                      ...(pkg.hasConflict ? [{ label: "Conflict patterns results", section: "conflict-overview", color: "#1B5FE8" }] : []),
-                      // Restored: this is the closing section of the results
-                      // experience and had dropped out of the contents.
-                      { label: "What comes next", section: "what-comes-next", color: "#E8673A" },
-                    ].map((r, i, arr) => (
-                      <div key={r.section} onClick={bothDone ? () => {
-                          if (r.section === "highlights") {
-                            // Open the full standalone storycard swipe experience
-                            // (highlightsSeen=false), not the degraded inline version.
-                            setActiveResult("overview"); setHighlightsSeen(false);
-                          } else {
-                            setActiveResult(r.section); setHighlightsSeen(true);
-                          }
-                          setView("results");
-                        } : undefined}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: bothDone ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
-                        onMouseEnter={bothDone ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
-                        onMouseLeave={bothDone ? (e => e.currentTarget.style.background = "white") : undefined}>
-                        <span style={{ display: "flex", alignItems: "center", gap: "0.7rem", fontSize: "0.84rem", color: bothDone ? "#0E0B07" : "#A8997F", fontFamily: BFONT, fontWeight: 500 }}>
-                          <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: bothDone ? r.color : "#D4C0A8" }} />
-                          {r.label}
-                        </span>
-                        <span style={{ fontSize: "0.85rem", color: bothDone ? "#C8BFB4" : "#D4C0A8", flexShrink: 0 }}>{bothDone ? "→" : ""}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                )}
+                
 
                 {/* ════ STEP 3 · CONTINUE GROWING TOGETHER ════ */}
                 {/* Uniform square cards. Owned tools first; add-ons in their own
@@ -15048,59 +15328,70 @@ export default function App() {
                   {/* The app's Learn tab opens straight onto the tiles, with no
                       heading over them. */}
 
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))", gap: "0.85rem" }}>
-                    {hasWorkbookOrder && (
-                      <GrowSquare color="#9B5DE5" icon={GrowIcons.workbook(workbookReady ? "#9B5DE5" : "#B3A693")}
-                        title={workbookReady ? "Your workbook is ready" : "Your personalized workbook"}
-                        sub={workbookReady ? "Exercises and prompts built from your answers." : (bothDone ? WORKBOOK_COPY.generating : WAITING.DASHBOARD)}
-                        cta={workbookBuilding ? "Preparing…" : (workbookReady ? "Download →" : (bothDone ? "Generating…" : "Locked"))}
-                        onClick={workbookReady ? downloadWorkbook : undefined}
-                        disabled={!workbookReady} />
-                    )}
-                    {pkg.hasBudget && (
-                      <GrowSquare color="#A66534" icon={GrowIcons.budget("#A66534")}
-                        title="Shared Budget Builder"
-                        sub="Build a financial plan together from your results."
-                        cta="Open →" onClick={() => setView("budget")} />
-                    )}
-                    {pkg.hasChecklist && (
-                      <GrowSquare color="#A66534" icon={GrowIcons.checklist("#A66534")}
-                        title={CHECKLIST_COPY.title}
-                        sub="A practical guide to starting your life together."
-                        cta="Open →" onClick={() => setView("checklist")} />
-                    )}
-                    <GrowSquare color="#9B5DE5" icon={GrowIcons.guide("#9B5DE5")}
-                      title="How to review your results together"
-                      sub="A simple structure for the first conversation."
-                      cta="Read →" href="/practice/how-to-review-your-results-together?from=app" />
-                    <GrowSquare color="#E8673A" icon={GrowIcons.talk("#E8673A")}
-                      title="How to start a hard conversation"
-                      sub="Opening lines for the topics that matter most."
-                      cta="Read →" href="/practice/how-to-start-a-hard-conversation?from=app" />
-                    <GrowSquare color="#A66534" icon={GrowIcons.library("#A66534")}
-                      title="The full library"
-                      sub="Guides on communication, conflict, and growing together."
-                      cta="Explore →" href="/practice?from=app" />
-                    {/* ── NOTES, WHICH NOTHING LINKED TO ───────────────────
-                        Ellie: "Ensure that site mirrors app notes
-                        functionality. Maybe section 3 of dashboard on site
-                        could have the content from learn and notes on the
-                        app?"
+                  {/* ── THE APP'S THREE TOOL TILES ────────────────────────
+                      Ellie: "On learn, reorder the resource tiles. First should
+                      be personalized workbook, next build a budget, next
+                      'Merging lives checklist' if that fits." She said that
+                      about the app, and the app reads the order from
+                      `CATALOGUE`, so this reads it from there too rather than
+                      writing out three names in an order that would drift.
 
-                        The Notes page has existed here for a while and the
-                        only way to reach it was to type ?view=notes into the
-                        address bar: nothing on any screen set the view. So the
-                        app had a Notes tab and the website had a Notes page
-                        nobody could find, which is the same product disagreeing
-                        with itself about whether a feature exists.
+                      ── WHAT THIS REPLACED ───────────────────────────────
+                      Six large cards in a wrapped grid, each with an icon, a
+                      title, a sentence, a call to action and a progress bar:
+                      the three tools plus two article shortcuts and a link to
+                      Notes. The app has three compact tiles in one row carrying
+                      an icon and a name and nothing else. Ellie: "neither is
+                      content or layout."
 
-                        It goes in section 3 because that is where she put it,
-                        and because that section is already the tools and the
-                        reading: the two things the app's Learn tab holds. */}
-                    <GrowSquare color="#1B5FE8" icon={GrowIcons.notes("#1B5FE8")}
-                      title="Your notes and journal"
-                      sub="Everything you have marked, everything you have written, and your journal."
-                      cta="Open →" onClick={() => setView("notes")} />
+                      The two article shortcuts and the library link are gone
+                      because the In Practice sheet below now lists every
+                      article, which is what the app's Learn tab does, and Notes
+                      is a tab in the toolbar above rather than a card. Flagged
+                      in TASKS.md rather than assumed.
+
+                      A tool that has not been bought is shown and inert, the
+                      way the app shows it. Buying is the "Add to your..." block
+                      further down, which is the website's job and not the
+                      app's. */}
+                  {/* block: app-learn/tools */}
+                  <div data-block="app-learn/tools" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: isMobile ? "0.5rem" : "0.75rem" }}>
+                    {CATALOGUE.filter((t) => t.kind === "tool").map((tool) => {
+                      const owned = tool.key === "workbook" ? hasWorkbookOrder
+                        : tool.key === "budget" ? pkg.hasBudget : pkg.hasChecklist;
+                      const go = tool.key === "workbook"
+                        ? (workbookReady ? downloadWorkbook : null)
+                        : tool.key === "budget" ? () => setView("budget") : () => setView("checklist");
+                      const icon = tool.key === "workbook" ? GrowIcons.workbook
+                        : tool.key === "budget" ? GrowIcons.budget : GrowIcons.checklist;
+                      const tint = tool.key === "budget" ? "#1B5FE8" : "#E8673A";
+                      const live = Boolean(owned && go);
+                      return (
+                        <button key={tool.key} onClick={live ? go : undefined} disabled={!live}
+                          style={{
+                            background: "white", border: "none", borderRadius: 18,
+                            padding: isMobile ? "0.8rem 0.75rem 0.9rem" : "1rem 0.95rem 1.1rem",
+                            textAlign: "left", cursor: live ? "pointer" : "default",
+                            fontFamily: BFONT, display: "flex", flexDirection: "column",
+                            gap: isMobile ? "1.1rem" : "1.5rem", opacity: owned ? 1 : 0.55,
+                            boxShadow: "0 1px 3px rgba(14,11,7,0.07)",
+                          }}>
+                          <span style={{
+                            width: 34, height: 34, borderRadius: 10,
+                            background: tint + "1A", display: "flex",
+                            alignItems: "center", justifyContent: "center",
+                          }}>
+                            {icon(tint)}
+                          </span>
+                          <span style={{
+                            fontSize: isMobile ? "0.82rem" : "0.9rem", fontWeight: 600,
+                            color: C.ink, lineHeight: 1.25,
+                          }}>
+                            {tool.short}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* ── THE INSIGHT OF THE DAY ────────────────────────────
@@ -15118,56 +15409,80 @@ export default function App() {
                       modulo the list, and nothing about it is per-device. The
                       quotation marks and the citation are put on by the module,
                       not here, for the same reason. */}
+                  {/* ── THE INSIGHT, ON THE GROUND ────────────────────────
+                      This was a dark navy panel with its own gradient, which is
+                      a card sitting on the Learn ground. The app writes the
+                      insight straight onto the ground: an eyebrow, the quotation
+                      in the display face at reading size, the citation in
+                      italics under it, and the two controls on the right.
+
+                      Ellie: "Again, looks horrible. Bgs are not the same as the
+                      app, and neither is content or layout." A panel where the
+                      app has none is most of why this block did not look like
+                      the app even once the ground behind it was right. */}
                   {(() => {
                     const insight = insightOfTheDay();
                     if (!insight) return null;
                     return (
-                      /* Its own ground again, because the section around it is
-                         cream again. */
-                      <div style={{ marginTop: "1.5rem", background: "linear-gradient(135deg, #1E1A35, #2A2450)", borderRadius: 18, padding: isMobile ? "1.5rem 1.35rem" : "2rem 2.25rem" }}>
-                        <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>
+                      /* block: app-learn/insight */
+                      <div data-block="app-learn/insight" style={{ marginTop: isMobile ? "2rem" : "2.5rem" }}>
+                        <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem" }}>
                           {INSIGHT_EYEBROW}
                         </div>
-                        <p style={{ fontSize: isMobile ? "1rem" : "1.1rem", lineHeight: 1.6, color: "white", fontFamily: BFONT, fontWeight: 400, margin: 0 }}>
+                        <p style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.6rem", lineHeight: 1.35, color: "white", fontWeight: 400, margin: 0, letterSpacing: "-0.01em" }}>
                           {insight.body}
                         </p>
                         {insight.source ? (
-                          <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, fontStyle: "italic", marginTop: "1rem", marginBottom: 0 }}>
+                          <p style={{ fontSize: isMobile ? "0.82rem" : "0.88rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, fontStyle: "italic", margin: "1.1rem 0 0" }}>
                             {insight.source}
                           </p>
                         ) : null}
+                        {/* Ellie, on the app: "move the share and save buttons to
+                            the right rather than the left edge." Same here, and
+                            for the same reason: the citation runs full width and
+                            the controls are the next block under it.
+
+                            Share only. The app's Save puts the insight in the
+                            relationship journal, and the website has no way to
+                            write one, so a Save here would be a control that
+                            does nothing. Named in TASKS.md rather than drawn. */}
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.1rem" }}>
+                          <button
+                            onClick={() => {
+                              /* The same text the app shares, from the same
+                                 function, so a quotation is not attributed one
+                                 way in a message sent from a phone and another
+                                 from a laptop. The title is the eyebrow for the
+                                 reason Ellie gave the app: "if they're sharing
+                                 the insight can we have the text say insight of
+                                 the day?" */
+                              const text = insightShareText(insight);
+                              const url = window.location.origin;
+                              if (navigator.share) { navigator.share({ title: INSIGHT_EYEBROW, text, url }).catch(() => {}); return; }
+                              try { navigator.clipboard.writeText(text + "\n\n" + url); } catch { /* no clipboard here */ }
+                            }}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", borderRadius: 999, border: "1px solid rgba(255,255,255,0.35)", background: "transparent", padding: "0.45rem 1rem", cursor: "pointer", fontFamily: BFONT, fontSize: "0.78rem", fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M12 16V4" /><path d="M8 8l4-4 4 4" /><path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" />
+                            </svg>
+                            Share
+                          </button>
+                        </div>
                       </div>
                     );
                   })()}
 
-                  {/* ── THE READING ───────────────────────────────────────
-                      The app's Learn tab is three things: the tools, one
-                      insight a day, and the In Practice pieces. This had the
-                      first two. Ellie: "I want the content and look and feel to
-                      be exactly the same."
-
+                  {/* ── THE READING, AS A SHEET OVER THE GROUND ───────────
                       Every article, from the module the app is served through
                       /api/posts, so neither surface has a shorter library than
-                      the other. */}
-                  {/* block: app-learn/reading */}
-                  <div style={{ marginTop: "1.75rem" }}>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem" }}>
-                      From In Practice
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.6rem" }}>
-                      {IN_PRACTICE.map((a) => (
-                        <a key={a.slug} href={a.path}
-                          style={{ display: "block", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "0.85rem 1rem", textDecoration: "none" }}>
-                          <div style={{ fontSize: "0.6rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.3rem" }}>
-                            {a.categoryLabel}
-                          </div>
-                          <div style={{ fontSize: "0.85rem", color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>
-                            {a.title}
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
+                      the other. The shape of it is the app's: see
+                      AppLearnReading. */}
+                  <AppLearnReading
+                    articles={IN_PRACTICE}
+                    isMobile={isMobile}
+                    savedCount={0}
+                    readCount={0}
+                  />
 
                   {/* Add-ons — separate, quieter, never mixed with what you own */}
                   {(!hasWorkbookOrder || !pkg.hasIntimacy) && (

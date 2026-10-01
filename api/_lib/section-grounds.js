@@ -284,6 +284,29 @@ export const TAB_GROUNDS = {
   learn: { stops: lightenPair(BLUE_GROUND, 0.2), locations: null, angle: 225 },
 };
 
+/**
+ * The colour a tab's ground ends on.
+ *
+ * ── WHY A GRADIENT ALONE IS NOT ENOUGH ON A PAGE THAT SCROLLS ─────────────
+ * In the app the ground is exactly one screen: the gradient runs from the top
+ * of the phone to the bottom of it, and the cream holding to 58 per cent means
+ * cream for most of what you can see. On the website the same gradient was
+ * applied to a block as tall as its content, so the cream held for 58 per cent
+ * of a long page and the indigo arrived somewhere below the fold. Identical
+ * colours, identical angle, and nothing like the same screen.
+ *
+ * Ellie: "Bgs are not the same as the app."
+ *
+ * So the website paints the gradient at one viewport height and fills whatever
+ * is under it with the colour the gradient finishes on, which is what the app's
+ * screen looks like if you could keep scrolling past the bottom of the phone.
+ */
+export function tabGroundTail(tab) {
+  const g = TAB_GROUNDS[tab];
+  if (!g) return null;
+  return g.stops[g.stops.length - 1];
+}
+
 /** A tab's ground as CSS, with its stops where the app puts them. */
 export function tabGradientCss(tab) {
   const g = TAB_GROUNDS[tab];

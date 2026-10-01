@@ -824,6 +824,7 @@ export default function ResourcesScreen() {
 
               `tools` filters the catalogue by kind, so a fourth tool arriving
               on the server appears here on its own. */}
+          {/* block: app-learn/tools */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
             {toolTiles.map((r) => (
               <OwnedTile
@@ -882,6 +883,7 @@ export default function ResourcesScreen() {
                 rather than a banner. No shadow either: a shadow is what a
                 surface casts onto the one behind it, and there is only one
                 surface here. */}
+            {/* block: app-learn/insight */}
             <View
               style={{
                 paddingVertical: Spacing.xl,
