@@ -243,22 +243,54 @@ const lighten = (hex, t) => {
     .map((v) => up(v).toString(16).padStart(2, '0')).join('')}`;
 };
 
+/**
+ * What each of the app's tabs is actually painted with.
+ *
+ * ── THE FIRST VERSION WAS WRONG AND LOOKED IT ─────────────────────────────
+ * It had Home as two shades of blue, because `BlueGround` is the constant with
+ * "blue" and "ground" in its name. The home screen does not use it. It paints
+ * cream that holds past the half way line and only then falls to indigo, which
+ * is why the top of that screen reads as paper and the bottom as colour.
+ *
+ * Ellie, on the website wearing the wrong one: "Again, looks horrible. Bgs are
+ * not the same as the app." Naming is not evidence; the gradient the screen
+ * draws is.
+ *
+ * So each entry is the stops, where they sit, and the angle, taken from the
+ * screen that draws it:
+ *
+ *   home      index.tsx          cream, cream at 58%, indigo, start (0.3,0) to (0.7,1)
+ *   insights  insights.tsx Shell OrangeGround through TabScreen, (1,0) to (0,1)
+ *   learn     resources.tsx      LearnGround through TabScreen, (1,0) to (0,1)
+ *
+ * ── TURNING A REACT NATIVE SWEEP INTO A CSS ANGLE ─────────────────────────
+ * expo-linear-gradient takes two unit points; CSS takes one angle measured
+ * clockwise from "to top". TabScreen runs (1,0) to (0,1), top right to bottom
+ * left, which is 225 degrees. The home screen runs (0.3,0) to (0.7,1), mostly
+ * down and a little right, which is 180 minus atan(0.4), about 158.
+ */
+const CREAM = '#FFFDF9';
+const INDIGO = '#1B5FE8';
+
+const lightenPair = (pair, t) => pair.map((h) => lighten(h, t));
 const BLUE_GROUND = ['#2A3A6E', '#4A6CD4'];
 
 export const TAB_GROUNDS = {
-  /** Home. The blue the dashboard has always been. */
-  home: BLUE_GROUND,
-  /** Insights, and therefore the exercises: the brand orange, softened once. */
-  insights: ['#CB5A33', '#F09763'],
-  /** Learn, which is Home's blue lifted a fifth toward white. */
-  learn: [lighten(BLUE_GROUND[0], 0.2), lighten(BLUE_GROUND[1], 0.2)],
+  /** Home. Paper at the top, colour at the foot. */
+  home: { stops: [CREAM, CREAM, INDIGO], locations: [0, 0.58, 1], angle: 158 },
+  /** Insights, the brand orange, softened once at her ask. */
+  insights: { stops: ['#CB5A33', '#F09763'], locations: null, angle: 225 },
+  /** Learn, which is the home screen's blue lifted a fifth toward white. */
+  learn: { stops: lightenPair(BLUE_GROUND, 0.2), locations: null, angle: 225 },
 };
 
-/**
- * A tab's ground as CSS, dark corner to light, which is how the app draws it:
- * `start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}` is a 135 degree sweep.
- */
+/** A tab's ground as CSS, with its stops where the app puts them. */
 export function tabGradientCss(tab) {
   const g = TAB_GROUNDS[tab];
-  return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : null;
+  if (!g) return null;
+  const stops = g.stops.map((hex, i) => (g.locations
+    ? `${hex} ${Math.round(g.locations[i] * 100)}%`
+    : hex)).join(', ');
+  return `linear-gradient(${g.angle}deg, ${stops})`;
 }
+

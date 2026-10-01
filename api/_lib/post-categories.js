@@ -15,7 +15,12 @@
  */
 export const POST_CATEGORIES = [
   'Getting Started',
-  "When It's Difficult",
+  // Ellie, choosing between the two names the product was using: "Conflict and
+  // Repair and Understanding Each Other". The page tagged cards "Conflict &
+  // Repair" and shelved them under "When It's Difficult", so a reader met two
+  // names for one shelf. This is the one she picked, spelled the way she wrote
+  // it: "and", not an ampersand.
+  'Conflict and Repair',
   'Understanding Each Other',
   'Methodology',
 ];

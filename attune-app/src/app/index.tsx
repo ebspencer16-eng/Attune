@@ -23,7 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
-import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { openExternal } from '@/api/open-external';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -84,18 +84,6 @@ export default function HomeScreen() {
    * milliseconds against a cold start of seconds, so on any launch after the
    * first the dashboard is simply there. See api/last-seen.ts.
    */
-  /**
-   * How much of the screen the reading above the panel takes.
-   *
-   * 0.42 is where the panel sits today on the phone this was tuned against, so
-   * it keeps that composition and gives every other phone the same one rather
-   * than the same number of points. A minimum rather than a fixed height: a
-   * long greeting is allowed to push the panel down, which is the case a fixed
-   * height would crop.
-   */
-  const { height: screenHeight } = useWindowDimensions();
-  const readingHeight = Math.round(screenHeight * 0.42);
-
   const [data, setData] = useState<HomeResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -494,27 +482,34 @@ export default function HomeScreen() {
               the two cards were pushed to the bottom of the screen and a third
               of the page was empty blue. The blocks were right and the spacing
               was what made it read as a different screen. */}
-          {/* ── THE READING IS A FRACTION OF THE SCREEN, NOT A STACK OF POINTS ──
-              Ellie, four times now, most recently: "Done, but still seeing the
-              spacing issue on my cell."
+          {/* ── THE FIFTH FIX, WHICH IS A REMOVAL ────────────────────────
+              Ellie, with a screenshot of the simulator: "This is my simulator's
+              home screen right now. Fix it and make sure there's guards against
+              this happening in the future."
 
-              Three fixes before this one each moved where the spare height
-              collected: after the last child, then above the panel, then inside
-              it. None of them made the composition scale, which is the thing
-              she actually asked for: "dimensions are the same on every phone
-              screen."
+              The fourth fix gave this block `minHeight: 42% of the screen`, on
+              the reasoning that the reading above the tile should claim a share
+              of the phone rather than a number of points. The reasoning was
+              about a block that held the greeting AND the four quick links.
+              Those moved inside the tile, and the comment describing them was
+              left here, so what the rule actually sized was one line of text:
+              nearly half the screen reserved for a greeting, and the two cards
+              pushed off the bottom behind the tab bar.
 
-              They cannot be the same while the top of the page is a stack of
-              fixed point heights and the screen is not. The greeting and the
-              quick links come to the same number of points on a 15 Pro Max and
-              an SE, so they occupy a different fraction of each, and everything
-              below them starts in a different place.
+              The scaling rule was already in the file and already right. The
+              tile below is `flexGrow: 1`, so it takes whatever height is left
+              over on any phone, and the spare height ends up inside it as cream
+              rather than under it as blue. That is the thing she reported four
+              times. Nothing above the tile needs to claim a fraction of
+              anything; it only has to be its own size and let the tile have the
+              rest.
 
-              So the reading claims a share of the screen instead. The panel then
-              begins at the same fraction of the way down whatever phone it is
-              on, which is what makes two screenshots look alike. It is also the
-              design this file described at `topHeight` and never used. */}
-          <View style={{ paddingHorizontal: Spacing.xl, minHeight: readingHeight }}>
+              A fraction of the screen is the right shape for a block whose
+              content scales. It is the wrong shape for a single line, and
+              check-proportional-layout now guards the tile's claim on the spare
+              height rather than this block's minimum, which is what it was
+              asserting before and what kept the bug passing. */}
+          <View style={{ paddingHorizontal: Spacing.xl }}>
             {/* The wordmark is gone. It named the app to someone already
                 inside it, on the one screen where the whole ground is the
                 brand colour. Settings keeps the row: it is where account
@@ -534,14 +529,11 @@ export default function HomeScreen() {
               {data.greeting}
             </Text>
 
-            {/* ── FOUR WAYS IN ───────────────────────────────────────────
-                Ellie: "Instead of the 4 rounded squares above the two main
-                ones, let's add quick links to insight of the day, action plan
-                (what comes next page), insights highlights, and relationship
-                journal."
-
-                Four rounded squares in a row, as the reference has them, each
-                landing somewhere that already exists. */}
+            {/* The four quick links used to sit here and are inside the tile
+                now, at `app-home/quick-links`. The paragraph quoting Ellie
+                asking for them moved with them. A comment left behind by
+                content that went somewhere else is how this block came to be
+                sized for things it does not contain. */}
           </View>
 
           {/* ── THE TILE, EDGE TO EDGE, FADING UPWARD ────────────────────
