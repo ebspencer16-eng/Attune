@@ -3386,7 +3386,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "1.5rem" : "2rem" }}>
       {/* block: app-home/greeting */}
-      <h1 style={{
+      <h1 data-block="app-home/greeting" style={{
         fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
         fontSize: isMobile ? "2rem" : "2.75rem", lineHeight: 1.05, letterSpacing: "-0.02em",
       }}>
@@ -3394,7 +3394,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
       </h1>
 
       {/* block: app-home/quick-links */}
-      <div style={{
+      <div data-block="app-home/quick-links" style={{
         display: "grid",
         gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
         gap: isMobile ? "0.6rem" : "0.85rem",
@@ -3419,7 +3419,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard }) {
           how the app draws it: the panel is where the page ends rather than a
           card floating on it. */}
       {/* block: app-home/prompts */}
-      <div style={{
+      <div data-block="app-home/prompts" style={{
         background: C.cream, borderRadius: "22px 22px 0 0",
         padding: isMobile ? "1.25rem 1rem 2rem" : "1.75rem 1.5rem 2.5rem",
         marginTop: "auto",
