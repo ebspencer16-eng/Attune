@@ -14259,18 +14259,32 @@ export default function App() {
         });
 
         // Legacy expGaps still updated for backward compatibility
-        const EXP_LIFE_KEYS = [
-          { key: 'household', label: 'Visible Household Labor' },
-          { key: 'emotional', label: 'Emotional & Invisible Labor' },
-          { key: 'financial', label: 'Financial & Money' },
-          { key: 'career',    label: 'Career' },
-          { key: 'children',  label: 'Children & Family' },
-          { key: 'lifestyle', label: 'Home & Lifestyle' },
-        ];
-        const realExpGaps = EXP_LIFE_KEYS.map(({ key, label }) => {
-          const yourAns    = existing.expGaps?.find(g => g.key === key)?.yourAnswer || null;
-          const partnerAns = s.ex2?.life?.['lq_' + key] || null;
-          return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
+        /**
+         * ── DERIVED, NOT NAMED ────────────────────────────────────────
+         * This was a list of six keys looked up as `lq_<key>`, and five of
+         * the six named a question that does not exist: the real ids are
+         * lq_location, lq_faith, lq_finances and so on. So five of six rows
+         * carried a null answer and an unaligned flag into the workbook,
+         * which draws six of them.
+         *
+         * It survived because a null answer and `aligned: false` is exactly
+         * what an unanswered question looks like. The output was
+         * indistinguishable from a couple who had not finished.
+         *
+         * Built from the question registry now, the same way
+         * api/_lib/workbook-payload.js builds it, so there is no key that can
+         * fail to resolve. */
+        const realExpGaps = LIFE_QUESTIONS.map((q) => {
+          const yourAns    = newLifeQuestions.user[q.id] || null;
+          const partnerAns = newLifeQuestions.partner[q.id] || null;
+          return {
+            key: q.id.replace(/^lq_/, ''),
+            label: newLifeQuestions.meta[q.id]?.topic || q.topic,
+            yourAnswer: yourAns,
+            partnerAnswer: partnerAns,
+            /* Two unanswered questions are not agreement. */
+            aligned: Boolean(yourAns) && yourAns === partnerAns,
+          };
         });
         localStorage.setItem('attune_live_session', JSON.stringify({
           ...existing,

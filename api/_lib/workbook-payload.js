@@ -65,24 +65,41 @@ export function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerE
     };
   });
 
-  // Legacy expGaps shape — kept for backward compatibility with renderers
-  // that haven't been updated to use the new fields. Built from the same
-  // life-question data so values stay consistent. Only the original 7-key
-  // legacy set is included; new family-contact questions and Extended
-  // Family responsibilities live in the new fields above.
-  const LEGACY_EXP_KEYS = [
-    { key: 'household', label: 'Visible Household Labor' },
-    { key: 'emotional', label: 'Emotional & Invisible Labor' },
-    { key: 'financial', label: 'Financial & Money' },
-    { key: 'career',    label: 'Career' },
-    { key: 'children',  label: 'Children & Family' },
-    { key: 'lifestyle', label: 'Home & Lifestyle' },
-    { key: 'values',    label: 'Faith & Values' },
-  ];
-  const expGaps = LEGACY_EXP_KEYS.map(({ key, label }) => {
-    const yourAns = ex2Answers?.life?.['lq_' + key] || null;
-    const partnerAns = partnerEx2?.life?.[mirrorLifeId('lq_' + key)] || null;
-    return { key, label, yourAnswer: yourAns, partnerAnswer: partnerAns, aligned: yourAns === partnerAns };
+  /**
+   * ── expGaps, DERIVED RATHER THAN NAMED ──────────────────────────────────
+   * Ellie: "I only want the PDF workbook to exist, and if the PDF builder uses
+   * outdated references, then we need to update those."
+   *
+   * This was a hand-written list of seven keys looked up as `lq_<key>`:
+   * household, emotional, financial, career, children, lifestyle, values. Five
+   * of the seven name a question that does not exist. The real ids are
+   * lq_location, lq_faith, lq_finances, lq_routine, lq_social and the rest, so
+   * five of seven rows carried a null answer for both partners and
+   * `aligned: false`, and public/workbook-render.html drew six of them.
+   *
+   * It survived because every value it produced was a valid value. A null
+   * answer and an unaligned flag is exactly what an unanswered question looks
+   * like, so the output was indistinguishable from a couple who had not
+   * finished.
+   *
+   * Built from LIFE_QUESTIONS now, which is the registry the questions
+   * themselves come from, so a key cannot fail to resolve: there is no key.
+   * The label is the question's own topic, name-substituted, which is what the
+   * reader is shown everywhere else.
+   */
+  const expGaps = LIFE_QUESTIONS.map((q) => {
+    const yourAns = lifeQuestions.user[q.id];
+    const partnerAns = lifeQuestions.partner[q.id];
+    return {
+      key: q.id.replace(/^lq_/, ''),
+      label: lifeQuestions.meta[q.id].topic,
+      yourAnswer: yourAns,
+      partnerAnswer: partnerAns,
+      /* Both unanswered is not agreement. The old shape called two nulls
+         aligned, which is how a couple who had answered nothing read as
+         agreeing about everything. */
+      aligned: Boolean(yourAns) && yourAns === partnerAns,
+    };
   });
 
   return {

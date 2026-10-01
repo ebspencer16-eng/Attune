@@ -4,11 +4,11 @@
 
 | # | What I need from you |
 |--|--|
-| O512 | **Check one thing in Vercel: is `WORKBOOK_SERVICE_URL` marked Sensitive?** If yes, the empty box was normal. If no, it had no value and the workbook has never worked. Either way it is set now. I built you an audit: `/api/admin-env` lists every variable the code reads and whether it has a value. Never shows values. Open `www.attune-relationships.com/api/admin-env` signed in as an admin. |
-| O7 | SEO: every page tells Google the apex is canonical while the site runs on www. Harmless. Change it or leave it. |
+| O512 | **Open `www.attune-relationships.com/api/admin-env` signed in as an admin.** It lists every variable the code reads and whether it has a value. Never shows values. Tells you in one line if any required one is empty. On your Vercel question: an empty box means either the variable is marked Sensitive, or it had no value. The workbook failing instantly, with no Render logs, is what an empty value looks like. |
+| O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
-| O482 | Partner invite email mentions downloading the app. Fix when the app is live. |
+| O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when live, I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
@@ -16,22 +16,21 @@
 
 | # | Mine to build |
 |--|--|
-| O497 | Your dashboard list. Home, Insights, Learn, Notes. In progress. |
-| O513 | Notes and journal on the site. Not built. |
-| O508 | Workbook: PDF only, references updated. |
-| O490 | Delete the .docx once the PDF works. |
+| O490 | Delete the .docx workbook. Waiting on the PDF working, which is waiting on O512. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O488 | Spacing fix is published. Your phone was on it already. The slow pull-to-refresh is a separate bug and I am on it. I publish updates myself from now on. |
-| O507 | Sections renamed. Address changed to `/practice/conflict-and-repair`, every link updated, no redirects. |
-| O510 | Both platforms now offer the same five sections. A check fails the build if they drift. |
+| O497 | Dashboard rebuilt to your list. Home is four tiles and two prompts, no greeting, no results list, no banners, does not scroll. Beta feedback is one of the two prompts once a beta user has opened results. Insights has no hero and no description, sits on a cream panel, and shows the exercise status until both finish then the results nav. Learn's In Practice is the app's row layout with the app's peek. Notes now renders: it was built but its code sat in the wrong branch, so the tab drew nothing. |
+| O488 | Spacing fix and the slow-refresh fix are both published. The refresh was a request with no timeout, so it never finished rather than being slow. I publish updates myself now. |
+| O508 | Workbook expectations section: five of seven keys named questions that do not exist, so five rows were blank for every couple. Now built from the question registry. Both copies, website and server. |
+| O507 | Sections renamed. Address is `/practice/conflict-and-repair`, every link updated, no redirects. |
+| O510 | One name per section everywhere. The fourth was "Methodology" in one place and "Couple Types" in ten; it is Couple Types. Say if you want Methodology. |
 | O511 | Your checklist wording is in. |
-| O509 | `SOCIAL-LISTS.md` updated. |
-| O502 | Cards no longer clipped. Spacing still yours to judge. |
-| O494 | Cover pages on both surfaces, five chapters and five exercises. |
+| O509 | `SOCIAL-LISTS.md` updated with it. |
+| O502 | Cards no longer clipped. |
+| O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
@@ -40,6 +39,13 @@
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 | R20 | A real device, and a day. Sign in, close it, come back tomorrow. |
+
+### Two things I took out that you did not name
+
+| # | What |
+|--|--|
+| O514 | Home lost the partner-joined and welcome-back notices. You said Home is four tiles and two prompts, and those were neither. The app shows that kind of thing as an alert row. Say if you want them back and where. |
+| O515 | Learn lost two article shortcuts, the library link and the notes card. The In Practice sheet below lists all twelve now and Notes is a tab. Say if you want any back. |
 
 ## 4. Done and verified
 
