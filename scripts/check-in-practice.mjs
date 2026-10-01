@@ -111,7 +111,7 @@ for (const card of onPage) {
  * article has been written about twice.
  */
 const routes = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
-const CATEGORY_PAGES = new Set(['all', 'getting-started', 'when-its-difficult',
+const CATEGORY_PAGES = new Set(['all', 'getting-started', 'conflict-and-repair',
   'understanding-each-other', 'couple-types']);
 const articles = routes.rewrites
   .map((r) => r.source)
@@ -184,17 +184,23 @@ for (const a of IN_PRACTICE) {
     `(?:class="(?:${LABEL_CLASSES.join('|')})"[^>]*`
     + '|style="font-size:\\.72rem;color:var\\(--ink\\);font-weight:500;")>([^<]*)<', 'g');
 
-  /* Names a label may carry that are not one of the four shelves. */
-  const ALSO_FINE = new Set([
-    'All',          // the filter row's "everything" pill, not a shelf
-    'Couple Types', // a website shelf the server folds into Methodology
-  ]);
-  const shelves = new Set([...POST_CATEGORIES, ...ALSO_FINE]);
+  /**
+   * The only name here that is not a shelf.
+   *
+   * Ellie: "All should exist on both platforms - make sure inconsistencies
+   * cannot happen." This set used to also allow "Couple Types" beside
+   * "Methodology", on the reasoning that the website had a shelf the app folded
+   * into another one. It did not. Both platforms had the same four shelves and
+   * the fourth had two names: Methodology on the index pill, Couple Types on
+   * its own page, its three cards and its address. The exception was not
+   * covering a difference, it was hiding one, which is what an escape hatch in
+   * a gate does. There is one name now and nothing is exempt.
+   */
+  const shelves = new Set([...POST_CATEGORIES, 'All']);
   const bySlug = new Map(IN_PRACTICE.map((a) => [a.slug, a]));
 
-  /** Methodology is printed as "Couple Types" on the website's own shelf. */
-  const agrees = (label, want) => label === want
-    || (want === POST_CATEGORIES[3] && label === 'Couple Types');
+  /** One shelf, one name. No equivalences: that is what let two names stand. */
+  const agrees = (label, want) => label === want;
 
   const dir = new URL('../public/practice/', import.meta.url);
   const pages = [['practice.html', new URL('../public/practice.html', import.meta.url)]];

@@ -79,11 +79,13 @@ export const NUDGE_COOLDOWN_DAYS = 3;
  */
 const RESOURCE_BLURB = {
   budget: 'Build your budget with a customizable tool',
+  checklist: 'Merge your lives seamlessly with a practical checklist',
 };
 
 /** The name a resource card leads with, when Ellie has written one. */
 const RESOURCE_TITLE = {
   budget: 'Explore build-a-budget',
+  checklist: 'Complete your checklist',
 };
 
 /**

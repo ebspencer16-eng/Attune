@@ -22,5 +22,11 @@ export const POST_CATEGORIES = [
   // it: "and", not an ampersand.
   'Conflict and Repair',
   'Understanding Each Other',
-  'Methodology',
+  // Ellie: "All should exist on both platforms - make sure inconsistencies
+  // cannot happen." This shelf had two names as well: the index pill said
+  // Methodology and its own page, its three article cards and its address all
+  // said Couple Types. Settled on Couple Types because that is what ten of the
+  // eleven places already said and what the url is. Flip it here if you want
+  // Methodology and every surface follows.
+  'Couple Types',
 ];

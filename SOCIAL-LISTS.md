@@ -24,9 +24,9 @@ whether their results are ready, and what they have bought and not used.
 | 4 | 9 | Send James a reminder | Results unlock once James finishes her final exercise | Send a reminder |
 | 5 | 9 | Waiting on James | You sent a reminder recently | View progress |
 | 6 | 8 | Your results are ready | Insights and guidance based on your responses | Open results |
-| 7 | 7 | Explore build-a-budget | Build your budget with a customizable tool | Start |
-| 8 | 7 | Pick up Shared Budgeting | This exercise is in progress and status has been saved | Continue |
-| 9 | 7 | Start a new exercise | You have purchased exercises that you have not completed | Start |
+| 7 | 7 | Complete your checklist | Merge your lives seamlessly with a practical checklist | Start |
+| 8 | 7 | Explore build-a-budget | Build your budget with a customizable tool | Start |
+| 9 | 7 | Pick up Shared Budgeting | This exercise is in progress and status has been saved | Continue |
 | 10 | 5 | New publication to explore | View this and others in your Learn tab | Read |
 | 11 | 4 | Revisit Conflict Style | Your widest difference. Worth rereading together. | Open |
 | 12 | 4 | Revisit Money and what it is for | You flagged this and have not come back to it. | Open |
@@ -54,8 +54,8 @@ Every article, under the section it belongs to.
 | Conflict and Repair | Why couples fight about the same things |
 | Understanding Each Other | Five books that change how couples think |
 | Understanding Each Other | What your communication style reveals |
-| Methodology | What your couple type tells you |
-| Methodology | For the Bridge: the conversation you need |
-| Methodology | Why naming the pattern changes everything |
+| Couple Types | What your couple type tells you |
+| Couple Types | For the Bridge: the conversation you need |
+| Couple Types | Why naming the pattern changes everything |
 
 12 articles across 4 sections.
