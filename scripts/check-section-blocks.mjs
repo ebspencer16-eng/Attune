@@ -67,6 +67,8 @@ const SURFACES = [
          and everything else." The inventory is the half of that a check can
          hold, and it only holds if this file is read. */
       'attune-app/src/app/index.tsx',
+      /* The Learn tab, for the same reason: the website grew one. */
+      'attune-app/src/app/resources.tsx',
     ],
   },
 ];

@@ -1218,6 +1218,7 @@ export default function ResourcesScreen() {
             </View>
           ) : null}
 
+          {/* block: app-learn/reading */}
           {posts.length ? (
             <>
               {narrowing ? (

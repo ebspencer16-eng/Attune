@@ -129,6 +129,15 @@ export const SECTION_BLOCKS = {
    * so the words cannot drift. What can drift is whether a surface draws them
    * at all, which is what this is.
    */
+  /**
+   * The Learn tab. Three things in the app: the tools, one insight a day, and
+   * the In Practice reading. The website had the first two and a hand-typed
+   * list of six articles elsewhere, against the twelve the app is served.
+   */
+  'app-learn': [
+    { id: 'reading', note: 'Every In Practice article, from the shared list.' },
+  ],
+
   'app-home': [
     { id: 'greeting', note: "The page's own line, from the server's greeting." },
     { id: 'quick-links', note: 'The four ways in.' },

@@ -674,6 +674,28 @@ first edit, and when a structural change misfires, go back to that copy and
 re-run the whole sequence as one script with its checks. The script is cheap to
 re-run and reasoning about half-applied JSX is not.
 
+**innerText reports what CSS renders, and this has now cost three probes.**
+The site sets `text-transform: uppercase` on eyebrows and buttons, so a check
+for "From In Practice" or "Back to insights" fails against text that is
+character for character correct. It has fooled a gate, a probe of my own an hour
+later, and a third probe the next day. Use `textContent` when comparing words,
+or match case-insensitively when the string is a label. The rule: innerText is
+what a person sees, textContent is what the code said, and copy comparisons are
+about the second.
+
+**A hand-typed list beside a shared one is always the shorter list.** The
+website carried `BLOG_POSTS`, six In Practice articles typed into src/App.jsx,
+while api/_in-practice.js held twelve and is what the app is served. So the two
+surfaces offered different libraries and the website's was half. One of the six
+was not an article: `/practice/understanding-each-other` is the section index
+that lists the Understanding Each Other pieces, offered under the tag "Read" as
+though it were something to read.
+
+Both found by building a list of the articles for someone else to work from,
+which is the usual way. A list of a thing is where the thing's inconsistencies
+show up: the same exercise turned up two different names for one In Practice
+section, and one book cited two ways in the quotations.
+
 **Where the holes actually were.** Of the gates audited so far, the ones with
 holes all matched on a literal name or a single shape. The ones that run the
 code and compare the answers, `check-alignment-rule` over 81 answer pairs,

@@ -36,6 +36,8 @@ import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_C
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW } from "../api/_insights.js";
+/* Every In Practice article, which the app is served through /api/posts. */
+import { IN_PRACTICE } from "../api/_in-practice.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss } from "../api/_lib/section-grounds.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
@@ -15138,6 +15140,35 @@ export default function App() {
                     );
                   })()}
 
+                  {/* ── THE READING ───────────────────────────────────────
+                      The app's Learn tab is three things: the tools, one
+                      insight a day, and the In Practice pieces. This had the
+                      first two. Ellie: "I want the content and look and feel to
+                      be exactly the same."
+
+                      Every article, from the module the app is served through
+                      /api/posts, so neither surface has a shorter library than
+                      the other. */}
+                  {/* block: app-learn/reading */}
+                  <div style={{ marginTop: "1.75rem" }}>
+                    <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem" }}>
+                      From In Practice
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.6rem" }}>
+                      {IN_PRACTICE.map((a) => (
+                        <a key={a.slug} href={a.path}
+                          style={{ display: "block", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "0.85rem 1rem", textDecoration: "none" }}>
+                          <div style={{ fontSize: "0.6rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.3rem" }}>
+                            {a.categoryLabel}
+                          </div>
+                          <div style={{ fontSize: "0.85rem", color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>
+                            {a.title}
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Add-ons — separate, quieter, never mixed with what you own */}
                   {(!hasWorkbookOrder || !pkg.hasIntimacy) && (
                     <div style={{ marginTop: "1.5rem" }}>
@@ -15656,14 +15687,24 @@ export default function App() {
 
     
         {view === "resources" && (() => {
-          const BLOG_POSTS = [
-            { title: "How to review your results together", href: "/practice/how-to-review-your-results-together", tag: "Guide" },
-            { title: "Why couples fight about the same things", href: "/practice/why-couples-fight-about-the-same-things", tag: "Read" },
-            { title: "How to start a hard conversation", href: "/practice/how-to-start-a-hard-conversation", tag: "Guide" },
-            { title: "Understanding each other", href: "/practice/understanding-each-other", tag: "Read" },
-            { title: "What your couple type tells you", href: "/practice/what-your-couple-type-tells-you", tag: "Read" },
-            { title: "Conflict vs. repair", href: "/practice/conflict-vs-repair", tag: "Read" },
-          ];
+          /**
+           * ── THE READING LIST, DERIVED ─────────────────────────────────────
+           * Six articles were typed out here while api/_in-practice.js held
+           * twelve, which is the list the app is served through /api/posts. So
+           * the two surfaces offered different libraries, and the website's was
+           * the shorter one by half.
+           *
+           * One of the six was not an article at all. "/practice/
+           * understanding-each-other" is a section index, the page that lists
+           * the Understanding Each Other pieces, and it sat in this list under
+           * the tag "Read" as though it were something to read.
+           *
+           * The tag is the section now rather than "Guide" or "Read", which
+           * were a second taxonomy of two words that nothing else used.
+           */
+          const BLOG_POSTS = IN_PRACTICE.map((a) => ({
+            title: a.title, href: a.path, tag: a.categoryLabel,
+          }));
           const ADD_ONS = [
             { name: "The Personalized Workbook", desc: "A structured workbook built around your specific results and couple type.", price: "From $19", onClick: () => setView("workbook"), color: "#9B5DE5" },
             { name: "Shared Budgeting Tool", desc: "A guided financial exercise to surface what you each expect from shared finances.", price: "$20", href: "/offerings", color: "#1B5FE8" },
