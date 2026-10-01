@@ -696,6 +696,22 @@ which is the usual way. A list of a thing is where the thing's inconsistencies
 show up: the same exercise turned up two different names for one In Practice
 section, and one book cited two ways in the quotations.
 
+**A key list typed by hand is a key list nobody checked against the keys.**
+`EXP_LIFE_KEYS` in src/App.jsx names six categories and looks each one up as a
+life-question answer, `lq_<key>`. Five of the six ids do not exist: the real
+questions are lq_location, lq_faith, lq_values, lq_finances and so on. So five
+of six rows have carried a null partner answer and a meaningless alignment flag
+into the legacy `expGaps`, which public/workbook-render.html draws six rows of.
+
+It survived because every value it produces is a valid value. A null answer and
+`aligned: false` is what an unanswered question looks like, so the output was
+indistinguishable from a couple who had not finished.
+
+The general shape: when one list indexes into another, the check is not that the
+list is right but that every key in it resolves. That is two lines and it would
+have caught this, the exercise-to-chapter mapping, and the In Practice article
+that pointed at a section index.
+
 **Where the holes actually were.** Of the gates audited so far, the ones with
 holes all matched on a literal name or a single shape. The ones that run the
 code and compare the answers, `check-alignment-rule` over 81 answer pairs,
