@@ -858,6 +858,38 @@ export function configureApi(opts: {
   refreshInFlight = null;
 }
 
+/**
+ * How long a request may hang before it is given up on.
+ *
+ * ── THE BUG ───────────────────────────────────────────────────────────────
+ * Ellie: "when I pull down on the home page to refresh, it takes minutes."
+ *
+ * Not the server being slow. No request in this file had a timeout, and a
+ * `fetch` with no timeout does not fail on a stalled connection: it never
+ * settles at all. The catch below never runs, the screen never gets an answer,
+ * and the refresh spinner turns until the connection is finally reset by
+ * something outside the app. That reads exactly like a slow server and is not
+ * one, which is why it survived.
+ *
+ * Twenty seconds because /api/home makes several database calls in sequence and
+ * a cold function adds to that; the workbook is given longer because it is
+ * building a PDF on another service.
+ */
+const REQUEST_TIMEOUT_MS = 20000;
+const SLOW_PATHS = [/store-workbook/, /generate-pdf/];
+const timeoutFor = (path: string) => (SLOW_PATHS.some((r) => r.test(path)) ? 70000 : REQUEST_TIMEOUT_MS);
+
+/**
+ * AbortController rather than AbortSignal.timeout: Hermes does not carry the
+ * static, and a missing static is `undefined is not a function` at the moment
+ * the network is already misbehaving.
+ */
+function withTimeout(ms: number) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  return { signal: ctl.signal, done: () => clearTimeout(timer) };
+}
+
 async function request<T>(path: string, init: RequestInit = {}, retrying = false): Promise<ApiResult<T>> {
   let token = await getToken();
   if (!token && !retrying) {
@@ -876,16 +908,22 @@ async function request<T>(path: string, init: RequestInit = {}, retrying = false
   if (!token) return { ok: false, error: { kind: 'unauthorized', detail: 'no token stored' } };
 
   let res: Response;
+  const limit = withTimeout(timeoutFor(path));
   try {
     res = await fetch(`${baseUrl}${path}`, {
       ...init,
+      signal: limit.signal,
       headers: { ...(init.headers || {}), Authorization: `Bearer ${token}` },
     });
   } catch {
-    // No connection, DNS failure, or the request was cut off. Distinguished
-    // from a server error because the screen's response differs: offline is
-    // "show what we cached", a 500 is "something is wrong".
+    // No connection, DNS failure, the request was cut off, or it ran past the
+    // timeout above. Distinguished from a server error because the screen's
+    // response differs: offline is "show what we cached", a 500 is "something
+    // is wrong". A timeout is reported the same way on purpose, because what
+    // the reader should do about it is the same.
     return { ok: false, error: { kind: 'offline' } };
+  } finally {
+    limit.done();
   }
 
   if (res.status === 401) {
@@ -1627,8 +1665,13 @@ export async function trackScreenTime(view: string, ms: number): Promise<void> {
   if (!view || !Number.isFinite(ms) || ms < 1000) return;
   try {
     const token = await getToken();
+    /* A signal here as well. This one is fire and forget, but it is awaited,
+       so a stalled connection holds the caller open for as long as the socket
+       stays half-dead. Short, because nobody is waiting for a measurement. */
+    const limit = withTimeout(5000);
     await fetch(`${baseUrl}/api/track`, {
       method: 'POST',
+      signal: limit.signal,
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

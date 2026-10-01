@@ -197,78 +197,92 @@ export default function NotesScreen() {
 
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
-    loadingRef.current = true;
-    // Three calls that are always needed. Tags are fetched for the person's own
-    // list and for the labels an annotation is read through, which arrive on
-    // the same response.
     /**
-     * ── THE TAB DRAWS WHEN THE NOTES ARRIVE ─────────────────────────────────
-     * These were awaited together, so the tab was a spinner until the slowest of
-     * three serverless functions answered, all of them cold on a first launch.
-     * Ellie met the same shape on Learn: "the learn tab spun for about 30 secs,
-     * then showed a 'something went wrong' error... then went away after about a
-     * minute."
+     * ── THE SPINNER STOPS WHATEVER HAPPENS ──────────────────────────────
+     * Ellie: "when I pull down on the home page to refresh, it takes minutes."
      *
-     * All three still go out at once. What changed is that this screen is the
-     * notes, so it waits for those and lets the other two land behind: the tags
-     * are for the chip picker and the home payload is for the partner's name,
-     * and neither is worth a spinner.
+     * That was Home and the cause was a fetch with no timeout, fixed in
+     * client.ts. This screen had the second half of the same fault: the lines
+     * that clear `refreshing` sat on the happy path after six awaits, so
+     * anything that threw left the spinner turning for the life of the screen
+     * and `loadingRef` stuck on, which also stops every later focus reloading.
+     *
+     * The early return inside still clears both, because this finally runs on
+     * the way out of it.
      */
-    const tagsSoon = fetchTags();
-    const homeSoon = fetchHome();
-    const n = await fetchNotes();
-
-    if (!n.ok) {
-      setError(n.error);
+    try {
+      loadingRef.current = true;
+      // Three calls that are always needed. Tags are fetched for the person's own
+      // list and for the labels an annotation is read through, which arrive on
+      // the same response.
+      /**
+       * ── THE TAB DRAWS WHEN THE NOTES ARRIVE ─────────────────────────────────
+       * These were awaited together, so the tab was a spinner until the slowest of
+       * three serverless functions answered, all of them cold on a first launch.
+       * Ellie met the same shape on Learn: "the learn tab spun for about 30 secs,
+       * then showed a 'something went wrong' error... then went away after about a
+       * minute."
+       *
+       * All three still go out at once. What changed is that this screen is the
+       * notes, so it waits for those and lets the other two land behind: the tags
+       * are for the chip picker and the home payload is for the partner's name,
+       * and neither is worth a spinner.
+       */
+      const tagsSoon = fetchTags();
+      const homeSoon = fetchHome();
+      const n = await fetchNotes();
+  
+      if (!n.ok) {
+        setError(n.error);
+        // The spinner, the loading flag and the guard are cleared by the
+        // `finally` below, which runs on the way out of this early return too.
+        // They were cleared here as well and that is the version of this code
+        // that could leave them set: three lines on one path out of several.
+        return;
+      }
+      setError(null);
+      setNotes(n.data.notes);
+      setAnnotations(n.data.annotations);
+      /* Drawable now. The tags and the partner's name fill in behind. */
+      setLoading(false);
+      const t = await tagsSoon;
+      const h = await homeSoon;
+      setShared(n.data.sharedWithMe);
+      if (t.ok) {
+        setTags(t.data.tags);
+        setSectionLabels(t.data.sections ?? {});
+        setStandard(t.data.standard ?? []);
+        setTagPlaceholder(t.data.tagPlaceholder || 'Add a tag');
+      }
+      if (h.ok) {
+        /* The word this tab defines today, from api/_words.js by way of
+           /api/home. Copy lives on the server so it is one copy. */
+        setWord(h.data.word ?? null);
+        setPartnerName(h.data.partnerName ?? null);
+        setPartnerLinked(!!h.data.state?.partnerLinked);
+      }
+  
+      // The next two are only worth the round trip when something on screen needs
+      // them. Most people have no annotations at all, and a tab that opens five
+      // connections to render three cards is a tab that feels slow on a train.
+      const anns = n.data.annotations;
+      // post_block carries its post id too, so both kinds need the titles.
+      if (anns.some((a) => a.anchor_type === 'post' || a.anchor_type === 'post_block')) {
+        const p = await fetchPosts();
+        if (p.ok) {
+          setPostTitles(Object.fromEntries(p.data.posts.map((post) => [post.id, post.title])));
+        }
+      }
+      if (anns.some((a) => a.anchor_type?.startsWith('results_') && a.anchor_version != null)) {
+        const r = await fetchResults();
+        setResultsVersion(r.ok && r.data.ready ? r.data.results.version : null);
+      }
+  
+    } finally {
       setLoading(false);
       setRefreshing(false);
-      // Cleared here too. This path returns early, and leaving the flag set
-      // would mean the focus reload below never runs again for this tab: one
-      // failed load and Notes stays stale until the app restarts.
       loadingRef.current = false;
-      return;
     }
-    setError(null);
-    setNotes(n.data.notes);
-    setAnnotations(n.data.annotations);
-    /* Drawable now. The tags and the partner's name fill in behind. */
-    setLoading(false);
-    const t = await tagsSoon;
-    const h = await homeSoon;
-    setShared(n.data.sharedWithMe);
-    if (t.ok) {
-      setTags(t.data.tags);
-      setSectionLabels(t.data.sections ?? {});
-      setStandard(t.data.standard ?? []);
-      setTagPlaceholder(t.data.tagPlaceholder || 'Add a tag');
-    }
-    if (h.ok) {
-      /* The word this tab defines today, from api/_words.js by way of
-         /api/home. Copy lives on the server so it is one copy. */
-      setWord(h.data.word ?? null);
-      setPartnerName(h.data.partnerName ?? null);
-      setPartnerLinked(!!h.data.state?.partnerLinked);
-    }
-
-    // The next two are only worth the round trip when something on screen needs
-    // them. Most people have no annotations at all, and a tab that opens five
-    // connections to render three cards is a tab that feels slow on a train.
-    const anns = n.data.annotations;
-    // post_block carries its post id too, so both kinds need the titles.
-    if (anns.some((a) => a.anchor_type === 'post' || a.anchor_type === 'post_block')) {
-      const p = await fetchPosts();
-      if (p.ok) {
-        setPostTitles(Object.fromEntries(p.data.posts.map((post) => [post.id, post.title])));
-      }
-    }
-    if (anns.some((a) => a.anchor_type?.startsWith('results_') && a.anchor_version != null)) {
-      const r = await fetchResults();
-      setResultsVersion(r.ok && r.data.ready ? r.data.results.version : null);
-    }
-
-    setLoading(false);
-    setRefreshing(false);
-    loadingRef.current = false;
   }, []);
 
   useEffect(() => { load(); }, [load]);

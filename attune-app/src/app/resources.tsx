@@ -362,12 +362,29 @@ export default function ResourcesScreen() {
       fetchTags().then((g) => { if (g.ok) setTags(g.data.tags); }),
     ];
 
-    /* Refreshing is the pull gesture, and it should not stop spinning until
-       everything it was pulling for has actually landed. */
-    await Promise.all([home, ...rest]);
-    setLoading(false);
-    setRefreshing(false);
-    loadingRef.current = false;
+    /**
+     * Refreshing is the pull gesture, and it should not stop spinning until
+     * everything it was pulling for has actually landed.
+     *
+     * ── BUT IT MUST STOP ────────────────────────────────────────────────
+     * Ellie, about Home: "when I pull down on the home page to refresh, it
+     * takes minutes." The cause there was a fetch with no timeout, fixed in
+     * client.ts. The same three lines on this screen sat after an await with
+     * nothing to catch a throw, so one rejected promise in `rest` left the
+     * spinner turning for the life of the screen and `loadingRef` stuck on,
+     * which also stops every later focus reloading anything.
+     *
+     * `allSettled` rather than `all`: these are independent, and one failing is
+     * already handled inside its own `.then`. `all` rejects on the first
+     * failure and abandons the rest.
+     */
+    try {
+      await Promise.allSettled([home, ...rest]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+      loadingRef.current = false;
+    }
   }, []);
 
   /**

@@ -96,12 +96,28 @@ export default function HomeScreen() {
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
     loadingRef.current = true;
-    const res = await fetchHome();
-    if (res.ok) { setData(res.data); setError(null); keepLastSeen('home', res.data); }
-    else { setError(res.error); }
-    setLoading(false);
-    setRefreshing(false);
-    loadingRef.current = false;
+    /**
+     * ── THE SPINNER STOPS WHATEVER HAPPENS ──────────────────────────────
+     * Ellie: "when I pull down on the home page to refresh, it takes minutes."
+     *
+     * The real cause was a fetch with no timeout, fixed in client.ts. This is
+     * the second half of it: the three lines that clear the spinner sat after
+     * an await with nothing to catch a throw, so anything that did throw left
+     * `refreshing` true for the life of the screen. `fetchHome` shares one
+     * promise between tabs, which is exactly the shape that turns one bad
+     * request into every tab spinning.
+     */
+    try {
+      const res = await fetchHome();
+      if (res.ok) { setData(res.data); setError(null); keepLastSeen('home', res.data); }
+      else { setError(res.error); }
+    } catch {
+      setError({ kind: 'offline' });
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+      loadingRef.current = false;
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
