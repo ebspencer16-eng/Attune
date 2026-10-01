@@ -17,6 +17,7 @@
  * on card kind, so a new kind ships server-side without an app release.
  */
 
+import { showTool } from '@/app/resources';
 import ProfileSetup from '@/components/profile-setup';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -233,6 +234,20 @@ export default function HomeScreen() {
          */
         if (target.exercise) {
           router.push({ pathname: target.route, params: { exercise: target.exercise } } as never);
+          return;
+        }
+        /**
+         * A tool card opens the tool, not the tab it lives on.
+         *
+         * Same shape as the exercise above, and the same bug it was written
+         * for. The budget and the checklist resolved to no route at all until
+         * now, so both cards fell through appTargetFor to its website branch
+         * and opened Safari, which is the one thing the app is not for.
+         * Ellie: "Everything should run in the app."
+         */
+        if (target.tool) {
+          showTool(target.tool);
+          router.push(target.route as never);
           return;
         }
         router.push(target.route as never);

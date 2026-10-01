@@ -103,6 +103,90 @@ function websiteUrl(deepLink) {
   return link.startsWith('/?') ? `${SITE}/app${link.slice(1)}` : `${SITE}${link}`;
 }
 
+/**
+ * Where a card goes on the WEBSITE.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * `appTargetFor` has done this for the app since the cards were silently inert
+ * there. The website had the same bug and nobody had looked: its handler read
+ * `?view=` off the deepLink, checked it against RENDERABLE_VIEWS, and fell
+ * through to the Insights tab when it did not match.
+ *
+ * Three of the nine deepLinks the engine can produce do not match:
+ *
+ *   /?view=profile          the website renders no `profile` view
+ *   /?view=practice&post=N  nor a `practice` one
+ *   /feedback               a page, not a view, so the `?view=` read finds
+ *                           nothing at all
+ *
+ * So "Finish setting up your profile", "New publication to explore" and both
+ * feedback cards opened Insights. The last of those was raised to a top-two
+ * prompt the same week, which is how a card nobody could follow became one of
+ * the two things the home screen offers.
+ *
+ * Written here rather than in the handler for the reason the app's twin gives:
+ * a destination worked out in a screen is a destination nothing can check, and
+ * check-card-targets.mjs runs this over every link the engine produces.
+ *
+ * @returns { view } to switch the dashboard, or { href } to navigate.
+ */
+export function webTargetFor(deepLink, renderable) {
+  const link = String(deepLink || '');
+
+  /**
+   * Home first, in both of its spellings.
+   *
+   * This sat below the page branch, so `/` was treated as a page and answered
+   * `{ href: '/' }`: a full reload of the marketing site instead of switching
+   * to the Home tab. The engine does not currently emit a bare `/`, which is
+   * the only reason it was not visible, and "no caller does that yet" is not a
+   * reason for a resolver to be wrong.
+   */
+  if (!link || link === '/' || link === '/?view=home') return { view: 'home' };
+
+  /* A page of its own. /feedback is the questionnaire; anything else that is
+     not a ?view= link is a page too, and navigating is the honest answer. */
+  if (!link.startsWith('/?')) return { href: link };
+
+  const view = /[?&]view=([^&]+)/.exec(link)?.[1] || '';
+  if (view === 'home') return { view: 'home' };
+  /* No `view=` at all on a `/?` link. Falls to the unknown branch at the foot
+     rather than being read as home: answering "home, confidently" to a link
+     nobody can parse is the thing this function exists to stop. */
+
+  /* Profile setup is the account page on the website: it carries the name, the
+     pronouns and the partner's name, and the control that edits them. */
+  if (view === 'profile') return { view: 'account' };
+
+  /* In Practice is a set of static pages here rather than a view. The post id
+     rides along so the card opens the article it is about. */
+  if (view === 'practice') {
+    const post = /[?&]post=([^&]+)/.exec(link)?.[1];
+    return { href: post ? `/practice?post=${encodeURIComponent(post)}` : '/practice' };
+  }
+
+  /* Everything else is a view if this surface can draw it. The caller passes
+     its own set rather than this module importing from src/, which it must not:
+     api/ is also what the app is served from. */
+  if (renderable && renderable.has(view)) return { view };
+
+  /**
+   * Unknown, and it says so.
+   *
+   * The first version returned a bare `{ view: 'home' }` here, which is a view
+   * the website can draw, so check-card-targets accepted it and three plants
+   * that deleted a branch above passed: every one of them fell through to a
+   * perfectly valid destination that had nothing to do with the card. A
+   * fallback that cannot be told apart from an answer is how the old handler
+   * sent three cards to the Insights tab without anything noticing.
+   *
+   * `unresolved` is what the gate reads. The caller still shows the dashboard,
+   * because a card that opens nothing is worse than one that opens the page
+   * someone was already on.
+   */
+  return { view: 'home', unresolved: true };
+}
+
 export function appTargetFor(deepLink) {
   // The feedback questionnaire runs in the app now. It is a page on the
   // website rather than a view, so it is matched here rather than in the view
@@ -145,7 +229,24 @@ export function appTargetFor(deepLink) {
       : { external: websiteUrl(deepLink) };
   }
 
-  // Profile setup, feedback, budget, checklist: all still on the website.
+  /**
+   * The two tools that run inside the app.
+   *
+   * This comment used to read "Profile setup, feedback, budget, checklist: all
+   * still on the website", and it had been false for all four for months:
+   * profile setup and feedback are handled above, and the budget and the
+   * checklist have run in the app since Ellie asked for it. So both of their
+   * cards fell through to here and opened Safari, which is the one thing the
+   * app is not supposed to do.
+   *
+   * Routed to Learn, carrying which tool, the same shape the exercises use.
+   */
+  if (view === 'budget' || view === 'checklist') {
+    return { route: '/resources', tool: view };
+  }
+
+  /* Anything else genuinely is a website page. The workbook is bought there,
+     which is the whole reason that one is not in the list above. */
   return { external: websiteUrl(deepLink) };
 }
 

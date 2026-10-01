@@ -41,6 +41,7 @@ import { IN_PRACTICE } from "../api/_in-practice.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail } from "../api/_lib/section-grounds.js";
 import { resultsNav, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
+import { webTargetFor } from "../api/_lib/next-action.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -13040,7 +13041,6 @@ export default function App() {
     } catch {}
   }, [view]);
   const [isBetaTester, setIsBetaTester] = useState(false);
-  const [showPostSurvey, setShowPostSurvey] = useState(false);
   const [postSurveyDone, setPostSurveyDone] = useState(() => { try { return !!(localStorage.getItem('attune_survey_done') || localStorage.getItem('attune_post_survey_done')); } catch { return false; } });
   // If the profile records a completed survey (set server-side on submit), treat
   // it as done even on a device whose localStorage never saw it.
@@ -15359,12 +15359,23 @@ export default function App() {
                       setActiveResult(id === "plan" ? "what-comes-next" : "highlights");
                       setView("results");
                     }}
+                    /* ── WHERE A CARD GOES ─────────────────────────────
+                        This read `?view=` off the deepLink, checked it against
+                        RENDERABLE_VIEWS and fell through to the Insights tab.
+                        Three of the nine links the engine produces do not
+                        match: profile, practice and /feedback, which is a page
+                        and carries no `view=` at all. So "Finish setting up
+                        your profile", "New publication to explore" and both
+                        feedback cards opened Insights.
+
+                        webTargetFor is in next-action.js beside appTargetFor,
+                        which has done this for the app since its cards were
+                        found to be inert, and check-card-targets runs it over
+                        every link the engine can produce. */
                     onCard={(card) => {
-                      const link = String(card.deepLink || "");
-                      const m = link.match(/[?&]view=([a-z0-9-]+)/i);
-                      if (m && RENDERABLE_VIEWS.has(m[1])) { setView(m[1]); return; }
-                      if (/results/.test(link)) { setView("results"); return; }
-                      setDashTab("insights");
+                      const to = webTargetFor(card.deepLink, RENDERABLE_VIEWS);
+                      if (to.href) { window.location.href = to.href; return; }
+                      setView(to.view);
                     }}
                   >
                   {/* ── HOME IS FOUR LINKS AND TWO PROMPTS ────────────────
@@ -16967,6 +16978,36 @@ export default function App() {
                   initialSection={activeResult !== "overview" ? activeResult : undefined}
                   onSectionChange={setActiveResult}
                 />
+                {/* ── THE POST-RESULTS SURVEY, WHERE ITS NAME SAYS ──────────
+                    Its only trigger used to be a prompt on the dashboard's
+                    Home, and Ellie asked for Home to be four quick tiles and
+                    two action prompts and nothing else. Removing that prompt
+                    removed the only way in, so the survey became unreachable
+                    and five question ids stopped being collected: rating,
+                    convo, nps, expectation and testimonial. The admin's
+                    Feedback page charts all five, so it would have gone on
+                    drawing empty charts about questions nobody was being
+                    asked. That is the exact failure check-feedback-reachable
+                    was written after, one level over, and it passed throughout
+                    because /feedback still posts a DIFFERENT set of ids.
+
+                    It belongs here rather than on Home: it is a post-results
+                    survey, and this is after the results. Beta testers are
+                    excluded because they have their own card from the priority
+                    engine, and asking the same person twice is the product
+                    asking twice. */}
+                {highlightsSeen && !postSurveyDone && !isBetaTester ? (
+                  <PostResultsSurvey
+                    respondentId={account?.id || null}
+                    userName={userName}
+                    coupleType={coupleType}
+                    onClose={() => setPostSurveyDone(true)}
+                    onDone={() => {
+                      setPostSurveyDone(true);
+                      try { localStorage.setItem('attune_survey_done', '1'); } catch { /* private window */ }
+                    }}
+                  />
+                ) : null}
                 </div>
               </div>
               {/* Dark footer banner — inside pane so it scrolls into view */}

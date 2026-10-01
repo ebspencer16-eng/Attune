@@ -70,6 +70,32 @@ export function showPost(id: string) {
   openPostHandle?.(id);
 }
 
+/**
+ * Open one of the tools from another tab.
+ *
+ * ── WHY IT WAS NEEDED ─────────────────────────────────────────────────────
+ * The home screen's cards for the budget and the checklist resolved to no app
+ * route, so they fell through `appTargetFor` to its "still on the website"
+ * branch and opened Safari. Both tools have run inside the app since Ellie
+ * asked for it: "Everything should run in the app. Ideally, a user purchases
+ * online then downloads the app and only uses the app from that point."
+ *
+ * The comment on that branch still said "Profile setup, feedback, budget,
+ * checklist: all still on the website", which had been false for two of the
+ * four for months and was describing a dead path, which is the kind of comment
+ * that keeps a bug alive by explaining it.
+ *
+ * Same one-slot handle as showPost, for the same reason: a value for the next
+ * mount, and a setter for the mount already sitting behind the tab bar.
+ */
+let pendingTool: string | null = null;
+let openToolHandle: ((key: string) => void) | null = null;
+
+export function showTool(key: string) {
+  pendingTool = key;
+  openToolHandle?.(key);
+}
+
 export default function ResourcesScreen() {
   useScreenTime('resources');
   const [home, setHome] = useState<HomeResponse | null>(null);
@@ -102,7 +128,7 @@ export default function ResourcesScreen() {
    * and the list is here rather than inside the handler so adding the budget
    * is one line in one place.
    */
-  const [openTool_, setOpenTool] = useState<string | null>(null);
+  const [openTool_, setOpenTool] = useState<string | null>(pendingTool);
   const [openPost, setOpenPost] = useState<string | null>(pendingPost);
   /** Whether the insight of the day is open as a full card. */
   const [insightOpen, setInsightOpen] = useState(false);
@@ -412,8 +438,10 @@ export default function ResourcesScreen() {
   // The handle showPost() moves, and the slot it left behind for this mount.
   useEffect(() => {
     pendingPost = null;
+    pendingTool = null;
     openPostHandle = (id: string) => { setOpenTool(null); setOpenPost(id); };
-    return () => { openPostHandle = null; };
+    openToolHandle = (key: string) => { setOpenPost(null); setOpenTool(key); };
+    return () => { openPostHandle = null; openToolHandle = null; };
   }, []);
 
   // Reload when this tab comes into focus, not only when it mounts.

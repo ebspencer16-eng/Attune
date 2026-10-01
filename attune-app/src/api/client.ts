@@ -647,6 +647,10 @@ export type HomeCard = {
   app?: {
     route?: string; exercise?: string; external?: string;
     settings?: boolean; feedback?: boolean;
+    /* Which tool a card opens on the Learn tab, the same way `exercise` says
+       which exercise. The budget and the checklist run in the app; without
+       this they fell through to opening Safari. */
+    tool?: string;
     /** Open the results at the storycards rather than at the landing menu. */
     results?: boolean;
   };

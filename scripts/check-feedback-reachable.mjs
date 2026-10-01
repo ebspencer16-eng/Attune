@@ -86,6 +86,71 @@ for (const id of STORED_IDS) {
     + '      name to a new one. Keep the id and change the label.');
 }
 
+// ── 3b. Every id the admin charts is one something still collects ─────────
+//
+// ── THE BUG THIS CAME FROM, WHICH WAS MINE ────────────────────────────────
+// Ellie asked for the dashboard's Home to be four quick tiles and two action
+// prompts and nothing else. The prompt I removed to do that was the only
+// trigger for PostResultsSurvey, so that survey became unreachable and five
+// ids stopped being collected: rating, convo, nps, expectation, testimonial.
+// The admin's Feedback page charts all five. It would have gone on drawing
+// empty charts about questions nobody was being asked, which is word for word
+// the failure the top of this file describes.
+//
+// Part 1 passed throughout, because /feedback still posts. It asks a different
+// set of ids, and "something sends feedback" cannot tell two sets apart. So the
+// check is per id, from the admin's side: what does the page chart, and does
+// anything still ask it.
+//
+// The admin's ids are read out of its own source rather than listed here, for
+// the reason part 3 gives about the stored ids: a list typed in a gate goes
+// stale the first time a chart is added, and goes stale silently.
+{
+  const admin = read('public/admin.html');
+  const app = read('src/App.jsx');
+
+  /* What the admin reads off a feedback row. `r.nps`, `row.rating`,
+     `f['convo']` are the three ways it does it. */
+  const charted = new Set();
+  for (const m of admin.matchAll(/\b(?:r|row|f|d|fb|resp|x)\.([a-z_]{3,20})\b/g)) charted.add(m[1]);
+  for (const m of admin.matchAll(/\b(?:r|row|f|d|fb|resp|x)\[['"]([a-z_]{3,20})['"]\]/g)) charted.add(m[1]);
+
+  /* Only the ones that are actually feedback answers. Everything else the
+     admin reads off a row is a column, not a question. */
+  const FEEDBACK_IDS = ['rating', 'convo', 'nps', 'expectation', 'testimonial', 'improve'];
+  const watched = FEEDBACK_IDS.filter((id) => charted.has(id));
+  if (!watched.length) {
+    problems.push('the admin charts none of the post-results survey ids. Refusing to pass:'
+      + ' a gate that has lost its subject must never report success.');
+  }
+
+  /**
+   * Asked by something a person can reach.
+   *
+   * Being present in the file is not enough: PostResultsSurvey sat in
+   * src/App.jsx, fully written, while nothing rendered it. So the component
+   * that asks them has to be rendered somewhere as well as defined.
+   */
+  const asksThem = (() => {
+    const def = /function PostResultsSurvey\b/.test(app);
+    const rendered = /<PostResultsSurvey\b/.test(app);
+    return { def, rendered };
+  })();
+
+  if (watched.length && !asksThem.def) {
+    problems.push(`the admin charts ${watched.join(', ')} and nothing in src/App.jsx defines`
+      + ' PostResultsSurvey, which is what asks them. Either the survey moved, in which case'
+      + ' point this gate at where it went, or those charts are about a question the product'
+      + ' no longer asks.');
+  } else if (watched.length && !asksThem.rendered) {
+    problems.push(`the admin charts ${watched.join(', ')} and PostResultsSurvey is defined but`
+      + ' never rendered, so nothing asks them.\n'
+      + '      A component that exists and is not drawn is the same as a deleted one, except\n'
+      + '      that reading the file says otherwise. This is how five charts came to be about\n'
+      + '      questions nobody was being asked.');
+  }
+}
+
 // ── 4. The card reaches it in the app ─────────────────────────────────────
 const nextAction = read('api/_lib/next-action.js')
   .replace(/\/\*[\s\S]*?\*\//g, ' ')
