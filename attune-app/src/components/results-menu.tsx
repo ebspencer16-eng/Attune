@@ -116,9 +116,19 @@ const ICON_FALLBACK = 'circle';
  */
 
 export default function ResultsMenu({
-  groups, current, onOpenSection, density = 'page',
+  groups, current, onOpenSection, density = 'page', exerciseResultsLabel,
 }: {
   groups: ResultsNavGroup[];
+  /**
+   * The eyebrow over the five exercise sections, from `pageCopy` on
+   * /api/results. It was written into this file, which meant the website could
+   * not draw the same menu without typing the words again. Ellie: "There should
+   * be NO additional prose as you are reconstructing these pages."
+   *
+   * Optional, and falls back to the words it used to hold, because a results
+   * row frozen before this key existed will not carry it.
+   */
+  exerciseResultsLabel?: string | null;
   /** The page being read, so its band opens and its row is marked. */
   current?: string | null;
   onOpenSection: (id: string) => void;
@@ -230,7 +240,9 @@ export default function ResultsMenu({
                   paddingRight: Spacing.xl,
                   flexDirection: 'row', alignItems: 'center', gap: Spacing.lg,
                 }}>
-                <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>Exercise results</Text>
+                <Text style={{ ...Type.eyebrow, color: c.accentQuiet }}>
+                  {exerciseResultsLabel || 'Exercise results'}
+                </Text>
               </View>
             ) : null}
             {/* ── A ROW, NOT A BAND ──────────────────────────────────────

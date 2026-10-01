@@ -88,6 +88,38 @@ for (const [section, blocks] of Object.entries(SECTION_BLOCKS)) {
     const present = has.filter((h) => h.present).map((h) => h.name);
     const missing = has.filter((h) => !h.present).map((h) => h.name);
 
+    /**
+     * ── A BLOCK ONE SURFACE DELIBERATELY DOES NOT DRAW ──────────────────
+     * Ellie: "Remove good evening hero, site has a banner and that's enough."
+     *
+     * The greeting is still the app's opening line, because the app has no
+     * banner carrying the couple's names. So the two surfaces differ on
+     * purpose, and the spec has to be able to say that, with the reason, or the
+     * only ways to make this gate pass are to put the greeting back or to
+     * delete the entry and lose the record that the app draws one.
+     *
+     * `only` is not an escape hatch for a block someone has not got round to:
+     * it fails if the named surface does not draw it, so writing it down is a
+     * claim that still has to be true.
+     */
+    if (block.only) {
+      const want = sources.map((x) => x.name).filter((n) => block.only.includes(n));
+      const drawn = present.filter((n) => block.only.includes(n));
+      const extra = present.filter((n) => !block.only.includes(n));
+      if (drawn.length !== want.length) {
+        problems.push(`${tag}: marked as ${block.only.join(' and ')} only, and`
+          + ` ${want.filter((n) => !drawn.includes(n)).join(', ')} does not draw it`
+          + (block.note ? `\n      ${block.note}` : ''));
+      } else if (extra.length) {
+        problems.push(`${tag}: marked as ${block.only.join(' and ')} only, and`
+          + ` ${extra.join(', ')} draws it too. Either it belongs on both, in which case`
+          + ' drop `only`, or this surface grew it back.');
+      } else {
+        claimed += 1;
+      }
+      continue;
+    }
+
     if (present.length === sources.length) { claimed += 1; continue; }
     if (present.length === 0) {
       // Neither surface claims it. Either the spec is ahead of both, which is
@@ -152,4 +184,6 @@ if (problems.length) {
 }
 
 const total = Object.values(SECTION_BLOCKS).reduce((n, b) => n + b.length, 0);
-console.log(`[check-section-blocks] ${claimed} of ${total} blocks present on both surfaces.`);
+const onlyOne = Object.values(SECTION_BLOCKS).flat().filter((b) => b.only).length;
+console.log(`[check-section-blocks] ${claimed} of ${total} blocks accounted for`
+  + (onlyOne ? `, ${onlyOne} of them drawn by one surface on purpose.` : ' on both surfaces.'));

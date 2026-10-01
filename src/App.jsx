@@ -40,6 +40,7 @@ import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insi
 import { IN_PRACTICE } from "../api/_in-practice.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail } from "../api/_lib/section-grounds.js";
+import { resultsNav, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
 import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exercise-progress.js";
@@ -3461,12 +3462,61 @@ function DashTabs({ active, onChange, isMobile }) {
  * tiles on the blue. Same twelve articles, so the inventory check passed, and
  * nothing about it looked like the app. Ellie: "neither is content or layout."
  */
-function AppLearnReading({ articles, isMobile, savedCount, readCount }) {
+function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) {
   const [query, setQuery] = useState("");
+  /**
+   * The head: the grab line, the two pills, the heading, the line under it and
+   * the search box. Everything below is meant to be off the screen until
+   * someone scrolls, which is what "peek" means on the app's Learn tab.
+   *
+   * Measured rather than assumed, and re-measured when the window changes,
+   * because the heading wraps at narrow widths and a peek computed from a
+   * number would be wrong on exactly the screens where it matters.
+   */
+  const headRef = useRef(null);
+  useEffect(() => {
+    const el = headRef.current;
+    if (!el || !onPeek) return undefined;
+    /* The grab line and the padding above it are part of what shows, so they
+       are part of the peek: the app adds GRAB_LINE_H and a spacing unit to its
+       own measured head for the same reason. Measured from the sheet's top
+       rather than added as a number. */
+    const report = () => {
+      const sheet = el.closest('[data-block="app-learn/reading"]');
+      const top = sheet ? sheet.getBoundingClientRect().top : el.getBoundingClientRect().top;
+      onPeek(Math.round(el.getBoundingClientRect().bottom - top));
+    };
+    report();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(report);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [onPeek]);
   const q = query.trim().toLowerCase();
   const shown = q
     ? articles.filter((a) => `${a.title} ${a.categoryLabel}`.toLowerCase().includes(q))
     : articles;
+
+  /** One article, as the app draws it: a grey tile with a bookmark corner. */
+  const tile = (a) => (
+    <a key={a.slug} href={a.path} style={{
+      display: "block", background: "#F2EDE6", borderRadius: 14,
+      padding: "0.6rem 0.7rem", textDecoration: "none", position: "relative",
+      minHeight: 66,
+    }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+        style={{ position: "absolute", top: 9, right: 9 }}>
+        <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+      </svg>
+      <span style={{
+        display: "block", fontFamily: BFONT, fontSize: "0.8rem",
+        lineHeight: 1.3, color: C.ink, paddingRight: "1rem",
+      }}>
+        {a.title}
+      </span>
+    </a>
+  );
 
   const pill = (label, n) => (
     <span style={{
@@ -3480,87 +3530,112 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount }) {
   return (
     /* block: app-learn/reading */
     <div data-block="app-learn/reading" style={{
-      marginTop: isMobile ? "2rem" : "2.5rem",
+      /* No top margin. The website's dashboard spends about 250 points on a
+         banner the app does not have, so every point above the sheet is a point
+         off the peek, and a gap here was the easiest one to give back. */
+      marginTop: 0,
       marginLeft: isMobile ? "-1.25rem" : "-2rem",
       marginRight: isMobile ? "-1.25rem" : "-2rem",
       background: "white", borderRadius: "34px 34px 0 0",
-      padding: isMobile ? "0.9rem 1.25rem 3rem" : "1rem 2rem 3.5rem",
+      padding: isMobile ? "0.75rem 1.25rem 3rem" : "0.85rem 2rem 3.5rem",
       boxShadow: "0 -10px 30px rgba(14,11,7,0.10)",
     }}>
       {/* Ellie: "Add some shading on the learn page bottom tile." The grab line
           above it is what makes the panel read as lifted rather than as a box. */}
+      {/* Ellie: "Add some shading on the learn page bottom tile." The grab line
+          above the head is what makes the panel read as lifted rather than as a
+          box. It sits outside the measured head on purpose: the app counts it
+          separately too. */}
       <div style={{
         width: 46, height: 4, borderRadius: 2, background: "#E8673A",
-        margin: "0 auto 1.1rem",
+        margin: "0 auto 0.9rem",
       }} />
 
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.1rem" }}>
-        {pill("Saved", savedCount)}
-        {pill("Read", readCount)}
-      </div>
+      {/* ── THE HEAD IS A ROW, AS IT IS IN THE APP ────────────────────────
+          Ellie: "In practice section should be formatted the same way as the
+          app's", and "Content on this page needs to be resized so that the in
+          practice section has the same peek as the app does."
 
-      <h2 style={{
-        fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
-        fontSize: isMobile ? "2rem" : "2.4rem", lineHeight: 1.05, letterSpacing: "-0.02em",
-      }}>
-        In Practice
-      </h2>
-      <p style={{
-        fontFamily: BFONT, fontSize: "0.95rem", color: "#8A7A66",
-        margin: "0.35rem 0 1.1rem",
-      }}>
-        Featured publications
-      </p>
+          Those are one thing. The app's head is a row: the pills, the heading,
+          the line under it and the search in a left column, with four featured
+          articles in a 2x2 grid beside them. It measures that row and the peek
+          is its height, so the two asks are the same ask.
 
-      {/* Ellie: "Search articles bar should be bottom aligned with the..." and
-          "with 'Search articles' in grey text that disappears once you type." */}
-      <label style={{ display: "block", marginBottom: "1.1rem" }}>
-        <span style={{ position: "absolute", left: -9999 }}>Search articles</span>
-        <span style={{
-          display: "flex", alignItems: "center", gap: "0.55rem",
-          background: "#F5F1EA", borderRadius: 999,
-          padding: isMobile ? "0.6rem 1rem" : "0.7rem 1.1rem",
-        }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
-            strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
-          </svg>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search articles"
-            style={{
-              border: "none", background: "transparent", outline: "none",
-              fontFamily: BFONT, fontSize: "0.9rem", color: C.ink, width: "100%",
-            }}
-          />
-        </span>
-      </label>
+          This had the same parts stacked, which made the head much shorter and
+          the peek with it, and no amount of adjusting the gap above would have
+          matched while the shape underneath was different.
 
-      <div style={{
-        display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)",
-        gap: "0.6rem",
+          Ellie, on the app: "Search articles bar should be bottom aligned with
+          the bottom 2 featured articles." The column is as tall as the grid
+          beside it and the search sits at its foot. */}
+      <div ref={headRef} style={{
+        display: "flex", flexDirection: "row", gap: isMobile ? "0.75rem" : "1.25rem",
+        alignItems: "stretch",
       }}>
-        {shown.map((a) => (
-          <a key={a.slug} href={a.path} style={{
-            display: "block", background: "#F2EDE6", borderRadius: 14,
-            padding: "0.85rem 0.9rem", textDecoration: "none", position: "relative",
-            minHeight: 104,
+        <div style={{ flex: "1 1 0", display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.9rem" }}>
+            {pill("Saved", savedCount)}
+            {pill("Read", readCount)}
+          </div>
+
+          <h2 style={{
+            fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
+            fontSize: isMobile ? "1.9rem" : "2.4rem", lineHeight: 1.05, letterSpacing: "-0.02em",
           }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-              style={{ position: "absolute", top: 10, right: 10 }}>
-              <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
-            </svg>
+            In Practice
+          </h2>
+          <p style={{
+            fontFamily: BFONT, fontSize: isMobile ? "0.88rem" : "0.95rem", color: "#8A7A66",
+            margin: "0.3rem 0 0",
+          }}>
+            Featured publications
+          </p>
+
+          {/* Pushed to the foot of the column, which is what bottom-aligns it
+              with the lower two cards beside it. */}
+          <label style={{ display: "block", marginTop: "auto", paddingTop: "1rem" }}>
+            <span style={{ position: "absolute", left: -9999 }}>Search articles</span>
             <span style={{
-              display: "block", fontFamily: BFONT, fontSize: "0.86rem",
-              lineHeight: 1.3, color: C.ink, paddingRight: "1.1rem",
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              background: "#F5F1EA", borderRadius: 999,
+              padding: isMobile ? "0.55rem 0.85rem" : "0.65rem 1rem",
             }}>
-              {a.title}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
+                strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
+              </svg>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search articles"
+                style={{
+                  border: "none", background: "transparent", outline: "none",
+                  fontFamily: BFONT, fontSize: "0.85rem", color: C.ink, width: "100%",
+                  minWidth: 0,
+                }}
+              />
             </span>
-          </a>
-        ))}
+          </label>
+        </div>
+
+        {/* Four, in a 2x2, beside the column. The rest are below the fold, which
+            is what makes this a peek rather than a page. */}
+        <div style={{
+          flex: "1 1 0", display: "grid", gridTemplateColumns: "1fr 1fr",
+          gap: "0.5rem", minWidth: 0,
+        }}>
+          {shown.slice(0, 4).map((a) => tile(a))}
+        </div>
       </div>
+
+      {shown.length > 4 && (
+        <div style={{
+          display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+          gap: "0.5rem", marginTop: "0.5rem",
+        }}>
+          {shown.slice(4).map((a) => tile(a))}
+        </div>
+      )}
       {!shown.length && (
         <p style={{ fontFamily: BFONT, fontSize: "0.85rem", color: "#8A7A66", marginTop: "1rem" }}>
           Nothing matches that.
@@ -3571,7 +3646,6 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount }) {
 }
 
 function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
-  const greeting = feed?.greeting || `Good to see you, ${userName}`;
   const cards = [feed?.primary, feed?.secondary].filter(Boolean);
   /**
    * The app's four, in the app's order, with the app's labels.
@@ -3588,14 +3662,29 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
     { id: "journal", label: "Relationship journal", icon: QuickIcons.book },
   ];
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "1.5rem" : "2rem" }}>
-      {/* block: app-home/greeting */}
-      <h1 data-block="app-home/greeting" style={{
-        fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
-        fontSize: isMobile ? "2rem" : "2.75rem", lineHeight: 1.05, letterSpacing: "-0.02em",
-      }}>
-        {greeting}
-      </h1>
+    /* ── IT FITS, IT DOES NOT SCROLL ──────────────────────────────────────
+       Ellie: "Home page should not be scroll-able... resize those so they fit
+       appropriately no matter the size of the window. That way the blue
+       gradient will be visible on that page as well."
+
+       So the column is the height it is given and nothing inside it overflows:
+       the links keep their own size, the tile takes the rest, and the two cards
+       inside the tile are allowed to shrink. `minHeight: 0` on the tile is what
+       lets that happen at all, because a flex child will not shrink below its
+       content without it, and that is what pushes a page into scrolling. */
+    <div style={{
+      display: "flex", flexDirection: "column", gap: isMobile ? "1rem" : "1.5rem",
+      height: "100%", minHeight: 0, overflow: "hidden",
+    }}>
+      {/* ── NO GREETING HERE ──────────────────────────────────────────────
+          Ellie: "Remove good evening hero, site has a banner and that's
+          enough." The banner above already carries both their names and a line
+          under them, so the greeting was the page saying hello twice.
+
+          It is still drawn in the app, where there is no banner, and it still
+          comes from the same /api/home payload. The block marker goes with it,
+          because a marker for something this surface does not draw is the
+          inventory check telling us the two agree when they do not. */}
 
       {/* ── FOUR ACROSS, BARELY THERE, ICON ABOVE THE NAME ─────────────────
           Ellie, about these squares in the app: "the four boxes should be
@@ -3662,8 +3751,12 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
         background: C.cream, borderRadius: "22px 22px 0 0",
         marginLeft: isMobile ? "-1.25rem" : "-2rem",
         marginRight: isMobile ? "-1.25rem" : "-2rem",
-        padding: isMobile ? "1.5rem 1.25rem 3rem" : "2rem 2rem 3.5rem",
+        padding: isMobile ? "1.25rem 1.25rem 1.5rem" : "1.75rem 2rem 2rem",
         marginTop: "auto",
+        /* Takes what is left and is allowed to give it back. Without
+           `minHeight: 0` a flex child refuses to shrink under its content,
+           which is what made this page scroll. */
+        flex: "1 1 auto", minHeight: 0, display: "flex", flexDirection: "column",
       }}>
         {/* Two across, on a phone as well. The app puts them side by side at
             390 points wide and stacking them here was the layout differing from
@@ -3671,19 +3764,26 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
         <div style={{
           display: "grid", gridTemplateColumns: "1fr 1fr",
           gap: isMobile ? "0.65rem" : "1.1rem",
+          flex: "1 1 auto", minHeight: 0,
         }}>
           {cards.map((card) => (
             <button key={card.id} onClick={() => onCard(card)}
               style={{
                 background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
                 padding: isMobile ? "0.85rem" : "1rem", textAlign: "left",
-                cursor: "pointer", fontFamily: BFONT, display: "block",
+                cursor: "pointer", fontFamily: BFONT,
+                display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden",
               }}>
               {/* The square an image goes in. Tinted until the artwork exists,
                   which is what the list in TASKS.md O506 is for. */}
+              {/* The picture is what gives way on a short window: it keeps
+                  its square while there is room and shrinks before the words
+                  do, because a card whose title is cut off is a card that has
+                  stopped working. */}
               <div style={{
                 width: "100%", aspectRatio: "1 / 1", borderRadius: 12,
-                background: card.tint || "#F3E4DE", marginBottom: "0.85rem",
+                background: card.tint || "#F3E4DE", marginBottom: "0.7rem",
+                flex: "1 1 auto", minHeight: 0,
               }} />
               <div style={{
                 fontFamily: HFONT, fontSize: isMobile ? "1rem" : "1.1rem", fontWeight: 700,
@@ -12368,11 +12468,49 @@ export default function App() {
     return () => { live = false; };
   }, [isLoggedIn]);
 
+  /**
+   * How much of the In Practice sheet shows before you scroll, in pixels.
+   *
+   * Ellie: "Content on this page needs to be resized so that the in practice
+   * section has the same peek as the app does."
+   *
+   * The app computes this rather than writing a number down: the peek is the
+   * grab line plus the sheet's head, and the gap above the sheet is whatever is
+   * left of the screen once that and the tab bar have taken their share. The
+   * same rule here, measured the same way, so a change to the head moves the
+   * sheet instead of being eaten by a constant that no longer fits.
+   *
+   * Zero until the first measurement, which is one frame.
+   */
+  const [learnPeek, setLearnPeek] = useState(0);
+
   const [dashTab, setDashTab] = useState(() => {
     try {
       const t = new URLSearchParams(window.location.search).get('tab');
       return DASH_TABS.some((x) => x.id === t) ? t : 'home';
     } catch { return 'home'; }
+  });
+
+  /**
+   * Where the Learn content starts, measured from the top of the page.
+   *
+   * The banner above it is a different height on a phone and a laptop, and it
+   * wraps. Measured rather than guessed: see the note on the block itself.
+   */
+  const [learnTop, setLearnTop] = useState(0);
+  const learnAboveRef = useRef(null);
+  useEffect(() => {
+    const el = learnAboveRef.current;
+    if (dashTab !== "learn" || !el) return undefined;
+    const report = () => {
+      const top = Math.round(el.getBoundingClientRect().top + window.scrollY);
+      setLearnTop((cur) => (Math.abs(cur - top) > 1 ? top : cur));
+    };
+    report();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(report);
+    ro.observe(document.body);
+    return () => ro.disconnect();
   });
 
   /**
@@ -14949,266 +15087,96 @@ export default function App() {
                       setDashTab("insights");
                     }}
                   >
+                  {/* ── HOME IS FOUR LINKS AND TWO PROMPTS ────────────────
+                      Ellie: "Home page should not be scroll-able. The only
+                      things on it are the 4 quick access tiles and the 2 action
+                      prompts, resize those so they fit appropriately no matter
+                      the size of the window."
 
+                      Everything else that was on this tab is gone: the results
+                      button and its section list, the beta feedback banner, the
+                      survey prompt, the welcome-back banner, the profile setup
+                      tile, the partner-joined card and the exercise step list.
 
-                {/* Beta tester tile — thank-you + feedback survey CTA (merged; replaces the separate survey prompt for beta testers) */}
-                {isBetaTester && (
-                  <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(27,95,232,0.06))", border: "1.5px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem" }}>
-                    <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#7C3AED", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.4rem" }}>Beta tester</div>
-                    <div style={{ fontSize: "0.92rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, marginBottom: "0.3rem", lineHeight: 1.3 }}>Thank you for being one of our beta testers.</div>
-                    <div style={{ fontSize: "0.8rem", color: "#6B5C4D", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, lineHeight: 1.55, marginBottom: postSurveyDone ? 0 : "0.95rem" }}>Your feedback shapes what we build next. When you're done reviewing your results and workbook, please let us know what you think about your Attune experience.</div>
-                    {postSurveyDone ? (
-                      <div style={{ fontSize: "0.76rem", color: "#7C3AED", fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>Thank you for sharing your feedback.</div>
-                    ) : (
-                      <button onClick={() => { try { localStorage.setItem('attune_feedback_ctx', JSON.stringify({ respondentId: account?.id || null, coupleType: coupleType?.name || null, at: Date.now() })); } catch {} window.location.href = '/feedback'; }}
-                        style={{ background: "#7C3AED", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.2rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer" }}>Feedback survey →</button>
-                    )}
-                  </div>
-                )}
+                      Most of them had somewhere better to be and are there:
+                      "Beta feedback should be one of the two action prompts
+                      once a beta user has viewed results. Should not have its
+                      own banner", so it is a card from the priority engine now
+                      (next-action.js, kind beta_feedback). Profile setup was
+                      already a card the engine raises. The exercise list is the
+                      Insights tab, which is what she asked for there.
 
-                {/* Survey prompt — NON-beta only (beta testers get the merged beta tile above); once results seen, until submitted */}
-                {highlightsSeen && !postSurveyDone && !isBetaTester && (
-                  <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.08), rgba(27,95,232,0.05))", border: "1.5px solid rgba(232,103,58,0.30)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "2rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
-                    <div style={{ flex: 1, minWidth: 200 }}>
-                      <div style={{ fontSize: "0.56rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: "0.35rem" }}>One last thing</div>
-                      <div style={{ fontSize: "0.9rem", color: "#0E0B07", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, lineHeight: 1.35 }}>When you're done reviewing your results and workbook, we'd love to hear what you think.</div>
-                    </div>
-                    <button onClick={() => { if (isBetaTester) { try { localStorage.setItem('attune_feedback_ctx', JSON.stringify({ respondentId: account?.id || null, coupleType: coupleType?.name || null, at: Date.now() })); } catch {} window.location.href = '/feedback'; } else { setShowPostSurvey(true); } }} style={{ background: "#E8673A", color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }}>Share your experience →</button>
-                  </div>
-                )}
-                {showPostSurvey && <PostResultsSurvey respondentId={account?.id || null} userName={userName} coupleType={coupleType} onClose={() => setShowPostSurvey(false)} onDone={() => { setPostSurveyDone(true); try { localStorage.setItem('attune_survey_done', '1'); localStorage.setItem('attune_post_survey_done', '1'); } catch {} setShowPostSurvey(false); }} />}
-
-                {/* Welcome-back banner — surfaces any in-progress exercise so
-                    the user can jump straight back in. Covers both session
-                    expiry (user was signed out, came back, re-authenticated)
-                    and normal resume (came back a day later). Dismissible
-                    per-session. */}
-                {isLoggedIn && (() => {
-                  if (window.__attune_welcome_back_dismissed) return null;
-                  // Detect the first exercise that has saved progress
-                  let target = null;
-                  try {
-                    const ex1 = JSON.parse(localStorage.getItem('attune_ex1_progress') || 'null');
-                    const ex2 = JSON.parse(localStorage.getItem('attune_ex2_progress') || 'null');
-                    const ex3 = JSON.parse(localStorage.getItem('attune_ex3_progress') || 'null');
-                    if (ex1 && Object.keys(ex1.answers || {}).length > 0) target = { view: 'exercise1', label: 'Exercise 1' };
-                    else if (ex2 && ex2.phase && ex2.phase !== 'intro') target = { view: 'exercise2', label: 'Exercise 2' };
-                    else if (ex3 && Object.keys(ex3.answers || {}).length > 0) target = { view: 'exercise3', label: 'Exercise 3' };
-                  } catch {}
-                  if (!target) return null;
-                  return (
-                    <div style={{ background: "linear-gradient(135deg, rgba(232,103,58,0.07), rgba(27,95,232,0.05))", border: "1.5px solid rgba(232,103,58,0.28)", borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.85rem", flexWrap: "wrap" }}>
-                      <div style={{ flex: 1, minWidth: 200 }}>
-                        <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: "0.2rem" }}>Welcome back, {userName}</div>
-                        <p style={{ fontSize: "0.82rem", color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", margin: 0, lineHeight: 1.5 }}>
-                          You were in the middle of {target.label}. Your progress is saved.
-                        </p>
-                      </div>
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button onClick={() => setView(target.view)}
-                          style={{ background: "linear-gradient(135deg,#E8673A,#1B5FE8)", color: "white", border: "none", borderRadius: 10, padding: "0.55rem 1.1rem", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-                          Continue {target.label} →
-                        </button>
-                        <button onClick={() => { window.__attune_welcome_back_dismissed = true; setView(view); }}
-                          style={{ background: "transparent", border: "1px solid rgba(140,122,104,0.3)", borderRadius: 10, padding: "0.55rem 0.8rem", fontSize: "0.72rem", color: "#7A6753", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-                          Dismiss
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Profile setup tile. For the purchaser, show until name +
-                    pronouns + partner name + partner invited are all set. For
-                    an invitee, the purchaser already invited them and may have
-                    set their name/pronouns, so only show when the invitee's own
-                    name or pronouns is still missing. Either partner can edit
-                    everything later in account settings. */}
-                {isLoggedIn && !profileSetupDone && (
-                  account?.joinedViaInvite
-                    ? !(account?.name && account?.pronouns)
-                    : !(account?.name && account?.pronouns && account?.partnerName && account?.partnerEmail)
-                ) && (
-                  <ProfileSetupTile
-                    account={account}
-                    onSetup={() => setShowProfileSetup(true)}
-                    onDismiss={completeProfileSetup}
-                  />
-                )}
-
-                {/* Partner invite is handled on the Account page (resend there).
-                    The dashboard no longer shows an invite card, which read as if
-                    the invite hadn't been sent yet. */}
-
-                {/* Partner joined — spinner during initial sync, then static waiting card */}
-                {isLoggedIn && !hasRealPartner && account?.partnerJoined && partnerSyncing && (
-                  <div style={{ background: "linear-gradient(135deg,#EEF2FF,#F5F7FF)", border: "1.5px solid rgba(27,95,232,.25)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.9rem" }}>
-                    <style>{`@keyframes attune-spin{to{transform:rotate(360deg)}}`}</style>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(27,95,232,0.18)", borderTopColor: "#1B5FE8", flexShrink: 0, animation: "attune-spin 0.8s linear infinite" }} />
-                    <div>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>Checking for {account.partnerName || "your partner"}'s results…</div>
-                      <div style={{ fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>Just a moment.</div>
-                    </div>
-                  </div>
-                )}
-                {isLoggedIn && !hasRealPartner && account?.partnerJoined && !partnerSyncing && (
-                  <div style={{ background: "linear-gradient(135deg,#EEF2FF,#F5F7FF)", border: "1.5px solid rgba(27,95,232,.25)", borderRadius: 14, padding: "1.1rem 1.4rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.9rem" }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#1B5FE8,#3B3A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1rem" }}>✓</div>
-                    <div>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0E0B07", fontFamily: "'DM Sans',sans-serif", marginBottom: 2 }}>{account.partnerName || "Your partner"} has joined.</div>
-                      <div style={{ fontSize: "0.75rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.5 }}>{WAITING.DASHBOARD}</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ── COUPLE PORTRAIT ── (hidden from dashboard pending portrait integration) ── */}
-                {false && isLoggedIn && (
-                  <div style={{ marginBottom: "2rem" }}>
-                    <div
-                      onClick={() => setShowPortraitSetup(true)}
-                      style={{ background: couplePortrait ? "white" : "linear-gradient(135deg, #FDF8F4 0%, #F5EEE8 100%)", border: couplePortrait ? `1.5px solid ${C.stone}` : "2px dashed #C8B8A8", borderRadius: 20, padding: "2.5rem 2rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1.25rem", minHeight: 220, cursor: "pointer", transition: "box-shadow .15s, border-color .15s", position: "relative", overflow: "hidden" }}
-                      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 28px rgba(0,0,0,.08)"; e.currentTarget.style.borderColor = couplePortrait ? "#C8B8A8" : "#B09080"; }}
-                      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = couplePortrait ? C.stone : "#C8B8A8"; }}
-                    >
-                      {couplePortrait ? (
-                        <>
-                          {/* Rendered portrait */}
-                          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-                            <div style={{ position: "relative" }}>
-                              {mkCouple(couplePortrait.p1, couplePortrait.p2, false, "dash-portrait")}
-                            </div>
-                            <div style={{ textAlign: "left" }}>
-                              <div style={{ fontSize: "1.15rem", fontWeight: 700, color: C.ink, fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.2, marginBottom: 4 }}>
-                                {userName}{partnerName ? ` & ${partnerName}` : ""}
-                              </div>
-                              {coupleType && (
-                                <div style={{ fontSize: "0.78rem", color: coupleType.color || C.clay, fontWeight: 600, fontFamily: font.body }}>{coupleType.name}</div>
-                              )}
-                            </div>
-                          </div>
-                          <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: font.body, letterSpacing: "0.06em", textTransform: "uppercase" }}>Tap to update portrait</div>
-                        </>
-                      ) : (
-                        <>
-                          {/* Empty frame — two overlapping circles */}
-                          <div style={{ position: "relative", width: 120, height: 80 }}>
-                            <div style={{ position: "absolute", left: 0, top: 0, width: 80, height: 80, borderRadius: "50%", border: "2.5px dashed #C8B8A8", background: "#FAF7F4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C8B8A8" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/></svg>
-                            </div>
-                            <div style={{ position: "absolute", right: 0, top: 0, width: 80, height: 80, borderRadius: "50%", border: "2.5px dashed #C8B8A8", background: "#F5F0EC", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C8B8A8" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7"/></svg>
-                            </div>
-                          </div>
-                          <div style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: C.ink, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 6 }}>Create your couple portrait</div>
-                            <div style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, lineHeight: 1.6, maxWidth: 280 }}>Add a photo or illustration for each partner. Shows up across your results and shareable cards.</div>
-                          </div>
-                          <button
-                            onClick={e => { e.stopPropagation(); setShowPortraitSetup(true); }}
-                            style={{ background: C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.5rem", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body, letterSpacing: "0.02em" }}>
-                            Add portrait
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* ════ STEP 1 · COMPLETE YOUR EXERCISES ════
-                    ── ON THE APP'S ORANGE ────────────────────────────────
-                    Ellie: "section 2 on site should look like the insights
-                    menu". The app's Insights tab is this table, on the brand
-                    orange, with the heading in white on it. It was a white card
-                    on cream here, which is the same inventory and a different
-                    place.
-
-                    The ground comes from api/_lib/section-grounds.js so the two
-                    surfaces paint one colour rather than two hexes that drift;
-                    the app keeps its own constants because Expo cannot import
-                    from api/, and check-tab-grounds holds them equal. */}
-                {/* The orange ground came out. Ellie, seeing it: "This looks
-                    bad." The right answer is the bigger one she proposed in the
-                    same message, mirroring the app's four sections behind its
-                    tab bar, and a painted block in the middle of the step
-                    headers was neither that nor an improvement. See TASKS.md
-                    O497. */}
-
-                  {/* ── MOVED IN, NOT COPIED ──────────────────────────────
-                      This was a second `dashTab === "home"` block further down
-                      the file, a sibling of the one above rather than part of
-                      it. Two blocks under one condition is the duplication this
-                      project keeps paying for, and it showed: once Home gained
-                      a cream tile the way the app has one, this half stayed
-                      outside it and went on reading against the indigo.
-
-                      It is the same JSX, moved rather than rewritten. */}
-
-                <div style={{ marginBottom: "2.5rem" }}>
-                  {/* No numeral: the results card is the app's, on Home, and the
-                      app does not number its screens. */}
-                  <button onClick={bothDone ? () => { setActiveResult("overview"); setHighlightsSeen(false); setView("results"); } : undefined} disabled={!bothDone}
-                    style={{ width: "100%", marginBottom: "0.85rem", padding: "0.85rem", borderRadius: 12, border: "none", fontSize: "0.85rem", fontWeight: 700, fontFamily: BFONT, letterSpacing: ".02em", cursor: bothDone ? "pointer" : "not-allowed", background: bothDone ? "#E8673A" : "#EFE7DD", color: bothDone ? "white" : "#B3A693", transition: "all .15s" }}>
-                    {bothDone ? "Review results →" : "Review results"}
-                  </button>
-                  {!bothDone && <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#A8997F", margin: "0 0 0.85rem", fontFamily: BFONT }}>{WAITING.DASHBOARD}</p>}
-                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: `3px solid ${bothDone ? "#1B5FE8" : "#D4C0A8"}`, borderRadius: 16, overflow: "hidden", opacity: bothDone ? 1 : 0.6, boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
-                    {[
-                      { label: "Storycard highlights", section: "highlights", color: "#E8673A" },
-                      { label: "Your couple type", section: "couple-type", color: "#9B5DE5" },
-                      { label: "Communication results", section: "comm-overview", color: "#E8673A" },
-                      { label: "Expectations results", section: "exp-overview", color: "#1B5FE8" },
-                      ...(pkg.hasAnniversary ? [{ label: "Relationship reflection results", section: "reflection-overview", color: "#10B981" }] : []),
-                      ...(pkg.hasIntimacy ? [{ label: "Physical intimacy results", section: "intimacy-overview", color: "#B5546E" }] : []),
-                      ...(pkg.hasConflict ? [{ label: "Conflict patterns results", section: "conflict-overview", color: "#1B5FE8" }] : []),
-                      // Restored: this is the closing section of the results
-                      // experience and had dropped out of the contents.
-                      { label: "What comes next", section: "what-comes-next", color: "#E8673A" },
-                    ].map((r, i, arr) => (
-                      <div key={r.section} onClick={bothDone ? () => {
-                          if (r.section === "highlights") {
-                            // Open the full standalone storycard swipe experience
-                            // (highlightsSeen=false), not the degraded inline version.
-                            setActiveResult("overview"); setHighlightsSeen(false);
-                          } else {
-                            setActiveResult(r.section); setHighlightsSeen(true);
-                          }
-                          setView("results");
-                        } : undefined}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderBottom: i < arr.length - 1 ? "1px solid #F0E9E0" : "none", cursor: bothDone ? "pointer" : "default", gap: "0.75rem", transition: "background .15s" }}
-                        onMouseEnter={bothDone ? (e => e.currentTarget.style.background = "#FAF7F2") : undefined}
-                        onMouseLeave={bothDone ? (e => e.currentTarget.style.background = "white") : undefined}>
-                        <span style={{ display: "flex", alignItems: "center", gap: "0.7rem", fontSize: "0.84rem", color: bothDone ? "#0E0B07" : "#A8997F", fontFamily: BFONT, fontWeight: 500 }}>
-                          <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: bothDone ? r.color : "#D4C0A8" }} />
-                          {r.label}
-                        </span>
-                        <span style={{ fontSize: "0.85rem", color: bothDone ? "#C8BFB4" : "#D4C0A8", flexShrink: 0 }}>{bothDone ? "→" : ""}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                      Two are simply not here any more and are flagged in
+                      TASKS.md rather than quietly dropped: the partner-joined
+                      and welcome-back notices. The app shows that kind of thing
+                      as an alert row on Home and the website now has nowhere
+                      for one. */}
                   </AppHome>
                   </>
                 )}
                 {dashTab === "insights" && (
                 <div style={{ marginBottom: "2.5rem" }}>
-                  {/* ── THE APP'S OWN HEADING ───────────────────────────────────────
-                      The numbered step headers went with the step spine. This
-                      is the line the app's Insights tab opens with, word for
-                      word, and it is Ellie's: "Ensure that when exercises are
-                      unfinished, insights page hero says 'Insights generate
-                      once your exercises are complete'."
+                  {/* ── NO HERO, NO DESCRIPTION ────────────────────────────
+                      Ellie: "No hero and description line", and for the whole
+                      dashboard: "There should be NO additional prose as you are
+                      reconstructing these pages. I have approved what's on the
+                      app and this should mirror that."
 
-                      White, because the ground under it is the orange. That is
-                      the rule she has asked for in the app four times and it is
-                      the same rule here. */}
-                  <h2 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.5rem" : "1.9rem", fontWeight: 700, color: "white", lineHeight: 1.15, letterSpacing: "-0.02em", margin: "0 0 0.6rem" }}>
-                    {bothDone ? "Your results are ready" : "Insights generate once your exercises are complete"}
-                  </h2>
-                  <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 300, lineHeight: 1.55, margin: "0 0 1.5rem" }}>
-                    {WAITING.DASHBOARD}
-                  </p>
-                  <div style={{ background: "white", border: "1.5px solid #E8DDD0", borderTop: "3px solid #E8673A", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 14px rgba(14,11,7,0.04)" }}>
-                    {(() => {
+                      The app's Insights tab opens straight onto the panel. The
+                      heading and the line under it were written for this page
+                      and exist nowhere in the app, which is what she is asking
+                      me to stop doing. */}
+                  {/* ── THE PANEL, AS THE APP DRAWS IT ─────────────────────
+                      Ellie: "Bg should be the gradient the app uses not this
+                      full bleed orange."
+
+                      The ground was already the app's gradient. What made it
+                      read as a flat orange field is that the app puts its
+                      content on a large cream panel with a generous radius, so
+                      the orange is a border around it rather than the page. */}
+                  <div style={{ background: "#FDF4EF", borderRadius: 26, overflow: "hidden", padding: isMobile ? "1.25rem 1rem" : "1.75rem 1.5rem" }}>
+                    {/* ── COMPLETE: THE NAV, NOT THE STATUS ────────────────
+                        Ellie: "this page should be the exercise status menu
+                        only until all exercises are complete, at which point it
+                        should show the insights nav menu and provide access to
+                        results."
+
+                        The same list the app draws, from resultsNav, which is
+                        also what the website's own results sidebar is built
+                        from. One source, so a section added to results appears
+                        here without anyone remembering to add it. */}
+                    {bothDone ? (
+                      <div>
+                        {resultsNav({
+                          hasReflection: pkg.hasReflection,
+                          intimacyReady: pkg.hasIntimacy,
+                          conflictListed: pkg.hasConflict,
+                        }).map((group) => (
+                          <div key={group.id}>
+                            {group.id === "comm" && (
+                              <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, fontFamily: BFONT, margin: "1.25rem 0 0.5rem" }}>
+                                {EXERCISE_RESULTS_EYEBROW}
+                              </div>
+                            )}
+                            <button
+                              onClick={() => { setActiveResult(group.id); setView("results"); }}
+                              style={{
+                                display: "flex", alignItems: "center", gap: "0.75rem", width: "100%",
+                                background: "transparent", border: "none", cursor: "pointer",
+                                padding: group.children ? "0.7rem 0.25rem" : "0.8rem 0.25rem",
+                                textAlign: "left", fontFamily: HFONT,
+                                fontSize: group.children ? (isMobile ? "1rem" : "1.1rem") : (isMobile ? "1.15rem" : "1.3rem"),
+                                fontWeight: 700, color: C.ink, lineHeight: 1.2,
+                              }}>
+                              <span style={{ flex: 1 }}>{group.label}</span>
+                              {group.children ? (
+                                <span style={{ color: "#A8997F", fontSize: "0.7rem" }}>▾</span>
+                              ) : null}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (() => {
                       // Exercises are numbered in sequence, so the intimacy
                       // exercise reads as 04 (or 03 when there's no reflection),
                       // matching the number on its intro screen (10.5).
@@ -15324,10 +15292,33 @@ export default function App() {
 
                     Same ground as the app, from api/_lib/section-grounds.js. */}
                 {dashTab === "learn" && (
+                /* ── THE SHEET STARTS WHERE THE SCREEN ENDS, LESS ITS HEAD ──
+                   Ellie: "Content on this page needs to be resized so that the
+                   in practice section has the same peek as the app does."
+
+                   The tools and the insight take the screen minus the sheet's
+                   head, so the head is what shows at the bottom and the
+                   articles begin below the fold, which is the app's rule
+                   exactly. `100dvh` rather than `100vh` because a phone
+                   browser's toolbars are part of `vh` and not part of what you
+                   can see, which would push the peek off the bottom on the one
+                   device this is about. */
                 <div style={{ marginBottom: "2rem" }}>
                   {/* The app's Learn tab opens straight onto the tiles, with no
                       heading over them. */}
 
+                  <div ref={learnAboveRef} style={{
+                    display: "flex", flexDirection: "column",
+                    justifyContent: "space-between",
+                    /* Its own distance from the top of the page, measured, plus
+                       the sheet's measured head. The first version guessed the
+                       banner at 250 points and the search box ended up under
+                       the fold, which is the kind of number that is wrong on
+                       every window except the one it was tuned on. */
+                    minHeight: (learnPeek && learnTop)
+                      ? `calc(100dvh - ${learnTop}px - ${learnPeek}px)`
+                      : undefined,
+                  }}>
                   {/* ── THE APP'S THREE TOOL TILES ────────────────────────
                       Ellie: "On learn, reorder the resource tiles. First should
                       be personalized workbook, next build a budget, next
@@ -15472,6 +15463,8 @@ export default function App() {
                     );
                   })()}
 
+                  </div>
+
                   {/* ── THE READING, AS A SHEET OVER THE GROUND ───────────
                       Every article, from the module the app is served through
                       /api/posts, so neither surface has a shorter library than
@@ -15482,6 +15475,7 @@ export default function App() {
                     isMobile={isMobile}
                     savedCount={0}
                     readCount={0}
+                    onPeek={setLearnPeek}
                   />
 
                   {/* Add-ons — separate, quieter, never mixed with what you own */}
@@ -15514,6 +15508,30 @@ export default function App() {
                     </div>
                   )}
                 </div>
+                )}
+
+                {/* ── THE NOTES TAB, WHICH WAS IN THE WRONG BRANCH ──────
+                    Ellie: "Why is there no relationship journal or notes system
+                    on the site? Please build."
+
+                    It was built. `ConnectedNotesView` is the full page: the
+                    journal composer, the marks grouped by section, the tags and
+                    the archive. It was sitting inside the `view === "exercises"`
+                    branch, several hundred lines below the dashboard, so
+                    `dashTab === "notes"` was evaluated on a screen nobody was
+                    looking at and the Notes tab drew nothing at all.
+
+                    Found by rendering the tab and asking the page what it had:
+                    no heading, no button, 418 characters of body text, and the
+                    same component rendering perfectly at ?view=notes. */}
+                {dashTab === "notes" && (
+                  <ConnectedNotesView
+                    userName={userName}
+                    partnerName={partnerName}
+                    sectionLabels={RESULTS_SECTION_LABELS}
+                    onOpenSection={(id) => { setActiveResult(id); setView("results"); }}
+                    onBack={() => setDashTab("home")}
+                  />
                 )}
 
                 </div>
@@ -15634,17 +15652,6 @@ export default function App() {
                     </div>
                     <button onClick={() => setView("results")} style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "white", borderRadius: 10, padding: "0.65rem 1.25rem", fontSize: "0.75rem", fontWeight: 700, fontFamily: BFONT, whiteSpace: "nowrap", cursor: "pointer" }}>View Results →</button>
                   </div>
-                )}
-                {/* The app's Notes tab. This page already existed at ?view=notes and
-                    nothing on any screen linked to it. */}
-                {dashTab === "notes" && (
-                  <ConnectedNotesView
-                    userName={userName}
-                    partnerName={partnerName}
-                    sectionLabels={RESULTS_SECTION_LABELS}
-                    onOpenSection={(id) => { setActiveResult(id); setView("results"); }}
-                    onBack={() => setDashTab("home")}
-                  />
                 )}
 
                 {!bothDone && (

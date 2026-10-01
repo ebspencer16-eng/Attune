@@ -38,6 +38,8 @@ const DAY = 24 * 60 * 60 * 1000;
  *   inPractice: { latestId, latestTitle, latestPublishedAt, lastReadAt },
  *   partnerLastActiveAt, partnerNudgedAt,
  *   opens30d, feedbackGivenAt,
+ *   betaTester,                             any order of either partner carries
+ *                                           a beta promo code, per _lib/beta.js
  *   topGapDimensionLabel, unresolvedConversationTitle
  * }
  * @returns { primary, secondary[] } cards, each { id, kind, title, body, cta, deepLink }
@@ -285,9 +287,35 @@ export function nextActions(state = {}) {
     }
   }
 
+  /**
+   * ── BETA FEEDBACK IS A PROMPT, NOT A BANNER ─────────────────────────────
+   * Ellie: "Beta feedback should be one of the two action prompts once a beta
+   * user has viewed results. Should not have its own banner."
+   *
+   * It was a panel of its own on the website's dashboard, above everything, on
+   * every visit. Here it is a card like the others and competes for a slot like
+   * the others.
+   *
+   * Priority 6 puts it under "your results are ready", which is the thing a
+   * beta tester is being asked to give feedback about and must not be pushed
+   * below, and above the resource and revisit prompts, which is what makes it
+   * one of the two once results have been opened.
+   *
+   * Opened, not ready: asking what someone thought of results they have not
+   * looked at is asking them to make something up.
+   */
+  if (state.betaTester && state.resultsLastOpenedAt && !state.feedbackGivenAt) {
+    add({ id: 'beta-feedback', kind: 'beta_feedback', priority: 6,
+      title: 'Tell us what you think',
+      body: 'You are testing Attune before launch. Your notes shape what ships.',
+      cta: 'Share your experience', deepLink: '/feedback' });
+  }
+
   // 8. Feedback, only from people who actually use it. Asking a stranger to
   //    rate you is noise; asking a regular is a fair request.
-  if ((state.opens30d || 0) >= 5 && !state.feedbackGivenAt) {
+  /* Not for a beta tester: they have the card above, and two cards asking the
+     same person for feedback is the product asking twice. */
+  if (!state.betaTester && (state.opens30d || 0) >= 5 && !state.feedbackGivenAt) {
     add({ id: 'feedback', kind: 'feedback', priority: 2,
       title: 'Tell us about your experience',
       body: 'Take a minute to share feedback to help us shape Attune',

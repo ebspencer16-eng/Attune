@@ -18,6 +18,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { isBetaOrderSet } from './_lib/beta.js';
 
 export const config = { runtime: 'edge' };
 
@@ -31,9 +32,6 @@ const supabase = () => createClient(
 const CORS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function isBetaCode(c) {
-  return typeof c === 'string' && c.toUpperCase().includes('BETA');
-}
 
 export default async function handler(req) {
   try {
@@ -86,7 +84,7 @@ export default async function handler(req) {
       reportToSentry(new Error('couple-beta-status orders query: ' + ordersErr.message), { route: '/api/couple-beta-status' }).catch(() => {});
     }
 
-    const isBeta = Array.isArray(orders) && orders.some(o => isBetaCode(o.promo_code));
+    const isBeta = isBetaOrderSet(orders);
 
     return new Response(JSON.stringify({ ok: true, isBeta }), { headers: CORS });
   } catch (err) {

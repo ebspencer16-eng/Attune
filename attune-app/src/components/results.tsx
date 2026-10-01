@@ -771,6 +771,7 @@ export default function Results({
             groups={groups.filter((g) => !(g.id === 'highlights' && hideHighlights))}
             current={null}
             onOpenSection={rememberSection}
+            exerciseResultsLabel={pageCopy('exerciseResults', 'Exercise results')}
           />
         </View>
       </View>
@@ -1094,6 +1095,7 @@ export default function Results({
                 current={section}
                 density="sheet"
                 onOpenSection={(id) => { setNavOpen(false); rememberSection(id); }}
+                exerciseResultsLabel={pageCopy('exerciseResults', 'Exercise results')}
               />
             </Pressable>
           </Pressable>

@@ -141,7 +141,14 @@ export const SECTION_BLOCKS = {
   ],
 
   'app-home': [
-    { id: 'greeting', note: "The page's own line, from the server's greeting." },
+    /**
+     * Ellie: "Remove good evening hero, site has a banner and that's enough."
+     *
+     * The app has no banner, so the greeting is its opening line and stays. The
+     * website's dashboard already carries both names and a line under them, so
+     * the greeting was the page saying hello twice.
+     */
+    { id: 'greeting', only: ['app'], note: "The app's own opening line, from the server's greeting." },
     { id: 'quick-links', note: 'The four ways in.' },
     { id: 'prompts', note: 'The two cards the priority engine picked.' },
   ],

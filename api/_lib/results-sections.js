@@ -174,6 +174,12 @@ export const PAGE_TITLES = {
  */
 export const PAGE_COPY = {
   /**
+   * Over the five exercise sections in the results menu, on both surfaces.
+   * Here rather than in the app's menu component, where it used to be the only
+   * copy: a word the website cannot read is a word the website rewrites.
+   */
+  exerciseResults: 'Exercise results',
+  /**
    * Over the placement bars on the communication overview.
    *
    * Ellie: "can just be titled 'overview' now that the main hero says
@@ -299,6 +305,22 @@ export function isResultsSection(key) {
  * Labels are the website's, exactly, because the website is the product this
  * is meant to match.
  */
+/**
+ * The line above the five exercise sections in the results menu.
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * It was typed into attune-app/src/components/results-menu.tsx and nowhere
+ * else, so the website could not draw the same menu without writing it a second
+ * time. Ellie, about the dashboard: "There should be NO additional prose as you
+ * are reconstructing these pages. I have approved what's on the app and this
+ * should mirror that." The only way to mirror a word is to read it.
+ *
+ * It reads from PAGE_COPY rather than standing beside it, because PAGE_COPY is
+ * already the map /api/results sends to the app as `pageCopy`. One string, one
+ * delivery, and no new channel for a single word.
+ */
+export const EXERCISE_RESULTS_EYEBROW = PAGE_COPY.exerciseResults;
+
 export function resultsNav({ hasReflection = false, intimacyReady = false, conflictListed = false } = {}) {
   /**
    * Ellie: "Change 'at a glance' to 'overview' throughout site and app nav and

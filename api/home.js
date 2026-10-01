@@ -18,6 +18,7 @@
 export const config = { runtime: 'edge' };
 
 import { nextActions, greeting, appTargetFor } from './_lib/next-action.js';
+import { isBetaOrderSet } from './_lib/beta.js';
 import { progressFor } from './_lib/exercise-progress.js';
 import { isAdminAddress } from './_lib/admins.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
@@ -195,6 +196,40 @@ export default async function handler(req) {
       if (top) topGapDimensionLabel = top;
     }
 
+    /**
+     * ── IS EITHER PARTNER A BETA TESTER ─────────────────────────────────
+     * Ellie: "Beta feedback should be one of the two action prompts once a beta
+     * user has viewed results. Should not have its own banner."
+     *
+     * The prompt comes from the priority engine, so the engine has to know. The
+     * answer lives on the orders table, as a promo code, and api/beta.js owns
+     * what counts rather than this file deciding again.
+     *
+     * No extra round trips for the identities: the signed-in user's email came
+     * back with the token check and the partner's is a column already selected
+     * above. couple-beta-status has to ask the auth admin for both, because it
+     * starts from a user id and nothing else.
+     *
+     * A failure here is not an error. Not knowing someone is a beta tester
+     * costs a prompt; refusing to draw the home screen over it costs the
+     * screen.
+     */
+    let betaTester = false;
+    try {
+      const ids = [me.id, me.partner_profile_id].filter(Boolean);
+      const emails = [user.email, partner?.email]
+        .filter(Boolean).map((e) => String(e).toLowerCase());
+      const or = [
+        `user_id.in.(${ids.join(',')})`,
+        ...(emails.length ? [`buyer_email.in.(${emails.map((e) => `"${e}"`).join(',')})`] : []),
+      ].join(',');
+      const oRes = await fetch(
+        `${supabaseUrl}/rest/v1/orders?select=promo_code&or=(${encodeURIComponent(or)})`,
+        { headers: svc },
+      );
+      betaTester = isBetaOrderSet(await oRes.json().catch(() => []));
+    } catch { /* a missing beta flag costs a prompt, not the screen */ }
+
     // Newest published post, and whether they have read it. Drives the
     // "new in In Practice" card, and the badge below.
     let inPractice = {};
@@ -316,6 +351,7 @@ export default async function handler(req) {
       partnerNudgedAt: me.partner_nudged_at || null,
       opens30d: 0,
       feedbackGivenAt: me.feedback_given_at || null,
+      betaTester,
       topGapDimensionLabel,
     };
 
