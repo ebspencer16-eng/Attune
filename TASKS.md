@@ -4,8 +4,7 @@
 
 | # | What I need from you |
 |--|--|
-| O512 | **Go to `www.attune-relationships.com/admin`, enter the admin password, then click Environment in the left sidebar.** Opening `/api/admin-env` in a tab sends no password, which is the unauthorized you saw. |
-| O516 | **Three sentences are mine, not yours.** Partner joined says "Preston joined Attune" / "You can both start your exercises now". The web journal lock says "Locked. Enter your password to read your entries." Rewrite any of them. |
+| O512 | **Redeploy the workbook service on Render, then tell me.** In Render, open the Attune service and click Manual Deploy → Deploy latest commit. The fix is in the repo: four files the service reads were never copied into its image, which is why it crashed instantly every time. Once it builds I will delete the .docx version (O490). |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -17,19 +16,23 @@
 
 | # | Mine to build |
 |--|--|
-| O490 | Delete the .docx workbook. Waiting on the PDF working, which is waiting on O512. |
+| | **Nothing open.** Everything you have raised is either in section 3 for your eye or in section 1 waiting on you. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O488 | **Settings has a Check for update button.** One press asks, downloads and reloads, and tells you if you are already current. You need one more manual update to get the button itself. |
-| O497 | Home fits the window and does not scroll on a laptop; no more jump on load. Insights has the bullets, indents, icons and cream panel, and its rows open the right pages. Learn has the app's In Practice peek. |
-| O517 | Notes is the app's Notes tab: word of the day, Recent and Shared with me tiles, the journal button with the streak, then the entries. The journal is behind your account password. |
-| O514 | Partner joined is an alert row on both. No welcome back notice anywhere. |
-| O510 | Methodology, everywhere, and the address is `/practice/methodology` to match. Say if you wanted the address left alone. |
-| O518 | **Four cards on the home screen went nowhere and now do.** Profile setup, the new-publication card and both feedback cards all opened Insights on the site; the budget and checklist cards opened Safari from the app instead of the in-app tool. |
-| O519 | **The post-results survey was unreachable and I broke it.** Removing it from Home removed its only trigger, so five of the admin's feedback charts had stopped collecting. It runs after results now. |
+| O520 | **The site's Insights view.** You said you never approved it and it was not in a section. It is this row from now on. Bullets removed, exercise rows indented further with their icons, all five present, icons redrawn to match the app's. |
+| O497 | The second prompt card was empty: the server sends `secondary` as a list and the site read it as one card. Both cards carry their words now. |
+| O517 | Notes is the word, the two tiles, the orange button and the tags. Back button, Write something, the journal section and From Preston are gone. The button opens the journal; the password opens what is in it. |
+| O521 | **Insights menu was missing Relationship Reflection.** It read a flag that does not exist, so it was always false. All five exercises show now. |
+| O522 | **The key warning was the budget tool, not Insights.** It shows on whatever tab you are on because all four load at once. |
+| O523 | **The app's budget shows the website's three numbers**: Monthly income, Left to allocate, Savings rate. It showed three different ones. The app still saves as you type where the site has a Save button; say if you want them matched. |
+| O488 | Settings has a Check for update button. One press asks, downloads and reloads. |
+| O514 | Partner joined is an alert row on both. |
+| O510 | Methodology everywhere, address `/practice/methodology`. |
+| O518 | Four home cards went nowhere and now do. |
+| O519 | The post-results survey was unreachable; it runs after results now. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
