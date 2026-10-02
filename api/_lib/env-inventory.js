@@ -11,14 +11,14 @@
  */
 
 export const ENV_VARS = [
-  { name: "ADMIN_API_KEY", required: false, readBy: ["api/generate-workbook.js","api/save-exercise.js","api/store-workbook-pdf.js","api/store-workbook.js"] },
+  { name: "ADMIN_API_KEY", required: false, readBy: ["api/save-exercise.js","api/store-workbook-pdf.js"] },
   { name: "ADMIN_EMAILS", required: false, readBy: ["api/_lib/admins.js"] },
   { name: "ADMIN_EMAIL_HASH", required: false, readBy: ["api/admin-login.js"] },
   { name: "ADMIN_PASSWORD_HASH", required: false, readBy: ["api/admin-login.js"] },
   { name: "ADMIN_SECRET", required: true, readBy: ["api/_lib/admin-auth.js","api/admin-login.js"], note: "The admin sign-in." },
   { name: "ANTHROPIC_API_KEY", required: false, readBy: ["api/cron-feedback-synthesis.js"] },
   { name: "ATTUNE_PHYSICAL_ENABLED", required: false, readBy: ["api/create-payment-intent.js"] },
-  { name: "BROWSERLESS_TOKEN", required: false, readBy: ["api/generate-pdf.js","api/store-workbook.js"], note: "Optional. Without it the workbook prints in the browser instead." },
+  { name: "BROWSERLESS_TOKEN", required: false, readBy: ["api/generate-pdf.js"], note: "Optional. Without it the workbook prints in the browser instead." },
   { name: "CONSENT_PEPPER", required: false, readBy: ["api/_lib/consent.js"] },
   { name: "CRON_SECRET", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-prune-events.js"] },
   { name: "DIGEST_TO", required: false, readBy: ["api/cron-beta-digest.js","api/cron-feedback-synthesis.js"] },

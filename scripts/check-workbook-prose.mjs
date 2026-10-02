@@ -1,8 +1,15 @@
-// Fails the build when the two workbook generators stop agreeing.
+// Fails the build when the PDF builder stops agreeing with the prose it reads.
 //
-// ── WHY THERE ARE TWO ──────────────────────────────────────────────────────
-// api/generate-workbook.js builds the .docx, from api/_workbook-content.js.
-// That is what the app and the website hand over.
+// ── THERE USED TO BE TWO BUILDERS ──────────────────────────────────────────
+// api/generate-workbook.js built a .docx from api/_workbook-content.js and
+// scripts/build_workbook.py builds the PDF, and this file existed because the
+// same words lived in both.
+//
+// Ellie: "I want customers to be able to download the pdf. Remove the word
+// file." The .docx builder is deleted. What survives is the half that was
+// always the real risk: the Python cannot import JavaScript, so it reads
+// api/_workbook-content.js through a generated JSON, and that copy can go
+// stale without anything saying so.
 //
 // scripts/build_workbook.py builds the PDF. Dockerfile.workbook puts it in a
 // container with scripts/service.mjs, and api/store-workbook-pdf.js posts to
@@ -137,16 +144,13 @@ if (missing.length) {
 }
 
 // ── 4. No placeholder reaches a customer ──────────────────────────────────
+//
+// The .docx half of this is gone with its builder. It printed seven of them,
+// twenty-five of which were the Conversation Library's questions and five the
+// whole body of every same-type moment card, so one reader in ten received a
+// section made entirely of notes to ourselves. Worth keeping written down:
+// that is what a placeholder costs when nothing checks for it.
 {
-  const docx = readFileSync(`${ROOT}api/generate-workbook.js`, 'utf8')
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/(^|\s)\/\/[^\n]*/g, ' ');
-  const left = [...docx.matchAll(/PH\(/g)].length;
-  if (left) {
-    console.error(`[check-workbook-prose] api/generate-workbook.js still prints ${left} placeholder${left === 1 ? '' : 's'}.`);
-    console.error('  "[PLACEHOLDER: ...]" is a note to ourselves, and it was going out in the .docx.');
-    process.exit(1);
-  }
   const pdfLeft = [...py.matchAll(/PLACEHOLDER/g)].length;
   if (pdfLeft) {
     console.error(`[check-workbook-prose] scripts/build_workbook.py mentions PLACEHOLDER ${pdfLeft} times.`);
@@ -155,5 +159,5 @@ if (missing.length) {
 }
 
 console.log(
-  `[check-workbook-prose] ${strings.length} expectations strings, identical in the .docx builder `
-  + `and the PDF builder; ${Object.keys(JSON.parse(readFileSync(`${ROOT}scripts/workbook_prose.json`, 'utf8'))).length} shared blocks, no placeholders in either.`);
+  `[check-workbook-prose] ${strings.length} expectations strings, identical in the PDF builder `
+  + `and api/_workbook-content.js; ${Object.keys(JSON.parse(readFileSync(`${ROOT}scripts/workbook_prose.json`, 'utf8'))).length} shared blocks read rather than copied, no placeholders.`);

@@ -5751,70 +5751,26 @@ async function markStatus(orderId, newStatus) {
 }
 
 // ── Generate workbook for a specific order ─────────────
+/**
+ * The workbook is a PDF, and this control built a Word file out of demo data.
+ *
+ * Ellie: "I want customers to be able to download the pdf. Remove the word
+ * file." This was the last caller of the Word builder, and the orders it ran
+ * against come from generateOrders(), which invents names and scores. So it
+ * never produced any real couple's workbook; it produced a Word document about
+ * people who do not exist.
+ *
+ * Removed rather than repointed at the PDF service, because what a couple's
+ * workbook contains is their own answers and this table does not have them. If
+ * an admin build is wanted it belongs beside real order rows, through
+ * /api/store-workbook-pdf with that couple's user id, which that endpoint
+ * already accepts.
+ */
 async function generateWorkbookForOrder(orderId) {
-  const order = ORDERS.find(o => o.id === orderId);
-  if (!order) return;
-
   const btn = document.getElementById('wb-btn-' + orderId);
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg> Building...';
-  }
-
-  // Resolve partner names from order data
-  const partnerA = order.partnerA || (order.coupleNames ? order.coupleNames.split(' & ')[0] : 'Partner A');
-  const partnerB = order.partnerB || (order.coupleNames ? order.coupleNames.split(' & ')[1] : 'Partner B') || 'Partner B';
-
-  const payload = {
-    userName: partnerA,
-    partnerName: partnerB,
-    scores: order.scores || {},
-    partnerScores: order.partnerScores || {},
-    // Pass the full couple type object so the workbook can render the
-    // couple-type intro page with strengths / sticking points / patterns.
-    coupleType: order.coupleType || null,
-    expGaps: order.expGaps || [],
-  };
-
-  try {
-    const resp = await fetch('/api/generate-workbook', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error(err || resp.statusText);
-    }
-
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Attune_Workbook_${partnerA.replace(/\s+/g,'_')}_and_${partnerB.replace(/\s+/g,'_')}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Downloaded';
-      btn.style.color = '#10B981';
-      btn.style.borderColor = 'rgba(16,185,129,.4)';
-      btn.style.background = 'rgba(16,185,129,.1)';
-    }
-  } catch (e) {
-    console.error('Workbook generation failed:', e);
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg> Failed – retry';
-      btn.style.color = '#EF4444';
-      btn.style.borderColor = 'rgba(239,68,68,.4)';
-      btn.style.background = 'rgba(239,68,68,.08)';
-    }
-    alert('Workbook generation failed. Check that the server is running and try again.');
+    btn.textContent = 'Not available here';
   }
 }
 

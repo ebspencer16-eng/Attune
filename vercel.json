@@ -50,10 +50,6 @@
       "destination": "/api/track-type.js"
     },
     {
-      "source": "/api/generate-workbook",
-      "destination": "/api/generate-workbook.js"
-    },
-    {
       "source": "/api/send-order-email",
       "destination": "/api/send-order-email.js"
     },
@@ -232,10 +228,6 @@
     {
       "source": "/workbook-render",
       "destination": "/workbook-render.html"
-    },
-    {
-      "source": "/api/store-workbook",
-      "destination": "/api/store-workbook.js"
     },
     {
       "source": "/robots.txt",

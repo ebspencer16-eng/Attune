@@ -39,9 +39,21 @@
  * that makes this builder easy to lose is that it lives in four files with no
  * import edge between them and the rest of the codebase.
  *
+ * ── AND THEN THE .DOCX GENERATOR WENT ─────────────────────────────────────
+ * This file used to say: "The .docx generator stays. The website offers it as
+ * its own download and that is a customer choosing a Word file on purpose."
+ *
+ * Ellie: "I want customers to be able to download the pdf. Remove the word
+ * file." So that sentence was an assumption written in the voice of a decision,
+ * and it was wrong. api/generate-workbook.js and api/store-workbook.js are
+ * deleted, the website's "Download (.docx)" tile goes through the PDF path, and
+ * the admin's build button is gone: it was the last caller, and it ran against
+ * generateOrders(), which invents its couples.
+ *
+ * Both halves are checked below, because deleting the builder is not the same
+ * promise as nothing offering a Word file.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The .docx generator stays. The website offers it as its own download and that
- * is a customer choosing a Word file on purpose.
  *
  * public/workbook-render.html stays too. It is what /api/workbook-view serves
  * and the website's own print path, and check-workbook-view holds it to its
@@ -128,13 +140,98 @@ if (!appAsks) {
 }
 
 /**
- * And nothing anywhere asks the .docx-storing endpoint.
+ * ── THE WORD BUILDERS ARE GONE, AND NOTHING OFFERS A WORD FILE ────────────
+ * Two separate promises. A deleted builder with a button still pointing at it
+ * is a 404 under a download control, and a surviving builder with no button is
+ * the thing someone wires back up.
+ */
+for (const gone of ['api/generate-workbook.js', 'api/store-workbook.js']) {
+  if (existsSync(`${ROOT}${gone}`)) {
+    fails.push(`${gone} is back. Ellie: "Remove the word file." The workbook is the`
+      + ' PDF the service renders; a second builder producing a different document is'
+      + ' how the wrong one shipped three times.');
+  }
+}
+
+/**
+ * No customer surface names a Word file.
  *
- * /api/store-workbook has no callers at all now: the app moved to the PDF
- * service and the website's Word download goes straight to /api/generate-workbook.
- * It is left in place rather than deleted, because deleting a live URL is Ellie's
- * call, and it is held to having no callers because a third plausible endpoint is
- * most of why the wrong workbook shipped three times.
+ * Checked on what a reader can SEE or FETCH, not on the word appearing: these
+ * files are full of comments explaining why the .docx went, and a gate that
+ * failed on its own explanation would be deleted within a week.
+ */
+const OFFERS = [
+  ['src/App.jsx', 'the dashboard and the results page'],
+  ['public/admin.html', 'the admin'],
+  ['api/send-email.js', 'the receipt'],
+];
+for (const [rel, where] of OFFERS) {
+  let src;
+  try { src = bare(readFileSync(`${ROOT}${rel}`, 'utf8')); } catch { continue; }
+  /* A download attribute, a label, or a fetch, each naming .docx. */
+  /**
+   * Any .docx at all, once the comments are stripped.
+   *
+   * The first version matched three specific shapes and a plant walked through
+   * it: the button's label sits on its own line, so `[>"'`]...\(\.docx\)`,
+   * which wanted the tag on the same line, saw nothing. That is the gate
+   * matching a shape rather than the thing. These files explain at length why
+   * the Word file went, and `bare()` drops comment lines, so what is left is
+   * code and copy — and neither has any business naming a Word file.
+   */
+  /* And a fetch to either Word builder, which carries no .docx of its own. A
+     plant that only re-wired the admin's button walked straight past the
+     check above, because the URL does not name the format. */
+  const asks = /fetch\(\s*['"`][^'"`]*\/api\/(generate|store)-workbook['"`]/.exec(src);
+  if (asks) {
+    const line = src.slice(0, asks.index).split('\n').length;
+    fails.push(`${rel} fetches a Word builder, in ${where}, at bared line ${line}.`
+      + ' Both are deleted, so this is a 404 under a download control.');
+  }
+
+  const hit = /\.docx/i.exec(src);
+  if (hit) {
+    const line = src.slice(0, hit.index).split('\n').length;
+    const near = src.split('\n')[line - 1].trim().slice(0, 90);
+    fails.push(`${rel} still names a Word file, in ${where}, at bared line ${line}:`
+      + `\n      ${near}\n      Ellie: "I want customers to be able to download the pdf.`
+      + ' Remove the word file."');
+  }
+}
+
+/**
+ * And one download path, not two.
+ *
+ * The results page and the dashboard each had their own, producing two different
+ * documents under two different buttons. src/workbook-download.js is the one.
+ */
+{
+  const app = bare(readFileSync(`${ROOT}src/App.jsx`, 'utf8'));
+  /**
+   * Handing the file over is what has to be shared, not asking for one.
+   *
+   * Two places still post to /api/store-workbook-pdf without going through the
+   * module and both are right: they warm a file after a purchase and give it to
+   * nobody. What drifted was the two DOWNLOAD controls, which produced two
+   * different documents, so that is what is matched: an anchor given a workbook
+   * to hand over outside src/workbook-download.js.
+   */
+  const hands = [...app.matchAll(/\.download\s*=\s*[^;\n]*[Ww]orkbook/g)];
+  if (hands.length) {
+    fails.push(`src/App.jsx hands a workbook to the browser itself, in ${hands.length}`
+      + ' place(s). saveWorkbook in src/workbook-download.js is where that lives, with the'
+      + ' stored-link rule and the four failure messages, so the two buttons on this site'
+      + ' cannot drift into two documents again. They had.');
+  }
+  if (!/from ['"]\.\/workbook-download\.js['"]/.test(app)) {
+    fails.push('src/App.jsx does not import src/workbook-download.js, so whatever it is'
+      + ' doing for a download is its own. Refusing to pass: a gate that has lost its'
+      + ' subject must never report success.');
+  }
+}
+
+/**
+ * And nothing anywhere asks the .docx-storing endpoint.
  */
 for (const rel of ['src/App.jsx', 'api/save-exercise.js', 'api/home.js', 'api/tool-data.js']) {
   let src;
@@ -164,4 +261,6 @@ if (fails.length) {
 }
 console.log('[check-one-workbook] the workbook is the PDF service: its four pieces'
   + ' are present, the app and the completion trigger both ask'
-  + ' /api/store-workbook-pdf, and nothing in the app renders one itself.');
+  + ' /api/store-workbook-pdf, nothing in the app renders one itself, both Word'
+  + ' builders are deleted, no surface offers a Word file, and the website has one'
+  + ' download path rather than two.');

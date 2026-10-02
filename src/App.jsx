@@ -1,5 +1,6 @@
 import { signedUrlIsLive } from "../api/_lib/workbook-link.js";
 import { isWorkbookUrl } from "../api/_lib/workbook-format.js";
+import { getWorkbookUrl, saveWorkbook } from "./workbook-download.js";
 import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
@@ -9356,120 +9357,34 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               the paywall entirely. */}
           {hasWorkbook && (() => {
             // Build the payload from this couple's actual data
+            /**
+             * The workbook, which is a PDF.
+             *
+             * Ellie: "I want customers to be able to download the pdf. Remove the word
+             * file." This was 115 lines that tried a stored link, then a .docx from
+             * /api/generate-workbook, then html2pdf in a hidden iframe, then the .docx
+             * again, under a button reading "Download (.docx)". None of those is the
+             * workbook: the workbook is what the PDF service renders, and the dashboard
+             * has always asked for that one. Two download paths producing two different
+             * documents is the failure this codebase is organised against.
+             *
+             * src/workbook-download.js is the one path now, and both callers use it.
+             */
             const buildAndDownload = async () => {
-              // Build full payload using shared helper. Phase 5a: payload now
-              // includes responsibilities + lifeQuestions for the new
-              // renderer alongside legacy expGaps for backward compatibility.
               const payload = buildWorkbookPayload(
                 userName, partnerName,
                 ex1Answers, partnerEx1,
                 ex2Answers, partnerEx2,
                 coupleType
               );
-
-              try {
-                // Pull auth token so generate-workbook can verify purchase
-                const _wbAuth = await (async () => {
-                  try {
-                    const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                    if (!hasSupabase()) return null;
-                    const { data: { session } } = await sb.auth.getSession();
-                    return session?.access_token || null;
-                  } catch { return null; }
-                })();
-                const _wbHeaders = {
-                  'Content-Type': 'application/json',
-                  ...(_wbAuth ? { Authorization: `Bearer ${_wbAuth}` } : {}),
-                };
-                // Use the pre-generated workbook URL if it is still live.
-                // It was signed for seven days when the file was made, so for
-                // most couples it has expired by the time they click, and the
-                // old code handed it over anyway: a new tab, an error page,
-                // and no way to tell that from a slow download. An expired one
-                // now falls through to generating a fresh file below.
-                const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
-                if (ord?.workbookUrl && signedUrlIsLive(ord.workbookUrl)) {
-                  const a = document.createElement('a');
-                  a.href = ord.workbookUrl;
-                  a.download = workbookFileName(userName, partnerName);
-                  a.target = '_blank';
-                  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                  return;
-                }
-                // Always try docx API first — reliable on all browsers
-                toast('Generating your workbook…');
-                const resp2 = await fetch('/api/generate-workbook', { method: 'POST', headers: _wbHeaders, body: JSON.stringify(payload) });
-                if (resp2.ok) {
-                  const blob2 = await resp2.blob();
-                  const url2 = URL.createObjectURL(blob2);
-                  const a2 = document.createElement('a'); a2.href = url2;
-                  a2.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
-                  document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
-                  URL.revokeObjectURL(url2);
-                  return;
-                }
-                // Fallback: Generate PDF in-browser using html2pdf.js
-                toast('Generating your workbook as PDF… this takes about 5 seconds.');
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-                await new Promise((res, rej) => { script.onload = res; script.onerror = rej; document.head.appendChild(script); });
-                // Build render URL with workbook data
-                const renderPayload = encodeURIComponent(JSON.stringify({
-                  p1: userName, p2: partnerName,
-                  ct: coupleType?.name || '', ctTagline: coupleType?.tagline || '', ctColor: coupleType?.color || '#E8673A',
-                  scores: payload.scores, partnerScores: payload.partnerScores, expGaps: payload.expGaps,
-                }));
-                // Load workbook-render.html content into an off-screen iframe
-                const iframe = document.createElement('iframe');
-                iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1123px;border:none;';
-                document.body.appendChild(iframe);
-                await new Promise(res => {
-                  iframe.onload = res;
-                  iframe.src = `/workbook-render?data=${renderPayload}`;
-                });
-                await new Promise(res => setTimeout(res, 1500)); // Wait for fonts/images
-                const el = iframe.contentDocument.body;
-                const filename = `Attune_Workbook_${userName.replace(/\s+/g,'_')}_and_${partnerName.replace(/\s+/g,'_')}.pdf`;
-                await window.html2pdf().set({
-                  margin: [10, 14],
-                  filename,
-                  image: { type: 'jpeg', quality: 0.97 },
-                  html2canvas: { scale: 2, useCORS: true, logging: false },
-                  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                  pagebreak: { mode: ['avoid-all', 'css'] },
-                }).from(el).save();
-                document.body.removeChild(iframe);
-              } catch (e) {
-                console.error('Workbook PDF generation failed:', e);
-                // Final fallback: docx (reuse _wbHeaders from outer scope —
-                // it's already constructed with auth above, so this caller
-                // doesn't need its own session lookup)
-                try {
-                  const _wbAuthRetry = await (async () => {
-                    try {
-                      const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                      if (!hasSupabase()) return null;
-                      const { data: { session } } = await sb.auth.getSession();
-                      return session?.access_token || null;
-                    } catch { return null; }
-                  })();
-                  const resp = await fetch('/api/generate-workbook', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      ...(_wbAuthRetry ? { Authorization: `Bearer ${_wbAuthRetry}` } : {}),
-                    },
-                    body: JSON.stringify(payload),
-                  });
-                  if (!resp.ok) throw new Error();
-                  const blob = await resp.blob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a'); a.href = url;
-                  a.download = `Attune_Workbook_${userName}_and_${partnerName}.docx`;
-                  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                } catch { toast('Workbook generation failed. Please try again.'); }
-              }
+              const stored = (() => {
+                try { return JSON.parse(localStorage.getItem('attune_order') || 'null')?.workbookUrl || null; }
+                catch { return null; }
+              })();
+              toast('Building your workbook…');
+              const got = await getWorkbookUrl({ storedUrl: stored, body: payload });
+              if (got.error) { toast(got.error); return; }
+              saveWorkbook(got.url, userName, partnerName);
             };
 
             return (
@@ -9490,12 +9405,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap", alignItems: "center" }}>
                   <button onClick={buildAndDownload}
                     style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#9B5DE5", color: "white", borderRadius: 10, padding: "0.6rem 1.25rem", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT }}>
-                    ↓ Download (.docx)
+                    ↓ Download workbook
                   </button>
                   <a href="/offerings#pkg-workbook" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("workbook-upsell"); } }} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.15rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 600, fontFamily: BFONT }}>
                     Order a bound copy →
                   </a>
-                  <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>Opens in Word, Google Docs, or Pages</span>
+                  {/* Ellie: "Remove the word file." It said "Opens in Word, Google
+                      Docs, or Pages", which was true of the document this button
+                      used to fetch and is not true of a workbook. */}
+                  <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>A PDF, built from your answers</span>
                 </div>
               </div>
             );
@@ -12078,7 +11996,7 @@ const UPSELL_PRODUCTS = {
     price: "$19",
     pricePrint: "$39",
     tagline: "Built from your actual results.",
-    description: "A guided workbook generated from your specific scores, pre-filled with your gap levels, your three communication priorities, and conversation prompts calibrated to where you and your partner diverge most. Comes as a .docx you can fill in together, print at home, or read on screen.",
+    description: "A guided workbook generated from your specific scores, pre-filled with your gap levels, your three communication priorities, and conversation prompts calibrated to where you and your partner diverge most. Comes as a PDF you can fill in together, print at home, or read on screen.",
     includes: [
       "Guided exercises for your top gap dimensions",
       "Conversation prompts specific to your pairing",
@@ -12087,7 +12005,7 @@ const UPSELL_PRODUCTS = {
     ],
     accentColor: "#E8673A",
     variants: [
-      { id: "digital", label: "Digital (.docx)", price: "$19" },
+      { id: "digital", label: "Digital (PDF)", price: "$19" },
       // Printed & bound is a shipped item — phase 2 only.
       ...(PHYSICAL_ENABLED ? [{ id: "print", label: "Printed & bound", price: "$39" }] : []),
     ],
@@ -14336,106 +14254,34 @@ export default function App() {
   // already had a generated workbook were being pitched the thing they owned.
   // Use the stored signed URL, and regenerate a fresh one if it has expired
   // (Supabase signs these for 7 days) or was never persisted on this device.
+  /**
+   * The workbook, through the one path that produces one.
+   *
+   * The stored-link check, the builder call and the four failure messages all
+   * used to live here, and a second copy of two of them lived in the results
+   * page under a button offering a .docx. src/workbook-download.js is the one
+   * implementation; what stays here is what belongs to this screen: the
+   * building flag, the toast, and writing the fresh link back onto the order.
+   */
   const downloadWorkbook = async () => {
     if (workbookBuilding) return;
-    const grab = (url) => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Attune_Workbook_${userName || 'Attune'}_and_${partnerName || 'Partner'}.pdf`;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    };
-    // A stored link is only handed over if it points at a workbook. The app
-    // served a 40 KB .docx from exactly this kind of fallback, because the
-    // format rule was being applied where the link is MINTED and not where a
-    // stored one is reused. Falling through here asks the service to build the
-    // PDF, which is the right answer and is what the button promises.
-    const stored = isWorkbookUrl(order?.workbookUrl) ? order.workbookUrl : null;
-    const currentVersion = order?.workbookVersion === WORKBOOK_CONTENT_VERSION;
-    if (stored && currentVersion) {
-      try {
-        const head = await fetch(stored, { method: 'HEAD' });
-        if (head.ok) { grab(stored); return; }
-      } catch {}
-    }
-    // No usable URL — ask the API for one. This re-renders the PDF and
-    // re-signs it, then persists the URL back onto the order.
     setWorkbookBuilding(true);
     try {
       const live = JSON.parse(localStorage.getItem('attune_live_session') || 'null');
-      if (!live) { showToast('Your workbook is still being prepared. Try again in a moment.'); return; }
-      const token = await (async () => {
-        try {
-          const { supabase: sb, hasSupabase } = await import('./supabase.js');
-          if (!hasSupabase()) return null;
-          const { data: { session } } = await sb.auth.getSession();
-          return session?.access_token || null;
-        } catch { return null; }
-      })();
-      const resp = await fetch('/api/store-workbook-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify(live),
+      const got = await getWorkbookUrl({
+        storedUrl: order?.workbookUrl,
+        storedIsCurrent: order?.workbookVersion === WORKBOOK_CONTENT_VERSION,
+        body: live || {},
       });
-      const data = await resp.json().catch(() => null);
-      if (!resp.ok || !data?.url) {
-        /**
-         * ── SAY WHICH FAILURE IT WAS ──────────────────────────────────────
-         * Ellie: "I went to get the workbook but saw a download failed
-         * message. Refreshed and tried again with the same result."
-         *
-         * "Please try again" is the wrong advice for three of the four things
-         * that can go wrong here, and trying again is exactly what she did,
-         * twice. The workbook is rendered by an external service, so the
-         * failures are: the service is not configured, it did not answer, it
-         * answered with an error, or the couple has not finished enough of the
-         * exercises to build one.
-         *
-         * The server already distinguishes them and says so in `error`. That
-         * was being thrown away and replaced with one sentence. Only the
-         * transient case gets "try again" now, and the rest say what is
-         * actually wrong, because two of them are settings rather than
-         * accidents and no amount of retrying fixes a missing environment
-         * variable.
-         */
-        const why = String(data?.error || '');
-        console.warn('[Attune] workbook download failed:', resp.status, data);
-        showToast(
-          /not configured/i.test(why)
-            ? 'The workbook service is not switched on yet. This is on us, not you.'
-          : /not enough answers/i.test(why)
-            ? 'There is not enough here to build a workbook yet. Finish the exercises and it will be ready.'
-          /**
-           * ── A 504 SAYS WHICH 504 IT WAS ───────────────────────────────
-           * Ellie: "Doesn't seem like it's timing out after 60secs because
-           * that message shows immediately after clicking workbook."
-           *
-           * Exactly right, and it is the detail that moved this on. The
-           * server distinguishes a service that took too long from one that
-           * could not be reached at all, and names the host in both. This
-           * page was flattening the two into "did not answer", which reads as
-           * slowness and sent her to wait a minute for something that had
-           * already failed.
-           *
-           * The host is in the message because she is the one who can check
-           * it against the Render dashboard, and no secret is in it.
-           */
-          : /could not be reached/i.test(why)
-            ? `${why}. Nothing is listening at that address, so this is a setting rather than a wait.`
-          : /did not answer within/i.test(why)
-            ? `${why}. It is running but slow, so trying again in a minute may work.`
-          : resp.status >= 500 || resp.status === 0
-            ? 'The workbook service did not answer. Give it a minute and try again.'
-            : 'Workbook download failed. Please try again.');
-        return;
+      if (got.error) { showToast(got.error); return; }
+      if (got.fresh) {
+        setOrder(prev => {
+          const next = { ...(prev || {}), workbookUrl: got.url, workbookStatus: 'ready', workbookVersion: WORKBOOK_CONTENT_VERSION };
+          try { localStorage.setItem('attune_order', JSON.stringify(next)); } catch {}
+          return next;
+        });
       }
-      setOrder(prev => {
-        const next = { ...(prev || {}), workbookUrl: data.url, workbookStatus: 'ready', workbookVersion: WORKBOOK_CONTENT_VERSION };
-        try { localStorage.setItem('attune_order', JSON.stringify(next)); } catch {}
-        return next;
-      });
-      grab(data.url);
+      saveWorkbook(got.url, userName, partnerName);
     } catch (e) {
       console.warn('[Attune] workbook download error:', e);
       showToast('Workbook download failed. Please try again.');

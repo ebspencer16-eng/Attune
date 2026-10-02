@@ -2,9 +2,10 @@
  * POST /api/generate-pdf
  *
  * Renders the Attune workbook as a PDF via Browserless.
- * Falls back to redirecting to the .docx generator if BROWSERLESS_TOKEN is not set.
+ * Without BROWSERLESS_TOKEN it answers 503. There is no .docx generator to fall
+ * back to any more: the workbook is a PDF. See api/_lib/workbook-format.js.
  *
- * Body: same shape as /api/generate-workbook
+ * Body: the workbook payload src/App.jsx assembles.
  *   { userName, partnerName, scores, partnerScores, coupleType, expGaps }
  *
  * Required env vars:

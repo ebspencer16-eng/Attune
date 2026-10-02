@@ -140,7 +140,7 @@ function workbookPromoEmail({ toName, partnerName, code, checkoutUrl, discountPe
       <div class="detail-row"><span>Expectations guide</span><strong>from your results</strong></div>
       <div class="divider"></div>
       <p style="margin-bottom:6px;"><strong>Two ways to get it</strong></p>
-      <div class="detail-row"><span>Digital (.docx)</span><strong>instant download</strong></div>
+      <div class="detail-row"><span>Digital (PDF)</span><strong>instant download</strong></div>
       <div class="detail-row"><span>Printed &amp; bound</span><strong>ships in 5-7 days</strong></div>
       <div class="divider"></div>
       <p>Use this code at checkout. It works once, for ${who}, and takes ${pct}% off the workbook.</p>

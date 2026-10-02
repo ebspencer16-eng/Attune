@@ -200,7 +200,11 @@ const PDF = `Attune_Workbook_Ellie_and_Sam.${WORKBOOK_EXT}`;
    */
   const REUSERS = [
     { file: 'api/tool-data.js', value: 'row?.workbook_url' },
-    { file: 'src/App.jsx', value: 'order?.workbookUrl' },
+    /* The website's stored link used to be handled inline in src/App.jsx, in two
+       places that produced two different documents. It goes through one module
+       now, and this follows it rather than staying pointed at where the bug was
+       found: a gate aimed at the old address passes about code nobody runs. */
+    { file: 'src/workbook-download.js', value: 'storedUrl' },
   ];
   for (const { file, value } of REUSERS) {
     const src = readFileSync(`${ROOT}${file}`, 'utf8');
