@@ -97,9 +97,16 @@ export function workbookFailure(status, error) {
  * @param {object?} opts.body      what to send the builder; the dashboard sends
  *                                 the live session, the results page sends the
  *                                 payload it has already assembled
+ * @param {function?} opts.onBuilding  called once, only if a build is actually
+ *                                 needed. A caller cannot know that in advance
+ *                                 without asking the stored-link question
+ *                                 itself, which is the question this function
+ *                                 exists to own. Without it both callers
+ *                                 announced "building your workbook" and then
+ *                                 handed over a file that already existed.
  * @returns {Promise<{url: string, fresh: boolean} | {error: string}>}
  */
-export async function getWorkbookUrl({ storedUrl = null, storedIsCurrent = true, body = {} } = {}) {
+export async function getWorkbookUrl({ storedUrl = null, storedIsCurrent = true, body = {}, onBuilding = null } = {}) {
   /* A stored link is only worth using if it points at a workbook, has not
      expired, and was made from the content this build renders. Anything else
      falls through to a build, which is the honest answer and now works. */
@@ -109,6 +116,8 @@ export async function getWorkbookUrl({ storedUrl = null, storedIsCurrent = true,
       if (head.ok) return { url: storedUrl, fresh: false };
     } catch { /* gone from storage; build a new one */ }
   }
+
+  try { onBuilding?.(); } catch { /* a caller's toast is not worth failing over */ }
 
   const token = await authToken();
   let resp;

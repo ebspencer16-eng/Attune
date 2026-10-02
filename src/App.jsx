@@ -9391,11 +9391,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 try { return JSON.parse(localStorage.getItem('attune_order') || 'null')?.workbookUrl || null; }
                 catch { return null; }
               })();
-              /* Her words, from the module that already says this on both
-                 surfaces when a workbook is being made. The line I had written
-                 here was my own, and copy is hers. */
-              toast(WORKBOOK_COPY.generating);
-              const got = await getWorkbookUrl({ storedUrl: stored, body: payload });
+              const got = await getWorkbookUrl({
+                storedUrl: stored,
+                body: payload,
+                /* Only when there is actually something to wait for. Her words, from the
+                   module that already says this on both surfaces. */
+                onBuilding: () => toast(WORKBOOK_COPY.generating),
+              });
               if (got.error) { toast(got.error); return; }
               saveWorkbook(got.url, userName, partnerName);
             };
@@ -14278,13 +14280,16 @@ export default function App() {
    */
   const downloadWorkbook = async () => {
     if (workbookBuilding) return;
-    setWorkbookBuilding(true);
     try {
       const live = JSON.parse(localStorage.getItem('attune_live_session') || 'null');
       const got = await getWorkbookUrl({
         storedUrl: order?.workbookUrl,
         storedIsCurrent: order?.workbookVersion === WORKBOOK_CONTENT_VERSION,
         body: live || {},
+        /* Only when a build is actually needed. This flag was set before the
+           stored link was looked at, so a workbook that already existed put the
+           tile into its building state for the moment before it downloaded. */
+        onBuilding: () => setWorkbookBuilding(true),
       });
       if (got.error) { showToast(got.error); return; }
       if (got.fresh) {
