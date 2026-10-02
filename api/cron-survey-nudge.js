@@ -67,21 +67,64 @@ export default async function handler(req) {
   const H = { apikey: key, Authorization: `Bearer ${key}` };
   const daysAgo = (d) => new Date(now.getTime() - d * 864e5).toISOString();
 
+  /**
+   * ── AN EXCLUSION LIST THAT FAILS OPEN SENDS MORE MAIL, NOT LESS ─────────
+   * Both lists below say who must NOT be emailed, and both were built inside a
+   * `try { ... } catch {}`. A rejected select left the set empty and the run
+   * carried on, so the failure mode was: everyone who had already answered the
+   * survey gets nudged to answer it again, and every beta tester gets a survey
+   * they were deliberately excluded from. Silently, and in the direction that
+   * reaches customers.
+   *
+   * That is the shape CLAUDE.md records for the engagement page, pointed the
+   * other way: there a failed select read as an empty table and drew a zero;
+   * here it reads as an empty exclusion list and sends an email. A query that
+   * decides who to leave alone has to fail closed.
+   *
+   * So a failure is recorded and the run sends nothing. The response says which
+   * list could not be read, because a cron that quietly does nothing is the
+   * other half of this same bug.
+   */
+  const unreadable = [];
+
   // Already responded (either survey) -> exclude by respondent id.
   const submitted = new Set();
   try {
     const fr = await fetch(`${url}/rest/v1/feedback_submissions?type=in.(post_results,beta_survey)&select=text`, { headers: H });
-    for (const r of (await fr.json()) || []) { let p = {}; try { p = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {} if (p && p.respondentId) submitted.add(p.respondentId); }
-  } catch {}
+    if (!fr.ok) throw new Error(`feedback_submissions ${fr.status}`);
+    const rows = await fr.json();
+    if (!Array.isArray(rows)) throw new Error('feedback_submissions did not answer with rows');
+    for (const r of rows) { let p = {}; try { p = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {} if (p && p.respondentId) submitted.add(p.respondentId); }
+  } catch (e) {
+    console.error('[cron-survey-nudge] who has already answered:', e?.message || e);
+    unreadable.push('already answered');
+  }
 
   // Beta testers -> excluded from all survey emails. Beta = an order used a beta code.
   const betaEmails = new Set();
   try {
     const bc = await fetch(`${url}/rest/v1/beta_codes?select=code`, { headers: H });
-    const codes = new Set(((await bc.json()) || []).map(c => String(c.code || '').toUpperCase()));
+    if (!bc.ok) throw new Error(`beta_codes ${bc.status}`);
+    const codeRows = await bc.json();
+    if (!Array.isArray(codeRows)) throw new Error('beta_codes did not answer with rows');
+    const codes = new Set(codeRows.map(c => String(c.code || '').toUpperCase()));
     const ord = await fetch(`${url}/rest/v1/orders?select=buyer_email,promo_code`, { headers: H });
-    for (const o of (await ord.json()) || []) { const pc = String(o.promo_code || '').toUpperCase(); if (pc && codes.has(pc) && o.buyer_email) betaEmails.add(String(o.buyer_email).toLowerCase()); }
-  } catch {}
+    if (!ord.ok) throw new Error(`orders ${ord.status}`);
+    const orderRows = await ord.json();
+    if (!Array.isArray(orderRows)) throw new Error('orders did not answer with rows');
+    for (const o of orderRows) { const pc = String(o.promo_code || '').toUpperCase(); if (pc && codes.has(pc) && o.buyer_email) betaEmails.add(String(o.buyer_email).toLowerCase()); }
+  } catch (e) {
+    console.error('[cron-survey-nudge] who is a beta tester:', e?.message || e);
+    unreadable.push('beta testers');
+  }
+
+  if (unreadable.length) {
+    return json({
+      ok: false,
+      sent: 0,
+      error: `could not read who to leave alone (${unreadable.join(', ')}), so nothing was sent`,
+    }, 503);
+  }
 
   const mark = (id, field) => fetch(`${url}/rest/v1/profiles?id=eq.${id}`, { method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ [field]: now.toISOString() }) });
   const sendEmail = (to, subject, html) => fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }) }).then(r => r.ok);
