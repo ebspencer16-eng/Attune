@@ -23,7 +23,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 
 import {
   fetchToolData, saveToolData, markEditing,
@@ -79,13 +80,36 @@ export default function Budget({ onClose }: { onClose: () => void }) {
 
   useEffect(() => { load(); }, [load]);
 
+  /**
+   * ── THE SAVE BAR THE WEBSITE HAS ────────────────────────────────────────
+   * Ellie: "I want them completely matched. I also want the same flow, visual,
+   * etc."
+   *
+   * The website saves when you press Save changes and says which of four things
+   * is true underneath: Saved, Saving, Unsaved changes, All changes saved. The
+   * app saved silently as you typed and said nothing at all, so the same tool
+   * gave two different accounts of whether your numbers were safe.
+   *
+   * The bar is the same. The saving on blur stays underneath it, because
+   * removing it would mean a phone that loses a number when someone takes a
+   * call, and the status tells the truth either way: `savedRef` is what the
+   * saver already compares against, so "All changes saved" is a fact about what
+   * reached the server rather than a hopeful label.
+   */
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
   const save = useCallback(async (next: BudgetState) => {
     const body = JSON.stringify(next);
     if (body === savedRef.current) return;
+    setSaveStatus('saving');
     const r = await saveToolData('budget', next);
     setSaveFailed(!r.ok);
-    if (r.ok) savedRef.current = body;
+    if (r.ok) { savedRef.current = body; setSaveStatus('saved'); }
+    else setSaveStatus('idle');
   }, []);
+
+  /** Whether anything on screen has not reached the server. */
+  const dirty = JSON.stringify(state) !== savedRef.current;
 
   /**
    * ── AND A SAVE ON THE WAY OUT ───────────────────────────────────────────
@@ -213,8 +237,20 @@ export default function Budget({ onClose }: { onClose: () => void }) {
    * mount at launch, which is why it was reported from the Insights tab for a
    * component that belongs to Learn.
    */
-  const section = (title: string, intro: string, children: React.ReactNode, key?: string) => (
+  /* Ellie: the same flow as the web, which numbers its sections. The website
+     prints "Step 1" over the first block in the brand blue; the step is passed
+     in so the app does not count them a second time. */
+  const section = (title: string, intro: string, children: React.ReactNode, key?: string, step?: number) => (
     <View key={key} style={{ marginTop: Spacing.xxl }}>
+      {step ? (
+        <Text style={{
+          ...Type.small, fontSize: 10, letterSpacing: 1.6,
+          textTransform: 'uppercase', color: '#1B5FE8', fontWeight: '700',
+          marginBottom: Spacing.xs,
+        }}>
+          {`Step ${step}`}
+        </Text>
+      ) : null}
       <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>{intro}</Text>
       {children}
@@ -243,10 +279,18 @@ export default function Budget({ onClose }: { onClose: () => void }) {
       <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>{copy.intro}</Text>
 
       {/* ── THE NUMBERS, AT THE TOP ──────────────────────────────────────── */}
+      {/* ── THE WEBSITE'S DARK STRIP ────────────────────────────────────
+          Ellie: "I want them completely matched. I also want the same flow,
+          visual, etc."
+
+          The website pins a dark panel with the three numbers in colour. This
+          was a plain bordered box in the app's surface colour. Same numbers,
+          same labels now, and the same panel they sit in. */}
       <View
         style={{
-          marginTop: Spacing.lg, backgroundColor: c.surface, borderColor: c.border,
-          borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg,
+          marginTop: Spacing.lg, backgroundColor: '#15123A',
+          borderRadius: Radius.lg, padding: Spacing.lg,
+          flexDirection: 'row', justifyContent: 'space-between',
         }}>
         {/* ── THE WEBSITE'S THREE NUMBERS, NOT THREE OTHERS ──────────────
             Ellie: "Budget tool in app needs to be the same flow as the web
@@ -264,15 +308,22 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             choice of what to show differed. The labels come from the server
             now, so neither screen writes its own. */}
         {[
-          [copy.statIncome, bFmt(rev.totalIncome), c.textStrong],
+          [copy.statIncome, bFmt(rev.totalIncome), '#34d399'],
           [rev.surplus >= 0 ? copy.statLeft : copy.statOver,
             (rev.surplus >= 0 ? '' : '-') + bFmt(rev.surplus),
-            rev.surplus >= 0 ? c.textStrong : '#B5546E'],
-          [copy.statSavings, `${rev.savingsRate.toFixed(1)}%`, c.textStrong],
+            rev.surplus >= 0 ? '#E8C572' : '#f87171'],
+          [copy.statSavings, `${rev.savingsRate.toFixed(1)}%`, '#93C5FD'],
         ].map(([label, value, tint]) => (
-          <View key={String(label)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
-            <Text style={{ ...Type.small, color: c.textMuted }}>{label}</Text>
-            <Text style={{ ...Type.small, fontWeight: '700', color: tint as string }}>
+          <View key={String(label)} style={{ flex: 1 }}>
+            <Text style={{
+              ...Type.small, fontSize: 9, letterSpacing: 1.4,
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.72)',
+            }}>
+              {label}
+            </Text>
+            <Text style={{
+              ...Type.title, fontSize: 19, fontWeight: '700', color: tint as string, marginTop: 2,
+            }}>
               {value}
             </Text>
           </View>
@@ -323,7 +374,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             );
           })}
         </View>
-      ))}
+      ), undefined, 1)}
 
       {[[copy.essentials, copy.essentialsIntro, essentials] as const,
         [copy.discretionary, copy.discretionaryIntro, discretionary] as const,
@@ -345,7 +396,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             </View>
           ))}
         </View>
-      ), title))}
+      ), title, title === copy.essentials ? 2 : 3))}
 
       <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginTop: Spacing.xl, marginBottom: Spacing.xs }}>
         {copy.personalLabel}
@@ -392,8 +443,45 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             <Text style={{ ...Type.small, color: c.accentQuiet, fontWeight: '700' }}>Add a goal</Text>
           </Pressable>
         </View>
-      ))}
+      ), undefined, 4)}
     </ScrollView>
+
+    {/* ── THE SAVE BAR ───────────────────────────────────────────────────
+        The website's, pinned to the foot: a status line and a button that is
+        live only when there is something to send. Ellie asked for the two
+        tools to be matched, and this is the part of its flow the app had no
+        equivalent of at all. */}
+    <View
+      style={{
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        gap: Spacing.lg, paddingHorizontal: Spacing.xl,
+        paddingTop: Spacing.md, paddingBottom: BottomTabInset + Spacing.md,
+        backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.border,
+      }}>
+      <Text style={{ ...Type.small, color: c.textMuted }}>
+        {saveStatus === 'saving' ? 'Saving...'
+          : dirty ? 'Unsaved changes'
+            : saveStatus === 'saved' ? '\u2713 Saved' : 'All changes saved'}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={copy.save}
+        disabled={!dirty || saveStatus === 'saving'}
+        onPress={() => { void save(state); }}
+        style={{
+          paddingVertical: Spacing.sm, paddingHorizontal: Spacing.xl,
+          borderRadius: Radius.pill,
+          backgroundColor: (!dirty || saveStatus === 'saving') ? c.border : '#1B5FE8',
+        }}>
+        <Text
+          style={{
+            ...Type.small, fontWeight: '700',
+            color: (!dirty || saveStatus === 'saving') ? c.textMuted : Palette.white,
+          }}>
+          {copy.save}
+        </Text>
+      </Pressable>
+    </View>
     </ScreenFrame>
   );
 }

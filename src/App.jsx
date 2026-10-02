@@ -3517,6 +3517,7 @@ const NAV_ICONS = {
 };
 
 function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
+  /* Shared out over whatever height the panel has. See the panel's own note. */
   const LABEL_LEFT = 0;
   /**
    * Ellie: "further indent the exercise results rows (with their icon and
@@ -3536,7 +3537,10 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
    */
 
   return (
-    <div>
+    <div style={{
+      flex: 1, minHeight: 0, display: "flex", flexDirection: "column",
+      justifyContent: "space-between",
+    }}>
       {groups.map((g, i) => {
         const kids = g.children || [];
         const icon = NAV_ICONS[g.id];
@@ -3565,8 +3569,9 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                 display: "flex", alignItems: "center", gap: NAV_GAP, width: "100%",
                 background: "transparent", border: "none", cursor: "pointer",
                 textAlign: "left", fontFamily: HFONT, color: C.ink,
-                paddingTop: isExercise ? "0.6rem" : "0.7rem",
-                paddingBottom: isExercise ? "0.6rem" : "0.7rem",
+                paddingTop: isExercise ? "0.45rem" : "0.5rem",
+                paddingBottom: isExercise ? "0.45rem" : "0.5rem",
+                minHeight: 0, flexShrink: 1,
                 paddingLeft: isExercise ? EXERCISE_LEFT : LABEL_LEFT,
                 paddingRight: 0,
               }}>
@@ -3824,10 +3829,10 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
    * a single line if left to wrap.
    */
   const QUICK = [
-    { id: "insight", label: "Insight of the day", icon: QuickIcons.brain },
+    { id: "insight", label: "Insight of\nthe day", icon: QuickIcons.brain },
     { id: "plan", label: "Action\nplans", icon: QuickIcons.signpost },
-    { id: "highlights", label: "Results highlights", icon: QuickIcons.sparkles },
-    { id: "journal", label: "Relationship journal", icon: QuickIcons.book },
+    { id: "highlights", label: "Results\nhighlights", icon: QuickIcons.sparkles },
+    { id: "journal", label: "Relationship\njournal", icon: QuickIcons.book },
   ];
   return (
     /* ── IT FITS, IT DOES NOT SCROLL ──────────────────────────────────────
@@ -3892,9 +3897,15 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
             }}>
               {q.icon()}
             </span>
+            {/* Ellie: "no matter the width of the window, the quick access
+                tile labels should be split to 2 lines." So the break is in the
+                label rather than left to the wrap, which is what the app does
+                with "Action plans", and the box is two lines tall whether the
+                second one has words in it or not. */}
             <span style={{
               fontSize: 11, lineHeight: "14px", color: C.muted,
-              textAlign: "center", width: "78%", whiteSpace: "pre-line",
+              textAlign: "center", width: "86%", whiteSpace: "pre-line",
+              minHeight: 28,
             }}>
               {q.label}
             </span>
@@ -3920,11 +3931,19 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
           It runs full width, which is why the side margins are taken back off:
           the app's tile goes edge to edge. */}
       {/* block: app-home/prompts */}
+      {/* ── NO CREAM TILE UNDER THE PROMPTS ───────────────────────────────
+          Ellie: "the two action prompt tiles are on a cream tile so I can't see
+          the blue behind it."
+
+          The tile was here because the app has one. On the app it is the foot
+          of a phone screen and the ground still shows above and below it; here
+          it filled the rest of a laptop window and the gradient she asked for
+          was behind it rather than visible. The two cards are white tiles of
+          their own, which is what she asked for on the app in the first place:
+          "The two action prompts on the homepage should be in their own white
+          tiles." They are enough on their own. */}
       <div data-block="app-home/prompts" style={{
-        background: C.cream, borderRadius: "22px 22px 0 0",
-        marginLeft: isMobile ? "-1.25rem" : "-2rem",
-        marginRight: isMobile ? "-1.25rem" : "-2rem",
-        padding: isMobile ? "1.25rem 1.25rem 1.5rem" : "1.75rem 2rem 2rem",
+        padding: isMobile ? "0.25rem 0 1.5rem" : "0.5rem 0 2rem",
         /* No `marginTop: auto`. An auto margin absorbs the free space in a flex
            column, so the tile was told to take what is left and simultaneously
            given nothing left to take: its own content then set its height and
@@ -4034,14 +4053,20 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                 fontFamily: HFONT, fontSize: isMobile ? "1rem" : "1.1rem", fontWeight: 700,
                 color: C.ink, lineHeight: 1.2, marginBottom: "0.4rem",
                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                overflow: "hidden", flexShrink: 0,
+                overflow: "hidden", flexShrink: 0, minHeight: "2.4em",
               }}>
                 {card.title}
               </div>
+              {/* Ellie: "if the action prompt text splits to 2 lines, it must
+                  do it on both tiles so that the formatting is the same for
+                  each." Clamping alone does not do that: a one-line body stays
+                  one line and the two cards end up different heights. A minimum
+                  of two lines holds the shape whether the words fill it or
+                  not. */}
               <div style={{
                 fontSize: "0.82rem", color: C.muted, lineHeight: 1.45,
                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                overflow: "hidden", flexShrink: 0,
+                overflow: "hidden", flexShrink: 0, minHeight: "2.4em",
               }}>
                 {card.body}
               </div>
@@ -15446,12 +15471,18 @@ export default function App() {
                   <div style={{
                     background: "#FDF4EF", borderRadius: 26,
                     padding: isMobile ? "1.25rem 1.1rem" : "1.75rem 1.6rem",
-                    /* Fills what is left, so the orange reads as the edge of the
-                       page rather than the page. Scrolls inside itself when the
-                       list is longer than the window, which is the only way a
-                       panel that fills the screen can also hold nine rows on a
-                       short one. */
-                    flex: 1, minHeight: 0, overflowY: "auto",
+                    /* ── IT FITS, IT DOES NOT SCROLL ──────────────────────
+                       Ellie: "Menu should resize so that it doesn't need to
+                       scroll."
+
+                       So the panel fills what is left and the rows inside share
+                       it, rather than keeping a fixed height and overflowing.
+                       The rows are generous when there is room and tighten when
+                       there is not, which is what "resize" asks for; a scroll
+                       bar on a menu of nine things is the page admitting it did
+                       not fit. */
+                    flex: 1, minHeight: 0, overflow: "hidden",
+                    display: "flex", flexDirection: "column",
                   }}>
                     {/* ── COMPLETE: THE NAV, NOT THE STATUS ────────────────
                         Ellie: "this page should be the exercise status menu

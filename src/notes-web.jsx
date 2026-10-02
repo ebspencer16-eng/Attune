@@ -911,7 +911,9 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: C.warm }}>
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '2.5rem 1.5rem 4rem' }}>
+      {/* Ellie: "too much white space above the word tile." The back button
+          that used to sit in that space is gone, and its padding went with it. */}
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '1rem 1.5rem 4rem' }}>
 
         {/* ── NO HEADING, NO DESCRIPTION ────────────────────────────────
             Ellie, about the dashboard: "There should be NO additional prose as
@@ -923,7 +925,37 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
             in the app. */}
 
         {loading ? (
-          <p style={{ fontSize: '0.85rem', color: C.muted, fontFamily: BFONT }}>Loading your notes.</p>
+          /* ── A CENTRED MARK AND A SPINNER ──────────────────────────────
+             Ellie: "'Loading your notes' takes a long time, doesn't show a
+             spinner, and should be centered with the attune mark as well."
+
+             It was one small line of grey text at the top left, which on a slow
+             request is indistinguishable from a page that has finished and has
+             nothing on it. The mark is the same lockup the rest of the site
+             uses, and the ring turns so the wait reads as a wait. */
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: '0.9rem', padding: '4rem 0',
+          }}>
+            <style>{'@keyframes attuneSpin{to{transform:rotate(360deg)}}'}</style>
+            <svg width="36" height="26" viewBox="0 0 103 76" fill="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="notesLoadG" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#E8673A" /><stop offset="100%" stopColor="#1B5FE8" />
+                </linearGradient>
+              </defs>
+              <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#notesLoadG)" />
+              <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)" />
+            </svg>
+            <span style={{
+              width: 18, height: 18, borderRadius: '50%',
+              border: `2px solid ${C.stone}`, borderTopColor: C.accent,
+              animation: 'attuneSpin .7s linear infinite', display: 'block',
+            }} />
+            <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT, margin: 0 }}>
+              Loading your notes
+            </p>
+          </div>
         ) : null}
 
         {failed ? (
@@ -1070,9 +1102,10 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
               return (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <div style={{
-                    background: C.white, borderRadius: '18px 18px 0 0',
+                    background: C.white, borderRadius: 22,
                     padding: '1.25rem 1.4rem 1.5rem',
                     display: 'flex', alignItems: 'flex-start', gap: '1rem',
+                    position: 'relative', zIndex: 1,
                   }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: '0.78rem', color: C.muted, fontFamily: BFONT, marginBottom: '0.3rem' }}>
@@ -1087,17 +1120,38 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                     </div>
                   </div>
                   {/* Ellie's label, from the shared module. */}
+                  {/* ── THE SAME CARD THE APP DRAWS ─────────────────────
+                      Ellie: "Please format the word tile the same way as it
+                      appears on the app with the shading, etc."
+
+                      Her instructions to the app, which this now follows: "I
+                      can see the top rounded corners on the word in use tile,
+                      but I don't want to be able to. I want it to extend
+                      cleanly behind the growth tile" — so this is square at the
+                      top and rounded only at the foot, and it is pulled up
+                      under the white card above. "Add shading behind the word
+                      in use tile so that there's more contrast" — a deep, tight
+                      shadow, so the white card reads as sitting on this rather
+                      than beside it. And the label is the emphatic half in bold
+                      italic with the meaning quiet under it, not the reverse. */}
                   <div style={{
-                    background: '#F3EFE8', borderRadius: '0 0 18px 18px',
-                    padding: '1rem 1.4rem 1.25rem',
+                    background: '#EFEAE3',
+                    borderRadius: '0 0 22px 22px',
+                    padding: '2rem 1.4rem 1.25rem',
+                    marginTop: '-1.25rem',
+                    boxShadow: '0 10px 14px rgba(42,27,16,0.22)',
+                    position: 'relative', zIndex: 0,
                   }}>
                     <div style={{
-                      fontFamily: BFONT, fontSize: '0.86rem', fontWeight: 700,
-                      fontStyle: 'italic', color: C.ink, marginBottom: '0.4rem',
+                      fontFamily: BFONT, fontSize: '0.92rem', fontWeight: 700,
+                      fontStyle: 'italic', color: C.ink, marginBottom: '0.35rem',
                     }}>
                       {NOTES_COPY.wordInUse}
                     </div>
-                    <div style={{ fontFamily: BFONT, fontSize: '0.92rem', color: C.text, lineHeight: 1.55 }}>
+                    <div style={{
+                      fontFamily: BFONT, fontSize: '1.02rem', fontWeight: 500,
+                      color: C.text, lineHeight: 1.5,
+                    }}>
                       {w.definition}
                     </div>
                   </div>

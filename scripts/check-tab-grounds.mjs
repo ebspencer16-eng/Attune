@@ -173,11 +173,25 @@ try {
  */
 const TABS = [
   { tab: 'home', file: 'attune-app/src/app/index.tsx', inline: true },
-  { tab: 'insights', file: 'attune-app/src/components/tab-screen.tsx', from: 'OrangeGround' },
+  /**
+   * Insights does NOT use OrangeGround.
+   *
+   * This read `from: 'OrangeGround'` and passed, while the tab painted
+   * `INSIGHTS_GROUND = ['#F0A57F', Palette.cream]` declared in its own screen.
+   * Ellie: "Bg should be the cream with orange glow like the app."
+   *
+   * That is the second time a constant with the right-sounding name stood in
+   * for the screen here; Home was painted from BlueGround, which the home
+   * screen does not use. Both times this gate was aimed at the constant. The
+   * rule is the one at the top of this file and it has to mean it: read what
+   * the screen draws, not what a name suggests it draws.
+   */
+  { tab: 'insights', file: 'attune-app/src/components/tab-screen.tsx',
+    declaredIn: 'attune-app/src/app/insights.tsx', name: 'INSIGHTS_GROUND' },
   { tab: 'learn', file: 'attune-app/src/components/tab-screen.tsx', from: 'LearnGround' },
 ];
 
-for (const { tab, file, inline, from } of TABS) {
+for (const { tab, file, inline, from, declaredIn, name } of TABS) {
   const server = TAB_GROUNDS[tab];
   if (!server) {
     fails.push(`api/_lib/section-grounds.js has no ground for the ${tab} tab, so the`
@@ -196,6 +210,17 @@ for (const { tab, file, inline, from } of TABS) {
         + ` the server's ${tab} stops against.`);
     } else {
       want = ground.colours.map(resolve);
+    }
+  } else if (declaredIn) {
+    /* Declared in the screen itself, as a literal pair possibly naming a
+       Palette entry. Read from there rather than from the theme. */
+    const src = read(declaredIn);
+    const m = new RegExp(`const ${name} = \\[([^\\]]+)\\]`).exec(src);
+    want = m ? m[1].split(',').map((x) => resolve(x.trim())) : null;
+    if (!want || !want.length) {
+      fails.push(`${declaredIn} no longer declares ${name}, which is what the ${tab} tab paints.`
+        + ' Refusing to pass: a gate that has lost its subject must never report success.');
+      want = null;
     }
   } else if (appTheme) {
     const v = appTheme[from];

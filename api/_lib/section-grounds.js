@@ -279,7 +279,22 @@ export const TAB_GROUNDS = {
   /** Home. Paper at the top, colour at the foot. */
   home: { stops: [CREAM, CREAM, INDIGO], locations: [0, 0.58, 1], angle: 158 },
   /** Insights, the brand orange, softened once at her ask. */
-  insights: { stops: ['#CB5A33', '#F09763'], locations: null, angle: 225 },
+  /**
+   * ── ORANGE INTO CREAM, NOT TWO ORANGES ────────────────────────────────
+   * Ellie: "Bg should be the cream with orange glow like the app."
+   *
+   * This was `OrangeGround`, which is a constant in the app's theme and is not
+   * what the Insights tab paints. The screen uses its own
+   * `INSIGHTS_GROUND = ['#F0A57F', Palette.cream]`, because she asked for it by
+   * name: "Remove blue gradient from insights bg, do a top right to bottom left
+   * orange to cream gradient."
+   *
+   * The same mistake as Home, which was painted from `BlueGround` while the
+   * home screen used none of it. Twice now a constant with the right-sounding
+   * name has stood in for the screen, and both times check-tab-grounds was
+   * pointed at the constant and passed. It reads the screen now.
+   */
+  insights: { stops: ['#F0A57F', '#FFFDF9'], locations: null, angle: 225 },
   /** Learn, which is the home screen's blue lifted a fifth toward white. */
   learn: { stops: lightenPair(BLUE_GROUND, 0.2), locations: null, angle: 225 },
 };

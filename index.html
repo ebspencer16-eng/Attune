@@ -118,6 +118,40 @@
        it is 16px of scroll on a page Ellie asked not to scroll: "Home page
        should not be scroll-able." */
     body { overflow-x: hidden; max-width: 100%; margin: 0; }
+
+    /* ── A BUTTON LOOKS PRESSED WHEN IT IS PRESSED ─────────────────────────
+       Ellie: "nothing happened the first few times I clicked the personalized
+       workbook button... add on the site and the web some sense of a button
+       push, whether that's a click, a grey-out, a 'push down' visual effect."
+
+       The workbook takes several seconds to build, so without this the only
+       honest reading of a press is that nothing happened, and the natural
+       response is to press it again. She did.
+
+       Here rather than on each control: there are hundreds of buttons across
+       the site and the dashboard, and a rule applied one component at a time is
+       the kind of list that is never finished. `:active` is the moment the
+       pointer is down, which is exactly the feedback that was missing.
+
+       `@media (hover: hover)` is deliberately NOT used: a touch screen needs
+       this more than a mouse does, not less. */
+    button:not(:disabled):active,
+    a[role="button"]:active,
+    [data-pressable]:active {
+      transform: scale(0.985);
+      filter: brightness(0.96);
+    }
+    button, a[role="button"], [data-pressable] {
+      transition: transform .08s ease, filter .08s ease, opacity .12s ease;
+    }
+    /* A disabled or busy control says so by not moving, and by its cursor. */
+    button:disabled { cursor: default; }
+    @media (prefers-reduced-motion: reduce) {
+      button, a[role="button"], [data-pressable] { transition: none; }
+      button:not(:disabled):active,
+      a[role="button"]:active,
+      [data-pressable]:active { transform: none; }
+    }
   </style>
 
     <title>Attune</title>

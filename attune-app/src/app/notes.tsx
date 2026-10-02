@@ -39,11 +39,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
-import {
-  ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable,
-  Share,
-  RefreshControl, ScrollView, Switch, Text, TextInput, View,
-} from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Share, RefreshControl, ScrollView, Switch, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {

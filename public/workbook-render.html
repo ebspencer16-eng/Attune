@@ -113,6 +113,22 @@
     .page { padding: 0.75in 0.9in; width: 100%; min-height: 297mm; }
   }
 </style>
+<!-- attune:press-feedback -->
+<style>
+  /* Ellie: "add on the site and the web some sense of a button push". One rule
+     rather than a list of controls: see index.html for the reasoning. */
+  button:not(:disabled):active, a[role="button"]:active, .btn:active, [data-pressable]:active {
+    transform: scale(0.985); filter: brightness(0.96);
+  }
+  button, a[role="button"], .btn, [data-pressable] {
+    transition: transform .08s ease, filter .08s ease, opacity .12s ease;
+  }
+  button:disabled { cursor: default; }
+  @media (prefers-reduced-motion: reduce) {
+    button, a[role="button"], .btn, [data-pressable] { transition: none; }
+    button:not(:disabled):active, a[role="button"]:active, .btn:active, [data-pressable]:active { transform: none; }
+  }
+</style>
 </head>
 <body>
 

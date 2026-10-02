@@ -49,10 +49,8 @@
  */
 
 import { useMemo, useRef, useState } from 'react';
-import {
-  Pressable, StyleSheet, Text, View,
-  type LayoutRectangle, type StyleProp, type TextStyle, type ViewStyle,
-} from 'react-native';
+import { StyleSheet, Text, View, type LayoutRectangle, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { SymbolView } from 'expo-symbols';
 

@@ -9,7 +9,8 @@
  * slightly different messages.
  */
 
-import { Pressable, Share, Text, View } from 'react-native';
+import { Share, Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';

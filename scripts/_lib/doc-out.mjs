@@ -24,14 +24,34 @@
  */
 
 import { existsSync, mkdirSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
 
 const SANDBOX = '/mnt/user-data/outputs';
 
+/**
+ * ── 4. SOMEWHERE WRITABLE, IF NONE OF THOSE ARE ───────────────────────────
+ * Ellie's Render log:
+ *
+ *   Error: EACCES: permission denied, mkdir '/app/.doc-out'
+ *
+ * The workbook container runs as `pwuser` and /app belongs to root, so the
+ * repo-relative fallback is not writable there. The real fix is in
+ * render_workbook.mjs, which should never have reached this code in service
+ * mode at all, and that is fixed. This is the second line: a helper that
+ * decides where to put a file should not be able to kill the process that
+ * called it, least of all after that process has already done its work.
+ */
 export function docOut(filename) {
   const root = new URL('../../', import.meta.url).pathname;
   const dir = process.env.ATTUNE_DOC_OUT
     || (existsSync(SANDBOX) ? SANDBOX : join(root, '.doc-out'));
-  mkdirSync(dir, { recursive: true });
-  return filename ? join(dir, filename) : dir;
+  try {
+    mkdirSync(dir, { recursive: true });
+    return filename ? join(dir, filename) : dir;
+  } catch {
+    const fallback = join(tmpdir(), 'attune-doc-out');
+    mkdirSync(fallback, { recursive: true });
+    return filename ? join(fallback, filename) : fallback;
+  }
 }

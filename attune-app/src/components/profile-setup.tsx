@@ -21,7 +21,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 
 import {
   createProfile, fetchProfileSetupCopy, joinInvite, lookUpInvite,

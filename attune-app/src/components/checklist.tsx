@@ -22,7 +22,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import {

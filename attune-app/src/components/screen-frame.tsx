@@ -22,7 +22,8 @@
  * right of its title row; the budget and the checklist had their own.
  */
 
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Colors, Spacing, Type } from '@/constants/attune-theme';

@@ -18,9 +18,8 @@ import { useEffect, useState } from 'react';
 import Constants from 'expo-constants';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import * as Updates from 'expo-updates';
-import {
-  ActivityIndicator, Linking, Modal, Pressable, ScrollView, Text, TextInput, View,
-} from 'react-native';
+import { ActivityIndicator, Linking, Modal, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

@@ -17,9 +17,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
-import {
-  ActivityIndicator, Image, Linking, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View,
-} from 'react-native';
+import { ActivityIndicator, Image, Linking, Modal, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { openExternal } from '@/api/open-external';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';

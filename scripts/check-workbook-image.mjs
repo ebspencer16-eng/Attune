@@ -133,6 +133,54 @@ for (const e of ENTRIES) walk(join(ROOT, e));
   needed.add('scripts/build_workbook.py');
 }
 
+/**
+ * ── THE SERVICE PATH DOES NOT FALL THROUGH ────────────────────────────────
+ * Ellie's log, after the image was complete:
+ *
+ *   Error: EACCES: permission denied, mkdir '/app/.doc-out'
+ *     at docOut (.../doc-out.mjs:35:3)
+ *     at .../render_workbook.mjs:135:11
+ *
+ * render_workbook.mjs has two modes. The service branch ends with
+ * `process.stdout.write(pdfBuf, cb)`, which is asynchronous, so it does not end
+ * the module: execution continued into the local sample block, which calls
+ * `docOut()` at module scope and tried to create a directory in /app. The
+ * container runs as a non-root user, so it threw, and it threw before the write
+ * callback fired. The parent then reported a truncated PDF, which that file's
+ * own comment names as the exact symptom of exiting before stdout drains.
+ *
+ * The PDF was built correctly on every one of those runs. The failure was
+ * entirely in what happened after it.
+ *
+ * So: every `docOut()` in that file has to sit inside the `!isService` branch.
+ */
+{
+  const rw = readFileSync(join(ROOT, 'scripts/render_workbook.mjs'), 'utf8');
+  const code = rw.replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
+
+  const guard = code.indexOf('if (!isService) {');
+  const calls = [...code.matchAll(/\bdocOut\s*\(/g)];
+  if (!calls.length) {
+    fails.push('scripts/render_workbook.mjs no longer calls docOut at all. Refusing to pass: a'
+      + ' gate that has lost its subject must never report success.');
+  } else if (guard === -1) {
+    fails.push('scripts/render_workbook.mjs has no `if (!isService)` branch, so its local sample'
+      + ' code runs in the service too.\n'
+      + '      The service writes the PDF to stdout asynchronously and does not end the module,'
+      + ' so\n      everything after it runs on the server, as a user that cannot write to /app.');
+  } else {
+    for (const c of calls) {
+      if (c.index > guard) continue;
+      const line = code.slice(0, c.index).split('\n').length;
+      fails.push(`scripts/render_workbook.mjs:${line} calls docOut() before the \`!isService\``
+        + ' branch, so it runs on the server as well as locally.\n'
+        + '      That is a directory creation inside /app, which the container user cannot do,'
+        + ' and\n      it happens after the PDF is already built.');
+    }
+  }
+}
+
 for (const rel of [...needed].sort()) {
   if (copied.has(rel)) continue;
   fails.push(`${rel} is reached by the workbook service and Dockerfile.workbook does not copy`

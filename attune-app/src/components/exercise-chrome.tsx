@@ -12,7 +12,8 @@
  * not have to be made five times and remembered five times.
  */
 
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 
 import {
   AccentFallback, AccentFor, Colors, Palette, Radius, Spacing, Type,

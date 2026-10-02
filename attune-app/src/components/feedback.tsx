@@ -18,7 +18,8 @@
  * whatever was collected before.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 
 import { fetchFeedbackForm, sendFeedback, type ApiError, type FeedbackForm } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';

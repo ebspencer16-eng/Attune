@@ -12,7 +12,8 @@
  * when the software is working exactly as designed.
  */
 
-import { ActivityIndicator, Image, Linking, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { openExternal } from '@/api/open-external';
 import type { ApiError } from '@/api/client';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';

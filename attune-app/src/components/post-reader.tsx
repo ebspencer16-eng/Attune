@@ -28,7 +28,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { ScrollView, Share, Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import { fetchPost, markPostRead, SITE_URL, type ApiError, type Note, type Post, type PostBlock, type Tag } from '@/api/client';

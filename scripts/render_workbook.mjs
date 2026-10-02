@@ -130,30 +130,53 @@ if (isService) {
   });
 }
 
-// ── Local sample mode (default) ──────────────────────────────────────────────
-const VARIANTS = [
-  { html: docOut('attune_workbook_sample.html'),           pdf: docOut('attune_workbook_sample.pdf') },
-  { html: docOut('attune_workbook_sample_same_type.html'), pdf: docOut('attune_workbook_sample_same_type.pdf') },
-];
+/**
+ * ── LOCAL SAMPLE MODE, AND ONLY WHEN THIS IS NOT THE SERVICE ──────────────
+ * Ellie's Render log, after the image was finally complete:
+ *
+ *   Error: EACCES: permission denied, mkdir '/app/.doc-out'
+ *     at docOut (file:///app/scripts/_lib/doc-out.mjs:35:3)
+ *     at file:///app/scripts/render_workbook.mjs:135:11
+ *
+ * The service block above ends with `process.stdout.write(pdfBuf, cb)`, which
+ * is asynchronous, so it does not end the module. Execution carried straight on
+ * into this block, which calls `docOut()` at module scope, which tries to make
+ * a directory inside /app. The container runs as `pwuser` and /app belongs to
+ * root, so it threw, and it threw before the write callback could fire.
+ *
+ * That is also why the parent reported `pdfBytes=255808`: the comment above
+ * names that exact number as the truncation symptom. The PDF was built
+ * correctly every time, 428KB of HTML and a real document, and then the process
+ * died part way through handing it over. The two failures were one failure.
+ *
+ * So the sample path is now explicitly the other branch. `isService` was
+ * already the condition; it was simply never used as one.
+ */
+if (!isService) {
+  const VARIANTS = [
+    { html: docOut('attune_workbook_sample.html'),           pdf: docOut('attune_workbook_sample.pdf') },
+    { html: docOut('attune_workbook_sample_same_type.html'), pdf: docOut('attune_workbook_sample_same_type.pdf') },
+  ];
 
-const browser = await chromium.launch();
-for (const v of VARIANTS) {
-  if (!existsSync(v.html)) {
-    console.log(`Skip: ${v.html} not present`);
-    continue;
+  const browser = await chromium.launch();
+  for (const v of VARIANTS) {
+    if (!existsSync(v.html)) {
+      console.log(`Skip: ${v.html} not present`);
+      continue;
+    }
+    const page = await browser.newPage();
+    await page.goto('file://' + path.resolve(v.html), { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1500);
+    await page.addStyleTag({ content: '@page { size: 8.5in 11in; margin: 0; }' });
+    await page.pdf({
+      path: v.pdf,
+      format: 'Letter',
+      printBackground: true,
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      preferCSSPageSize: true,
+    });
+    await page.close();
+    console.log(`Wrote ${v.pdf}`);
   }
-  const page = await browser.newPage();
-  await page.goto('file://' + path.resolve(v.html), { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1500);
-  await page.addStyleTag({ content: '@page { size: 8.5in 11in; margin: 0; }' });
-  await page.pdf({
-    path: v.pdf,
-    format: 'Letter',
-    printBackground: true,
-    margin: { top: '0', right: '0', bottom: '0', left: '0' },
-    preferCSSPageSize: true,
-  });
-  await page.close();
-  console.log(`Wrote ${v.pdf}`);
+  await browser.close();
 }
-await browser.close();

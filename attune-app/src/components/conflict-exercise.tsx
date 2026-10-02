@@ -19,7 +19,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fetchConflictQuestions, saveExercise } from '@/api/client';

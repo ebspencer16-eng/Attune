@@ -29,7 +29,8 @@
  */
 
 import { useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, Switch, Text, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import { deleteNote, shareNote, updateNote, type Note, type Tag } from '@/api/client';

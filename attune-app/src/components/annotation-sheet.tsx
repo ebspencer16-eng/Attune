@@ -28,9 +28,8 @@
  */
 
 import { useState } from 'react';
-import {
-  ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View,
-} from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import { createNote, createTag, type Tag } from '@/api/client';

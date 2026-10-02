@@ -43,11 +43,8 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, SafeAreaView,
-  ScrollView, StyleSheet, Text, View,
-  Image,
-} from 'react-native';
+import { Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, SafeAreaView, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
