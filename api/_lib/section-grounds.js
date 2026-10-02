@@ -270,14 +270,25 @@ const lighten = (hex, t) => {
  * down and a little right, which is 180 minus atan(0.4), about 158.
  */
 const CREAM = '#FFFDF9';
-const INDIGO = '#1B5FE8';
 
 const lightenPair = (pair, t) => pair.map((h) => lighten(h, t));
 const BLUE_GROUND = ['#2A3A6E', '#4A6CD4'];
 
 export const TAB_GROUNDS = {
-  /** Home. Paper at the top, colour at the foot. */
-  home: { stops: [CREAM, CREAM, INDIGO], locations: [0, 0.58, 1], angle: 158 },
+  /**
+   * Home. Paper at the top, colour at the foot.
+   *
+   * ── SOFTENED, AND THE FIRST SOFTENING MISSED ──────────────────────────
+   * Ellie: "Soften the blue gradient." She had asked once before, "Can we
+   * soften the blue gradient on the homepage, just like we did for the orange
+   * on insights", and what was softened was the app's `BlueGround`, which the
+   * home screen does not paint: it painted `Palette.indigo`, untouched. So the
+   * request reached the Learn tab and never reached the home ground.
+   *
+   * The foot is the light end of BlueGround on both surfaces now, so one
+   * softening moves both grounds and there is no third blue to forget.
+   */
+  home: { stops: [CREAM, CREAM, BLUE_GROUND[1]], locations: [0, 0.58, 1], angle: 158 },
   /** Insights, the brand orange, softened once at her ask. */
   /**
    * ── ORANGE INTO CREAM, NOT TWO ORANGES ────────────────────────────────

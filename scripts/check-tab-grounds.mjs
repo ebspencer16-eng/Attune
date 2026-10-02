@@ -122,9 +122,23 @@ const PALETTE = {};
   const t = read('attune-app/src/constants/attune-theme.ts');
   for (const m of t.matchAll(/^\s{2}(\w+): '(#[0-9a-fA-F]{3,8})',/gm)) PALETTE[m[1]] = m[2];
 }
+/**
+ * One token from a `colors={[...]}` array, as a colour.
+ *
+ * `Palette.x` is read out of the theme's source, a quoted literal is itself,
+ * and a bare exported name is read out of the EVALUATED theme. The last of
+ * those is how `HomeGroundFoot` resolves: it is `BlueGround[1]`, not a literal,
+ * because Ellie asked for the home ground to be softened and the softening had
+ * gone to BlueGround, which the home screen was not painting. Reading the
+ * compiled module rather than matching a hex is the same choice LearnGround
+ * already forced, for the same reason: a gate that reimplements the rule is
+ * comparing itself to one side instead of the two sides to each other.
+ */
 const resolve = (tok) => {
   const m = /^Palette\.(\w+)$/.exec(tok);
   if (m) return PALETTE[m[1]] || tok;
+  const bare = /^[A-Za-z_$][\w$]*$/.exec(tok);
+  if (bare && appTheme && typeof appTheme[tok] === 'string') return appTheme[tok];
   return tok.replace(/^'|'$/g, '');
 };
 

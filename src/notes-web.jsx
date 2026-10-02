@@ -938,7 +938,12 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
             justifyContent: 'center', gap: '0.9rem', padding: '4rem 0',
           }}>
             <style>{'@keyframes attuneSpin{to{transform:rotate(360deg)}}'}</style>
-            <svg width="36" height="26" viewBox="0 0 103 76" fill="none" aria-hidden="true">
+            {/* Ellie: "Make the mark bigger on the loading screen." 68 across,
+                which is not a guess: it is the number the app's own loading
+                screen uses, from her earlier ask there, "when we show loading
+                pages we include the mark logo, I like that, but it needs to be
+                larger." The height follows the viewBox so it cannot squash. */}
+            <svg width="68" height="50" viewBox="0 0 103 76" fill="none" aria-hidden="true">
               <defs>
                 <linearGradient id="notesLoadG" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#E8673A" /><stop offset="100%" stopColor="#1B5FE8" />
@@ -1139,7 +1144,15 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                     borderRadius: '0 0 22px 22px',
                     padding: '2rem 1.4rem 1.25rem',
                     marginTop: '-1.25rem',
-                    boxShadow: '0 10px 14px rgba(42,27,16,0.22)',
+                    /* Ellie: "less shading behind word tile."
+                       It carried the app's numbers verbatim, opacity 0.22 at a
+                       14 radius, and a CSS box-shadow is not an iOS layer
+                       shadow: the same figures draw a wider, heavier smudge in
+                       a browser than they do on a phone. So copying them across
+                       was a transcription rather than a match, which is why it
+                       looked right in the app and heavy here. Lighter and
+                       tighter, to read the way the app's does. */
+                    boxShadow: '0 6px 10px rgba(42,27,16,0.12)',
                     position: 'relative', zIndex: 0,
                   }}>
                     <div style={{

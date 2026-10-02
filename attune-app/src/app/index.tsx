@@ -49,7 +49,7 @@ import { showJournal } from '@/app/notes';
 import PageWash, { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
-  BlueGround, BottomTabInset, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BlueGround, BottomTabInset, Colors, Fonts, HomeGroundFoot, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -427,9 +427,13 @@ export default function HomeScreen() {
           third of the way to indigo at 45 per cent of the page, which put blue
           behind the greeting. Cream holds to past halfway now and the colour
           is the bottom of the screen, which is where she put it. */}
+      {/* Ellie: "Soften the blue gradient." The foot is the light end of
+          BlueGround, the blue she had already had softened once. Palette.indigo
+          is the unsoftened one and this screen was the last place painting it.
+          See HomeGroundFoot. */}
       <LinearGradient
         pointerEvents="none"
-        colors={[Palette.cream, Palette.cream, Palette.indigo]}
+        colors={[Palette.cream, Palette.cream, HomeGroundFoot]}
         locations={[0, 0.58, 1]}
         start={{ x: 0.3, y: 0 }}
         end={{ x: 0.7, y: 1 }}

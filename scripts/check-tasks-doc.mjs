@@ -131,7 +131,30 @@ for (const sec of sections) {
   try {
     revisions = execSync('git log -n 40 --format=%H -- TASKS.md',
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
-      .split('\n').map((x) => x.trim()).filter(Boolean).slice(1);
+      .split('\n').map((x) => x.trim()).filter(Boolean);
+    /**
+     * ── WHETHER THE NEWEST REVISION IS HISTORY OR IS THE DOCUMENT ─────────
+     * This used to drop it unconditionally, with `.slice(1)`, on the assumption
+     * that HEAD holds the version being checked. That is only true after a
+     * commit, and `npm run check` runs BEFORE one. So while TASKS.md was
+     * modified in the working tree, the baseline excluded the one revision where
+     * a row approved in the last commit still sat in section 3, and every such
+     * row read as having been born in section 4.
+     *
+     * It cost a false alarm the day after the gate was widened to forty
+     * revisions for exactly this class of mistake. So the question is asked
+     * rather than assumed: if HEAD's copy is the file on disk, HEAD is the
+     * document and is not evidence about its own past. If it differs, the
+     * change is uncommitted and HEAD is genuine history.
+     */
+    if (revisions.length) {
+      let head = null;
+      try {
+        head = execSync(`git show ${revisions[0]}:TASKS.md`,
+          { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+      } catch { head = null; }
+      if (head !== null && head === doc) revisions = revisions.slice(1);
+    }
   } catch {
     /* Not a git checkout, or TASKS.md is new. Nothing to compare, and saying so
        is better than inventing a baseline. */

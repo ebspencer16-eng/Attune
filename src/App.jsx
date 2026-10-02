@@ -1,4 +1,5 @@
 import { signedUrlIsLive } from "../api/_lib/workbook-link.js";
+import { isWorkbookUrl } from "../api/_lib/workbook-format.js";
 import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
@@ -14345,7 +14346,12 @@ export default function App() {
       a.rel = 'noopener';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     };
-    const stored = order?.workbookUrl;
+    // A stored link is only handed over if it points at a workbook. The app
+    // served a 40 KB .docx from exactly this kind of fallback, because the
+    // format rule was being applied where the link is MINTED and not where a
+    // stored one is reused. Falling through here asks the service to build the
+    // PDF, which is the right answer and is what the button promises.
+    const stored = isWorkbookUrl(order?.workbookUrl) ? order.workbookUrl : null;
     const currentVersion = order?.workbookVersion === WORKBOOK_CONTENT_VERSION;
     if (stored && currentVersion) {
       try {

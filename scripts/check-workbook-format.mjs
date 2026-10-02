@@ -32,6 +32,22 @@
  * one holding only a PDF, and one empty. Reading the function cannot tell you
  * what it picks out of a list; running it can.
  *
+ * ── AND THEN THE OTHER WAY A LINK REACHES A READER ────────────────────────
+ * That was the whole of this gate, and it was aimed at the half that was
+ * already correct. Ellie, weeks later, with the in-app browser open on
+ * `Attune_Workbook_..._and_Preston.docx`, 40 KB.
+ *
+ * Minting is one of two producers. The other is reuse: api/tool-data.js and
+ * src/App.jsx both fall back to the URL stored on the order row when minting
+ * returns null, and minting returns null for exactly the couples whose folder
+ * holds no PDF, which is every couple today. So the enforcing branch and the
+ * bypassing branch sat in one expression and the bypass is the one that ran.
+ *
+ * CLAUDE.md says this twice: a rule kept in one place and skipped in the one
+ * beside it, and a gate that reports success about code nobody runs. So every
+ * surface that hands over a STORED link is checked too, by name, and each one
+ * has to put that link through isWorkbookUrl.
+ *
  * The three statements of the format are also compared, because the extension
  * used to be typed into the file name as `.docx` while the builder wrote a PDF,
  * so a workbook would have downloaded under a Word extension.
@@ -52,7 +68,7 @@ import { readFileSync } from 'node:fs';
 
 import { freshWorkbookUrl } from '../api/_lib/workbook-link.js';
 import { workbookFileName } from '../api/_lib/workbook-copy.js';
-import { WORKBOOK_EXT, WORKBOOK_MIME, isWorkbookFile } from '../api/_lib/workbook-format.js';
+import { WORKBOOK_EXT, WORKBOOK_MIME, isWorkbookFile, isWorkbookUrl } from '../api/_lib/workbook-format.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const fails = [];
@@ -150,6 +166,61 @@ const PDF = `Attune_Workbook_Ellie_and_Sam.${WORKBOOK_EXT}`;
   if (url) fails.push(`an empty folder produced ${url} rather than null.`);
 }
 
+// ── 3. A stored link is held to the same rule ───────────────────────────────
+{
+  const live = (name) => {
+    /* A signature that has not expired, so `signedUrlIsLive` is not what stops
+       it. The question under test is the format, not the clock. */
+    const exp = Math.floor(Date.now() / 1000) + 3600;
+    const payload = Buffer.from(JSON.stringify({ exp })).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return `${SUPA}/storage/v1/object/sign/workbooks/ORD-1/${encodeURIComponent(name)}?token=h.${payload}.s`;
+  };
+
+  if (isWorkbookUrl(live(DOCX))) {
+    fails.push('isWorkbookUrl accepts a link to a Word file, so every surface that reuses a'
+      + ' stored link is free to hand one over.');
+  }
+  if (!isWorkbookUrl(live(PDF))) {
+    fails.push('isWorkbookUrl rejects a link to a real workbook, which would mean nobody with'
+      + ' a built workbook can open it.');
+  }
+  if (isWorkbookUrl(null) || isWorkbookUrl('') || isWorkbookUrl('not a url')) {
+    fails.push('isWorkbookUrl accepts something that is not a link to anything. Unparseable has'
+      + ' to fail toward "still building" rather than toward the wrong document.');
+  }
+
+  /**
+   * Every surface that reuses a stored link puts it through that question.
+   *
+   * Matched on what the stored value is HANDED TO, not on the function name
+   * appearing in the file: `isWorkbookUrl` imported and never called would read
+   * as covered, which is the first way a gate gets defeated without deleting
+   * anything.
+   */
+  const REUSERS = [
+    { file: 'api/tool-data.js', value: 'row?.workbook_url' },
+    { file: 'src/App.jsx', value: 'order?.workbookUrl' },
+  ];
+  for (const { file, value } of REUSERS) {
+    const src = readFileSync(`${ROOT}${file}`, 'utf8');
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
+    const esc = value.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&');
+    const uses = [...code.matchAll(new RegExp(esc, 'g'))];
+    if (!uses.length) {
+      fails.push(`${file} no longer reads ${value}, which is the stored workbook link.`
+        + ' Refusing to pass: a gate that has lost its subject must never report success.');
+      continue;
+    }
+    if (!new RegExp(`isWorkbookUrl\\(\\s*${esc}\\s*\\)`).test(code)) {
+      fails.push(`${file} hands ${value} to a reader without asking whether it points at a`
+        + ' workbook.\n      Minting returns null for every couple with no PDF, so this'
+        + ' fallback is the branch that\n      actually runs, and it served a .docx.');
+    }
+  }
+}
+
 if (fails.length) {
   console.error('\n check-workbook-format: a reader can be handed the wrong document.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
@@ -158,4 +229,5 @@ if (fails.length) {
 
 console.log('[check-workbook-format] four folders: the old Word file is never served, a'
   + ' workbook beside it is, an empty folder answers null, and the extension in the file'
-  + ' name is the one the builder writes.');
+  + ' name is the one the builder writes. Both surfaces that reuse a STORED link ask the'
+  + ' same question of it, which is the half this gate used to miss.');

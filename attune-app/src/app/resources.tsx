@@ -19,7 +19,8 @@ import { useFocusEffect } from 'expo-router';
 import { useTabReset } from '@/hooks/use-tab-reset';
 import { ActivityIndicator, Image, Linking, Modal, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
-import { openExternal } from '@/api/open-external';
+import { openExternal, openInApp } from '@/api/open-external';
+import { oneShot } from '@/lib/one-shot';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -61,12 +62,21 @@ const ALL = 'All';
  * results screen uses for sections: a value for the next mount, and a setter
  * for the mount that is already there behind the tab bar.
  */
-let pendingPost: string | null = null;
-let openPostHandle: ((id: string) => void) | null = null;
+/**
+ * ── THE SLOT IS EMPTIED BY WHOEVER READS IT ───────────────────────────────
+ * Ellie: "for some reason on the app when I click download it opens the how to
+ * review your results together article."
+ *
+ * This was a bare variable and a handle, and `showPost` wrote the variable even
+ * when a mounted screen had already taken the value. Nothing emptied it after
+ * that, so one tap on a mark in Notes left that article's slug in module memory
+ * for the rest of the session, and the next time iOS rebuilt this tab the
+ * rebuilt screen opened it unasked. See lib/one-shot.ts.
+ */
+const postSlot = oneShot<string>();
 
 export function showPost(id: string) {
-  pendingPost = id;
-  openPostHandle?.(id);
+  postSlot.send(id);
 }
 
 /**
@@ -87,12 +97,10 @@ export function showPost(id: string) {
  * Same one-slot handle as showPost, for the same reason: a value for the next
  * mount, and a setter for the mount already sitting behind the tab bar.
  */
-let pendingTool: string | null = null;
-let openToolHandle: ((key: string) => void) | null = null;
+const toolSlot = oneShot<string>();
 
 export function showTool(key: string) {
-  pendingTool = key;
-  openToolHandle?.(key);
+  toolSlot.send(key);
 }
 
 export default function ResourcesScreen() {
@@ -127,8 +135,8 @@ export default function ResourcesScreen() {
    * and the list is here rather than inside the handler so adding the budget
    * is one line in one place.
    */
-  const [openTool_, setOpenTool] = useState<string | null>(pendingTool);
-  const [openPost, setOpenPost] = useState<string | null>(pendingPost);
+  const [openTool_, setOpenTool] = useState<string | null>(toolSlot.pending);
+  const [openPost, setOpenPost] = useState<string | null>(postSlot.pending);
   /** Whether the insight of the day is open as a full card. */
   const [insightOpen, setInsightOpen] = useState(false);
   /** Whether the save-to-journal sheet is up for the insight of the day. */
@@ -257,15 +265,19 @@ export default function ResourcesScreen() {
     setBusyTool('workbook');
     try {
       /* 1. The file, if there is one. This is the whole of the happy path and
-         it is one openURL with no network in front of it. */
+         it is one browser presentation with no network in front of it.
+
+         In the app, not Safari. Ellie: "app simulator still downloads the pdf".
+         Safari's answer to a document is a download prompt; an in-app browser
+         draws it. See openInApp. */
       let wb = tools?.workbook;
-      if (wb?.url) { await openExternal(wb.url); return; }
+      if (wb?.url) { await openInApp(wb.url); return; }
 
       /* 2. It may have been built since this screen loaded. One cheap read
             before committing to anything slow. */
       const fresh = await fetchToolData();
       if (fresh.ok) { setTools(fresh.data); wb = fresh.data.workbook; }
-      if (wb?.url) { await openExternal(wb.url); return; }
+      if (wb?.url) { await openInApp(wb.url); return; }
 
       /* 3. Ask the server for one. It is built when results unlock, so this is
             for a couple whose results opened before that was true. */
@@ -275,7 +287,7 @@ export default function ResourcesScreen() {
         setWorkbookNote(null);
         const again = await fetchToolData();
         if (again.ok) setTools(again.data);
-        await openExternal(made.data.url);
+        await openInApp(made.data.url);
         return;
       }
 
@@ -434,13 +446,13 @@ export default function ResourcesScreen() {
 
   useEffect(() => { load(); }, [load]);
 
-  // The handle showPost() moves, and the slot it left behind for this mount.
+  // The setter showPost() and showTool() reach, for a tap that arrives while
+  // this screen is already mounted behind the tab bar. Registering is also what
+  // empties the slot, so the value cannot reach a second mount as well.
   useEffect(() => {
-    pendingPost = null;
-    pendingTool = null;
-    openPostHandle = (id: string) => { setOpenTool(null); setOpenPost(id); };
-    openToolHandle = (key: string) => { setOpenPost(null); setOpenTool(key); };
-    return () => { openPostHandle = null; openToolHandle = null; };
+    const offPost = postSlot.register((id) => { setOpenTool(null); setOpenPost(id); });
+    const offTool = toolSlot.register((key) => { setOpenPost(null); setOpenTool(key); });
+    return () => { offPost(); offTool(); };
   }, []);
 
   // Reload when this tab comes into focus, not only when it mounts.

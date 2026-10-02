@@ -27,6 +27,7 @@
 
 import { jsonBody } from './_lib/http.js';
 import { freshWorkbookUrl, signedUrlIsLive } from './_lib/workbook-link.js';
+import { isWorkbookUrl } from './_lib/workbook-format.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { coupleKeyOf } from './_lib/couple-key.js';
 // The checklist's own content, so the app renders the website's words rather
@@ -267,8 +268,19 @@ export default async function handler(req) {
         const fresh = await freshWorkbookUrl({
           supabaseUrl, serviceKey, orderNum: row?.order_num,
         });
+        /**
+         * The stored link is held to the same rule as a minted one.
+         *
+         * It was not, and minting returns null for precisely the couples whose
+         * folder holds no PDF, so this fallback handed every one of them the old
+         * Word file. Ellie saw it open in the app as
+         * `Attune_Workbook_..._and_Preston.docx`. See isWorkbookUrl.
+         */
+        const stored = isWorkbookUrl(row?.workbook_url) && signedUrlIsLive(row?.workbook_url)
+          ? row.workbook_url
+          : null;
         workbook = {
-          url: fresh || (signedUrlIsLive(row?.workbook_url) ? row.workbook_url : null),
+          url: fresh || stored,
           fileName: workbookFileName(profile.name, partnerName),
           copy: WORKBOOK_COPY,
         };

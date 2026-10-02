@@ -46,3 +46,35 @@ export const WORKBOOK_MIME = 'application/pdf';
 export function isWorkbookFile(name) {
   return typeof name === 'string' && name.toLowerCase().endsWith(`.${WORKBOOK_EXT}`);
 }
+
+/**
+ * True for a signed link that actually points at a workbook.
+ *
+ * ── WHY THE RULE NEEDED A SECOND FORM ─────────────────────────────────────
+ * Ellie, again, after the first fix: the app opened
+ * `Attune_Workbook_..._and_Preston.docx`, 40 KB, in the in-app browser.
+ *
+ * `isWorkbookFile` was being applied to one of the two ways a link reaches a
+ * reader. api/tool-data.js mints a fresh link, which obeys it, and then falls
+ * back to the URL stored on the order row when minting returns null:
+ *
+ *   url: fresh || (signedUrlIsLive(row?.workbook_url) ? row.workbook_url : null)
+ *
+ * Minting returns null for exactly the couples whose folder holds no PDF, which
+ * is every couple today. So the branch that enforces the format and the branch
+ * that bypasses it were the same expression, and the bypass was the one that
+ * ran. The gate passed because it tested the minting function.
+ *
+ * That is the shape CLAUDE.md names twice over: a rule kept in one place and
+ * skipped in the one beside it, and a gate aimed at the half that was already
+ * correct.
+ *
+ * The object's path is in the URL, before the query, so the same question can
+ * be asked of a link. Anything unparseable is not a workbook, which fails
+ * toward "we are still building it" rather than toward the wrong document.
+ */
+export function isWorkbookUrl(url) {
+  if (typeof url !== 'string' || !url) return false;
+  const path = url.split('?')[0].split('#')[0];
+  return isWorkbookFile(decodeURIComponent(path));
+}

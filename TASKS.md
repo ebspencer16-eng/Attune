@@ -4,7 +4,7 @@
 
 | # | What I need from you |
 |--|--|
-| O512 | **Redeploy the workbook service on Render once more, then try the workbook.** Your log found it: the PDF was built correctly every time, then the process died handing it over, because it ran code meant for local use that tries to write inside /app as a user that cannot. Manual Deploy, Deploy latest commit. |
+| O525 | **The site still offers the Word file, and you have already said you do not want it.** The workbook tile on the dashboard has a "↓ Download (.docx)" button under the line "Opens in Word, Google Docs, or Pages". You approved O508: "I only want the PDF workbook to exist." Taking a download button off a page customers use is your call, not mine. Say the word and it goes, and the tile offers the PDF only. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -22,13 +22,11 @@
 
 | # | Built, needs your eye |
 |--|--|
-| O524 | **A press now looks like a press**, on the app and across the whole site. The app had no pressed state at all: one control out of ninety reacted. That is why the workbook button felt dead. |
+| O512 | **The app was serving the Word file, and I can show you the screenshot.** Two bugs behind one tap. The tile handed the file to Safari, which downloads rather than shows; it opens inside the app now, full screen, with the share button for saving it. And the file itself was `Attune_Workbook_..._and_Preston.docx`, 40 KB. The rule that says "a workbook is a PDF" was being applied where the link is built and skipped where a stored link is reused, and the stored branch is the one that runs for everyone who has no PDF yet. Both surfaces now ask the same question, and a couple with no PDF gets "Building your workbook" and a real build instead of a Word file. |
+| O512b | **Why your phone opened an article and my simulator did not.** The slot that carries "open this article" between tabs kept a copy after a mounted screen had already taken the value, and nothing emptied it. One tap on a mark in Notes left that article in memory for the session; when iOS released the Learn tab while Safari was in front and rebuilt it on return, the rebuilt screen opened it. The simulator never releases the tab, which is why I could not reproduce it. Fixed and gated. "How to review your results together" is the first featured article, which fits. |
+| O497 | **Softened.** Worth knowing: you asked for this once before, and what got softened was a constant the home screen does not paint. Both grounds now end on the same blue, so one change moves both and there is no third one to forget. |
+| O517 | **Mark is 68 across, the size the app uses.** Shadow behind the word tile is lighter: it had the app’s numbers copied across verbatim, and a CSS shadow draws heavier than an iOS one from the same figures, so the match was a transcription rather than a match. |
 | O520 | Insights is cream with the orange glow, read off the app's own screen instead of a constant that was never used there. The menu fits without scrolling. |
-| O497 | No cream tile under the prompts, so the gradient shows. Quick-link labels are two lines at any width. Both prompt cards hold the same shape. |
-| O517 | Loading is centred with the mark and a spinner. Less space above the word tile. The word tile is the app's, with the shading. |
-| O523 | The app's budget is the website's: dark three-stat strip, numbered steps, save bar with its four states. It still also saves as you type, so nothing is lost if you leave mid-number. |
-| O521 | Fixed and gated: a flag read off the ownership object that does not exist now fails the build. |
-| O522 | Fixed. It was the budget tool's section helper, not Insights. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -43,6 +41,10 @@
 
 | Verified by you | What |
 |--|--|
+| O524 | **Approved.** |
+| O523 | **Approved.** |
+| O521 | **Approved.** |
+| O522 | **Approved.** |
 | O488 | **Approved.** |
 | O514 | **Approved.** |
 | O510 | **Approved.** |

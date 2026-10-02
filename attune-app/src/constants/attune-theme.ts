@@ -99,6 +99,26 @@ const lighten = (hex: string, t: number) => {
 export const LearnGround = [lighten(BlueGround[0], 0.2), lighten(BlueGround[1], 0.2)] as const;
 
 /**
+ * The colour the home screen's ground finishes on.
+ *
+ * ── THE SOFTENING WENT TO A CONSTANT THE HOME SCREEN DOES NOT USE ─────────
+ * Ellie, months ago: "Can we soften the blue gradient on the homepage, just
+ * like we did for the orange on insights." BlueGround was softened, and the
+ * comment above it still records that as the reason. The home screen paints
+ * `Palette.indigo`, which nothing touched, so her request reached the Learn tab
+ * and never reached the page she asked about. She asked again: "Soften the blue
+ * gradient."
+ *
+ * The third time a constant with the right-sounding name has stood in for this
+ * screen. So the foot of the home ground IS the light end of BlueGround now,
+ * rather than a blue of its own: one softening, and both grounds follow it.
+ *
+ * Palette.indigo keeps its value, because the storycards, the couple colours
+ * and the Notes ground all draw with it and she has approved those.
+ */
+export const HomeGroundFoot = BlueGround[1];
+
+/**
  * The Insights tab's ground, which is the same idea in the brand orange.
  *
  * Ellie: "The home page is the attune blue, please try making the landing page
