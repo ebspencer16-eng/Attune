@@ -500,7 +500,14 @@ async function resolveEntitlements(sb, session, profile) {
     if (session?.access_token && !blob) postRecompute(session.access_token);
     return ent;
   }
-  if (blob) { try { ent = mergeEntitlementsGrantOnly(ent, blob); } catch {} }
+  /* A merge that throws leaves `ent` as it was, which is the SMALLER set: the
+     customer sees fewer features than they own and nothing anywhere says so.
+     Grant-only means this cannot take anything away, so carrying on is right;
+     being silent about it is not. */
+  if (blob) {
+    try { ent = mergeEntitlementsGrantOnly(ent, blob); }
+    catch (e) { console.warn('[Attune] stored entitlements would not merge:', e); }
+  }
   if (!session?.access_token) return ent;
   const mustAwait = !blob || ent.readFailed;
   const drifted = !blob || !sameEntitlements(ent, blob);
@@ -509,7 +516,8 @@ async function resolveEntitlements(sb, session, profile) {
   if (!mustAwait) return ent; // background refresh only
   const res = await req;
   if (res?.ok && res.entitlements) {
-    try { ent = mergeEntitlementsGrantOnly(ent, res.entitlements); } catch {}
+    try { ent = mergeEntitlementsGrantOnly(ent, res.entitlements); }
+    catch (e) { console.warn('[Attune] recomputed entitlements would not merge:', e); }
   }
   return ent;
 }
