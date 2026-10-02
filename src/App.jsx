@@ -1,6 +1,7 @@
 import { signedUrlIsLive } from "../api/_lib/workbook-link.js";
 import { isWorkbookUrl } from "../api/_lib/workbook-format.js";
 import { getWorkbookUrl, saveWorkbook } from "./workbook-download.js";
+import { AttuneMark } from "./attune-mark.jsx";
 import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
@@ -2855,7 +2856,7 @@ function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
       <div style={{ background: C.warm, borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
-          <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="glg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#glg)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)"/></svg>
+          <AttuneMark width={28} />
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
         </div>
 
@@ -9668,7 +9669,7 @@ function WrappedCard({ children, bg, onDownload, cardIndex, cardRef, inline, por
           containerType: "inline-size" }}>
         {/* Attune watermark */}
         <div style={{ position: "absolute", bottom: 16, left: 20, display: "flex", alignItems: "center", gap: 6, opacity: 0.45 }}>
-          <svg width="22" height="16" viewBox="0 0 103 76" fill="none"><defs><linearGradient id={"wg"+cardIndex} x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill={"url(#wg"+cardIndex+")"}/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.9" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke={"url(#wg"+cardIndex+")"} strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill={"url(#wg"+cardIndex+")"} transform="translate(58.16,21.3) scale(0.72)"/></svg>
+          <AttuneMark width={22} />
           <span style={{ ...scType("wordmark") }}>Attune</span>
         </div>
         {/* Portrait corner bubble */}
@@ -11052,7 +11053,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="am1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#am1)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#am1)" strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#am1)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+          <AttuneMark width={28} />
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.05rem", fontWeight: 700, color: "#0E0B07" }}>Attune</span>
         </div>
 
@@ -11255,7 +11256,7 @@ function NewPasswordScreen({ onDone }) {
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
-          <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="npg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#npg)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
+          <AttuneMark width={28} />
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: '#0E0B07' }}>Attune</span>
         </div>
         {done ? (
@@ -11595,7 +11596,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
     <div style={{ minHeight: '100vh', background: '#1e1a35', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2.5rem' }}>
-        <svg width="32" height="23" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="plg" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#plg)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#plg)" strokeWidth="2.2" strokeLinejoin="round"/><g transform="translate(58.16,21.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#plg)"/></g></svg>
+        <AttuneMark width={32} />
         <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.05rem', fontWeight: 700, color: 'white' }}>Attune</span>
       </div>
 
@@ -11816,7 +11817,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '3rem 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
-          <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg1" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg1)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
+          <AttuneMark width={28} />
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
         </div>
         <Exercise01Flow userName={account.name} partnerName={account.partnerName} onComplete={handleEx1Done} skipIntro={true} />
@@ -11829,7 +11830,7 @@ function PartnerBExerciseFlow({ account, onComplete }) {
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '3rem 2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
-          <svg width="28" height="20" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="bfg2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#bfg2)"/><g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g></svg>
+          <AttuneMark width={28} />
           <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '0.95rem', fontWeight: 700, color: C.ink }}>Attune</span>
         </div>
         <ExpectationsExercise userName={account.name} partnerName={account.partnerName} onComplete={handleEx2Done} isAnniversary={["married","remarried"].includes(account.buyerRelationshipStatus || account.relationshipStatus)} />
@@ -14956,21 +14957,9 @@ export default function App() {
           <div onClick={() => { if (isLoggedIn) { setView('home'); } else { window.location.href = '/home'; } }} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
             {(isMobile && view !== "results") ? (
               /* White logo mark for gradient background */
-              <svg width="28" height="20" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs><linearGradient id="mktNavGradM" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs>
-                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mktNavGradM)" stroke="white" strokeWidth="2.2" strokeLinejoin="round"/>
-                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
-                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mktNavGradM)" strokeWidth="2.2" strokeLinejoin="round"/>
-                <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mktNavGradM)" transform="translate(58.16,21.3) scale(0.72)"/>
-              </svg>
+              <AttuneMark width={28} tone="onColor" />
             ) : (
-              <svg width="36" height="26" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs><linearGradient id="appNavGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs>
-                <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#appNavGrad)"/>
-                <g transform="translate(13.16,11.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93"/></g>
-                <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#appNavGrad)" strokeWidth="2.2" strokeLinejoin="round"/>
-                <g transform="translate(58.16,21.3) scale(0.72)"><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#appNavGrad)"/></g>
-              </svg>
+              <AttuneMark width={36} />
             )}
             <span style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: (isMobile && view !== "results") ? "white" : (view === "home" ? "white" : C.ink) }}>Attune</span>
           </div>
@@ -15117,13 +15106,7 @@ export default function App() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem 0", position: "relative" }}>
                     {/* Logo — links to landing page */}
                     <div onClick={() => window.location.href = '/home'} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                      <svg width="28" height="20" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                        <defs><linearGradient id="mktNavGradH" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs>
-                        <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#mktNavGradH)" stroke="white" strokeWidth="2.2" strokeLinejoin="round"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/>
-                        <path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#mktNavGradH)" strokeWidth="2.2" strokeLinejoin="round"/>
-                        <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#mktNavGradH)" transform="translate(58.16,21.3) scale(0.72)"/>
-                      </svg>
+                      <AttuneMark width={28} tone="onColor" style={{ flexShrink: 0 }} />
                       <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "white", fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: "-.01em" }}>Attune</span>
                     </div>
                     {/* Hamburger button */}
@@ -16924,7 +16907,7 @@ export default function App() {
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 2fr", gap: isMobile ? "1.5rem" : "3rem", paddingBottom: "2.5rem", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                      <svg width="36" height="26" viewBox="0 0 103 76" fill="none"><defs><linearGradient id="ftGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#E8673A"/><stop offset="100%" stopColor="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#ftGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#ftGrad)" strokeWidth="2.2" strokeLinejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#ftGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+                      <AttuneMark width={36} />
                       <span style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "white" }}>Attune</span>
                     </div>
                     <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,.4)", lineHeight: 1.7, fontFamily: BFONT, fontWeight: 300 }}>Understand each other deeply.<br/>And how to grow together.</p>

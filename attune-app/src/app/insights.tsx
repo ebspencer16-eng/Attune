@@ -38,7 +38,7 @@ import {
   Colors, MaxContentWidth, OrangeGround, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
 import { WAITING } from '@/constants/waiting';
-import TabScreen from '@/components/tab-screen';
+import TabScreen, { TOP_LEFT } from '@/components/tab-screen';
 import { LOADING } from '@/constants/loading-copy';
 
 const c = Colors.light;
@@ -355,6 +355,16 @@ export default function InsightsScreen() {
 
 /** Her diagonal: the brand orange at the top right into the app's cream. */
 const INSIGHTS_GROUND = ['#F0A57F', Palette.cream] as const;
+/**
+ * Which corner the orange comes from.
+ *
+ * Ellie: "Have orange come from top left." It ran top right to bottom left,
+ * which is the diagonal Learn uses, and the direction was written inside
+ * TabScreen where neither tab could set it. It is declared here beside the
+ * colours now, because a ground is a direction as much as a pair of stops, and
+ * check-tab-grounds reads both off this screen.
+ */
+const INSIGHTS_AIM = TOP_LEFT;
 
 function Shell({ children, tint }: { children: React.ReactNode; tint?: string | null }) {
   /* ── THE TAB'S OWN COLOUR ──────────────────────────────────────────────
@@ -393,7 +403,7 @@ function Shell({ children, tint }: { children: React.ReactNode; tint?: string | 
      diagonal she named. `groundColors` paints edge to edge and `groundTone`
      keeps the lockup in ink, which is what Learn uses for the same reason. */
   return (
-    <TabScreen groundColors={INSIGHTS_GROUND} groundTone="ink">{children}</TabScreen>
+    <TabScreen groundColors={INSIGHTS_GROUND} groundAim={INSIGHTS_AIM} groundTone="ink">{children}</TabScreen>
   );
 }
 

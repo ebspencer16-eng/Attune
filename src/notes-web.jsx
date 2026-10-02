@@ -39,6 +39,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AttuneMark } from "./attune-mark.jsx";
 
 import { ANNOTATION_COLORS, DEFAULT_ANNOTATION_COLOR } from '../api/_lib/annotations.js';
 import { JOURNAL_ANCHOR, isJournalEntry } from '../api/_lib/tags.js';
@@ -943,15 +944,7 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
                 screen uses, from her earlier ask there, "when we show loading
                 pages we include the mark logo, I like that, but it needs to be
                 larger." The height follows the viewBox so it cannot squash. */}
-            <svg width="68" height="50" viewBox="0 0 103 76" fill="none" aria-hidden="true">
-              <defs>
-                <linearGradient id="notesLoadG" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#E8673A" /><stop offset="100%" stopColor="#1B5FE8" />
-                </linearGradient>
-              </defs>
-              <path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#notesLoadG)" />
-              <path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity=".93" transform="translate(13.16,11.3) scale(0.72)" />
-            </svg>
+            <AttuneMark width={68} />
             <span style={{
               width: 18, height: 18, borderRadius: '50%',
               border: `2px solid ${C.stone}`, borderTopColor: C.accent,

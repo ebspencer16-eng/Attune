@@ -305,7 +305,10 @@ export const TAB_GROUNDS = {
    * name has stood in for the screen, and both times check-tab-grounds was
    * pointed at the constant and passed. It reads the screen now.
    */
-  insights: { stops: ['#F0A57F', '#FFFDF9'], locations: null, angle: 225 },
+  /* Ellie: "Have orange come from top left." 135 is top left to bottom right;
+     225, which this was, is the other diagonal and is what Learn still runs.
+     The app states the same turn as TOP_LEFT in insights.tsx. */
+  insights: { stops: ['#F0A57F', '#FFFDF9'], locations: null, angle: 135 },
   /** Learn, which is the home screen's blue lifted a fifth toward white. */
   learn: { stops: lightenPair(BLUE_GROUND, 0.2), locations: null, angle: 225 },
 };

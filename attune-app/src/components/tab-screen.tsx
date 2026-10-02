@@ -22,6 +22,11 @@
 
 import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+/** Top right to bottom left. The diagonal every painted tab ran until Insights. */
+export const TOP_RIGHT = { start: { x: 1, y: 0 }, end: { x: 0, y: 1 } } as const;
+/** Top left to bottom right. Ellie, of Insights: "Have orange come from top left." */
+export const TOP_LEFT = { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } } as const;
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BrandHeader from '@/components/brand-header';
@@ -31,7 +36,7 @@ import { Colors } from '@/constants/attune-theme';
 const c = Colors.light;
 
 export default function TabScreen({
-  children, ground = 'cream', tint, second, groundColors, corners, groundTone = 'light',
+  children, ground = 'cream', tint, second, groundColors, groundAim = TOP_RIGHT, corners, groundTone = 'light',
   markOutline = true,
 }: {
   children: React.ReactNode;
@@ -58,6 +63,15 @@ export default function TabScreen({
    * here has to know which is which.
    */
   groundColors?: readonly [string, string];
+  /**
+   * Which corner the first colour comes from.
+   *
+   * Ellie, of Insights: "Have orange come from top left." This was written into
+   * the component, so both painted tabs ran the same diagonal and there was no
+   * way to turn one of them without turning the other. It travels with the
+   * colours now, which is where a ground's direction belongs.
+   */
+  groundAim?: { start: { x: number; y: number }; end: { x: number; y: number } };
   /** Both wash colours from the top corners. See PageWash. */
   corners?: boolean;
   /**
@@ -85,10 +99,10 @@ export default function TabScreen({
         <LinearGradient
           pointerEvents="none"
           colors={[...groundColors]}
-          /* Top right to bottom left, which is the diagonal Ellie named for
-             Insights and reads the same way on Learn. */
-          start={{ x: 1, y: 0 }}
-          end={{ x: 0, y: 1 }}
+          /* The ground says which way it runs. TOP_RIGHT is the default and is
+             what Learn uses; Insights comes from the other corner at her ask. */
+          start={groundAim.start}
+          end={groundAim.end}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         />
       ) : null}

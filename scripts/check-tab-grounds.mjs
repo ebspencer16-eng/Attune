@@ -117,6 +117,62 @@ function pageGround(rel) {
   };
 }
 
+/**
+ * The named diagonals a painted tab can run.
+ *
+ * ── WHY THE AIM STOPPED BEING A LITERAL ───────────────────────────────────
+ * Ellie, of Insights: "Have orange come from top left." The direction was
+ * written inside TabScreen, so both painted tabs ran the same diagonal and
+ * turning one turned the other. It is a prop now, defaulted in the component
+ * and named by the screen that declares the ground, which is where a ground's
+ * direction belongs.
+ *
+ * So this gate can no longer read two literals out of one component. It reads
+ * the named constants, then asks each tab which one it passes. Parsed rather
+ * than evaluated because tab-screen.tsx imports react-native and will not run
+ * here; they are plain literals and the shape is checked rather than assumed.
+ */
+const AIMS = {};
+{
+  const src = read('attune-app/src/components/tab-screen.tsx');
+  for (const m of src.matchAll(
+    /export const (\w+) = \{\s*start:\s*\{\s*x:\s*([\d.]+),\s*y:\s*([\d.]+)\s*\},\s*end:\s*\{\s*x:\s*([\d.]+),\s*y:\s*([\d.]+)\s*\}\s*\}/g)) {
+    AIMS[m[1]] = {
+      start: { x: Number(m[2]), y: Number(m[3]) },
+      end: { x: Number(m[4]), y: Number(m[5]) },
+    };
+  }
+}
+
+/** The aim TabScreen uses when a caller names none. */
+function defaultAim() {
+  const src = read('attune-app/src/components/tab-screen.tsx');
+  const m = /groundAim\s*=\s*(\w+)/.exec(src);
+  return m ? AIMS[m[1]] || null : null;
+}
+
+/**
+ * Which diagonal this tab actually runs.
+ *
+ * @param rel  the file whose ground block was read
+ * @param ground  what pageGround returned for it
+ * @param declaredIn  the screen that declares this tab's ground, if any
+ */
+function aimOf(rel, ground, declaredIn) {
+  /* Written out in the ground block itself. The home screen does this. */
+  if (ground.points) return ground.points;
+  /* Handed in by the caller. Resolve through the screen that renders it. */
+  const caller = declaredIn || rel;
+  const src = read(caller);
+  const named = /groundAim=\{(\w+)\}/.exec(src);
+  if (!named) return defaultAim();
+  const direct = AIMS[named[1]];
+  if (direct) return direct;
+  /* One hop: `const INSIGHTS_AIM = TOP_LEFT;` beside the colours. */
+  const alias = new RegExp(`const ${named[1]} = (\\w+);`).exec(src);
+  return alias ? AIMS[alias[1]] || null : null;
+}
+
 const PALETTE = {};
 {
   const t = read('attune-app/src/constants/attune-theme.ts');
@@ -270,6 +326,7 @@ for (const { tab, file, inline, from, declaredIn, name } of TABS) {
   }
 
   // ── Which way it runs ─────────────────────────────────────────────────────
+  ground.points = aimOf(file, ground, declaredIn);
   if (!ground.points) {
     fails.push(`${file}'s page ground is no longer aimed with start and end points, so`
       + ` the angle the website draws ${tab} at cannot be compared to it. Refusing to`
