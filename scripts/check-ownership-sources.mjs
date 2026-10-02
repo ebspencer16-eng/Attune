@@ -105,6 +105,74 @@ for (const f of files) {
   }
 }
 
+/**
+ * ── 4. THE WEBSITE READS NO FLAG ITS OWN `pkg` DOES NOT HAVE ──────────────
+ * Ellie: "make sure all rows are present (I'm not seeing relationship
+ * reflection)."
+ *
+ * The dashboard's Insights menu asked for `pkg.hasReflection`. That key does
+ * not exist: the flag is `hasAnniversary`, which is what every other caller in
+ * the file reads. So it was `undefined`, `undefined` is falsy, and the four
+ * Relationship Reflection pages were quietly left out of the menu for every
+ * couple who owns them.
+ *
+ * Nothing could have caught it. A missing property is not a missing name, so
+ * check-server-undefined does not see it; it builds, it runs, and it reads as
+ * "they do not own this", which is a perfectly ordinary thing for it to say.
+ * That is the same shape as the five lq_ keys that named no question: when one
+ * list indexes into another, the check is not that the list is right but that
+ * every key resolves.
+ *
+ * Both sides are derived here. The keys come from the object literal and from
+ * the package table it spreads; the reads come from the file. Writing either
+ * one down would be the bug again.
+ */
+{
+  const app = readFileSync(`${ROOT}src/App.jsx`, 'utf8');
+
+  /** The braces of a named object literal, by depth. */
+  const literal = (name) => {
+    const at = app.indexOf(`${name} = {`);
+    if (at === -1) return null;
+    const open = app.indexOf('{', at);
+    let depth = 0;
+    for (let i = open; i < app.length; i += 1) {
+      if (app[i] === '{') depth += 1;
+      else if (app[i] === '}') {
+        depth -= 1;
+        if (depth === 0) return app.slice(open, i + 1);
+      }
+    }
+    return null;
+  };
+
+  const pkgLiteral = literal('const pkg');
+  const configLiteral = literal('pkgConfig');
+  if (!pkgLiteral || !configLiteral) {
+    fails.push('src/App.jsx no longer builds `pkg` from `pkgConfig` the way this expects.'
+      + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  } else {
+    const defined = new Set([
+      ...[...pkgLiteral.matchAll(/(\bhas\w+)\s*:/g)].map((m) => m[1]),
+      ...[...configLiteral.matchAll(/(\bhas\w+)\s*:/g)].map((m) => m[1]),
+    ]);
+    if (!defined.size) {
+      fails.push('no ownership flags could be read out of `pkg`. Refusing to pass: a gate that'
+        + ' has lost its subject must never report success.');
+    }
+    /* Comments quote the bug by name, so they come out before matching. */
+    const code = app.replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
+    const read = new Set([...code.matchAll(/\bpkg\.(has\w+)/g)].map((m) => m[1]));
+    for (const name of [...read].sort()) {
+      if (defined.has(name)) continue;
+      fails.push(`src/App.jsx reads pkg.${name}, which \`pkg\` does not define.\n`
+        + `      It is undefined, undefined is falsy, and the feature reads as unowned for\n`
+        + '      everyone who owns it. Nothing errors and nothing looks wrong.');
+    }
+  }
+}
+
 if (fails.length) {
   console.error('[check-ownership-sources] the rule and its callers disagree about what an account owns:');
   for (const f of fails) console.error(`  ${f}`);

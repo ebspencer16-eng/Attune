@@ -31,6 +31,7 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const doc = readFileSync(`${ROOT}TASKS.md`, 'utf8');
@@ -83,6 +84,67 @@ for (const sec of sections) {
       if (!/\*\*Nothing (waiting|open|outstanding)/i.test(before)) {
         fails.push(`an empty table in "${sec.name}" has nothing above it saying it is empty`);
       }
+    }
+  }
+}
+
+/**
+ * ── NOTHING IS BORN IN SECTION 4 ──────────────────────────────────────────
+ * Ellie: "I never approved the insights page web view and it's not in sections
+ * 1, 2, or 3."
+ *
+ * That has happened before and she was blunter about it then: "Not only are
+ * those not done, but they never appeared in tasks as open or ready for review.
+ * This is not ok." Filing something straight into "done and verified" takes it
+ * off both of our lists at once, and under-delivering is visible while a
+ * verified row is not.
+ *
+ * ── WHY THIS SHAPE ────────────────────────────────────────────────────────
+ * The obvious rule, "every section 4 row records an approval", fails on 488 of
+ * the 645 rows that are already there: months of settled work she reported,
+ * I fixed, and she moved on from. A check that reports 488 failures on every
+ * run is a check nobody reads, and a real break hides inside the noise. This
+ * file's own repository has paid for that exact mistake once.
+ *
+ * So the rule is about MOVEMENT, which is what the complaint is actually about:
+ * an id may not make its first appearance in section 4. It has to have been
+ * open or ready for review in an earlier commit first. Historical rows are not
+ * re-litigated because they are not new.
+ *
+ * Compared against the previous commit rather than a date, so there is nothing
+ * to grandfather and no cutoff to go stale.
+ */
+{
+  let previous = null;
+  try {
+    previous = execSync('git show HEAD~1:TASKS.md', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch {
+    /* No parent commit, or TASKS.md is new. Nothing to compare, and saying so
+       is better than inventing a baseline. */
+  }
+
+  if (previous) {
+    const idsIn = (text) => {
+      const out = new Map();
+      let current = null;
+      for (const line of text.split('\n')) {
+        const h = /^##\s*(\d)\./.exec(line);
+        if (h) { current = Number(h[1]); continue; }
+        const row = /^\|\s*([A-Z]+\d+)\s*\|/.exec(line);
+        if (row && current) out.set(row[1], current);
+      }
+      return out;
+    };
+    const before = idsIn(previous);
+    const now = idsIn(doc);
+
+    for (const [id, section] of now) {
+      if (section !== 4) continue;
+      if (before.has(id)) continue;
+      fails.push(`${id} appears in "4. Done and verified" and was in no section in the previous`
+        + ' commit.\n      An id has to be open or ready for review before it is done. Filing'
+        + ' one straight\n      into section 4 takes it off both lists at once, which is the'
+        + ' thing Ellie has\n      asked about twice.');
     }
   }
 }

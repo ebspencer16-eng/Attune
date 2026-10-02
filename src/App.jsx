@@ -3475,44 +3475,65 @@ const NAV_GAP = 16;
 
 /** Only the exercises, the way the app has it. Keyed by the server's group id. */
 const NAV_ICONS = {
+  /* Ellie: "re-draw the icons to match the icons on the menu in the app."
+     The app uses SF Symbols: bubble.left.and.bubble.right, brain, book, heart
+     and arrow.triangle.branch. These are those five, drawn at one weight with
+     round caps and joins, which is what makes a set look like SF Symbols
+     rather than like five icons from five places. */
   comm: (c) => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h7A2.5 2.5 0 0 1 15 7.5v3A2.5 2.5 0 0 1 12.5 13H8l-3 2.5V13A2.5 2.5 0 0 1 3 10.5z" />
-      <path d="M18 9h.5A2.5 2.5 0 0 1 21 11.5v3A2.5 2.5 0 0 1 18.5 17H17l-2.5 2v-2" />
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2.8 7.2a2.4 2.4 0 0 1 2.4-2.4h7.2a2.4 2.4 0 0 1 2.4 2.4v3.2a2.4 2.4 0 0 1-2.4 2.4H7.6l-3.2 2.4v-2.5a2.4 2.4 0 0 1-1.6-2.3z" />
+      <path d="M17.2 9.6h1.6a2.4 2.4 0 0 1 2.4 2.4v3.2a2.4 2.4 0 0 1-1.6 2.3v2.5l-3.2-2.4h-4.8a2.4 2.4 0 0 1-2.3-1.7" />
     </svg>
   ),
-  exp: (c) => QuickIcons.brain(c),
+  exp: (c) => (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 5.4a2.7 2.7 0 0 0-4.8-.5A2.5 2.5 0 0 0 4.4 8a2.6 2.6 0 0 0-.5 4 2.6 2.6 0 0 0 .9 3.9 2.7 2.7 0 0 0 3.3 2.6 2.6 2.6 0 0 0 3.9-1.3Z" />
+      <path d="M12 5.4a2.7 2.7 0 0 1 4.8-.5A2.5 2.5 0 0 1 19.6 8a2.6 2.6 0 0 1 .5 4 2.6 2.6 0 0 1-.9 3.9 2.7 2.7 0 0 1-3.3 2.6 2.6 2.6 0 0 1-3.9-1.3Z" />
+      <path d="M12 5.4v12.8" />
+    </svg>
+  ),
   reflection: (c) => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H11v15H4.5A1.5 1.5 0 0 1 3 17.5z" />
-      <path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H13v15h6.5a1.5 1.5 0 0 0 1.5-1.5z" />
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 6.8C10.4 5.3 8.2 4.6 5.4 4.8A1.2 1.2 0 0 0 4.3 6v10.3a1.2 1.2 0 0 0 1.3 1.2c2.5-.2 4.6.4 6.4 1.7" />
+      <path d="M12 6.8c1.6-1.5 3.8-2.2 6.6-2a1.2 1.2 0 0 1 1.1 1.2v10.3a1.2 1.2 0 0 1-1.3 1.2c-2.5-.2-4.6.4-6.4 1.7" />
+      <path d="M12 6.8v12.4" />
     </svg>
   ),
   intimacy: (c) => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 20s-7-4.6-7-9.3A4.2 4.2 0 0 1 12 7.8a4.2 4.2 0 0 1 7 2.9c0 4.7-7 9.3-7 9.3z" />
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20.3S3.8 15.1 3.8 9.6a4.4 4.4 0 0 1 8.2-2.3 4.4 4.4 0 0 1 8.2 2.3c0 5.5-8.2 10.7-8.2 10.7Z" />
     </svg>
   ),
   conflict: (c) => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 21v-7" /><path d="M12 14L6 8V3" /><path d="M12 14l6-6V3" />
-      <path d="M4 3h4v4" /><path d="M20 3h-4v4" />
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21v-6.6" />
+      <path d="M12 14.4 6.2 8.6V4.4" />
+      <path d="m12 14.4 5.8-5.8V4.4" />
+      <path d="M3.6 6.8 6.2 4.2l2.6 2.6" />
+      <path d="M15.2 6.8l2.6-2.6 2.6 2.6" />
     </svg>
   ),
 };
 
 function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
   const LABEL_LEFT = 0;
-  const EXERCISE_LEFT = NAV_ICON_COL + NAV_GAP;
+  /**
+   * Ellie: "further indent the exercise results rows (with their icon and
+   * title)". The icon moves with the title rather than staying in a column of
+   * its own, which is what "with their icon" is asking for: the whole row steps
+   * in, not just the words.
+   */
+  const EXERCISE_LEFT = NAV_ICON_COL + NAV_GAP * 2;
 
-  const bullet = (
-    <span aria-hidden="true" style={{
-      width: NAV_ICON_COL, display: "inline-flex", justifyContent: "flex-start",
-      alignItems: "center", flexShrink: 0,
-    }}>
-      <span style={{ width: 5, height: 5, borderRadius: 3, background: "#C8BFB4" }} />
-    </span>
-  );
+  /**
+   * No bullet, and no column where one was.
+   *
+   * Ellie: "remove the bullet points from the insights menu". She asked for
+   * them in the app a while back and has changed her mind here; the app keeps
+   * its own. The spacer goes with them, because a column held open for a dot
+   * that is not drawn is the indent she then has to ask me to remove.
+   */
 
   return (
     <div>
@@ -3529,7 +3550,6 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                 paddingTop: isMobile ? "1rem" : "1.25rem", paddingBottom: "0.35rem",
                 paddingLeft: LABEL_LEFT,
               }}>
-                {bullet}
                 <span style={{
                   fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase",
                   color: "#A66534", fontWeight: 700, fontFamily: BFONT,
@@ -3557,7 +3577,7 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                 }}>
                   {icon(g.color || "#E8673A")}
                 </span>
-              ) : bullet}
+              ) : null}
               <span style={{
                 flex: 1,
                 fontSize: isExercise
@@ -3762,7 +3782,28 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
 }
 
 function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
-  const cards = [feed?.primary, feed?.secondary].filter(Boolean);
+  /**
+   * ── `secondary` IS A LIST, NOT A CARD ───────────────────────────────────
+   * Ellie, with a screenshot: "A few problems with this page. Formatting is
+   * off." The second card was an empty tinted square with no words in it.
+   *
+   * /api/home sends `secondary` as an array: nextActions returns
+   * `withApp.slice(1, 4)`. This read it as one card, so the second tile was
+   * rendering an Array: `card.title` undefined, `card.body` undefined,
+   * `card.tint` undefined, and a card-shaped box with nothing in it. Nothing
+   * errored, because every one of those is a perfectly ordinary undefined.
+   *
+   * The app has always indexed `secondary[0]`. Two readings of one payload, and
+   * only one of them was right.
+   *
+   * It survived my own screenshots because the stub I was rendering against
+   * sent an object, which is the mistake this file warns about in another
+   * place: a fixture that is not the shape of the thing it stands in for.
+   */
+  const cards = [
+    feed?.primary,
+    ...(Array.isArray(feed?.secondary) ? feed.secondary : [feed?.secondary]),
+  ].filter(Boolean).slice(0, 2);
   /**
    * ── THE SHAPE IS THERE BEFORE THE WORDS ARE ─────────────────────────────
    * Ellie: "Has done the same weird thing each time I open, the formatting
@@ -5776,11 +5817,15 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "linear-gradient(135deg, #0f0c29, #1d1a4e)", borderRadius: 14, padding: "1rem 1.25rem", marginBottom: "1.5rem", color: "white", boxShadow: "0 6px 24px rgba(15,12,41,0.25)" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
           {[
-            { label: "Monthly income",  value: bFmt(rev.totalIncome),  color: "#34d399" },
-            { label: rev.surplus >= 0 ? "Left to allocate" : "Over budget",
+            /* The four labels come from BUDGET_COPY so the app can show the
+               same three numbers under the same names. They were typed here
+               and typed differently in the app, which is how the two tools came
+               to disagree about which numbers a budget has. */
+            { label: BUDGET_COPY.statIncome,  value: bFmt(rev.totalIncome),  color: "#34d399" },
+            { label: rev.surplus >= 0 ? BUDGET_COPY.statLeft : BUDGET_COPY.statOver,
               value: (rev.surplus >= 0 ? "" : "-") + bFmt(rev.surplus),
               color: rev.surplus >= 0 ? "#E8C572" : "#f87171" },
-            { label: "Savings rate",    value: rev.savingsRate.toFixed(1) + "%", color: "#93C5FD" },
+            { label: BUDGET_COPY.statSavings, value: rev.savingsRate.toFixed(1) + "%", color: "#93C5FD" },
           ].map(({ label, value, color }) => (
             <div key={label}>
               <div style={{ fontSize: "0.56rem", color: "rgba(255,255,255,0.72)", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: font.body, marginBottom: "0.2rem" }}>{label}</div>
@@ -15421,7 +15466,14 @@ export default function App() {
                     {bothDone ? (
                       <AppInsightsMenu
                         groups={resultsNav({
-                          hasReflection: pkg.hasReflection,
+                          /* `pkg.hasReflection` does not exist. The flag is
+                             `hasAnniversary`, which is what every other caller
+                             reads, so this was undefined and the Relationship
+                             Reflection rows never appeared in the menu. Ellie:
+                             "make sure all rows are present (I'm not seeing
+                             relationship reflection)". Nothing errors on a
+                             property that is not there; it reads as false. */
+                          hasReflection: pkg.hasAnniversary,
                           intimacyReady: pkg.hasIntimacy,
                           conflictListed: pkg.hasConflict,
                         })}

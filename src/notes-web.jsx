@@ -586,6 +586,19 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
    * require reading the old ones, and a diary you cannot add to until you have
    * authenticated is a diary people stop using.
    */
+  /**
+   * Whether the journal is the thing on screen.
+   *
+   * Ellie: "remove the relationship journal section from the notes page, keep
+   * the orange button and the journal opens if you click on that... Just like
+   * the app, it should go from the orange button to the tags section."
+   *
+   * So the page is the word, the two tiles, the button and the tags, and the
+   * journal is somewhere the button takes you rather than a block people scroll
+   * past. Separate from `journalOpen`, which is whether the password has been
+   * given: you can be looking at the journal and still be locked out of it.
+   */
+  const [journalView, setJournalView] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
   const [pw, setPw] = useState('');
   const [pwBusy, setPwBusy] = useState(false);
@@ -899,14 +912,6 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: C.warm }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '2.5rem 1.5rem 4rem' }}>
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            style={{ background: 'transparent', border: 'none', color: C.muted, fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: BFONT, padding: 0, marginBottom: '1.75rem' }}>
-            ← Back
-          </button>
-        ) : null}
 
         {/* ── NO HEADING, NO DESCRIPTION ────────────────────────────────
             Ellie, about the dashboard: "There should be NO additional prose as
@@ -927,6 +932,126 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
 
         {!loading && !failed ? (
           <>
+            {/* ── THE JOURNAL IS SOMEWHERE YOU GO ───────────────────────
+                Ellie: "remove the relationship journal section from the notes
+                page, keep the orange button and the journal opens if you click
+                on that and enter a password... Just like the app, it should go
+                from the orange button to the tags section, not sure why we
+                added additional sections on this page."
+
+                So it is not a section any more. The button opens it, the
+                password opens what is in it, and Back returns to the page. */}
+            {journalView ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setJournalView(false)}
+                  style={{ background: 'transparent', border: 'none', color: C.muted, fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: BFONT, padding: 0, marginBottom: '1.5rem' }}>
+                  &larr; Notes
+                </button>
+            {/* ── THE JOURNAL ──────────────────────────────────────────
+                    Ellie: "Ensure that site mirrors app notes functionality."
+
+                    The journal was in the app and not here, so an entry written on
+                    a phone could not be read on a laptop, and the same rows were
+                    being drawn on this page as results marks with an ISO date for
+                    a heading. It is the same endpoint, the same anchor and the
+                    same private write; the copy comes from api/_lib/journal-copy.js
+                    so the two surfaces say one thing. */}
+                    <div style={{ marginBottom: '2.5rem' }}>
+                  <div style={eyebrow}>{NOTES_COPY.journalTitle}</div>
+                  <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT, margin: '0 0 0.9rem' }}>
+                    {NOTES_COPY.journalOpen}
+                  </p>
+                  <div style={{ ...card, marginBottom: '1rem' }}>
+                    <textarea
+                      value={entryDraft}
+                      onChange={(e) => setEntryDraft(e.target.value)}
+                      placeholder={JOURNAL_COPY.placeholder}
+                      rows={3}
+                      style={{
+                        width: '100%', border: 'none', outline: 'none', resize: 'vertical',
+                        fontFamily: BFONT, fontSize: '0.88rem', color: C.text,
+                        lineHeight: 1.65, background: 'transparent',
+                      }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Primary label="Save" onClick={addEntry} busy={entryBusy} />
+                    </div>
+                  </div>
+
+                  {/* ── SHUT UNTIL THE PASSWORD IS GIVEN ──────────────────
+                      Everything below this is what someone wrote. The composer
+                      above is not: adding an entry gives nothing away. */}
+                  {!journalOpen ? (
+                    <form onSubmit={unlockJournal} style={{ ...card, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.muted}
+                          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                        </svg>
+                        <span style={{ fontSize: '0.82rem', color: C.text, fontFamily: BFONT }}>
+                          {JOURNAL_COPY.lockedWeb}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="password"
+                          value={pw}
+                          onChange={(ev) => setPw(ev.target.value)}
+                          autoComplete="current-password"
+                          aria-label={JOURNAL_COPY.lockedWeb}
+                          style={{
+                            flex: 1, border: `1px solid ${C.stone}`, borderRadius: 999,
+                            padding: '0.45rem 0.9rem', fontFamily: BFONT, fontSize: '0.8rem',
+                            color: C.text, background: C.white, minWidth: 0,
+                          }}
+                        />
+                        <Primary label={JOURNAL_COPY.unlock} onClick={unlockJournal} busy={pwBusy} />
+                      </div>
+                      {pwError ? (
+                        <div style={{ fontSize: '0.76rem', color: C.muted, fontFamily: BFONT }}>{pwError}</div>
+                      ) : null}
+                    </form>
+                  ) : null}
+
+                  {/* Hidden until there is something to search, the same as the
+                      app: a search field over nothing is a control that lies. */}
+                  {journalOpen && entries.length ? (
+                    <input
+                      value={entryQuery}
+                      onChange={(e) => setEntryQuery(e.target.value)}
+                      placeholder={JOURNAL_COPY.search}
+                      style={{
+                        width: '100%', border: `1px solid ${C.stone}`, borderRadius: 999,
+                        padding: '0.45rem 0.9rem', fontFamily: BFONT, fontSize: '0.8rem',
+                        color: C.text, background: C.white, marginBottom: '0.9rem',
+                      }}
+                    />
+                  ) : null}
+
+                  {journalOpen && entryDays.length ? entryDays.map(([day, rows]) => (
+                    <div key={day} style={{ marginBottom: '1.25rem' }}>
+                      <div style={{
+                        fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+                        color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: '0.5rem',
+                      }}>
+                        {whenWritten(rows[0]?.created_at) || day}
+                      </div>
+                      {rows.map((n) => <Entry key={n.id} entry={n} />)}
+                    </div>
+                  )) : (journalOpen ? (
+                    <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT }}>
+                      {entryQuery.trim() ? JOURNAL_COPY.noMatch : JOURNAL_COPY.empty}
+                    </p>
+                  ) : null)}
+                </div>
+
+
+
+              </>
+            ) : (
+            <>
             {/* ── THE APP'S NOTES TAB, IN ORDER ─────────────────────────
                 Ellie: "the notes page looks nothing like the app's."
 
@@ -1011,7 +1136,11 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
             {/* The journal's own button, with the streak beside it. */}
             <button
               type="button"
-              onClick={() => { const el = document.getElementById('attune-journal'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+              /* Ellie: "keep the orange button and the journal opens if you
+                 click on that and enter a password." It used to scroll to a
+                 journal section further down the page; that section is gone, so
+                 this is the way in. */
+              onClick={() => setJournalView(true)}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
                 width: '100%', background: C.accent, border: 'none', borderRadius: 999,
@@ -1037,166 +1166,8 @@ export function NotesView({ userName, partnerName, sectionLabels = {}, onOpenSec
               </span>
             </button>
 
-            {/* Write one that is not attached to anything. */}
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={eyebrow}>Write something</div>
-              <textarea
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                rows={3}
-                placeholder="Anything you want to come back to"
-                style={{
-                  width: '100%', boxSizing: 'border-box', resize: 'vertical',
-                  border: `1px solid ${C.stone}`, borderRadius: 12, padding: '0.8rem',
-                  fontFamily: BFONT, fontSize: '0.88rem', color: C.text, background: C.white,
-                }}
-              />
-              <button
-                type="button"
-                disabled={busy || !draft.trim()}
-                onClick={add}
-                style={{
-                  marginTop: '0.6rem', background: draft.trim() ? C.ink : C.stone, color: C.white,
-                  border: 'none', borderRadius: 999, padding: '0.5rem 1.2rem',
-                  cursor: draft.trim() ? 'pointer' : 'default', fontSize: '0.78rem',
-                  fontWeight: 700, fontFamily: BFONT,
-                }}>
-                {busy ? 'Saving' : 'Save note'}
-              </button>
-            </div>
-
-            {bySection.length ? (
-              <div style={{ marginBottom: '2.5rem' }}>
-                <div style={eyebrow}>From your results</div>
-                {bySection.map(([sectionId, list]) => (
-                  <div key={sectionId} style={{ marginBottom: '1.5rem' }}>
-                    <div style={{
-                      fontFamily: HFONT, fontSize: '1rem', fontWeight: 700,
-                      color: C.ink, marginBottom: '0.6rem',
-                    }}>
-                      {sectionLabels[sectionId] || sectionId}
-                    </div>
-                    {list.map((n) => <Note key={n.id} note={n} />)}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {/* ── THE JOURNAL ──────────────────────────────────────────
-                Ellie: "Ensure that site mirrors app notes functionality."
-
-                The journal was in the app and not here, so an entry written on
-                a phone could not be read on a laptop, and the same rows were
-                being drawn on this page as results marks with an ISO date for
-                a heading. It is the same endpoint, the same anchor and the
-                same private write; the copy comes from api/_lib/journal-copy.js
-                so the two surfaces say one thing. */}
-            <div id="attune-journal" style={{ marginBottom: '2.5rem' }}>
-              <div style={eyebrow}>{NOTES_COPY.journalTitle}</div>
-              <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT, margin: '0 0 0.9rem' }}>
-                {NOTES_COPY.journalOpen}
-              </p>
-              <div style={{ ...card, marginBottom: '1rem' }}>
-                <textarea
-                  value={entryDraft}
-                  onChange={(e) => setEntryDraft(e.target.value)}
-                  placeholder={JOURNAL_COPY.placeholder}
-                  rows={3}
-                  style={{
-                    width: '100%', border: 'none', outline: 'none', resize: 'vertical',
-                    fontFamily: BFONT, fontSize: '0.88rem', color: C.text,
-                    lineHeight: 1.65, background: 'transparent',
-                  }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <Primary label="Save" onClick={addEntry} busy={entryBusy} />
-                </div>
-              </div>
-
-              {/* ── SHUT UNTIL THE PASSWORD IS GIVEN ──────────────────
-                  Everything below this is what someone wrote. The composer
-                  above is not: adding an entry gives nothing away. */}
-              {!journalOpen ? (
-                <form onSubmit={unlockJournal} style={{ ...card, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.muted}
-                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                    </svg>
-                    <span style={{ fontSize: '0.82rem', color: C.text, fontFamily: BFONT }}>
-                      {JOURNAL_COPY.lockedWeb}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                      type="password"
-                      value={pw}
-                      onChange={(ev) => setPw(ev.target.value)}
-                      autoComplete="current-password"
-                      aria-label={JOURNAL_COPY.lockedWeb}
-                      style={{
-                        flex: 1, border: `1px solid ${C.stone}`, borderRadius: 999,
-                        padding: '0.45rem 0.9rem', fontFamily: BFONT, fontSize: '0.8rem',
-                        color: C.text, background: C.white, minWidth: 0,
-                      }}
-                    />
-                    <Primary label={JOURNAL_COPY.unlock} onClick={unlockJournal} busy={pwBusy} />
-                  </div>
-                  {pwError ? (
-                    <div style={{ fontSize: '0.76rem', color: C.muted, fontFamily: BFONT }}>{pwError}</div>
-                  ) : null}
-                </form>
-              ) : null}
-
-              {/* Hidden until there is something to search, the same as the
-                  app: a search field over nothing is a control that lies. */}
-              {journalOpen && entries.length ? (
-                <input
-                  value={entryQuery}
-                  onChange={(e) => setEntryQuery(e.target.value)}
-                  placeholder={JOURNAL_COPY.search}
-                  style={{
-                    width: '100%', border: `1px solid ${C.stone}`, borderRadius: 999,
-                    padding: '0.45rem 0.9rem', fontFamily: BFONT, fontSize: '0.8rem',
-                    color: C.text, background: C.white, marginBottom: '0.9rem',
-                  }}
-                />
-              ) : null}
-
-              {journalOpen && entryDays.length ? entryDays.map(([day, rows]) => (
-                <div key={day} style={{ marginBottom: '1.25rem' }}>
-                  <div style={{
-                    fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: C.muted, fontWeight: 700, fontFamily: BFONT, marginBottom: '0.5rem',
-                  }}>
-                    {whenWritten(rows[0]?.created_at) || day}
-                  </div>
-                  {rows.map((n) => <Entry key={n.id} entry={n} />)}
-                </div>
-              )) : (journalOpen ? (
-                <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT }}>
-                  {entryQuery.trim() ? JOURNAL_COPY.noMatch : JOURNAL_COPY.empty}
-                </p>
-              ) : null)}
-            </div>
-
-            {notes.length ? (
-              <div style={{ marginBottom: '2.5rem' }}>
-                <div style={eyebrow}>Yours</div>
-                {notes.map((n) => <Note key={n.id} note={n} />)}
-              </div>
-            ) : null}
-
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={eyebrow}>{`From ${partnerName}`}</div>
-              {shared.length
-                ? shared.map((n) => <Note key={n.id} note={n} readOnly />)
-                : (
-                  <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: BFONT }}>
-                    {`Nothing shared with you yet. When ${partnerName} shares a note it turns up here.`}
-                  </p>
-                )}
-            </div>
+            </>
+            )}
 
             <div>
               <div style={eyebrow}>Tags</div>

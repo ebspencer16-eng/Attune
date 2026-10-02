@@ -196,8 +196,25 @@ export default function Budget({ onClose }: { onClose: () => void }) {
     );
   };
 
-  const section = (title: string, intro: string, children: React.ReactNode) => (
-    <View style={{ marginTop: Spacing.xxl }}>
+  /**
+   * One titled block.
+   *
+   * ── IT TAKES A KEY ──────────────────────────────────────────────────────
+   * Ellie: "On insights page in app, I'm seeing a warning 'Each child in a list
+   * should have a unique ke...'"
+   *
+   * It is this. Two of the four call sites are inside a `.map`, and a helper
+   * that returns an element gives React no way to key it from outside: the key
+   * has to be on the element the helper returns. The other two calls pass
+   * nothing and are not in a list, which is why the warning appeared
+   * intermittently and pointed at no file anyone was looking at.
+   *
+   * The warning surfaces wherever the app happens to be, because all four tabs
+   * mount at launch, which is why it was reported from the Insights tab for a
+   * component that belongs to Learn.
+   */
+  const section = (title: string, intro: string, children: React.ReactNode, key?: string) => (
+    <View key={key} style={{ marginTop: Spacing.xxl }}>
       <Text style={{ ...Type.title, color: c.textStrong }}>{title}</Text>
       <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>{intro}</Text>
       {children}
@@ -231,22 +248,41 @@ export default function Budget({ onClose }: { onClose: () => void }) {
           marginTop: Spacing.lg, backgroundColor: c.surface, borderColor: c.border,
           borderWidth: 1, borderRadius: Radius.lg, padding: Spacing.lg,
         }}>
+        {/* ── THE WEBSITE'S THREE NUMBERS, NOT THREE OTHERS ──────────────
+            Ellie: "Budget tool in app needs to be the same flow as the web
+            experience."
+
+            This showed Income, Allocated and Left over. The website shows
+            Monthly income, Left to allocate and Savings rate, and says "Over
+            budget" when the third is negative. Two of the three numbers were
+            the same with different names and the third was a different number,
+            so the two tools disagreed about what a budget is for.
+
+            Both surfaces already compute all of them: `computeReveal` is the
+            one piece of arithmetic deliberately repeated in the app, and
+            check-budget-mirror runs both copies over the same budgets. Only the
+            choice of what to show differed. The labels come from the server
+            now, so neither screen writes its own. */}
         {[
-          ['Income', rev.totalIncome],
-          ['Allocated', rev.totalAllocated],
-          ['Left over', rev.surplus],
-        ].map(([label, v]) => (
+          [copy.statIncome, bFmt(rev.totalIncome), c.textStrong],
+          [rev.surplus >= 0 ? copy.statLeft : copy.statOver,
+            (rev.surplus >= 0 ? '' : '-') + bFmt(rev.surplus),
+            rev.surplus >= 0 ? c.textStrong : '#B5546E'],
+          [copy.statSavings, `${rev.savingsRate.toFixed(1)}%`, c.textStrong],
+        ].map(([label, value, tint]) => (
           <View key={String(label)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
             <Text style={{ ...Type.small, color: c.textMuted }}>{label}</Text>
-            <Text
-              style={{
-                ...Type.small, fontWeight: '700',
-                color: label === 'Left over' && (v as number) < 0 ? '#B5546E' : c.textStrong,
-              }}>
-              {((v as number) < 0 ? '-' : '') + bFmt(v as number)}
+            <Text style={{ ...Type.small, fontWeight: '700', color: tint as string }}>
+              {value}
             </Text>
           </View>
         ))}
+        {/* ── NO "UNSAVED CHANGES" LINE HERE ─────────────────────────────
+            The website has one because it saves when you press Save changes.
+            The app saves as you type, so there is no moment this would be true
+            for, and a line that is never true is worse than no line. The save
+            model is the one part of the flow that still differs between the
+            two, and that is a decision rather than a bug; it is in TASKS.md. */}
       </View>
 
       {saveFailed ? (
@@ -309,7 +345,7 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             </View>
           ))}
         </View>
-      )))}
+      ), title))}
 
       <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginTop: Spacing.xl, marginBottom: Spacing.xs }}>
         {copy.personalLabel}

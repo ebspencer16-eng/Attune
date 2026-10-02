@@ -155,6 +155,26 @@ export function computeReveal(state, userName, partnerName) {
  * you type. A sentence that is only true on one surface belongs on that one.
  */
 export const BUDGET_COPY = {
+  /**
+   * ── THE THREE NUMBERS AT THE TOP ────────────────────────────────────────
+   * Ellie: "Budget tool in app needs to be the same flow as the web
+   * experience."
+   *
+   * The website pins a dark strip with Monthly income, Left to allocate and
+   * Savings rate, and says "Over budget" when the third is negative. The app
+   * had a plain bordered box with Income, Allocated and Left over: three
+   * different labels for two of the same numbers and a third that was not the
+   * same number at all. Both surfaces compute all of them, so the difference
+   * was entirely in what each chose to show.
+   *
+   * Here because they are words a customer reads, and they were typed into two
+   * screens that could not see each other.
+   */
+  statIncome: 'Monthly income',
+  statLeft: 'Left to allocate',
+  statOver: 'Over budget',
+  statSavings: 'Savings rate',
+
   title: 'Shared Budget Tool',
   intro: 'Build your real shared budget together. Your numbers stay yours, Attune is a calculator, not a financial advisor.',
   step1: 'Start with where you stand',

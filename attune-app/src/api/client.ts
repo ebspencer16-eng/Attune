@@ -1333,6 +1333,10 @@ export type BudgetCopy = {
   essentials: string; essentialsIntro: string;
   discretionary: string; discretionaryIntro: string;
   personalLabel: string; goals: string; goalsIntro: string; save: string;
+  /* The three numbers at the top, and the line that says they are unsaved.
+     From the server, so the app and the website label them the same way: they
+     had three different labels for two of the same numbers before. */
+  statIncome: string; statLeft: string; statOver: string; statSavings: string;
 };
 
 export type ChecklistCopy = {
