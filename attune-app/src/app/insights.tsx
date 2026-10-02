@@ -268,6 +268,9 @@ export default function InsightsScreen() {
    * not come up often, but "open this exercise" answered with a different
    * screen is a request that silently went nowhere.
    */
+  /** See the note on the `owned` prop below. */
+  const ownedForResults = (results && 'owned' in results && results.owned) || home?.owned || [];
+
   if (ready && !openExercise) {
     return (
       <Shell tint={accent}>
@@ -279,7 +282,25 @@ export default function InsightsScreen() {
             itself. */}
         <Results
           results={results}
-          owned={home?.owned ?? []}
+          /**
+           * ── THE RESULTS PAYLOAD'S OWN LIST, WHEN IT HAS ONE ──────────
+           * This read /api/home's `owned`, and /api/results sends its own,
+           * computed differently:
+           *
+           *   capabilitiesFor(capabilitiesFor(me).owned.length ? me : partner)
+           *
+           * which is the invited partner inheriting what was bought for them.
+           * /api/home asks only about the person signed in. The two agree once
+           * partner-sync has written the inherited package onto the invitee's
+           * profile, which it does, but that write is best-effort and only
+           * warns when it fails. In that case home says the invitee owns
+           * nothing and results says what they actually own, and this screen was
+           * taking the weaker of the two: sections they paid for, missing.
+           *
+           * So the endpoint that knows the rule wins, and home is the fallback
+           * for a payload written before it sent one.
+           */
+          owned={ownedForResults}
           /* The section's colour, which the wash behind it takes. See the
              note on onAccent: the tab paints one wash, so the page has to
              say what colour it is rather than painting its own. */
