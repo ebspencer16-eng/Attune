@@ -4,7 +4,7 @@
 
 | # | What I need from you |
 |--|--|
-| O525 | **The site still offers the Word file, and you have already said you do not want it.** The workbook tile on the dashboard has a "↓ Download (.docx)" button under the line "Opens in Word, Google Docs, or Pages". You approved O508: "I only want the PDF workbook to exist." Taking a download button off a page customers use is your call, not mine. Say the word and it goes, and the tile offers the PDF only. |
+| O526 | **Run migration 077 in the Supabase SQL Editor.** `supabase/migrations/077_clear_docx_workbook_links.sql`. It clears the stored link wherever it points at a Word file. The code already refuses to serve one, so nothing breaks if you leave it; what it fixes is rows that still claim a workbook is ready when none is. Safe to run twice. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -22,11 +22,10 @@
 
 | # | Built, needs your eye |
 |--|--|
-| O512 | **The app was serving the Word file, and I can show you the screenshot.** Two bugs behind one tap. The tile handed the file to Safari, which downloads rather than shows; it opens inside the app now, full screen, with the share button for saving it. And the file itself was `Attune_Workbook_..._and_Preston.docx`, 40 KB. The rule that says "a workbook is a PDF" was being applied where the link is built and skipped where a stored link is reused, and the stored branch is the one that runs for everyone who has no PDF yet. Both surfaces ask the same question now, so a couple with no PDF gets "Building your workbook" and a real build instead of a Word file. **What I have actually seen:** the in-app browser, in the simulator, and the .docx it was serving. The refusal is server-side, so it shows up once Vercel finishes deploying. |
-| O512b | **Why your phone opened an article and my simulator did not.** The slot that carries "open this article" between tabs kept a copy after a mounted screen had already taken the value, and nothing emptied it. One tap on a mark in Notes left that article in memory for the session; when iOS released the Learn tab while Safari was in front and rebuilt it on return, the rebuilt screen opened it. The simulator never releases the tab, which is why I could not reproduce it. Fixed and gated. "How to review your results together" is the first featured article, which fits. |
-| O497 | **Softened.** Worth knowing: you asked for this once before, and what got softened was a constant the home screen does not paint. Both grounds now end on the same blue, so one change moves both and there is no third one to forget. |
-| O517 | **Mark is 68 across, the size the app uses.** Shadow behind the word tile is lighter: it had the app’s numbers copied across verbatim, and a CSS shadow draws heavier than an iOS one from the same figures, so the match was a transcription rather than a match. |
-| O520 | Insights is cream with the orange glow, read off the app's own screen instead of a constant that was never used there. The menu fits without scrolling. |
+| O525 | **The Word file is gone.** Both builders deleted, with their routes. The last thing calling one was the admin button, which ran against invented orders, so it had never built any real couple a workbook. The site had two download paths producing two different documents; there is one now. Three places stated the format to customers and all three said Word: the offerings blurb, the digital label and the receipt. I changed only the file type in your sentences. Migration 077 clears the old links, below. |
+| O512 | **It was serving the Word file, and that is now impossible.** The fix above removes the document, not just the link to it. The workbook also opens inside the app rather than going out to Safari. Live on the site as of this afternoon. |
+| O517 | **The mark was half a mark.** It is two speech bubbles and the site drew one, in five of the twelve places it draws the logo by hand. You spotted it because I had just made this one bigger. There is one drawing now and every surface uses it. |
+| O520 | **Orange comes from the top left.** The direction was written inside the shared tab component, so turning Insights would have turned Learn too. It belongs to each ground now. Cream with the orange glow, and the menu fits without scrolling, are still there from the last round. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -41,6 +40,8 @@
 
 | Verified by you | What |
 |--|--|
+| O497 | **Approved.** |
+| O512b | **"Thank you."** |
 | O524 | **Approved.** |
 | O523 | **Approved.** |
 | O521 | **Approved.** |
@@ -519,7 +520,6 @@
 | R21 | Scrolling on insights and results, on a device |
 
 ### Verified in code rather than by eye
-
 | Verified | By |
 |--|--|
 | A progress total is counted from the list the exercise actually asks | `check-question-counts.mjs`, planted thirteen ways, and it caught two exercises. Relationship Reflection's status row read "N of 5" while it asks fourteen: the total came from `REFLECTION_QUESTIONS`, a five-question subset derived for the admin explorer, and the exercise walks `ANNIVERSARY_QUESTIONS`. Expectations read "37 of 32", because it counts every responsibility item once and asks each of them twice, once about now and once about growing up, and because it counted the follow-up a "Both of us" answer opens as a question. Both are visible to anyone who answers everything and closes the screen before pressing finish. The gate calls `/api/questions` and counts what it serves rather than adding the modules up a second time; Expectations has no flat list, so it gets the other invariant, that a complete answer set lands exactly on the total. It caught my own first attempt at the fix, which read a flag off the wrong object and overshot by four |
@@ -644,7 +644,6 @@
 | The checklist and budget run in the app against one copy of their content | `check-tool-content.mjs`, `check-budget-mirror.mjs` |
 | In Practice: all 12 articles reach the app | `check-in-practice.mjs` |
 | The app does not sell | `check-app-does-not-sell.mjs` |
-
 | # | Task | Verified by |
 |--|--|--|
 | — | `/api/admin-posts` and `/api/admin-presets` had never answered: 500 on every request since the day each shipped | Live, 401 now; `check-runtime-shape.mjs`, 2 plants |
