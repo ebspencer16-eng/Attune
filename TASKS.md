@@ -4,6 +4,7 @@
 
 | # | What I need from you |
 |--|--|
+| O527 | **A copy question.** Every home prompt card carries a button label on the server ("Set up", "Continue", "Open results", "Send a reminder", "Read"), and neither the app nor the site prints one: the whole card is the button, with the title and the line under it doing the work. So nine labels exist and nobody reads them. Either the cards should show one, or the field should go. Your call. |
 | O526 | **Run migration 077 in the Supabase SQL Editor.** `supabase/migrations/077_clear_docx_workbook_links.sql`. It clears the stored link wherever it points at a Word file. The code already refuses to serve one, so nothing breaks if you leave it; what it fixes is rows that still claim a workbook is ready when none is. Safe to run twice. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
@@ -22,6 +23,8 @@
 
 | # | Built, needs your eye |
 |--|--|
+| O528 | **Both prompt cards on the site were the same colour.** The site read a tint off the payload and nothing has ever put one there, so both fell to one fallback while the app alternates warm and cool. Found by auditing every field each endpoint sends against what each surface reads. Same audit: the app was typing a heading the server already sends, the profile editor was typing four field labels, and an invited partner could have been shown fewer results sections than they own. |
+| O529 | **Swept and found nothing else.** All 56 endpoints answer correctly from outside with no 500s. All 40 pages serve real content. All 35 internal links resolve. The full drive is green: 29 results sections, 13 app views, 37 static pages, all five exercises. 206 gates pass. |
 | O525 | **The Word file is gone.** Both builders deleted, with their routes. The last thing calling one was the admin button, which ran against invented orders, so it had never built any real couple a workbook. The site had two download paths producing two different documents; there is one now. Three places stated the format to customers and all three said Word: the offerings blurb, the digital label and the receipt. I changed only the file type in your sentences. Migration 077 clears the old links, below. |
 | O512 | **It was serving the Word file, and that is now impossible.** The fix above removes the document, not just the link to it. The workbook also opens inside the app rather than going out to Safari. Live on the site as of this afternoon. |
 | O517 | **The mark was half a mark.** It is two speech bubbles and the site drew one, in five of the twelve places it draws the logo by hand. You spotted it because I had just made this one bigger. There is one drawing now and every surface uses it. |

@@ -681,6 +681,37 @@ first edit, and when a structural change misfires, go back to that copy and
 re-run the whole sequence as one script with its checks. The script is cheap to
 re-run and reasoning about half-applied JSX is not.
 
+**A rule applied where a value is minted is not applied where a stored one is
+reused.** The workbook is a PDF, and `freshWorkbookUrl` filtered the folder to
+PDFs. The surface that hands it over then did this:
+
+    url: fresh || (signedUrlIsLive(row.workbook_url) ? row.workbook_url : null)
+
+Minting returns null for exactly the couples whose folder holds no PDF, which
+was every couple, so the branch that enforced the rule and the branch that
+bypassed it were one expression and the bypass is the one that ran. Ellie
+watched a 40 KB `.docx` open in the app while `check-workbook-format` passed,
+because that gate tested the minting function: the half that was already right.
+
+So for any rule about what a value may be, find every producer of that value.
+A fresh one and a cached one are two producers. A gate pointed at one of them
+reports success about code nobody runs.
+
+**A constant that exists is not a thing that is drawn.** The first
+`check-mark-artwork` asked whether the component carried the favicon's four
+paths. Deleting the `<path>` that draws the right bubble leaves `BUBBLE_R`
+declared, so every string was still carried and the component rendered half a
+mark. The gate counts what is drawn now. The same shape: a helper imported and
+never called, a constant declared and never passed. Ask what the code DOES with
+the name, not whether the name is there.
+
+**curl against the live site can be answered by Vercel's bot checkpoint, and it
+looks like a thin page.** A sweep of all forty routes reported sensible-looking
+text lengths, and several of those were the checkpoint rather than the page:
+`/offerings` came back with one `href` on it. It is intermittent and arrives
+after a burst of requests. Send a browser user agent, and grep the body for
+`security-checkpoint` before believing any measurement taken from outside.
+
 **innerText reports what CSS renders, and this has now cost three probes.**
 The site sets `text-transform: uppercase` on eyebrows and buttons, so a check
 for "From In Practice" or "Back to insights" fails against text that is
