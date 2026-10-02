@@ -9391,7 +9391,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 try { return JSON.parse(localStorage.getItem('attune_order') || 'null')?.workbookUrl || null; }
                 catch { return null; }
               })();
-              toast('Building your workbook…');
+              /* Her words, from the module that already says this on both
+                 surfaces when a workbook is being made. The line I had written
+                 here was my own, and copy is hers. */
+              toast(WORKBOOK_COPY.generating);
               const got = await getWorkbookUrl({ storedUrl: stored, body: payload });
               if (got.error) { toast(got.error); return; }
               saveWorkbook(got.url, userName, partnerName);
