@@ -1,5 +1,15 @@
 # Phase 5 audit — current state of the production workbook generators
 
+> **Out of date. There is one workbook generator now, and it is the PDF.**
+>
+> Ellie: "I want customers to be able to download the pdf. Remove the word
+> file." `api/generate-workbook.js` and `api/store-workbook.js` are deleted, so
+> the two-endpoint comparison below is a record of a state the product has left.
+> What a workbook is lives in `api/_lib/workbook-format.js`; what builds one is
+> the Python and Playwright service behind `/api/store-workbook-pdf`.
+>
+> Kept because the comparison is why the PDF builder was chosen.
+
 The production stack has TWO endpoints that generate a workbook. They serve
 different files (.docx vs .pdf) and currently produce very different output.
 

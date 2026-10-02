@@ -1,5 +1,15 @@
 # LMFT Scheduling Setup Checklist
 
+> **Retired. This describes a feature the product no longer has.**
+>
+> The LMFT session offering was removed from the codebase in 97cacb6c, "Remove
+> the LMFT session offering from the codebase". `api/calendly-webhook.js` and
+> `public/lmft-booking.html`, which the steps below configure, do not exist.
+>
+> Kept because it records how the integration was set up, and because a
+> deliberate retirement should be visible as one rather than as a gap. Do not
+> work from it without deciding to bring the feature back first.
+
 The LMFT booking flow uses Calendly for self-scheduling. Calendly handles the
 schedule UI, time-zone math, the LMFT's calendar invite + video link, and
 reminder emails. We layer our brand on top with a custom confirmation email
