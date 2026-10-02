@@ -115,15 +115,29 @@ for (const sec of sections) {
  * to grandfather and no cutoff to go stale.
  */
 {
-  let previous = null;
+  /**
+   * The id's history, not just the last commit.
+   *
+   * Comparing to HEAD~1 alone was too narrow and said so immediately: six rows
+   * Ellie had approved in earlier messages were flagged as born in section 4,
+   * because they had been in section 3 two commits back and I had dropped them
+   * from the file instead of moving them. The id had a history; one commit of
+   * it did not.
+   *
+   * Bounded at forty revisions. A row that has not been mentioned in forty
+   * edits of this file is not one anybody is tracking.
+   */
+  let revisions = [];
   try {
-    previous = execSync('git show HEAD~1:TASKS.md', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    revisions = execSync('git log -n 40 --format=%H -- TASKS.md',
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+      .split('\n').map((x) => x.trim()).filter(Boolean).slice(1);
   } catch {
-    /* No parent commit, or TASKS.md is new. Nothing to compare, and saying so
+    /* Not a git checkout, or TASKS.md is new. Nothing to compare, and saying so
        is better than inventing a baseline. */
   }
 
-  if (previous) {
+  if (revisions.length) {
     const idsIn = (text) => {
       const out = new Map();
       let current = null;
@@ -135,16 +149,25 @@ for (const sec of sections) {
       }
       return out;
     };
-    const before = idsIn(previous);
-    const now = idsIn(doc);
+    /** Every id that has ever been in a section, across those revisions. */
+    const everTracked = new Set();
+    for (const rev of revisions) {
+      let text = '';
+      try {
+        text = execSync(`git show ${rev}:TASKS.md`,
+          { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+      } catch { continue; }
+      for (const id of idsIn(text).keys()) everTracked.add(id);
+    }
 
+    const now = idsIn(doc);
     for (const [id, section] of now) {
       if (section !== 4) continue;
-      if (before.has(id)) continue;
-      fails.push(`${id} appears in "4. Done and verified" and was in no section in the previous`
-        + ' commit.\n      An id has to be open or ready for review before it is done. Filing'
-        + ' one straight\n      into section 4 takes it off both lists at once, which is the'
-        + ' thing Ellie has\n      asked about twice.');
+      if (everTracked.has(id)) continue;
+      fails.push(`${id} appears in "4. Done and verified" and has never been in any section`
+        + ' before.\n      An id has to be open or ready for review first. Filing one straight'
+        + ' into section 4\n      takes it off both lists at once, which is the thing Ellie has'
+        + ' asked about twice.');
     }
   }
 }

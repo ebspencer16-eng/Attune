@@ -4,7 +4,7 @@
 
 | # | What I need from you |
 |--|--|
-| O512 | **Redeploy the workbook service on Render, then tell me.** In Render, open the Attune service and click Manual Deploy → Deploy latest commit. The fix is in the repo: four files the service reads were never copied into its image, which is why it crashed instantly every time. Once it builds I will delete the .docx version (O490). |
+| O512 | **Redeploy the workbook service on Render once more, then try the workbook.** Your log found it: the PDF was built correctly every time, then the process died handing it over, because it ran code meant for local use that tries to write inside /app as a user that cannot. Manual Deploy, Deploy latest commit. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -16,23 +16,19 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** Everything you have raised is either in section 3 for your eye or in section 1 waiting on you. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O520 | **The site's Insights view.** You said you never approved it and it was not in a section. It is this row from now on. Bullets removed, exercise rows indented further with their icons, all five present, icons redrawn to match the app's. |
-| O497 | The second prompt card was empty: the server sends `secondary` as a list and the site read it as one card. Both cards carry their words now. |
-| O517 | Notes is the word, the two tiles, the orange button and the tags. Back button, Write something, the journal section and From Preston are gone. The button opens the journal; the password opens what is in it. |
-| O521 | **Insights menu was missing Relationship Reflection.** It read a flag that does not exist, so it was always false. All five exercises show now. |
-| O522 | **The key warning was the budget tool, not Insights.** It shows on whatever tab you are on because all four load at once. |
-| O523 | **The app's budget shows the website's three numbers**: Monthly income, Left to allocate, Savings rate. It showed three different ones. The app still saves as you type where the site has a Save button; say if you want them matched. |
-| O488 | Settings has a Check for update button. One press asks, downloads and reloads. |
-| O514 | Partner joined is an alert row on both. |
-| O510 | Methodology everywhere, address `/practice/methodology`. |
-| O518 | Four home cards went nowhere and now do. |
-| O519 | The post-results survey was unreachable; it runs after results now. |
+| O524 | **A press now looks like a press**, on the app and across the whole site. The app had no pressed state at all: one control out of ninety reacted. That is why the workbook button felt dead. |
+| O520 | Insights is cream with the orange glow, read off the app's own screen instead of a constant that was never used there. The menu fits without scrolling. |
+| O497 | No cream tile under the prompts, so the gradient shows. Quick-link labels are two lines at any width. Both prompt cards hold the same shape. |
+| O517 | Loading is centred with the mark and a spinner. Less space above the word tile. The word tile is the app's, with the shading. |
+| O523 | The app's budget is the website's: dark three-stat strip, numbered steps, save bar with its four states. It still also saves as you type, so nothing is lost if you leave mid-number. |
+| O521 | Fixed and gated: a flag read off the ownership object that does not exist now fails the build. |
+| O522 | Fixed. It was the budget tool's section helper, not Insights. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -47,6 +43,17 @@
 
 | Verified by you | What |
 |--|--|
+| O488 | **Approved.** |
+| O514 | **Approved.** |
+| O510 | **Approved.** |
+| O518 | **Approved.** |
+| O519 | **Approved.** |
+| O516 | **Approved. All three.** |
+| O508 | **Approved.** |
+| O507 | **Approved.** |
+| O511 | **Approved.** |
+| O509 | **Approved.** |
+| O502 | **Approved.** |
 | O505 | **Approved.** Citation full width, Save and Share under it and on the right. |
 | O493 | **Approved.** 49 quotations, 31 from four books and 18 from pages, every one verified against the source rather than a transcription, and none of our own sentences left. |
 | R173 | **Approved.** The workbook opens in the browser from the app rather than throwing someone out to Safari. |
