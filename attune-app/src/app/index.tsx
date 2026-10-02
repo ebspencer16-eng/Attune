@@ -45,7 +45,7 @@ import GhostTile, { GhostInk, GhostInkQuiet, GhostRule } from '@/components/ghos
 import { insightCard, StoryCard } from '@/components/highlight-cards';
 import { BRAND_NAME } from '@/components/brand-header';
 import { showSection } from '@/components/results';
-import { showJournal } from '@/app/notes';
+import { showJournal, JOURNAL_TITLE } from '@/app/notes';
 import PageWash, { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
@@ -1048,7 +1048,7 @@ const QUICK_LINKS: QuickLinkItem[] = [
      of the four sitting on a single line. */
   { id: 'plan', label: 'Action\nplans', icon: 'signpost', section: 'what-comes-next' },
   { id: 'highlights', label: 'Results highlights', icon: 'sparkles', section: 'highlights' },
-  { id: 'journal', label: 'Relationship journal', icon: 'book.closed' },
+  { id: 'journal', label: JOURNAL_TITLE, icon: 'book.closed' },
 ];
 
 /**

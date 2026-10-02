@@ -1093,7 +1093,14 @@ const JUMP_BACK_IN = 'Recent';
 const WRITE_ENTRY = 'Write a journal entry';
 const SHARED_WITH_ME = 'Shared with me';
 const WORD_IN_USE = 'Word in use';
-const JOURNAL_TITLE = 'Relationship journal';
+/**
+ * Exported, because the home screen's quick link had typed it out too.
+ *
+ * Three copies of one name: api/_lib/notes-copy.js owns it, this file mirrors
+ * it under check-journal-copy, and index.tsx had a third that nothing watched.
+ * One mirror in the app, read from here.
+ */
+export const JOURNAL_TITLE = 'Relationship journal';
 /**
  * The app's lock line.
  *

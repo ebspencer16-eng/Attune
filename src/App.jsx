@@ -42,7 +42,7 @@ import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insi
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE } from "../api/_in-practice.js";
 /* The colour each of the app's tabs is painted in. */
-import { tabGradientCss, tabGroundTail } from "../api/_lib/section-grounds.js";
+import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
 import { resultsNav, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
 import { webTargetFor } from "../api/_lib/next-action.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
@@ -4019,7 +4019,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
               <div style={{ height: "0.7rem", borderRadius: 4, background: "#F6F1EA", width: "80%" }} />
             </div>
           ))}
-          {cards.map((card) => (
+          {cards.map((card, cardIdx) => (
             <button key={card.id} onClick={() => onCard(card)}
               style={{
                 background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
@@ -4035,7 +4035,16 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                   stopped working. */}
               <div style={{
                 width: "100%", borderRadius: 12,
-                background: card.tint || "#F3E4DE", marginBottom: "0.7rem",
+                /* ── THE PAYLOAD HAS NEVER CARRIED A TINT ──────────────
+                   This read `card.tint`, and nothing on the server has ever
+                   set one: `git log -S tint` over api/_lib/next-action.js and
+                   api/home.js returns nothing. So both prompts fell to the
+                   same fallback and the pair was one colour here while the app
+                   alternates two. The same shape as `secondary` being an array
+                   rather than a card: a field read off the app's payload that
+                   the payload does not have, and an undefined property is a
+                   default rather than an error. See cardTint. */
+                background: cardTint(cardIdx), marginBottom: "0.7rem",
                 /* No aspect-ratio. A definite width plus an aspect makes the
                    height definite too, and a definite height does not shrink,
                    whatever flex says: that is why the cards were cut off the

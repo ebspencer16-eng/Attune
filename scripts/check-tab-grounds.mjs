@@ -341,6 +341,58 @@ for (const { tab, file, inline, from, declaredIn, name } of TABS) {
   }
 }
 
+/**
+ * ── AND THE TWO PROMPT-CARD TINTS ─────────────────────────────────────────
+ * The home screen's pair of action cards. The website read `card.tint` off the
+ * payload and nothing has ever put one there, so both cards fell to one
+ * fallback colour while the app alternates two. Same arrangement as the grounds
+ * above: the app cannot import the server's list, so the two are held equal.
+ *
+ * Read off the screen that draws them, not off a constant with the right name.
+ * That mistake has been made twice in this file already.
+ */
+{
+  const { CARD_TINTS } = await import(`${ROOT}api/_lib/section-grounds.js`);
+  const home = read('attune-app/src/app/index.tsx');
+
+  const app = [];
+  for (const name of ['CARD_TINT_A', 'CARD_TINT_B']) {
+    const m = new RegExp(`const ${name} = '(#[0-9a-fA-F]{3,8})';`).exec(home);
+    if (!m) {
+      fails.push(`attune-app/src/app/index.tsx no longer declares ${name}, which is what the home`
+        + ' screen tints its prompt cards with. Refusing to pass: a gate that has lost its'
+        + ' subject must never report success.');
+    } else app.push(m[1]);
+  }
+
+  /* And that the screen USES them. A pair of constants nothing draws with is
+     the half-mark bug one file over: the value exists and the picture does not. */
+  for (const name of ['CARD_TINT_A', 'CARD_TINT_B']) {
+    if (!new RegExp(`tint:\\s*${name}\\b`).test(home)) {
+      fails.push(`attune-app/src/app/index.tsx declares ${name} and does not tint a card with it.`);
+    }
+  }
+
+  if (app.length === 2 && !same(app, CARD_TINTS)) {
+    fails.push(`the home prompt cards are ${JSON.stringify(app)} in the app and`
+      + ` ${JSON.stringify(CARD_TINTS)} on the server. The website draws the server's, so this is`
+      + ' one pair of cards being two different pairs of colours depending on which surface you'
+      + ' are on.');
+  }
+
+  /* And the website takes them from there rather than from the payload, which
+     is where this started: `card.tint` is a field no card has ever had. */
+  const site = read('src/App.jsx');
+  if (/background:\s*card\.tint/.test(site)) {
+    fails.push('src/App.jsx tints a prompt card from `card.tint`, which api/_lib/next-action.js'
+      + ' has never set. Both cards fall to one fallback and the pair is one colour.');
+  }
+  if (!/cardTint\(/.test(site)) {
+    fails.push('src/App.jsx does not call cardTint(), so whatever is tinting those cards is its'
+      + ' own. Refusing to pass: a gate that has lost its subject must never report success.');
+  }
+}
+
 if (fails.length) {
   console.error('\n check-tab-grounds: a tab is two colours depending on which surface you'
     + ' are on.\n');

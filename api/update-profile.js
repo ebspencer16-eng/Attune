@@ -26,7 +26,7 @@
  */
 
 import { jsonBody } from './_lib/http.js';
-import { ABOUT_YOU } from './_lib/profile-setup-copy.js';
+import { ABOUT_YOU, PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
 
 export const config = { runtime: 'edge' };
 
@@ -96,6 +96,17 @@ export default async function handler(req) {
       // The questions themselves, so the screen draws the same five the signup
       // does rather than a second copy of them.
       aboutYou: ABOUT_YOU,
+      /**
+       * And the four field labels, for the same reason.
+       *
+       * The editor had them typed out: 'Your name', 'Your first name',
+       * "Partner's name", "Partner's first name". All four are in
+       * PROFILE_SETUP_COPY, which the signup screen already reads, so the same
+       * two fields were labelled from two places and only one of them is
+       * Ellie's. Sending them costs four strings on a request the screen makes
+       * anyway.
+       */
+      copy: PROFILE_SETUP_COPY,
     });
   }
 

@@ -1511,7 +1511,7 @@ export type EditableProfile = {
 };
 
 export function fetchEditableProfile() {
-  return request<{ ok: true; profile: EditableProfile; aboutYou: AboutYou }>('/api/update-profile');
+  return request<{ ok: true; profile: EditableProfile; aboutYou: AboutYou; copy: ProfileSetupCopy }>('/api/update-profile');
 }
 
 export function updateProfile(input: {

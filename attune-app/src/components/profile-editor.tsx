@@ -27,8 +27,7 @@ import { Pressable } from '@/components/pressable';
 
 import {
   fetchEditableProfile, updateProfile,
-  type AboutYou, type ApiError, type EditableProfile,
-} from '@/api/client';
+  type AboutYou, type ApiError, type EditableProfile, type ProfileSetupCopy } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import { LOADING } from '@/constants/loading-copy';
 import {
@@ -42,6 +41,15 @@ const PRONOUNS = ['she/her', 'he/him', 'they/them'];
 export default function ProfileEditor({ onSaved }: { onSaved?: () => void }) {
   const [loaded, setLoaded] = useState<EditableProfile | null>(null);
   const [about, setAbout] = useState<AboutYou | null>(null);
+  /**
+   * The field labels, from the server.
+   *
+   * They were typed here: 'Your name', 'Your first name', "Partner's name",
+   * "Partner's first name". All four live in api/_lib/profile-setup-copy.js,
+   * which the signup screen already reads, so one pair of fields was labelled
+   * from two places and only one of them was Ellie's.
+   */
+  const [copy, setCopy] = useState<ProfileSetupCopy | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [draft, setDraft] = useState<Record<string, string>>({});
@@ -53,7 +61,7 @@ export default function ProfileEditor({ onSaved }: { onSaved?: () => void }) {
     let live = true;
     fetchEditableProfile().then((r) => {
       if (!live) return;
-      if (r.ok) { setLoaded(r.data.profile); setAbout(r.data.aboutYou); setError(null); }
+      if (r.ok) { setLoaded(r.data.profile); setAbout(r.data.aboutYou); setCopy(r.data.copy ?? null); setError(null); }
       else setError(r.error);
     });
     return () => { live = false; };
@@ -141,9 +149,9 @@ export default function ProfileEditor({ onSaved }: { onSaved?: () => void }) {
 
   return (
     <View>
-      {field('name', 'Your name', 'Your first name')}
+      {field('name', copy?.yourName ?? '', copy?.yourNamePlaceholder ?? '')}
       {chips('pronouns', 'Your pronouns', PRONOUNS.map((p) => [p, p] as [string, string]))}
-      {field('partnerName', "Partner's name", "Partner's first name")}
+      {field('partnerName', copy?.partnerName ?? '', copy?.partnerNamePlaceholder ?? '')}
       {chips('partnerPronouns', "Partner's pronouns", PRONOUNS.map((p) => [p, p] as [string, string]))}
 
       {about ? (

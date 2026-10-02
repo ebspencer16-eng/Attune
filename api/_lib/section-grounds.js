@@ -314,6 +314,40 @@ export const TAB_GROUNDS = {
 };
 
 /**
+ * ── THE TWO PROMPT-CARD TINTS ─────────────────────────────────────────────
+ * The home screen's two action cards are tinted where their artwork will go,
+ * warm then cool, so the pair reads as two things rather than one repeated.
+ *
+ * ── WHY THEY ARE HERE ─────────────────────────────────────────────────────
+ * Because the website was reading a field that has never existed.
+ * src/App.jsx drew `background: card.tint || "#F3E4DE"`, and nothing in
+ * api/_lib/next-action.js has ever set `tint` on a card: `git log -S tint`
+ * over that file and api/home.js returns nothing at all. So every card on the
+ * website fell to the same fallback and the two prompts were one colour, while
+ * the app assigns CARD_TINT_A and CARD_TINT_B by position.
+ *
+ * The same shape as `secondary` being an array: the website was written to read
+ * the app's payload, and took a field off it that the payload does not carry.
+ * Both were invisible because an undefined property is not an error; it is a
+ * default.
+ *
+ * The app cannot import this, so it keeps its constants and
+ * check-tab-grounds.mjs holds the two lists equal, which is the arrangement
+ * the tab grounds already use.
+ */
+export const CARD_TINTS = ['#F7E8E0', '#E4E9F7'];
+
+/**
+ * The tint for a card in this position.
+ *
+ * Positional rather than per-kind, because that is what the app does: the first
+ * card is warm and the second is cool whatever either of them says.
+ */
+export function cardTint(i) {
+  return CARD_TINTS[i % CARD_TINTS.length];
+}
+
+/**
  * The colour a tab's ground ends on.
  *
  * ── WHY A GRADIENT ALONE IS NOT ENOUGH ON A PAGE THAT SCROLLS ─────────────

@@ -102,8 +102,20 @@ function overallTone(bands: string[], value: number): string {
   return bands[i];
 }
 
+/**
+ * The app's own label above an action.
+ *
+ * An action's `title` is the instruction itself ("Call out the behavior rather
+ * than your partner"), so the eyebrow over it has to be something else. It has
+ * no counterpart in api/_conflict-results-prose.js and is not a second copy of
+ * anything.
+ *
+ * Its pair was: that constant held "One thing to keep in mind", which is the
+ * `title` on every note the payload already carries, so a copy edit would have
+ * moved the website and left the app saying the old words. The note's own title
+ * is read now.
+ */
 const ADVICE_TRY = 'One thing to try';
-const ADVICE_KEEP = 'One thing to keep in mind';
 
 /** The section's blue, which the website uses for this label. */
 const accentBlue = '#1B5FE8';
@@ -587,7 +599,20 @@ function Patterns({
           // Never gets neither. Attaching an instruction to a pattern that is
           // not happening would read as a warning about nothing.
           const advice = v >= 2 ? content.patternActions[p.key] : v === 1 ? content.patternNotes[p.key] : null;
-          const adviceLabel = v >= 2 ? ADVICE_TRY : ADVICE_KEEP;
+          /**
+           * ── THE SERVER ALREADY SENDS THIS HEADING ─────────────────────
+           * Every note in PATTERN_NOTES carries a `title`, and it is the same
+           * sentence this screen had typed into ADVICE_KEEP. So a copy edit to
+           * that title would have changed the website and left the app saying
+           * the old words, with nothing to notice it: the two agree today,
+           * which is exactly what makes it invisible.
+           *
+           * The payload's title wins and the constant is the fallback for a
+           * stored row written before it existed. ADVICE_TRY has no counterpart
+           * in the payload: an action's own title is the specific instruction,
+           * so the eyebrow above it is the app's own word.
+           */
+          const adviceLabel = v >= 2 ? ADVICE_TRY : (advice?.title || '');
 
           return (
             <View
@@ -631,9 +656,11 @@ function Patterns({
                    missed, so three lines of white type sat on a white panel.
                    A ghost band, like every other panel on these pages. */
                 <View style={{ marginTop: Spacing.md, backgroundColor: PANEL_BAND, borderColor: PANEL_EDGE, borderWidth: 1, borderRadius: Radius.md, padding: Spacing.lg }}>
-                  <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.xs }}>
-                    {adviceLabel}
-                  </Text>
+                  {adviceLabel ? (
+                    <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.xs }}>
+                      {adviceLabel}
+                    </Text>
+                  ) : null}
                   {v >= 2 && advice.title ? (
                     <Prose style={{ ...Type.cardTitle, color: Palette.white, marginBottom: 2 }}>{advice.title}</Prose>
                   ) : null}
