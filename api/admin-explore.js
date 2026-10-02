@@ -322,6 +322,21 @@ export default async function handler(req) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
   if (!SUPABASE_URL || !SUPABASE_KEY) return json({ error: 'Supabase env vars missing' }, 500);
+
+  /**
+   * ── A QUERY THAT FAILED IS NOT A TABLE THAT IS EMPTY ────────────────────
+   * Three selects below were wrapped in `try { ... } catch {}` with an empty
+   * array left behind, so a rejected query made this page quietly smaller: a
+   * couple whose partner came in through an invite shows as unpaired, a filter
+   * loses its options, the testimonials disappear. Every one of those is a
+   * confident answer and a wrong one.
+   *
+   * That is the bug Ellie reported about the Engagement page, in a different
+   * tab: "there should be data for some of these already." That endpoint
+   * answers with the rows it could read AND a list of what it could not. This
+   * one now does the same, and the page prints it.
+   */
+  const couldNotRead = [];
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
@@ -332,7 +347,14 @@ export default async function handler(req) {
     // never create a full profile. Pull them so a couple isn't shown as unpaired
     // just because one half came in through an invite.
     let partnerSessions = [];
-    try { const _ps = await admin.from('partner_sessions').select('invite_code, ex1_answers'); partnerSessions = _ps.data || []; } catch (e) {}
+    try {
+      const _ps = await admin.from('partner_sessions').select('invite_code, ex1_answers');
+      if (_ps.error) throw _ps.error;
+      partnerSessions = _ps.data || [];
+    } catch (e) {
+      console.error('[admin-explore] partner_sessions:', e?.message || e);
+      couldNotRead.push('invited partners, so some couples may read as unpaired');
+    }
     const sessByInvite = new Map();
     for (const sx of partnerSessions) { if (sx && sx.invite_code && sx.ex1_answers) sessByInvite.set(sx.invite_code, sx); }
 
@@ -367,7 +389,10 @@ export default async function handler(req) {
           for (const [fk, src] of Object.entries(FB_CAT_SRC)) { const v = payload[src]; if (v) fbCatOptions[fk].add(v); }
         }
       }
-    } catch {}
+    } catch (e) {
+      console.error('[admin-explore] beta survey filters:', e?.message || e);
+      couldNotRead.push('the beta survey, so its filter options are missing');
+    }
     const fbCatOpts = Object.fromEntries(Object.entries(fbCatOptions).map(([k, set]) => [k, [...set]]));
 
     const _has = (o) => !!(o && typeof o === 'object' && Object.keys(o).length > 0);
@@ -584,7 +609,10 @@ export default async function handler(req) {
         for (const k of SEG_KEYS) t[k] = seg[k] != null ? seg[k] : null;
         testimonialsAnon.push(t);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('[admin-explore] testimonials:', e?.message || e);
+      couldNotRead.push('the testimonials');
+    }
 
     return json({
       generatedAt: new Date().toISOString(),
@@ -596,6 +624,9 @@ export default async function handler(req) {
       surveys: surveysAnon,
       testimonials: testimonialsAnon,
       betaResponses: betaResponsesAnon,
+      /* Empty on a clean run. Anything in it is a question the page cannot
+         answer, said out loud rather than drawn as a smaller number. */
+      couldNotRead,
     });
   } catch (e) {
     return json({ error: safeError('admin-explore', e, 'Query failed.') }, 500);

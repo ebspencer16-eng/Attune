@@ -1463,6 +1463,9 @@ window.adminAuthHeaders = function(extra){
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
+      /* Before anything is drawn from it. */
+      const _cnr = explorerCouldNotRead(data);
+      if (_cnr) { const host = $('xp-result') || $('xp-table') || document.getElementById('explore'); if (host) host.insertAdjacentHTML('beforebegin', _cnr); }
       fillFieldSelect($('xp-row-field'), true);
       fillFieldSelect($('xp-col-field'), true);
       fillScaleSelect($('xp-measure-field'));
@@ -4798,6 +4801,26 @@ async function renderIntimacyResponses(){
   if(dimEl){ if(!stats.length) dimEl.innerHTML=emptyHtml; else renderBars('intimacy-dim-bars', stats.slice().sort((a,b)=>b.align-a.align).map(d=>({l:d.l,v:d.align})), '#10B981'); }
 }
 
+
+/**
+ * What the cube could not read, said out loud.
+ *
+ * /api/admin-explore used to swallow three failed selects and answer with a
+ * smaller dataset, so a couple whose partner joined by invite read as unpaired
+ * and nobody could tell that from the truth. It reports them now, and a number
+ * drawn from an incomplete read has to say so where the number is.
+ */
+function explorerCouldNotRead(data) {
+  const list = (data && data.couldNotRead) || [];
+  if (!list.length) return '';
+  return '<div style="background:rgba(232,103,58,.10);border:1px solid rgba(232,103,58,.35);'
+    + 'border-radius:8px;padding:.6rem .8rem;margin-bottom:.9rem;font-size:.7rem;'
+    + 'font-family:var(--mono);color:#E8673A;">'
+    + 'Some of this could not be read, so the counts below are low: '
+    + list.map(x => String(x).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]))).join('; ')
+    + '. This is a query that failed, not an empty table.</div>';
+}
+
 // ── Per-exercise Question Explorer (crosstab + a visual for every question) ──
 // Powered by the same anonymized respondent cube as the Explore page. Renders a
 // crosstab picker plus a distribution bar for every question in the exercise.
@@ -4808,6 +4831,8 @@ async function ensureCube() {
   const j = await res.json();
   if (j.error) throw new Error(j.error);
   __cubeCache = j;
+  const _cnr = explorerCouldNotRead(j);
+  if (_cnr) { const host = document.getElementById('qx-root') || document.getElementById('questions'); if (host) host.insertAdjacentHTML('afterbegin', _cnr); }
   return j;
 }
 const QX_ESC = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));

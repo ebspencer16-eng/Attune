@@ -27,12 +27,28 @@
  * read anyway, the reason is reported, and a measure computed from them is
  * available rather than empty.
  *
+ * ── AND THE EXPLORE ENDPOINT, WHICH HAD THE SAME HABIT ────────────────────
+ * This file used to say: "The other admin endpoints. This one is the one that
+ * failed." api/admin-explore.js had three selects in `try { ... } catch {}`
+ * leaving an empty array behind, so a rejected query made the page quietly
+ * smaller: a couple whose partner joined by invite read as UNPAIRED, a filter
+ * lost its options, the testimonials vanished. Every one a confident answer and
+ * a wrong one, which is this file's whole subject.
+ *
+ * It is here rather than in a gate of its own because that would be a second
+ * fixture for one rule, and CLAUDE.md is explicit that the two then drift and
+ * the weaker one wins. Same promise, second endpoint.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The other admin endpoints. This one is the one that failed, and the one that
- * paginates by hand. If another grows the same helper, it belongs here.
+ * Whether the admin page draws the warning well. It has to print it, which is
+ * checked, but how it looks is not something a check can answer.
  */
 
+import { readFileSync } from 'node:fs';
+
 import { SITE_URL } from '../api/_lib/site.js';
+
+const ROOT = new URL('..', import.meta.url).pathname;
 
 process.env.SUPABASE_URL = 'https://example.invalid';
 process.env.SUPABASE_SERVICE_KEY = 'test-key';
@@ -86,8 +102,46 @@ if (res.status !== 200 || !body?.ok) {
   }
 }
 
+
+// ── The Explore endpoint, same promise ──────────────────────────────────────
+{
+  /** Everything answers, except the invited partners. */
+  globalThis.fetch = async (u) => {
+    const url = String(u);
+    const table = url.split('/rest/v1/')[1]?.split('?')[0];
+    if (table === 'partner_sessions') {
+      return new Response('{"code":"42P01","message":"relation does not exist"}', { status: 400 });
+    }
+    return new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+
+  const { default: explore } = await import('../api/admin-explore.js');
+  const r = await explore(new Request(`${SITE_URL}/api/admin-explore`, {
+    headers: { authorization: 'Bearer test-admin-secret' },
+  }));
+  const b = await r.json().catch(() => null);
+
+  if (r.status !== 200 || !b) {
+    problems.push(`admin-explore answered ${r.status} when one table was missing. It has to answer`
+      + ' with what it can read.');
+  } else if (!Array.isArray(b.couldNotRead) || !b.couldNotRead.length) {
+    problems.push('admin-explore read none of the invited partners and said nothing about it.\n'
+      + '      A couple whose partner joined by invite then reads as unpaired, and the page has\n'
+      + '      no way to tell that from the truth. Silence here is how the Engagement page lied.');
+  }
+
+  /* And the page prints it. A field reported and never drawn is the same
+     silence one layer out, which is a mistake this repo made today in the
+     other direction: the website read a `tint` nothing sent. */
+  const admin = readFileSync(`${ROOT}public/admin.html`, 'utf8');
+  if (!/couldNotRead/.test(admin)) {
+    problems.push('public/admin.html never reads couldNotRead, so the endpoint reports a failed'
+      + ' query to nobody.');
+  }
+}
+
 if (problems.length) {
-  console.error('[check-query-failures] the Engagement endpoint confuses a rejected query with an empty table:\n');
+  console.error('[check-query-failures] an admin endpoint confuses a rejected query with an empty table:\n');
   for (const p of problems) console.error('  ' + p);
   process.exit(1);
 }
