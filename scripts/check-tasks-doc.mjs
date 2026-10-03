@@ -195,6 +195,49 @@ for (const sec of sections) {
   }
 }
 
+/**
+ * ── SECTION 4 IS ONE LINE PER ROW, SAYING WHAT THE TASK WAS ───────────────
+ * Ellie: "row should list what the task was, concisely but with the context
+ * necessary to understand what it was. All rows should be 1 line. Apply to all
+ * past tasks and use this structure going forward."
+ *
+ * It had drifted the other way: 180 of the 489 rows said only "**Approved.**",
+ * which records a verdict and not a task, and the rest ran to two thousand
+ * characters of reasoning. Neither is a thing you can read down. The
+ * descriptions were recovered from the revision where each row was still open,
+ * which is the only place they survive.
+ *
+ * Two shapes are refused: a row that says nothing but a verdict, and a row long
+ * enough to wrap on any screen.
+ */
+{
+  const at = doc.indexOf('## 4.');
+  const sec = at === -1 ? '' : doc.slice(at);
+  const rows = sec.split('\n').filter((l) => /^\|\s*[A-Z]+\d+\s*\|/.test(l));
+  if (!rows.length) {
+    fails.push('section 4 has no rows at all. Refusing to pass: a gate that has lost its'
+      + ' subject must never report success.');
+  }
+  const VERDICT = /^\|\s*[A-Z]+\d+\s*\|\s*(\*\*)?(approved|done|ran it|yes|fixed)[.!]?(\*\*)?\s*\|\s*$/i;
+  const bare = rows.filter((l) => VERDICT.test(l));
+  if (bare.length) {
+    fails.push(`${bare.length} row(s) in section 4 say only that you approved something, which is`
+      + ' what the section already means.\n'
+      + `      First: ${bare[0].trim().slice(0, 70)}\n`
+      + '      The row has to say what the task WAS. The description is in the revision where\n'
+      + '      the row was still open, if it needs recovering.');
+  }
+  const LIMIT = 230;
+  const long = rows.filter((l) => l.length > LIMIT);
+  if (long.length) {
+    const id = /^\|\s*([A-Z]+\d+)/.exec(long[0])?.[1];
+    fails.push(`${long.length} row(s) in section 4 are longer than ${LIMIT} characters, starting`
+      + ` with ${id} at ${long[0].length}.\n`
+      + '      Section 4 is a list you read down. The reasoning belongs in the commit that did\n'
+      + '      the work, where it is next to the code it is about.');
+  }
+}
+
 if (fails.length) {
   console.error('[check-tasks-doc] TASKS.md is not telling the truth about itself:');
   for (const f of fails) console.error(`  ${f}`);
