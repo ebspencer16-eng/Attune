@@ -44,7 +44,7 @@ import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser'
 import * as SecureStore from 'expo-secure-store';
 
 import { Pressable } from '@/components/pressable';
-import { SITE_URL } from '@/api/client';
+import { fetchAdminTicket, SITE_URL } from '@/api/client';
 import { Colors, Lift, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -111,14 +111,46 @@ export default function Admin({ sections, onClose }: {
     setStored(entry); setUnlocked(true); setEntry(''); setConfirm('');
   }, [entry, confirm, stored]);
 
-  const open = (key: string) => {
-    /* The page, at the site's own address, full screen inside the app. Its Done
-       button is the back button Ellie asked for: it returns here. */
-    openBrowserAsync(`${SITE}/admin#${key}`, {
-      presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-      toolbarColor: c.background,
-      controlsColor: c.accent,
-    }).catch((e) => console.warn('[admin] would not open', key, e));
+  const [opening, setOpening] = useState<string | null>(null);
+
+  /**
+   * ── NO PASSWORD ONCE YOU ARE IN THROUGH YOUR OWN ACCOUNT ────────────────
+   * Ellie: "Carolina and I shouldn't have to enter the admin password if we are
+   * entering through our accounts. We should have the 4-digit pin once when we
+   * initially click admin from settings, but no passwords from that point."
+   *
+   * So the ticket is fetched here and travels in the URL's FRAGMENT, which is
+   * never sent to a server and which the admin page strips from the address bar
+   * before it does anything else. It is good for two minutes.
+   *
+   * What is NOT carried is the admin token. The exchange happens on the page,
+   * because that is the only thing that should ever hold it.
+   *
+   * If the ticket cannot be fetched the page still opens: the password gate is
+   * behind it and one sign-in is a worse morning than a dead end.
+   */
+  const open = async (key: string) => {
+    if (opening) return;
+    setOpening(key);
+    let ticket: string | null = null;
+    try {
+      const r = await fetchAdminTicket();
+      if (r.ok) ticket = r.data.ticket;
+    } catch (e) {
+      console.warn('[admin] no ticket, falling back to the password gate', e);
+    }
+    const frag = ticket ? `#${key}&t=${encodeURIComponent(ticket)}` : `#${key}`;
+    try {
+      await openBrowserAsync(`${SITE}/admin${frag}`, {
+        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+        toolbarColor: c.background,
+        controlsColor: c.accent,
+      });
+    } catch (e) {
+      console.warn('[admin] would not open', key, e);
+    } finally {
+      setOpening(null);
+    }
   };
 
   if (stored === undefined) {
@@ -217,14 +249,16 @@ export default function Admin({ sections, onClose }: {
             key={s.key}
             accessibilityRole="button"
             accessibilityLabel={s.label}
-            onPress={() => open(s.key)}
+            onPress={() => { open(s.key); }}
             style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
               paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
               borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
             }}>
             <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{s.label}</Text>
-            <Text style={{ color: c.accent, fontSize: 16 }}>{'›'}</Text>
+            {opening === s.key
+              ? <ActivityIndicator color={c.accentQuiet} />
+              : <Text style={{ color: c.accent, fontSize: 16 }}>{'›'}</Text>}
           </Pressable>
         ))}
       </View>

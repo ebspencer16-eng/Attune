@@ -2698,6 +2698,70 @@ async function attemptLogin() {
   if (passInp)  passInp.addEventListener('keydown',  e => { if (e.key === 'Enter') attemptLogin(); });
 })();
 
+// ── ARRIVING FROM THE APP, WITH A TICKET ──────────────────────────────────────
+// Ellie: "Carolina and I shouldn't have to enter the admin password if we are
+// entering through our accounts. We should have the 4-digit pin once when we
+// initially click admin from settings, but no passwords from that point."
+//
+// The app asks /api/admin-session for a ticket, which that endpoint mints only
+// for an account api/_lib/admins.js recognises, and opens this page with it in
+// the URL FRAGMENT. A fragment is never sent to the server, so it stays out of
+// request logs and referrers, and it is stripped from the address bar before
+// anything else runs. The ticket expires in two minutes either way.
+//
+// Exchanged here rather than in the app because what comes back is the admin
+// token, and this page is the only thing that should ever hold it.
+/* Noticed synchronously, so the gate below knows an exchange is in flight and
+   does not flash the password form in front of somebody who is already being
+   signed in. */
+window.__attuneAdminTicket = (() => {
+  try { return new URLSearchParams((location.hash || '').replace(/^#/, '')).get('t'); }
+  catch (_) { return null; }
+})();
+
+(async function ticketFromApp() {
+  let ticket = null;
+  try {
+    const frag = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+    ticket = frag.get('t');
+    if (ticket) {
+      // Out of the address bar before the exchange, so a screenshot or a shared
+      // link carries nothing. The section the app asked for is kept.
+      frag.delete('t');
+      const rest = frag.toString();
+      history.replaceState(null, '', location.pathname + location.search + (rest ? '#' + rest : ''));
+    }
+  } catch (_) {}
+  if (!ticket) return;
+  try {
+    const r = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticket }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok && d && d.token) {
+      localStorage.setItem('attune_admin_s', d.token);
+      try { localStorage.setItem('attune_admin_auth', JSON.stringify({ ok: 1, ts: Date.now() })); }
+      catch (_) { sessionStorage.setItem('attune_admin_auth', '1'); }
+      /* The same reload the password path does, so every loader runs with the
+         token in place rather than half of them having started without it. */
+      location.reload();
+      return;
+    }
+    window.__attuneAdminTicket = null;
+    const gate = document.getElementById('admin-login-gate');
+    if (gate) gate.classList.remove('hidden');
+  } catch (err) {
+    window.__attuneAdminTicket = null;
+    const gate = document.getElementById('admin-login-gate');
+    if (gate) gate.classList.remove('hidden');
+    // The password gate is still there behind this. A failed exchange is one
+    // sign-in, not a dead end.
+    console.warn('[Admin] ticket exchange failed:', err);
+  }
+})();
+
 // Restore admin login across browser sessions (30-day sliding window) so Ellie and
 // Carolina don't have to sign in every visit. Falls back to legacy sessionStorage.
 (function restoreAdminSession() {
@@ -2723,7 +2787,13 @@ async function attemptLogin() {
   let hasToken = false;
   try { hasToken = !!(localStorage.getItem('attune_admin_s') || new URLSearchParams(location.search).get('s')); } catch (_) {}
   if (ok && !hasToken) ok = false;
-  if (ok) { const gate = document.getElementById('admin-login-gate'); if (gate) gate.classList.add('hidden'); }
+  /* A ticket in flight counts as signed in for the moment it takes, because the
+     alternative is a password form in front of somebody the server is already
+     letting through. It puts the gate back itself if the exchange fails. */
+  if (ok || window.__attuneAdminTicket) {
+    const gate = document.getElementById('admin-login-gate');
+    if (gate) gate.classList.add('hidden');
+  }
 })();
 window.adminSignOut = function () {
   try { localStorage.removeItem('attune_admin_auth'); } catch (_) {}

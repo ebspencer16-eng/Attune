@@ -1,4 +1,5 @@
 import { jsonBody } from './_lib/http.js';
+import { adminTicketValid } from './_lib/admin-ticket.js';
 /**
  * /api/admin-login
  *
@@ -61,6 +62,27 @@ export default async function handler(req) {
   const _parsed = await jsonBody(req);
   if (_parsed.error) return _parsed.error;
   body = _parsed.body;
+
+  /**
+   * ── A TICKET INSTEAD OF A PASSWORD ──────────────────────────────────────
+   * Ellie: "Carolina and I shouldn't have to enter the admin password if we are
+   * entering through our accounts."
+   *
+   * /api/admin-session gives a signed-in admin account a ticket, signed under
+   * ADMIN_SECRET and good for two minutes. Exchanging it here is the same trade
+   * the password makes, and it is no weaker: a ticket can only be minted by
+   * something that already holds the secret, and only for an address
+   * api/_lib/admins.js recognises.
+   *
+   * Checked before the password path rather than after, so a ticket never
+   * reaches the credential comparison and cannot be read as a missing password.
+   */
+  if (body.ticket) {
+    if (await adminTicketValid(String(body.ticket), adminSecret)) {
+      return json({ token: adminSecret });
+    }
+    return json({ error: 'That link has expired. Open the admin again.' }, 401);
+  }
 
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');

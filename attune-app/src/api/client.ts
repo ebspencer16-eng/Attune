@@ -1518,6 +1518,18 @@ export type EditableProfile = {
   relationshipLength: string | null; children: string | null; signupSource: string | null;
 };
 
+/**
+ * A ticket that gets this account into the admin without the admin password.
+ *
+ * Ellie: "Carolina and I shouldn't have to enter the admin password if we are
+ * entering through our accounts." /api/admin-session mints one only for an
+ * address api/_lib/admins.js recognises, and it is good for two minutes. The
+ * admin page exchanges it; nothing here ever holds the admin token.
+ */
+export function fetchAdminTicket() {
+  return request<{ ok: true; ticket: string; expiresIn: number }>('/api/admin-session');
+}
+
 export function fetchEditableProfile() {
   return request<{ ok: true; profile: EditableProfile; aboutYou: AboutYou; copy: ProfileSetupCopy }>('/api/update-profile');
 }
