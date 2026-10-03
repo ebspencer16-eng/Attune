@@ -240,11 +240,17 @@ export default function NotesScreen() {
       setError(null);
       setNotes(n.data.notes);
       setAnnotations(n.data.annotations);
+      /* ── EVERYTHING THIS RESPONSE CARRIES, BEFORE THE SCREEN DRAWS ──────
+         `sharedWithMe` was assigned two awaits below, after the screen was
+         already drawable, so the Shared peek said "Nothing shared with you
+         yet." in the gap: an empty state drawn over data that was already in
+         hand. The same shape Ellie hit on Learn, where In Practice said
+         "nothing published yet" while its request was still in flight. */
+      setShared(n.data.sharedWithMe);
       /* Drawable now. The tags and the partner's name fill in behind. */
       setLoading(false);
       const t = await tagsSoon;
       const h = await homeSoon;
-      setShared(n.data.sharedWithMe);
       if (t.ok) {
         setTags(t.data.tags);
         setSectionLabels(t.data.sections ?? {});

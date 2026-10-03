@@ -15,19 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| O540 | **No admin password once you are in through your own account.** You: "Carolina and I shouldn't have to enter the admin password if we are entering through our accounts. We should have the 4-digit pin once when we initially click admin from settings, but no passwords from that point." The app holds your session; the admin pages want the admin secret. Hand it to the web view from an endpoint that checks your account is an admin, so the password never comes up. |
+| O541 | **In Practice said "nothing published yet", then showed the peek after a refresh.** An empty state that appears before the answer has arrived, or a failed first load reading as an empty shelf. A query that failed is not an empty table. |
+| O542 | **The insight of the day pushes the In Practice peek off the screen.** Fix the peek's position first, then derive the room the insight has, then make every quote fit it, shrinking the type on the Learn page rather than cutting a quote. Today's quote stays. |
+| O543 | **Insights cover pages on the site draw a dot with a glow where the app draws the section's icon.** |
+| O544 | **The site's results pages need the app's floating grey arrow, bottom right, visible wherever you are on the page.** The labelled buttons in the bottom corners come out. |
+| O545 | **The insights menu arrows are not evenly spaced and Communication's row does not line up with the others.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O540 | **Admin is in the app, behind a code you set on the phone.** Settings, then a 4-digit code you choose the first time. I have not been told it and it is not in the repo: it lives in that phone's keychain. The menu is the admin's own left nav in the Insights-menu style, and each row opens that page full screen inside the app, with Done as the back button. The seventeen pages come from the server, so the app writes none of them down. **The code is a convenience lock, not the security: every admin endpoint still asks for the admin password and the row only appears for your accounts.** |
-| O539 | **Section 4 is 489 one-line rows saying what each task was.** 180 of them said only "Approved"; the descriptions came out of the file's own 241 revisions. The file went from 142KB to 63KB. It is a mechanical pass, so some lines read better than others. |
-| O527 | **The cta field is gone,** and `priority` with it: the sort key meant nothing to a reader and was being published too. Every field on a card is now read by a surface, gated. |
-| O537 | **Every insights-menu row opens its own page.** The storycards were drawing over whatever section the row asked for. |
-| O538 | **The dropdown arrows work.** They were decoration inside the row's own button, so they could only ever do what the row does. They open the pages under a section now. |
-| O536 | **The web prompt cards have the hairline and the mark,** from the app's card. |
-| O535 | **I could not reproduce the slow home page, and I would rather say so.** Measured from here: first paint 240ms, nothing hidden, no blocking resource over 43ms. Two API calls take about a second each but neither blocks the page. If it happens again, tell me the browser and whether the tab was in the background when it loaded. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -46,6 +44,11 @@
 
 | Verified by you | What it was |
 |--|--|
+| O539 | Section 4 rewritten to 489 one-line rows saying what each task was, recovered from the file's own 241 revisions. |
+| O527 | The cta field removed from every home card, and `priority` with it, so every field a card carries is read by a surface. |
+| O537 | Insights menu rows opened Highlights instead of their own page, because the storycards drew over whichever section was asked for. |
+| O536 | The web prompt cards got the hairline under the title and the mark in the image box, from the app's card. |
+| O535 | The slow home page: measured at 240ms to first paint with nothing hidden, could not be reproduced, closed at her word. |
 | O512 | The app was serving the Word file, and I can show you the screenshot. Two bugs behind one tap. |
 | O517 | Mark is 68 across, the size the app uses. |
 | O520 | Orange comes from the top left. The direction was written inside the shared tab component, so turning Insights would have turned Learn too. |

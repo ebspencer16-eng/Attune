@@ -187,6 +187,10 @@ export default function ResourcesScreen() {
    * this settles after one extra layout rather than chasing itself.
    */
   const [aboveH, setAboveH] = useState(0);
+  /** The tools row's height, for the insight's budget. See quoteFit. */
+  const [tilesH, setTilesH] = useState(0);
+  /** The insight block's width, for estimating how much quote fits on a line. */
+  const [insightW, setInsightW] = useState(0);
 
   // The workbook is a file, so the tab needs to know whether it exists before
   // a tap. Fetched alongside everything else rather than on press: a tap that
@@ -350,6 +354,23 @@ export default function ResourcesScreen() {
   // Tracked separately from the catalogue: In Practice failing is not the same
   // as In Practice being empty, and the screen said the same thing for both.
   const [postsFailed, setPostsFailed] = useState(false);
+  /**
+   * Whether In Practice has answered at all.
+   *
+   * ── THE BUG ─────────────────────────────────────────────────────────────
+   * Ellie: "In practice on my phone just said 'nothing published yet' then I
+   * refreshed again and it showed me the peek."
+   *
+   * The tab draws as soon as /api/home lands, which is deliberate: everything
+   * else on it is a section and should not hold the screen. The posts are their
+   * own request and are still in flight at that moment, so the shelf rendered
+   * with an empty list and said so.
+   *
+   * There are three states and the screen modelled two: not asked yet, asked
+   * and failed, asked and empty. An empty list that has not answered is not an
+   * empty shelf, the same way a rejected query is not an empty table.
+   */
+  const [postsAnswered, setPostsAnswered] = useState(false);
 
   const loadingRef = useRef(false);
   /**
@@ -391,6 +412,8 @@ export default function ResourcesScreen() {
       fetchPosts().then((p) => {
         if (p.ok) { setPosts(p.data.posts); setCategories(p.data.categories ?? []); setPostsFailed(false); }
         else setPostsFailed(true);
+        /* Answered, either way. Until this the shelf has nothing to say. */
+        setPostsAnswered(true);
       }),
       fetchToolData().then((t) => { if (t.ok) setTools(t.data); }),
       // A failed read here costs marking, not the tab, so it is not an error
@@ -578,6 +601,98 @@ export default function ResourcesScreen() {
    * Zero until both measurements have arrived, which is one frame.
    */
   const insightLift = sheetTop > SHEET_PEEK ? Math.round((sheetTop - SHEET_PEEK) / 2) : 0;
+
+  /**
+   * ── THE QUOTE FITS THE ROOM IT HAS ──────────────────────────────────────
+   * Ellie: "Today the insight of the day quote is so long that, in the
+   * simulator, it pushes the in practice tile down so I can't see the full
+   * thing... Please figure out the placement of the in practice peek, then work
+   * backwards to figure out the max height of the insight of the day, and make
+   * sure all quotes we use will fit in that space... Maybe, if the quote will
+   * push the in practice tile down, we shrink the font size on the learn page?"
+   *
+   * That is the order, so this is the order. The peek's position is fixed by
+   * the arithmetic above: it sits a measured distance off the bottom of the
+   * page and does not move for anything. What is left over is the room the
+   * insight has, and the quote is given exactly that:
+   *
+   *   screen  −  the tools row  −  the peek  −  everything in the insight
+   *              block that is not the quote
+   *
+   * The leftovers are the eyebrow, the citation, the two controls and the
+   * block's own padding. They are counted rather than measured because every
+   * one of them is a known height and measuring would make this depend on
+   * itself: the quote's size changes the block's height, which would change the
+   * budget, which would change the quote's size.
+   *
+   * The quote then takes as many lines as fit and shrinks to reach them, so a
+   * long quotation is smaller type rather than a peek pushed off the screen.
+   * Nothing is ever cut: `adjustsFontSizeToFit` scales the whole quotation down
+   * to the line count it is given, which is what she asked for and is why the
+   * one she loves today survives.
+   */
+  const QUOTE_BASE = 18;
+  const QUOTE_LEADING = 1.5;
+  /** Smallest the quotation is ever set at. Below this it stops being readable. */
+  const QUOTE_FLOOR = 12;
+  const INSIGHT_FURNITURE = Spacing.xl * 2    // the block's own padding
+    + 16 + Spacing.md                         // the eyebrow and its margin
+    + 40 + Spacing.lg                         // the citation, two lines, and its margin
+    + 36 + Spacing.md;                        // the save and share row
+
+  /**
+   * ── THE QUOTE FITS THE ROOM IT HAS ──────────────────────────────────────
+   * Ellie: "Today the insight of the day quote is so long that, in the
+   * simulator, it pushes the in practice tile down so I can't see the full
+   * thing... Please figure out the placement of the in practice peek, then work
+   * backwards to figure out the max height of the insight of the day, and make
+   * sure all quotes we use will fit in that space... Maybe, if the quote will
+   * push the in practice tile down, we shrink the font size on the learn page?"
+   *
+   * That is the order, so this is the order. The peek's position is settled by
+   * the arithmetic above: it sits a measured distance off the bottom of the page
+   * and does not move for anything. What is left is the room the insight has:
+   *
+   *   screen  -  the tools row  -  the peek  -  everything in the insight
+   *              block that is not the quote
+   *
+   * The leftovers are counted rather than measured, because measuring would
+   * make this depend on itself: the quote's size changes the block's height,
+   * which would change the budget, which would change the quote's size.
+   *
+   * ── SIZE AND LINE COUNT ARE ONE QUESTION ────────────────────────────────
+   * My first version chose the line count at the base size and then shrank the
+   * type to reach it, and check-insight-fits found what is wrong with that: the
+   * leading shrinks with the type, so a smaller size does not just fit more
+   * characters per line, it fits more LINES in the same room. Solving them
+   * separately made the longest quotations unfittable at any size when in fact
+   * they fit comfortably one step down.
+   *
+   * So each candidate size is asked the whole question at once, largest first:
+   * how many lines fit in the room at this size, and does the quotation fit in
+   * them. The first yes wins.
+   */
+  const quoteFit = (() => {
+    const text = home?.research?.body || '';
+    const fallback = { size: QUOTE_BASE, lines: 6 };
+    if (!text || !scrollH || !headH || !tilesH || !insightW) return fallback;
+    const peek = headH + GRAB_LINE_H + Spacing.md + PEEK_CLEARANCE;
+    const room = scrollH - peek - tilesH - TabTopInset - INSIGHT_FURNITURE;
+    if (room <= 0) return fallback;
+    for (let size = QUOTE_BASE; size >= QUOTE_FLOOR; size -= 1) {
+      const leading = Math.round(size * QUOTE_LEADING);
+      const lines = Math.floor(room / leading);
+      if (lines < 1) continue;
+      /* Playfair at this weight runs about half the point size per character.
+         Approximate, and only has to be close: adjustsFontSizeToFit is the
+         backstop, so being one size out costs a point of type rather than a cut
+         quotation. */
+      const perLine = Math.max(12, Math.floor(insightW / (size * 0.5)));
+      if (Math.ceil(text.length / perLine) <= lines) return { size, lines };
+    }
+    const leading = Math.round(QUOTE_FLOOR * QUOTE_LEADING);
+    return { size: QUOTE_FLOOR, lines: Math.max(1, Math.floor(room / leading)) };
+  })();
 
   const mostRead = useMemo<PostSummary[]>(
     () => posts.slice().sort((a, b) => (b.reads || 0) - (a.reads || 0)).slice(0, 4),
@@ -881,7 +996,15 @@ export default function ResourcesScreen() {
               `tools` filters the catalogue by kind, so a fourth tool arriving
               on the server appears here on its own. */}
           {/* block: app-learn/tools */}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
+          <View
+            /* How tall the tools row ends up. The insight's room is what is
+               left of the screen once this and the peek have taken theirs; see
+               quoteFit. */
+            onLayout={(e) => {
+              const h = Math.round(e.nativeEvent.layout.height);
+              if (Math.abs(h - tilesH) > 1) setTilesH(h);
+            }}
+            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.lg }}>
             {toolTiles.map((r) => (
               <OwnedTile
                 key={r.key}
@@ -941,6 +1064,10 @@ export default function ResourcesScreen() {
                 surface here. */}
             {/* block: app-learn/insight */}
             <View
+              onLayout={(e) => {
+                const w = Math.round(e.nativeEvent.layout.width) - Spacing.xl * 2;
+                if (Math.abs(w - insightW) > 1) setInsightW(w);
+              }}
               style={{
                 paddingVertical: Spacing.xl,
                 paddingHorizontal: Spacing.xl,
@@ -952,7 +1079,19 @@ export default function ResourcesScreen() {
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.7)', marginBottom: Spacing.md }}>
                 {home.research.label || INSIGHT_OF_THE_DAY}
               </Text>
-              <Text style={{ ...Type.title, fontSize: 18, lineHeight: 27, fontWeight: '400', color: Palette.white }}>
+              <Text
+                /* As many lines as there is room for, and smaller type to reach
+                   them. See quoteFit: the peek's place is settled first and
+                   the quote takes what is left. */
+                numberOfLines={quoteFit.lines}
+                adjustsFontSizeToFit
+                minimumFontScale={0.72}
+                style={{
+                  ...Type.title,
+                  fontSize: quoteFit.size,
+                  lineHeight: Math.round(quoteFit.size * QUOTE_LEADING),
+                  fontWeight: '400', color: Palette.white,
+                }}>
                 {home.research.body}
               </Text>
               {/* ── THE CITATION GETS THE WHOLE WIDTH ──────────────────────
@@ -1348,11 +1487,19 @@ export default function ResourcesScreen() {
             </>
           ) : (
             <View style={{ paddingHorizontal: Spacing.xl }}>
-              <Text style={{ ...Type.body, color: c.textMuted }}>
-                {postsFailed
-                  ? 'In Practice could not load. Pull down to try again.'
-                  : 'Nothing published yet. New pieces will appear here.'}
-              </Text>
+              {/* Nothing is claimed until In Practice has answered. A spinner
+                  rather than a sentence: the shelf is one section of a tab that
+                  is already drawn, so a line of text here saying the wrong
+                  thing is worse than a moment of nothing. */}
+              {!postsAnswered ? (
+                <ActivityIndicator color={c.accentQuiet} />
+              ) : (
+                <Text style={{ ...Type.body, color: c.textMuted }}>
+                  {postsFailed
+                    ? 'In Practice could not load. Pull down to try again.'
+                    : 'Nothing published yet. New pieces will appear here.'}
+                </Text>
+              )}
             </View>
           )}
         </View>
