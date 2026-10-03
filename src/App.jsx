@@ -3483,6 +3483,9 @@ function DashTabs({ active, onChange, isMobile }) {
  */
 const NAV_ICON_COL = 24;
 const NAV_GAP = 16;
+/* The caret's column. Fixed, so the arrows line up down the menu and every
+   label ends at the same place whether its section has pages or not. */
+const NAV_CARET_COL = 28;
 
 /** Only the exercises, the way the app has it. Keyed by the server's group id. */
 const NAV_ICONS = {
@@ -3491,33 +3494,33 @@ const NAV_ICONS = {
      and arrow.triangle.branch. These are those five, drawn at one weight with
      round caps and joins, which is what makes a set look like SF Symbols
      rather than like five icons from five places. */
-  comm: (c) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  comm: (c, size = 21) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M2.8 7.2a2.4 2.4 0 0 1 2.4-2.4h7.2a2.4 2.4 0 0 1 2.4 2.4v3.2a2.4 2.4 0 0 1-2.4 2.4H7.6l-3.2 2.4v-2.5a2.4 2.4 0 0 1-1.6-2.3z" />
       <path d="M17.2 9.6h1.6a2.4 2.4 0 0 1 2.4 2.4v3.2a2.4 2.4 0 0 1-1.6 2.3v2.5l-3.2-2.4h-4.8a2.4 2.4 0 0 1-2.3-1.7" />
     </svg>
   ),
-  exp: (c) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  exp: (c, size = 21) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 5.4a2.7 2.7 0 0 0-4.8-.5A2.5 2.5 0 0 0 4.4 8a2.6 2.6 0 0 0-.5 4 2.6 2.6 0 0 0 .9 3.9 2.7 2.7 0 0 0 3.3 2.6 2.6 2.6 0 0 0 3.9-1.3Z" />
       <path d="M12 5.4a2.7 2.7 0 0 1 4.8-.5A2.5 2.5 0 0 1 19.6 8a2.6 2.6 0 0 1 .5 4 2.6 2.6 0 0 1-.9 3.9 2.7 2.7 0 0 1-3.3 2.6 2.6 2.6 0 0 1-3.9-1.3Z" />
       <path d="M12 5.4v12.8" />
     </svg>
   ),
-  reflection: (c) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  reflection: (c, size = 21) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 6.8C10.4 5.3 8.2 4.6 5.4 4.8A1.2 1.2 0 0 0 4.3 6v10.3a1.2 1.2 0 0 0 1.3 1.2c2.5-.2 4.6.4 6.4 1.7" />
       <path d="M12 6.8c1.6-1.5 3.8-2.2 6.6-2a1.2 1.2 0 0 1 1.1 1.2v10.3a1.2 1.2 0 0 1-1.3 1.2c-2.5-.2-4.6.4-6.4 1.7" />
       <path d="M12 6.8v12.4" />
     </svg>
   ),
-  intimacy: (c) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  intimacy: (c, size = 21) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 20.3S3.8 15.1 3.8 9.6a4.4 4.4 0 0 1 8.2-2.3 4.4 4.4 0 0 1 8.2 2.3c0 5.5-8.2 10.7-8.2 10.7Z" />
     </svg>
   ),
-  conflict: (c) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  conflict: (c, size = 21) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 21v-6.6" />
       <path d="M12 14.4 6.2 8.6V4.4" />
       <path d="m12 14.4 5.8-5.8V4.4" />
@@ -3574,7 +3577,7 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
         const isExercise = Boolean(icon);
         const firstExercise = isExercise && !NAV_ICONS[groups[i - 1]?.id];
         return (
-          <div key={g.id} style={{ position: "relative" }}>
+          <div key={g.id}>
             {firstExercise ? (
               <div style={{
                 display: "flex", alignItems: "center", gap: NAV_GAP,
@@ -3589,11 +3592,26 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                 </span>
               </div>
             ) : null}
+            {/* ── THE CARET SITS ON ITS OWN ROW, NOT OVER THE GROUP ────────
+                Ellie: "arrows are not evenly spaced, comms doesn't line up with
+                it's row the same way the others do."
+
+                It was absolutely positioned against the group's box, and a
+                group's box is not a row: Communication is the first exercise so
+                it carries the "Exercise results" eyebrow, and an open group
+                carries its children. Centring on that box put the caret
+                somewhere different on every row, and furthest off on the one
+                row with a heading above it.
+
+                A flex row instead. The label takes the space, the caret takes a
+                fixed column, and a group with no pages holds that column open
+                so every label ends at the same place and the carets line up. */}
+            <div style={{ display: "flex", alignItems: "center" }}>
             <button
               onClick={() => onOpen(kids.length ? kids[0].id : g.id)}
               aria-label={g.label}
               style={{
-                display: "flex", alignItems: "center", gap: NAV_GAP, width: "100%",
+                display: "flex", alignItems: "center", gap: NAV_GAP, flex: 1, minWidth: 0,
                 background: "transparent", border: "none", cursor: "pointer",
                 textAlign: "left", fontFamily: HFONT, color: C.ink,
                 paddingTop: isExercise ? "0.45rem" : "0.5rem",
@@ -3629,17 +3647,20 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
                 aria-expanded={openGroup === g.id}
                 aria-label={`${openGroup === g.id ? "Hide" : "Show"} the pages under ${g.label}`}
                 style={{
-                  position: "absolute", right: 0, top: 0,
-                  display: "flex", alignItems: "center", justifyContent: "flex-end",
-                  height: "100%", minWidth: "2rem", padding: "0 0.2rem",
+                  width: NAV_CARET_COL, flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
                   background: "transparent", border: "none", cursor: "pointer",
-                  color: "#A8997F", fontSize: "0.68rem", lineHeight: 1,
+                  color: "#A8997F", fontSize: "0.68rem", lineHeight: 1, padding: 0,
                   transform: openGroup === g.id ? "rotate(180deg)" : "none",
                   transformOrigin: "center",
                 }}>
                 &#9662;
               </button>
-            ) : null}
+            ) : (
+              /* The column stays open so every label ends in the same place. */
+              <span aria-hidden="true" style={{ width: NAV_CARET_COL, flexShrink: 0 }} />
+            )}
+            </div>
             {openGroup === g.id ? (
               /* The pages under this section, each opening its own. The cover
                  is left out: it is what the row itself opens. */
@@ -7717,15 +7738,57 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     "what-comes-next",
   ];
   const curIdx = allPages.indexOf(section);
+  /**
+   * ── THE ARROWS FLOAT, AS THEY DO IN THE APP ────────────────────────────
+   * Ellie: "Same as we did for the app, all results pages on the site should
+   * have a grey arrow that's visible in the bottom right no matter where you
+   * are on the page, so the nav is very clear. Remove the labeled buttons in
+   * the bottom corners."
+   *
+   * The labelled pair sat at the foot of the content, so on a long page the way
+   * forward was only visible once you had scrolled to the end of what you were
+   * reading. Fixed to the viewport, they are where the app puts them and they
+   * are there the whole time.
+   *
+   * The app's geometry, so the two surfaces are the same control: a 46 point
+   * circle, a chevron, a hairline and a soft drop, because a pale circle on a
+   * white page needs an edge from somewhere.
+   *
+   * The destination is still named, in the accessible label and the tooltip,
+   * which is where a name belongs once the control is a glyph.
+   */
+  const ARROW = 46;
+  const arrowStyle = (side) => ({
+    position: "fixed", bottom: "1.5rem", [side]: "1.5rem",
+    width: ARROW, height: ARROW, borderRadius: ARROW / 2,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    background: "rgba(255,253,249,0.92)", backdropFilter: "blur(10px)",
+    border: "1px solid rgba(14,11,7,0.10)",
+    boxShadow: "0 3px 10px rgba(14,11,7,0.16)",
+    color: C.ink, fontSize: "1.1rem", lineHeight: 1,
+    cursor: "pointer", zIndex: 60,
+  });
   const PrevNext = () => (
-    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: `1px solid ${C.stone}` }}>
-      {curIdx > 0
-        ? <button onClick={() => go(allPages[curIdx - 1])} style={{ background: "transparent", border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.72rem", color: C.muted, cursor: "pointer", fontFamily: BFONT, fontWeight: 600 }}>← {getPageLabel(allPages[curIdx - 1])}</button>
-        : <div />}
-      {curIdx < allPages.length - 1
-        ? <button onClick={() => go(allPages[curIdx + 1])} style={{ background: "#2d2250", border: "none", borderRadius: 10, padding: "0.6rem 1.25rem", fontSize: "0.72rem", color: "white", cursor: "pointer", fontFamily: BFONT, fontWeight: 600 }}>{getPageLabel(allPages[curIdx + 1])} →</button>
-        : <div />}
-    </div>
+    <>
+      {curIdx > 0 ? (
+        <button
+          onClick={() => go(allPages[curIdx - 1])}
+          aria-label={`Back to ${getPageLabel(allPages[curIdx - 1])}`}
+          title={getPageLabel(allPages[curIdx - 1])}
+          style={arrowStyle("left")}>
+          {"\u2039"}
+        </button>
+      ) : null}
+      {curIdx < allPages.length - 1 ? (
+        <button
+          onClick={() => go(allPages[curIdx + 1])}
+          aria-label={`On to ${getPageLabel(allPages[curIdx + 1])}`}
+          title={getPageLabel(allPages[curIdx + 1])}
+          style={arrowStyle("right")}>
+          {"\u203A"}
+        </button>
+      ) : null}
+    </>
   );
 
   function getPageLabel(id) {
@@ -7829,7 +7892,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 alignItems: "center", justifyContent: "center", marginBottom: "2rem",
                 background: `radial-gradient(circle, ${accent}22 0%, ${accent}14 35%, ${accent}08 55%, transparent 72%)`,
               }}>
-                <span style={{ fontSize: "3.2rem", color: accent, lineHeight: 1 }}>{group?.icon || "◉"}</span>
+                {/* ── THE SECTION'S ICON, NOT A DOT ────────────────────────
+                    Ellie: "Insights cover pages on the web use a dot with a
+                    glow behind it rather than the icon like the app."
+
+                    `group.icon` has never existed on these rows, so this fell
+                    to the `◉` every time: a default that looked deliberate.
+                    The five icons are the ones already drawn for the insights
+                    menu, which are the website's version of the app's SF
+                    Symbols, at the size the app's cover uses. */}
+                {NAV_ICONS[section.replace("-cover", "")]
+                  ? NAV_ICONS[section.replace("-cover", "")](accent, 78)
+                  : <span style={{ fontSize: "3.2rem", color: accent, lineHeight: 1 }}>{"\u25C9"}</span>}
               </div>
               {/* block: cover/title */}
               <h1 style={{ fontFamily: font.display, fontSize: "clamp(1.7rem, 4vw, 2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, margin: 0, maxWidth: 460 }}>
