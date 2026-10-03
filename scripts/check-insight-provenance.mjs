@@ -198,13 +198,29 @@ for (let day = 0; day < INSIGHTS.length; day += 1) {
 const CARD_SITES = ['attune-app/src/app/index.tsx', 'attune-app/src/app/resources.tsx'];
 for (const f of CARD_SITES) {
   const src = readFileSync(`${ROOT}${f}`, 'utf8');
-  const at = src.indexOf('insightCard(');
+  /**
+   * The StoryCard a reader opens, not the first `insightCard(` in the file.
+   *
+   * This took the first one, and the Learn tab now renders a second, hidden off
+   * the edge of the screen so the Share control on the banner has a card to
+   * photograph. That copy has no Save and no Share, because nobody can see it,
+   * and the window landed on it: the check reported Share missing from a card
+   * that has it. Anchored to the element it is about.
+   */
+  const at = src.indexOf('<StoryCard');
   if (at < 0) {
     fails.push(`${f} no longer opens the insight of the day, so one of the two ways`
       + ' into it is gone.');
     continue;
   }
-  const block = src.slice(Math.max(0, at - 400), at + 900);
+  const end = src.indexOf('/>', at);
+  const block = src.slice(at, end === -1 ? at + 900 : end);
+  if (!/insightCard\(/.test(block)) {
+    fails.push(`${f} opens a StoryCard that is not the insight of the day, so this is pointed at`
+      + ' the wrong element. Refusing to pass: a gate that has lost its subject must never report'
+      + ' success.');
+    continue;
+  }
   for (const [prop, what] of [['journal', 'Save to journal'], ['share', 'Share']]) {
     if (!new RegExp(`${prop}=\\{`).test(block)) {
       fails.push(`${f} opens the insight of the day without ${prop}, so ${what} is`

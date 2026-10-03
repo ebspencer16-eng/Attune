@@ -75,6 +75,46 @@ import {
 
 const c = Colors.light;
 
+/**
+ * What the sheet calls an insight.
+ *
+ * Ellie: "I want the message to be titled Attune Relationships Insight of the
+ * Day." The product's name and which thing it is, in one line, because a
+ * message titled "Insight of the day" tells the person receiving it nothing
+ * about who sent it.
+ */
+export const INSIGHT_SHARE_TITLE = 'Attune Relationships Insight of the Day';
+
+/**
+ * The card, rendered where nobody can see it, so it can be sent as a picture.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Ellie wants the storycard in the message, and the Share control on the Learn
+ * banner has no card on screen to photograph: the card only exists once it is
+ * opened. Rather than change what that button does, a copy is laid out off the
+ * left edge and captured from there.
+ *
+ * Off the edge rather than `opacity: 0` or `display: none`, because a view with
+ * no layout has nothing to capture. It takes no touches and reads to nobody:
+ * `pointerEvents` none and hidden from the accessibility tree.
+ */
+export function InsightCardShot({ card, style, shotRef, width = 320 }: {
+  card: HighlightCard;
+  style?: unknown;
+  shotRef: React.RefObject<View | null>;
+  width?: number;
+}) {
+  return (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{ position: 'absolute', left: -10000, top: 0 }}>
+      <Card card={card} onDone={() => {}} w={width} h={width / SC.ratio} active shotRef={shotRef} map={style as never} />
+    </View>
+  );
+}
+
 /** The gradients, by the tone each card asks for. */
 const TONES: Record<string, [string, string, string]> = {
   night: ['#0E0B1E', '#1A1040', '#0E0B1E'],
@@ -422,6 +462,8 @@ export function StoryCard({ card, onClose, style, journal, share }: {
   if (style) SC = { ...SC, ...style };
   const [box, setBox] = useState({ width: Dimensions.get('window').width, height: 0 });
   const [keeping, setKeeping] = useState(false);
+  /** The card's own view, so Share can send it as a picture. */
+  const shot = useRef<View | null>(null);
   const cardW = Math.min(box.width - Spacing.lg * 2, box.height ? box.height * SC.ratio : 9999);
   const cardH = cardW / SC.ratio;
   return (
@@ -446,7 +488,9 @@ export function StoryCard({ card, onClose, style, journal, share }: {
           <SaveToJournal quote={journal} onClose={() => setKeeping(false)} />
         ) : null}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Card card={card} onDone={onClose} w={cardW} h={cardH} active />
+          {/* The same ref the reel's Save uses, so the card a reader is looking
+              at is the picture that gets shared. */}
+          <Card card={card} onDone={onClose} w={cardW} h={cardH} active shotRef={shot} />
           {/* Ellie: "Save to journal and share buttons should be in the bottom
               right of the screen, below the card, on the insight of the day."
               Keeping sat beside Close in the top bar, which put the two things
@@ -463,8 +507,14 @@ export function StoryCard({ card, onClose, style, journal, share }: {
                 <ShareButton
                   tone="light"
                   accessibilityLabel="Share the insight of the day"
+                  /* Ellie: "I want the message to be titled Attune Relationships
+                     Insight of the Day, and include a link to the site, but I
+                     want the image to be a picture of the insight of the day
+                     storycard." */
+                  title={INSIGHT_SHARE_TITLE}
                   message={share}
                   url={SITE_URL}
+                  capture={shot}
                 />
               ) : null}
               {journal ? (

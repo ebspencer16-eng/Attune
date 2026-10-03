@@ -15,16 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| O540 | **No admin password once you are in through your own account.** You: "Carolina and I shouldn't have to enter the admin password if we are entering through our accounts. We should have the 4-digit pin once when we initially click admin from settings, but no passwords from that point." The app holds your session; the admin pages want the admin secret. Hand it to the web view from an endpoint that checks your account is an admin, so the password never comes up. |
-| O543 | **Insights cover pages on the site draw a dot with a glow where the app draws the section's icon.** |
-| O544 | **The site's results pages need the app's floating grey arrow, bottom right, visible wherever you are on the page.** The labelled buttons in the bottom corners come out. |
-| O545 | **The insights menu arrows are not evenly spaced and Communication's row does not line up with the others.** |
-| O546 | **Sharing the insight should send the storycard as a picture.** You: "I want the message to be titled Attune Relationships Insight of the Day, and include a link to the site, but I want the image to be a picture of the insight of the day storycard that people can view, download, screenshot, etc. I want that storycard to be visible in the text, not just the written quote." The app already captures a storycard to an image for Save; share has to carry that image, a title and a link rather than the quote as text. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| O546 | **Sharing the insight sends the storycard as a picture.** Titled "Attune Relationships Insight of the Day", the quote and the link in the message, the card as the image. The Share on the Learn banner has no card on screen, so one is rendered off the edge to photograph. **I have not seen the share sheet myself**: the simulator stopped accepting touches part way through testing, which it does after a lot of hot reloads, so what I can show you is the code and the check, not a screenshot. |
+| O540 | **No admin password once you are in through your account.** The app asks the server for a two-minute ticket, which it only mints for your two accounts, and the admin page trades it for the token it already uses. The ticket rides in the part of the URL that never reaches a server, and is wiped from the address bar on arrival. The four-digit code is unchanged. |
+| O543 | **Insights covers draw the section's icon.** It was reading a field those rows have never had, so it fell to the dot every time. |
+| O544 | **The results arrows float, bottom corners, wherever you are on the page.** The labelled buttons are gone. |
+| O545 | **The menu carets line up.** They were positioned against the whole group, which for Communication includes the section heading above it. |
 | O542 | **The insight fits above the peek now, and today's quote is intact.** The peek is pinned off the bottom of the page, the insight takes what is left, and the quotation is set at whatever size reaches the lines that room holds. All 49 fit; today's sets at 13pt. Nothing is ever cut. |
 | O541 | **In Practice no longer says it is empty before it has answered.** The tab draws when the home payload lands and the posts are a separate request. Notes had a quieter version of the same thing on the Shared peek. |
 | O494 | Cover pages on both surfaces. |

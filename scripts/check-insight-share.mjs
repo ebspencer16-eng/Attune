@@ -123,6 +123,89 @@ for (const c of cases) {
   }
 }
 
+// ── AND WHAT THE SHEET ACTUALLY CARRIES ─────────────────────────────────────
+/**
+ * Ellie: "I want the message to be titled Attune Relationships Insight of the
+ * Day, and include a link to the site, but I want the image to be a picture of
+ * the insight of the day storycard that people can view, download, screenshot,
+ * etc. I want that storycard to be visible in the text, not just the written
+ * quote."
+ *
+ * The half above is about the WORDS being the same on both surfaces. This half
+ * is about what goes with them, and it is here rather than in a file of its own
+ * because two gates named after one subject is how they drift.
+ *
+ * Three things, each with its own way of quietly not happening: the title is a
+ * default somebody overrides at one call site and not the other; the link
+ * disappears because iOS takes one url and the picture becomes it; the picture
+ * never arrives because the card it photographs is not on screen.
+ */
+{
+  const readFile = (rel) => readFileSync(`${ROOT}${rel}`, 'utf8');
+  const bare = (src) => src.replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .split('\n').map((l) => l.replace(/(^|[^:])\/\/.*$/, '$1')).join('\n');
+  const TITLE = 'Attune Relationships Insight of the Day';
+
+  const cards = readFile('attune-app/src/components/highlight-cards.tsx');
+  if (!cards.includes(`'${TITLE}'`)) {
+    bad.push(`no file declares the title "${TITLE}". She named it; it is not a default to drift`
+      + ' from.');
+  }
+
+  for (const [rel, where] of [
+    ['attune-app/src/components/highlight-cards.tsx', 'the storycard view'],
+    ['attune-app/src/app/resources.tsx', 'the Learn banner'],
+  ]) {
+    const src = bare(readFile(rel));
+    const at = src.indexOf('Share the insight of the day');
+    if (at === -1) {
+      bad.push(`${rel} no longer shares the insight (${where}).`);
+      continue;
+    }
+    const open = src.lastIndexOf('<ShareButton', at);
+    const close = src.indexOf('/>', at);
+    const el = open === -1 || close === -1 ? '' : src.slice(open, close);
+    if (!/title=\{INSIGHT_SHARE_TITLE\}/.test(el)) {
+      bad.push(`${where} does not title the share INSIGHT_SHARE_TITLE, so one of the two places`
+        + ' says something else.');
+    }
+    if (!/capture=\{/.test(el)) {
+      bad.push(`${where} shares the insight with no card to photograph, so it sends the quote as`
+        + ' text. "I want that storycard to be visible in the text, not just the written quote."');
+    }
+    if (!/url=\{/.test(el)) bad.push(`${where} sends no address, and she asked for a link.`);
+  }
+
+  const btn = bare(readFile('attune-app/src/components/share-button.tsx'));
+  if (!/captureRef\(/.test(btn)) bad.push('share-button.tsx captures nothing, so no picture can go.');
+  if (!/picture && url \?[^\n]*\$\{url\}/.test(btn)) {
+    bad.push('share-button.tsx does not put the address into the message when it sends a picture.'
+      + ' iOS takes one url and the picture is it, so a link left in that slot never leaves.');
+  }
+  if (!/url: picture \|\| url/.test(btn)) {
+    bad.push('share-button.tsx does not prefer the picture for the url slot, so the card is'
+      + ' captured and then not sent.');
+  }
+
+  const at = cards.indexOf('export function InsightCardShot');
+  if (at === -1) {
+    bad.push('InsightCardShot is gone, so the Learn banner has no card to photograph.');
+  } else {
+    const body = bare(cards.slice(at, at + 1600));
+    if (!/left: -\d{4,}/.test(body)) {
+      bad.push('InsightCardShot is not off the edge of the screen, so the invisible copy is'
+        + ' visible.');
+    }
+    if (/display: 'none'|opacity: 0\b/.test(body)) {
+      bad.push('InsightCardShot is hidden with display or opacity. A view with no layout has'
+        + ' nothing to capture, which is why it is moved rather than hidden.');
+    }
+    if (!/pointerEvents="none"/.test(body)) {
+      bad.push('InsightCardShot takes touches, so an invisible card is in front of something.');
+    }
+  }
+}
+
 if (bad.length) {
   console.error('\n check-insight-share: the two surfaces share an insight differently.\n');
   for (const b of bad) console.error(`  ✗ ${b}\n`);
@@ -135,3 +218,5 @@ if (bad.length) {
 console.log(`[check-insight-share] ${cases.length} cases driven through insightOfTheDay`
   + ` (${cited} of them carrying a real citation) plus 7 shapes the rotation never produces:`
   + ' the app and the website build the same share text, blank line and all.');
+console.log('  and both places that share it send the storycard as a picture, titled as she asked,'
+  + ' with the address in the message because the picture takes the url slot.');

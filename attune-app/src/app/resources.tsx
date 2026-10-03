@@ -31,7 +31,7 @@ import { lastSeen } from '@/api/last-seen';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
-import { insightCard, StoryCard } from '@/components/highlight-cards';
+import { insightCard, InsightCardShot, INSIGHT_SHARE_TITLE, StoryCard } from '@/components/highlight-cards';
 import { SaveToJournal } from '@/components/journal';
 import Checklist from '@/components/checklist';
 import TabScreen from '@/components/tab-screen';
@@ -191,6 +191,8 @@ export default function ResourcesScreen() {
   const [tilesH, setTilesH] = useState(0);
   /** The insight block's width, for estimating how much quote fits on a line. */
   const [insightW, setInsightW] = useState(0);
+  /** The off-screen copy of the card, so Share can send it as a picture. */
+  const insightShot = useRef<View | null>(null);
 
   // The workbook is a file, so the tab needs to know whether it exists before
   // a tap. Fetched alongside everything else rather than on press: a tap that
@@ -1149,13 +1151,16 @@ export default function ResourcesScreen() {
                   tone="light"
                   label="Share"
                   accessibilityLabel="Share the insight of the day"
-                  /* Ellie: "if they're sharing the insight can we have the text
-                     say insight of the day?" The subject is the product's name
-                     everywhere else, which is right for a storycard and for a
-                     link; this one is a named thing and says which. */
-                  title="Insight of the day"
+                  /* Ellie: "I want the message to be titled Attune Relationships
+                     Insight of the Day, and include a link to the site, but I
+                     want the image to be a picture of the insight of the day
+                     storycard that people can view, download, screenshot, etc."
+                     The card is rendered off the edge of the screen for exactly
+                     this: there is none on this banner to photograph. */
+                  title={INSIGHT_SHARE_TITLE}
                   message={insightShareText(home.research)}
                   url={SITE}
+                  capture={insightShot}
                 />
               </View>
             </View>
@@ -1566,6 +1571,16 @@ export default function ResourcesScreen() {
         <SaveToJournal
           quote={insightShareText(home.research)}
           onClose={() => setKeepingInsight(false)}
+        />
+      ) : null}
+
+      {/* Off the left edge, laid out but invisible, so the Share control on the
+          banner can send the card as a picture. See InsightCardShot. */}
+      {home?.research ? (
+        <InsightCardShot
+          card={insightCard(home.research, home.research?.label || INSIGHT_OF_THE_DAY)}
+          style={home.storycardStyle}
+          shotRef={insightShot}
         />
       ) : null}
 

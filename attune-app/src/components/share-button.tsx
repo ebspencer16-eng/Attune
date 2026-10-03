@@ -9,7 +9,9 @@
  * slightly different messages.
  */
 
-import { Share, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Share, Text, View } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
@@ -32,8 +34,25 @@ const c = Colors.light;
  */
 const SUBJECT = 'Attune Relationships';
 
+/**
+ * ── THE INSIGHT GOES AS A PICTURE ─────────────────────────────────────────
+ * Ellie: "I want the message to be titled Attune Relationships Insight of the
+ * Day, and include a link to the site, but I want the image to be a picture of
+ * the insight of the day storycard that people can view, download, screenshot,
+ * etc. I want that storycard to be visible in the text, not just the written
+ * quote."
+ *
+ * So a caller can hand this the view holding the card. It is captured to a PNG
+ * and that file is what the sheet carries, which is what makes the card appear
+ * in a message rather than a line of text and a link. The same capture the Save
+ * button on a storycard already does.
+ *
+ * iOS takes one url, and when there is a picture the picture is it, so the
+ * address rides in the message. That is the trade and it is the right way
+ * round: a link is readable as text and an image is not.
+ */
 export default function ShareButton({
-  message, url, title = SUBJECT, label, tone = 'ink', accessibilityLabel,
+  message, url, title = SUBJECT, label, tone = 'ink', accessibilityLabel, capture,
 }: {
   /** What lands in the message. */
   message: string;
@@ -53,23 +72,50 @@ export default function ShareButton({
   label?: string;
   tone?: 'ink' | 'light';
   accessibilityLabel?: string;
+  /**
+   * A view to send as a picture.
+   *
+   * When it is given and the capture works, the sheet carries the image and the
+   * address moves into the message. When it is not, or the capture fails, this
+   * is exactly what it was before: a line of text and a link.
+   */
+  capture?: { current: View | null };
 }) {
   const tint = tone === 'light' ? 'rgba(255,255,255,0.9)' : c.accent;
+  const [busy, setBusy] = useState(false);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || 'Share'}
       hitSlop={12}
-      onPress={() => {
-        Share.share(
-          { title, message, ...(url ? { url } : null) },
-          // `subject` rides in the options rather than the content, which is
-          // where React Native puts it and why the wrong words were showing:
-          // iOS reads the subject and ignores the title entirely.
-          { subject: title },
-        ).catch(() => {
+      disabled={busy}
+      onPress={async () => {
+        if (busy) return;
+        setBusy(true);
+        let picture: string | null = null;
+        if (capture?.current) {
+          try {
+            picture = await captureRef(capture.current, { format: 'png', quality: 1 });
+          } catch (e) {
+            /* No picture is not no share. The text and the link still go. */
+            console.warn('[share] could not capture the card', e);
+          }
+        }
+        /* With a picture, the address goes in the words, because iOS takes one
+           url and the picture has to be it. */
+        const body = picture && url ? `${message}\n\n${url}` : message;
+        try {
+          await Share.share(
+            { title, message: body, ...(picture || url ? { url: picture || url } : null) },
+            // `subject` rides in the options rather than the content, which is
+            // where React Native puts it and why the wrong words were showing:
+            // iOS reads the subject and ignores the title entirely.
+            { subject: title },
+          );
+        } catch {
           /* dismissed, which is not a failure */
-        });
+        }
+        setBusy(false);
       }}
       style={{
         flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
@@ -79,13 +125,17 @@ export default function ShareButton({
           paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
         } : null),
       }}>
-      <SymbolView
-        name={'square.and.arrow.up' as never}
-        size={15}
-        tintColor={tint}
-        fallback={<Text style={{ ...Type.small, color: tint }}>{'\u21E7'}</Text>}
-        style={{ width: 17, height: 19 }}
-      />
+      {busy ? (
+        <ActivityIndicator color={tint} style={{ width: 17, height: 19 }} />
+      ) : (
+        <SymbolView
+          name={'square.and.arrow.up' as never}
+          size={15}
+          tintColor={tint}
+          fallback={<Text style={{ ...Type.small, color: tint }}>{'\u21E7'}</Text>}
+          style={{ width: 17, height: 19 }}
+        />
+      )}
       {label ? (
         <Text style={{ ...Type.small, fontWeight: '700', color: tint }}>{label}</Text>
       ) : null}
