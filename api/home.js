@@ -21,6 +21,7 @@ import { nextActions, greeting, appTargetFor } from './_lib/next-action.js';
 import { isBetaOrderSet } from './_lib/beta.js';
 import { progressFor } from './_lib/exercise-progress.js';
 import { isAdminAddress } from './_lib/admins.js';
+import { ADMIN_SECTIONS } from './_lib/admin-sections.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
@@ -368,6 +369,18 @@ export default async function handler(req) {
        * into a browser. See api/_lib/admins.js.
        */
       admin: isAdminAddress(me.email),
+      /**
+       * The admin's own pages, for the menu the app draws.
+       *
+       * Sent rather than mirrored. Ellie asked for the admin's left nav as a
+       * list inside the app, and an Expo project cannot import from api/, so
+       * the alternative was seventeen labels typed a second time. The shorter
+       * list always wins that argument; see api/_lib/admin-sections.js.
+       *
+       * Null for everyone else, because it is a map of a surface they have no
+       * business knowing the shape of.
+       */
+      adminSections: isAdminAddress(me.email) ? ADMIN_SECTIONS : null,
       greeting: greeting({
         now: state.now,
         firstName: state.firstName,

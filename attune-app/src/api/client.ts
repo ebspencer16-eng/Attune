@@ -728,6 +728,14 @@ export type HomeResponse = {
    */
   admin?: boolean;
   /**
+   * The admin's own left nav, for the menu Settings draws.
+   *
+   * Null for everyone else. From api/_lib/admin-sections.js, which
+   * public/admin.html's nav is held to, so the app's menu and the website's
+   * sidebar cannot list different pages.
+   */
+  adminSections?: { key: string; label: string }[] | null;
+  /**
    * The home tile's third row: something to return to. Two states, both
    * decided server-side in api/_lib/pick-up.js so the app renders one shape.
    * Null when there is neither a note nor a published post.

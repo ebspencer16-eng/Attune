@@ -24,6 +24,7 @@ import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
+import Admin, { type AdminSection } from '@/components/admin';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
@@ -73,29 +74,48 @@ const SITE = SITE_URL;
  */
 function AdminRow() {
   const [show, setShow] = useState(false);
+  /**
+   * The admin's own pages, from /api/home.
+   *
+   * Sent rather than typed here. Ellie asked for the admin's left nav as a list
+   * in the app, and an Expo project cannot import api/_lib/admin-sections.js,
+   * so the alternative was seventeen labels written out a second time. A page
+   * added to the admin appears in this menu with no app release.
+   */
+  const [sections, setSections] = useState<AdminSection[]>([]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const res = await fetchHome();
-      if (!cancelled && res.ok) setShow(!!res.data.admin);
+      if (cancelled || !res.ok) return;
+      setShow(!!res.data.admin);
+      setSections(res.data.adminSections || []);
     })();
     return () => { cancelled = true; };
   }, []);
 
   if (!show) return null;
+  if (open) {
+    return (
+      <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: c.background }}>
+          <ScrollView>
+            <Admin sections={sections} onClose={() => setOpen(false)} />
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  }
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Open the admin"
-      /* .catch rather than a try, because this is not awaited: the handler
-         starts the browser and returns. A rejection with nobody listening is
-         what put an error banner on the bottom of the app. */
-      onPress={() => openBrowserAsync(`${SITE}/admin`, {
-        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-        toolbarColor: c.background,
-        controlsColor: c.accent,
-      }).catch((e) => console.warn('[settings] admin would not open', e))}
+      /* The menu, not the website. Ellie: "Build a home page that has the left
+         nav (in an insights menu style list)." Each row in it opens that page
+         full screen, and the browser's Done is the back button to the menu. */
+      onPress={() => setOpen(true)}
       style={{
         marginTop: Spacing.xxl, flexDirection: 'row', alignItems: 'center',
         justifyContent: 'space-between', gap: Spacing.md,
@@ -105,7 +125,7 @@ function AdminRow() {
       <View style={{ flex: 1 }}>
         <Text style={{ ...Type.cardTitle, color: c.textStrong }}>Admin</Text>
         <Text style={{ ...Type.small, color: c.textMuted, marginTop: 2 }}>
-          Orders, posts, engagement. Asks for the admin password.
+          Orders, posts, engagement. Asks for your code.
         </Text>
       </View>
       <Text style={{ color: c.accent, fontSize: 16 }}>{'\u203A'}</Text>

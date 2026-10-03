@@ -15,18 +15,19 @@
 
 | # | Mine to build |
 |--|--|
-| O527 | **Remove the cta field from the home cards.** You: "Field should go." Nine labels on the server that neither surface prints. Delete it from every card in the priority engine and from both surfaces' types, and gate it so it cannot come back unread. |
-| O535 | **The site's home page takes a long time and does not paint until the window loses focus.** You: "It didn't load until I clicked out of the window." Not-painting-until-blur is a render waiting on an event that never fires, not slowness. Find what the first paint is waiting on. |
-| O536 | **The web action prompt tiles are missing the hairline under the title and the mark in the image box.** Both are on the app's cards. Same derivation as the tints: one source, gated. |
-| O537 | **Every row on the site's insights menu opens Highlights instead of its own page.** The row knows which section it is; something is dropping it on the way to the view. |
-| O538 | **The dropdown arrows on the site's insights menu do nothing.** |
-| O539 | **Rewrite section 4 so every row says what the task was, in one line.** You: "row should list what the task was, concisely but with the context necessary to understand what it was. All rows should be 1 line. Apply to all past tasks and use this structure going forward." 663 rows, 180 of which say only "Approved"; the description has to be recovered from the revision where the row was still open. Gate the one-line shape so it holds. |
-| O540 | **Admin inside the app, behind a 4-digit PIN.** You: "Build admin into Carolina's and my apps as a button in settings that asks for our 4-digit pin. Admin in the app should look like it does on the site's mobile view. Build a home page that has the left nav (in an insights menu style list), and every page should have a back button that brings you to that menu." The PIN is a convenience lock on your own phone, not the security boundary: the server still has to authorise by account, and I will never ask you for the PIN or put it anywhere in the repo. You set it on the device the first time. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| O540 | **Admin is in the app, behind a code you set on the phone.** Settings, then a 4-digit code you choose the first time. I have not been told it and it is not in the repo: it lives in that phone's keychain. The menu is the admin's own left nav in the Insights-menu style, and each row opens that page full screen inside the app, with Done as the back button. The seventeen pages come from the server, so the app writes none of them down. **The code is a convenience lock, not the security: every admin endpoint still asks for the admin password and the row only appears for your accounts.** |
+| O539 | **Section 4 is 489 one-line rows saying what each task was.** 180 of them said only "Approved"; the descriptions came out of the file's own 241 revisions. The file went from 142KB to 63KB. It is a mechanical pass, so some lines read better than others. |
+| O527 | **The cta field is gone,** and `priority` with it: the sort key meant nothing to a reader and was being published too. Every field on a card is now read by a surface, gated. |
+| O537 | **Every insights-menu row opens its own page.** The storycards were drawing over whatever section the row asked for. |
+| O538 | **The dropdown arrows work.** They were decoration inside the row's own button, so they could only ever do what the row does. They open the pages under a section now. |
+| O536 | **The web prompt cards have the hairline and the mark,** from the app's card. |
+| O535 | **I could not reproduce the slow home page, and I would rather say so.** Measured from here: first paint 240ms, nothing hidden, no blocking resource over 43ms. Two API calls take about a second each but neither blocks the page. If it happens again, tell me the browser and whether the tab was in the background when it loaded. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
