@@ -1081,6 +1081,11 @@ export default function Results({
                 window and cannot ask where anything is. */}
             <Pressable
               onPress={() => {}}
+              /* It swallows the tap that would close the section dropdown and is not a
+                 control. Without this the whole card dims and sinks when a finger
+                 lands anywhere on it, because the press feedback added for O524
+                 applies to every Pressable, which is the point of it. */
+              noPressFeedback
               style={{
                 position: 'absolute',
                 left: dropLeft,

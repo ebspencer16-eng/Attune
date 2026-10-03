@@ -137,6 +137,11 @@ export default function MarkSheet({
         {/* The card stops the tap that closes the sheet. */}
         <Pressable
           onPress={() => {}}
+          /* It swallows the tap that would close the mark sheet and is not a
+             control. Without this the whole card dims and sinks when a finger
+             lands anywhere on it, because the press feedback added for O524
+             applies to every Pressable, which is the point of it. */
+          noPressFeedback
           style={{
             backgroundColor: c.surface,
             borderTopLeftRadius: Radius.xl + 10, borderTopRightRadius: Radius.xl + 10,

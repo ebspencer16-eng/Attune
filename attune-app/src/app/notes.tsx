@@ -1999,6 +1999,11 @@ function Editor({
           {/* Stops a tap inside the card reaching the ground behind it. */}
           <Pressable
             onPress={() => {}}
+            /* It swallows the tap that would close the note card and is not a
+               control. Without this the whole card dims and sinks when a finger
+               lands anywhere on it, because the press feedback added for O524
+               applies to every Pressable, which is the point of it. */
+            noPressFeedback
             style={{
               backgroundColor: c.background, borderRadius: Radius.xl,
               padding: Spacing.xl, maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',

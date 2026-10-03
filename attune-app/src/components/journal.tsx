@@ -314,6 +314,11 @@ export function SaveToJournal({ quote, onClose }: { quote: string; onClose: (sav
         {/* The sheet itself swallows the press that would close it. */}
         <Pressable
           onPress={() => {}}
+          /* It swallows the tap that would close the journal sheet and is not a
+             control. Without this the whole card dims and sinks when a finger
+             lands anywhere on it, because the press feedback added for O524
+             applies to every Pressable, which is the point of it. */
+          noPressFeedback
           style={{
             backgroundColor: Palette.cream,
             borderTopLeftRadius: Radius.card, borderTopRightRadius: Radius.card,

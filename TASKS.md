@@ -23,6 +23,7 @@
 
 | # | Built, needs your eye |
 |--|--|
+| O534 | **The press feedback was dimming whole sheets.** Four Pressables exist only to swallow a tap, so a touch on an open sheet does not close it, and giving every Pressable a pressed state made the journal sheet, the mark sheet, a note card and the section dropdown all dim and sink when a finger landed anywhere on them. A fix for one complaint making something else worse. Fixed and gated. Found by sweeping for accessibility labels, not by looking for it. |
 | O531 | **The survey nudge could email people it was told to leave alone.** It builds two lists before sending, who has already answered and who is a beta tester, and both were built inside a swallowed error. A failed query emptied them and the run carried on, so everyone who had answered would be nudged again and every beta tester would get a survey they were excluded from. It now sends nothing and says which list it could not read. |
 | O532 | **The Explore page got quietly smaller when a query failed.** Same shape as the Engagement bug you reported: a couple whose partner joined by invite read as unpaired, because the invited half lives in a table whose failure was swallowed. The page now prints what could not be read, above the numbers. |
 | O533 | **Two documents were describing features we removed.** The LMFT booking setup guide and a workbook audit that opens "there are TWO endpoints that generate a workbook". Both now say at the top what happened. The four documents a session actually works from are held to naming files that exist. |

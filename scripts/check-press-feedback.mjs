@@ -25,6 +25,20 @@
  * 3. The website carries its `:active` rule, in the SPA shell and on every
  *    static page, because the same complaint covered both.
  *
+ * ── AND A CONTROL THAT IS NOT ONE ─────────────────────────────────────────
+ * Four Pressables in this app exist to SWALLOW a tap: the card inside a modal,
+ * which stops a touch on it reaching the ground behind and closing the sheet.
+ * They have an empty onPress and are not controls.
+ *
+ * Giving every Pressable a pressed state dimmed and sank all four. Touch the
+ * journal sheet, the mark sheet, a note card or the section dropdown anywhere at
+ * all and the whole card reacts as though it were a button. A fix for one
+ * complaint making a different thing worse, and found by sweeping for
+ * accessibility labels rather than by looking for it.
+ *
+ * `noPressFeedback` is for exactly this and it is named rather than silent, so
+ * an exception is a decision somebody wrote down. A swallower has to carry it.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Whether a slow action also shows progress. That is a different promise and
  * the tools already keep it: `busyTool` dims the tile and spins. This is about
@@ -75,6 +89,40 @@ for (const file of appFiles) {
 if (!users) {
   fails.push('no file in the app draws a <Pressable>. Refusing to pass: a gate that has lost its'
     + ' subject must never report success.');
+}
+
+// ── 1b. A tap swallower does not act like a button ──────────────────────────
+{
+  let swallowers = 0;
+  for (const file of appFiles) {
+    const rel = file.slice(ROOT.length);
+    if (rel === WRAPPER) continue;
+    const src = readFileSync(file, 'utf8');
+    for (const m of src.matchAll(/onPress=\{\(\)\s*=>\s*\{\s*\}\}/g)) {
+      swallowers += 1;
+      /* The rest of the opening tag it sits in. Matched to the next `>` at
+         brace depth zero, because every prop here is a braced expression. */
+      let depth = 0;
+      let end = m.index;
+      for (let i = m.index; i < src.length; i += 1) {
+        if (src[i] === '{') depth += 1;
+        else if (src[i] === '}') depth -= 1;
+        else if (src[i] === '>' && depth === 0) { end = i; break; }
+      }
+      const tag = src.slice(m.index, end);
+      if (!/\bnoPressFeedback\b/.test(tag)) {
+        const line = src.slice(0, m.index).split('\n').length;
+        fails.push(`${rel}:${line} is a Pressable with an empty onPress, which is how a modal card`
+          + ' swallows the tap that would close it.\n'
+          + '      It is not a control, and without `noPressFeedback` the whole card dims and'
+          + ' sinks\n      when a finger lands anywhere on it.');
+      }
+    }
+  }
+  if (!swallowers) {
+    console.log('[check-press-feedback] note: no tap swallowers found, so that half checked'
+      + ' nothing. If the modals changed shape, this rule needs re-aiming.');
+  }
 }
 
 // ── 2. The wrapper still does something ─────────────────────────────────────
