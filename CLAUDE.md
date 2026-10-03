@@ -836,6 +836,23 @@ guess into a measurement. `xcrun simctl io booted screenshot` plus a pixel scan
 gives the target's exact position; the mapping from there is what has to be
 measured rather than derived.
 
+**A Simulator with no window still takes screenshots, and that looks exactly
+like a dead control.** `xcrun simctl io booted screenshot` goes through the
+device, so it keeps working when the Simulator app has no window open. Synthetic
+taps go through System Events and need one: they fail with "Can't get window 1 of
+process Simulator", and if that error is swallowed the only symptom is a screen
+that does not change. Twice in one session that read as "the control I am testing
+is broken".
+
+Check it before concluding anything about a tap:
+
+    osascript -e 'tell application "System Events" to count windows of process "Simulator"'
+
+Zero means the problem is the window, not the app. Reopening it is not reliable
+from a script; `open -a Simulator`, the Window menu and a device reboot all
+failed here, so the honest move is to say the screen could not be driven rather
+than to keep tapping at nothing.
+
 **After many hot reloads the app stops accepting touches.** Not a crash, not a
 red screen: gestures through react-native-gesture-handler keep working and
 every ordinary press stops. It looks exactly like the control you are testing
