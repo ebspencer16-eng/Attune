@@ -42,7 +42,7 @@ const DAY = 24 * 60 * 60 * 1000;
  *                                           a beta promo code, per _lib/beta.js
  *   topGapDimensionLabel, unresolvedConversationTitle
  * }
- * @returns { primary, secondary[] } cards, each { id, kind, title, body, cta, deepLink }
+ * @returns { primary, secondary[] } cards, each { id, kind, title, body, deepLink }
  */
 import { EXERCISES } from '../_exercises.js';
 
@@ -276,7 +276,7 @@ export function nextActions(state = {}) {
     add({ id: 'profile', kind: 'profile_setup', priority: 12,
       title: 'Finish setting up your profile',
       body: 'We need info to properly set up your exercises',
-      cta: 'Set up', deepLink: '/?view=profile' });
+      deepLink: '/?view=profile' });
   }
 
   // 2. Your own unfinished exercise. Above nudging the partner on purpose:
@@ -305,7 +305,7 @@ export function nextActions(state = {}) {
         body: started
           ? `You've completed ${e.answered}/${e.total} questions`
           : `Your results unlock once you and ${them} complete your exercises`,
-        cta: 'Continue', deepLink: `/?view=${link}` });
+        deepLink: `/?view=${link}` });
       break; // one exercise at a time, in order
     }
   }
@@ -327,7 +327,6 @@ export function nextActions(state = {}) {
       body: nudgedRecently
         ? 'You sent a reminder recently'
         : `Results unlock once ${them} finishes ${pronounForm(state.partnerPronouns, 'pos')} final exercise`,
-      cta: nudgedRecently ? 'View progress' : 'Send a reminder',
       disabled: nudgedRecently,
       /**
        * The one card that does something rather than going somewhere.
@@ -346,7 +345,7 @@ export function nextActions(state = {}) {
     add({ id: 'open-results', kind: 'open_results', priority: 8,
       title: 'Your results are ready',
       body: 'Insights and guidance based on your responses',
-      cta: 'Open results', deepLink: '/?view=results' });
+      deepLink: '/?view=results' });
   }
 
   // 4. A resource they paid for and have not used. Bought and unused is worse
@@ -362,7 +361,7 @@ export function nextActions(state = {}) {
         body: r.started
           ? 'This exercise is in progress and status has been saved'
           : (RESOURCE_BLURB[key] || 'You have purchased exercises that you have not completed'),
-        cta: r.started ? 'Continue' : 'Start', deepLink: `/?view=${link}` });
+        deepLink: `/?view=${link}` });
       break;
     }
   }
@@ -372,7 +371,7 @@ export function nextActions(state = {}) {
     add({ id: 'new-post', kind: 'new_post', priority: 5,
       title: 'New publication to explore',
       body: 'View this and others in your Learn tab',
-      cta: 'Read', deepLink: `/?view=practice&post=${ip.latestId}` });
+      deepLink: `/?view=practice&post=${ip.latestId}` });
   }
 
   // 7. Revisit, anchored to something specific. Never "it has been a while".
@@ -384,7 +383,7 @@ export function nextActions(state = {}) {
         body: state.unresolvedConversationTitle
           ? 'You flagged this and have not come back to it.'
           : `Your widest difference. Worth rereading together.`,
-        cta: 'Open', deepLink: '/?view=results' });
+        deepLink: '/?view=results' });
     }
   }
 
@@ -409,7 +408,7 @@ export function nextActions(state = {}) {
     add({ id: 'beta-feedback', kind: 'beta_feedback', priority: 6,
       title: 'Tell us what you think',
       body: 'You are testing Attune before launch. Your notes shape what ships.',
-      cta: 'Share your experience', deepLink: '/feedback' });
+      deepLink: '/feedback' });
   }
 
   // 8. Feedback, only from people who actually use it. Asking a stranger to
@@ -421,7 +420,7 @@ export function nextActions(state = {}) {
       title: 'Tell us about your experience',
       body: 'Take a minute to share feedback to help us shape Attune',
       // A page, not a view. /?view=feedback drew the header and nothing else.
-      cta: 'Leave feedback', deepLink: '/feedback' });
+      deepLink: '/feedback' });
   }
 
   /**
@@ -461,7 +460,22 @@ export function nextActions(state = {}) {
   cards.sort((a, b) => b.priority - a.priority);
   // Every card gains its app destination here, once, rather than each add()
   // call remembering to set one.
-  const withApp = cards.map(c => ({ ...c, app: appTargetFor(c.deepLink) }));
+  /**
+   * ── THE SORT KEY DOES NOT GO OUT ─────────────────────────────────────────
+   * `priority` decides the order on the line above and has no meaning to a
+   * reader. The spread published it anyway, to both surfaces, for the life of
+   * this screen.
+   *
+   * It is stripped here rather than left alone because of what came off this
+   * card beside it. `cta` was nine button labels neither surface printed, and
+   * Ellie's answer was "Field should go"; `tint` was a field the website read
+   * that nothing had ever sent. Both were invisible for the same reason: an
+   * extra key costs nothing and raises no error. With `priority` gone, every
+   * field on a card is read by a surface, which is a rule a check can hold
+   * without a list of exceptions, and a list of exceptions is how this kind of
+   * rule goes quiet.
+   */
+  const withApp = cards.map(({ priority, ...c }) => ({ ...c, app: appTargetFor(c.deepLink) }));
   return { primary: withApp[0], secondary: withApp.slice(1, 4) };
 }
 
@@ -514,27 +528,27 @@ const IDLE_PROMPTS = [
   {
     title: 'Send a note to your partner',
     body: 'Mark a line in your results and share it with them.',
-    cta: 'Open results', deepLink: '/?view=results',
+    deepLink: '/?view=results',
   },
   {
     title: 'Reread what you each wrote',
     body: 'Written answers are worth revisiting and discussing.',
-    cta: 'Open results', deepLink: '/?view=results',
+    deepLink: '/?view=results',
   },
   {
     title: 'Pick one conversation to have this week',
     body: 'Every section ends with something to try.',
-    cta: 'What comes next', deepLink: '/?view=results',
+    deepLink: '/?view=results',
   },
   {
     title: 'Read something from In Practice',
     body: 'Short pieces on the things that impact relationships.',
-    cta: 'Open In Practice', deepLink: '/practice',
+    deepLink: '/practice',
   },
   {
     title: 'Look back at your tags',
     body: 'What you marked is a record of what mattered to you.',
-    cta: 'Open notes', deepLink: '/?view=notes',
+    deepLink: '/?view=notes',
   },
 ];
 

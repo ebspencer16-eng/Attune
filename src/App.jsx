@@ -3528,6 +3528,22 @@ const NAV_ICONS = {
 };
 
 function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
+  /**
+   * Which group is open, if any.
+   *
+   * ── THE ARROW PROMISED SOMETHING NOBODY BUILT ───────────────────────────
+   * Ellie: "Dropdown arrows on site's insights menu don't work." They did not:
+   * the caret was aria-hidden decoration inside the row's own button, so it
+   * looked like a disclosure and behaved like part of the label.
+   *
+   * Every one of these groups has pages under it. Communication has four,
+   * Expectations has seven, and before this the only way to reach one was to
+   * open the section and page through. The caret is what it looked like now.
+   *
+   * One at a time: this is a list of eight, and two open at once on a phone
+   * pushes the rest off the panel.
+   */
+  const [openGroup, setOpenGroup] = useState(null);
   /* Shared out over whatever height the panel has. See the panel's own note. */
   const LABEL_LEFT = 0;
   /**
@@ -3558,7 +3574,7 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
         const isExercise = Boolean(icon);
         const firstExercise = isExercise && !NAV_ICONS[groups[i - 1]?.id];
         return (
-          <div key={g.id}>
+          <div key={g.id} style={{ position: "relative" }}>
             {firstExercise ? (
               <div style={{
                 display: "flex", alignItems: "center", gap: NAV_GAP,
@@ -3603,10 +3619,47 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
               }}>
                 {g.label}
               </span>
-              {kids.length ? (
-                <span aria-hidden="true" style={{ color: "#A8997F", fontSize: "0.68rem", paddingRight: "0.2rem" }}>&#9662;</span>
-              ) : null}
             </button>
+            {/* The caret is its own control. Inside the row's button it could
+                only ever do what the row does, which is why it did nothing. */}
+            {kids.length ? (
+              <button
+                type="button"
+                onClick={() => setOpenGroup((cur) => (cur === g.id ? null : g.id))}
+                aria-expanded={openGroup === g.id}
+                aria-label={`${openGroup === g.id ? "Hide" : "Show"} the pages under ${g.label}`}
+                style={{
+                  position: "absolute", right: 0, top: 0,
+                  display: "flex", alignItems: "center", justifyContent: "flex-end",
+                  height: "100%", minWidth: "2rem", padding: "0 0.2rem",
+                  background: "transparent", border: "none", cursor: "pointer",
+                  color: "#A8997F", fontSize: "0.68rem", lineHeight: 1,
+                  transform: openGroup === g.id ? "rotate(180deg)" : "none",
+                  transformOrigin: "center",
+                }}>
+                &#9662;
+              </button>
+            ) : null}
+            {openGroup === g.id ? (
+              /* The pages under this section, each opening its own. The cover
+                 is left out: it is what the row itself opens. */
+              <div style={{ paddingLeft: (isExercise ? EXERCISE_LEFT : LABEL_LEFT) + NAV_ICON_COL + NAV_GAP, paddingBottom: "0.35rem" }}>
+                {kids.filter((ch) => !ch.cover).map((ch) => (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => onOpen(ch.id)}
+                    style={{
+                      display: "block", width: "100%", textAlign: "left",
+                      background: "transparent", border: "none", cursor: "pointer",
+                      fontFamily: BFONT, color: C.muted, fontSize: isMobile ? "0.82rem" : "0.88rem",
+                      padding: "0.3rem 0", lineHeight: 1.3,
+                    }}>
+                    {ch.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         );
       })}
@@ -4022,7 +4075,18 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                 width: "100%", borderRadius: 12,
                 background: "#F6F1EA", marginBottom: "0.7rem",
                 flex: "1 1 auto", minHeight: 0,
-              }} />
+                /* ── THE MARK SITS IN THE CORNER, AS IT DOES IN THE APP ──
+                   Ellie: "Home page action prompt tiles on web are missing the
+                   hairline below the hero and the mark in the image box."
+
+                   Her words for the app's version: "just a shaded square with
+                   an attune logo in the bottom right". The box was the shade
+                   and not the logo. */
+                display: "flex", alignItems: "flex-end", justifyContent: "flex-end",
+                padding: "0.5rem",
+              }}>
+                <AttuneMark width={34} style={{ opacity: 0.5 }} />
+              </div>
               <div style={{ height: "1.1rem", borderRadius: 5, background: "#F2EDE6", marginBottom: "0.45rem" }} />
               <div style={{ height: "0.7rem", borderRadius: 4, background: "#F6F1EA", width: "80%" }} />
             </div>
@@ -4059,7 +4123,18 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                    bottom of a short window rather than getting smaller. It
                    takes what is left and no more. */
                 flex: "1 1 auto", minHeight: 0,
-              }} />
+                /* ── THE MARK SITS IN THE CORNER, AS IT DOES IN THE APP ──
+                   Ellie: "Home page action prompt tiles on web are missing the
+                   hairline below the hero and the mark in the image box."
+
+                   Her words for the app's version: "just a shaded square with
+                   an attune logo in the bottom right". The box was the shade
+                   and not the logo. */
+                display: "flex", alignItems: "flex-end", justifyContent: "flex-end",
+                padding: "0.5rem",
+              }}>
+                <AttuneMark width={34} style={{ opacity: 0.5 }} />
+              </div>
               {/* ── CLAMPED, SO IT ENDS RATHER THAN BEING SLICED ──────────
                   Ellie, with a screenshot of a laptop window: "Doesn't fit on
                   one screen." The page is the window now and nothing overflows
@@ -4077,6 +4152,10 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
               }}>
                 {card.title}
               </div>
+              {/* The app draws a hairline between the title and the line under
+                  it. Ellie asked for it there by name: "The two larger tiles
+                  within that one also have a border." */}
+              <div style={{ height: 1, background: C.stone, margin: "0 0 0.55rem", flexShrink: 0 }} />
               {/* Ellie: "if the action prompt text splits to 2 lines, it must
                   do it on both tiles so that the formatting is the same for
                   each." Clamping alone does not do that: a one-line body stays
@@ -15373,7 +15452,24 @@ export default function App() {
                         /* The group's first child, which is its cover page. A
                            group id is a heading, not a page: opening one was
                            what sent every row to the storycards. */
-                        onOpen={(sectionId) => { setActiveResult(sectionId); setView("results"); }}
+                        /**
+                         * ── AND PAST THE STORYCARDS ──────────────────────
+                         * Ellie: "All rows on insights menu on site open the
+                         * highlights rather than their specific pages."
+                         *
+                         * They did. The results view draws the storycards
+                         * whenever `highlightsSeen` is false, so whichever
+                         * section a row asked for was set and then ignored.
+                         * The id was never the problem.
+                         *
+                         * Picking a row by name is "take me to this page",
+                         * which is a different sentence from being told the
+                         * results are ready, and the app already makes that
+                         * distinction: its home card starts with the cards and
+                         * its Insights tab opens the menu. Opening a section by
+                         * name counts as having seen them.
+                         */
+                        onOpen={(sectionId) => { setActiveResult(sectionId); setHighlightsSeen(true); setView("results"); }}
                       />
                     ) : (() => {
                       // Exercises are numbered in sequence, so the intimacy

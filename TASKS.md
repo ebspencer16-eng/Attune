@@ -4,8 +4,6 @@
 
 | # | What I need from you |
 |--|--|
-| O527 | **A copy question.** Every home prompt card carries a button label on the server ("Set up", "Continue", "Open results", "Send a reminder", "Read"), and neither the app nor the site prints one: the whole card is the button, with the title and the line under it doing the work. So nine labels exist and nobody reads them. Either the cards should show one, or the field should go. Your call. |
-| O526 | **Run migration 077 in the Supabase SQL Editor.** `supabase/migrations/077_clear_docx_workbook_links.sql`. It clears the stored link wherever it points at a Word file. The code already refuses to serve one, so nothing breaks if you leave it; what it fixes is rows that still claim a workbook is ready when none is. Safe to run twice. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -17,23 +15,18 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| O527 | **Remove the cta field from the home cards.** You: "Field should go." Nine labels on the server that neither surface prints. Delete it from every card in the priority engine and from both surfaces' types, and gate it so it cannot come back unread. |
+| O535 | **The site's home page takes a long time and does not paint until the window loses focus.** You: "It didn't load until I clicked out of the window." Not-painting-until-blur is a render waiting on an event that never fires, not slowness. Find what the first paint is waiting on. |
+| O536 | **The web action prompt tiles are missing the hairline under the title and the mark in the image box.** Both are on the app's cards. Same derivation as the tints: one source, gated. |
+| O537 | **Every row on the site's insights menu opens Highlights instead of its own page.** The row knows which section it is; something is dropping it on the way to the view. |
+| O538 | **The dropdown arrows on the site's insights menu do nothing.** |
+| O539 | **Rewrite section 4 so every row says what the task was, in one line.** You: "row should list what the task was, concisely but with the context necessary to understand what it was. All rows should be 1 line. Apply to all past tasks and use this structure going forward." 663 rows, 180 of which say only "Approved"; the description has to be recovered from the revision where the row was still open. Gate the one-line shape so it holds. |
+| O540 | **Admin inside the app, behind a 4-digit PIN.** You: "Build admin into Carolina's and my apps as a button in settings that asks for our 4-digit pin. Admin in the app should look like it does on the site's mobile view. Build a home page that has the left nav (in an insights menu style list), and every page should have a back button that brings you to that menu." The PIN is a convenience lock on your own phone, not the security boundary: the server still has to authorise by account, and I will never ask you for the PIN or put it anywhere in the repo. You set it on the device the first time. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O534 | **The press feedback was dimming whole sheets.** Four Pressables exist only to swallow a tap, so a touch on an open sheet does not close it, and giving every Pressable a pressed state made the journal sheet, the mark sheet, a note card and the section dropdown all dim and sink when a finger landed anywhere on them. A fix for one complaint making something else worse. Fixed and gated. Found by sweeping for accessibility labels, not by looking for it. |
-| O531 | **The survey nudge could email people it was told to leave alone.** It builds two lists before sending, who has already answered and who is a beta tester, and both were built inside a swallowed error. A failed query emptied them and the run carried on, so everyone who had answered would be nudged again and every beta tester would get a survey they were excluded from. It now sends nothing and says which list it could not read. |
-| O532 | **The Explore page got quietly smaller when a query failed.** Same shape as the Engagement bug you reported: a couple whose partner joined by invite read as unpaired, because the invited half lives in a table whose failure was swallowed. The page now prints what could not be read, above the numbers. |
-| O533 | **Two documents were describing features we removed.** The LMFT booking setup guide and a workbook audit that opens "there are TWO endpoints that generate a workbook". Both now say at the top what happened. The four documents a session actually works from are held to naming files that exist. |
-| O530 | **A one-line way to answer "is this on my phone".** `npm run app:published` asks Expo when the running bundle went out and lists the app commits since. It caught today's own case: an update went out, one more app fix landed two minutes later, and the published bundle was already behind when I said it was out. Both are published now. |
-| O528 | **Both prompt cards on the site were the same colour.** The site read a tint off the payload and nothing has ever put one there, so both fell to one fallback while the app alternates warm and cool. Found by auditing every field each endpoint sends against what each surface reads. Same audit: the app was typing a heading the server already sends, the profile editor was typing four field labels, and an invited partner could have been shown fewer results sections than they own. |
-| O529 | **Swept and found nothing else.** All 56 endpoints answer correctly from outside with no 500s. All 40 pages serve real content. All 35 internal links resolve. The full drive is green: 29 results sections, 13 app views, 37 static pages, all five exercises. 206 gates pass. |
-| O525 | **The Word file is gone.** Both builders deleted, with their routes. The last thing calling one was the admin button, which ran against invented orders, so it had never built any real couple a workbook. The site had two download paths producing two different documents; there is one now. Three places stated the format to customers and all three said Word: the offerings blurb, the digital label and the receipt. I changed only the file type in your sentences. Migration 077 clears the old links, below. |
-| O512 | **It was serving the Word file, and that is now impossible.** The fix above removes the document, not just the link to it. The workbook also opens inside the app rather than going out to Safari. Live on the site as of this afternoon. |
-| O517 | **The mark was half a mark.** It is two speech bubbles and the site drew one, in five of the twelve places it draws the logo by hand. You spotted it because I had just made this one bigger. There is one drawing now and every surface uses it. |
-| O520 | **Orange comes from the top left.** The direction was written inside the shared tab component, so turning Insights would have turned Learn too. It belongs to each ground now. Cream with the orange glow, and the menu fits without scrolling, are still there from the last round. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -48,6 +41,18 @@
 
 | Verified by you | What |
 |--|--|
+| O512 | **Approved.** |
+| O517 | **Approved.** |
+| O520 | **Approved.** |
+| O525 | **Approved.** |
+| O528 | **Approved.** |
+| O529 | **Approved.** |
+| O530 | **Approved.** |
+| O531 | **Approved.** |
+| O532 | **Approved.** |
+| O533 | **Approved.** |
+| O534 | **Approved.** |
+| O526 | **Ran it.** Migration 077, which clears the stored workbook link wherever it points at a Word file. |
 | O497 | **Approved.** |
 | O512b | **"Thank you."** |
 | O524 | **Approved.** |

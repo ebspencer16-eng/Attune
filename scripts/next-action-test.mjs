@@ -142,15 +142,32 @@ ok('an idle card rather than an invented task', primary({}).kind === 'idle');
   ok('the idle prompt changes from day to day', new Set(days.map((c) => c.title)).size >= 3);
   ok('the same day gives the same prompt',
     primary({ now: NOW_MS }).title === primary({ now: NOW_MS + 1000 }).title);
-  ok('every idle prompt has a destination and a label',
-    days.every((c) => c.title && c.body && c.cta && c.deepLink));
+  /* No `cta`. Ellie: "Field should go." Nine button labels were written on the
+     server and neither surface ever printed one, because the whole card is the
+     button and the title and the line under it do the work. */
+  ok('every idle prompt has a destination and words',
+    days.every((c) => c.title && c.body && c.deepLink));
 }
 
 // ── Shape ───────────────────────────────────────────────────────────────────
 const full = nextActions(base({ profileComplete: false, resultsLastOpenedAt: null, opens30d: 9 }));
 ok('one primary and at most three secondary', !!full.primary && full.secondary.length <= 3);
-ok('secondary is lower priority than primary',
-  full.secondary.every(c => c.priority <= full.primary.priority));
+/**
+ * The most important card is the primary one.
+ *
+ * This used to read `c.priority <= full.primary.priority`, off the payload. The
+ * sort key does not go out any more: it decides the order inside the engine and
+ * means nothing to a reader, and leaving it on the card is how `cta` and `tint`
+ * survived unread for months. So the ordering is asserted by what it DOES.
+ *
+ * Profile setup is the top rung, because the exercises need pronouns and
+ * answering without them produces copy that misgenders someone. It has to be
+ * the primary card in a state where several others also apply, and the others
+ * have to be behind it rather than missing.
+ */
+ok('the top rung is primary when several cards apply', full.primary.kind === 'profile_setup');
+ok('the cards it outranks are still offered, behind it',
+  full.secondary.length > 0 && full.secondary.every(c => c.kind !== 'profile_setup'));
 // Every card must also carry an app destination, or the card does nothing when
 // tapped in the app. That was true of every card for the life of the screen:
 // the app pushed the website route and navigated nowhere.

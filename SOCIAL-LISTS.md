@@ -18,24 +18,24 @@ whether their results are ready, and what they have bought and not used.
 
 | # | Priority | Heading | Description | Button |
 |---|---|---|---|---|
-| 1 | 12 | Finish setting up your profile | We need info to properly set up your exercises | Set up |
-| 2 | 10 | Complete your exercises | Your results unlock once you and James complete your exercises | Continue |
-| 3 | 10 | Continue Communication | You've completed 12/30 questions | Continue |
-| 4 | 9 | Send James a reminder | Results unlock once James finishes her final exercise | Send a reminder |
-| 5 | 9 | Waiting on James | You sent a reminder recently | View progress |
-| 6 | 8 | Your results are ready | Insights and guidance based on your responses | Open results |
-| 7 | 7 | Complete your checklist | Merge your lives seamlessly with a practical checklist | Start |
-| 8 | 7 | Explore build-a-budget | Build your budget with a customizable tool | Start |
-| 9 | 7 | Pick up Shared Budgeting | This exercise is in progress and status has been saved | Continue |
-| 10 | 5 | New publication to explore | View this and others in your Learn tab | Read |
-| 11 | 4 | Revisit Conflict Style | Your widest difference. Worth rereading together. | Open |
-| 12 | 4 | Revisit Money and what it is for | You flagged this and have not come back to it. | Open |
-| 13 | 2 | Tell us about your experience | Take a minute to share feedback to help us shape Attune | Leave feedback |
-| 14 | 0 | Look back at your tags | What you marked is a record of what mattered to you. | Open notes |
-| 15 | 0 | Pick one conversation to have this week | Every section ends with something to try. | What comes next |
-| 16 | 0 | Read something from In Practice | Short pieces on the things that impact relationships. | Open In Practice |
-| 17 | 0 | Reread what you each wrote | Written answers are worth revisiting and discussing. | Open results |
-| 18 | 0 | Send a note to your partner | Mark a line in your results and share it with them. | Open results |
+| 1 | undefined | Complete your checklist | Merge your lives seamlessly with a practical checklist | undefined |
+| 2 | undefined | Complete your exercises | Your results unlock once you and James complete your exercises | undefined |
+| 3 | undefined | Continue Communication | You've completed 12/30 questions | undefined |
+| 4 | undefined | Explore build-a-budget | Build your budget with a customizable tool | undefined |
+| 5 | undefined | Finish setting up your profile | We need info to properly set up your exercises | undefined |
+| 6 | undefined | Look back at your tags | What you marked is a record of what mattered to you. | undefined |
+| 7 | undefined | New publication to explore | View this and others in your Learn tab | undefined |
+| 8 | undefined | Pick one conversation to have this week | Every section ends with something to try. | undefined |
+| 9 | undefined | Pick up Shared Budgeting | This exercise is in progress and status has been saved | undefined |
+| 10 | undefined | Read something from In Practice | Short pieces on the things that impact relationships. | undefined |
+| 11 | undefined | Reread what you each wrote | Written answers are worth revisiting and discussing. | undefined |
+| 12 | undefined | Revisit Conflict Style | Your widest difference. Worth rereading together. | undefined |
+| 13 | undefined | Revisit Money and what it is for | You flagged this and have not come back to it. | undefined |
+| 14 | undefined | Send a note to your partner | Mark a line in your results and share it with them. | undefined |
+| 15 | undefined | Send James a reminder | Results unlock once James finishes her final exercise | undefined |
+| 16 | undefined | Tell us about your experience | Take a minute to share feedback to help us shape Attune | undefined |
+| 17 | undefined | Waiting on James | You sent a reminder recently | undefined |
+| 18 | undefined | Your results are ready | Insights and guidance based on your responses | undefined |
 
 18 prompts.
 
