@@ -15,16 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| O544 | **The floating arrows reach six pages out of eighteen.** Measured on the live site: `couple-type` and `reflection-ratings` draw them, `comm-cover` and `comm-overview` draw nothing. Every page opts out of the shared pair with `noPrevNext` and four of them then draw their own, which is the one-rule-in-several-places failure again. Fix: `Layout` draws them always, the opt-out is deleted, the four private copies go. Then lift them clear of the 60px footer strip they currently sit on top of. Gate it. |
-| O540 | **The code screen is a dead end.** It said "that is not the code", which only happens when the keychain already holds one, and the only way to clear it is behind the code. Add the escape to the locked screen and make it prove who you are against the server rather than just wiping the lock. Answer her question: the simulator keychain is real and behaves like the phone's. |
-| O547 | **The glow behind the cover icon is too faint.** It is 13% of the accent at the centre. Raise it and keep it dispersing rather than becoming the disc she asked me to remove. |
-| O548 | **The citation has to shrink with the quote.** Yesterday's quote set at 13pt beside a citation that never moves, so the words were smaller than their footnote. Scale the citation off the quote's size, which also buys the quote more room. |
-| O549 | **The desktop prompt tile's picture is a wide rectangle.** It should be the rounded square the app draws. Her words about the app's version: "I want white boxes holding rounded square images with the text under it, right now the image takes up the full top half of the tile rather than being its own rounded square." The web copy has no aspect ratio, so on a wide card it spreads. Measure the room the home tile actually has before picking a width, because the same page is the one that must not scroll. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| O544 | **The arrows reach every page now.** They were on six of the eighteen: every page opted out and four then drew their own pair, so the code looked deliberate everywhere and most pages had nothing. One pair, drawn by the layout, 76 above the bottom so it clears the footer strip it was sitting on top of. A gate holds it and caught all seven plants. |
+| O540 | **Forgot your code, on the locked screen.** It asks the server, which only answers for your account or Carolina's, then lets you set a new one. To your question: the simulator keychain is real and behaves like the phone's, so this was never simulator-only. Something was already stored there; what was wrong is that there was no way past it. Worth saying plainly: a code you can reset by being signed in is a speed bump, not a lock. What protects the data is that every admin endpoint asks for ADMIN_SECRET regardless. |
+| O549 | **The desktop prompt tile draws a rounded square.** The picture was taking whatever height the card had left, which on a wide card is a letterbox, and it is the thing you rejected in the app. The card is now as wide as it is tall less the words, so the square fits without the page scrolling. On a short window the picture gives up its square rather than the card overflowing. |
+| O548 | **The citation shrinks with the quote.** It is 72% of whatever the quotation sets at, which is the ratio the tile already had at full size, so nothing moves on a short insight. And it buys the quote back the room it gives up, as you guessed. |
+| O547 | **The glow behind the cover icon is stronger.** 13% of the accent to 31%, still fading out well inside the circle so it does not become the disc you asked me to remove. |
 | O546 | **Sharing the insight sends the storycard as a picture.** Titled "Attune Relationships Insight of the Day", the quote and the link in the message, the card as the image. The Share on the Learn banner has no card on screen, so one is rendered off the edge to photograph. **I have not seen the share sheet myself**: the Simulator had no window, so synthetic taps had nothing to land on while screenshots kept working, which reads exactly like a dead button. What I can show you is the code and the check, not a screenshot. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
