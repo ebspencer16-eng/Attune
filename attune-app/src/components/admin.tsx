@@ -114,6 +114,50 @@ export default function Admin({ sections, onClose }: {
   const [opening, setOpening] = useState<string | null>(null);
 
   /**
+   * ── A LOCK WITH NO WAY OUT IS A DEAD END ────────────────────────────────
+   * Ellie: "Just tried the code in the simulator and it gave me 'that's not the
+   * code' but didn't let me set one."
+   *
+   * That message only appears when the keychain already holds a code, and the
+   * only way to clear one was behind the code itself. So a code she does not
+   * have, for any reason, locked her out of her own admin with no way back
+   * short of deleting the app. That is the worse bug of the two, whatever put
+   * the value there.
+   *
+   * ── WHAT IT ASKS FOR INSTEAD ────────────────────────────────────────────
+   * The server. /api/admin-session mints a ticket only for a live session on an
+   * account api/_lib/admins.js recognises, so forgetting the code costs being
+   * signed in as herself or as Carolina, which is a stronger thing to hold than
+   * four digits.
+   *
+   * It does mean the code is a speed bump rather than a lock: whoever is
+   * holding the unlocked phone IS that session. Saying so plainly is the point.
+   * The code keeps the admin out of reach of a casual tap; ADMIN_SECRET on
+   * every endpoint is what protects the data, and that has not moved.
+   */
+  const [forgetting, setForgetting] = useState(false);
+  const forget = useCallback(async () => {
+    if (forgetting) return;
+    setForgetting(true);
+    setProblem(null);
+    try {
+      const r = await fetchAdminTicket();
+      if (!r.ok) {
+        setProblem('That account is not an admin, so the code cannot be cleared here.');
+        return;
+      }
+      await clearPin();
+      setStored(null);
+      setEntry('');
+      setConfirm('');
+    } catch {
+      setProblem('No answer from the server. The code was not changed.');
+    } finally {
+      setForgetting(false);
+    }
+  }, [forgetting]);
+
+  /**
    * ── NO PASSWORD ONCE YOU ARE IN THROUGH YOUR OWN ACCOUNT ────────────────
    * Ellie: "Carolina and I shouldn't have to enter the admin password if we are
    * entering through our accounts. We should have the 4-digit pin once when we
@@ -226,6 +270,18 @@ export default function Admin({ sections, onClose }: {
             {setting ? 'Set the code' : 'Open the admin'}
           </Text>
         </Pressable>
+
+        {setting ? null : (
+          <Pressable
+            accessibilityRole="button"
+            onPress={forget}
+            disabled={forgetting}
+            style={{ marginTop: Spacing.lg, alignItems: 'center' }}>
+            {forgetting
+              ? <ActivityIndicator color={c.accentQuiet} />
+              : <Text style={{ ...Type.small, color: c.accent }}>Forgot your code?</Text>}
+          </Pressable>
+        )}
 
         <Pressable accessibilityRole="button" onPress={onClose} style={{ marginTop: Spacing.lg, alignItems: 'center' }}>
           <Text style={{ ...Type.small, color: c.textMuted }}>Back to settings</Text>

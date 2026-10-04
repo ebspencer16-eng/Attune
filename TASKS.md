@@ -15,19 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| O544 | **The floating arrows reach six pages out of eighteen.** Measured on the live site: `couple-type` and `reflection-ratings` draw them, `comm-cover` and `comm-overview` draw nothing. Every page opts out of the shared pair with `noPrevNext` and four of them then draw their own, which is the one-rule-in-several-places failure again. Fix: `Layout` draws them always, the opt-out is deleted, the four private copies go. Then lift them clear of the 60px footer strip they currently sit on top of. Gate it. |
+| O540 | **The code screen is a dead end.** It said "that is not the code", which only happens when the keychain already holds one, and the only way to clear it is behind the code. Add the escape to the locked screen and make it prove who you are against the server rather than just wiping the lock. Answer her question: the simulator keychain is real and behaves like the phone's. |
+| O547 | **The glow behind the cover icon is too faint.** It is 13% of the accent at the centre. Raise it and keep it dispersing rather than becoming the disc she asked me to remove. |
+| O548 | **The citation has to shrink with the quote.** Yesterday's quote set at 13pt beside a citation that never moves, so the words were smaller than their footnote. Scale the citation off the quote's size, which also buys the quote more room. |
+| O549 | **The desktop prompt tile's picture is a wide rectangle.** It should be the rounded square the app draws. Her words about the app's version: "I want white boxes holding rounded square images with the text under it, right now the image takes up the full top half of the tile rather than being its own rounded square." The web copy has no aspect ratio, so on a wide card it spreads. Measure the room the home tile actually has before picking a width, because the same page is the one that must not scroll. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O546 | **Sharing the insight sends the storycard as a picture.** Titled "Attune Relationships Insight of the Day", the quote and the link in the message, the card as the image. The Share on the Learn banner has no card on screen, so one is rendered off the edge to photograph. **I have not seen the share sheet myself**: the simulator stopped accepting touches part way through testing, which it does after a lot of hot reloads, so what I can show you is the code and the check, not a screenshot. |
-| O540 | **No admin password once you are in through your account.** The app asks the server for a two-minute ticket, which it only mints for your two accounts, and the admin page trades it for the token it already uses. The ticket rides in the part of the URL that never reaches a server, and is wiped from the address bar on arrival. The four-digit code is unchanged. |
-| O543 | **Insights covers draw the section's icon.** It was reading a field those rows have never had, so it fell to the dot every time. |
-| O544 | **The results arrows float, bottom corners, wherever you are on the page.** The labelled buttons are gone. |
-| O545 | **The menu carets line up.** They were positioned against the whole group, which for Communication includes the section heading above it. |
-| O542 | **The insight fits above the peek now, and today's quote is intact.** The peek is pinned off the bottom of the page, the insight takes what is left, and the quotation is set at whatever size reaches the lines that room holds. All 49 fit; today's sets at 13pt. Nothing is ever cut. |
-| O541 | **In Practice no longer says it is empty before it has answered.** The tab draws when the home payload lands and the posts are a separate request. Notes had a quieter version of the same thing on the Shared peek. |
+| O546 | **Sharing the insight sends the storycard as a picture.** Titled "Attune Relationships Insight of the Day", the quote and the link in the message, the card as the image. The Share on the Learn banner has no card on screen, so one is rendered off the edge to photograph. **I have not seen the share sheet myself**: the Simulator had no window, so synthetic taps had nothing to land on while screenshots kept working, which reads exactly like a dead button. What I can show you is the code and the check, not a screenshot. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -46,6 +44,10 @@
 
 | Verified by you | What it was |
 |--|--|
+| O545 | The insights menu carets were positioned against the whole group, so Communication's sat above its row instead of beside it. |
+| O543 | Insights cover pages on the site drew a dot instead of the section icon, because the code read a field those rows have never carried. |
+| O542 | A long insight of the day pushed the In Practice peek off the bottom of the Learn tab; the quote now sets to whatever size fits the room the peek leaves. |
+| O541 | In Practice said "nothing published yet" before the posts request had answered, so the shelf looked empty and then filled on a refresh. |
 | O539 | Section 4 rewritten to 489 one-line rows saying what each task was, recovered from the file's own 241 revisions. |
 | O527 | The cta field removed from every home card, and `priority` with it, so every field a card carries is read by a surface. |
 | O537 | Insights menu rows opened Highlights instead of their own page, because the storycards drew over whichever section was asked for. |

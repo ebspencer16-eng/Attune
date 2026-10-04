@@ -23,10 +23,16 @@
  * over every insight at the smallest screen the app supports.
  *
  * ── IT RUNS THE CODE THAT SHIPS ───────────────────────────────────────────
- * The numbers are lifted out of resources.tsx rather than restated here. A gate
- * that carries its own copy of the arithmetic is comparing itself to one side,
- * which is the mistake check-card-type-clipping was written to stop making: it
- * passed for weeks against a copy of the rule the app was not running.
+ * It imports quoteFit from attune-app/src/lib/insight-fit.ts and runs that, so
+ * there is one copy of the arithmetic and this is it. The first version lifted
+ * four constants out of resources.tsx and re-ran the formula itself, which is
+ * the mistake check-card-type-clipping was written to stop making: a gate
+ * comparing itself to a copy of the rule the app does not run. That copy had
+ * already started to matter, because the rule changed when the citation learned
+ * to shrink with the quote.
+ *
+ * What stays here is the room, because the room is measured from a screenshot
+ * of a real phone and that measurement is this file's own.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Whether the type is pleasant at the smallest size. That is hers to look at,
@@ -35,6 +41,7 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { transform } from 'esbuild';
 
 import { INSIGHTS } from '../api/_insights.js';
 
@@ -44,23 +51,39 @@ const src = readFileSync(`${ROOT}${SRC}`, 'utf8');
 
 const fails = [];
 
-/** One number, lifted from the screen. */
-function num(name) {
-  const m = new RegExp(`const ${name} = ([0-9.]+);`).exec(src);
-  return m ? Number(m[1]) : null;
-}
-
-const QUOTE_BASE = num('QUOTE_BASE');
-const QUOTE_LEADING = num('QUOTE_LEADING');
-const QUOTE_FLOOR = num('QUOTE_FLOOR');
-
-/** How wide a line is taken to be, per point of type. */
-const perChar = (() => {
-  const m = /insightW \/ \(size \* ([0-9.]+)\)/.exec(src);
-  return m ? Number(m[1]) : null;
+/**
+ * The screen's own answer, imported rather than rewritten.
+ *
+ * A .ts file in an Expo project is not importable from a plain .mjs, so its
+ * types are stripped by esbuild and the module is evaluated here. It imports
+ * nothing of its own, which is why this works and is a good reason to keep it
+ * that way.
+ */
+const FIT = await (async () => {
+  const src = readFileSync(`${ROOT}attune-app/src/lib/insight-fit.ts`, 'utf8');
+  const { code } = await transform(src, { loader: 'ts', format: 'cjs' });
+  const mod = { exports: {} };
+  new Function('module', 'exports', code)(mod, mod.exports);
+  return mod.exports;
 })();
 
-/** The furniture around the quote, with Spacing resolved. */
+const { quoteFit, citeHeight, QUOTE_BASE, QUOTE_LEADING, QUOTE_FLOOR, CHAR_RATIO } = FIT;
+
+if (!QUOTE_BASE || !QUOTE_LEADING || !QUOTE_FLOOR || !CHAR_RATIO || typeof quoteFit !== 'function') {
+  console.error('[check-insight-fits] attune-app/src/lib/insight-fit.ts did not give up the'
+    + ` arithmetic: base=${QUOTE_BASE} leading=${QUOTE_LEADING} floor=${QUOTE_FLOOR}`
+    + ` charRatio=${CHAR_RATIO} quoteFit=${typeof quoteFit}.`
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+
+/**
+ * The fixed half of the furniture, lifted from the screen.
+ *
+ * This genuinely does live in resources.tsx: it is a sum of that screen's own
+ * spacing scale, and moving it into the lib would mean the lib importing the
+ * theme, which is what stops the lib being importable here at all.
+ */
 const FURNITURE = (() => {
   const m = /const INSIGHT_FURNITURE = ([\s\S]*?);\n/.exec(src);
   if (!m) return null;
@@ -76,10 +99,8 @@ const FURNITURE = (() => {
   }, 0);
 })();
 
-if (!QUOTE_BASE || !QUOTE_LEADING || !QUOTE_FLOOR || !perChar || !FURNITURE) {
-  console.error('[check-insight-fits] the quote arithmetic is not where this expects it in'
-    + ` ${SRC}: base=${QUOTE_BASE} leading=${QUOTE_LEADING} floor=${QUOTE_FLOOR}`
-    + ` perChar=${perChar} furniture=${FURNITURE}.`
+if (!FURNITURE) {
+  console.error(`[check-insight-fits] INSIGHT_FURNITURE is not where this expects it in ${SRC}.`
     + ' Refusing to pass: a gate that has lost its subject must never report success.');
   process.exit(1);
 }
@@ -107,28 +128,26 @@ const SCREEN = { scrollH: 690, insightW: 354, tilesH: 117, headH: 109 };
 const PEEK = SCREEN.headH + 4 + 12 + 108;      // grab line, gap, BottomTabInset + xl
 /* TabTopInset, which the screen subtracts because the tools row starts that far
    down inside the scroll view. 60, from the theme. */
-const room = SCREEN.scrollH - PEEK - SCREEN.tilesH - 60 - FURNITURE;
+const roomFor = (scrollH) => scrollH - PEEK - SCREEN.tilesH - 60 - FURNITURE;
+const room = roomFor(SCREEN.scrollH);
 
 /**
- * The screen's own answer, re-run here.
+ * Did it fit, or was it taken to the floor?
  *
- * Size and line count are one question: the leading shrinks with the type, so a
- * smaller size fits more lines in the same room as well as more characters on
- * each. Asking them separately is what the first version of this file did, and
- * it is what this check caught.
+ * quoteFit never fails: the floor is the floor and adjustsFontSizeToFit takes
+ * the rest. So "it did not fit" is the floor's own answer not holding the text,
+ * which is the thing that would be visibly cut.
  */
-function fitFor(text) {
-  for (let size = QUOTE_BASE; size >= QUOTE_FLOOR; size -= 1) {
-    const leading = Math.round(size * QUOTE_LEADING);
-    const lines = Math.floor(room / leading);
-    if (lines < 1) continue;
-    const perLine = Math.max(12, Math.floor(SCREEN.insightW / (size * perChar)));
-    if (Math.ceil(text.length / perLine) <= lines) return { size, lines };
-  }
-  return null;
+function fitFor(text, r = room) {
+  const f = quoteFit({ text, room: r, width: SCREEN.insightW });
+  const perLine = Math.max(12, Math.floor(SCREEN.insightW / (f.size * CHAR_RATIO)));
+  const need = Math.ceil(text.length / perLine);
+  return need <= f.lines ? f : null;
 }
 
 let worst = null;
+const cited = [];
+const over = [];
 let smallest = QUOTE_BASE;
 for (const insight of INSIGHTS) {
   const text = insight?.body || '';
@@ -136,13 +155,41 @@ for (const insight of INSIGHTS) {
   const fit = fitFor(text);
   if (!fit) {
     const leading = Math.round(QUOTE_FLOOR * QUOTE_LEADING);
-    const lines = Math.floor(room / leading);
-    const perLine = Math.max(12, Math.floor(SCREEN.insightW / (QUOTE_FLOOR * perChar)));
+    const lines = Math.floor((room - citeHeight(QUOTE_FLOOR)) / leading);
+    const perLine = Math.max(12, Math.floor(SCREEN.insightW / (QUOTE_FLOOR * CHAR_RATIO)));
     const need = Math.ceil(text.length / perLine);
     if (!worst || need > worst.need) worst = { text, need, lines, id: insight.id || '(no id)' };
     continue;
   }
   if (fit.size < smallest) smallest = fit.size;
+  /**
+   * ── AND THE CITATION IS ALWAYS THE SMALLER OF THE TWO ───────────────────
+   * Ellie: "yesterday's quote looked odd since it was not larger than the
+   * citation text."
+   *
+   * It was not: the quotation shrank to 13 and the citation stayed at the
+   * screen's fixed 13, so the attribution was set as large as the words it
+   * attributes. Fitting alone cannot see that, because both sizes fit.
+   */
+  /**
+   * ── AND THE BLOCK IT ASKS FOR IS THE BLOCK IT HAS ───────────────────────
+   * Fitting is only half of it. A fit that hands out more lines than the room
+   * holds still "fits" by its own arithmetic and pushes the peek down anyway,
+   * which is the bug Ellie reported in the first place. Planting that is what
+   * found this missing: taking the citation out of the budget made every
+   * quotation fit more easily and the check said nothing.
+   *
+   * So: the lines it gave out, plus the citation it chose, against the room.
+   */
+  const asked = fit.lines * Math.round(fit.size * QUOTE_LEADING) + citeHeight(fit.size);
+  if (asked > room) {
+    over.push(`"${insight.id || '(no id)'}" is given ${fit.lines} lines at ${fit.size}pt and a`
+      + ` ${fit.cite}pt citation, which is ${asked}pt of a ${room}pt budget.`);
+  }
+  if (fit.cite >= fit.size) {
+    cited.push(`"${insight.id || '(no id)'}" sets its quotation at ${fit.size}pt and its citation`
+      + ` at ${fit.cite}pt, so the attribution is not smaller than the words.`);
+  }
 }
 
 if (worst) {
@@ -151,6 +198,17 @@ if (worst) {
     + `      "${worst.text.slice(0, 90)}…"\n`
     + '      It would be cut rather than shrunk. Either the peek gives up some room, the floor\n'
     + '      goes lower, or that quotation is too long and is one to query.');
+}
+
+if (over.length) {
+  fails.push(`${over.length} insight${over.length === 1 ? '' : 's'} are given more room than the`
+    + ` insight block has, which is what pushes the peek off the bottom of the page:\n      `
+    + over.slice(0, 3).join('\n      '));
+}
+
+if (cited.length) {
+  fails.push(`${cited.length} insight${cited.length === 1 ? '' : 's'} set the citation as large as`
+    + ` the quotation:\n      ${cited.slice(0, 3).join('\n      ')}`);
 }
 
 if (fails.length) {
@@ -167,18 +225,13 @@ const longest = INSIGHTS.reduce((a, b) => ((b?.body || '').length > (a?.body || 
 const tightest = (() => {
   const text = longest?.body || '';
   for (let h = 300; h <= SCREEN.scrollH; h += 5) {
-    const r = h - PEEK - SCREEN.tilesH - 60 - FURNITURE;
-    for (let size = QUOTE_BASE; size >= QUOTE_FLOOR; size -= 1) {
-      const lines = Math.floor(r / Math.round(size * QUOTE_LEADING));
-      const perLine = Math.max(12, Math.floor(SCREEN.insightW / (size * perChar)));
-      if (lines >= 1 && Math.ceil(text.length / perLine) <= lines) return h;
-    }
+    if (fitFor(text, roomFor(h))) return h;
   }
   return null;
 })();
 
 console.log(`[check-insight-fits] all ${INSIGHTS.length} insights fit above the peek on the`
   + ` ${SCREEN.scrollH}pt screen this was measured on, the longest at ${smallest}pt with its`
-  + ` leading derived from it.`);
+  + ` leading and its citation derived from it.`);
 console.log(`  the longest quotation needs a scrolling area of ${tightest ?? 'more than ' + SCREEN.scrollH}pt;`
   + ' a phone shorter than that is not covered here.');

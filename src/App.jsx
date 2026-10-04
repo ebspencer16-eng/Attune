@@ -4081,21 +4081,67 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
         {/* Two across, on a phone as well. The app puts them side by side at
             390 points wide and stacking them here was the layout differing from
             the app on the one screen Ellie looks at most. */}
+        {/* ── THE PICTURE IS A ROUNDED SQUARE ──────────────────────────────
+            Ellie, of this tile on her desktop: "Home page action prompt tiles
+            are rendering incorrectly on my desktop." On a 680 column each card
+            is about 330 wide and the picture was taking whatever height the
+            card had left, which on a wide card is a letterbox. She had already
+            rejected exactly that in the app: "I want white boxes holding
+            rounded square images with the text under it, right now the image
+            takes up the full top half of the tile rather than being its own
+            rounded square."
+
+            A square picture makes the card as tall as it is wide plus the
+            words, and this page must not scroll, so the width has to come from
+            the height rather than the other way round. That is one line of
+            arithmetic the browser can do: the cell is a size container, and the
+            card is as wide as the cell is tall, less the words under the
+            picture. 120 is those words, and it is measured rather than added
+            up: rendered at four window heights the card comes out 108 points
+            taller than its picture every time, which is the two clamped lines,
+            the hairline and the padding. 120 leaves a dozen points in hand.
+
+            Where container units are not understood the card takes the whole
+            cell and the picture goes back to filling what is left, which is
+            what it does today: a worse layout, not a broken one. */}
+        <style>{`
+          .ah-cell { container-type: size; min-width: 0; display: flex; align-items: flex-start; }
+          /* The pair hugs the middle rather than each card floating in its own
+             half, which is how the app has them: side by side with one gap. */
+          .ah-cell:nth-child(odd) { justify-content: flex-end; }
+          .ah-cell:nth-child(even) { justify-content: flex-start; }
+          /* 200 is a floor. Without it a short window makes a card small enough
+             to look like a mistake, and the better trade there is a picture
+             that gives up its square. max-height is what lets it: the card is
+             capped at the cell, so the picture shrinks rather than the card
+             overflowing or the page scrolling. */
+          .ah-card { width: min(100%, max(200px, calc(100cqh - 120px))); max-height: 100%; }
+          .ah-pic { aspect-ratio: 1 / 1; flex: 0 1 auto; min-height: 0; }
+          @supports not (width: 1cqh) {
+            .ah-card { width: 100%; }
+            .ah-pic { aspect-ratio: auto; flex: 1 1 auto; }
+          }
+        `}</style>
         <div style={{
           display: "grid", gridTemplateColumns: "1fr 1fr",
           gap: isMobile ? "0.65rem" : "1.1rem",
+          /* A row with a definite height, which `alignContent: start` takes
+             away: a size container whose own height comes from its content
+             measures zero, and the first version of this drew a 34px card. */
+          gridTemplateRows: "minmax(0, 1fr)",
           flex: "1 1 auto", minHeight: 0,
         }}>
           {placeholders.map((p) => (
-            <div key={p.id} aria-hidden="true" style={{
+            <div key={p.id} className="ah-cell">
+            <div aria-hidden="true" className="ah-card" style={{
               background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
               padding: isMobile ? "0.85rem" : "1rem",
               display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden",
             }}>
-              <div style={{
+              <div className="ah-pic" style={{
                 width: "100%", borderRadius: 12,
                 background: "#F6F1EA", marginBottom: "0.7rem",
-                flex: "1 1 auto", minHeight: 0,
+                minHeight: 0,
                 /* ── THE MARK SITS IN THE CORNER, AS IT DOES IN THE APP ──
                    Ellie: "Home page action prompt tiles on web are missing the
                    hairline below the hero and the mark in the image box."
@@ -4111,9 +4157,11 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
               <div style={{ height: "1.1rem", borderRadius: 5, background: "#F2EDE6", marginBottom: "0.45rem" }} />
               <div style={{ height: "0.7rem", borderRadius: 4, background: "#F6F1EA", width: "80%" }} />
             </div>
+            </div>
           ))}
           {cards.map((card, cardIdx) => (
-            <button key={card.id} onClick={() => onCard(card)}
+            <div key={card.id} className="ah-cell">
+            <button onClick={() => onCard(card)} className="ah-card"
               style={{
                 background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
                 padding: isMobile ? "0.85rem" : "1rem", textAlign: "left",
@@ -4126,7 +4174,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                   its square while there is room and shrinks before the words
                   do, because a card whose title is cut off is a card that has
                   stopped working. */}
-              <div style={{
+              <div className="ah-pic" style={{
                 width: "100%", borderRadius: 12,
                 /* ── THE PAYLOAD HAS NEVER CARRIED A TINT ──────────────
                    This read `card.tint`, and nothing on the server has ever
@@ -4138,12 +4186,14 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                    the payload does not have, and an undefined property is a
                    default rather than an error. See cardTint. */
                 background: cardTint(cardIdx), marginBottom: "0.7rem",
-                /* No aspect-ratio. A definite width plus an aspect makes the
-                   height definite too, and a definite height does not shrink,
-                   whatever flex says: that is why the cards were cut off the
-                   bottom of a short window rather than getting smaller. It
-                   takes what is left and no more. */
-                flex: "1 1 auto", minHeight: 0,
+                /* The square, and the card's width, are in the stylesheet above:
+                   an aspect ratio needs a width that does not come from the
+                   height, and here it is the height that is known. This used to
+                   carry `flex: 1 1 auto` with a note saying an aspect ratio
+                   could not be used because a definite height does not shrink.
+                   That was true and the conclusion was wrong: the answer is to
+                   make the width definite first. */
+                minHeight: 0,
                 /* ── THE MARK SITS IN THE CORNER, AS IT DOES IN THE APP ──
                    Ellie: "Home page action prompt tiles on web are missing the
                    hairline below the hero and the mark in the image box."
@@ -4191,6 +4241,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                 {card.body}
               </div>
             </button>
+            </div>
           ))}
         </div>
         {children ? (
@@ -7759,7 +7810,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
    */
   const ARROW = 46;
   const arrowStyle = (side) => ({
-    position: "fixed", bottom: "1.5rem", [side]: "1.5rem",
+    // 60 is the footer strip the results view pins to the bottom of the
+    // window, measured on the live site: the arrows were drawing on top of
+    // it. 16 above that is the gap every other corner on this page uses.
+    position: "fixed", bottom: 76, [side]: "1.5rem",
     width: ARROW, height: ARROW, borderRadius: ARROW / 2,
     display: "flex", alignItems: "center", justifyContent: "center",
     background: "rgba(255,253,249,0.92)", backdropFilter: "blur(10px)",
@@ -7820,7 +7874,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   }
 
   // Layout wrapper
-  const Layout = ({ children, accent, noPrevNext = false }) => (
+  const Layout = ({ children, accent }) => (
     <div>
       {/* Mobile tabs */}
       <div style={{ display: "none" }} className="mobile-tabs"><MobileTabBar /></div>
@@ -7847,7 +7901,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         </div>
         <div style={{ flex: 1, minWidth: 0, padding: "0 1.5rem" }}>
           {children}
-          {!noPrevNext && <PrevNext />}
+          {/* ── EVERY PAGE, WITHOUT ASKING ───────────────────────────────
+              Ellie: "Not seeing these on cover pages, overview pages, or any
+              detailed pages."
+
+              She was right on twelve of the eighteen. Each page used to opt out
+              of the shared pair and four of them then drew their own lower
+              down, which is this file's recurring failure in miniature: one
+              rule kept in several places with nothing checking that they agree.
+              The pair is fixed to the viewport now, so where it sits in the
+              markup decides nothing, and there is no reason for a page to have
+              an opinion about it. check-results-arrows holds that. */}
+          <PrevNext />
         </div>
       </div>
     </div>
@@ -7874,7 +7939,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const group = sidebarSections.find((x) => x.id === section.replace("-cover", ""));
     const accent = group?.color || coupleType?.color || "#E8673A";
     return (
-      <Layout accent={accent} noPrevNext>
+      <Layout accent={accent}>
         {/* block: cover/frame */}
         <div style={{ padding: "1.5rem 0.5rem" }}>
           <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
@@ -7890,7 +7955,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <div style={{
                 width: 132, height: 132, borderRadius: "50%", display: "flex",
                 alignItems: "center", justifyContent: "center", marginBottom: "2rem",
-                background: `radial-gradient(circle, ${accent}22 0%, ${accent}14 35%, ${accent}08 55%, transparent 72%)`,
+                /* Ellie: "now the glow is too faint". It was 13% of the accent at
+                   the centre, which on cream is close to nothing. 31% now, still
+                   falling to nothing well inside the box so it disperses rather
+                   than becoming the disc she asked me to take out. */
+                background: `radial-gradient(circle, ${accent}50 0%, ${accent}30 38%, ${accent}14 58%, transparent 76%)`,
               }}>
                 {/* ── THE SECTION'S ICON, NOT A DOT ────────────────────────
                     Ellie: "Insights cover pages on the web use a dot with a
@@ -8285,7 +8354,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return i >= 0 ? i + 1 : 0;
     })();
     return (
-      <Layout accent="#E8673A" noPrevNext={true}>
+      <Layout accent="#E8673A">
         <PersonalityResultsPage
           myAnswers={ex1Answers} partnerAnswers={partnerEx1}
           userName={userName} partnerName={partnerName}
@@ -8317,7 +8386,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       : section.startsWith("exp-convo-") ? `convo-${Math.max(0, FIXED_CATS.findIndex(fc => fc.section === section))}`
       : "overview";
     return (
-      <Layout accent="#1B5FE8" noPrevNext={true}>
+      <Layout accent="#1B5FE8">
         <ExpectationsResultsPage
           myAnswers={ex2Answers} partnerAnswers={partnerEx2}
           coupleTypeCode={(() => { try { const t = deriveNewCoupleType(myS, partS); return (t?.typeInfoA?.typeCode || "") + (t?.typeInfoB?.typeCode || ""); } catch { return null; } })()}
@@ -8371,7 +8440,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const myAdmire = mine.a8;
       const theirAdmire = theirs.a8;
       return (
-        <Layout accent="#1B5FE8" noPrevNext={true}>
+        <Layout accent="#1B5FE8">
           {/* Brighter than the detail pages, which keep the darker ground.
               Matches the comms and expectations glance pages. */}
           <ResultsSlide bg={gradientCss("reflection-overview")}>
@@ -8466,7 +8535,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               })()}
 
             </div>
-            <PrevNext />
           </ResultsSlide>
         </Layout>
       );
@@ -8570,7 +8638,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
 
       return (
-        <Layout accent="#1B5FE8" noPrevNext={true}>
+        <Layout accent="#1B5FE8">
           <div style={{ maxWidth: 660 }}>
             {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.ratings.title}</h2>
@@ -8677,7 +8745,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
               );
             })()}
-            <PrevNext />
           </div>
         </Layout>
       );
@@ -8692,7 +8759,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const PROMPTS = REFLECTION_PROMPTS;
 
       return (
-        <Layout accent="#1B5FE8" noPrevNext={true}>
+        <Layout accent="#1B5FE8">
           <div style={{ maxWidth: 660 }}>
             {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.story.title}</h2>
@@ -8733,7 +8800,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               );
             })}
 
-            <PrevNext />
           </div>
         </Layout>
       );
@@ -8774,7 +8840,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── OVERVIEW ──
     if (section === "intimacy-overview" || section === "intimacy") {
       return (
-        <Layout accent={ROSE} noPrevNext={true}>
+        <Layout accent={ROSE}>
           {/* Brighter than the detail pages, which keep the darker ground. */}
           <ResultsSlide bg={gradientCss("intimacy-overview")}>
             <link href={FONT_URL} rel="stylesheet" />
@@ -8876,7 +8942,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               })()}
 
             </div>
-            <PrevNext />
           </ResultsSlide>
         </Layout>
       );
@@ -8934,7 +8999,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       // The tints live in api/_lib/intimacy-results.js so the app can paint
       // the same six pages from the same numbers.
       return (
-        <Layout accent={ROSE} noPrevNext={true}>
+        <Layout accent={ROSE}>
           <ResultsSlide bg={`linear-gradient(145deg, ${groundForDimension(dimMatch).join(", ")})`}>
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
@@ -9040,7 +9105,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           ? WAITING.LOCKED_BY_YOU
           : WAITING.LOCKED_BY_THEM;
       return (
-        <Layout accent="#1B5FE8" noPrevNext={true}>
+        <Layout accent="#1B5FE8">
           <div style={{ maxWidth: 560 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Conflict patterns</div>
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.75rem" }}>{title}</div>
@@ -9387,7 +9452,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
     };
     return (
-      <Layout accent="#E8673A" noPrevNext={true}>
+      <Layout accent="#E8673A">
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What comes next</h2>
 

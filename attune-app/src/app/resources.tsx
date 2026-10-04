@@ -21,6 +21,7 @@ import { ActivityIndicator, Image, Linking, Modal, RefreshControl, ScrollView, T
 import { Pressable } from '@/components/pressable';
 import { openExternal, openInApp } from '@/api/open-external';
 import { oneShot } from '@/lib/one-shot';
+import { quoteFit as fit, citeSize, QUOTE_BASE, QUOTE_LEADING, CITE_LEADING } from '@/lib/insight-fit';
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -633,13 +634,22 @@ export default function ResourcesScreen() {
    * to the line count it is given, which is what she asked for and is why the
    * one she loves today survives.
    */
-  const QUOTE_BASE = 18;
-  const QUOTE_LEADING = 1.5;
-  /** Smallest the quotation is ever set at. Below this it stops being readable. */
-  const QUOTE_FLOOR = 12;
+  /**
+   * ── THE FIXED HALF OF THE FURNITURE ─────────────────────────────────────
+   * Everything in the insight block that is not the quotation and not the
+   * citation: the block's own padding, the eyebrow, and the save and share row.
+   *
+   * They are counted rather than measured because every one of them is a known
+   * height and measuring would make this depend on itself: the quote's size
+   * changes the block's height, which would change the budget, which would
+   * change the quote's size.
+   *
+   * The citation is NOT here. Its height moves with the quote's size, so it
+   * belongs inside the answer rather than beside it. See lib/insight-fit.
+   */
   const INSIGHT_FURNITURE = Spacing.xl * 2    // the block's own padding
     + 16 + Spacing.md                         // the eyebrow and its margin
-    + 40 + Spacing.lg                         // the citation, two lines, and its margin
+    + Spacing.lg                              // the citation's top margin
     + 36 + Spacing.md;                        // the save and share row
 
   /**
@@ -655,45 +665,19 @@ export default function ResourcesScreen() {
    * the arithmetic above: it sits a measured distance off the bottom of the page
    * and does not move for anything. What is left is the room the insight has:
    *
-   *   screen  -  the tools row  -  the peek  -  everything in the insight
-   *              block that is not the quote
+   *   screen  -  the tools row  -  the peek  -  the fixed furniture
    *
-   * The leftovers are counted rather than measured, because measuring would
-   * make this depend on itself: the quote's size changes the block's height,
-   * which would change the budget, which would change the quote's size.
-   *
-   * ── SIZE AND LINE COUNT ARE ONE QUESTION ────────────────────────────────
-   * My first version chose the line count at the base size and then shrank the
-   * type to reach it, and check-insight-fits found what is wrong with that: the
-   * leading shrinks with the type, so a smaller size does not just fit more
-   * characters per line, it fits more LINES in the same room. Solving them
-   * separately made the longest quotations unfittable at any size when in fact
-   * they fit comfortably one step down.
-   *
-   * So each candidate size is asked the whole question at once, largest first:
-   * how many lines fit in the room at this size, and does the quotation fit in
-   * them. The first yes wins.
+   * The answer itself is in lib/insight-fit, which check-insight-fits imports
+   * and runs. It used to be here, with the gate holding a second copy of it.
    */
   const quoteFit = (() => {
     const text = home?.research?.body || '';
-    const fallback = { size: QUOTE_BASE, lines: 6 };
+    const fallback = { size: QUOTE_BASE, lines: 6, cite: citeSize(QUOTE_BASE) };
     if (!text || !scrollH || !headH || !tilesH || !insightW) return fallback;
     const peek = headH + GRAB_LINE_H + Spacing.md + PEEK_CLEARANCE;
     const room = scrollH - peek - tilesH - TabTopInset - INSIGHT_FURNITURE;
     if (room <= 0) return fallback;
-    for (let size = QUOTE_BASE; size >= QUOTE_FLOOR; size -= 1) {
-      const leading = Math.round(size * QUOTE_LEADING);
-      const lines = Math.floor(room / leading);
-      if (lines < 1) continue;
-      /* Playfair at this weight runs about half the point size per character.
-         Approximate, and only has to be close: adjustsFontSizeToFit is the
-         backstop, so being one size out costs a point of type rather than a cut
-         quotation. */
-      const perLine = Math.max(12, Math.floor(insightW / (size * 0.5)));
-      if (Math.ceil(text.length / perLine) <= lines) return { size, lines };
-    }
-    const leading = Math.round(QUOTE_FLOOR * QUOTE_LEADING);
-    return { size: QUOTE_FLOOR, lines: Math.max(1, Math.floor(room / leading)) };
+    return fit({ text, room, width: insightW });
   })();
 
   const mostRead = useMemo<PostSummary[]>(
@@ -1117,7 +1101,18 @@ export default function ResourcesScreen() {
                   pulls them up, three pushes them down, and a longer citation in
                   a future edition needs no change here. Measuring the text to
                   decide would be the same layout with a way to be wrong. */}
-              <Text style={{ ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic, marginTop: Spacing.lg }}>
+              <Text
+                numberOfLines={2}
+                style={{
+                  ...Type.small, color: 'rgba(255,255,255,0.55)', fontFamily: Fonts.bodyItalic,
+                  marginTop: Spacing.lg,
+                  /* Ellie: "yesterday's quote looked odd since it was not larger
+                     than the citation text." It is a fraction of whatever the
+                     quotation set at, so the quote is always the bigger of the
+                     two, and the room it gives back is room the quote gets. */
+                  fontSize: quoteFit.cite,
+                  lineHeight: Math.round(quoteFit.cite * CITE_LEADING),
+                }}>
                 {home.research.source || ''}
               </Text>
               {/* Right edge: Ellie, "move the share and save buttons to the
