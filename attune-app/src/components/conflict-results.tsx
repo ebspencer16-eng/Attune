@@ -30,7 +30,7 @@ import PageTile from '@/components/page-tile';
 import StepCount from '@/components/step-count';
 import { Prose } from '@/components/annotation-context';
 import { ResultsScroll } from '@/components/results-scroll';
-import {
+import { Fonts,
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
@@ -857,7 +857,9 @@ function Written({ name, text }: { name: string; text: string | null }) {
       <Prose
         style={{
           ...Type.body, color: Palette.white, lineHeight: 24,
-          fontStyle: text ? 'italic' : 'normal',
+          /* The family, not the flag: iOS draws the upright face for
+             fontStyle on a registered family and says nothing. */
+          ...(text ? { fontFamily: Fonts.bodyItalic } : null),
         }}>
         {text ? `“${text}”` : 'No answer given.'}
       </Prose>

@@ -1832,7 +1832,11 @@ function ConversationCell({
     <Prose
       style={{
         ...Type.small, fontSize: 11, fontWeight: muted ? '600' : '700',
-        fontStyle: muted ? 'italic' : 'normal',
+        /* The family, not the flag. iOS does not slant a registered typeface on
+           request and reports nothing, so `fontStyle: 'italic'` drew this
+           upright and looked like a design choice. Eighteen places were fixed
+           when that was found; this is the nineteenth, and the only one left. */
+        ...(muted ? { fontFamily: Fonts.bodyItalic } : null),
         color: muted ? c.textMuted : tint,
         width: CONVO_COL.person, textAlign: 'center', lineHeight: 15,
       }}>
@@ -2382,7 +2386,25 @@ function WrittenPair({
           <Text style={{ ...Type.eyebrow, fontSize: 9, color: Palette.white, marginBottom: Spacing.xs }}>
             {side.name}
           </Text>
-          <Prose style={{ ...Type.body, color: 'rgba(255,255,255,0.85)' }}>{side.words}</Prose>
+          {/* ── THEIR OWN WORDS, SET AS A QUOTATION ─────────────────────
+              Ellie: "Your action plan on overview... for the rel relf. section
+              should have each person's content in italics and quotation marks,
+              so that it's clear that that's what the person wrote."
+
+              The marks are curly, which is what every other quotation in this
+              product uses, and the italic is the family rather than the flag:
+              iOS draws the upright face for `fontStyle` on a registered family
+              and reports nothing.
+
+              The marks are added here rather than stored with the answer. What
+              someone typed is what they typed; punctuation around it is how
+              this page chooses to show it, and baking it into the value would
+              put a quotation mark in their journal and in the workbook. */}
+          <Prose style={{
+            ...Type.body, color: 'rgba(255,255,255,0.85)', fontFamily: Fonts.bodyItalic,
+          }}>
+            {`\u201C${side.words}\u201D`}
+          </Prose>
         </View>
       ))}
 

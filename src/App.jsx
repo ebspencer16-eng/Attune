@@ -3910,12 +3910,34 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
         <div style={{ marginTop: "1.5rem" }}>
           {shelves.map(([shelf, items]) => (
             <div key={shelf} style={{ marginBottom: "1.5rem" }}>
-              <div style={{
-                fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase",
-                fontWeight: 700, fontFamily: BFONT, color: "#A89C8C", marginBottom: "0.6rem",
-              }}>
-                {shelf}
-              </div>
+              {/* ── THE EYEBROW OPENS THE SHELF ───────────────────────────
+                  Ellie: "I'm not seeing the option to open each section's full
+                  list of articles, etc." The app's shelf heading is a row with
+                  an arrow on the right that opens that shelf as a page of its
+                  own; this drew the name and nothing else.
+
+                  The website has no shelf page, so the arrow filters this list
+                  to that shelf, which is the same answer in the shape this
+                  surface has: one shelf, everything on it, and a way back. */}
+              <button
+                type="button"
+                onClick={() => setQuery(query === shelf ? "" : shelf)}
+                aria-label={`See everything in ${shelf}`}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  width: "100%", background: "transparent", border: "none", padding: 0,
+                  cursor: "pointer", marginBottom: "0.6rem",
+                }}>
+                <span style={{
+                  fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase",
+                  fontWeight: 700, fontFamily: BFONT, color: "#A89C8C",
+                }}>
+                  {shelf}
+                </span>
+                <span style={{ color: C.clay, fontSize: "0.9rem", lineHeight: 1 }}>
+                  {query === shelf ? "\u00D7" : "\u2192"}
+                </span>
+              </button>
               {/* Side by side, and it scrolls. The app's row is a horizontal
                   ScrollView; this is the same thing a browser already does. */}
               <div style={{
@@ -8769,7 +8791,17 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         { name: partnerName, words: commitment.them, color: SC_PEOPLE.them }].map((p, i) => (
                         <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: "1px solid rgba(255,255,255,0.22)", borderLeft: `4px solid ${p.color}`, borderRadius: 12, padding: "0.8rem 1rem" }}>
                           <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "white", fontFamily: BFONT, lineHeight: 1.4 }}>{p.name}</div>
-                          <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, lineHeight: 1.55, marginTop: "0.25rem" }}>{p.words}</div>
+                          {/* Ellie: "Your action plan on overview... for the rel
+                              relf. section should have each person's content in
+                              italics and quotation marks, so that it's clear
+                              that that's what the person wrote." The app draws
+                              the same two tiles the same way.
+
+                              The marks are added here rather than stored with
+                              the answer: what someone typed is what they typed,
+                              and baking punctuation into the value would put a
+                              quotation mark in their journal and the workbook. */}
+                          <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.72)", fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55, marginTop: "0.25rem" }}>{"\u201C" + (p.words || "") + "\u201D"}</div>
                         </div>
                       ))}
                     </div>
@@ -16262,7 +16294,18 @@ export default function App() {
                      * comes back multiplied by it. One rule, two type scales,
                      * rather than a second copy tuned for this one.
                      */
-                    const LEARN_GAP = 28;
+                    /* Ellie, twice: "Need space between the share button and the
+                       in practice peek", then "there is still no space between
+                       the save and share buttons and the in practice peek.
+                       Maybe make the featured publications tiles smaller?"
+
+                       28 was not enough to read as a gap. 56 is, and it comes
+                       out of the quote's budget rather than out of the peek:
+                       the sheet's position is settled first and the insight
+                       takes what is left, which is the order she asked for. The
+                       featured tiles stay the size they are, because shrinking
+                       them moves the sheet down and takes the gap back. */
+                    const LEARN_GAP = 56;
                     const base = isMobile ? 21.6 : 25.6;      // 1.35rem, 1.6rem
                     const scale = base / FIT_BASE;
                     const furniture = 14 + 14 + 18 + 34 + 18; // eyebrow, its margin, the citation's margin, the controls, theirs

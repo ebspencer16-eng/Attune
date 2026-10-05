@@ -27,7 +27,7 @@
 // names is actually registered and has a file on disk, and that no generic
 // family name has crept back in.
 
-import { readFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const theme = readFileSync(ROOT + 'attune-app/src/constants/attune-theme.ts', 'utf8');
@@ -117,6 +117,52 @@ if (problems.length) {
   process.exit(1);
 }
 
+/**
+ * ── AND NOTHING ASKS FOR ITALIC BY FLAG ───────────────────────────────────
+ * iOS does not slant a registered family on request. `fontStyle: 'italic'`
+ * draws the upright face and reports no error, which is how eighteen places in
+ * this app asked for italic and every one of them was upright, three of them
+ * copy Ellie had asked for by name months apart. Italic is a family here:
+ * Fonts.bodyItalic, Fonts.bodyBoldItalic, Fonts.displayItalic.
+ *
+ * A nineteenth survived that sweep, in the expectations answer cells, and was
+ * found a month later by reading the file for something else. The fix is one
+ * line and the reason it lasted is that an upright face is a valid render:
+ * nothing is wrong enough to fail. So this fails instead.
+ *
+ * Comments are stripped first, because three files explain the rule in prose
+ * and quoting it is not asking for it.
+ */
+const appFiles = (function walk(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const full = `${dir}/${name}`;
+    try {
+      if (statSync(full).isDirectory()) { walk(full, out); continue; }
+    } catch { continue; }
+    if (/\.tsx?$/.test(full)) out.push(full);
+  }
+  return out;
+}(`${ROOT}attune-app/src`));
+
+const asked = [];
+for (const rel of appFiles) {
+  const src = readFileSync(rel, 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .split('\n').map((l) => l.replace(/(^|[^:])\/\/.*$/, '$1')).join('\n');
+  for (const m of src.matchAll(/fontStyle:\s*[^,\n}]*italic/g)) {
+    asked.push(`${rel.replace(ROOT, '')}:${src.slice(0, m.index).split('\n').length}  ${m[0].trim()}`);
+  }
+}
+if (asked.length) {
+  console.error('\n check-fonts: something asks for italic with a flag instead of a family.\n');
+  for (const a of asked) console.error(`  ✗ ${a}`);
+  console.error('\n  iOS draws the upright face and reports nothing, so this looks like a design'
+    + '\n  choice rather than a bug. Use Fonts.bodyItalic, Fonts.bodyBoldItalic or'
+    + '\n  Fonts.displayItalic, each of which has a file and a registration.\n');
+  process.exit(1);
+}
+
 console.log(
   `[check-fonts] ${registered.size} faces registered and on disk; `
-  + `the app uses ${displayFamily} and ${bodyFamily}, the same as the website.`);
+  + `the app uses ${displayFamily} and ${bodyFamily}, the same as the website, `
+  + 'and nothing asks for italic with a flag.');
