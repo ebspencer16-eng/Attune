@@ -154,6 +154,45 @@ for (const m of src.matchAll(/<Layout\b([^>]*)>/g)) {
   }
 }
 
+// ── And the sequence they walk is the nav's ─────────────────────────────────
+/*
+ * Ellie: "clicking the arrows takes me to the storycard highlights."
+ *
+ * The list the arrows walked was typed out here beside the nav's own, and it
+ * was missing all five cover pages. On a cover `indexOf` returns -1, the Next
+ * test `curIdx < length - 1` is true, and element zero is Highlights. So every
+ * cover's arrow went there, which is exactly what she saw.
+ *
+ * A hand-typed list beside a shared one is always the shorter list. This one
+ * also restated the communication domains and the expectations categories, so a
+ * category moving would have walked the arrows out of step with the sidebar
+ * with nothing to show for it.
+ */
+const pages = /const allPages = ([\s\S]*?);\n/.exec(src);
+if (!pages) {
+  console.error(`[check-results-arrows] allPages is not where this expects it in ${SRC}.`
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+if (!/navPageIds\s*\(/.test(pages[1])) {
+  fails.push('the arrows walk a list that is not the nav\'s:\n'
+    + `      const allPages = ${pages[1].trim().slice(0, 70)}…\n`
+    + '      It has to be navPageIds() from api/_lib/results-sections.js. The typed-out version\n'
+    + '      was missing all five covers, so every cover\'s Next went to Highlights.');
+}
+
+/*
+ * And -1 has to be handled. A section the nav does not list is not in the
+ * sequence; drawing a Next for it sends the reader to element zero.
+ */
+const nextTest = /\{curIdx[^?]*?< allPages\.length - 1 \?/.exec(src);
+if (nextTest && !/curIdx >= 0/.test(nextTest[0])) {
+  fails.push('the Next arrow does not check that the section is in the sequence:\n'
+    + `      ${nextTest[0]}\n`
+    + '      indexOf returns -1 for a section the nav does not list, which passes this test\n'
+    + '      and sends the reader to allPages[0].');
+}
+
 // ── Fixed to the viewport, which is what "no matter where you are" means ────
 const arrowStyle = /const arrowStyle = \(side\) => \(\{([\s\S]*?)\}\);/.exec(src);
 if (!arrowStyle) {

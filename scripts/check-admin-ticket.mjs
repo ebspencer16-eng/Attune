@@ -148,12 +148,17 @@ const SECRET = 'test-admin-secret';
     fails.push('the app names the admin token. It should never hold one: the page exchanges the'
       + ' ticket.');
   }
-  if (!/#\$\{key\}&t=\$\{encodeURIComponent\(ticket\)\}|#\$\{key\}/.test(code)) {
-    fails.push('the app no longer opens the admin on a fragment. A ticket in the QUERY string is'
-      + ' sent to the server and lands in its logs.');
+  /*
+   * The ticket rides in the fragment, which is never sent to a server, and it
+   * is encoded. This used to match on `#${key}&t=`, from when the app opened a
+   * named admin page; the key is gone and the rule is not, so it matches the
+   * part that is the rule: a `#` immediately before the ticket.
+   */
+  if (!/#t=\$\{encodeURIComponent\(ticket\)\}/.test(code)) {
+    fails.push('the app does not put the ticket in the URL fragment, encoded. A ticket in the'
+      + ' QUERY string is sent to the server and lands in its logs.');
   }
-  if (/\?t=|\&t=\$\{ticket\}(?![\s\S]{0,40}encodeURIComponent)/.test(code)
-      && !/#\$\{key\}&t=/.test(code)) {
+  if (/[?&]t=\$\{/.test(code.replace(/#t=\$\{encodeURIComponent\(ticket\)\}/g, ''))) {
     fails.push('the ticket is in the query string rather than the fragment.');
   }
 

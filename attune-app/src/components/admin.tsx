@@ -4,15 +4,18 @@
  * ── WHAT ELLIE ASKED FOR ──────────────────────────────────────────────────
  * "Build admin into Carolina's and my apps as a button in settings that asks
  * for our 4-digit pin (use our phone password). This makes for quick access for
- * us. Admin in the app should look like it does on the site's mobile view.
- * Build a home page that has the left nav (in an insights menu style list), and
- * every page should have a back button that brings you to that menu."
+ * us. Admin in the app should look like it does on the site's mobile view."
  *
- * So: a menu that looks like the Insights menu, listing the admin's own left
- * nav, and each row opening that page. The pages are the site's mobile view
- * because they ARE the site's mobile view, opened full screen inside the app;
- * the browser's Done is the back button to this menu. There is no second admin
- * to drift from the first, which is the thing this codebase keeps paying for.
+ * Then, having used it: "the app doesn't need the nav menu. After typing your 4
+ * digit code, it should take you straight to the dashboard overview and we can
+ * use the hamburger nav from there."
+ *
+ * So the code, and then the admin. The page is the site's mobile view because
+ * it IS the site's mobile view, opened full screen inside the app, and its own
+ * hamburger is the nav. There is no second admin to drift from the first, which
+ * is the thing this codebase keeps paying for, and there is no longer a second
+ * copy of its nav either: the menu this used to draw was a list of seventeen
+ * pages that had to stay in step with the real one.
  *
  * ── WHAT THE CODE IS AND IS NOT ───────────────────────────────────────────
  * It is a convenience lock on an unlocked phone, so a person holding it cannot
@@ -45,7 +48,7 @@ import * as SecureStore from 'expo-secure-store';
 
 import { Pressable } from '@/components/pressable';
 import { fetchAdminTicket, SITE_URL } from '@/api/client';
-import { Colors, Lift, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
 const SITE = SITE_URL;
@@ -56,7 +59,6 @@ const PIN_KEY = 'attune.admin.pin';
 /** What a code has to be. Hers: "our 4-digit pin". */
 const DIGITS = 4;
 
-export type AdminSection = { key: string; label: string };
 
 /**
  * Read, set and clear the code.
@@ -76,11 +78,7 @@ async function clearPin(): Promise<void> {
   try { await SecureStore.deleteItemAsync(PIN_KEY); } catch { /* already gone */ }
 }
 
-export default function Admin({ sections, onClose }: {
-  /** The admin's own left nav, from /api/home. */
-  sections: AdminSection[];
-  onClose: () => void;
-}) {
+export default function Admin({ onClose }: { onClose: () => void }) {
   /** null while the keychain is being read, so neither screen flashes. */
   const [stored, setStored] = useState<string | null | undefined>(undefined);
   const [unlocked, setUnlocked] = useState(false);
@@ -99,7 +97,7 @@ export default function Admin({ sections, onClose }: {
   const submit = useCallback(async () => {
     setProblem(null);
     if (stored) {
-      if (entry === stored) { setUnlocked(true); setEntry(''); return; }
+      if (entry === stored) { setUnlocked(true); setEntry(''); open(); return; }
       setEntry('');
       setProblem('That is not the code.');
       return;
@@ -108,10 +106,10 @@ export default function Admin({ sections, onClose }: {
     if (confirm !== entry) { setProblem('The two did not match.'); setConfirm(''); return; }
     const saved = await writePin(entry);
     if (!saved) { setProblem('This phone would not store the code. Nothing was saved.'); return; }
-    setStored(entry); setUnlocked(true); setEntry(''); setConfirm('');
+    setStored(entry); setUnlocked(true); setEntry(''); setConfirm(''); open();
   }, [entry, confirm, stored]);
 
-  const [opening, setOpening] = useState<string | null>(null);
+  const [opening, setOpening] = useState(false);
 
   /**
    * ── A LOCK WITH NO WAY OUT IS A DEAD END ────────────────────────────────
@@ -173,9 +171,9 @@ export default function Admin({ sections, onClose }: {
    * If the ticket cannot be fetched the page still opens: the password gate is
    * behind it and one sign-in is a worse morning than a dead end.
    */
-  const open = async (key: string) => {
+  const open = async () => {
     if (opening) return;
-    setOpening(key);
+    setOpening(true);
     let ticket: string | null = null;
     try {
       const r = await fetchAdminTicket();
@@ -183,7 +181,10 @@ export default function Admin({ sections, onClose }: {
     } catch (e) {
       console.warn('[admin] no ticket, falling back to the password gate', e);
     }
-    const frag = ticket ? `#${key}&t=${encodeURIComponent(ticket)}` : `#${key}`;
+    /* The overview is the admin's own default, so the fragment carries the
+       ticket and nothing else. admin.html strips it on arrival and what is left
+       is an empty hash, which is the overview. */
+    const frag = ticket ? `#t=${encodeURIComponent(ticket)}` : '';
     try {
       await openBrowserAsync(`${SITE}/admin${frag}`, {
         presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
@@ -191,9 +192,9 @@ export default function Admin({ sections, onClose }: {
         controlsColor: c.accent,
       });
     } catch (e) {
-      console.warn('[admin] would not open', key, e);
+      console.warn('[admin] would not open', e);
     } finally {
-      setOpening(null);
+      setOpening(false);
     }
   };
 
@@ -290,39 +291,32 @@ export default function Admin({ sections, onClose }: {
     );
   }
 
-  // ── The menu ──────────────────────────────────────────────────────────────
+  /**
+   * ── STRAIGHT THROUGH ────────────────────────────────────────────────────
+   * Unlocking opens the admin, so this is only ever on screen while the browser
+   * is coming up, or after it has been dismissed. A dead end either way without
+   * something to press, which is what the first version of this screen was.
+   */
   return (
-    <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.xxl, paddingBottom: Spacing.xxxl }}>
-      {/* The same shape as the Insights menu: one floating card, rows inside
-          it, no heading over a list that names everything it leads to. */}
-      <View
-        style={{
-          backgroundColor: c.surface, borderRadius: Radius.card,
-          overflow: 'hidden', ...Lift,
-        }}>
-        {sections.map((s, i) => (
+    <View style={{ paddingHorizontal: Spacing.xl, paddingTop: Spacing.xxxl, alignItems: 'center' }}>
+      {opening
+        ? <ActivityIndicator color={c.accentQuiet} />
+        : (
           <Pressable
-            key={s.key}
             accessibilityRole="button"
-            accessibilityLabel={s.label}
-            onPress={() => { open(s.key); }}
+            onPress={open}
             style={{
-              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-              paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
-              borderTopWidth: i === 0 ? 0 : 1, borderTopColor: c.border,
+              backgroundColor: c.accent, borderRadius: Radius.pill,
+              paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xxl, alignItems: 'center',
             }}>
-            <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{s.label}</Text>
-            {opening === s.key
-              ? <ActivityIndicator color={c.accentQuiet} />
-              : <Text style={{ color: c.accent, fontSize: 16 }}>{'›'}</Text>}
+            <Text style={{ ...Type.cardTitle, color: '#FFFFFF' }}>Open the admin</Text>
           </Pressable>
-        ))}
-      </View>
+        )}
 
       <Pressable
         accessibilityRole="button"
         onPress={async () => { await clearPin(); setStored(null); setUnlocked(false); }}
-        style={{ marginTop: Spacing.xl, alignItems: 'center' }}>
+        style={{ marginTop: Spacing.xxl, alignItems: 'center' }}>
         <Text style={{ ...Type.small, color: c.textMuted }}>Forget this code</Text>
       </Pressable>
 

@@ -24,7 +24,7 @@ import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
-import Admin, { type AdminSection } from '@/components/admin';
+import Admin from '@/components/admin';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
@@ -77,12 +77,13 @@ function AdminRow() {
   /**
    * The admin's own pages, from /api/home.
    *
-   * Sent rather than typed here. Ellie asked for the admin's left nav as a list
-   * in the app, and an Expo project cannot import api/_lib/admin-sections.js,
-   * so the alternative was seventeen labels written out a second time. A page
-   * added to the admin appears in this menu with no app release.
+   * Ellie, having used it: "the app doesn't need the nav menu. After typing your
+   * 4 digit code, it should take you straight to the dashboard overview and we
+   * can use the hamburger nav from there."
+   *
+   * So this is one row and a code. The list of pages it used to carry is gone,
+   * along with the payload field that fed it: the admin's nav is on the admin.
    */
-  const [sections, setSections] = useState<AdminSection[]>([]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -91,7 +92,6 @@ function AdminRow() {
       const res = await fetchHome();
       if (cancelled || !res.ok) return;
       setShow(!!res.data.admin);
-      setSections(res.data.adminSections || []);
     })();
     return () => { cancelled = true; };
   }, []);
@@ -102,7 +102,7 @@ function AdminRow() {
       <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
         <View style={{ flex: 1, backgroundColor: c.background }}>
           <ScrollView>
-            <Admin sections={sections} onClose={() => setOpen(false)} />
+            <Admin onClose={() => setOpen(false)} />
           </ScrollView>
         </View>
       </Modal>
@@ -112,9 +112,8 @@ function AdminRow() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Open the admin"
-      /* The menu, not the website. Ellie: "Build a home page that has the left
-         nav (in an insights menu style list)." Each row in it opens that page
-         full screen, and the browser's Done is the back button to the menu. */
+      /* The code, and then the admin itself, full screen. The browser's Done
+         comes back here. */
       onPress={() => setOpen(true)}
       style={{
         marginTop: Spacing.xxl, flexDirection: 'row', alignItems: 'center',

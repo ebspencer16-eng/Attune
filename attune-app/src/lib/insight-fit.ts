@@ -39,8 +39,22 @@ export const QUOTE_FLOOR = 12;
  * one keeps the same relationship instead of losing it.
  */
 export const CITE_RATIO = 0.72;
-/** Below this a citation is decoration rather than an attribution. */
-export const CITE_FLOOR = 9;
+/**
+ * ── THE CITATION HAS A FLOOR, AND THE FLOOR SETS THE MAXIMUM ──────────────
+ * Ellie: "We need to set a minimum bound for this so that the citation is
+ * always readable. Working backwards from this, and using what we know about
+ * the heights, we can set a max quote length."
+ *
+ * That is the right order and it runs this way: the citation never goes below
+ * 11, which costs the quotation a fixed amount of room at every size, and what
+ * is left is the longest quotation that can ever be set. check-insight-fits
+ * computes that number from this one and prints it, and fails on any insight
+ * over it, so the limit is a measurement rather than a guess written down.
+ *
+ * 9 was the old floor and it was reached: a 12 point quotation took a 9 point
+ * citation, which is small print under small print.
+ */
+export const CITE_FLOOR = 11;
 export const CITE_LEADING = 1.45;
 /** What the budget sets aside for it. A book citation runs to two. */
 export const CITE_LINES = 2;

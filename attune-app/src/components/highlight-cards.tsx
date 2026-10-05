@@ -83,7 +83,15 @@ const c = Colors.light;
  * message titled "Insight of the day" tells the person receiving it nothing
  * about who sent it.
  */
-export const INSIGHT_SHARE_TITLE = 'Attune Relationships Insight of the Day';
+export const INSIGHT_SHARE_TITLE = 'Attune Relationships: Insight of the Day';
+/**
+ * The same words as a filename.
+ *
+ * The share sheet reads the picture's name, so the picture is named this. A
+ * colon is legal on disk and drawn as a slash, so it is the one character of
+ * her title that cannot come along.
+ */
+export const INSIGHT_SHARE_FILE = 'Attune Relationships Insight of the Day';
 
 /**
  * The card, rendered where nobody can see it, so it can be sent as a picture.
@@ -507,13 +515,21 @@ export function StoryCard({ card, onClose, style, journal, share }: {
                 <ShareButton
                   tone="light"
                   accessibilityLabel="Share the insight of the day"
-                  /* Ellie: "I want the message to be titled Attune Relationships
-                     Insight of the Day, and include a link to the site, but I
-                     want the image to be a picture of the insight of the day
-                     storycard." */
+                  /* ── THE PICTURE, AND ONE LINE ─────────────────────────
+                     Ellie: "I don't want the quote and citation written out in
+                     the message as well, and I don't want to include the link
+                     to the site since the insight pic has that anyways... can
+                     we title it 'Attune Relationships: Insight of the Day' and
+                     have that be the bold text that is sent prior to the
+                     image?"
+
+                     So the message IS the title, and there is no url: the card
+                     carries the quotation, the citation and the address, and
+                     repeating any of them in the text is the same words twice.
+                     Without a url the picture takes that slot on its own. */
                   title={INSIGHT_SHARE_TITLE}
-                  message={share}
-                  url={SITE_URL}
+                  message={INSIGHT_SHARE_TITLE}
+                  pictureName={INSIGHT_SHARE_FILE}
                   capture={shot}
                 />
               ) : null}

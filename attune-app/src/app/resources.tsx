@@ -32,7 +32,7 @@ import { lastSeen } from '@/api/last-seen';
 import type { ApiError, CatalogueItem, HomeResponse, Note, PostSummary, Tag } from '@/api/client';
 import Budget from '@/components/budget';
 import PostReader from '@/components/post-reader';
-import { insightCard, InsightCardShot, INSIGHT_SHARE_TITLE, StoryCard } from '@/components/highlight-cards';
+import { insightCard, InsightCardShot, INSIGHT_SHARE_TITLE, INSIGHT_SHARE_FILE, StoryCard } from '@/components/highlight-cards';
 import { SaveToJournal } from '@/components/journal';
 import Checklist from '@/components/checklist';
 import TabScreen from '@/components/tab-screen';
@@ -1146,15 +1146,14 @@ export default function ResourcesScreen() {
                   tone="light"
                   label="Share"
                   accessibilityLabel="Share the insight of the day"
-                  /* Ellie: "I want the message to be titled Attune Relationships
-                     Insight of the Day, and include a link to the site, but I
-                     want the image to be a picture of the insight of the day
-                     storycard that people can view, download, screenshot, etc."
-                     The card is rendered off the edge of the screen for exactly
-                     this: there is none on this banner to photograph. */
+                  /* The card is rendered off the edge of the screen for exactly
+                     this: there is none on this banner to photograph. The
+                     message is the title and nothing else, and no address goes,
+                     because the picture carries the quotation, the citation and
+                     the site. See the storycard view for her words. */
                   title={INSIGHT_SHARE_TITLE}
-                  message={insightShareText(home.research)}
-                  url={SITE}
+                  message={INSIGHT_SHARE_TITLE}
+                  pictureName={INSIGHT_SHARE_FILE}
                   capture={insightShot}
                 />
               </View>

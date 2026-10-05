@@ -132,15 +132,145 @@ export const notesApi = {
   purgeTag: (id) => post({ action: 'purgeTag', id }),
 };
 
+/**
+ * ── KEEPING AN INSIGHT, FROM A LAPTOP ─────────────────────────────────────
+ * Ellie: "Learn web page insight section is missing save button - I want the
+ * functionality to save it to a journal entry just like the app can."
+ *
+ * The app's SaveToJournal, as a web dialog. Everything that matters is the
+ * same and is shared rather than repeated: the anchor type and the day key
+ * come from api/_lib, the four sentences come from JOURNAL_COPY, and the write
+ * is the same `create` action on the same endpoint. What differs is the frame
+ * around it, because a sheet that rises from the bottom of a phone is not what
+ * a dialog does on a desktop.
+ *
+ * The quote goes in `anchor_context`, the column that already means "the words
+ * this was made on", and the commentary goes in the body. Putting the quote in
+ * the body would blur the two halves the tile is meant to separate, and a
+ * search for a phrase would find the quote as often as anything written.
+ *
+ * The commentary is optional, as it is in the app.
+ */
+export function SaveInsightToJournal({ quote, onClose }) {
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    setFailed(false);
+    const res = await notesApi.create({
+      body: note.trim(),
+      anchorType: JOURNAL_ANCHOR,
+      anchorKey: journalDayKey(),
+      anchorContext: quote,
+      visibility: 'private',
+    });
+    setBusy(false);
+    if (!res || res.error) { setFailed(true); return; }
+    onClose(true);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={JOURNAL_COPY.saveTitle}
+      onClick={() => onClose(false)}
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(14,11,7,0.45)', zIndex: 700,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem',
+      }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: C.warm, borderRadius: 20, padding: '1.5rem',
+          width: 'min(460px, 100%)', fontFamily: BFONT,
+          boxShadow: '0 24px 60px rgba(14,11,7,0.28)',
+        }}>
+        <div style={{
+          fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase',
+          fontWeight: 700, color: C.clay, marginBottom: '0.85rem',
+        }}>
+          {JOURNAL_COPY.saveTitle}
+        </div>
+        {/* The quote as it will be kept, so nobody saves something they have not
+            read. Italic with a rule beside it, the same as the app's. */}
+        <p style={{
+          fontFamily: BFONT, fontStyle: 'italic', color: C.text, lineHeight: 1.5,
+          borderLeft: `2px solid ${C.accent}`, paddingLeft: '0.75rem', margin: '0 0 1rem',
+          fontSize: '0.92rem',
+        }}>
+          {quote}
+        </p>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder={JOURNAL_COPY.savePlaceholder}
+          rows={4}
+          style={{
+            width: '100%', boxSizing: 'border-box', borderRadius: 12,
+            border: `1px solid ${C.stone}`, background: C.white, padding: '0.7rem',
+            fontFamily: BFONT, fontSize: '0.9rem', color: C.text, resize: 'vertical',
+          }}
+        />
+        {failed ? (
+          <p style={{ color: C.accent, fontSize: '0.8rem', margin: '0.6rem 0 0' }}>
+            {JOURNAL_COPY.saveFailed}
+          </p>
+        ) : null}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1rem' }}>
+          <button
+            type="button"
+            onClick={() => onClose(false)}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontFamily: BFONT, fontSize: '0.85rem', color: C.muted, padding: '0.6rem 0.9rem',
+            }}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={busy}
+            style={{
+              background: C.accent, border: 'none', borderRadius: 999, cursor: 'pointer',
+              fontFamily: BFONT, fontSize: '0.85rem', fontWeight: 700, color: C.white,
+              padding: '0.6rem 1.5rem', opacity: busy ? 0.6 : 1,
+            }}>
+            {JOURNAL_COPY.saveAction}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ══ MARKING THE RESULTS ═══════════════════════════════════════════════════ */
 
-/** The five things a selection can become, in the order the app lists them. */
+/**
+ * The five things a selection can become, in the order the app lists them, each
+ * drawn rather than spelled out.
+ *
+ * Ellie: "The notes toolbar that pops up when I select text online uses words,
+ * but can we switch to the icon toolbar we use in the app?"
+ *
+ * The app's row is an icon with a small label under it, and these are the SF
+ * Symbols it names, drawn: highlighter, underline, tag, square.and.pencil and
+ * paperplane. The label stays, because it is in the app's row too and because a
+ * paperplane on its own is a guess.
+ *
+ * ── THE SAME FIVE, IN THE SAME ORDER ──────────────────────────────────────
+ * This list and ACTIONS in attune-app/src/components/annotation-sheet.tsx are
+ * the same rule in two places, which an Expo project cannot avoid. Held by
+ * check-mark-toolbar: same ids, same order, same words.
+ */
 const ACTIONS = [
-  { id: 'highlight', label: 'Highlight' },
-  { id: 'underline', label: 'Underline' },
-  { id: 'tag', label: 'Tag' },
-  { id: 'note', label: 'Note' },
-  { id: 'share', label: 'Share' },
+  { id: 'highlight', label: 'Highlight', icon: 'M4 20h16M7 16l9-9 3 3-9 9H7v-3z' },
+  { id: 'underline', label: 'Underline', icon: 'M7 4v6a5 5 0 0 0 10 0V4M5 20h14' },
+  { id: 'tag', label: 'Tag', icon: 'M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9-9-9zM8 8h.01' },
+  { id: 'note', label: 'Note', icon: 'M4 20h4l10-10-4-4L4 16v4zM13 5l4 4' },
+  { id: 'share', label: 'Share', icon: 'M21 3L3 10l7 3 3 7 8-17z' },
 ];
 
 /**
@@ -297,12 +427,19 @@ export function MarkToolbar({ marking, partnerName }) {
               key={a.id}
               type="button"
               onClick={() => setStep(a.id)}
+              aria-label={a.label}
+              title={a.label}
               style={{
                 background: 'transparent', border: 'none', cursor: 'pointer',
-                padding: '0.4rem 0.6rem', fontSize: '0.72rem', color: C.text,
+                padding: '0.4rem 0.55rem', color: C.text,
                 fontFamily: BFONT, fontWeight: 600,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
               }}>
-              {a.label}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.accent}
+                strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={a.icon} />
+              </svg>
+              <span style={{ fontSize: '0.62rem', color: C.muted, fontWeight: 500 }}>{a.label}</span>
             </button>
           ))}
         </div>

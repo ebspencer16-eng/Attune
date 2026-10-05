@@ -52,7 +52,7 @@ const SUBJECT = 'Attune Relationships';
  * round: a link is readable as text and an image is not.
  */
 export default function ShareButton({
-  message, url, title = SUBJECT, label, tone = 'ink', accessibilityLabel, capture,
+  message, url, title = SUBJECT, label, tone = 'ink', accessibilityLabel, capture, pictureName,
 }: {
   /** What lands in the message. */
   message: string;
@@ -80,6 +80,19 @@ export default function ShareButton({
    * is exactly what it was before: a line of text and a link.
    */
   capture?: { current: View | null };
+  /**
+   * What the picture is called.
+   *
+   * Ellie: "When I click share, I'm seeing that the title is a long string of
+   * letters and numbers (1F3E11DE-3DBE-4552-BD9E-5C6A6...)."
+   *
+   * That string is the capture's temporary filename, and the sheet puts the
+   * file's name at the top because a file is what it is being handed.
+   * react-native-view-shot takes a `fileName`, so the fix is to name it rather
+   * than to try to talk the sheet out of reading it. No colon: it is a path on
+   * disk and the Finder draws a colon as a slash.
+   */
+  pictureName?: string;
 }) {
   const tint = tone === 'light' ? 'rgba(255,255,255,0.9)' : c.accent;
   const [busy, setBusy] = useState(false);
@@ -95,7 +108,9 @@ export default function ShareButton({
         let picture: string | null = null;
         if (capture?.current) {
           try {
-            picture = await captureRef(capture.current, { format: 'png', quality: 1 });
+            picture = await captureRef(capture.current, {
+              format: 'png', quality: 1, ...(pictureName ? { fileName: pictureName } : null),
+            });
           } catch (e) {
             /* No picture is not no share. The text and the link still go. */
             console.warn('[share] could not capture the card', e);

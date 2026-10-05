@@ -15,18 +15,21 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| O544 | **The arrows land on Highlights instead of the page they name.** Same shape as O537, which was the menu rows doing it, so the storycards are drawing over whatever section was asked for. Find what `go()` does not set that the menu's open now does, and make one path rather than two. |
+| O540 | **Drop the admin menu in the app.** After the four digits, straight to the dashboard overview; the hamburger on the site's mobile view is the nav from there. Delete the section list and the `adminSections` payload if nothing else reads it. |
+| O549 | **The desktop prompt tile is still wrong and I have not seen the real one.** My proof was a standalone harness, not her page: the demo home needs a session and I never got past it. Get the signed-in dashboard in front of a browser, measure the actual cell, then fix what is actually wrong. |
+| O548 | **Floor the citation and cap the quote.** The citation has a floor of 9 and nothing stops the quote reaching it. Set the smallest readable citation, work back through the arithmetic to the longest quotation that fits above it, and fail the build on an insight longer than that. |
+| O546 | **The share message is wrong.** The title is the picture's temp filename. She wants "Attune Relationships: Insight of the Day" as the bold line before the image, and nothing else: no quote, no citation, no link, because the picture carries all three. |
+| O550 | **Learn on the web: the share button sits against the In Practice peek.** Space between them. |
+| O551 | **Learn on the web has no Save on the insight.** The app saves it to a journal entry; the website does not offer it at all. Same payload, same journal. |
+| O552 | **Learn on the web: the peek is cut off and In Practice is not organised like the app's.** The app groups by category and the website does not. Read the app's shelf and match it. |
+| O553 | **The web selection toolbar uses words where the app uses icons.** Switch to the app's icon toolbar. |
+| O554 | **Confirm marking works on the website.** Select, highlight, underline, note, and the margin markers on a results page and an article. The app's half of this was broken for months with nothing failing, so measure rather than read. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O544 | **The arrows reach every page now.** They were on six of the eighteen: every page opted out and four then drew their own pair, so the code looked deliberate everywhere and most pages had nothing. One pair, drawn by the layout, 76 above the bottom so it clears the footer strip it was sitting on top of. A gate holds it and caught all seven plants. |
-| O540 | **Forgot your code, on the locked screen.** It asks the server, which only answers for your account or Carolina's, then lets you set a new one. To your question: the simulator keychain is real and behaves like the phone's, so this was never simulator-only. Something was already stored there; what was wrong is that there was no way past it. Worth saying plainly: a code you can reset by being signed in is a speed bump, not a lock. What protects the data is that every admin endpoint asks for ADMIN_SECRET regardless. |
-| O549 | **The desktop prompt tile draws a rounded square.** The picture was taking whatever height the card had left, which on a wide card is a letterbox, and it is the thing you rejected in the app. The card is now as wide as it is tall less the words, so the square fits without the page scrolling. On a short window the picture gives up its square rather than the card overflowing. |
-| O548 | **The citation shrinks with the quote.** It is 72% of whatever the quotation sets at, which is the ratio the tile already had at full size, so nothing moves on a short insight. And it buys the quote back the room it gives up, as you guessed. |
-| O547 | **The glow behind the cover icon is stronger.** 13% of the accent to 31%, still fading out well inside the circle so it does not become the disc you asked me to remove. |
-| O546 | **Sharing the insight sends the storycard as a picture.** Titled "Attune Relationships Insight of the Day", the quote and the link in the message, the card as the image. The Share on the Learn banner has no card on screen, so one is rendered off the edge to photograph. **I have not seen the share sheet myself**: the Simulator had no window, so synthetic taps had nothing to land on while screenshots kept working, which reads exactly like a dead button. What I can show you is the code and the check, not a screenshot. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -45,6 +48,7 @@
 
 | Verified by you | What it was |
 |--|--|
+| O547 | The glow behind the insights cover icon was too faint to see on cream; raised from 13% of the accent to 31%. |
 | O545 | The insights menu carets were positioned against the whole group, so Communication's sat above its row instead of beside it. |
 | O543 | Insights cover pages on the site drew a dot instead of the section icon, because the code read a field those rows have never carried. |
 | O542 | A long insight of the day pushed the In Practice peek off the bottom of the Learn tab; the quote now sets to whatever size fits the room the peek leaves. |

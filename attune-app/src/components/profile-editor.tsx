@@ -33,6 +33,7 @@ import { LOADING } from '@/constants/loading-copy';
 import {
   Colors, Palette, Radius, Spacing, Type, inputType,
 } from '@/constants/attune-theme';
+import { SAVE_FAILED } from '@/constants/save-copy';
 
 const c = Colors.light;
 
@@ -86,7 +87,7 @@ export default function ProfileEditor({ onSaved }: { onSaved?: () => void }) {
       setFailed(
         r.error.kind === 'offline'
           ? 'No connection. Nothing was lost; try again in a moment.'
-          : 'That did not save. Try again in a moment.',
+          : SAVE_FAILED,
       );
       return;
     }

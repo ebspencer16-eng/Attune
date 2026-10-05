@@ -67,7 +67,7 @@ const FIT = await (async () => {
   return mod.exports;
 })();
 
-const { quoteFit, citeHeight, QUOTE_BASE, QUOTE_LEADING, QUOTE_FLOOR, CHAR_RATIO } = FIT;
+const { quoteFit, citeHeight, citeSize, QUOTE_BASE, QUOTE_LEADING, QUOTE_FLOOR, CHAR_RATIO } = FIT;
 
 if (!QUOTE_BASE || !QUOTE_LEADING || !QUOTE_FLOOR || !CHAR_RATIO || typeof quoteFit !== 'function') {
   console.error('[check-insight-fits] attune-app/src/lib/insight-fit.ts did not give up the'
@@ -230,8 +230,36 @@ const tightest = (() => {
   return null;
 })();
 
+/**
+ * ── THE LONGEST QUOTATION THAT CAN EVER BE SET ────────────────────────────
+ * Ellie: "We need to set a minimum bound for this so that the citation is
+ * always readable. Working backwards from this, and using what we know about
+ * the heights, we can set a max quote length."
+ *
+ * Working backwards is this: the citation's floor costs a fixed height, the
+ * quote's floor sets the leading, the room is what it is, and the product of
+ * the lines that leaves and the characters a line holds is the cap. It is
+ * printed rather than written down anywhere, because the moment it is written
+ * down it is a second copy of four numbers that can each move.
+ *
+ * It is a limit on the RAW length. A quotation is one paragraph here, so
+ * characters is the honest unit; words would need an assumption about their
+ * length and the per-line figure already carries one.
+ */
+const CAP = (() => {
+  const leading = Math.round(QUOTE_FLOOR * QUOTE_LEADING);
+  const lines = Math.floor((room - citeHeight(QUOTE_FLOOR)) / leading);
+  const perLine = Math.max(12, Math.floor(SCREEN.insightW / (QUOTE_FLOOR * CHAR_RATIO)));
+  return { chars: lines * perLine, lines, perLine };
+})();
+
+const longestNow = INSIGHTS.reduce((a, b) => ((b?.body || '').length > (a?.body || '').length ? b : a));
+
 console.log(`[check-insight-fits] all ${INSIGHTS.length} insights fit above the peek on the`
   + ` ${SCREEN.scrollH}pt screen this was measured on, the longest at ${smallest}pt with its`
   + ` leading and its citation derived from it.`);
 console.log(`  the longest quotation needs a scrolling area of ${tightest ?? 'more than ' + SCREEN.scrollH}pt;`
   + ' a phone shorter than that is not covered here.');
+console.log(`  the most an insight can run to is ${CAP.chars} characters: ${CAP.lines} lines of about`
+  + ` ${CAP.perLine} at the ${QUOTE_FLOOR}pt floor, above an ${citeSize(QUOTE_FLOOR)}pt citation.`
+  + ` The longest in the file is ${(longestNow?.body || '').length}.`);

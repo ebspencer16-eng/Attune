@@ -144,9 +144,16 @@ for (const c of cases) {
   const readFile = (rel) => readFileSync(`${ROOT}${rel}`, 'utf8');
   const bare = (src) => src.replace(/\/\*[\s\S]*?\*\//g, ' ')
     .split('\n').map((l) => l.replace(/(^|[^:])\/\/.*$/, '$1')).join('\n');
-  const TITLE = 'Attune Relationships Insight of the Day';
+  const TITLE = 'Attune Relationships: Insight of the Day';
 
   const cards = readFile('attune-app/src/components/highlight-cards.tsx');
+  if (!/INSIGHT_SHARE_FILE = '[^']+'/.test(cards)) {
+    bad.push('no file declares the picture\'s name.');
+  }
+  if (/INSIGHT_SHARE_FILE = '[^']*:/.test(cards)) {
+    bad.push('the picture\'s name has a colon in it. It is a path on disk and a colon is drawn'
+      + ' as a slash, so the name arrives wrong.');
+  }
   if (!cards.includes(`'${TITLE}'`)) {
     bad.push(`no file declares the title "${TITLE}". She named it; it is not a default to drift`
       + ' from.');
@@ -173,14 +180,41 @@ for (const c of cases) {
       bad.push(`${where} shares the insight with no card to photograph, so it sends the quote as`
         + ' text. "I want that storycard to be visible in the text, not just the written quote."');
     }
-    if (!/url=\{/.test(el)) bad.push(`${where} sends no address, and she asked for a link.`);
+    /**
+     * ── THE MESSAGE IS THE TITLE, AND NOTHING ELSE GOES ───────────────────
+     * Ellie, having seen the first version: "I don't want the quote and
+     * citation written out in the message as well, and I don't want to include
+     * the link to the site since the insight pic has that anyways."
+     *
+     * The card carries the quotation, the citation and the address. Anything of
+     * those in the text is the same words twice, and the first version sent all
+     * three. This rule used to be the opposite, which is why it is spelled out:
+     * a url here is a regression, not a feature coming back.
+     */
+    if (!/message=\{INSIGHT_SHARE_TITLE\}/.test(el)) {
+      bad.push(`${where} sends something other than the title as the message. The picture carries`
+        + ' the quotation, the citation and the link; the words beside it are the title.');
+    }
+    if (/\burl=\{/.test(el)) {
+      bad.push(`${where} sends an address alongside the picture. She asked for it gone: "I don't`
+        + ' want to include the link to the site since the insight pic has that anyways."');
+    }
+    if (!/pictureName=\{INSIGHT_SHARE_FILE\}/.test(el)) {
+      bad.push(`${where} does not name the picture, so the sheet shows the capture's temporary`
+        + ' filename: "the title is a long string of letters and numbers".');
+    }
   }
 
   const btn = bare(readFile('attune-app/src/components/share-button.tsx'));
   if (!/captureRef\(/.test(btn)) bad.push('share-button.tsx captures nothing, so no picture can go.');
   if (!/picture && url \?[^\n]*\$\{url\}/.test(btn)) {
     bad.push('share-button.tsx does not put the address into the message when it sends a picture.'
-      + ' iOS takes one url and the picture is it, so a link left in that slot never leaves.');
+      + ' iOS takes one url and the picture is it, so a link left in that slot never leaves.'
+      + ' This is for the callers that DO send one; the insight is not one of them.');
+  }
+  if (!/fileName: pictureName/.test(btn)) {
+    bad.push('share-button.tsx does not pass the picture\'s name to captureRef, so the sheet'
+      + ' falls back to the temporary filename it was given.');
   }
   if (!/url: picture \|\| url/.test(btn)) {
     bad.push('share-button.tsx does not prefer the picture for the url slot, so the card is'
@@ -219,4 +253,5 @@ console.log(`[check-insight-share] ${cases.length} cases driven through insightO
   + ` (${cited} of them carrying a real citation) plus 7 shapes the rotation never produces:`
   + ' the app and the website build the same share text, blank line and all.');
 console.log('  and both places that share it send the storycard as a picture, titled as she asked,'
-  + ' with the address in the message because the picture takes the url slot.');
+  + ' with the title as the only words beside it and the picture named so the sheet'
+  + ' does not show a temporary filename.');

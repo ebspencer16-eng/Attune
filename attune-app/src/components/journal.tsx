@@ -72,6 +72,7 @@ import { createNote, deleteNote, fetchNotes, type Note } from '@/api/client';
 import {
   Colors, Fonts, inputType, Lift, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
+import { SAVE_FAILED } from '@/constants/save-copy';
 
 const c = Colors.light;
 
@@ -908,7 +909,7 @@ const FAILED = 'Your journal could not be loaded. Pull down to try again.';
 const SAVE_TITLE = 'Keep this in your journal';
 const SAVE_PLACEHOLDER = 'Add commentary';
 const SAVE_ACTION = 'Save';
-const SAVE_FAILED = 'That did not save. Try again in a moment.';
+
 const UNLOCK = 'Unlock';
 const TRY_AGAIN = 'Try again';
 /** Shown when the phone was asked and said no. A placeholder, like the rest. */

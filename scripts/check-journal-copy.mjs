@@ -72,6 +72,26 @@ const NOTES_PAIRS = {
   sharedEmpty: 'PEEK_SHARED_EMPTY',
 };
 const LOCK_PAIRS = { lockedApp: 'JOURNAL_LOCKED' };
+/**
+ * The four sentences on the sheet that keeps an insight.
+ *
+ * They lived in the app alone until the website learned to save one too. Same
+ * promise as PAIRS: the app's constant is a mirror, this holds it to the home.
+ */
+const SAVE_PAIRS = {
+  saveTitle: 'SAVE_TITLE',
+  savePlaceholder: 'SAVE_PLACEHOLDER',
+  saveAction: 'SAVE_ACTION',
+};
+/**
+ * The failure line is in a file of its own, because three screens say it.
+ *
+ * The sheet that keeps an insight, the profile editor and profile setup each
+ * had their own copy of it, which only became visible when the sentence got a
+ * home: check-app-copy-mirrors reported two of the three the moment it was
+ * added to JOURNAL_COPY. One constant now, in attune-app/src/constants.
+ */
+const SAVE_FAILED_PAIR = { saveFailed: 'SAVE_FAILED' };
 
 const fails = [];
 const app = readFileSync(APP, 'utf8');
@@ -94,7 +114,7 @@ for (const [key, name] of Object.entries(PAIRS)) {
 }
 
 /** And the website has to actually read the module, not restate it. */
-for (const key of Object.keys(PAIRS)) {
+for (const key of [...Object.keys(PAIRS), ...Object.keys(SAVE_PAIRS), ...Object.keys(SAVE_FAILED_PAIR)]) {
   if (!web.includes(`JOURNAL_COPY.${key}`)) {
     fails.push(`src/notes-web.jsx never draws JOURNAL_COPY.${key}. A string in`
       + ' the shared module that one surface does not render is a string that'
@@ -115,14 +135,25 @@ const readConst = (src, name) => {
   return m ? m[1].replace(/\\'/g, "'") : null;
 };
 
-for (const [map, pairs, label] of [
-  [NOTES_COPY, NOTES_PAIRS, 'NOTES_COPY'],
-  [JOURNAL_COPY, LOCK_PAIRS, 'JOURNAL_COPY'],
+/* The sheet that keeps an insight is in components/journal.tsx, not in the Notes
+   tab, so its four sentences are read from there. Each row names its own file:
+   a gate that looks for a constant in the wrong file reports the string missing,
+   which reads as "the app stopped saying it" when the truth is that this is
+   pointed at the wrong place. */
+const journalApp = app;
+
+for (const [map, pairs, label, src, where] of [
+  [JOURNAL_COPY, SAVE_PAIRS, 'JOURNAL_COPY', journalApp, 'attune-app/src/components/journal.tsx'],
+  [JOURNAL_COPY, SAVE_FAILED_PAIR, 'JOURNAL_COPY',
+    readFileSync(`${ROOT}attune-app/src/constants/save-copy.ts`, 'utf8'),
+    'attune-app/src/constants/save-copy.ts'],
+  [NOTES_COPY, NOTES_PAIRS, 'NOTES_COPY', notesApp, 'attune-app/src/app/notes.tsx'],
+  [JOURNAL_COPY, LOCK_PAIRS, 'JOURNAL_COPY', notesApp, 'attune-app/src/app/notes.tsx'],
 ]) {
   for (const [key, name] of Object.entries(pairs)) {
-    const got = readConst(notesApp, name);
+    const got = readConst(src, name);
     if (got === null) {
-      fails.push(`attune-app/src/app/notes.tsx no longer declares ${name}, which holds the`
+      fails.push(`${where} no longer declares ${name}, which holds the`
         + ` app's copy of ${label}.${key}. Either the string moved, in which case point this`
         + ' gate at where it went, or the app stopped saying it. Refusing to skip it: a gate'
         + ' that has lost half its subject must not report success on the other half.');
@@ -154,6 +185,7 @@ if (fails.length) {
   process.exit(1);
 }
 const total = Object.keys(PAIRS).length + Object.keys(NOTES_PAIRS).length
+  + Object.keys(SAVE_PAIRS).length + Object.keys(SAVE_FAILED_PAIR).length
   + Object.keys(LOCK_PAIRS).length;
 console.log(`✓ check-journal-copy: ${total} strings across the journal and the Notes tab,`
   + ' the same on the website and in the app, every one of them drawn on both.');

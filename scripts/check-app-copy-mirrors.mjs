@@ -115,6 +115,7 @@ const MIRRORS = {
   'attune-app/src/constants/waiting.ts': 'check-waiting-copy.mjs',
   'attune-app/src/app/notes.tsx': 'check-journal-copy.mjs',
   'attune-app/src/components/journal.tsx': 'check-journal-copy.mjs',
+  'attune-app/src/constants/save-copy.ts': 'check-journal-copy.mjs',
 };
 
 const runs = readFileSync(join(ROOT, 'package.json'), 'utf8');

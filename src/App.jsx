@@ -40,10 +40,11 @@ import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insights.js";
 /* Every In Practice article, which the app is served through /api/posts. */
-import { IN_PRACTICE } from "../api/_in-practice.js";
+import { IN_PRACTICE, shelfFor } from "../api/_in-practice.js";
+import { POST_CATEGORIES } from "../api/_lib/post-categories.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
-import { resultsNav, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
+import { resultsNav, navPageIds, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
 import { webTargetFor } from "../api/_lib/next-action.js";
 /* The one counter for how far through an exercise someone is. /api/home uses
    it to tell the app; the dashboard table uses it to draw the same ring. */
@@ -103,7 +104,8 @@ import { availableSections as availableResultsSections, PAGE_TITLES as SC_TITLES
  * /api/notes carried the real ones, so a mark made on a phone was invisible on
  * a laptop and the other way round. See src/notes-web.jsx.
  */
-import { NotesView as ConnectedNotesView, ResultsMarkingLayer, notesApi } from "./notes-web.jsx";
+import { NotesView as ConnectedNotesView, ResultsMarkingLayer, SaveInsightToJournal, notesApi } from "./notes-web.jsx";
+import { JOURNAL_COPY } from "../api/_lib/journal-copy.js";
 import { RESULTS_SECTION_LABELS, COVER_SECTIONS } from "../api/_lib/results-sections.js";
 // The reflection question set, moved out of this file so the app can reach
 // it too. See api/_anniversary-questions.js.
@@ -3720,8 +3722,23 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
   }, [onPeek]);
   const q = query.trim().toLowerCase();
   const shown = q
-    ? articles.filter((a) => `${a.title} ${a.categoryLabel}`.toLowerCase().includes(q))
+    ? articles.filter((a) => `${a.title} ${shelfFor(a)}`.toLowerCase().includes(q))
     : articles;
+
+  /**
+   * The shelves, in the order POST_CATEGORIES gives them, each with what is on
+   * it. Derived from shelfFor rather than from a label on the article, which is
+   * the same call /api/posts makes for the app.
+   */
+  const shelves = (() => {
+    const byShelf = new Map();
+    for (const a of shown.slice(4)) {
+      const shelf = shelfFor(a);
+      if (!byShelf.has(shelf)) byShelf.set(shelf, []);
+      byShelf.get(shelf).push(a);
+    }
+    return POST_CATEGORIES.filter((c) => byShelf.has(c)).map((c) => [c, byShelf.get(c)]);
+  })();
 
   /** One article, as the app draws it: a grey tile with a bookmark corner. */
   const tile = (a) => (
@@ -3854,12 +3871,48 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
         </div>
       </div>
 
+      {/* ── BELOW THE FOLD, BY SHELF ──────────────────────────────────────
+          Ellie: "the in practice section doesn't contain all of the articles
+          organized like the app does. Please match the app."
+
+          The app's words for the shape, from when she asked for it there: "have
+          them organized in sections with eyebrow text for each section... Each
+          section should have articles side by side, and users can swipe to see
+          them." So: an eyebrow naming the shelf, and a row that scrolls
+          sideways under it.
+
+          The shelves come from shelfFor, which is what /api/posts sends the app,
+          rather than from each article's own label. Two of the twelve used to
+          carry a label that disagreed with their shelf, which is why the label
+          stopped living on the article.
+
+          A shelf with nothing on it is not drawn, which is also why this maps
+          over what is there rather than over the four names. While a search is
+          running the shelves hold only what matched. */}
       {shown.length > 4 && (
-        <div style={{
-          display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
-          gap: "0.5rem", marginTop: "0.5rem",
-        }}>
-          {shown.slice(4).map((a) => tile(a))}
+        <div style={{ marginTop: "1.5rem" }}>
+          {shelves.map(([shelf, items]) => (
+            <div key={shelf} style={{ marginBottom: "1.5rem" }}>
+              <div style={{
+                fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase",
+                fontWeight: 700, fontFamily: BFONT, color: "#A89C8C", marginBottom: "0.6rem",
+              }}>
+                {shelf}
+              </div>
+              {/* Side by side, and it scrolls. The app's row is a horizontal
+                  ScrollView; this is the same thing a browser already does. */}
+              <div style={{
+                display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.35rem",
+                scrollbarWidth: "thin",
+              }}>
+                {items.map((a) => (
+                  <div key={a.slug} style={{ flex: "0 0 auto", width: isMobile ? 190 : 230 }}>
+                    {tile(a)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
       {!shown.length && (
@@ -3872,6 +3925,67 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
 }
 
 function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
+  /**
+   * ── THE PICTURE IS A ROUNDED SQUARE, AND THE WIDTH COMES FROM THE HEIGHT ─
+   * Ellie, of this tile on her desktop: "Home page action prompt tiles are
+   * rendering incorrectly on my desktop", and then "Still messed up."
+   *
+   * The picture was taking whatever height the card had left, which on a 330
+   * wide card is a letterbox. She had already rejected exactly that in the app:
+   * "I want white boxes holding rounded square images with the text under it,
+   * right now the image takes up the full top half of the tile rather than
+   * being its own rounded square."
+   *
+   * A square picture makes the card as tall as it is wide, plus the words, and
+   * this page must not scroll. So the width has to come from the height:
+   *
+   *     card width = the room these cards have  -  the words under the picture
+   *
+   * ── WHY MEASURED AND NOT A CONTAINER QUERY ─────────────────────────────
+   * The first version did this in CSS with `container-type: size`, which is the
+   * same arithmetic and needs every ancestor between here and the window to
+   * have a definite height. I could not get this screen in front of a browser
+   * to find out whether they do: it needs an account, and `?demo=1` on it
+   * renders blank rather than a dashboard. A layout whose correctness depends
+   * on a chain I cannot check is a bad bet, and she had already told me once
+   * that it was still wrong.
+   *
+   * One measured number has no chain. Before the first measurement the card
+   * takes the whole cell and the picture fills what is left, which is what it
+   * did before any of this, so the worst case is the old layout rather than a
+   * broken one.
+   */
+  const promptsRef = useRef(null);
+  const [promptsH, setPromptsH] = useState(0);
+  useEffect(() => {
+    const el = promptsRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver((entries) => {
+      const h = Math.round(entries[0].contentRect.height);
+      setPromptsH((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  /**
+   * 120 is the words under the picture, and it is measured rather than added
+   * up: rendered at four heights the card comes out 108 taller than its
+   * picture every time, which is the two clamped lines, the hairline and the
+   * padding. 120 leaves a dozen in hand.
+   *
+   * 200 is a floor. Without it a short window makes a card small enough to look
+   * like a mistake, and the better trade there is a picture that gives up its
+   * square: the card is capped at the cell, so the picture shrinks rather than
+   * the card overflowing or the page scrolling.
+   */
+  const cardW = promptsH ? Math.max(200, promptsH - 120) : 0;
+  const cardStyle = cardW
+    ? { width: cardW, maxWidth: "100%", maxHeight: "100%" }
+    : { width: "100%" };
+  const picStyle = cardW
+    ? { aspectRatio: "1 / 1", flex: "0 1 auto", minHeight: 0 }
+    : { flex: "1 1 auto", minHeight: 0 };
+
   /**
    * ── `secondary` IS A LIST, NOT A CARD ───────────────────────────────────
    * Ellie, with a screenshot: "A few problems with this page. Formatting is
@@ -4081,67 +4195,34 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
         {/* Two across, on a phone as well. The app puts them side by side at
             390 points wide and stacking them here was the layout differing from
             the app on the one screen Ellie looks at most. */}
-        {/* ── THE PICTURE IS A ROUNDED SQUARE ──────────────────────────────
-            Ellie, of this tile on her desktop: "Home page action prompt tiles
-            are rendering incorrectly on my desktop." On a 680 column each card
-            is about 330 wide and the picture was taking whatever height the
-            card had left, which on a wide card is a letterbox. She had already
-            rejected exactly that in the app: "I want white boxes holding
-            rounded square images with the text under it, right now the image
-            takes up the full top half of the tile rather than being its own
-            rounded square."
-
-            A square picture makes the card as tall as it is wide plus the
-            words, and this page must not scroll, so the width has to come from
-            the height rather than the other way round. That is one line of
-            arithmetic the browser can do: the cell is a size container, and the
-            card is as wide as the cell is tall, less the words under the
-            picture. 120 is those words, and it is measured rather than added
-            up: rendered at four window heights the card comes out 108 points
-            taller than its picture every time, which is the two clamped lines,
-            the hairline and the padding. 120 leaves a dozen points in hand.
-
-            Where container units are not understood the card takes the whole
-            cell and the picture goes back to filling what is left, which is
-            what it does today: a worse layout, not a broken one. */}
         <style>{`
-          .ah-cell { container-type: size; min-width: 0; display: flex; align-items: flex-start; }
+          .ah-cell { min-width: 0; display: flex; align-items: flex-start; }
           /* The pair hugs the middle rather than each card floating in its own
              half, which is how the app has them: side by side with one gap. */
           .ah-cell:nth-child(odd) { justify-content: flex-end; }
           .ah-cell:nth-child(even) { justify-content: flex-start; }
-          /* 200 is a floor. Without it a short window makes a card small enough
-             to look like a mistake, and the better trade there is a picture
-             that gives up its square. max-height is what lets it: the card is
-             capped at the cell, so the picture shrinks rather than the card
-             overflowing or the page scrolling. */
-          .ah-card { width: min(100%, max(200px, calc(100cqh - 120px))); max-height: 100%; }
-          .ah-pic { aspect-ratio: 1 / 1; flex: 0 1 auto; min-height: 0; }
-          @supports not (width: 1cqh) {
-            .ah-card { width: 100%; }
-            .ah-pic { aspect-ratio: auto; flex: 1 1 auto; }
-          }
         `}</style>
-        <div style={{
+        <div ref={promptsRef} style={{
           display: "grid", gridTemplateColumns: "1fr 1fr",
           gap: isMobile ? "0.65rem" : "1.1rem",
-          /* A row with a definite height, which `alignContent: start` takes
-             away: a size container whose own height comes from its content
-             measures zero, and the first version of this drew a 34px card. */
+          /* A row with a definite height. Without it the row sizes to its
+             content and the cards size to the row, and the two wait for each
+             other: the first version of this drew a 34px card. */
           gridTemplateRows: "minmax(0, 1fr)",
           flex: "1 1 auto", minHeight: 0,
         }}>
           {placeholders.map((p) => (
             <div key={p.id} className="ah-cell">
             <div aria-hidden="true" className="ah-card" style={{
+              ...cardStyle,
               background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
               padding: isMobile ? "0.85rem" : "1rem",
               display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden",
             }}>
               <div className="ah-pic" style={{
+                ...picStyle,
                 width: "100%", borderRadius: 12,
                 background: "#F6F1EA", marginBottom: "0.7rem",
-                minHeight: 0,
                 /* ── THE MARK SITS IN THE CORNER, AS IT DOES IN THE APP ──
                    Ellie: "Home page action prompt tiles on web are missing the
                    hairline below the hero and the mark in the image box."
@@ -4163,6 +4244,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
             <div key={card.id} className="ah-cell">
             <button onClick={() => onCard(card)} className="ah-card"
               style={{
+                ...cardStyle,
                 background: "white", border: "1px solid #EFE7DC", borderRadius: 18,
                 padding: isMobile ? "0.85rem" : "1rem", textAlign: "left",
                 cursor: "pointer", fontFamily: BFONT,
@@ -4175,6 +4257,7 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                   do, because a card whose title is cut off is a card that has
                   stopped working. */}
               <div className="ah-pic" style={{
+                ...picStyle,
                 width: "100%", borderRadius: 12,
                 /* ── THE PAYLOAD HAS NEVER CARRIED A TINT ──────────────
                    This read `card.tint`, and nothing on the server has ever
@@ -4186,14 +4269,12 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
                    the payload does not have, and an undefined property is a
                    default rather than an error. See cardTint. */
                 background: cardTint(cardIdx), marginBottom: "0.7rem",
-                /* The square, and the card's width, are in the stylesheet above:
-                   an aspect ratio needs a width that does not come from the
-                   height, and here it is the height that is known. This used to
-                   carry `flex: 1 1 auto` with a note saying an aspect ratio
-                   could not be used because a definite height does not shrink.
-                   That was true and the conclusion was wrong: the answer is to
-                   make the width definite first. */
-                minHeight: 0,
+                /* The square is in picStyle, and it only arrives once the card's
+                   width is known. This used to carry `flex: 1 1 auto` with a
+                   note saying an aspect ratio could not be used because a
+                   definite height does not shrink. That was true and the
+                   conclusion was wrong: the answer is to make the width
+                   definite first, which is what the measurement is for. */
                 /* ── THE MARK SITS IN THE CORNER, AS IT DOES IN THE APP ──
                    Ellie: "Home page action prompt tiles on web are missing the
                    hairline below the hero and the mark in the image box."
@@ -7774,20 +7855,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   );
 
   // Prev/Next navigation
-  // allPages must exactly match sidebar order so Prev/Next stays in sync with the nav
-  // Domain order matches sidebar exactly
-  const allPages = [
-    "highlights",
-    "couple-type",
-    "comm-overview",
-    ...UR_DOMAINS.map(g => `comm-${g.id}`),
-    "exp-overview",
-    ...FIXED_CATS.map((fc) => fc.section),
-    ...(hasAnniversary ? ["reflection-overview", "reflection-ratings", "reflection-story"] : []),
-    ...(intimacyBothDone ? ["intimacy-overview", ...INTIMACY_DOMAINS.map(d => `intimacy-${d.id}`)] : []),
-    ...(conflictListed ? ["conflict-overview", "conflict-snapshot", "conflict-patterns", "conflict-wrote"] : []),
-    "what-comes-next",
-  ];
+  /**
+   * ── THE PAGE ORDER IS THE NAV'S, NOT A COPY OF IT ───────────────────────
+   * Ellie: "clicking the arrows takes me to the storycard highlights."
+   *
+   * This was a hand-typed list beside a shared one, which CLAUDE.md says is
+   * always the shorter list, and it was: the five cover pages were not in it.
+   * So on any cover `curIdx` was -1, the right arrow read `curIdx < length - 1`
+   * as true, and `allPages[0]` is Highlights. Every cover's arrow went there.
+   *
+   * navPageIds is the nav flattened in order, which is what this wanted to be.
+   * The old list also restated UR_DOMAINS and FIXED_CATS, so a category moving
+   * would have walked the arrows out of step with the sidebar silently.
+   */
+  const allPages = navPageIds({
+    hasReflection: hasAnniversary,
+    intimacyReady: intimacyBothDone,
+    conflictListed,
+  });
   const curIdx = allPages.indexOf(section);
   /**
    * ── THE ARROWS FLOAT, AS THEY DO IN THE APP ────────────────────────────
@@ -7824,6 +7909,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   });
   const PrevNext = () => (
     <>
+      {/* A section the nav does not list has no place in the sequence, so it
+          gets no arrows. Before this, -1 drew a Next that went to Highlights. */}
       {curIdx > 0 ? (
         <button
           onClick={() => go(allPages[curIdx - 1])}
@@ -7833,7 +7920,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {"\u2039"}
         </button>
       ) : null}
-      {curIdx < allPages.length - 1 ? (
+      {curIdx >= 0 && curIdx < allPages.length - 1 ? (
         <button
           onClick={() => go(allPages[curIdx + 1])}
           aria-label={`On to ${getPageLabel(allPages[curIdx + 1])}`}
@@ -13222,6 +13309,8 @@ export default function App() {
       : (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? _secMap[_demoSec]
       : (initialView === 'results' && _savedResults?.activeResult ? _migrateResult(_savedResults.activeResult) : "overview")
   );
+  /** The insight the Save dialog is open on, or null. */
+  const [saveInsight, setSaveInsight] = useState(null);
   const [highlightsSeen, setHighlightsSeen] = useState(
     (initialView === 'results' && _deepSection) ? true
       : (initialView === 'results' && _demoSec && _secMap[_demoSec]) ? true
@@ -15748,10 +15837,24 @@ export default function App() {
                        the sheet's measured head. The first version guessed the
                        banner at 250 points and the search box ended up under
                        the fold, which is the kind of number that is wrong on
-                       every window except the one it was tuned on. */
-                    minHeight: (learnPeek && learnTop)
+                       every window except the one it was tuned on.
+
+                       ── HEIGHT, NOT MIN-HEIGHT ─────────────────────────
+                       Ellie: "Learn web page in practice peek is not fully
+                       visible." A minimum is a floor and not a ceiling, so
+                       anything in here taller than its share pushed the sheet
+                       down by the difference and took the peek off the bottom
+                       with it. A height is the budget this was always meant to
+                       be, and the space-between inside it does the distributing.
+
+                       What this does NOT do is shrink the quotation to fit, the
+                       way the app's Learn tab does. On a short enough window a
+                       long insight will still reach the sheet. That is a real
+                       limit and it is named in TASKS.md rather than hidden. */
+                    height: (learnPeek && learnTop)
                       ? `calc(100dvh - ${learnTop}px - ${learnPeek}px)`
                       : undefined,
+                    minHeight: 0,
                   }}>
                   {/* ── THE APP'S THREE TOOL TILES ────────────────────────
                       Ellie: "On learn, reorder the resource tiles. First should
@@ -15867,11 +15970,32 @@ export default function App() {
                             for the same reason: the citation runs full width and
                             the controls are the next block under it.
 
-                            Share only. The app's Save puts the insight in the
-                            relationship journal, and the website has no way to
-                            write one, so a Save here would be a control that
-                            does nothing. Named in TASKS.md rather than drawn. */}
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.1rem" }}>
+                            ── AND SAVE, WHICH USED TO BE MISSING ──────────
+                            Ellie: "Learn web page insight section is missing
+                            save button - I want the functionality to save it to
+                            a journal entry just like the app can." The note
+                            here used to say the website had no way to write a
+                            journal entry. It has had one the whole time:
+                            notesApi.create is the same action the app calls.
+
+                            ── AND ROOM UNDER THEM ─────────────────────────
+                            "Need space between the share button and the in
+                            practice peek on learn web page." This block is the
+                            last thing above the sheet, and the sheet starts
+                            exactly where the window ends less its own head, so
+                            the controls sat against it. */}
+                        <div style={{
+                          display: "flex", justifyContent: "flex-end", gap: "0.6rem",
+                          marginTop: "1.1rem", paddingBottom: isMobile ? "1.5rem" : "2rem",
+                        }}>
+                          <button
+                            onClick={() => setSaveInsight(insight)}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", borderRadius: 999, border: "1px solid rgba(255,255,255,0.35)", background: "transparent", padding: "0.45rem 1rem", cursor: "pointer", fontFamily: BFONT, fontSize: "0.78rem", fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+                            </svg>
+                            {JOURNAL_COPY.saveAction}
+                          </button>
                           <button
                             onClick={() => {
                               /* The same text the app shares, from the same
@@ -17226,6 +17350,15 @@ export default function App() {
         )}
 
     </div>
+    {/* Keeping the insight of the day. The same write the app makes, from the
+        same endpoint; see SaveInsightToJournal. */}
+    {saveInsight && (
+      <SaveInsightToJournal
+        quote={insightShareText(saveInsight)}
+        onClose={(saved) => { setSaveInsight(null); if (saved) toast("Saved to your journal"); }}
+      />
+    )}
+
     {showPortraitSetup && (
       <PortraitSetup
         userName={userName}

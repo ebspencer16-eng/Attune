@@ -21,7 +21,6 @@ import { nextActions, greeting, appTargetFor } from './_lib/next-action.js';
 import { isBetaOrderSet } from './_lib/beta.js';
 import { progressFor } from './_lib/exercise-progress.js';
 import { isAdminAddress } from './_lib/admins.js';
-import { ADMIN_SECTIONS } from './_lib/admin-sections.js';
 import { EXERCISES, EXERCISE_COLUMNS, isExerciseDone } from './_exercises.js';
 import { resultsGate } from './_lib/results-gate.js';
 import { CATALOGUE } from './_catalogue.js';
@@ -380,7 +379,6 @@ export default async function handler(req) {
        * Null for everyone else, because it is a map of a surface they have no
        * business knowing the shape of.
        */
-      adminSections: isAdminAddress(me.email) ? ADMIN_SECTIONS : null,
       greeting: greeting({
         now: state.now,
         firstName: state.firstName,

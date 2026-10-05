@@ -50,6 +50,23 @@ export const JOURNAL_COPY = {
   noMatch: 'Nothing here matches that.',
   /** No entries at all, yet. */
   empty: 'Nothing here yet. The first entry is usually the hardest one.',
+
+  /**
+   * ── KEEPING AN INSIGHT ────────────────────────────────────────────────
+   * Ellie: "there should be a button on the insight of the day page that allows
+   * users to save this to relationship journal. It should save nicely in a tile
+   * with the quote and the user can add commentary about it."
+   *
+   * Four sentences that were typed into attune-app/src/components/journal.tsx
+   * and nowhere else, which was fine while the app was the only surface that
+   * could save one. Then: "Learn web page insight section is missing save
+   * button - I want the functionality to save it to a journal entry just like
+   * the app can." The moment there are two surfaces the words need one home.
+   */
+  saveTitle: 'Keep this in your journal',
+  savePlaceholder: 'Add commentary',
+  saveAction: 'Save',
+  saveFailed: 'That did not save. Try again in a moment.',
 };
 
 /**
