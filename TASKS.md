@@ -23,6 +23,7 @@
 
 | # | Built, needs your eye |
 |--|--|
+| S12 | **The admin was scoring with a different formula from the product.** It had its own copy of the scorer that took a plain average where the real one weights the questions, and its reverse-scoring list was empty, so a reverse-worded question was counted backwards. On the same answers the product says 1.75 on Conflict and the admin charted 3.00. It uses the real engine now. This is the one worth knowing about, because the admin is where you read what customers are like. |
 | S7 | **A promo code that bundled an add-on free still charged for it.** The cart's price was worked out in three places and each knew about a different subset of the five bundled-free flags. A beta code giving away Relationship Reflection charged forty dollars for it the moment the cart had anything else paid in it. One source now, and a gate that runs the real functions. |
 | S8 | **Conflict Patterns was never sent to Stripe as a line.** The subtotal charged forty dollars for it and the invoice did not carry it, so Stripe's total came back forty short of the quote on every ordinary order containing it. No promo code involved. |
 | S9 | **Add-on prices could drift with every price gate passing.** Three tables exist; the gate covered one shape and had written add-ons out of its own scope. Moving the reflection add-on by five dollars in the tax endpoint passed all three price gates. |
