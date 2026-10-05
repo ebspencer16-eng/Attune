@@ -203,23 +203,57 @@ async function calculateTaxWithStripe(secretKey, items, customerAddress, promoCo
   }
 }
 
+/**
+ * ── WHAT ONE ITEM COSTS, ONCE ─────────────────────────────────────────────
+ * This file used to work a cart's price out in three places, and each knew
+ * about a different subset of the five flags that mark an add-on bundled free
+ * by a promo code:
+ *
+ *   addonsTotal      all five. It decides whether the order is free.
+ *   subtotalDollars  the workbook only. It is the quoted subtotal.
+ *   itemsTotalCents  none of them. It is the charged total whenever the Stripe
+ *                    tax call is skipped or fails.
+ *
+ * So a code bundling Reflection free took the no-charge path only while the
+ * cart held nothing else. One paid add-on beside it and `addonsTotal` was no
+ * longer zero, the order went to the charged path, and the bundled add-on was
+ * quoted and billed: forty dollars for something the code gave away.
+ *
+ * The same shape as premium being priced at 198 in one endpoint and 295 in
+ * another, one level down: three copies of one rule inside one module, with
+ * nothing checking that they agree.
+ *
+ * All three now call these two. check-promo-totals runs them over every
+ * bundled add-on, with and without a paid one beside it.
+ */
+
+/** The add-ons an item is actually billed for: its add-ons, less the gifts. */
+function billableAddons(item) {
+  let a = itemAddonTotal(item);
+  if (item._promoWorkbookFree)   a -= wbAmount(item);
+  if (item._promoIntimacyFree)   a -= ADDON_PRICES.intimacy;
+  if (item._promoReflectionFree) a -= ADDON_PRICES.reflection;
+  if (item._promoBudgetFree)     a -= ADDON_PRICES.budget;
+  if (item._promoChecklistFree)  a -= ADDON_PRICES.checklist;
+  return Math.max(0, a);
+}
+
+/** What this item costs, in dollars, after every promo the code applies. */
+function itemChargeDollars(it) {
+  if (it._promoWorkbookPercent) {
+    // Flash promo: the package and the other add-ons stand, the workbook is
+    // reduced by a percentage.
+    return itemSubtotal(it) - (wbAmount(it) * it._promoWorkbookPercent / 100);
+  }
+  if (!it._promoCoveredBase) return itemSubtotal(it);
+  // The code covered the package: pay for the add-ons it did not include,
+  // plus whatever a fixed-mode code sets the package to.
+  return billableAddons(it) + (it._promoMode === 'fixed' ? (it._promoFixedAmount || 0) : 0);
+}
+
 // Helper — compute cart total in cents, respecting promo coverage
 function itemsTotalCents(items, promoCovered) {
-  return items.reduce((sum, it) => {
-    let dollars;
-    if (it._promoWorkbookPercent) {
-      const wb = it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint
-               : it.addonWorkbook === 'digital' ? ADDON_PRICES.workbookDigital : 0;
-      dollars = itemSubtotal(it) - (wb * it._promoWorkbookPercent / 100);
-    } else if (!it._promoCoveredBase) {
-      dollars = itemSubtotal(it);
-    } else if (it._promoMode === 'fixed') {
-      dollars = itemAddonTotal(it) + (it._promoFixedAmount || 0);
-    } else {
-      dollars = itemAddonTotal(it); // free-mode
-    }
-    return sum + dollars * 100;
-  }, 0);
+  return items.reduce((sum, it) => sum + itemChargeDollars(it) * 100, 0);
 }
 
 
@@ -511,17 +545,10 @@ export default async function handler(req) {
     if (codeMeta.includesChecklist) {
       items.forEach(it => { it.addonChecklist = true; it._promoChecklistFree = true; });
     }
-    const addonsTotal = items.reduce((sum, it) => {
-      let a = itemAddonTotal(it);
-      if (it._promoWorkbookFree) {
-        a -= wbAmount(it);
-      }
-      if (it._promoIntimacyFree)   a -= ADDON_PRICES.intimacy;
-      if (it._promoReflectionFree) a -= ADDON_PRICES.reflection;
-      if (it._promoBudgetFree)     a -= ADDON_PRICES.budget;
-      if (it._promoChecklistFree)  a -= ADDON_PRICES.checklist;
-      return sum + Math.max(0, a);
-    }, 0);
+    // Whether anything is left to pay for. billableAddons is the same function
+    // the quoted subtotal and the charged total use, so "this order is free"
+    // and "this order costs nothing" cannot disagree.
+    const addonsTotal = items.reduce((sum, it) => sum + billableAddons(it), 0);
 
     if (supabaseUrl && supabaseServiceKey) {
       // Check code is active + increment uses
@@ -658,20 +685,7 @@ export default async function handler(req) {
   //   no promo                  → full itemSubtotal (package + add-ons)
   //   free-mode promo covered   → itemAddonTotal only
   //   fixed-mode promo covered  → itemAddonTotal + fixed package amount
-  const subtotalDollars = items.reduce((sum, it) => {
-    if (it._promoWorkbookPercent) {
-      const wb = it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint
-               : it.addonWorkbook === 'digital' ? ADDON_PRICES.workbookDigital : 0;
-      return sum + itemSubtotal(it) - (wb * it._promoWorkbookPercent / 100);
-    }
-    if (!it._promoCoveredBase) return sum + itemSubtotal(it);
-    let addons = itemAddonTotal(it);
-    if (it._promoWorkbookFree) {
-      addons = Math.max(0, addons - (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital));
-    }
-    if (it._promoMode === 'fixed') return sum + addons + (it._promoFixedAmount || 0);
-    return sum + addons; // free-mode
-  }, 0);
+  const subtotalDollars = items.reduce((sum, it) => sum + itemChargeDollars(it), 0);
   const promoCovered = items.some(it => it._promoCoveredBase);
   if (subtotalDollars <= 0) {
     return new Response(JSON.stringify({ error: 'Empty cart' }), {
