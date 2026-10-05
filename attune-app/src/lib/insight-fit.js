@@ -1,6 +1,21 @@
 /**
  * How big the insight of the day is set, and how many lines it gets.
  *
+ * ── WHY IT IS .js AND NOT .ts ─────────────────────────────────────────────
+ * Because src/App.jsx imports it, and the website's build is the only one that
+ * can reach across into this folder.
+ *
+ * As TypeScript it broke the deploy, silently and only off this machine: vite
+ * transforms a .ts file through esbuild, esbuild looks for the nearest
+ * tsconfig.json, and attune-app's extends "expo/tsconfig.base". The website's
+ * own `npm ci` does not install the app's dependencies, so on Vercel that
+ * resolved to nothing and the build failed with a message about a tsconfig
+ * nobody had touched. It passed here because attune-app/node_modules exists on
+ * a developer's machine.
+ *
+ * Plain JavaScript asks no tsconfig. The types are in JSDoc, which the app's
+ * TypeScript reads just as well.
+ *
  * ── WHY IT IS ITS OWN FILE ────────────────────────────────────────────────
  * check-insight-fits used to lift four constants out of resources.tsx and
  * re-run the formula itself. That is a second copy of a rule, which is the
@@ -68,16 +83,18 @@ export const CITE_LINES = 2;
  */
 export const CHAR_RATIO = 0.5;
 
-export function citeSize(quote: number): number {
+/** @param {number} quote @returns {number} */
+export function citeSize(quote) {
   return Math.max(CITE_FLOOR, Math.round(quote * CITE_RATIO));
 }
 
 /** The height the citation takes at a given quote size. */
-export function citeHeight(quote: number): number {
+/** @param {number} quote @returns {number} */
+export function citeHeight(quote) {
   return Math.round(citeSize(quote) * CITE_LEADING) * CITE_LINES;
 }
 
-export type Fit = { size: number; lines: number; cite: number };
+/** @typedef {{ size: number, lines: number, cite: number }} Fit */
 
 /**
  * ── SIZE, LINE COUNT AND CITATION ARE ONE QUESTION ────────────────────────
@@ -100,9 +117,11 @@ export type Fit = { size: number; lines: number; cite: number };
  *              furniture, and NOT minus the citation. The citation is this
  *              function's business because its height moves with the answer.
  */
-export function quoteFit({ text, room, width }: {
-  text: string; room: number; width: number;
-}): Fit {
+/**
+ * @param {{ text: string, room: number, width: number }} input
+ * @returns {Fit}
+ */
+export function quoteFit({ text, room, width }) {
   for (let size = QUOTE_BASE; size >= QUOTE_FLOOR; size -= 1) {
     const left = room - citeHeight(size);
     const leading = Math.round(size * QUOTE_LEADING);

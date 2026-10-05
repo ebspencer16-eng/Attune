@@ -23,7 +23,7 @@
  * over every insight at the smallest screen the app supports.
  *
  * ── IT RUNS THE CODE THAT SHIPS ───────────────────────────────────────────
- * It imports quoteFit from attune-app/src/lib/insight-fit.ts and runs that, so
+ * It imports quoteFit from attune-app/src/lib/insight-fit.js and runs that, so
  * there is one copy of the arithmetic and this is it. The first version lifted
  * four constants out of resources.tsx and re-ran the formula itself, which is
  * the mistake check-card-type-clipping was written to stop making: a gate
@@ -60,7 +60,7 @@ const fails = [];
  * that way.
  */
 const FIT = await (async () => {
-  const src = readFileSync(`${ROOT}attune-app/src/lib/insight-fit.ts`, 'utf8');
+  const src = readFileSync(`${ROOT}attune-app/src/lib/insight-fit.js`, 'utf8');
   const { code } = await transform(src, { loader: 'ts', format: 'cjs' });
   const mod = { exports: {} };
   new Function('module', 'exports', code)(mod, mod.exports);
@@ -70,7 +70,7 @@ const FIT = await (async () => {
 const { quoteFit, citeHeight, citeSize, QUOTE_BASE, QUOTE_LEADING, QUOTE_FLOOR, CHAR_RATIO } = FIT;
 
 if (!QUOTE_BASE || !QUOTE_LEADING || !QUOTE_FLOOR || !CHAR_RATIO || typeof quoteFit !== 'function') {
-  console.error('[check-insight-fits] attune-app/src/lib/insight-fit.ts did not give up the'
+  console.error('[check-insight-fits] attune-app/src/lib/insight-fit.js did not give up the'
     + ` arithmetic: base=${QUOTE_BASE} leading=${QUOTE_LEADING} floor=${QUOTE_FLOOR}`
     + ` charRatio=${CHAR_RATIO} quoteFit=${typeof quoteFit}.`
     + ' Refusing to pass: a gate that has lost its subject must never report success.');

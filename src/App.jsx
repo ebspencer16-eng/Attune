@@ -49,10 +49,13 @@ import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insi
  * asks the same function rather than restating the rule in a second idiom.
  *
  * It lives under attune-app because an Expo project cannot import from api/,
- * and the website can import from anywhere. insight-fit.ts imports nothing
- * itself, deliberately, which is what makes it reachable from both.
+ * and the website can import from anywhere. insight-fit.js imports nothing
+ * itself, deliberately, which is what makes it reachable from both, and it is
+ * plain JavaScript rather than TypeScript for a reason written at the top of
+ * it: a .ts file here sends vite looking for the app's tsconfig, which extends
+ * a package the website never installs, and the deploy fails.
  */
-import { quoteFit as fitQuote, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEADING, CITE_LEADING as FIT_CITE_LEADING } from "../attune-app/src/lib/insight-fit.ts";
+import { quoteFit as fitQuote, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEADING, CITE_LEADING as FIT_CITE_LEADING } from "../attune-app/src/lib/insight-fit.js";
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE, shelfFor } from "../api/_in-practice.js";
 import { POST_CATEGORIES } from "../api/_lib/post-categories.js";

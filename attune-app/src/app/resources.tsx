@@ -21,7 +21,7 @@ import { ActivityIndicator, Image, Linking, Modal, RefreshControl, ScrollView, T
 import { Pressable } from '@/components/pressable';
 import { openExternal, openInApp } from '@/api/open-external';
 import { oneShot } from '@/lib/one-shot';
-import { quoteFit as fit, citeSize, QUOTE_BASE, QUOTE_LEADING, CITE_LEADING } from '@/lib/insight-fit';
+import { quoteFit as fit, citeSize, QUOTE_BASE, QUOTE_LEADING, CITE_LEADING } from "@/lib/insight-fit";
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
