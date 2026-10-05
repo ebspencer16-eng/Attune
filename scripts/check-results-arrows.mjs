@@ -193,6 +193,73 @@ if (nextTest && !/curIdx >= 0/.test(nextTest[0])) {
     + '      and sends the reader to allPages[0].');
 }
 
+// ── And the destination is named, from the nav ──────────────────────────────
+/*
+ * The arrows announce where they go, in the accessible label and the tooltip,
+ * which is where a name belongs once the control is a glyph. That name has to
+ * come from the nav.
+ *
+ * It did not. getPageLabel was twenty lines of hand-typed labels with no branch
+ * for a cover page, so the moment the arrows reached the covers they announced
+ * "Back to comm-cover": the raw id, to a reader, on the live site. Found by
+ * driving the deployed site and reading every label rather than by looking at
+ * the code, which had looked complete both times it was wrong.
+ *
+ * The same file already carried a note about the first time: the buttons "fell
+ * back to the raw section id and read conflict-patterns instead of Your
+ * Patterns". That was fixed by adding four more lines, which left the next gap
+ * exactly as open as the last one.
+ */
+const labels = /function getPageLabel\(id\) \{([\s\S]*?)\n  \}/.exec(src);
+if (!labels) {
+  console.error(`[check-results-arrows] getPageLabel is not where this expects it in ${SRC}.`
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+/*
+ * It reads a map built from resultsNav and does nothing else. A branch in here
+ * is a label typed a second time, and the one that matters is always the one
+ * nobody typed.
+ */
+const typed = (labels[1].match(/'[^']{3,}'|"[^"]{3,}"/g) || [])
+  .filter((q) => !/^['"]\w+['"]$/.test(q));
+if (typed.length) {
+  fails.push(`getPageLabel writes ${typed.length} label${typed.length === 1 ? '' : 's'} of its own:`
+    + `\n      ${typed.slice(0, 4).join(', ')}\n`
+    + '      resultsNav names every page the arrows can reach, including the covers. A list\n'
+    + '      here is a second copy of those names, and the page it forgets reports its raw id.');
+}
+if (!/pageLabels\[id\]/.test(labels[1])) {
+  fails.push('getPageLabel does not read the map built from resultsNav, so the arrows can name a'
+    + ' page something the nav does not call it.');
+}
+/*
+ * And the map is built from the nav. Scoped to the block that builds it: the
+ * first version asked whether `resultsNav(` appeared anywhere in the file, and
+ * it does, because the sidebar draws from it. So a plant that cut the map off
+ * from the nav entirely passed, which is this file's own warning about matching
+ * a name instead of what follows it.
+ */
+const mapBlock = (() => {
+  const at = src.indexOf('const pageLabels = (() => {');
+  if (at === -1) return null;
+  let depth = 0;
+  for (let i = src.indexOf('{', at); i < src.length; i += 1) {
+    if (src[i] === '{') depth += 1;
+    else if (src[i] === '}') { depth -= 1; if (depth === 0) return src.slice(at, i); }
+  }
+  return null;
+})();
+if (!mapBlock) {
+  console.error(`[check-results-arrows] the page-name map is not where this expects it in ${SRC}.`
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+if (!/resultsNav\(\{/.test(mapBlock)) {
+  fails.push('the page-name map is not built from resultsNav, so the arrows name pages from'
+    + ' something other than the nav they walk.');
+}
+
 // ── Fixed to the viewport, which is what "no matter where you are" means ────
 const arrowStyle = /const arrowStyle = \(side\) => \(\{([\s\S]*?)\}\);/.exec(src);
 if (!arrowStyle) {

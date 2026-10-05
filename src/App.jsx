@@ -7932,32 +7932,48 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     </>
   );
 
-  function getPageLabel(id) {
-    if (id === "highlights") return "Highlights";
-    if (id === "couple-type") return "Couple Type";
-    if (id === "comm-overview") return "Communication Overview";
-    if (id.startsWith("comm-")) {
-      const key = id.replace("comm-","");
-      const g = UR_DOMAINS.find(x => x.id === key);
-      return g ? g.label : (DIM_META[key]?.label || id);
+  /**
+   * ── THE NAME OF A PAGE IS THE NAV'S NAME FOR IT ─────────────────────────
+   * This was twenty lines of hand-typed labels beside the nav's own, and it
+   * failed the way a hand-typed list always fails here: it had no branch for a
+   * cover, so once the arrows reached the covers they announced "Back to
+   * comm-cover". The raw id, to a reader, on the live site.
+   *
+   * It had already failed once before in the same way, which is written into
+   * the lines it replaced: "Without these the Prev/Next buttons fell back to
+   * the raw section id and read conflict-patterns instead of Your Patterns."
+   * Fixing that by adding four more lines left the next gap exactly as open.
+   *
+   * resultsNav names every page, and it is what the sidebar and the app both
+   * draw from. Four of those names are just "Overview", which is right under a
+   * group heading and ambiguous on its own, so a name that more than one page
+   * shares takes its group's name in front of it.
+   */
+  const pageLabels = (() => {
+    const groups = resultsNav({
+      hasReflection: hasAnniversary,
+      intimacyReady: intimacyBothDone,
+      conflictListed,
+    });
+    const seen = new Map();
+    for (const g of groups) {
+      for (const c of (g.children || [g])) {
+        seen.set(c.label, (seen.get(c.label) || 0) + 1);
+      }
     }
-    if (id === "exp-overview") return "Expectations Overview";
-    // By section id, not by the number in it. The number is the category's own
-    // and stopped being its place in the flow when Life & Values moved first.
-    if (id.startsWith("exp-convo-")) return FIXED_CATS.find(fc => fc.section === id)?.label || id;
-    if (id === "reflection-overview") return "Reflection Overview";
-    if (id === "reflection-ratings") return "How You Each Rated";
-    if (id === "reflection-story") return "Side by Side";
-    if (id === "intimacy-overview") return "Physical Intimacy";
-    if (id.startsWith("intimacy-")) { const dd = INTIMACY_DOMAINS.find(x => `intimacy-${x.id}` === id) || INTIMACY_DIMENSIONS.find(x => `intimacy-${x.id}` === id); if (dd) return dd.label; }
-    // Without these the Prev/Next buttons fell back to the raw section id and
-    // read "conflict-patterns" instead of "Your Patterns".
-    if (id === "conflict-overview") return "Conflict Patterns";
-    if (id === "conflict-snapshot") return "Your Conflict Snapshot";
-    if (id === "conflict-patterns") return "Your Patterns";
-    if (id === "conflict-wrote")    return "What You Each Wrote";
-    if (id === "what-comes-next") return "What Comes Next";
-    return id;
+    const out = {};
+    for (const g of groups) {
+      for (const c of (g.children || [g])) {
+        out[c.id] = seen.get(c.label) > 1 && g.label && g.label !== c.label
+          ? `${g.label} ${c.label}`
+          : c.label;
+      }
+    }
+    return out;
+  })();
+
+  function getPageLabel(id) {
+    return pageLabels[id] || id;
   }
 
   // Layout wrapper
