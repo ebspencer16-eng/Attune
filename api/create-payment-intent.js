@@ -78,17 +78,35 @@ function buildTaxLineItems(item, itemIndex) {
       lines.push({ amount: wbAmt * 100, tax_code: tax, reference: `item-${itemIndex}-wb`, quantity: 1 });
     }
   }
-  if (item.addonReflection) {
+  /**
+   * ── AN ADD-ON THE CODE GAVE AWAY IS NOT A LINE ────────────────────────
+   * These four were pushed whenever the add-on was on the item, with no
+   * reference to whether a promo had bundled it free. Only the workbook above
+   * checked, which is what made it look deliberate.
+   *
+   * It matters more here than anywhere else in this file: these lines go to
+   * Stripe, Stripe returns `amount_total`, and that figure is charged ahead of
+   * every total computed locally. So on the ordinary path — the tax call
+   * succeeding — a code bundling Relationship Reflection charged forty dollars
+   * for it regardless of what the page had quoted.
+   *
+   * The flags are the same ones billableAddons reads. check-promo-totals
+   * requires these lines to add up to what that function says is owed.
+   */
+  if (item.addonReflection && !item._promoReflectionFree) {
     lines.push({ amount: ADDON_PRICES.reflection * 100, tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-reflection`, quantity: 1 });
   }
-  if (item.addonBudget) {
+  if (item.addonBudget && !item._promoBudgetFree) {
     lines.push({ amount: ADDON_PRICES.budget * 100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-budget`,     quantity: 1 });
   }
-  if (item.addonChecklist) {
+  if (item.addonChecklist && !item._promoChecklistFree) {
     lines.push({ amount: ADDON_PRICES.checklist * 100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-checklist`,  quantity: 1 });
   }
-  if (item.addonIntimacy) {
+  if (item.addonIntimacy && !item._promoIntimacyFree) {
     lines.push({ amount: ADDON_PRICES.intimacy * 100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-intimacy`,   quantity: 1 });
+  }
+  if (item.addonConflict) {
+    lines.push({ amount: ADDON_PRICES.conflict * 100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${itemIndex}-conflict`,   quantity: 1 });
   }
   return lines;
 }

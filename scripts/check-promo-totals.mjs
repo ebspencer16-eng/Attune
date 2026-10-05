@@ -90,6 +90,7 @@ const parts = {
   billableAddons: lift('billableAddons'),
   itemChargeDollars: lift('itemChargeDollars'),
   itemsTotalCents: lift('itemsTotalCents'),
+  buildTaxLineItems: lift('buildTaxLineItems'),
   addonsTotal: liftReduce('addonsTotal'),
   subtotalDollars: liftReduce('subtotalDollars'),
 };
@@ -101,11 +102,15 @@ if (missing.length) {
 }
 
 const make = new Function(
-  'ADDON_PRICES', 'DIGITAL_PRICES', 'PHYSICAL_PRICES', 'PHYSICAL_ENABLED',
+  'ADDON_PRICES', 'DIGITAL_PRICES', 'PHYSICAL_PRICES', 'PHYSICAL_ENABLED', 'TAX_CODES',
   `${Object.values(parts).join('\n')}
-   return { itemsTotalCents, addonsTotal, subtotalDollars, itemAddonTotal, itemSubtotal };`,
+   return { itemsTotalCents, addonsTotal, subtotalDollars, itemAddonTotal, itemSubtotal,
+            buildTaxLineItems, billableAddons, itemChargeDollars };`,
 );
-const M = make(ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, true);
+/* The tax codes are Stripe's product categories and have no bearing on an
+   amount, so any string will do; what is checked is what the lines add up to. */
+const M = make(ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES, true,
+  new Proxy({}, { get: () => 'txcd_test' }));
 
 /**
  * The five add-ons a code can bundle, and the flag that marks each one free.
@@ -175,6 +180,88 @@ for (const free of FREE_FLAGS) {
     }
     if (quoted !== charged) {
       fails.push(`${label}: quoted $${quoted} and charged $${charged}. One cart, two answers.`);
+    }
+
+    /**
+     * ── AND THE LINES STRIPE PRICES ADD UP TO THE SAME THING ──────────────
+     * buildTaxLineItems is what goes to Stripe, and Stripe's `amount_total`
+     * comes back and is charged ahead of every total worked out here. So the
+     * lines are the real invoice; a total that disagrees with them is a
+     * quote the customer does not pay.
+     *
+     * This is the assertion that would have caught the original bug in this
+     * file, where the tax was computed on a base a hundred dollars too high.
+     * It caught two more: four add-ons stayed on the invoice after a code gave
+     * them away, and Conflict Patterns had no line at all while the subtotal
+     * charged forty dollars for it, so Stripe's total came back forty short.
+     *
+     * The package line is dropped for a covered base, which is what
+     * calculateTaxWithStripe does to these lines before sending them.
+     */
+    const lines = M.buildTaxLineItems(it, 0);
+    const addonLines = lines
+      .filter((l) => !String(l.reference).endsWith('-pkg'))
+      .reduce((sum, l) => sum + l.amount, 0) / 100;
+    if (addonLines !== M.billableAddons(it)) {
+      fails.push(`${label}: the add-on lines sent to Stripe come to $${addonLines} and the cart`
+        + ` says $${M.billableAddons(it)} is owed for add-ons.\n`
+        + '      Stripe prices the lines and its amount_total is what gets charged, so the lines\n'
+        + '      are the invoice. Anything the cart counts and the lines do not is money never\n'
+        + '      taken; anything the lines carry and the cart does not is money taken twice.');
+    }
+  }
+}
+
+/**
+ * An ordinary cart, every add-on paid for, no promo code.
+ *
+ * The lines Stripe prices have to come to the same figure the cart charges.
+ * Without this the per-add-on cases above never price a paid Budget line,
+ * because the only Budget in them is the one a code gave away and is therefore
+ * absent: a line with the wrong amount on it passed unseen.
+ */
+{
+  const it = {
+    pkgKey: 'premium', isPhysical: false, addonWorkbook: 'digital',
+    addonReflection: true, addonBudget: true, addonChecklist: true,
+    addonIntimacy: true, addonConflict: true,
+  };
+  const lines = M.buildTaxLineItems(it, 0);
+  const total = lines.reduce((sum, l) => sum + l.amount, 0) / 100;
+  if (total !== M.itemSubtotal(it)) {
+    fails.push(`a full cart with no promo: the lines sent to Stripe come to $${total} and the cart`
+      + ` charges $${M.itemSubtotal(it)}.\n`
+      + '      Every line is priced from ADDON_PRICES and so is the cart, so a difference here is'
+      + '\n      a line with the wrong amount, a missing line, or one counted twice.');
+  }
+  const addonLines = lines.filter((l) => !String(l.reference).endsWith('-pkg'))
+    .reduce((sum, l) => sum + l.amount, 0) / 100;
+  if (addonLines !== M.itemAddonTotal(it)) {
+    fails.push(`a full cart with no promo: the add-on lines come to $${addonLines} and`
+      + ` itemAddonTotal says $${M.itemAddonTotal(it)}.`);
+  }
+}
+
+/**
+ * Every add-on the cart charges for has a line, promos aside.
+ *
+ * Conflict Patterns was in itemAddonTotal and in no tax line, which is how the
+ * quote and the invoice came to differ by forty dollars on an ordinary order
+ * with no promo code at all.
+ */
+{
+  const named = [...src.matchAll(/if \(item\.addon(\w+)\)\s+addons \+= ADDON_PRICES/g)]
+    .map((m) => m[1]);
+  const plain = { pkgKey: 'core', isPhysical: false };
+  for (const a of named) {
+    const it = { ...plain };
+    if (a === 'Workbook') it.addonWorkbook = 'digital'; else it[`addon${a}`] = true;
+    const lines = M.buildTaxLineItems(it, 0)
+      .filter((l) => !String(l.reference).endsWith('-pkg'));
+    if (!lines.length) {
+      fails.push(`an order with the ${a} add-on and nothing else is charged for it by`
+        + ' itemAddonTotal and sent to Stripe as no line at all, so the invoice is short by its'
+        + ' price.');
     }
   }
 }
