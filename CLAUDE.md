@@ -812,6 +812,66 @@ entirely. Every file read correctly and nothing threw. Loading the page and
 asking for the function is what showed it, which is the argument for a gate
 that drives rather than one that reads.
 
+**A gate that compares inputs is not comparing the thing.** check-scoring-mirror
+held the website's scorer to the engine on which questions belong to which
+dimension and which are reverse-worded, and never ran either of them. That is
+the half that was wrong somewhere else: `api/admin-data.js` scored the same
+questions, with the same ten dimensions, and took a plain average where the
+engine takes a weighted one. Its flipped set was `new Set()`, empty, under a
+comment saying the flip "is handled by the shared scorer rather than here" —
+true of a shared scorer that file was not calling.
+
+The two disagreed by up to 1.25 of a point on a one-to-five scale. Ellie reads
+the admin to find out what customers are like.
+
+Both gates run the code now. When a check is about two implementations of one
+rule, the question is whether they give the same ANSWER, and the inputs are at
+best a cheap first half. Sweep varied inputs, too: a weighting difference
+vanishes when every answer in a dimension is the same, so a tidy fixture of
+all-3s proves nothing.
+
+**One rule in three places inside one file, each knowing a different subset.**
+`api/create-payment-intent.js` worked a cart's price out three times:
+`addonsTotal` knew all five "this add-on is bundled free" flags, `subtotalDollars`
+knew the workbook, and `itemsTotalCents` knew none. So a promo bundling an
+add-on free charged for it, and a bundled workbook was quoted right and billed
+anyway. Worse, `buildTaxLineItems` — the lines that go to Stripe, whose
+`amount_total` is charged ahead of every local total — had no line for Conflict
+Patterns at all, so an ordinary order containing it came back forty dollars
+short of its own quote.
+
+The invariant worth holding anywhere money is computed: **the lines sent to the
+processor add up to what the cart says is owed.** That one assertion catches a
+missing line, a double-counted one, a mispriced one, and the original 198/295
+bug this file is known for.
+
+**`grep` for a function name defined twice.** It took one command to find the
+second scorer, and the same command found two more copies of the flipped-question
+set. A rule with two implementations is this codebase's whole failure mode, and
+the cheapest version of looking for it is:
+
+    grep -rn "^\(export \)\?function " api/ | awk ... | sort | uniq -d
+
+**A gate's own baseline can swallow the thing it measures.** Teaching
+check-render to notice a view that renders nothing took three attempts. Counting
+characters could not tell Notes, which draws one deliberate sentence, from a page
+that drew nothing. Counting words against a baseline taken from a view that does
+not exist was worse: an unknown view falls through to the results page, so every
+word of the results copy became the definition of "empty" and four working views
+were reported broken. Print the baseline before trusting any set a check compares
+against.
+
+What worked was asking the DOM: the text of the one region the app renders views
+into, with fixed overlays removed. An empty view draws 16 characters there and
+the dashboard draws 0, while the thinnest real view draws 43.
+
+**And it had been reporting on two pages it never rendered.** `?view=home`
+cannot render signed out, and `checklist` is gated on a capability PKG_CAPS
+grants to newlywed alone while the run drove everything at premium. Both said
+ok, because the only assertion was that nothing threw, and a page that renders
+nothing throws nothing. Drive each view at a package that owns it, and report
+the one that cannot be rendered as not rendered.
+
 ---
 
 ## Verification, non-negotiable

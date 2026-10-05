@@ -15,14 +15,14 @@
 
 | # | Mine to build |
 |--|--|
-| S3 | **Sweep: the Learn page layout, measured.** The insight fit went in unmeasured because that screen needs an account. Harness-mount it the way check-prompt-tiles does. |
-| S5 | **Sweep: anything else that builds here and not in a clean clone.** |
-| S6 | **Sweep: keep going through the payment and email paths.** The money path has turned up four real bugs; finish it. |
+| S3 | **The Learn page layout, measured.** The insight fit went in unmeasured because that screen needs an account. Harness-mount it the way check-prompt-tiles does. |
+| S13 | **The website's resolveRoleTokens has no behavioural gate.** Its thresholds and tokens match the server's today; nothing holds them together. Lower priority than it sounds, because the smoke already catches a raw token on any results page. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| S14 | **Swept and found sound:** all 13 emails render with nothing unresolved and every email anything sends is in the catalogue; the two role-token resolvers use identical thresholds; every internal link on the live site resolves; every dollar figure a customer reads is one the catalogue sets. |
 | S12 | **The admin was scoring with a different formula from the product.** It had its own copy of the scorer that took a plain average where the real one weights the questions, and its reverse-scoring list was empty, so a reverse-worded question was counted backwards. On the same answers the product says 1.75 on Conflict and the admin charted 3.00. It uses the real engine now. This is the one worth knowing about, because the admin is where you read what customers are like. |
 | S7 | **A promo code that bundled an add-on free still charged for it.** The cart's price was worked out in three places and each knew about a different subset of the five bundled-free flags. A beta code giving away Relationship Reflection charged forty dollars for it the moment the cart had anything else paid in it. One source now, and a gate that runs the real functions. |
 | S8 | **Conflict Patterns was never sent to Stripe as a line.** The subtotal charged forty dollars for it and the invoice did not carry it, so Stripe's total came back forty short of the quote on every ordinary order containing it. No promo code involved. |
