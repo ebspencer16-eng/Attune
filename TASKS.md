@@ -15,16 +15,20 @@
 
 | # | Mine to build |
 |--|--|
-| S1 | **Sweep: does `check-render` actually see the home view?** `?demo=1&view=home` renders an account modal over a blank page when I drive it, and the gate reports `ok view:home`. If it is measuring the modal, thirteen view lines may mean less than they say. |
-| S2 | **Sweep: every list that indexes into another list.** CLAUDE.md's rule after `EXP_LIFE_KEYS`: the check is not that a list is right but that every key in it resolves. Do it across the repo rather than one list at a time. |
-| S3 | **Sweep: the Learn page layout, measured.** The insight fit went in unmeasured because that screen needs an account. Harness-mount it the way check-prompt-tiles does and find out whether the peek is actually clear. |
-| S4 | **Sweep: fields the server sends that nothing draws, and fields a surface reads that nothing sends.** Both directions, both surfaces. |
-| S5 | **Sweep: anything else that builds here and not in a clean clone.** The deploy failure was one instance; look for others before they are found by the site not changing. |
+| S3 | **Sweep: the Learn page layout, measured.** The insight fit went in unmeasured because that screen needs an account. Harness-mount it the way check-prompt-tiles does. |
+| S5 | **Sweep: anything else that builds here and not in a clean clone.** |
+| S6 | **Sweep: keep going through the payment and email paths.** The money path has turned up four real bugs; finish it. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| S7 | **A promo code that bundled an add-on free still charged for it.** The cart's price was worked out in three places and each knew about a different subset of the five bundled-free flags. A beta code giving away Relationship Reflection charged forty dollars for it the moment the cart had anything else paid in it. One source now, and a gate that runs the real functions. |
+| S8 | **Conflict Patterns was never sent to Stripe as a line.** The subtotal charged forty dollars for it and the invoice did not carry it, so Stripe's total came back forty short of the quote on every ordinary order containing it. No promo code involved. |
+| S9 | **Add-on prices could drift with every price gate passing.** Three tables exist; the gate covered one shape and had written add-ons out of its own scope. Moving the reflection add-on by five dollars in the tax endpoint passed all three price gates. |
+| S1 | **Two views were reported as rendering clean while rendering nothing.** The dashboard cannot render signed out, and the Merging Lives Checklist was being driven at a package that does not include it, so neither had ever been rendered by a check. The checklist is covered now; the dashboard says plainly that it is not. |
+| S10 | **The entitlement test compared the server against a copy of the website kept inside the test.** Making the website grant premium a checklist the server refuses left it printing "22 passed, 0 failed". It reads the real file now. |
+| S11 | **Swept and found nothing wrong:** every internal link on the live site resolves, every dollar figure a customer reads is one the catalogue sets, every article's shelf and every exercise's capability resolves, and the app's article list is the server's. |
 | O558 | **Your last two rounds were not on the site until now, and that is the thing to know first.** The push worked, my build passed every time, and Vercel had been failing for two commits on a file extension. One shared file was TypeScript, which sent the website's build looking for a package only the app installs. Found by cloning the repo and running Vercel's own build command; a gate holds that boundary now. Everything below is live and I checked it on the real site. |
 | O549 | **The tile's picture had a gap on the left and none on the right.** The card measures in border-box and the picture measured in content-box, so the picture's own padding was added outside its width: sixteen points wider than the box it sits in. Third report and my third attempt, so this time I exported the component and measured the real thing in a browser at four window sizes before changing anything. The gate found a second fault you had not reported: the two cards were seven points different in height. |
 | O552 | **The web insight shrinks to fit, like the app.** It calls the app's own function rather than a second version of it, scaled for the larger type. |

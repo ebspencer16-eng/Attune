@@ -34,7 +34,7 @@ import { corsHeaders, safeError } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
-import { axisScores, typeCodeFromAxes, blendedDimScores } from './_type-engine.js';
+import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
@@ -43,38 +43,38 @@ import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results
 // them into aggregates. Raw answers never leave the server, which keeps the
 // "anonymized, UUID only" guarantee on the dashboard intact.
 
-// Mirrors calcDimScores in src/App.jsx. lv5's a/b display order is reversed
-// relative to its dimension orientation, so its raw value is flipped.
-const DIM_ITEMS = {
-  energy:     ['en4','en6'],
-  expression: ['ex6','ex7','ex8'],
-  love:       ['lv1','lv2'],
-  bids:       ['bd1','bd3','bd4'],
-  needs:      ['nd1','nd5'],
-  conflict:   ['cf1','cf2','cf3','st1'],
-  repair:     ['rp2','rp3','rp6'],
-  feedback:   ['fb2','fb5'],
-  listening:  ['ls1','ls3'],
-  reassurance:['rs1','rs3'],
-};
-// lv5 was removed from the exercise. st1 is the only flipped question, and it
-// is handled by the shared scorer rather than here.
-const FLIPPED = new Set();
+/**
+ * ── THE ADMIN SCORES WITH THE ENGINE, NOT WITH ITS OWN ARITHMETIC ─────────
+ * This file used to carry its own `calcDimScores`, its own `DIM_ITEMS` and its
+ * own `FLIPPED`, under a comment saying it mirrored src/App.jsx. It did not
+ * mirror anything. It differed from api/_type-engine.js in two ways:
+ *
+ *   it took a plain average, where the engine takes a WEIGHTED one, and every
+ *   one of the ten dimensions has non-uniform weights;
+ *
+ *   its FLIPPED was `new Set()`, empty, under a comment reading "st1 is the
+ *   only flipped question, and it is handled by the shared scorer rather than
+ *   here" — which was true of a shared scorer this file was not calling.
+ *
+ * So a reverse-worded question was counted forwards. Measured over four hundred
+ * answer sets, the two disagreed by as much as 1.25 of a point on a 1-5 scale:
+ * the product telling a couple 1.75 on Conflict while the admin charted 3.00
+ * for the same answers. A couple answering 4 to everything is 3.40 and 4.00.
+ *
+ * CLAUDE.md lists api/_type-engine.js as the single source for dimensions,
+ * weights and scoring, and says why: two scorers drifting apart is how this
+ * product starts lying to people. These were already apart.
+ *
+ * The engine returns `{}` for a missing answer set where this returned null,
+ * and every caller here tests the result for falsiness, so the null is kept at
+ * this boundary rather than changed in the engine for one consumer.
+ */
+const DIM_ITEMS = DIM_KEYS;
 
 function calcDimScores(answers) {
   if (!answers || typeof answers !== 'object') return null;
-  const out = {};
-  let answeredAny = false;
-  for (const [dim, keys] of Object.entries(DIM_ITEMS)) {
-    const vals = keys.map(k => {
-      const raw = answers[k];
-      if (raw == null || isNaN(raw)) return null;
-      return FLIPPED.has(k) ? (6 - Number(raw)) : Number(raw);
-    }).filter(v => v != null);
-    if (vals.length) answeredAny = true;
-    out[dim] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-  }
-  return answeredAny ? out : null;
+  const out = engineDimScores(answers);
+  return Object.values(out).some((v) => v != null) ? out : null;
 }
 
 // Alignment = how close two partners sit on a 1-5 dimension, as a percentage.

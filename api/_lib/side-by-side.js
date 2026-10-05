@@ -24,9 +24,17 @@
  */
 
 import { PERSONALITY_QUESTIONS } from '../_questions.js';
+import { FLIPPED_QUESTIONS } from '../_type-engine.js';
 
-/** The one question whose scale runs the other way. */
-const FLIPPED = new Set(['st1']);
+/**
+ * The questions whose scale runs the other way.
+ *
+ * This was `new Set(['st1'])`, typed here. It agreed with the engine, which is
+ * the whole reason nobody would have noticed the day it stopped: the same
+ * second copy in api/admin-data.js was an EMPTY set, so every reverse-worded
+ * answer in the admin was counted forwards.
+ */
+const FLIPPED = FLIPPED_QUESTIONS;
 
 const num = (v) => {
   const n = Number(v);
