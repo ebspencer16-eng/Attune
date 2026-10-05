@@ -15,19 +15,21 @@
 
 | # | Mine to build |
 |--|--|
-| O549 | **No buffer between the inner square and the right edge of the tile.** Third report on this tile and my second wrong fix. Stop guessing: export AppHome, render the real component in a browser at several window sizes, and measure the gap on all four sides. Build the gate first, watch it fail, then fix. |
-| O552 | **The web Learn insight is cut off by the peek.** Her: "We might have to shrink everything to make it work." The app already solves this exactly: lib/insight-fit sizes the quote to the room the peek leaves. The website restates the layout instead of using it. |
-| O550 | **Still no room between the share row and the peek.** The padding I added is inside a block whose height is the budget, so it took room from the quote rather than adding any. Same fix as O552. |
-| O546 | **The share SHEET still shows the temp filename, though the sent message is right.** So `fileName` renames what is sent and not what the preview reads. The preview header comes from the file on disk, so the file itself has to be named: copy the capture to a named path and share that. |
-| O553 | **Drop the toolbar's icon labels.** Icons only, evenly spaced. |
-| O555 | **The beta feedback popup cannot be dismissed and returns on every refresh.** Tapping anywhere should close it, and closing it should be remembered. |
-| O556 | **Tapping the side of a results card should page, as it does in the app.** Left half back, right half forward, same order the arrows walk. |
-| O557 | **The home page took forever to load.** Second report; O535 measured 240ms and closed it, which was the wrong measurement because it ran signed out and she is not. Measure the signed-in path: what the dashboard waits on before it paints. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| O558 | **Your last two rounds were not on the site until now, and that is the thing to know first.** The push worked, my build passed every time, and Vercel had been failing for two commits on a file extension. One shared file was TypeScript, which sent the website's build looking for a package only the app installs. Found by cloning the repo and running Vercel's own build command; a gate holds that boundary now. Everything below is live and I checked it on the real site. |
+| O549 | **The tile's picture had a gap on the left and none on the right.** The card measures in border-box and the picture measured in content-box, so the picture's own padding was added outside its width: sixteen points wider than the box it sits in. Third report and my third attempt, so this time I exported the component and measured the real thing in a browser at four window sizes before changing anything. The gate found a second fault you had not reported: the two cards were seven points different in height. |
+| O552 | **The web insight shrinks to fit, like the app.** It calls the app's own function rather than a second version of it, scaled for the larger type. |
+| O550 | **Room between the share row and the peek.** Taken out of the budget rather than added as padding: padding inside a block whose height is the budget takes room from the quote and adds none, which is what my last attempt did. |
+| O546 | **The share sheet shows the right title now.** `fileName` is read only by the library's Android code; iOS accepted it and ignored it, which is why the message was right and the preview was not. The picture is copied to a properly named file before it goes. |
+| O553 | **Icons only, evenly spaced.** The word stays in the tooltip and for screen readers. |
+| O555 | **The feedback popup stays closed.** Tapping anywhere already closed it; nothing remembered that, so every refresh brought it back. |
+| O556 | **Tapping the left third of a storycard goes back, the rest forward.** The app's fraction. A tap that began as selecting text pages nothing, so marking a card does not lose it. |
+| O557 | **The slow home page: one real cause found, and I cannot yet see the rest.** Three separate files were each asking the server which privacy rules apply, and one of them never cached the answer. That is now one request per session instead of up to three. **But I measured the page signed out, where it paints in under half a second, and yours is signed in.** If it is still slow, tell me whether it is every time or now and then, and on the laptop or the phone. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |

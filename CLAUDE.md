@@ -766,6 +766,52 @@ as guarded. **A gate that matches too much is not the safe direction.** It
 either gets loosened until it matches nothing, or it manufactures the
 evidence it was meant to look for.
 
+**A green build here is not a deploy.** `npx vite build` passed every time
+while Vercel had been failing for two commits, so two rounds of Ellie's fixes
+were not on the site and the only symptom was that they were not there.
+
+src/App.jsx imported a `.ts` file from `attune-app/`, which is the right
+instinct and the wrong extension: vite runs a `.ts` through esbuild, esbuild
+reads the nearest tsconfig, and `attune-app/tsconfig.json` extends
+`expo/tsconfig.base`. The website's own `npm ci` installs the root package
+only, so that resolves to nothing off this machine. A developer has
+`attune-app/node_modules` and never sees it.
+
+Two habits out of it. Vercel's build command is in `vercel.json` and is NOT
+`npm run build`, so run that command, in a clone, after `npm ci`:
+
+    git clone . /tmp/x && cd /tmp/x && npm ci && <buildCommand from vercel.json>
+
+And when a change does not appear on the site, check whether the build ran
+before checking anything else. I re-fetched the asset hash four times over
+twelve minutes before asking that question.
+
+**A JSX comment cannot sit between `{cond ? (` and the element**, for the same
+reason it cannot sit after `return (` or `{cond && (`. Three forms of one rule
+now, so the general statement: any parenthesis opening a single JSX expression
+takes the element and nothing before it.
+
+**Backticks in a comment inside a template literal end the string.** A CSS
+comment inside a `<style>` template that wrote a word in backticks closed the
+literal, and the build failed on the next word with a message about a brace. A
+comment inside a template is still inside the string.
+
+**A constant hides a key from a gate that matches literals.**
+`check-localstorage-keys` scans for `localStorage.setItem('attune_...')` and
+reported "all covered" while `localStorage.setItem(SURVEY_DISMISSED, '1')`
+wrote a key registered nowhere, so it would have survived every sign-out on a
+shared browser. It resolves `const NAME = 'attune_...'` now. Same shape as
+`EXERCISE_COLUMNS` hiding `conflict_data`: when a scanner looks for a string,
+ask what the indirection for that string is.
+
+**Code below an early return does not run, and nothing says so.** A helper
+added to `public/_flags.js` went inside the app-banner block, which returns on
+`document.getElementById('root')`. On /app it was never defined, both its
+readers fell back to their safe answer, and the privacy banner stopped drawing
+entirely. Every file read correctly and nothing threw. Loading the page and
+asking for the function is what showed it, which is the argument for a gate
+that drives rather than one that reads.
+
 ---
 
 ## Verification, non-negotiable
