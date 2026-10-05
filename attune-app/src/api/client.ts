@@ -519,7 +519,18 @@ export type NextStepGroup = {
    * introduces them so it can be italicised. Only the reflection group sends
    * it; see api/_lib/what-comes-next.js.
    */
-  items: { title: string; quote?: string | null; body: string | null; say: string | null }[];
+  items: {
+    title: string; quote?: string | null; body: string | null; say: string | null;
+    /**
+     * The page this row is about, when it has one of its own.
+     *
+     * Ellie: "each row should have a little arrow on the right side of the row
+     * to open that page directly, then remove the open expectations arrow at
+     * the bottom of the expectations list." A group whose rows carry this does
+     * not draw its own Open link.
+     */
+    section?: string | null;
+  }[];
 };
 
 export type ExpectationsSummary = {

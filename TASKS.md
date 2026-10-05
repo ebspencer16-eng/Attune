@@ -15,8 +15,19 @@
 
 | # | Mine to build |
 |--|--|
-| S3 | **The Learn page layout, measured.** The insight fit went in unmeasured because that screen needs an account. Harness-mount it the way check-prompt-tiles does. |
-| S13 | **The website's resolveRoleTokens has no behavioural gate.** Its thresholds and tokens match the server's today; nothing holds them together. Lower priority than it sounds, because the smoke already catches a raw token on any results page. |
+| S12b | **A gate so the scorer divergence cannot come back.** check-one-scorer and the strengthened check-scoring-mirror already landed; confirm both catch it from every direction and that nothing else can score. |
+| N1 | **Storycards have two sets of arrows.** Remove the stationary pair below the card; keep the floating ones. |
+| N2 | **The results arrows must not sit over the footer.** Lowest they go is the bottom of the page content. |
+| N3 | **The results arrows must line up with the content margins**, same place on every page. The back arrow is currently under the left nav, outside the margin. |
+| N4 | **Tapping the left or right edge of a results page pages it**, app and website, like the storycards. |
+| N5 | **Expectations responses centre-aligned in their column**, every expectations results page, app and website. |
+| N6 | **Reflection action plan: each person's words in italics and quotation marks**, so it reads as what they wrote. Overview, app and website. |
+| N7 | **Expectations rows in What Comes Next: "Discuss household expectations together"**, with an arrow on the right of each row opening that page. Then remove the "open expectations" arrow at the foot of the list. |
+| N8 | **Conflict shows four action items on the overview and one in What Comes Next.** List all four. |
+| N9 | **What Comes Next says "Physical Intimacy Expectations"**, not "Physical Intimacy". |
+| N10 | **Learn on the web: still no space above the peek, and no way into a section's full list.** Shrink the featured tiles if that is what it takes, and match the rest of the app's behaviour. |
+
+**From here on, every change applies to both the app and the website.** Her words, N6.
 
 ## 3. For you to review
 

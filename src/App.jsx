@@ -7948,11 +7948,67 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
    * which is where a name belongs once the control is a glyph.
    */
   const ARROW = 46;
+  /**
+   * ── THE ARROWS SIT INSIDE THE CONTENT, NOT INSIDE THE WINDOW ────────────
+   * Ellie: "The previous/next arrows should be left- and right-aligned
+   * (respectively) with the margins of each results page content (they should
+   * be the same exact position from page to page but should not be outside of
+   * the margins like they currently are, the back arrow is below the left nav
+   * currently)."
+   *
+   * They were `left: 1.5rem` and `right: 1.5rem` against the viewport, so on a
+   * wide window the back arrow sat under the sidebar and neither lined up with
+   * anything on the page.
+   *
+   * And: "The previous/next arrows should not be able to be on top of the
+   * footer, the lowest they can go should be the bottom of the page content."
+   * Fixed to the window, they floated over the dark footer once you reached the
+   * end. So the bottom is whichever is higher, their resting place or the end
+   * of the content.
+   *
+   * Measured rather than guessed, because the column's width is the window's
+   * less a sidebar that is there on a laptop and not on a phone, and because a
+   * number tuned on one window is wrong on every other. Before the first
+   * measurement they fall back to the corner they used to take, which is the
+   * old behaviour rather than no arrows.
+   */
+  const contentRef = useRef(null);
+  const [arrowBox, setArrowBox] = useState(null);
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return undefined;
+    const report = () => {
+      const r = el.getBoundingClientRect();
+      /* 60 is the footer strip the results view pins to the bottom of the
+         window, and 16 is the gap every other corner on this page uses. */
+      const rest = 76;
+      const atContentEnd = Math.round(window.innerHeight - r.bottom + 16);
+      const next = {
+        left: Math.round(r.left),
+        right: Math.round(window.innerWidth - r.right),
+        bottom: Math.max(rest, atContentEnd),
+      };
+      setArrowBox((cur) => (cur
+        && Math.abs(cur.left - next.left) < 2
+        && Math.abs(cur.right - next.right) < 2
+        && Math.abs(cur.bottom - next.bottom) < 2 ? cur : next));
+    };
+    report();
+    window.addEventListener("scroll", report, true);
+    window.addEventListener("resize", report);
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(report);
+    if (ro) ro.observe(el);
+    return () => {
+      window.removeEventListener("scroll", report, true);
+      window.removeEventListener("resize", report);
+      if (ro) ro.disconnect();
+    };
+  });
+
   const arrowStyle = (side) => ({
-    // 60 is the footer strip the results view pins to the bottom of the
-    // window, measured on the live site: the arrows were drawing on top of
-    // it. 16 above that is the gap every other corner on this page uses.
-    position: "fixed", bottom: 76, [side]: "1.5rem",
+    position: "fixed",
+    bottom: arrowBox ? arrowBox.bottom : 76,
+    [side]: arrowBox ? arrowBox[side] : "1.5rem",
     width: ARROW, height: ARROW, borderRadius: ARROW / 2,
     display: "flex", alignItems: "center", justifyContent: "center",
     background: "rgba(255,253,249,0.92)", backdropFilter: "blur(10px)",
@@ -8056,7 +8112,37 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* Extra bottom padding so last nav item doesn't sit flush at the edge */}
           <div style={{ height: "2rem" }} />
         </div>
-        <div style={{ flex: 1, minWidth: 0, padding: "0 1.5rem" }}>
+        {/* ── THE EDGES PAGE, AS THE STORYCARDS DO ─────────────────────
+            Ellie: "Clicking the left or right edge of the results pages should
+            move you forward or backward, in both the app and the site, just
+            like the storycard highlights do."
+
+            The storycards' own rule, which is hers from when she asked for it
+            there: "if I tap the left hand side of the page I want it to go back
+            a page." A sixth of the width on each side here rather than a third,
+            because a results page is a column of text somebody is reading and
+            the middle has to stay theirs.
+
+            Anything that is itself a control still wins: a click on a button,
+            a link or a marked sentence stops before it reaches this handler,
+            which is why it sits on the column and not on a layer over it. And a
+            click that finished a text selection pages nothing, or marking a
+            sentence would cost you the page you marked. */}
+        <div
+          ref={contentRef}
+          onClick={(e) => {
+            if (!allPages.length || curIdx < 0) return;
+            const sel = typeof window !== "undefined" && window.getSelection
+              ? String(window.getSelection() || "") : "";
+            if (sel.trim()) return;
+            if (e.target.closest("button, a, input, textarea, select, [role=button]")) return;
+            const box = e.currentTarget.getBoundingClientRect();
+            const edge = box.width / 6;
+            const x = e.clientX - box.left;
+            if (x < edge) { if (curIdx > 0) go(allPages[curIdx - 1]); return; }
+            if (x > box.width - edge && curIdx < allPages.length - 1) go(allPages[curIdx + 1]);
+          }}
+          style={{ flex: 1, minWidth: 0, padding: "0 1.5rem" }}>
           {children}
           {/* ── EVERY PAGE, WITHOUT ASKING ───────────────────────────────
               Ellie: "Not seeing these on cover pages, overview pages, or any
@@ -9638,10 +9724,22 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               const expItems = [];
               const catCounts = {};
               allRows.filter(r => r.bothAnswered && !r.aligned).forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
+              /* Ellie: "Rather than 'Work through household together' the action
+                 plan rows for expectations in the what comes next page should
+                 read 'Discuss household expectations together' and each row
+                 should have a little arrow on the right side of the row to open
+                 that page directly, then remove the 'open expectations' arrow at
+                 the bottom of the expectations list."
+
+                 `section` is that arrow's destination, taken from the category
+                 rather than from this row's place in the list, which is the same
+                 id the nav and every mark already use. The wording is the
+                 server's, from api/_lib/what-comes-next.js. */
               Object.entries(catCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).forEach(([label, n]) => {
                 expItems.push({
-                  tip: `Work through your ${label.toLowerCase()} list together`,
+                  tip: `Discuss ${label.toLowerCase()} expectations together`,
                   phrase: `${n} topic${n !== 1 ? "s" : ""} here where you assumed different things. Start with the first one.`,
+                  section: (FIXED_CATS.find(c => c.label === label) || {}).section || null,
                 });
               });
               if (!expItems.length) expItems.push({ tip: "Keep your expectations current", phrase: "You matched across every area. Revisit this when something changes." });
@@ -9668,21 +9766,35 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   const prompt = (INTIMACY_RESULTS_PROSE[d.id]?.prompt || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
                   return { tip: `Talk about ${(meta?.label || d.id).toLowerCase()}`, phrase: prompt };
                 });
-              if (intItems.length) groups.push({ id: "intimacy", label: "Physical Intimacy", color: "#B5546E", items: intItems });
-
-              // Conflict Patterns, last. Only the patterns that crossed into
-              // Sometimes, since those are the ones carrying an action. The
-              // pattern name is not shown here: this page is read together and
-              // the risk detail is private to each reader, so the action is
-              // surfaced without naming which pattern produced it.
-              const confItems = (conflictMine?.ranked || [])
-                .filter(pp => (pp.value ?? 0) >= 2 && PATTERN_ACTIONS[pp.key])
-                .map(pp => ({
-                  tip: PATTERN_ACTIONS[pp.key].title,
-                  phrase: interpConflict(PATTERN_ACTIONS[pp.key].body, { partner: partnerName }),
-                }));
-              if (confItems.length) groups.push({ id: "conflict", label: "Conflict Patterns", color: "#1B5FE8", items: confItems });
+              /* Ellie: "I want the what comes next page to call it physical
+                 intimacy expectations not just physical intimacy." */
+              if (intItems.length) groups.push({ id: "intimacy", label: "Physical Intimacy Expectations", color: "#B5546E", items: intItems });
             }
+
+            /* ── CONFLICT IS ITS OWN SECTION ──────────────────────────────
+               This whole block sat inside `if (intimacyBothDone && ...)`, so a
+               couple who owns Conflict Patterns and has not finished Physical
+               Intimacy got no conflict list at all. Nothing failed: a section
+               that is not pushed is a section that is simply not there.
+
+               And the selection is the band, not the raw value. Ellie: "I have
+               4 items in my conflict action plan on that overview page, but one
+               thing listed in the what comes next section for conflict." The
+               overview page picks the patterns in a band worth watching or
+               worth attention; this picked anything answered 2 or more, which
+               is a different list of a different length.
+
+               The pattern name is not shown here: this page is read together
+               and the risk detail is private to each reader, so the action is
+               surfaced without naming which pattern produced it. */
+            const confItems = (conflictMine?.ranked || [])
+              .filter(pp => (pp.band === "worth_watching" || pp.band === "worth_attention")
+                && PATTERN_ACTIONS[pp.key])
+              .map(pp => ({
+                tip: PATTERN_ACTIONS[pp.key].title,
+                phrase: interpConflict(PATTERN_ACTIONS[pp.key].body, { partner: partnerName }),
+              }));
+            if (confItems.length) groups.push({ id: "conflict", label: "Conflict Patterns", color: "#1B5FE8", items: confItems });
 
             if (!groups.length) return null;
             return (
@@ -9703,15 +9815,30 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         </span>
                       </summary>
                       <div style={{ borderTop: `1px solid ${C.stone}` }}>
+                        {/* ── A ROW WITH ITS OWN PAGE CARRIES ITS OWN ARROW ──
+                            Ellie: "each row should have a little arrow on the
+                            right side of the row to open that page directly."
+                            The app draws the same arrow from the same field. */}
                         {g.items.map((it, i) => (
-                          <div key={i} style={{ padding: "0.85rem 1.1rem", borderBottom: i < g.items.length - 1 ? `1px solid ${C.stone}` : "none" }}>
-                            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: it.phrase ? "0.3rem" : 0, lineHeight: 1.4 }}>{it.tip}</div>
-                            {it.phrase && (
-                              <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
-                                <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: g.color, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, marginTop: "0.2rem" }}>Try</span>
-                                <span style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>{it.phrase}</span>
-                              </div>
-                            )}
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.85rem 1.1rem", borderBottom: i < g.items.length - 1 ? `1px solid ${C.stone}` : "none" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: it.phrase ? "0.3rem" : 0, lineHeight: 1.4 }}>{it.tip}</div>
+                              {it.phrase && (
+                                <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
+                                  <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: g.color, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, marginTop: "0.2rem" }}>Try</span>
+                                  <span style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>{it.phrase}</span>
+                                </div>
+                              )}
+                            </div>
+                            {it.section ? (
+                              <button
+                                onClick={() => go(it.section)}
+                                aria-label={`Open ${it.tip}`}
+                                title={it.tip}
+                                style={{ background: "transparent", border: "none", cursor: "pointer", color: g.color, fontSize: "1.1rem", lineHeight: 1, padding: "0.2rem 0.3rem", flexShrink: 0 }}>
+                                {"\u203A"}
+                              </button>
+                            ) : null}
                           </div>
                         ))}
                       </div>
@@ -10522,13 +10649,19 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
       <div style={{ position: inline ? "static" : "absolute", bottom: inline ? undefined : 0, left: inline ? undefined : 0, right: inline ? undefined : 0, padding: inline ? "0" : "0 1.5rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginTop: inline ? "1rem" : 0 }}>
         
         {/* block: highlights/controls */}
-        {(!inline && !isMobile) ? <div style={{ width: 44, height: 44 }} /> : (
-        <button onClick={() => cardIdx > 0 && setCardIdx(n => n - 1)} disabled={cardIdx === 0}
-          style={{ width: 44, height: 44, borderRadius: "50%", background: cardIdx === 0 ? "transparent" : inline ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.1)", border: cardIdx === 0 ? "none" : "1px solid " + (inline ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"), color: cardIdx === 0 ? "transparent" : inline ? "#0E0B07" : "white", fontSize: "1.1rem", cursor: cardIdx === 0 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          ‹
-        </button>
-        )}
-        {/* Progress dots — prominent at bottom on mobile */}
+        {/* ── ONE SET OF ARROWS ────────────────────────────────────────
+            Ellie: "Storycard highlights have two sets of nav arrows - remove
+            the ones that are stationary below the card."
+
+            Highlights is a results page, so the layout draws the floating pair
+            that every results page has, and the storycards drew their own pair
+            under the card as well. Two sets, doing two different things, which
+            is worse than two sets doing one.
+
+            The stationary pair is gone. Paging a card is the left or right edge
+            of the card itself, which is how every story reel works and what she
+            asked for here, and the dots below jump straight to one. The
+            floating pair keeps its own job: the next results page. */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: inline ? 0 : 6 }}>
           {inline
             ? <span style={{ fontSize: "0.62rem", color: C.muted, fontFamily: BFONT, letterSpacing: "0.1em" }}>{cardIdx + 1} / {TOTAL_CARDS}</span>
@@ -10538,13 +10671,6 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
               ))
           }
         </div>
-        {(isLast || (!inline && !isMobile))
-          ? <div style={{ width: 44, height: 44 }} />
-          : <button onClick={advance}
-              style={{ width: 44, height: 44, borderRadius: "50%", background: inline ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.1)", border: "1px solid " + (inline ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"), color: inline ? "#0E0B07" : "white", fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              ›
-            </button>
-        }
       </div>
     </>
   );

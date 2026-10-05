@@ -114,10 +114,28 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       label: 'Expectations',
       section: 'exp-overview',
       items: expCats.length
+        /**
+         * ── EACH ROW SAYS WHAT IT IS AND OPENS ITS OWN PAGE ──────────────
+         * Ellie: "Rather than 'Work through household together' the action plan
+         * rows for expectations in the what comes next page should read
+         * 'Discuss household expectations together' and each row should have a
+         * little arrow on the right side of the row to open that page directly,
+         * then remove the 'open expectations' arrow at the bottom of the
+         * expectations list."
+         *
+         * `section` on the item is that arrow's destination. The category
+         * already carries the id the nav uses, so the row goes to the page it
+         * names rather than to the overview above it, and a surface that draws
+         * a row arrow draws it from this and not from a list of its own.
+         *
+         * A group whose items each carry a section does not draw its own open
+         * arrow: the same link seven times is six too many.
+         */
         ? expCats.map((cat) => ({
-          title: `Work through ${cat.label.toLowerCase()} together`,
+          title: `Discuss ${cat.label.toLowerCase()} expectations together`,
           body: `${cat.differences} ${cat.differences === 1 ? 'thing' : 'things'} here you each pictured differently. Start with the first one.`,
           say: null,
+          section: cat.section,
         }))
         : [{
           title: 'Keep your expectations current',
@@ -134,7 +152,10 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     groups.push({
       id: 'intimacy',
       color: '#C2185B',
-      label: 'Physical Intimacy',
+      /* Ellie: "I want the what comes next page to call it physical intimacy
+         expectations not just physical intimacy." It is the exercise's own
+         name, and the short form reads as a different subject. */
+      label: 'Physical Intimacy Expectations',
       section: 'intimacy-overview',
       items: convos.map((d) => ({ title: d.label, body: null, say: d.prompt })),
     });

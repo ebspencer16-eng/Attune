@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { Modal, ScrollView, Text, View } from 'react-native';
+import { Modal, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
@@ -696,6 +696,42 @@ export default function Results({
       else if (e.translationX > 60 && prev) runOnJS(rememberSection)(prev);
     }), [prev, next, rememberSection]);
 
+  /**
+   * ── AND A TAP ON THE EDGE PAGES TOO ─────────────────────────────────────
+   * Ellie: "Clicking the left or right edge of the results pages should move
+   * you forward or backward, in both the app and the site, just like the
+   * storycard highlights do."
+   *
+   * The storycards' rule, which is hers: "if I tap the left hand side of the
+   * page I want it to go back a page." A sixth of the width on each side rather
+   * than the storycards' third, because a results page is a column of text
+   * somebody is reading and the middle has to stay theirs.
+   *
+   * Reads `prev` and `next` like the swipe does, so the gesture, the tap and
+   * the two arrows cannot disagree about where they go.
+   *
+   * ── WHY A GESTURE AND NOT A PRESSABLE ───────────────────────────────────
+   * A Pressable wrapping the page would swallow every press inside it: the
+   * arrows, the links, the long press that starts a highlight. A tap gesture
+   * composed with the swipe loses to any of those, because a child handler
+   * claims the touch first, which is the behaviour the website gets for free
+   * from an event bubbling to a parent.
+   */
+  const { width: screenW } = useWindowDimensions();
+  const edgeTap = useMemo(() => Gesture.Tap()
+    .maxDuration(300)
+    .onEnd((e, ok) => {
+      if (!ok) return;
+      const edge = screenW / 6;
+      if (e.x < edge && prev) runOnJS(rememberSection)(prev);
+      else if (e.x > screenW - edge && next) runOnJS(rememberSection)(next);
+    }), [prev, next, rememberSection, screenW]);
+
+  /* The swipe wins a race: a drag that happens to end near an edge is a swipe,
+     not two taps. */
+  const pageGestures = useMemo(
+    () => Gesture.Exclusive(pageSwipe, edgeTap), [pageSwipe, edgeTap]);
+
   /** The label of a section id, wherever it sits in the nav. */
   const labelOf = (id: string): string => {
     for (const g of groups) {
@@ -896,7 +932,7 @@ export default function Results({
           if it has travelled fifteen points vertically first. Without those
           two the gesture would eat every vertical scroll on the tallest pages
           in the product. */}
-      <GestureDetector gesture={pageSwipe}>
+      <GestureDetector gesture={pageGestures}>
       <View style={{ flex: 1 }}>
         {/* ── THE GROUND IS THE TAB'S, NOT THIS VIEW'S ─────────────────
             Ellie: "Insights bg feels segmented - can you make the bg
@@ -3084,6 +3120,7 @@ function WhatComesNext({
               color={group.color || c.accent}
               items={group.items}
               onOpen={() => onGoToSection(group.section)}
+              onOpenItem={onGoToSection}
             />
           ))}
         </View>
@@ -3100,12 +3137,29 @@ function WhatComesNext({
  * under a small "Try".
  */
 function NextGroup({
-  label, color, items, onOpen,
+  label, color, items, onOpen, onOpenItem,
 }: {
   label: string; color: string;
-  items: { title: string; quote?: string | null; body?: string | null; say?: string | null }[];
+  items: {
+    title: string; quote?: string | null; body?: string | null; say?: string | null;
+    /** The page this row is about, when it has one of its own. */
+    section?: string | null;
+  }[];
   onOpen: () => void;
+  onOpenItem: (id: string) => void;
 }) {
+  /**
+   * ── A ROW WITH ITS OWN PAGE CARRIES ITS OWN ARROW ───────────────────────
+   * Ellie: "each row should have a little arrow on the right side of the row to
+   * open that page directly, then remove the 'open expectations' arrow at the
+   * bottom of the expectations list."
+   *
+   * So the group's own Open link is drawn only when its rows have nowhere of
+   * their own to go. Derived from the items rather than from the group's id,
+   * because the next group whose rows name a page should behave the same way
+   * without anyone remembering to add it here.
+   */
+  const rowsLinkOut = items.some((i) => i.section);
   const [open, setOpen] = useState(false);
   return (
     <View
@@ -3137,10 +3191,12 @@ function NextGroup({
             <View
               key={`${label}-${i}`}
               style={{
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
                 paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
                 borderBottomColor: c.border,
                 borderBottomWidth: i < items.length - 1 ? 1 : 0,
               }}>
+              <View style={{ flex: 1 }}>
               {/* Title and phrase. No description paragraph: the website prints
                   none here either. */}
               <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong, lineHeight: 19 }}>
@@ -3159,15 +3215,29 @@ function NextGroup({
                   </Prose>
                 </View>
               ) : null}
+              </View>
+              {item.section ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open ${item.title}`}
+                  hitSlop={10}
+                  onPress={() => onOpenItem(item.section as string)}>
+                  {/* not markable: a control, and its name is the row beside it. */}
+                  <Text style={{ color, fontSize: 17 }}>{'\u203A'}</Text>
+                </Pressable>
+              ) : null}
             </View>
           ))}
-          <Pressable
-      accessibilityRole="button" onPress={onOpen} style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
-            {/* not markable: the label on a button, built here rather than sent. */}
-            <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
-              {`Open ${label} \u2192`}
-            </Text>
-          </Pressable>
+          {rowsLinkOut ? null : (
+            <Pressable
+              accessibilityRole="button" onPress={onOpen}
+              style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
+              {/* not markable: the label on a button, built here rather than sent. */}
+              <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
+                {`Open ${label} \u2192`}
+              </Text>
+            </Pressable>
+          )}
         </View>
       ) : null}
     </View>

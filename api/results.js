@@ -883,8 +883,24 @@ export default async function handler(req) {
         conflictReady: ownership.ownsConflict,
         /* The reader's OWN conflict answers, so their action plan can be the
            one their overview page shows them. Private from the partner, not
-           from the reader, and this payload is already per viewer. */
-        conflictAnswers: me?.conflict_data || null,
+           from the reader, and this payload is already per viewer.
+
+           `.answers`, not the column. conflict_data is a record-shaped column,
+           `{ answers, completedAt }`, and this passed the whole record. So
+           summarizeConflict looked for question ids on an object that has two
+           keys, found none, judged the exercise unfinished and returned null,
+           and What Comes Next drew its "no patterns worth watching" fallback.
+
+           Ellie: "I have 4 items in my conflict action plan on that overview
+           page, but one thing listed in the what comes next section for
+           conflict." Four and one, and the one was that fallback. Nothing
+           threw: a record is an object and an object with no question ids on it
+           is what an unfinished exercise looks like.
+
+           api/conflict-results.js, which draws the overview, has always passed
+           `me.conflict_data?.answers`. check-conflict-plans-agree holds the two
+           together now. */
+        conflictAnswers: me?.conflict_data?.answers || null,
         names: { you: me.name || 'You', them: partner?.name || 'your partner' },
       }),
       /**
