@@ -420,8 +420,16 @@ export function MarkToolbar({ marking, partnerName }) {
 
   return (
     <div style={panel} onMouseUp={(e) => e.stopPropagation()}>
+      {/* Ellie: "we don't need the icon labels, just the icons evenly spaced."
+          So the word is gone from the row and stays in the title and the
+          accessible name, where it is what a hover and a screen reader read. An
+          icon with no name anywhere is a guess.
+
+          This comment sits ABOVE the conditional, not inside it: a ternary
+          branch's parenthesis takes one expression, the same as `return (` and
+          `{cond && (`. */}
       {!step ? (
-        <div style={{ display: 'flex', gap: '0.15rem' }}>
+        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
           {marking.actions.map((a) => (
             <button
               key={a.id}
@@ -431,15 +439,14 @@ export function MarkToolbar({ marking, partnerName }) {
               title={a.label}
               style={{
                 background: 'transparent', border: 'none', cursor: 'pointer',
-                padding: '0.4rem 0.55rem', color: C.text,
-                fontFamily: BFONT, fontWeight: 600,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                /* Square, so five of them space evenly whatever their glyph. */
+                width: 34, height: 34, padding: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.accent}
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={C.accent}
                 strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={a.icon} />
               </svg>
-              <span style={{ fontSize: '0.62rem', color: C.muted, fontWeight: 500 }}>{a.label}</span>
             </button>
           ))}
         </div>

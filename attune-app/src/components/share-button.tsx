@@ -12,6 +12,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Share, Text, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
+import { File, Paths } from 'expo-file-system';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
@@ -33,6 +34,30 @@ const c = Colors.light;
  * get it wrong.
  */
 const SUBJECT = 'Attune Relationships';
+
+/**
+ * The same picture, under a name a person would want to read.
+ *
+ * The share sheet's header is the file's name, so naming the file is the only
+ * thing that changes it. Copied rather than moved, because the capture's own
+ * path belongs to react-native-view-shot and outliving it is not this
+ * component's business; both sit in the cache and the system reclaims them.
+ *
+ * Any failure here returns the original. A picture under an ugly name is worth
+ * more than no picture, and this is cosmetic.
+ */
+async function named(uri: string, name: string): Promise<string> {
+  try {
+    const src = new File(uri);
+    const dest = new File(Paths.cache, `${name}.png`);
+    try { dest.delete(); } catch { /* it was not there */ }
+    await src.copy(dest);
+    return dest.uri;
+  } catch (e) {
+    console.warn('[share] could not name the picture', e);
+    return uri;
+  }
+}
 
 /**
  * ── THE INSIGHT GOES AS A PICTURE ─────────────────────────────────────────
@@ -88,9 +113,21 @@ export default function ShareButton({
    *
    * That string is the capture's temporary filename, and the sheet puts the
    * file's name at the top because a file is what it is being handed.
-   * react-native-view-shot takes a `fileName`, so the fix is to name it rather
-   * than to try to talk the sheet out of reading it. No colon: it is a path on
-   * disk and the Finder draws a colon as a slash.
+   *
+   * ── WHY THE FIRST FIX DID NOTHING ───────────────────────────────────────
+   * It passed `fileName` to react-native-view-shot, which reads it in
+   * RNViewShotModule.java and nowhere else: the option is Android only and iOS
+   * ignores it silently. So the message was right, because that comes from the
+   * subject, and the sheet she was looking at before sending was unchanged.
+   * Ellie: "When the message sends this shows correctly, but in the share
+   * preview... it shows that random string."
+   *
+   * An option that is accepted and ignored on the one platform this ships to is
+   * the same shape as fontStyle italic on a registered family: a valid-looking
+   * call, no error, nothing happens.
+   *
+   * So the file is copied to a named one and that is what goes. No colon in the
+   * name: it is a path on disk and the Finder draws a colon as a slash.
    */
   pictureName?: string;
 }) {
@@ -108,9 +145,8 @@ export default function ShareButton({
         let picture: string | null = null;
         if (capture?.current) {
           try {
-            picture = await captureRef(capture.current, {
-              format: 'png', quality: 1, ...(pictureName ? { fileName: pictureName } : null),
-            });
+            picture = await captureRef(capture.current, { format: 'png', quality: 1 });
+            if (pictureName) picture = await named(picture, pictureName);
           } catch (e) {
             /* No picture is not no share. The text and the link still go. */
             console.warn('[share] could not capture the card', e);

@@ -212,9 +212,28 @@ for (const c of cases) {
       + ' iOS takes one url and the picture is it, so a link left in that slot never leaves.'
       + ' This is for the callers that DO send one; the insight is not one of them.');
   }
-  if (!/fileName: pictureName/.test(btn)) {
-    bad.push('share-button.tsx does not pass the picture\'s name to captureRef, so the sheet'
-      + ' falls back to the temporary filename it was given.');
+  /**
+   * ── THE NAME HAS TO BE A FILE ON DISK ───────────────────────────────────
+   * The first version of this asked for `fileName: pictureName` on the
+   * captureRef call, and react-native-view-shot reads that option in its
+   * Android module and nowhere else. iOS ignores it with no error, so the check
+   * passed, the code looked right, and Ellie still saw the UUID: "in the share
+   * preview... it shows that random string."
+   *
+   * So the rule is the outcome, not the option: the capture is copied to a file
+   * named after the picture, and that file's uri is what the sheet is handed.
+   */
+  if (/fileName: pictureName/.test(btn)) {
+    bad.push('share-button.tsx passes `fileName` to captureRef. That option exists only in the'
+      + ' library\'s Android module; on iOS it is accepted and ignored, which is how this'
+      + ' shipped looking fixed. Copy the capture to a named file instead.');
+  }
+  if (!/new File\(Paths\.cache, `\$\{name\}\.png`\)/.test(btn) || !/\.copy\(dest\)/.test(btn)) {
+    bad.push('share-button.tsx does not copy the capture to a file named after the picture, so'
+      + ' the sheet shows the capture\'s temporary filename.');
+  }
+  if (!/picture = await named\(picture, pictureName\)/.test(btn)) {
+    bad.push('share-button.tsx names a copy of the picture and then shares the original.');
   }
   if (!/url: picture \|\| url/.test(btn)) {
     bad.push('share-button.tsx does not prefer the picture for the url slot, so the card is'

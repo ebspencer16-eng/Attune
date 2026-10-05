@@ -15,22 +15,19 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| O549 | **No buffer between the inner square and the right edge of the tile.** Third report on this tile and my second wrong fix. Stop guessing: export AppHome, render the real component in a browser at several window sizes, and measure the gap on all four sides. Build the gate first, watch it fail, then fix. |
+| O552 | **The web Learn insight is cut off by the peek.** Her: "We might have to shrink everything to make it work." The app already solves this exactly: lib/insight-fit sizes the quote to the room the peek leaves. The website restates the layout instead of using it. |
+| O550 | **Still no room between the share row and the peek.** The padding I added is inside a block whose height is the budget, so it took room from the quote rather than adding any. Same fix as O552. |
+| O546 | **The share SHEET still shows the temp filename, though the sent message is right.** So `fileName` renames what is sent and not what the preview reads. The preview header comes from the file on disk, so the file itself has to be named: copy the capture to a named path and share that. |
+| O553 | **Drop the toolbar's icon labels.** Icons only, evenly spaced. |
+| O555 | **The beta feedback popup cannot be dismissed and returns on every refresh.** Tapping anywhere should close it, and closing it should be remembered. |
+| O556 | **Tapping the side of a results card should page, as it does in the app.** Left half back, right half forward, same order the arrows walk. |
+| O557 | **The home page took forever to load.** Second report; O535 measured 240ms and closed it, which was the wrong measurement because it ran signed out and she is not. Measure the signed-in path: what the dashboard waits on before it paints. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| O544 | **The arrows reach every page and go where they say.** They were on six of eighteen: the list they walked was typed out beside the nav's own and had no cover pages in it, so a cover fell to "not in the list", which the Next test read as "there is a next" and sent you to Highlights. They walk the nav itself now. Driving the live site then showed a second one: the arrows were announcing "Back to comm-cover", the raw id, because the page names were another hand-typed list. Those come from the nav too. Verified on all eighteen pages, both arrows. |
-| O540 | **The admin menu is gone; the code opens the admin.** Four digits, then the dashboard overview, and the hamburger from there. The seventeen-row list went with it, along with the payload field that fed it. |
-| O546 | **The share is the card and one line.** "Attune Relationships: Insight of the Day" and nothing else: no quote, no citation, no link, because the picture carries all three. The string of letters you saw was the picture's temporary filename, which the sheet shows because a file is what it is handed. It has a name now. |
-| O548 | **The citation never goes below 11pt, and that sets the longest quote.** Working backwards as you said: the floor costs a fixed amount of room, so the most an insight can ever run to is 354 characters. The longest in the file is 260. The build fails on anything over, and the number is computed rather than written down, so it moves if the layout does. |
-| O551 | **Save on the website's insight.** Same journal entry the app writes, same endpoint. Its four sentences moved into the shared copy module so the two surfaces cannot drift. |
-| O553 | **The web selection toolbar draws the app's five icons.** Same five, same order, same words, held by a gate. |
-| O552 | **In Practice below the fold is organised by shelf, like the app.** An eyebrow per shelf and a row that scrolls sideways under it. The shelves come from the same function that tells the app, not from a label on the article. |
-| O550 | **Room under the share and save buttons.** And the block above the sheet is a height rather than a minimum, which is what was pushing the peek off the bottom. |
-| O554 | **Marking works online. Driven, not read.** Select a sentence, release, the toolbar opens with all five; highlight saves to the right place anchored on the exact words; a mark handed back is painted onto them. It could not be confirmed any other way: marking is off in the demo, and every browser check here runs signed out, so the gate bundles the real module and drives it. |
-| O549 | **The desktop prompt tile picture is a square, measured.** **You should look at this one first.** My first attempt was wrong and I told you it was fixed: I proved it in a standalone test page rather than on your dashboard, which needs an account. I still cannot get that screen in front of a browser, so this is built to fail safe instead: the card measures its own room, and until that measurement lands it looks exactly as it did before. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -49,6 +46,11 @@
 
 | Verified by you | What it was |
 |--|--|
+| O544 | Results arrows reached six pages of eighteen and the covers announced their raw section id; both lists now come from the nav. |
+| O540 | The app's admin menu was a second copy of the admin's own nav; the four-digit code now opens the overview directly. |
+| O548 | The insight citation could shrink to 9pt under a 12pt quote; floored at 11, which sets the longest usable quotation at 354 characters. |
+| O551 | The website's insight had no Save, so a quote could be kept on a phone and not on a laptop. |
+| O554 | Marking on the website was never confirmed end to end, because it is disabled in the demo every browser check uses. |
 | O547 | The glow behind the insights cover icon was too faint to see on cream; raised from 13% of the accent to 31%. |
 | O545 | The insights menu carets were positioned against the whole group, so Communication's sat above its row instead of beside it. |
 | O543 | Insights cover pages on the site drew a dot instead of the section icon, because the code read a field those rows have never carried. |

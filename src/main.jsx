@@ -31,16 +31,16 @@ async function _consentAllowsErrorReporting() {
   if (answer === 'granted') return true;
   if (answer === 'declined') return false;
 
+  /* public/_flags.js is the one asker: it loads before this module, caches the
+     answer for the session and dedupes callers in the same tick. This used to
+     have its own fetch and its own cache, which is how one page load asked
+     /api/region twice. Nothing here means consent is required, the same answer
+     a failed request gave. */
   let required = true;
   try {
-    const cached = sessionStorage.getItem('attune_region_consent_required');
-    if (cached === '0' || cached === '1') {
-      required = cached === '1';
-    } else {
-      const res = await fetch('/api/region', { headers: { Accept: 'application/json' } });
-      required = res.ok ? !!(await res.json()).consentRequired : true;
-      try { sessionStorage.setItem('attune_region_consent_required', required ? '1' : '0'); } catch { /* blocked */ }
-    }
+    required = typeof window.__attuneConsentRequired === 'function'
+      ? await window.__attuneConsentRequired()
+      : true;
   } catch { required = true; }
 
   // Required and unanswered means not yet. "Upon first visit" is before the

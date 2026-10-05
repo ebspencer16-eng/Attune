@@ -31,6 +31,52 @@ window.ATTUNE_FLAGS = {
  * an installed app, since prompting someone to get the app they are using is
  * the clearest possible sign nobody checked.
  */
+/**
+ * ── ONE QUESTION, ASKED ONCE ──────────────────────────────────────────────
+ * "Does this visitor's country require consent" was asked by three different
+ * files: this one, _track.js and src/main.jsx. Each had its own fetch, two of
+ * them cached the answer and the banner's never did, and none knew about the
+ * others. So a cold first load made up to three identical requests and every
+ * load after made at least one, for an answer that cannot change in a session.
+ *
+ * Measured on the deployed site: /api/region appears twice in one page load's
+ * resource timeline, a millisecond apart, which is what two callers racing
+ * looks like.
+ *
+ * ── WHY ITS OWN BLOCK, AT THE TOP ───────────────────────────────────────
+ * The first version of this sat inside the app-banner block below, which
+ * returns early on half a dozen conditions including "this page is the React
+ * app". So on /app the helper was never defined, the two readers fell back to
+ * their safe answer, and the banner never drew at all. Nothing threw. Found by
+ * loading the page and asking for the function rather than by reading the file,
+ * which is the only way that shows up.
+ *
+ * A failed request answers "required", the same as an unknown country, which is
+ * the safe direction and what all three did already.
+ */
+(function () {
+  var REGION_KEY = 'attune_region_consent_required';
+  var asked = null;
+  window.__attuneConsentRequired = function () {
+    var cached = null;
+    try { cached = sessionStorage.getItem(REGION_KEY); } catch (e) {}
+    if (cached === '0') return Promise.resolve(false);
+    if (cached === '1') return Promise.resolve(true);
+    /* The in-flight promise, which is the half a cache alone does not cover:
+       two callers inside one tick both miss the cache and both fetch. */
+    if (asked) return asked;
+    asked = fetch('/api/region', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : { consentRequired: true }; })
+      .catch(function () { return { consentRequired: true }; })
+      .then(function (region) {
+        var required = !!region.consentRequired;
+        try { sessionStorage.setItem(REGION_KEY, required ? '1' : '0'); } catch (e) {}
+        return required;
+      });
+    return asked;
+  };
+})();
+
 (function () {
   var F = window.ATTUNE_FLAGS || {};
   if (!F.APP_BANNER_ENABLED) return;
@@ -116,10 +162,7 @@ window.ATTUNE_FLAGS = {
 
     // Ask which rule applies before drawing anything. A failed request is
     // treated as consent-required, for the same reason an unknown country is.
-    fetch('/api/region', { headers: { Accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : { consentRequired: true }; })
-      .catch(function () { return { consentRequired: true }; })
-      .then(function (region) { draw(!!region.consentRequired); });
+    window.__attuneConsentRequired().then(draw);
   });
 
   function draw(needsConsent) {

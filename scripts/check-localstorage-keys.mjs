@@ -26,7 +26,25 @@ const EXEMPT = {
 
 // Both quote styles: attune_portrait is written with double quotes, and a
 // single-quote-only scan would have missed it.
-const used = new Set([...src.matchAll(/localStorage\.\w+\(\s*['"](attune_[a-z0-9_]+)['"]/g)].map(m => m[1]));
+//
+// ── AND KEYS REACHED THROUGH A CONSTANT ────────────────────────────────────
+// This matched a literal inside the call and nothing else, so
+// `localStorage.setItem(SURVEY_DISMISSED, '1')` was invisible: the key was
+// written on every dismissal, cleared on no sign-out, and this reported "all
+// covered". Caught by adding such a key and watching the gate stay green.
+//
+// CLAUDE.md names this shape: a gate matching on a literal is blind to anything
+// reached through a registry, and the fix is to resolve the indirection rather
+// than to ban it. So any `const NAME = 'attune_...'` in the file is resolved
+// first, and a call passing that name counts as using that key.
+const consts = new Map([...src.matchAll(/\bconst\s+([A-Z][A-Z0-9_]*)\s*=\s*['"](attune_[a-z0-9_]+)['"]/g)]
+  .map(m => [m[1], m[2]]));
+
+const used = new Set([
+  ...[...src.matchAll(/localStorage\.\w+\(\s*['"](attune_[a-z0-9_]+)['"]/g)].map(m => m[1]),
+  ...[...src.matchAll(/localStorage\.\w+\(\s*([A-Z][A-Z0-9_]*)\b/g)]
+    .map(m => consts.get(m[1])).filter(Boolean),
+]);
 
 const missing = [...used].filter(k => !registry.has(k) && !(k in EXEMPT)).sort();
 

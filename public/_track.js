@@ -42,19 +42,15 @@
     if (answer === 'granted') return Promise.resolve('granted');
     if (answer === 'declined') return Promise.resolve(null);
 
-    var cached = null;
-    try { cached = sessionStorage.getItem(REGION_KEY); } catch (e) {}
-    if (cached === '0') return Promise.resolve('not-required');
-    if (cached === '1') return Promise.resolve(null);   // required, unanswered
-
-    return fetch('/api/region', { headers: { Accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : { consentRequired: true }; })
-      .catch(function () { return { consentRequired: true }; })
-      .then(function (region) {
-        var required = !!region.consentRequired;
-        try { sessionStorage.setItem(REGION_KEY, required ? '1' : '0'); } catch (e) {}
-        return required ? null : 'not-required';
-      });
+    /* The one asker is in _flags.js, which loads before this. It caches and it
+       dedupes, so this no longer makes a request of its own; three files asking
+       one question separately is what made a cold load fetch /api/region twice.
+       If that file is somehow absent this treats consent as required, which is
+       the same thing a failed request did. */
+    if (typeof window.__attuneConsentRequired !== 'function') return Promise.resolve(null);
+    return window.__attuneConsentRequired().then(function (required) {
+      return required ? null : 'not-required';
+    });
   }
 
   function send(kind, key, ms) {

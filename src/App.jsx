@@ -39,6 +39,20 @@ import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_C
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insights.js";
+/**
+ * ── THE APP'S ARITHMETIC, NOT A SECOND COPY OF IT ─────────────────────────
+ * Ellie: "Peek looks right but it's cutting off the insight of the day. We
+ * might have to shrink everything to make it work."
+ *
+ * The app already does exactly that, and it was written with a gate holding it.
+ * This file is the only other place that has to answer the same question, so it
+ * asks the same function rather than restating the rule in a second idiom.
+ *
+ * It lives under attune-app because an Expo project cannot import from api/,
+ * and the website can import from anywhere. insight-fit.ts imports nothing
+ * itself, deliberately, which is what makes it reachable from both.
+ */
+import { quoteFit as fitQuote, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEADING, CITE_LEADING as FIT_CITE_LEADING } from "../attune-app/src/lib/insight-fit.ts";
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE, shelfFor } from "../api/_in-practice.js";
 import { POST_CATEGORIES } from "../api/_lib/post-categories.js";
@@ -244,7 +258,7 @@ const USER_LOCALSTORAGE_KEYS = [
   'attune_profile_setup_done',
   'attune_results_email_sent', 'attune_stay_subscribed',
   'attune_results_state', 'attune_couple_type_saved',
-  'attune_post_survey_done', 'attune_survey_done',
+  'attune_post_survey_done', 'attune_survey_done', 'attune_survey_dismissed',
   'attune_wb_promo_fired', 'attune_feedback_ctx',
   // An order number whose claim did not land. Kept so the next sign-in can try
   // again, and cleared on sign-out like everything else that names a purchase.
@@ -3924,7 +3938,19 @@ function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) 
   );
 }
 
-function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
+/**
+ * Exported so a browser check can render the real thing.
+ *
+ * Ellie has now reported this tile wrong three times and two of my fixes were
+ * wrong, both because I measured something that was not this component: first a
+ * hand-written page with the same CSS, then nothing at all, because the
+ * dashboard needs an account and ?demo=1 on it renders blank. A component that
+ * can only be checked by being signed in is a component nothing checks.
+ *
+ * See check-prompt-tiles.mjs, which mounts this with a stub payload and
+ * measures the cards at several window sizes.
+ */
+export function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
   /**
    * ── THE PICTURE IS A ROUNDED SQUARE, AND THE WIDTH COMES FROM THE HEIGHT ─
    * Ellie, of this tile on her desktop: "Home page action prompt tiles are
@@ -4197,6 +4223,24 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
             the app on the one screen Ellie looks at most. */}
         <style>{`
           .ah-cell { min-width: 0; display: flex; align-items: flex-start; }
+          /* ── THE PICTURE PAYS FOR ITS OWN PADDING ────────────────────────
+             Ellie, third report on this tile: "Still no buffer between the
+             inner square and the right edge of the tile."
+
+             The card is border-box and the picture was content-box, so the
+             picture's own half-rem of padding, which holds the mark off the
+             corner, was added OUTSIDE its 100% width. Sixteen points wider than
+             the box it sits in: a full gap on the left, none on the right, and
+             it looked like a padding someone forgot rather than one counted
+             twice. Measured at 270 declared and 286 drawn.
+
+             Both halves here. The card too, because a width means two
+             different things under the two models and the arithmetic that
+             sizes this one is written in border-box terms.
+
+             No backticks in this comment: it lives inside a template literal,
+             so one closes the string and the build fails on the next word. */
+          .ah-card, .ah-pic, .ah-pic * { box-sizing: border-box; }
           /* The pair hugs the middle rather than each card floating in its own
              half, which is how the app has them: side by side with one gap. */
           .ah-cell:nth-child(odd) { justify-content: flex-end; }
@@ -4317,7 +4361,14 @@ function AppHome({ feed, isMobile, userName, onQuick, onCard, children }) {
               <div style={{
                 fontSize: "0.82rem", color: C.muted, lineHeight: 1.45,
                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                overflow: "hidden", flexShrink: 0, minHeight: "2.4em",
+                /* Two lines of THIS leading, which is 2 x 1.45. It was 2.4em,
+                   borrowed from the title above it where the leading is 1.2, so
+                   a one-line body reserved less than a two-line body used and
+                   the pair came out seven points apart. Exactly what the
+                   minimum was added to stop: Ellie, "if the action prompt text
+                   splits to 2 lines, it must do it on both tiles so that the
+                   formatting is the same for each." */
+                overflow: "hidden", flexShrink: 0, minHeight: "2.9em",
               }}>
                 {card.body}
               </div>
@@ -10421,7 +10472,40 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
         ))}
       </div>}
 
-      <div style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+      {/* ── WHICH SIDE WAS TAPPED ────────────────────────────────────────
+          Ellie: "Just like we have on the app, tapping the side of the results
+          cards should go forward or backward to the next or previous page."
+
+          The app's rule, from when she asked for it there: "On storycards, if I
+          tap the left hand side of the page I want it to go back a page." A
+          third of the width is the back half, which is the same fraction the
+          app uses, because it has to be clearly a side rather than a sliver and
+          it has to leave the middle to the card, where the buttons on the first
+          and last card are.
+
+          The last card does not advance. Tapping into nothing is how someone
+          decides a thing is broken, and the end of the sequence has its own
+          button. Neither does the first card go back.
+
+          Anything inside the card that is itself a control still wins: a click
+          on a button stops before it reaches here, which is why the handler is
+          on the frame rather than on a layer over it. */}
+      <div
+        onClick={(e) => {
+          /* A click that began as a selection is someone reading, not paging.
+             Marking a sentence on a storycard and then losing the card is the
+             kind of thing nobody reports and everybody notices. */
+          const sel = typeof window !== "undefined" && window.getSelection
+            ? String(window.getSelection() || "") : "";
+          if (sel.trim()) return;
+          const box = e.currentTarget.getBoundingClientRect();
+          if (e.clientX - box.left < box.width / 3) {
+            if (cardIdx > 0) setCardIdx((n) => n - 1);
+            return;
+          }
+          if (!isLast) setCardIdx((n) => n + 1);
+        }}
+        style={{ flex: inline ? undefined : 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: inline ? "0 0 3rem" : isMobile ? "0.5rem 0 4rem" : "1rem 0.5rem 5rem", overflowY: inline ? undefined : "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain", cursor: "pointer" }}>
         {cards[cardIdx]}
       </div>
 
@@ -13042,6 +13126,41 @@ export default function App() {
    */
   const [learnTop, setLearnTop] = useState(0);
   const learnAboveRef = useRef(null);
+  /**
+   * How tall the three tool tiles are, so the insight knows its own room.
+   *
+   * The block above the sheet has a fixed height; the tools take what they
+   * take; the insight gets the rest. That subtraction is the whole of what the
+   * app's Learn tab does, and it is why its quotation never pushes the peek off
+   * the screen.
+   */
+  const [learnToolsH, setLearnToolsH] = useState(0);
+  const learnToolsRef = useRef(null);
+  /**
+   * And the block they sit in, so the subtraction has both halves.
+   *
+   * In state rather than read off the ref during render: a rect read while
+   * rendering is not something React re-renders for, so the quote would be
+   * sized from whatever the layout happened to be one paint ago.
+   */
+  const [learnAbove, setLearnAbove] = useState({ h: 0, w: 0 });
+  useEffect(() => {
+    if (dashTab !== "learn" || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const h = Math.round(e.contentRect.height);
+        const w = Math.round(e.contentRect.width);
+        if (e.target === learnToolsRef.current) {
+          setLearnToolsH((cur) => (Math.abs(cur - h) > 1 ? h : cur));
+        } else {
+          setLearnAbove((cur) => (Math.abs(cur.h - h) > 1 || Math.abs(cur.w - w) > 1 ? { h, w } : cur));
+        }
+      }
+    });
+    if (learnToolsRef.current) ro.observe(learnToolsRef.current);
+    if (learnAboveRef.current) ro.observe(learnAboveRef.current);
+    return () => ro.disconnect();
+  });
   useEffect(() => {
     const el = learnAboveRef.current;
     if (dashTab !== "learn" || !el) return undefined;
@@ -13349,7 +13468,29 @@ export default function App() {
     } catch {}
   }, [view]);
   const [isBetaTester, setIsBetaTester] = useState(false);
-  const [postSurveyDone, setPostSurveyDone] = useState(() => { try { return !!(localStorage.getItem('attune_survey_done') || localStorage.getItem('attune_post_survey_done')); } catch { return false; } });
+  /**
+   * ── DISMISSED IS AS GOOD AS DONE, FOR SHOWING IT AGAIN ──────────────────
+   * Ellie: "When I went into my results I was prompted with a pop-up feedback
+   * thing that wouldn't go away and showed each time I refreshed. Users should
+   * be able to tap anywhere and have that go away."
+   *
+   * Tapping the backdrop did close it, and only in memory: the flag was written
+   * by the Done button and by nothing else. So every refresh brought it back,
+   * which is indistinguishable from a dialog that will not close, and is worse,
+   * because the answer she found by experiment was that there is no answer.
+   *
+   * Dismissing writes its own key. Separate from the one Done writes, so the
+   * record still says whether anyone answered: a dialog people close is a thing
+   * worth knowing, and overloading one flag would lose it.
+   */
+  const SURVEY_DISMISSED = 'attune_survey_dismissed';
+  const [postSurveyDone, setPostSurveyDone] = useState(() => {
+    try {
+      return !!(localStorage.getItem('attune_survey_done')
+        || localStorage.getItem('attune_post_survey_done')
+        || localStorage.getItem(SURVEY_DISMISSED));
+    } catch { return false; }
+  });
   // If the profile records a completed survey (set server-side on submit), treat
   // it as done even on a device whose localStorage never saw it.
   useEffect(() => { if (account?.betaSurveyAt) setPostSurveyDone(true); }, [account?.betaSurveyAt]);
@@ -15899,7 +16040,7 @@ export default function App() {
                       further down, which is the website's job and not the
                       app's. */}
                   {/* block: app-learn/tools */}
-                  <div data-block="app-learn/tools" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: isMobile ? "0.5rem" : "0.75rem" }}>
+                  <div ref={learnToolsRef} data-block="app-learn/tools" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: isMobile ? "0.5rem" : "0.75rem" }}>
                     {CATALOGUE.filter((t) => t.kind === "tool").map((tool) => {
                       const owned = tool.key === "workbook" ? hasWorkbookOrder
                         : tool.key === "budget" ? pkg.hasBudget : pkg.hasChecklist;
@@ -15967,17 +16108,69 @@ export default function App() {
                   {(() => {
                     const insight = insightOfTheDay();
                     if (!insight) return null;
+
+                    /**
+                     * ── THE QUOTE FITS THE ROOM THE PEEK LEAVES ───────────
+                     * Ellie: "Peek looks right but it's cutting off the insight
+                     * of the day. We might have to shrink everything to make it
+                     * work."
+                     *
+                     * The same answer the app's Learn tab gives, from the same
+                     * function. The room here is what is left of the block
+                     * above the sheet once the tool tiles and this block's own
+                     * furniture have taken theirs, less a gap:
+                     *
+                     * Ellie, separately: "No room currently" between the share
+                     * button and the peek. LEARN_GAP is that room, taken out of
+                     * the budget rather than added as padding. Padding inside a
+                     * block whose height IS the budget takes room from the
+                     * quote and adds none, which is what my last attempt did.
+                     *
+                     * ── THE SCALE ─────────────────────────────────────────
+                     * insight-fit counts in the app's points, where the quote
+                     * starts at 18. The website sets it larger, so the room and
+                     * the width go in divided by that ratio and the answer
+                     * comes back multiplied by it. One rule, two type scales,
+                     * rather than a second copy tuned for this one.
+                     */
+                    const LEARN_GAP = 28;
+                    const base = isMobile ? 21.6 : 25.6;      // 1.35rem, 1.6rem
+                    const scale = base / FIT_BASE;
+                    const furniture = 14 + 14 + 18 + 34 + 18; // eyebrow, its margin, the citation's margin, the controls, theirs
+                    const room = (learnAbove.h && learnToolsH)
+                      ? learnAbove.h - learnToolsH - furniture - LEARN_GAP
+                      : 0;
+                    const width = learnAbove.w;
+                    const fit = (room > 0 && width > 0)
+                      ? fitQuote({ text: insight.body, room: room / scale, width: width / scale })
+                      : null;
+                    const quoteSize = fit ? Math.round(fit.size * scale) : base;
+                    const citeSize = fit
+                      ? Math.round(fit.cite * scale)
+                      : (isMobile ? 13.1 : 14.1);
+
                     return (
                       /* block: app-learn/insight */
                       <div data-block="app-learn/insight" style={{ marginTop: isMobile ? "2rem" : "2.5rem" }}>
                         <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem" }}>
                           {INSIGHT_EYEBROW}
                         </div>
-                        <p style={{ fontFamily: HFONT, fontSize: isMobile ? "1.35rem" : "1.6rem", lineHeight: 1.35, color: "white", fontWeight: 400, margin: 0, letterSpacing: "-0.01em" }}>
+                        <p style={{
+                          fontFamily: HFONT, fontSize: quoteSize,
+                          lineHeight: `${Math.round(quoteSize * FIT_LEADING)}px`,
+                          color: "white", fontWeight: 400, margin: 0, letterSpacing: "-0.01em",
+                          display: "-webkit-box", WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: fit ? fit.lines : undefined, overflow: "hidden",
+                        }}>
                           {insight.body}
                         </p>
                         {insight.source ? (
-                          <p style={{ fontSize: isMobile ? "0.82rem" : "0.88rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, fontStyle: "italic", margin: "1.1rem 0 0" }}>
+                          <p style={{
+                            fontSize: citeSize,
+                            lineHeight: `${Math.round(citeSize * FIT_CITE_LEADING)}px`,
+                            color: "rgba(255,255,255,0.62)", fontFamily: BFONT,
+                            fontStyle: "italic", margin: "1.1rem 0 0",
+                          }}>
                             {insight.source}
                           </p>
                         ) : null}
@@ -16002,7 +16195,7 @@ export default function App() {
                             the controls sat against it. */}
                         <div style={{
                           display: "flex", justifyContent: "flex-end", gap: "0.6rem",
-                          marginTop: "1.1rem", paddingBottom: isMobile ? "1.5rem" : "2rem",
+                          marginTop: "1.1rem",
                         }}>
                           <button
                             onClick={() => setSaveInsight(insight)}
@@ -17292,7 +17485,10 @@ export default function App() {
                     respondentId={account?.id || null}
                     userName={userName}
                     coupleType={coupleType}
-                    onClose={() => setPostSurveyDone(true)}
+                    onClose={() => {
+                      setPostSurveyDone(true);
+                      try { localStorage.setItem(SURVEY_DISMISSED, '1'); } catch { /* private window */ }
+                    }}
                     onDone={() => {
                       setPostSurveyDone(true);
                       try { localStorage.setItem('attune_survey_done', '1'); } catch { /* private window */ }
