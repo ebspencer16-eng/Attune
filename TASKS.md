@@ -15,21 +15,22 @@
 
 | # | Mine to build |
 |--|--|
-| O544 | **The arrows land on Highlights instead of the page they name.** Same shape as O537, which was the menu rows doing it, so the storycards are drawing over whatever section was asked for. Find what `go()` does not set that the menu's open now does, and make one path rather than two. |
-| O540 | **Drop the admin menu in the app.** After the four digits, straight to the dashboard overview; the hamburger on the site's mobile view is the nav from there. Delete the section list and the `adminSections` payload if nothing else reads it. |
-| O549 | **The desktop prompt tile is still wrong and I have not seen the real one.** My proof was a standalone harness, not her page: the demo home needs a session and I never got past it. Get the signed-in dashboard in front of a browser, measure the actual cell, then fix what is actually wrong. |
-| O548 | **Floor the citation and cap the quote.** The citation has a floor of 9 and nothing stops the quote reaching it. Set the smallest readable citation, work back through the arithmetic to the longest quotation that fits above it, and fail the build on an insight longer than that. |
-| O546 | **The share message is wrong.** The title is the picture's temp filename. She wants "Attune Relationships: Insight of the Day" as the bold line before the image, and nothing else: no quote, no citation, no link, because the picture carries all three. |
-| O550 | **Learn on the web: the share button sits against the In Practice peek.** Space between them. |
-| O551 | **Learn on the web has no Save on the insight.** The app saves it to a journal entry; the website does not offer it at all. Same payload, same journal. |
-| O552 | **Learn on the web: the peek is cut off and In Practice is not organised like the app's.** The app groups by category and the website does not. Read the app's shelf and match it. |
-| O553 | **The web selection toolbar uses words where the app uses icons.** Switch to the app's icon toolbar. |
-| O554 | **Confirm marking works on the website.** Select, highlight, underline, note, and the margin markers on a results page and an article. The app's half of this was broken for months with nothing failing, so measure rather than read. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| O544 | **The arrows reach every page and go where they say.** They were on six of eighteen: the list they walked was typed out beside the nav's own and had no cover pages in it, so a cover fell to "not in the list", which the Next test read as "there is a next" and sent you to Highlights. They walk the nav itself now. Driving the live site then showed a second one: the arrows were announcing "Back to comm-cover", the raw id, because the page names were another hand-typed list. Those come from the nav too. Verified on all eighteen pages, both arrows. |
+| O540 | **The admin menu is gone; the code opens the admin.** Four digits, then the dashboard overview, and the hamburger from there. The seventeen-row list went with it, along with the payload field that fed it. |
+| O546 | **The share is the card and one line.** "Attune Relationships: Insight of the Day" and nothing else: no quote, no citation, no link, because the picture carries all three. The string of letters you saw was the picture's temporary filename, which the sheet shows because a file is what it is handed. It has a name now. |
+| O548 | **The citation never goes below 11pt, and that sets the longest quote.** Working backwards as you said: the floor costs a fixed amount of room, so the most an insight can ever run to is 354 characters. The longest in the file is 260. The build fails on anything over, and the number is computed rather than written down, so it moves if the layout does. |
+| O551 | **Save on the website's insight.** Same journal entry the app writes, same endpoint. Its four sentences moved into the shared copy module so the two surfaces cannot drift. |
+| O553 | **The web selection toolbar draws the app's five icons.** Same five, same order, same words, held by a gate. |
+| O552 | **In Practice below the fold is organised by shelf, like the app.** An eyebrow per shelf and a row that scrolls sideways under it. The shelves come from the same function that tells the app, not from a label on the article. |
+| O550 | **Room under the share and save buttons.** And the block above the sheet is a height rather than a minimum, which is what was pushing the peek off the bottom. |
+| O554 | **Marking works online. Driven, not read.** Select a sentence, release, the toolbar opens with all five; highlight saves to the right place anchored on the exact words; a mark handed back is painted onto them. It could not be confirmed any other way: marking is off in the demo, and every browser check here runs signed out, so the gate bundles the real module and drives it. |
+| O549 | **The desktop prompt tile picture is a square, measured.** **You should look at this one first.** My first attempt was wrong and I told you it was fixed: I proved it in a standalone test page rather than on your dashboard, which needs an account. I still cannot get that screen in front of a browser, so this is built to fail safe instead: the card measures its own room, and until that measurement lands it looks exactly as it did before. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
