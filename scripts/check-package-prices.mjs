@@ -29,9 +29,22 @@
  * them impossible to leave out of step. The same reasoning as
  * check-checkout-pricing.mjs, which says so too.
  *
+ * ── AND ADD-ON PRICES, WHICH IT USED TO LEAVE OUT ─────────────────────────
+ * This file used to say add-on prices were "already one table in
+ * api/_catalogue.js for the server". They are not: api/calculate-tax.js keeps
+ * its own, and public/cart.js keeps a third.
+ *
+ * Planted against: moving the Relationship Reflection add-on from 40 to 45 in
+ * api/calculate-tax.js alone — the endpoint that works out the tax a customer
+ * reads at checkout — passed this gate, check-checkout-pricing and
+ * check-prices-on-page. The page would have shown tax on a base five dollars
+ * too high, which is the bug this file exists for, in the add-on column.
+ *
+ * So the same scan runs over add-on tables. The package list and the add-on
+ * list are two shapes of one promise, which is why they are here together
+ * rather than in a second file that would drift from this one.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * Add-on prices. Those are already one table in api/_catalogue.js for the
- * server, and check-checkout-pricing.mjs covers the checkout page's own.
  *
  * The synthetic orders in admin.html's generateOrders(), which invents names,
  * addresses and prices for a demo with no database behind it. Its prices are
@@ -42,7 +55,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const { DIGITAL_PRICES, PHYSICAL_PRICES } = await import(`${ROOT}api/_catalogue.js`);
+const { DIGITAL_PRICES, PHYSICAL_PRICES, ADDON_PRICES } = await import(`${ROOT}api/_catalogue.js`);
 
 const KEYS = Object.keys(DIGITAL_PRICES);
 if (KEYS.length !== 4) {
@@ -114,6 +127,43 @@ if (tables < 6) {
   problems.push(`only found ${tables} package price tables; there were 10 when this was written, so the scan has gone blind.`);
 }
 
+/**
+ * ── THE ADD-ON TABLES ─────────────────────────────────────────────────────
+ * Any object that names at least three add-ons and gives each a number is an
+ * add-on price table, whoever wrote it. Three is enough to be unmistakable and
+ * low enough to catch a partial copy, which is the kind that drifts.
+ */
+const ADDON_KEYS = Object.keys(ADDON_PRICES);
+let addonTables = 0;
+for (const rel of ['api', 'public', 'src', 'attune-app/src'].flatMap((d) => files(d))) {
+  if (rel === 'api/_catalogue.js') continue;
+  const src = readFileSync(join(ROOT, rel), 'utf8');
+  for (const m of src.matchAll(/\{[^{}]*\}/g)) {
+    const got = {};
+    for (const k of ADDON_KEYS) {
+      const f = new RegExp(`['"]?${k}['"]?\\s*:\\s*(\\d+)`).exec(m[0]);
+      if (f) got[k] = Number(f[1]);
+    }
+    const named = Object.keys(got);
+    if (named.length < 3) continue;
+    /* Every value the same is a counter, not a price list: no three add-ons
+       here cost the same. The package scan skips those for the same reason. */
+    if (new Set(Object.values(got)).size === 1) continue;
+    addonTables += 1;
+    const wrong = named.filter((k) => got[k] !== ADDON_PRICES[k]);
+    if (wrong.length) {
+      const line = src.slice(0, m.index).split('\n').length;
+      problems.push(`${rel}:${line} prices add-ons differently from api/_catalogue.js: `
+        + wrong.map((k) => `${k} ${got[k]}, not ${ADDON_PRICES[k]}`).join('; ') + '.');
+    }
+  }
+}
+if (addonTables < 2) {
+  problems.push(`only found ${addonTables} add-on price tables outside the catalogue; there were`
+    + ' two when this was written (api/calculate-tax.js and public/cart.js), so the scan has gone'
+    + ' blind.');
+}
+
 if (problems.length) {
   console.error('[check-package-prices] a package costs different amounts in different files:\n');
   for (const p of problems) console.error('  ' + p);
@@ -122,4 +172,5 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-package-prices] ${tables} package price tables, all agreeing with api/_catalogue.js.`);
+console.log(`[check-package-prices] ${tables} package price tables and ${addonTables} add-on`
+  + ' price tables, all agreeing with api/_catalogue.js.');
