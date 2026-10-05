@@ -26,7 +26,7 @@
 // stays a decision rather than becoming a surprise.
 
 import { readFileSync } from 'fs';
-import { DIM_KEYS, FLIPPED_QUESTIONS } from '../api/_type-engine.js';
+import { DIM_KEYS, FLIPPED_QUESTIONS, QUESTION_WEIGHTS, calcDimScores } from '../api/_type-engine.js';
 
 const src = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const start = src.indexOf('function calcDimScores');
@@ -87,6 +87,78 @@ if (problems.length) {
   process.exit(1);
 }
 
+/**
+ * ── AND THE SAME ANSWER, NOT JUST THE SAME QUESTIONS ──────────────────────
+ * Everything above compares the inputs: which questions belong to which
+ * dimension, and which are reversed. None of it looks at the arithmetic.
+ *
+ * That is the half that was actually wrong somewhere else. api/admin-data.js
+ * scored the same questions, with the same ten dimensions, and took a plain
+ * average where the engine takes a weighted one; it disagreed with the product
+ * by as much as 1.25 of a point on a one-to-five scale. Every input check in
+ * this file would have passed on it.
+ *
+ * So the website's own scorer is lifted and run. It is a closure over
+ * QUESTION_WEIGHTS and `score`, which it declares inside itself, so it comes
+ * out whole and is given only what it reads from the module scope.
+ *
+ * The one agreed difference: the engine returns null for a dimension nothing
+ * answered and the website returns 3, because the website positions a mark on
+ * an axis and always needs a number. That is documented where it happens, and
+ * is the only place the two are allowed to differ.
+ */
+const webScorer = await (async () => {
+  const at = src.indexOf('function calcDimScores');
+  let depth = 0;
+  let end = -1;
+  for (let i = src.indexOf('{', at); i < src.length; i += 1) {
+    if (src[i] === '{') depth += 1;
+    else if (src[i] === '}') { depth -= 1; if (depth === 0) { end = i + 1; break; } }
+  }
+  if (end === -1) return null;
+  try {
+    // eslint-disable-next-line no-new-func
+    return new Function('QUESTION_WEIGHTS',
+      `${src.slice(at, end)}\nreturn calcDimScores;`)(QUESTION_WEIGHTS);
+  } catch { return null; }
+})();
+
+if (typeof webScorer !== 'function') {
+  console.error('[check-scoring-mirror] could not lift calcDimScores out of src/App.jsx to run it.'
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+
+/*
+ * Varied answers rather than a sweep of round numbers: a weighting difference
+ * vanishes when every answer in a dimension is the same, which is exactly what
+ * a tidy fixture of all-3s would have been.
+ */
+let worst = 0;
+let worstAt = null;
+for (let seed = 0; seed < 400; seed += 1) {
+  const answers = {};
+  let i = 0;
+  for (const keys of Object.values(DIM_KEYS)) {
+    for (const k of keys) { answers[k] = 1 + ((seed * 7 + (i += 1) * 3) % 5); }
+  }
+  const engine = calcDimScores(answers);
+  const web = webScorer(answers);
+  for (const dim of Object.keys(DIM_KEYS)) {
+    if (engine[dim] == null) continue;   // the agreed difference, above
+    const gap = Math.abs(engine[dim] - web[dim]);
+    if (gap > worst) { worst = gap; worstAt = { dim, engine: engine[dim], web: web[dim] }; }
+  }
+}
+if (worst > 0.0001) {
+  console.error('[check-scoring-mirror] the website scores a couple differently from the engine:');
+  console.error(`  ${worstAt.dim} comes out ${worstAt.engine.toFixed(3)} in api/_type-engine.js`
+    + ` and ${worstAt.web.toFixed(3)} in src/App.jsx, on the same answers.`);
+  console.error('  Same questions and the same flipped set are not the same score: the engine'
+    + ' weights\n  each question by QUESTION_WEIGHTS and renormalises over the ones answered.');
+  process.exit(1);
+}
+
 console.log(
   `[check-scoring-mirror] ${Object.keys(DIM_KEYS).length} dimensions score from the same `
-  + 'questions on both surfaces, same flipped set.');
+  + 'questions on both surfaces, same flipped set, and 400 answer sets score identically.');
