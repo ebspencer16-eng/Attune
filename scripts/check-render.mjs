@@ -24,6 +24,7 @@ import { readFileSync } from 'fs';
 import { launch } from './_lib/browser.mjs';
 import { RESULTS_SECTIONS, COVER_SECTIONS, RESULTS_SECTION_LABELS, PAGE_COPY } from '../api/_lib/results-sections.js';
 import { conflictDemo } from '../api/_lib/conflict-demo.js';
+import { PKG_CAPS } from '../api/_lib/entitlements.js';
 
 const BASE = process.env.BASE || 'http://localhost:4173';
 const TYPE = process.env.TYPE || 'WX';
@@ -71,13 +72,54 @@ const SECTIONS = RESULTS_SECTIONS;
  * `?view=` is the app's own entry point for this, the same one the results
  * run already uses.
  */
+/**
+ * ── EACH VIEW, AT A PACKAGE THAT OWNS IT ──────────────────────────────────
+ * Every view used to be driven at one package, premium, and every one of them
+ * reported ok. Two of the thirteen rendered nothing at all:
+ *
+ *   home       cannot render signed out. `?view=home` shows the account form
+ *              and nothing behind it, so the dashboard — the screen Ellie looks
+ *              at most, and the one whose tiles she has reported wrong three
+ *              times — had never been rendered by any check here.
+ *   checklist  is gated on `pkg.hasChecklist`, and PKG_CAPS grants that to
+ *              newlywed alone. At premium the condition is false and the page
+ *              is a header and a cookie banner: 314 characters, reported clean.
+ *              The Merging Lives Checklist had never been rendered either.
+ *
+ * Both were "ok" because the only assertion was that nothing threw. A page that
+ * renders nothing throws nothing.
+ *
+ * So the capability each view needs is read out of src/App.jsx, where it is
+ * written as `view === "x" && pkg.hasY`, and the package is the first in
+ * PKG_CAPS that grants it. Derived on both sides: a view gated on a seventh
+ * capability is covered the day it is added, and a package that stops including
+ * something moves the run rather than quietly skipping it.
+ */
+const APP_SRC = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+
 const VIEWS = (() => {
-  const src = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
   const ids = new Set();
-  for (const m of src.matchAll(/view\s*===\s*["']([a-zA-Z0-9_-]+)["']/g)) ids.add(m[1]);
+  for (const m of APP_SRC.matchAll(/view\s*===\s*["']([a-zA-Z0-9_-]+)["']/g)) ids.add(m[1]);
   ids.delete('results');   // covered section by section above
   return [...ids].sort();
 })();
+
+/** `view === "checklist" && pkg.hasChecklist` → checklist needs hasChecklist. */
+const VIEW_NEEDS = Object.fromEntries(
+  [...APP_SRC.matchAll(/view\s*===\s*["']([a-zA-Z0-9_-]+)["']\s*&&\s*pkg\.(has[A-Za-z]+)/g)]
+    .map((m) => [m[1], m[2]]),
+);
+
+/** The cheapest package that grants a capability, or the run's default. */
+function pkgFor(view) {
+  const need = VIEW_NEEDS[view];
+  if (!need) return PKG;
+  if ((PKG_CAPS[PKG] || {})[need]) return PKG;
+  /* A capability PKG_CAPS does not name is the website's own flag, not a
+     package's, so no package choice helps and the run's default stands. */
+  const owner = Object.keys(PKG_CAPS).find((k) => PKG_CAPS[k][need]);
+  return owner || PKG;
+}
 
 // Anything in braces that survived to the screen, plus the two words that mean
 // a value was missing rather than absent.
@@ -94,6 +136,7 @@ page.on('console', (m) => {
 
 let failed = 0;
 const skipped = [];
+const unrendered = [];
 await page.goto(BASE + '/');
 
 /**
@@ -245,26 +288,181 @@ console.log('');
  * A bounce is not a failure. It is the app doing what it should. It is only
  * reported so the number at the end says how many views were actually seen.
  */
-const pageText = () => page.evaluate(() => (document.body.innerText || '').replace(/\s+/g, ' ').trim());
-await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&conflict=1&view=home`);
-await page.wait(900);
-const homeText = await pageText();
+/**
+ * What the page says, and what it says that is its own.
+ *
+ * A view reached while signed out gets the account form over it, which is
+ * correct and is what a visitor needs. It is also a thousand characters of text
+ * that belongs to the form rather than to the view, and the old comparison
+ * counted it: `view=home` renders the form and NOTHING else, and passed.
+ *
+ * So the form's own text is subtracted. What is left is the view's.
+ */
+/**
+ * What this view drew, in the region the app draws views into.
+ *
+ * ── WHY THE CONTENT REGION AND NOT THE PAGE ─────────────────────────────
+ * A view reached while signed out gets the account form over it, and every page
+ * carries a nav and a cookie banner. That is a thousand characters that belong
+ * to the chrome rather than to the view, and counting it is what let
+ * `view=home` pass while rendering nothing at all.
+ *
+ * Earlier attempts subtracted the chrome by vocabulary, and twice the baseline
+ * swallowed real copy and reported working views as broken: an unknown view
+ * falls through to the results page, and the demo seeds answers so an empty
+ * page can still carry a completion sentence. Measuring the one region the app
+ * renders into, with fixed overlays taken out of it, needs no vocabulary and
+ * no guess.
+ *
+ * innerText, not textContent: the region carries a <style> block, and
+ * textContent returns the CSS.
+ */
+const pageText = () => page.evaluate(() => {
+  const main = document.querySelector('[data-main-scroll]');
+  if (!main) return { own: '', gated: false, found: false };
+  let t = (main.innerText || '').replace(/\s+/g, ' ').trim();
+  let gated = false;
+  for (const el of main.querySelectorAll('div')) {
+    if (getComputedStyle(el).position !== 'fixed') continue;
+    const sub = (el.innerText || '').replace(/\s+/g, ' ').trim();
+    if (!sub) continue;
+    if (/Create account|Sign in to/.test(sub)) gated = true;
+    t = t.replace(sub, '').trim();
+  }
+  return { own: t, gated, found: true };
+});
+
+/**
+ * The words a page carries when it has rendered nothing: the nav, the demo
+ * toolbar, the cookie banner.
+ *
+ * Measured rather than chosen, from two pages that really do render nothing: a
+ * view that does not exist, and a view this package does not own. The second is
+ * the shape that was being reported clean, so it is the one worth taking the
+ * baseline from.
+ *
+ * ── WHY WORDS AND NOT A LENGTH ──────────────────────────────────────────
+ * A length cannot tell a short real page from an empty one. `view=notes`
+ * signed out renders one sentence, 26 characters of its own, and that is the
+ * app doing the right thing; `view=checklist` at a package that does not own it
+ * renders nothing, and comes to more characters because of the chrome around
+ * it. A view has rendered something when it puts a word on the page that an
+ * empty one does not have.
+ */
+/**
+ * A view, rendered from its URL and nothing else.
+ *
+ * The section loop above leaves `attune_results_state` behind, and an unknown
+ * view then falls through to the results page. The first version of this took
+ * its baseline after that loop and came back with 172 words of results copy —
+ * communication, conflict, patterns, intimacy — as the definition of an empty
+ * page. Everything real was a subset of it, and four working views were
+ * reported as rendering nothing.
+ *
+ * A gate that matches too much is not the safe direction: it manufactures the
+ * evidence it was meant to look for. So each view starts from a clean browser,
+ * which is also what a visitor following a link has.
+ */
+async function freshView(url) {
+  await page.goto(url);
+  await page.evaluate(() => {
+    try { localStorage.clear(); sessionStorage.clear(); } catch { /* blocked */ }
+  });
+  await page.goto(url);
+  await page.wait(900);
+  return pageText();
+}
+/**
+ * ── THE BASELINE IS A VIEW THIS PACKAGE DOES NOT OWN ──────────────────────
+ * Not a view that does not exist: `?view=__nothing__` falls through to the
+ * results page, so taking the baseline from it put every word of the results
+ * copy into the definition of "empty". Everything real was then a subset of it
+ * and four working views were reported as rendering nothing.
+ *
+ * A gate that matches too much is not the safe direction: it manufactures the
+ * evidence it was meant to look for. Found by printing the baseline rather than
+ * trusting it, which is worth doing to any set a check compares against.
+ *
+ * An unowned view is the real empty page: the app reached the view, decided
+ * this couple does not own it, and drew the chrome. It is also exactly the page
+ * that was being reported clean.
+ */
+/*
+ * Only capabilities PKG_CAPS actually names. src/App.jsx also gates views on
+ * `pkg.hasAnniversary` and `pkg.hasIntimacy`, which are the website's own
+ * vocabulary and its add-on flags rather than package capabilities; treating an
+ * unknown name as "not owned" picked exercise3 as the empty page and took the
+ * baseline from a view that renders.
+ */
+const unowned = Object.keys(VIEW_NEEDS)
+  .find((v) => Object.values(PKG_CAPS).some((c) => VIEW_NEEDS[v] in c)
+    && !(PKG_CAPS[PKG] || {})[VIEW_NEEDS[v]]);
+if (!unowned) {
+  console.error(`[check-render] every gated view is owned by ${PKG}, so there is no page that`
+    + ' renders nothing to measure an empty one from.'
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+const emptyPage = await freshView(
+  `${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&conflict=1&view=${unowned}`);
+if (!emptyPage.found) {
+  console.error('[check-render] the page has no [data-main-scroll] region, so there is nothing to'
+    + ' measure a view in.'
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+/** What the region holds when the app has decided not to draw the view. */
+const EMPTY = emptyPage.own.length;
+if (process.env.RENDER_DEBUG) console.log(`  empty region: ${EMPTY} chars ${JSON.stringify(emptyPage.own)}`);
+if (EMPTY > 120) {
+  console.error(`[check-render] a view the package does not own still draws ${EMPTY} characters,`
+    + ' so this cannot tell an empty view from a drawn one.'
+    + ' Refusing to pass: a gate that has lost its subject must never report success.');
+  process.exit(1);
+}
+
+/**
+ * How much more than nothing counts as having drawn something.
+ *
+ * Measured: an unowned view draws 16 characters, the dashboard signed out draws
+ * 0, and the thinnest real view is Notes at 43, which is one deliberate
+ * sentence. 20 sits clear of both sides.
+ */
+const DREW = 20;
 
 for (const v of VIEWS) {
   errors.length = 0;
-  await page.goto(`${BASE}/?demo=1&type=${TYPE}&pkg=${PKG}&intimacy=1&conflict=1&view=${v}`);
-  await page.wait(900);
-  const text = await pageText();
+  const pkg = pkgFor(v);
+  const text = await freshView(
+    `${BASE}/?demo=1&type=${TYPE}&pkg=${pkg}&intimacy=1&conflict=1&view=${v}`);
+  const note = pkg === PKG ? '' : `  (${pkg}, which is what owns it)`;
+
   if (errors.length) {
     viewFailed += 1;
     console.error(`  FAIL  view:${v}`);
     for (const e of errors.slice(0, 3)) console.error(`        ${e.slice(0, 160)}`);
-  } else if (v !== 'home' && text === homeText) {
-    bounced.push(v);
-    console.log(`  BACK  view:${v}  (sent back to home, so nothing of its own was rendered)`);
-  } else {
-    console.log(`  ok    view:${v}`);
+    continue;
   }
+
+  /**
+   * Nothing of its own. Not a failure and not a pass: it has to say which.
+   *
+   * `home` is the known one and it cannot be otherwise, because the dashboard
+   * is built from an account and the demo has none. Saying "ok" about it for
+   * months is how the screen Ellie looks at most went unrendered by every check
+   * here. AppHome itself is driven by check-prompt-tiles.
+   */
+  if (text.own.length - EMPTY < DREW) {
+    unrendered.push(v);
+    const why = v === 'home'
+      ? 'the dashboard is built from an account and the demo has none; AppHome is driven by check-prompt-tiles'
+      : `${text.own.length} characters at ${pkg}, against ${EMPTY} on a view nobody owns`
+        + `${text.gated ? ', behind the account form' : ''}`;
+    console.log(`  NONE  view:${v}  (${why})`);
+    continue;
+  }
+
+  console.log(`  ok    view:${v}${note}`);
 }
 
 await page.close();
@@ -274,8 +472,12 @@ if (failed || viewFailed) {
   if (viewFailed) console.error(`[check-render] ${viewFailed} of ${VIEWS.length} other views threw on render.`);
   process.exit(1);
 }
-console.log(`\n[check-render] ${SECTIONS.length - skipped.length} of ${SECTIONS.length} sections and ${VIEWS.length - bounced.length} of ${VIEWS.length} other views rendered clean (${TYPE}, ${PKG}).`);
+console.log(`\n[check-render] ${SECTIONS.length - skipped.length} of ${SECTIONS.length} sections and ${VIEWS.length - bounced.length - unrendered.length} of ${VIEWS.length} other views rendered clean (${TYPE}, each view at a package that owns it).`);
 if (bounced.length) console.log(`[check-render] sent back to home, not rendered: ${bounced.join(', ')}`);
+if (unrendered.length) {
+  console.log(`[check-render] rendered nothing of their own, for the reasons given above:`
+    + ` ${unrendered.join(', ')}`);
+}
 if (skipped.length) {
   /* Not "no demo data": the per-section lines above say which reason applied to
      each, and asserting one of them here for all of them is how the wrong reason

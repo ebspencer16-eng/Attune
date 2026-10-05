@@ -15,7 +15,11 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| S1 | **Sweep: does `check-render` actually see the home view?** `?demo=1&view=home` renders an account modal over a blank page when I drive it, and the gate reports `ok view:home`. If it is measuring the modal, thirteen view lines may mean less than they say. |
+| S2 | **Sweep: every list that indexes into another list.** CLAUDE.md's rule after `EXP_LIFE_KEYS`: the check is not that a list is right but that every key in it resolves. Do it across the repo rather than one list at a time. |
+| S3 | **Sweep: the Learn page layout, measured.** The insight fit went in unmeasured because that screen needs an account. Harness-mount it the way check-prompt-tiles does and find out whether the peek is actually clear. |
+| S4 | **Sweep: fields the server sends that nothing draws, and fields a surface reads that nothing sends.** Both directions, both surfaces. |
+| S5 | **Sweep: anything else that builds here and not in a clean clone.** The deploy failure was one instance; look for others before they are found by the site not changing. |
 
 ## 3. For you to review
 

@@ -8,15 +8,60 @@
  * Run: node scripts/entitlement_matrix_test.mjs
  */
 
+import { readFileSync } from 'node:fs';
+
 import { computeEntitlements, mergeEntitlementsGrantOnly, PKG_CAPS } from '../api/_lib/entitlements.js';
 
-// Mirror of pkgConfig in src/App.jsx (verified against source).
-const pkgConfig = {
-  core:        { hasChecklist: false, hasAnniversary: false, hasBudget: false },
-  newlywed:    { hasChecklist: true,  hasAnniversary: false, hasBudget: true },
-  anniversary: { hasChecklist: false, hasAnniversary: true,  hasBudget: false },
-  premium:     { hasChecklist: false, hasAnniversary: true,  hasBudget: true },
-};
+/**
+ * ── THE WEBSITE'S OWN TABLE, READ OUT OF THE WEBSITE ──────────────────────
+ * This used to be typed here, under the comment "Mirror of pkgConfig in
+ * src/App.jsx (verified against source)", and the check at the bottom compared
+ * PKG_CAPS against it.
+ *
+ * So it compared the server's table to a third copy that lived in the test.
+ * Planted against: making premium grant the checklist in src/App.jsx, which the
+ * server refuses, left the website offering a tool nobody bought and this file
+ * printed "PKG_CAPS.premium matches pkgConfig.premium" and "22 passed, 0
+ * failed". The two things it claims to compare were never compared.
+ *
+ * CLAUDE.md, written after a different gate did the same thing: when a gate
+ * compares two implementations, each one's data has to come from its own side.
+ * A fixture in the middle turns a comparison into an assertion that a constant
+ * equals itself.
+ *
+ * ── THE TWO VOCABULARIES ────────────────────────────────────────────────
+ * The website calls the reflection capability `hasAnniversary` and the server
+ * calls it `hasReflection`. That is a real rename at the boundary and not a
+ * bug; it is mapped at the comparison below and named here so nobody reads the
+ * absence of `hasReflection` in App.jsx as a missing capability.
+ */
+const pkgConfig = (() => {
+  const src = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const at = src.indexOf('const pkgConfig = {');
+  if (at === -1) throw new Error('pkgConfig is gone from src/App.jsx.'
+    + ' Refusing to pass: a test that has lost its subject must never report success.');
+  const body = src.slice(at, src.indexOf('\n  };', at));
+  const out = {};
+  for (const m of body.matchAll(/^\s{4}(\w+):\s*\{([^}]*)\}/gm)) {
+    const row = {};
+    for (const f of m[2].matchAll(/(has\w+):\s*(true|false)/g)) row[f[1]] = f[2] === 'true';
+    out[m[1]] = row;
+  }
+  const names = Object.keys(out);
+  if (names.length !== Object.keys(PKG_CAPS).length) {
+    throw new Error(`read ${names.length} packages out of src/App.jsx and the server has `
+      + `${Object.keys(PKG_CAPS).length}: ${names.join(', ')}.`
+      + ' Refusing to pass: a test that has lost its subject must never report success.');
+  }
+  for (const [k, v] of Object.entries(out)) {
+    if (!('hasChecklist' in v) || !('hasAnniversary' in v) || !('hasBudget' in v)) {
+      throw new Error(`pkgConfig.${k} in src/App.jsx is not the shape this expects: `
+        + `${JSON.stringify(v)}.`
+        + ' Refusing to pass: a test that has lost its subject must never report success.');
+    }
+  }
+  return out;
+})();
 
 // Mirror of the dashboard's `pkg` object construction.
 function gates(order) {
