@@ -43,19 +43,32 @@ import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from '../api/_catalogue
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const SRC = 'api/create-payment-intent.js';
+/**
+ * The base price, the workbook rule and the add-on total moved to a shared
+ * module, because calculate-tax.js had its own copy of all three and the
+ * workbook rule was only in the payment endpoint: premium includes the
+ * workbook, so a premium cart was taxed on 19 to 39 dollars more than it was
+ * charged. Lifting from both is what keeps this gate running the code that
+ * ships rather than whichever half stayed put.
+ */
+const PRICER = 'api/_lib/cart-pricing.js';
 const src = readFileSync(`${ROOT}${SRC}`, 'utf8');
+const pricer = readFileSync(`${ROOT}${PRICER}`, 'utf8');
 const fails = [];
 
-/** A top-level `function name(...) { ... }`, by brace depth. */
+/** A top-level `function name(...) { ... }`, by brace depth, from either file. */
 function lift(name) {
-  const at = src.indexOf(`function ${name}(`);
-  if (at === -1) return null;
-  let depth = 0;
-  for (let i = src.indexOf('{', at); i < src.length; i += 1) {
-    if (src[i] === '{') depth += 1;
-    else if (src[i] === '}') {
-      depth -= 1;
-      if (depth === 0) return src.slice(at, i + 1);
+  for (const text of [src, pricer]) {
+    let at = text.indexOf(`function ${name}(`);
+    if (at === -1) continue;
+    /* `export function` is the same function; take the body either way. */
+    let depth = 0;
+    for (let i = text.indexOf('{', at); i < text.length; i += 1) {
+      if (text[i] === '{') depth += 1;
+      else if (text[i] === '}') {
+        depth -= 1;
+        if (depth === 0) return text.slice(at, i + 1);
+      }
     }
   }
   return null;
@@ -81,7 +94,9 @@ function liftReduce(name) {
 
 const parts = {
   itemBasePrice: lift('itemBasePrice'),
-  wbAmount: lift('wbAmount'),
+  /* Named workbookAmount in the shared module; the endpoint imports it as
+     wbAmount, which is the name the rest of that file reads. */
+  wbAmount: lift('workbookAmount'),
   itemAddonTotal: lift('itemAddonTotal'),
   itemSubtotal: lift('itemSubtotal'),
   /* The two the three totals are now built from. If either stops existing the
@@ -104,6 +119,10 @@ if (missing.length) {
 const make = new Function(
   'ADDON_PRICES', 'DIGITAL_PRICES', 'PHYSICAL_PRICES', 'PHYSICAL_ENABLED', 'TAX_CODES',
   `${Object.values(parts).join('\n')}
+   /* The endpoint imports workbookAmount under the name the rest of that file
+      reads. Lifted code carries the call sites, so the alias has to come with
+      them or every total that touches the workbook throws. */
+   const wbAmount = workbookAmount;
    return { itemsTotalCents, addonsTotal, subtotalDollars, itemAddonTotal, itemSubtotal,
             buildTaxLineItems, billableAddons, itemChargeDollars };`,
 );

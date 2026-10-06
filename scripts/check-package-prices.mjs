@@ -158,10 +158,22 @@ for (const rel of ['api', 'public', 'src', 'attune-app/src'].flatMap((d) => file
     }
   }
 }
-if (addonTables < 2) {
-  problems.push(`only found ${addonTables} add-on price tables outside the catalogue; there were`
-    + ' two when this was written (api/calculate-tax.js and public/cart.js), so the scan has gone'
-    + ' blind.');
+/**
+ * ── ONE IS NOW THE RIGHT NUMBER, AND THAT IS A CHANGE WORTH RECORDING ─────
+ * This read `< 2` and named api/calculate-tax.js and public/cart.js as the two
+ * copies it expected to find. calculate-tax.js no longer has one: it imports
+ * ADDON_PRICES from the catalogue and its pricing from _lib/cart-pricing.js,
+ * because its copy had the add-on table right and the WORKBOOK RULE wrong, and
+ * this gate only ever compared tables. Premium includes the workbook, so a
+ * premium cart was taxed on 19 to 39 dollars more than it was charged.
+ *
+ * public/cart.js is a static file with no build step and genuinely cannot
+ * import the catalogue, so its copy stays and this is what holds it. Zero means
+ * the scan has stopped finding it rather than that the copy is gone.
+ */
+if (addonTables < 1) {
+  problems.push(`found no add-on price tables outside the catalogue; public/cart.js is a static`
+    + ' file that cannot import it and therefore keeps one, so the scan has gone blind.');
 }
 
 if (problems.length) {

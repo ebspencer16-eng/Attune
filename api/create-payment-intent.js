@@ -18,6 +18,7 @@ import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
+import { itemBasePrice, itemAddonTotal, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
 
 export const config = { runtime: 'edge' };
 
@@ -275,34 +276,11 @@ function itemsTotalCents(items, promoCovered) {
 }
 
 
-function itemBasePrice(item) {
-  return item.isPhysical
-    ? (PHYSICAL_PRICES[item.pkgKey] ?? 0)
-    : (DIGITAL_PRICES[item.pkgKey]  ?? 0);
-}
-
-// Workbook charge in dollars for an item. Premium includes the workbook
-// (digital is free); a printed copy is the digital->print upgrade ($20).
-function wbAmount(item) {
-  if (!item.addonWorkbook) return 0;
-  const print = item.addonWorkbook === 'print';
-  // Premium physical includes the printed workbook; only a digital package pays
-  // the $20 to upgrade its workbook to printed.
-  if (item.pkgKey === 'premium') return (!item.isPhysical && print) ? 20 : 0;
-  return print ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
-}
-
-function itemAddonTotal(item) {
-  let addons = 0;
-  addons += wbAmount(item);
-  if (item.addonReflection) addons += ADDON_PRICES.reflection;
-  if (item.addonBudget)     addons += ADDON_PRICES.budget;
-  if (item.addonChecklist)  addons += ADDON_PRICES.checklist;
-  if (item.addonIntimacy)   addons += ADDON_PRICES.intimacy;
-  if (item.addonConflict)   addons += ADDON_PRICES.conflict;
-  return addons;
-}
-
+/* itemBasePrice, wbAmount and itemAddonTotal were here. They are in
+   _lib/cart-pricing.js now, because calculate-tax.js had its own copy of all
+   three and the workbook rule was only in this one: premium includes the
+   workbook, so a premium cart was taxed on 19 to 39 dollars more than it was
+   charged. check-one-cart-price forbids a second copy. */
 function itemSubtotal(item) {
   return itemBasePrice(item) + itemAddonTotal(item);
 }

@@ -20,16 +20,16 @@
  */
 
 import { jsonBody } from './_lib/http.js';
-import { DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
+import { ADDON_PRICES } from './_catalogue.js';
+import { itemBasePrice, itemAddonTotal, workbookAmount } from './_lib/cart-pricing.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 
 export const config = { runtime: 'edge' };
 
-// Mirrors create-payment-intent.js — keep in sync.
-const ADDON_PRICES = {
-  workbookDigital: 19, workbookPrint: 39,
-  reflection: 40, budget: 20, checklist: 20, intimacy: 20, conflict: 40,
-};
+/* ADDON_PRICES was written out here under a comment reading "Mirrors
+   create-payment-intent.js — keep in sync", which is this codebase's failure
+   mode given as an instruction. It comes from the catalogue now, and the
+   pricing itself from _lib/cart-pricing.js, which both endpoints import. */
 const TAX_CODES = {
   digitalPackage:  'txcd_10000000',
   physicalPackage: 'txcd_99999999',
@@ -46,21 +46,6 @@ const BETA_CODES = {
 for (let i = 1; i <= 12; i++) {
   BETA_CODES[`ATTUNE-BETA-${String(i).padStart(2,'0')}`] =
     { pkg: 'core', mode: 'free', amount: 0, includesWorkbook: true, workbookVariant: 'digital' };
-}
-
-function itemBasePrice(it) {
-  return it.isPhysical ? (PHYSICAL_PRICES[it.pkgKey] ?? 0) : (DIGITAL_PRICES[it.pkgKey] ?? 0);
-}
-function itemAddonTotal(it) {
-  let a = 0;
-  if (it.addonWorkbook === 'print')   a += ADDON_PRICES.workbookPrint;
-  if (it.addonWorkbook === 'digital') a += ADDON_PRICES.workbookDigital;
-  if (it.addonReflection) a += ADDON_PRICES.reflection;
-  if (it.addonBudget)     a += ADDON_PRICES.budget;
-  if (it.addonChecklist)  a += ADDON_PRICES.checklist;
-  if (it.addonIntimacy)   a += ADDON_PRICES.intimacy;
-  if (it.addonConflict)   a += ADDON_PRICES.conflict;
-  return a;
 }
 
 function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includesWorkbook = false, workbookPercent = 0) {
@@ -83,8 +68,13 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
         quantity: 1,
       });
     }
-    if (!includesWorkbook && it.addonWorkbook === 'print')   lines.push({ amount: Math.round(ADDON_PRICES.workbookPrint*100*(1-workbookPercent/100)),   tax_code: TAX_CODES.workbookPrint,   reference: `item-${idx}-wbprint`,   quantity: 1 });
-    if (!includesWorkbook && it.addonWorkbook === 'digital') lines.push({ amount: Math.round(ADDON_PRICES.workbookDigital*100*(1-workbookPercent/100)), tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
+    /* What the workbook is actually billed at, not what it lists at. Premium
+       includes it, so these two lines used to send Stripe a charge of 19 or 39
+       that the payment intent never makes: the lines sent to the processor
+       have to add up to what the cart says is owed. */
+    const wb = includesWorkbook ? 0 : Math.round(workbookAmount(it) * 100 * (1 - workbookPercent / 100));
+    if (wb > 0 && it.addonWorkbook === 'print') lines.push({ amount: wb, tax_code: TAX_CODES.workbookPrint, reference: `item-${idx}-wbprint`, quantity: 1 });
+    if (wb > 0 && it.addonWorkbook === 'digital') lines.push({ amount: wb, tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
     if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
     if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
     if (it.addonIntimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: 'addon_intimacy' });
@@ -173,11 +163,13 @@ export default async function handler(req) {
         base = (promoFixedAmount != null) ? promoFixedAmount : 0;
       }
       let addons = itemAddonTotal(it);
+      /* Taken off what the workbook is billed at, which for premium is nothing:
+         subtracting its list price made the subtotal go negative on a promo
+         that bundles a workbook the package already includes. */
       if (includesWorkbook) {
-        addons -= (it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital);
+        addons -= workbookAmount(it);
       } else if (workbookPercent && (it.addonWorkbook === 'print' || it.addonWorkbook === 'digital')) {
-        const wb = it.addonWorkbook === 'print' ? ADDON_PRICES.workbookPrint : ADDON_PRICES.workbookDigital;
-        addons -= wb * workbookPercent / 100;
+        addons -= workbookAmount(it) * workbookPercent / 100;
       }
       return sum + (base + Math.max(0, addons)) * 100;
     }, 0);
