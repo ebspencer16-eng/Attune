@@ -766,6 +766,23 @@ as guarded. **A gate that matches too much is not the safe direction.** It
 either gets loosened until it matches nothing, or it manufactures the
 evidence it was meant to look for.
 
+**"Is my fix on the site" is answered by a marker, not by a hash.** Ellie, of a
+round of fixes: "I don't think what I'm seeing on the site is current. I've
+refreshed, hard refreshed, checked the deployment status." The site was current,
+and settling that first changed what the rest of the round meant: two things she
+was looking at were still broken rather than undeployed.
+
+The asset hash is not the answer. Vercel builds with `VITE_SUPABASE_*` set and a
+developer's machine does not, so a local build legitimately hashes differently
+from a correct deploy. What works is a string only the new code has: pick one,
+build the PREVIOUS commit too and count it there, then count it in the bundle
+the live site serves. `readMinutes` was 14 at HEAD, 12 one commit earlier, and
+14 live. A marker you have not checked against the previous commit is a guess;
+the first one I tried was a colour that is still used in seven other places.
+
+Her own replies are evidence too, and cheaper. She had approved two items from
+the newest commit, which she could only have seen on a current site.
+
 **A green build here is not a deploy.** `npx vite build` passed every time
 while Vercel had been failing for two commits, so two rounds of Ellie's fixes
 were not on the site and the only symptom was that they were not there.
