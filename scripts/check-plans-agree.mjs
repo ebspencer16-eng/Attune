@@ -56,15 +56,62 @@
 
 import { whatComesNext } from '../api/_lib/what-comes-next.js';
 import { intimacyActionPlan } from '../api/_lib/intimacy-results.js';
+import { personalityFeedback, commsActionPlan, commsProtocols } from '../api/_lib/comms-plan.js';
+import { contentFor } from '../api/_content/index.js';
+import { COMM_DOMAINS } from '../api/_lib/tags.js';
 
 const fails = [];
 
-/** A plan with three domains, as the glance page draws it. */
-const tiles = [
-  { domain: 'inner', label: 'Internal Processing', color: '#9B5DE5', dim: 'energy', title: null, body: 'Say the thing you are chewing on out loud before it is finished.' },
-  { domain: 'connection', label: 'How You Connect', color: '#E8673A', dim: 'love', title: null, body: 'Name one bid you missed this week.' },
-  { domain: 'hard', label: 'When Things Get Hard', color: '#1B5FE8', dim: 'conflict', title: null, body: 'Agree the pause before you need it.', reflect: 'And ask whether you are trying to understand or to win.' },
-];
+/**
+ * ── THE TILES COME FROM THE FUNCTION THAT MAKES THEM ──────────────────────
+ * These three were typed out here, and that cost two things.
+ *
+ * Every one carried `title: null`, so the aligned branch was never exercised,
+ * and the hard one carried a `reflect` field this gate then asserted was
+ * carried through. commsActionPlan has not emitted `reflect` since Ellie asked
+ * for that prompt removed from the overview everywhere. So the gate was
+ * holding the product to a field the product had deleted, and would have
+ * failed a correct implementation.
+ *
+ * A fixture that mirrors the producer is the failure this repo is about: it
+ * drifts, and the comparison quietly stops being about anything. The tiles are
+ * built now, from feedback over real answers, which is also the only way a
+ * change to how a domain picks its lead dimension can reach this check.
+ */
+const copy = contentFor(null);
+const COMM_DIMS = [...new Set(COMM_DOMAINS.flatMap((d) => d.dims))];
+
+/**
+ * Four couples, chosen for the cases the rule turns on rather than swept.
+ *
+ * `tied` is the one that matters: equal gaps inside a domain, which is where
+ * two different tie-breaks pick two different dimensions and give a couple two
+ * different pieces of advice. The website had its own tie-break and that case
+ * is 11% of real domain tiles, so a fixture without it passes while the bug
+ * ships.
+ */
+const COUPLES = {
+  'wide gaps everywhere': Object.fromEntries(COMM_DIMS.map((k) => [k, [1, 5]])),
+  'matched everywhere': Object.fromEntries(COMM_DIMS.map((k) => [k, [3, 3]])),
+  'tied gaps inside every domain': Object.fromEntries(COMM_DIMS.map((k) => [k, [2, 4]])),
+  'one domain matched, two not': Object.fromEntries(COMM_DIMS.map((k) => [k,
+    ['conflict', 'repair', 'feedback'].includes(k) ? [3, 3] : [1, 5]])),
+};
+
+function tilesFor(pairs) {
+  const dimensions = COMM_DIMS.map((k) => ({
+    key: k, label: k, left: 'one way', right: 'another way',
+    a: pairs[k]?.[0] ?? 3, b: pairs[k]?.[1] ?? 3,
+  }));
+  const feedback = personalityFeedback({
+    dimensions, viewer: 'a', youName: 'Ellie', themName: 'Preston', copy,
+  });
+  return {
+    tiles: commsActionPlan({ feedback, copy }),
+    protocols: commsProtocols(
+      Object.fromEntries(feedback.map((f) => [f.dim, f])), 'Ellie', 'Preston'),
+  };
+}
 
 const intimacyDims = [
   { id: 'frequency', section: 'intimacy-frequency', label: 'Frequency', state: 'discuss', distancePct: 60, prompt: 'How often feels right to each of you?' },
@@ -73,38 +120,39 @@ const intimacyDims = [
 ];
 
 /**
+ * ── COMMUNICATION: EVERY ROW IS ITS GLANCE TILE ────────────────────────────
+ * Run per couple, because the rule that picks a domain's lead dimension is the
+ * part that broke, and it only shows on a couple whose gaps make it choose.
+ *
  * The protocols ride on the same object, because api/results.js passes the
  * whole plan. They are the list this page used to build its Communication
- * group from, and they are deliberately in the fixture: without them a branch
- * that prefers them falls through to the tiles and the plant passes. Which it
- * did, the first time this gate was planted against.
+ * group from, and they stay in deliberately: without them a branch that
+ * prefers them falls through to the tiles and the plant passes. Which it did,
+ * the first time this gate was planted against.
  */
-const protocols = [
-  { title: 'Name the pause', thisWeek: 'Agree a word that means stop.' },
-  { title: 'Say the unfinished thought', thisWeek: 'Before it is tidy.' },
-  { title: 'Ask the second question', thisWeek: 'One more than feels natural.' },
-];
+for (const [who, pairs] of Object.entries(COUPLES)) {
+  const { tiles, protocols } = tilesFor(pairs);
+  const { groups } = whatComesNext({
+    coupleTypeId: null,
+    commsPlan: { tiles, protocols },
+    expectations: null,
+    intimacy: null,
+    reflection: null,
+    conflictReady: false,
+    names: { you: 'Ellie', them: 'Preston' },
+  });
+  const comm = groups.find((g) => g.id === 'comm');
+  const where = `(${who})`;
 
-const { groups } = whatComesNext({
-  coupleTypeId: null,
-  commsPlan: { tiles, protocols },
-  expectations: null,
-  intimacy: { actionPlan: intimacyActionPlan(intimacyDims) },
-  reflection: null,
-  conflictReady: false,
-  names: { you: 'Ellie', them: 'Preston' },
-});
-
-const byId = Object.fromEntries(groups.map((g) => [g.id, g]));
-
-/** Communication: the same three tiles, in the same order. */
-const comm = byId.comm;
-if (!comm) {
-  fails.push('there is no Communication group at all');
-} else {
-  if (comm.items.length !== tiles.length) {
-    fails.push(`Communication lists ${comm.items.length} items and the glance plan has ${tiles.length}`);
+  if (!comm) {
+    fails.push(`there is no Communication group at all ${where}`);
+    continue;
   }
+  if (comm.items.length !== tiles.length) {
+    fails.push(`Communication has ${comm.items.length} rows and the glance plan has`
+      + ` ${tiles.length} tiles ${where}. The rows are the tiles.`);
+  }
+
   /*
    * A protocol's words must not be here: their presence means the group was
    * built from the wrong list, whatever it happens to contain. This is the
@@ -113,35 +161,45 @@ if (!comm) {
   const all = comm.items.map((it) => `${it.title || ''} ${it.body || ''} ${it.say || ''}`).join(' ');
   for (const pr of protocols) {
     if (all.includes(pr.title) || (pr.thisWeek && all.includes(pr.thisWeek))) {
-      fails.push(`Communication is built from the protocols, not from the glance plan: "${pr.title}"`);
+      fails.push(`Communication is built from the protocols, not from the glance plan:`
+        + ` "${pr.title}" ${where}`);
     }
   }
-  if (comm.items.length !== tiles.length) {
-    fails.push(`Communication has ${comm.items.length} rows and the glance plan has ${tiles.length}`
-      + ' tiles. The rows are the tiles.');
-  }
+
   tiles.forEach((tile, i) => {
     const item = comm.items[i];
     if (!item) return;
-    const wanted = tile.body || tile.title;
     /*
      * Drawn, not merely present. `body` is on the payload and neither surface
      * renders it on this page, so a row whose advice sits there is a heading
      * with nothing under it, which is exactly what the conflict rows were.
      */
     const drawn = `${item.title || ''} ${item.say || ''}`;
-    if (wanted && !drawn.includes(wanted)) {
-      fails.push(`Communication item ${i + 1} does not carry the glance tile's advice where this`
-        + ` page draws it: "${String(wanted).slice(0, 48)}"`);
-    }
-    if (tile.reflect && !drawn.includes(tile.reflect)) {
-      fails.push(`Communication item ${i + 1} drops the extra line the glance tile carries`);
+    /*
+     * Both halves of the tile, because the overview draws both: its heading
+     * and the advice under it. Checking only the advice is how the heading
+     * came to be a sentence on one page and a domain name on the other.
+     */
+    for (const [what, wanted] of [['heading', tile.label], ['advice', tile.body], ['title', tile.title]]) {
+      if (wanted && !drawn.includes(wanted)) {
+        fails.push(`Communication row ${i + 1} does not carry the glance tile's ${what}`
+          + ` where this page draws it: "${String(wanted).slice(0, 48)}" ${where}`);
+      }
     }
   });
 }
 
 /** Physical Intimacy: the same list the glance page's plan is. */
-const intimacy = byId.intimacy;
+const { groups: intimacyGroups } = whatComesNext({
+  coupleTypeId: null,
+  commsPlan: tilesFor(COUPLES['wide gaps everywhere']),
+  expectations: null,
+  intimacy: { actionPlan: intimacyActionPlan(intimacyDims) },
+  reflection: null,
+  conflictReady: false,
+  names: { you: 'Ellie', them: 'Preston' },
+});
+const intimacy = intimacyGroups.find((g) => g.id === 'intimacy');
 const plan = intimacyActionPlan(intimacyDims);
 if (!intimacy) {
   fails.push('there is no Physical Intimacy group at all');
@@ -165,4 +223,6 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log(`[check-plans-agree] ${groups.length} groups; Communication and Physical Intimacy carry exactly their own section's plan.`);
+console.log(`[check-plans-agree] ${Object.keys(COUPLES).length} couples, including one with tied`
+  + ` gaps in every domain; Communication and Physical Intimacy carry exactly their own`
+  + ` section's plan, heading and advice.`);

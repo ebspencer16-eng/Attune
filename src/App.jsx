@@ -4953,63 +4953,32 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
   // The protocols are collected on What Comes Next, which builds them where
   // it uses them. This const was computed here and read by nothing.
 
-  // Results-at-a-glance action plan: one item per domain. The item is chosen by
-  // the WIDEST GAP in that domain, not by protocol order, so the three cards
-  // speak to this couple's three biggest mismatches. Ties break toward the
-  // dimension weighted more heavily in the axis scoring, since that is the one
-  // doing more to shape their type. Every dimension has its own item, so two
-  // cards can no longer show the same text.
-  // COMM_DOMAINS, as a lookup. This was the same three lists written out again.
-  const _DOMAIN_DIMS = Object.fromEntries(COMM_DOMAINS.map(d => [d.id, d.dims]));
-  const _DOMAIN_LABELS = { inner: "Internal processing", connection: "How you connect", hard: "When things get hard" };
-  // Widest-gap dimension in a domain, ties broken toward the dimension weighted
-  // more heavily in the axis scoring. Used by both the glance card and the
-  // "One thing to try" tile on that domain's page, so they never disagree.
-  const leadDimFor = (dom) => (_DOMAIN_DIMS[dom] || []).filter(d => byDim[d]).slice().sort((x, y) => {
-    const gx = byDim[x]?.gap ?? 0, gy = byDim[y]?.gap ?? 0;
-    if (Math.abs(gx - gy) > 1e-9) return gy - gx;
-    return (AXIS_CONFIG[y]?.weight ?? 0) - (AXIS_CONFIG[x]?.weight ?? 0);
-  })[0];
-  // The guidance itself is the approved per-dimension prose from getDimShift,
-  // which already adapts to where each partner sits on that spectrum (15 score
-  // pairings per dimension). adviceText is that prose. Reassurance is new and
-  // has no shift prose yet, so it falls back to its action item rather than
-  // rendering blank.
-  const dimAdviceFor = (dim) => {
-    if (!dim) return null;
-    const fb = byDim[dim];
-    // adviceText is the approved shift prose, written for pairs far enough
-    // apart to warrant it. A closely matched couple gets the per-dimension
-    // "one thing to keep in mind" line instead, which says something useful
-    // about sharing a position rather than restating that they share it. The
-    // strength line is a last resort so the tile is never empty.
-    return fb?.adviceText
-      || alignedAdvice(dim, fb?.myScore, fb?.partScore, _content)
-      || fb?.strengthText
-      || null;
-  };
-  // No generic label on this page.
-  //
-  // These tiles used to open with "One thing to try" or "One thing to keep in
-  // mind", which sits where a summary line should and says nothing: the domain
-  // name is already above it and the advice is already below. On Conflict
-  // Patterns the same label does real work, because there it separates an
-  // action from an awareness note and that difference is tied to the frequency
-  // band. Here there is no such distinction to carry.
-  //
-  // An aligned domain still gets a title, because DOMAIN_ALIGNED's is a real
-  // sentence about this couple rather than a label.
-  const glancePlan = ["inner","connection","hard"].map(dom => {
-    const lead = leadDimFor(dom);
-    const advice = dimAdviceFor(lead);
-    const base = advice
-      ? { title: null, body: advice, dimLabel: DIM_META[lead]?.label }
-      : { title: _content.DOMAIN_ALIGNED[dom].title, body: _content.DOMAIN_ALIGNED[dom].body };
-    if (dom === "hard") {
-      base.reflect = "In your next hard conversation, pause and ask yourself: am I trying to understand my partner's side, or am I trying to win the argument? Aim for the first one.";
-    }
-    return { domain: dom, label: _DOMAIN_LABELS[dom], color: DIM_META[_DOMAIN_DIMS[dom][0]].color, dim: lead, ...base };
-  });
+  /**
+   * ── THE ACTION PLAN, FROM THE ONE PLACE THAT BUILDS IT ─────────────────
+   * Ellie, twice: "The what comes next page still isn't matching the action
+   * items on the comms overview page."
+   *
+   * The first fix pointed What Comes Next at commsActionPlan and stopped
+   * there. This page went on building its own three tiles, under the name
+   * glancePlan, with its own rule for which dimension leads a domain: widest
+   * gap, ties broken toward the dimension weighted more heavily in the axis
+   * scoring. The server breaks a tie by taking the first in the domain's own
+   * order. Ties are ordinary on a one-to-five scale, and over 12,000 domain
+   * tiles the two rules choose a different lead dimension 11.1% of the time,
+   * which is different advice on the two pages for the same couple. The 89%
+   * that agreed is why it read as fine.
+   *
+   * Three more differences came out with it, none of them drifted yet:
+   * the labels were typed again here in sentence case against the shared
+   * list's title case, the colour was read off the domain's first dimension
+   * rather than off the domain, and the extra line on "when things get hard"
+   * was still here after she asked for it gone everywhere.
+   *
+   * So there is one builder. The detail page's one instruction is this same
+   * tile, which is what its own note already claimed it was.
+   */
+  const commsTiles = commsActionPlan({ feedback, copy: _content });
+  const commsTileFor = (dom) => commsTiles.find((t) => t.domain === dom) || null;
 
   const scaleLabels = ["Strongly A","Lean A","Neutral","Lean B","Strongly B"];
 
@@ -5090,7 +5059,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
           <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Your action plan</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {/* block: comm-overview/action-tiles */}
-            {glancePlan.map((item, i) => (
+            {commsTiles.map((item, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,0.13)", border: `1px solid ${item.color}66`, borderLeft: `4px solid ${item.color}`, borderRadius: 12, padding: "0.9rem 1.1rem", boxShadow: "0 6px 20px rgba(0,0,0,0.14)" }}>
                 <div style={{ fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.95)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.4rem" }}>{item.label}</div>
                 {item.title && <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontFamily: BFONT, fontWeight: 600, marginBottom: "0.35rem" }}>{item.title}</div>}
@@ -5201,12 +5170,14 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
             reach the other branch: the guard below returns null when there is
             no advice, so this only ever read "One thing to try". */}
         {(() => {
-          const lead = leadDimFor(grp.id);
-          const advice = dimAdviceFor(lead);
+          /* The same tile Results at a glance shows for this domain, which is
+             what the note above has always said this is. It was a second
+             computation of it, from the page's own copy of the rule. */
+          const tile = commsTileFor(grp.id);
+          const advice = tile?.body || null;
           if (!advice) return null;
-          const m = DIM_META[lead];
           return (
-            <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.2)", borderLeft: `4px solid ${m.color}`, borderRadius: 14, padding: "1.25rem 1.5rem" }}>
+            <div style={{ marginTop: "1.5rem", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.2)", borderLeft: `4px solid ${tile.color}`, borderRadius: 14, padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.6rem" }}>
                 {/* The label belongs HERE, on the detail page, where this tile
                     is the page's one instruction. It is dropped only where the

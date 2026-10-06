@@ -1,3 +1,5 @@
+import { COMM_DOMAINS as DOMAINS } from './tags.js';
+
 /**
  * The three Communication domain pages: what each one is called, what it says,
  * and what colour it is painted.
@@ -31,29 +33,30 @@ export function groundFor(id) {
  * September, and replaced longer ones she had not written. Both surfaces read
  * them from here.
  */
-export const COMM_DOMAINS = [
-  {
-    id: 'inner',
-    label: 'Internal Processing',
-    color: '#9B5DE5',
-    dims: ['energy', 'expression', 'reassurance'],
-    prose: "How you handle feelings before sharing thoughts aloud. Understand each other's approaches to establish supportive communication methods.",
-  },
-  {
-    id: 'connection',
-    label: 'How You Connect',
-    color: '#E8673A',
-    dims: ['love', 'needs', 'bids', 'listening'],
-    prose: "The mechanics of your relationship. Understanding your unique dynamic helps you communicate in a way that will be interpreted clearly.",
-  },
-  {
-    id: 'hard',
-    label: 'When Things Get Hard',
-    color: '#1B5FE8',
-    dims: ['conflict', 'repair', 'feedback'],
-    prose: 'All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in difficult situations.',
-  },
-];
+/**
+ * ── THE THREE DOMAINS, DERIVED ────────────────────────────────────────────
+ * This list used to carry each domain's id, label, colour and dimensions,
+ * typed out, beside DOMAIN_LABEL, DOMAIN_COLOR and DOMAIN_OF in tags.js doing
+ * the same job. Two copies of the three domains, in two modules, read by
+ * different halves of the product: commsActionPlan builds the action plan from
+ * tags.js, while src/App.jsx and what-comes-next.js read this one.
+ *
+ * All four values agreed, which is why nothing had ever noticed. Values that
+ * agree today are the ones nothing watches, and the shape of every serious bug
+ * in this codebase is one rule maintained by hand in two places. Had the two
+ * `dims` lists ever parted, a dimension would have been scored into one
+ * domain's action plan and drawn on another domain's page.
+ *
+ * So the facts come from tags.js. The prose stays here, which is the one thing
+ * this module owns.
+ */
+const PROSE = {
+  inner: "How you handle feelings before sharing thoughts aloud. Understand each other's approaches to establish supportive communication methods.",
+  connection: "The mechanics of your relationship. Understanding your unique dynamic helps you communicate in a way that will be interpreted clearly.",
+  hard: 'All couples navigate conflict. What sets healthy relationships apart is the ability to communicate effectively in difficult situations.',
+};
+
+export const COMM_DOMAINS = DOMAINS.map((d) => ({ ...d, prose: PROSE[d.id] }));
 
 /** Everything a renderer needs for one domain, ground included. */
 export function commDomains() {
