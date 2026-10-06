@@ -12,6 +12,7 @@ export const config = { runtime: 'edge' };
 
 import { corsHeaders, safeError } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { COUPLE_TYPES } from './_couple-types.js';
 
 async function kvGet(key, url, token) {
   const res = await fetch(`${url}/lrange/${key}/0/-1`, {
@@ -48,14 +49,15 @@ export default async function handler(req) {
     });
   }
 
-  // All couple type IDs
-  const COUPLE_TYPE_IDS = [
-    'mirror','steady_pair','complementary','richly_different','quiet_depth','full_room',
-    'spark_ground','head_heart','both_logic','both_feeling','fast_repair','slow_repair',
-    'conflict_mismatch','close_knit','independent_pair','reach_retreat','structured_life',
-    'open_flow','plan_flow','open_book','quiet_reserve','express_reserve','translator',
-    'expectation_aligned','expectation_gap'
-  ];
+  /**
+   * Every couple type, from the table that defines them.
+   *
+   * These were the same twenty-five legacy names track-type.js was validating
+   * against, so this asked the store for counts under keys nothing has ever
+   * written. The admin's couple type distribution was empty and looked like a
+   * product nobody had finished.
+   */
+  const COUPLE_TYPE_IDS = COUPLE_TYPES.map((t) => t.id);
   // All 16 possible 4-letter codes
   const STYLE_CODES = [];
   for (const e of ['E','I']) for (const x of ['X','G']) for (const f of ['F','S']) for (const c of ['C','A']) {

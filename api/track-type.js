@@ -17,6 +17,8 @@ import { jsonBody } from './_lib/http.js';
  *   KV_REST_API_TOKEN
  */
 
+import { COUPLE_TYPES } from './_couple-types.js';
+
 export const config = { runtime: 'edge' };
 
 async function kvIncr(key, url, token) {
@@ -52,13 +54,23 @@ export default async function handler(req) {
 
   // Validate — only accept known code patterns and type IDs
   const validCodes = /^[EIXGFSC]{4}$/;
-  const validTypes = [
-    'mirror','steady_pair','complementary','richly_different','quiet_depth','full_room',
-    'spark_ground','head_heart','both_logic','both_feeling','fast_repair','slow_repair',
-    'conflict_mismatch','close_knit','independent_pair','reach_retreat','structured_life',
-    'open_flow','plan_flow','open_book','quiet_reserve','express_reserve','translator',
-    'expectation_aligned','expectation_gap'
-  ];
+  /**
+   * ── THE TYPES, FROM THE TABLE THAT DEFINES THEM ─────────────────────────
+   * These twenty-five were written out here, and not one of them is a couple
+   * type any more. The product types a couple as a pair of individual codes,
+   * WW through ZZ, which is what api/_couple-types.js holds and what
+   * src/App.jsx sends: `coupleTypeId: coupleType?.id`.
+   *
+   * So every real couple that finished was answered with 400 "invalid type"
+   * and nothing was recorded. Verified against the live endpoint: WX, WW and
+   * ZZ are all refused. The only thing this has ever counted is the fallback
+   * the website used when a couple had NO type, which it sent as
+   * "complementary", so the one bucket with anything in it is a legacy name
+   * standing for couples the type engine could not place.
+   *
+   * Ellie reads the admin to find out what customers are like.
+   */
+  const validTypes = COUPLE_TYPES.map((t) => t.id);
   const validGapTiers = ['aligned','compatible','complementary','distinct'];
 
   if (!coupleTypeId || !validTypes.includes(coupleTypeId)) {

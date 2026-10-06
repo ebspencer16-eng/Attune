@@ -7704,6 +7704,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const _typeFired = useRef(false);
   useEffect(() => {
     if (_typeFired.current) return;
+    /* Nothing to report until the couple has a type. */
+    if (!coupleType?.id) return;
     _typeFired.current = true;
     const codeA = getStyleCode(myS);
     const codeB = getStyleCode(partS);
@@ -7713,7 +7715,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        coupleTypeId: coupleType?.id || "complementary",
+        /* No fallback. "complementary" is not a couple type any more and was
+           being sent for every couple the engine could not place, so the one
+           bucket with anything in it was a legacy name standing for an absence.
+           A couple with no type is not counted, which is the honest answer. */
+        coupleTypeId: coupleType.id,
         codeA, codeB, gapTier, hasEx2,
       }),
     }).catch(() => {}); // non-blocking, non-critical
