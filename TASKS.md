@@ -15,26 +15,21 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| L1 | **The gap above the In Practice peek, a fourth time.** You say it is still touching. My evidence was a harness that mounts the sheet on its own, and the Learn tab only exists inside the signed-in dashboard, so nothing in this repo has ever drawn the real page. Measuring the real one is the task. The gap is the symptom. |
+| L2 | **The site's In Practice has to look like the app's, not just carry the same words.** Against the app's tile: an image box with the mark behind it, the Article pill, a bookmark that fills when saved, the title held to two lines, and a meta line reading "9 min read" in the accent colour then a dot and "Read". The site has a title and "9 min" in grey, and it passes zero for both counts, so nothing on it has ever said whether you have read a piece. |
+| N15b | **What Comes Next still does not match the comms overview's action items.** Second attempt. The first compared the two builders; this time I read what each page actually draws. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| L1 | **The gap above the peek was never about the number.** The block above the sheet spreads its children to its edges, so the insight's last row sat flush against the sheet, and every point I carved out of the quotation was handed straight back. It is the block's own bottom padding now, which that spreading cannot reach. Measured: the buttons end at 364 and the sheet starts at 420. |
-| L2 | **The website's article tiles show how long each takes.** The app has shown it since In Practice shipped and the tiles had only ever carried a title. |
-| L3 | **The number of articles sits beside each section heading**, on both surfaces. |
-| N15b | **The comms rows are back to the overview's own action items**, at your word. A row is the tile's heading with its advice and extra line underneath. Both of your instructions are kept side by side in the gate, because the rule survived a direct instruction to break it on the strength of what breaking it would have cost. |
+| O559 | **The site is current, and I checked before fixing anything.** You said the changes were not there. The newest website commit added a field called `readMinutes` to the article tiles: it appears 14 times in a bundle built from the current commit and 12 times in one built from the commit before, and the bundle the live site is serving has 14. Your own answers say the same thing from the other side, because L2 and L3 are both from that commit. So L1 and N15b are still broken rather than undeployed. |
 | N15 | **One note on a conflict between two of your instructions.** You once asked that each What Comes Next group match its section's at-a-glance plan, and a gate holds that. Your new comms instruction reverses it: the site's Try line comes from the protocols, which that gate was written to forbid. I followed the newer one and recorded both quotes side by side in the gate. The consequence: on the app, the comms Try line now appears only on this page. |
-| S3 | **The Learn page peek is measured, and it did not need your account.** The sheet takes its articles as a prop and measures itself, so it can be mounted on its own with the real list. A gate now proves it reports a peek that holds its whole head and stops short of the shelves, on a laptop column and a phone, with all 12 articles drawn. |
-| O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
-| R175 | Articles can carry an illustration. Tinted by shelf until artwork exists. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-| R20 | A real device, and a day. Sign in, close it, come back tomorrow. |
 
 ## 4. Done and verified
 
@@ -44,6 +39,11 @@
 
 | Verified by you | What it was |
 |--|--|
+| L3 | The number of articles was missing beside each In Practice section heading, on both surfaces. |
+| S3 | The Learn page peek had never been measured, because the tab lives behind sign-in; the sheet measures itself now and a gate holds it. |
+| O494 | Cover pages on both surfaces. |
+| R175 | Articles can carry an illustration, tinted by shelf until artwork exists. |
+| R20 | A real device for a day: sign in, close the app, come back tomorrow. |
 | D1 | The website sidebar called two sections something the app did not: Communication and Physical Intimacy against their full names. |
 | D2 | Communication was purple on the site and orange in the app, Reflection blue against green, and all six expectations categories one green. |
 | D6 | Nothing guarded the two people's colours across surfaces; they agreed by luck. |
