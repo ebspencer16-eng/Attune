@@ -22,6 +22,7 @@ import { Pressable } from '@/components/pressable';
 import { openExternal, openInApp } from '@/api/open-external';
 import { oneShot } from '@/lib/one-shot';
 import { quoteFit as fit, citeSize, QUOTE_BASE, QUOTE_LEADING, CITE_LEADING } from "@/lib/insight-fit";
+import { cardGround } from "@/lib/card-tints.js";
 import { SymbolView } from 'expo-symbols';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -2029,7 +2030,12 @@ function PillMenu<T extends string>({
 }
 
 /** The tints a card's ground can take, in the order the shelves come back. */
-const CARD_TINTS = [SectionColor.communication, SectionColor.expectations, SectionColor.reflection, SectionColor.intimacy];
+/* The four shelf tints live in lib/card-tints.js, which the website reads too.
+   Ellie: "I want the site's in practice to look exactly like the app's. That
+   means the same visuals, coloring, etc." They were SectionColor's four here
+   and the website cannot import that file: it is .ts, and a .ts import from
+   attune-app is what broke the Vercel deploy for two commits.
+   check-card-tints holds the shared list to SectionColor. */
 
 /**
  * One article, as a card.
@@ -2062,7 +2068,7 @@ function PostCard({
    * families, which is what the shelves are.
    */
   const shelfIndex = Math.max(0, shelves.indexOf(post.category || ''));
-  const ground = post.hero_color || `${CARD_TINTS[shelfIndex % CARD_TINTS.length]}1f`;
+  const ground = cardGround(post.hero_color, shelfIndex);
   return (
     <Pressable
       accessibilityRole="button"

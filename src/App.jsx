@@ -59,6 +59,10 @@ import { quoteFit as fitQuote, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEAD
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE, shelfFor } from "../api/_in-practice.js";
 import { POST_CATEGORIES } from "../api/_lib/post-categories.js";
+/* The shelf tints an In Practice card is grounded in, the same module the
+   app reads. Ellie: "I want the site's in practice to look exactly like the
+   app's. That means the same visuals, coloring, etc." */
+import { cardGround } from "../attune-app/src/lib/card-tints.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
 import { resultsNav, navPageIds, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
@@ -3717,7 +3721,38 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
  * three times. check-learn-peek mounts this with the real article list and
  * measures what it says its head is against what the head actually comes to.
  */
-export function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) {
+/**
+ * The three colours the app's In Practice card is set in.
+ *
+ * TILE_GREY is the featured tile's ground, mutedInk is the meta line under a
+ * title and orange is the accent the minutes are set in. They are hex here
+ * because they come from attune-theme.ts and the website cannot import a .ts
+ * out of attune-app: that is what broke the Vercel deploy for two commits.
+ * check-card-tints holds all three to the app's own values.
+ */
+const TILE_GREY = "#EFECE7";
+const MUTED_INK = "#7A6753";
+const ACCENT = "#E8673A";
+
+export function AppLearnReading({
+  articles, isMobile, savedCount, readCount, onPeek,
+  /**
+   * What this reader has saved and read, by slug, and how to change it.
+   *
+   * Ellie: "I want the site's in practice to look exactly like the app's... the
+   * app uses different font colors and has more text indicating whether
+   * something's been read."
+   *
+   * The app has had both since In Practice shipped, from /api/posts, which
+   * answers with `saved` and `read` per piece for the reader asking. This
+   * surface passed zero for both counts and drew neither, so nothing on the
+   * website had ever said whether you had read something.
+   *
+   * Defaulted so the component still mounts on its own, which is how
+   * check-learn-peek measures it without an account.
+   */
+  state = null, onToggleSave = null,
+}) {
   const [query, setQuery] = useState("");
   /**
    * The head: the grab line, the two pills, the heading, the line under it and
@@ -3767,38 +3802,140 @@ export function AppLearnReading({ articles, isMobile, savedCount, readCount, onP
     return POST_CATEGORIES.filter((c) => byShelf.has(c)).map((c) => [c, byShelf.get(c)]);
   })();
 
-  /** One article, as the app draws it: a grey tile with a bookmark corner. */
-  const tile = (a) => (
+  /** Where this piece stands with this reader, if the feed has arrived. */
+  const stateOf = (slug) => (state && state[slug]) || null;
+
+  /**
+   * The bookmark, which is the same control in both places the app draws it.
+   *
+   * Filled and in the accent when saved, outlined and quiet when not. It was an
+   * outline that never changed and was not a button, so the website had a
+   * drawing of the app's control rather than the control.
+   */
+  const bookmark = (a, size, pos) => {
+    const saved = !!stateOf(a.slug)?.saved;
+    return (
+      <button
+        type="button"
+        aria-pressed={saved}
+        aria-label={saved ? `Remove ${a.title} from saved` : `Save ${a.title}`}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (onToggleSave) onToggleSave(a); }}
+        disabled={!onToggleSave}
+        style={{
+          position: "absolute", ...pos, padding: 4, lineHeight: 0,
+          background: pos.round ? "rgba(255,253,249,0.92)" : "transparent",
+          border: "none", borderRadius: pos.round ? "50%" : 6,
+          width: pos.round ? 30 : undefined, height: pos.round ? 30 : undefined,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: onToggleSave ? "pointer" : "default",
+        }}>
+        <svg width={size} height={size} viewBox="0 0 24 24"
+          fill={saved ? ACCENT : "none"} stroke={saved ? ACCENT : "#A8937B"}
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
+        </svg>
+      </button>
+    );
+  };
+
+  /**
+   * ── THE FOUR FEATURED, AS THE APP DRAWS THEM ──────────────────────────
+   * Grey, not tinted. Ellie, of the app: "Featured publications should be grey
+   * tiles not colored. The shelves' colours are on the full cards below, where
+   * they mean which shelf; four of them in a grid up here was a palette rather
+   * than a signal."
+   *
+   * And the title sits at the FOOT of the tile, not the head: "Sneak peek
+   * article tiles should fit the full name of the article, not cut them off",
+   * so the tile is sized by its title rather than the title cut to the tile.
+   * The website had the title at the top in 12.8pt at normal weight; the app
+   * sets it at 11 over 14, bold, bottom aligned, with no minutes under it.
+   */
+  const featured = (a) => (
     <a key={a.slug} href={a.path} style={{
-      display: "block", background: "#F2EDE6", borderRadius: 14,
-      padding: "0.6rem 0.7rem", textDecoration: "none", position: "relative",
-      minHeight: 66,
+      display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      background: TILE_GREY, borderRadius: 14, padding: "0.5rem",
+      textDecoration: "none", position: "relative", minHeight: 88,
     }}>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-        style={{ position: "absolute", top: 9, right: 9 }}>
-        <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
-      </svg>
+      {bookmark(a, 15, { top: 4, right: 4 })}
       <span style={{
-        display: "block", fontFamily: BFONT, fontSize: "0.8rem",
-        lineHeight: 1.3, color: C.ink, paddingRight: "1rem",
+        display: "block", fontFamily: BFONT, fontSize: 11, lineHeight: "14px",
+        fontWeight: 700, color: C.ink, paddingRight: "1.1rem",
       }}>
         {a.title}
       </span>
-      {/* ── HOW LONG IT TAKES ──────────────────────────────────────────────
-          Ellie: "the articles online are missing the times". The app has
-          printed one under every article since In Practice shipped, from the
-          same field, and these tiles had the title and nothing else. */}
-      {a.readMinutes ? (
-        <span style={{
-          display: "block", fontFamily: BFONT, fontSize: "0.68rem",
-          color: "#8A7A66", marginTop: "0.3rem",
-        }}>
-          {`${a.readMinutes} min`}
-        </span>
-      ) : null}
     </a>
   );
+
+  /**
+   * ── ONE ARTICLE, AS A CARD ────────────────────────────────────────────
+   * The app's PostCard, which Ellie asked for with the Natural Cycles app
+   * open: "I want articles to have a little image like the natural cycles
+   * app... I like that natural cycles has a little 'article' box on the image."
+   *
+   * So: a white card lifted off the ground, an illustration box carrying the
+   * label and the bookmark, the title held to two lines, and how long it takes.
+   * The website drew a flat grey rectangle 66 tall with the title and the
+   * minutes in it, which is none of that.
+   *
+   * The ground is the shelf's tint, from lib/card-tints.js, which is the same
+   * module the app reads so the two cannot paint one shelf two colours.
+   */
+  const tile = (a) => {
+    const st = stateOf(a.slug);
+    const ground = cardGround(a.heroColor || null, POST_CATEGORIES.indexOf(shelfFor(a)));
+    return (
+      <a key={a.slug} href={a.path} style={{
+        display: "block", background: "white", borderRadius: 26, overflow: "hidden",
+        textDecoration: "none", boxShadow: "0 10px 20px rgba(42,27,16,0.10)",
+      }}>
+        <div style={{ height: 132, background: ground, position: "relative" }}>
+          {/* The mark, quietly, so a card with no illustration still looks
+              like something rather than like something missing. The app draws
+              it at 64 wide and 22% in this corner. AttuneMark rather than a
+              new asset: it is what every other mark on this site is, and
+              check-mark-artwork holds it to the favicon's four paths. */}
+          <span aria-hidden="true" style={{
+            position: "absolute", right: 16, bottom: 12, opacity: 0.22, lineHeight: 0,
+          }}>
+            <AttuneMark width={64} />
+          </span>
+          {/* The label, so a reader knows what kind of thing they are about to
+              open before they read the title. */}
+          <span style={{
+            position: "absolute", top: 12, left: 12,
+            background: "rgba(255,253,249,0.92)", borderRadius: 8,
+            padding: "3px 8px", fontFamily: BFONT, fontSize: 9, fontWeight: 700,
+            letterSpacing: "0.16em", textTransform: "uppercase", color: C.ink,
+          }}>
+            Article
+          </span>
+          {bookmark(a, 14, { top: 12, right: 12, round: true })}
+        </div>
+        <div style={{ padding: "1rem" }}>
+          {/* Two lines whether or not it needs them: a one line title beside a
+              two line one is a ragged edge, which is why the app gives it a
+              minimum rather than letting the card size itself. */}
+          <span style={{
+            display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2,
+            overflow: "hidden", fontFamily: BFONT, fontSize: 16, lineHeight: "22px",
+            fontWeight: 700, color: C.ink, minHeight: 46,
+          }}>
+            {a.title}
+          </span>
+          <span style={{
+            display: "block", fontFamily: BFONT, fontSize: 13, lineHeight: "19px",
+            color: MUTED_INK, marginTop: "0.5rem",
+          }}>
+            {a.readMinutes ? (
+              <span style={{ color: ACCENT }}>{`${a.readMinutes} min read`}</span>
+            ) : null}
+            {st?.read ? "  ·  Read" : ""}
+          </span>
+        </div>
+      </a>
+    );
+  };
 
   const pill = (label, n) => (
     <span style={{
@@ -3906,7 +4043,7 @@ export function AppLearnReading({ articles, isMobile, savedCount, readCount, onP
           flex: "1 1 0", display: "grid", gridTemplateColumns: "1fr 1fr",
           gap: "0.5rem", minWidth: 0,
         }}>
-          {shown.slice(0, 4).map((a) => tile(a))}
+          {shown.slice(0, 4).map((a) => featured(a))}
         </div>
       </div>
 
@@ -13379,6 +13516,84 @@ export default function App() {
    * The banner above it is a different height on a phone and a laptop, and it
    * wraps. Measured rather than guessed: see the note on the block itself.
    */
+  /**
+   * ── WHAT THIS READER HAS SAVED AND READ ───────────────────────────────
+   * Ellie: "I want the site's in practice to look exactly like the app's. That
+   * means the same visuals, coloring, etc. (for example the app uses different
+   * font colors and has more text indicating whether something's been read)."
+   *
+   * The app has had both since In Practice shipped. /api/posts answers with
+   * `saved` and `read` per piece for the reader asking, which is the same call
+   * the app makes, so this is not a second source of that state. This surface
+   * passed zero for both counts and drew neither, so the two pills at the head
+   * of the sheet have always read "Saved 0" and "Read 0" for everybody.
+   *
+   * Keyed by id, which for the twelve website pieces is the slug: see the
+   * fromSite branch of api/posts.js. The static list stays what is DRAWN,
+   * because those twelve are pages on this site and a posts-table row is not.
+   * This only decorates them.
+   */
+  const [learnState, setLearnState] = useState(null);
+  useEffect(() => {
+    if (dashTab !== "learn" || learnState) return undefined;
+    let gone = false;
+    (async () => {
+      try {
+        const { supabase: sb, hasSupabase } = await import("./supabase.js");
+        if (!hasSupabase()) return;
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session?.access_token) return;
+        const r = await fetch("/api/posts?action=feed", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!r.ok) throw new Error(`posts ${r.status}`);
+        const body = await r.json().catch(() => null);
+        if (gone || !Array.isArray(body?.posts)) return;
+        const by = {};
+        for (const post of body.posts) by[post.id] = { saved: !!post.saved, read: !!post.read };
+        setLearnState(by);
+      } catch (e) {
+        /* The shelf still draws. Every piece is a page on this site whether or
+           not we know what you have read, so a failed read here costs the two
+           counts and the Read line, not the library. */
+        console.warn("[Attune] In Practice state unavailable:", e);
+      }
+    })();
+    return () => { gone = true; };
+  }, [dashTab, learnState]);
+
+  /** Saving, which is the same endpoint the app posts to. */
+  const toggleSavedPost = async (article) => {
+    const id = article.slug;
+    const now = !(learnState?.[id]?.saved);
+    /* On the screen first, then on the server: a bookmark that waits for a
+       round trip reads as a control that did not work. */
+    setLearnState((cur) => ({ ...(cur || {}), [id]: { ...(cur?.[id] || {}), saved: now } }));
+    try {
+      const { supabase: sb, hasSupabase } = await import("./supabase.js");
+      if (!hasSupabase()) throw new Error("no supabase");
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.access_token) throw new Error("not signed in");
+      const r = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        /* The same shape savePost sends from the app: the verb is the
+           action, and `saved` is not a field this endpoint reads. */
+        body: JSON.stringify({ action: now ? "save" : "unsave", id }),
+      });
+      const out = await r.json().catch(() => null);
+      if (!r.ok || !out?.ok) throw new Error(`save ${r.status}`);
+      /* It answers with the state the reader should now see, so a second tap
+         that crossed with the first settles on the server's answer. */
+      setLearnState((cur) => ({ ...(cur || {}), [id]: { ...(cur?.[id] || {}), saved: !!out.saved } }));
+    } catch (e) {
+      console.warn("[Attune] could not save that article:", e);
+      setLearnState((cur) => ({ ...(cur || {}), [id]: { ...(cur?.[id] || {}), saved: !now } }));
+      const t = (typeof window !== "undefined" && window.__attuneShowToast) || null;
+      if (t) t(JOURNAL_COPY.saveFailed);
+    }
+  };
+
   const [learnTop, setLearnTop] = useState(0);
   const learnAboveRef = useRef(null);
   /**
@@ -16528,8 +16743,12 @@ export default function App() {
                   <AppLearnReading
                     articles={IN_PRACTICE}
                     isMobile={isMobile}
-                    savedCount={0}
-                    readCount={0}
+                    /* The counts the two pills show. They were zero, typed, so
+                       both pills read zero for every reader on every visit. */
+                    savedCount={learnState ? Object.values(learnState).filter((x) => x.saved).length : 0}
+                    readCount={learnState ? Object.values(learnState).filter((x) => x.read).length : 0}
+                    state={learnState}
+                    onToggleSave={toggleSavedPost}
                     onPeek={setLearnPeek}
                   />
 
