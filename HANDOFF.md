@@ -1921,3 +1921,68 @@ here can drive.
 **The next sweeps I would run.** The notification round trip across surfaces, the
 app's behaviour on a genuinely empty account, and the five admin pages, which
 have no browser coverage at all.
+
+---
+
+## 6 October 2026, evening — where I stopped
+
+**Done and pushed.** Working tree clean, `npm run check` exits 0 across 227
+gates, `npx vite build` clean, the app typechecks, and the EAS production
+channel is current (`npm run app:published` says the phone is up to date).
+
+**The deploy question, answered first.** Ellie: "I don't think what I'm seeing
+on the site is current." It was current. The newest website commit added
+`readMinutes` to the article tiles: 14 occurrences in a bundle built from HEAD,
+12 in one built from the commit before, and 14 in the bundle the live site
+serves. Her own answers confirmed it from the other side, since L2 and L3 are
+both changes from that commit. Worth repeating that method before chasing a
+"my fix is not there" report: build the previous commit too, so the marker is
+known to be distinctive rather than assumed to be.
+
+**N15b, the comms action plan.** The website carried its own builder, named
+`glancePlan`, with its own tie-break for which dimension leads a domain. Over
+12,000 domain tiles the two rules disagree 11.1% of the time. The website calls
+`commsActionPlan` now. One layer down, `api/_lib/comm-domains.js` and
+`api/_lib/tags.js` both carried the three domains' ids, labels, colours and
+dims; comm-domains derives them now and keeps only the prose.
+
+Two gates. `check-plans-agree` had a hand-typed fixture asserting a `reflect`
+field the product deleted months ago, so it was holding the code to something
+that no longer exists; it builds its tiles with `commsActionPlan` now, over four
+couples including one with tied gaps. `check-one-comms-plan` is new and proves
+there is one builder.
+
+**L1, the Learn gap, is the honest half.** I found and fixed one real defect:
+`furniture` omitted the insight block's own top margin, 32 on a phone and 40 on
+a laptop, so the quote was sized for room it does not have. The app's own
+`INSIGHT_FURNITURE` includes that term.
+
+**I could not reproduce her report.** `check-learn-gap` measures the rendered
+gap at four window sizes with the longest and shortest insight and a quote that
+fills every line it is given: the share row stops 56 above the sheet, before the
+fix and after. She has reported this four times and three of my harnesses have
+been wrong about the layout, so the next step is a screenshot and which surface,
+not a fifth guess. It is in TASKS.md as L1 asking exactly that.
+
+Two harness mistakes are written into that gate's header and are worth knowing:
+measuring the children as the span from the first to the last telescopes to the
+content box under `space-between` and measures nothing, and an empty stand-in
+for a block is free to shrink in a flex column, so it absorbs every overflow the
+gate exists to see.
+
+**L2, In Practice.** The website's tiles are the app's now: grey featured tiles
+with the title at the foot, white shelf cards tinted by shelf with the ARTICLE
+label, a bookmark that fills and actually saves, and "5 min read · Read". The
+Saved and Read pills were passed zero, typed, since the sheet shipped; the page
+reads `/api/posts?action=feed`, the same call the app makes.
+
+The shelf tints moved to `attune-app/src/lib/card-tints.js`, plain JavaScript
+for the reason `insight-fit.js` is, since the website cannot import the app's
+`.ts` theme. `check-card-tints` holds that list to `SectionColor` and the
+website's three flat colours to the app's.
+
+**Still unfinished, and named rather than hidden.** Reading is marked in the app
+only. A piece read on the website will not say Read until the static In Practice
+pages post that, and the website's shelf shows the twelve static pieces rather
+than the posts-table rows the app also gets, because those have no page here.
+Both are in TASKS.md for her to decide.

@@ -15,14 +15,16 @@
 
 | # | Mine to build |
 |--|--|
-| L1 | **The gap above the In Practice peek, a fourth time.** You say it is still touching. My evidence was a harness that mounts the sheet on its own, and the Learn tab only exists inside the signed-in dashboard, so nothing in this repo has ever drawn the real page. Measuring the real one is the task. The gap is the symptom. |
-| L2 | **The site's In Practice has to look like the app's, not just carry the same words.** Against the app's tile: an image box with the mark behind it, the Article pill, a bookmark that fills when saved, the title held to two lines, and a meta line reading "9 min read" in the accent colour then a dot and "Read". The site has a title and "9 min" in grey, and it passes zero for both counts, so nothing on it has ever said whether you have read a piece. |
-| N15b | **What Comes Next still does not match the comms overview's action items.** Second attempt. The first compared the two builders; this time I read what each page actually draws. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| L2 | **The site's In Practice is the app's card now.** White cards lifted off the ground, tinted by shelf, with the ARTICLE label, the bookmark that fills orange when you save, the title held to two lines and "5 min read · Read" under it. The featured four are grey with the title at the foot, as the app has them. The bookmark was a drawing of a control before this: an outline that never changed and was not a button. |
+| L2b | **Saved and Read now say a number.** Both pills were passed zero, typed, so they read "Saved 0" and "Read 0" for everybody since the sheet shipped. The page asks /api/posts, the same call the app makes. Reading is still only marked in the app, so a piece you read on the website will not say Read until that page can mark it. Tell me if you want that. |
+| N15b | **One builder for the comms action plan, not two.** The site's overview had its own rule for which dimension leads a domain. Measured over 12,000 domain tiles, the two picked a different one 11% of the time, which is different advice on the two pages for the same couple. |
+| L1 | **The gap: one real defect fixed, and I could not reproduce yours.** The quote's room was computed without the block's own top margin, 40 points, so it was sized for room it does not have. That is fixed and gated. But at four window sizes, with the longest and the shortest insight we ship, the share row stops 56 above the sheet both before and after. **A screenshot would settle it, and tell me whether it is the app or the site.** |
 | O559 | **The site is current, and I checked before fixing anything.** You said the changes were not there. The newest website commit added a field called `readMinutes` to the article tiles: it appears 14 times in a bundle built from the current commit and 12 times in one built from the commit before, and the bundle the live site is serving has 14. Your own answers say the same thing from the other side, because L2 and L3 are both from that commit. So L1 and N15b are still broken rather than undeployed. |
 | N15 | **One note on a conflict between two of your instructions.** You once asked that each What Comes Next group match its section's at-a-glance plan, and a gate holds that. Your new comms instruction reverses it: the site's Try line comes from the protocols, which that gate was written to forbid. I followed the newer one and recorded both quotes side by side in the gate. The consequence: on the app, the comms Try line now appears only on this page. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
