@@ -15,17 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| N13 | **What Comes Next: one page, built once, with the halves she picked.** Reflection above Physical Intimacy. Reflection rows from the app. Physical Intimacy rows from the site. Expectations rows from the app. Conflict rows carry their Try line, which the app was dropping. Comms rows: the detailed page's name in bold with the site's Try content under it. Couple type rows name the person, not the role. Every row has an arrow to its page and no section has a link at its foot. Opening one section closes the others. Both surfaces, so the website has to stop building its own. |
-| N5b | **Emotional Labor: the names are not centred over Expects and Experienced.** Her words. Measure that page specifically rather than the category pages in general, which I already measured as centred. |
-| S3 | **The Learn page layout, measured.** She has offered her account. I must not ask her for a password, so work out what can be measured without one and say precisely what is still blocked. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| N6 | **Each person's words in italics and quotation marks** on the reflection action plan, both surfaces. |
-| N7 | **"Discuss household expectations together"**, with an arrow on each row opening that page, and the group's own open link gone. |
-| N10 | **The Learn page's shelves open.** The eyebrow is now a row with an arrow that narrows the list to that shelf. The gap above the peek doubled, taken out of the quote's budget rather than the peek's position. |
+| N13 | **What Comes Next is built once now.** You picked halves of two versions, so rather than reconcile eight differences by hand I made the website call the same builder the app is served. Every one of your asks landed in that one place: reflection above physical intimacy, the site's intimacy rows, the app's expectations and reflection rows, the conflict Try line the app was dropping, comms titled with the detail page and the site's Try under it, an arrow on every row, no link at the foot of a section, and one dropdown open at a time. |
+| N14 | **The couple type rows name the person on both surfaces.** The tips write the role out in words rather than as a token, and the website had swapped those for a name for a long time while the server never did. That swap is shared now, including the rule that keeps "a truly guarded partner" generic. |
+| N15 | **One note on a conflict between two of your instructions.** You once asked that each What Comes Next group match its section's at-a-glance plan, and a gate holds that. Your new comms instruction reverses it: the site's Try line comes from the protocols, which that gate was written to forbid. I followed the newer one and recorded both quotes side by side in the gate. The consequence: on the app, the comms Try line now appears only on this page. |
+| N5b | **Emotional Labor, and every other category.** The table is three stacked grids sharing one column template; the names row had a rem of padding the others did not, so the same template resolved to 92.5pt columns in one and 98.2 in the others and each name drifted further left than the one before. All three measure identically now, the names dead centre and the answers under their headers. |
+| S3 | **The Learn page peek is measured, and it did not need your account.** The sheet takes its articles as a prop and measures itself, so it can be mounted on its own with the real list. A gate now proves it reports a peek that holds its whole head and stops short of the shelves, on a laptop column and a phone, with all 12 articles drawn. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |

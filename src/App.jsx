@@ -3708,7 +3708,16 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
   );
 }
 
-function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) {
+/**
+ * Exported so a browser check can measure it.
+ *
+ * The Learn tab is inside the signed-in dashboard, so the peek it reports is
+ * the one number on that page nothing could verify: the insight above it is
+ * sized from it, and Ellie has reported the insight cut off or the peek cut off
+ * three times. check-learn-peek mounts this with the real article list and
+ * measures what it says its head is against what the head actually comes to.
+ */
+export function AppLearnReading({ articles, isMobile, savedCount, readCount, onPeek }) {
   const [query, setQuery] = useState("");
   /**
    * The head: the grab line, the two pills, the heading, the line under it and
