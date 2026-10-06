@@ -40,6 +40,15 @@
  * check-category-colors holds both surfaces to. The sidebar was the only place
  * Household and Financial looked like the same thing.
  *
+ * ── AND THE TWO PEOPLE ────────────────────────────────────────────────────
+ * Every surface marks one partner in orange and the other in blue, on the
+ * storycards, the couple map, the ratings, the written pairs. The website reads
+ * PERSON_COLORS from api/_lib/storycard-style.js; the app cannot import from
+ * api/, so it names them again through its own palette, and nothing watched the
+ * pair. They agreed, which is the whole reason nobody would notice the day they
+ * stopped, and the same sentence has now been true of a section's label and a
+ * section's colour in one sweep.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * The page headings inside each section, which come from RESULTS_SECTION_LABELS
  * and PAGE_TITLES and are already shared by both surfaces; check-page-eyebrows
@@ -54,6 +63,7 @@
 import { readFileSync } from 'node:fs';
 
 import { resultsNav } from '../api/_lib/results-sections.js';
+import { PERSON_COLORS } from '../api/_lib/storycard-style.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const WEB = 'src/App.jsx';
@@ -139,6 +149,41 @@ for (const m of block.matchAll(/id: "([\w-]+)"[^\n]*?color: "(#[0-9A-Fa-f]{6})"/
     + '\n      Communication came to be purple on the website and orange in the app.');
 }
 
+// ── The two people are the same two colours on both surfaces ───────────────
+{
+  const theme = readFileSync(`${ROOT}attune-app/src/constants/attune-theme.ts`, 'utf8');
+  const app = readFileSync(`${ROOT}attune-app/src/components/results.tsx`, 'utf8');
+
+  /* Which palette entry the app marks each person with, and what that entry is.
+     Read rather than assumed, so renaming the palette entry is not a silent
+     change of colour. */
+  const named = {};
+  for (const m of app.matchAll(/const (YOU|THEM)_COLOR = Palette\.(\w+)/g)) named[m[1]] = m[2];
+  if (!named.YOU || !named.THEM) {
+    console.error('[check-section-names] the app no longer marks the two people with'
+      + ' YOU_COLOR and THEM_COLOR from the palette.'
+      + ' Refusing to pass: a gate that has lost its subject must never report success.');
+    process.exit(1);
+  }
+  const value = (key) => {
+    const m = new RegExp(`\\b${key}: '(#[0-9A-Fa-f]{6})'`).exec(theme);
+    return m ? m[1].toUpperCase() : null;
+  };
+  const pairs = [['you', named.YOU, 'YOU_COLOR'], ['them', named.THEM, 'THEM_COLOR']];
+  for (const [side, entry, konst] of pairs) {
+    const got = value(entry);
+    const want = (PERSON_COLORS[side] || '').toUpperCase();
+    if (!got) {
+      fails.push(`the app's ${konst} is Palette.${entry} and the theme has no such colour.`);
+    } else if (got !== want) {
+      fails.push(`the app marks "${side}" ${got} (Palette.${entry}) and the website marks them`
+        + ` ${want} (PERSON_COLORS.${side}).\n`
+        + '      One partner is one colour across the whole product: the storycards, the map, the\n'
+        + '      ratings, the written pairs. Two values is two people on two surfaces.');
+    }
+  }
+}
+
 if (fails.length) {
   console.error('\n check-section-names: a screen has two names, or two colours.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
@@ -147,4 +192,5 @@ if (fails.length) {
 
 console.log(`[check-section-names] ${derived.length} sidebar rows, every name and every section`
   + ' colour taken from the nav the app renders, so neither surface can call a screen something the'
-  + ' other does not, or paint it differently.');
+  + ' other does not, or paint it differently, and the two people are the same two colours on'
+  + ' both.');
