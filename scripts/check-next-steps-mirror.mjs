@@ -146,19 +146,26 @@ if (conflict && conflict.items.some((i) => i.body && !i.say)) {
 }
 
 /*
- * The comms rows are titled with the page they came from, not with a piece of
- * advice. Ellie: "Bold title should be the detailed page name, then the content
- * should be the 'try' content that the site shows."
+ * ── THE COMMS ROWS ARE THEIR GLANCE TILES ────────────────────────────────
+ * This file briefly held the opposite: she asked for the detail page's name as
+ * the title and the website's Try line under it, then, told that the website's
+ * Try line comes from the protocols and the protocols appear nowhere else in
+ * the app, said "Revert, make the action items for comms match the comms
+ * overview page's action items exactly."
+ *
+ * check-plans-agree holds the content, tile by tile, which is where that
+ * comparison belongs because it has the glance plan to compare against. What is
+ * held here is the part this file is about: a row still has to draw something
+ * under its heading, and still has to know the page it opens.
  */
 const comms = built.groups.find((g) => g.id === 'comm');
 if (comms) {
-  const bad = comms.items.filter((i) => !/^(Internal Processing|How You Connect|When Things Get Hard)$/.test(i.title));
-  if (bad.length) {
-    fails.push(`a Communication row is titled "${bad[0].title}", which is not one of the three`
-      + ' detail pages. The title is the page; the advice is the Try line under it.');
-  }
   if (comms.items.some((i) => !i.say)) {
-    fails.push('a Communication row has no Try line under its page name.');
+    fails.push('a Communication row has nothing under its heading. The glance tile\'s advice goes'
+      + ' in `say`, which both surfaces draw; `body` is on the payload and neither draws it here.');
+  }
+  if (comms.items.some((i) => !/^comm-/.test(i.section || ''))) {
+    fails.push('a Communication row does not open a communication page.');
   }
 }
 

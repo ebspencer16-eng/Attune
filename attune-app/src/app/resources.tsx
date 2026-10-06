@@ -1466,7 +1466,14 @@ export default function ResourcesScreen() {
                           paddingHorizontal: Spacing.xl, marginBottom: Spacing.md,
                           maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
                         }}>
-                        <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{shelf}</Text>
+                        {/* Ellie: "I'd like for the app and site to list the
+                            count of articles next to each section title." The
+                            website draws the same two words from the same
+                            list. */}
+                        <Text style={{ ...Type.eyebrow, color: c.textMuted }}>
+                          {shelf}
+                          <Text style={{ color: c.border }}>{`   ${inShelf.length}`}</Text>
+                        </Text>
                         <Text style={{ ...Type.body, color: c.accent }}>{'\u2192'}</Text>
                       </Pressable>
                       <ScrollView

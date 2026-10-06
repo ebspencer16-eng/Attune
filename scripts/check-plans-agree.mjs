@@ -18,22 +18,28 @@
  * is that nothing on it is new: every group is something the reader has
  * already met in context, collected in one place.
  *
- * ── AND THEN SHE REVERSED IT, FOR COMMUNICATION ONLY ──────────────────────
- * Having read both pages side by side: "Both app and site use the wrong setup
- * for comms action items. Bold title should be the detailed page name, then the
- * content should be the 'try' content that the site shows."
+ * ── IT WAS BRIEFLY REVERSED, AND SHE REVERSED IT BACK ─────────────────────
+ * Reading both pages side by side she asked for something else: "Both app and
+ * site use the wrong setup for comms action items. Bold title should be the
+ * detailed page name, then the content should be the 'try' content that the
+ * site shows."
  *
- * The website's Try line for Communication has always been the protocol's
- * `thisWeek`, which is the thing this gate was written to forbid. So the rule
- * for this one group is now the opposite of what it was, and it is recorded
- * here rather than quietly relaxed, because the sentence above is a good rule
- * and the next person to read it will want to know why Communication is out.
+ * The website's Try line for Communication comes from the protocols, which is
+ * the thing this gate was written to forbid, and the protocols appear nowhere
+ * else in the app. Told that, she said: "Good call. Revert, make the action
+ * items for comms match the comms overview page's action items exactly."
  *
- * What is NOT reversed: the other five groups, and the premise. The title of a
- * Communication row is now the detail page it came from, which is the least
- * new thing it could be, and the Try line is content the website has shown in
- * this exact place for as long as the page has existed. It is new on the app
- * alone, and that is the trade she asked for with both pages in front of her.
+ * Both quotes are kept because the round trip is the useful part: the rule
+ * above survived a direct instruction to break it, on the strength of what
+ * breaking it would have cost, which is a better argument for it than the
+ * original bug.
+ *
+ * What a row carries now is the whole of its glance tile: the tile's heading as
+ * the title, and the tile's advice with the extra line the hardest domain
+ * carries joined onto it, as the Try line. Both are DRAWN, which `body` is not
+ * on this page: sending advice as `body` is how the conflict rows came to be
+ * headings with nothing under them. The domain's page is still where the row's
+ * arrow goes, which is the half of her earlier ask that survives.
  *
  * ── WHAT IS CHECKED ───────────────────────────────────────────────────────
  * For each section that has both an at-a-glance plan and a group here, the
@@ -100,10 +106,16 @@ if (!comm) {
     fails.push(`Communication lists ${comm.items.length} items and the glance plan has ${tiles.length}`);
   }
   /*
-   * One row per glance tile, in the glance plan's order, titled with the detail
-   * page that tile belongs to. The row is still the tile's: what changed is
-   * which part of it is drawn, not which tiles there are.
+   * A protocol's words must not be here: their presence means the group was
+   * built from the wrong list, whatever it happens to contain. This is the
+   * original rule, restored at her word.
    */
+  const all = comm.items.map((it) => `${it.title || ''} ${it.body || ''} ${it.say || ''}`).join(' ');
+  for (const pr of protocols) {
+    if (all.includes(pr.title) || (pr.thisWeek && all.includes(pr.thisWeek))) {
+      fails.push(`Communication is built from the protocols, not from the glance plan: "${pr.title}"`);
+    }
+  }
   if (comm.items.length !== tiles.length) {
     fails.push(`Communication has ${comm.items.length} rows and the glance plan has ${tiles.length}`
       + ' tiles. The rows are the tiles.');
@@ -111,19 +123,19 @@ if (!comm) {
   tiles.forEach((tile, i) => {
     const item = comm.items[i];
     if (!item) return;
-    if (item.title !== tile.label) {
-      fails.push(`Communication item ${i + 1} is titled "${item.title}" and its tile belongs to`
-        + ` "${tile.label}". The title is the detail page, which is what she asked for and what`
-        + ' gives the row somewhere to go.');
+    const wanted = tile.body || tile.title;
+    /*
+     * Drawn, not merely present. `body` is on the payload and neither surface
+     * renders it on this page, so a row whose advice sits there is a heading
+     * with nothing under it, which is exactly what the conflict rows were.
+     */
+    const drawn = `${item.title || ''} ${item.say || ''}`;
+    if (wanted && !drawn.includes(wanted)) {
+      fails.push(`Communication item ${i + 1} does not carry the glance tile's advice where this`
+        + ` page draws it: "${String(wanted).slice(0, 48)}"`);
     }
-    /* The protocol for that tile's dimension, which is the Try line the website
-       has always printed here. A tile whose protocol has no weekly line falls
-       back to the tile's own advice, so a row is never a heading alone. */
-    const protocol = protocols.find((pr) => pr.dim === tile.dim);
-    const wanted = protocol?.thisWeek || tile.body;
-    if (wanted && !String(item.say || '').includes(wanted)) {
-      fails.push(`Communication item ${i + 1} does not carry its Try line: `
-        + `"${String(wanted).slice(0, 48)}"`);
+    if (tile.reflect && !drawn.includes(tile.reflect)) {
+      fails.push(`Communication item ${i + 1} drops the extra line the glance tile carries`);
     }
   });
 }

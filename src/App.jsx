@@ -3785,6 +3785,18 @@ export function AppLearnReading({ articles, isMobile, savedCount, readCount, onP
       }}>
         {a.title}
       </span>
+      {/* ── HOW LONG IT TAKES ──────────────────────────────────────────────
+          Ellie: "the articles online are missing the times". The app has
+          printed one under every article since In Practice shipped, from the
+          same field, and these tiles had the title and nothing else. */}
+      {a.readMinutes ? (
+        <span style={{
+          display: "block", fontFamily: BFONT, fontSize: "0.68rem",
+          color: "#8A7A66", marginTop: "0.3rem",
+        }}>
+          {`${a.readMinutes} min`}
+        </span>
+      ) : null}
     </a>
   );
 
@@ -3938,11 +3950,17 @@ export function AppLearnReading({ articles, isMobile, savedCount, readCount, onP
                   width: "100%", background: "transparent", border: "none", padding: 0,
                   cursor: "pointer", marginBottom: "0.6rem",
                 }}>
+                {/* Ellie: "I'd like for the app and site to list the count of
+                    articles next to each section title." The app draws the same
+                    two words from the same list. */}
                 <span style={{
                   fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase",
                   fontWeight: 700, fontFamily: BFONT, color: "#A89C8C",
                 }}>
                   {shelf}
+                  <span style={{ color: "#C3B7A6", marginLeft: "0.5rem", letterSpacing: "0.08em" }}>
+                    {items.length}
+                  </span>
                 </span>
                 <span style={{ color: C.clay, fontSize: "0.9rem", lineHeight: 1 }}>
                   {query === shelf ? "\u00D7" : "\u2192"}
@@ -13356,6 +13374,27 @@ export default function App() {
    */
   const [learnPeek, setLearnPeek] = useState(0);
 
+  /**
+   * ── THE GAP ABOVE THE IN PRACTICE SHEET ─────────────────────────────────
+   * Ellie, three times: "Need space between the share button and the in
+   * practice peek", then "there is still no space", then "there's no buffer
+   * between the save and share buttons and the in practice section".
+   *
+   * Twice I made the number bigger and twice nothing moved, because the number
+   * was never what was wrong. The block above the sheet is a flex column with
+   * `justify-content: space-between` and a height equal to its whole budget, so
+   * its last child — the insight, with the save and share buttons at its foot —
+   * is pushed flush to the bottom edge of that block, which is exactly where
+   * the sheet begins. Carving room out of the quotation's budget just gave
+   * space-between more to spread, and it spread it between the children.
+   *
+   * Padding does what the subtraction could not: the content box ends here,
+   * above the block's edge, so the last child stops short of the sheet whatever
+   * else happens. It is subtracted from the quotation's room automatically,
+   * because a ResizeObserver reports the content box.
+   */
+  const LEARN_GAP = 56;
+
   const [dashTab, setDashTab] = useState(() => {
     try {
       const t = new URLSearchParams(window.location.search).get('tab');
@@ -16257,6 +16296,10 @@ export default function App() {
                       ? `calc(100dvh - ${learnTop}px - ${learnPeek}px)`
                       : undefined,
                     minHeight: 0,
+                    /* See LEARN_GAP. Without this, space-between puts the
+                       insight's last row against the top of the sheet. */
+                    paddingBottom: LEARN_GAP,
+                    boxSizing: "border-box",
                   }}>
                   {/* ── THE APP'S THREE TOOL TILES ────────────────────────
                       Ellie: "On learn, reorder the resource tiles. First should
@@ -16389,12 +16432,16 @@ export default function App() {
                        takes what is left, which is the order she asked for. The
                        featured tiles stay the size they are, because shrinking
                        them moves the sheet down and takes the gap back. */
-                    const LEARN_GAP = 56;
                     const base = isMobile ? 21.6 : 25.6;      // 1.35rem, 1.6rem
                     const scale = base / FIT_BASE;
                     const furniture = 14 + 14 + 18 + 34 + 18; // eyebrow, its margin, the citation's margin, the controls, theirs
+                    /* No LEARN_GAP here: the gap is the block's bottom padding
+                       and a ResizeObserver reports the content box, so it is
+                       already out of this height. Subtracting it again took the
+                       room twice and the quotation paid for a gap it was not
+                       getting. */
                     const room = (learnAbove.h && learnToolsH)
-                      ? learnAbove.h - learnToolsH - furniture - LEARN_GAP
+                      ? learnAbove.h - learnToolsH - furniture
                       : 0;
                     const width = learnAbove.w;
                     const fit = (room > 0 && width > 0)

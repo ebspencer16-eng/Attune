@@ -15,25 +15,19 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| N15b | **Revert the comms change: the rows match the Communication overview's action plan exactly.** Her call, and she is right that content appearing only on this page was the wrong trade. Put the gate's original rule back with both quotes still beside it. |
+| L1 | **Still no buffer above the In Practice peek.** Third report, so stop adjusting the number and find out what actually puts the insight against the sheet. Measure it. |
+| L2 | **The website's article tiles have no read time.** The app shows one. |
+| L3 | **A count of articles beside each section title**, app and site. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| D1 | **Two sections had two names, one per surface.** The website's sidebar called them Communication and Physical Intimacy; the app calls them Communication Styles and Physical Intimacy Expectations, which is the exercise's own name and the one you asked for last round. The sidebar takes its names from the app's nav now. |
-| D2 | **Two sections were a different colour on each surface**, and the six expectations categories were all one green. Communication was purple on the site and orange in the app; Reflection was blue here and green there. Both times the app agreed with the page's own gradient, so the sidebar was the odd one out. And each category has its own colour, which its page is tinted with: the sidebar was the one place all six sit together, so it was the only place they looked alike. |
-| D6 | **Nothing guarded the two people's colours.** One partner is orange and one is blue everywhere; the website reads that from a shared file and the app names it again, because it cannot import from the server. They agreed, which is exactly why nobody would notice the day they stopped. Gated now. |
-| D3 | **Swept and clean:** every one of the 29 results sections renders with no sideways scroll, no clipped text and nothing colliding with the floating arrows; all 15 marketing pages fit the window at 390 and at 1280. |
-| D5 | **Swept and clean:** the storycards' eight kinds, every field the server sends drawn, type fitting its line box at three widths, and nothing read that is never sent. |
-| N13 | **What Comes Next is built once now.** You picked halves of two versions, so rather than reconcile eight differences by hand I made the website call the same builder the app is served. Every one of your asks landed in that one place: reflection above physical intimacy, the site's intimacy rows, the app's expectations and reflection rows, the conflict Try line the app was dropping, comms titled with the detail page and the site's Try under it, an arrow on every row, no link at the foot of a section, and one dropdown open at a time. |
-| N14 | **The couple type rows name the person on both surfaces.** The tips write the role out in words rather than as a token, and the website had swapped those for a name for a long time while the server never did. That swap is shared now, including the rule that keeps "a truly guarded partner" generic. |
 | N15 | **One note on a conflict between two of your instructions.** You once asked that each What Comes Next group match its section's at-a-glance plan, and a gate holds that. Your new comms instruction reverses it: the site's Try line comes from the protocols, which that gate was written to forbid. I followed the newer one and recorded both quotes side by side in the gate. The consequence: on the app, the comms Try line now appears only on this page. |
-| N5b | **Emotional Labor, and every other category.** The table is three stacked grids sharing one column template; the names row had a rem of padding the others did not, so the same template resolved to 92.5pt columns in one and 98.2 in the others and each name drifted further left than the one before. All three measure identically now, the names dead centre and the answers under their headers. |
 | S3 | **The Learn page peek is measured, and it did not need your account.** The sheet takes its articles as a prop and measures itself, so it can be mounted on its own with the real list. A gate now proves it reports a peek that holds its whole head and stops short of the shelves, on a laptop column and a phone, with all 12 articles drawn. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
-| R190 | Admin from Settings, for ADMIN_EMAILS only. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R175 | Articles can carry an illustration. Tinted by shelf until artwork exists. |
 | R2 | App insights and results. All 29 sections. |
@@ -49,6 +43,15 @@
 
 | Verified by you | What it was |
 |--|--|
+| D1 | The website sidebar called two sections something the app did not: Communication and Physical Intimacy against their full names. |
+| D2 | Communication was purple on the site and orange in the app, Reflection blue against green, and all six expectations categories one green. |
+| D6 | Nothing guarded the two people's colours across surfaces; they agreed by luck. |
+| D3 | Swept all 29 results sections and 15 marketing pages for overflow, clipped text and collisions; clean. |
+| D5 | Swept the storycards: eight kinds, every field drawn, type fitting at three widths. |
+| N13 | What Comes Next was built twice and had drifted eight ways; the website calls the shared builder now. |
+| N14 | Couple type rows named the archetype on the app and the person on the site. |
+| N5b | The expectations table's three grids resolved one column template against three different widths. |
+| R190 | Admin reachable from Settings for the two admin accounts only. |
 | N1 | Storycards had two sets of arrows, because Highlights is a results page and drew the shared floating pair as well as its own. |
 | N2 | The results arrows floated over the footer; they now stop at the end of the page content. |
 | N3 | The results arrows were positioned against the window, so the back arrow sat under the left nav instead of on the content margin. |

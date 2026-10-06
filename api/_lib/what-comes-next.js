@@ -105,28 +105,32 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       label: 'Communication',
       section: 'comm-overview',
       /**
-       * ── THE PAGE'S NAME, AND THE THING TO TRY ─────────────────────────
-       * Ellie: "Both app and site use the wrong setup for comms action items.
-       * Bold title should be the detailed page name, then the content should
-       * be the 'try' content that the site shows."
+       * ── EXACTLY WHAT THE COMMUNICATION OVERVIEW SAYS ──────────────────
+       * Ellie asked for the detail page's name as the title and the website's
+       * Try line under it; the Try line on the website comes from the
+       * protocols, which do not appear anywhere else in the app. Shown that,
+       * she said: "Revert, make the action items for comms match the comms
+       * overview page's action items exactly."
        *
-       * The title was the advice's own heading, which is a sentence about this
-       * couple rather than a place to go, so a row told you something and gave
-       * you nowhere to read it. `label` is the domain's page: Internal
-       * Processing, How You Connect, When Things Get Hard.
+       * She is right, and it is the rule this whole page is built on: nothing
+       * here is a new claim, every group is something the reader has already
+       * met in context. A Try line that exists only on this page is exactly the
+       * thing that rule forbids.
        *
-       * The Try line is the protocol's `thisWeek`, which is what the website
-       * has always printed here, matched to the tile by the dimension the tile
-       * leads with. A domain whose protocol has no weekly line falls back to
-       * the advice, so a row is never a heading with nothing under it.
+       * So a row is its glance tile: the tile's heading, and the tile's advice
+       * with the extra line the hardest domain carries joined onto it. Both of
+       * those are drawn here, where `body` is not: sending the advice as `body`
+       * is how the conflict rows came to be headings with nothing under them.
+       *
+       * The domain's page is still where the row's arrow goes, which is what
+       * `section` is for and is the half of her earlier ask that survives.
        */
       items: commTiles.map((tile) => {
-        const protocol = (commsPlan?.protocols || []).find((pr) => pr.dim === tile.dim);
         const domain = COMM_DOMAINS.find((d) => d.id === tile.domain);
         return {
-          title: tile.label || tile.title,
+          title: tile.title || tile.label,
           body: null,
-          say: named(protocol?.thisWeek || tile.body) || null,
+          say: [tile.body, tile.reflect].filter(Boolean).join(' ') || null,
           section: domain ? `comm-${domain.id}` : 'comm-overview',
         };
       }),
