@@ -19,8 +19,29 @@
 import { COUPLE_TYPES } from '../_couple-types.js';
 import { summarizeConflict } from './conflict-results.js';
 import { PATTERN_ACTIONS } from '../_conflict-results-prose.js';
+import { COMM_DOMAINS } from './comm-domains.js';
+import { resolveRoleTokens } from './role-tokens.js';
 
-export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, reflectionPlan, conflictReady, conflictAnswers, names }) {
+export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, reflectionPlan, conflictReady, conflictAnswers, names, sides }) {
+  /**
+   * ── THE PEOPLE, NAMED ───────────────────────────────────────────────────
+   * Ellie: "Couple type action items should match the site - the app is
+   * showing 'Guarded partner:...' but the site says 'Preston'. I want that done
+   * throughout, make sure the app matches."
+   *
+   * The couple type's tips are written with role tokens, {EXP} and {GRD} and
+   * their pronoun forms, because which partner is which depends on the couple.
+   * The website resolves them and this page did not, so the app read out the
+   * role where the website read out the person.
+   *
+   * `sides` is the two people with the axes that decide who holds which role.
+   * Without it every token falls back to the generic phrase, which is what
+   * role-tokens does for a couple that has no such role, and is right: it is
+   * never a raw `{EXP}` on the page either way.
+   */
+  const named = (text) => (text
+    ? resolveRoleTokens(String(text), sides?.you || null, sides?.them || null)
+    : text);
   const groups = [];
   const you = names?.you || 'You';
   const them = names?.them || 'your partner';
@@ -35,11 +56,12 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       label: 'Couple type',
       section: 'couple-type',
       items: type.tips.slice(0, 3).map((t) => ({
-        title: t.title,
-        body: t.body || null,
+        title: named(t.title),
+        body: named(t.body) || null,
         // The sentence to actually say. On a page of advice this is the only
         // part that survives contact with a real evening.
-        say: t.phraseTry || null,
+        say: named(t.phraseTry) || null,
+        section: 'couple-type',
       })),
     });
   }
@@ -82,15 +104,32 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       color: '#E8673A',
       label: 'Communication',
       section: 'comm-overview',
-      items: commTiles.map((tile) => ({
-        // The domain is the heading on the glance tile, and the advice is its
-        // body. A tile for an aligned domain carries a title of its own.
-        title: tile.title || tile.label,
-        body: tile.body || null,
-        // The extra line the hardest domain carries. It is on the tile, so it
-        // is here: this page is the same list, not a summary of it.
-        say: tile.reflect || null,
-      })),
+      /**
+       * ── THE PAGE'S NAME, AND THE THING TO TRY ─────────────────────────
+       * Ellie: "Both app and site use the wrong setup for comms action items.
+       * Bold title should be the detailed page name, then the content should
+       * be the 'try' content that the site shows."
+       *
+       * The title was the advice's own heading, which is a sentence about this
+       * couple rather than a place to go, so a row told you something and gave
+       * you nowhere to read it. `label` is the domain's page: Internal
+       * Processing, How You Connect, When Things Get Hard.
+       *
+       * The Try line is the protocol's `thisWeek`, which is what the website
+       * has always printed here, matched to the tile by the dimension the tile
+       * leads with. A domain whose protocol has no weekly line falls back to
+       * the advice, so a row is never a heading with nothing under it.
+       */
+      items: commTiles.map((tile) => {
+        const protocol = (commsPlan?.protocols || []).find((pr) => pr.dim === tile.dim);
+        const domain = COMM_DOMAINS.find((d) => d.id === tile.domain);
+        return {
+          title: tile.label || tile.title,
+          body: null,
+          say: named(protocol?.thisWeek || tile.body) || null,
+          section: domain ? `comm-${domain.id}` : 'comm-overview',
+        };
+      }),
     });
   }
 
@@ -145,24 +184,12 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     });
   }
 
-  // 3. Physical Intimacy: the same three the at-a-glance page lists, from the
-  //    same field, rather than this function's own slice of a longer list.
-  const convos = intimacy?.actionPlan || [];
-  if (convos.length) {
-    groups.push({
-      id: 'intimacy',
-      color: '#C2185B',
-      /* Ellie: "I want the what comes next page to call it physical intimacy
-         expectations not just physical intimacy." It is the exercise's own
-         name, and the short form reads as a different subject. */
-      label: 'Physical Intimacy Expectations',
-      section: 'intimacy-overview',
-      items: convos.map((d) => ({ title: d.label, body: null, say: d.prompt })),
-    });
-  }
-
   /**
-   * 4. Reflection, in their own words.
+   * 3. Reflection, in their own words.
+   *
+   * Ellie: "I want rel relf listed above physical intimacy expectations on
+   * what comes next pages." Above it on both surfaces, which is this order,
+   * because each renders the groups in the order they are sent.
    *
    * ── THIS HAS BEEN BOTH WAYS ───────────────────────────────────────────
    * It was these two rows, then Ellie: "Rel Relf action items don't carry to
@@ -204,14 +231,41 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
      * changes the app only, and that is the surface she is reading.
      */
     const items = [];
-    if (commitment.you) items.push({ title: `${you} wrote:`, quote: commitment.you, body: null, say: null });
-    if (commitment.them) items.push({ title: `${them} wrote:`, quote: commitment.them, body: null, say: null });
+    if (commitment.you) items.push({ title: `${you} wrote:`, quote: commitment.you, body: null, say: null, section: 'reflection-overview' });
+    if (commitment.them) items.push({ title: `${them} wrote:`, quote: commitment.them, body: null, say: null, section: 'reflection-overview' });
     groups.push({
       id: 'reflection',
       color: '#10B981',
       label: 'Relationship Reflection',
       section: 'reflection-overview',
       items,
+    });
+  }
+
+  // 4. Physical Intimacy: the same three the at-a-glance page lists, from the
+  //    same field, rather than this function's own slice of a longer list.
+  const convos = intimacy?.actionPlan || [];
+  if (convos.length) {
+    groups.push({
+      id: 'intimacy',
+      color: '#C2185B',
+      /* Ellie: "I want the what comes next page to call it physical intimacy
+         expectations not just physical intimacy." It is the exercise's own
+         name, and the short form reads as a different subject. */
+      label: 'Physical Intimacy Expectations',
+      section: 'intimacy-overview',
+      /**
+       * Ellie: "Use the site's physical intimacy action items, not the app's."
+       * The website says "Talk about how it happens" and the server said "How
+       * it happens", which is the dimension's name rather than something to do.
+       * Its prompt is the same on both.
+       */
+      items: convos.map((d) => ({
+        title: `Talk about ${String(d.label || '').toLowerCase()}`,
+        body: null,
+        say: named(d.prompt),
+        section: d.section || 'intimacy-overview',
+      })),
     });
   }
 
@@ -239,7 +293,18 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     .filter((p) => p.band === 'worth_watching' || p.band === 'worth_attention')
     .map((p) => PATTERN_ACTIONS[p.key])
     .filter(Boolean)
-    .map((a) => ({ title: a.title, body: (a.body || '').replace(/\{partner\}/g, them), say: null }));
+    /* Ellie: "I want the full action item with the try section (like the site
+       shows) for the conflict patterns action items on the app what comes next
+       page." The advice's body WAS being sent, as `body`, and the app draws
+       `title` and `say` and nothing else, so on a phone every conflict row was
+       a heading with nothing under it. It is the Try line on both surfaces
+       now, which is where the website has always printed it. */
+    .map((a) => ({
+      title: a.title,
+      body: null,
+      say: (a.body || '').replace(/\{partner\}/g, them),
+      section: 'conflict-overview',
+    }));
 
   if (conflictReady) {
     groups.push({
@@ -248,9 +313,12 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       section: 'conflict-overview',
       items: conflictItems.length ? conflictItems : [{
         // Nothing in a band worth watching is a real answer, not an empty one.
+        // Its sentence is the Try line, like every other row here, and it opens
+        // the same page: a row with no way out is the thing the arrows replaced.
         title: 'Reread your patterns before the next hard conversation',
-        body: 'Not during one. The point of knowing them is recognising one early.',
-        say: null,
+        body: null,
+        say: 'Not during one. The point of knowing them is recognising one early.',
+        section: 'conflict-overview',
       }],
     });
   }

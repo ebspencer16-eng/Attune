@@ -15,43 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| N5 | **Expectations responses: I cannot find a page where they are not centred.** Measured on every expectations page on both surfaces and every answer cell is already centre-aligned. Tell me which page you are looking at and I will fix it. |
-| S3 | **The Learn page layout, measured.** It still goes in unmeasured because that screen needs an account. |
-| S13 | **The website's resolveRoleTokens has no behavioural gate.** Thresholds match today; nothing holds them together. |
-| N11 | **What Comes Next is built twice.** The server builds it and the app renders it; the website builds its own from client-side results. That is how four things drifted at once this round. The right fix is the website reading the server's page, which is bigger than any one of these items and wants its own pass. |
+| N13 | **What Comes Next: one page, built once, with the halves she picked.** Reflection above Physical Intimacy. Reflection rows from the app. Physical Intimacy rows from the site. Expectations rows from the app. Conflict rows carry their Try line, which the app was dropping. Comms rows: the detailed page's name in bold with the site's Try content under it. Couple type rows name the person, not the role. Every row has an arrow to its page and no section has a link at its foot. Opening one section closes the others. Both surfaces, so the website has to stop building its own. |
+| N5b | **Emotional Labor: the names are not centred over Expects and Experienced.** Her words. Measure that page specifically rather than the category pages in general, which I already measured as centred. |
+| S3 | **The Learn page layout, measured.** She has offered her account. I must not ask her for a password, so work out what can be measured without one and say precisely what is still blocked. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| N1 | **One set of arrows on the storycards.** Highlights is a results page, so it had the floating pair every results page has plus the storycards' own stationary pair. The stationary ones are gone; a card pages by its own edge and the dots jump to one. |
-| N2 | **The arrows stop at the end of the content** rather than floating over the footer. |
-| N3 | **The arrows line up with the content margins**, measured, identical on every page. They were positioned against the window, which is why the back arrow sat under the left nav. |
-| N4 | **Tapping the left or right edge of a results page moves you a page**, both surfaces. A sixth of the width, because the middle is for reading. A tap that finished a selection pages nothing. |
 | N6 | **Each person's words in italics and quotation marks** on the reflection action plan, both surfaces. |
 | N7 | **"Discuss household expectations together"**, with an arrow on each row opening that page, and the group's own open link gone. |
-| N8 | **Four conflict items, not one.** Two separate causes. The app was handed the whole database record where it needed the answers inside it, so the exercise read as unfinished and it drew its "nothing worth watching" fallback. The website picked its items by a different rule from the overview, and its whole conflict block sat inside the Physical Intimacy branch, so owning Conflict and not finishing Intimacy meant no list at all. |
-| N9 | **Physical Intimacy Expectations**, the exercise's own name. |
 | N10 | **The Learn page's shelves open.** The eyebrow is now a row with an arrow that narrows the list to that shelf. The gap above the peek doubled, taken out of the quote's budget rather than the peek's position. |
-| S12b | **Two gates so the scorer cannot drift again**, as you asked. One forbids a second scorer, a second dimension map or a second reverse-scoring list anywhere. The other runs both scorers over 400 answer sets and fails if they disagree, which is the half that was missing: the old one compared the question lists and never the answer. |
-| N12 | **Two more places asked for italics in a way iOS ignores.** Eighteen were fixed when that was found; these two survived, in the expectations answers and the conflict free-text. The build fails on it now. |
-| S14 | **Swept and found sound:** all 13 emails render with nothing unresolved and every email anything sends is in the catalogue; the two role-token resolvers use identical thresholds; every internal link on the live site resolves; every dollar figure a customer reads is one the catalogue sets. |
-| S12 | **The admin was scoring with a different formula from the product.** It had its own copy of the scorer that took a plain average where the real one weights the questions, and its reverse-scoring list was empty, so a reverse-worded question was counted backwards. On the same answers the product says 1.75 on Conflict and the admin charted 3.00. It uses the real engine now. This is the one worth knowing about, because the admin is where you read what customers are like. |
-| S7 | **A promo code that bundled an add-on free still charged for it.** The cart's price was worked out in three places and each knew about a different subset of the five bundled-free flags. A beta code giving away Relationship Reflection charged forty dollars for it the moment the cart had anything else paid in it. One source now, and a gate that runs the real functions. |
-| S8 | **Conflict Patterns was never sent to Stripe as a line.** The subtotal charged forty dollars for it and the invoice did not carry it, so Stripe's total came back forty short of the quote on every ordinary order containing it. No promo code involved. |
-| S9 | **Add-on prices could drift with every price gate passing.** Three tables exist; the gate covered one shape and had written add-ons out of its own scope. Moving the reflection add-on by five dollars in the tax endpoint passed all three price gates. |
-| S1 | **Two views were reported as rendering clean while rendering nothing.** The dashboard cannot render signed out, and the Merging Lives Checklist was being driven at a package that does not include it, so neither had ever been rendered by a check. The checklist is covered now; the dashboard says plainly that it is not. |
-| S10 | **The entitlement test compared the server against a copy of the website kept inside the test.** Making the website grant premium a checklist the server refuses left it printing "22 passed, 0 failed". It reads the real file now. |
-| S11 | **Swept and found nothing wrong:** every internal link on the live site resolves, every dollar figure a customer reads is one the catalogue sets, every article's shelf and every exercise's capability resolves, and the app's article list is the server's. |
-| O558 | **Your last two rounds were not on the site until now, and that is the thing to know first.** The push worked, my build passed every time, and Vercel had been failing for two commits on a file extension. One shared file was TypeScript, which sent the website's build looking for a package only the app installs. Found by cloning the repo and running Vercel's own build command; a gate holds that boundary now. Everything below is live and I checked it on the real site. |
-| O549 | **The tile's picture had a gap on the left and none on the right.** The card measures in border-box and the picture measured in content-box, so the picture's own padding was added outside its width: sixteen points wider than the box it sits in. Third report and my third attempt, so this time I exported the component and measured the real thing in a browser at four window sizes before changing anything. The gate found a second fault you had not reported: the two cards were seven points different in height. |
-| O552 | **The web insight shrinks to fit, like the app.** It calls the app's own function rather than a second version of it, scaled for the larger type. |
-| O550 | **Room between the share row and the peek.** Taken out of the budget rather than added as padding: padding inside a block whose height is the budget takes room from the quote and adds none, which is what my last attempt did. |
-| O546 | **The share sheet shows the right title now.** `fileName` is read only by the library's Android code; iOS accepted it and ignored it, which is why the message was right and the preview was not. The picture is copied to a properly named file before it goes. |
-| O553 | **Icons only, evenly spaced.** The word stays in the tooltip and for screen readers. |
-| O555 | **The feedback popup stays closed.** Tapping anywhere already closed it; nothing remembered that, so every refresh brought it back. |
-| O556 | **Tapping the left third of a storycard goes back, the rest forward.** The app's fraction. A tap that began as selecting text pages nothing, so marking a card does not lose it. |
-| O557 | **The slow home page: one real cause found, and I cannot yet see the rest.** Three separate files were each asking the server which privacy rules apply, and one of them never cached the answer. That is now one request per session instead of up to three. **But I measured the page signed out, where it paints in under half a second, and yours is signed in.** If it is still slow, tell me whether it is every time or now and then, and on the laptop or the phone. |
 | O494 | Cover pages on both surfaces. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R190 | Admin from Settings, for ADMIN_EMAILS only. |
@@ -70,6 +44,31 @@
 
 | Verified by you | What it was |
 |--|--|
+| N1 | Storycards had two sets of arrows, because Highlights is a results page and drew the shared floating pair as well as its own. |
+| N2 | The results arrows floated over the footer; they now stop at the end of the page content. |
+| N3 | The results arrows were positioned against the window, so the back arrow sat under the left nav instead of on the content margin. |
+| N4 | Tapping the left or right edge of a results page now pages it, on both surfaces, as the storycards do. |
+| N8 | Conflict showed four action items on its overview and one in What Comes Next, from two separate causes, one per surface. |
+| N9 | What Comes Next called the exercise Physical Intimacy rather than Physical Intimacy Expectations. |
+| S12b | Two gates so that cannot return: one forbids a second scorer anywhere, the other runs both over 400 answer sets. |
+| N12 | Two places still asked for italics with a flag iOS ignores on a registered family; the build fails on it now. |
+| S14 | Swept the emails, the role-token resolvers, every internal link and every price on the live site; all sound. |
+| S12 | The admin scored couples with a plain average and no reverse-scoring where the product weights and reverses, differing by up to 1.25 points. |
+| S7 | A promo code that bundled an add-on free still charged for it, because the cart price was computed in three places. |
+| S8 | Conflict Patterns was never sent to Stripe as a line, so its total came back forty dollars short of the quote. |
+| S9 | Add-on prices could drift between three tables with every price gate passing. |
+| S1 | check-render reported two views clean that rendered nothing: the dashboard and the Merging Lives Checklist. |
+| S10 | The entitlement test compared the server against a copy of the website kept inside the test file. |
+| S11 | Swept the article shelves, exercise capabilities, internal links and rendered prices; nothing wrong. |
+| O558 | Two rounds of fixes never deployed: a .ts import sent the website build looking for a package only the app installs. |
+| O549 | The home prompt tile drew a letterbox and had a gap on one side only, from a border-box card holding a content-box picture. |
+| O552 | A long insight of the day pushed the In Practice peek off the Learn page. |
+| O550 | No room between the share row and the In Practice peek. |
+| O546 | The share sheet showed the capture temp filename, because the library option that names it is Android only. |
+| O553 | The web selection toolbar used words where the app uses icons. |
+| O555 | The feedback popup returned on every refresh, because closing it was never recorded. |
+| O556 | Tapping the side of a storycard did not page it on the website. |
+| O557 | Three files each asked the server which privacy rules apply, and one never cached the answer. |
 | O544 | Results arrows reached six pages of eighteen and the covers announced their raw section id; both lists now come from the nav. |
 | O540 | The app's admin menu was a second copy of the admin's own nav; the four-digit code now opens the overview directly. |
 | O548 | The insight citation could shrink to 9pt under a 12pt quote; floored at 11, which sets the longest usable quotation at 354 characters. |

@@ -176,7 +176,8 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE, CARD_REF_WIDTH as SC_REF_WIDTH, CARD_MAP_PCT as SC_MAP_PCT } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
-import { commsProtocols } from "../api/_lib/comms-plan.js";
+import { commsProtocols, commsActionPlan } from "../api/_lib/comms-plan.js";
+import { whatComesNext } from "../api/_lib/what-comes-next.js";
 import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
 import { ABOUT_YOU } from "../api/_lib/profile-setup-copy.js";
 import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_RATINGS, FEEDBACK_SCALE } from "../api/_lib/feedback-copy.js";
@@ -5557,8 +5558,22 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                 <div style={{ padding: "0.65rem 1rem", borderBottom: `1px solid ${fc.color}18`, background: fc.color + "0c" }}>
                   <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT }}>Conversations to have</span>
                 </div>
-                {/* Column headers: names centered over their column group(s) */}
-                <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, padding: "0.55rem 1rem 0" }}>
+                {/* ── THE THREE GRIDS SHARE ONE SET OF COLUMNS ──────────
+                    Ellie: "Emotional labor, names in rows don't look centered
+                    with Expects and Experienced column titles."
+
+                    On every category, not only that one. This row carried a
+                    rem of horizontal padding and the two rows under it carried
+                    none, so the same `1.6fr 1fr 1fr 1fr 1fr` resolved to 92.5pt
+                    columns here and 98.2pt below: measured, thirty-two points
+                    of difference, which is exactly the padding. The names
+                    drifted left of the columns they name, a little more with
+                    each column, so the first looked right and the second was
+                    visibly out.
+
+                    The padding moves onto the cells, where it does not change
+                    what a fraction of the row is worth. */}
+                <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, paddingTop: "0.55rem" }}>
                   <div />
                   <div style={{ gridColumn: nameSpan, textAlign: "center", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fc.color, fontFamily: BFONT, paddingBottom: "0.4rem", borderBottom: `2.5px solid ${fc.color}40` }}>{userName}</div>
                   <div style={{ gridColumn: nameSpan, textAlign: "center", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#777", fontFamily: BFONT, paddingBottom: "0.4rem", borderBottom: "2.5px solid rgba(0,0,0,0.12)" }}>{partnerName}</div>
@@ -5582,10 +5597,20 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                   const myDetail = myAnswers?.bothDetail?.[ck] || null;
                   const partDetail = partnerAnswers?.bothDetail?.[ck] || null;
                   const isLast = gi === thisCatGaps.length - 1;
+                  /* No horizontal padding on the row, for the reason above the
+                     names grid: three grids share one column template and a
+                     padding here makes this row's columns narrower than the
+                     headers above it, so an answer sits left of the column that
+                     names it. The inset moves onto the first cell, which is
+                     where the header row already carries it.
+
+                     A block comment above the `return`, not a JSX comment under
+                     it: nothing may sit between `return (` and the root element,
+                     which is the third time that has cost a build this week. */
                   return (
-                    <div key={gi} style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, padding: "0.65rem 1rem", borderTop: `1px solid ${fc.color}10`, alignItems: "center", background: gi % 2 === 1 ? fc.color + "06" : "transparent" }}>
+                    <div key={gi} style={{ display: "grid", gridTemplateColumns: gridCols, gap: 0, padding: "0.65rem 0", borderTop: `1px solid ${fc.color}10`, alignItems: "center", background: gi % 2 === 1 ? fc.color + "06" : "transparent" }}>
                       {/* Responsibility name */}
-                      <div style={{ fontSize: "0.78rem", fontWeight: 500, color: "#2a2848", fontFamily: BFONT, lineHeight: 1.35, paddingRight: "0.75rem" }}>{g.item}</div>
+                      <div style={{ fontSize: "0.78rem", fontWeight: 500, color: "#2a2848", fontFamily: BFONT, lineHeight: 1.35, paddingLeft: "1rem", paddingRight: "0.75rem" }}>{g.item}</div>
                       {/* userName expects, and what Both turned out to mean */}
                       <div style={{ fontSize: "0.8rem", fontWeight: 700, color: fc.color, fontFamily: BFONT, lineHeight: 1.35, textAlign: "center", background: fc.color + "0d", borderRadius: 6, padding: "0.2rem 0.4rem", margin: "0 0.25rem" }}>
                         {respDisplay(resolveLabel(g.mine), myDetail) || "—"}
@@ -9733,100 +9758,77 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
           {/* ── ACTION ITEMS — one dropdown per exercise the couple has ── */}
           {(() => {
-            const gInterp = (str) => resolveRoleTokens(String(str || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName), myS, partS, userName, partnerName, coupleType);
-            const groups = [];
-
-            // 1. Couple type — the type's own tips, each with a phrase to try.
-            const ctItems = (coupleType?.tips || []).slice(0, 3)
-              .filter(t => t?.title)
-              .map(t => ({ tip: gInterp(t.title), phrase: t.phraseTry ? gInterp(t.phraseTry) : "" }));
-            if (ctItems.length) groups.push({ id: "couple-type", label: "Couple type", color: coupleType?.color || "#9B5DE5", items: ctItems });
-
-            // 2. Communication — the same protocols the glance action plan draws
-            //    from. These were missing from this page entirely.
-            try {
-              const commsItems = buildCommsProtocols(byDim, userName, partnerName)
-                .slice(0, COMMS_PROTOCOL_LIMIT)
-                .map(pr => ({ tip: gInterp(pr.title), phrase: gInterp(pr.thisWeek || pr.body || "") }));
-              if (commsItems.length) groups.push({ id: "comm", label: "Communication", color: "#E8673A", items: commsItems });
-            } catch {}
-
-            // 3. Expectations — the widest-gap areas, named rather than generic.
-            try {
-              const expItems = [];
-              const catCounts = {};
-              allRows.filter(r => r.bothAnswered && !r.aligned).forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
-              /* Ellie: "Rather than 'Work through household together' the action
-                 plan rows for expectations in the what comes next page should
-                 read 'Discuss household expectations together' and each row
-                 should have a little arrow on the right side of the row to open
-                 that page directly, then remove the 'open expectations' arrow at
-                 the bottom of the expectations list."
-
-                 `section` is that arrow's destination, taken from the category
-                 rather than from this row's place in the list, which is the same
-                 id the nav and every mark already use. The wording is the
-                 server's, from api/_lib/what-comes-next.js. */
-              Object.entries(catCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).forEach(([label, n]) => {
-                expItems.push({
-                  tip: `Discuss ${label.toLowerCase()} expectations together`,
-                  phrase: `${n} topic${n !== 1 ? "s" : ""} here where you assumed different things. Start with the first one.`,
-                  section: (FIXED_CATS.find(c => c.label === label) || {}).section || null,
-                });
-              });
-              if (!expItems.length) expItems.push({ tip: "Keep your expectations current", phrase: "You matched across every area. Revisit this when something changes." });
-              groups.push({ id: "exp", label: "Expectations", color: "#1B5FE8", items: expItems });
-            } catch {}
-
-            // 4. Relationship Reflection — headlines rewritten as instructions
-            //    you can actually do, rather than statements of what happened.
-            if (hasAnniversary && ex3Answers && partnerEx3) {
-              try {
-                const reflItems = deriveAnniversaryInsights(ex3Answers, partnerEx3, userName, partnerName, coupleType)
-                  .filter(i => i.type === "explore").slice(0, 3)
-                  .map(i => ({ tip: reflectionActionTitle(i.title, _content), phrase: i.action || "" }));
-                if (reflItems.length) groups.push({ id: "reflection", label: "Relationship Reflection", color: "#10b981", items: reflItems });
-              } catch {}
-            }
-
-            // 5. Physical Intimacy — the dimensions that are not aligned.
-            if (intimacyBothDone && intimacySummary) {
-              const intItems = intimacySummary.dimSummary
-                .filter(d => d.state !== "aligned" && d.avgGap != null).slice(0, 3)
-                .map(d => {
-                  const meta = INTIMACY_DIMENSIONS.find(x => x.id === d.id);
-                  const prompt = (INTIMACY_RESULTS_PROSE[d.id]?.prompt || "").replace(/\{U\}/g, userName).replace(/\{P\}/g, partnerName);
-                  return { tip: `Talk about ${(meta?.label || d.id).toLowerCase()}`, phrase: prompt };
-                });
-              /* Ellie: "I want the what comes next page to call it physical
-                 intimacy expectations not just physical intimacy." */
-              if (intItems.length) groups.push({ id: "intimacy", label: "Physical Intimacy Expectations", color: "#B5546E", items: intItems });
-            }
-
-            /* ── CONFLICT IS ITS OWN SECTION ──────────────────────────────
-               This whole block sat inside `if (intimacyBothDone && ...)`, so a
-               couple who owns Conflict Patterns and has not finished Physical
-               Intimacy got no conflict list at all. Nothing failed: a section
-               that is not pushed is a section that is simply not there.
-
-               And the selection is the band, not the raw value. Ellie: "I have
-               4 items in my conflict action plan on that overview page, but one
-               thing listed in the what comes next section for conflict." The
-               overview page picks the patterns in a band worth watching or
-               worth attention; this picked anything answered 2 or more, which
-               is a different list of a different length.
-
-               The pattern name is not shown here: this page is read together
-               and the risk detail is private to each reader, so the action is
-               surfaced without naming which pattern produced it. */
-            const confItems = (conflictMine?.ranked || [])
-              .filter(pp => (pp.band === "worth_watching" || pp.band === "worth_attention")
-                && PATTERN_ACTIONS[pp.key])
-              .map(pp => ({
-                tip: PATTERN_ACTIONS[pp.key].title,
-                phrase: interpConflict(PATTERN_ACTIONS[pp.key].body, { partner: partnerName }),
-              }));
-            if (confItems.length) groups.push({ id: "conflict", label: "Conflict Patterns", color: "#1B5FE8", items: confItems });
+            /**
+             * ── ONE PAGE, BUILT ONCE ──────────────────────────────────────
+             * This used to assemble its own six groups from its own
+             * client-side results, beside api/_lib/what-comes-next.js doing
+             * the same job for the app. Two implementations of one page, and
+             * they had drifted in six ways that Ellie found by reading them
+             * side by side: different wording on the expectations rows, a
+             * different name for Physical Intimacy, a different rule choosing
+             * the conflict items, conflict nested inside the intimacy branch,
+             * the reflection rows written two ways, and the comms rows titled
+             * with advice rather than with the page they came from.
+             *
+             * So it calls the same function the app is served. What stays here
+             * is the adapter: this surface computes its results in the browser
+             * and has to shape them into what that function takes.
+             */
+            const wcn = whatComesNext({
+              coupleTypeId: coupleType?.id || null,
+              commsPlan: {
+                tiles: commsActionPlan({
+                  feedback: personalityFeedback,
+                  copy: _content,
+                }),
+                protocols: buildCommsProtocols(byDim, userName, partnerName),
+              },
+              expectations: (() => {
+                const counts = {};
+                allRows.filter(r => r.bothAnswered && !r.aligned)
+                  .forEach(r => { counts[r.category] = (counts[r.category] || 0) + 1; });
+                return {
+                  categories: FIXED_CATS.map(c => ({
+                    label: c.label,
+                    section: c.section,
+                    differences: counts[c.label] || 0,
+                  })),
+                };
+              })(),
+              intimacy: (intimacyBothDone && intimacySummary)
+                ? { actionPlan: intimacyActionPlan(intimacySummary.dimSummary || []) }
+                : null,
+              reflection: (hasAnniversary && ex3Answers && partnerEx3)
+                ? { written: [{ key: "a6", you: ex3Answers.a6 || "", them: partnerEx3.a6 || "" }] }
+                : null,
+              conflictReady: !!conflictMine,
+              conflictAnswers,
+              names: { you: userName, them: partnerName },
+              /* Who holds which role, so a tip names the person rather than the
+                 archetype. The same pair the server builds from its stored
+                 axes; here they are the two typed profiles this page already
+                 has. */
+              sides: {
+                you: { name: userName, pronouns: userPronouns, axes: { open: myS?.openScore, withdraw: myS?.withdrawScore } },
+                them: { name: partnerName, pronouns: partnerPronouns, axes: { open: partS?.openScore, withdraw: partS?.withdrawScore } },
+              },
+            });
+            /* The renderer below has always spoken of tip and phrase. The
+               payload says title and say, which is what the app reads, so the
+               names are mapped here rather than changed on the payload and
+               broken for the app. */
+            const groups = (wcn.groups || []).map(g => ({
+              id: g.id,
+              label: g.label,
+              color: g.color || "#E8673A",
+              section: g.section,
+              items: (g.items || []).map(it => ({
+                tip: it.title,
+                quote: it.quote || null,
+                phrase: it.say || it.body || "",
+                section: it.section || null,
+              })),
+            }));
 
             if (!groups.length) return null;
             return (
@@ -9836,8 +9838,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                   {/* block: what-comes-next/groups */}
+                  {/* ── ONE OPEN AT A TIME ────────────────────────────────
+                      Ellie: "on both app and site, clicking on a new section in
+                      'what comes next' should close the other dropdown."
+
+                      `name` on a <details> is what the browser already has for
+                      this: elements sharing a name behave as one accordion. No
+                      state, no handler, and it keeps working if someone opens
+                      one with a keyboard. */}
                   {groups.map(g => (
-                    <details key={g.id} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 14, overflow: "hidden" }}>
+                    <details key={g.id} name="what-comes-next" style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 14, overflow: "hidden" }}>
                       <summary style={{ listStyle: "none", cursor: "pointer", padding: "0.85rem 1.1rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
                         <span style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{g.label}</span>
                         <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
@@ -9854,7 +9864,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         {g.items.map((it, i) => (
                           <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.85rem 1.1rem", borderBottom: i < g.items.length - 1 ? `1px solid ${C.stone}` : "none" }}>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: it.phrase ? "0.3rem" : 0, lineHeight: 1.4 }}>{it.tip}</div>
+                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: (it.phrase || it.quote) ? "0.3rem" : 0, lineHeight: 1.4 }}>
+                                {it.tip}
+                                {/* Their own words, in the same sentence as the
+                                    name, set apart so it reads as a quotation.
+                                    The app draws these two rows the same way. */}
+                                {it.quote ? (
+                                  <span style={{ fontWeight: 400, fontStyle: "italic" }}>{` \u201C${it.quote}\u201D`}</span>
+                                ) : null}
+                              </div>
                               {it.phrase && (
                                 <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
                                   <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: g.color, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, marginTop: "0.2rem" }}>Try</span>

@@ -96,6 +96,69 @@ export function resolveRoleTokens(text, a, b) {
       out = out.replace(new RegExp(`\\{${tok}_${f}\\}`, 'g'), pronounForm('', f));
     }
   }
+  out = swapRolePhrases(out, a, b);
+
   return out.replace(/\{[A-Za-z0-9_]+\}/g, (m) => (m === '{U}' || m === '{P}' ? m : ''))
     .replace(/\s{2,}/g, ' ').trim();
+}
+
+/**
+ * ── THE ROLE WRITTEN OUT IN WORDS, SWAPPED FOR THE PERSON ─────────────────
+ * Ellie: "Couple type action items should match the site - the app is showing
+ * 'Guarded partner:...' but the site says 'Preston'. I want that done
+ * throughout, make sure the app matches."
+ *
+ * Not every piece of role copy uses a token. Some of it names the role in
+ * prose, because it was written before the tokens existed: a couple type's tips
+ * say "Guarded partner: share the half-formed version". The website has swapped
+ * those for the person's name for a long time and the server never did, so the
+ * same sentence read as a person on a laptop and as an archetype on a phone.
+ *
+ * ── THE ARTICLE DECIDES ─────────────────────────────────────────────────
+ * An INDEFINITE article means the sentence is about the archetype and not about
+ * this couple: "shares more than a truly guarded partner would" has to stay as
+ * it is, or it renders "more than a truly Preston would". A definite article or
+ * none means this person, and swaps. That rule came from the website, where it
+ * was found the hard way, and it moves here with it.
+ *
+ * Each pair maps two ways of naming one role, because the copy uses both.
+ */
+const ROLE_PHRASES = [
+  ['EXP', ['expressive partner', 'open partner']],
+  ['GRD', ['guarded partner', 'reserved partner']],
+  ['RCH', ['reaching partner', 'engaging partner']],
+  ['WDR', ['withdrawing partner', 'quieter partner']],
+];
+
+function swapRolePhrases(text, a, b) {
+  if (!text || !a?.name || !b?.name) return text;
+  const aOpen = (a?.axes?.open ?? 3) >= 3.0;
+  const bOpen = (b?.axes?.open ?? 3) >= 3.0;
+  const aEngage = (a?.axes?.withdraw ?? 3) <= 3.0;
+  const bEngage = (b?.axes?.withdraw ?? 3) <= 3.0;
+
+  const who = {};
+  /* A role nobody holds is a role this couple does not have, and the generic
+     phrase is already the right words for it. Only a couple who sit on
+     opposite sides of an axis have the two roles to name. */
+  if (aOpen !== bOpen) {
+    who.EXP = aOpen ? a.name : b.name;
+    who.GRD = aOpen ? b.name : a.name;
+  }
+  if (aEngage !== bEngage) {
+    who.RCH = aEngage ? a.name : b.name;
+    who.WDR = aEngage ? b.name : a.name;
+  }
+
+  let out = text;
+  for (const [role, phrases] of ROLE_PHRASES) {
+    if (!who[role]) continue;
+    for (const phrase of phrases) {
+      out = out.replace(
+        new RegExp(`\\b(a |an |the )?(?:truly |genuinely |really )?${phrase}\\b`, 'gi'),
+        (match, article) => (article && /^(a|an) $/i.test(article) ? match : who[role]),
+      );
+    }
+  }
+  return out;
 }

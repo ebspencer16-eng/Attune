@@ -18,6 +18,23 @@
  * is that nothing on it is new: every group is something the reader has
  * already met in context, collected in one place.
  *
+ * ── AND THEN SHE REVERSED IT, FOR COMMUNICATION ONLY ──────────────────────
+ * Having read both pages side by side: "Both app and site use the wrong setup
+ * for comms action items. Bold title should be the detailed page name, then the
+ * content should be the 'try' content that the site shows."
+ *
+ * The website's Try line for Communication has always been the protocol's
+ * `thisWeek`, which is the thing this gate was written to forbid. So the rule
+ * for this one group is now the opposite of what it was, and it is recorded
+ * here rather than quietly relaxed, because the sentence above is a good rule
+ * and the next person to read it will want to know why Communication is out.
+ *
+ * What is NOT reversed: the other five groups, and the premise. The title of a
+ * Communication row is now the detail page it came from, which is the least
+ * new thing it could be, and the Try line is content the website has shown in
+ * this exact place for as long as the page has existed. It is new on the app
+ * alone, and that is the trade she asked for with both pages in front of her.
+ *
  * ── WHAT IS CHECKED ───────────────────────────────────────────────────────
  * For each section that has both an at-a-glance plan and a group here, the
  * items are built and compared. Not the wording of the group's title, which
@@ -82,24 +99,31 @@ if (!comm) {
   if (comm.items.length !== tiles.length) {
     fails.push(`Communication lists ${comm.items.length} items and the glance plan has ${tiles.length}`);
   }
-  // A protocol's words must not be here: their presence means the group was
-  // built from the wrong list, whatever it happens to contain.
-  const all = comm.items.map((it) => `${it.title || ''} ${it.body || ''} ${it.say || ''}`).join(' ');
-  for (const pr of protocols) {
-    if (all.includes(pr.title) || (pr.thisWeek && all.includes(pr.thisWeek))) {
-      fails.push(`Communication is built from the protocols, not from the glance plan: "${pr.title}"`);
-    }
+  /*
+   * One row per glance tile, in the glance plan's order, titled with the detail
+   * page that tile belongs to. The row is still the tile's: what changed is
+   * which part of it is drawn, not which tiles there are.
+   */
+  if (comm.items.length !== tiles.length) {
+    fails.push(`Communication has ${comm.items.length} rows and the glance plan has ${tiles.length}`
+      + ' tiles. The rows are the tiles.');
   }
   tiles.forEach((tile, i) => {
     const item = comm.items[i];
     if (!item) return;
-    const wanted = tile.body || tile.title;
-    const got = `${item.title || ''} ${item.body || ''} ${item.say || ''}`;
-    if (wanted && !got.includes(wanted)) {
-      fails.push(`Communication item ${i + 1} does not carry the glance tile's advice: "${String(wanted).slice(0, 48)}"`);
+    if (item.title !== tile.label) {
+      fails.push(`Communication item ${i + 1} is titled "${item.title}" and its tile belongs to`
+        + ` "${tile.label}". The title is the detail page, which is what she asked for and what`
+        + ' gives the row somewhere to go.');
     }
-    if (tile.reflect && !got.includes(tile.reflect)) {
-      fails.push(`Communication item ${i + 1} drops the extra line the glance tile carries`);
+    /* The protocol for that tile's dimension, which is the Try line the website
+       has always printed here. A tile whose protocol has no weekly line falls
+       back to the tile's own advice, so a row is never a heading alone. */
+    const protocol = protocols.find((pr) => pr.dim === tile.dim);
+    const wanted = protocol?.thisWeek || tile.body;
+    if (wanted && !String(item.say || '').includes(wanted)) {
+      fails.push(`Communication item ${i + 1} does not carry its Try line: `
+        + `"${String(wanted).slice(0, 48)}"`);
     }
   });
 }

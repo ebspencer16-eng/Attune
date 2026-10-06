@@ -902,6 +902,30 @@ export default async function handler(req) {
            together now. */
         conflictAnswers: me?.conflict_data?.answers || null,
         names: { you: me.name || 'You', them: partner?.name || 'your partner' },
+        /**
+         * Who holds which role, so the copy can name a person.
+         *
+         * Ellie: "the app is showing 'Guarded partner:...' but the site says
+         * 'Preston'. I want that done throughout." The couple type's tips name
+         * the role in prose rather than in a token, and the website has swapped
+         * those for the person's name for a long time. That swap now lives in
+         * api/_lib/role-tokens.js and needs the two sides' axes to know who is
+         * who, which is the same pair `role()` is built from further up.
+         *
+         * In viewer order: `you` is the reader. results.partners is in storage
+         * order, so the side has to be chosen rather than assumed, or half the
+         * couples would read the other person's name.
+         */
+        sides: (() => {
+          const mine = displayed.partners?.[viewerSide] || null;
+          const other = displayed.partners?.[viewerSide === 'a' ? 'b' : 'a'] || null;
+          return {
+            you: mine ? { ...mine, name: me.name || 'You', pronouns: me.pronouns || '' } : null,
+            them: other
+              ? { ...other, name: partner?.name || 'your partner', pronouns: partner?.pronouns || '' }
+              : null,
+          };
+        })(),
       }),
       /**
        * The navigation, as two levels, exactly as the website's sidebar.

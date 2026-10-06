@@ -3110,6 +3110,8 @@ function mixHex(a: string, b: string, t: number): string {
 function WhatComesNext({
   data, onGoToSection,
 }: { data: { groups: NextStepGroup[] } | null; onGoToSection: (id: string) => void }) {
+  /** Which section is open, if any. Only one ever is. */
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   if (!data?.groups.length) {
     return (
       <Waiting
@@ -3133,6 +3135,13 @@ function WhatComesNext({
           start with.
         </Text>
 
+        {/* ── ONE OPEN AT A TIME ──────────────────────────────────────
+            Ellie: "on both app and site, clicking on a new section in 'what
+            comes next' should close the other dropdown."
+
+            The website gets this from the browser, by naming its <details>
+            elements; here it is one piece of state held above the rows, which
+            is the same behaviour written out. */}
         <View style={{ gap: Spacing.sm }}>
           {/* block: what-comes-next/groups */}
           {data.groups.map((group) => (
@@ -3141,7 +3150,8 @@ function WhatComesNext({
               label={group.label}
               color={group.color || c.accent}
               items={group.items}
-              onOpen={() => onGoToSection(group.section)}
+              open={openGroup === group.id}
+              onToggle={() => setOpenGroup((cur) => (cur === group.id ? null : group.id))}
               onOpenItem={onGoToSection}
             />
           ))}
@@ -3159,7 +3169,7 @@ function WhatComesNext({
  * under a small "Try".
  */
 function NextGroup({
-  label, color, items, onOpen, onOpenItem,
+  label, color, items, open, onToggle, onOpenItem,
 }: {
   label: string; color: string;
   items: {
@@ -3167,22 +3177,21 @@ function NextGroup({
     /** The page this row is about, when it has one of its own. */
     section?: string | null;
   }[];
-  onOpen: () => void;
+  open: boolean;
+  onToggle: () => void;
   onOpenItem: (id: string) => void;
 }) {
   /**
-   * ── A ROW WITH ITS OWN PAGE CARRIES ITS OWN ARROW ───────────────────────
-   * Ellie: "each row should have a little arrow on the right side of the row to
-   * open that page directly, then remove the 'open expectations' arrow at the
-   * bottom of the expectations list."
+   * ── EVERY ROW CARRIES ITS OWN ARROW ─────────────────────────────────────
+   * Ellie: "Copy this setup on each row in the what comes next page. No links
+   * at the bottom of sections, just arrows in each row that bring you to that
+   * results page."
    *
-   * So the group's own Open link is drawn only when its rows have nowhere of
-   * their own to go. Derived from the items rather than from the group's id,
-   * because the next group whose rows name a page should behave the same way
-   * without anyone remembering to add it here.
+   * So there is no group-level Open link at all any more, and every row the
+   * builder emits carries the page it is about. check-next-steps-mirror fails
+   * on a row that does not, because a row without one is a dead end and the
+   * link at the foot is what used to cover for it.
    */
-  const rowsLinkOut = items.some((i) => i.section);
-  const [open, setOpen] = useState(false);
   return (
     <View
       style={{
@@ -3191,7 +3200,7 @@ function NextGroup({
         borderRadius: Radius.lg, overflow: 'hidden',
       }}>
       <Pressable
-        onPress={() => setOpen((v) => !v)}
+        onPress={onToggle}
         accessibilityRole="button"
         style={{
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -3250,16 +3259,7 @@ function NextGroup({
               ) : null}
             </View>
           ))}
-          {rowsLinkOut ? null : (
-            <Pressable
-              accessibilityRole="button" onPress={onOpen}
-              style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg }}>
-              {/* not markable: the label on a button, built here rather than sent. */}
-              <Text style={{ ...Type.small, fontWeight: '700', color: c.textMuted }}>
-                {`Open ${label} \u2192`}
-              </Text>
-            </Pressable>
-          )}
+
         </View>
       ) : null}
     </View>
