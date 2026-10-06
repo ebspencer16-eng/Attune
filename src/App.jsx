@@ -4153,7 +4153,28 @@ export function AppLearnReading({
               {/* Side by side, and it scrolls. The app's row is a horizontal
                   ScrollView; this is the same thing a browser already does. */}
               <div style={{
-                display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.35rem",
+                /* ── ROOM FOR THE SHADOW TO FINISH ───────────────────────
+                   Ellie: "Still a hard line on the bottom of the shadow, I
+                   want it to fade like a regular shadow backing."
+
+                   It was fading. It was being cut. `overflow-x: auto` makes
+                   overflow-y compute to auto as well rather than staying
+                   visible, so this row clips what its children draw outside
+                   it, and a card's shadow is `0 6px 14px`: it reaches twenty
+                   points below the card and the row allowed five and a half.
+                   The straight edge was this container, at the exact point
+                   the blur was still at most of its strength.
+
+                   So the padding is the shadow's own reach, top and bottom,
+                   which is what it needs to end on its own. */
+                display: "flex", gap: "0.5rem", overflowX: "auto",
+                paddingTop: 10, paddingBottom: 22,
+                /* Sideways too, and pulled back out by the same amount so the
+                   first card still lines up with the heading above it. The
+                   blur is 14 in every direction, so the first card's left edge
+                   and the last card's right edge were cut the same way the
+                   bottoms were. */
+                paddingLeft: 14, paddingRight: 14, marginLeft: -14, marginRight: -14,
                 scrollbarWidth: "thin",
               }}>
                 {items.map((a) => (
