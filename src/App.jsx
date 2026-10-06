@@ -7834,54 +7834,111 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   }, []);
 
   // Sidebar items
+  /**
+   * ── THE NAME OF A SECTION COMES FROM THE NAV ────────────────────────────
+   * The sidebar used to write its own labels, and two of them had drifted from
+   * the names the app shows: "Communication" against "Communication Styles",
+   * and "Physical Intimacy" against "Physical Intimacy Expectations", which is
+   * the exercise's own name and the one Ellie asked for by name on What Comes
+   * Next. Someone reading the website and then the phone met two names for one
+   * screen.
+   *
+   * Only the label is taken. The icon, the short label, the colour and the two
+   * synthetic "Detailed results" rows are this sidebar's own presentation and
+   * have no counterpart in the nav, so they stay here.
+   */
+  const navLabels = (() => {
+    const out = {};
+    for (const g of resultsNav({
+      hasReflection: hasAnniversary,
+      intimacyReady: intimacyBothDone,
+      conflictListed,
+    })) {
+      out[g.id] = g.label;
+      for (const c of (g.children || [])) out[c.id] = c.label;
+    }
+    return out;
+  })();
+  const navLabel = (id, fallback) => navLabels[id] || fallback;
+
+  /**
+   * ── AND THE COLOUR, FOR THE SAME REASON ─────────────────────────────────
+   * Communication was purple here and orange in the app; Relationship
+   * Reflection was blue here and green there. Both times the app agreed with
+   * the page's own ground and with SectionColor in the theme, and this sidebar
+   * was the odd one out: the dot beside a section's name was a colour that
+   * section is nowhere else in the product.
+   *
+   * A section's rows take their section's colour unless they carry one of their
+   * own, which the communication domains and the expectations categories do and
+   * which is deliberate: those pages are tinted per domain.
+   */
+  const navColors = (() => {
+    const out = {};
+    for (const g of resultsNav({
+      hasReflection: hasAnniversary,
+      intimacyReady: intimacyBothDone,
+      conflictListed,
+    })) {
+      if (g.color) out[g.id] = g.color;
+      for (const c of (g.children || [])) out[c.id] = c.color || g.color;
+    }
+    return out;
+  })();
+  const navColor = (id, fallback) => navColors[id] || fallback;
+
   const sidebarSections = [
-    { id: "highlights", label: "Highlights", icon: "✦", color: coupleType?.color || "#E8673A" },
-    { id: "couple-type", label: "Couple Type", shortLabel: "Type & Map", icon: "◈", color: coupleType?.color || "#E8673A" },
+    { id: "highlights", label: navLabel("highlights", "Highlights"), icon: "✦", color: coupleType?.color || "#E8673A" },
+    { id: "couple-type", label: navLabel("couple-type", "Couple Type"), shortLabel: "Type & Map", icon: "◈", color: coupleType?.color || "#E8673A" },
     {
-      id: "comm", label: "Communication", shortLabel: "Comms", icon: "◉", color: "#9B5DE5",
+      id: "comm", label: navLabel("comm", "Communication"), shortLabel: "Comms", icon: "◉", color: navColor("comm", "#E8673A"),
       children: [
-        { id: "comm-overview", label: "Overview" },
-        { id: "comm-detail-header", label: "Detailed results", isDomainHeader: true, color: "#9B5DE5" },
+        { id: "comm-overview", label: navLabel("comm-overview", "Overview") },
+        { id: "comm-detail-header", label: navLabel("comm-detail-header", "Detailed results"), isDomainHeader: true, color: navColor("comm", "#E8673A") },
         ...UR_DOMAINS.map(g => ({ id: `comm-${g.id}`, label: g.label, isDeepChild: true, italic: true, color: g.color })),
       ]
     },
     {
-      id: "exp", label: "Expectations", icon: "◉", color: "#1B5FE8",
+      id: "exp", label: navLabel("exp", "Expectations"), icon: "◉", color: navColor("exp", "#1B5FE8"),
       children: [
-        { id: "exp-overview", label: "Overview" },
-        { id: "exp-detail-header", label: "Detailed results", isDomainHeader: true, color: "#10B981" },
-        ...FIXED_CATS.map((fc) => ({ id: fc.section, label: fc.label, isDeepChild: true, italic: true, color: "#10B981" })),
+        { id: "exp-overview", label: navLabel("exp-overview", "Overview") },
+        { id: "exp-detail-header", label: navLabel("exp-detail-header", "Detailed results"), isDomainHeader: true, color: navColor("exp", "#1B5FE8") },
+        /* Each category has a colour of its own, which its page is tinted with
+           and which check-category-colors holds both surfaces to. This row drew
+           all six in one green, so the sidebar was the only place in the product
+           where Household and Financial looked like the same thing. */
+        ...FIXED_CATS.map((fc) => ({ id: fc.section, label: fc.label, isDeepChild: true, italic: true, color: fc.color })),
       ]
     },
     ...(hasAnniversary ? [{
-      id: "reflection", label: "Relationship Reflection", shortLabel: "Refl.", icon: "◉", color: "#1B5FE8",
+      id: "reflection", label: navLabel("reflection", "Relationship Reflection"), shortLabel: "Refl.", icon: "◉", color: navColor("reflection", "#10B981"),
       children: [
-        { id: "reflection-overview", label: "Overview" },
-        { id: "reflection-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
-        { id: "reflection-ratings", label: "How You Each Rated", isDeepChild: true, italic: true, color: "#1B5FE8" },
-        { id: "reflection-story", label: "Side by Side", isDeepChild: true, italic: true, color: "#1B5FE8" },
+        { id: "reflection-overview", label: navLabel("reflection-overview", "Overview") },
+        { id: "reflection-detail-header", label: navLabel("reflection-detail-header", "Detailed results"), isDomainHeader: true, color: navColor("reflection", "#10B981") },
+        { id: "reflection-ratings", label: navLabel("reflection-ratings", "How You Each Rated"), isDeepChild: true, italic: true, color: navColor("reflection", "#10B981") },
+        { id: "reflection-story", label: navLabel("reflection-story", "Side by Side"), isDeepChild: true, italic: true, color: navColor("reflection", "#10B981") },
       ]
     }] : []),
     ...(intimacyBothDone ? [{
-      id: "intimacy", label: "Physical Intimacy", shortLabel: "Intimacy", icon: "◉", color: "#B5546E",
+      id: "intimacy", label: navLabel("intimacy", "Physical Intimacy"), shortLabel: "Intimacy", icon: "◉", color: navColor("intimacy", "#B5546E"),
       children: [
-        { id: "intimacy-overview", label: "Overview" },
-        { id: "intimacy-detail-header", label: "Detailed results", isDomainHeader: true, color: "#B5546E" },
+        { id: "intimacy-overview", label: navLabel("intimacy-overview", "Overview") },
+        { id: "intimacy-detail-header", label: navLabel("intimacy-detail-header", "Detailed results"), isDomainHeader: true, color: navColor("intimacy", "#B5546E") },
         ...INTIMACY_DOMAINS.map(d => ({ id: `intimacy-${d.id}`, label: d.label, isDeepChild: true, italic: true, color: "#B5546E" })),
       ]
     }] : []),
     ...(conflictListed ? [{
-      id: "conflict", label: "Conflict Patterns", shortLabel: "Conflict", icon: "\u25C9", color: "#1B5FE8",
+      id: "conflict", label: navLabel("conflict", "Conflict Patterns"), shortLabel: "Conflict", icon: "\u25C9", color: navColor("conflict", "#1B5FE8"),
       locked: !conflictBothDone,
       children: [
-        { id: "conflict-overview", label: "Overview" },
-        { id: "conflict-detail-header", label: "Detailed results", isDomainHeader: true, color: "#1B5FE8" },
-        { id: "conflict-snapshot", label: "Your Conflict Snapshot", isDeepChild: true, italic: true, color: "#1B5FE8" },
-        { id: "conflict-patterns", label: "Your Patterns", isDeepChild: true, italic: true, color: "#1B5FE8" },
-        { id: "conflict-wrote", label: "What You Each Wrote", isDeepChild: true, italic: true, color: "#1B5FE8" },
+        { id: "conflict-overview", label: navLabel("conflict-overview", "Overview") },
+        { id: "conflict-detail-header", label: navLabel("conflict-detail-header", "Detailed results"), isDomainHeader: true, color: navColor("conflict", "#1B5FE8") },
+        { id: "conflict-snapshot", label: navLabel("conflict-snapshot", "Your Conflict Snapshot"), isDeepChild: true, italic: true, color: navColor("conflict", "#1B5FE8") },
+        { id: "conflict-patterns", label: navLabel("conflict-patterns", "Your Patterns"), isDeepChild: true, italic: true, color: navColor("conflict", "#1B5FE8") },
+        { id: "conflict-wrote", label: navLabel("conflict-wrote", "What You Each Wrote"), isDeepChild: true, italic: true, color: navColor("conflict", "#1B5FE8") },
       ]
     }] : []),
-    { id: "what-comes-next", label: "What Comes Next", shortLabel: "What's Next", icon: "→", color: "#E8673A" },
+    { id: "what-comes-next", label: navLabel("what-comes-next", "What Comes Next"), shortLabel: "What's Next", icon: "→", color: navColor("what-comes-next", "#E8673A") },
   ];
 
   // Sidebar render

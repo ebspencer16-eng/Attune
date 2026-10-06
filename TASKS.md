@@ -15,7 +15,11 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| D1 | **Sweep: does the same thing have the same name on both surfaces?** Section titles, eyebrows, page headings, button words. A designer reading one surface and then the other should not meet two names for one screen. |
+| D2 | **Sweep: does the same thing have the same colour?** Section accents, grounds, the people's two colours. |
+| D3 | **Sweep: render every results section and look for the visual faults a designer will see first** — horizontal overflow, clipped text, anything sitting under the floating arrows, anything overlapping. |
+| D4 | **Sweep: controls that do nothing, and surfaces that draw a field nobody sends.** Both directions. |
+| D5 | **Sweep: the storycards**, which are the most looked-at screens in the product and the ones she reports most. |
 
 ## 3. For you to review
 
