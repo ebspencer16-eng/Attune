@@ -15,15 +15,16 @@
 
 | # | Mine to build |
 |--|--|
-| N15b | **Revert the comms change: the rows match the Communication overview's action plan exactly.** Her call, and she is right that content appearing only on this page was the wrong trade. Put the gate's original rule back with both quotes still beside it. |
-| L1 | **Still no buffer above the In Practice peek.** Third report, so stop adjusting the number and find out what actually puts the insight against the sheet. Measure it. |
-| L2 | **The website's article tiles have no read time.** The app shows one. |
-| L3 | **A count of articles beside each section title**, app and site. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| L1 | **The gap above the peek was never about the number.** The block above the sheet spreads its children to its edges, so the insight's last row sat flush against the sheet, and every point I carved out of the quotation was handed straight back. It is the block's own bottom padding now, which that spreading cannot reach. Measured: the buttons end at 364 and the sheet starts at 420. |
+| L2 | **The website's article tiles show how long each takes.** The app has shown it since In Practice shipped and the tiles had only ever carried a title. |
+| L3 | **The number of articles sits beside each section heading**, on both surfaces. |
+| N15b | **The comms rows are back to the overview's own action items**, at your word. A row is the tile's heading with its advice and extra line underneath. Both of your instructions are kept side by side in the gate, because the rule survived a direct instruction to break it on the strength of what breaking it would have cost. |
 | N15 | **One note on a conflict between two of your instructions.** You once asked that each What Comes Next group match its section's at-a-glance plan, and a gate holds that. Your new comms instruction reverses it: the site's Try line comes from the protocols, which that gate was written to forbid. I followed the newer one and recorded both quotes side by side in the gate. The consequence: on the app, the comms Try line now appears only on this page. |
 | S3 | **The Learn page peek is measured, and it did not need your account.** The sheet takes its articles as a prop and measures itself, so it can be mounted on its own with the real list. A gate now proves it reports a peek that holds its whole head and stops short of the shelves, on a laptop column and a phone, with all 12 articles drawn. |
 | O494 | Cover pages on both surfaces. |
