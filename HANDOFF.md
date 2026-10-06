@@ -1890,3 +1890,34 @@ to a check nobody reads.
 are the notification round trip across surfaces (raised on one, read on the
 other) and the app's behaviour on a genuinely empty account, which is what all
 four testers now are.
+
+---
+
+## 6 October: where this session stopped
+
+**Nothing is half-done.** TASKS.md section 2 is empty, the tree is clean and
+pushed, the app update is published, 224 gates pass and the full smoke runs end
+to end. A new session can start from CLAUDE.md and TASKS.md alone.
+
+**What section 3 is waiting on.** Thirteen rows, the newest being the What Comes
+Next convergence, the expectations column alignment, the Learn page gap, read
+times and per-section counts, and the cross-surface sweep of names and colours.
+Everything there has been built and verified; it needs her eye, not more work.
+
+**What section 1 is waiting on her for.** The same six long-standing ones: O7,
+C3, R12, O482, O1, O16. None has moved in weeks and none is blocking anything.
+
+**The one thing I could not verify myself.** The insight share sheet on a real
+phone. The code, the typecheck and check-insight-share all pass; a Simulator
+with no window cannot be driven, and that reads exactly like a dead button.
+
+**A graphic designer is coming in to look at UX.** The cross-surface sweep was
+run for that: section names, section colours, category colours and the two
+people's colours are each held to one source now, and the visual sweep over all
+29 results sections and all 15 marketing pages at 390 and 1280 came back clean.
+The thing a designer is most likely to find next is in the app, which no check
+here can drive.
+
+**The next sweeps I would run.** The notification round trip across surfaces, the
+app's behaviour on a genuinely empty account, and the five admin pages, which
+have no browser coverage at all.

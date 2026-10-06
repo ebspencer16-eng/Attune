@@ -872,6 +872,54 @@ ok, because the only assertion was that nothing threw, and a page that renders
 nothing throws nothing. Drive each view at a package that owns it, and report
 the one that cannot be rendered as not rendered.
 
+**`space-between` hands back any gap you carve out.** Ellie asked three times
+for room between the insight's buttons and the In Practice sheet. Twice I made
+the number bigger and nothing moved: the block above the sheet is a flex column
+with `justify-content: space-between` and a height equal to its whole budget, so
+its last child is pushed flush to its bottom edge, and every point taken out of
+the quotation's budget was more space for that rule to spread. A gap that has to
+survive a layout belongs in padding on the container, which spreading cannot
+reach. Three reports is the signal that the number was never the subject.
+
+**A harness that is wrong about the layout reports a working page as broken.**
+This cost two rounds in one stretch. check-learn-peek's first version took the
+first article tile as the first thing below the fold, when the head is a ROW and
+four featured tiles sit beside the heading inside the peek; it reported the peek
+as six times too big. The gap harness gave a block `flex: 1` beside a tall
+sibling, so it collapsed to its own padding and measured a 2 point gap that is
+really 56. Before believing a measurement, check the harness reproduces the
+page's own structure.
+
+**Never pipe a build to /dev/null.** `npx vite build > /dev/null 2>&1` hid a JSX
+comment sitting between `return (` and its element, so the bundle never changed
+and three rounds of measurement were against a stale one. Grep the output for
+`built in` or check the exit code; the error is the cheap part.
+
+**Check a promise everywhere it is made, not only where it was first broken.**
+check-category-colors said "both surfaces draw it" and checked the tiles on each
+surface. The website's results sidebar painted all six categories one green, and
+that sidebar is the one place the six sit side by side, so it was the only place
+Household and Financial looked like the same thing. The gate was true about the
+two places it looked and wrong about the claim it printed.
+
+**Values that agree today are the ones nothing watches.** One cross-surface sweep
+found a section with two names, two sections with two colours, and the two
+people's colours restated in the app with nothing holding them to the website's.
+Only the first two had drifted. The third was the same bug waiting, and the
+reason to gate it is that it looked fine.
+
+**Reconciling N differences between two implementations leaves N more.** What
+Comes Next was built twice and Ellie, reading both, picked halves: eight
+instructions, each of which would have meant another comparison in the gate. The
+answer was to make the website call the server's builder. When a list of
+differences arrives, that is the signal to converge rather than to reconcile.
+
+**When an instruction reverses an earlier one, keep both quotes in the gate.**
+She asked for the comms rows to carry the website's Try line, which a gate
+forbade; told that it would put content on that page that appears nowhere else
+in the app, she reversed it. Both quotes are in check-plans-agree now, because
+the round trip is a better argument for the rule than the original bug was.
+
 ---
 
 ## Verification, non-negotiable
