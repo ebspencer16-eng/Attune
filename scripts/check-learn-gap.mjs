@@ -333,11 +333,27 @@ const server = createServer((_q, res) => {
 });
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 
+/**
+ * ── WHICH WINDOWS THE PAGE IS EXPECTED TO FIT IN ──────────────────────────
+ * The last flag, and it exists because without it this gate had an escape
+ * hatch. The peek check is skipped where the window is too short to hold the
+ * tools, the insight and the peek at any size the quotation's floor allows,
+ * which is a real limit. But "too short" was derived from the measurement, so
+ * a plant that made the peek bigger simply moved two more windows into the
+ * skipped bucket and the run still passed. That is the KNOWN field on
+ * check-exercise-flow all over again: a hatch nobody needs is one somebody
+ * reaches for at the moment a real regression starts failing.
+ *
+ * So it is declared instead. The two ordinary sizes MUST fit; if either stops
+ * fitting, something above the sheet grew and the build fails. The two short
+ * ones are not expected to, with the reason, and if one of them starts fitting
+ * that is good news rather than a failure.
+ */
 const WINDOWS = [
-  ['laptop', 1100, 800, false, 250],
-  ['short laptop', 1100, 650, false, 250],
-  ['phone', 390, 760, true, 180],
-  ['short phone', 360, 600, true, 180],
+  ['laptop', 1100, 800, false, 250, true],
+  ['short laptop', 1100, 650, false, 250, false],
+  ['phone', 390, 760, true, 180, true],
+  ['short phone', 360, 600, true, 180, false],
 ];
 const CASES = [
   ['a quote that fills its lines', fills],
@@ -350,7 +366,7 @@ let measured = 0;
 let tightest = Infinity;
 let tooShort = 0;
 
-for (const [label, W, H, isMobile, banner] of WINDOWS) {
+for (const [label, W, H, isMobile, banner, mustFit] of WINDOWS) {
   const page = await launch({ width: W, height: H });
   await page.goto(`http://127.0.0.1:${server.address().port}/`);
   await page.wait(300);
@@ -401,7 +417,16 @@ for (const [label, W, H, isMobile, banner] of WINDOWS) {
         continue;
       }
       tightest = Math.min(tightest, m.gap);
-      if (y === 0 && insight !== fills && m.overBudget > 1) tooShort += 1;
+      if (y === 0 && insight !== fills && m.overBudget > 1) {
+        tooShort += 1;
+        if (mustFit) {
+          fails.push(`${label} ${W}x${H}, ${which}: the page needs ${m.overBudget} points more than`
+            + ' this window has, with the quotation already at its floor.'
+            + '\n      This is an ordinary window size and the page is expected to fit in it, so'
+            + '\n      something above the sheet has grown: the banner, the tool tiles, the'
+            + '\n      insight\'s furniture, the gap, or the peek.');
+        }
+      }
       const where = `${label} ${W}x${H}, ${which}, scrolled ${m.scrolled}`;
       if (process.env.GAPDEBUG && y === 0) console.log(`  ${where}: sheetTop=${m.sheetTop} viewport=${m.viewport} peek=${m.peek} overBudget=${m.overBudget} gap=${m.gap}`);
       if (m.gap < LEARN_GAP - 1) {
@@ -468,6 +493,6 @@ if (fails.length) {
 console.log(`[check-learn-gap] ${measured} measurements: 4 window sizes x 3 quotations x 4 scroll`
   + ` positions, driving the real sheet inside the dashboard's own scroller. The sheet starts at`
   + ` least ${tightest} below the share row (LEARN_GAP is ${LEARN_GAP}) and never over the quotation.`);
-console.log(`  the peek is held to the foot of the window in every case but ${tooShort}, where the`
-  + ' window is too short for the tools, the insight and the peek at any size the floor allows,'
-  + ' and where the sheet lands is not a choice.');
+console.log(`  the peek is held to the foot of the window in every case but ${tooShort}, all of them`
+  + ` on the ${WINDOWS.filter((w) => !w[5]).length} sizes declared too short to hold the tools, the`
+  + ' insight and the peek at any setting the quotation\'s floor allows. The ordinary sizes fit.');

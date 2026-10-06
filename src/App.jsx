@@ -3864,7 +3864,7 @@ export function AppLearnReading({
          left on a laptop to set the insight at any size the floor allows. The
          app does not pay that because it has no 250 point banner over it. */
       background: TILE_GREY, borderRadius: 14, padding: "0.5rem",
-      textDecoration: "none", position: "relative", minHeight: 68,
+      textDecoration: "none", position: "relative", minHeight: 54,
     }}>
       {bookmark(a, 15, { top: 4, right: 4 })}
       <span style={{
@@ -3914,10 +3914,21 @@ export function AppLearnReading({
              "Also, these tiles feel too big." The picture area was 132 and
              is 72; the title is 15 over 20 rather than 16 over 22; the
              padding is 12 rather than 16. About two thirds of the height. */
-          display: "block", background: ground, borderRadius: 18, overflow: "hidden",
-          textDecoration: "none", boxShadow: "0 6px 14px rgba(42,27,16,0.08)",
+          /* ── THE TINT IS THE PICTURE, NOT THE TILE ───────────────────
+             Shading the whole tile was my reading of "just shade the tile" and
+             it was the wrong one. Ellie: "Undo this. I like the way the app
+             looks. Also, I want each tile to have shading behind it, but I
+             don't want shading on each row the way you have it currently."
+
+             Both halves of that. A tile tinted end to end makes a shelf read as
+             a band of colour, because every tile on one shelf is one colour and
+             they sit in a row: the shading was on the ROW. Confined to the
+             picture area it is a card with an illustration, which is the app's,
+             and the shading behind each tile is the shadow it floats on. */
+          display: "block", background: "white", borderRadius: 18, overflow: "hidden",
+          textDecoration: "none", boxShadow: "0 6px 14px rgba(42,27,16,0.10)",
         }}>
-        <div style={{ height: 72, position: "relative" }}>
+        <div style={{ height: 72, background: ground, position: "relative" }}>
           {/* The mark, quietly, so a tile with no illustration still looks
               like something rather than like something missing. */}
           <span aria-hidden="true" style={{
@@ -3937,11 +3948,6 @@ export function AppLearnReading({
           </span>
           {bookmark(a, 13, { top: 8, right: 8, round: true })}
         </div>
-        {/* No ground of its own at all. A wash over the tint was still an
-            edge, and an edge across the middle of a tile is the hard cutoff
-            she is describing: "Just shade the tile." One colour, top to
-            bottom, and the only line on it is the tile's own rounded edge.
-            The tints are drawn at 12% so the words carry on a tile. */}
         <div style={{ padding: "0.75rem" }}>
           {/* Two lines whether or not it needs them: a one line title beside a
               two line one is a ragged edge, which is why the app gives it a
@@ -3969,8 +3975,8 @@ export function AppLearnReading({
 
   const pill = (label, n) => (
     <span style={{
-      background: "#F2EDE6", borderRadius: 999, padding: "0.4rem 0.85rem",
-      fontFamily: BFONT, fontSize: "0.78rem", color: "#6B5B4A", whiteSpace: "nowrap",
+      background: "#F2EDE6", borderRadius: 999, padding: "0.3rem 0.8rem",
+      fontFamily: BFONT, fontSize: "0.74rem", color: "#6B5B4A", whiteSpace: "nowrap",
     }}>
       {label} <span style={{ color: "#A8937B", fontWeight: 700 }}>{n}</span>
     </span>
@@ -3986,7 +3992,13 @@ export function AppLearnReading({
       marginLeft: isMobile ? "-1.25rem" : "-2rem",
       marginRight: isMobile ? "-1.25rem" : "-2rem",
       background: "white", borderRadius: "34px 34px 0 0",
-      padding: isMobile ? "0.75rem 1.25rem 3rem" : "0.85rem 2rem 3.5rem",
+      /* ── EVERY POINT IN HERE IS A POINT OFF THE INSIGHT ────────────
+         Ellie, asked which of the four things competing for this screen
+         should give: "Shorter peek is fine." The peek is this sheet's head,
+         so the saving is taken out of the lid, the type and the spacing in
+         it, and the four featured tiles, rather than out of any one of them
+         alone. 190 points to 139. */
+      padding: isMobile ? "0.6rem 1.25rem 3rem" : "0.65rem 2rem 3.5rem",
       boxShadow: "0 -10px 30px rgba(14,11,7,0.10)",
     }}>
       {/* Ellie: "Add some shading on the learn page bottom tile." The grab line
@@ -3997,7 +4009,7 @@ export function AppLearnReading({
           separately too. */}
       <div style={{
         width: 46, height: 4, borderRadius: 2, background: "#E8673A",
-        margin: "0 auto 0.9rem",
+        margin: "0 auto 0.45rem",
       }} />
 
       {/* ── THE HEAD IS A ROW, AS IT IS IN THE APP ────────────────────────
@@ -4027,32 +4039,32 @@ export function AppLearnReading({
         alignItems: "stretch",
       }}>
         <div style={{ flex: "1 1 0", display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.9rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.6rem" }}>
             {pill("Saved", savedCount)}
             {pill("Read", readCount)}
           </div>
 
           <h2 style={{
             fontFamily: HFONT, fontWeight: 700, color: C.ink, margin: 0,
-            fontSize: isMobile ? "1.9rem" : "2.4rem", lineHeight: 1.05, letterSpacing: "-0.02em",
+            fontSize: isMobile ? "1.55rem" : "1.9rem", lineHeight: 1.05, letterSpacing: "-0.02em",
           }}>
             In Practice
           </h2>
           <p style={{
-            fontFamily: BFONT, fontSize: isMobile ? "0.88rem" : "0.95rem", color: "#8A7A66",
-            margin: "0.3rem 0 0",
+            fontFamily: BFONT, fontSize: isMobile ? "0.82rem" : "0.88rem", color: "#8A7A66",
+            margin: "0.25rem 0 0",
           }}>
             Featured publications
           </p>
 
           {/* Pushed to the foot of the column, which is what bottom-aligns it
               with the lower two cards beside it. */}
-          <label style={{ display: "block", marginTop: "auto", paddingTop: "1rem" }}>
+          <label style={{ display: "block", marginTop: "auto", paddingTop: "0.5rem" }}>
             <span style={{ position: "absolute", left: -9999 }}>Search articles</span>
             <span style={{
               display: "flex", alignItems: "center", gap: "0.5rem",
               background: "#F5F1EA", borderRadius: 999,
-              padding: isMobile ? "0.55rem 0.85rem" : "0.65rem 1rem",
+              padding: isMobile ? "0.45rem 0.8rem" : "0.5rem 0.9rem",
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8937B"
                 strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -16777,7 +16789,7 @@ export default function App() {
                        Two arithmetics for one screen and one of them was
                        missing a line: check-learn-gap measures the rendered
                        block now rather than trusting either sum. */
-                    const insightMargin = isMobile ? 32 : 40;   // 2rem / 2.5rem
+                    const insightMargin = isMobile ? 20 : 24;   // 1.25rem / 1.5rem
                     const furniture = insightMargin + 14 + 14 + 18 + 34 + 18; // its margin, eyebrow, eyebrow's margin, the citation's margin, the controls, theirs
                     /* No LEARN_GAP here: the gap is the block's bottom padding
                        and a ResizeObserver reports the content box, so it is
@@ -16836,7 +16848,15 @@ export default function App() {
 
                     return (
                       /* block: app-learn/insight */
-                      <div data-block="app-learn/insight" style={{ marginTop: isMobile ? "2rem" : "2.5rem" }}>
+                      /* 1.5rem, not 2.5. The last 18 points the page was
+                         short by on a laptop, taken out of dead space between
+                         the tiles and the quotation rather than out of the
+                         heading, which had already come down from 2.4rem to
+                         1.9. This margin is in `furniture`, so it comes
+                         straight off the block's height: with the quotation
+                         already at its floor there is no room for it to grow
+                         back into. */
+                      <div data-block="app-learn/insight" style={{ marginTop: isMobile ? "1.25rem" : "1.5rem" }}>
                         <div style={{ fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.78)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.9rem" }}>
                           {INSIGHT_EYEBROW}
                         </div>

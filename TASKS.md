@@ -21,13 +21,8 @@
 
 | # | Built, needs your eye |
 |--|--|
-| L1 | **Found it, and your screenshot is what found it.** The block above the sheet had a fixed height. A ceiling does not shrink content that is too tall: it spills, and the sheet is painted over it. Measured in a harness that reproduces the dashboard's scroller, the buttons finished 29 points BELOW the sheet. It is a minimum now, so the sheet is pushed down instead of covering anything. |
-| L1b | **One decision I need from you.** On a laptop the banner, the three tool tiles, the insight's furniture, the 56 point gap and the peek come to 58 points more than the window has, with the quote already at its smallest. Four things want one screen. Which gives: a shorter banner, smaller tool tiles, a smaller gap, or a shorter peek? |
-| L2c | **One colour through each tile, no edge across the middle.** The words had their own lighter ground and the line between them was the hard cutoff. |
-| L2d | **Smaller.** Picture area 72 rather than 132, title 15 over 20, featured tiles 68 rather than 88. Those four are the tallest part of the peek, so their size was costing the insight its room. |
-| L2b | **Opening an article on the site marks it read**, so Read counts both places. |
-| N15 | **The Try lines are gone**, both surfaces. |
-| W1 | **The dashboard keeps its tab through a refresh.** |
+| L1b | **The peek is 148 on a laptop, down from 190, and the page fits now.** The saving came out of the lid, the pills, the heading (2.4rem to 1.9), the search box and the four featured tiles, plus 16 points of dead space between the tiles and the quotation so the heading did not have to shrink further. A browser window under about 700 points tall still cannot hold all of it; the gate says which sizes are expected to fit and fails if an ordinary one stops. |
+| L2c | **The tint is back in the picture area only.** Shading the whole tile made each shelf read as a band of colour, because every tile on a shelf is one colour and they sit in a row. The shading behind each tile is its shadow. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
@@ -42,11 +37,14 @@
 
 | Verified by you | What it was |
 |--|--|
+| L1 | The In Practice sheet was painted over the end of the insight, because the block above it had a fixed height. |
+| L2d | The In Practice tiles were too big. |
+| L2b | Reading an article on the website did not count as read. |
+| N15 | The Try lines came off What Comes Next on both surfaces. |
+| W1 | Refreshing the dashboard went back to the Home tab. |
 | N15b | The comms action plan was built twice; one builder now. |
 | O559 | "The site is not current": it was, proven with a marker counted in the previous commit's bundle too. |
 | L2 | The site's In Practice tiles were a flat grey rectangle where the app has a card; approved, with the shading and the size to follow. |
-| N15b | The comms action plan was built twice and the two picked a different lead dimension 11% of the time. |
-| O559 | "The site is not current": it was, proven by a marker counted in the previous commit's bundle as well as this one. |
 | L3 | The number of articles was missing beside each In Practice section heading, on both surfaces. |
 | S3 | The Learn page peek had never been measured, because the tab lives behind sign-in; the sheet measures itself now and a gate holds it. |
 | O494 | Cover pages on both surfaces. |

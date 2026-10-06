@@ -2022,3 +2022,30 @@ Everything else this round is small and done: one colour through each In
 Practice tile with no edge across the middle, smaller tiles, reading an article
 on the website marks it read, the Try lines gone from What Comes Next on both
 surfaces, and the dashboard keeps its tab through a refresh.
+
+## 6 October 2026, night — the peek, and the tile put back
+
+**L1b, her call on what gives: "Shorter peek is fine."** The peek is 148 on a
+laptop, down from 190, and the page fits: the laptop and the phone both come in
+at zero over budget where they were 58 and 17 over. The saving is spread rather
+than taken from one place — the sheet's lid, the pills, the heading from 2.4rem
+to 1.9, the search box, the four featured tiles from 88 to 54 — plus 16 points
+of dead space between the tiles and the quotation, so the heading did not have
+to shrink further.
+
+A window under roughly 700 points tall still cannot hold the banner, the tools,
+the insight and the peek together. That is declared in the gate rather than
+derived, and the reason is worth keeping: when it was derived, a plant that made
+the peek bigger simply moved two more windows into the "too short" bucket and
+the run still passed. The two ordinary sizes are marked as having to fit, so a
+regression above the sheet fails the build instead of being absorbed.
+
+**L2c, undone at her word.** "I like the way the app looks. Also, I want each
+tile to have shading behind it, but I don't want shading on each row the way you
+have it currently." Both halves of that are one observation: a tile tinted end
+to end makes a shelf read as a band of colour, because every tile on one shelf
+is the same colour and they sit in a row. The shading was on the row. The tint
+is back in the picture area, the body is white, and the shading behind each tile
+is the shadow it floats on.
+
+Everything else from the round is approved and in section 4.
