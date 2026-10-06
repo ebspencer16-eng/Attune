@@ -1986,3 +1986,39 @@ only. A piece read on the website will not say Read until the static In Practice
 pages post that, and the website's shelf shows the twelve static pieces rather
 than the posts-table rows the app also gets, because those have no page here.
 Both are in TASKS.md for her to decide.
+
+## 6 October 2026, late — the Learn tab, found
+
+Ellie's screenshot of the live page is what finally found L1, after four
+reports and four harnesses that were wrong about the layout. The sheet was
+being painted OVER the end of the insight: the block above it had a fixed
+`height`, and a ceiling does not shrink content that is too tall for it. The
+children spill, the sheet starts at the block's border edge and is painted
+after it. Reproduced at minus 29 points in a harness that finally includes the
+dashboard's own scroller.
+
+It is a minimum now, and the quotation is fitted to the BUDGET rather than to
+the rendered block, which was a feedback loop the moment the height stopped
+being fixed. And the fit no longer bails to null when the room is zero or less,
+because null meant full size with no line clamp: a 1,996 point quotation in a
+713 point window.
+
+**The open question for her is L1b**, and it is a real one. On a laptop the
+banner, the tool tiles, the insight's furniture, the gap and the peek come to 58
+points more than the window has, with the quotation already at its floor. Four
+things want one screen. The gate counts and prints every window where that
+happens rather than passing over it, so the number is visible rather than
+assumed away. Until she picks what gives, the sheet sits 58 points lower than
+the peek wants on a laptop, which is the honest failure of the two.
+
+check-learn-gap now drives the real page: the real AppLearnReading inside the
+dashboard's shape, 36 measurements over four window sizes, three quotations and
+four scroll positions, with the two budget expressions lifted out of src/App.jsx
+and run rather than retyped. Six plants, four caught outright; the two that
+passed were right to, and revealed that nothing was holding the peek to the foot
+of the window, which it now does.
+
+Everything else this round is small and done: one colour through each In
+Practice tile with no edge across the middle, smaller tiles, reading an article
+on the website marks it read, the Try lines gone from What Comes Next on both
+surfaces, and the dashboard keeps its tab through a refresh.

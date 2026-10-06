@@ -15,17 +15,19 @@
 
 | # | Mine to build |
 |--|--|
-| L1 | **The sheet is painted over the quote.** Your screenshot shows it, and it is not the gap: the second line of the insight runs under the white, and Save and Share are behind it entirely. The block above the sheet sizes itself from `window.scrollY` and `100dvh`, and the dashboard scrolls in an inner column, so that number is wrong and moves as you scroll. Confirm that, fix it against the scroller, and rebuild the gate around the real page rather than the sheet on its own. |
-| L2c | **Shade the whole tile, no hard cutoff.** The tint is a band across the top of the card and it stops dead at the edges. |
-| L2d | **The tiles are too big.** Shrink the card and the type with it. |
-| L2b | **Mark an article read on the website too.** It is only marked in the app, so Read counts one surface. |
-| N15 | **Remove the Try lines from What Comes Next**, both surfaces. Your reversal of the earlier ask; both quotes stay in the gate. |
-| W1 | **Refreshing the dashboard goes back to Home.** The tab is read from the URL and never written to it. |
+| | **Nothing open.** |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| L1 | **Found it, and your screenshot is what found it.** The block above the sheet had a fixed height. A ceiling does not shrink content that is too tall: it spills, and the sheet is painted over it. Measured in a harness that reproduces the dashboard's scroller, the buttons finished 29 points BELOW the sheet. It is a minimum now, so the sheet is pushed down instead of covering anything. |
+| L1b | **One decision I need from you.** On a laptop the banner, the three tool tiles, the insight's furniture, the 56 point gap and the peek come to 58 points more than the window has, with the quote already at its smallest. Four things want one screen. Which gives: a shorter banner, smaller tool tiles, a smaller gap, or a shorter peek? |
+| L2c | **One colour through each tile, no edge across the middle.** The words had their own lighter ground and the line between them was the hard cutoff. |
+| L2d | **Smaller.** Picture area 72 rather than 132, title 15 over 20, featured tiles 68 rather than 88. Those four are the tallest part of the peek, so their size was costing the insight its room. |
+| L2b | **Opening an article on the site marks it read**, so Read counts both places. |
+| N15 | **The Try lines are gone**, both surfaces. |
+| W1 | **The dashboard keeps its tab through a refresh.** |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
@@ -40,6 +42,8 @@
 
 | Verified by you | What it was |
 |--|--|
+| N15b | The comms action plan was built twice; one builder now. |
+| O559 | "The site is not current": it was, proven with a marker counted in the previous commit's bundle too. |
 | L2 | The site's In Practice tiles were a flat grey rectangle where the app has a card; approved, with the shading and the size to follow. |
 | N15b | The comms action plan was built twice and the two picked a different lead dimension 11% of the time. |
 | O559 | "The site is not current": it was, proven by a marker counted in the previous commit's bundle as well as this one. |
