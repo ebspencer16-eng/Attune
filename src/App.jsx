@@ -3751,7 +3751,7 @@ export function AppLearnReading({
    * Defaulted so the component still mounts on its own, which is how
    * check-learn-peek measures it without an account.
    */
-  state = null, onToggleSave = null,
+  state = null, onToggleSave = null, onOpenArticle = null,
 }) {
   const [query, setQuery] = useState("");
   /**
@@ -3852,10 +3852,19 @@ export function AppLearnReading({
    * sets it at 11 over 14, bold, bottom aligned, with no minutes under it.
    */
   const featured = (a) => (
-    <a key={a.slug} href={a.path} style={{
+    <a key={a.slug} href={a.path}
+      onClick={() => { if (onOpenArticle) onOpenArticle(a); }}
+      style={{
       display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      /* ── AND SMALLER, BECAUSE THESE ARE THE PEEK ───────────────────
+         Ellie: "these tiles feel too big." These four are also the tallest
+         part of the sheet's head, and the head IS the peek, so every point
+         here is a point off the quotation's budget on the page above. At 88,
+         matching the app's, the peek came to 216 and there was not enough room
+         left on a laptop to set the insight at any size the floor allows. The
+         app does not pay that because it has no 250 point banner over it. */
       background: TILE_GREY, borderRadius: 14, padding: "0.5rem",
-      textDecoration: "none", position: "relative", minHeight: 88,
+      textDecoration: "none", position: "relative", minHeight: 68,
     }}>
       {bookmark(a, 15, { top: 4, right: 4 })}
       <span style={{
@@ -3885,52 +3894,73 @@ export function AppLearnReading({
     const st = stateOf(a.slug);
     const ground = cardGround(a.heroColor || null, POST_CATEGORIES.indexOf(shelfFor(a)));
     return (
-      <a key={a.slug} href={a.path} style={{
-        display: "block", background: "white", borderRadius: 26, overflow: "hidden",
-        textDecoration: "none", boxShadow: "0 10px 20px rgba(42,27,16,0.10)",
-      }}>
-        <div style={{ height: 132, background: ground, position: "relative" }}>
-          {/* The mark, quietly, so a card with no illustration still looks
-              like something rather than like something missing. The app draws
-              it at 64 wide and 22% in this corner. AttuneMark rather than a
-              new asset: it is what every other mark on this site is, and
-              check-mark-artwork holds it to the favicon's four paths. */}
+      <a
+        key={a.slug}
+        href={a.path}
+        onClick={() => { if (onOpenArticle) onOpenArticle(a); }}
+        style={{
+          /* ── THE WHOLE TILE IS SHADED ────────────────────────────────
+             Ellie: "the shading behind each tile needs to not have a hard
+             cutoff at the margins, it looks weird. Just shade the tile."
+
+             It was a 132 point band of the shelf's tint across the top with
+             white under it, which is the app's card, where the band is an
+             illustration box waiting for illustrations. On a row of small
+             tiles it read as a stripe that stopped dead rather than as a
+             picture. The tint is the tile's own ground now and there is no
+             edge inside it to cut off.
+
+             ── AND SMALLER ─────────────────────────────────────────────
+             "Also, these tiles feel too big." The picture area was 132 and
+             is 72; the title is 15 over 20 rather than 16 over 22; the
+             padding is 12 rather than 16. About two thirds of the height. */
+          display: "block", background: ground, borderRadius: 18, overflow: "hidden",
+          textDecoration: "none", boxShadow: "0 6px 14px rgba(42,27,16,0.08)",
+        }}>
+        <div style={{ height: 72, position: "relative" }}>
+          {/* The mark, quietly, so a tile with no illustration still looks
+              like something rather than like something missing. */}
           <span aria-hidden="true" style={{
-            position: "absolute", right: 16, bottom: 12, opacity: 0.22, lineHeight: 0,
+            position: "absolute", right: 10, bottom: 8, opacity: 0.2, lineHeight: 0,
           }}>
-            <AttuneMark width={64} />
+            <AttuneMark width={40} />
           </span>
           {/* The label, so a reader knows what kind of thing they are about to
               open before they read the title. */}
           <span style={{
-            position: "absolute", top: 12, left: 12,
-            background: "rgba(255,253,249,0.92)", borderRadius: 8,
-            padding: "3px 8px", fontFamily: BFONT, fontSize: 9, fontWeight: 700,
+            position: "absolute", top: 8, left: 8,
+            background: "rgba(255,253,249,0.92)", borderRadius: 7,
+            padding: "2px 7px", fontFamily: BFONT, fontSize: 8, fontWeight: 700,
             letterSpacing: "0.16em", textTransform: "uppercase", color: C.ink,
           }}>
             Article
           </span>
-          {bookmark(a, 14, { top: 12, right: 12, round: true })}
+          {bookmark(a, 13, { top: 8, right: 8, round: true })}
         </div>
-        <div style={{ padding: "1rem" }}>
+        {/* No ground of its own at all. A wash over the tint was still an
+            edge, and an edge across the middle of a tile is the hard cutoff
+            she is describing: "Just shade the tile." One colour, top to
+            bottom, and the only line on it is the tile's own rounded edge.
+            The tints are drawn at 12% so the words carry on a tile. */}
+        <div style={{ padding: "0.75rem" }}>
           {/* Two lines whether or not it needs them: a one line title beside a
               two line one is a ragged edge, which is why the app gives it a
-              minimum rather than letting the card size itself. */}
+              minimum rather than letting the tile size itself. */}
           <span style={{
             display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2,
-            overflow: "hidden", fontFamily: BFONT, fontSize: 16, lineHeight: "22px",
-            fontWeight: 700, color: C.ink, minHeight: 46,
+            overflow: "hidden", fontFamily: BFONT, fontSize: 15, lineHeight: "20px",
+            fontWeight: 700, color: C.ink, minHeight: 40,
           }}>
             {a.title}
           </span>
           <span style={{
-            display: "block", fontFamily: BFONT, fontSize: 13, lineHeight: "19px",
-            color: MUTED_INK, marginTop: "0.5rem",
+            display: "block", fontFamily: BFONT, fontSize: 12, lineHeight: "17px",
+            color: MUTED_INK, marginTop: "0.35rem",
           }}>
             {a.readMinutes ? (
               <span style={{ color: ACCENT }}>{`${a.readMinutes} min read`}</span>
             ) : null}
-            {st?.read ? "  ·  Read" : ""}
+            {st?.read ? "  \u00b7  Read" : ""}
           </span>
         </div>
       </a>
@@ -3987,7 +4017,12 @@ export function AppLearnReading({
           Ellie, on the app: "Search articles bar should be bottom aligned with
           the bottom 2 featured articles." The column is as tall as the grid
           beside it and the search sits at its foot. */}
-      <div ref={headRef} style={{
+      <div
+        ref={headRef}
+        /* Named so a browser check can measure the peek where it sits on the
+           page, rather than only asking the sheet what it reported. */
+        data-learn-head=""
+        style={{
         display: "flex", flexDirection: "row", gap: isMobile ? "0.75rem" : "1.25rem",
         alignItems: "stretch",
       }}>
@@ -4110,7 +4145,7 @@ export function AppLearnReading({
                 scrollbarWidth: "thin",
               }}>
                 {items.map((a) => (
-                  <div key={a.slug} style={{ flex: "0 0 auto", width: isMobile ? 190 : 230 }}>
+                  <div key={a.slug} style={{ flex: "0 0 auto", width: isMobile ? 158 : 186 }}>
                     {tile(a)}
                   </div>
                 ))}
@@ -10056,7 +10091,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         {g.items.map((it, i) => (
                           <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.85rem 1.1rem", borderBottom: i < g.items.length - 1 ? `1px solid ${C.stone}` : "none" }}>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: (it.phrase || it.quote) ? "0.3rem" : 0, lineHeight: 1.4 }}>
+                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: 0, lineHeight: 1.4 }}>
                                 {it.tip}
                                 {/* Their own words, in the same sentence as the
                                     name, set apart so it reads as a quotation.
@@ -10065,12 +10100,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                                   <span style={{ fontWeight: 400, fontStyle: "italic" }}>{` \u201C${it.quote}\u201D`}</span>
                                 ) : null}
                               </div>
-                              {it.phrase && (
-                                <div style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start" }}>
-                                  <span style={{ fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: g.color, fontFamily: BFONT, fontWeight: 700, flexShrink: 0, marginTop: "0.2rem" }}>Try</span>
-                                  <span style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, fontStyle: "italic", lineHeight: 1.55 }}>{it.phrase}</span>
-                                </div>
-                              )}
+                              {/* ── THE TRY LINE IS GONE ──────────────────
+                                  Ellie, having asked for it twice and then read
+                                  it on the page: "Remove the try lines, sorry."
+
+                                  A row is its heading and the arrow to the page
+                                  it came from. That page is where the advice
+                                  lives and always was; this line was the
+                                  summary repeating it, and for the comms rows
+                                  it was the only place in the app some of those
+                                  sentences appeared at all, which is the thing
+                                  this page is not supposed to do.
+
+                                  `say` stays on the payload: check-plans-agree
+                                  compares it to prove a row came from its own
+                                  section's plan rather than a second list, and
+                                  the moment it is not sent nothing can tell
+                                  those two apart again. */}
                             </div>
                             {it.section ? (
                               <button
@@ -13562,6 +13608,42 @@ export default function App() {
     return () => { gone = true; };
   }, [dashTab, learnState]);
 
+  /**
+   * ── READING ONE HERE COUNTS AS READING IT ─────────────────────────────
+   * Ellie: "I want read to appear both places."
+   *
+   * It was marked in the app only, so the Read count and the Read line on a
+   * card described one surface while claiming to describe the reader. The
+   * endpoint has handled website pieces by slug since it was written, and the
+   * reason is in its own comment: they are at revision 1 because a page is
+   * edited in place, so there is nothing to be behind.
+   *
+   * `keepalive` because the tile is a link and the browser is already leaving:
+   * an ordinary fetch is cancelled on navigation and the read is lost. A
+   * beacon would survive too and cannot carry an Authorization header, which
+   * this needs.
+   */
+  const markArticleRead = async (article) => {
+    const id = article.slug;
+    if (learnState?.[id]?.read) return;
+    setLearnState((cur) => ({ ...(cur || {}), [id]: { ...(cur?.[id] || {}), read: true } }));
+    try {
+      const { supabase: sb, hasSupabase } = await import("./supabase.js");
+      if (!hasSupabase()) return;
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.access_token) return;
+      await fetch("/api/posts", {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ action: "read", id }),
+      });
+    } catch (e) {
+      /* Not worth telling anyone about: the article still opens, and the worst
+         case is that it is marked read the next time it is opened. */
+      console.warn("[Attune] could not record that read:", e);
+    }
+  };
+
   /** Saving, which is the same endpoint the app posts to. */
   const toggleSavedPost = async (article) => {
     const id = article.slug;
@@ -13631,12 +13713,33 @@ export default function App() {
     if (learnAboveRef.current) ro.observe(learnAboveRef.current);
     return () => ro.disconnect();
   });
+  /**
+   * ── MEASURED AGAINST THE THING THAT SCROLLS ───────────────────────────
+   * This was `rect.top + window.scrollY` against a budget of `100dvh`, and
+   * both halves are wrong here. The dashboard is a 100dvh row with an inner
+   * column that scrolls, so `window.scrollY` is always 0 and `rect.top` is
+   * wherever the block happens to be on screen at the moment something
+   * re-renders. Any render while scrolled measured a different number, and the
+   * budget derived from it moved with it.
+   *
+   * The offset inside the scroller's own content does not move when you
+   * scroll, and the scroller's clientHeight is the room there actually is.
+   * `100dvh` only equalled that by accident, because the scroller happens to
+   * fill the window today.
+   */
+  const [learnRoom, setLearnRoom] = useState(0);
   useEffect(() => {
     const el = learnAboveRef.current;
     if (dashTab !== "learn" || !el) return undefined;
     const report = () => {
-      const top = Math.round(el.getBoundingClientRect().top + window.scrollY);
-      setLearnTop((cur) => (Math.abs(cur - top) > 1 ? top : cur));
+      const scroller = el.closest("[data-dash-scroll]");
+      if (!scroller) return;
+      const offset = Math.round(
+        el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop,
+      );
+      setLearnTop((cur) => (Math.abs(cur - offset) > 1 ? offset : cur));
+      const room = Math.round(scroller.clientHeight);
+      setLearnRoom((cur) => (Math.abs(cur - room) > 1 ? room : cur));
     };
     report();
     if (typeof ResizeObserver === "undefined") return undefined;
@@ -13929,14 +14032,25 @@ export default function App() {
   // Keep the URL honest about which view is showing. Without this, leaving
   // results for the dashboard left ?view=results in the address bar, so a
   // refresh dropped you back into the storycards.
+  //
+  // ── AND WHICH TAB ───────────────────────────────────────────────────────
+  // Ellie: "Whenever I refresh a page on the site dashboard it brings me back
+  // to home."
+  //
+  // `dashTab` initialises from `?tab=`, and nothing ever wrote it, so the
+  // parameter was readable and never present: every refresh, every back out of
+  // a results page, every reload started on Home. One effect for both, because
+  // it is one promise: the address bar says where you are.
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
       if (view === 'results') url.searchParams.set('view', 'results');
       else url.searchParams.delete('view');
+      if (view === 'home' && dashTab && dashTab !== 'home') url.searchParams.set('tab', dashTab);
+      else url.searchParams.delete('tab');
       window.history.replaceState(window.history.state, '', url.pathname + (url.search || '') + url.hash);
     } catch {}
-  }, [view]);
+  }, [view, dashTab]);
   const [isBetaTester, setIsBetaTester] = useState(false);
   /**
    * ── DISMISSED IS AS GOOD AS DONE, FOR SHOWING IT AGAIN ──────────────────
@@ -16049,10 +16163,15 @@ export default function App() {
             {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
             {/* Home does not scroll; Learn and Notes do. The tab decides, rather
                 than the column always scrolling and Home quietly overflowing. */}
-            <div style={{
-              flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0,
-              overflowY: dashTab === "home" ? "hidden" : "auto",
-            }}>
+            <div
+              /* Named so the Learn block can measure its budget against the
+                 thing that actually scrolls. It used to measure against the
+                 window, which is not what moves. */
+              data-dash-scroll=""
+              style={{
+                flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0,
+                overflowY: dashTab === "home" ? "hidden" : "auto",
+              }}>
 
               {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: banner only) ── */}
               <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", flexShrink: 0, position: "relative", overflow: "hidden" }}>
@@ -16478,8 +16597,33 @@ export default function App() {
                        way the app's Learn tab does. On a short enough window a
                        long insight will still reach the sheet. That is a real
                        limit and it is named in TASKS.md rather than hidden. */
-                    height: (learnPeek && learnTop)
-                      ? `calc(100dvh - ${learnTop}px - ${learnPeek}px)`
+                    /* ── A MINIMUM, NOT A CEILING, AND WHY IT CHANGED BACK ──
+                       This was `height`, and the note here used to argue for
+                       it: a minimum is a floor and not a ceiling, so anything
+                       taller than its share pushed the sheet down and took the
+                       peek off the bottom.
+
+                       What that argument missed is what a ceiling does when the
+                       content is taller anyway. It does not shrink it. The
+                       children spill out of the bottom of the block, the sheet
+                       begins at the block's border edge and is painted after
+                       it, so the sheet is drawn OVER the end of the insight.
+                       Ellie's screenshot of the live page: the second line of
+                       the quotation running under the white, and Save and Share
+                       behind it completely. Measured in a harness that
+                       reproduces the dashboard's own scroller: the controls
+                       finished 29 points BELOW the top of the sheet.
+
+                       The quotation is fitted to the room now, which it was not
+                       when this was last a minimum, so the case that argument
+                       was about is already handled: the type shrinks first. A
+                       minimum only does anything when the fit still is not
+                       enough, and then it pushes the sheet down, which is
+                       visible and recoverable. The other way hides the end of a
+                       sentence under a white panel and looks like a bug nobody
+                       can describe. */
+                    minHeight: (learnPeek && learnTop && learnRoom)
+                      ? `${Math.max(0, learnRoom - learnTop - learnPeek)}px`
                       : undefined,
                     minHeight: 0,
                     /* See LEARN_GAP. Without this, space-between puts the
@@ -16640,12 +16784,50 @@ export default function App() {
                        already out of this height. Subtracting it again took the
                        room twice and the quotation paid for a gap it was not
                        getting. */
-                    const room = (learnAbove.h && learnToolsH)
-                      ? learnAbove.h - learnToolsH - furniture
+                    /* ── FITTED TO THE BUDGET, NOT TO THE RENDERED BLOCK ──
+                       This read `learnAbove.h`, the block's measured content
+                       box, which was right while the block had a fixed height
+                       and became a feedback loop the moment it took a minimum:
+                       a bigger quotation makes a taller block, a taller block
+                       reports more room, more room buys a bigger quotation. It
+                       settles at the largest size every time, the block is
+                       always over its budget, and the sheet is always pushed
+                       below the fold. Measured: the peek was off the screen on
+                       all four window sizes.
+
+                       The budget is what the quotation gets, and the budget is
+                       decided by where the sheet goes. That is the order Ellie
+                       asked for: "figure out the placement of the in practice
+                       peek, then work backwards to figure out the max height of
+                       the insight of the day." Reading the rendered height
+                       inverted it. */
+                    const learnBudget = (learnRoom && learnTop && learnPeek)
+                      ? Math.max(0, learnRoom - learnTop - learnPeek) - LEARN_GAP
+                      : 0;
+                    const room = (learnBudget && learnToolsH)
+                      ? learnBudget - learnToolsH - furniture
                       : 0;
                     const width = learnAbove.w;
-                    const fit = (room > 0 && width > 0)
-                      ? fitQuote({ text: insight.body, room: room / scale, width: width / scale })
+                    /* ── NO ROOM IS NOT THE SAME AS NO LIMIT ─────────────
+                       This bailed to null when the room came out at or below
+                       zero, and null means the quotation is set at full size
+                       with no line clamp at all, because the clamp is
+                       `fit ? fit.lines : undefined`. So the one case where
+                       there is no room produced the largest possible
+                       quotation: measured at 1,996 points tall in a 713 point
+                       window.
+
+                       quoteFit already answers this question. Its own fallback
+                       is the floor size and whatever lines fit, so handing it a
+                       room of 1 gets the smallest readable setting and a clamp,
+                       which is the right answer to "there is no room" in a way
+                       that unbounded type is not. */
+                    const fit = width > 0
+                      ? fitQuote({
+                        text: insight.body,
+                        room: Math.max(1, room) / scale,
+                        width: width / scale,
+                      })
                       : null;
                     const quoteSize = fit ? Math.round(fit.size * scale) : base;
                     const citeSize = fit
@@ -16749,6 +16931,7 @@ export default function App() {
                     readCount={learnState ? Object.values(learnState).filter((x) => x.read).length : 0}
                     state={learnState}
                     onToggleSave={toggleSavedPost}
+                    onOpenArticle={markArticleRead}
                     onPeek={setLearnPeek}
                   />
 

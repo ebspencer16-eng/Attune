@@ -15,18 +15,17 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| L1 | **The sheet is painted over the quote.** Your screenshot shows it, and it is not the gap: the second line of the insight runs under the white, and Save and Share are behind it entirely. The block above the sheet sizes itself from `window.scrollY` and `100dvh`, and the dashboard scrolls in an inner column, so that number is wrong and moves as you scroll. Confirm that, fix it against the scroller, and rebuild the gate around the real page rather than the sheet on its own. |
+| L2c | **Shade the whole tile, no hard cutoff.** The tint is a band across the top of the card and it stops dead at the edges. |
+| L2d | **The tiles are too big.** Shrink the card and the type with it. |
+| L2b | **Mark an article read on the website too.** It is only marked in the app, so Read counts one surface. |
+| N15 | **Remove the Try lines from What Comes Next**, both surfaces. Your reversal of the earlier ask; both quotes stay in the gate. |
+| W1 | **Refreshing the dashboard goes back to Home.** The tab is read from the URL and never written to it. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| L2 | **The site's In Practice is the app's card now.** White cards lifted off the ground, tinted by shelf, with the ARTICLE label, the bookmark that fills orange when you save, the title held to two lines and "5 min read · Read" under it. The featured four are grey with the title at the foot, as the app has them. The bookmark was a drawing of a control before this: an outline that never changed and was not a button. |
-| L2b | **Saved and Read now say a number.** Both pills were passed zero, typed, so they read "Saved 0" and "Read 0" for everybody since the sheet shipped. The page asks /api/posts, the same call the app makes. Reading is still only marked in the app, so a piece you read on the website will not say Read until that page can mark it. Tell me if you want that. |
-| N15b | **One builder for the comms action plan, not two.** The site's overview had its own rule for which dimension leads a domain. Measured over 12,000 domain tiles, the two picked a different one 11% of the time, which is different advice on the two pages for the same couple. |
-| L1 | **The gap: one real defect fixed, and I could not reproduce yours.** The quote's room was computed without the block's own top margin, 40 points, so it was sized for room it does not have. That is fixed and gated. But at four window sizes, with the longest and the shortest insight we ship, the share row stops 56 above the sheet both before and after. **A screenshot would settle it, and tell me whether it is the app or the site.** |
-| O559 | **The site is current, and I checked before fixing anything.** You said the changes were not there. The newest website commit added a field called `readMinutes` to the article tiles: it appears 14 times in a bundle built from the current commit and 12 times in one built from the commit before, and the bundle the live site is serving has 14. Your own answers say the same thing from the other side, because L2 and L3 are both from that commit. So L1 and N15b are still broken rather than undeployed. |
-| N15 | **One note on a conflict between two of your instructions.** You once asked that each What Comes Next group match its section's at-a-glance plan, and a gate holds that. Your new comms instruction reverses it: the site's Try line comes from the protocols, which that gate was written to forbid. I followed the newer one and recorded both quotes side by side in the gate. The consequence: on the app, the comms Try line now appears only on this page. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
@@ -41,6 +40,9 @@
 
 | Verified by you | What it was |
 |--|--|
+| L2 | The site's In Practice tiles were a flat grey rectangle where the app has a card; approved, with the shading and the size to follow. |
+| N15b | The comms action plan was built twice and the two picked a different lead dimension 11% of the time. |
+| O559 | "The site is not current": it was, proven by a marker counted in the previous commit's bundle as well as this one. |
 | L3 | The number of articles was missing beside each In Practice section heading, on both surfaces. |
 | S3 | The Learn page peek had never been measured, because the tab lives behind sign-in; the sheet measures itself now and a gate holds it. |
 | O494 | Cover pages on both surfaces. |

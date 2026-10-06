@@ -3238,14 +3238,18 @@ function NextGroup({
                   <Text style={{ fontWeight: '400', fontFamily: Fonts.bodyItalic }}>{` ${item.quote}`}</Text>
                 ) : null}
               </Text>
-              {item.say ? (
-                <View style={{ flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.xs }}>
-                  <Text style={{ ...Type.eyebrow, fontSize: 9, color, marginTop: 3 }}>Try</Text>
-                  <Prose style={{ ...Type.small, color: c.textMuted, fontFamily: Fonts.bodyItalic, flex: 1, lineHeight: 19 }}>
-                    {item.say}
-                  </Prose>
-                </View>
-              ) : null}
+              {/* ── THE TRY LINE IS GONE ────────────────────────────────
+                  Ellie, having asked for it twice and then read it on the page:
+                  "Remove the try lines, sorry."
+
+                  A row is its heading and the arrow to the page it came from.
+                  That page is where the advice lives and always was; this line
+                  was the summary repeating it, and for the comms rows it was
+                  the only place in this app some of those sentences appeared,
+                  which is exactly what this page is not supposed to do.
+
+                  `say` stays on the payload: check-plans-agree compares it to
+                  prove a row came from its own section's plan. */}
               </View>
               {item.section ? (
                 <Pressable

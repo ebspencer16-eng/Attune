@@ -34,12 +34,23 @@
  * breaking it would have cost, which is a better argument for it than the
  * original bug.
  *
- * What a row carries now is the whole of its glance tile: the tile's heading as
- * the title, and the tile's advice with the extra line the hardest domain
- * carries joined onto it, as the Try line. Both are DRAWN, which `body` is not
- * on this page: sending advice as `body` is how the conflict rows came to be
- * headings with nothing under them. The domain's page is still where the row's
- * arrow goes, which is the half of her earlier ask that survives.
+ * ── AND THEN THE TRY LINE CAME OFF ALTOGETHER ────────────────────────────
+ * Reading the finished page: "Remove the try lines, sorry."
+ *
+ * So a row is now its heading and the arrow to the page it came from, on both
+ * surfaces. That page is where the advice lives and always was, and for the
+ * comms rows this line was the only place in the app some of those sentences
+ * appeared, which is the thing this page is not supposed to do.
+ *
+ * `say` is still SENT, and this gate still compares it, which is the whole
+ * reason the field survives: it is how a row is proved to have come from its
+ * own section's plan rather than from a second list. The moment it stops being
+ * sent, the Communication group and the protocols become indistinguishable
+ * again and this gate has nothing to compare.
+ *
+ * Three instructions on one line, two of them reversals, all three quoted here,
+ * because the round trip is the useful part: the rule survived a direct
+ * instruction to break it on the strength of what breaking it would cost.
  *
  * ── WHAT IS CHECKED ───────────────────────────────────────────────────────
  * For each section that has both an at-a-glance plan and a group here, the
@@ -170,9 +181,12 @@ for (const [who, pairs] of Object.entries(COUPLES)) {
     const item = comm.items[i];
     if (!item) return;
     /*
-     * Drawn, not merely present. `body` is on the payload and neither surface
-     * renders it on this page, so a row whose advice sits there is a heading
-     * with nothing under it, which is exactly what the conflict rows were.
+     * `title` and `say`, not `body`. `body` is on the payload and nothing has
+     * ever rendered it on this page, so a row whose advice sits there is lost
+     * rather than merely hidden, which is exactly what the conflict rows were.
+     * The Try line is no longer drawn, at her word, but `say` is still where a
+     * row's advice is carried and it is still what proves where the row came
+     * from.
      */
     const drawn = `${item.title || ''} ${item.say || ''}`;
     /*
@@ -182,8 +196,8 @@ for (const [who, pairs] of Object.entries(COUPLES)) {
      */
     for (const [what, wanted] of [['heading', tile.label], ['advice', tile.body], ['title', tile.title]]) {
       if (wanted && !drawn.includes(wanted)) {
-        fails.push(`Communication row ${i + 1} does not carry the glance tile's ${what}`
-          + ` where this page draws it: "${String(wanted).slice(0, 48)}" ${where}`);
+        fails.push(`Communication row ${i + 1} does not carry the glance tile's ${what}:`
+          + ` "${String(wanted).slice(0, 48)}" ${where}`);
       }
     }
   });
@@ -225,4 +239,5 @@ if (fails.length) {
 
 console.log(`[check-plans-agree] ${Object.keys(COUPLES).length} couples, including one with tied`
   + ` gaps in every domain; Communication and Physical Intimacy carry exactly their own`
-  + ` section's plan, heading and advice.`);
+  + ` section's plan, heading and advice. The advice is carried rather than drawn,`
+  + ` at her word: "Remove the try lines, sorry."`);
