@@ -15,24 +15,26 @@
 
 | # | Mine to build |
 |--|--|
-| S12b | **A gate so the scorer divergence cannot come back.** check-one-scorer and the strengthened check-scoring-mirror already landed; confirm both catch it from every direction and that nothing else can score. |
-| N1 | **Storycards have two sets of arrows.** Remove the stationary pair below the card; keep the floating ones. |
-| N2 | **The results arrows must not sit over the footer.** Lowest they go is the bottom of the page content. |
-| N3 | **The results arrows must line up with the content margins**, same place on every page. The back arrow is currently under the left nav, outside the margin. |
-| N4 | **Tapping the left or right edge of a results page pages it**, app and website, like the storycards. |
-| N5 | **Expectations responses centre-aligned in their column**, every expectations results page, app and website. |
-| N6 | **Reflection action plan: each person's words in italics and quotation marks**, so it reads as what they wrote. Overview, app and website. |
-| N7 | **Expectations rows in What Comes Next: "Discuss household expectations together"**, with an arrow on the right of each row opening that page. Then remove the "open expectations" arrow at the foot of the list. |
-| N8 | **Conflict shows four action items on the overview and one in What Comes Next.** List all four. |
-| N9 | **What Comes Next says "Physical Intimacy Expectations"**, not "Physical Intimacy". |
-| N10 | **Learn on the web: still no space above the peek, and no way into a section's full list.** Shrink the featured tiles if that is what it takes, and match the rest of the app's behaviour. |
-
-**From here on, every change applies to both the app and the website.** Her words, N6.
+| N5 | **Expectations responses: I cannot find a page where they are not centred.** Measured on every expectations page on both surfaces and every answer cell is already centre-aligned. Tell me which page you are looking at and I will fix it. |
+| S3 | **The Learn page layout, measured.** It still goes in unmeasured because that screen needs an account. |
+| S13 | **The website's resolveRoleTokens has no behavioural gate.** Thresholds match today; nothing holds them together. |
+| N11 | **What Comes Next is built twice.** The server builds it and the app renders it; the website builds its own from client-side results. That is how four things drifted at once this round. The right fix is the website reading the server's page, which is bigger than any one of these items and wants its own pass. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| N1 | **One set of arrows on the storycards.** Highlights is a results page, so it had the floating pair every results page has plus the storycards' own stationary pair. The stationary ones are gone; a card pages by its own edge and the dots jump to one. |
+| N2 | **The arrows stop at the end of the content** rather than floating over the footer. |
+| N3 | **The arrows line up with the content margins**, measured, identical on every page. They were positioned against the window, which is why the back arrow sat under the left nav. |
+| N4 | **Tapping the left or right edge of a results page moves you a page**, both surfaces. A sixth of the width, because the middle is for reading. A tap that finished a selection pages nothing. |
+| N6 | **Each person's words in italics and quotation marks** on the reflection action plan, both surfaces. |
+| N7 | **"Discuss household expectations together"**, with an arrow on each row opening that page, and the group's own open link gone. |
+| N8 | **Four conflict items, not one.** Two separate causes. The app was handed the whole database record where it needed the answers inside it, so the exercise read as unfinished and it drew its "nothing worth watching" fallback. The website picked its items by a different rule from the overview, and its whole conflict block sat inside the Physical Intimacy branch, so owning Conflict and not finishing Intimacy meant no list at all. |
+| N9 | **Physical Intimacy Expectations**, the exercise's own name. |
+| N10 | **The Learn page's shelves open.** The eyebrow is now a row with an arrow that narrows the list to that shelf. The gap above the peek doubled, taken out of the quote's budget rather than the peek's position. |
+| S12b | **Two gates so the scorer cannot drift again**, as you asked. One forbids a second scorer, a second dimension map or a second reverse-scoring list anywhere. The other runs both scorers over 400 answer sets and fails if they disagree, which is the half that was missing: the old one compared the question lists and never the answer. |
+| N12 | **Two more places asked for italics in a way iOS ignores.** Eighteen were fixed when that was found; these two survived, in the expectations answers and the conflict free-text. The build fails on it now. |
 | S14 | **Swept and found sound:** all 13 emails render with nothing unresolved and every email anything sends is in the catalogue; the two role-token resolvers use identical thresholds; every internal link on the live site resolves; every dollar figure a customer reads is one the catalogue sets. |
 | S12 | **The admin was scoring with a different formula from the product.** It had its own copy of the scorer that took a plain average where the real one weights the questions, and its reverse-scoring list was empty, so a reverse-worded question was counted backwards. On the same answers the product says 1.75 on Conflict and the admin charted 3.00. It uses the real engine now. This is the one worth knowing about, because the admin is where you read what customers are like. |
 | S7 | **A promo code that bundled an add-on free still charged for it.** The cart's price was worked out in three places and each knew about a different subset of the five bundled-free flags. A beta code giving away Relationship Reflection charged forty dollars for it the moment the cart had anything else paid in it. One source now, and a gate that runs the real functions. |
