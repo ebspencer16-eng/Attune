@@ -16405,7 +16405,21 @@ export default function App() {
                        them moves the sheet down and takes the gap back. */
                     const base = isMobile ? 21.6 : 25.6;      // 1.35rem, 1.6rem
                     const scale = base / FIT_BASE;
-                    const furniture = 14 + 14 + 18 + 34 + 18; // eyebrow, its margin, the citation's margin, the controls, theirs
+                    /* ── EVERY FIXED PART, INCLUDING THE BLOCK'S OWN ─────
+                       This was the five parts inside the insight and not the
+                       block's own top margin, which is 32 on a phone and 40 on
+                       a laptop and is just as fixed as the rest. So the quote
+                       was sized for forty points more room than it had, and on
+                       a narrow window with a long quotation it takes that room
+                       out of the gap below it.
+
+                       The app's INSIGHT_FURNITURE opens with `Spacing.xl * 2`,
+                       commented "the block's own padding", which is this term.
+                       Two arithmetics for one screen and one of them was
+                       missing a line: check-learn-gap measures the rendered
+                       block now rather than trusting either sum. */
+                    const insightMargin = isMobile ? 32 : 40;   // 2rem / 2.5rem
+                    const furniture = insightMargin + 14 + 14 + 18 + 34 + 18; // its margin, eyebrow, eyebrow's margin, the citation's margin, the controls, theirs
                     /* No LEARN_GAP here: the gap is the block's bottom padding
                        and a ResizeObserver reports the content box, so it is
                        already out of this height. Subtracting it again took the

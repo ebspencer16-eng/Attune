@@ -11,8 +11,8 @@ export const EMAIL_TRIGGERS = {
     "src/App.jsx:11079",
     "src/App.jsx:11181",
     "src/App.jsx:11500",
-    "src/App.jsx:17220",
-    "src/App.jsx:18018",
+    "src/App.jsx:17234",
+    "src/App.jsx:18032",
     "src/App.jsx:3029"
   ],
   "results_viewed": [
