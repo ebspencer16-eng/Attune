@@ -7,12 +7,14 @@
  * Python workbook service. See scripts/SERVICE_INTEGRATION.md for the full
  * end-to-end picture.
  *
- * NOTE: getDomainRows() below is a near-duplicate of the same-named function
- * inside api/generate-workbook.js. Long-term, we should extract it (and
- * computeAlignmentPct) into api/_workbook-content.js so the docx and PDF
- * paths share one source of truth. For now, this duplication is intentional
- * and isolated — touching generate-workbook.js would risk breaking the live
- * docx flow that customers depend on today.
+ * NOTE: getDomainRows() below builds the display rows for each domain. It was
+ * described here as a near-duplicate of the same-named function inside
+ * api/generate-workbook.js, kept deliberately because "touching
+ * generate-workbook.js would risk breaking the live docx flow that customers
+ * depend on today". That file was deleted when the Word workbook went, so the
+ * reason for the duplication expired and the duplication outlived it. The
+ * percentages are shared now; the row labels are this file's own, because they
+ * are the PDF's column headings rather than a rule.
  */
 
 import { EXP_DOMAINS, alignmentText } from './_workbook-content.js';
@@ -87,12 +89,22 @@ function getDomainRows(domainKey, responsibilities, lifeQuestions, u, p) {
   }
 }
 
-// Match logic mirrors api/generate-workbook.js computeAlignmentPct.
-function computeAlignmentPct(rows) {
-  if (!rows || rows.length === 0) return 0;
-  const matches = rows.filter(r => r.userValue === r.partnerValue).length;
-  return Math.round((matches / rows.length) * 100);
-}
+/*
+ * computeAlignmentPct was here, counting rows where the two answers are the
+ * same string, under a comment reading "Match logic mirrors
+ * api/generate-workbook.js computeAlignmentPct". That file was deleted when the
+ * Word workbook went, so the thing it mirrored had not existed for some time
+ * and the header note above still explained that the duplication was kept to
+ * avoid breaking it.
+ *
+ * The number it produced disagreed with the one the results page and the app
+ * show. Those use domainAlignmentPct, which scores each item for how CLOSE the
+ * two answers are and takes the mean; this counted only exact matches, so a
+ * couple one step apart on everything read 50 to 71 per cent on their results
+ * page and 0 per cent in their workbook.
+ *
+ * The payload carries the percentages now, computed where the raw answers are.
+ */
 
 /**
  * payloadToCouple(payload) -> COUPLE
@@ -137,7 +149,9 @@ export function payloadToCouple(payload) {
 
   EXP_DOMAINS.forEach(domain => {
     const rows = getDomainRows(domain.key, payload?.responsibilities, payload?.lifeQuestions, u, p);
-    expectations[domain.key] = computeAlignmentPct(rows);
+    /* From the payload, computed by the shared function. Zero when a payload
+       predates the field, which is visibly wrong rather than quietly harsher. */
+    expectations[domain.key] = payload?.expectationsPct?.[domain.key] ?? 0;
     expectations_detail[domain.key] = {
       [uKey]: rows.map(r => [r.label, r.userValue]),
       [pKey]: rows.map(r => [r.label, r.partnerValue]),

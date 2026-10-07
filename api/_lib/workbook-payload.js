@@ -20,6 +20,7 @@
  */
 
 import { calcDimScores } from '../_type-engine.js';
+import { expectationsByDomain } from './expectations-alignment.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS, substName } from '../_questions.js';
 import { normRespValue, mirrorRespKey, mirrorLifeId } from './expectations.js';
 
@@ -115,6 +116,29 @@ export function buildWorkbookPayload(userName, partnerName, ex1Answers, partnerE
     phraseThatLands: coupleType?.tips?.[0]?.phraseTry || null,
     // NEW Phase 5a fields — full ex2 data
     responsibilities,
+    /**
+     * ── THE PER-DOMAIN PERCENTAGES, COMPUTED THE ONE WAY ────────────────
+     * api/_couple-shape.js worked these out itself, by counting rows where
+     * the two answers are the same string. The results page and the app use
+     * domainAlignmentPct, which scores each item for how close the two
+     * answers are and takes the mean, so a pair one step apart gets partial
+     * credit.
+     *
+     * Measured over the same answers: a couple one step apart on everything
+     * reads 50 to 71 per cent on their results page and 0 per cent in their
+     * workbook. On random answers the workbook came out 12 to 50 points
+     * lower on every domain. One number, two methods, and the harsher one
+     * printed in the thing they keep.
+     *
+     * Computed here because this is where the raw answers are. By the time
+     * _couple-shape sees the payload the responsibilities have been
+     * normalised to names and the original pair is gone, so it could not
+     * have called the shared function even if it had wanted to.
+     */
+    expectationsPct: Object.fromEntries(
+      expectationsByDomain({ mine: ex2Answers, theirs: partnerEx2, youName: userName, themName: partnerName })
+        .map((d) => [d.key, d.pct]),
+    ),
     lifeQuestions,
     // LEGACY field — kept for backward compatibility
     expGaps,

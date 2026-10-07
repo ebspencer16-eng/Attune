@@ -5615,9 +5615,11 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                 {catData.filter(fc => fc.rows.length > 0).map(fc => {
                   // Similarity-based pct: mean of item scores in [0,1], rounded
-                  // to %. Matches the methodology used by the workbook Snapshot
-                  // and the headline alignPct. Rows where the scorer can't read
-                  // the values drop out of the mean rather than skewing it.
+                  // to %. The same methodology as the headline alignPct, and now
+                  // as the workbook: this comment claimed all three agreed and
+                  // the workbook was counting exact matches, which came out up
+                  // to 71 points lower on the same answers. Rows the scorer
+                  // cannot read drop out of the mean rather than skewing it.
                   const scored = fc.rows.filter(r => r.score != null);
                   const pct = scored.length
                     ? Math.round((scored.reduce((a, r) => a + r.score, 0) / scored.length) * 100)
