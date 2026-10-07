@@ -375,10 +375,17 @@ anything is the same failure as a second copy of a rule. The question to ask
 before writing one is not "how would I build this" but "what already builds
 this", and the answer lives in `api/` and `public/` more often than it looks.
 
-`check-workbook-view.mjs` now holds the one page to its two callers: the app's
-payload, the website's payload and the keys the page reads are the same set,
-and a caller that drops one fails the build rather than rendering a workbook
-with a blank half.
+`check-workbook-view.mjs` holds that page and `api/workbook-view.js` to the same
+set of keys, so a caller that drops one fails the build rather than rendering a
+workbook with a blank half.
+
+It used to say "its two callers", and that went stale without anyone noticing,
+which is this file doing the thing it warns about four paragraphs up. The app's
+path through `/api/workbook-view` was removed deliberately, because rendering in
+the browser drew the wrong document, and `fetchWorkbookView` was left behind
+after its only caller went. So the endpoint is deployed, auth-gated and called
+by nothing in the tree. An unused twin of a removed path is what somebody wires
+back in, so it is deleted; whether the route itself stays is in TASKS.md.
 
 **A page that shows people what the product does is a copy of the product.**
 /email-preview held six hand-written mock-ups of emails while the product sent

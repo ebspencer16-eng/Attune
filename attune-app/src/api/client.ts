@@ -1999,37 +1999,22 @@ export function fetchExerciseQuestions<T>(exercise: string) {
     `/api/questions?exercise=${encodeURIComponent(exercise)}`);
 }
 
-/**
- * What the website's workbook page needs to draw this couple's workbook.
+/*
+ * fetchWorkbookView and its WorkbookView type were here, and nothing called
+ * them. The path they served was the app rendering the workbook in the browser
+ * from a payload, and that step was removed on purpose: it drew the wrong
+ * document. See the note on openTool in app/resources.tsx. The function was
+ * left behind, which made /api/workbook-view a live route with no caller in the
+ * tree, and left CLAUDE.md saying the workbook page is held "to its two
+ * callers" when only one of them still exists.
  *
- * The app does not build a workbook or a PDF: it opens the page the website
- * renders, with the payload that page takes. See api/workbook-view.js.
+ * Removed rather than kept, because an unused twin of a removed path is what
+ * somebody wires back in: it would fetch the right payload and draw the wrong
+ * workbook, which is the bug Ellie reported.
+ *
+ * Whether /api/workbook-view itself should stay is in TASKS.md. It is harmless
+ * and auth-gated; it just serves nobody.
  */
-export type WorkbookView = {
-  p1: string;
-  p2: string;
-  ct: string;
-  ctTagline: string;
-  ctColor: string;
-  scores: Record<string, number>;
-  partnerScores: Record<string, number>;
-  expGaps: unknown[];
-};
-
-export async function fetchWorkbookView() {
-  /**
-   * The payload is unwrapped here rather than at the call site.
-   *
-   * `request` hands back the whole response body as `data`, so the endpoint's
-   * own `data` field sits one level further in than it looks. Reading
-   * `view.data.p1` therefore gave undefined, and the workbook page fell back
-   * to its placeholders: the cover read "Partner A & Partner B" with a screen
-   * full of correct data sitting one key away.
-   */
-  const res = await request<{ ok: true; data: WorkbookView }>('/api/workbook-view');
-  if (!res.ok) return res;
-  return { ok: true as const, data: res.data.data };
-}
 
 /** Expectations. A different shape from ex1, so it gets its own reader. */
 export function fetchExpectations() {

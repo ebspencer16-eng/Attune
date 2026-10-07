@@ -4,7 +4,12 @@
  *
  * ── WHY THIS GATE EXISTS ──────────────────────────────────────────────────
  * public/workbook-render.html is the workbook: one designed page, read by the
- * website when it prints a PDF and by the app when it opens one. It takes its
+ * website when it prints a PDF. The app used to open it too, through
+ * fetchWorkbookView, and that path was removed on purpose because it drew the
+ * wrong document; the function outlived it and has been deleted, so
+ * /api/workbook-view currently has no caller anywhere in the tree. This gate
+ * holds the endpoint and the page to each other regardless, because the
+ * endpoint is still deployed and is the obvious way back in. It takes its
  * data from a query parameter, so every caller builds that object by hand, and
  * a caller that forgets a key does not fail. It renders a workbook with a
  * blank half.

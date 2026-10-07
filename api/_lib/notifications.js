@@ -44,6 +44,18 @@ const PUSHABLE = {
 };
 
 /**
+ * ── DESIGNED, NOT BUILT: NOTHING SENDS A PUSH ─────────────────────────────
+ * This function and the PUSHABLE table above it are the only mention of push
+ * anywhere in the tree. There is no expo-notifications, no token storage and no
+ * sender, and nothing imports shouldNotify. Alerts reach people as rows at the
+ * top of the home tile; see the Alerts note in CLAUDE.md.
+ *
+ * Left in place because it is a considered ruleset rather than leftovers: a
+ * cooldown, a monthly cap, a quiet class, and a rule that nothing is pushed to
+ * someone who opened the app today. Said out loud here because a module that
+ * reads as live is one that gets reasoned about as live, and the next person to
+ * ask "are we rate-limiting pushes" would have found this and believed it.
+ *
  * @param event    { kind, title, body, deepLink }
  * @param history  { sentAt: [ISO strings], pushEnabled, lastOpenedAt, readLastPost }
  * @param now      ISO string or ms
