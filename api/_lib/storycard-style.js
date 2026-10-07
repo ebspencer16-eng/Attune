@@ -282,10 +282,18 @@ export const TONES = {
  * type gets a different card. The app used one fixed purple for everyone and
  * spent the colour on the type name, which is where it was least visible.
  */
-export function typeGround(accent) {
-  if (!accent) return TONES.type;
-  return [`${accent}CC`, `${accent}66`, '#14102E'];
-}
+/*
+ * typeGround(accent) was here and nothing has ever imported it, on either
+ * surface: added with this module and dead from that commit. It cannot be
+ * used. The couple type's accent is per couple, so the ground has to be
+ * derived at render time, and the app renders. An Expo project cannot import
+ * from api/, so the app has its own copy and always will.
+ *
+ * Leaving an unused twin of a live function is the trap this codebase pays
+ * for most: somebody edits the copy that looks canonical and nothing changes,
+ * which is a gate pointed at the wrong copy with the gate left out. The app's
+ * is the one that ships.
+ */
 
 /**
  * The two call-outs on the communication card.

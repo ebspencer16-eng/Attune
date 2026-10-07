@@ -150,6 +150,63 @@ for (const key of Object.keys(STORYCARD_STYLE)) {
     + '      which is what this module exists to prevent, or it should not be sent.');
 }
 
+// ── AND THE APP'S FALLBACKS ARE NOT A SECOND OPINION ───────────────────────
+// The app reads these values off the payload and keeps literals beneath them
+// "as a last resort for a payload written before that field existed". Its own
+// note says so, and adds: "They are not a second opinion: if they ever
+// disagree with the module, the module is right."
+//
+// Nothing was holding them to that. The fallback path is not hypothetical:
+// results are frozen, so a couple whose row was written before `tones` was
+// sent has no tones in it and hits these literals every time. A stale fallback
+// shows exactly those couples the wrong grounds, and only those couples, which
+// is the hardest kind of report to act on.
+//
+// Compared by value, for the keys the app keeps a literal for. Anything the app
+// does not keep a fallback for is not this check's business.
+{
+  const tonesInApp = (() => {
+    const at = app.indexOf('const TONES: Record<string, [string, string, string]> = {');
+    if (at < 0) return null;
+    const open = app.indexOf('{', at);
+    let depth = 0; let end = -1;
+    for (let i = open; i < app.length; i += 1) {
+      if (app[i] === '{') depth += 1;
+      else if (app[i] === '}') { depth -= 1; if (depth === 0) { end = i + 1; break; } }
+    }
+    if (end < 0) return null;
+    const out = {};
+    for (const m of app.slice(open, end).matchAll(/'?([\w-]+)'?\s*:\s*\[([^\]]+)\]/g)) {
+      out[m[1]] = m[2].split(',').map((x) => x.trim().replace(/^'|'$/g, ''));
+    }
+    return out;
+  })();
+
+  if (!tonesInApp || Object.keys(tonesInApp).length < 4) {
+    problems.push('the app\'s fallback tone table could not be read, so this gate cannot compare'
+      + ' it.\n      A gate that has lost its subject must not report success: the app keeps'
+      + '\n      literals for a payload that predates `tones`, and frozen results mean older'
+      + '\n      couples hit them on every render.');
+  } else {
+    for (const [name, want] of Object.entries(STORYCARD_STYLE.tones || {})) {
+      const got = tonesInApp[name];
+      if (!got) {
+        problems.push(`the server has a "${name}" card ground and the app's fallback table has no`
+          + ' entry for it, so a couple whose results predate `tones` gets no ground for that card.');
+        continue;
+      }
+      const same = got.length === want.length
+        && got.every((c, i) => String(c).toUpperCase() === String(want[i]).toUpperCase());
+      if (!same) {
+        problems.push(`the "${name}" card ground is [${want.join(', ')}] on the server and`
+          + ` [${got.join(', ')}] in the app's fallback.`
+          + '\n      The app\'s own note says the module is right when they disagree; this is'
+          + '\n      what makes that true rather than stated.');
+      }
+    }
+  }
+}
+
 if (problems.length) {
   console.error('[check-storycard-fields] the app is not drawing what the server sends:');
   for (const p of problems) console.error(`  ${p}`);
@@ -162,4 +219,5 @@ if (problems.length) {
 
 console.log(
   `[check-storycard-fields] ${cards.length} cards across ${seen.size} kinds; `
-  + 'every field the server sends is drawn by the app.');
+  + 'every field the server sends is drawn by the app, and the app\'s fallback grounds equal '
+  + 'the server\'s for every card.');
