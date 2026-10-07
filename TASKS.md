@@ -4,6 +4,8 @@
 
 | # | What I need from you |
 |--|--|
+| B17a | **The push list, for your approval.** Ten below. Five already have copy and are raised in the app today, so pushing them needs no new words from you. Five are new and need copy. Say which you want and I build those. |
+| B17b | **Push needs three things only you can give.** An Apple push key through your developer account, a migration I write and you run to store each person's push token and their answer to being asked, and your decision on when the app asks permission. Nothing sends a push today. |
 | B12 | **The stored gap-tier counts were banded by the old cut points.** The four tier names did not change, only the lines between them, so old and new counts mix. Leave them, or I can clear them alongside B6. |
 | B6 | **The old couple-type counts are a different taxonomy.** Whatever is stored under the 25 retired names cannot be read as couple types. Leave them, or I can clear them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -17,17 +19,17 @@
 
 | # | Mine to build |
 |--|--|
-| S20 | **Clicking an article from Learn signs you out.** Your report. Find out what clears the session on the way to a static In Practice page, and stop it. Nothing else matters as much. |
-| B5 | **The how-to-use-your-results footer on all 17 In Practice pages.** You like that one; it is the canonical footer, and sixteen pages have none. |
-| B15 | **Remove `/api/workbook-view`.** Its last caller is gone. |
-| B12b | **Clear the legacy counters**, both sets: the 25 retired couple-type names and the gap tiers banded by the old cut points. I cannot reach the store from here, so this is a script plus one command for you. |
-| R195 | **The sign-in page is too dark.** |
-| B17 | **A list of push notifications, then build them.** Your examples: a partner sent a note, a journal streak about to expire. Nothing sends a push today, so this is the ruleset plus the whole mechanism. List first, for your approval, before any of it is built. |
+| B17 | **Build the push notifications you approve.** The list is `app/PUSH-NOTIFICATIONS.md` and waits on B17a and B17b. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| S20 | **Clicking an article no longer takes you out of your account.** Nothing was signing anyone out, and I measured that: a round trip to a static article page and back leaves every session key in place. What happened is the tile left the dashboard for a marketing page, which drops the signed-in chrome and puts "Sign in" in the corner. Articles open inside Learn now, from the same bodies the app reads. |
+| B5 | **The footer you like is on all 17 In Practice pages.** Checked in a browser that it renders the same there as on /home, not just that the markup is present. |
+| B15 | **`/api/workbook-view` is gone**, and the gate that watched it is repointed at the one caller that remains. |
+| R195 | **The sign-in page is lighter at the top.** The foot of that gradient could not move: white text on it is already at 4.79 to 1 and the softening I first wrote took it to 3.34, which is below readable. The top had room and went a quarter lighter. The app's own grounds had never been contrast checked; they are now. |
+| B12b | **A script to clear the legacy counters, and the two commands to run it.** It reads and prints first and deletes nothing until you add `--confirm`. See below. |
 | B16 | **A dead client function removed, and two stale claims corrected.** `fetchWorkbookView` outlived the path it served; CLAUDE.md said the workbook page was held "to its two callers" when one of them no longer existed. A stale map is the first thing every session reads. |
 | B13 | **Yesterday's Learn page fix was doing nothing, and I found it.** The style object already carried `minHeight: 0` and my budget line went in above it. A key written twice in one object loses the first silently, so the block had no minimum at all. The gate passed because its harness rebuilt the block instead of rendering the page's own style. Both halves are fixed and both are gated. |
 | B14 | **A dead copy of a live function, removed.** The server exported a storycard colour helper nothing has ever imported; the app has the real one. An unused twin is where someone edits the copy that looks canonical and nothing changes. The app's fallback colour table is now held to the server's, which matters for couples whose results predate that field. |

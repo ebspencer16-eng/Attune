@@ -2200,3 +2200,41 @@ server and all three are already held by gates that run both copies. The
 sweeps that keep paying are: grep for functions defined twice, scan for numbers
 banded into named strings, grep for comments admitting a duplication, and now
 parse for a key written twice.
+
+## 7 October 2026, night — her round, worked through
+
+Everything she answered is done except the push build, which waits on her
+approval of the list.
+
+**The sign-out report.** Nothing was signing anyone out, and that is measured:
+a browser round trip from /app to a static In Practice page and back leaves
+every `sb-` and `attune_` key in place, nothing under public/ clears auth
+storage, and the one sign-out path needs a missing local account AND a
+successful profile read with no row, after a retry. What the tile did was leave
+the dashboard for a marketing page, which drops the signed-in chrome and offers
+"Sign in" in the corner. Articles open inside Learn now, from the same twelve
+bodies the app has read in-app since they were generated.
+
+**R195 is the one worth reading.** "Too dark" looked like a one-line change to
+the softening the Learn tab already uses. Measured, that pairing takes the foot
+of the gradient to 3.34 to 1 against white, under the 4.5 body text needs: a
+page she asked to be lighter would have come back harder to read. The two stops
+are not alike, 10.89 against 4.79, so only the top moves. The app's own grounds
+had never been contrast checked at all, which is why nothing would have caught
+it; they are in check-ground-contrast now with one declared exemption.
+
+**B12 and B6**, clearing the legacy counters, is `scripts/clear-legacy-counters.mjs`.
+It cannot run from here, because the KV values live in Vercel and should stay
+there. It is a dry run by default: it reads every key it would touch, prints
+what each holds, and deletes nothing until `--confirm`. It refuses to run at all
+if a retired name is also a live couple type.
+
+**B17** is `app/PUSH-NOTIFICATIONS.md`: ten events, five of which already have
+copy and are raised in the app today, five that need words from her. Plus the
+three things only she can provide: an Apple push key, a migration for the token
+and the consent answer, and the decision about when the app asks. The ruleset in
+api/_lib/notifications.js is already written and does not need to change.
+
+**Three of her questions were about whether something was fixed.** B2, B4 and
+B10 were all fixed rather than merely found. B10 in particular: the twelve empty
+CSV columns now resolve and will carry data, rather than being removed.
