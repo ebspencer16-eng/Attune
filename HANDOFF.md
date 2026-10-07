@@ -2238,3 +2238,37 @@ api/_lib/notifications.js is already written and does not need to change.
 **Three of her questions were about whether something was fixed.** B2, B4 and
 B10 were all fixed rather than merely found. B10 in particular: the twelve empty
 CSV columns now resolve and will carry data, rather than being removed.
+
+## 7 October 2026, late — three more sweeps
+
+**Colours written on both surfaces.** 73 hexes appear as literals in both the
+app and the website. Most are already held: the storycard grounds by
+check-card-tints, the annotation and conflict palettes by their own gates. Two
+were not.
+
+The budget's three headline stats took four hex values typed into each surface.
+What makes that worth fixing rather than noting is the comment beside the
+website's copy, which records that the LABELS for those same three numbers
+drifted once already and "the two tools came to disagree about which numbers a
+budget has". They are in both budget modules now and check-budget-mirror
+compares them the way it compares a number.
+
+The two people's colours on a glance ground were the other. On that dark panel
+the partner is a lighter blue than on a storycard, deliberately. check-section-names
+was written for exactly this failure on the base pair and was checking the base
+pair only.
+
+**Text contrast across the static site**, which nothing measured. 37 pages, 181
+runs of text below the readable ratio, 35 distinct colour pairs. It is a report
+rather than a gate, named report-contrast.mjs so check-gates-run does not demand
+it be wired in: most of what it finds is the brand orange used as small text,
+and that is a palette decision for Ellie. app/CONTRAST.md splits it into the
+four that miss by two per cent, the three that are a real decision, and the
+three that are white dimmed by opacity rather than a colour at all. Seven of the
+ten I would take without discussion and have said so in TASKS.md as B19. None
+is changed.
+
+**One habit worth repeating.** I restored a file from a backup taken BEFORE the
+fix twice today, and both times noticed only because a gate went on failing
+after the "restore". A copy is a restore point only if it was made after the
+thing you want to keep.
