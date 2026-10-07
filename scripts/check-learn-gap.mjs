@@ -132,12 +132,46 @@ fromPage("LEARN_GAP as the block's bottom padding", /paddingBottom: LEARN_GAP,/,
  * AppHome: a component that can only be checked by being signed in is a
  * component nothing checks. That is in TASKS.md rather than left implied.
  */
-const BUDGET = fromPage(
-  'the budget expression',
-  /minHeight: \(learnPeek && learnTop && learnRoom\)\s*\n\s*\? `\$\{([^}]+)\}px`/,
-  // eslint-disable-next-line no-new-func
-  (m) => Function('learnRoom', 'learnTop', 'learnPeek', `return ${m[1]};`),
-);
+/**
+ * ── THE BLOCK'S WHOLE STYLE OBJECT, LIFTED AND APPLIED ────────────────────
+ * Not the budget line alone. This gate used to rebuild the block's styles by
+ * hand from that one expression, and the page then shipped with `minHeight: 0`
+ * three lines below the budget in the same object: the later key wins, the
+ * block had no minimum at all, and this passed for a day because its harness
+ * applied a budget the page did not.
+ *
+ * So the object literal comes out of src/App.jsx by brace depth and is
+ * evaluated with the measured values bound, which means a stray override, a
+ * renamed property or a deleted line changes what this renders.
+ * check-duplicate-keys covers the repeated-key case across the tree; this makes
+ * the gate stop lying about this particular block.
+ */
+const BLOCK_STYLE = (() => {
+  const at = src.indexOf('<div ref={learnAboveRef} style={{');
+  if (at < 0) {
+    console.error('[check-learn-gap] could not find the block\'s style object in src/App.jsx.'
+      + ' Refusing to pass.');
+    process.exit(1);
+  }
+  const open = src.indexOf('{{', at) + 1;
+  let depth = 0;
+  let end = -1;
+  for (let i = open; i < src.length; i += 1) {
+    if (src[i] === '{') depth += 1;
+    else if (src[i] === '}') { depth -= 1; if (depth === 0) { end = i + 1; break; } }
+  }
+  if (end < 0) {
+    console.error('[check-learn-gap] the block\'s style object does not close. Refusing to pass.');
+    process.exit(1);
+  }
+  const literal = src.slice(open, end);
+  if (!/minHeight/.test(literal) || !/paddingBottom: LEARN_GAP/.test(literal)) {
+    console.error('[check-learn-gap] the lifted style object carries no minHeight or no'
+      + ' paddingBottom: LEARN_GAP, so it is not the block this gate is about. Refusing to pass.');
+    process.exit(1);
+  }
+  return literal;
+})();
 const SCROLL_ROOM = fromPage(
   'how the scroller\'s room is measured',
   /const room = Math\.round\(([^)]+(?:\([^)]*\))?[^)]*)\);/,
@@ -204,7 +238,7 @@ import { AppLearnReading } from ${JSON.stringify(`${ROOT}src/App.jsx`)};
 import { quoteFit } from ${JSON.stringify(`${ROOT}attune-app/src/lib/insight-fit.js`)};
 
 const LEARN_GAP = ${LEARN_GAP};
-const budget = ${BUDGET.toString()};
+const blockStyle = (LEARN_GAP, learnPeek, learnTop, learnRoom) => (${BLOCK_STYLE});
 const MARGIN = ${JSON.stringify(MARGIN)};
 const FIT_BASE = ${FIT_BASE}, FIT_LEADING = ${FIT_LEADING}, FIT_CITE_LEADING = ${FIT_CITE_LEADING};
 const ARTICLES = ${JSON.stringify(IN_PRACTICE)};
@@ -249,7 +283,10 @@ function Page({ insight, isMobile, banner, furniture }) {
   const scale = base / FIT_BASE;
   /* The budget, not the rendered block: see the note in src/App.jsx. Reading
      the rendered height is a feedback loop once the block takes a minimum. */
-  const budgetBox = (room && top && peek) ? budget(room, top, peek) - LEARN_GAP : 0;
+  /* The budget the quote is fitted to, read back off the style the page gives
+     the block rather than computed a second way here. */
+  const mh = parseFloat(blockStyle(LEARN_GAP, peek, top, room).minHeight) || 0;
+  const budgetBox = mh ? mh - LEARN_GAP : 0;
   const r = (budgetBox && toolsH) ? budgetBox - toolsH - furniture : 0;
   const fit = above.w > 0 ? quoteFit({ text: insight.body, room: Math.max(1, r) / scale, width: above.w / scale }) : null;
   const q = fit ? Math.round(fit.size * scale) : base;
@@ -260,11 +297,9 @@ function Page({ insight, isMobile, banner, furniture }) {
       <div data-dash-scroll="" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, overflowY: 'auto' }}>
         <div style={{ background: 'linear-gradient(120deg,#C8522E,#6B3FA0,#1B5FE8)', flexShrink: 0, height: banner }} />
         <div style={{ padding: isMobile ? '0 1.25rem' : '0 2rem', background: '#5a6ea8' }}>
-          <div ref={aboveRef} style={{
-            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-            minHeight: (peek && top && room) ? budget(room, top, peek) + 'px' : undefined,
-            minWidth: 0, paddingBottom: LEARN_GAP, boxSizing: 'border-box',
-          }}>
+          {/* The page's own style object, lifted out of src/App.jsx and applied
+              here, rather than a hand-built copy of it. */}
+          <div ref={aboveRef} style={blockStyle(LEARN_GAP, peek, top, room)}>
             <div ref={toolsRef} style={{ height: 96, flexShrink: 0, background: 'rgba(255,255,255,0.2)' }} />
             <div id="insight" style={{ marginTop: isMobile ? MARGIN.mobile : MARGIN.desktop, color: 'white' }}>
               <div style={{ fontSize: '0.58rem', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.9rem' }}>INSIGHT OF THE DAY</div>
