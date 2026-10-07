@@ -54,7 +54,7 @@
 // than quietly folded in, because a gate that guesses at a design decision
 // will encode the guess.
 
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, relative } from 'path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -114,6 +114,12 @@ function canon(block) {
     // active link was <a href="/home" class="active"> normalises to
     // <a href="/home" > and never matches one that was plain.
     .replace(/\s*\bactive\b/g, '')
+    // The mobile menu marks the current page with an inline style rather than
+    // a class: style="color:var(--ink);font-weight:600" on the link to the page
+    // you are on. It is the same declaration as `active` above, written the
+    // other way, and it is the reason this block legitimately differs between
+    // pages. Normalised for that reason and no other.
+    .replace(/\s*style="color:var\(--ink\);font-weight:600"/g, '')
     .replace(/\s*class="\s*"/g, '')
     .replace(/\s+>/g, '>')
     // Whitespace between tags. Some pages write class="logo"><svg and others
@@ -126,12 +132,40 @@ function canon(block) {
 
 const problems = [];
 
+/**
+ * ── EVERY PAGE, NOT EVERY PAGE IN ONE DIRECTORY ───────────────────────────
+ * This walked `public/` and nothing under it, so the seventeen In Practice
+ * pages in public/practice/ were never once compared, and they had drifted:
+ *
+ *   their nav listed /offerings twice, as "What's included" and as "Packages",
+ *   and the FAQ page twice, as "FAQs" and as "Reviews";
+ *   it had no Wedding Registry, which every other page has had since it
+ *   launched;
+ *   and their mobile menu offered /app and /reviews where every other page
+ *   offers /wedding-registry.
+ *
+ * The gate printed "one nav across 12 pages" the whole time and was telling the
+ * truth about the twelve it could see. A file walk that does not recurse is the
+ * same blindness as a matcher that only knows one spelling.
+ */
+function htmlFiles(dir = PUBLIC, prefix = 'public') {
+  const out = [];
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) {
+      out.push(...htmlFiles(full, `${prefix}/${name}`));
+      continue;
+    }
+    if (name.endsWith('.html')) out.push({ name, rel: `${prefix}/${name}`, full });
+  }
+  return out;
+}
+
 function compare(kind, openRe, tag, exempt, stripStyle) {
   const groups = new Map();
-  for (const name of readdirSync(PUBLIC)) {
-    if (!name.endsWith('.html') || exempt.has(name)) continue;
-    const rel = `public/${name}`;
-    const text = readFileSync(join(PUBLIC, name), 'utf8');
+  for (const { name, rel, full } of htmlFiles()) {
+    if (exempt.has(name)) continue;
+    const text = readFileSync(full, 'utf8');
     let block = blockOf(text, new RegExp(openRe), tag);
     if (!block) continue;
     if (stripStyle) block = block.replace(/<style>[\s\S]*?<\/style>/g, '');
@@ -156,6 +190,18 @@ function compare(kind, openRe, tag, exempt, stripStyle) {
 
 const navs = compare('nav', '<nav[^>]*>', 'nav', new Set(NAV_EXEMPT.keys()), true);
 const foots = compare('footer', '<footer[^>]*class="[^"]*site-footer[^"]*"[^>]*>', 'footer', new Set(), true);
+
+/**
+ * ── AND THE MOBILE MENU, WHICH IS CHROME TOO ──────────────────────────────
+ * A third pasted block, on two dozen pages, that nothing had ever compared.
+ * The nav and the footer were covered and this was not, so the In Practice
+ * pages' mobile menu offered /app and /reviews where every other page offers
+ * /wedding-registry, and the only way to see that was to open the pages.
+ *
+ * It is the menu a customer on a phone actually uses, which makes it the half
+ * of the nav that matters most and the half that was unwatched.
+ */
+const menus = compare('mobile menu', '<div[^>]*id="mobile-menu"[^>]*>', 'div', new Set(), true);
 
 /**
  * The React app's footer, which is not in public/ and so was invisible above.
@@ -222,5 +268,6 @@ if (problems.length) {
 
 console.log(
   `[check-chrome] one nav across ${navs} pages (${NAV_EXEMPT.size} named variants), `
-  + `one footer across ${foots}, and src/App.jsx's ${site.size} footer links agree with it. `
+  + `one footer across ${foots}, `
+  + `one mobile menu across ${menus}, and src/App.jsx's ${site.size} footer links agree. `
   + `Footer style blocks are NOT covered; see the header.`);
