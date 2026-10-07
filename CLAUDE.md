@@ -375,17 +375,21 @@ anything is the same failure as a second copy of a rule. The question to ask
 before writing one is not "how would I build this" but "what already builds
 this", and the answer lives in `api/` and `public/` more often than it looks.
 
-`check-workbook-view.mjs` holds that page and `api/workbook-view.js` to the same
-set of keys, so a caller that drops one fails the build rather than rendering a
-workbook with a blank half.
+`check-workbook-view.mjs` holds that page and the payload `src/App.jsx` hands it
+to the same set of keys, so a caller that drops one fails the build rather than
+rendering a workbook with a blank half.
 
 It used to say "its two callers", and that went stale without anyone noticing,
 which is this file doing the thing it warns about four paragraphs up. The app's
-path through `/api/workbook-view` was removed deliberately, because rendering in
-the browser drew the wrong document, and `fetchWorkbookView` was left behind
-after its only caller went. So the endpoint is deployed, auth-gated and called
-by nothing in the tree. An unused twin of a removed path is what somebody wires
-back in, so it is deleted; whether the route itself stays is in TASKS.md.
+path through the workbook-view route was removed deliberately, because
+rendering in the browser drew the wrong document, and `fetchWorkbookView` was
+left behind after its only caller went, which left a deployed route nothing
+called. Ellie's answer was to remove it, so the endpoint and its handler are
+gone and the website is the page's one caller.
+
+(The handler is not named here as a path on purpose: check-maps-are-current
+fails on a document that names a file not in the tree, and it caught this
+sentence doing exactly that while describing the deletion.)
 
 **A page that shows people what the product does is a copy of the product.**
 /email-preview held six hand-written mock-ups of emails while the product sent

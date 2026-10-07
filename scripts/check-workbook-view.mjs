@@ -67,29 +67,31 @@ function keysOfPayload(source, marker) {
 
 const problems = [];
 
-const fromApp = keysOfPayload(read('api/workbook-view.js'), '      data: {');
+/*
+ * api/workbook-view.js was the app's way to this page and is gone: its last
+ * caller, fetchWorkbookView, was deleted after the path it served was removed
+ * for drawing the wrong document, and Ellie's answer to "keep the route or
+ * remove it" was remove it.
+ *
+ * So there is one caller now, and this gate is the page against that caller.
+ * It still earns its place: public/workbook-render.html is the workbook, the
+ * website hands it a payload by query string, and a key dropped from that
+ * payload renders a workbook with a blank half rather than failing.
+ */
 const fromSite = keysOfPayload(read('src/App.jsx'), 'const _data = encodeURIComponent(JSON.stringify({');
 const page = read('public/workbook-render.html');
 const readByPage = [...page.matchAll(/\bD\.([A-Za-z_]\w*)/g)].map((m) => m[1]);
 
-if (!fromApp) problems.push('api/workbook-view.js no longer builds a `data` object for the page');
 if (!fromSite) problems.push('src/App.jsx no longer builds a payload for /workbook-render');
 if (!readByPage.length) problems.push('public/workbook-render.html reads nothing off its payload');
 
-if (fromApp && fromSite && readByPage.length) {
+if (fromSite && readByPage.length) {
   const wanted = new Set(readByPage);
-  const missingFromApp = [...wanted].filter((k) => !fromApp.includes(k));
-  const missingFromSite = [...wanted].filter((k) => !fromSite.includes(k));
-  const unread = fromApp.filter((k) => !wanted.has(k));
-
-  for (const k of missingFromApp) {
-    problems.push(`the page reads D.${k} and api/workbook-view.js does not send it`);
-  }
-  for (const k of missingFromSite) {
+  for (const k of [...wanted].filter((k) => !fromSite.includes(k))) {
     problems.push(`the page reads D.${k} and src/App.jsx does not send it`);
   }
-  for (const k of unread) {
-    problems.push(`api/workbook-view.js sends ${k} and the page never reads it`);
+  for (const k of fromSite.filter((k) => !wanted.has(k))) {
+    problems.push(`src/App.jsx sends ${k} and the page never reads it`);
   }
 }
 
@@ -102,4 +104,5 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-workbook-view] ${readByPage.length} payload keys, sent by both surfaces and read by the page.`);
+console.log(`[check-workbook-view] ${readByPage.length} payload keys: everything the workbook page`
+  + ' reads is sent by its one remaining caller, and nothing is sent that it does not read.');

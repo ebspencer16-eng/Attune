@@ -55,7 +55,7 @@
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  *
- * public/workbook-render.html stays too. It is what /api/workbook-view serves
+ * public/workbook-render.html stays too. It is the workbook the website prints
  * and the website's own print path, and check-workbook-view holds it to its
  * callers. What is forbidden is the APP reaching for it, because the app's
  * workbook is the PDF.
