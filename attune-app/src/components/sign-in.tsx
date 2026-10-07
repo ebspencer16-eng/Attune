@@ -21,7 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { OAUTH_PROVIDERS, isAuthConfigured, signIn, signInWithProvider } from '@/api/auth';
 import type { OAuthProvider } from '@/api/auth';
 import BrandHeader from '@/components/brand-header';
-import { BlueGround, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
+import { SignInGround, Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -86,7 +86,17 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
   } as const;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: BlueGround[0] }}>
+    /* ── SOFTER, AND IN BOTH PLACES ──────────────────────────────────────
+       Ellie: "This page is too dark." This screen painted BlueGround at full
+       strength, which is the blue she has already had softened twice. It takes
+       the same softening the Learn tab does.
+
+       Both the safe area and the gradient, because the safe area is what shows
+       behind the notch and above the gradient: changing one would have left a
+       dark band at the top of a lightened page. The theme's own note warns
+       that a constant with the right-sounding name has stood in for a screen
+       three times here. */
+    <SafeAreaView style={{ flex: 1, backgroundColor: SignInGround[0] }}>
       {/* ── THE FIRST SCREEN, ON THE BRAND'S OWN GROUND ──────────────────
           Ellie: "Sign in screen on the blue ground with the lockup sounds
           right." It is the first thing a new customer sees and it was the
@@ -94,7 +104,7 @@ export default function SignIn({ onSignedIn, rejectedReason }: { onSignedIn: () 
           is the home screen's, from one place, and the lockup is the same one
           every tab carries. */}
       <LinearGradient
-        colors={[...BlueGround]}
+        colors={[...SignInGround]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0.9, y: 1 }}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}

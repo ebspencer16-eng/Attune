@@ -99,6 +99,32 @@ const lighten = (hex: string, t: number) => {
 export const LearnGround = [lighten(BlueGround[0], 0.2), lighten(BlueGround[1], 0.2)] as const;
 
 /**
+ * The sign-in screen's ground: the same blue, lighter at the top only.
+ *
+ * Ellie: "This page is too dark." It painted BlueGround at full strength.
+ *
+ * ── WHY ONLY THE TOP STOP MOVES ───────────────────────────────────────────
+ * Because the bottom one has nowhere to go. White type needs 4.5 to 1 and this
+ * screen sets white type on the gradient:
+ *
+ *   #2A3A6E, the top, clears 10.89 to 1. It can lighten a long way.
+ *   #4A6CD4, the foot, clears 4.79 to 1 already. Lightening it by the fifth
+ *   the Learn tab uses takes it to 3.34, and the form's own labels stop being
+ *   readable.
+ *
+ * The first version of this softened both, the way LearnGround does, and the
+ * numbers caught it. The Learn tab gets away with that pairing because its
+ * white type sits at the dark end and a white sheet covers the rest; a sign-in
+ * form sits in the middle of the page.
+ *
+ * So the top lightens by a quarter, which is most of what "too dark" is about
+ * and still clears 5.24 to 1, and the foot stays where she already has it.
+ * check-ground-contrast measures the app's grounds now; it only ever covered
+ * the results ones, which is why this was never going to be caught.
+ */
+export const SignInGround = [lighten(BlueGround[0], 0.25), BlueGround[1]] as const;
+
+/**
  * The colour the home screen's ground finishes on.
  *
  * ── THE SOFTENING WENT TO A CONSTANT THE HOME SCREEN DOES NOT USE ─────────
