@@ -38,6 +38,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { LIFE_QUESTIONS } from '../api/_questions.js';
+import { ANNIVERSARY_QUESTIONS, SATISFACTION_QUESTION_IDS } from '../api/_anniversary-questions.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -97,6 +98,60 @@ if (!checked) {
     + ' or public/. Refusing to pass: a gate that has lost its subject must never report'
     + ' success.');
   process.exit(1);
+}
+
+/**
+ * ── AND THE THREE SATISFACTION SCALES, WHICH WERE THE SAME BUG ────────────
+ * api/admin-csv.js exported three satisfaction columns per partner, in two
+ * different CSVs, by the ids `sf_feel`, `sf_future` and `sf_growth`. None of
+ * the three has ever been an id in ANNIVERSARY_QUESTIONS; the real ones are
+ * a_sat_conn, a_sat_comm and a_sat_fun. So twelve columns across the two
+ * exports have always come out empty, and an empty column reads as a question
+ * nobody answered rather than a key that does not resolve.
+ *
+ * It was written out twice in the same file, the second time under a comment
+ * reading "If any of those change, keep this list in sync", which is this
+ * codebase's failure mode given as an instruction.
+ *
+ * Both now read SATISFACTION_QUESTION_IDS, which is derived from the question
+ * set: the scale questions in the satisfaction category. Checked here because
+ * it is the same rule this gate exists for — when one list indexes into
+ * another, every key in it has to resolve — and a second fixture for it would
+ * be a second version of this one.
+ */
+{
+  const annIds = new Set(ANNIVERSARY_QUESTIONS.map((q) => q.id));
+  if (!SATISFACTION_QUESTION_IDS.length) {
+    console.error('[check-life-keys-resolve] the satisfaction scales derive to an empty list,'
+      + ' so the CSV columns would be silently dropped rather than empty. Refusing to pass.');
+    process.exit(1);
+  }
+  for (const id of SATISFACTION_QUESTION_IDS) {
+    if (!annIds.has(id)) {
+      fails.push(`the satisfaction id "${id}" is not a question in ANNIVERSARY_QUESTIONS.`);
+    }
+  }
+  /* And nobody writes the ids out again. An `sf_` prefix is the shape the old
+     copy took; the general form is a literal list beside the word satisfaction. */
+  for (const file of files) {
+    /* Comments blanked first. These files explain the bug they came from and
+       quote the dead ids while doing it, and the first version of this scan
+       reported that as the bug: a gate that reads a comment as code punishes a
+       file for saying what went wrong. */
+    const src = readFileSync(file, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + ' '.repeat(m.length - pre.length));
+    const rel = file.replace(ROOT, '');
+    if (/\bsf_(feel|future|growth)\b/.test(src)) {
+      fails.push(`${rel} still names sf_feel, sf_future or sf_growth, which resolve to nothing.`);
+    }
+    const m = /const (\w*(?:SAT|SATISFACTION)\w*)\s*=\s*\[\s*['"]/.exec(src);
+    if (m) {
+      fails.push(`${rel} lists the satisfaction ids by hand as \`${m[1]}\`.`
+        + '\n      SATISFACTION_QUESTION_IDS is derived from the question set, which is what stops'
+        + '\n      the list and the questions parting again.');
+    }
+  }
 }
 
 if (fails.length) {

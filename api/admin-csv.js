@@ -20,6 +20,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { SATISFACTION_QUESTION_IDS } from './_anniversary-questions.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 
 import { packageIncludes } from './_lib/ownership.js';
@@ -160,7 +161,11 @@ async function buildCombinedData(admin) {
   // Column layout: [category_label, column_name]. Category only appears on
   // the first column of each span.
   const DIMS = Object.keys(DIM_KEYS);
-  const SAT_KEYS = ['sf_feel', 'sf_future', 'sf_growth'];
+  /* The three satisfaction scales, from the question set that defines them.
+     This was ['sf_feel', 'sf_future', 'sf_growth'], and none of those three has
+     ever been an id in ANNIVERSARY_QUESTIONS, so these six columns have always
+     been empty. An empty column reads as a question nobody answered. */
+  const SAT_KEYS = SATISFACTION_QUESTION_IDS;
 
   const cols = [
     ['Identity', 'anon_couple_id'],
@@ -608,10 +613,10 @@ async function exportResults(admin) {
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
 
   const dimCols = (prefix) => Object.keys(DIM_KEYS).map(d => `${prefix}_${d}`);
-  // Ex3 has three scale questions specifically for couple satisfaction.
-  // Keys from ANNIVERSARY_QUESTIONS in src/App.jsx — sf_feel, sf_future, sf_growth.
-  // If any of those change, keep this list in sync.
-  const SATISFACTION_KEYS = ['sf_feel', 'sf_future', 'sf_growth'];
+  /* The same three, and the second copy of them in this file. The comment here
+     used to read "If any of those change, keep this list in sync", which is
+     this codebase's failure mode given as an instruction. */
+  const SATISFACTION_KEYS = SATISFACTION_QUESTION_IDS;
   const satCols = (prefix) => SATISFACTION_KEYS.map(k => `${prefix}_${k}`);
 
   const headers = [

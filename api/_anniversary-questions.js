@@ -43,6 +43,25 @@ export const ANNIVERSARY_QUESTIONS = [
  * Stored on each completion as profiles.ex3_version, so answers can later be
  * segmented by which wording someone actually saw.
  */
+/**
+ * ── THE THREE SATISFACTION SCALES, DERIVED ────────────────────────────────
+ * The admin CSV exports these three per partner, and it asked for them by the
+ * ids `sf_feel`, `sf_future` and `sf_growth` under a comment reading "Keys from
+ * ANNIVERSARY_QUESTIONS in src/App.jsx... If any of those change, keep this
+ * list in sync". None of the three has ever been an id here, so six columns in
+ * one CSV and six in another have always come out empty, and an empty column
+ * looks exactly like a question nobody answered.
+ *
+ * Exported so the list cannot be typed again: they are the scale questions in
+ * the "How We're Doing" category, which is what makes them the satisfaction
+ * block rather than a naming convention someone has to keep.
+ */
+export const SATISFACTION_CATEGORY = "How We're Doing";
+
+export const SATISFACTION_QUESTION_IDS = ANNIVERSARY_QUESTIONS
+  .filter((q) => q.category === SATISFACTION_CATEGORY && q.type === 'scale')
+  .map((q) => q.id);
+
 export const ANNIVERSARY_VERSION = 1;
 
 /**
