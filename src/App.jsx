@@ -16694,10 +16694,24 @@ export default function App() {
                        visible and recoverable. The other way hides the end of a
                        sentence under a white panel and looks like a bug nobody
                        can describe. */
+                    /* ── AND minHeight: 0 WAS BELOW THIS, SO IT WON ──────
+                       This object carried `minHeight: 0` already, left from
+                       when the budget above was a `height`. Two minHeights in
+                       one style object is not an error: the later one wins
+                       silently, so from the moment the budget became a minimum
+                       it was overridden by a zero and the block had no minimum
+                       at all.
+
+                       check-learn-gap passed throughout, because its harness
+                       builds the block from the budget expression lifted out of
+                       this file rather than rendering this style object. A gate
+                       pointed at the wrong copy reports success about code
+                       nobody runs, and this time the wrong copy was the one I
+                       wrote for it. check-duplicate-keys exists so the next one
+                       fails the build instead. */
                     minHeight: (learnPeek && learnTop && learnRoom)
                       ? `${Math.max(0, learnRoom - learnTop - learnPeek)}px`
-                      : undefined,
-                    minHeight: 0,
+                      : 0,
                     /* See LEARN_GAP. Without this, space-between puts the
                        insight's last row against the top of the sheet. */
                     paddingBottom: LEARN_GAP,

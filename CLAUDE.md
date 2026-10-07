@@ -315,6 +315,24 @@ a blank shell. Reading found none of those.
 part worth keeping: when a surface is deployed, sweep it from outside before
 reasoning about it from inside.
 
+**A key written twice in one object literal loses the first, silently, and a
+gate that rebuilds the markup cannot see it.** The Learn block's budget is a
+`minHeight`, which is the whole of that fix, and the style object already
+carried `minHeight: 0` from when the budget was a `height`. The new line went in
+above it, so the zero won and the block had no minimum at all for a day.
+
+check-learn-gap passed the whole time. Its harness builds the block from the
+budget expression lifted out of `src/App.jsx` rather than rendering that style
+object, so it applied a budget the page did not. The rule this file already
+states, now pointed at a gate I wrote: a gate aimed at the wrong copy reports
+success about code nobody runs.
+
+`check-duplicate-keys.mjs` asks Babel for every object expression and fails on a
+plain key written twice. Its first version walked lines and counted braces and
+reported three findings, two of which were the two branches of a ternary:
+`cond ? { id } : { id }` is two objects with one key each, and no line-based
+scan can tell those apart.
+
 **A green build is not a claim that the names resolve.** `vite build` exits 0
 on a file that reads a name nothing declares: esbuild treats an unresolved
 identifier as a global and emits it. That was tested by planting one in
