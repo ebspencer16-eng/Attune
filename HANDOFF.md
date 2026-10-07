@@ -2049,3 +2049,62 @@ is back in the picture area, the body is white, and the shading behind each tile
 is the shadow it floats on.
 
 Everything else from the round is approved and in section 4.
+
+## 7 October 2026 — a bug scan, and what it found
+
+Five real bugs, each fixed and gated, each measured rather than reasoned about.
+`npm run check` is green across 231 gates, the smoke drives all 29 sections, 37
+static pages and 5 exercises clean, and 58 endpoints answer from outside with no
+500s.
+
+**The shadow was fading; the box around it was cutting it.** `overflow-x: auto`
+computes `overflow-y` to auto as well, so the shelf row clipped its cards'
+shadows twenty points short. Nothing was wrong with the shadow, which is why
+looking at the card twice found nothing. check-shadow-room asks the browser:
+for every scrolling element, every shadowed descendant's reach against that
+row's padding, on all four sides.
+
+**Premium was taxed on a workbook it is not charged for.** Found by grepping for
+functions defined twice, which is the one command that finds this codebase every
+time. `itemBasePrice` and `itemAddonTotal` lived in both create-payment-intent
+and calculate-tax, and only one knew premium includes the workbook. Four cart
+shapes taxed a customer on $19 to $39 they never pay, with a Stripe line to
+match. One pricer now, in `api/_lib/cart-pricing.js`. Verified against the live
+endpoint after deploy: all six carts agree.
+
+Three gates reacted to that move and each was right. check-server-undefined
+caught a rename, check-package-prices refused because it expected two add-on
+tables and found one, check-promo-totals refused because the functions it lifts
+had left the file. That is what a gate noticing its own subject moved looks like.
+
+**Couple type telemetry has recorded nothing, for every couple.** track-type
+validated against 25 names the product stopped using; every real id came back
+400. get-feedback then read those same 25 keys. Confirmed in production.
+
+**Style codes were dropped the same way**, and two of the six axes were in every
+code and counted nowhere. The validator wanted four characters from an alphabet
+missing half the letters, and skipped rather than refused.
+
+Both now derive from their tables. The shared style-code module was WRONG on its
+first attempt, which is the part worth remembering: it differed from the
+website's own reading on 7,104 of 20,000 score sets, because four axes ask
+whether a score is above neutral and two ask whether it is below, so an exact 3
+goes opposite ways. A sweep that avoided 3 would have shown nothing.
+
+**Seventeen pages had a nav nothing had ever checked.** check-chrome's file walk
+did not recurse, so `public/practice/` was invisible. Their nav offered
+/offerings twice under two labels and the FAQ page twice, one of them as
+"Reviews", and had no Wedding Registry. The mobile menu was a third piece of
+chrome on two dozen pages that neither check had ever compared. All three are
+compared now, across 29 pages.
+
+**Two things are for Ellie, in section 1.** Sixteen of the seventeen In Practice
+pages have no footer, so legal, privacy choices and contact cannot be reached
+from them; they never had one and the seventeenth got one by accident, so it is
+a decision rather than drift. And whatever is counted in the store under the 25
+retired couple-type names is a different taxonomy that cannot be read as couple
+types.
+
+One process note: I destroyed my own uncommitted fix with `git checkout --`
+while restoring a plant, which is the sixth time that command has done it here.
+The restore pattern is `cp`, both directions, every time.

@@ -4,6 +4,8 @@
 
 | # | What I need from you |
 |--|--|
+| B5 | **Should the In Practice articles have a footer?** 16 of the 17 have none, so legal, privacy choices and contact cannot be reached from them. They never had one; the 17th got one by accident. Add to all, or remove the one. |
+| B6 | **The old couple-type counts are a different taxonomy.** Whatever is stored under the 25 retired names cannot be read as couple types. Leave them, or I can clear them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -21,6 +23,11 @@
 
 | # | Built, needs your eye |
 |--|--|
+| L2c | **The shadow was fading; the row around it was cutting it.** `overflow-x: auto` makes a row clip vertically too, and the card's shadow reaches 20 points below it where the row allowed 5. It had room on no side; it has room on all four now. |
+| B1 | **Premium was taxed on a workbook it is not charged for.** Two files priced the cart and only one knew premium includes the workbook, so the tax was computed on $19 to $39 the customer never pays, and Stripe was sent a line the charge does not contain. One pricer now. Verified on the live site: all six carts agree. |
+| B2 | **Couple type telemetry has recorded nothing, for every couple.** The endpoint checked an incoming type against 25 names the product stopped using; every real one came back "invalid type". The admin then read those same 25 keys, so the chart was empty. Confirmed against production. |
+| B3 | **Style codes were dropped too, and two axes were never counted.** The code has six axes; the endpoint accepted four characters and the admin read 16 four-letter keys. Nothing matched, and nothing said so. |
+| B4 | **17 In Practice pages had a nav nothing had ever checked.** The gate read one directory and not the folder under it. Their nav offered Packages twice and the FAQ page twice (as "Reviews"), and had no Wedding Registry. The phone menu was its own third copy that nothing compared at all. |
 | L1b | **The peek is 148 on a laptop, down from 190, and the page fits now.** The saving came out of the lid, the pills, the heading (2.4rem to 1.9), the search box and the four featured tiles, plus 16 points of dead space between the tiles and the quotation so the heading did not have to shrink further. A browser window under about 700 points tall still cannot hold all of it; the gate says which sizes are expected to fit and fails if an ordinary one stops. |
 | L2c | **The tint is back in the picture area only.** Shading the whole tile made each shelf read as a band of colour, because every tile on a shelf is one colour and they sit in a row. The shading behind each tile is its shadow. |
 | R195 | Sign in on the blue with the lockup. Built, not seen by me. |
@@ -37,7 +44,8 @@
 
 | Verified by you | What it was |
 |--|--|
-| L1 | The In Practice sheet was painted over the end of the insight, because the block above it had a fixed height. |
+| L1b | The Learn page could not hold the tools, the insight and the peek at once; the peek gave 42 points. |
+| L1 | The In Practice sheet was painted over the end of the insight. |
 | L2d | The In Practice tiles were too big. |
 | L2b | Reading an article on the website did not count as read. |
 | N15 | The Try lines came off What Comes Next on both surfaces. |

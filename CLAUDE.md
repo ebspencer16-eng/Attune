@@ -513,6 +513,31 @@ vacuous. **When a gate compares two implementations, each one's data has to come
 from its own side.** A fixture shared between them turns a comparison into an
 assertion that a function equals itself.
 
+**A file walk that does not recurse is the same blindness as a matcher that
+knows one spelling.** check-chrome printed "one nav across 12 pages" for months
+and was telling the truth about the twelve it could see: its `readdirSync` read
+`public/` and nothing under it, so the seventeen In Practice pages in
+`public/practice/` had never once been compared. They had drifted into a nav
+offering /offerings twice under two labels and the FAQ page twice, one of those
+as "Reviews", with no Wedding Registry at all.
+
+Adding the directory also found a third piece of chrome that neither the nav
+check nor the footer check had ever looked at: the mobile menu, pasted into two
+dozen pages, which is the menu a customer on a phone actually uses. The half of
+the nav that matters most was the half nothing watched.
+
+So when a gate reports a count, ask what it counted. Eighteen gates here walk a
+directory without recursing; most are scanning a flat one on purpose and say so,
+and the one that was not said nothing either way. If a scan's scope is
+deliberate, write the reason beside it, the way check-stripped-fields does:
+"Endpoints are the top level of api/. Underscore files are libraries."
+
+**A gate that reads a comment as code punishes a file for saying what went
+wrong.** check-style-codes flagged track-type.js for carrying a four-letter code
+pattern, and the pattern it found was quoted inside the comment explaining that
+the four-letter pattern had been the bug. Blank comments before scanning, or the
+cost of writing down what happened is a failing build.
+
 **A gate that nothing runs is not a gate.** Two were sitting in `scripts/`
 connected to nothing: `check-section-aliases`, which stops a page rename making
 every mark on that page invisible, and `check-tab-reset`, which Ellie asked for
