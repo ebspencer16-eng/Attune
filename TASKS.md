@@ -4,6 +4,7 @@
 
 | # | What I need from you |
 |--|--|
+| B12 | **The stored gap-tier counts were banded by the old cut points.** The four tier names did not change, only the lines between them, so old and new counts mix. Leave them, or I can clear them alongside B6. |
 | B5 | **Should the In Practice articles have a footer?** 16 of the 17 have none, so legal, privacy choices and contact cannot be reached from them. They never had one; the 17th got one by accident. Add to all, or remove the one. |
 | B6 | **The old couple-type counts are a different taxonomy.** Whatever is stored under the 25 retired names cannot be read as couple types. Leave them, or I can clear them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -23,6 +24,11 @@
 
 | # | Built, needs your eye |
 |--|--|
+| B7 | **The band a couple is told they are in was not the band they were counted in.** Their average gap was banded at 0.75/1.50/2.25 on their results page and at 1.0/1.8/2.5 before being stored, so the admin counted a couple as more aligned than they had been told on 19% of the range. One banding now, and the cut points are multiples of the threshold that already decides a single dimension. |
+| B8 | **Four more copies of two more bandings.** How well one person reads the other, and how well the two read each other, were each written out in the admin as well as in the results module. They agreed, which is the state B7 was in until it did not. |
+| B9 | **The expectations bars were two different colours.** Green above 80/amber/orange in the app, green above 75/orange/red on the site. The app's ramp carried a comment saying a percentage means the same thing wherever it appears; it did not. One ramp now, and it had three copies besides. |
+| B10 | **Twelve CSV columns have always been empty.** The admin exported the three couple-satisfaction scales by ids that have never existed. The real ones are a_sat_conn, a_sat_comm, a_sat_fun. An empty column reads as a question nobody answered. |
+| B11 | **The workbook told couples they were up to 71 points less aligned than their results did.** It counted only exact matches where the results page gives partial credit for being close. A couple one step apart on everything read 50 to 71 per cent on the site and 0 per cent in the workbook they keep. One methodology now. |
 | L2c | **The shadow was fading; the row around it was cutting it.** `overflow-x: auto` makes a row clip vertically too, and the card's shadow reaches 20 points below it where the row allowed 5. It had room on no side; it has room on all four now. |
 | B1 | **Premium was taxed on a workbook it is not charged for.** Two files priced the cart and only one knew premium includes the workbook, so the tax was computed on $19 to $39 the customer never pays, and Stripe was sent a line the charge does not contain. One pricer now. Verified on the live site: all six carts agree. |
 | B2 | **Couple type telemetry has recorded nothing, for every couple.** The endpoint checked an incoming type against 25 names the product stopped using; every real one came back "invalid type". The admin then read those same 25 keys, so the chart was empty. Confirmed against production. |

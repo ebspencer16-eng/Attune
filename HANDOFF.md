@@ -2108,3 +2108,54 @@ types.
 One process note: I destroyed my own uncommitted fix with `git checkout --`
 while restoring a plant, which is the sixth time that command has done it here.
 The restore pattern is `cp`, both directions, every time.
+
+## 7 October 2026, later — five more, all one shape
+
+The sweep kept paying, and every one of these is the same bug: one rule, two
+implementations, agreeing until they did not. `npm run check` is green across
+233 gates.
+
+**The band a couple is told they are in was not the band they were counted in.**
+Their average gap was banded at 0.75/1.50/2.25 on the results page and at
+1.0/1.8/2.5 before being stored, so the admin counted a couple as more aligned
+than they had been told across 19% of the range, always in that direction. The
+surviving cut points are multiples of STRENGTH, the threshold that already
+decides whether one dimension reads as a strength, so they move together.
+
+**Then four more copies of two more bandings**, found by sweeping for the shape
+rather than the instance: every place a number is banded into named strings. How
+well one person reads the other, and how well the two read each other, were each
+written out in the admin beside the module that already returned them.
+
+**The expectations bars were two different colours** on the two surfaces, under
+a comment in the app claiming "a percentage means the same thing wherever it
+appears". It had three copies besides that one.
+
+**Twelve CSV columns have always been empty.** The admin exported the three
+couple-satisfaction scales by ids that have never existed, written out twice in
+one file, the second time under "If any of those change, keep this list in
+sync". That is the third comment of that kind found in two days.
+
+**The workbook told couples they were up to 71 points less aligned than their
+results did.** It counted exact matches where the results page gives partial
+credit for being close. A couple one step apart on everything read 50 to 71 per
+cent on the site and 0 per cent in the workbook they keep. It had looked right
+for as long as anyone checked a couple who agree exactly, which is the one case
+where the two methods cannot differ.
+
+**The method that keeps working.** Three sweeps, each cheap, each finding
+something: `grep` for functions defined twice; a scan for numbers banded into
+named strings; and a grep for comments that admit a duplication ("mirrors",
+"keep in sync", "copy of"). The third is the best value of the three, because
+the comment is written at the moment someone knew it was a risk.
+
+**One honest correction.** I believed the workbook's exact-match comparison
+treated two people both claiming a task as agreement. It does not:
+buildWorkbookPayload normalises both sides to absolute names first. My first
+probe reported every domain at zero because it fed the wrong shape, and the
+numbers above are from the corrected one. Checking the harness before believing
+it is the whole lesson of this screen.
+
+**Two more decisions are in section 1** (B6, B12): the counts already stored
+under the retired couple-type names, and the gap-tier counts banded by the old
+cut points. Both are historic data that cannot be read as what it claims to be.
