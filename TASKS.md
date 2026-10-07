@@ -4,10 +4,9 @@
 
 | # | What I need from you |
 |--|--|
+| B12 | **Two old counters in the admin are mixing old numbers with new ones. One command clears both.** The couple-type chart counted under 25 names the product stopped using, and the "how different are they" chart sorted couples using lines I have since moved, under the same four names. So both charts hold a mix you cannot separate. Clearing makes each count one thing again. In Terminal, one line at a time: `npx vercel env pull .env.local` then `node --env-file=.env.local scripts/clear-legacy-counters.mjs`. That one only READS and prints. Run the same line with ` --confirm` on the end to clear. Then delete .env.local. |
 | B17a | **The push list, for your approval.** Ten below. Five already have copy and are raised in the app today, so pushing them needs no new words from you. Five are new and need copy. Say which you want and I build those. |
 | B17b | **Push needs three things only you can give.** An Apple push key through your developer account, a migration I write and you run to store each person's push token and their answer to being asked, and your decision on when the app asks permission. Nothing sends a push today. |
-| B12 | **The stored gap-tier counts were banded by the old cut points.** The four tier names did not change, only the lines between them, so old and new counts mix. Leave them, or I can clear them alongside B6. |
-| B6 | **The old couple-type counts are a different taxonomy.** Whatever is stored under the 25 retired names cannot be read as couple types. Leave them, or I can clear them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -25,26 +24,10 @@
 
 | # | Built, needs your eye |
 |--|--|
-| S20 | **Clicking an article no longer takes you out of your account.** Nothing was signing anyone out, and I measured that: a round trip to a static article page and back leaves every session key in place. What happened is the tile left the dashboard for a marketing page, which drops the signed-in chrome and puts "Sign in" in the corner. Articles open inside Learn now, from the same bodies the app reads. |
-| B5 | **The footer you like is on all 17 In Practice pages.** Checked in a browser that it renders the same there as on /home, not just that the markup is present. |
-| B15 | **`/api/workbook-view` is gone**, and the gate that watched it is repointed at the one caller that remains. |
-| R195 | **The sign-in page is lighter at the top.** The foot of that gradient could not move: white text on it is already at 4.79 to 1 and the softening I first wrote took it to 3.34, which is below readable. The top had room and went a quarter lighter. The app's own grounds had never been contrast checked; they are now. |
-| B12b | **A script to clear the legacy counters, and the two commands to run it.** It reads and prints first and deletes nothing until you add `--confirm`. See below. |
-| B16 | **A dead client function removed, and two stale claims corrected.** `fetchWorkbookView` outlived the path it served; CLAUDE.md said the workbook page was held "to its two callers" when one of them no longer existed. A stale map is the first thing every session reads. |
-| B13 | **Yesterday's Learn page fix was doing nothing, and I found it.** The style object already carried `minHeight: 0` and my budget line went in above it. A key written twice in one object loses the first silently, so the block had no minimum at all. The gate passed because its harness rebuilt the block instead of rendering the page's own style. Both halves are fixed and both are gated. |
-| B14 | **A dead copy of a live function, removed.** The server exported a storycard colour helper nothing has ever imported; the app has the real one. An unused twin is where someone edits the copy that looks canonical and nothing changes. The app's fallback colour table is now held to the server's, which matters for couples whose results predate that field. |
-| B7 | **The band a couple is told they are in was not the band they were counted in.** Their average gap was banded at 0.75/1.50/2.25 on their results page and at 1.0/1.8/2.5 before being stored, so the admin counted a couple as more aligned than they had been told on 19% of the range. One banding now, and the cut points are multiples of the threshold that already decides a single dimension. |
-| B8 | **Four more copies of two more bandings.** How well one person reads the other, and how well the two read each other, were each written out in the admin as well as in the results module. They agreed, which is the state B7 was in until it did not. |
-| B9 | **The expectations bars were two different colours.** Green above 80/amber/orange in the app, green above 75/orange/red on the site. The app's ramp carried a comment saying a percentage means the same thing wherever it appears; it did not. One ramp now, and it had three copies besides. |
-| B10 | **Twelve CSV columns have always been empty.** The admin exported the three couple-satisfaction scales by ids that have never existed. The real ones are a_sat_conn, a_sat_comm, a_sat_fun. An empty column reads as a question nobody answered. |
-| B11 | **The workbook told couples they were up to 71 points less aligned than their results did.** It counted only exact matches where the results page gives partial credit for being close. A couple one step apart on everything read 50 to 71 per cent on the site and 0 per cent in the workbook they keep. One methodology now. |
-| L2c | **The shadow was fading; the row around it was cutting it.** `overflow-x: auto` makes a row clip vertically too, and the card's shadow reaches 20 points below it where the row allowed 5. It had room on no side; it has room on all four now. |
-| B1 | **Premium was taxed on a workbook it is not charged for.** Two files priced the cart and only one knew premium includes the workbook, so the tax was computed on $19 to $39 the customer never pays, and Stripe was sent a line the charge does not contain. One pricer now. Verified on the live site: all six carts agree. |
-| B2 | **Couple type telemetry has recorded nothing, for every couple.** The endpoint checked an incoming type against 25 names the product stopped using; every real one came back "invalid type". The admin then read those same 25 keys, so the chart was empty. Confirmed against production. |
-| B3 | **Style codes were dropped too, and two axes were never counted.** The code has six axes; the endpoint accepted four characters and the admin read 16 four-letter keys. Nothing matched, and nothing said so. |
-| B4 | **17 In Practice pages had a nav nothing had ever checked.** The gate read one directory and not the folder under it. Their nav offered Packages twice and the FAQ page twice (as "Reviews"), and had no Wedding Registry. The phone menu was its own third copy that nothing compared at all. |
-| L1b | **The peek is 148 on a laptop, down from 190, and the page fits now.** The saving came out of the lid, the pills, the heading (2.4rem to 1.9), the search box and the four featured tiles, plus 16 points of dead space between the tiles and the quotation so the heading did not have to shrink further. A browser window under about 700 points tall still cannot hold all of it; the gate says which sizes are expected to fit and fails if an ordinary one stops. |
-| L2c | **The tint is back in the picture area only.** Shading the whole tile made each shelf read as a band of colour, because every tile on a shelf is one colour and they sit in a row. The shading behind each tile is its shadow. |
+| B10 | **Fixed, not removed.** The admin CSV asked for the three couple-satisfaction columns by ids that have never existed, so twelve columns came out blank. They resolve now and will carry data from the next export. |
+| B2 | **Fixed.** The endpoint checked an arriving couple type against 25 names the product stopped using, so every real couple was refused and nothing was recorded. Confirmed against the live site before and after. |
+| B3 | **Fixed.** A person gets a style code, a short string describing how they communicate. It has six parts; three places still thought it had four, so every code was thrown away without error and the admin chart read zero. All three read one definition now. |
+| B4 | **Fixed.** The 17 In Practice pages had a nav no check had ever looked at: it offered Packages twice, the FAQ page twice (once labelled "Reviews"), and no Wedding Registry. The phone menu was a third copy nothing compared. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -58,6 +41,21 @@
 
 | Verified by you | What it was |
 |--|--|
+| S20 | Clicking an article in Learn read as signing you out; it opens inside Learn now and nothing was ever clearing the session. |
+| B5 | The footer you like is on all 17 In Practice pages; 16 of them had none. |
+| B15 | The workbook-view route served nobody and is removed. |
+| R195 | The sign-in page was too dark; the top of the gradient is lighter and the foot could not move without white text failing to be readable. |
+| B16 | A dead client function removed, and two stale claims in CLAUDE.md corrected. |
+| B13 | Yesterday's Learn page fix was inert: a repeated key in one style object lost the first silently. |
+| B14 | A dead copy of a live function removed, and the app's fallback colour table held to the server's. |
+| B7 | The band a couple is told they are in was not the band they were counted in; one banding now. |
+| B8 | Four more copies of two more bandings, in the admin, converged. |
+| B9 | The expectations bars were two different colours on the two surfaces; one ramp now. |
+| B11 | The workbook said couples were up to 71 points less aligned than their results did. |
+| L2c | The In Practice tile's tint is in the picture area, with the shadow behind the tile and room for it to fade. |
+| B1 | Premium was taxed on a workbook it is not charged for; one cart pricer now. |
+| L1b | The Learn page could not hold the tools, the insight and the peek at once; the peek gave 42 points. |
+| B12b | A script to clear the legacy counters, dry run by default. |
 | L1b | The Learn page could not hold the tools, the insight and the peek at once; the peek gave 42 points. |
 | L1 | The In Practice sheet was painted over the end of the insight. |
 | L2d | The In Practice tiles were too big. |
