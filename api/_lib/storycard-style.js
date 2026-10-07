@@ -328,6 +328,26 @@ export const CALLOUT_TONES = {
  */
 export const PERSON_COLORS = { you: '#E8673A', them: '#1B5FE8' };
 
+/**
+ * The same two people, on a dark glance ground.
+ *
+ * `them` is a lighter blue here than on a storycard, and that is deliberate:
+ * #1B5FE8 on the near-black glance panel is almost invisible, so the dot and
+ * the bar use a lift of it. `you` does not change, because the orange already
+ * clears that ground.
+ *
+ * ── WHY IT IS HERE AND NOT IN TWO FILES ───────────────────────────────────
+ * It was in two files. The app named the pair GLANCE_YOU and GLANCE_THEM, the
+ * website wrote both hex values out in five places, and nothing held them
+ * together. check-section-names was written for exactly this failure on the
+ * base pair, where "they agreed, which is the whole reason nobody would notice
+ * the day they stopped", and it checked the base pair only.
+ */
+export const PERSON_GLANCE_COLORS = {
+  you: PERSON_COLORS.you,
+  them: '#6C7FFF',
+};
+
 export const RING_COLORS = { life: '#9B5DE5', responsibilities: '#1B5FE8' };
 
 /**

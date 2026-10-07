@@ -63,7 +63,7 @@
 import { readFileSync } from 'node:fs';
 
 import { resultsNav } from '../api/_lib/results-sections.js';
-import { PERSON_COLORS } from '../api/_lib/storycard-style.js';
+import { PERSON_COLORS, PERSON_GLANCE_COLORS } from '../api/_lib/storycard-style.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const WEB = 'src/App.jsx';
@@ -184,6 +184,49 @@ for (const m of block.matchAll(/id: "([\w-]+)"[^\n]*?color: "(#[0-9A-Fa-f]{6})"/
   }
 }
 
+/**
+ * ── AND THE SAME TWO PEOPLE ON A GLANCE GROUND ────────────────────────────
+ * `them` is a lighter blue on the dark glance panel than on a storycard,
+ * because #1B5FE8 is almost invisible there. That is deliberate and it was in
+ * two places: the app named the pair GLANCE_YOU and GLANCE_THEM, the website
+ * wrote both values out in five spots, and nothing held them together.
+ *
+ * This gate was written for that exact failure on the base pair, and its own
+ * header says why it matters: "They agreed, which is the whole reason nobody
+ * would notice the day they stopped." It checked the base pair only.
+ *
+ * The pair is PERSON_GLANCE_COLORS now, the website imports it, and the app's
+ * two constants are held to it here the same way its theme is held to the base
+ * pair. The app cannot import from api/, which is why this comparison exists
+ * rather than a shared import.
+ */
+{
+  const app = readFileSync(`${ROOT}attune-app/src/components/results.tsx`, 'utf8');
+  for (const [side, konst] of [['you', 'GLANCE_YOU'], ['them', 'GLANCE_THEM']]) {
+    const m = new RegExp(`const ${konst} = '(#[0-9A-Fa-f]{6})'`).exec(app);
+    const want = (PERSON_GLANCE_COLORS[side] || '').toUpperCase();
+    if (!want) {
+      fails.push(`PERSON_GLANCE_COLORS has no "${side}", so this cannot be compared.`);
+    } else if (!m) {
+      fails.push(`the app no longer declares ${konst}, so the glance pair is being written`
+        + ' somewhere this cannot see.');
+    } else if (m[1].toUpperCase() !== want) {
+      fails.push(`on a glance ground the app marks "${side}" ${m[1].toUpperCase()} (${konst}) and`
+        + ` the website marks them ${want} (PERSON_GLANCE_COLORS.${side}).\n`
+        + '      One partner is one colour on one ground. Two values is two people again, and this\n'
+        + '      is the pair the base check was not looking at.');
+    }
+  }
+  /* And the website must not go back to writing them out. */
+  for (const [side, hex] of Object.entries(PERSON_GLANCE_COLORS)) {
+    if (side === 'you') continue;
+    if (new RegExp(`["']${hex}["']`, 'i').test(web)) {
+      fails.push(`${WEB} writes the glance colour ${hex} out as a literal again.`
+        + ' PERSON_GLANCE_COLORS is imported there.');
+    }
+  }
+}
+
 if (fails.length) {
   console.error('\n check-section-names: a screen has two names, or two colours.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
@@ -193,4 +236,4 @@ if (fails.length) {
 console.log(`[check-section-names] ${derived.length} sidebar rows, every name and every section`
   + ' colour taken from the nav the app renders, so neither surface can call a screen something the'
   + ' other does not, or paint it differently, and the two people are the same two colours on'
-  + ' both.');
+  + ' both, on a storycard and on a glance ground.');

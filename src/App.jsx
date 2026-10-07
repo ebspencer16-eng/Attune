@@ -183,7 +183,7 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 // The storycard type scale. The opener is drawn from it; the other eight
 // cards still carry their values inline, and those values are what the scale
 // was transcribed from, which is why the app matches them today.
-import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE, CARD_REF_WIDTH as SC_REF_WIDTH, CARD_MAP_PCT as SC_MAP_PCT } from "../api/_lib/storycard-style.js";
+import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE, CARD_REF_WIDTH as SC_REF_WIDTH, CARD_MAP_PCT as SC_MAP_PCT, PERSON_GLANCE_COLORS as GLANCE_COLORS } from "../api/_lib/storycard-style.js";
 import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols, commsActionPlan } from "../api/_lib/comms-plan.js";
@@ -2451,7 +2451,7 @@ function PctTrackViz({ myPct, partPct, userName = "You", partnerName = "Partner"
   const myIsLeft = (myPct ?? 0) <= (partPct ?? 0);
   const dots = [
     { pct: myPct, label: userName, color: "#E8673A", ink: "#FFC0AC", isLeft: myIsLeft, z: 2, dy: close ? (myIsLeft ? -6 : 6) : 0 },
-    { pct: partPct, label: partnerName, color: "#6C7FFF", ink: "#C3CBFF", isLeft: !myIsLeft, z: 1, dy: close ? (myIsLeft ? 6 : -6) : 0 },
+    { pct: partPct, label: partnerName, color: GLANCE_COLORS.them, ink: "#C3CBFF", isLeft: !myIsLeft, z: 1, dy: close ? (myIsLeft ? 6 : -6) : 0 },
   ].filter(d => d.pct != null);
   return (
     <div style={{ margin: "1.25rem 0 0", paddingBottom: "0.25rem", position: "relative" }}>
@@ -2645,7 +2645,7 @@ function IntimacyResponseBreakdown({ dim, myAnswers, partnerAnswers, userName, p
   }).filter(r => r.a != null || r.b != null);
   if (!rows.length) return null;
   const pct = v => Math.max(5, Math.min(95, v * 100));
-  const UC = "#E8673A", PC = "#6C7FFF";
+  const UC = GLANCE_COLORS.you, PC = GLANCE_COLORS.them;
   const sameInitial = (userName?.[0] || "").toUpperCase() === (partnerName?.[0] || "").toUpperCase();
   const label = (INTIMACY_DIMENSIONS.find(x => x.id === dim) || {}).label || "";
   /* ── FLAT, INSIDE A DROPDOWN ─────────────────────────────────────────
@@ -2703,7 +2703,7 @@ function SideBySideResponses({ dims, myAnswers, partnerAnswers, userName, partne
   // Initials only work when they differ. When they collide, the dots go plain
   // and a legend carries the names instead.
   const sameInit = uInit === pInit;
-  const U = "#E8673A", Pc = "#6C7FFF";
+  const U = GLANCE_COLORS.you, Pc = GLANCE_COLORS.them;
   const qs = PERSONALITY_QUESTIONS.filter(q => dims.includes(q.dimension));
   const num = v => (v == null || isNaN(v)) ? null : Number(v);
   const pct = v => Math.max(3, Math.min(97, ((v - 1) / 4) * 100));
@@ -5350,7 +5350,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                 <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{userName}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#6C7FFF" }} />
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: GLANCE_COLORS.them }} />
                 <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.45)", fontFamily: BFONT }}>{partnerName}</span>
               </div>
             </div>
@@ -5376,7 +5376,7 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
                   <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.65)", fontFamily: BFONT, flexShrink: 0, width: "clamp(88px,30%,120px)", lineHeight: 1.25 }}>{m.label}</span>
                   <div style={{ flex: 1, position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "visible" }}>
                     <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${myDy}px))`, left: `${myPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#E8673A", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 2 }} />
-                    <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: "#6C7FFF", border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 1 }} />
+                    <div style={{ position: "absolute", top: "50%", transform: `translateY(calc(-50% + ${partDy}px))`, left: `${partPct}%`, width: 10, height: 10, borderRadius: "50%", background: GLANCE_COLORS.them, border: "1.5px solid rgba(14,11,7,0.3)", marginLeft: -5, zIndex: 1 }} />
                   </div>
                 </div>
               );
