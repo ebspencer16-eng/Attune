@@ -2159,3 +2159,44 @@ it is the whole lesson of this screen.
 **Two more decisions are in section 1** (B6, B12): the counts already stored
 under the retired couple-type names, and the gap-tier counts banded by the old
 cut points. Both are historic data that cannot be read as what it claims to be.
+
+## 7 October 2026, evening — the sweep turned on my own work
+
+**Yesterday's Learn page fix was inert, and the duplicate-key sweep found it.**
+The block's style object already carried `minHeight: 0`, left from when the
+budget was a `height`, and my new line went in above it. A key written twice in
+one object literal loses the first silently, so the block had no minimum at all
+from the moment it shipped.
+
+check-learn-gap passed the whole time, because its harness built the block's
+styles by hand from the budget expression lifted out of src/App.jsx: it applied
+a budget the page did not. That is this codebase's oldest lesson pointed at a
+gate I wrote. Two things changed. `check-duplicate-keys` asks Babel for every
+object expression and fails on a repeated plain key, across 8,382 object
+literals; and check-learn-gap now lifts and applies the page's whole style
+object, so a stray override changes what it renders. Planted with the exact bug:
+it fails by 315 points now.
+
+Its first version walked lines and counted braces and reported two false
+findings, both the two branches of a ternary. `cond ? { id } : { id }` is two
+objects with one key each.
+
+**A dead twin, removed.** `typeGround` in api/_lib/storycard-style.js has never
+been imported on either surface since the commit that added it, and cannot be:
+the app has the live copy and an Expo project cannot import from api/. An unused
+twin of a live function is where someone edits the canonical-looking copy and
+nothing happens.
+
+**And a fallback nothing held to its source.** The app reads the eight storycard
+grounds off the payload and keeps literals beneath them, with a note saying the
+module wins if they disagree. Nothing enforced that, and the fallback is not
+hypothetical: results are frozen, so couples whose rows predate the field hit
+those literals on every render. check-storycard-fields compares them by value
+now.
+
+**Most of what I checked was fine, which is worth saying.** journalStreak,
+computeReveal and annotationColor are all duplicated across the app and the
+server and all three are already held by gates that run both copies. The
+sweeps that keep paying are: grep for functions defined twice, scan for numbers
+banded into named strings, grep for comments admitting a duplication, and now
+parse for a key written twice.

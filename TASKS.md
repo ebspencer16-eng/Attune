@@ -24,6 +24,8 @@
 
 | # | Built, needs your eye |
 |--|--|
+| B13 | **Yesterday's Learn page fix was doing nothing, and I found it.** The style object already carried `minHeight: 0` and my budget line went in above it. A key written twice in one object loses the first silently, so the block had no minimum at all. The gate passed because its harness rebuilt the block instead of rendering the page's own style. Both halves are fixed and both are gated. |
+| B14 | **A dead copy of a live function, removed.** The server exported a storycard colour helper nothing has ever imported; the app has the real one. An unused twin is where someone edits the copy that looks canonical and nothing changes. The app's fallback colour table is now held to the server's, which matters for couples whose results predate that field. |
 | B7 | **The band a couple is told they are in was not the band they were counted in.** Their average gap was banded at 0.75/1.50/2.25 on their results page and at 1.0/1.8/2.5 before being stored, so the admin counted a couple as more aligned than they had been told on 19% of the range. One banding now, and the cut points are multiples of the threshold that already decides a single dimension. |
 | B8 | **Four more copies of two more bandings.** How well one person reads the other, and how well the two read each other, were each written out in the admin as well as in the results module. They agreed, which is the state B7 was in until it did not. |
 | B9 | **The expectations bars were two different colours.** Green above 80/amber/orange in the app, green above 75/orange/red on the site. The app's ramp carried a comment saying a percentage means the same thing wherever it appears; it did not. One ramp now, and it had three copies besides. |
