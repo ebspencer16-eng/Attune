@@ -24,6 +24,7 @@ import { Modal, ScrollView, Text, useWindowDimensions, View } from 'react-native
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
+import { alignedTone as sharedAlignedTone } from '@/lib/aligned-tone.js';
 import CoupleMap from '@/components/couple-map';
 import PageTile, { NeutralGround, ResultsBottomInset } from '@/components/page-tile';
 import StepCount from '@/components/step-count';
@@ -77,11 +78,10 @@ import {
  * expectations categories use on their own bars, so a percentage means the
  * same thing wherever it appears.
  */
-function alignedTone(pct: number): string {
-  if (pct >= 80) return '#10b981';
-  if (pct >= 50) return '#F5B841';
-  return Palette.orange;
-}
+/* The ramp itself is lib/aligned-tone.js, which the website reads too: this
+   was one of three copies of it, and one of the other two is fourteen hundred
+   lines below in this file. */
+const alignedTone = sharedAlignedTone;
 
 const ALIGNED_FILL = '#EDF8F2';
 const ALIGNED_HEAD = '#DCF0E6';
@@ -1477,7 +1477,10 @@ function ExpectationsOverview({
             <View style={{ gap: Spacing.sm }}>
               {categories.map((cat) => {
                 const pct = cat.answered ? Math.round((cat.aligned / cat.answered) * 100) : 0;
-                const bar = pct >= 80 ? '#10b981' : pct >= 50 ? '#F5B841' : '#E8673A';
+                /* alignedTone, not the ramp written out again. The note on that
+                   function says a percentage means the same thing wherever it
+                   appears, and this line was the counter-example. */
+                const bar = alignedTone(pct);
                 return (
                   <View key={cat.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
                     <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 104 }}>

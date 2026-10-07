@@ -111,6 +111,64 @@ for (const [where, src] of [[APP, app], [WEB, web]]) {
   }
 }
 
+/**
+ * ── AND THE ALIGNMENT RAMP, WHICH HAD THREE COPIES ────────────────────────
+ * Green when two people are close, amber in the middle, orange when they are
+ * far apart. There was a function for it in the app's results.tsx whose own
+ * comment read "the same three the expectations categories use on their own
+ * bars, so a percentage means the same thing wherever it appears" — and
+ * fourteen hundred lines below it, in the same file, the ramp written out again
+ * as an inline ternary. A third copy drew the website's intimacy bars.
+ *
+ * All three agreed, which is the state every colour here has been in just
+ * before it stopped. It is attune-app/src/lib/aligned-tone.js now, plain
+ * JavaScript so the website can read it, and both surfaces call it.
+ *
+ * NOT statColor in api/_lib/storycard-style.js, which steps green, blue, orange
+ * at 70 and 50 for a large figure on a storycard. Different palette, different
+ * surface, and its own note says why. Named here so nobody merges the two.
+ */
+{
+  const TONE = 'attune-app/src/lib/aligned-tone.js';
+  const tone = await import(`${ROOT}${TONE}`);
+  if (!tone.ALIGNED_TONE_STOPS || tone.ALIGNED_TONE_STOPS.length !== 2) {
+    console.error(`[check-card-tints] ${TONE} no longer describes two stops. Refusing to pass.`);
+    process.exit(1);
+  }
+  const stops = tone.ALIGNED_TONE_STOPS;
+  /* Run it, either side of each stop. */
+  for (const s of stops) {
+    if (tone.alignedTone(s.from) !== s.color) {
+      fails.push(`the ramp returns ${tone.alignedTone(s.from)} at ${s.from} and the stop says ${s.color}.`);
+    }
+    if (tone.alignedTone(s.from - 1) === s.color) {
+      fails.push(`the ramp returns ${s.color} just below ${s.from}, so that stop does nothing.`);
+    }
+  }
+  /* And nobody writes it out again: ALL THREE of the ramp's colours on one
+     line beside a numeric comparison.
+     Two was the first version and it matched `shiftColor`, which colours how
+     much a person's answers CHANGED between takes and runs the other way,
+     green at the bottom. It shares two colours with this ramp and is not it. A
+     gate that matches too much either gets loosened until it matches nothing or
+     manufactures the finding it was looking for, so the test is the whole ramp
+     rather than part of its palette. */
+  const colours = [...stops.map((s) => s.color), tone.ALIGNED_TONE_LOW];
+  for (const [rel, src] of [[APP, app], [WEB, web],
+    ['attune-app/src/components/results.tsx', readFileSync(ROOT + 'attune-app/src/components/results.tsx', 'utf8')]]) {
+    const clean = src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + ' '.repeat(m.length - p.length));
+    for (const line of clean.split('\n')) {
+      const hits = colours.filter((c) => line.toUpperCase().includes(c.toUpperCase())).length;
+      if (hits === colours.length && /[<>]=?\s*\d/.test(line)) {
+        fails.push(`${rel} writes the alignment ramp out again: ${line.trim().slice(0, 88)}`
+          + `\n      alignedTone in ${TONE} is the ramp, and both surfaces import it.`);
+        break;
+      }
+    }
+  }
+}
+
 if (fails.length) {
   console.error('[check-card-tints] The In Practice card is two different colours:');
   for (const f of fails) console.error(`  ${f}`);
@@ -120,4 +178,5 @@ if (fails.length) {
 }
 
 console.log(`[check-card-tints] four shelf tints shared and equal to SectionColor's, three card`
-  + ' colours equal to the app\'s, and both surfaces ground a card through cardGround.');
+  + ' colours equal to the app\'s, both surfaces grounding a card through cardGround, and one'
+  + ' alignment ramp after three copies of it.');

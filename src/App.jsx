@@ -63,6 +63,7 @@ import { POST_CATEGORIES } from "../api/_lib/post-categories.js";
    app reads. Ellie: "I want the site's in practice to look exactly like the
    app's. That means the same visuals, coloring, etc." */
 import { cardGround } from "../attune-app/src/lib/card-tints.js";
+import { alignedTone } from "../attune-app/src/lib/aligned-tone.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
 import { resultsNav, navPageIds, EXERCISE_RESULTS_EYEBROW } from "../api/_lib/results-sections.js";
@@ -5622,7 +5623,19 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                     ? Math.round((scored.reduce((a, r) => a + r.score, 0) / scored.length) * 100)
                     : 0;
                   const isStrong = pct >= 75;
-                  const barColor = isStrong ? "#10b981" : pct >= 40 ? "#E8673A" : "#F87171";
+                  /* ── THE SAME RAMP THE APP DRAWS THESE BARS WITH ─────────
+                     This was green above 75, orange above 40 and #F87171 below,
+                     a red that appears nowhere else. The app draws the same
+                     expectations bars green above 80, amber above 50 and orange
+                     below, through a function whose own comment says it is
+                     "the same three the expectations categories use on their own
+                     bars, so a percentage means the same thing wherever it
+                     appears". It was not the same three, and the two surfaces
+                     coloured one number two ways.
+
+                     `isStrong` keeps its own threshold because it is not about
+                     colour: it decides the wording beside the bar. */
+                  const barColor = alignedTone(pct);
                   return (
                     <div key={fc.id} onClick={() => go(`convo-${FIXED_CATS.findIndex(c => c.id === fc.id)}`)}
                       style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.55rem" }}>
@@ -9453,7 +9466,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   {INTIMACY_DIMENSIONS.map(d => {
                     const found = (intimacySummary?.dimSummary || []).find(x => x.id === d.id);
                     const pct = found?.avgGap == null ? null : Math.round((1 - found.avgGap) * 100);
-                    const tone = pct == null ? "rgba(255,255,255,0.4)" : pct >= 80 ? "#10b981" : pct >= 50 ? "#F5B841" : "#E8673A";
+                    /* The third copy of this ramp was here. It lives in
+                       the app's lib now, which the app reads as well, so a
+                       percentage cannot mean one thing on a phone and another
+                       on a laptop. */
+                    const tone = pct == null ? "rgba(255,255,255,0.4)" : alignedTone(pct);
                     return (
                       <div key={d.id} onClick={() => go(`intimacy-${d.id}`)}
                         style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
