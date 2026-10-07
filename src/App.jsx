@@ -135,6 +135,7 @@ import {
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { styleCodeFor } from "../api/_lib/style-codes.js";
+import { pairingLabel, pairingTier } from "../api/_lib/pairing.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
@@ -4653,11 +4654,17 @@ export function AppHome({ feed, isMobile, userName, onQuick, onCard, children })
 }
 
 // ── OVERALL PAIRING LABEL ────────────────────────────────────────────────────
+/**
+ * ── ONE BANDING OF THE AVERAGE GAP ──────────────────────────────────────────
+ * This set of cut points was right and it was not the only set. The gapTier
+ * expression further down banded the same number at 1.0, 1.8 and 2.5 before
+ * sending it to the tracker, so the admin counted a couple as more aligned
+ * than this told them they were, on 19% of the range. Both come from
+ * _lib/pairing.js now, whose bands are multiples of the STRENGTH threshold
+ * these numbers already were.
+ */
 function overallPairingLabel(avgGap) {
-  if (avgGap <= 0.75) return "Highly aligned";
-  if (avgGap <= 1.50) return "Compatible";
-  if (avgGap <= 2.25) return "Complementary";
-  return "Distinctly different";
+  return pairingLabel(avgGap);
 }
 
 // ── DERIVE COUPLE TYPE FROM EXERCISE ─────────────────────────────────────────
@@ -7713,7 +7720,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     _typeFired.current = true;
     const codeA = getStyleCode(myS);
     const codeB = getStyleCode(partS);
-    const gapTier = avgGap < 1.0 ? "aligned" : avgGap < 1.8 ? "compatible" : avgGap < 2.5 ? "complementary" : "distinct";
+    /* The same banding the couple reads on their results page. It used to be
+       its own, at 1.0, 1.8 and 2.5, so the chart Ellie reads disagreed with
+       what the customer was told about one couple in five. */
+    const gapTier = pairingTier(avgGap);
     const hasEx2 = !!(ex2Answers && partnerEx2 && Object.keys(ex2Answers).length > 0 && Object.keys(partnerEx2).length > 0);
     fetch("/api/track-type", {
       method: "POST",

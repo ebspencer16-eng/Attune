@@ -19,6 +19,7 @@ import { jsonBody } from './_lib/http.js';
 
 import { COUPLE_TYPES } from './_couple-types.js';
 import { STYLE_CODE_PATTERN, STYLE_AXES, AXIS_COUNTER_NAMES } from './_lib/style-codes.js';
+import { PAIRING_TIERS } from './_lib/pairing.js';
 
 export const config = { runtime: 'edge' };
 
@@ -81,7 +82,10 @@ export default async function handler(req) {
    * Ellie reads the admin to find out what customers are like.
    */
   const validTypes = COUPLE_TYPES.map((t) => t.id);
-  const validGapTiers = ['aligned','compatible','complementary','distinct'];
+  /* The tiers, from the bands that produce them. Written out here, they were
+     right about the names and said nothing about the cut points, which is the
+     half that had drifted. */
+  const validGapTiers = PAIRING_TIERS;
 
   if (!coupleTypeId || !validTypes.includes(coupleTypeId)) {
     return new Response(JSON.stringify({ ok: false, reason: 'invalid type' }), { status: 400 });

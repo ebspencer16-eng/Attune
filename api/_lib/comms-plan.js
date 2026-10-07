@@ -22,8 +22,18 @@
 import { alignedAdvice, getDimShift } from './dimension-copy.js';
 import { COMM_DOMAINS } from './tags.js';
 
-const STRENGTH = 0.75;
-const OPPORTUNITY = 1.5;
+/**
+ * Exported because they are the canonical pair and a third place had copied
+ * them: `overallPairingLabel` in src/App.jsx bands the average gap at 0.75,
+ * 1.50 and 2.25, which is one, two and three times STRENGTH. _lib/pairing.js
+ * derives those bands from here rather than writing the numbers again.
+ *
+ * check-feedback-mirror holds these two against the website's own reading,
+ * either side of each line by a hundredth, which is the check that matters for
+ * a rule made of thresholds.
+ */
+export const STRENGTH = 0.75;
+export const OPPORTUNITY = 1.5;
 
 /**
  * How each dimension reads for this couple.
