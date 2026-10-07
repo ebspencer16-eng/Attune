@@ -13,7 +13,7 @@ export const config = { runtime: 'edge' };
 import { corsHeaders, safeError } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { COUPLE_TYPES } from './_couple-types.js';
-import { ALL_STYLE_CODES } from './_lib/style-codes.js';
+import { ALL_STYLE_CODES, STYLE_AXES, AXIS_COUNTER_NAMES } from './_lib/style-codes.js';
 
 async function kvGet(key, url, token) {
   const res = await fetch(`${url}/lrange/${key}/0/-1`, {
@@ -80,27 +80,29 @@ export default async function handler(req) {
     // Type & code counters — batched
     const typePromises = Promise.all(COUPLE_TYPE_IDS.map(id => kvCount(`attune:ct:${id}`, kvUrl, kvToken)));
     const codePromises = Promise.all(STYLE_CODES.map(code => kvCount(`attune:code:${code}`, kvUrl, kvToken)));
-    const axisPromises = Promise.all([
-      kvCount('attune:axis:energy:E', kvUrl, kvToken),
-      kvCount('attune:axis:energy:I', kvUrl, kvToken),
-      kvCount('attune:axis:expression:X', kvUrl, kvToken),
-      kvCount('attune:axis:expression:G', kvUrl, kvToken),
-      kvCount('attune:axis:conflict:F', kvUrl, kvToken),
-      kvCount('attune:axis:conflict:S', kvUrl, kvToken),
-      kvCount('attune:axis:listening:R', kvUrl, kvToken),
-      kvCount('attune:axis:listening:L', kvUrl, kvToken),
-      kvCount('attune:ct:total', kvUrl, kvToken),
-      kvCount('attune:code:total', kvUrl, kvToken),
-      kvCount('attune:ex2:complete', kvUrl, kvToken),
-      kvCount('attune:ex2:skipped', kvUrl, kvToken),
-      kvCount('attune:gap:aligned', kvUrl, kvToken),
-      kvCount('attune:gap:compatible', kvUrl, kvToken),
-      kvCount('attune:gap:complementary', kvUrl, kvToken),
-      kvCount('attune:gap:distinct', kvUrl, kvToken),
+    /**
+     * One counter per axis letter, derived from the axes.
+     *
+     * This asked for eight keys covering four axes, in a flat array the
+     * response then read back BY POSITION: axisCounts[8] was the couple-type
+     * total and axisCounts[12] the first gap tier. Four axes is two short, and
+     * adding the missing two would have moved every index after them. They are
+     * two lists now, named rather than numbered.
+     */
+    const axisKeys = STYLE_AXES.flatMap((axis, i) => [
+      `attune:axis:${AXIS_COUNTER_NAMES[i]}:${axis.above}`,
+      `attune:axis:${AXIS_COUNTER_NAMES[i]}:${axis.below}`,
     ]);
+    const axisPromises = Promise.all(axisKeys.map((k) => kvCount(k, kvUrl, kvToken)));
+    const TOTAL_KEYS = ['attune:ct:total', 'attune:code:total', 'attune:ex2:complete',
+      'attune:ex2:skipped', 'attune:gap:aligned', 'attune:gap:compatible',
+      'attune:gap:complementary', 'attune:gap:distinct'];
+    const totalPromises = Promise.all(TOTAL_KEYS.map((k) => kvCount(k, kvUrl, kvToken)));
 
-    const [[allFeedback, loveCount, goodCount, suggestCount, totalCount], typeCounts, codeCounts, axisCounts] =
-      await Promise.all([feedbackPromises, typePromises, codePromises, axisPromises]);
+    const [[allFeedback, loveCount, goodCount, suggestCount, totalCount],
+      typeCounts, codeCounts, axisCounts, totalCounts] =
+      await Promise.all([feedbackPromises, typePromises, codePromises, axisPromises, totalPromises]);
+    const tally = Object.fromEntries(TOTAL_KEYS.map((k, i) => [k, totalCounts[i]]));
 
     // Aggregate survey responses
     const appResponses = allFeedback.filter(f => f.source === 'app_experience');
@@ -165,18 +167,18 @@ export default async function handler(req) {
     const styleCodeDist = {};
     STYLE_CODES.forEach((code, i) => { if (codeCounts[i] > 0) styleCodeDist[code] = codeCounts[i]; });
 
-    // Axis breakdown
-    const axisDist = {
-      energy:     { E: axisCounts[0], I: axisCounts[1] },
-      expression: { X: axisCounts[2], G: axisCounts[3] },
-      conflict:   { F: axisCounts[4], S: axisCounts[5] },
-      listening:  { R: axisCounts[6], L: axisCounts[7] },
-    };
+    // Axis breakdown, every axis, named from the axes themselves
+    const axisDist = Object.fromEntries(STYLE_AXES.map((axis, i) => [
+      AXIS_COUNTER_NAMES[i],
+      { [axis.above]: axisCounts[i * 2], [axis.below]: axisCounts[i * 2 + 1] },
+    ]));
 
     // Gap tier distribution
     const gapDist = {
-      aligned: axisCounts[12], compatible: axisCounts[13],
-      complementary: axisCounts[14], distinct: axisCounts[15],
+      aligned: tally['attune:gap:aligned'],
+      compatible: tally['attune:gap:compatible'],
+      complementary: tally['attune:gap:complementary'],
+      distinct: tally['attune:gap:distinct'],
     };
 
     return new Response(JSON.stringify({
@@ -189,10 +191,10 @@ export default async function handler(req) {
         good: goodCount,
         suggest: suggestCount,
         footerTotal: totalCount,
-        typesTracked: axisCounts[8],
-        codesTracked: axisCounts[9],
-        ex2Complete: axisCounts[10],
-        ex2Skipped: axisCounts[11],
+        typesTracked: tally['attune:ct:total'],
+        codesTracked: tally['attune:code:total'],
+        ex2Complete: tally['attune:ex2:complete'],
+        ex2Skipped: tally['attune:ex2:skipped'],
       },
       ratingDist,
       scaleAgg,

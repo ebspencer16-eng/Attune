@@ -47,7 +47,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
-  STYLE_AXES, STYLE_CODE_PATTERN, ALL_STYLE_CODES, styleCodeFor,
+  STYLE_AXES, STYLE_CODE_PATTERN, ALL_STYLE_CODES, AXIS_COUNTER_NAMES, styleCodeFor,
 } from '../api/_lib/style-codes.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -131,6 +131,36 @@ for (const rel of ['api', 'src'].flatMap((d) => files(d))) {
   if (built) {
     fails.push(`${rel}:${src.slice(0, built.index).split('\n').length} builds its own list of style`
       + ` codes.\n      ALL_STYLE_CODES in ${AXES} is generated from the axes.`);
+  }
+}
+
+/**
+ * ── AND EVERY AXIS IS COUNTED AND READ BACK ───────────────────────────────
+ * The axis counters were the same bug one layer down: track-type wrote four of
+ * the six, because it destructured the first four characters of the code and
+ * named them, and get-feedback asked for those same four in a flat array it
+ * then read BY POSITION. The two axes added after that was written were in
+ * every code and counted nowhere.
+ *
+ * The key is `attune:axis:<name>:<letter>`, so the writer and the reader have
+ * to agree about the names, the letters and how many there are.
+ */
+{
+  const writer = readFileSync(join(ROOT, 'api/track-type.js'), 'utf8');
+  const reader = readFileSync(join(ROOT, 'api/get-feedback.js'), 'utf8');
+  for (const [rel, src] of [['api/track-type.js', writer], ['api/get-feedback.js', reader]]) {
+    if (!/AXIS_COUNTER_NAMES/.test(src)) {
+      fails.push(`${rel} does not use AXIS_COUNTER_NAMES, so its axis counters are named`
+        + ' somewhere else and there is nothing holding the two ends together.');
+    }
+    if (/attune:axis:(energy|expression|conflict|listening|needs|repair):/.test(src)) {
+      fails.push(`${rel} writes an axis counter key with the axis name typed into it.`
+        + '\n      That is how four of six came to be counted: the names were spelled out and'
+        + '\n      the list they came from grew.');
+    }
+  }
+  if (AXIS_COUNTER_NAMES.length !== STYLE_AXES.length) {
+    fails.push(`there are ${STYLE_AXES.length} axes and ${AXIS_COUNTER_NAMES.length} counter names.`);
   }
 }
 

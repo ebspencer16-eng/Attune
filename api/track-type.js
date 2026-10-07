@@ -18,7 +18,7 @@ import { jsonBody } from './_lib/http.js';
  */
 
 import { COUPLE_TYPES } from './_couple-types.js';
-import { STYLE_CODE_PATTERN } from './_lib/style-codes.js';
+import { STYLE_CODE_PATTERN, STYLE_AXES, AXIS_COUNTER_NAMES } from './_lib/style-codes.js';
 
 export const config = { runtime: 'edge' };
 
@@ -111,13 +111,19 @@ export default async function handler(req) {
     ops.push(kvIncr('attune:code:total', kvUrl, kvToken));
   }
 
-  // Axis popularity counters (extracted from codes)
+  /**
+   * Axis popularity, one counter per axis, from the code.
+   *
+   * This destructured the first four characters and named them energy,
+   * expression, conflict and listening. Those four are right, and they are the
+   * first four of six: the two axes added after this was written, needs and
+   * repair, were in every code and counted nowhere. Derived from STYLE_AXES so
+   * a seventh cannot be left out the same way.
+   */
   for (const code of [codeA, codeB].filter(c => c && validCodes.test(c))) {
-    const [e, x, f, c] = code;
-    ops.push(kvIncr(`attune:axis:energy:${e}`,     kvUrl, kvToken));
-    ops.push(kvIncr(`attune:axis:expression:${x}`, kvUrl, kvToken));
-    ops.push(kvIncr(`attune:axis:conflict:${f}`,   kvUrl, kvToken));
-    ops.push(kvIncr(`attune:axis:listening:${c}`,  kvUrl, kvToken));
+    STYLE_AXES.forEach((axis, i) => {
+      ops.push(kvIncr(`attune:axis:${AXIS_COUNTER_NAMES[i]}:${code[i]}`, kvUrl, kvToken));
+    });
   }
 
   // Gap tier distribution

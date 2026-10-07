@@ -47,6 +47,16 @@ export const STYLE_AXES = [
   { dims: ['repair'], above: 'T', below: 'Q', flip: true, meaning: 'Quick-gesture / Talk-through' },
 ];
 
+/**
+ * What each axis's popularity counter is called in the store.
+ *
+ * The first dimension of the axis, which is what track-type.js already used
+ * for the four it knew about: energy, expression, conflict, listening. Named
+ * here so the endpoint that writes them and the admin that reads them back
+ * cannot disagree, which they did about how many there were.
+ */
+export const AXIS_COUNTER_NAMES = STYLE_AXES.map((a) => a.dims[0]);
+
 /** Every letter a code can contain, for validating one that arrives. */
 export const STYLE_LETTERS = STYLE_AXES.flatMap((a) => [a.above, a.below]);
 
