@@ -56,6 +56,9 @@ import { join } from 'node:path';
 
 import { PAIRING_BANDS, PAIRING_TIERS, pairingLabel, pairingTier } from '../api/_lib/pairing.js';
 import { STRENGTH } from '../api/_lib/comms-plan.js';
+import {
+  READ_BANDS, UNDERSTANDING_BANDS, readBandFor, understandingBandFor,
+} from '../api/_lib/results.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const HOME = 'api/_lib/pairing.js';
@@ -131,6 +134,67 @@ for (const rel of ['api', 'src', 'attune-app/src'].flatMap((d) => files(d))) {
 }
 
 /**
+ * ── THE OTHER TWO NUMBERS BANDED AT THE COUPLE LEVEL ──────────────────────
+ * Found by sweeping for the same pattern once the pairing bug was fixed: every
+ * place a number is banded into named strings by a chain of comparisons. There
+ * were two more, and between them four copies.
+ *
+ *   how well one person reads the other, `reads_them_well / mixed /
+ *   misreads_them`, in _lib/results.js and again in admin-data.js with display
+ *   labels;
+ *
+ *   how well the two read each other, `understand_each_other / partial /
+ *   misunderstand_each_other`, in _lib/results.js, again in admin-data.js and
+ *   a third time in admin-explore.js.
+ *
+ * All four agreed on 0.5 and 1.0. That is precisely the state the pairing bands
+ * were in until they did not, and the admin was recomputing a band that
+ * readAccuracy already returns, which is the same shape as this file once
+ * scoring with a plain average where the engine weights. A figure Ellie trusts,
+ * computed by a second rule.
+ *
+ * The keys are what a results row stores and are frozen; the labels are for a
+ * screen. Both live beside the cut points now.
+ */
+for (const [what, bands, fn] of [
+  ['the reader bands', READ_BANDS, readBandFor],
+  ['the understanding bands', UNDERSTANDING_BANDS, understandingBandFor],
+]) {
+  if (bands.length !== 3) {
+    fails.push(`${what}: expected three, found ${bands.length}.`);
+    continue;
+  }
+  const edges = bands.map((b) => b.under).filter(Number.isFinite);
+  for (const c of edges) {
+    for (const g of [Number((c - 0.01).toFixed(2)), c, Number((c + 0.01).toFixed(2))]) {
+      const got = fn(g);
+      const want = bands.find((b) => g < b.under) || bands[bands.length - 1];
+      if (got.key !== want.key) {
+        fails.push(`${what}: ${g} reads as "${got.key}" and the band list says "${want.key}".`);
+      }
+    }
+  }
+  /* And nobody bands it again. Matched on the keys and the labels together,
+     because the copies that existed used the labels and the original used the
+     keys, so looking for either alone finds one half. */
+  const words = bands.flatMap((b) => [b.key, b.label]);
+  for (const rel of ['api', 'src', 'attune-app/src'].flatMap((d) => files(d))) {
+    if (rel === 'api/_lib/results.js') continue;
+    const src = readFileSync(join(ROOT, rel), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + ' '.repeat(m.length - pre.length));
+    for (const line of src.split('\n')) {
+      const named = words.filter((w) => line.includes(`'${w}'`) || line.includes(`"${w}"`)).length;
+      if (named >= 2 && /[<>]=?\s*[\d.]/.test(line)) {
+        fails.push(`${rel} bands ${what} itself: ${line.trim().slice(0, 90)}`
+          + '\n      readBandFor and understandingBandFor in api/_lib/results.js do that.');
+        break;
+      }
+    }
+  }
+}
+
+/**
  * ── AND THE ENDPOINT ACCEPTS EVERY TIER ───────────────────────────────────
  * The scan above only flags a list of tiers when a number is compared beside
  * it, because a list on its own is a legitimate thing to have. That left a
@@ -164,6 +228,8 @@ if (fails.length) {
   process.exit(1);
 }
 
+console.log(`  the reader and understanding bands at ${READ_BANDS.filter((b) => Number.isFinite(b.under)).map((b) => b.under).join(' and ')}`
+  + ' have one home too, keys and labels together, after four copies of them were found.');
 console.log(`[check-pairing-bands] ${PAIRING_BANDS.length} bands at`
   + ` ${cuts.join(', ')}, multiples of STRENGTH; ${checked} average gaps including both sides of`
   + ` every cut, label and tier naming the same band every time; ${scanned} files band it nowhere`

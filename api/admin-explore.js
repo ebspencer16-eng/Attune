@@ -18,7 +18,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
-import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
+import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, understandingBandFor } from './_lib/results.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { JOURNAL_BUCKETS, JOURNAL_VOLUME_BANDS, journalBucket, journalUseByOwner, journalVolumeBand } from './_lib/journal-use.js';
 // Individual type from raw ex1 answers (for invited partners who answered via a
@@ -480,8 +480,9 @@ export default async function handler(req) {
         }
         if (mine && theirs) {
           const mean = (mine.meanError + theirs.meanError) / 2;
-          _u.understanding = mean < 0.5 ? 'Understand each other'
-            : mean < 1.0 ? 'Partial' : 'Misunderstand each other';
+          /* The same banding admin-data and the results module use; this was
+             a third copy of its two cut points. */
+          _u.understanding = understandingBandFor(mean).label;
         }
       }
 

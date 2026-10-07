@@ -53,6 +53,48 @@ const round = (n, dp = 3) => (n == null || isNaN(n) ? null : Number(Number(n).to
  * positive means the reader placed them further toward the B pole than they
  * placed themselves.
  */
+/**
+ * ── HOW WELL ONE PERSON READS THE OTHER, BANDED ONCE ──────────────────────
+ * Deliberately coarse and a starting point for tuning: on a 1-5 scale, half a
+ * point is a nudge and a full point is a different read. Both cut points are
+ * the same for the individual band and the couple band, which is why they are
+ * one list.
+ *
+ * ── WHY THESE ARE EXPORTED ────────────────────────────────────────────────
+ * Because four places banded this number and three of them wrote the cut points
+ * out again. This module returned a band and the admin recomputed its own with
+ * display labels instead of reading it: `mean < 0.5 ? 'Understand each other'`
+ * in admin-data.js, the same line again in admin-explore.js, and the reader
+ * band beside it. All four agreed on 0.5 and 1.0, which is the state the
+ * pairing bands were in until they did not: one number, banded twice, and the
+ * chart Ellie reads disagreeing with what the customer was told.
+ *
+ * `key` is what a results row stores and must not change, because results are
+ * frozen and a stored row is served back as it was written. `label` is for a
+ * screen, and the admin reads it from here.
+ */
+const BAND_CUTS = [0.5, 1.0];
+
+export const READ_BANDS = [
+  { under: BAND_CUTS[0], key: 'reads_them_well', label: 'Reads them well' },
+  { under: BAND_CUTS[1], key: 'mixed', label: 'Mixed' },
+  { under: Infinity, key: 'misreads_them', label: 'Misreads them' },
+];
+
+export const UNDERSTANDING_BANDS = [
+  { under: BAND_CUTS[0], key: 'understand_each_other', label: 'Understand each other' },
+  { under: BAND_CUTS[1], key: 'partial', label: 'Partial' },
+  { under: Infinity, key: 'misunderstand_each_other', label: 'Misunderstand each other' },
+];
+
+const bandIn = (bands, mean) => bands.find((b) => mean < b.under) || bands[bands.length - 1];
+
+/** How well one person reads the other. */
+export function readBandFor(mean) { return bandIn(READ_BANDS, mean); }
+
+/** How well the two of them read each other, from the average of both. */
+export function understandingBandFor(mean) { return bandIn(UNDERSTANDING_BANDS, mean); }
+
 export function readAccuracy(readerAnswers, subjectAnswers) {
   if (!readerAnswers || !subjectAnswers) return null;
   const truth = calcDimScores(subjectAnswers);
@@ -84,9 +126,7 @@ export function readAccuracy(readerAnswers, subjectAnswers) {
 
   return {
     meanError: round(mean, 2),
-    // Bands are deliberately coarse and are a starting point for tuning. On a
-    // 1-5 scale, half a point is a nudge and a full point is a different read.
-    band: mean < 0.5 ? 'reads_them_well' : mean < 1.0 ? 'mixed' : 'misreads_them',
+    band: readBandFor(mean).key,
     dimensions,
     worst,
   };
@@ -186,7 +226,7 @@ export function coupleResults({ aAnswers, bAnswers, aName = null, bName = null }
     const asymmetry = round(Math.abs(aReadsB.meanError - bReadsA.meanError), 2);
     understanding = {
       meanError: round(mean, 2),
-      band: mean < 0.5 ? 'understand_each_other' : mean < 1.0 ? 'partial' : 'misunderstand_each_other',
+      band: understandingBandFor(mean).key,
       asymmetry,
       lopsided: asymmetry >= 0.4,
       betterReader: aReadsB.meanError === bReadsA.meanError ? null

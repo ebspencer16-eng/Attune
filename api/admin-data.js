@@ -35,7 +35,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
-import { personResults, readAccuracy, ALIGNMENT_THRESHOLD } from './_lib/results.js';
+import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
 
 // ── Response aggregates ──────────────────────────────────────────────────────
 // The Responses page charts used to be hardcoded zero arrays: the raw answers
@@ -436,13 +436,17 @@ export default async function handler(req) {
           const theirs = readAccuracy(partner.ex1_answers, p.ex1_answers);    // how well they read me
           if (mine && theirs) {
             const mean = (mine.meanError + theirs.meanError) / 2;
-            p.understanding = mean < 0.5 ? 'Understand each other'
-              : mean < 1.0 ? 'Partial' : 'Misunderstand each other';
+            /* The band from the module that defines it, not a second copy of
+               its cut points. This read `mean < 0.5 ? ...` with its own
+               labels while readAccuracy was already returning a band, which is
+               the same shape as this file scoring with a plain average where
+               the engine weights: a figure Ellie trusts, computed by a second
+               rule. */
+            p.understanding = understandingBandFor(mean).label;
             p.understanding_error = Number(mean.toFixed(2));
             // How well this person reads their partner, separately from the
             // couple average, so a lopsided pair is visible.
-            p.reads_partner = mine.meanError < 0.5 ? 'Reads them well'
-              : mine.meanError < 1.0 ? 'Mixed' : 'Misreads them';
+            p.reads_partner = readBandFor(mine.meanError).label;
             p.reads_partner_error = Number(mine.meanError.toFixed(2));
             p.understanding_lopsided = Math.abs(mine.meanError - theirs.meanError) >= 0.4 ? 'Lopsided' : 'Even';
             // Same shape as the alignment cut, applied to read error: how many
