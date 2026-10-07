@@ -4,9 +4,7 @@
 
 | # | What I need from you |
 |--|--|
-| B15 | **`/api/workbook-view` now serves nobody.** The app path that used it was removed on purpose (it drew the wrong document) and I have deleted the leftover client function. The route is harmless and auth-gated. Keep it as the way back in, or I remove it. |
 | B12 | **The stored gap-tier counts were banded by the old cut points.** The four tier names did not change, only the lines between them, so old and new counts mix. Leave them, or I can clear them alongside B6. |
-| B5 | **Should the In Practice articles have a footer?** 16 of the 17 have none, so legal, privacy choices and contact cannot be reached from them. They never had one; the 17th got one by accident. Add to all, or remove the one. |
 | B6 | **The old couple-type counts are a different taxonomy.** Whatever is stored under the 25 retired names cannot be read as couple types. Leave them, or I can clear them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
@@ -19,14 +17,18 @@
 
 | # | Mine to build |
 |--|--|
-| | **Nothing open.** |
+| S20 | **Clicking an article from Learn signs you out.** Your report. Find out what clears the session on the way to a static In Practice page, and stop it. Nothing else matters as much. |
+| B5 | **The how-to-use-your-results footer on all 17 In Practice pages.** You like that one; it is the canonical footer, and sixteen pages have none. |
+| B15 | **Remove `/api/workbook-view`.** Its last caller is gone. |
+| B12b | **Clear the legacy counters**, both sets: the 25 retired couple-type names and the gap tiers banded by the old cut points. I cannot reach the store from here, so this is a script plus one command for you. |
+| R195 | **The sign-in page is too dark.** |
+| B17 | **A list of push notifications, then build them.** Your examples: a partner sent a note, a journal streak about to expire. Nothing sends a push today, so this is the ruleset plus the whole mechanism. List first, for your approval, before any of it is built. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
 | B16 | **A dead client function removed, and two stale claims corrected.** `fetchWorkbookView` outlived the path it served; CLAUDE.md said the workbook page was held "to its two callers" when one of them no longer existed. A stale map is the first thing every session reads. |
-| B17 | **Push notifications are designed and not built**, and the module now says so. The ruleset (cooldown, monthly cap, nothing to someone who opened the app today) is the only mention of push in the tree; nothing sends one. Your alerts are the rows on the home tile. |
 | B13 | **Yesterday's Learn page fix was doing nothing, and I found it.** The style object already carried `minHeight: 0` and my budget line went in above it. A key written twice in one object loses the first silently, so the block had no minimum at all. The gate passed because its harness rebuilt the block instead of rendering the page's own style. Both halves are fixed and both are gated. |
 | B14 | **A dead copy of a live function, removed.** The server exported a storycard colour helper nothing has ever imported; the app has the real one. An unused twin is where someone edits the copy that looks canonical and nothing changes. The app's fallback colour table is now held to the server's, which matters for couples whose results predate that field. |
 | B7 | **The band a couple is told they are in was not the band they were counted in.** Their average gap was banded at 0.75/1.50/2.25 on their results page and at 1.0/1.8/2.5 before being stored, so the admin counted a couple as more aligned than they had been told on 19% of the range. One banding now, and the cut points are multiples of the threshold that already decides a single dimension. |
@@ -41,7 +43,6 @@
 | B4 | **17 In Practice pages had a nav nothing had ever checked.** The gate read one directory and not the folder under it. Their nav offered Packages twice and the FAQ page twice (as "Reviews"), and had no Wedding Registry. The phone menu was its own third copy that nothing compared at all. |
 | L1b | **The peek is 148 on a laptop, down from 190, and the page fits now.** The saving came out of the lid, the pills, the heading (2.4rem to 1.9), the search box and the four featured tiles, plus 16 points of dead space between the tiles and the quotation so the heading did not have to shrink further. A browser window under about 700 points tall still cannot hold all of it; the gate says which sizes are expected to fit and fails if an ordinary one stops. |
 | L2c | **The tint is back in the picture area only.** Shading the whole tile made each shelf read as a band of colour, because every tile on a shelf is one colour and they sit in a row. The shading behind each tile is its shadow. |
-| R195 | Sign in on the blue with the lockup. Built, not seen by me. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |

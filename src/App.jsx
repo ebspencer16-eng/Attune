@@ -59,6 +59,9 @@ import { quoteFit as fitQuote, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEAD
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE, shelfFor } from "../api/_in-practice.js";
 import { POST_CATEGORIES } from "../api/_lib/post-categories.js";
+/* The article bodies the app reads, so the dashboard can draw one without
+   sending the reader out to a marketing page. */
+import { IN_PRACTICE_BODIES } from "../api/_in-practice-bodies.js";
 /* The shelf tints an In Practice card is grounded in, the same module the
    app reads. Ellie: "I want the site's in practice to look exactly like the
    app's. That means the same visuals, coloring, etc." */
@@ -3740,6 +3743,114 @@ const TILE_GREY = "#EFECE7";
 const MUTED_INK = "#7A6753";
 const ACCENT = "#E8673A";
 
+/**
+ * ── AN ARTICLE, READ WITHOUT LEAVING YOUR ACCOUNT ─────────────────────────
+ * Ellie: "When I am in my learn tab and click an article, I don't want it to
+ * sign the user out of their account."
+ *
+ * Nothing was signing anyone out. Measured in a browser: a visit to a static In
+ * Practice page and back leaves every `sb-` and `attune_` key in place. What
+ * happened is that the tile was a link to /practice/<slug>, which is a
+ * marketing page with the marketing nav on it, so one tap left the dashboard,
+ * dropped the signed-in chrome and offered "Sign in" in the corner. It reads as
+ * being signed out because everything that says you are signed in is gone.
+ *
+ * The app has read these in-app since its bodies were generated. This is the
+ * same bodies, drawn here, so Learn keeps you where you are. The link still
+ * works as a link: a middle click or a new tab opens the public page, which is
+ * what a reader expects of an article and what search engines follow.
+ */
+function LearnArticle({ article, isMobile, onBack }) {
+  const body = IN_PRACTICE_BODIES[article.slug] || null;
+  const H = { fontFamily: HFONT, color: C.ink };
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto", paddingBottom: "3rem" }}>
+      <button
+        type="button"
+        onClick={onBack}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: "0.45rem",
+          background: "transparent", border: "none", padding: "0.25rem 0",
+          cursor: "pointer", fontFamily: BFONT, fontSize: "0.78rem",
+          fontWeight: 700, color: C.clay, marginBottom: "1.25rem",
+        }}>
+        &larr; In Practice
+      </button>
+      <h1 style={{ ...H, fontWeight: 700, fontSize: isMobile ? "1.6rem" : "2.1rem", lineHeight: 1.12, letterSpacing: "-0.02em", margin: 0 }}>
+        {body?.pageTitle || article.title}
+      </h1>
+      {article.readMinutes ? (
+        <p style={{ fontFamily: BFONT, fontSize: "0.78rem", color: ACCENT, margin: "0.5rem 0 0" }}>
+          {`${article.readMinutes} min read`}
+        </p>
+      ) : null}
+      {body?.intro ? (
+        <p style={{ fontFamily: BFONT, fontSize: isMobile ? "0.96rem" : "1.02rem", lineHeight: 1.65, color: C.ink, margin: "1.25rem 0 0" }}>
+          {body.intro}
+        </p>
+      ) : null}
+      {/* The four shapes api/_in-practice-bodies.js generates. An unknown
+          block is drawn as a paragraph rather than dropped: a reader losing a
+          sentence is worse than one reading it in the wrong size. */}
+      {(body?.blocks || []).map((b) => {
+        if (b.type === "heading") {
+          return (
+            <h2 key={b.id} style={{ ...H, fontWeight: 700, fontSize: isMobile ? "1.15rem" : "1.3rem", lineHeight: 1.25, margin: "2rem 0 0.6rem" }}>
+              {b.text}
+            </h2>
+          );
+        }
+        if (b.type === "quote") {
+          return (
+            <blockquote key={b.id} style={{ margin: "1.5rem 0", paddingLeft: "1.1rem", borderLeft: `3px solid ${C.clay}` }}>
+              <p style={{ fontFamily: HFONT, fontSize: isMobile ? "1.05rem" : "1.18rem", lineHeight: 1.5, color: C.ink, margin: 0 }}>
+                {b.text}
+              </p>
+              {b.source ? (
+                <p style={{ fontFamily: BFONT, fontSize: "0.78rem", color: MUTED_INK, margin: "0.5rem 0 0" }}>{b.source}</p>
+              ) : null}
+            </blockquote>
+          );
+        }
+        if (b.type === "prompt") {
+          return (
+            /* The block's own label, and nothing when it has none. The first
+               version printed "Try this" over every one of these, which put
+               five identical eyebrows in a row on one article and invented a
+               label the product does not use. The app draws `block.label` and
+               says in its own note that the website does too; fourteen of these
+               blocks carry one, and the rest are callouts with no heading.
+               `source` is drawn for the same reason: a claim that cites its
+               work loses the citation if only the sentence is taken. */
+            <div key={b.id} style={{ margin: "1.5rem 0", background: "#F7F2EA", borderRadius: 14, padding: "1rem 1.1rem", borderLeft: `4px solid ${C.clay}` }}>
+              {b.label ? (
+                <div style={{ fontFamily: BFONT, fontSize: "0.56rem", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, color: C.clay, marginBottom: "0.4rem" }}>
+                  {b.label}
+                </div>
+              ) : null}
+              <p style={{ fontFamily: BFONT, fontSize: "0.95rem", lineHeight: 1.6, color: C.ink, margin: 0 }}>{b.text}</p>
+              {b.source ? (
+                <p style={{ fontFamily: BFONT, fontSize: "0.76rem", fontStyle: "italic", color: MUTED_INK, margin: "0.5rem 0 0" }}>{b.source}</p>
+              ) : null}
+            </div>
+          );
+        }
+        return (
+          <p key={b.id} style={{ fontFamily: BFONT, fontSize: isMobile ? "0.96rem" : "1.02rem", lineHeight: 1.7, color: C.ink, margin: "1rem 0 0" }}>
+            {b.text}
+          </p>
+        );
+      })}
+      {!body ? (
+        <p style={{ fontFamily: BFONT, fontSize: "0.92rem", lineHeight: 1.6, color: MUTED_INK, marginTop: "1.5rem" }}>
+          This one opens on the site.{" "}
+          <a href={article.path} style={{ color: ACCENT }}>Read it there</a>.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function AppLearnReading({
   articles, isMobile, savedCount, readCount, onPeek,
   /**
@@ -3859,7 +3970,7 @@ export function AppLearnReading({
    */
   const featured = (a) => (
     <a key={a.slug} href={a.path}
-      onClick={() => { if (onOpenArticle) onOpenArticle(a); }}
+      onClick={(e) => { if (!onOpenArticle) return; e.preventDefault(); onOpenArticle(a); }}
       style={{
       display: "flex", flexDirection: "column", justifyContent: "flex-end",
       /* ── AND SMALLER, BECAUSE THESE ARE THE PEEK ───────────────────
@@ -3903,7 +4014,9 @@ export function AppLearnReading({
       <a
         key={a.slug}
         href={a.path}
-        onClick={() => { if (onOpenArticle) onOpenArticle(a); }}
+        /* preventDefault only when there is somewhere in-dashboard to open it.
+           Mounted on its own, as the gates do, the link still navigates. */
+        onClick={(e) => { if (!onOpenArticle) return; e.preventDefault(); onOpenArticle(a); }}
         style={{
           /* ── THE WHOLE TILE IS SHADED ────────────────────────────────
              Ellie: "the shading behind each tile needs to not have a hard
@@ -13651,6 +13764,8 @@ export default function App() {
    * because those twelve are pages on this site and a posts-table row is not.
    * This only decorates them.
    */
+  /** The article being read inside the Learn tab, if any. */
+  const [learnArticle, setLearnArticle] = useState(null);
   const [learnState, setLearnState] = useState(null);
   useEffect(() => {
     if (dashTab !== "learn" || learnState) return undefined;
@@ -13695,6 +13810,16 @@ export default function App() {
    * beacon would survive too and cannot carry an Authorization header, which
    * this needs.
    */
+  const openLearnArticle = (article) => {
+    setLearnArticle(article);
+    /* The reader starts at the top of the piece, not where the shelf was. */
+    try {
+      const sc = document.querySelector('[data-dash-scroll]');
+      if (sc) sc.scrollTop = 0;
+    } catch { /* no scroller in a harness */ }
+    markArticleRead(article);
+  };
+
   const markArticleRead = async (article) => {
     const id = article.slug;
     if (learnState?.[id]?.read) return;
@@ -16645,6 +16770,30 @@ export default function App() {
                    can see, which would push the peek off the bottom on the one
                    device this is about. */
                 <div style={{ marginBottom: "2rem" }}>
+                  {/* ── AN ARTICLE OPENS HERE, NOT ON THE MARKETING SITE ──
+                      Ellie: "When I am in my learn tab and click an article, I
+                      don't want it to sign the user out of their account."
+
+                      Nothing signs anyone out, and that was measured rather
+                      than assumed: a round trip from /app to a static In
+                      Practice page and back leaves every `sb-` and `attune_`
+                      key in place. What the tile did was leave the dashboard
+                      for a marketing page, which drops the signed-in chrome and
+                      puts "Sign in" in the corner. Everything that says you are
+                      signed in disappears, so it reads as being signed out.
+
+                      The reader takes the whole tab while it is open, and the
+                      sheet is not left mounted under it: the peek is measured
+                      from what is on the page, so a sheet nobody is looking at
+                      would go on reporting one. */}
+                  {learnArticle ? (
+                    <LearnArticle
+                      article={learnArticle}
+                      isMobile={isMobile}
+                      onBack={() => setLearnArticle(null)}
+                    />
+                  ) : (
+                    <>
                   {/* The app's Learn tab opens straight onto the tiles, with no
                       heading over them. */}
 
@@ -17025,7 +17174,7 @@ export default function App() {
                     readCount={learnState ? Object.values(learnState).filter((x) => x.read).length : 0}
                     state={learnState}
                     onToggleSave={toggleSavedPost}
-                    onOpenArticle={markArticleRead}
+                    onOpenArticle={openLearnArticle}
                     onPeek={setLearnPeek}
                   />
 
@@ -17057,6 +17206,8 @@ export default function App() {
                         )}
                       </div>
                     </div>
+                  )}
+                                    </>
                   )}
                 </div>
                 )}
