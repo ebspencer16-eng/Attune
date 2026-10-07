@@ -24,6 +24,7 @@
 
 | # | Built, needs your eye |
 |--|--|
+| B18 | **The budget's three headline numbers were coloured by two sets of hex values**, one typed into each surface. They agreed. The note beside the website's copy records that the LABELS for these same three numbers drifted once already, which is how the two tools came to disagree about which numbers a budget has. The colours sit with the copy and the arithmetic now, and the gate that compares every figure compares them too. |
 | B10 | **Fixed, not removed.** The admin CSV asked for the three couple-satisfaction columns by ids that have never existed, so twelve columns came out blank. They resolve now and will carry data from the next export. |
 | B2 | **Fixed.** The endpoint checked an arriving couple type against 25 names the product stopped using, so every real couple was refused and nothing was recorded. Confirmed against the live site before and after. |
 | B3 | **Fixed.** A person gets a style code, a short string describing how they communicate. It has six parts; three places still thought it had four, so every code was thrown away without error and the admin chart read zero. All three read one definition now. |

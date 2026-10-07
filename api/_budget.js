@@ -154,6 +154,31 @@ export function computeReveal(state, userName, partnerName) {
  * phone it describes a button that does not exist because the app saves as
  * you type. A sentence that is only true on one surface belongs on that one.
  */
+/**
+ * The three numbers at the top of the budget, and what colour each is.
+ *
+ * ── WHY THESE ARE HERE ────────────────────────────────────────────────────
+ * They were four hex values typed into the website's component and the same
+ * four typed into the app's. The note beside the website's copy records what
+ * happened the last time these three numbers were kept in two places: the
+ * LABELS were typed twice and "the two tools came to disagree about which
+ * numbers a budget has". The labels were moved into BUDGET_COPY and the
+ * colours were left exactly where they had been.
+ *
+ * So they sit with the copy and the arithmetic, in the module the app mirrors,
+ * and check-budget-mirror compares them the way it compares every number.
+ *
+ * `left` and `over` are one number in two states: what is still unallocated,
+ * or what the budget is over by. The colour is the only thing that says which,
+ * so the pair has to move together.
+ */
+export const BUDGET_STAT_COLORS = {
+  income: '#34d399',
+  left: '#E8C572',
+  over: '#f87171',
+  savings: '#93C5FD',
+};
+
 export const BUDGET_COPY = {
   /**
    * ── THE THREE NUMBERS AT THE TOP ────────────────────────────────────────

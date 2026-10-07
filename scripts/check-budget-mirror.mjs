@@ -30,6 +30,7 @@ import { readFileSync } from 'fs';
 import { transformSync } from 'esbuild';
 
 import { computeReveal as serverReveal, BUDGET_CATEGORIES } from '../api/_budget.js';
+import * as serverModule from '../api/_budget.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const src = readFileSync(ROOT + 'attune-app/src/constants/budget.ts', 'utf8');
@@ -37,10 +38,14 @@ const src = readFileSync(ROOT + 'attune-app/src/constants/budget.ts', 'utf8');
 const compiled = transformSync(src, { loader: 'ts', format: 'cjs' }).code;
 
 let appReveal;
+/* The whole evaluated module, so this can compare anything the two copies are
+   both meant to hold rather than only the function. */
+let appModule;
 try {
   const module = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('module', 'exports', compiled)(module, module.exports);
+  appModule = module.exports;
   appReveal = module.exports.computeReveal;
   if (typeof appReveal !== 'function') throw new Error('computeReveal is not exported');
 } catch (e) {
@@ -86,6 +91,39 @@ for (const { name, s } of STATES) {
   }
 }
 
+/**
+ * ── AND THE THREE STATS ARE THE SAME THREE COLOURS ────────────────────────
+ * This compared every number the two copies produce and nothing about how they
+ * are drawn. The budget's three headline stats were four hex values typed into
+ * the website's component and the same four typed into the app's, and the note
+ * beside the website's copy records what happened the last time these three
+ * numbers were kept in two places: the LABELS drifted, and "the two tools came
+ * to disagree about which numbers a budget has". The labels were moved into
+ * BUDGET_COPY and the colours were left where they were.
+ *
+ * They are in both modules now, beside the copy and the arithmetic, so this
+ * compares them the way it compares a number. `left` and `over` are one figure
+ * in two states and the colour is the only thing that says which, so the pair
+ * has to agree as a pair.
+ */
+{
+  const theirs = appModule.BUDGET_STAT_COLORS;
+  const ours = serverModule.BUDGET_STAT_COLORS;
+  if (!ours || !theirs) {
+    problems.push('one of the two budget modules no longer exports BUDGET_STAT_COLORS, so the'
+      + ' three stat colours are being written somewhere else and nothing compares them.');
+  } else {
+    for (const key of [...new Set([...Object.keys(ours), ...Object.keys(theirs)])]) {
+      const a = String(ours[key] || '').toUpperCase();
+      const b = String(theirs[key] || '').toUpperCase();
+      if (a !== b) {
+        problems.push(`the ${key} stat is ${ours[key] || 'missing'} on the website and`
+          + ` ${theirs[key] || 'missing'} in the app.`);
+      }
+    }
+  }
+}
+
 if (problems.length) {
   console.error('[check-budget-mirror] the two budget calculators disagree:');
   for (const p of problems.slice(0, 12)) console.error(`  ${p}`);
@@ -94,4 +132,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-budget-mirror] ${STATES.length} budgets, every figure identical on both surfaces.`);
+console.log(`[check-budget-mirror] ${STATES.length} budgets, every figure identical on both surfaces, and the three stat colours the same three.`);

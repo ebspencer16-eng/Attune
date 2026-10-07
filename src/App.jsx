@@ -153,7 +153,7 @@ import { CATALOGUE } from "../api/_catalogue.js";
 // The Merging lives checklist, moved out so the app can read it too.
 import { CHECKLIST_AREAS, CHECKLIST_COPY } from "../api/_checklist.js";
 // The budget tool, moved out so the app can read it too.
-import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY, bNum, bFmt, computeReveal } from "../api/_budget.js";
+import { BUDGET_CATEGORIES, POOLING_MODELS, BUDGET_COPY, bNum, bFmt, computeReveal, BUDGET_STAT_COLORS } from "../api/_budget.js";
 // What both surfaces say about the workbook, and what the file is called.
 import { WORKBOOK_COPY, workbookFileName } from "../api/_lib/workbook-copy.js";
 // Profile setup's labels, shared with the app's own setup screen.
@@ -6541,11 +6541,11 @@ function BudgetTool({ userName, partnerName, onBack, budgetState, setBudgetState
                same three numbers under the same names. They were typed here
                and typed differently in the app, which is how the two tools came
                to disagree about which numbers a budget has. */
-            { label: BUDGET_COPY.statIncome,  value: bFmt(rev.totalIncome),  color: "#34d399" },
+            { label: BUDGET_COPY.statIncome,  value: bFmt(rev.totalIncome),  color: BUDGET_STAT_COLORS.income },
             { label: rev.surplus >= 0 ? BUDGET_COPY.statLeft : BUDGET_COPY.statOver,
               value: (rev.surplus >= 0 ? "" : "-") + bFmt(rev.surplus),
-              color: rev.surplus >= 0 ? "#E8C572" : "#f87171" },
-            { label: BUDGET_COPY.statSavings, value: rev.savingsRate.toFixed(1) + "%", color: "#93C5FD" },
+              color: rev.surplus >= 0 ? BUDGET_STAT_COLORS.left : BUDGET_STAT_COLORS.over },
+            { label: BUDGET_COPY.statSavings, value: rev.savingsRate.toFixed(1) + "%", color: BUDGET_STAT_COLORS.savings },
           ].map(({ label, value, color }) => (
             <div key={label}>
               <div style={{ fontSize: "0.56rem", color: "rgba(255,255,255,0.72)", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: font.body, marginBottom: "0.2rem" }}>{label}</div>

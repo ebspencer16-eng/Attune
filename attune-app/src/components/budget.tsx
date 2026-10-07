@@ -30,7 +30,7 @@ import {
   fetchToolData, saveToolData, markEditing,
   type ApiError, type BudgetCategoryPayload, type BudgetCopy, type BudgetState,
 } from '@/api/client';
-import { bFmt, computeReveal } from '@/constants/budget';
+import { bFmt, computeReveal, BUDGET_STAT_COLORS } from '@/constants/budget';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
 import { useFlushOnUnmount } from '@/hooks/use-flush-on-unmount';
@@ -308,11 +308,11 @@ export default function Budget({ onClose }: { onClose: () => void }) {
             choice of what to show differed. The labels come from the server
             now, so neither screen writes its own. */}
         {[
-          [copy.statIncome, bFmt(rev.totalIncome), '#34d399'],
+          [copy.statIncome, bFmt(rev.totalIncome), BUDGET_STAT_COLORS.income],
           [rev.surplus >= 0 ? copy.statLeft : copy.statOver,
             (rev.surplus >= 0 ? '' : '-') + bFmt(rev.surplus),
-            rev.surplus >= 0 ? '#E8C572' : '#f87171'],
-          [copy.statSavings, `${rev.savingsRate.toFixed(1)}%`, '#93C5FD'],
+            rev.surplus >= 0 ? BUDGET_STAT_COLORS.left : BUDGET_STAT_COLORS.over],
+          [copy.statSavings, `${rev.savingsRate.toFixed(1)}%`, BUDGET_STAT_COLORS.savings],
         ].map(([label, value, tint]) => (
           <View key={String(label)} style={{ flex: 1 }}>
             <Text style={{
