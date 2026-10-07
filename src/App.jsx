@@ -134,6 +134,7 @@ import {
   ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION, ADMIRED_NOUN, admiredNoun, NON_ANSWER, GLANCE_TEXT,
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
+import { styleCodeFor } from "../api/_lib/style-codes.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
@@ -1935,15 +1936,18 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
 const pronoun = (p, form) => pronounForm(p, form);
 
 
+/**
+ * ── THE CODE IS READ IN ONE PLACE ───────────────────────────────────────────
+ * This was the only implementation and its own header comment had gone stale
+ * with it: it described the fourth axis as C/A while the code returned R/L.
+ * Two other files believed the comment rather than the code, and both dropped
+ * every style code the product has ever produced. The axes live in
+ * api/_lib/style-codes.js now and this is the same answer, verified against
+ * what stood here over twenty thousand score sets and at the neutral boundary
+ * where two of the six axes read backwards.
+ */
 function getStyleCode(scores) {
-  // 6-axis style code: E/I · X/G · F/S · C/A · D/H · Q/T
-  const e = (scores.energy      || 3) > 3.0  ? 'E' : 'I';  // Outward / Inward
-  const x = ((scores.expression || 3) + (scores.feedback || 3)) / 2 > 3.0 ? 'X' : 'G'; // Expressive / Guarded
-  const f = (scores.conflict    || 3) < 3.0  ? 'F' : 'S';  // Fast-engage / Space-first
-  const c = (scores.listening   || 3) > 3.0  ? 'R' : 'L';  // Responsive / Reflective
-  const d = (scores.needs       || 3) > 3.0  ? 'D' : 'H';  // Direct / Hint (needs directness)
-  const q = (scores.repair      || 3) < 3.0  ? 'Q' : 'T';  // Quick-gesture / Talk-through (repair style)
-  return e + x + f + c + d + q;
+  return styleCodeFor(scores);
 }
 
 

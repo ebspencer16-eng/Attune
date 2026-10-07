@@ -18,6 +18,7 @@ import { jsonBody } from './_lib/http.js';
  */
 
 import { COUPLE_TYPES } from './_couple-types.js';
+import { STYLE_CODE_PATTERN } from './_lib/style-codes.js';
 
 export const config = { runtime: 'edge' };
 
@@ -53,7 +54,16 @@ export default async function handler(req) {
   const { coupleTypeId, codeA, codeB, gapTier, hasEx2 } = body;
 
   // Validate — only accept known code patterns and type IDs
-  const validCodes = /^[EIXGFSC]{4}$/;
+  /**
+   * The shape of a style code, from the axes that define one.
+   *
+   * This was /^[EIXGFSC]{4}$/: four characters, from an alphabet containing
+   * none of R, L, D, H, Q or T. The code has been six axes for a long time, so
+   * every one that arrived failed this test and was SKIPPED rather than
+   * refused, which is why nothing ever said so. The admin's style distribution
+   * has read zero for every code since.
+   */
+  const validCodes = STYLE_CODE_PATTERN;
   /**
    * ── THE TYPES, FROM THE TABLE THAT DEFINES THEM ─────────────────────────
    * These twenty-five were written out here, and not one of them is a couple

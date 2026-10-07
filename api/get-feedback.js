@@ -13,6 +13,7 @@ export const config = { runtime: 'edge' };
 import { corsHeaders, safeError } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { COUPLE_TYPES } from './_couple-types.js';
+import { ALL_STYLE_CODES } from './_lib/style-codes.js';
 
 async function kvGet(key, url, token) {
   const res = await fetch(`${url}/lrange/${key}/0/-1`, {
@@ -58,11 +59,14 @@ export default async function handler(req) {
    * product nobody had finished.
    */
   const COUPLE_TYPE_IDS = COUPLE_TYPES.map((t) => t.id);
-  // All 16 possible 4-letter codes
-  const STYLE_CODES = [];
-  for (const e of ['E','I']) for (const x of ['X','G']) for (const f of ['F','S']) for (const c of ['C','A']) {
-    STYLE_CODES.push(e+x+f+c);
-  }
+  /**
+   * Every style code, from the axes that define one.
+   *
+   * This built the sixteen four-letter combinations of E/I, X/G, F/S and C/A.
+   * The code has six axes and its fourth is R/L, so none of these sixteen keys
+   * has ever been written and the chart read zero for all of them.
+   */
+  const STYLE_CODES = ALL_STYLE_CODES;
 
   try {
     const feedbackPromises = Promise.all([
