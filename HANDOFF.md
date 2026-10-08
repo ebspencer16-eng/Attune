@@ -2296,3 +2296,28 @@ it, which is what produced a spurious "Chrome did not report a debugging port".
 
 Both of those are the same mistake in different clothes: a check that looks like
 it is measuring the thing, in a place where it cannot.
+
+## 8 October 2026, later — the accessible-names sweep
+
+Twenty-nine form fields whose only name was a placeholder, which disappears the
+moment someone types. Two on checkout, eight on the feedback form, ten in the
+sign-up, the rest on the article index and the admin. In every case the words
+were already on the screen and not connected to the field, so nothing new is
+written: checkout's labels get a `for`, the feedback questions get an id and the
+field points at them, and the sign-up's shared `inp` helper already takes the
+label as its first argument, so one line names ten fields.
+
+Also three duplicate SVG gradient ids on /home, where `url(#id)` resolves to the
+first match, so the second copy of three cards painted with the first copy's
+gradient. Identical definitions today, which is the usual shape: nothing looks
+wrong until one of them is changed.
+
+**One bad edit, reverted rather than patched.** My first pass at the admin
+matched `<select>` anywhere, including inside JavaScript strings that build
+markup, and produced labels reading `' + container Id + ' distmode`. Restored
+from HEAD and redone over markup lines only.
+
+**Two gates now live in the smoke rather than in check**, check-no-sideways-scroll
+and check-control-names, because both read dist/ which only the smoke builds,
+and both use the server the smoke already has. Wiring a browser gate into `npm
+run check` looked fine locally only because a build was lying around.
