@@ -11,13 +11,13 @@ export const EMAIL_TRIGGERS = {
     "src/App.jsx:11447",
     "src/App.jsx:11549",
     "src/App.jsx:11868",
-    "src/App.jsx:17881",
-    "src/App.jsx:18679",
+    "src/App.jsx:17896",
+    "src/App.jsx:18694",
     "src/App.jsx:3042"
   ],
   "results_viewed": [
-    "src/App.jsx:12906",
-    "src/App.jsx:15170"
+    "src/App.jsx:12921",
+    "src/App.jsx:15185"
   ],
   "shipping_notification": [
     "public/admin.html:5831"

@@ -262,8 +262,8 @@
       <h2 style="margin:0;">Attune Admin</h2>
     </div>
     <div class="sub">Sign in to continue</div>
-    <input id="login-email" class="login-inp" type="email" placeholder="Email" autocomplete="username"/>
-    <input id="login-password" class="login-inp" type="password" placeholder="Password" autocomplete="current-password"/>
+    <input id="login-email" class="login-inp" type="email" placeholder="Email" autocomplete="username"/ aria-label="Email"
+    <input id="login-password" class="login-inp" type="password" placeholder="Password" autocomplete="current-password"/ aria-label="Password"
     <div class="login-err" id="login-err"></div>
     <button class="login-btn" id="login-btn" onclick="attemptLogin()">Sign in →</button>
   </div>
@@ -432,7 +432,7 @@
             <div class="chart-title">Revenue over time</div>
             <div class="chart-subtitle">Last 12 months</div>
           </div>
-          <select class="tile-slicer" id="slz-revenue" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+          <select class="tile-slicer" id="slz-revenue" title="Cut this tile by a segment" aria-label="Slz revenue"<option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-revenue"></canvas></div>
       </div>
@@ -442,7 +442,7 @@
             <div class="chart-title">Package mix</div>
             <div class="chart-subtitle">Orders by package type</div>
           </div>
-          <select class="tile-slicer" id="slz-pkgmix" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+          <select class="tile-slicer" id="slz-pkgmix" title="Cut this tile by a segment" aria-label="Slz pkgmix"<option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-pkg-mix"></canvas></div>
       </div>
@@ -452,7 +452,7 @@
             <div class="chart-title">Relationship length distribution</div>
             <div class="chart-subtitle">Anonymous demographic breakdown</div>
           </div>
-          <select class="tile-slicer" id="slz-ovrellen" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+          <select class="tile-slicer" id="slz-ovrellen" title="Cut this tile by a segment" aria-label="Slz ovrellen"<option value="">Everyone</option></select>
         </div>
         <div class="chart-body">
           <div class="insight-list" id="rellength-bars" style="margin-top:.5rem;"></div>
@@ -464,7 +464,7 @@
             <div class="chart-title">How couples found Attune</div>
             <div class="chart-subtitle">Acquisition source</div>
           </div>
-          <select class="tile-slicer" id="slz-source" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+          <select class="tile-slicer" id="slz-source" title="Cut this tile by a segment" aria-label="Slz source"<option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-source"></canvas></div>
       </div>
@@ -516,16 +516,16 @@
         </div>
         <div style="padding:.5rem 1.4rem 1.4rem;display:grid;gap:.8rem;">
           <label style="font-size:.72rem;color:var(--muted);">Slug (the address, cannot change once published)
-            <input id="post-id" type="text" placeholder="repair-after-a-hard-week" style="width:100%;padding:.5rem;margin-top:.25rem;">
+            <input id="post-id" type="text" placeholder="repair-after-a-hard-week" style="width:100%;padding:.5rem;margin-top:.25rem;" aria-label="repair-after-a-hard-week"
           </label>
           <label style="font-size:.72rem;color:var(--muted);">Title
-            <input id="post-title" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;">
+            <input id="post-title" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;" aria-label="Post title"
           </label>
           <label style="font-size:.72rem;color:var(--muted);">Subtitle
-            <input id="post-subtitle" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;">
+            <input id="post-subtitle" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;" aria-label="Post subtitle"
           </label>
           <label style="font-size:.72rem;color:var(--muted);">What it is about (tag keys, comma separated, e.g. dim:repair, expcat:household)
-            <input id="post-dims" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;">
+            <input id="post-dims" type="text" style="width:100%;padding:.5rem;margin-top:.25rem;" aria-label="Post dims"
           </label>
           <div>
             <div style="font-size:.72rem;color:var(--muted);margin-bottom:.35rem;">Blocks</div>
@@ -533,13 +533,13 @@
             <button class="btn-secondary" onclick="postAddBlock()" style="margin-top:.5rem;">Add block</button>
           </div>
           <label style="font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.5rem;">
-            <input id="post-substantive" type="checkbox">
+            <input id="post-substantive" type="checkbox" aria-label="Post substantive"
             Substantive change: resurface this for readers who already read it. Leave unchecked for typos.
           </label>
           <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
             <button class="btn-secondary" onclick="postSave()">Save</button>
             <button class="btn-secondary" onclick="postPublish()">Publish now</button>
-            <input id="post-schedule" type="datetime-local" style="padding:.4rem;">
+            <input id="post-schedule" type="datetime-local" style="padding:.4rem;" aria-label="Post schedule"
             <button class="btn-secondary" onclick="postSchedule()">Schedule</button>
             <button class="btn-secondary" onclick="postUnpublish()">Unpublish</button>
             <button class="btn-secondary" onclick="postsCancel()">Close</button>
@@ -565,30 +565,30 @@
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed · drop-off: <span id="orders-dropoff">—</span></div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle">Ordered → Started → Both done → Results viewed · drop-off: <span id="orders-dropoff">—</span></div></div><select class="tile-slicer" id="slz-sfunnel" title="Cut this tile by a couple-level segment" aria-label="Slz sfunnel"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-funnel"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Order volume by geography</div><div class="chart-subtitle">By US state, from shipping or billing location. Orders outside the US are grouped as one segment.</div></div><select class="tile-slicer" id="slz-geo" title="Cut this tile by a segment" aria-label="Slz geo"<option value="">Everyone</option></select></div>
         <div class="chart-body"><div id="geo-breakdown"></div></div>
       </div>
     </div>
     <div class="filter-bar">
       <span class="filter-label">Filter:</span>
-      <select class="filter-select" id="orders-pkg-filter" onchange="applyOrderFilters()">
+      <select class="filter-select" id="orders-pkg-filter" onchange="applyOrderFilters()" aria-label="Orders pkg filter"
         <option value="">All packages</option>
         <option value="core">Assessment</option>
         <option value="newlywed">Starting Out</option>
         <option value="anniversary">Anniversary</option>
         <option value="premium">Premium</option>
       </select>
-      <select class="filter-select" id="orders-date-filter" onchange="applyOrderFilters()">
+      <select class="filter-select" id="orders-date-filter" onchange="applyOrderFilters()" aria-label="Orders date filter"
         <option value="">All time</option>
         <option value="7">Last 7 days</option>
         <option value="30">Last 30 days</option>
         <option value="90">Last 90 days</option>
       </select>
-      <select class="filter-select" id="orders-type-filter" onchange="applyOrderFilters()">
+      <select class="filter-select" id="orders-type-filter" onchange="applyOrderFilters()" aria-label="Orders type filter"
         <option value="">All couple types</option>
         <option value="WW">WW – The Mirror</option>
         <option value="WY">WY – The Balance</option>
@@ -638,15 +638,15 @@
       <div class="kpi-card green"><div class="kpi-label">Premium</div><div class="kpi-val" id="pkgkpi-premium">—</div><div class="kpi-sub" id="pkgkpi-premium-sub">Share of orders</div></div>
     </div>
     <div class="chart-card">
-      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+      <div class="chart-head"><div><div class="chart-title">Package split over time</div><div class="chart-subtitle">Stacked by month</div></div><select class="tile-slicer" id="slz-pkgtrend" title="Cut this tile by a segment" aria-label="Slz pkgtrend"<option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-pkg-stacked"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+      <div class="chart-head"><div><div class="chart-title">Revenue contribution by package</div><div class="chart-subtitle">Last 12 months</div></div><select class="tile-slicer" id="slz-revpkg" title="Cut this tile by a segment" aria-label="Slz revpkg"<option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-rev-pkg"></canvas></div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div><select class="tile-slicer" id="slz-addons" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+      <div class="chart-head"><div><div class="chart-title">Add-on attachment by package</div><div class="chart-subtitle">Share of orders in each package that include each add-on</div></div><select class="tile-slicer" id="slz-addons" title="Cut this tile by a segment" aria-label="Slz addons"<option value="">Everyone</option></select></div>
       <div class="chart-body"><div style="height:260px;position:relative;"><canvas id="chart-pkg-addons"></canvas></div></div>
     </div>
   </div>
@@ -687,18 +687,18 @@
     <!-- Headline tiles -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 .6rem">
       <div class="section-label" style="margin:0">Last 30 days</div>
-      <select class="tile-slicer eng-slicer" id="slz-eng-head" data-tile="head" title="Cut these four by a segment"><option value="">Everyone</option></select>
+      <select class="tile-slicer eng-slicer" id="slz-eng-head" data-tile="head" title="Cut these four by a segment" aria-label="Slz eng head"<option value="">Everyone</option></select>
     </div>
     <div class="kpi-grid" id="eng-headlines"></div>
 
     <!-- Funnel over time, and acquisition beside it -->
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-funnel" data-tile="funnel" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Completion funnel</div><div class="chart-subtitle" id="eng-funnel-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-funnel" data-tile="funnel" title="Cut this tile by a segment" aria-label="Slz eng funnel"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-funnel"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Visits and downloads</div><div class="chart-subtitle" id="eng-acq-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-acq" data-tile="acq" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Visits and downloads</div><div class="chart-subtitle" id="eng-acq-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-acq" data-tile="acq" title="Cut this tile by a segment" aria-label="Slz eng acq"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-acq"></canvas></div>
       </div>
     </div>
@@ -707,28 +707,28 @@
     <div class="section-label">Time per page</div>
     <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Marketing pages</div><div class="chart-subtitle" id="eng-mk-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-mk" data-tile="mk" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Marketing pages</div><div class="chart-subtitle" id="eng-mk-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-mk" data-tile="mk" title="Cut this tile by a segment" aria-label="Slz eng mk"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-mk"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-ex" data-tile="ex" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-ex" data-tile="ex" title="Cut this tile by a segment" aria-label="Slz eng ex"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-ex"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-res" data-tile="res" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-res" data-tile="res" title="Cut this tile by a segment" aria-label="Slz eng res"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-res"></canvas></div>
       </div>
     </div>
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-rs" data-tile="rs" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-rs" data-tile="rs" title="Cut this tile by a segment" aria-label="Slz eng rs"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-rs"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-head">
           <div><div class="chart-title">Detailed results pages</div><div class="chart-subtitle" id="eng-det-n">&mdash;</div></div>
-          <select class="tile-slicer" id="eng-det-pick" title="Which section"></select>
-          <select class="tile-slicer eng-slicer" id="slz-eng-det" data-tile="det" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+          <select class="tile-slicer" id="eng-det-pick" title="Which section" aria-label="Eng det pick"</select>
+          <select class="tile-slicer eng-slicer" id="slz-eng-det" data-tile="det" title="Cut this tile by a segment" aria-label="Slz eng det"<option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-eng-det"></canvas></div>
       </div>
@@ -738,11 +738,11 @@
     <div class="section-label">Learning</div>
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-art-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-art" data-tile="art" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">In Practice reads</div><div class="chart-subtitle" id="eng-art-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-art" data-tile="art" title="Cut this tile by a segment" aria-label="Slz eng art"<option value="">Everyone</option></select></div>
         <div id="eng-articles"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Tags</div><div class="chart-subtitle" id="eng-tag-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-tags" data-tile="tags" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Tags</div><div class="chart-subtitle" id="eng-tag-n">&mdash;</div></div><select class="tile-slicer eng-slicer" id="slz-eng-tags" data-tile="tags" title="Cut this tile by a segment" aria-label="Slz eng tags"<option value="">Everyone</option></select></div>
         <div id="eng-tags"></div>
       </div>
     </div>
@@ -751,11 +751,11 @@
         <div class="chart-head">
           <div><div class="chart-title">Notes by section</div><div class="chart-subtitle" id="eng-ns-n">&mdash;</div></div>
           <div style="display:flex;gap:.4rem">
-            <select class="tile-slicer" id="eng-ns-mode" title="How to count">
+            <select class="tile-slicer" id="eng-ns-mode" title="How to count" aria-label="Eng ns mode"
               <option value="total">Total engagement</option>
               <option value="detail">Detailed engagement</option>
             </select>
-            <select class="tile-slicer eng-slicer" id="slz-eng-ns" data-tile="ns" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+            <select class="tile-slicer eng-slicer" id="slz-eng-ns" data-tile="ns" title="Cut this tile by a segment" aria-label="Slz eng ns"<option value="">Everyone</option></select>
           </div>
         </div>
         <div class="chart-body"><canvas id="chart-eng-ns"></canvas></div>
@@ -764,12 +764,12 @@
         <div class="chart-head">
           <div><div class="chart-title">Notes by page</div><div class="chart-subtitle" id="eng-nd-n">&mdash;</div></div>
           <div style="display:flex;gap:.4rem">
-            <select class="tile-slicer" id="eng-nd-mode" title="How to count">
+            <select class="tile-slicer" id="eng-nd-mode" title="How to count" aria-label="Eng nd mode"
               <option value="total">Total engagement</option>
               <option value="detail">Detailed engagement</option>
             </select>
-            <select class="tile-slicer" id="eng-nd-pick" title="Which section"></select>
-            <select class="tile-slicer eng-slicer" id="slz-eng-nd" data-tile="nd" title="Cut this tile by a segment"><option value="">Everyone</option></select>
+            <select class="tile-slicer" id="eng-nd-pick" title="Which section" aria-label="Eng nd pick"</select>
+            <select class="tile-slicer eng-slicer" id="slz-eng-nd" data-tile="nd" title="Cut this tile by a segment" aria-label="Slz eng nd"<option value="">Everyone</option></select>
           </div>
         </div>
         <div class="chart-body"><canvas id="chart-eng-nd"></canvas></div>
@@ -797,27 +797,27 @@
     </div>
     <div class="chart-grid three">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-age" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Age range</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-age" title="Cut this tile by a segment" aria-label="Slz age"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-age"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-gender" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-gender" title="Cut this tile by a segment" aria-label="Slz gender"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-gender"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-relstatus" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-relstatus" title="Cut this tile by a segment" aria-label="Slz relstatus"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-relstatus"></canvas></div>
       </div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Length of relationship</div></div><select class="tile-slicer" id="slz-demorellen" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Length of relationship</div></div><select class="tile-slicer" id="slz-demorellen" title="Cut this tile by a segment" aria-label="Slz demorellen"<option value="">Everyone</option></select></div>
         <div class="chart-body">
           <div class="insight-list" id="demo-rellength-bars" style="margin-top:.5rem;"></div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-children" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Children together</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-children" title="Cut this tile by a segment" aria-label="Slz children"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-children"></canvas></div>
       </div>
     </div>
@@ -843,11 +843,11 @@
     <div id="resp-comm">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+          <div class="chart-head"><div><div class="chart-title">Avg alignment score by dimension</div><div class="chart-subtitle">Communication exercise · 10 dimensions</div></div><select class="tile-slicer" id="slz-rdim" title="Cut this tile by a couple-level segment" aria-label="Slz rdim"<option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-dim-scores"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+          <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment" aria-label="Slz rcouple"<option value="">Everyone</option></select></div>
           <div class="chart-body">
             <div class="insight-list" id="comm-type-bars" style="margin-top:.5rem;"></div>
           </div>
@@ -860,17 +860,17 @@
     <div id="resp-exp" style="display:none">
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+          <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment" aria-label="Slz rexp"<option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+          <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment" aria-label="Slz rgap"<option value="">Everyone</option></select></div>
           <div class="chart-body">
             <div class="insight-list" id="exp-gap-bars" style="margin-top:.5rem;"></div>
           </div>
         </div>
       </div>
-      <div class="chart-card" style="margin-top:1.25rem"><div class="chart-head"><div><div class="chart-title">Who-does-what agreement by question</div><div class="chart-subtitle">% of couples who name the same person (one “Me” + one “Partner” = agreement) · directional items</div></div><select class="tile-slicer" id="slz-ragree" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div><div class="chart-body"><div class="insight-list" id="resp-agree-bars" style="margin-top:.5rem;"></div></div></div><div class="qx-section" id="qx-exp" style="margin-top:1.25rem"></div>
+      <div class="chart-card" style="margin-top:1.25rem"><div class="chart-head"><div><div class="chart-title">Who-does-what agreement by question</div><div class="chart-subtitle">% of couples who name the same person (one “Me” + one “Partner” = agreement) · directional items</div></div><select class="tile-slicer" id="slz-ragree" title="Cut this tile by a couple-level segment" aria-label="Slz ragree"<option value="">Everyone</option></select></div><div class="chart-body"><div class="insight-list" id="resp-agree-bars" style="margin-top:.5rem;"></div></div></div><div class="qx-section" id="qx-exp" style="margin-top:1.25rem"></div>
     </div>
 
     <div id="resp-story" style="display:none">
@@ -882,7 +882,7 @@
       </div>
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div><select class="tile-slicer" id="slz-rfeel" title="Cut this tile by a couple-level segment"><option value="">Everyone</option></select></div>
+          <div class="chart-head"><div><div class="chart-title">Overall relationship feel distribution</div><div class="chart-subtitle">Combined avg score per couple</div></div><select class="tile-slicer" id="slz-rfeel" title="Cut this tile by a couple-level segment" aria-label="Slz rfeel"<option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-story-feel"></canvas></div>
         </div>
         <div class="chart-card">
@@ -898,7 +898,7 @@
     <div id="resp-intimacy" style="display:none">
       <div class="chart-grid full">
         <div class="chart-card">
-          <div class="chart-head"><div><div class="chart-title">Alignment by intimacy dimension</div><div class="chart-subtitle">Average alignment across dimensions</div></div><select class="tile-slicer" id="slz-intim" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+          <div class="chart-head"><div><div class="chart-title">Alignment by intimacy dimension</div><div class="chart-subtitle">Average alignment across dimensions</div></div><select class="tile-slicer" id="slz-intim" title="Cut this tile by a segment" aria-label="Slz intim"<option value="">Everyone</option></select></div>
           <div class="chart-body"><div class="insight-list" id="intimacy-dim-bars" style="margin-top:.5rem;"></div></div>
         </div>
       </div>
@@ -916,7 +916,7 @@
     </div>
     <div style="display:flex;justify-content:flex-end;align-items:center;gap:.5rem;margin-bottom:.6rem;">
       <span style="font-size:.66rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;">Slice all metrics</span>
-      <select id="sat-kpi-slicer" class="tile-slicer" title="Cut every metric below by a segment"></select>
+      <select id="sat-kpi-slicer" class="tile-slicer" title="Cut every metric below by a segment" aria-label="Sat kpi slicer"</select>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val" id="sat-nps">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
@@ -928,16 +928,16 @@
     </div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Led to a real conversation</div><div class="chart-subtitle">Did Attune spark a conversation between partners</div></div><select class="tile-slicer" id="slz-sconvo" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Led to a real conversation</div><div class="chart-subtitle">Did Attune spark a conversation between partners</div></div><select class="tile-slicer" id="slz-sconvo" title="Cut this tile by a segment" aria-label="Slz sconvo"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-convo"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">Post-completion survey</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment" aria-label="Slz srate"<option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-ratings"></canvas></div>
       </div>
     </div>
     <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment" aria-label="Slz snps"<option value="">Everyone</option></select></div>
       <div class="chart-body"><canvas id="chart-nps"></canvas></div>
     </div>
     <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Footer feedback · site-wide reaction strip</div>
@@ -982,7 +982,7 @@
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
       <div style="flex:1;min-width:180px;">
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by NPS segment</div>
-        <select id="filter-nps" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);">
+        <select id="filter-nps" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" aria-label="Filter nps"
           <option value="all">All respondents</option>
           <option value="promoter">Promoters only (NPS 9–10)</option>
           <option value="passive">Passives only (NPS 7–8)</option>
@@ -991,7 +991,7 @@
       </div>
       <div style="flex:1;min-width:180px;">
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by expectation match</div>
-        <select id="filter-exp-match" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);">
+        <select id="filter-exp-match" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" aria-label="Filter exp match"
           <option value="all">All</option>
           <option value="exceeded">Exceeded (4–5)</option>
           <option value="met">Met (3)</option>
@@ -1000,7 +1000,7 @@
       </div>
       <div style="flex:1;min-width:180px;">
         <div style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:.4rem;">Filter by conversation outcome</div>
-        <select id="filter-convo" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);">
+        <select id="filter-convo" onchange="applyFilters()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" aria-label="Filter convo"
           <option value="all">All</option>
           <option value="yes-significant">Had a significant conversation</option>
           <option value="yes-smaller">Had a smaller conversation</option>
@@ -1024,12 +1024,12 @@
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
         <div style="flex:1;min-width:220px;">
           <div style="font-size:.72rem;color:var(--dim);margin-bottom:.3rem;">Row (segment by)</div>
-          <select id="crosstab-row" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" id="crosstab-row"></select>
+          <select id="crosstab-row" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" id="crosstab-row" aria-label="Crosstab row"</select>
         </div>
         <div style="font-size:1.1rem;color:var(--dim);padding-top:1.2rem;">×</div>
         <div style="flex:1;min-width:220px;">
           <div style="font-size:.72rem;color:var(--dim);margin-bottom:.3rem;">Column (measure)</div>
-          <select id="crosstab-col" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" id="crosstab-col"></select>
+          <select id="crosstab-col" onchange="runCrosstab()" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:.82rem;font-family:var(--bfont);" id="crosstab-col" aria-label="Crosstab col"</select>
         </div>
       </div>
       <div id="crosstab-result" style="margin-top:1rem;"></div>
@@ -1207,15 +1207,15 @@
   <div class="xp-controls">
     <div class="xp-ctl">
       <label>Rows</label>
-<select id="xp-row-field"></select>
+<select id="xp-row-field" aria-label="Xp row field"</select>
     </div>
     <div class="xp-ctl">
       <label>Columns</label>
-<select id="xp-col-field"></select>
+<select id="xp-col-field" aria-label="Xp col field"</select>
     </div>
     <div class="xp-ctl">
       <label>Cells</label>
-      <select id="xp-cell">
+      <select id="xp-cell" aria-label="Xp cell"
         <option value="count">Count</option>
         <option value="pctTotal">% of total</option>
         <option value="pctRow">% of row</option>
@@ -1225,7 +1225,7 @@
     </div>
     <div class="xp-ctl" id="xp-measure-wrap" style="display:none;">
       <label>Average of</label>
-<select id="xp-measure-field"></select>
+<select id="xp-measure-field" aria-label="Xp measure field"</select>
     </div>
     <div class="xp-ctl">
       <label>&nbsp;</label>
@@ -1604,13 +1604,13 @@ window.adminAuthHeaders = function(extra){
     <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment" aria-label="Slz tcouple"<option value="">Everyone</option></select></div>
         <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 1.4rem 1rem;">
           <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment" aria-label="Slz tindiv"<option value="">Everyone</option></select></div>
         <canvas id="types-indiv-chart" height="220"></canvas>
       </div>
     </div>
@@ -1618,25 +1618,25 @@ window.adminAuthHeaders = function(extra){
     <!-- Axis distributions: split summary + score histogram per axis -->
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub"></div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Engage / Withdraw</div><div class="chart-card-sub"></div></div><select class="tile-slicer" id="slz-teng" title="Cut this tile by a segment" aria-label="Slz teng"<option value="">Everyone</option></select></div>
         <div id="types-w-axis" style="padding:.7rem 1.4rem 1.3rem;"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Guarded / Open</div><div class="chart-card-sub"></div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Guarded / Open</div><div class="chart-card-sub"></div></div><select class="tile-slicer" id="slz-topen" title="Cut this tile by a segment" aria-label="Slz topen"<option value="">Everyone</option></select></div>
         <div id="types-o-axis" style="padding:.7rem 1.4rem 1.3rem;"></div>
       </div>
     </div>
 
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Average placement by gender</div><div class="chart-card-sub">Mean position of each gender on the two axes. Always split by gender, on top of any slice you choose.</div></div><select class="tile-slicer" id="slz-tmap" title="Cut this map by a segment"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Average placement by gender</div><div class="chart-card-sub">Mean position of each gender on the two axes. Always split by gender, on top of any slice you choose.</div></div><select class="tile-slicer" id="slz-tmap" title="Cut this map by a segment" aria-label="Slz tmap"<option value="">Everyone</option></select></div>
         <div id="types-couple-map" style="padding:1rem 1.4rem 1.4rem;"></div>
       </div>
     </div>
 
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type &times; outcomes</div><div class="chart-card-sub">Beta feedback grouped by couple type. Delivery and shift are 1&ndash;5 averages. Conversation is the share who said it led to a new one.</div></div><select class="tile-slicer" id="slz-tout" title="Filter the population before grouping"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type &times; outcomes</div><div class="chart-card-sub">Beta feedback grouped by couple type. Delivery and shift are 1&ndash;5 averages. Conversation is the share who said it led to a new one.</div></div><select class="tile-slicer" id="slz-tout" title="Filter the population before grouping" aria-label="Slz tout"<option value="">Everyone</option></select></div>
         <div id="types-outcomes" style="padding:.7rem 1.4rem 1.4rem;"></div>
       </div>
     </div>
@@ -1774,7 +1774,7 @@ window.adminAuthHeaders = function(extra){
     </div>
 
     <div class="chart-card" style="margin-top:1rem;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-title">Discount size distribution</div><div class="chart-sub">Count of code-redeeming orders by discount size</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment"><option value="">Everyone</option></select></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-title">Discount size distribution</div><div class="chart-sub">Count of code-redeeming orders by discount size</div></div><select class="tile-slicer" id="slz-pdisc" title="Cut this tile by a segment" aria-label="Slz pdisc"<option value="">Everyone</option></select></div>
       <div style="height:240px;position:relative;"><canvas id="pr-discount-chart"></canvas></div>
     </div>
 
@@ -1988,12 +1988,12 @@ window.adminAuthHeaders = function(extra){
       <div class="chart-card-header"><div class="chart-card-title">Testimonials review</div><div class="chart-card-sub">Star + NPS attached; “★ Feature” publishes a testimonial to the homepage</div></div>
       <div style="padding:.5rem 1.4rem 1.4rem;">
         <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem;">
-          <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;box-sizing:border-box;">
+          <input id="testi-search" type="text" placeholder="Search testimonials or names…" oninput="renderTestimonialsReview()" style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;box-sizing:border-box;" aria-label="Search testimonials or names…"
           <details id="testi-filter-dd" style="position:relative;">
             <summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;white-space:nowrap;">Filter<span id="testi-filter-n" style="color:var(--dim);font-family:var(--mono);font-size:.66rem;"></span> ▾</summary>
             <div id="testi-filter-panel" style="position:absolute;z-index:30;top:100%;right:0;margin-top:.35rem;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem .85rem;box-shadow:0 12px 34px rgba(0,0,0,.18);max-height:360px;overflow:auto;min-width:230px;"></div>
           </details>
-          <select id="tf-sort" onchange="renderTestimonialsReview()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .6rem;font-size:.74rem;cursor:pointer;">
+          <select id="tf-sort" onchange="renderTestimonialsReview()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .6rem;font-size:.74rem;cursor:pointer;" aria-label="Tf sort"
             <option value="new">Newest first</option>
             <option value="old">Oldest first</option>
             <option value="high">Highest rated</option>

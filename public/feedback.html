@@ -226,7 +226,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   </div>
 
   <div class="question">
-    <div class="q-text">How well did Attune deliver on what you were expecting?</div>
+    <div class="q-text" id="qt1">How well did Attune deliver on what you were expecting?</div>
     <div class="rating-row" id="expectationMatch">
       <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">1</span>Fell short</button>
       <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">2</span></button>
@@ -236,7 +236,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-expectationMatch">
       <div class="q-text" id="fuq-expectationMatch"></div>
-      <textarea id="fu_expectationMatch" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_expectationMatch" placeholder="Be as specific as you can..." aria-labelledby="qt1"></textarea>
     </div>
   </div>
 
@@ -260,7 +260,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   <div class="section-label">02 · The communication exercise</div>
 
   <div class="question">
-    <div class="q-text">Overall, how would you rate the communication exercise?</div>
+    <div class="q-text" id="qt2">Overall, how would you rate the communication exercise?</div>
     <div class="rating-row" id="commsOverall">
       <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">1</span>Poor</button>
       <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">2</span></button>
@@ -270,12 +270,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-commsOverall">
       <div class="q-text" id="fuq-commsOverall"></div>
-      <textarea id="fu_commsOverall" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_commsOverall" placeholder="Be as specific as you can..." aria-labelledby="qt2"></textarea>
     </div>
   </div>
 
   <div class="question">
-    <div class="q-text">How honestly were you able to answer?</div>
+    <div class="q-text" id="qt3">How honestly were you able to answer?</div>
     <div class="rating-row" id="commsHonesty">
       <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
       <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">2</span></button>
@@ -285,7 +285,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-commsHonesty">
       <div class="q-text" id="fuq-commsHonesty"></div>
-      <textarea id="fu_commsHonesty" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_commsHonesty" placeholder="Be as specific as you can..." aria-labelledby="qt3"></textarea>
     </div>
   </div>
 
@@ -297,8 +297,8 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   </div>
 
   <div class="question">
-    <div class="q-text">Did you notice questions that felt off, too clinical, or beside the point? If so, please share your thoughts.</div>
-    <textarea id="commsQuestionsFeedback" placeholder="Which ones, and why? If nothing stood out, say so."></textarea>
+    <div class="q-text" id="qt4">Did you notice questions that felt off, too clinical, or beside the point? If so, please share your thoughts.</div>
+    <textarea id="commsQuestionsFeedback" placeholder="Which ones, and why? If nothing stood out, say so." aria-labelledby="qt4"></textarea>
   </div>
 </div>
 
@@ -309,7 +309,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   <div class="section-label">03 · The expectations exercise</div>
 
   <div class="question">
-    <div class="q-text">Overall, how would you rate the expectations exercise?</div>
+    <div class="q-text" id="qt5">Overall, how would you rate the expectations exercise?</div>
     <div class="rating-row" id="expOverall">
       <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">1</span>Poor</button>
       <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">2</span></button>
@@ -319,12 +319,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-expOverall">
       <div class="q-text" id="fuq-expOverall"></div>
-      <textarea id="fu_expOverall" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_expOverall" placeholder="Be as specific as you can..." aria-labelledby="qt5"></textarea>
     </div>
   </div>
 
   <div class="question">
-    <div class="q-text">How honestly were you able to answer?</div>
+    <div class="q-text" id="qt6">How honestly were you able to answer?</div>
     <div class="rating-row" id="expHonesty">
       <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
       <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">2</span></button>
@@ -334,7 +334,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-expHonesty">
       <div class="q-text" id="fuq-expHonesty"></div>
-      <textarea id="fu_expHonesty" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_expHonesty" placeholder="Be as specific as you can..." aria-labelledby="qt6"></textarea>
     </div>
   </div>
 
@@ -346,8 +346,8 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   </div>
 
   <div class="question">
-    <div class="q-text">Were there responsibilities not mentioned in this exercise that matter to your relationship?</div>
-    <textarea id="expMissing" placeholder="Anything specific that should have been included. If nothing, say so."></textarea>
+    <div class="q-text" id="qt7">Were there responsibilities not mentioned in this exercise that matter to your relationship?</div>
+    <textarea id="expMissing" placeholder="Anything specific that should have been included. If nothing, say so." aria-labelledby="qt7"></textarea>
   </div>
 </div>
 
@@ -400,7 +400,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   </div>
 
   <div class="question">
-    <div class="q-text">How much did it shift your understanding of how you two operate as a couple?</div>
+    <div class="q-text" id="qt8">How much did it shift your understanding of how you two operate as a couple?</div>
     <div class="rating-row" id="shiftCouple">
       <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">1</span>No shift</button>
       <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">2</span></button>
@@ -410,12 +410,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-shiftCouple">
       <div class="q-text" id="fuq-shiftCouple"></div>
-      <textarea id="fu_shiftCouple" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_shiftCouple" placeholder="Be as specific as you can..." aria-labelledby="qt8"></textarea>
     </div>
   </div>
 
   <div class="question">
-    <div class="q-text">How much did it shift your understanding of yourself?</div>
+    <div class="q-text" id="qt9">How much did it shift your understanding of yourself?</div>
     <div class="rating-row" id="shiftSelf">
       <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">1</span>No shift</button>
       <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">2</span></button>
@@ -425,12 +425,12 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-shiftSelf">
       <div class="q-text" id="fuq-shiftSelf"></div>
-      <textarea id="fu_shiftSelf" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_shiftSelf" placeholder="Be as specific as you can..." aria-labelledby="qt9"></textarea>
     </div>
   </div>
 
   <div class="question">
-    <div class="q-text">How likely are you to review your results at some point in the next 6 months?</div>
+    <div class="q-text" id="qt10">How likely are you to review your results at some point in the next 6 months?</div>
     <div class="rating-row" id="returnLikelihood">
       <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">1</span>Very unlikely</button>
       <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">2</span></button>
@@ -440,7 +440,7 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
     </div>
     <div class="conditional" id="fu-returnLikelihood">
       <div class="q-text" id="fuq-returnLikelihood"></div>
-      <textarea id="fu_returnLikelihood" placeholder="Be as specific as you can..."></textarea>
+      <textarea id="fu_returnLikelihood" placeholder="Be as specific as you can..." aria-labelledby="qt10"></textarea>
     </div>
   </div>
 
@@ -457,9 +457,9 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   </div>
 
   <div class="question">
-    <div class="q-text">What's behind that rating?</div>
+    <div class="q-text" id="qt11">What's behind that rating?</div>
     <div class="q-sub">What makes it feel more or less valuable compared to other options?</div>
-    <textarea id="valueWhy" placeholder="What shapes how you think about what Attune is worth..."></textarea>
+    <textarea id="valueWhy" placeholder="What shapes how you think about what Attune is worth..." aria-labelledby="qt11"></textarea>
   </div>
 </div>
 
@@ -470,15 +470,15 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   <div class="section-label">05 · What you actually discovered</div>
 
   <div class="question">
-    <div class="q-text">In your own words, what did you actually discover or notice?</div>
+    <div class="q-text" id="qt12">In your own words, what did you actually discover or notice?</div>
     <div class="q-sub">This is the most valuable thing you can share with us.</div>
-    <textarea id="whatDiscovered" placeholder="Anything, big or small. What stuck?" style="min-height:110px"></textarea>
+    <textarea id="whatDiscovered" placeholder="Anything, big or small. What stuck?" style="min-height:110px" aria-labelledby="qt12"></textarea>
   </div>
 
   <div class="question">
-    <div class="q-text">Is there anything you wish you'd known before doing Attune, to be more prepared, or more excited?</div>
+    <div class="q-text" id="qt13">Is there anything you wish you'd known before doing Attune, to be more prepared, or more excited?</div>
     <div class="q-sub">This helps us with how we explain Attune to new couples.</div>
-    <textarea id="wishKnew" placeholder="Something about the process, the format, what to expect..."></textarea>
+    <textarea id="wishKnew" placeholder="Something about the process, the format, what to expect..." aria-labelledby="qt13"></textarea>
   </div>
 
 </div>
@@ -490,21 +490,21 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   <div class="section-label">06 · A word from you</div>
 
   <div class="question">
-    <div class="q-text">If you were telling a close friend about Attune, what would you say?</div>
+    <div class="q-text" id="qt14">If you were telling a close friend about Attune, what would you say?</div>
     <div class="q-sub">Write it how you'd actually say it, not a review.</div>
-    <textarea id="testimonial" placeholder="e.g. 'We've been together four years and I still learned something I didn't expect...'" style="min-height:110px"></textarea>
+    <textarea id="testimonial" placeholder="e.g. 'We've been together four years and I still learned something I didn't expect...'" style="min-height:110px" aria-labelledby="qt14"></textarea>
   </div>
 
   <div class="question">
-    <div class="q-text">May we use your words and first name on our website's reviews section?</div>
+    <div class="q-text" id="qt15">May we use your words and first name on our website's reviews section?</div>
     <div class="chips consent-chips" id="testimonialConsent">
       <div class="consent-row">
         <button class="chip" data-g="testimonialConsent" data-s="1">Yes – use my words and my first name,</button>
-        <input type="text" class="inline-input" id="consentFirstName" placeholder="first name">
+        <input type="text" class="inline-input" id="consentFirstName" placeholder="first name" aria-labelledby="qt15">
       </div>
       <div class="consent-row">
         <button class="chip" data-g="testimonialConsent" data-s="1">Yes – initials only, my initials are</button>
-        <input type="text" class="inline-input" id="consentInitials" placeholder="initials" maxlength="5">
+        <input type="text" class="inline-input" id="consentInitials" placeholder="initials" maxlength="5" aria-label="initials">
       </div>
       <button class="chip" data-g="testimonialConsent" data-s="1">Yes – keep it anonymous</button>
       <button class="chip" data-g="testimonialConsent" data-s="1">No, internal use only</button>
@@ -514,13 +514,13 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
   <hr>
 
   <div class="question">
-    <div class="q-text">How likely are you to recommend Attune to a couple you know?</div>
+    <div class="q-text" id="qt16">How likely are you to recommend Attune to a couple you know?</div>
     <div class="q-sub">0 = not at all · 10 = absolutely</div>
     <div class="nps-row" id="nps"></div>
     <div class="nps-labels"><span>Not likely</span><span>Very likely</span></div>
     <div class="conditional" id="npsCond">
       <div class="q-text">What's holding you back from recommending Attune?</div>
-      <textarea id="npsWhy" placeholder="Be honest. This is exactly what we need to hear..."></textarea>
+      <textarea id="npsWhy" placeholder="Be honest. This is exactly what we need to hear..." aria-labelledby="qt16"></textarea>
     </div>
   </div>
 

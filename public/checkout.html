@@ -942,12 +942,12 @@ function renderItemsStep() {
       <!-- Names -->
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Partner 1 – first name</label>
-          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="partner1Name" value="${(it.partner1Name||'').replace(/"/g,'&quot;')}" placeholder="e.g. Sarah" autocomplete="given-name" oninput="onItemInput(this)">
+          <label class="form-label" for="p1name-${idx}">Partner 1 – first name</label>
+          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="partner1Name" id="p1name-${idx}" value="${(it.partner1Name||'').replace(/"/g,'&quot;')}" placeholder="e.g. Sarah" autocomplete="given-name" oninput="onItemInput(this)">
         </div>
         <div class="form-group">
-          <label class="form-label">Partner 2 – first name</label>
-          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="partner2Name" value="${(it.partner2Name||'').replace(/"/g,'&quot;')}" placeholder="e.g. James" autocomplete="given-name" oninput="onItemInput(this)">
+          <label class="form-label" for="p2name-${idx}">Partner 2 – first name</label>
+          <input class="form-input item-input" type="text" data-idx="${idx}" data-field="partner2Name" id="p2name-${idx}" value="${(it.partner2Name||'').replace(/"/g,'&quot;')}" placeholder="e.g. James" autocomplete="given-name" oninput="onItemInput(this)">
         </div>
       </div>
 

@@ -12028,6 +12028,12 @@ function AuthModal({ mode, onClose, onSuccess }) {
         <input
           type={type}
           placeholder={placeholder}
+          /* The placeholder is the only thing naming this field, and a
+             placeholder is not a label: it disappears the moment someone types
+             and a screen reader announces an empty box. The same words, said to
+             assistive tech as well. Nothing new is written here; the label is
+             the argument this helper already takes. */
+          aria-label={placeholder}
           autoComplete={autoFill}
           autoCapitalize={type === 'email' ? 'none' : undefined}
           autoCorrect={type === 'email' ? 'off' : undefined}
@@ -12169,7 +12175,10 @@ function AuthModal({ mode, onClose, onSuccess }) {
               {ABOUT_YOU.fields.map(({ key: k, label, options: opts }) => (
                 <div key={k} style={{ marginBottom: "0.65rem" }}>
                   <label style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
-                  <select value={form[k]} onChange={e => upd(k, e.target.value)}
+                  /* The visible label is right above this and says the same thing; naming
+                     the field with it costs nothing and is the difference between a
+                     screen reader saying "combo box" and saying what it is for. */
+                  <select value={form[k]} onChange={e => upd(k, e.target.value)} aria-label={label}
                     style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                     {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
@@ -12275,7 +12284,10 @@ function NewPasswordScreen({ onDone }) {
   // Reset form: always a new password, so the manager offers to update the
   // stored credential rather than filling the old one back in.
   const inp = (placeholder, val, onChange, type = 'password') => (
-    <input type={type} placeholder={placeholder} autoComplete={type === 'password' ? 'new-password' : 'username'}
+    /* aria-label for the reason on the other inp helper: the placeholder is
+       the only name this field has. */
+    <input type={type} placeholder={placeholder} aria-label={placeholder}
+      autoComplete={type === 'password' ? 'new-password' : 'username'}
       value={val} onChange={e => { onChange(e.target.value); setErr(''); }}
       style={{ width: '100%', padding: '0.78rem 1rem', border: `1.5px solid ${err ? '#ef4444' : '#E8DDD0'}`, borderRadius: 11, fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", color: '#0E0B07', background: '#FFFDF9', outline: 'none', marginBottom: '0.6rem', boxSizing: 'border-box' }} />
   );
@@ -12680,7 +12692,10 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           ].map(({ k, label, opts }) => (
             <div key={k} style={{ marginBottom: "0.65rem" }}>
               <label style={{ fontSize: "0.68rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", display: "block", marginBottom: "0.2rem" }}>{label}</label>
-              <select value={form[k]} onChange={e => upd(k, e.target.value)}
+              /* The visible label is right above this and says the same thing; naming
+                     the field with it costs nothing and is the difference between a
+                     screen reader saying "combo box" and saying what it is for. */
+                  <select value={form[k]} onChange={e => upd(k, e.target.value)} aria-label={label}
                 style={{ width: "100%", padding: "0.55rem 0.75rem", border: "1.5px solid #E8DDD0", borderRadius: 8, fontSize: "0.8rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9" }}>
                 {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>

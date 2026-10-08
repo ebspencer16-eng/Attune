@@ -63,6 +63,7 @@ try {
      around; on a fresh clone it would have refused with "no pages to
      measure", which is the right failure in the wrong place. */
   await run(process.execPath, ['scripts/check-no-sideways-scroll.mjs'], { env: { ...process.env, BASE } });
+  await run(process.execPath, ['scripts/check-control-names.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }
