@@ -313,7 +313,14 @@ renderArticles();
       .site-footer .sf-bottom{padding:1rem 1.25rem 0!important;flex-direction:column!important;align-items:flex-start!important;gap:.3rem!important}
       .site-footer .sf-copy,.site-footer .sf-email{font-size:.7rem!important}
     }
-  </style>
+  
+/* The nav collapses to the hamburger on a phone. Without this the full nav
+   stays and the page scrolls sideways: these five index pages had no such
+   rule, and the canonical nav is wider than the one they used to carry, so
+   putting it on them pushed 11 points past the right edge at 360. The
+   twelve article pages beside them have had this rule all along. */
+@media(max-width:640px){.nav-center,.nav-right .btn-nav,.nav-signin{display:none}.hamburger{display:flex}}
+</style>
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">

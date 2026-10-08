@@ -57,6 +57,12 @@ try {
 // that nothing else draws. See that file's header for what it is and is not.
 try {
   await run(process.execPath, ['scripts/check-static-render.mjs'], { env: { ...process.env, BASE } });
+  /* Here rather than in `npm run check` because it reads dist/, which the
+     smoke builds a few lines up and a plain check run does not have. Wired
+     into check first, it passed only because a build happened to be lying
+     around; on a fresh clone it would have refused with "no pages to
+     measure", which is the right failure in the wrong place. */
+  await run(process.execPath, ['scripts/check-no-sideways-scroll.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }

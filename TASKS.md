@@ -25,6 +25,7 @@
 
 | # | Built, needs your eye |
 |--|--|
+| B21 | **Five pages scrolled sideways on a phone, and it was my doing.** Putting the shared nav on the In Practice pages exposed that five of them have no rule collapsing it to the hamburger on a narrow screen, so the wider nav pushed 11 points past the edge. Fixed, and now measured: 37 pages at two phone widths, nothing scrolling and nothing drawn past the edge. |
 | B20 | **The two people's colours on a glance page were written out on both surfaces.** On a dark glance ground your partner is a lighter blue than on a storycard, deliberately, because the storycard blue is almost invisible there. That pair was in two files and the gate written for exactly this failure was only checking the other pair. |
 | B18 | **The budget's three headline numbers were coloured by two sets of hex values**, one typed into each surface. They agreed. The note beside the website's copy records that the LABELS for these same three numbers drifted once already, which is how the two tools came to disagree about which numbers a budget has. The colours sit with the copy and the arithmetic now, and the gate that compares every figure compares them too. |
 | B10 | **Fixed, not removed.** The admin CSV asked for the three couple-satisfaction columns by ids that have never existed, so twelve columns came out blank. They resolve now and will carry data from the next export. |
