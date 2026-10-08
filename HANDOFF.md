@@ -2272,3 +2272,27 @@ is changed.
 fix twice today, and both times noticed only because a gate went on failing
 after the "restore". A copy is a restore point only if it was made after the
 thing you want to keep.
+
+## 8 October 2026 — the overflow sweep, and a gate that was blind twice
+
+**Five pages scrolled sideways on a phone and I caused it.** Putting the shared
+nav on the In Practice pages exposed that five of them, the section indexes,
+have no rule collapsing the nav to the hamburger. Measured before and after:
+zero on the previous commit, eleven points after, on exactly those five.
+
+**The gate for it was blind in a way worth remembering.** `scrollWidth -
+clientWidth` is the obvious measurement and it cannot see anything on seventeen
+of these pages, because they set `overflow-x: hidden` and `clip` on html and
+body. That is a deliberate guard against sideways scroll, and it means content
+past the edge is CUT OFF rather than scrolled to: worse, and invisible to the
+obvious check. A planted 900 point element on /home passed while sitting 415
+points past the edge. It measures both now.
+
+**And it was in the wrong runner.** It reads dist/, which the smoke builds and
+`npm run check` does not, so wired into check it passed only because a build was
+lying around. On a fresh clone it would have refused. It is in the smoke now,
+using the server the smoke already has rather than starting a second one beside
+it, which is what produced a spurious "Chrome did not report a debugging port".
+
+Both of those are the same mistake in different clothes: a check that looks like
+it is measuring the thing, in a place where it cannot.
