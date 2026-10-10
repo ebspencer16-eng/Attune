@@ -879,6 +879,38 @@ async function markEditing(field) {
   } catch { /* a courtesy, never a blocker */ }
 }
 
+/**
+ * Tell the server an exercise just finished.
+ *
+ * ── WHY THE SERVER HAS TO BE TOLD ───────────────────────────────────────────
+ * The website saves answers itself, straight to Supabase with the signed-in
+ * user's session, and only falls back to /api/save-exercise when RLS blocks
+ * the write. Everything that happens at the moment a couple becomes complete
+ * lives behind that endpoint: the partner's alert, and the workbook build.
+ *
+ * So a couple who finished here were never told, and their workbook was built
+ * only if the buyer was the one finishing, in the browser holding their order.
+ * Ellie: "make sure workbook begins generating once results are complete."
+ *
+ * /api/exercise-completed takes no answers. It reads the rows that are already
+ * stored and runs the same function the app's path runs, so the two cannot
+ * disagree about what completion means. Fire and forget: the answers are
+ * saved, and this is the courtesy on the side of that. Safe to call twice.
+ */
+async function notifyCompleted(exerciseKey) {
+  try {
+    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+    if (!hasSupabase()) return;
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) return;
+    await fetch('/api/exercise-completed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ exercise: exerciseKey }),
+    });
+  } catch { /* a courtesy, never a blocker */ }
+}
+
 async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answers, extraPatch = {}) {
   if (!sb || !accountId || !exerciseNum || !answers) return { error: new Error('bad args') };
   const col     = `ex${exerciseNum}_answers`;
@@ -979,6 +1011,7 @@ async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answer
             window.__attuneShowToast('Synced.');
             window.__attune_sync_failed = false;
           }
+          /* That endpoint announces its own completions, so nothing more here. */
           return { data: null };
         } else {
           console.warn('[Attune] save-exercise fallback also failed:', await resp.text());
@@ -993,6 +1026,7 @@ async function saveExerciseWithRetakeSnapshot(sb, accountId, exerciseNum, answer
   // answers. Return a real error so callers can react instead of treating
   // an empty write as success.
   if (zeroRows) return { error: new Error('Save did not persist (0 rows updated and fallback failed)') };
+  if (!result?.error) notifyCompleted(`ex${exerciseNum}`);
   return result;
 }
 
@@ -6983,145 +7017,12 @@ const JAMES_ANNIVERSARY_DEMO = {
 // where a reader meets it without a detour. ActionPlanList drew that page and
 // outlived it, unused, for long enough to look like something still in service.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// BETA SURVEY MODAL — 4-question in-app feedback, triggered from results sidebar
-// ─────────────────────────────────────────────────────────────────────────────
-const BETA_Qs = [
-  {
-    id: "useful",
-    q: "How useful were your results?",
-    type: "scale",
-    labels: ["Not useful", "Somewhat", "Very useful"],
-  },
-  {
-    id: "surprise",
-    q: "Was there anything in your results that surprised you?",
-    type: "choice",
-    options: ["Yes, something I didn't expect", "A little, some things landed differently", "Not really. It confirmed what I knew"],
-  },
-  {
-    id: "together",
-    q: "Have you reviewed your results with your partner yet?",
-    type: "choice",
-    options: ["Yes, together", "Not yet, planning to", "No. We did it separately"],
-  },
-  {
-    id: "improve",
-    q: "What would have made Attune more useful?",
-    type: "text",
-    placeholder: "Anything at all, length, format, what was missing, what felt off",
-  },
-];
-
-function BetaSurveyModal({ userName, coupleType, onClose }) {
-  const [step, setStep] = React.useState(0);
-  const [answers, setAnswers] = React.useState({});
-  const [submitted, setSubmitted] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const q = BETA_Qs[step];
-  const total = BETA_Qs.length;
-  const ans = answers[q?.id];
-  const canNext = q?.type === "text" ? true : !!ans;
-
-  const next = () => {
-    if (step < total - 1) setStep(s => s + 1);
-    else handleSubmit();
-  };
-
-  const handleSubmit = async () => {
-    setSubmitting(true);
-    try {
-      await fetch('/api/get-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'beta_survey', userName, coupleType: coupleType?.name, answers }),
-      });
-    } catch {}
-    setSubmitted(true);
-    setSubmitting(false);
-  };
-
-  if (submitted) return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
-        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.3rem" }}>✓</div>
-        <div style={{ fontFamily: font.display, fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>Thank you.</div>
-        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem" }}>Your feedback goes directly to the people building Attune. It shapes what we change.</p>
-        <button onClick={onClose} style={{ background: C.ink, color: "white", border: "none", borderRadius: 11, padding: "0.7rem 2rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body }}>Done</button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 420, maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
-          <div>
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Beta feedback</div>
-            <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body }}>{step + 1} of {total}</div>
-          </div>
-          <button onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: C.muted }}>✕</button>
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ height: 3, background: C.stone, borderRadius: 2, marginBottom: "1.75rem", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${((step + 1) / total) * 100}%`, background: "linear-gradient(90deg,#E8673A,#1B5FE8)", borderRadius: 2, transition: "width 0.3s ease" }} />
-        </div>
-
-        {/* Question */}
-        <div style={{ fontFamily: font.display, fontSize: "1.1rem", fontWeight: 700, color: C.ink, lineHeight: 1.3, marginBottom: "1.5rem" }}>{q.q}</div>
-
-        {/* Scale */}
-        {q.type === "scale" && (
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            {[1, 2, 3, 4, 5].map(v => (
-              <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))}
-                style={{ flex: 1, aspectRatio: "1", borderRadius: 10, border: `1.5px solid ${ans === v ? "#E8673A" : C.stone}`, background: ans === v ? "#FFF0EB" : "white", color: ans === v ? "#E8673A" : C.muted, fontWeight: ans === v ? 700 : 400, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.12s", fontFamily: font.body }}>
-                {v}
-              </button>
-            ))}
-          </div>
-        )}
-        {q.type === "scale" && (
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.62rem", color: C.muted, fontFamily: font.body, marginBottom: "1.5rem" }}>
-            {q.labels.map((l, i) => <span key={i}>{l}</span>)}
-          </div>
-        )}
-
-        {/* Choice */}
-        {q.type === "choice" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-            {q.options.map((o, i) => (
-              <button key={i} onClick={() => setAnswers(a => ({ ...a, [q.id]: o }))}
-                style={{ padding: "0.75rem 1rem", borderRadius: 11, border: `1.5px solid ${ans === o ? "#E8673A" : C.stone}`, background: ans === o ? "#FFF0EB" : "white", color: ans === o ? "#E8673A" : C.ink, fontWeight: ans === o ? 600 : 400, fontSize: "0.82rem", cursor: "pointer", textAlign: "left", fontFamily: font.body, transition: "all 0.12s" }}>
-                {o}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Text */}
-        {q.type === "text" && (
-          <textarea
-            placeholder={q.placeholder}
-            value={ans || ""}
-            onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
-            rows={4}
-            style={{ width: "100%", border: `1.5px solid ${C.stone}`, borderRadius: 11, padding: "0.75rem 1rem", fontSize: "0.85rem", fontFamily: font.body, color: C.ink, background: "white", outline: "none", resize: "none", marginBottom: "1.5rem", boxSizing: "border-box" }}
-          />
-        )}
-
-        <button onClick={next} disabled={!canNext || submitting}
-          style={{ width: "100%", background: canNext ? "linear-gradient(135deg, #E8673A, #1B5FE8)" : C.stone, color: canNext ? "white" : C.muted, border: "none", borderRadius: 11, padding: "0.85rem", fontSize: "0.82rem", fontWeight: 700, cursor: canNext ? "pointer" : "default", fontFamily: font.body, transition: "all 0.15s" }}>
-          {submitting ? "Submitting…" : step < total - 1 ? "Next →" : "Submit feedback"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
+// The twenty-six question beta survey modal is gone. It posted to
+// /api/get-feedback, which is admin only and answers 401, and the flag it was
+// gated on was declared false and never set true by anything, so it could not
+// be opened in the first place. The live survey is PostResultsSurvey, further
+// down, which posts to /api/submit-beta-survey and stores what it is told.
+// Removed 2026-10-10.
 // ─────────────────────────────────────────────────────────────────────────────
 // RETAKE COMPARISON CARD
 // Shows on the results page when the user has completed an exercise more than
@@ -7503,6 +7404,10 @@ function ExperienceFeedback({ userName }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         source: 'app_experience',
+        /* Which surface answered. Both surfaces ask the same questions, and
+           the admin's `source` column is the only thing that can tell them
+           apart once the rows are side by side. */
+        surface: 'website',
         rating,
         questionAnswers: answers,
         stage: answers.q_stage || null,
@@ -7655,7 +7560,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const [typeShared, setTypeShared] = useState(false);
   const shareCardRef = useRef(null);
   const [shareBusy, setShareBusy] = useState(false);
-  const [showSurvey, setShowSurvey] = useState(false);
   const [stayEmail, setStayEmail] = useState('');
   const [stayDone, setStayDone] = useState(() => { try { return !!localStorage.getItem('attune_stay_subscribed'); } catch { return false; } });
   const [stayLoading, setStayLoading] = useState(false);
@@ -7949,144 +7853,61 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       } catch (e) { console.warn('[Attune] workbook promo trigger failed:', e); }
     })();
 
-    // ── Auto-fulfil workbook if pre-ordered ─────────────────────────────────
-    // If the couple ordered a digital workbook before completing exercises,
-    // generate it now and mark it ready. If they ordered print, flag for fulfillment.
-    // Gates: order exists, workbook addon purchased, not already generated,
-    // and BOTH partners have completed ex1 and ex2 (partial data would
-    // produce a workbook with empty sections, which we never want to ship).
+    // ── Flag a print order for fulfilment ───────────────────────────────────
+    //
+    // ── WHAT USED TO BE HERE ────────────────────────────────────────────────
+    // The digital workbook was generated from this block, in the browser, 139
+    // lines of it. It needed the buyer's order in this browser's storage, so
+    // the invited partner finishing on their own laptop generated nothing, and
+    // an app-only couple generated nothing ever.
+    //
+    // That is api/_lib/completion.js now, which runs the moment a couple's
+    // results open whichever surface the last exercise was finished on, and
+    // asks the couple's folder whether a workbook is already there before
+    // building another. Two producers of one file is the failure this codebase
+    // is about; the one that stays is the one both surfaces reach.
+    //
+    // The print flag is not generation and stays here: it is a fulfilment
+    // status for a physical order, read by the admin and by whoever ships it.
     (async () => {
       try {
         const orderRaw = localStorage.getItem('attune_order');
         if (!orderRaw) return;
         const ord = JSON.parse(orderRaw);
-        // 10.6 — ownership is not the same as the add-on flag. Premium (and comp
-        // premium) accounts include the workbook while addonWorkbook stays ''.
-        // Guarding on addonWorkbook alone meant generation never fired for them
-        // and the dashboard sat on "Generating now" forever.
-        const _ownsWorkbook = !!ord?.addonWorkbook || (ord?.pkgKey || ord?.pkg) === 'premium';
-        if (!_ownsWorkbook) return;
-        if (localStorage.getItem('attune_workbook_ready') === 'true') return; // already done
-        // A URL means the file exists. Whether its signature has expired is a
-        // different question, and not this one: it decides whether to generate,
-        // not whether to hand anyone a link.
-        if (ord?.workbookUrl) return; // generated on another device
+        if (ord?.addonWorkbook !== 'print') return;
+        if (ord?.workbookStatus === 'print_queued') return;
 
-        // Require both partners to have completed both exercises. Without
-        // this, the workbook would generate from one partner's data alone.
+        // Require both partners to have finished both exercises, the same rule
+        // the server's trigger applies: a workbook printed from one person's
+        // answers has empty sections in it.
         const bothEx1Done = !!(ex1Answers && partnerEx1
           && Object.keys(ex1Answers).length > 0
           && Object.keys(partnerEx1).length > 0);
         const bothEx2Done = !!(ex2Answers && partnerEx2
           && Object.keys(ex2Answers).length > 0
           && Object.keys(partnerEx2).length > 0);
-        if (!bothEx1Done || !bothEx2Done) {
-          ord.workbookStatus = 'pending_exercises';
-          localStorage.setItem('attune_order', JSON.stringify(ord));
-          return;
-        }
+        if (!bothEx1Done || !bothEx2Done) return;
 
-        if (ord.addonWorkbook === 'print') {
-          // Flag print order for fulfillment. Two paths:
-          //  1. localStorage (legacy admin-on-same-device view)
-          //  2. Supabase orders.workbook_status (server-side, visible to
-          //     any admin/fulfillment vendor regardless of device)
-          ord.workbookStatus = 'print_queued';
-          localStorage.setItem('attune_order', JSON.stringify(ord));
-          localStorage.setItem('attune_workbook_print_queued', JSON.stringify({
-            queuedAt: Date.now(),
-            orderNum: ord.orderNum,
-            buyerName: ord.buyerName,
-            buyerEmail: ord.buyerEmail,
-          }));
-          // Server-side: update the order row so admin dashboards on
-          // other devices and any external fulfillment tooling can see
-          // this order is ready to ship. Best-effort; if Supabase is
-          // unavailable, the localStorage flag still drives the local
-          // admin view.
-          try {
-            const { supabase: sb, hasSupabase } = await import('./supabase.js');
-            if (hasSupabase() && ord.orderNum) {
-              await sb.from('orders').update({
-                workbook_status: 'print_queued',
-              }).eq('order_num', ord.orderNum);
-            }
-          } catch (_) {}
-          return;
-        }
-
-        // Digital — auto-generate AND persist to Supabase Storage.
-        // Calls /api/store-workbook-pdf (which calls the external Render
-        // Playwright service to produce the Volume 01 PDF, then uploads
-        // it to storage and returns a 7-day signed URL). The order row is
-        // updated server-side with workbook_url + workbook_status='ready'
-        // + workbook_format='pdf'.
-        ord.workbookStatus = 'generating';
+        // Two paths, because an admin on another device cannot read this one's
+        // storage: the flag here drives the local admin view, and the order row
+        // is what any fulfilment tooling sees.
+        ord.workbookStatus = 'print_queued';
         localStorage.setItem('attune_order', JSON.stringify(ord));
-
-        // Build full payload using shared helper. Phase 5a: payload now
-        // includes responsibilities + lifeQuestions for the new renderer
-        // alongside the legacy expGaps shape for backward compatibility.
-        const payload = buildWorkbookPayload(
-          userName, partnerName,
-          ex1Answers, partnerEx1,
-          ex2Answers, partnerEx2,
-          coupleType
-        );
-        // Add orderId so store-workbook-pdf can update the row.
-        if (ord.orderNum) payload.orderId = ord.orderNum;
-
-        // Pull the user's access token so the API can verify they own a
-        // workbook addon. Without this header, the endpoint returns 401.
-        const _wbAuth = await (async () => {
-          try {
-            const { supabase: sb, hasSupabase } = await import('./supabase.js');
-            if (!hasSupabase()) return null;
-            const { data: { session } } = await sb.auth.getSession();
-            return session?.access_token || null;
-          } catch { return null; }
-        })();
-        const resp = await fetch('/api/store-workbook-pdf', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(_wbAuth ? { Authorization: `Bearer ${_wbAuth}` } : {}),
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (!resp.ok) {
-          // Don't fail silently. A swallowed 403/500 here is what left the
-          // dashboard sitting on "Generating now" with nothing to debug (10.6).
-          let _body = '';
-          try { _body = await resp.text(); } catch {}
-          console.warn('[Attune] workbook generation failed:', resp.status, _body.slice(0, 200));
-          ord.workbookStatus = 'failed';
-          try { localStorage.setItem('attune_order', JSON.stringify(ord)); } catch {}
-        }
-        if (resp.ok) {
-          // store-workbook-pdf returns { ok, url, filename } — persist
-          // the signed URL in the order so the dashboard download can
-          // pull it directly without re-generating.
-          try {
-            const data = await resp.json();
-            localStorage.setItem('attune_workbook_ready', 'true');
-            ord.workbookStatus = 'ready';
-            if (data?.url) ord.workbookUrl = data.url;
-            if (data?.filename) ord.workbookFilename = data.filename;
-            localStorage.setItem('attune_order', JSON.stringify(ord));
-            // Notify buyer by email
-            if (ord.buyerEmail) {
-              // account isn't a prop here — read from localStorage so the
-              // server-side dedup can match the right user.
-              const _acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
-              // workbook_ready email retired — folded into the results-ready email (emails #4 + #7 combined).
-            }
-          } catch {}
-        }
-      } catch (e) {
-        console.warn('[Attune] workbook auto-generation threw:', e);
-      }
+        localStorage.setItem('attune_workbook_print_queued', JSON.stringify({
+          queuedAt: Date.now(),
+          orderNum: ord.orderNum,
+          buyerName: ord.buyerName,
+          buyerEmail: ord.buyerEmail,
+        }));
+        try {
+          const { supabase: sb, hasSupabase } = await import('./supabase.js');
+          if (hasSupabase() && ord.orderNum) {
+            await sb.from('orders').update({
+              workbook_status: 'print_queued',
+            }).eq('order_num', ord.orderNum);
+          }
+        } catch (_) {}
+      } catch (e) { console.warn('[Attune] print queue flag failed:', e); }
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -10550,7 +10371,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               Back to dashboard →
             </button>
           </div>
-          {showSurvey && <BetaSurveyModal userName={userName} coupleType={coupleType} onClose={() => setShowSurvey(false)} />}
 
           {/* The end of the whole experience is where to ask how it went. */}
           <ExperienceFeedback userName={userName} />
@@ -17462,53 +17282,20 @@ export default function App() {
                       console.warn('[Attune] ex2 save error:', e);
                     }
                   }
-                  // Invitee completion: do NOT store own answers as
-                  // partnerSession. The poll effect fetches the PARTNER's data
-                  // (keyed by partnerProfileId) so hasRealPartner becomes true
-                  // for the invitee too, and both partners reach the same
-                  // merged results. Nothing to do here beyond the normal save.
-                  // Auto-trigger workbook generation if both partners are done and order includes workbook.
-                  // Recompute bothDone using the JUST-completed answers `a` rather than the closure
-                  // value of ex2Answers (which is still null at this moment — setEx2State hasn't
-                  // flushed yet). Without this, finishing Ex02 doesn't fire workbook gen even
-                  // though both partners are now done.
-                  const _bothDoneNow = !!(ex1Answers && a && (isDemo || hasRealPartner));
-                  if (_bothDoneNow && hasWorkbookOrder) {
-                    setTimeout(async () => {
-                      const ord = JSON.parse(localStorage.getItem('attune_order') || 'null');
-                      if (!ord) return;
-                      const myS = calcDimScores(ex1Answers);
-                      const partS = calcDimScores(partnerEx1);
-                      // Pull auth token so the endpoint can verify purchase
-                      let _swAuth = null;
-                      try {
-                        const { supabase: sb, hasSupabase } = await import('./supabase.js');
-                        if (hasSupabase()) {
-                          const { data: { session } } = await sb.auth.getSession();
-                          _swAuth = session?.access_token || null;
-                        }
-                      } catch {}
-                      fetch('/api/store-workbook-pdf', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          ...(_swAuth ? { Authorization: `Bearer ${_swAuth}` } : {}),
-                        },
-                        body: JSON.stringify({
-                          userName, partnerName,
-                          scores: myS, partnerScores: partS,
-                          // Full couple type so the intro page has all fields.
-                          coupleType: coupleType || null,
-                          orderId: ord.orderNum || null,
-                        }),
-                      }).then(r => r.json()).then(d => {
-                        if (d.url) {
-                          const updated = { ...ord, workbookUrl: d.url, workbook_status: 'ready' };
-                          try { localStorage.setItem('attune_order', JSON.stringify(updated)); } catch {}
-                        }
-                      }).catch(() => {});
-                    }, 2000);
-                  }
+                  /**
+                   * ── THE WORKBOOK IS NOT BUILT FROM HERE ────────────────
+                   * A third producer used to sit on this line: a two second
+                   * timeout that posted to the PDF builder with names, two
+                   * score sets and a couple type, and none of the
+                   * expectations or responsibilities data the other producer
+                   * sent. So which document a couple got depended on which
+                   * block ran last, and one of the two was missing half the
+                   * workbook.
+                   *
+                   * One producer now: api/_lib/completion.js, reached by
+                   * notifyCompleted above, which builds the payload on the
+                   * server from the couple's stored rows.
+                   */
                 }} isAnniversary={demoPkg === "anniversary"} />
             }
           </div>
@@ -17607,6 +17394,7 @@ export default function App() {
                 // by RLS reports success while touching zero rows, so without
                 // .select('id') the answers silently never reach the database.
                 const res = await saveProfileData(sb, account.id, { conflict_data: record }, 'conflict');
+                if (!res?.error) notifyCompleted('conflict');
                 if (res?.error) {
                   const { data: { session } } = await sb.auth.getSession();
                   const headers = { 'Content-Type': 'application/json' };
@@ -17662,6 +17450,7 @@ export default function App() {
                   sb.from('profiles').update({ intimacy_data: record }).eq('id', account.id).select('id')
                 );
                 const zeroRows = !res?.error && (!res?.data || res.data.length === 0);
+                if (!res?.error && !zeroRows) notifyCompleted('intimacy');
                 if (res?.error || zeroRows) {
                   console.warn('[intimacy] direct write blocked, falling back to service role');
                   const { data: { session } } = await sb.auth.getSession();

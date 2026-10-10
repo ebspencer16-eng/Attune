@@ -950,6 +950,11 @@
       <div class="chart-card-header"><div class="chart-card-title">Suggestions</div><div class="chart-card-sub">Messages sent via the footer strip · also emailed to hello@attune-relationships.com</div></div>
       <div id="ff-suggestions" style="display:flex;flex-direction:column;gap:.6rem;padding:.6rem 1.4rem 1.2rem;"><div style="color:var(--muted);font-size:.78rem;">Loading…</div></div>
     </div>
+    <!-- Experience questionnaire. The questions are NOT written here: they come
+         from /api/send-feedback, which is the module both surfaces ask them
+         from, so this page cannot drift from what was asked. -->
+    <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Experience questionnaire · &ldquo;How was your experience?&rdquo; (<span id="xf-count">0</span> responses)</div>
+    <div id="xf-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
   </div>
 
   <div class="page" id="page-feedback-survey">
@@ -3204,6 +3209,7 @@ function showPage(id) {
   if (id==='survey-explorer') initSurveyExplorer();
   if (id==='feedback-survey') renderFeedbackSurvey();
   if (id==='satisfaction') renderFooterFeedback();
+  if (id==='satisfaction') renderExperienceFeedback();
   if (id==='satisfaction') renderOverviewKPIs();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
@@ -3326,6 +3332,77 @@ async function renderFooterFeedback(){
   set('ff-love',love); set('ff-good',good); set('ff-suggest',sugg.length);
   const el=document.getElementById('ff-suggestions');
   if(el) el.innerHTML = sugg.length ? sugg.map(r=>renderQuoteCard(String(r.text).trim(), r.source||'Anonymous', 3, '#F59E0B')).join('') : '<div style="color:var(--muted);font-size:.8rem;">No suggestions yet.</div>';
+}
+
+// ── Experience questionnaire ("How was your experience?") ─────────────────────
+// Asked at the end of What Comes Next on the website and from Settings in the
+// app. Both post to /api/send-feedback with source 'app_experience'.
+//
+// Until 2026-10-10 those answers reached a Vercel KV store whose host no longer
+// resolves, and nothing on this page drew them, so the honest state was: asked,
+// emailed, and never counted. The questions come from the endpoint rather than
+// being typed here, which is the same module both surfaces ask them from.
+async function renderExperienceFeedback(){
+  const tiles=document.getElementById('xf-tiles');
+  if(!tiles) return;
+  let form=null, rows=[];
+  try {
+    const [f, ad] = await Promise.all([
+      fetch('/api/send-feedback').then(r=>r.json()),
+      fetchAdminData(),
+    ]);
+    form=f;
+    rows=((ad&&ad.feedback_submissions)||[])
+      .filter(r=>r.type==='app_experience')
+      .map(r=>{ try{ return typeof r.text==='string'?JSON.parse(r.text):r.text; }catch{ return null; } })
+      .filter(Boolean);
+  } catch(e){}
+  const n=rows.length;
+  const cEl=document.getElementById('xf-count'); if(cEl) cEl.textContent=n;
+  if(!form||!form.questions){
+    tiles.innerHTML='<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">Could not load the questions.</div>';
+    return;
+  }
+  if(!n){
+    tiles.innerHTML='<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">No answers yet. Each of the '+form.questions.length+' questions gets its own tile here, plus the overall rating.</div>';
+    return;
+  }
+  const card=(title,sub,inner)=>'<div class="chart-card"><div class="chart-card-header"><div class="chart-card-title">'+title+'</div>'+(sub?'<div class="chart-card-sub">'+sub+'</div>':'')+'</div><div style="padding:.6rem 1.25rem 1.1rem;">'+inner+'</div></div>';
+  const bars=(counts,order,color)=>{ const keys=order||Object.keys(counts); const mx=Math.max(1,...keys.map(k=>counts[k]||0)); return keys.map(k=>renderBar(String(k),(counts[k]||0),mx,color,(counts[k]||0)+' ('+Math.round((counts[k]||0)/n*100)+'%)')).join(''); };
+  let html='';
+
+  // The overall rating, 0 to 3, with the endpoint's own four labels.
+  const rl=(form.ratings||[]);
+  if(rl.length){
+    const c={}; rl.forEach(l=>c[l]=0);
+    rows.forEach(r=>{ const i=parseInt(r.rating,10); if(Number.isFinite(i)&&rl[i]!=null) c[rl[i]]+=1; });
+    const vals=rows.map(r=>parseInt(r.rating,10)).filter(Number.isFinite);
+    const avg=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length+1).toFixed(1):'—';
+    html+=card('Overall','avg '+avg+' of 4 · n='+vals.length, bars(c, rl.slice().reverse(), '#10B981'));
+  }
+
+  form.questions.forEach(q=>{
+    const answered=rows.map(r=>(r.questionAnswers||{})[q.id]).filter(v=>v!=null&&v!=='');
+    if(q.type==='scale'){
+      const scale=form.scale||[];
+      const c={}; scale.forEach(l=>c[l]=0);
+      /* Both surfaces store 1 to 5, the website as a number and the app as a
+         string, so the label is scale[v-1] and the average is the value. */
+      answered.forEach(v=>{ const i=parseInt(v,10); const l=scale[i-1]!=null?scale[i-1]:String(v); if(c[l]==null)c[l]=0; c[l]+=1; });
+      const nums=answered.map(v=>parseInt(v,10)).filter(Number.isFinite);
+      const avg=nums.length?(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1):'—';
+      html+=card(q.label,'avg '+avg+' of 5 · n='+answered.length, bars(c, scale.slice().reverse(), '#1B5FE8'));
+    } else if(q.type==='choice'){
+      const c={}; (q.options||[]).forEach(o=>c[o]=0);
+      answered.forEach(v=>{ if(c[v]==null)c[v]=0; c[v]+=1; });
+      html+=card(q.label,'n='+answered.length, bars(c, q.options||null, '#9B5DE5'));
+    } else {
+      html+=card(q.label,'n='+answered.length, answered.length
+        ? answered.map(t=>renderQuoteCard(String(t).trim(),'Anonymous',3,'#F59E0B')).join('')
+        : '<div style="color:var(--muted);font-size:.8rem;">Nothing written yet.</div>');
+    }
+  });
+  tiles.innerHTML=html;
 }
 
 // ── Feedback Survey (shorter post-results survey) — tile per question ──────────

@@ -27,6 +27,7 @@ import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
 import Admin from '@/components/admin';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
+import { pushState, registerForPush, turnPushOff, type PushState } from '@/api/push';
 import { Colors, MaxContentWidth, Palette, Radius, Spacing, Type, inputType } from '@/constants/attune-theme';
 import ProfileEditor from '@/components/profile-editor';
 import { WAITING_SETTINGS } from '@/constants/waiting';
@@ -129,6 +130,68 @@ function AdminRow() {
       </View>
       <Text style={{ color: c.accent, fontSize: 16 }}>{'\u203A'}</Text>
     </Pressable>
+  );
+}
+
+/**
+ * Notifications, on or off.
+ *
+ * ── WHY A ROW AND NOT A SWITCH PER KIND ───────────────────────────────────
+ * Six kinds can arrive and none of them is routine: a partner finishing, a
+ * note shared, results opening, a workbook finishing, an unfinished exercise,
+ * a new article. A screen of six switches invites a reader to reason about
+ * which they want, and the honest answer for a product that sends at most four
+ * a month is that it is one decision. If Ellie wants it split later, the
+ * kinds are already named in api/_lib/notifications.js.
+ *
+ * ── THE THREE STATES ARE NOT TWO ──────────────────────────────────────────
+ * Not asked, said yes, said no. iOS will not let the app ask twice, so a "no"
+ * cannot be undone from here: the only way back is the Settings app, and this
+ * row says so rather than offering a switch that would do nothing. That
+ * sentence is the one piece of copy on this screen that needed writing, and it
+ * is listed in TASKS.md for Ellie to correct.
+ *
+ * In a build with no notifications module in it, the row is not drawn at all.
+ * Showing a control that cannot work is worse than showing nothing.
+ */
+function NotificationsRow() {
+  const [state, setState] = useState<PushState | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { pushState().then(setState); }, []);
+  if (!state || state === 'unavailable') return null;
+
+  const label = state === 'granted' ? 'On' : state === 'denied' ? 'Off' : 'Not set up';
+  const act = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (state === 'granted') { await turnPushOff(); setState('denied'); return; }
+      if (state === 'not_asked') { setState(await registerForPush({ ask: true })); return; }
+      /* Said no already. iOS owns that answer; the app can only point at it. */
+      await Linking.openSettings().catch(() => undefined);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <View style={{ ...card(), marginTop: Spacing.xl }}>
+      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Notifications</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={act}
+        style={{
+          paddingVertical: Spacing.md,
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+        <Text style={{ ...Type.body, color: c.text }}>
+          {state === 'granted' ? 'Turn notifications off' : state === 'denied'
+            ? 'Turn them on in your phone settings' : 'Turn notifications on'}
+        </Text>
+        <Text style={{ ...Type.body, color: c.textMuted }}>{busy ? '' : label}</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -267,6 +330,8 @@ export default function Settings({
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Your profile</Text>
         <ProfileEditor />
       </View>
+
+      <NotificationsRow />
 
       <View style={{ ...card(), marginTop: Spacing.xl }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Privacy</Text>

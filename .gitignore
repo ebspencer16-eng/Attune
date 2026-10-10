@@ -6,3 +6,5 @@ dist/
 .pyc
 __pycache__/
 .doc-out/
+.vercel
+.env*

@@ -20,6 +20,8 @@
 import { showTool } from '@/app/resources';
 import ProfileSetup from '@/components/profile-setup';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { onPushTap, pushThatOpenedTheApp, registerForPush } from '@/api/push';
+import { PUSH_ASK_MOMENT } from '@/constants/push';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
@@ -265,6 +267,61 @@ export default function HomeScreen() {
         : `${SITE}${card.deepLink}`);
     }
   };
+
+  /**
+   * ── NOTIFICATIONS: REGISTERING, AND THE ONE ASK ──────────────────────────
+   *
+   * Two separate things, on purpose.
+   *
+   * Registering happens on every launch for somebody who has already said yes,
+   * because a reinstall or an OS update hands out a new token and an address
+   * nobody refreshed is a notification nobody receives. It asks nothing.
+   *
+   * The ask happens once, at the moment PUSH_ASK_MOMENT names, because iOS
+   * only allows one: a no cannot be re-asked in the app, only in the Settings
+   * app. src/constants/push.ts says which moment and why it is Ellie's choice.
+   *
+   * Both are inert in a build without the notifications module in it, which is
+   * every build before her next one. See src/api/push.ts.
+   */
+  const refreshedPush = useRef(false);
+  const askedPush = useRef(false);
+  useEffect(() => {
+    if (!refreshedPush.current) {
+      refreshedPush.current = true;
+      registerForPush({ ask: PUSH_ASK_MOMENT === 'launch' });
+      return;
+    }
+    if (askedPush.current || PUSH_ASK_MOMENT !== 'after_first_exercise') return;
+    /* Finished one of their own. Object.values rather than a named exercise:
+       which one they start with is theirs to choose. */
+    const finishedOne = Object.values(data?.exercises || {}).some((e) => e?.mine);
+    if (!finishedOne) return;
+    askedPush.current = true;
+    registerForPush({ ask: true });
+  }, [data]);
+
+  /**
+   * A tap on a notification goes where the card for that event would go.
+   *
+   * The payload carries `target`, which is appTargetFor's answer on the
+   * server, so this hands it to `open` and nothing here decides where a kind
+   * of event belongs. A resolver in the app would be the second copy of that
+   * rule, and two copies of a rule is this codebase's whole failure mode.
+   */
+  const openRef = useRef(open);
+  openRef.current = open;
+  useEffect(() => {
+    let stop = () => {};
+    let cancelled = false;
+    pushThatOpenedTheApp().then((tap) => {
+      if (!cancelled && tap) openRef.current(tap as HomeCard);
+    });
+    onPushTap((tap) => openRef.current(tap as HomeCard)).then((off) => {
+      if (cancelled) off(); else stop = off;
+    });
+    return () => { cancelled = true; stop(); };
+  }, []);
 
   /**
    * Alerts, and what a tap does to one.

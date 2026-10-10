@@ -16,6 +16,7 @@
 export const config = { runtime: 'edge' };
 
 import { jsonBody } from './_lib/http.js';
+import { publishedFilter } from './_lib/posts-filter.js';
 import { SITE_URL } from './_lib/site.js';
 
 import { POST_CATEGORIES } from './_lib/post-categories.js';
@@ -114,8 +115,10 @@ export default async function handler(req) {
 
     // Published means published_at is set AND in the past. Scheduling is a
     // future timestamp, so this one filter covers drafts and scheduling both.
+    // The condition itself is in api/_lib/posts-filter.js, because the daily
+    // push asks the same question and asked it wrong when it asked separately.
     const nowIso = new Date().toISOString();
-    const publishedFilter = `published_at=not.is.null&published_at=lte.${nowIso}`;
+    const published = publishedFilter(nowIso);
 
     if (action === 'feed') {
       /**
@@ -134,7 +137,7 @@ export default async function handler(req) {
        */
       const FEED_COLS = 'id,title,subtitle,category,dimension_keys,read_minutes,hero_color,published_at,revision,blocks';
       const feedQuery = (cols) =>
-        rest(`posts?${publishedFilter}&select=${cols}&order=published_at.desc&limit=50`, { headers: svc });
+        rest(`posts?${published}&select=${cols}&order=published_at.desc&limit=50`, { headers: svc });
 
       const [pRes, rRes, allRes, sRes] = await Promise.all([
         feedQuery(`${FEED_COLS},keywords,hero_image`),
@@ -256,7 +259,7 @@ export default async function handler(req) {
       if (!id) return json({ ok: false, error: 'missing id' }, 400);
       // The published filter is applied here too. Knowing a slug must not be
       // enough to read a draft.
-      const r = await rest(`posts?id=eq.${encodeURIComponent(id)}&${publishedFilter}&select=*`, { headers: svc });
+      const r = await rest(`posts?id=eq.${encodeURIComponent(id)}&${published}&select=*`, { headers: svc });
       const post = (await r.json().catch(() => []))?.[0];
       if (post) return json({ ok: true, post });
 
@@ -297,7 +300,7 @@ export default async function handler(req) {
     if (req.method === 'POST' && action === 'read') {
       if (!body.id) return json({ ok: false, error: 'missing id' }, 400);
       // Record the revision read, not just the fact of reading.
-      const pr = await rest(`posts?id=eq.${encodeURIComponent(body.id)}&${publishedFilter}&select=revision`, { headers: svc });
+      const pr = await rest(`posts?id=eq.${encodeURIComponent(body.id)}&${published}&select=revision`, { headers: svc });
       const post = (await pr.json().catch(() => []))?.[0];
 
       /**

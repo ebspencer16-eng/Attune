@@ -18,11 +18,25 @@
  */
 
 import { jsonBody } from './_lib/http.js';
-import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_SCALE } from './_lib/feedback-copy.js';
+import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_SCALE, FEEDBACK_RATINGS } from './_lib/feedback-copy.js';
 
 export const config = { runtime: 'edge' };
 
-// Also write to Supabase for richer analytics
+/**
+ * The store the admin actually reads.
+ *
+ * This function was written, correct, and called by nothing. Every quick
+ * reaction from the footer and every answer to "How was your experience?" on
+ * both surfaces went to Vercel KV and to an email, and KV is a store whose
+ * host no longer resolves. So the Feedback Overview, the feedback digest and
+ * the testimonials feature have been reporting on a table these two senders
+ * have never written a row to.
+ *
+ * `type` is what the admin filters on: 'quick' for the footer strip and
+ * 'app_experience' for the questionnaire. `text` carries the whole record as
+ * JSON for the questionnaire, which is how submit-beta-survey stores its
+ * answers and how the admin reads them back.
+ */
 async function supabaseStore(entry) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
@@ -30,6 +44,7 @@ async function supabaseStore(entry) {
   try {
     await fetch(`${url}/rest/v1/feedback_submissions`, {
       method: 'POST',
+      signal: AbortSignal.timeout(6000),
       headers: {
         'Content-Type': 'application/json',
         'apikey': key,
@@ -38,7 +53,8 @@ async function supabaseStore(entry) {
       },
       body: JSON.stringify({
         type: entry.type || 'quick',
-        rating: entry.rating || null,
+        /* 0 is "Not great", which `||` reads as absent. */
+        rating: Number.isFinite(entry.rating) ? entry.rating : null,
         text: entry.text || null,
         email: entry.email || null,
         couple_type: entry.coupleType || null,
@@ -72,6 +88,10 @@ export default async function handler(req) {
         ok: true,
         copy: FEEDBACK_COPY,
         scale: FEEDBACK_SCALE,
+        /* The four buttons, by index, which is what `rating` stores. The
+           admin draws its distribution from these rather than a second copy
+           of the four labels. */
+        ratings: FEEDBACK_RATINGS,
         questions: FEEDBACK_QUESTIONS,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },
@@ -114,9 +134,22 @@ export default async function handler(req) {
 
   const ts = new Date().toISOString();
 
-  // Store in Vercel KV for analytics
   const record = { source, rating, message, page, pkgType, exercisesComplete,
     alignmentLevel, stage, howHeard, questionAnswers, ts };
+
+  /* Supabase first, because it is the store every admin surface reads. */
+  const quick = source === 'footer_quick';
+  await supabaseStore({
+    type: quick ? 'quick' : 'app_experience',
+    rating: typeof rating === 'number' ? rating : null,
+    /* The footer sends one sentence; the questionnaire sends seven answers,
+       so that one keeps its whole record the way the surveys do. */
+    text: quick ? (message || null) : JSON.stringify(record),
+    coupleType: body.coupleType || null,
+    source: quick ? (page || 'footer') : (body.surface || 'results'),
+  });
+
+  // Still written to Vercel KV, which answers nothing now. See B23.
   await kvStore('attune:feedback', JSON.stringify(record));
 
   // Also track quick-feedback counts separately for easy retrieval

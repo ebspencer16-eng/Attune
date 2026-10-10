@@ -47,12 +47,11 @@
 import { jsonBody } from './_lib/http.js';
 import { createClient } from '@supabase/supabase-js';
 
-import { EXERCISES, EXERCISE_COLUMNS } from './_exercises.js';
+import { EXERCISES } from './_exercises.js';
 import { ANNIVERSARY_VERSION } from './_anniversary-questions.js';
-import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
-import { resultsGate, doneFromProfile } from './_lib/results-gate.js';
-import { recordNotification } from './_lib/notifications.js';
-import { SITE_URL } from './_lib/site.js';
+/* What happens at the moment results open lives in one module, because the
+   website completes an exercise without coming through here at all. */
+import { announceCompletion } from './_lib/completion.js';
 
 export const config = { runtime: 'edge' };
 
@@ -223,124 +222,11 @@ export default async function handler(req) {
   // alert is a courtesy on the side of that.
   if (!isProgress) {
     try {
-      await announceIfComplete({ admin, userId: resolvedUserId, exerciseKey: exercise });
+      await announceCompletion({ admin, userId: resolvedUserId, exerciseKey: exercise });
     } catch (e) {
       console.warn('[save-exercise] completion alerts failed:', e?.message);
     }
   }
 
   return ok({ mode });
-}
-
-/**
- * Tell both partners when a completion was the last one outstanding.
- *
- * ── WHY THE RULE IS NOT RESTATED HERE ─────────────────────────────────────
- * Whether results are open is decided by api/_lib/results-gate.js and nowhere
- * else. That file exists because the rule was once written three times and the
- * three disagreed. This is a fourth caller, not a fourth copy.
- *
- * ── HOW "IT JUST BECAME READY" IS KNOWN WITHOUT A SECOND READ ─────────────
- * The profile is read after the write, so it already carries this completion.
- * Running the gate a second time with this one exercise flipped back to false
- * is the state a moment ago. Ready now and not ready then is the transition,
- * and it happens exactly once per couple. Without that test, anyone editing an
- * answer months later would re-announce results that have been open all along.
- *
- * ── ONE ROW, NOT TWO ──────────────────────────────────────────────────────
- * Only the partner hears about it. The person who just finished is holding the
- * phone: the home screen already offers them "Your results are ready", from
- * the card engine, and an alert above it saying the same sentence is one
- * prompt printed twice. I built it the other way first and a screenshot of the
- * home screen settled it.
- *
- * So results_ready has copy and no caller, recorded as such beside new_post.
- * The only event it would fit is a couple becoming ready without either of
- * them doing anything, and the one place that could happen, partner-sync
- * linking two accounts, links a partner who has just arrived and answered
- * nothing.
- */
-async function announceIfComplete({ admin, userId, exerciseKey }) {
-  const cols = ['id', 'name', 'pronouns', 'partner_pronouns', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
-
-  const { data: me } = await admin.from('profiles').select(cols).eq('id', userId).maybeSingle();
-  if (!me?.partner_profile_id) return;
-  const { data: them } = await admin.from('profiles').select(cols).eq('id', me.partner_profile_id).maybeSingle();
-  if (!them?.id) return;
-
-  const pkg = capabilitiesFor(me);
-  const mine = doneFromProfile(me);
-  const theirs = doneFromProfile(them);
-
-  const now = resultsGate({ pkg, mine, theirs, partnerLinked: true });
-  if (!now.ready) return;
-  const before = resultsGate({
-    pkg, theirs, partnerLinked: true,
-    mine: { ...mine, [exerciseKey]: false },
-  });
-  if (before.ready) return;
-
-  const firstName = (n) => (n || '').trim().split(/\s+/)[0] || null;
-  await recordNotification({
-    ownerId: them.id,
-    kind: 'partner_finished',
-    subjectId: me.id,
-    copy: {
-      partnerName: firstName(me.name),
-      // The alert is about me, so it takes my pronouns. What my partner wrote
-      // down about me is the fallback, and they/them is the fallback for that.
-      partnerPronouns: me.pronouns || them.partner_pronouns,
-    },
-  });
-
-  // The other thing that becomes true at this moment.
-  await makeWorkbook({ me, pkg });
-}
-
-/**
- * Build the workbook, now that there is enough to build one from.
- *
- * ── WHY HERE ──────────────────────────────────────────────────────────────
- * Ellie: "I clicked workbook and it said generating now, we'll email you when
- * it's ready. But shouldn't this have been generated immediately when our
- * results are done? Shouldn't it be there already?"
- *
- * It should. Generation ran in the browser, from a block in src/App.jsx that
- * needs the buyer's order in that browser's storage and both partners
- * finished. A couple who finish and only ever open the app got the waiting
- * sentence for ever, and there was no email behind it either: the only
- * workbook email in the product is a discount offer to people who do not own
- * one.
- *
- * This is the same moment the couple's results open, which is the earliest
- * moment a workbook can be honest about what it contains.
- *
- * ── WHY IT CALLS AN ENDPOINT RATHER THAN DOING IT ─────────────────────────
- * The generator is a Node function that produces a .docx and uploads it, and
- * this runs on edge. The website's own trigger does exactly this, and the
- * admin key is what tells store-workbook the payment was already established.
- *
- * Failure is logged and dropped. The answers are saved and the results are
- * open; a missing workbook is a thing to retry, not a reason to fail the save
- * someone is waiting on.
- */
-async function makeWorkbook({ me, pkg }) {
-  if (!pkg?.ownsWorkbook) return;
-  const adminKey = process.env.ADMIN_API_KEY;
-  if (!adminKey) {
-    console.warn('[save-exercise] no ADMIN_API_KEY, so no workbook was generated');
-    return;
-  }
-  try {
-    const r = await fetch(`${SITE_URL}/api/store-workbook-pdf`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
-      body: JSON.stringify({ userId: me.id }),
-    });
-    if (!r.ok) {
-      console.warn('[save-exercise] workbook generation said', r.status, (await r.text().catch(() => '')).slice(0, 200));
-    }
-  } catch (e) {
-    console.warn('[save-exercise] workbook generation failed:', e?.message);
-  }
 }

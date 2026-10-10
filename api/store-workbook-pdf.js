@@ -142,8 +142,22 @@ export default async function handler(req, res) {
    * body that carries only a user id is assembled here from the same source
    * /api/store-workbook uses, and both end at the same renderer.
    */
+  /**
+   * Whose workbook this is.
+   *
+   * ── WHY IT IS HOISTED ───────────────────────────────────────────────────
+   * This was computed inside the branch that assembles a payload, and the
+   * persist below used `authedUserId`, which is null on an admin call. The
+   * automatic trigger IS an admin call, so the one path that now builds every
+   * couple's workbook stored the link on nobody's profile. For a couple with
+   * an order row that was survivable, because the order carries it too; for a
+   * comp account, which has no order row, the file was written into a folder
+   * named after a timestamp and nothing could ever find it again.
+   */
+  const subjectUserId = isAdminCall ? (body?.userId || null) : authedUserId;
+
   if (!body?.scores && !body?.partnerScores) {
-    const forUser = isAdminCall ? body?.userId : authedUserId;
+    const forUser = subjectUserId;
     if (!forUser) return res.status(400).json({ error: 'nothing to build from' });
     if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Server not configured' });
     const built = await payloadForCouple({ supabaseUrl, serviceKey, userId: forUser });
@@ -281,18 +295,18 @@ export default async function handler(req, res) {
     // device. This is what makes comp accounts (which have no order row) behave
     // like paid ones. Best-effort: a failure here still returns the URL to the
     // caller, who downloads it directly.
-    if (authedUserId && downloadUrl) {
+    if (subjectUserId && downloadUrl) {
       try {
         const profRes = await fetch(
-          `${supabaseUrl}/rest/v1/profiles?id=eq.${authedUserId}&select=partner_profile_id`,
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${subjectUserId}&select=partner_profile_id`,
           { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
         );
         const profRows = profRes.ok ? await profRes.json() : [];
         const partnerId = Array.isArray(profRows) ? profRows[0]?.partner_profile_id : null;
-        const ids = [authedUserId, partnerId].filter(Boolean);
+        const ids = [subjectUserId, partnerId].filter(Boolean);
         const idFilter = ids.length > 1
           ? `id=in.(${ids.join(',')})`
-          : `id=eq.${authedUserId}`;
+          : `id=eq.${subjectUserId}`;
         await fetch(`${supabaseUrl}/rest/v1/profiles?${idFilter}`, {
           method: 'PATCH',
           headers: {
@@ -328,6 +342,38 @@ export default async function handler(req, res) {
           workbook_format: 'pdf',
         }),
       }).catch(() => {});
+    }
+
+    /**
+     * Tell both of them it exists.
+     *
+     * Ellie's wording: "Your personalized workbook is ready for you to explore
+     * in your learn tab". Both partners, because it is one document about the
+     * two of them and either can open it.
+     *
+     * Only when this build was not asked for by a reader standing in front of
+     * the tile: `isAdminCall` is the automatic trigger, and a push saying your
+     * workbook is ready, to someone who pressed download twenty seconds ago,
+     * is the product talking over itself.
+     *
+     * Never fails the response. The file is built and stored; an alert is the
+     * courtesy on the side of that.
+     */
+    if (isAdminCall && subjectUserId && downloadUrl) {
+      try {
+        const { recordNotification } = await import('./_lib/notifications.js');
+        const profRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${subjectUserId}&select=partner_profile_id`,
+          { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
+        );
+        const rows = profRes.ok ? await profRes.json() : [];
+        const partnerId = Array.isArray(rows) ? rows[0]?.partner_profile_id : null;
+        for (const who of [subjectUserId, partnerId].filter(Boolean)) {
+          await recordNotification({ ownerId: who, kind: 'workbook_ready' });
+        }
+      } catch (e) {
+        console.warn('[store-workbook-pdf] workbook_ready alert failed:', e?.message || e);
+      }
     }
 
     return res.status(200).json({ ok: true, url: downloadUrl, filename });

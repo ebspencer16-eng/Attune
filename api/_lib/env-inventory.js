@@ -11,7 +11,7 @@
  */
 
 export const ENV_VARS = [
-  { name: "ADMIN_API_KEY", required: false, readBy: ["api/save-exercise.js","api/store-workbook-pdf.js"] },
+  { name: "ADMIN_API_KEY", required: false, readBy: ["api/_lib/completion.js","api/store-workbook-pdf.js"] },
   { name: "ADMIN_EMAILS", required: false, readBy: ["api/_lib/admins.js"] },
   { name: "ADMIN_EMAIL_HASH", required: false, readBy: ["api/admin-login.js"] },
   { name: "ADMIN_PASSWORD_HASH", required: false, readBy: ["api/admin-login.js"] },
@@ -22,6 +22,7 @@ export const ENV_VARS = [
   { name: "CONSENT_PEPPER", required: false, readBy: ["api/_lib/consent.js"] },
   { name: "CRON_SECRET", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-prune-events.js"] },
   { name: "DIGEST_TO", required: false, readBy: ["api/cron-beta-digest.js","api/cron-feedback-synthesis.js"] },
+  { name: "EXPO_ACCESS_TOKEN", required: false, readBy: ["api/_lib/push.js"] },
   { name: "FROM_EMAIL", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-survey-nudge.js"] },
   { name: "INTERNAL_API_SECRET", required: false, readBy: ["api/_lib/origin.js","api/generate-workbook-promo.js"] },
   { name: "KV_REST_API_TOKEN", required: false, readBy: ["api/admin-csv.js","api/get-feedback.js","api/send-feedback.js","api/track-type.js"] },
@@ -35,13 +36,13 @@ export const ENV_VARS = [
   { name: "STRIPE_SECRET_KEY", required: true, readBy: ["api/calculate-tax.js","api/create-payment-intent.js","api/stripe-webhook.js"] },
   { name: "STRIPE_WEBHOOK_SECRET", required: true, readBy: ["api/stripe-webhook.js"], note: "Without it, paid orders are never recorded." },
   { name: "SUPABASE_ANON_KEY", required: true, readBy: ["api/account-signup.js","api/admin-config.js","api/admin-session.js","api/claim-order.js"] },
-  { name: "SUPABASE_SERVICE_KEY", required: true, readBy: ["api/_lib/consent.js","api/_lib/notifications.js","api/admin-actions.js","api/admin-csv.js"], alsoAccepts: ["SUPABASE_SERVICE_ROLE_KEY","SUPABASE_SERVICE_ROLE"], note: "The server's own database key. Everything needs it." },
-  { name: "SUPABASE_URL", required: true, readBy: ["api/_lib/consent.js","api/_lib/notifications.js","api/account-signup.js","api/admin-actions.js"] },
+  { name: "SUPABASE_SERVICE_KEY", required: true, readBy: ["api/_lib/completion.js","api/_lib/consent.js","api/_lib/notifications.js","api/_lib/push.js"], alsoAccepts: ["SUPABASE_SERVICE_ROLE_KEY","SUPABASE_SERVICE_ROLE"], note: "The server's own database key. Everything needs it." },
+  { name: "SUPABASE_URL", required: true, readBy: ["api/_lib/completion.js","api/_lib/consent.js","api/_lib/notifications.js","api/_lib/push.js"] },
   { name: "SUPPORT_EMAIL", required: false, readBy: ["api/send-feedback.js"] },
   { name: "VERCEL_GIT_COMMIT_SHA", required: false, readBy: ["api/_lib/sentry-edge.js"] },
   { name: "VITE_SENTRY_DSN", required: false, readBy: ["api/_lib/sentry-edge.js"] },
   { name: "VITE_SUPABASE_ANON_KEY", required: false, readBy: ["api/account-signup.js","api/admin-config.js","api/claim-order.js","api/conflict-results.js"] },
-  { name: "VITE_SUPABASE_URL", required: false, readBy: ["api/_lib/notifications.js","api/account-signup.js","api/admin-config.js","api/admin-posts.js"] },
+  { name: "VITE_SUPABASE_URL", required: false, readBy: ["api/_lib/notifications.js","api/_lib/push.js","api/account-signup.js","api/admin-config.js"] },
   { name: "WORKBOOK_SERVICE_SECRET", required: true, readBy: ["api/store-workbook-pdf.js"], note: "The password that service asks for." },
   { name: "WORKBOOK_SERVICE_URL", required: true, readBy: ["api/store-workbook-pdf.js"], note: "The PDF builder on Render. Without it the workbook fails instantly." },
 ];

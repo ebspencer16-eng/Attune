@@ -151,6 +151,94 @@ for (const id of STORED_IDS) {
   }
 }
 
+// ── 3c. The answers reach the store the admin reads ───────────────────────
+//
+// ── WHY THIS IS RUN RATHER THAN READ ──────────────────────────────────────
+// `supabaseStore` sat in api/send-feedback.js, correct, writing exactly the
+// right columns, and called by nothing. Every quick reaction from the footer
+// and every answer to "How was your experience?" on both surfaces went to a
+// Vercel KV store whose host no longer resolves, and to an email. So the
+// Feedback Overview, the feedback digest and the testimonials feature all
+// reported on a table those two senders had never written a row to.
+//
+// Reading the file would not have caught it: the function was there, the
+// columns were right, and the only thing missing was a call. So the handler is
+// run, with a stubbed fetch, and the rows it tries to write are inspected. And
+// every `type` it writes has to be a type the admin filters on, because a row
+// nothing draws is the same failure one step later.
+{
+  const admin = read('public/admin.html');
+  const captured = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts = {}) => {
+    captured.push({ url: String(url), body: opts.body });
+    return new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  /* Credentials the write needs, pointed at the stub. No RESEND key, so the
+     handler stops after storing; no KV, so the dead store is skipped. */
+  process.env.SUPABASE_URL = 'https://stub.invalid';
+  process.env.SUPABASE_SERVICE_KEY = 'stub-key';
+  delete process.env.RESEND_API_KEY;
+  delete process.env.KV_REST_API_URL;
+  delete process.env.KV_REST_API_TOKEN;
+
+  const post = async (body) => {
+    captured.length = 0;
+    const { default: handler } = await import('../api/send-feedback.js');
+    await handler(new Request('https://x.invalid/api/send-feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }));
+    return captured.filter((c) => /feedback_submissions/.test(c.url))
+      .map((c) => { try { return JSON.parse(c.body); } catch { return null; } })
+      .filter(Boolean);
+  };
+
+  const senderCases = [
+    ['the footer reaction strip', { source: 'footer_quick', rating: 3, message: 'Love this', page: '/offerings' }],
+    ['the experience questionnaire', {
+      source: 'app_experience', surface: 'website', rating: 2,
+      questionAnswers: { q_clear: 5, q_accurate: 4, q_open: 'It helped' },
+    }],
+  ];
+
+  for (const [what, body] of senderCases) {
+    const rows = await post(body);
+    if (rows.length !== 1) {
+      problems.push(`${what} posts to /api/send-feedback and ${rows.length === 0
+        ? 'nothing is written to feedback_submissions'
+        : `${rows.length} rows are written`}.\n`
+        + '      That table is what every admin surface reads. A sender that does not reach it\n'
+        + '      is answered by an email and counted nowhere.');
+      continue;
+    }
+    const row = rows[0];
+    if (!row.type) {
+      problems.push(`${what} writes a row with no type, and every admin tile filters on type.`);
+      continue;
+    }
+    /* Drawn by the admin: a filter on that exact type string. */
+    const drawn = new RegExp(`type\\s*===\\s*['"]${row.type}['"]`).test(admin);
+    if (!drawn) {
+      problems.push(`${what} stores type '${row.type}' and no tile in public/admin.html filters`
+        + ' on it, so those answers are collected and never drawn.');
+    }
+    /* The answers themselves have to survive the trip. */
+    if (body.questionAnswers) {
+      const text = String(row.text || '');
+      for (const id of Object.keys(body.questionAnswers)) {
+        if (!text.includes(id)) {
+          problems.push(`${what} loses the answer to ${id}: it is not in the stored row.`);
+        }
+      }
+    } else if (body.message && !String(row.text || '').includes(body.message)) {
+      problems.push(`${what} loses the message it was sent.`);
+    }
+  }
+  globalThis.fetch = realFetch;
+}
+
 // ── 4. The card reaches it in the app ─────────────────────────────────────
 const nextAction = read('api/_lib/next-action.js')
   .replace(/\/\*[\s\S]*?\*\//g, ' ')

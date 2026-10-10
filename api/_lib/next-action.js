@@ -250,6 +250,26 @@ export function appTargetFor(deepLink) {
   return { external: websiteUrl(deepLink) };
 }
 
+/**
+ * The exercise this person is being asked about, if any.
+ *
+ * One at a time, in registry order, owned and not finished by them. Exported
+ * because the home card and the daily "don't forget" push have to name the
+ * same one: api/cron-push.js asks this rather than looping itself, which is
+ * how the list came to be written out by hand twice before, each time missing
+ * Conflict Patterns.
+ *
+ * `ex` is the per-exercise state /api/home builds: { owned, mine, theirs,
+ * started, answered, total } keyed by the registry's key.
+ */
+export function firstUnfinished(ex = {}) {
+  for (const e of EXERCISES) {
+    const state = ex[e.key];
+    if (state?.owned && !state.mine) return { ...e, state };
+  }
+  return null;
+}
+
 export function nextActions(state = {}) {
   const now = state.now ? new Date(state.now).getTime() : Date.now();
   const ago = (iso) => (iso ? (now - new Date(iso).getTime()) / DAY : Infinity);
@@ -286,9 +306,14 @@ export function nextActions(state = {}) {
   //    of the five exercises: Conflict Patterns was missing, so a couple who
   //    owned it and had not finished it was never once prompted to. Nothing
   //    errored; the card simply never existed.
-  for (const { key, label, view: link } of EXERCISES) {
-    const e = ex[key];
-    if (e?.owned && !e.mine) {
+  /* Which exercise, from the helper below, so the daily push names the one
+     this card names. Two answers to "which exercise are they being asked
+     about" is the same sentence in two voices. */
+  {
+    const first = firstUnfinished(ex);
+    const { key, label, view: link } = first || {};
+    const e = first?.state;
+    if (first) {
       /**
        * ── STARTED IS A DIFFERENT PROMPT FROM NOT STARTED ──────────────────
        * Ellie: "If one of the exercises is in progress, can the first prompt
@@ -306,7 +331,6 @@ export function nextActions(state = {}) {
           ? `You've completed ${e.answered}/${e.total} questions`
           : `Your results unlock once you and ${them} complete your exercises`,
         deepLink: `/?view=${link}` });
-      break; // one exercise at a time, in order
     }
   }
 

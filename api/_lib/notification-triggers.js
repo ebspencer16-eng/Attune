@@ -8,7 +8,7 @@
 
 export const NOTIFICATION_TRIGGERS = {
   "partner_finished": [
-    "api/save-exercise.js:286"
+    "api/_lib/completion.js:96"
   ],
   "partner_nudged_you": [
     "api/partner-nudge.js:96"
@@ -22,13 +22,52 @@ export const NOTIFICATION_TRIGGERS = {
   ],
   "partner_deleted": [
     "api/delete-account.js:336"
+  ],
+  "results_ready": [],
+  "workbook_ready": [
+    "api/store-workbook-pdf.js:372"
+  ],
+  "journal_streak": [],
+  "exercise_unfinished": [],
+  "new_post": []
+};
+
+/**
+ * Where each kind is raised as a PUSH, which writes no row.
+ *
+ * A kind in here and not in NOTIFICATION_TRIGGERS is deliberate: the home
+ * screen already carries a card with that sentence on it, and an alert row
+ * above the card would be the same prompt printed twice.
+ */
+export const PUSH_TRIGGERS = {
+  "partner_finished": [],
+  "partner_nudged_you": [],
+  "partner_joined": [],
+  "partner_shared": [],
+  "partner_deleted": [],
+  "results_ready": [
+    "api/_lib/completion.js:125"
+  ],
+  "workbook_ready": [],
+  "journal_streak": [
+    "api/cron-push.js:183"
+  ],
+  "exercise_unfinished": [
+    "api/cron-push.js:140"
+  ],
+  "new_post": [
+    "api/cron-push.js:218"
   ]
 };
 
-/** The kinds something raises. */
-export const RAISED_KINDS = Object.entries(NOTIFICATION_TRIGGERS)
-  .filter(([, where]) => where.length).map(([kind]) => kind).sort();
+/** The kinds something raises, either way. */
+export const RAISED_KINDS = Object.keys(NOTIFICATION_TRIGGERS)
+  .filter((kind) => NOTIFICATION_TRIGGERS[kind].length || PUSH_TRIGGERS[kind].length).sort();
 
-/** The kinds with copy and no caller. */
-export const UNRAISED_KINDS = Object.entries(NOTIFICATION_TRIGGERS)
-  .filter(([, where]) => !where.length).map(([kind]) => kind).sort();
+/** The kinds with copy and no caller of any kind. */
+export const UNRAISED_KINDS = Object.keys(NOTIFICATION_TRIGGERS)
+  .filter((kind) => !NOTIFICATION_TRIGGERS[kind].length && !PUSH_TRIGGERS[kind].length).sort();
+
+/** Raised as a push and deliberately not as a row. */
+export const PUSH_ONLY_KINDS = Object.keys(PUSH_TRIGGERS)
+  .filter((kind) => PUSH_TRIGGERS[kind].length && !NOTIFICATION_TRIGGERS[kind].length).sort();

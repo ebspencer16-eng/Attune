@@ -1594,7 +1594,32 @@ export function sendFeedback(input: {
   return request<{ ok: true }>('/api/send-feedback', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ source: 'app_experience', ...input }),
+    body: JSON.stringify({ source: 'app_experience', surface: 'app', ...input }),
+  });
+}
+
+/**
+ * This device's push address, and the answer to being asked.
+ *
+ * ── WHAT IT DOES NOT SEND ─────────────────────────────────────────────────
+ * Nothing identifying. The endpoint takes the person from the session token,
+ * so the body carries a device token, a platform and a yes or no. `optIn`
+ * absent means "registering, not re-answering": every launch after the first
+ * refreshes the address without overwriting a decision.
+ *
+ * The push module calls this; see src/api/push.ts, which never imports
+ * expo-notifications at the top level because a build without that native
+ * module would throw before anything rendered.
+ */
+export function savePushToken(input: {
+  token?: string;
+  platform?: 'ios' | 'android' | null;
+  optIn?: boolean;
+}) {
+  return request<{ ok: true; optIn?: boolean }>('/api/push-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
   });
 }
 

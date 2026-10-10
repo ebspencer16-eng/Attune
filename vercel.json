@@ -404,6 +404,10 @@
     {
       "path": "/api/cron-prune-events",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron-push",
+      "schedule": "0 17 * * *"
     }
   ]
 }

@@ -64,7 +64,10 @@ with checks (migration, object, kind, degraded) as (
      'A deleted tag comes straight back, because there is nowhere to put it.'),
     ('076_couple_tools',
      'couple_tools', 'table',
-     'The Shared Budget and the checklist go back to being one each. Both partners still see their own, neither sees the other, and nothing says so.')
+     'The Shared Budget and the checklist go back to being one each. Both partners still see their own, neither sees the other, and nothing says so.'),
+    ('078_push',
+     'push_tokens', 'table',
+     'No push notification can be sent or even asked about. /api/push-token answers that push storage is not set up; the daily cron reports nobody opted in and sends nothing.')
 )
 select
   c.migration,

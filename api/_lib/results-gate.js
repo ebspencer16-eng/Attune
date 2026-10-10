@@ -38,9 +38,31 @@
 
 import { EXERCISES, isExerciseDone } from '../_exercises.js';
 
+/**
+ * The capability flags, whichever shape the caller is holding.
+ *
+ * ── WHY THIS IS NOT FUSSINESS ─────────────────────────────────────────────
+ * `capabilitiesFor` returns the exercise flags nested: `{ ownsConflict: true,
+ * caps: { hasConflict: true } }`. The registry gates an exercise on
+ * `hasConflict`, so a caller who passes the whole object instead of its `caps`
+ * asks for a key that is not at that level, gets undefined, and every optional
+ * exercise silently drops out of the rule. api/home.js and api/results.js both
+ * pass `caps`. The completion trigger passed the whole object, so it decided a
+ * couple's results had opened on Communication and Expectations alone, and
+ * told the partner so while the app's own home screen, reading the correct
+ * shape, still said they were waiting.
+ *
+ * Reading both shapes here is one normalisation in the one place that reads
+ * the flags. The alternative was every caller remembering which half to send.
+ */
+function capFlags(pkg) {
+  if (pkg && typeof pkg.caps === 'object' && pkg.caps) return pkg.caps;
+  return pkg || {};
+}
+
 /** Does this couple own this exercise? A null capability means everyone does. */
 export function ownsExercise(exercise, pkg) {
-  return !exercise.capability || !!pkg?.[exercise.capability];
+  return !exercise.capability || !!capFlags(pkg)[exercise.capability];
 }
 
 /**

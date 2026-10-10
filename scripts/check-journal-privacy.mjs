@@ -324,7 +324,33 @@ const admitsJournal = (u) => {
  * The two admin files are on the list because they count entries. Both are
  * checked below for what they select: a count is fine, a body is not.
  */
-const KNOWN_READERS = new Set(['notes.js', 'home.js', 'admin-explore.js', 'admin-engagement.js']);
+/**
+ * Every file that may read the notes table, and why.
+ *
+ *   notes.js            serves a person their own writing. That is the point.
+ *   home.js             the third row of the home tile, journal excluded.
+ *   admin-explore.js    counts entries per person. Dates, never writing.
+ *   admin-engagement.js the same, rolled up.
+ *   cron-push.js        the day keys of a journal streak and when the last
+ *                       entry was written, for the reminder Ellie approved.
+ *                       It asks for owner_id, anchor_key and created_at: a
+ *                       date, a date, and an id. A push that could quote a
+ *                       diary entry onto a lock screen is not a feature, it is
+ *                       the worst thing this product could do, which is why the
+ *                       select is checked below rather than trusted.
+ */
+const KNOWN_READERS = new Set(['notes.js', 'home.js', 'admin-explore.js',
+  'admin-engagement.js', 'cron-push.js']);
+
+/**
+ * The readers that may only ever count.
+ *
+ * Was the admin pages alone, filtered by their name prefix. The daily push
+ * cron is the first reader of this table that is neither a person reading
+ * their own notebook nor an admin page, and a name prefix cannot express that.
+ * So the list is named rather than matched.
+ */
+const COUNTS_ONLY = ['admin-explore.js', 'admin-engagement.js', 'cron-push.js'];
 const apiFiles = readdirSync('api').filter((f) => f.endsWith('.js'));
 for (const f of apiFiles) {
   const src = readFileSync(`api/${f}`, 'utf8');
@@ -353,11 +379,15 @@ for (const f of apiFiles) {
  * and kind are not either.
  */
 const WRITING = ['body', 'title', 'anchor_context'];
-for (const f of apiFiles.filter((n) => n.startsWith('admin-') && KNOWN_READERS.has(n))) {
+for (const f of apiFiles.filter((n) => COUNTS_ONLY.includes(n))) {
   const src = readFileSync(`api/${f}`, 'utf8');
   /** Both query shapes: a PostgREST URL string, and a supabase-js chain. */
   const queries = [
-    ...src.matchAll(/notes\?select=([^'"`&\s]*)/g),
+    /* The select need not be the first parameter. api/cron-push.js filters by
+       anchor type and owner before it names its columns, and this read it as
+       "no query found", which is the branch that refuses to pass. Still bound
+       to a notes query: the filters in between cannot contain a quote. */
+    ...src.matchAll(/notes\?[^'"`]*?select=([^'"`&\s]*)/g),
     ...src.matchAll(/from\('notes'\)[\s\S]{0,300}?\.select\(\s*['"`]([^'"`]*)['"`]/g),
   ].map((m) => m[1]);
   if (!queries.length) {

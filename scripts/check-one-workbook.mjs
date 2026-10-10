@@ -242,16 +242,26 @@ for (const rel of ['src/App.jsx', 'api/save-exercise.js', 'api/home.js', 'api/to
   }
 }
 
-/** And the trigger that builds one the moment a couple's results open. */
-const save = bare(readFileSync(`${ROOT}api/save-exercise.js`, 'utf8'));
-if (/\/api\/store-workbook['"`]/.test(save)) {
-  fails.push('api/save-exercise.js builds the workbook through /api/store-workbook'
-    + ' when a couple finishes, so the file waiting for them is the wrong document'
-    + ' before they ever tap anything.');
+/**
+ * And the trigger that builds one the moment a couple's results open.
+ *
+ * It was inside api/save-exercise.js, which is how the APP finishes an
+ * exercise. The website finishes one without going through that endpoint at
+ * all, so the trigger moved into api/_lib/completion.js, which both paths
+ * reach. This file still asks the same question of whichever file holds it;
+ * check-completion-reach.mjs is what proves it fires at the right moment, by
+ * running it.
+ */
+const TRIGGER = 'api/_lib/completion.js';
+const trigger = bare(readFileSync(`${ROOT}${TRIGGER}`, 'utf8'));
+if (/\/api\/store-workbook['"`]/.test(trigger)) {
+  fails.push(`${TRIGGER} builds the workbook through /api/store-workbook when a couple`
+    + ' finishes, so the file waiting for them is the wrong document before they ever'
+    + ' tap anything.');
 }
-if (!/store-workbook-pdf/.test(save)) {
-  fails.push('api/save-exercise.js no longer builds a workbook when a couple\'s'
-    + ' results open, so nothing is ready when they go looking for it.');
+if (!/store-workbook-pdf/.test(trigger)) {
+  fails.push(`${TRIGGER} no longer builds a workbook when a couple's results open,`
+    + ' so nothing is ready when they go looking for it.');
 }
 
 if (fails.length) {

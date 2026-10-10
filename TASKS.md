@@ -4,10 +4,10 @@
 
 | # | What I need from you |
 |--|--|
-| B19 | **181 pieces of text on the site are below the readable contrast ratio**, across 37 pages. Most are the brand orange used as small print and the grey used for eyebrows, so this is a palette decision and yours. `app/CONTRAST.md` has the measurement, the worst offenders and the exact replacement values. Seven of them I would take without thinking: four miss by two per cent, and three are white dimmed by opacity rather than a colour at all. Say go and I will do those seven. |
-| B12 | **Two old counters in the admin are mixing old numbers with new ones. One command clears both.** The couple-type chart counted under 25 names the product stopped using, and the "how different are they" chart sorted couples using lines I have since moved, under the same four names. So both charts hold a mix you cannot separate. Clearing makes each count one thing again. In Terminal, one line at a time: `npx vercel env pull .env.local` then `node --env-file=.env.local scripts/clear-legacy-counters.mjs`. That one only READS and prints. Run the same line with ` --confirm` on the end to clear. Then delete .env.local. |
-| B17a | **The push list, for your approval.** Ten below. Five already have copy and are raised in the app today, so pushing them needs no new words from you. Five are new and need copy. Say which you want and I build those. |
-| B17b | **Push needs three things only you can give.** An Apple push key through your developer account, a migration I write and you run to store each person's push token and their answer to being asked, and your decision on when the app asks permission. Nothing sends a push today. |
+| B19 | **One example of each, in the table under this one.** Fifteen colours, fifteen rows. Say "all" and I take every fix; or name the rows you want done differently. Six of the fifteen are the admin, which no customer sees, and I will take those unless you say otherwise. |
+| B17b | **Three things and one decision.** The Key ID of the key you made, your Team ID, and the key file itself uploaded to Expo with one command. The decision is when the app asks permission, and there are three options with my recommendation. All of it is written out in `app/PUSH-NOTIFICATIONS.md`, bottom section, in order. Everything else is built and waiting. |
+| B23 | **Delete two dead Vercel variables: KV_REST_API_URL and KV_REST_API_TOKEN.** The store they point at no longer exists: the host does not resolve. One variable covers all three environments, so it has been dead in production too. Nothing needed it, which is why nothing broke. This is also the answer to B12: there is nothing left to clear. |
+| B3 | **It is not customer facing, and it is not anywhere facing.** A style code is six letters describing how one person communicates, counted on the server with no name attached. No screen draws it, and the admin's Type Analytics page works the same thing out live from real profiles. Say "remove" and the counter goes with the dead store. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
 | R12 | Privacy and Terms: waiting on the lawyer. |
@@ -15,24 +15,58 @@
 | O1 | App Store launch: tell me when live, I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
+### B19, one example of each
+
+Fifteen colours, 187 runs of text, 37 pages. The floor is 4.5 to 1 for small
+text. "Take" is what I recommend doing without a discussion; "yours" is a brand
+decision I will not make for you.
+
+| # | Colour | One example | Now | Would be | |
+|--|--|--|--|--|--|
+| 1 | faint grey `#B8AC9C` | /checkout, "calculated from billing ZIP" | 2.23 | `#7D756A` | take |
+| 2 | muted grey `#9C9890` | /feedback, "Pick all that apply" | 2.42 | `#6D6A65` | take |
+| 3 | green `#10B981` | /resources, "Crisis support" | 2.54 | `#0C875E` | take |
+| 4 | clay `#A66534` | /practice, "View all posts" | 4.37 | `#A36333` | take |
+| 5 | pink `#E91E63` | /practice, "Conflict and Repair" | 4.10 | `#DD1C5E` | take |
+| 6 | teal `#00897B` | /practice/methodology, "In Practice · Methodology" | 4.08 | `#008174` | take |
+| 7 | periwinkle `#5B6DF8` | /start, "Most Complete" | 3.72 | `#5161DD` | take |
+| 8 | white at 35% | /admin, "Sign in to continue" | 3.19 | 55% | take |
+| 9 | white at 40% | every footer, "© 2026 Attune Relationships" | 3.82 | 60% | take |
+| 10 | white at 45% | /email-preview, "Email template preview" | 4.40 | 55% | take |
+| 11 | **brand orange `#E8673A` as small text** | /resources, "Find this book"; every "In Practice ·" label; the email address on /contact | 2.88 to 3.26 | `#B6512D` | yours |
+| 12 | **white on a brand orange button** | /wedding-registry, "Add Attune to your registry" | 3.26 | the ground to `#C15630`, or the words to ink | yours |
+| 13 | admin orange `#FF6B35` | /admin, "Engage / Withdraw" | 2.84 | `#C55329` | take |
+| 14 | admin slate `#8892A9` | /admin, "Privacy policy" | 2.63 | `#646B7C` | take |
+| 15 | admin periwinkle `#6C7FFF` | /admin, "Open / Guarded" | 3.43 | `#5C6DDA` | take |
+
+Every "would be" is the smallest change that clears the floor, computed rather
+than chosen, so none of them is a new colour so much as the same colour two or
+three per cent darker. Rows 8 to 10 are not colours at all: they are white type
+faded with opacity on a dark ground, and the number was picked by eye.
+
+Rows 11 and 12 are the brand colour, which is why they are yours. The orange
+only fails as **small** text: as a large heading, or as a button fill, it
+passes, so nothing about the brand has to change. A darker orange for small
+print would sit beside the existing one rather than replacing it.
+
+Row 12 has a second option worth knowing about. The brand orange with **ink**
+on it reads at 5.46, comfortably over the floor, so that button can keep its
+exact colour and set its words dark instead.
+
 ## 2. Open
 
 | # | Mine to build |
 |--|--|
-| B17 | **Build the push notifications you approve.** The list is `app/PUSH-NOTIFICATIONS.md` and waits on B17a and B17b. |
+| B17 | **Build the six push notifications you wrote.** Your copy, word for word, in `api/_lib/notifications.js`. Six things to build: the migration that stores a push token and the answer to being asked, the token registration in the app, the permission prompt, the send path, the trigger for each of the six, and a gate per trigger. Waits on B17b for the key only; everything else lands first. |
+| B24 | **Start the workbook when results unlock**, which is the half of your workbook-ready note that is not copy. It builds on request today, so the push would announce something that has not been made yet. |
+| B25 | **The footer's feedback and the app's feedback never reach the admin.** `supabaseStore` is written and never called, so both went only to the dead store. One call, with the columns mapped the way the survey writes them. |
+| B26 | **Remove the dead survey and the dead store's paths.** A 26-question survey modal on the dashboard cannot be opened and posts to an admin-only URL; four endpoints talk to a host that no longer resolves. |
+| D15 | **Write the design and UX review.** Both surfaces, as a graphic designer and then as a UX designer, with a ranked list of what I would change and what each one costs. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| B22 | **Nothing on a form said what it was to a screen reader.** Nineteen fields on the static pages and ten more in the sign-up had only a placeholder, which disappears the moment someone types. The labels were already on the screen in every case, just not connected, so nothing new was written. Also three duplicate SVG ids on /home, where the second copy of three cards was painting with the first copy's gradient. |
-| B21 | **Five pages scrolled sideways on a phone, and it was my doing.** Putting the shared nav on the In Practice pages exposed that five of them have no rule collapsing it to the hamburger on a narrow screen, so the wider nav pushed 11 points past the edge. Fixed, and now measured: 37 pages at two phone widths, nothing scrolling and nothing drawn past the edge. |
-| B20 | **The two people's colours on a glance page were written out on both surfaces.** On a dark glance ground your partner is a lighter blue than on a storycard, deliberately, because the storycard blue is almost invisible there. That pair was in two files and the gate written for exactly this failure was only checking the other pair. |
-| B18 | **The budget's three headline numbers were coloured by two sets of hex values**, one typed into each surface. They agreed. The note beside the website's copy records that the LABELS for these same three numbers drifted once already, which is how the two tools came to disagree about which numbers a budget has. The colours sit with the copy and the arithmetic now, and the gate that compares every figure compares them too. |
-| B10 | **Fixed, not removed.** The admin CSV asked for the three couple-satisfaction columns by ids that have never existed, so twelve columns came out blank. They resolve now and will carry data from the next export. |
-| B2 | **Fixed.** The endpoint checked an arriving couple type against 25 names the product stopped using, so every real couple was refused and nothing was recorded. Confirmed against the live site before and after. |
-| B3 | **Fixed.** A person gets a style code, a short string describing how they communicate. It has six parts; three places still thought it had four, so every code was thrown away without error and the admin chart read zero. All three read one definition now. |
-| B4 | **Fixed.** The 17 In Practice pages had a nav no check had ever looked at: it offered Packages twice, the FAQ page twice (once labelled "Reviews"), and no Wedding Registry. The phone menu was a third copy nothing compared. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -46,6 +80,13 @@
 
 | Verified by you | What it was |
 |--|--|
+| B22 | Twenty-nine form fields said nothing to a screen reader, and three duplicate SVG ids made three cards paint with another card's gradient. |
+| B21 | Five In Practice pages scrolled sideways on a phone once the shared nav was on them; 37 pages are measured at two widths now. |
+| B20 | The two people's colours on a dark glance ground were written out on both surfaces, and the gate for exactly that failure was checking the other pair. |
+| B18 | The budget's three headline numbers were coloured by two sets of hex values, one typed into each surface. |
+| B10 | The admin CSV asked for the three couple-satisfaction columns by ids that have never existed, so twelve columns came out blank. |
+| B2 | /api/track-type checked every arriving couple type against 25 retired names, refused them all, and recorded nothing. |
+| B4 | The 17 In Practice pages had a nav no check had looked at: Packages twice, the FAQ twice, and no Wedding Registry. |
 | S20 | Clicking an article in Learn read as signing you out; it opens inside Learn now and nothing was ever clearing the session. |
 | B5 | The footer you like is on all 17 In Practice pages; 16 of them had none. |
 | B15 | The workbook-view route served nobody and is removed. |

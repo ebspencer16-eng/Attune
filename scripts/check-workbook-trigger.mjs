@@ -17,9 +17,19 @@
  *      the same object, or a couple gets a different workbook depending on
  *      which surface happened to build it. src/App.jsx imports it now; a
  *      second definition anywhere is the drift.
- *   2. The server triggers it at the moment results open, which is the same
- *      moment api/save-exercise.js tells a partner that the other finished.
- *      A trigger that lives anywhere else is one a phone-only couple can miss.
+ *   2. The waiting line promises nothing the product cannot do.
+ *
+ * ── WHERE THE TRIGGER ITSELF IS CHECKED ───────────────────────────────────
+ * Not here, any more. This file used to test that api/save-exercise.js asked
+ * for a workbook inside its results-ready transition, by reading the file. The
+ * trigger moved into api/_lib/completion.js, because the website finishes an
+ * exercise without going through that endpoint at all, and
+ * check-completion-reach.mjs now RUNS it: four couples, and the build and the
+ * alert have to happen at the transition and not on either side of it.
+ *
+ * Keeping a second, weaker version of that rule here would be two gates on one
+ * promise, which drift, and the weaker one wins because it is the one that
+ * still passes. So this file keeps the halves that gate does not touch.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Whether the .docx is any good, and whether the external PDF service is
@@ -53,26 +63,7 @@ if (!/from ['"][^'"]*workbook-payload\.js['"]/.test(read('src/App.jsx'))) {
   fails.push('src/App.jsx does not import the shared payload builder.');
 }
 
-// ── 2. The trigger sits on the results-ready transition ────────────────────
-const save = codeOnly(read('api/save-exercise.js'));
-if (!/store-workbook/.test(save)) {
-  fails.push('api/save-exercise.js never asks for a workbook, so a couple who only use the app never get one.');
-}
-if (!/announceIfComplete/.test(save)) {
-  fails.push('api/save-exercise.js has no results-ready transition to hang the workbook on.');
-}
-// Inside that function, not somewhere else in the file: the transition is what
-// makes it happen once, for the couple, at the right moment.
-// Bounded to that function's own body. Slicing to the end of the file meant
-// the helper it calls counted as the call, so deleting the call passed.
-const at = save.indexOf('async function announceIfComplete');
-const fnEnd = save.indexOf('\n}', at);
-const fn = at < 0 ? '' : save.slice(at, fnEnd < 0 ? undefined : fnEnd);
-if (!/makeWorkbook|store-workbook/.test(fn)) {
-  fails.push('the workbook is asked for outside the results-ready transition, so it can fire at the wrong time.');
-}
-
-// ── 3. And the waiting line does not promise an email ──────────────────────
+// ── 2. And the waiting line does not promise an email ──────────────────────
 const copy = read('api/_lib/workbook-copy.js');
 // Quotes of either kind, and an apostrophe inside a double-quoted one: the
 // first version of this could not read "We'll email you", which is the exact
@@ -90,4 +81,4 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log(`[check-workbook-trigger] one payload builder, a trigger on the results-ready transition, and a waiting line that promises nothing it cannot do: "${generating}"`);
+console.log(`[check-workbook-trigger] one payload builder, and a waiting line that promises nothing it cannot do: "${generating}". The trigger itself is check-completion-reach.`);
