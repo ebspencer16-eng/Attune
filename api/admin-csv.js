@@ -103,7 +103,7 @@ export default async function handler(req) {
     if (type === 'engagement')    return await exportEngagement(admin);
     if (type === 'results')       return await exportResults(admin);
     if (type === 'typing')        return await exportTyping(admin);
-    if (type === 'feedback')      return await exportFeedback();
+    if (type === 'feedback')      return await exportFeedback(admin);
     return errResponse(400, 'Unknown type. Use combined|combined_xlsx|orders|demographics|engagement|results|typing|feedback');
   } catch (e) {
     console.error('[admin-csv]', type, e);
@@ -156,7 +156,7 @@ async function buildCombinedData(admin) {
     if (o.user_id && !ordersByUser[o.user_id]) ordersByUser[o.user_id] = o;
   });
 
-  const feedbackByEmail = await loadFeedbackByEmail();
+  const feedbackByEmail = await loadFeedbackByEmail(admin);
 
   // Column layout: [category_label, column_name]. Category only appears on
   // the first column of each span.
@@ -399,20 +399,32 @@ async function exportCombinedXlsx(admin) {
   });
 }
 
-// Pull feedback responses from Vercel KV and key by email where possible.
-// Returns { [email_lowercased]: response_object }
-async function loadFeedbackByEmail() {
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
-  if (!kvUrl || !kvToken) return {};
+/**
+ * Survey responses, keyed by email where there is one.
+ *
+ * ── IT READ A STORE THAT HAS GONE ────────────────────────────────────────
+ * This asked Vercel KV for `feedback:beta_survey`, and nothing has written
+ * that key for a long time: /feedback posts to /api/submit-beta-survey, which
+ * stores in Supabase. The KV host stopped resolving at some point, and on
+ * 2026-10-10 Ellie deleted the two variables, so this returned {} and the
+ * combined export quietly lost its feedback columns.
+ *
+ * Supabase is where the answers are. `text` holds the whole submission as
+ * JSON, which is how submit-beta-survey writes it and how the admin page
+ * reads it back.
+ */
+async function loadFeedbackByEmail(admin) {
   try {
-    const res = await fetch(`${kvUrl}/lrange/feedback:beta_survey/0/-1`, {
-      headers: { Authorization: `Bearer ${kvToken}` },
-    });
-    if (!res.ok) return {};
-    const data = await res.json();
-    const entries = (data.result || []).map(r => {
-      try { return typeof r === 'string' ? JSON.parse(r) : r; } catch { return null; }
+    const { data, error } = await admin
+      .from('feedback_submissions')
+      .select('text, email, submitted_at')
+      .in('type', ['beta_survey', 'post_results'])
+      .order('submitted_at', { ascending: false });
+    if (error) return {};
+    const entries = (data || []).map((row) => {
+      let parsed = {};
+      try { parsed = typeof row.text === 'string' ? JSON.parse(row.text) : (row.text || {}); } catch { parsed = {}; }
+      return { ...parsed, email: parsed.email || row.email, submitted_at: row.submitted_at };
     }).filter(Boolean);
 
     const byEmail = {};
@@ -693,20 +705,26 @@ async function exportTyping(admin) {
 }
 
 // ── 5. FEEDBACK ────────────────────────────────────────────────────────
-// Pulls the beta_survey responses from Vercel KV (same source as the
-// admin Feedback page) and produces one column per question.
-async function exportFeedback() {
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
-  if (!kvUrl || !kvToken) return errResponse(500, 'KV not configured (KV_REST_API_URL, KV_REST_API_TOKEN)');
-
-  const res = await fetch(`${kvUrl}/lrange/feedback:beta_survey/0/-1`, {
-    headers: { Authorization: `Bearer ${kvToken}` },
-  });
-  if (!res.ok) return errResponse(500, 'Could not fetch feedback from KV');
-  const data = await res.json();
-  const entries = (data.result || []).map(r => {
-    try { return typeof r === 'string' ? JSON.parse(r) : r; } catch { return null; }
+// One column per question, from the table the surveys are actually stored in.
+// This read Vercel KV until 2026-10-10 and answered "KV not configured" once
+// the variables were deleted, which is a button in the admin that returns an
+// error. The rows are in Supabase and always were.
+async function exportFeedback(admin) {
+  const { data, error } = await admin
+    .from('feedback_submissions')
+    .select('type, text, email, couple_type, submitted_at')
+    .in('type', ['beta_survey', 'post_results'])
+    .order('submitted_at', { ascending: false });
+  if (error) return errResponse(500, 'Could not read the feedback table');
+  const entries = (data || []).map((row) => {
+    let parsed = {};
+    try { parsed = typeof row.text === 'string' ? JSON.parse(row.text) : (row.text || {}); } catch { parsed = {}; }
+    return {
+      submitted_at: row.submitted_at,
+      couple_type: parsed.coupleType || row.couple_type || '',
+      survey: row.type,
+      ...parsed,
+    };
   }).filter(Boolean);
 
   if (entries.length === 0) {

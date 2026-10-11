@@ -42,14 +42,6 @@
       "destination": "/api/stripe-config.js"
     },
     {
-      "source": "/api/get-feedback",
-      "destination": "/api/get-feedback.js"
-    },
-    {
-      "source": "/api/track-type",
-      "destination": "/api/track-type.js"
-    },
-    {
       "source": "/api/send-order-email",
       "destination": "/api/send-order-email.js"
     },

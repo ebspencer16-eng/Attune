@@ -179,8 +179,6 @@ for (const id of STORED_IDS) {
   process.env.SUPABASE_URL = 'https://stub.invalid';
   process.env.SUPABASE_SERVICE_KEY = 'stub-key';
   delete process.env.RESEND_API_KEY;
-  delete process.env.KV_REST_API_URL;
-  delete process.env.KV_REST_API_TOKEN;
 
   const post = async (body) => {
     captured.length = 0;

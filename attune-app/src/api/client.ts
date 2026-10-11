@@ -1580,8 +1580,8 @@ export function fetchFeedbackForm() {
 /**
  * Send one set of answers.
  *
- * `source` is 'app_experience', which is what /api/get-feedback and the
- * admin's Feedback Overview already filter on. Nothing identifying is sent:
+ * `source` is 'app_experience', which is what the admin's Feedback Overview
+ * filters on. Nothing identifying is sent:
  * the endpoint has never taken a name or an email and this does not start.
  */
 export function sendFeedback(input: {

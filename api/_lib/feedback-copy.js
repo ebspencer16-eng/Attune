@@ -8,10 +8,9 @@
  * product, so it was deleted as unreferenced.
  *
  * The consequence was quiet and complete. Nothing in the website, the app or
- * the static pages posts to /api/send-feedback any more. /api/get-feedback
- * still reads what it stores, and the admin still draws a Feedback Overview
- * and a "Love it clicks · Footer reaction strip" tile from it. So three
- * surfaces report on a question nobody is asked.
+ * the static pages posts to /api/send-feedback any more, while the admin went
+ * on drawing a Feedback Overview and a "Love it clicks · Footer reaction
+ * strip" tile. So three surfaces reported on a question nobody was asked.
  *
  * ── WHY A MODULE ──────────────────────────────────────────────────────────
  * So the next surface to ask does not write a second version of the question.

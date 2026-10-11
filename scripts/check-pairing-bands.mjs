@@ -195,30 +195,18 @@ for (const [what, bands, fn] of [
 }
 
 /**
- * ── AND THE ENDPOINT ACCEPTS EVERY TIER ───────────────────────────────────
- * The scan above only flags a list of tiers when a number is compared beside
- * it, because a list on its own is a legitimate thing to have. That left a
- * hole, found by planting it: dropping 'distinct' from the validator in
- * track-type.js passed both this gate and check-type-telemetry, and the
- * consequence is that the couples furthest apart are refused and counted
- * nowhere. The most different couples are the ones Ellie would most want to
- * see.
+ * ── THE ENDPOINT THAT VALIDATED THE TIERS IS GONE ─────────────────────────
+ * There was a third part here. An analytics endpoint accepted a gap tier and
+ * counted it, and this held its validator to PAIRING_TIERS rather than to a
+ * list that resembled it: dropping 'distinct' by hand passed every other
+ * check, and the consequence was that the couples furthest apart were refused
+ * and counted nowhere.
  *
- * So the validator has to BE the list, not resemble it.
+ * Ellie had the whole counter removed on 2026-10-11, along with the store it
+ * wrote to, so there is no longer an endpoint to hold. The rule it protected
+ * is covered by the sweep above, which fails on any file that bands a gap
+ * anywhere but in api/_lib/pairing.js.
  */
-{
-  const rel = 'api/track-type.js';
-  const src = readFileSync(join(ROOT, rel), 'utf8');
-  if (!/PAIRING_TIERS/.test(src)) {
-    fails.push(`${rel} does not use PAIRING_TIERS, so the tiers it accepts are written somewhere`
-      + ' else and a band can be dropped without anything noticing.');
-  } else {
-    const m = /const validGapTiers\s*=\s*([^;]+);/.exec(src);
-    if (m && !/PAIRING_TIERS/.test(m[1])) {
-      fails.push(`${rel} imports PAIRING_TIERS and validates against \`${m[1].trim()}\` instead.`);
-    }
-  }
-}
 
 if (fails.length) {
   console.error('[check-pairing-bands] The band a couple reads is not the band they are counted in:');

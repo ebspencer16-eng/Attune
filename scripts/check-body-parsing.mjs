@@ -45,7 +45,6 @@ Object.assign(process.env, {
   SUPABASE_ANON_KEY: 'test-key', RESEND_API_KEY: 'test-key',
   ADMIN_SECRET: 'admin-test', INTERNAL_API_SECRET: 'internal-test',
   STRIPE_SECRET_KEY: 'sk_test', CRON_SECRET: 'cron-test',
-  KV_REST_API_URL: 'https://example.invalid', KV_REST_API_TOKEN: 'test-key',
 });
 globalThis.fetch = async (u) => new Response(
   String(u).includes('/auth/v1/user') ? '{"id":"00000000-0000-4000-8000-000000000000"}' : '[]',

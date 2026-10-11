@@ -8,7 +8,8 @@
  *   their results page: 0.75, 1.50, 2.25.
  *
  *   the `gapTier` expression a few thousand lines further down, which is what
- *   /api/track-type STORES and the admin charts: 1.0, 1.8, 2.5.
+ *   the analytics counter STORED and the admin charted: 1.0, 1.8, 2.5. That
+ *   counter was removed on 2026-10-11; the disagreement is what matters here.
  *
  * Over the plausible range those two put the same couple in different buckets
  * 19% of the time, and always in the same direction: the admin counted a couple

@@ -54,8 +54,6 @@ Object.assign(process.env, {
   RESEND_API_KEY: 'test-not-a-real-key',
   SUPABASE_URL: 'https://example.invalid',
   SUPABASE_SERVICE_KEY: 'test-not-a-real-key',
-  KV_REST_API_URL: 'https://example.invalid',
-  KV_REST_API_TOKEN: 'test-not-a-real-key',
 });
 
 /** The handlers log what they would have sent. Not this tool's output. */

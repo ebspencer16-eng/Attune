@@ -4,7 +4,7 @@
  * ── WHY IT EXISTS ─────────────────────────────────────────────────────────
  * Nothing in the product asks this any more. The questionnaire was a
  * component in src/App.jsx, already disconnected, and it was deleted in
- * d54d7c2 as unreferenced. /api/send-feedback, /api/get-feedback and the
+ * d54d7c2 as unreferenced. /api/send-feedback and the
  * admin's Feedback Overview all survived it, so three surfaces report on a
  * question nobody is asked.
  *

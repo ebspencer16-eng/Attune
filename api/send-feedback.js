@@ -5,16 +5,17 @@
  *   1. Footer "Love it / Pretty good / Suggest something" buttons (all pages)
  *   2. End-of-experience questionnaire in the app (App.jsx)
  *
- * Sends a formatted email to SUPPORT_EMAIL and stores in Vercel KV for analytics.
+ * Sends a formatted email to SUPPORT_EMAIL and stores the row in Supabase,
+ * which is what every admin surface reads.
  *
  * Required env vars:
  *   RESEND_API_KEY
  *   FROM_EMAIL       — e.g. hello@attune-relationships.com
  *   SUPPORT_EMAIL    — where feedback lands
  *
- * Optional (for analytics storage):
- *   KV_REST_API_URL  — Vercel KV endpoint
- *   KV_REST_API_TOKEN — Vercel KV token
+ * Everything it records goes to Supabase. There was a Vercel KV sidecar
+ * beside it until 2026-10-10, writing three more keys nobody read, and the
+ * store it wrote to had stopped resolving some time before that.
  */
 
 import { jsonBody } from './_lib/http.js';
@@ -63,19 +64,6 @@ async function supabaseStore(entry) {
       }),
     });
   } catch(e) { console.warn('[feedback] supabase write failed:', e); }
-}
-
-async function kvStore(key, value) {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return;
-  try {
-    await fetch(`${url}/lpush/${key}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(value),
-    });
-  } catch (e) { console.warn('KV store failed:', e); }
 }
 
 export default async function handler(req) {
@@ -137,7 +125,6 @@ export default async function handler(req) {
   const record = { source, rating, message, page, pkgType, exercisesComplete,
     alignmentLevel, stage, howHeard, questionAnswers, ts };
 
-  /* Supabase first, because it is the store every admin surface reads. */
   const quick = source === 'footer_quick';
   await supabaseStore({
     type: quick ? 'quick' : 'app_experience',
@@ -149,28 +136,6 @@ export default async function handler(req) {
     source: quick ? (page || 'footer') : (body.surface || 'results'),
   });
 
-  // Still written to Vercel KV, which answers nothing now. See B23.
-  await kvStore('attune:feedback', JSON.stringify(record));
-
-  // Also track quick-feedback counts separately for easy retrieval
-  if (source === 'footer_quick') {
-    const ratingKey = rating === 3 ? 'love' : rating === 2 ? 'good' : 'suggest';
-    await kvStore(`attune:feedback:${ratingKey}`, JSON.stringify({ page, message, ts }));
-    const url = process.env.KV_REST_API_URL;
-    const token = process.env.KV_REST_API_TOKEN;
-    if (url && token) {
-      try {
-        await fetch(`${url}/incr/attune:count:${ratingKey}`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        await fetch(`${url}/incr/attune:count:total`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } catch(e) {}
-    }
-  }
 
   const apiKey = process.env.RESEND_API_KEY;
   const toEmail = process.env.SUPPORT_EMAIL || process.env.FROM_EMAIL || 'hello@attune-relationships.com';

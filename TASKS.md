@@ -9,9 +9,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | # | What I need from you |
 |--|--|
 | B17b | **Three steps and one choice, all written out under this table.** Push notifications are built and cannot reach a phone until you do them. About twenty minutes, plus a build that runs by itself. |
-| B23 | **Delete two dead variables in Vercel: `KV_REST_API_URL` and `KV_REST_API_TOKEN`.** Settings, Environment Variables, the three dots beside each, Remove. The store they point at no longer exists, nothing reads it, and this is also the answer to B12: there is nothing left to clear. |
-| B29 | **Ask Supabase to confirm the AES-256 claim in writing.** Your privacy policy says answers are "encrypted with AES-256 while stored". It is almost certainly true and nobody has it in writing. The email to send is under this table. |
-| B3 | **Say "remove" and a dead counter goes.** A style code is six letters describing how one person communicates, counted on the server with no name attached. No screen draws it, and the admin works the same thing out live from real profiles. |
 | B19 | **Two colour decisions left, and they are the brand.** I took the thirteen you approved. The remaining 53 pieces of unreadable text are all one colour: the Attune orange used as small print. Both options are under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** Run this to read them: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. |
@@ -54,28 +51,45 @@ press return. The first line moves you to the right folder, so it does not
 matter where your terminal was.
 
 **Step 1. Put the Apple key into Expo.** Not Vercel: Expo sends the
-notifications on our behalf, so Expo is what needs the key. This command reads
-the key file off your machine and uploads it. Nothing gets pasted into a chat.
+notifications on our behalf, so Expo is what needs the key.
+
+**You never paste the contents of the key anywhere.** It asks for the file's
+location, and the two things it wants are written out below so you can copy
+them.
 
 ```
-cd /Users/Ellie/Projects/unison/attune-app && npx eas credentials
+cd /Users/Ellie/Projects/unison/attune-app && npx eas-cli credentials -p ios
 ```
 
-It asks a few questions in a list you move through with the arrow keys:
+It asks a few questions. Move with the arrow keys, choose with return.
 
-1. **Platform** → choose **iOS**.
-2. **Build profile** → choose **production**.
-3. From the menu, choose the line with **Push Notifications** in it ("Manage
-   your Apple Push Notifications Key").
-4. Choose **Set up a new key**, or **Use an existing key** if it offers yours.
-5. It will ask you to sign in to your Apple developer account.
-6. If it asks for the key file, that is the `.p8` file you downloaded when you
-   made the key. If it asks for a Key ID, it is the ten character code on the
-   key's page in the Apple developer portal, under Certificates, Identifiers &
-   Profiles, then Keys. If it asks for a Team ID, it is `HX5FX68K6L`.
+1. **Build profile** → **production**.
+2. From the menu, the line with **Push Notifications** in it.
+3. Then **Set up Push Notifications** or **Add a new push key**, whichever it
+   offers.
+4. If it asks **"Generate a new Apple Push Notifications service key?"**,
+   answer **no**. You already made one.
+5. **Path to P8 file** → paste this:
 
-Apple only lets you download a `.p8` once. If it is gone, revoke that key in
-the developer portal and make another; nothing else breaks.
+```
+/Users/Ellie/Downloads/AuthKey_59776926QU.p8
+```
+
+6. **Key ID** → paste this:
+
+```
+59776926QU
+```
+
+7. It will ask you to sign in to Apple. That is your developer account email,
+   your password, and the code your phone shows.
+
+That is the key you made yesterday evening at 16:50; the Key ID is in its
+filename, which is how I know. If it asks for a Team ID at any point it is
+`HX5FX68K6L`. If something goes wrong, send me what the screen says.
+
+If it only offers to generate a new key and will not take yours, let it
+generate one. Apple allows two push keys per account and either works.
 
 **Step 2. Run the migration.** This command copies the SQL onto your
 clipboard. You do not need to open the file.
@@ -94,7 +108,7 @@ cannot arrive over the air. Run these one at a time, waiting for each to
 finish.
 
 ```
-git pull
+cd /Users/Ellie/Projects/unison && git pull
 ```
 
 ```
@@ -135,20 +149,6 @@ splits are mine:
 
 Rewrite either and I will put it in.
 
-### B29, the email to send Supabase
-
-Open a support ticket from the Supabase dashboard, or reply to your Supabase
-contact, and send exactly this:
-
-> Please confirm in writing whether data at rest for our project, including
-> database volumes and automated backups, is encrypted with AES-256, and
-> whether that applies on our current plan.
-
-Save the reply wherever you keep the legal paperwork. That reply is the
-evidence if anyone ever asks why the privacy policy says what it says. If they
-will not confirm AES-256 specifically, tell me and we change the sentence to
-match what they will confirm.
-
 ### B19, the two that are left
 
 The thirteen are done and on the site. All 53 remaining pieces of unreadable
@@ -182,6 +182,8 @@ reads at 5.46, comfortably over.
 
 | # | Built, needs your eye |
 |--|--|
+| B3 | **The style code is gone, and so is everything else that wrote to the store you just deleted.** The endpoint, the axes it used, the two gates that watched them and the script that was going to clear the counters: five files. Nothing to look at; say the word and it moves to done. |
+| B32 | **One admin button was broken by deleting those variables, and is fixed.** "Feedback responses" in the export menu read the dead store and would have returned an error. It reads the survey table in Supabase now, which is where the answers have always been, and the combined export gets its feedback columns back. |
 | B28 | **The thirteen contrast fixes are on the site.** 187 pieces of unreadable text down to 53, and all 53 that are left are the one brand decision in B19. The greys, the greens, the clay, the shelf colours, the faded whites and the three admin colours are all over the line now. |
 | B31 | **The repo had 32 markdown files and now has 18.** Fourteen deleted, three merged into their nearest sibling. What was in them is either in this file, or done, or in git. Nothing you need is in a file you have to go and find. |
 | B17 | **All six push notifications are built, with your copy.** Nothing can reach a phone until B17b. Two of the six titles are splits of your sentences; they are in the B17b section above for you to correct. |
@@ -202,6 +204,8 @@ reads at 5.46, comfortably over.
 
 | Verified by you | What it was |
 |--|--|
+| B23 | The two dead Vercel variables are deleted. The store they pointed at had stopped resolving, and nothing read it. |
+| B29 | Supabase asked to confirm the AES-256 claim in the privacy policy in writing. |
 | B22 | Twenty-nine form fields said nothing to a screen reader, and three duplicate SVG ids made three cards paint with another card's gradient. |
 | B21 | Five In Practice pages scrolled sideways on a phone once the shared nav was on them. Both widths I measured were really 500 points; see B27. |
 | B20 | The two people's colours on a dark glance ground were written out on both surfaces, and the gate for exactly that failure was checking the other pair. |

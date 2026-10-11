@@ -2456,3 +2456,40 @@ rule about a comment describing a dead path, applied to my own tidying.
 Clean, pushed, 239 gates green. Section 1 of TASKS.md holds eleven asks and
 sixteen design decisions. Section 2 holds three faults I do not need an answer
 on and will take next.
+
+## 2026-10-11 — B3 taken, and the KV layer with it
+
+She deleted the two Vercel variables (B23), confirmed the AES-256 claim with
+Supabase (B29), and answered B3 with "Remove". Those three together make every
+Vercel KV path in the repo dead by construction, so they all went:
+
+- `api/track-type.js`, `api/_lib/style-codes.js`, their two gates and the
+  script written to clear their counters. Five files, plus the effect in
+  src/App.jsx that computed two style codes on every results session.
+- `api/get-feedback.js`, which was GET-only, admin-authed, read by nothing, and
+  reading a store that no longer resolves.
+- The KV sidecar in `api/send-feedback.js`. Supabase was already doing the
+  work.
+
+**One thing B23 broke, and I had not predicted it.** "Feedback responses" in
+the admin's export menu went to `api/admin-csv.js`, which read the beta survey
+out of KV and answers `KV not configured` without the variables. The rows are
+in Supabase and always were; both readers in that file point there now. Worth
+remembering as a shape: deleting a credential does not only stop writes, it
+turns a read path into an error page, and the error is in a menu nobody opens
+until they want the data.
+
+Eight comments across the server, the website and the app named one of the
+deleted endpoints. All repointed, because a comment describing a dead path is
+the thing that costs the next session an hour.
+
+**And my own instruction, broken the same day I wrote it down.** TASKS.md told
+her to run `npx eas credentials`. The package is `eas-cli`; `npx eas` cannot
+resolve a binary and says "could not determine executable to run". The app's
+own npm scripts have said `npx eas-cli` all along, which is where the right
+answer was. It now reads `npx eas-cli credentials -p ios`, and the two values
+the prompt asks for are written out in TASKS.md so she can paste them: the
+push key she made is `/Users/Ellie/Downloads/AuthKey_59776926QU.p8` and the
+Key ID is in the filename, `59776926QU`. Checked against the file dates: the
+other two .p8 files in Downloads are from 8 September and are App Store
+Connect keys.

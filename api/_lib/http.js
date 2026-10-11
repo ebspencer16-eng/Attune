@@ -110,7 +110,7 @@ export function safeError(where, e, fallback = 'Something went wrong on our end.
  * which throws on either. A sweep of every endpoint with seven malformed
  * bodies found twenty answering 500 to a body of `null` alone: account-signup,
  * create-profile, send-email, send-order-email, notes, notifications, posts,
- * privacy-choices, claim-order, track-type, update-profile and more. Some
+ * privacy-choices, claim-order, update-profile and more. Some
  * threw before reaching their own auth check.
  *
  * A 500 where a 400 belongs is not a hole, but it is noise in the logs that a

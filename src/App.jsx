@@ -138,7 +138,6 @@ import {
   ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION, ADMIRED_NOUN, admiredNoun, NON_ANSWER, GLANCE_TEXT,
 } from "../api/_anniversary-questions.js";
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
-import { styleCodeFor } from "../api/_lib/style-codes.js";
 import { pairingLabel, pairingTier } from "../api/_lib/pairing.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION } from "../api/_axes.js";
@@ -1975,19 +1974,6 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
 const pronoun = (p, form) => pronounForm(p, form);
 
 
-/**
- * ── THE CODE IS READ IN ONE PLACE ───────────────────────────────────────────
- * This was the only implementation and its own header comment had gone stale
- * with it: it described the fourth axis as C/A while the code returned R/L.
- * Two other files believed the comment rather than the code, and both dropped
- * every style code the product has ever produced. The axes live in
- * api/_lib/style-codes.js now and this is the same answer, verified against
- * what stood here over twenty thousand score sets and at the neutral boundary
- * where two of the six axes read backwards.
- */
-function getStyleCode(scores) {
-  return styleCodeFor(scores);
-}
 
 
 // Score-based couple type derivation using all 10 communication dimensions.
@@ -7018,7 +7004,7 @@ const JAMES_ANNIVERSARY_DEMO = {
 // outlived it, unused, for long enough to look like something still in service.
 //
 // The twenty-six question beta survey modal is gone. It posted to
-// /api/get-feedback, which is admin only and answers 401, and the flag it was
+// an admin-only endpoint that answered 401, and the flag it was
 // gated on was declared false and never set true by anything, so it could not
 // be opened in the first place. The live survey is PostResultsSurvey, further
 // down, which posts to /api/submit-beta-survey and stores what it is told.
@@ -7375,8 +7361,8 @@ function UnifiedResultsRoot(props) {
  * ── WHY IT IS BACK ────────────────────────────────────────────────────────
  * It was a component here once, already disconnected from anything that
  * rendered it, and d54d7c2 deleted it as unreferenced. Nothing has asked for
- * feedback since. /api/send-feedback, /api/get-feedback and two tiles on the
- * admin kept reporting on it, all showing nothing.
+ * feedback since. /api/send-feedback and two tiles on the admin kept
+ * reporting on it, all showing nothing.
  *
  * Every sentence and every question comes from api/_lib/feedback-copy.js,
  * which the app's screen reads too, so the two surfaces cannot ask different
@@ -7742,33 +7728,23 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
    */
   const conflictPairing = conflictBothDone ? { a: conflictSelf, b: conflictTheirs } : null;
 
-  // ── ANONYMOUS TYPE TRACKING ─────────────────────────────────────────────────
-  // Fires once per results session. No PII — only type IDs and 4-letter style codes.
+  /**
+   * ── THE SESSION, FOR THE ADMIN WORKBOOK ─────────────────────────────────
+   * Fires once per results session, which is what `_typeFired` is for.
+   *
+   * It used to do two things, and the first is gone. It computed a style
+   * code for each person and posted it, with the couple type and the gap
+   * tier, to an endpoint that counted them in Vercel KV. No screen drew any
+   * of it, the admin works the same numbers out live from real profiles,
+   * and the store itself no longer resolves. Ellie, asked whether the style
+   * code was wanted: "Remove." The endpoint and its two gates went with it.
+   */
   const _typeFired = useRef(false);
   useEffect(() => {
     if (_typeFired.current) return;
     /* Nothing to report until the couple has a type. */
     if (!coupleType?.id) return;
     _typeFired.current = true;
-    const codeA = getStyleCode(myS);
-    const codeB = getStyleCode(partS);
-    /* The same banding the couple reads on their results page. It used to be
-       its own, at 1.0, 1.8 and 2.5, so the chart Ellie reads disagreed with
-       what the customer was told about one couple in five. */
-    const gapTier = pairingTier(avgGap);
-    const hasEx2 = !!(ex2Answers && partnerEx2 && Object.keys(ex2Answers).length > 0 && Object.keys(partnerEx2).length > 0);
-    fetch("/api/track-type", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        /* No fallback. "complementary" is not a couple type any more and was
-           being sent for every couple the engine could not place, so the one
-           bucket with anything in it was a legacy name standing for an absence.
-           A couple with no type is not counted, which is the honest answer. */
-        coupleTypeId: coupleType.id,
-        codeA, codeB, gapTier, hasEx2,
-      }),
-    }).catch(() => {}); // non-blocking, non-critical
 
     // ── Save full computed session to localStorage for admin workbook generation ──
     // Serializes the real scores, couple type, and expectations gaps from this session.
