@@ -2321,3 +2321,77 @@ from HEAD and redone over markup lines only.
 and check-control-names, because both read dist/ which only the smoke builds,
 and both use the server the smoke already has. Wiring a browser gate into `npm
 run check` looked fine locally only because a build was lying around.
+
+## 2026-10-10 — push notifications, three bugs behind them, and a design review
+
+**Where it stopped: everything builds and every gate passes. 239 gates green.
+Nothing is half-done. Three things wait on Ellie and they are in TASKS.md
+section 1.**
+
+### Push, built end to end
+
+Her six, with her copy, in `api/_lib/notifications.js`. Migration 078 is the
+storage: a token per device, a three-valued consent on the profile, and a send
+log the rate limit reads. `api/_lib/push.js` hands a message to Expo; the
+decision to send is still `shouldNotify`, which was written months ago and did
+not change. Three of the six hang off an event (a note shared, a couple
+becoming complete, a workbook finishing); the other three are
+`api/cron-push.js`, daily at 17:00 UTC, because they are about something not
+happening.
+
+The app side is `attune-app/src/api/push.ts`, and every reference to
+expo-notifications in it is a dynamic import inside a try. That is deliberate
+and it is the thing to be careful with: a native module cannot arrive over the
+air, so this release has to be INERT in the build on her phone rather than
+broken. **I did not publish an EAS update this round.** The only app changes
+are the push work, the sequence is her build first, and the one machine I could
+have tested the inert path on runs Expo Go, which has the module in it. So the
+test would have proved nothing. `app/PUSH-NOTIFICATIONS.md` has the three
+commands she needs, in order.
+
+### The three bugs that fell out of writing the gates
+
+1. **The completion trigger used the wrong half of the capability object.**
+   `resultsGate` wants the `caps` flags and was handed the whole thing, so
+   every optional exercise dropped out and a couple was called complete on two
+   exercises. The partner got "your results are ready" while the app's home
+   screen still said they were waiting.
+2. **The website's completion never reached the server.** It writes answers
+   itself, so nothing that happens at that moment happened: no alert, no
+   workbook. One module both paths reach now, plus
+   `/api/exercise-completed`. Two browser-side workbook builders removed; one
+   sent a payload with no expectations data in it.
+3. **`supabaseStore` was defined and never called.** Every footer reaction and
+   every experience questionnaire went to a dead KV store. They reach the admin
+   now, and the questionnaire has a tile drawn from the questions themselves.
+
+### And one in my own tools
+
+`launch({ width: 320 })` was giving a 500 point viewport, on every browser
+check in this repo, because macOS has a minimum window width. The gate I wrote
+eight days ago printed "37 pages at 2 phone widths" and both were 500. Fixed in
+`scripts/_lib/browser.mjs`; the first honest run at 320 found the packages
+page's add-on tiles and three admin charts drawn past the right edge. Both
+fixed. The TASKS.md row she had already approved carries the correction.
+
+Also: a headless page's animation clock never advances, so anything that fades
+in photographs as blank. `scripts/shot.mjs` turns animations off now.
+
+### The design review
+
+`DESIGN-REVIEW.md`, sixteen findings and a ranked eleven. It is a list to
+choose from; none of it is built. Two items need a sentence from her and are
+named as such. The captures it is based on are in the session scratchpad, not
+the repo.
+
+### What is waiting on her
+
+- **B17b** the Apple key into Expo, migration 078, a new build, and which
+  moment the app asks for permission. All four in `app/PUSH-NOTIFICATIONS.md`.
+- **B19** the contrast table, fifteen examples, thirteen I would just take.
+- **B23** delete KV_REST_API_URL and KV_REST_API_TOKEN from Vercel. The store is
+  gone: the host does not resolve, and one variable covers all three
+  environments. This is also the answer to B12, which has nothing left to clear.
+- **B3** the style code is anonymous telemetry into that dead store and no
+  screen draws it. Say remove and it goes.
+- **D15** the review.

@@ -94,7 +94,14 @@ function installReaper() {
   }
 }
 
-export async function launch({ width = 1280, height = 1200 } = {}) {
+/**
+ * `userAgent` is for the one case a check has to look like a person: Vercel
+ * answers a burst of requests from a headless browser with its bot checkpoint,
+ * which is a thin page that reads as a thin page rather than as a refusal.
+ * CLAUDE.md records a sweep of forty routes where several measurements were
+ * the checkpoint and nobody noticed.
+ */
+export async function launch({ width = 1280, height = 1200, userAgent = null } = {}) {
   const chrome = findChrome();
   if (!chrome) {
     throw new Error(
@@ -116,6 +123,7 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
     '--disable-gpu',
     '--no-sandbox',
     '--disable-dev-shm-usage',
+    ...(userAgent ? [`--user-agent=${userAgent}`] : []),
     'about:blank',
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
 
@@ -179,6 +187,26 @@ export async function launch({ width = 1280, height = 1200 } = {}) {
   ({ sessionId } = await send('Target.attachToTarget', { targetId, flatten: true }, false));
   await send('Page.enable');
   await send('Runtime.enable');
+
+  /**
+   * ── THE WINDOW IS NOT THE VIEWPORT, AND macOS HAS A FLOOR ────────────────
+   * `--window-size=360,760` does not give a 360 point viewport. macOS enforces
+   * a minimum window width, and every launch here at a phone width measured
+   * 500 instead: asked 320, got 500; asked 360, got 500; asked 430, got 500.
+   *
+   * So every check in this repo that believed it was looking at a phone was
+   * looking at a 500 point window. check-no-sideways-scroll printed "37 pages
+   * at 2 phone widths" and both of them were the same width, and it was not a
+   * phone's. That is the shape CLAUDE.md warns about twice over: a harness
+   * that is wrong about the layout, and a number stated without its method.
+   *
+   * Emulation.setDeviceMetricsOverride sets the viewport itself, which is what
+   * every caller meant, so it is applied here rather than left to each one to
+   * remember. Nothing else about launch changes.
+   */
+  await send('Emulation.setDeviceMetricsOverride', {
+    width, height, deviceScaleFactor: 1, mobile: width <= 500,
+  });
 
   return {
     on(event, fn) { if (listeners[event]) listeners[event].push(fn); },

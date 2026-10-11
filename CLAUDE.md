@@ -991,6 +991,70 @@ forbade; told that it would put content on that page that appears nowhere else
 in the app, she reversed it. Both quotes are in check-plans-agree now, because
 the round trip is a better argument for the rule than the original bug was.
 
+**A harness that ignores the size it was given measures nothing, politely.**
+`launch({ width: 320 })` gave a 500 point viewport, because macOS enforces a
+minimum window width and `--window-size` is a window rather than a viewport.
+Asked 320, got 500. Asked 360, got 500. Asked 430, got 500.
+
+So every browser check here that believed it was looking at a phone was looking
+at a 500 point browser, and `check-no-sideways-scroll` printed "37 pages at 2
+phone widths" when both of its widths were the same width and neither was a
+phone's. I wrote that gate and that sentence eight days ago.
+
+`Emulation.setDeviceMetricsOverride` is applied inside `launch` now, so every
+caller gets the width it asked for. The first honest run at 320 found two pages
+drawing content past the right edge on a page that hides its overflow. The
+habit: when a tool takes a size, print what it actually got once, before
+believing anything it measures.
+
+**A headless page's animation clock does not advance.**
+`document.getAnimations()` reports every animation as `running` with
+`currentTime` pinned at 0ms, for as long as you wait, and `.finish()` does not
+move it. Anything with `animation-fill-mode: both` therefore renders its FROM
+state for ever, which in this codebase means opacity 0.
+
+A screenshot of the results highlights came back as an empty gradient card, and
+I spent four measurements establishing that the page was fine and the camera was
+not. `animation: none !important` makes each element render its own base style,
+which is the end state. `scripts/shot.mjs` does it; so should anything else that
+captures a page for a person to look at.
+
+**innerText is what a person sees, textContent is what the code said, and this
+is the fourth time.** Looking for the storycard's eyebrow by
+`textContent.startsWith('YOUR RESULTS')` found nothing, because the element says
+"Your results" and the uppercase is `text-transform`. The note four paragraphs
+up says exactly this and I did it anyway. When matching copy, match
+case-insensitively or match the module's string.
+
+**A definition without a call is not a feature, and it reads like one.**
+`supabaseStore` sat in `api/send-feedback.js`, correct, writing the right
+columns, called by nothing. Every footer reaction and every answer to "How was
+your experience?" went to a Vercel KV store whose host no longer resolves, so
+the Feedback Overview, the digest and the testimonials feature all reported on a
+table those senders had never written a row to. Reading the file finds a
+function that looks live. Running the handler and counting the writes is what
+found it, and that is now the shape of `check-feedback-reachable`'s last part.
+
+**The same moment, reached two ways, needs one implementation.** Everything that
+happens when a couple's results open lived inside `api/save-exercise.js`, which
+is how the APP finishes an exercise. The website writes the answers itself and
+only falls back to that endpoint when RLS blocks it, so for a website completion
+the partner was never told and the workbook was never built. It is
+`api/_lib/completion.js` now, and `/api/exercise-completed` is the website
+saying "done" after its own write.
+
+Found while building it: the trigger passed the whole `capabilitiesFor` object
+to `resultsGate`, which wants its `caps` half, so every optional exercise
+dropped out of the rule and a couple was called complete on Communication and
+Expectations alone. `resultsGate` reads either shape now. The general form: when
+a function takes "the flags", check which flags, because the object with the
+right name is not always the object with the right keys.
+
+**Ask a question in a way she can paste.** B12 failed for her with "module not
+found" because TASKS.md said to run the same line with ` --confirm` on the end,
+in backticks, and a pasted backtick is an argument. Give the whole command on
+its own line, every time, even when it is nearly the same as the one above it.
+
 ---
 
 ## Verification, non-negotiable

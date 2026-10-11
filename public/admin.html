@@ -149,6 +149,11 @@
   .tile-slicer:hover,.tile-slicer:focus{opacity:1;color:var(--text);outline:none}
   .tile-slicer.on{opacity:1;color:var(--accent,#6C7FFF);border-color:var(--accent,#6C7FFF)}
   .chart-body{padding:1.25rem}
+  /* Chart.js writes a pixel width onto the canvas from the size of its parent
+     at the moment it draws, and keeps it when the parent gets narrower. On a
+     320 point phone three of them stood 14 points past the right edge, cut off
+     rather than scrollable, because the page hides horizontal overflow. */
+  .chart-body canvas, .chart-card canvas{max-width:100%}
   .chart-body canvas{max-height:220px}
 
   /* INSIGHT ROW */

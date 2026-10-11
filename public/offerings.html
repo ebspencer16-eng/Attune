@@ -259,7 +259,13 @@
   .byo-row-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 .55rem}
   .byo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
   .byo-grid.three{grid-template-columns:repeat(3,1fr)}
-  .byo-tile{border:1px solid var(--stone);border-radius:12px;padding:.85rem .95rem;background:var(--cream);display:flex;flex-direction:column;gap:.3rem;transition:border-color .15s}
+  /* min-width:0 because a grid item's default is auto, which means a tile
+     whose contents will not shrink makes the whole grid wider than the page.
+     The price and the Add button are one nowrap row, which is exactly that
+     kind of contents: at 320 points the two columns ran 25 points past the
+     right edge, and the page hides its overflow, so the right-hand tiles were
+     cut off rather than scrollable. */
+  .byo-tile{min-width:0;border:1px solid var(--stone);border-radius:12px;padding:.85rem .95rem;background:var(--cream);display:flex;flex-direction:column;gap:.3rem;transition:border-color .15s}
   .byo-tile:hover{border-color:var(--clay)}
   .byo-tile h4{font-family:'Playfair Display',Georgia,serif;font-size:.9rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25}
   .byo-tile p{font-size:.72rem;color:var(--muted);line-height:1.45;margin:0;flex:1}
@@ -289,6 +295,11 @@
   .cmp-note{width:100%;font-size:.72rem;color:var(--muted);line-height:1.5;margin:var(--s-xs) auto 0;font-style:italic;max-width:760px;text-align:right}
 
   @media(max-width:900px){ .byo-grid{grid-template-columns:repeat(2,1fr)} }
+  /* One column on the narrowest phones. Two tiles side by side cannot hold a
+     price and an Add button at 320 points however little padding they have. */
+  @media(max-width:380px){
+    .byo-grid,.byo-grid.three{grid-template-columns:1fr}
+  }
   @media(max-width:600px){
     .cmp-note{text-align:center}
     .byo-panel{padding:1.2rem var(--s-md) 1.4rem;border-radius:14px}

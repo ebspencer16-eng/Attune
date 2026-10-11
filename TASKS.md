@@ -4,6 +4,7 @@
 
 | # | What I need from you |
 |--|--|
+| D15 | **The design and UX review you asked for: `DESIGN-REVIEW.md`.** Sixteen findings, as a graphic designer and then as a UX designer, each with what I would do and what it costs, and a ranked list of eleven at the end. Tell me which to take. Two of them need a sentence from you: what the gap on the couple map means, and what happens after checkout. |
 | B19 | **One example of each, in the table under this one.** Fifteen colours, fifteen rows. Say "all" and I take every fix; or name the rows you want done differently. Six of the fifteen are the admin, which no customer sees, and I will take those unless you say otherwise. |
 | B17b | **Three things and one decision.** The Key ID of the key you made, your Team ID, and the key file itself uploaded to Expo with one command. The decision is when the app asks permission, and there are three options with my recommendation. All of it is written out in `app/PUSH-NOTIFICATIONS.md`, bottom section, in order. Everything else is built and waiting. |
 | B23 | **Delete two dead Vercel variables: KV_REST_API_URL and KV_REST_API_TOKEN.** The store they point at no longer exists: the host does not resolve. One variable covers all three environments, so it has been dead in production too. Nothing needed it, which is why nothing broke. This is also the answer to B12: there is nothing left to clear. |
@@ -57,16 +58,18 @@ exact colour and set its words dark instead.
 
 | # | Mine to build |
 |--|--|
-| B17 | **Build the six push notifications you wrote.** Your copy, word for word, in `api/_lib/notifications.js`. Six things to build: the migration that stores a push token and the answer to being asked, the token registration in the app, the permission prompt, the send path, the trigger for each of the six, and a gate per trigger. Waits on B17b for the key only; everything else lands first. |
-| B24 | **Start the workbook when results unlock**, which is the half of your workbook-ready note that is not copy. It builds on request today, so the push would announce something that has not been made yet. |
-| B25 | **The footer's feedback and the app's feedback never reach the admin.** `supabaseStore` is written and never called, so both went only to the dead store. One call, with the columns mapped the way the survey writes them. |
-| B26 | **Remove the dead survey and the dead store's paths.** A 26-question survey modal on the dashboard cannot be opened and posts to an admin-only URL; four endpoints talk to a host that no longer resolves. |
-| D15 | **Write the design and UX review.** Both surfaces, as a graphic designer and then as a UX designer, with a ranked list of what I would change and what each one costs. |
+| B28 | **The thirteen contrast fixes**, once you have said yes to the table above. The two brand rows wait for you either way. |
+| D16 | **Whichever of the sixteen you pick.** Nothing from the review is built; it is a list to choose from. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| B17 | **All six push notifications are built, with your copy.** Nothing can reach a phone until B17b: the key, the migration and a new build. Two of the six titles are splits of your sentences and are listed in `app/PUSH-NOTIFICATIONS.md` for you to correct. |
+| B24 | **The workbook starts building the moment results unlock, on both surfaces.** It only ever did in the buyer's own browser, so a couple who finish in the app got nothing. Two more browser-side builders are gone; one of them sent a payload with no expectations data in it, so which document a couple got depended on which block ran last. |
+| B25 | **Your footer feedback and both "How was your experience" forms now reach the admin.** They were going to a store that no longer exists. The questionnaire has a tile on the Feedback Overview page, drawn from the questions themselves. |
+| B26 | **A 26-question survey nobody could open is deleted.** It posted to an admin-only URL and answered 401, and the flag that would have shown it was never set to true. |
+| B27 | **Every browser check in this repo was measuring a 500 point window, including the ones that said "phone".** macOS has a minimum window width and the tool was asking for a window rather than a viewport. Fixed, and the first honest run at 320 points found the add-on tiles on the packages page and three admin charts drawn past the right edge, where the page cuts them off. Both fixed. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -81,7 +84,7 @@ exact colour and set its words dark instead.
 | Verified by you | What it was |
 |--|--|
 | B22 | Twenty-nine form fields said nothing to a screen reader, and three duplicate SVG ids made three cards paint with another card's gradient. |
-| B21 | Five In Practice pages scrolled sideways on a phone once the shared nav was on them; 37 pages are measured at two widths now. |
+| B21 | Five In Practice pages scrolled sideways on a phone once the shared nav was on them. Both widths I measured were really 500 points; see B27. |
 | B20 | The two people's colours on a dark glance ground were written out on both surfaces, and the gate for exactly that failure was checking the other pair. |
 | B18 | The budget's three headline numbers were coloured by two sets of hex values, one typed into each surface. |
 | B10 | The admin CSV asked for the three couple-satisfaction columns by ids that have never existed, so twelve columns came out blank. |
