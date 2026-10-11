@@ -1055,6 +1055,34 @@ found" because TASKS.md said to run the same line with ` --confirm` on the end,
 in backticks, and a pasted backtick is an argument. Give the whole command on
 its own line, every time, even when it is nearly the same as the one above it.
 
+**And the paste has to include getting there.** Ellie: "Tired of reminding you
+this, I don't know how to code. You can't say 'from the project folder' then
+give instructions. You have to give me what to paste to get there."
+
+So every command in TASKS.md begins with the `cd`, in the same block, joined
+with `&&`, and absolute: `cd /Users/Ellie/Projects/unison/attune-app && npm run
+testflight`. Never "from the app folder, run". Never a fragment to append. A
+file she needs to put somewhere gets `| pbcopy` and the instruction to paste,
+rather than a path to go and open.
+
+**TASKS.md is the only document she should have to open.** Ellie: "I'm tired
+of navigating to all the different md files. You need to build instructions,
+suggestions, commentary into tasks.md when I ask for it. I want that doc to be
+as concise as possible but I need necessary context and explanations
+sometimes."
+
+The shape that satisfies both: the table rows stay one or two sentences, and
+anything longer goes in a section UNDER that table, keyed to the row's id. Not
+a new file, and not a link to one.
+
+On 2026-10-10 the repo had 32 markdown files and now has 18. Fourteen were
+deleted and three merged into their nearest sibling. What is left is this file,
+TASKS.md, HANDOFF.md, the three maps under `app/` that
+check-maps-are-current holds, `app/TESTFLIGHT.md`, the three generated review
+documents, `LEGAL-VS-CODE.md`, `SECURITY.md`, `scripts/SERVICE_INTEGRATION.md`
+and four small ones inside the Expo project. Before adding a seventeenth, ask
+whether it is a row in TASKS.md instead.
+
 ---
 
 ## Verification, non-negotiable

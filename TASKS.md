@@ -1,75 +1,194 @@
 # Tasks
 
+Everything you need is in this file. Commands are written to be copied whole,
+including the part that moves to the right folder, so you never have to know
+where you are. Anything longer than a row lives under the table it belongs to.
+
 ## 1. Needs you
 
 | # | What I need from you |
 |--|--|
-| D15 | **The design and UX review you asked for: `DESIGN-REVIEW.md`.** Sixteen findings, as a graphic designer and then as a UX designer, each with what I would do and what it costs, and a ranked list of eleven at the end. Tell me which to take. Two of them need a sentence from you: what the gap on the couple map means, and what happens after checkout. |
-| B19 | **One example of each, in the table under this one.** Fifteen colours, fifteen rows. Say "all" and I take every fix; or name the rows you want done differently. Six of the fifteen are the admin, which no customer sees, and I will take those unless you say otherwise. |
-| B17b | **Three things and one decision.** The Key ID of the key you made, your Team ID, and the key file itself uploaded to Expo with one command. The decision is when the app asks permission, and there are three options with my recommendation. All of it is written out in `app/PUSH-NOTIFICATIONS.md`, bottom section, in order. Everything else is built and waiting. |
-| B23 | **Delete two dead Vercel variables: KV_REST_API_URL and KV_REST_API_TOKEN.** The store they point at no longer exists: the host does not resolve. One variable covers all three environments, so it has been dead in production too. Nothing needed it, which is why nothing broke. This is also the answer to B12: there is nothing left to clear. |
-| B3 | **It is not customer facing, and it is not anywhere facing.** A style code is six letters describing how one person communicates, counted on the server with no name attached. No screen draws it, and the admin's Type Analytics page works the same thing out live from real profiles. Say "remove" and the counter goes with the dead store. |
+| B17b | **Three steps and one choice, all written out under this table.** Push notifications are built and cannot reach a phone until you do them. About twenty minutes, plus a build that runs by itself. |
+| B23 | **Delete two dead variables in Vercel: `KV_REST_API_URL` and `KV_REST_API_TOKEN`.** Settings, Environment Variables, the three dots beside each, Remove. The store they point at no longer exists, nothing reads it, and this is also the answer to B12: there is nothing left to clear. |
+| B29 | **Ask Supabase to confirm the AES-256 claim in writing.** Your privacy policy says answers are "encrypted with AES-256 while stored". It is almost certainly true and nobody has it in writing. The email to send is under this table. |
+| B3 | **Say "remove" and a dead counter goes.** A style code is six letters describing how one person communicates, counted on the server with no name attached. No screen draws it, and the admin works the same thing out live from real profiles. |
+| B19 | **Two colour decisions left, and they are the brand.** I took the thirteen you approved. The remaining 53 pieces of unreadable text are all one colour: the Attune orange used as small print. Both options are under this table. |
+| C3 | **Fifty words for the Notes tab, waiting on you.** Run this to read them: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
+| R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
-| C3 | 50 words written, waiting on you. `WORDS-REVIEW.md`. |
-| R12 | Privacy and Terms: waiting on the lawyer. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
-| O1 | App Store launch: tell me when live, I flip two flags. |
+| O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### B19, one example of each
+### The design review, as decisions
 
-Fifteen colours, 187 runs of text, 37 pages. The floor is 4.5 to 1 for small
-text. "Take" is what I recommend doing without a discussion; "yours" is a brand
-decision I will not make for you.
+Sixteen findings, one row each, with what I would do and what it costs. Say
+yes to any of them by number. The three at the top are the ones I would take
+first. Two need a sentence from you and nobody else can write them.
 
-| # | Colour | One example | Now | Would be | |
-|--|--|--|--|--|--|
-| 1 | faint grey `#B8AC9C` | /checkout, "calculated from billing ZIP" | 2.23 | `#7D756A` | take |
-| 2 | muted grey `#9C9890` | /feedback, "Pick all that apply" | 2.42 | `#6D6A65` | take |
-| 3 | green `#10B981` | /resources, "Crisis support" | 2.54 | `#0C875E` | take |
-| 4 | clay `#A66534` | /practice, "View all posts" | 4.37 | `#A36333` | take |
-| 5 | pink `#E91E63` | /practice, "Conflict and Repair" | 4.10 | `#DD1C5E` | take |
-| 6 | teal `#00897B` | /practice/methodology, "In Practice · Methodology" | 4.08 | `#008174` | take |
-| 7 | periwinkle `#5B6DF8` | /start, "Most Complete" | 3.72 | `#5161DD` | take |
-| 8 | white at 35% | /admin, "Sign in to continue" | 3.19 | 55% | take |
-| 9 | white at 40% | every footer, "© 2026 Attune Relationships" | 3.82 | 60% | take |
-| 10 | white at 45% | /email-preview, "Email template preview" | 4.40 | 55% | take |
-| 11 | **brand orange `#E8673A` as small text** | /resources, "Find this book"; every "In Practice ·" label; the email address on /contact | 2.88 to 3.26 | `#B6512D` | yours |
-| 12 | **white on a brand orange button** | /wedding-registry, "Add Attune to your registry" | 3.26 | the ground to `#C15630`, or the words to ink | yours |
-| 13 | admin orange `#FF6B35` | /admin, "Engage / Withdraw" | 2.84 | `#C55329` | take |
-| 14 | admin slate `#8892A9` | /admin, "Privacy policy" | 2.63 | `#646B7C` | take |
-| 15 | admin periwinkle `#6C7FFF` | /admin, "Open / Guarded" | 3.43 | `#5C6DDA` | take |
+| # | The finding, and what I would do |
+|--|--|
+| D17 | **The feedback survey opens before anyone has read their results.** The moment the storycards end, a six-question modal covers the page. There is a second questionnaire at the end of What Comes Next, with different questions. I would keep the one at the end and fire the modal from there too. **2 hours.** |
+| D18 | **The tab bar sits on top of the content on two tabs.** On Learn the search field is half behind it; on Notes a sentence is cut in half. I would add the bar's height as bottom padding on every tab. **1 hour.** |
+| D19 | **Two primary buttons for one action.** The nav's Get started is a black pill and the page's is orange, one above the other. The packages page has three different add-to-cart styles. I would make them all the orange pill. **Half a day.** |
+| D20 | **The couple map does not say what it means.** Four pastel quadrants with no key, axis labels turned on their side, and the gap between the two dots, which is the whole point of the product, drawn as an unlabelled dotted line. I would turn the labels upright, make the quadrants one colour, and label the gap. **The label is a sentence only you can write.** Half a day. |
+| D21 | **The homepage shows wireframes of a form, not the product.** The hero and the three step cards use grey placeholder boxes. I would put the real couple map, a real storycard and a real slider in them. Free, and it answers half of D12. **Half a day.** |
+| D32 | **Is there a budget for illustration?** Asked once before as D12 and never answered, and it is the largest single difference between how Attune looks and how its competitors look. Six drawings, one hand. The alternative is D21, which costs nothing and gets most of the way. |
+| D22 | **The packages page is four small boxes on a phone.** Each one holds a name that wraps, a price and a link, and under them a four column comparison table at 390 points. I would put one package per row, full width, and turn the table into a short list per package. **1 day.** |
+| D23 | **A lavender that is not in the brand, in three places:** step 02 on the homepage, one quadrant of the couple map, and the two add-on icons on the dashboard's Resources page. I would make all three the indigo. **One line each.** |
+| D24 | **The settings gear in the app is a bright system blue circle** on all four tabs, and on Insights it is the loudest thing on the screen. I would give it the app's own warm grey or glass. **1 hour.** |
+| D25 | **Both surfaces have a hole in the middle of a screen.** The app's Home has about 200 points of nothing under the greeting, which also wraps to two lines; Insights leaves 40 per cent of the screen empty under the menu. I would let the menu fill the screen, and either give the greeting one line or put an image in the gap. **Half a day.** |
+| D26 | **A new couple opens the app and meets empty boxes.** Two blank picture areas on Home, two "nothing yet" cards and an empty tag box on Notes. I would give each one something to do instead of something to say. **Half a day.** |
+| D27 | **Checkout never says what happens next.** It takes both first names, takes the money, and never mentions that an invite goes to the partner. **One line, in your words, and nobody else can write it.** |
+| D28 | **"Tap to begin" is on the first results card on a laptop,** where you click. Your copy, so your change: one word, or one sentence that works on both. |
+| D29 | **Three of the five exercise icons are hearts,** two of them in different colours. I would draw three distinct ones. **2 hours.** |
+| D30 | **The marketing pages jump from a 44 point headline to 14 point body** with nothing in between, so every section reads as either a shout or a paragraph. I would add one size: a standfirst under each heading. **1 hour.** |
+| D31 | **On a phone the nav hides Get started behind the hamburger** while the laptop keeps it visible, so the main action disappears on the device most people arrive on. I would put it in the bar on both. **1 hour.** |
 
-Every "would be" is the smallest change that clears the floor, computed rather
-than chosen, so none of them is a new colour so much as the same colour two or
-three per cent darker. Rows 8 to 10 are not colours at all: they are white type
-faded with opacity on a dark ground, and the number was picked by eye.
+---
 
-Rows 11 and 12 are the brand colour, which is why they are yours. The orange
-only fails as **small** text: as a large heading, or as a button fill, it
-passes, so nothing about the brand has to change. A darker orange for small
-print would sit beside the existing one rather than replacing it.
+### B17b, step by step
 
-Row 12 has a second option worth knowing about. The brand orange with **ink**
-on it reads at 5.46, comfortably over the floor, so that button can keep its
-exact colour and set its words dark instead.
+Each box is one paste. Copy the whole thing, including the first line, and
+press return. The first line moves you to the right folder, so it does not
+matter where your terminal was.
+
+**Step 1. Put the Apple key into Expo.** Not Vercel: Expo sends the
+notifications on our behalf, so Expo is what needs the key. This command reads
+the key file off your machine and uploads it. Nothing gets pasted into a chat.
+
+```
+cd /Users/Ellie/Projects/unison/attune-app && npx eas credentials
+```
+
+It asks a few questions in a list you move through with the arrow keys:
+
+1. **Platform** → choose **iOS**.
+2. **Build profile** → choose **production**.
+3. From the menu, choose the line with **Push Notifications** in it ("Manage
+   your Apple Push Notifications Key").
+4. Choose **Set up a new key**, or **Use an existing key** if it offers yours.
+5. It will ask you to sign in to your Apple developer account.
+6. If it asks for the key file, that is the `.p8` file you downloaded when you
+   made the key. If it asks for a Key ID, it is the ten character code on the
+   key's page in the Apple developer portal, under Certificates, Identifiers &
+   Profiles, then Keys. If it asks for a Team ID, it is `HX5FX68K6L`.
+
+Apple only lets you download a `.p8` once. If it is gone, revoke that key in
+the developer portal and make another; nothing else breaks.
+
+**Step 2. Run the migration.** This command copies the SQL onto your
+clipboard. You do not need to open the file.
+
+```
+cat /Users/Ellie/Projects/unison/supabase/migrations/078_push.sql | pbcopy
+```
+
+Then open Supabase, click **SQL Editor**, click into the box, press Command-V
+to paste, and press **Run**. It is safe to run twice. It adds a table for
+device tokens, three columns on profiles, and a log of what has been sent.
+
+**Step 3. Build the app and send it to TestFlight.** This one has to be a
+build rather than an update: notification code is native, and a native change
+cannot arrive over the air. Run these one at a time, waiting for each to
+finish.
+
+```
+git pull
+```
+
+```
+cd /Users/Ellie/Projects/unison/attune-app && npm run testflight
+```
+
+```
+cd /Users/Ellie/Projects/unison/attune-app && npm run testflight:send
+```
+
+The build runs on Expo's machines and takes fifteen to twenty minutes. You can
+close the terminal once it says the build is queued; the link it prints shows
+the progress.
+
+**Step 4. One choice: when the app asks permission.** iOS lets an app ask
+once. If someone says no, we can never ask again in the app; they have to find
+it in their phone's Settings, and almost nobody does. So this decides for good
+how many couples we can reach when their partner finishes.
+
+- **A. On the first launch after signing in.** The most asks and the worst
+  answers: most people say no to an app they have used for ninety seconds.
+- **B. Once they finish their first exercise. This is what is set now, and
+  what I recommend.** The moment they finish, the next thing that matters is
+  their partner finishing, which is exactly what a notification is for.
+- **C. Only from Settings.** The fewest people, the highest intent.
+
+The switch in Settings exists under all three, so nobody is stuck with the
+answer we caught them on. Say A, B or C. Saying B means nothing to do.
+
+**And two sentences to check.** You wrote all six notifications. Four of them
+split naturally into a bold line and a line under it. Two did not, and these
+splits are mine:
+
+| | Bold line | Line under it |
+|--|--|--|
+| Journal streak | **Your journal streak is about to expire** | Your streak of 6 days of entries in your relationship journal is about to expire. |
+| Workbook ready | **Your personalized workbook is ready** | For you to explore in your learn tab |
+
+Rewrite either and I will put it in.
+
+### B29, the email to send Supabase
+
+Open a support ticket from the Supabase dashboard, or reply to your Supabase
+contact, and send exactly this:
+
+> Please confirm in writing whether data at rest for our project, including
+> database volumes and automated backups, is encrypted with AES-256, and
+> whether that applies on our current plan.
+
+Save the reply wherever you keep the legal paperwork. That reply is the
+evidence if anyone ever asks why the privacy policy says what it says. If they
+will not confirm AES-256 specifically, tell me and we change the sentence to
+match what they will confirm.
+
+### B19, the two that are left
+
+The thirteen are done and on the site. All 53 remaining pieces of unreadable
+text are the Attune orange used as **small** print: "Find this book", every
+"In Practice ·" label, the email address on /contact, the "Add to registry"
+link. As a heading or a button fill the same orange passes; it is only small
+text that fails.
+
+**Option 1.** A second, darker orange for small print only, `#B6512D`, sitting
+beside the brand one. Nothing else changes, and nothing larger than small print
+is touched.
+
+**Option 2.** Leave it. It is a real brand, the failure is at the readability
+standard rather than at "can anyone see it", and some people will not notice.
+
+There is also one button: white on orange, "Add Attune to your registry", at
+3.26 against a floor of 4.5. That one has a third option, which is to keep the
+exact brand orange and set the words in ink instead. Ink on the brand orange
+reads at 5.46, comfortably over.
+
 
 ## 2. Open
 
 | # | Mine to build |
 |--|--|
-| B28 | **The thirteen contrast fixes**, once you have said yes to the table above. The two brand rows wait for you either way. |
-| D16 | **Whichever of the sixteen you pick.** Nothing from the review is built; it is a list to choose from. |
+| D33 | **The three from the review that need no answer, because they are faults rather than choices.** The "Or pay with card" line on checkout can appear with no wallet button above it; Physical Intimacy is indented in the results sidebar so it reads as part of Relationship Reflection; the homepage's three statistics wrap two and one on a phone. |
+| D34 | **The dashboard's Resources page becomes the app's Learn tab.** You asked for this in L2 and I did it to the marketing page instead. The dashboard's version is still twelve flat rows where the app has tiles, counts, bookmarks and a search. |
+| D16 | **Whichever of the sixteen you pick.** Nothing from the review is built. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| B17 | **All six push notifications are built, with your copy.** Nothing can reach a phone until B17b: the key, the migration and a new build. Two of the six titles are splits of your sentences and are listed in `app/PUSH-NOTIFICATIONS.md` for you to correct. |
-| B24 | **The workbook starts building the moment results unlock, on both surfaces.** It only ever did in the buyer's own browser, so a couple who finish in the app got nothing. Two more browser-side builders are gone; one of them sent a payload with no expectations data in it, so which document a couple got depended on which block ran last. |
-| B25 | **Your footer feedback and both "How was your experience" forms now reach the admin.** They were going to a store that no longer exists. The questionnaire has a tile on the Feedback Overview page, drawn from the questions themselves. |
+| B28 | **The thirteen contrast fixes are on the site.** 187 pieces of unreadable text down to 53, and all 53 that are left are the one brand decision in B19. The greys, the greens, the clay, the shelf colours, the faded whites and the three admin colours are all over the line now. |
+| B31 | **The repo had 32 markdown files and now has 18.** Fourteen deleted, three merged into their nearest sibling. What was in them is either in this file, or done, or in git. Nothing you need is in a file you have to go and find. |
+| B17 | **All six push notifications are built, with your copy.** Nothing can reach a phone until B17b. Two of the six titles are splits of your sentences; they are in the B17b section above for you to correct. |
+| B24 | **The workbook starts building the moment results unlock, on both surfaces.** It only ever did in the buyer's own browser, so a couple who finish in the app got nothing. Two other builders are gone; one of them was sending a payload with no expectations data in it. |
+| B25 | **Your footer feedback and both "How was your experience" forms now reach the admin.** They were going to a store that no longer exists. The questionnaire has its own tile on the Feedback Overview page. |
 | B26 | **A 26-question survey nobody could open is deleted.** It posted to an admin-only URL and answered 401, and the flag that would have shown it was never set to true. |
-| B27 | **Every browser check in this repo was measuring a 500 point window, including the ones that said "phone".** macOS has a minimum window width and the tool was asking for a window rather than a viewport. Fixed, and the first honest run at 320 points found the add-on tiles on the packages page and three admin charts drawn past the right edge, where the page cuts them off. Both fixed. |
+| B27 | **Every browser check here was measuring a 500 point window, including the ones that said "phone".** macOS has a minimum window width and the tool was asking for a window rather than a viewport. Fixed, and the first honest run at 320 points found the packages page's add-on tiles and three admin charts cut off at the right edge. Both fixed. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |

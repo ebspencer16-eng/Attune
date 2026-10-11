@@ -21,8 +21,8 @@
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --bg:#EDF1FA;--surface:#E6ECF7;--card:#FFFFFF;--border:#D3DCEC;
-    --text:#1B2547;--muted:#586187;--dim:#8892A9;
-    --orange:#FF6B35;--indigo:#6C7FFF;--green:#34D399;--amber:#FBBF24;--rose:#F87171;
+    --text:#1B2547;--muted:#586187;--dim:#626975;
+    --orange:#C55329;--indigo:#5C6DDA;--green:#34D399;--amber:#FBBF24;--rose:#F87171;
     --hfont:'Playfair Display',Georgia,serif;
     --bfont:'DM Sans',sans-serif;
     --mono:'DM Mono',monospace;
@@ -147,7 +147,7 @@
   .chart-subtitle{font-size:.68rem;color:var(--muted);margin-top:.15rem}
   .tile-slicer{align-self:flex-start;min-width:74px;max-width:160px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:7px;font-size:.66rem;padding:.28rem .5rem;cursor:pointer;opacity:.7;font-family:inherit;transition:opacity .15s}
   .tile-slicer:hover,.tile-slicer:focus{opacity:1;color:var(--text);outline:none}
-  .tile-slicer.on{opacity:1;color:var(--accent,#6C7FFF);border-color:var(--accent,#6C7FFF)}
+  .tile-slicer.on{opacity:1;color:var(--accent,#5C6DDA);border-color:var(--accent,#5C6DDA)}
   .chart-body{padding:1.25rem}
   /* Chart.js writes a pixel width onto the canvas from the size of its parent
      at the moment it draws, and keeps it when the parent gets narrower. On a
@@ -185,7 +185,7 @@
   .login-card{background:#1a1730;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:360px;box-shadow:0 32px 80px rgba(0,0,0,.5);}
   .login-card .grad-bar{height:3px;background:linear-gradient(90deg,#E8673A,#1B5FE8);border-radius:2px;margin-bottom:1.75rem;}
   .login-card h2{font-family:var(--hfont);font-size:1.35rem;font-weight:700;color:white;margin:0 0 .3rem;}
-  .login-card .sub{font-size:.75rem;color:rgba(255,255,255,.35);margin-bottom:1.5rem;font-family:var(--bfont);}
+  .login-card .sub{font-size:.75rem;color:rgba(255,255,255,.55);margin-bottom:1.5rem;font-family:var(--bfont);}
   .login-inp{width:100%;padding:.72rem 1rem;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;color:white;font-size:.85rem;font-family:var(--bfont);outline:none;box-sizing:border-box;margin-bottom:.65rem;transition:border-color .15s;}
   .login-inp:focus{border-color:var(--orange);}
   .login-inp::placeholder{color:rgba(255,255,255,.25);}
@@ -1138,7 +1138,7 @@
   <div class="ux-cardlabel" style="font-size:.62rem;">3 · Dashboards — one per package (fully functional, demo data)</div>
   <div class="ux-grid" style="margin-bottom:1.9rem;">
       <a class="ux-card" style="text-decoration:none;display:block;" href="/app?demo=core&view=home" target="_blank" rel="noopener">
-        <div class="ux-cardhead"><span class="ux-dot" style="background:#FF6B35"></span><span class="ux-name">Core</span></div>
+        <div class="ux-cardhead"><span class="ux-dot" style="background:#C55329"></span><span class="ux-name">Core</span></div>
         <div class="ux-desc" style="margin:.35rem 0 0;">Full dashboard, populated with demo data ↗</div>
       </a>
       <a class="ux-card" style="text-decoration:none;display:block;" href="/app?demo=newlywed&view=home" target="_blank" rel="noopener">
@@ -1146,7 +1146,7 @@
         <div class="ux-desc" style="margin:.35rem 0 0;">Full dashboard, populated with demo data ↗</div>
       </a>
       <a class="ux-card" style="text-decoration:none;display:block;" href="/app?demo=anniversary&view=home" target="_blank" rel="noopener">
-        <div class="ux-cardhead"><span class="ux-dot" style="background:#6C7FFF"></span><span class="ux-name">Anniversary</span></div>
+        <div class="ux-cardhead"><span class="ux-dot" style="background:#5C6DDA"></span><span class="ux-name">Anniversary</span></div>
         <div class="ux-desc" style="margin:.35rem 0 0;">Full dashboard, populated with demo data ↗</div>
       </a>
       <a class="ux-card" style="text-decoration:none;display:block;" href="/app?demo=premium&view=home" target="_blank" rel="noopener">
@@ -1714,11 +1714,11 @@ window.adminAuthHeaders = function(extra){
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:.5rem 1.4rem;">
           <div>
-            <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#FF6B35;font-weight:700;margin-bottom:.6rem;">Engage / Withdraw</div>
+            <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#C55329;font-weight:700;margin-bottom:.6rem;">Engage / Withdraw</div>
             <div id="sandbox-withdraw"></div>
           </div>
           <div>
-            <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#6C7FFF;font-weight:700;margin-bottom:.6rem;">Open / Guarded</div>
+            <div style="font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:#5C6DDA;font-weight:700;margin-bottom:.6rem;">Open / Guarded</div>
             <div id="sandbox-open"></div>
           </div>
         </div>
@@ -2203,7 +2203,7 @@ function drawFunnel() {
   setTileText('eng-funnel-n', f.available
     ? 'Over 12 months · sign-ups counted twice, because a sign-up is one half of a couple'
     : 'No accounts yet.');
-  const COLORS = ['#6C7FFF', '#E8673A', '#34D399', '#FBBF24', '#9B5DE5', '#22A5C4'];
+  const COLORS = ['#5C6DDA', '#E8673A', '#34D399', '#FBBF24', '#9B5DE5', '#22A5C4'];
   mkChart(document.getElementById('chart-eng-funnel'), {
     type: 'line',
     data: {
@@ -2230,7 +2230,7 @@ function drawAcquisition() {
     : 'Nothing recorded yet.');
   const sets = [{
     label: 'Marketing site visits', data: a.visits || [],
-    borderColor: '#6C7FFF', backgroundColor: 'transparent', tension: .35, borderWidth: 2, pointRadius: 0,
+    borderColor: '#5C6DDA', backgroundColor: 'transparent', tension: .35, borderWidth: 2, pointRadius: 0,
   }];
   if (a.downloads) {
     sets.push({ label: 'App downloads', data: a.downloads, borderColor: '#E8673A', backgroundColor: 'transparent', tension: .35, borderWidth: 2, pointRadius: 0 });
@@ -2295,7 +2295,7 @@ function drawTimePerPage() {
         labels: v.labels,
         data: v.site,
         second: { label: 'App', data: v.app, colour: '#E8673A' },
-        colour: '#6C7FFF',
+        colour: '#5C6DDA',
         axis: 'seconds',
         max: ceiling,
       };
@@ -2389,7 +2389,7 @@ function drawLearning() {
         axis: 'notes',
         stacked: detail ? [
           { label: 'Tags', data: v.breakdown.tags, colour: '#FBBF24' },
-          { label: 'Personal notes', data: v.breakdown.personal, colour: '#6C7FFF' },
+          { label: 'Personal notes', data: v.breakdown.personal, colour: '#5C6DDA' },
           { label: 'Shared notes', data: v.breakdown.shared, colour: '#34D399' },
         ] : null,
         firstLabel: detail ? 'Highlights' : 'Notes',
@@ -2563,7 +2563,7 @@ async function renderPromosPage(force) {
   const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
   const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
   const addons = [
-    { key: o => !!o.addon_workbook, label: 'Workbook',   color: '#6C7FFF' },
+    { key: o => !!o.addon_workbook, label: 'Workbook',   color: '#5C6DDA' },
     { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
     { key: o => !!o.addon_budget,   label: 'Budget',     color: '#E36BAE' },
     { key: o => !!o.addon_intimacy, label: 'Intimacy',   color: '#B5546E' },
@@ -3472,7 +3472,7 @@ function renderBar(label, val, max, color, subLabel='') {
   </div>`;
 }
 
-function renderScoreBar(label, score, color='#6C7FFF') {
+function renderScoreBar(label, score, color='#5C6DDA') {
   if (score == null) return renderBar(label, 0, 5, color, '—');
   return renderBar(label, score, 5, color, score.toFixed(1));
 }
@@ -3530,14 +3530,14 @@ async function renderTestimonialsReview(){
     const starStr='★'.repeat(rating)+'☆'.repeat(5-rating);
     const date=t.ts?new Date(t.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
     const ctName=t.coupleTypeName||(t.couple_type&&typeof CT_NAMES!=='undefined'&&CT_NAMES[t.couple_type])||t.couple_type||'';
-    return '<div style="border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:10px;padding:.8rem 1rem;margin-bottom:.7rem;background:'+(t.featured?'rgba(108,127,255,.06)':'var(--card)')+';">'
+    return '<div style="border:1px solid '+(t.featured?'#5C6DDA':'var(--border)')+';border-radius:10px;padding:.8rem 1rem;margin-bottom:.7rem;background:'+(t.featured?'rgba(108,127,255,.06)':'var(--card)')+';">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;">'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:.85rem;color:#F5A623;letter-spacing:.05em;">'+starStr+(t.nps!=null?' <span style="color:var(--dim);font-size:.66rem;font-family:var(--mono);">NPS '+t.nps+'</span>':'')+'</div>'
           +'<div style="font-size:.82rem;color:var(--text);line-height:1.5;margin:.35rem 0;font-style:italic;">“'+QX_ESC(t.testimonial)+'”</div>'
           +'<div style="font-size:.68rem;color:var(--muted);">'+QX_ESC(t.name||'Anonymous')+(ctName?' · '+QX_ESC(ctName):'')+(date?' · '+date:'')+'</div>'
         +'</div>'
-        +'<button onclick="toggleFeatured(\''+String(t.id).replace(/'/g,"")+'\','+(t.featured?'false':'true')+')" style="flex:0 0 auto;background:'+(t.featured?'#6C7FFF':'transparent')+';color:'+(t.featured?'#fff':'var(--muted)')+';border:1px solid '+(t.featured?'#6C7FFF':'var(--border)')+';border-radius:8px;padding:.35rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;">'+(t.featured?'★ Featured':'☆ Feature')+'</button>'
+        +'<button onclick="toggleFeatured(\''+String(t.id).replace(/'/g,"")+'\','+(t.featured?'false':'true')+')" style="flex:0 0 auto;background:'+(t.featured?'#5C6DDA':'transparent')+';color:'+(t.featured?'#fff':'var(--muted)')+';border:1px solid '+(t.featured?'#5C6DDA':'var(--border)')+';border-radius:8px;padding:.35rem .6rem;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;">'+(t.featured?'★ Featured':'☆ Feature')+'</button>'
       +'</div></div>';
   }).join('');
 }
@@ -3683,7 +3683,7 @@ function paintBetaTile(key, SIM){
   const $ = (id)=>document.getElementById(id);
   const _score5 = (v)=> v==null ? '\u2014' : v+'<span style="font-size:.9rem">/5</span>';
   const GRID_COLS=['Design','Accuracy','Importance'], GRID_COLORS=['#E8673A','#9B5DE5','#1B5FE8','#10B981'];
-  const OV_COLS=['Clarity','Impact','Overall Satisfaction'], OV_COLORS=['#6C7FFF','#E8673A','#10B981'];
+  const OV_COLS=['Clarity','Impact','Overall Satisfaction'], OV_COLORS=['#5C6DDA','#E8673A','#10B981'];
   const mx=(arr)=>Math.max(1,...arr.map(i=>i.v));
   const gridHTML=(rows)=>rows.map(row=>`<div style="margin-bottom:.35rem"><div style="font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:.35rem">${row.label}</div>`+row.scores.map((sv,i)=>sv!=null?renderScoreBar(GRID_COLS[i],sv,GRID_COLORS[i]):'').join('')+'</div>').join('');
   switch(key){
@@ -3737,7 +3737,7 @@ window.renderTimeByStage = function renderTimeByStage(rowsArg) {
   const SHORT = ['Checkout/setup','Communication','Expectations','Results','Workbook'];
   const DUR = ['Less than 10 minutes','10–20 minutes','20–45 minutes','45–60 minutes','Over 1 hour'];
   const DUR_SHORT = ['<10m','10–20m','20–45m','45–60m','1h+'];
-  const DUR_COLORS = ['#34D399','#6C7FFF','#FBBF24','#FF6B35','#F87171'];
+  const DUR_COLORS = ['#34D399','#5C6DDA','#FBBF24','#C55329','#F87171'];
   const rows = (rowsArg || window.__fbSurveys || []);
   if (!rows.length) { canvas.style.display='none'; if (empty) empty.style.display='block'; return; }
   canvas.style.display='block'; if (empty) empty.style.display='none';
@@ -3788,15 +3788,15 @@ function renderConcludingRemarks(R){
   if(!withResp.length){ pills.innerHTML=''; scoreEl.style.display='none'; body.innerHTML='<div style="color:var(--muted);font-size:.8rem;">No written responses yet.</div>'; return; }
   const st = window.__remarksState = window.__remarksState || { q: withResp[0].key, sent:'all' };
   if(!withResp.some(q=>q.key===st.q)){ st.q=withResp[0].key; st.sent='all'; }
-  const pill=(active,label,onclick,color)=>'<button onclick="'+onclick+'" style="font-size:.72rem;padding:.32rem .8rem;border-radius:999px;border:1px solid '+(active?(color||'#6C7FFF'):'var(--border)')+';background:'+(active?(color||'#6C7FFF')+'22':'transparent')+';color:'+(active?'var(--text)':'var(--muted)')+';cursor:pointer;font-family:var(--bfont);">'+label+'</button>';
+  const pill=(active,label,onclick,color)=>'<button onclick="'+onclick+'" style="font-size:.72rem;padding:.32rem .8rem;border-radius:999px;border:1px solid '+(active?(color||'#5C6DDA'):'var(--border)')+';background:'+(active?(color||'#5C6DDA')+'22':'transparent')+';color:'+(active?'var(--text)':'var(--muted)')+';cursor:pointer;font-family:var(--bfont);">'+label+'</button>';
   pills.innerHTML = withResp.map(q=>{ const cnt=R.filter(r=>String(r[q.key]||'').trim()).length; return pill(st.q===q.key, q.label+' ('+cnt+')', "__setRemarkQ('"+q.key+"')"); }).join('');
   const cur = withResp.find(q=>q.key===st.q);
   if(cur.score){ scoreEl.style.display='flex';
-    scoreEl.innerHTML=[['all','All','#6C7FFF'],['neg','Negative','#F87171'],['neu','Neutral','#F59E0B'],['pos','Positive','#10B981']].map(([k,l,c])=>pill(st.sent===k,l,"__setRemarkSent('"+k+"')",c)).join('');
+    scoreEl.innerHTML=[['all','All','#5C6DDA'],['neg','Negative','#F87171'],['neu','Neutral','#F59E0B'],['pos','Positive','#10B981']].map(([k,l,c])=>pill(st.sent===k,l,"__setRemarkSent('"+k+"')",c)).join('');
   } else { scoreEl.style.display='none'; scoreEl.innerHTML=''; }
   let rows=R.filter(r=>String(r[cur.key]||'').trim());
   if(cur.score && st.sent!=='all') rows=rows.filter(r=>_fbSentOf(r,cur)===st.sent);
-  body.innerHTML = rows.length ? rows.map(r=>{ const txt=String(r[cur.key]).trim(); const sent=_fbSentOf(r,cur); const col = cur.score ? (sent==='pos'?'#10B981':sent==='neg'?'#F87171':'#F59E0B') : '#6C7FFF'; const sc = cur.score ? (sent==='pos'?5:sent==='neg'?1:3) : 3; return renderQuoteCard(txt,'Anonymous',sc,col); }).join('') : '<div style="color:var(--muted);font-size:.8rem;">No responses in this filter.</div>';
+  body.innerHTML = rows.length ? rows.map(r=>{ const txt=String(r[cur.key]).trim(); const sent=_fbSentOf(r,cur); const col = cur.score ? (sent==='pos'?'#10B981':sent==='neg'?'#F87171':'#F59E0B') : '#5C6DDA'; const sc = cur.score ? (sent==='pos'?5:sent==='neg'?1:3) : 3; return renderQuoteCard(txt,'Anonymous',sc,col); }).join('') : '<div style="color:var(--muted);font-size:.8rem;">No responses in this filter.</div>';
 }
 window.__setRemarkQ=function(k){ const st=window.__remarksState=window.__remarksState||{}; st.q=k; st.sent='all'; renderConcludingRemarks(window.__betaR||[]); };
 window.__setRemarkSent=function(k){ const st=window.__remarksState=window.__remarksState||{}; st.sent=k; renderConcludingRemarks(window.__betaR||[]); };
@@ -3844,7 +3844,7 @@ if (typeof Chart !== 'undefined') {
 }
 
 const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
-const PKG_COLORS = ['#FF6B35','#FBBF24','#6C7FFF','#34D399'];
+const PKG_COLORS = ['#C55329','#FBBF24','#5C6DDA','#34D399'];
 const PKG_LABELS = ['Assessment','Starting Out','Anniversary','Premium'];
 
 // ── Simulated data ────────────────────────────────────
@@ -3881,7 +3881,7 @@ let realRatingN = 0;          // sample size for avg rating
 let realDropoffExercise = null; // "Ex 01" | "Ex 02" | null
 
 // ── Bar renderer ──────────────────────────────────────
-function renderBars(containerId, items, color='#6C7FFF') {
+function renderBars(containerId, items, color='#5C6DDA') {
   const max = Math.max(...items.map(i=>i.v)) || 1;
   const el = document.getElementById(containerId);
   if (!el) return;
@@ -3966,7 +3966,7 @@ function generateOrders() {
       nuance:'The risk is one person feeling unheard while the other is confused, because resolution happened on the surface but not underneath.',
       scoresA:{ energy:2.8, expression:4.0, listening:3.9, values:2.7, love:2.1, needs:2.2, bids:4.1, conflict:1.9, stress:2.2, repair:3.7, feedback:3.8 },
       scoresB:{ energy:3.5, expression:2.2, listening:3.2, values:3.3, love:3.5, needs:3.8, bids:3.2, conflict:2.2, stress:3.5, repair:2.4, feedback:2.3 } },
-    { id:'WZ', name:'The opening', color:'#A66534',
+    { id:'WZ', name:'The opening', color:'#A36333',
       tagline:'One reaches, one reserves. The gap between those instincts is the conversation worth having.',
       description:'{U} and {P} have the widest gap in the pairing set – full mismatch on both axes.',
       nuance:'Complementary styles create strong balance when named explicitly. Without naming, they create distance.',
@@ -4265,7 +4265,7 @@ async function loadRealDemographics() {
     // that relLengths/sourceData are populated. Targeted (not gated on the page
     // being active) since renderBars/mkChart work on off-screen elements too.
     // Cube-backed + sliceable — keep consistent with initCharts('overview').
-    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
+    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#5C6DDA'});
     wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
@@ -4380,9 +4380,9 @@ async function renderResponseTile(opts){
   const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
   setTileN(el, a.pairs);
   if(opts.kind==='radar'){
-    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#6C7FFF',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6C7FFF'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{display:false},pointLabels:{font:{size:10}}}}}});
+    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#5C6DDA',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#5C6DDA'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{display:false},pointLabels:{font:{size:10}}}}}});
   } else if(opts.kind==='expalign'){
-    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#FF6B35'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#C55329',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C55329'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
     mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
@@ -4432,7 +4432,7 @@ function renderAddonAttachment() {
   const pkgs = ['core', 'newlywed', 'anniversary', 'premium'];
   const pkgLabels = { core: 'Assessment', newlywed: 'Starting Out', anniversary: 'Anniversary', premium: 'Premium' };
   const addons = [
-    { key: o => !!o.addon_workbook,   label: 'Workbook',   color: '#6C7FFF' },
+    { key: o => !!o.addon_workbook,   label: 'Workbook',   color: '#5C6DDA' },
     { key: o => !!o.addon_reflection, label: 'Reflection', color: '#F4B860' },
     { key: o => !!o.addon_budget,     label: 'Budget',     color: '#E36BAE' },
     { key: o => !!o.addon_intimacy,   label: 'Intimacy',   color: '#B5546E' },
@@ -4870,7 +4870,7 @@ function renderOrdersTable(rows) {
   if (!rows) rows = ORDERS;
   const tbody = document.getElementById('orders-tbody');
   if (!tbody) return;
-  const pkgColors = {core:'#FF6B35',newlywed:'#FBBF24','newlywed-box':'#FBBF24',anniversary:'#6C7FFF','anniversary-box':'#6C7FFF',premium:'#34D399','premium-box':'#34D399'};
+  const pkgColors = {core:'#C55329',newlywed:'#FBBF24','newlywed-box':'#FBBF24',anniversary:'#5C6DDA','anniversary-box':'#5C6DDA',premium:'#34D399','premium-box':'#34D399'};
   const pkgNames  = {core:'Assessment',newlywed:'Starting Out','newlywed-box':'Starting Out',anniversary:'Anniversary','anniversary-box':'Anniversary',premium:'Premium','premium-box':'Premium'};
   const label = document.getElementById('orders-count-label');
   if (label) label.textContent = `${rows.length} order${rows.length === 1 ? '' : 's'}`;
@@ -5000,7 +5000,7 @@ const QX_CROSS = [
   { key: 'understanding_group', label: 'In tune / Misunderstood' },
 ];
 const QX_SCALE_COLORS = ['#F87171', '#FBBF24', '#B9C0CF', '#7DD3A8', '#34D399'];
-const QX_CAT_COLORS = ['#6C7FFF', '#FF6B35', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
+const QX_CAT_COLORS = ['#5C6DDA', '#C55329', '#34D399', '#FBBF24', '#B5546E', '#9B5DE5', '#22A5C4'];
 // Monochrome gradient helpers so distributions read as a neutral spectrum
 // (light = low end, dark = high end) instead of red/yellow/green (which implies
 // good/bad). Each exercise gets its own hue.
@@ -5008,7 +5008,7 @@ function _hexToRgb(h){ h=String(h).replace('#',''); return { r:parseInt(h.slice(
 function _rgbToHex(r,g,b){ const c=x=>('0'+Math.max(0,Math.min(255,Math.round(x))).toString(16)).slice(-2); return '#'+c(r)+c(g)+c(b); }
 function hexShade(base, frac){ const {r,g,b}=_hexToRgb(base); const t=0.22+0.78*frac; return _rgbToHex(255+(r-255)*t,255+(g-255)*t,255+(b-255)*t); }
 function hexRamp(base, n){ n=n||5; const out=[]; for(let i=0;i<n;i++) out.push(hexShade(base, n===1?1:i/(n-1))); return out; }
-const QX_THEME = { 'qx-comm':'#6C7FFF', 'qx-exp':'#FF6B35', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E', 'qx-feedback':'#22A5C4' };
+const QX_THEME = { 'qx-comm':'#5C6DDA', 'qx-exp':'#C55329', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E', 'qx-feedback':'#22A5C4' };
 const QX_MODE = {}; const QX_REPAINT = {};  // per-section 'mean'|'breakdown' + repaint fn (mean/breakdown toggle)
 // Numeric position of a cube answer: scale -> 1..5; intimacy -> option value 0..1; reflection Likert -> option index 0..n.
 function qxPosOf(f, raw){
@@ -5022,8 +5022,8 @@ function qxPosOf(f, raw){
 // Nominal slices (gender, status) use a fixed palette so a category keeps the
 // same colour everywhere. Ordinal scales use monochrome gradients (hexRamp).
 const MONEY_CLR = '#34D399';
-const DEMO_HUE  = '#6C7FFF';
-const CAT_PALETTE = ['#6C7FFF','#22A5C4','#9B5DE5','#E5578C','#FBBF24','#FF6B35','#34D399'];
+const DEMO_HUE  = '#5C6DDA';
+const CAT_PALETTE = ['#5C6DDA','#22A5C4','#9B5DE5','#E5578C','#FBBF24','#C55329','#34D399'];
 // Human-readable labels for raw stored segment values, plus a title-case
 // fallback so nothing shows as a bare lowercase code (e.g. "married").
 const QX_VAL_LABELS = {
@@ -5148,15 +5148,15 @@ async function renderCubeDist(opts){
   const dataPct=dataCounts.map(c=> n?Math.round(c/n*100):0);
   const tipLabel=(ctx)=>' '+dataCounts[ctx.dataIndex]+' ('+dataPct[ctx.dataIndex]+'%)';
   setTileN(el, n);
-  if(opts.mode==='insightbars'){ renderBars(opts.target, cats.map((v,i)=>({l:labels[i],v:dataPct[i]})), opts.color||'#6C7FFF'); return; }
+  if(opts.mode==='insightbars'){ renderBars(opts.target, cats.map((v,i)=>({l:labels[i],v:dataPct[i]})), opts.color||'#5C6DDA'); return; }
   if(!n){ mkChart(el,{type:'bar',data:{labels:['No data'],datasets:[{data:[0],backgroundColor:'#E6ECF6'}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{display:false}}}}); return; }
-  const pal=opts.palette||['#6C7FFF','#FF6B35','#34D399','#FBBF24','#F87171','#9B5DE5','#22A5C4'];
+  const pal=opts.palette||['#5C6DDA','#C55329','#34D399','#FBBF24','#F87171','#9B5DE5','#22A5C4'];
   if(opts.mode==='doughnut'){
     mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
   } else if(opts.mode==='hbar'){
     mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
   } else {
-    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
+    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#C55329',borderRadius:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   }
 }
 function wireCubeTile(opts){
@@ -5183,13 +5183,13 @@ async function renderOrderChart(opts){
     const data=months.map(m=>Math.round(sum[m.key]||0));
     mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{label:'Revenue',data,borderColor:MONEY_CLR,backgroundColor:'rgba(52,211,153,.12)',tension:.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}},animation:{duration:600}}});
   } else if(opts.kind==='pkgmix'){
-    const PK=[['core','Assessment','#FF6B35'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#6C7FFF'],['premium','Premium','#34D399']];
+    const PK=[['core','Assessment','#C55329'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#5C6DDA'],['premium','Premium','#34D399']];
     const cnt={}; orders.forEach(o=>{ const k=o.order_pkg; if(k) cnt[k]=(cnt[k]||0)+1; });
     const present=PK.filter(p=>cnt[p[0]]);
     if(!present.length){ mkChart(el,{type:'doughnut',data:{labels:['No orders'],datasets:[{data:[1],backgroundColor:['#E6ECF6'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{display:false}},cutout:'65%'}}); return; }
     mkChart(el,{type:'doughnut',data:{labels:present.map(p=>p[1]),datasets:[{data:present.map(p=>cnt[p[0]]),backgroundColor:present.map(p=>p[2]),borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{position:'bottom',labels:{padding:16,boxWidth:12}}},cutout:'65%'}});
   } else if(opts.kind==='pkgtrend'||opts.kind==='revpkg'){
-    const PK=[['core','Assessment','#FF6B35'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#6C7FFF'],['premium','Premium','#34D399']];
+    const PK=[['core','Assessment','#C55329'],['newlywed','Starting Out','#FBBF24'],['anniversary','Anniversary','#5C6DDA'],['premium','Premium','#34D399']];
     const months=_last12Months();
     const rev=opts.kind==='revpkg';
     const ds=PK.map(p=>{ const acc={}; orders.forEach(o=>{ if(o.order_pkg===p[0]&&o.month) acc[o.month]=(acc[o.month]||0)+(rev?(Number(o.amount)||0):1); });
@@ -5197,7 +5197,7 @@ async function renderOrderChart(opts){
     mkChart(el,{type:'bar',data:{labels:months.map(m=>m.label),datasets:ds},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#E6ECF6'},ticks:rev?{callback:v=>'$'+Math.round(v/1000)+'k'}:{precision:0}}}}});
   } else if(opts.kind==='addons'){
     const PK=[['core','Assessment'],['newlywed','Starting Out'],['anniversary','Anniversary'],['premium','Premium']];
-    const ADD=[['addon_workbook','Workbook','#6C7FFF'],['addon_reflection','Reflection','#F4B860'],['addon_budget','Budget','#E36BAE'],['addon_intimacy','Intimacy','#B5546E']];
+    const ADD=[['addon_workbook','Workbook','#5C6DDA'],['addon_reflection','Reflection','#F4B860'],['addon_budget','Budget','#E36BAE'],['addon_intimacy','Intimacy','#B5546E']];
     const byPkg={}; PK.forEach(p=>byPkg[p[0]]=orders.filter(o=>o.order_pkg===p[0]));
     const present=PK.filter(p=>byPkg[p[0]].length);
     mkChart(el,{type:'bar',data:{labels:present.length?present.map(p=>p[1]):['No orders yet'],datasets:ADD.map(a=>({label:a[1],backgroundColor:a[2],borderRadius:4,data:present.length?present.map(p=>Math.round(byPkg[p[0]].filter(o=>o[a[0]]).length/byPkg[p[0]].length*100)):[0]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10}}}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'},max:100},x:{grid:{display:false}}}}});
@@ -5210,7 +5210,7 @@ async function renderOrderChart(opts){
     if(!rowsG.length&&!outsideUS){ el.innerHTML='<div style="color:var(--dim);font-size:.8rem;padding:1rem 0;line-height:1.6">No location data for this cut.<br><span style="font-size:.72rem">Free promo orders skip payment, so they carry no address; paid orders appear here.</span></div>'; return; }
     const maxG=Math.max(...rowsG.map(r=>r[1]),outsideUS,1);
     const barG=(label,nn,color)=>{ const pct=Math.round(nn/maxG*100); return '<div class="insight-row"><div class="insight-label">'+label+'</div><div class="insight-bar-wrap"><div class="insight-bar" style="width:'+pct+'%;background:'+color+'"></div></div><div class="insight-pct">'+nn+'</div></div>'; };
-    let h='<div class="insight-list">'; rowsG.forEach(([st,nn])=>h+=barG(st,nn,'#6C7FFF')); if(outsideUS>0) h+=barG('Outside US',outsideUS,'#34D399'); h+='</div>';
+    let h='<div class="insight-list">'; rowsG.forEach(([st,nn])=>h+=barG(st,nn,'#5C6DDA')); if(outsideUS>0) h+=barG('Outside US',outsideUS,'#34D399'); h+='</div>';
     if(unknown>0) h+='<div style="font-size:.68rem;color:var(--dim);margin-top:.65rem">'+unknown+' order'+(unknown===1?'':'s')+' without captured location.</div>';
     el.innerHTML=h;
   }
@@ -5294,7 +5294,7 @@ async function renderPromoDiscount(selId){
     const v=Number(c.discount_value)||0;
     if(v>=100)buckets['100% off']++; else if(v>=75)buckets['75–99%']++; else if(v>=50)buckets['50–74%']++; else if(v>=25)buckets['25–49%']++; else buckets['1–24%']++; });
   const labels=order.filter(k=>buckets[k]>0); const data=labels.map(k=>buckets[k]);
-  mkChart(el,{type:'bar',data:{labels:labels.length?labels:['No code redemptions in this cut'],datasets:[{data:data.length?data:[0],backgroundColor:'#FF6B35',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{precision:0}},x:{grid:{display:false}}}}});
+  mkChart(el,{type:'bar',data:{labels:labels.length?labels:['No code redemptions in this cut'],datasets:[{data:data.length?data:[0],backgroundColor:'#C55329',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{precision:0}},x:{grid:{display:false}}}}});
 }
 // ── Type Analytics tiles, cube-backed + per-tile sliceable ───────────────────
 async function renderTypeCouple(containerId, selId){
@@ -5334,7 +5334,7 @@ async function renderTypeCoupleMap(opts){
   svg+='<rect x="'+pad+'" y="'+pad+'" width="'+(W-2*pad)+'" height="'+(H-2*pad)+'" fill="#E6ECF7" stroke="#D3DCEC" rx="10"/>';
   svg+='<line x1="'+xmid+'" y1="'+pad+'" x2="'+xmid+'" y2="'+(H-pad)+'" stroke="#C7D0E2" stroke-dasharray="3 3"/>';
   svg+='<line x1="'+pad+'" y1="'+ymid+'" x2="'+(W-pad)+'" y2="'+ymid+'" stroke="#C7D0E2" stroke-dasharray="3 3"/>';
-  const qlab=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" fill="#8892A9" font-size="8.5" text-anchor="'+a+'" font-family="monospace" opacity="0.85">'+t+'</text>';
+  const qlab=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" fill="#626975" font-size="8.5" text-anchor="'+a+'" font-family="monospace" opacity="0.85">'+t+'</text>';
   svg+=qlab(pad+5, pad+13,'W · Initiator','start');
   svg+=qlab(W-pad-5, pad+13,'X · Anchor','end');
   svg+=qlab(pad+5, H-pad-6,'Y · Feeler','start');
@@ -5466,7 +5466,7 @@ async function renderSelfPartnerGap(containerId){
     type: 'bar',
     data: { labels: sorted.map(x => x.l), datasets: [{
       data: sorted.map(x => Number(x.gap.toFixed(2))),
-      backgroundColor: '#6C7FFF', borderRadius: 4, maxBarThickness: 34,
+      backgroundColor: '#5C6DDA', borderRadius: 4, maxBarThickness: 34,
     }] },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -5575,14 +5575,14 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
   // questions (expectations, reflection) get a compact colour key on one line
   // directly below the bar — grey, italic, truncated with a full-text tooltip.
   const TRUNC = (t, n) => (t && t.length > n) ? t.slice(0, n - 1) + '…' : (t || '');
-  const SCALE_RAMP = hexRamp(QX_THEME[containerId] || '#6C7FFF', 5);
+  const SCALE_RAMP = hexRamp(QX_THEME[containerId] || '#5C6DDA', 5);
   const barFor = (f, drows) => {
     const counts = {}; let n = 0;
     drows.forEach(r => { let v = r[f.key]; if (v === null || v === undefined || v === '') return; if (f.kind === 'scale') v = String(Math.round(v)); counts[v] = (counts[v] || 0) + 1; n++; });
     const cats = f.kind === 'scale' ? ['1','2','3','4','5'] : (f.options ? f.options.map(o => o.v) : Object.keys(counts));
     // Categorical options also use a monochrome gradient of the exercise hue
     // (light->dark across the options); the colour key below maps shade->label.
-    const CAT_RAMP = hexRamp(QX_THEME[containerId] || '#6C7FFF', Math.max(cats.length, 2));
+    const CAT_RAMP = hexRamp(QX_THEME[containerId] || '#5C6DDA', Math.max(cats.length, 2));
     const optLabel = {}; (f.options || []).forEach(o => optLabel[o.v] = o.label);
     const segs = cats.map((c, idx) => {
       const cnt = counts[c] || 0; if (!cnt) return '';
@@ -5650,7 +5650,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     : '';
   QX_MODE[containerId] = 'mean';
   let curSlice = rows, curSliced = false;
-  const theme = QX_THEME[containerId] || '#6C7FFF';
+  const theme = QX_THEME[containerId] || '#5C6DDA';
   // Position of one response on a 0..1 axis: scale via (v-1)/4; ordinal via the
   // option's numeric value (intimacy) or its index (reflection Likert).
   const posOf = (f, raw) => {
@@ -5680,7 +5680,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const dot = (v, color, z, tip) => v == null ? '' : '<div data-tip="' + QX_ESC(tip) + '" style="position:absolute;top:50%;left:' + pct(v) + '%;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);cursor:default;z-index:' + z + ';"></div>';
     const track = '<div style="position:relative;flex:1 1 auto;min-width:0;height:6px;background:var(--surface);border-radius:999px;">' +
       dot(sliced ? omean : mean, theme, 1, (sliced ? 'Mean (everyone): ' : 'Mean: ') + score(sliced ? omean : mean) + ' (n=' + (sliced ? on : n) + ')') +
-      (sliced ? dot(mean, '#8892A9', 2, 'Selected view: ' + score(mean) + ' (n=' + n + ')') : '') + '</div>';
+      (sliced ? dot(mean, '#626975', 2, 'Selected view: ' + score(mean) + ' (n=' + n + ')') : '') + '</div>';
     // Score readout removed from the row; the dot's hover shows the exact mean.
     return '<div style="margin-bottom:.95rem;">' + header +
       '<div style="display:flex;align-items:center;gap:.5rem;">' +
@@ -5694,7 +5694,7 @@ async function renderQuestionExplorer(containerId, groupPrefixes, highPrefixes, 
     const meanKey = (QX_MODE[containerId] === 'mean' && sliced)
       ? '<div style="display:flex;gap:1.1rem;align-items:center;margin:0 0 .8rem;font-size:.62rem;color:var(--muted);">' +
           '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:11px;height:11px;border-radius:50%;background:' + theme + ';border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Mean (everyone)</span>' +
-          '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:11px;height:11px;border-radius:50%;background:#8892A9;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Selected view</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:.35rem;"><span style="width:11px;height:11px;border-radius:50%;background:#626975;border:2px solid #fff;box-shadow:0 0 0 1px var(--border);"></span>Selected view</span>' +
         '</div>'
       : '';
     distEl.innerHTML =
@@ -5738,7 +5738,7 @@ async function renderCoupleTypeDist(containerId) {
   el.innerHTML = items.map(it => `
     <div class="insight-row">
       <div class="insight-label">${it.label} <span style="color:var(--dim);font-family:var(--mono);font-size:.68rem">${it.id}</span></div>
-      <div class="insight-bar-wrap"><div class="insight-bar" style="width:${Math.round(it.v/max*100)}%;background:#6C7FFF"></div></div>
+      <div class="insight-bar-wrap"><div class="insight-bar" style="width:${Math.round(it.v/max*100)}%;background:#5C6DDA"></div></div>
       <div class="insight-pct">${it.v}</div>
     </div>`).join('');
 }
@@ -5781,7 +5781,7 @@ function renderGeography() {
     return `<div class="insight-row"><div class="insight-label">${label}</div><div class="insight-bar-wrap"><div class="insight-bar" style="width:${pct}%;background:${color}"></div></div><div class="insight-pct">${n}</div></div>`;
   };
   let html = '<div class="insight-list">';
-  stateRows.forEach(([st, n]) => { html += bar(st, n, '#6C7FFF'); });
+  stateRows.forEach(([st, n]) => { html += bar(st, n, '#5C6DDA'); });
   if (outsideUS > 0) html += bar('Outside US', outsideUS, '#34D399');
   html += '</div>';
   if (unknown > 0) html += `<div style="font-size:.68rem;color:var(--dim);margin-top:.65rem">${unknown} order${unknown === 1 ? '' : 's'} without captured location.</div>`;
@@ -5802,7 +5802,7 @@ function renderFulfillmentTable() {
   const label = document.getElementById('fulfill-count-label');
   if (label) label.textContent = `${rows.length} order${rows.length!==1?'s':''}`;
 
-  const pkgColors = {'newlywed-box':'#FBBF24','anniversary-box':'#6C7FFF','premium-box':'#34D399'};
+  const pkgColors = {'newlywed-box':'#FBBF24','anniversary-box':'#5C6DDA','premium-box':'#34D399'};
   const pkgNames = {'newlywed-box':'Starting Out Box','anniversary-box':'Anniversary Box','premium-box':'Premium Box'};
   const statusPill = { pending:'<span class="pill amber">🟡 Pending</span>', packed:'<span class="pill indigo">🔵 Packed</span>', shipped:'<span class="pill green">🟢 Shipped</span>' };
 
@@ -5817,7 +5817,7 @@ function renderFulfillmentTable() {
   tbody.innerHTML = rows.map(o => {
     const daysElapsed = o.fulfillStatus === 'shipped'
       ? `<span style="color:var(--green);font-family:var(--mono)">${o.daysToShip}d</span>`
-      : `<span style="color:${o.fulfillStatus==='packed'?'#6C7FFF':'var(--amber)'};font-family:var(--mono)">${Math.floor((Date.now()-o.date)/86400000)}d open</span>`;
+      : `<span style="color:${o.fulfillStatus==='packed'?'#5C6DDA':'var(--amber)'};font-family:var(--mono)">${Math.floor((Date.now()-o.date)/86400000)}d open</span>`;
 
     const action = o.fulfillStatus === 'pending'
       ? `<button onclick="markStatus('${o.id}','packed')" style="background:rgba(108,127,255,.15);color:#8b9fff;border:1px solid rgba(108,127,255,.3);border-radius:7px;padding:.3rem .7rem;font-size:.65rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap">Mark packed</button>`
@@ -6122,7 +6122,7 @@ async function renderRegrouped() {
 
   paint('regroup-misunderstood', 'regroup-misunderstood-note',
     r ? r.misunderstoodPairs : 0, r ? (r.understoodRated || 0) : 0,
-    'Misunderstood', 'In tune', '#6C7FFF',
+    'Misunderstood', 'In tune', '#5C6DDA',
     r ? `${r.misunderstoodPct}% misunderstood, across the ${r.understoodRated || 0} couples with Part 2 answers.` : '');
 
   // Leaves a trace in the console for exactly this situation.
@@ -6193,7 +6193,7 @@ function initCharts(page) {
     renderRegrouped();
     wireOrderChart({target:'chart-revenue',kind:'revenue',selId:'slz-revenue'});
     wireOrderChart({target:'chart-pkg-mix',kind:'pkgmix',selId:'slz-pkgmix'});
-    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#6C7FFF'});
+    wireCubeTile({target:'rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-ovrellen',color:'#5C6DDA'});
     wireCubeTile({target:'chart-source',field:'signup_source',mode:'hbar',selId:'slz-source',color:DEMO_HUE});
   }
   else if (page==='orders') { applyOrderFilters(); renderSatFunnel('slz-sfunnel'); if (typeof renderGeography === 'function') renderGeography(); }
@@ -6208,7 +6208,7 @@ function initCharts(page) {
     const weeks = Array(12).fill(0);
     stats.shipped.forEach(o=>{ const w=Math.floor((Date.now()-o.date)/604800000); if(w<12) weeks[11-w]++; });
     const weekLabels = Array.from({length:12},(_,i)=>{ const d=new Date(Date.now()-(11-i)*7*86400000); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); });
-    mkChart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#6C7FFF',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
+    mkChart(document.getElementById('chart-weekly-ship'),{type:'bar',data:{labels:weekLabels,datasets:[{label:'Shipped',data:weeks,backgroundColor:'#5C6DDA',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:45}},y:{grid:{color:'#E6ECF6'},ticks:{precision:0}}}}});
   }
   else if (page==='packages') {
     // Use real package-trend data when loadRealPackageTrend has populated it
@@ -6216,15 +6216,15 @@ function initCharts(page) {
     const pkgStacked = realTrend ? {
       labels: pkgTrendMonths,
       datasets: [
-        {label:'Assessment',  data: realTrend.Assessment,  backgroundColor:'#FF6B35'},
+        {label:'Assessment',  data: realTrend.Assessment,  backgroundColor:'#C55329'},
         {label:'Starting Out',data: realTrend.StartingOut, backgroundColor:'#FBBF24'},
-        {label:'Anniversary', data: realTrend.Anniversary, backgroundColor:'#6C7FFF'},
+        {label:'Anniversary', data: realTrend.Anniversary, backgroundColor:'#5C6DDA'},
         {label:'Premium',     data: realTrend.Premium,     backgroundColor:'#34D399'},
       ]
     } : {labels:MONTHS,datasets:[
-      {label:'Assessment',data:Array(12).fill(0),backgroundColor:'#FF6B35'},
+      {label:'Assessment',data:Array(12).fill(0),backgroundColor:'#C55329'},
       {label:'Starting Out',data:Array(12).fill(0),backgroundColor:'#FBBF24'},
-      {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#6C7FFF'},
+      {label:'Anniversary',data:Array(12).fill(0),backgroundColor:'#5C6DDA'},
       {label:'Premium',data:Array(12).fill(0),backgroundColor:'#34D399'},
     ]};
     wireOrderChart({target:'chart-pkg-stacked',kind:'pkgtrend',selId:'slz-pkgtrend'});
@@ -6235,7 +6235,7 @@ function initCharts(page) {
     wireCubeTile({target:'chart-age',field:'age_range',mode:'bar',selId:'slz-age',color:DEMO_HUE});
     wireCubeTile({target:'chart-gender',field:'gender',mode:'doughnut',selId:'slz-gender',palette:CAT_PALETTE});
     wireCubeTile({target:'chart-relstatus',field:'relationship_status',mode:'doughnut',selId:'slz-relstatus',palette:CAT_PALETTE});
-    wireCubeTile({target:'demo-rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-demorellen',color:'#6C7FFF'});
+    wireCubeTile({target:'demo-rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-demorellen',color:'#5C6DDA'});
     wireCubeTile({target:'chart-children',field:'children',mode:'bar',selId:'slz-children',color:DEMO_HUE});
   }
   else if (page==='responses') {
@@ -6275,7 +6275,7 @@ const CT_NAMES = {"WW":"The ignition","XX":"The collaboration","YY":"The safe sp
 // live in the server-sent config (TYPES_DATA.config); the reducer below is
 // generic, so nothing here can drift from production typing.
 let TYPES_DATA = null;
-const TYPE_COLORS = { W:'#FF6B35', X:'#FBBF24', Y:'#6C7FFF', Z:'#34D399' };
+const TYPE_COLORS = { W:'#C55329', X:'#FBBF24', Y:'#5C6DDA', Z:'#34D399' };
 let sandboxWeights = null;
 
 async function loadTypesData(force) {
@@ -6383,8 +6383,8 @@ function renderTypes() {
   wireCubeTile({target:'types-indiv-chart',field:'type',mode:'doughnut',selId:'slz-tindiv',palette:['W','X','Y','Z'].map(t=>TYPE_COLORS[t])});
 
   // Axis distributions (cube-backed + sliceable): split bar + score histogram
-  renderTypeAxis({selId:'slz-teng', field:'axis_w', containerId:'types-w-axis', leftLbl:'Engage', rightLbl:'Withdraw', color:'#FF6B35'});
-  renderTypeAxis({selId:'slz-topen', field:'axis_o', containerId:'types-o-axis', leftLbl:'Guarded', rightLbl:'Open', color:'#6C7FFF'});
+  renderTypeAxis({selId:'slz-teng', field:'axis_w', containerId:'types-w-axis', leftLbl:'Engage', rightLbl:'Withdraw', color:'#C55329'});
+  renderTypeAxis({selId:'slz-topen', field:'axis_o', containerId:'types-o-axis', leftLbl:'Guarded', rightLbl:'Open', color:'#5C6DDA'});
   renderTypeCoupleMap({selId:'slz-tmap', containerId:'types-couple-map'});
   renderCoupleOutcomes({selId:'slz-tout', containerId:'types-outcomes'});
 
@@ -6483,7 +6483,7 @@ function buildSandbox() {
   if (!TYPES_DATA) return;
   sandboxWeights = {}; for (const d in TYPES_DATA.config) sandboxWeights[d] = TYPES_DATA.config[d].weight;
   const cfg = TYPES_DATA.config;
-  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#586187;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#1B2547;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#FF6B35':'#6C7FFF'};"></div>`;
+  const slider = (d) => `<div style="margin-bottom:.7rem;"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:#586187;margin-bottom:.2rem;"><span style="text-transform:capitalize;">${d}${cfg[d].invert?' <span style=\"color:#6B7280;\">(inv)</span>':''}</span><span id="sw-val-${d}" style="color:#1B2547;font-variant-numeric:tabular-nums;">${cfg[d].weight.toFixed(2)}</span></div><input type="range" id="sw-${d}" min="0" max="0.6" step="0.01" value="${cfg[d].weight}" oninput="onSandboxInput('${d}')" style="width:100%;accent-color:${cfg[d].axis==='withdraw'?'#C55329':'#5C6DDA'};"></div>`;
   const wDims = Object.keys(cfg).filter(d=>cfg[d].axis==='withdraw');
   const oDims = Object.keys(cfg).filter(d=>cfg[d].axis==='open');
   document.getElementById('sandbox-withdraw').innerHTML = wDims.map(slider).join('');
@@ -6824,7 +6824,7 @@ function renderScaleQuestion(q, container) {
     const pct = maxBucket ? Math.round((count / maxBucket) * 100) : 0;
     const isHigh = parseInt(v) >= (max * 0.7);
     html += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
-      <div style="width:100%;background:${isHigh ? '#10B981' : parseInt(v) <= (max * 0.3) ? '#F87171' : '#6C7FFF'};border-radius:3px 3px 0 0;height:${Math.max(4, pct * 0.44)}px;opacity:0.8;transition:height .4s"></div>
+      <div style="width:100%;background:${isHigh ? '#10B981' : parseInt(v) <= (max * 0.3) ? '#F87171' : '#5C6DDA'};border-radius:3px 3px 0 0;height:${Math.max(4, pct * 0.44)}px;opacity:0.8;transition:height .4s"></div>
     </div>`;
   });
 
@@ -6860,7 +6860,7 @@ function renderChipQuestion(q, container) {
     const barW = Math.round((count / maxV) * 100);
     return `<div class="insight-row">
       <div class="insight-label" style="font-size:.78rem">${label}</div>
-      <div class="insight-bar-wrap"><div class="insight-bar" style="width:${barW}%;background:#6C7FFF;transition:width .6s"></div></div>
+      <div class="insight-bar-wrap"><div class="insight-bar" style="width:${barW}%;background:#5C6DDA;transition:width .6s"></div></div>
       <div class="insight-pct">${pct}%<span style="color:var(--dim);font-size:.65rem;margin-left:3px">(${count})</span></div>
     </div>`;
   }).join('');
@@ -6924,7 +6924,7 @@ function runCrosstab() {
   result.innerHTML = `<div style="font-size:.68rem;color:var(--dim);margin-bottom:.65rem;font-weight:600">Avg ${colQ.label} by ${rowQ.label}</div>` +
     rows.map(({label, avg: a, n}) => {
       const pct = Math.round(((a - colQ.min) / colRange) * 100);
-      const color = a >= colMid + colRange * 0.15 ? '#10B981' : a <= colMid - colRange * 0.15 ? '#F87171' : '#6C7FFF';
+      const color = a >= colMid + colRange * 0.15 ? '#10B981' : a <= colMid - colRange * 0.15 ? '#F87171' : '#5C6DDA';
       return `<div class="insight-row">
         <div class="insight-label" style="font-size:.78rem">${label}</div>
         <div class="insight-bar-wrap"><div class="insight-bar" style="width:${pct}%;background:${color};transition:width .6s"></div></div>

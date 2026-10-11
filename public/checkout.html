@@ -349,7 +349,7 @@
               <input class="form-input" type="text" id="billAddr" placeholder="123 Main St" autocomplete="billing street-address" oninput="debounceTaxRefresh()">
             </div>
             <div class="form-group">
-              <label class="form-label" for="billAddr2">Apt, suite, unit <span style="color:#B8AC9C;font-weight:400">(optional)</span></label>
+              <label class="form-label" for="billAddr2">Apt, suite, unit <span style="color:#7D756A;font-weight:400">(optional)</span></label>
               <input class="form-input" type="text" id="billAddr2" placeholder="Apt 4B" autocomplete="billing address-line2" oninput="debounceTaxRefresh()">
             </div>
             <div class="form-row">
@@ -378,7 +378,7 @@
           <div id="expressCheckout"></div>
           <div style="display:flex;align-items:center;gap:var(--s-sm);margin:var(--s-md) 0 .25rem">
             <div style="flex:1;height:1px;background:#E8DDD0"></div>
-            <div style="font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:#B8AC9C;font-weight:700;font-family:'DM Sans',sans-serif">Or pay with card</div>
+            <div style="font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:#7D756A;font-weight:700;font-family:'DM Sans',sans-serif">Or pay with card</div>
             <div style="flex:1;height:1px;background:#E8DDD0"></div>
           </div>
         </div>
@@ -651,7 +651,7 @@ async function refreshTax() {
     taxLineEl.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#7A6753">
         <span>Sales tax</span>
-        <span style="font-size:.72rem;color:#B8AC9C;display:inline-flex;align-items:center;gap:.35rem">
+        <span style="font-size:.72rem;color:#7D756A;display:inline-flex;align-items:center;gap:.35rem">
           <span class="tax-spinner" style="width:10px;height:10px;border:1.5px solid rgba(140,122,104,.3);border-top-color:#7A6753;border-radius:50%;display:inline-block;animation:taxSpin .7s linear infinite"></span>
           calculating…
         </span>
@@ -1167,7 +1167,7 @@ function renderSummary() {
       taxLineEl.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;padding:.4rem 0;font-size:.8rem;color:#7A6753">
           <span>Sales tax</span>
-          <span style="font-size:.72rem;color:#B8AC9C">calculated from billing ZIP</span>
+          <span style="font-size:.72rem;color:#7D756A">calculated from billing ZIP</span>
         </div>`;
     }
   } else if (taxQuote.taxUnavailable || !taxQuote.taxCents) {

@@ -18,7 +18,7 @@ const CART_PKGS = {
   },
   anniversary: {
     name: 'Relationship Reflection', badge: 'Anniversary Gift',
-    badgeColor: '#EEEFFF', badgeText: '#5B6DF8',
+    badgeColor: '#EEEFFF', badgeText: '#5161DD',
     digitalPrice: 139, physicalPrice: 174,
     supportsPhysical: true,
   },

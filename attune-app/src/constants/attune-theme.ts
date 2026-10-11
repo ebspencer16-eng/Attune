@@ -42,7 +42,7 @@ export const Palette = {
    * below point at, which is why 179 places got darker from one edit.
    */
   mutedInk: '#7A6753',
-  clayInk: '#A66534',
+  clayInk: '#A36333',
   orange: '#E8673A',
   indigo: '#1B5FE8',
   white: '#FFFFFF',

@@ -55,7 +55,7 @@ const C = {
   ink: '#0E0B07',
   text: '#1E1610',
   muted: '#7A6753',
-  clay: '#A66534',
+  clay: '#A36333',
   stone: '#E8DDD0',
   warm: '#FBF8F3',
   white: '#FFFFFF',

@@ -242,8 +242,8 @@ function useMobile(breakpoint = 640) {
 
 const C = {
   cream: "#FFFDF9", warm: "#FBF8F3", stone: "#E8DDD0",
-  clay: "#A66534", bark: "#7C4D28", deep: "#14100A",
-  text: "#1E1610", muted: "#7A6753", accent: "#A66534",
+  clay: "#A36333", bark: "#7C4D28", deep: "#14100A",
+  text: "#1E1610", muted: "#7A6753", accent: "#A36333",
   ink: "#0E0B07",
   // Dimension accent palette -- used on exercise cards
   dAccent: ["#E8673A","#1B5FE8","#2AB07F","#E040A0","#F5A623","#9B5DE5","#00B4CC","#E8503A"],
@@ -3653,7 +3653,7 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
               }}>
                 <span style={{
                   fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase",
-                  color: "#A66534", fontWeight: 700, fontFamily: BFONT,
+                  color: "#A36333", fontWeight: 700, fontFamily: BFONT,
                 }}>
                   {eyebrow}
                 </span>
@@ -7140,7 +7140,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
 
   const pctChanged = Math.round((changes.length / totalComparable) * 100);
   const shiftLevel = pctChanged >= 30 ? 'significant' : pctChanged >= 10 ? 'notable' : 'minor';
-  const shiftColor = pctChanged >= 30 ? '#E8673A' : pctChanged >= 10 ? '#A66534' : '#10b981';
+  const shiftColor = pctChanged >= 30 ? '#E8673A' : pctChanged >= 10 ? '#A36333' : '#10b981';
 
   return (
     <div style={{
@@ -7178,7 +7178,7 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
           style={{
             background: 'transparent',
             border: '1px solid rgba(232,103,58,0.35)',
-            color: '#A66534',
+            color: '#A36333',
             fontSize: '0.72rem',
             fontWeight: 600,
             padding: '0.5rem 0.9rem',
@@ -7222,9 +7222,9 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
                       <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7A6753', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Before</div>
                       <div style={{ fontSize: '0.76rem', color: '#5C4A38', fontFamily: BFONT, lineHeight: 1.45 }}>{c.before}</div>
                     </div>
-                    <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: '#A66534' }}>→</div>
+                    <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: '#A36333' }}>→</div>
                     <div style={{ flex: '1 1 140px', background: 'linear-gradient(135deg, rgba(232,103,58,0.06), rgba(27,95,232,0.06))', border: '1px solid rgba(232,103,58,0.25)', borderRadius: 7, padding: '0.45rem 0.6rem' }}>
-                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#A66534', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Now</div>
+                      <div style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#A36333', fontWeight: 700, fontFamily: BFONT, marginBottom: '0.2rem' }}>Now</div>
                       <div style={{ fontSize: '0.76rem', color: '#0E0B07', fontFamily: BFONT, lineHeight: 1.45 }}>{c.after}</div>
                     </div>
                   </div>
@@ -12539,7 +12539,7 @@ function PartnerLandingScreen({ inviteFrom, inviteCode, onCreateAccount }) {
           </p>
         )}
 
-        <p style={{ fontSize: '0.68rem', color: '#A66534', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
+        <p style={{ fontSize: '0.68rem', color: '#A36333', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
           Attune uses your names to personalize your results. Your answers are never shared with your partner individually, only as part of your joint results.
         </p>
       </div>
@@ -16515,7 +16515,7 @@ export default function App() {
                         const frac = done ? 1
                           : (inProgress && total > 0) ? Math.max(0.05, Math.min(1, answered / total))
                           : 0;
-                        const ring = done ? "#059669" : "#A66534";
+                        const ring = done ? "#059669" : "#A36333";
                         if (!done && !inProgress) {
                           return <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "inline-block", background: "#D4C0A8" }} />;
                         }
@@ -16559,7 +16559,7 @@ export default function App() {
                                     const p = (r.myInProgress && exKey) ? progressCountFor(exKey) : { answered: 0, total: 0 };
                                     return dot(r.myDone, r.myInProgress, p.answered, p.total);
                                   })()}
-                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#A66534", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume →" : "Start →"}</span>
+                                  <span style={{ fontSize: isMobile ? "0.68rem" : "0.72rem", fontWeight: 700, fontFamily: BFONT, color: r.myDone ? "#059669" : "#A36333", whiteSpace: "nowrap" }}>{r.myDone ? "Done" : r.myInProgress ? "Resume →" : "Start →"}</span>
                                 </div>
                                 {/* Partner column — status only */}
                                 <div style={stCell}>
@@ -17111,7 +17111,7 @@ export default function App() {
             <div style={{ flex: 1, overflowY: "auto", background: "#FBF8F3" }}>
               <div style={{ maxWidth: 620, margin: "0 auto", padding: isMobile ? "2rem 1.25rem" : "3rem 2rem" }}>
                 <div style={{ marginBottom: "2rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Your exercises</div>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A36333", fontWeight: 700, marginBottom: "0.5rem", fontFamily: BFONT }}>Your exercises</div>
                   <h1 style={{ fontFamily: HFONT, fontSize: isMobile ? "1.75rem" : "2.1rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em", marginBottom: "0.5rem" }}>
                     Complete each exercise independently.
                   </h1>
@@ -17543,7 +17543,7 @@ export default function App() {
 
                 {/* Header */}
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Resources</div>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A36333", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Resources</div>
                   <h1 style={{ fontFamily: font.display, fontSize: isMobile ? "1.75rem" : "2.2rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.12, letterSpacing: "-.02em", marginBottom: "0.6rem" }}>
                     Keep going.
                   </h1>
@@ -17609,7 +17609,7 @@ export default function App() {
                     <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0E0B07", fontFamily: font.body, marginBottom: "0.25rem" }}>Explore all Attune publications</div>
                     <div style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: font.body, fontWeight: 300 }}>Guides, reads, and exercises for every stage of a relationship.</div>
                   </div>
-                  <span style={{ fontSize: "1.1rem", color: "#A66534", flexShrink: 0, marginLeft: "1rem" }}>→</span>
+                  <span style={{ fontSize: "1.1rem", color: "#A36333", flexShrink: 0, marginLeft: "1rem" }}>→</span>
                 </a>
 
               </div>
@@ -17633,7 +17633,7 @@ export default function App() {
 
                 {/* Header */}
                 <div style={{ marginBottom: "2.5rem" }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Account</div>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A36333", fontWeight: 700, marginBottom: "0.5rem", fontFamily: font.body }}>Account</div>
                   <h1 style={{ fontFamily: font.display, fontSize: isMobile ? "1.75rem" : "2.1rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em" }}>
                     {userName || "Your"} & {partnerName || "Partner"}
                   </h1>
@@ -17732,7 +17732,7 @@ export default function App() {
                   ].map((row, i, arr) => (
                     <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 1.35rem", borderBottom: i < arr.length - 1 ? "1px solid #F9F6F1" : "none", gap: "1rem" }}>
                       <span style={{ fontSize: "0.82rem", color: "#3C3C43", fontFamily: font.body }}>{row.label}</span>
-                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: row.done ? "#065f46" : "#A66534", fontFamily: font.body, background: row.done ? "rgba(16,185,129,0.1)" : "#FDF8F3", padding: "2px 10px", borderRadius: 99 }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: row.done ? "#065f46" : "#A36333", fontFamily: font.body, background: row.done ? "rgba(16,185,129,0.1)" : "#FDF8F3", padding: "2px 10px", borderRadius: 99 }}>
                         {row.done ? "Complete" : "Pending"}
                       </span>
                     </div>
@@ -17786,7 +17786,7 @@ export default function App() {
                       <div style={{ maxWidth: 340, margin: "0 auto", textAlign: "left" }}>
                         <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
                           This permanently deletes your account and your answers. It cannot be undone.{" "}
-                          <a href="/legal#privacy" style={{ color: "#A66534" }}>What is deleted</a>.
+                          <a href="/legal#privacy" style={{ color: "#A36333" }}>What is deleted</a>.
                         </p>
                         <p style={{ fontSize: "0.8rem", color: "#5C4A38", fontFamily: font.body, lineHeight: 1.6, margin: "0 0 0.6rem" }}>
                           Enter your password, then type DELETE to confirm.
@@ -17886,7 +17886,7 @@ export default function App() {
             <div style={{ maxWidth: 680, margin: "0 auto", width: "100%", padding: isMobile ? "2rem 1.25rem" : "3rem 2rem" }}>
               {/* Hero */}
               <div style={{ marginBottom: "2.5rem" }}>
-                <div style={{ fontSize: "0.6rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A66534", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Add-on</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: ".22em", textTransform: "uppercase", color: "#A36333", fontWeight: 700, marginBottom: "0.6rem", fontFamily: "'DM Sans', sans-serif" }}>Add-on</div>
                 <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: isMobile ? "1.75rem" : "2.3rem", fontWeight: 700, color: "#0E0B07", lineHeight: 1.1, letterSpacing: "-.02em", marginBottom: "1rem" }}>
                   The Personalized Workbook
                 </h1>
@@ -18056,7 +18056,7 @@ export default function App() {
                   ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#059669", fontFamily: font.body }}>Complete</span>
                   : (r.you
                       ? <span style={{ fontSize: "0.72rem", fontWeight: 600, color: C.clay, fontFamily: font.body }}>Start →</span>
-                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A66534", fontFamily: font.body }}>Pending</span>)}
+                      : <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#A36333", fontFamily: font.body }}>Pending</span>)}
               </div>
             ))}
           </div>

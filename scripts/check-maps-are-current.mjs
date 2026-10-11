@@ -10,18 +10,20 @@
  * four things as unbuilt that had been built for a while.
  *
  * So this covers the maps, not the records. CLAUDE.md and the three documents
- * under app/ are what a session is told to work from. AUDIT.md, HANDOFF.md and
- * the PHASE_* files are dated accounts of a past state, and a past-tense finding
- * naming a file that existed then is correct rather than stale. Holding those to
- * the current tree would mean rewriting history to keep a check quiet.
+ * under app/ are what a session is told to work from. HANDOFF.md is a dated
+ * account of a past state, and a past-tense finding naming a file that existed
+ * then is correct rather than stale. Holding it to the current tree would mean
+ * rewriting history to keep a check quiet.
  *
  * ── WHAT IS CHECKED ───────────────────────────────────────────────────────
  * Every repo path a map names, resolved against the tree. Found eleven stale
  * paths across six documents when it was written, none of them in these four,
  * and two documents making present-tense claims about features that had been
- * deliberately removed: LMFT_SETUP.md, which configures an integration whose
- * files went in 97cacb6c, and PHASE_5_AUDIT.md, which opens "The production
- * stack has TWO endpoints that generate a workbook". Both now say so at the top.
+ * deliberately removed: a setup guide for an integration whose files had gone,
+ * and an audit opening "The production stack has TWO endpoints that generate a
+ * workbook". Both were marked as retired at the top, and on 2026-10-10 both
+ * were deleted along with twelve other documents, which is the better answer to
+ * a document nobody should act on. git has them.
  *
  * ── A TRAP WORTH KNOWING ──────────────────────────────────────────────────
  * The first version of this scan matched `.js` before `.jsx`, so `src/App.jsx`

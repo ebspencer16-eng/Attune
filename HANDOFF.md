@@ -2395,3 +2395,64 @@ the repo.
 - **B3** the style code is anonymous telemetry into that dead store and no
   screen draws it. Say remove and it goes.
 - **D15** the review.
+
+## 2026-10-10, later — the thirteen contrast fixes, and 32 documents down to 18
+
+**Two instructions, both about how she is spoken to rather than about the
+product, and both now in CLAUDE.md.** Every command she is given has to be one
+paste including the `cd`, absolute, no "from the project folder". And TASKS.md
+has to be the only document she opens: instructions and context go in a section
+under the row they belong to, not in a file she has to find.
+
+### B19, taken
+
+Thirteen of the fifteen. 187 runs of unreadable text down to 53, and all 53 are
+the brand orange used as small print, which is B19's remaining decision and
+hers. The clay moved in `public/tokens.css`, which is where it actually lives;
+the pages read it through the variable, and replacing it in twenty files first
+was wasted motion that `report-contrast` caught by still showing 4.37.
+
+Two things worth knowing for next time. `#10B981` is the Reflection exercise
+colour as well as a label on /resources, so it was changed at the one failing
+use rather than globally. `#6C7FFF` is a person colour on the storycards as
+well as an admin chart colour, so only admin.html moved. A blanket replace
+would have repainted an exercise.
+
+The admin slate landed at exactly 4.4996 and the report rounds, so it read as a
+fail at "4.5:1 (needs 4.5)". One notch darker settled it. Aim past the floor,
+not at it.
+
+### The documents
+
+Deleted: AUDIT, PHASE_5_AUDIT, PHASE_5b_HANDOFF, LMFT_SETUP, ENV_SETUP,
+ENCRYPTION_SETUP, SOCIAL_SIGNIN_SETUP, SUPABASE_EMAIL_TEMPLATES, DELETION,
+DESIGN-REVIEW, scripts/PDF_BUILDER_STEPS, app/CONTRAST, app/PUSH-NOTIFICATIONS,
+app/APP_STORE_PRIVACY. Merged: APP_STORE_PRIVACY into app/TESTFLIGHT.md,
+DELETION into LEGAL-VS-CODE.md, PDF_BUILDER_STEPS into
+scripts/SERVICE_INTEGRATION.md. The design review and the push instructions
+became sections of TASKS.md.
+
+**Nothing was deleted on a guess.** Two of them were self-labelled retired.
+SOCIAL_SIGNIN_SETUP was a list of four steps to turn on Google and Apple
+sign-in, and both providers answer a real 302 to a real client id, so the steps
+are done. ENV_SETUP was a hand-kept copy of the environment variables, which
+`api/_lib/env-inventory.js` now generates. ENCRYPTION_SETUP had one live
+obligation in it, which is B29 in TASKS.md with the email to send. AUDIT.md's
+only open items were three methodology questions for the LMFT and two
+deliberately punted features; they are recorded here:
+
+- 5.2 threshold values (`stdDev < 0.3`, `Math.abs(score - 3) < 0.3`) are
+  placeholder defaults and want a methodologist's eye.
+- 5.2 has no surface text for a low-confidence result.
+- 3.7 `closeness` rests on one question (cl2).
+- Punted: a multi-item cart shows only the first item; an Ex01 retake does not
+  regenerate the workbook, which is moot until a retake UI exists.
+
+Three comments in gates named deleted files and were repointed, which is the
+rule about a comment describing a dead path, applied to my own tidying.
+
+### Where it stopped
+
+Clean, pushed, 239 gates green. Section 1 of TASKS.md holds eleven asks and
+sixteen design decisions. Section 2 holds three faults I do not need an answer
+on and will take next.

@@ -31,7 +31,7 @@
 // ── WHAT THIS CHECKS ───────────────────────────────────────────────────────
 // 1. Every expectations-domain string in build_workbook.py EXP_DOMAINS appears
 //    verbatim in api/_workbook-content.js. That is a block both files carry,
-//    and it is the one PHASE_5b_HANDOFF.md used to call canonical in the wrong
+//    and it is the one a since-deleted phase handoff called canonical in the wrong
 //    one of the two.
 // 2. scripts/workbook_prose.json is current with api/_workbook-prose.js. The
 //    Python reads the JSON, because it cannot import JavaScript, and a stale

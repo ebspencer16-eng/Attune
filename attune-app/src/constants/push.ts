@@ -8,7 +8,7 @@
  * when their partner finishes an exercise.
  *
  * That makes it a product decision rather than an implementation detail, and
- * it is Ellie's. The three options are written out in app/PUSH-NOTIFICATIONS.md
+ * it is Ellie's. The three options are written out in TASKS.md, under B17b,
  * with what each one costs; this is the switch, and changing it is one word.
  *
  *   'launch'               the first launch after signing in.
