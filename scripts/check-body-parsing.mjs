@@ -28,6 +28,18 @@
  * have found this: the shape that breaks is the destructure two lines after
  * the parse, not the parse.
  *
+ * ── AND A PLAIN GET, WHICH IS THE HALF IT USED TO MISS ────────────────────
+ * Every call here was a POST, so an endpoint's GET branches were never run.
+ * /api/posts answers its feed on a GET with no parameters, and on 2026-10-11
+ * that branch threw before it reached its first query: a filter named
+ * `published` in the handler scope and a list of posts named `published`
+ * inside the feed block, so the closure that built the query reached the one
+ * declared later. In Practice was empty in the app and Ellie found it, because
+ * every gate that ran this endpoint stopped at a 400 or a 401 first.
+ *
+ * So each endpoint is also called with a bare GET. A 400, a 401, a 404 or a
+ * 405 is a fine answer to that; a 500 is a handler falling over.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * The nodejs handlers, which take (req, res) and need a different harness.
  * check-runtime-shape.mjs is what keeps those honest about which they are.
@@ -103,6 +115,24 @@ for (const f of files) {
       problems.push(`api/${f} threw on ${name}: ${String(e.message).slice(0, 70)}`);
     }
   }
+
+  /* And the default GET, which is how a reader asks for a list. */
+  const get = new Request(`${SITE_URL}/api/${f.replace(/\.js$/, '')}`, {
+    headers: {
+      origin: SITE_URL,
+      authorization: 'Bearer admin-test', 'x-attune-internal': 'internal-test',
+    },
+  });
+  called++;
+  try {
+    const res = await mod.default(get);
+    if (res && res.status >= 500) {
+      problems.push(`api/${f} answered ${res.status} to a plain GET. Refusing is a 400, a 401`
+        + ' or a 405; a 500 is the handler falling over before it declined.');
+    }
+  } catch (e) {
+    problems.push(`api/${f} threw on a plain GET: ${String(e.message).slice(0, 70)}`);
+  }
 }
 [console.log, console.warn, console.error] = quiet;
 
@@ -113,4 +143,5 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-body-parsing] ${called} calls across ${files.length - UNCONFIGURED.size} endpoints; none threw and none answered 5xx.`);
+console.log(`[check-body-parsing] ${called} calls across ${files.length - UNCONFIGURED.size} endpoints,`
+  + ' seven malformed bodies and a bare GET each; none threw and none answered 5xx.');

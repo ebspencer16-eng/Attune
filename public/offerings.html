@@ -76,8 +76,8 @@
   .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
-  .btn-nav{background:var(--ink);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
-  .btn-nav:hover{background:#2a2218}
+  .btn-nav{background:var(--orange);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
+  .btn-nav:hover{background:#d45a2e}
 
   /* PAGE HEADER */
   
@@ -299,6 +299,12 @@
      price and an Add button at 320 points however little padding they have. */
   @media(max-width:380px){
     .byo-grid,.byo-grid.three{grid-template-columns:1fr}
+    /* The filled Add to cart is wider than the text link it replaced, and at
+       320 it pushed the two package tiles 2 points past the edge. Narrower
+       padding was not enough on its own: nowrap means the button sets a floor
+       under the tile's width whatever the padding is, so at this size it is
+       allowed to wrap. */
+    .pov-cta{padding:.4rem .7rem;font-size:.7rem;white-space:normal;max-width:100%}
   }
   @media(max-width:600px){
     .cmp-note{text-align:center}
@@ -328,10 +334,18 @@
   .pov-premium .pov-price{color:white}
   .pov-desc{font-size:.76rem;color:var(--muted);line-height:1.6;flex:1}
   .pov-premium .pov-desc{color:rgba(255,255,255,.45)}
-  .pov-cta{font-size:.72rem;font-weight:600;color:var(--clay);margin-top:.25rem;display:inline-block;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .15s}
-  .pov-cta:hover{text-decoration-color:var(--clay)}
-  .pov-premium .pov-cta{color:rgba(180,188,255,.8)}
-  .pov-premium .pov-cta:hover{text-decoration-color:rgba(180,188,255,.8)}
+  /* ── ONE WAY TO ADD SOMETHING TO A CART ──────────────────────────────────
+     This was a clay text link with an underline on hover, while the custom
+     panel below it used a filled orange button for exactly the same action.
+     Two styles for one verb on one page, and the one a person is scanning for
+     looked different depending on where they were looking. D19, approved.
+     Same shape as .byo-add, a size larger because this is the package. */
+  .pov-cta{display:inline-block;margin-top:.5rem;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:.42rem .95rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:filter .15s}
+  .pov-cta:hover{filter:brightness(1.06)}
+  /* On the dark premium tile the orange still carries; white on it is the one
+     combination B19 leaves as a decision, so the words stay white here and the
+     tile keeps its own ground. */
+  .pov-premium .pov-cta{background:var(--orange);color:#fff}
   /* HAMBURGER */
   .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
   .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px}
@@ -357,7 +371,20 @@
     .pkg-meta{flex-direction:column}
     .pkg-price{text-align:left}
     .nav-center{display:none}
-    .nav-right .btn-nav,.nav-signin{display:none}
+    /* D19 and D31: the one action the site is for stays in the bar on a phone.
+       It was hidden behind the hamburger, so the main call to action
+       disappeared on the device most people arrive on. Sign in still goes:
+       somebody signing in will look for the menu, somebody starting will not.
+       Smaller here, because the bar is 390 points wide and the mark and the
+       cart are in it too. */
+    .nav-signin{display:none}
+    .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
+  }
+  /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
+     320, where it stood 33 points past the right edge. The hamburger has it
+     there, which is what every phone narrower than an iPhone SE gets. */
+  @media(max-width:360px){
+    .nav-right .btn-nav{display:none}
     .hamburger{display:flex}
     .compare-table{font-size:.75rem}
     .pkg-overview{grid-template-columns:repeat(2,1fr)}
@@ -399,8 +426,13 @@
     .si{padding-left:1.25rem!important;padding-right:1.25rem!important}
     .cart-modal{width:calc(100vw - 2rem)!important;max-height:90vh;overflow-y:auto}
     .cart-overlay{padding:.75rem!important;align-items:flex-end!important}
-    .pov-grid{grid-template-columns:repeat(2,1fr)!important}
-    @media(max-width:420px){.pov-grid{grid-template-columns:1fr!important}}
+    /* minmax(0,1fr) rather than 1fr: a 1fr track will not shrink below its
+       contents' own minimum, and at 320 the second package's tile held the
+       grid 2 points past the right edge. The nested query below it was meant
+       to catch that and does not fire, so the tracks have to be able to give.
+       Same fix as min-width:0 on .byo-tile. */
+    .pov-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    .pov-tile{min-width:0}
   }
 
   

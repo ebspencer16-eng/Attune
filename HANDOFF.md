@@ -2493,3 +2493,47 @@ push key she made is `/Users/Ellie/Downloads/AuthKey_59776926QU.p8` and the
 Key ID is in the filename, `59776926QU`. Checked against the file dates: the
 other two .p8 files in Downloads are from 8 September and are App Store
 Connect keys.
+
+## 2026-10-11, evening — the review answered, and a regression of mine that she found first
+
+**In Practice would not load in her app, and it was my fault from that
+morning.** Pulling the published-posts filter into one module, I named it
+`published` in the handler scope, and the feed branch below it declares its own
+`published` for the rows. Same block, so the closure that builds the query hit
+the one declared later: "Cannot access 'published' before initialization", a
+500, and an empty library.
+
+The part worth keeping: **check-body-parsing only ever sent POSTs**, so the GET
+half of all 55 endpoints had never been run by anything. /api/posts answers its
+feed on a GET with no parameters. It sends a bare GET to every endpoint now, a
+500 to that is a failure, and planting the shadowed name back makes it fail.
+
+Her decisions on the design review, all sixteen: seven built, seven turned
+down, one with the designers, one question back to me.
+
+Built: the experience survey now waits for What Comes Next instead of opening
+over the first screen of the results; Notes clears the tab bar; one primary
+button (the nav's Get started is orange on all 24 pages, one add-to-cart style
+on /offerings); Get started stays in the bar on a phone above 360 points.
+
+**D26 she rewrote into something better than my finding.** The four home tiles
+now have four states: "Your exercises" into the status table before you finish,
+"Action plans" dimmed with a padlock while your partner is still answering, and
+both live once results open. The rule is `attune-app/src/lib/quick-tiles.js`,
+plain JavaScript for the usual reason, and check-quick-tiles runs it over every
+state. I widened one thing and said so: highlights is locked until results are
+READY rather than only until you begin, because there are no highlights until
+both have finished.
+
+**D29 I had wrong and she caught it.** I wrote that three of the five exercise
+icons were hearts and we should draw three more. The five distinct icons exist
+and the app has drawn them for months; the website's exercise list was drawing
+its own older set. It uses NAV_ICONS now.
+
+**D27 made two assumptions that are not true yet**, and the copy says what is
+true instead: checkout only ever collects one email, and the app is not in the
+store. The App Store sentence is written and held behind APP_BANNER_ENABLED.
+
+Her note on the review itself: "not sure why there are times listed, they seem
+way longer than what they should take you to execute these." Estimates are out
+of TASKS.md and should not come back.

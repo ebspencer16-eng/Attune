@@ -81,8 +81,8 @@
   .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
-  .btn-nav{background:var(--ink);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
-  .btn-nav:hover{background:#2a2218}
+  .btn-nav{background:var(--orange);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
+  .btn-nav:hover{background:#d45a2e}
 
   /* HERO */
   .hero{padding-top:58px;min-height:70vh;display:grid;grid-template-columns:1fr 1.4fr;grid-template-rows:auto auto;align-items:stretch;max-width:1280px;margin:0 auto;padding-left:3.5rem;padding-right:var(--s-2xl);gap:var(--s-3xl);position:relative;overflow:visible}
@@ -319,7 +319,20 @@
     .what-layout{grid-template-columns:1fr;gap:var(--s-2xl)}
     .pb-inner{grid-template-columns:1fr}
     .nav-center{display:none}
-    .nav-right .btn-nav,.nav-signin{display:none}
+    /* D19 and D31: the one action the site is for stays in the bar on a phone.
+       It was hidden behind the hamburger, so the main call to action
+       disappeared on the device most people arrive on. Sign in still goes:
+       somebody signing in will look for the menu, somebody starting will not.
+       Smaller here, because the bar is 390 points wide and the mark and the
+       cart are in it too. */
+    .nav-signin{display:none}
+    .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
+  }
+  /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
+     320, where it stood 33 points past the right edge. The hamburger has it
+     there, which is what every phone narrower than an iPhone SE gets. */
+  @media(max-width:360px){
+    .nav-right .btn-nav{display:none}
     .hamburger{display:flex}
     .hero-left{padding-bottom:var(--s-xl)}
     .hero-left h1{font-size:clamp(2.2rem,8vw,3.5rem)}

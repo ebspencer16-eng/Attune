@@ -17004,13 +17004,13 @@ export default function App() {
                             cta="From $19 →" onClick={() => setView("workbook")} />
                         )}
                         {!pkg.hasIntimacy && (
-                          <GrowSquare color="#B5546E" muted icon={GrowIcons.intimacy("#B5546E")}
+                          <GrowSquare color="#B5546E" muted icon={NAV_ICONS.intimacy("#B5546E", 18)}
                             title="Physical Intimacy Expectations"
                             sub="Answered independently, compared side by side."
                             cta="$20 →" onClick={() => setUpsellModal({ product: 'intimacy', cartAdded: false })} />
                         )}
                         {!pkg.hasConflict && (
-                          <GrowSquare color="#1B5FE8" muted icon={GrowIcons.intimacy("#1B5FE8")}
+                          <GrowSquare color="#1B5FE8" muted icon={NAV_ICONS.conflict("#1B5FE8", 18)}
                             title="Conflict Patterns"
                             sub="How conflict actually goes, with one section that stays private to you."
                             cta={"$40 →"} onClick={() => setUpsellModal({ product: 'conflict', cartAdded: false })} />
@@ -17109,7 +17109,7 @@ export default function App() {
                     done: !!ex1Answers, inProgress: false,
                     doneLabel: "Your profile is mapped",
                     onClick: () => setView("exercise1"),
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8673A" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                    icon: NAV_ICONS.comm("#E8673A", 18),
                   })}
                   {exTile({
                     num: nextExNum(),
@@ -17119,7 +17119,7 @@ export default function App() {
                     done: !!ex2Answers, inProgress: false,
                     doneLabel: "Your expectations are recorded",
                     onClick: () => setView("exercise2"),
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" strokeWidth="1.8" strokeLinecap="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>,
+                    icon: NAV_ICONS.exp("#1B5FE8", 18),
                   })}
                   {hasEx3 && exTile({
                     num: hasEx3 ? nextExNum() : null,
@@ -17129,7 +17129,7 @@ export default function App() {
                     done: !!ex3Answers, inProgress: false,
                     doneLabel: "Your reflection is captured",
                     onClick: () => setView("exercise3"),
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+                    icon: NAV_ICONS.reflection("#10b981", 18),
                   })}
                   {/* Owned add-on exercises. Without these the dashboard has
                       no way into them at all: the upsell square disappears the
@@ -17143,7 +17143,7 @@ export default function App() {
                     done: !!(intimacyData?.completedAt), inProgress: false,
                     doneLabel: "Your answers are saved",
                     onClick: () => setView("intimacy"),
-                    icon: GrowIcons.intimacy("#B5546E"),
+                    icon: NAV_ICONS.intimacy("#B5546E", 18),
                   })}
                   {pkg.hasConflict && exTile({
                     num: pkg.hasConflict ? nextExNum() : null,
@@ -17153,7 +17153,7 @@ export default function App() {
                     done: !!(conflictData?.completedAt), inProgress: false,
                     doneLabel: "Your answers are saved",
                     onClick: () => setView("conflict"),
-                    icon: GrowIcons.intimacy("#1B5FE8"),
+                    icon: NAV_ICONS.conflict("#1B5FE8", 18),
                   })}
                 </div>
 
@@ -18194,8 +18194,17 @@ export default function App() {
                     survey, and this is after the results. Beta testers are
                     excluded because they have their own card from the priority
                     engine, and asking the same person twice is the product
-                    asking twice. */}
-                {highlightsSeen && !postSurveyDone && !isBetaTester ? (
+                    asking twice.
+
+                    ── AND NOT UNTIL THEY HAVE READ SOMETHING ─────────────
+                    It opened on `highlightsSeen`, which is true the moment the
+                    storycards end, so a six question modal covered the first
+                    screen of the results before anyone had read a section of
+                    them. From the design review, D17, approved: it waits for
+                    What Comes Next, which is the last page of the whole
+                    experience and the one place where "how was it" is a
+                    question about something that has happened. */}
+                {activeResult === "what-comes-next" && !postSurveyDone && !isBetaTester ? (
                   <PostResultsSurvey
                     respondentId={account?.id || null}
                     userName={userName}

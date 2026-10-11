@@ -555,7 +555,7 @@ export default function NotesScreen() {
         <ScreenFrame onBack={() => setOpenTag(null)} backLabel="Notes">
           <ScrollView
             contentContainerStyle={{
-              paddingHorizontal: Spacing.xl, paddingBottom: Spacing.xxxl,
+              paddingHorizontal: Spacing.xl, paddingBottom: BottomTabInset + Spacing.xxxl,
               maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
             }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.xl }}>
@@ -605,7 +605,10 @@ export default function NotesScreen() {
   return (
     <Shell>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: Spacing.xxxl }}
+        /* The bar floats over the page, so the page has to end above it.
+           Spacing.xxxl alone is 48 against a bar of 84, which is why the
+           sentence inside the empty tags box was cut in half. D18. */
+        contentContainerStyle={{ paddingBottom: BottomTabInset + Spacing.xxxl }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

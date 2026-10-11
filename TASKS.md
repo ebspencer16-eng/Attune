@@ -8,7 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B17b | **Three steps and one choice, all written out under this table.** Push notifications are built and cannot reach a phone until you do them. About twenty minutes, plus a build that runs by itself. |
+| B17b | **Three steps and one choice, all written out under this table.** Push notifications are built and cannot reach a phone until you do them. |
 | B19 | **Two colour decisions left, and they are the brand.** I took the thirteen you approved. The remaining 53 pieces of unreadable text are all one colour: the Attune orange used as small print. Both options are under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** Run this to read them: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. |
@@ -17,30 +17,16 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### The design review, as decisions
+### Still open from the review
 
-Sixteen findings, one row each, with what I would do and what it costs. Say
-yes to any of them by number. The three at the top are the ones I would take
-first. Two need a sentence from you and nobody else can write them.
+Everything else is answered: seven built and in section 3, seven you turned
+down and recorded in section 4 so they do not come back, and the illustration
+question is with the designers you have contacted.
 
-| # | The finding, and what I would do |
+| # | What I need |
 |--|--|
-| D17 | **The feedback survey opens before anyone has read their results.** The moment the storycards end, a six-question modal covers the page. There is a second questionnaire at the end of What Comes Next, with different questions. I would keep the one at the end and fire the modal from there too. **2 hours.** |
-| D18 | **The tab bar sits on top of the content on two tabs.** On Learn the search field is half behind it; on Notes a sentence is cut in half. I would add the bar's height as bottom padding on every tab. **1 hour.** |
-| D19 | **Two primary buttons for one action.** The nav's Get started is a black pill and the page's is orange, one above the other. The packages page has three different add-to-cart styles. I would make them all the orange pill. **Half a day.** |
-| D20 | **The couple map does not say what it means.** Four pastel quadrants with no key, axis labels turned on their side, and the gap between the two dots, which is the whole point of the product, drawn as an unlabelled dotted line. I would turn the labels upright, make the quadrants one colour, and label the gap. **The label is a sentence only you can write.** Half a day. |
-| D21 | **The homepage shows wireframes of a form, not the product.** The hero and the three step cards use grey placeholder boxes. I would put the real couple map, a real storycard and a real slider in them. Free, and it answers half of D12. **Half a day.** |
-| D32 | **Is there a budget for illustration?** Asked once before as D12 and never answered, and it is the largest single difference between how Attune looks and how its competitors look. Six drawings, one hand. The alternative is D21, which costs nothing and gets most of the way. |
-| D22 | **The packages page is four small boxes on a phone.** Each one holds a name that wraps, a price and a link, and under them a four column comparison table at 390 points. I would put one package per row, full width, and turn the table into a short list per package. **1 day.** |
-| D23 | **A lavender that is not in the brand, in three places:** step 02 on the homepage, one quadrant of the couple map, and the two add-on icons on the dashboard's Resources page. I would make all three the indigo. **One line each.** |
-| D24 | **The settings gear in the app is a bright system blue circle** on all four tabs, and on Insights it is the loudest thing on the screen. I would give it the app's own warm grey or glass. **1 hour.** |
-| D25 | **Both surfaces have a hole in the middle of a screen.** The app's Home has about 200 points of nothing under the greeting, which also wraps to two lines; Insights leaves 40 per cent of the screen empty under the menu. I would let the menu fill the screen, and either give the greeting one line or put an image in the gap. **Half a day.** |
-| D26 | **A new couple opens the app and meets empty boxes.** Two blank picture areas on Home, two "nothing yet" cards and an empty tag box on Notes. I would give each one something to do instead of something to say. **Half a day.** |
-| D27 | **Checkout never says what happens next.** It takes both first names, takes the money, and never mentions that an invite goes to the partner. **One line, in your words, and nobody else can write it.** |
-| D28 | **"Tap to begin" is on the first results card on a laptop,** where you click. Your copy, so your change: one word, or one sentence that works on both. |
-| D29 | **Three of the five exercise icons are hearts,** two of them in different colours. I would draw three distinct ones. **2 hours.** |
-| D30 | **The marketing pages jump from a 44 point headline to 14 point body** with nothing in between, so every section reads as either a shout or a paragraph. I would add one size: a standfirst under each heading. **1 hour.** |
-| D31 | **On a phone the nav hides Get started behind the hamburger** while the laptop keeps it visible, so the main action disappears on the device most people arrive on. I would put it in the bar on both. **1 hour.** |
+| D28 | **"Tap to begin" is the first thing the results say, and on a laptop you click.** The question is only which you want: one word changed for the website, or one sentence that works on a phone and a laptop both. Either way it is your copy. |
+| D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you here; this row is so it does not get lost. |
 
 ---
 
@@ -176,12 +162,19 @@ reads at 5.46, comfortably over.
 |--|--|
 | D33 | **The three from the review that need no answer, because they are faults rather than choices.** The "Or pay with card" line on checkout can appear with no wallet button above it; Physical Intimacy is indented in the results sidebar so it reads as part of Relationship Reflection; the homepage's three statistics wrap two and one on a phone. |
 | D34 | **The dashboard's Resources page becomes the app's Learn tab.** You asked for this in L2 and I did it to the marketing page instead. The dashboard's version is still twelve flat rows where the app has tiles, counts, bookmarks and a search. |
-| D16 | **Whichever of the sixteen you pick.** Nothing from the review is built. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| D35 | **In Practice would not load in your app, and it was mine.** Yesterday I pulled the "what counts as published" rule into one place and named it the same as the list of posts two lines below it, so the feed threw before it ran a query. Fixed. The check that runs every endpoint only ever sent it a POST, so the whole GET half of every endpoint was unrun; it sends a plain GET now, and that catches this exact fault. |
+| D17 | **The experience survey waits for the last page of the results now.** It used to open the moment the storycards ended, over the first screen, before anyone had read a section. |
+| D18 | **Notes clears the tab bar.** Its two scrolls ended 48 points above the foot against a bar 84 tall, which is why the sentence in the empty tags box was cut in half. On Learn the sheet is a peek you pull up, and its own content already clears the bar, so nothing changed there. |
+| D19 | **One primary button.** Get started in the nav is the brand orange on all 24 pages, and the packages page has one add-to-cart style instead of three. |
+| D31 | **Get started stays in the bar on a phone.** It was behind the hamburger. Below 361 points it still collapses, because the bar cannot hold the mark, the cart and a button at 320. |
+| D26 | **The four home tiles say where you are, in the four states you described.** Before you finish: "Your exercises", opening the status table. Finished and waiting on your partner: "Action plans", dimmed, with a padlock. Results open: both live. Highlights stays locked until results are ready rather than only until you begin, because there are no highlights until you both finish. |
+| D27 | **Written, for your approval. Two things your version assumed are not true yet.** Checkout only ever asks for one email, so it cannot name both; the partner's is collected at setup, which is when their invite goes. And the app is not in the store, so the download line is written and held behind the same flag the rest of the site uses. Today it reads: "Thank you for your purchase. We sent a link to [your email]. Use it to set up your account. Your partner gets their invite as soon as you add their email." The day the app is live it reads: "Download Attune Relationships from the App Store, then sign in with the link we sent to [your email]. Your partner gets their invite as soon as you add their email." |
+| D29 | **You were right and I was wrong.** The five distinct icons exist and the app draws them. The website's exercise list was drawing its own set, and three of those five were the same heart. It uses the real five now. |
 | B3 | **The style code is gone, and so is everything else that wrote to the store you just deleted.** The endpoint, the axes it used, the two gates that watched them and the script that was going to clear the counters: five files. Nothing to look at; say the word and it moves to done. |
 | B32 | **One admin button was broken by deleting those variables, and is fixed.** "Feedback responses" in the export menu read the dead store and would have returned an error. It reads the survey table in Supabase now, which is where the answers have always been, and the combined export gets its feedback columns back. |
 | B28 | **The thirteen contrast fixes are on the site.** 187 pieces of unreadable text down to 53, and all 53 that are left are the one brand decision in B19. The greys, the greens, the clay, the shelf colours, the faded whites and the three admin colours are all over the line now. |
@@ -204,6 +197,13 @@ reads at 5.46, comfortably over.
 
 | Verified by you | What it was |
 |--|--|
+| D20 | Decided against: relabelling the couple map's axes, quadrants and the gap between the two dots. |
+| D21 | Decided against: replacing the homepage's wireframe images with pictures of the real product. |
+| D22 | Decided against: one package per row on a phone, and a list per package instead of the comparison table. |
+| D23 | Decided against: replacing the three lavenders with the brand indigo. |
+| D24 | Decided against: restyling the app's settings gear. It is the simulator's own control. |
+| D25 | Decided against: filling the empty band on the app's Home and Insights screens. |
+| D30 | Decided against: a standfirst size between the headline and the body on the marketing pages. |
 | B23 | The two dead Vercel variables are deleted. The store they pointed at had stopped resolving, and nothing read it. |
 | B29 | Supabase asked to confirm the AES-256 claim in the privacy policy in writing. |
 | B22 | Twenty-nine form fields said nothing to a screen reader, and three duplicate SVG ids made three cards paint with another card's gradient. |

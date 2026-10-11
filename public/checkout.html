@@ -214,8 +214,21 @@
 <div class="co-success" id="coSuccess">
   <div class="success-icon">✓</div>
   <div id="coCheckInbox">
-    <h1>Check your inbox.</h1>
-    <p id="coInboxCopy">We sent a link to <strong id="coEmailDisp">your email</strong>. Use it to set up your account and get started.</p>
+    <!-- ── WHAT HAPPENS NEXT, WHICH THIS PAGE NEVER SAID ──────────────────
+         Ellie, D27: "Successful checkout page should have a message like thank
+         you for your purchase, you and your partner should now download the
+         Attune Relationships app in the app store and access your account
+         using the setup email, we've sent one to [list both addresses]."
+
+         Two things are true that her sentence assumes are not. The app is not
+         in the App Store yet, so the line about downloading it is written and
+         held behind APP_BANNER_ENABLED, the same flag the rest of the site
+         uses to decide whether the app exists. And checkout only ever asks for
+         ONE email: the partner's is collected during setup, when the invite is
+         sent. So this says one address, truthfully, and says when the partner
+         hears from us. -->
+    <h1>Thank you for your purchase.</h1>
+    <p id="coInboxCopy">We sent a link to <strong id="coEmailDisp">your email</strong>. Use it to set up your account. Your partner gets their invite as soon as you add their email.</p>
     <p id="coOrderNum" style="font-family:'Menlo','SF Mono',monospace;font-size:.72rem;color:#7A6753;margin:0 0 var(--s-lg)"></p>
     <p style="font-size:.82rem;color:var(--muted);">Didn't get the email? Check your spam folder, or reach out to us at <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);">hello@attune-relationships.com</a>.</p>
     <a id="startLink" href="/app" style="display:none"></a>
@@ -1713,6 +1726,15 @@ async function handleSubmit(e) {
 
     try { document.getElementById('coSuccess').dataset.email = email; } catch(e) {}
     try { if (email) document.getElementById('coEmailDisp').textContent = email; } catch(e) {}
+    /* The app half of D27, which only becomes true the day it is in the store. */
+    try {
+      if (window.ATTUNE_FLAGS && window.ATTUNE_FLAGS.APP_BANNER_ENABLED) {
+        var _c = document.getElementById('coInboxCopy');
+        if (_c) _c.innerHTML = 'Download Attune Relationships from the App Store, then sign in with the'
+          + ' link we sent to <strong id="coEmailDisp">' + (email || 'your email') + '</strong>.'
+          + ' Your partner gets their invite as soon as you add their email.';
+      }
+    } catch(e) {}
     document.getElementById('coWrap').style.display = 'none';
     document.getElementById('coSuccess').classList.add('visible');
     persistOrderComplete(realOrderNum);

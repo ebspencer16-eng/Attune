@@ -22,6 +22,7 @@ import ProfileSetup from '@/components/profile-setup';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { onPushTap, pushThatOpenedTheApp, registerForPush } from '@/api/push';
 import { PUSH_ASK_MOMENT } from '@/constants/push';
+import { quickTiles } from '@/lib/quick-tiles';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect } from 'expo-router';
@@ -438,6 +439,10 @@ export default function HomeScreen() {
 
   /** Where a quick link goes. Four destinations that all already exist. */
   const goQuick = (q: QuickLinkItem) => {
+    /* A padlock is a statement, not a button. Nothing behind it has been
+       built yet: no highlights until both have finished, no action plan
+       until the same. */
+    if (q.locked) return;
     /* Ellie: "If a person clicks insight of the day can they see a full
        storycard with the insight of the day?" It opens here rather than
        sending someone to Learn to find it. */
@@ -785,7 +790,7 @@ export default function HomeScreen() {
                 paddingTop: Spacing.xl,
               }}>
               {/* block: app-home/quick-links */}
-              {QUICK_LINKS.map((q) => (
+              {quickLinksFor(data).map((q) => (
                 <QuickLink key={q.id} item={q} onGo={() => goQuick(q)} />
               ))}
             </View>
@@ -1090,23 +1095,26 @@ export type QuickLinkItem = {
   icon: string;
   /** For the two that land in the results, which page. */
   section?: string;
+  /** Nothing behind it yet: drawn dim, with a padlock, and it does not open. */
+  locked?: boolean;
 };
 
-const QUICK_LINKS: QuickLinkItem[] = [
-  /* Ellie: "insight should be a brain", then "Change action plan icon on home
-     page to be one of those street signs where there are arrow signs on either
-     side of the post." SF Symbols has a brain; the signpost is drawn, for the
-     same reason the stoplight before it was. */
-  { id: 'insight', label: 'Insight of the day', icon: 'brain' },
-  /* Ellie: "Change 'Action plan' to 'Action plans' and split that into 2 lines
-     to match the other quick access tiles on the app home page." Plural, and
-     the break is written into the label rather than left to the wrap: at this
-     width "Action plans" fits on one line, so it would have been the only tile
-     of the four sitting on a single line. */
-  { id: 'plan', label: 'Action\nplans', icon: 'signpost', section: 'what-comes-next' },
-  { id: 'highlights', label: 'Results highlights', icon: 'sparkles', section: 'highlights' },
-  { id: 'journal', label: JOURNAL_TITLE, icon: 'book.closed' },
-];
+/**
+ * ── THE FOUR TILES ARE NOT THE SAME FOUR ALL THE WAY THROUGH ─────────────
+ * Ellie: "for a user who has not completed exercises yet, quick access tiles
+ * should have slight adjustments." The rule, in all four of its states, is
+ * src/lib/quick-tiles.js, which is plain JavaScript so check-quick-tiles can
+ * run it rather than read it.
+ *
+ * Her earlier instructions about these tiles are kept inside that file: the
+ * brain on the insight, the signpost she asked for twice, and "Action plans"
+ * broken over two lines so it does not sit alone on one.
+ */
+const quickLinksFor = (home: HomeResponse | null): QuickLinkItem[] =>
+  quickTiles({
+    exercises: (home?.exercises || {}) as Record<string, { owned?: boolean; mine?: boolean }>,
+    resultsReady: !!home?.resultsReady,
+  }) as QuickLinkItem[];
 
 /**
  * A signpost, drawn. Second version.
@@ -1187,11 +1195,14 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
        two: giving it the whole tile puts "Action plan" on one. */
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={item.label}
+      accessibilityLabel={item.locked ? `${item.label.replace('\n', ' ')}, not yet` : item.label}
+      accessibilityState={{ disabled: !!item.locked }}
+      disabled={!!item.locked}
       onPress={onGo}
       style={{
         flex: 1, aspectRatio: 0.92, borderRadius: Radius.lg,
         backgroundColor: SQUARE_FILL,
+        opacity: item.locked ? 0.45 : 1,
         paddingTop: Spacing.sm, paddingBottom: Spacing.md,
         paddingHorizontal: Spacing.xs, alignItems: 'center',
       }}>
@@ -1199,8 +1210,22 @@ function QuickLink({ item, onGo }: { item: QuickLinkItem; onGo: () => void }) {
           homepage." Above the conditional, not inside it: a callback's return
           position takes one expression, and a JSX comment there does not
           compile. CLAUDE.md names this one. */}
+      {/* ── LOCKED IS A PADLOCK AND A DIMMER TILE ───────────────────────
+          Ellie: "it should show action plan but should be slightly greyed out
+          and the icon should be a padlock."
+
+          Slightly: the tile keeps its name and its place, because the point is
+          to say what is coming rather than to hide it. */}
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {item.icon === 'signpost' ? (
+        {item.locked ? (
+          <SymbolView
+            name={'lock' as never}
+            size={26}
+            tintColor={QUICK_INK}
+            fallback={<View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: QUICK_INK }} />}
+            style={{ width: 32, height: 32 }}
+          />
+        ) : item.icon === 'signpost' ? (
           <Signpost />
         ) : (
           <SymbolView
