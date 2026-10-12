@@ -238,6 +238,25 @@ for (const sec of sections) {
   }
 }
 
+// ── 5. the SQL she is told to run is the migration ────────────────────────
+//
+// TASKS.md carries the migration inline, because the two-window version of
+// this (copy it to the clipboard in Terminal, paste it into Supabase) is what
+// she pasted into the wrong window: "syntax error at or near cat". Inline is
+// a second copy of a file, so it is generated, and this is what stops the two
+// drifting. See scripts/build-tasks-sql.mjs.
+{
+  const { fill } = await import('./build-tasks-sql.mjs');
+  const { doc: filled, name } = fill(doc);
+  if (!name) {
+    fails.push('TASKS.md no longer carries a migration block. If she has nothing to run, take'
+      + ' the step out; if she does, the block is how she gets it.');
+  } else if (filled !== doc) {
+    fails.push(`the SQL in TASKS.md is not ${name}. She would paste something that is not the`
+      + ' migration. Run: node scripts/build-tasks-sql.mjs');
+  }
+}
+
 if (fails.length) {
   console.error('[check-tasks-doc] TASKS.md is not telling the truth about itself:');
   for (const f of fails) console.error(`  ${f}`);

@@ -8,9 +8,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B17b | **Three steps and one choice, all written out under this table.** Push notifications are built and cannot reach a phone until you do them. |
-| B19 | **Two colour decisions left, and they are the brand.** I took the thirteen you approved. The remaining 53 pieces of unreadable text are all one colour: the Attune orange used as small print. Both options are under this table. |
-| C3 | **Fifty words for the Notes tab, waiting on you.** Run this to read them: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
+| B17b | **Three steps, written out under this table.** The key into Expo, the migration, and a build. You have chosen B for when the app asks permission, which is what was already set, and approved both title splits, so there is nothing else to decide. |
+| C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
@@ -32,9 +31,13 @@ question is with the designers you have contacted.
 
 ### B17b, step by step
 
-Each box is one paste. Copy the whole thing, including the first line, and
-press return. The first line moves you to the right folder, so it does not
-matter where your terminal was.
+**Every box below says which window it goes in.** There are two: Terminal,
+which is the black window on your Mac, and the Supabase SQL editor, which is a
+box on a web page. Nothing in this file goes in both, and a Terminal command
+pasted into Supabase gives you "syntax error at or near" and does nothing.
+
+Copy each box whole, including its first line. Terminal commands start by
+moving to the right folder, so it does not matter where you were.
 
 **Step 1. Put the Apple key into Expo.** Not Vercel: Expo sends the
 notifications on our behalf, so Expo is what needs the key.
@@ -42,6 +45,8 @@ notifications on our behalf, so Expo is what needs the key.
 **You never paste the contents of the key anywhere.** It asks for the file's
 location, and the two things it wants are written out below so you can copy
 them.
+
+**In Terminal:**
 
 ```
 cd /Users/Ellie/Projects/unison/attune-app && npx eas-cli credentials -p ios
@@ -55,13 +60,14 @@ It asks a few questions. Move with the arrow keys, choose with return.
    offers.
 4. If it asks **"Generate a new Apple Push Notifications service key?"**,
    answer **no**. You already made one.
-5. **Path to P8 file** → paste this:
+5. **Path to P8 file** → it is waiting for an answer in the same Terminal
+   window. Paste this and press return:
 
 ```
 /Users/Ellie/Downloads/AuthKey_59776926QU.p8
 ```
 
-6. **Key ID** → paste this:
+6. **Key ID** → same window again:
 
 ```
 59776926QU
@@ -77,21 +83,148 @@ filename, which is how I know. If it asks for a Team ID at any point it is
 If it only offers to generate a new key and will not take yours, let it
 generate one. Apple allows two push keys per account and either works.
 
-**Step 2. Run the migration.** This command copies the SQL onto your
-clipboard. You do not need to open the file.
+**Step 2. Run the migration.** This one is not a Terminal command. It is SQL,
+and it goes in Supabase: open Supabase, click **SQL Editor** in the left menu,
+click **New query**, then copy everything in the box below, paste it into the
+big empty box, and press **Run**.
 
-```
-cat /Users/Ellie/Projects/unison/supabase/migrations/078_push.sql | pbcopy
-```
+It is safe to run twice. It adds a table for device tokens, three columns on
+profiles, and a log of what has been sent. Nothing can be sent until it has
+run, and the endpoints say so rather than failing quietly.
 
-Then open Supabase, click **SQL Editor**, click into the box, press Command-V
-to paste, and press **Run**. It is safe to run twice. It adds a table for
-device tokens, three columns on profiles, and a log of what has been sent.
+**In the Supabase SQL editor:**
+
+<!-- SQL 078_push.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 078: everything a push notification needs to exist.
+--
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- Ellie approved six push notifications on 2026-10-10 and asked for the
+-- migration that operationalises them. Until this runs, nothing can be sent:
+-- there is nowhere to keep a device token, no record of who said yes, and no
+-- log of what has already gone out, which is what the rate limit reads.
+--
+-- The copy for all six lives in api/_lib/notifications.js. The decision rules
+-- (a four day cooldown, four a month, and nothing pushed to someone who has
+-- already seen the card) live in the same file and have since before anything
+-- could send. This migration is the storage under them.
+--
+-- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
+-- 1. push_tokens — one row per DEVICE, not per person. Someone with a phone
+--    and an iPad has two, and a person who reinstalls gets a new one while the
+--    old one stays until Expo tells us it is dead. The token is the primary
+--    key for that reason: the same token can be reassigned by the OS to a
+--    different install, and the last writer owns it.
+--
+-- 2. Three columns on profiles. `push_opt_in` is three-valued on purpose:
+--    null means nobody has been asked yet, which is a different state from
+--    having said no, and the app needs to tell them apart to know whether to
+--    ask. `push_asked_at` is when, so a second ask can be timed rather than
+--    guessed at. `app_last_opened_at` is what "they have already seen the
+--    card" reads; it is stamped by /api/push-token on launch rather than by
+--    /api/home, because /api/home is polled and a write on a polled path is
+--    its own problem.
+--
+-- 3. push_sends — what has already been sent to whom. This is the cooldown's
+--    and the monthly cap's only source. It cannot be read off the
+--    notifications table: two of the six kinds deliberately write no alert row
+--    at all, because the home screen already carries a card saying the same
+--    thing, so the row and the push are not the same event.
+--
+-- ── ACCESS ──────────────────────────────────────────────────────────────────
+-- Row level security on, no policies. Nothing reaches these tables except the
+-- server with the service key: /api/push-token writes a token and the consent,
+-- and api/_lib/push.js reads tokens and writes the log. A device token is a
+-- credential for interrupting somebody, and the anon role has no business with
+-- one.
+--
+-- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
+-- ============================================================================
+
+-- ── 1. Devices ──────────────────────────────────────────────────────────────
+create table if not exists public.push_tokens (
+  -- Expo's token for one install, e.g. ExponentPushToken[xxxxxxxx]. The key,
+  -- because the OS can hand the same token to a different install later.
+  token        text primary key,
+  profile_id   uuid not null references public.profiles(id) on delete cascade,
+  -- 'ios' or 'android'. Kept so a platform-specific failure can be seen as one.
+  platform     text,
+  created_at   timestamptz not null default now(),
+  -- Refreshed on every launch that registers. A token nobody has presented for
+  -- months is probably an uninstalled app, and Expo will say so when we try.
+  last_seen_at timestamptz not null default now()
+);
+
+-- Every send starts from "whose devices", so this is the only lookup shape.
+create index if not exists push_tokens_profile_idx
+  on public.push_tokens (profile_id);
+
+alter table public.push_tokens enable row level security;
+
+comment on table public.push_tokens is
+  'One row per device that has agreed to receive push notifications. Written only by /api/push-token with the service key.';
+
+-- ── 2. Consent, and when the app was last opened ────────────────────────────
+alter table public.profiles
+  add column if not exists push_opt_in        boolean,
+  add column if not exists push_asked_at      timestamptz,
+  add column if not exists app_last_opened_at timestamptz;
+
+comment on column public.profiles.push_opt_in is
+  'Three-valued. null = never asked, true = said yes, false = said no. Asking again is a decision, so "not asked" and "declined" must not look alike.';
+comment on column public.profiles.push_asked_at is
+  'When the app last asked. A second ask is timed from this rather than guessed.';
+comment on column public.profiles.app_last_opened_at is
+  'Last launch that registered a push token. Read by the rule that will not push something the home screen is already showing them.';
+
+-- ── 3. What has already been sent ───────────────────────────────────────────
+create table if not exists public.push_sends (
+  id          bigserial primary key,
+  profile_id  uuid not null references public.profiles(id) on delete cascade,
+  -- Matches the kinds in api/_lib/notifications.js. Text, not an enum, so a
+  -- seventh kind is a code change rather than a migration.
+  kind        text not null,
+  sent_at     timestamptz not null default now(),
+  -- False when Expo refused it. Kept rather than dropped: a token that fails
+  -- every time is how we learn the app was deleted.
+  ok          boolean not null default true,
+  -- Expo's own message when it refused. Short, and never anything the reader
+  -- wrote: nothing from a note or a journal entry reaches this table.
+  detail      text
+);
+
+-- The cooldown and the monthly cap both ask "what has this person had
+-- recently", newest first.
+create index if not exists push_sends_recent_idx
+  on public.push_sends (profile_id, sent_at desc);
+
+alter table public.push_sends enable row level security;
+
+comment on table public.push_sends is
+  'One row per push attempt. The only source for the four day cooldown and the four a month cap, because two of the six kinds write no alert row to join against.';
+
+-- ── Verification ────────────────────────────────────────────────────────────
+select
+  (select count(*) from public.push_tokens)  as devices,
+  (select count(*) from public.push_sends)   as sends,
+  (select count(*) from public.profiles where push_opt_in is true)  as said_yes,
+  (select count(*) from public.profiles where push_opt_in is false) as said_no,
+  (select count(*) from public.profiles where push_opt_in is null)  as never_asked;
+
+select column_name, data_type
+  from information_schema.columns
+ where table_name = 'profiles'
+   and column_name in ('push_opt_in', 'push_asked_at', 'app_last_opened_at')
+ order by column_name;
+```
+<!-- /SQL -->
 
 **Step 3. Build the app and send it to TestFlight.** This one has to be a
 build rather than an update: notification code is native, and a native change
-cannot arrive over the air. Run these one at a time, waiting for each to
-finish.
+cannot arrive over the air.
+
+**In Terminal**, one at a time, waiting for each to finish:
 
 ```
 cd /Users/Ellie/Projects/unison && git pull
@@ -109,51 +242,34 @@ The build runs on Expo's machines and takes fifteen to twenty minutes. You can
 close the terminal once it says the build is queued; the link it prints shows
 the progress.
 
-**Step 4. One choice: when the app asks permission.** iOS lets an app ask
-once. If someone says no, we can never ask again in the app; they have to find
-it in their phone's Settings, and almost nobody does. So this decides for good
-how many couples we can reach when their partner finishes.
+**Step 4 is answered: B.** You chose "once they finish their first exercise",
+which is what was already set, so there is nothing to do. Kept here because it
+is the kind of decision someone will want the reasoning for later.
+
+iOS lets an app ask once. If someone says no, we can never ask again in the
+app; they have to find it in their phone's Settings, and almost nobody does. So
+this decided for good how many couples we can reach when their partner
+finishes.
 
 - **A. On the first launch after signing in.** The most asks and the worst
   answers: most people say no to an app they have used for ninety seconds.
-- **B. Once they finish their first exercise. This is what is set now, and
-  what I recommend.** The moment they finish, the next thing that matters is
-  their partner finishing, which is exactly what a notification is for.
+- **B. Once they finish their first exercise. Your choice, and what is set.**
+  The moment they finish, the next thing that matters is their partner
+  finishing, which is exactly what a notification is for.
 - **C. Only from Settings.** The fewest people, the highest intent.
 
 The switch in Settings exists under all three, so nobody is stuck with the
-answer we caught them on. Say A, B or C. Saying B means nothing to do.
+answer we caught them on.
 
-**And two sentences to check.** You wrote all six notifications. Four of them
-split naturally into a bold line and a line under it. Two did not, and these
-splits are mine:
+**The two splits are approved.** You wrote all six notifications; four split
+naturally into a bold line and a line under it, and these two did not, so the
+split was mine and you have said they are fine:
 
 | | Bold line | Line under it |
 |--|--|--|
 | Journal streak | **Your journal streak is about to expire** | Your streak of 6 days of entries in your relationship journal is about to expire. |
 | Workbook ready | **Your personalized workbook is ready** | For you to explore in your learn tab |
 
-Rewrite either and I will put it in.
-
-### B19, the two that are left
-
-The thirteen are done and on the site. All 53 remaining pieces of unreadable
-text are the Attune orange used as **small** print: "Find this book", every
-"In Practice ·" label, the email address on /contact, the "Add to registry"
-link. As a heading or a button fill the same orange passes; it is only small
-text that fails.
-
-**Option 1.** A second, darker orange for small print only, `#B6512D`, sitting
-beside the brand one. Nothing else changes, and nothing larger than small print
-is touched.
-
-**Option 2.** Leave it. It is a real brand, the failure is at the readability
-standard rather than at "can anyone see it", and some people will not notice.
-
-There is also one button: white on orange, "Add Attune to your registry", at
-3.26 against a floor of 4.5. That one has a third option, which is to keep the
-exact brand orange and set the words in ink instead. Ink on the brand orange
-reads at 5.46, comfortably over.
 
 
 ## 2. Open
@@ -197,6 +313,7 @@ reads at 5.46, comfortably over.
 
 | Verified by you | What it was |
 |--|--|
+| B19 | Thirteen contrast fixes taken. The brand orange as small print stays as it is: "Leave it." |
 | D20 | Decided against: relabelling the couple map's axes, quadrants and the gap between the two dots. |
 | D21 | Decided against: replacing the homepage's wireframe images with pictures of the real product. |
 | D22 | Decided against: one package per row on a phone, and a list per package instead of the comparison table. |

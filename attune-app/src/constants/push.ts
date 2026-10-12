@@ -21,9 +21,9 @@
 export type PushAskMoment = 'launch' | 'after_first_exercise' | 'settings_only';
 
 /**
- * Ellie's answer, pending: B17b in TASKS.md. Until she says otherwise this is
- * the recommendation, which is to ask once there is something to be notified
- * about. Someone who has just finished their first exercise is waiting on
- * their partner, and that wait is exactly what a notification is for.
+ * Ellie's answer, 2026-10-12: "I choose B." Ask once there is something to be
+ * notified about. Someone who has just finished their first exercise is
+ * waiting on their partner, and that wait is exactly what a notification is
+ * for. Changing this is changing a decision rather than a default.
  */
 export const PUSH_ASK_MOMENT: PushAskMoment = 'after_first_exercise';
