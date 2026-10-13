@@ -3,18 +3,18 @@
  * An endpoint that writes without auth has to refuse an empty submission.
  *
  * ── THE PROMISE ───────────────────────────────────────────────────────────
- * /api/send-feedback and /api/submit-beta-survey take a POST from anyone, on
+ * /api/send-feedback and /api/survey take a POST from anyone, on
  * purpose: feedback from someone who is not signed in is still feedback, and
- * the beta survey is filled in on a static page with no session. Both write.
+ * the survey is answered from a link in an email, with no session. Both write.
  * So both have to tell a submission from an empty one, and refuse the empty
  * one with a 400.
  *
  * ── THE BUG IT CAME FROM ──────────────────────────────────────────────────
- * `curl -X POST -d '{}'` at either of them answered 200. submit-beta-survey
+ * `curl -X POST -d '{}'` at either of them answered 200. The old survey endpoint
  * stored a feedback_submissions row and emailed the admin; send-feedback wrote
  * a KV record. Nothing rate-limits either, nothing checks an origin, and both
- * feed the admin screens: Feedback Overview, Beta Feedback and Survey Explorer
- * all count these rows. Anyone who found the URL could have moved the numbers
+ * feed the admin screens: the Feedback Overview and the Survey page count
+ * these rows. Anyone who found the URL could have moved the numbers
  * Ellie reads, and the first sign of it would have been a survey count that
  * did not match the people.
  *
@@ -86,21 +86,32 @@ const CASES = [
     ],
   },
   {
-    path: '/api/submit-beta-survey',
-    module: '../api/submit-beta-survey.js',
+    /**
+     * The survey, which anybody can POST to.
+     *
+     * The endpoint this replaces stored the 26-question survey and is retired
+     * with it. The replacement is reached the same way and needs the same
+     * guard: somebody following a link from an email has no session, so it
+     * cannot require one, and an empty body is a page loading rather than an
+     * answer.
+     */
+    path: '/api/survey',
+    module: '../api/survey.js',
     refuse: [
       ['an empty body', {}],
-      ['metadata and no answers', { surveyType: 'post_results', respondentId: 'x', userName: 'A', completed: true }],
-      ['an empty answers object', { surveyType: 'post_results', answers: {} }],
-      ['the static page\'s constants alone', { submitted: new Date().toISOString(), survey_version: 'beta_v5' }],
+      ['an empty answers object', { answers: {} }],
+      ['answers that are not an object', { answers: 'rating=5' }],
+      ['a source and nothing else', { source: 'link' }],
+      ['an answer of empty string', { answers: { surprise: '' } }],
+      ['an id this survey does not ask', { answers: { email: 'someone@example.com' } }],
     ],
     accept: [
-      // what src/App.jsx sends from the dashboard survey
-      ['the dashboard survey', { surveyType: 'post_results', respondentId: 'x', userName: 'A', answers: { q1: 4 }, completed: true }],
-      // what public/feedback.html sends, flat rather than nested
-      ['the static survey page', { submitted: new Date().toISOString(), survey_version: 'beta_v5', commsOverall: 4, nps: 9 }],
-      // the incomplete capture, which is one answer and a completed:false
-      ['a part-finished survey', { surveyType: 'post_results', answers: { q1: 2 }, completed: false }],
+      // one star and nothing else: Ellie asked for incomplete responses
+      ['a single answer', { answers: { rating: 4 }, source: 'results' }],
+      // the ranking, which is a list rather than a value
+      ['a ranking', { answers: { interest_rank: ['Highlights', 'Couple type'] }, source: 'app' }],
+      // what a finished one looks like
+      ['a finished survey', { answers: { rating: 5, nps: 9, surprise: 'The gap on chores.' }, done: true, source: 'link' }],
     ],
   },
 ];

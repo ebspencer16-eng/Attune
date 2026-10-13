@@ -21,19 +21,18 @@ import { createClient } from '@supabase/supabase-js';
 
 const esc = (s) => String(s || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
 
-// beta_survey rows store a JSON blob in `text`; flatten it to readable lines.
+/**
+ * The written half of a feedback row.
+ *
+ * This also flattened the old survey's JSON blob, which was how a 26-question
+ * response reached the digest. That survey is retired and its rows are deleted
+ * by migration 079; the survey's own answers are read on the admin's Survey
+ * page, where they can be coded and counted rather than pasted into an email.
+ *
+ * What is left is what /api/send-feedback stores: a message, in `text`.
+ */
 function extractText(row) {
-  if (!row.text) return '';
-  if (row.type === 'beta_survey') {
-    try {
-      const o = JSON.parse(row.text);
-      return Object.entries(o)
-        .filter(([k, v]) => v && typeof v === 'string' && k !== 'email' && v.length > 1)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(' | ');
-    } catch { return row.text; }
-  }
-  return row.text;
+  return row.text || '';
 }
 
 export default async function handler(req) {

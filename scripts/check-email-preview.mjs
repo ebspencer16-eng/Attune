@@ -47,7 +47,7 @@ const files = [
 ];
 
 /** Modules that mail Attune rather than a customer. */
-const INTERNAL = new Set(['api/send-feedback.js', 'api/submit-beta-survey.js', 'api/cron-beta-digest.js', 'api/cron-feedback-synthesis.js']);
+const INTERNAL = new Set(['api/send-feedback.js', 'api/cron-beta-digest.js', 'api/cron-feedback-synthesis.js']);
 
 /**
  * Exported names ending in Email that are not an email.

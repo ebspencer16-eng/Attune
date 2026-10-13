@@ -1,11 +1,32 @@
 /**
  * GET /api/featured-testimonials
- * Public. Returns the post-results survey testimonials an admin has marked
- * `featured`, for the homepage. Only consented testimonial text + first name.
+ *
+ * Public. The survey answers an admin has picked to publish on the homepage.
+ *
+ * ── NO NAME, BY DESIGN ────────────────────────────────────────────────────
+ * This read the old beta survey, which asked for a testimonial, asked for
+ * permission to use it, and asked for a first name or initials to put under
+ * it. The new survey asks none of those three.
+ *
+ * Ellie, on the consent question: "Do we have to ask this if we don't include
+ * PII with the testimonials? Is there fine print we could have instead that
+ * covers us? Wondering if we just don't use names or something."
+ *
+ * So the fine print under every open question is TESTIMONIAL_NOTICE in
+ * api/_lib/survey.js, and what it promises is that nothing published carries a
+ * name. This endpoint is where that promise is kept or broken: it selects two
+ * columns and the answers, and there is no name in the row to leak.
+ *
+ * ── WHAT CAN BE PUBLISHED ─────────────────────────────────────────────────
+ * One open answer on one response, chosen in the admin, which writes
+ * `featured_question` and `featured_at`. Nothing is published by default and
+ * nothing is published automatically: a survey answer reaching the homepage is
+ * always somebody's decision.
  */
 export const config = { runtime: 'edge' };
 
-import { corsHeaders, safeError } from './_lib/http.js';
+import { corsHeaders } from './_lib/http.js';
+import { TEXT_QUESTIONS } from './_lib/survey.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -22,26 +43,38 @@ function json(o) {
   });
 }
 
+/** What goes under a quote, in place of a name. */
+const ATTRIBUTION = { name: 'A verified couple', detail: 'Verified Attune couple' };
+
 export default async function handler() {
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE;
+  const key = process.env.SUPABASE_SERVICE_KEY
+           || process.env.SUPABASE_SERVICE_ROLE_KEY
+           || process.env.SUPABASE_SERVICE_ROLE;
   if (!url || !key) return json([]);
   try {
     const r = await fetch(
-      `${url}/rest/v1/feedback_submissions?type=in.(post_results,beta_survey)&featured=eq.true&select=text,submitted_at&order=submitted_at.desc&limit=12`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+      `${url}/rest/v1/survey_responses`
+      + '?featured_at=not.is.null'
+      + '&select=answers,featured_question,featured_at'
+      + '&order=featured_at.desc&limit=12',
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } },
     );
     const rows = await r.json();
     const out = [];
     for (const row of (Array.isArray(rows) ? rows : [])) {
-      let p = {}; try { p = typeof row.text === 'string' ? JSON.parse(row.text) : row.text; } catch {}
-      const a = (p && p.answers) || {};
-      // post_results stores under answers.testimonial; beta_survey stores flat on the payload.
-      const t = String((a.testimonial != null ? a.testimonial : (p && p.testimonial)) || '').trim();
-      if (!t) continue;
-      const name = String((p && (p.userName || p.consentFirstName)) || '').trim() || 'A verified couple';
-      out.push({ text: '“' + t + '”', name, detail: 'Verified Attune couple' });
+      const qid = row && row.featured_question;
+      /* Only an open answer. A star rating or a ranking is not a sentence, and
+         a bug that pointed this at one would publish "4" in quotation marks. */
+      if (!qid || !TEXT_QUESTIONS.includes(qid)) continue;
+      const text = String(((row.answers || {})[qid]) || '').trim();
+      if (!text) continue;
+      out.push({ text: `“${text}”`, ...ATTRIBUTION });
     }
     return json(out);
-  } catch (e) { return json([]); }
+  } catch (e) {
+    /* A homepage section that cannot load its quotes draws nothing, which is
+       what it already does with none. */
+    return json([]);
+  }
 }

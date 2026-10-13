@@ -1623,6 +1623,66 @@ export function savePushToken(input: {
   });
 }
 
+/** The survey everybody is asked at the end, and whatever they have answered. */
+export type SurveyQuestion = {
+  id: string;
+  kind: 'stars' | 'choice' | 'text' | 'rank' | 'scale' | 'nps';
+  label: string;
+  options?: string[];
+  scale?: string[];
+  placeholder?: string;
+  hint?: string;
+  min?: number;
+  max?: number;
+  /* The condition under which the question is asked, as data. See
+     api/_lib/survey.js: the app cannot import that file, so it runs the same
+     matcher over whatever the payload says rather than naming questions. */
+  showWhen?: { field?: string; startsWith?: string; atLeast?: number; atMost?: number };
+};
+export type SurveyForm = {
+  version: string;
+  /** Whether this person already reached the end of it. */
+  finished?: boolean;
+  copy: {
+    title: string; intro: string; submit: string; submitting: string;
+    thanksTitle: string; thanks: string; saved: string;
+  };
+  notice: string;
+  questions: SurveyQuestion[];
+  visible: string[];
+  rankOptions: string[];
+  answers: Record<string, string | number | string[]>;
+};
+
+/**
+ * The questions, built for this person.
+ *
+ * The ranking's options are the exercises they finished and the tools they
+ * own, which is why this is a request rather than a constant: a list built in
+ * the app would be the same list for everybody.
+ */
+export function fetchSurvey() {
+  return request<{ ok: true } & SurveyForm>('/api/survey');
+}
+
+/**
+ * Save what they have written so far.
+ *
+ * Ellie: "Collect incomplete responses." Every answer is posted as it is made
+ * rather than at the end, so closing the screen half way through leaves what
+ * was written. `done` is the only thing that marks it finished.
+ */
+export function saveSurvey(input: {
+  answers: Record<string, string | number | string[]>;
+  done?: boolean;
+}) {
+  return request<{ ok: true; saved: number }>('/api/survey', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...input, source: 'app' }),
+  });
+}
+
 export function fetchToolData() {
   return request<ToolData>('/api/tool-data');
 }

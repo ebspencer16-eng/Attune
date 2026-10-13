@@ -67,7 +67,7 @@ async function run(reject) {
     });
 
     if (u.includes('api.resend.com')) { emails.push(u); return j({ id: 'mail-1' }); }
-    if (u.includes('feedback_submissions')) return reject === 'answered' ? bad() : j([]);
+    if (u.includes('survey_responses')) return reject === 'answered' ? bad() : j([]);
     if (u.includes('beta_codes')) return reject === 'beta' ? bad() : j([]);
     if (u.includes('/orders')) return j([]);
     if (u.includes('/profiles')) {

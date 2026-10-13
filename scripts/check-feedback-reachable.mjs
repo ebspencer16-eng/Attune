@@ -131,19 +131,28 @@ for (const id of STORED_IDS) {
    * src/App.jsx, fully written, while nothing rendered it. So the component
    * that asks them has to be rendered somewhere as well as defined.
    */
+  /**
+   * The survey that asks them.
+   *
+   * It was PostResultsSurvey, six questions, posting to /api/submit-beta-survey.
+   * On 2026-10-13 it became ResultsSurvey, which reads its questions from
+   * /api/survey so the app and /feedback cannot ask a different set. The name
+   * is here rather than matched loosely because this gate's whole job is to
+   * notice when the thing that asks a question stops existing.
+   */
   const asksThem = (() => {
-    const def = /function PostResultsSurvey\b/.test(app);
-    const rendered = /<PostResultsSurvey\b/.test(app);
+    const def = /function ResultsSurvey\b/.test(app);
+    const rendered = /<ResultsSurvey\b/.test(app);
     return { def, rendered };
   })();
 
   if (watched.length && !asksThem.def) {
     problems.push(`the admin charts ${watched.join(', ')} and nothing in src/App.jsx defines`
-      + ' PostResultsSurvey, which is what asks them. Either the survey moved, in which case'
+      + ' ResultsSurvey, which is what asks them. Either the survey moved, in which case'
       + ' point this gate at where it went, or those charts are about a question the product'
       + ' no longer asks.');
   } else if (watched.length && !asksThem.rendered) {
-    problems.push(`the admin charts ${watched.join(', ')} and PostResultsSurvey is defined but`
+    problems.push(`the admin charts ${watched.join(', ')} and ResultsSurvey is defined but`
       + ' never rendered, so nothing asks them.\n'
       + '      A component that exists and is not drawn is the same as a deleted one, except\n'
       + '      that reading the file says otherwise. This is how five charts came to be about\n'

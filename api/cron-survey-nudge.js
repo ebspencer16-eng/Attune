@@ -3,7 +3,7 @@
  * Nudges NON-beta couples to complete the short post-results survey:
  *   • Pass 1 ~24h after finishing (survey_nudge_sent_at)
  *   • Pass 2 ~5–7 days after finishing, soft reminder (survey_nudge2_sent_at)
- * Skips anyone who already responded (post_results OR beta_survey) and skips
+ * Skips anyone who has already answered anything, and skips
  * beta testers entirely (they were asked to do the beta survey directly).
  */
 import { unsubscribeLink } from './_lib/email-footer.js';
@@ -87,14 +87,22 @@ export default async function handler(req) {
    */
   const unreadable = [];
 
-  // Already responded (either survey) -> exclude by respondent id.
+  /* Already answered -> leave alone.
+   *
+   * One row per person in survey_responses, including half-finished ones.
+   * Somebody who answered two questions and stopped has been asked, and
+   * emailing them again is asking twice.
+   *
+   * This read two retired row types and parsed a respondent id out of a JSON
+   * blob; migration 079 deletes every one of those rows, which would have made
+   * this exclusion list empty and nudged everybody. */
   const submitted = new Set();
   try {
-    const fr = await fetch(`${url}/rest/v1/feedback_submissions?type=in.(post_results,beta_survey)&select=text`, { headers: H });
-    if (!fr.ok) throw new Error(`feedback_submissions ${fr.status}`);
+    const fr = await fetch(`${url}/rest/v1/survey_responses?select=respondent_id`, { headers: H });
+    if (!fr.ok) throw new Error(`survey_responses ${fr.status}`);
     const rows = await fr.json();
-    if (!Array.isArray(rows)) throw new Error('feedback_submissions did not answer with rows');
-    for (const r of rows) { let p = {}; try { p = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {} if (p && p.respondentId) submitted.add(p.respondentId); }
+    if (!Array.isArray(rows)) throw new Error('survey_responses did not answer with rows');
+    for (const r of rows) { if (r && r.respondent_id) submitted.add(r.respondent_id); }
   } catch (e) {
     console.error('[cron-survey-nudge] who has already answered:', e?.message || e);
     unreadable.push('already answered');

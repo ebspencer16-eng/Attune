@@ -8,8 +8,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| B38 | **One migration to run, for the survey.** The SQL is in the box under this table. Nothing of the new survey can be stored until it runs, and every surface says so rather than failing quietly. |
+| B39 | **Five sentences around the survey are mine and need to be yours.** The questions are the ones you approved. What I wrote is the wrapper: see the list under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
-| R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. |
+| R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
@@ -17,338 +19,215 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ### Still open from the review
 
-All sixteen are answered. Seven are built and verified, seven you turned down
-and are recorded in section 4 so they do not come back, and this is the one
-that is somebody else's to do.
+Every one is answered. Eighteen of them are in section 4: eleven built and
+verified, seven you turned down and recorded there so they do not come back.
+These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I need |
 |--|--|
 | D27 | **The post-checkout message is written and approved. Left here so the EMAIL gets the same treatment.** The page now says what happens next; the setup email it points at still says what it always said. |
-| B33 | **A survey to replace the 26-question one, for us to agree on.** Eight questions, three of them conditional, written out under this table with what we lose by cutting the rest. Tell me what to change and I will build it. |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you here; this row is so it does not get lost. |
 
 ---
 
-### B33, the survey I would replace it with
+### B38, the migration to run
 
-The old one asked 26 questions with four rating grids in it. Most of them were
-about the exercises rather than about what happened to the couple, and the
-grids are the part people abandon. This is eight, three of them conditional,
-so most people answer five or six.
+**This box is SQL, and it goes in Supabase, not Terminal.** Open Supabase,
+click **SQL Editor** in the left menu, click **New query**, then copy
+everything in the box below, paste it into the big empty box, and press
+**Run**.
 
-**1. Did Attune lead to a conversation you would not have had otherwise?**
-One choice: *Yes, and we talked about something new* / *Yes, but nothing we
-had not covered* / *Not yet* / *No*.
-The only question here that measures whether the product worked. Keeps its id,
-so the trendline you already have continues.
+It is safe to run twice. It adds the survey's table, a table for coding the
+written answers, and two columns for publishing one of those answers on the
+homepage. It also deletes every answer to the old survey, which is what you
+asked for: "We can delete all prior survey data."
 
-**2. If yes: what did you end up talking about?** Free text, shown only to the
-people who said yes.
-This is where the quotes come from, and the only question in the set that
-tells us which part of a relationship Attune actually opens.
-
-**3. What did you learn that surprised you?** Free text.
-Replaces both "what did you actually discover" and "your biggest moment of
-recognition". The answers are the thing you read.
-
-**4. Which part did that come from?** One choice: Communication, Expectations,
-Relationship Reflection, Physical Intimacy, Conflict Patterns, the couple map,
-the workbook, nothing in particular.
-One tap, and it is the signal the four grids were circling: which part of the
-product does the work.
-
-**5. How accurate did your results feel?** One to five.
-The one quality measure that matters. If the results do not feel true, nothing
-else about the experience matters.
-
-**6. If three or less: what was off?** Free text, shown only to them.
-The diagnostic, asked of the people who have something to say rather than of
-everyone.
-
-**7. How likely are you to recommend Attune to a couple you know?** Nought to
-ten, then **what is behind that?** in their own words.
-Unchanged, and the id is unchanged, so the NPS trend survives the swap.
-
-**8. May we use your words and your first name on the site?** Yes or no, and
-the first name.
-Unchanged. It is what the testimonials feature reads.
-
-#### What we lose, said plainly
-
-- **Per-exercise ratings and the four grids.** We stop being able to say "the
-  expectations exercise scores 4.1 for clarity". Question 5 catches results
-  that feel wrong and question 6 asks why; what we give up is the ability to
-  rank the exercises against each other.
-- **"How honestly were you able to answer."** A real signal about whether the
-  product feels safe, and the first one I would add back if you want nine.
-- **Time spent on each part.** Self-reported, and the admin already measures
-  the real thing.
-- **Concerns before buying.** An objection list, which is worth having and is
-  the wrong moment to ask for it: these people have already bought.
-- **"What do you wish you had known."** An onboarding signal. The second one I
-  would add back.
-- **Interest in other Attune experiences.** A roadmap signal that is better
-  asked once, when there is something specific to offer.
-- **"Were there responsibilities we did not mention."** This produced a
-  concrete list of gaps in Expectations. Worth asking again as a one-off
-  rather than on every response.
-- **Return likelihood in six months.** People are bad at predicting this and
-  we can watch what they actually do.
-
-#### One thing to decide with it
-
-The old answers are stored under their question ids. Keeping `convo`, `nps`,
-`testimonial` and the consent fields means those four charts carry straight on
-across the change. Everything else starts a new series, and the admin's
-Survey Explorer will show the old questions with no new answers arriving. I
-would leave the old ones visible and dated rather than delete them.
-
-Tell me what to cut, add or reword and I will build it.
-
----
-
-### B17b, step by step
-
-**Every box below says which window it goes in.** There are two: Terminal,
-which is the black window on your Mac, and the Supabase SQL editor, which is a
-box on a web page. Nothing in this file goes in both, and a Terminal command
-pasted into Supabase gives you "syntax error at or near" and does nothing.
-
-Copy each box whole, including its first line. Terminal commands start by
-moving to the right folder, so it does not matter where you were.
-
-**Step 1. Put the Apple key into Expo.** Not Vercel: Expo sends the
-notifications on our behalf, so Expo is what needs the key.
-
-**You never paste the contents of the key anywhere.** It asks for the file's
-location, and the two things it wants are written out below so you can copy
-them.
-
-**In Terminal:**
-
-```
-cd /Users/Ellie/Projects/unison/attune-app && npx eas-cli credentials -p ios
-```
-
-It asks a few questions. Move with the arrow keys, choose with return.
-
-1. **Build profile** → **production**.
-2. From the menu, the line with **Push Notifications** in it.
-3. Then **Set up Push Notifications** or **Add a new push key**, whichever it
-   offers.
-4. If it asks **"Generate a new Apple Push Notifications service key?"**,
-   answer **no**. You already made one.
-5. **Path to P8 file** → it is waiting for an answer in the same Terminal
-   window. Paste this and press return:
-
-```
-/Users/Ellie/Downloads/AuthKey_59776926QU.p8
-```
-
-6. **Key ID** → same window again:
-
-```
-59776926QU
-```
-
-7. It will ask you to sign in to Apple. That is your developer account email,
-   your password, and the code your phone shows.
-
-That is the key you made yesterday evening at 16:50; the Key ID is in its
-filename, which is how I know. If it asks for a Team ID at any point it is
-`HX5FX68K6L`. If something goes wrong, send me what the screen says.
-
-If it only offers to generate a new key and will not take yours, let it
-generate one. Apple allows two push keys per account and either works.
-
-**Step 2. Run the migration.** This one is not a Terminal command. It is SQL,
-and it goes in Supabase: open Supabase, click **SQL Editor** in the left menu,
-click **New query**, then copy everything in the box below, paste it into the
-big empty box, and press **Run**.
-
-It is safe to run twice. It adds a table for device tokens, three columns on
-profiles, and a log of what has been sent. Nothing can be sent until it has
-run, and the endpoints say so rather than failing quietly.
+Until it runs, the survey answers with its questions and refuses to store
+anything, saying so. Nothing else in the product is affected.
 
 **In the Supabase SQL editor:**
 
-<!-- SQL 078_push.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 079_survey.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 078: everything a push notification needs to exist.
+-- 079: one survey, kept as it is written rather than only when it is sent.
 --
 -- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie approved six push notifications on 2026-10-10 and asked for the
--- migration that operationalises them. Until this runs, nothing can be sent:
--- there is nowhere to keep a device token, no record of who said yes, and no
--- log of what has already gone out, which is what the rate limit reads.
+-- Ellie, having approved a replacement for the 26-question beta survey:
 --
--- The copy for all six lives in api/_lib/notifications.js. The decision rules
--- (a four day cooldown, four a month, and nothing pushed to someone who has
--- already seen the card) live in the same file and have since before anything
--- could send. This migration is the storage under them.
+--   "Please use this as the regular survey for everyone at the end of their
+--    experience, not just beta users."
+--   "Collect incomplete responses."
+--   "Build a page into admin to view responses for each question in this
+--    survey... and build a tool to postcode open entry responses and quantify
+--    for visuals."
+--   "We can delete all prior survey data. Survey and experience are different
+--    enough now."
+--
+-- Three things follow from that. One row per person rather than one per
+-- submission, because an answer is saved as it is written and the row is
+-- updated; a place to record what a free-text answer is ABOUT, which is the
+-- coding tool; and the old rows go.
 --
 -- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
--- 1. push_tokens — one row per DEVICE, not per person. Someone with a phone
---    and an iPad has two, and a person who reinstalls gets a new one while the
---    old one stays until Expo tells us it is dead. The token is the primary
---    key for that reason: the same token can be reassigned by the OS to a
---    different install, and the last writer owns it.
+-- survey_responses: the answers, as jsonb keyed by question id, with the
+-- version they were given under. `completed_at` is null until somebody reaches
+-- the end, which is the difference between a partial answer and a finished
+-- one. Both are counted; only one of them is a response rate.
 --
--- 2. Three columns on profiles. `push_opt_in` is three-valued on purpose:
---    null means nobody has been asked yet, which is a different state from
---    having said no, and the app needs to tell them apart to know whether to
---    ask. `push_asked_at` is when, so a second ask can be timed rather than
---    guessed at. `app_last_opened_at` is what "they have already seen the
---    card" reads; it is stamped by /api/push-token on launch rather than by
---    /api/home, because /api/home is polled and a write on a polled path is
---    its own problem.
+-- survey_codes: what an open answer is about, one row per code per answer, so
+-- one sentence can be about two things and a chart can count both. Written by
+-- an admin through /api/admin-survey, never by a customer.
 --
--- 3. push_sends — what has already been sent to whom. This is the cooldown's
---    and the monthly cap's only source. It cannot be read off the
---    notifications table: two of the six kinds deliberately write no alert row
---    at all, because the home screen already carries a card saying the same
---    thing, so the row and the push are not the same event.
+-- ── WHAT IT DELETES ─────────────────────────────────────────────────────────
+-- Every row of the old surveys, at her word. The quick footer reactions and
+-- the app's experience answers stay: those are a different question and the
+-- Feedback Overview still draws them.
 --
 -- ── ACCESS ──────────────────────────────────────────────────────────────────
 -- Row level security on, no policies. Nothing reaches these tables except the
--- server with the service key: /api/push-token writes a token and the consent,
--- and api/_lib/push.js reads tokens and writes the log. A device token is a
--- credential for interrupting somebody, and the anon role has no business with
--- one.
+-- server with the service key. An answer here is anonymous in the sense that
+-- it carries no name and no email, but it is linked to a profile so a person
+-- can come back to a half-finished survey, and that link is not for anybody
+-- else to read.
 --
 -- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
 -- ============================================================================
 
--- ── 1. Devices ──────────────────────────────────────────────────────────────
-create table if not exists public.push_tokens (
-  -- Expo's token for one install, e.g. ExponentPushToken[xxxxxxxx]. The key,
-  -- because the OS can hand the same token to a different install later.
-  token        text primary key,
-  profile_id   uuid not null references public.profiles(id) on delete cascade,
-  -- 'ios' or 'android'. Kept so a platform-specific failure can be seen as one.
-  platform     text,
-  created_at   timestamptz not null default now(),
-  -- Refreshed on every launch that registers. A token nobody has presented for
-  -- months is probably an uninstalled app, and Expo will say so when we try.
-  last_seen_at timestamptz not null default now()
+create table if not exists public.survey_responses (
+  id            bigserial primary key,
+  -- One row per person. Null for somebody answering from an email link with no
+  -- session, which is why it is not the primary key.
+  respondent_id uuid references public.profiles(id) on delete set null,
+  -- The sorted pair, so both halves of a couple can be read together without
+  -- storing anything that says who they are.
+  couple_id     text,
+  -- Question id -> answer. A string, a number, or an array for the ranking.
+  answers       jsonb not null default '{}'::jsonb,
+  -- Which set of questions these answers were given under.
+  version       text,
+  -- Where it was answered: 'results', 'app' or 'link'.
+  source        text,
+  started_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now(),
+  -- Null while it is still being written. A partial answer is still an answer.
+  completed_at  timestamptz,
+  -- ── A quote on the homepage ───────────────────────────────────────────────
+  -- Which open answer an admin picked to publish, and when. The homepage reads
+  -- these two columns and nothing else, so a quote cannot be published without
+  -- somebody choosing both a response and the answer on it.
+  --
+  -- There is no name here, and that is the whole design. Ellie, on the consent
+  -- question the old survey asked: "Do we have to ask this if we don't include
+  -- PII with the testimonials? Is there fine print we could have instead that
+  -- covers us?" The fine print is TESTIMONIAL_NOTICE in api/_lib/survey.js and
+  -- it sits under every open question.
+  featured_question text,
+  featured_at       timestamptz
 );
 
--- Every send starts from "whose devices", so this is the only lookup shape.
-create index if not exists push_tokens_profile_idx
-  on public.push_tokens (profile_id);
+-- One row per person, which is what makes a partial answer resumable.
+create unique index if not exists survey_responses_respondent_idx
+  on public.survey_responses (respondent_id) where respondent_id is not null;
 
-alter table public.push_tokens enable row level security;
+-- The admin reads newest first.
+create index if not exists survey_responses_recent_idx
+  on public.survey_responses (updated_at desc);
 
-comment on table public.push_tokens is
-  'One row per device that has agreed to receive push notifications. Written only by /api/push-token with the service key.';
+-- The homepage reads only the featured ones.
+create index if not exists survey_responses_featured_idx
+  on public.survey_responses (featured_at desc) where featured_at is not null;
 
--- ── 2. Consent, and when the app was last opened ────────────────────────────
-alter table public.profiles
-  add column if not exists push_opt_in        boolean,
-  add column if not exists push_asked_at      timestamptz,
-  add column if not exists app_last_opened_at timestamptz;
+-- Added after the table existed, for anybody who ran an earlier copy of this
+-- file. `if not exists` makes both paths the same path.
+alter table public.survey_responses add column if not exists featured_question text;
+alter table public.survey_responses add column if not exists featured_at timestamptz;
 
-comment on column public.profiles.push_opt_in is
-  'Three-valued. null = never asked, true = said yes, false = said no. Asking again is a decision, so "not asked" and "declined" must not look alike.';
-comment on column public.profiles.push_asked_at is
-  'When the app last asked. A second ask is timed from this rather than guessed.';
-comment on column public.profiles.app_last_opened_at is
-  'Last launch that registered a push token. Read by the rule that will not push something the home screen is already showing them.';
+alter table public.survey_responses enable row level security;
 
--- ── 3. What has already been sent ───────────────────────────────────────────
-create table if not exists public.push_sends (
+comment on table public.survey_responses is
+  'One row per person for the end-of-experience survey. Updated as they answer, so a half-finished survey is kept. No name and no email: see api/_lib/survey.js.';
+comment on column public.survey_responses.featured_question is
+  'Which open answer on this row an admin published to the homepage. Null for every row that has not been picked. No name is stored anywhere here: see TESTIMONIAL_NOTICE.';
+comment on column public.survey_responses.completed_at is
+  'Null while it is still being written. Both partial and finished rows are counted; only finished ones are a response rate.';
+
+-- ── What an open answer is about ────────────────────────────────────────────
+create table if not exists public.survey_codes (
   id          bigserial primary key,
-  profile_id  uuid not null references public.profiles(id) on delete cascade,
-  -- Matches the kinds in api/_lib/notifications.js. Text, not an enum, so a
-  -- seventh kind is a code change rather than a migration.
-  kind        text not null,
-  sent_at     timestamptz not null default now(),
-  -- False when Expo refused it. Kept rather than dropped: a token that fails
-  -- every time is how we learn the app was deleted.
-  ok          boolean not null default true,
-  -- Expo's own message when it refused. Short, and never anything the reader
-  -- wrote: nothing from a note or a journal entry reaches this table.
-  detail      text
+  response_id bigint not null references public.survey_responses(id) on delete cascade,
+  -- Which open question this code is on.
+  question_id text not null,
+  -- The code itself, as typed in the admin. Free text on purpose: a fixed list
+  -- would have to be guessed before any answers exist.
+  code        text not null,
+  created_at  timestamptz not null default now()
 );
 
--- The cooldown and the monthly cap both ask "what has this person had
--- recently", newest first.
-create index if not exists push_sends_recent_idx
-  on public.push_sends (profile_id, sent_at desc);
+-- One code once per answer. Adding it twice is a tap, not an intention.
+create unique index if not exists survey_codes_once_idx
+  on public.survey_codes (response_id, question_id, code);
 
-alter table public.push_sends enable row level security;
+create index if not exists survey_codes_question_idx
+  on public.survey_codes (question_id);
 
-comment on table public.push_sends is
-  'One row per push attempt. The only source for the four day cooldown and the four a month cap, because two of the six kinds write no alert row to join against.';
+alter table public.survey_codes enable row level security;
+
+comment on table public.survey_codes is
+  'What an open survey answer is about, assigned by an admin. One row per code per answer, so one sentence can be about two things.';
+
+-- ── The old surveys go ──────────────────────────────────────────────────────
+-- Ellie: "We can delete all prior survey data. Survey and experience are
+-- different enough now." The quick footer reactions and the app's experience
+-- answers are a different question and stay.
+delete from public.feedback_submissions
+ where type in ('beta_survey', 'post_results');
+
+-- The profile flag that recorded somebody had answered the old one. It gates
+-- nothing now; the new survey knows by its own row.
+update public.profiles set beta_survey_at = null where beta_survey_at is not null;
 
 -- ── Verification ────────────────────────────────────────────────────────────
 select
-  (select count(*) from public.push_tokens)  as devices,
-  (select count(*) from public.push_sends)   as sends,
-  (select count(*) from public.profiles where push_opt_in is true)  as said_yes,
-  (select count(*) from public.profiles where push_opt_in is false) as said_no,
-  (select count(*) from public.profiles where push_opt_in is null)  as never_asked;
-
-select column_name, data_type
-  from information_schema.columns
- where table_name = 'profiles'
-   and column_name in ('push_opt_in', 'push_asked_at', 'app_last_opened_at')
- order by column_name;
+  (select count(*) from public.survey_responses)                                  as responses,
+  (select count(*) from public.survey_responses where completed_at is not null)   as finished,
+  (select count(*) from public.survey_codes)                                      as codes,
+  (select count(*) from public.survey_responses where featured_at is not null)    as featured_quotes,
+  (select count(*) from public.feedback_submissions where type in ('beta_survey','post_results')) as old_rows_left,
+  (select count(*) from public.feedback_submissions)                              as feedback_rows_kept;
 ```
 <!-- /SQL -->
 
-**Step 3. Build the app and send it to TestFlight.** This one has to be a
-build rather than an update: notification code is native, and a native change
-cannot arrive over the air.
+---
 
-**In Terminal**, one at a time, waiting for each to finish:
+### B39, the five sentences that are mine
 
-```
-cd /Users/Ellie/Projects/unison && git pull
-```
+You write every word a customer reads, and the nine questions are the ones you
+approved one by one. These five are the wrapper I had to write to build it, and
+they are all customer-facing, so they are yours to replace. Each one is a
+single string in `api/_lib/survey.js`; tell me the words and I will put them in.
 
-```
-cd /Users/Ellie/Projects/unison/attune-app && npm run testflight
-```
+| Where it shows | What it says now |
+|--|--|
+| Under the title, before the first question | A few questions about how it went. Your answers are anonymous, they are never shown to your partner, and you can stop at any point. |
+| Under every written answer, as fine print | We may quote what you write here on our website. We never publish your name, your email, or anything that could identify you or your partner. |
+| The button | Send |
+| After they finish, as a heading | Thank you |
+| Under that heading | This goes straight to the people building Attune. It is the main thing that decides what we change. |
 
-```
-cd /Users/Ellie/Projects/unison/attune-app && npm run testflight:send
-```
+Two notes on the second one. It is there instead of the question the old survey
+asked ("May we use your words and your first name on the site?"), which you
+removed: "Do we have to ask this if we don't include PII with the testimonials?
+Is there fine print we could have instead that covers us?" So nothing published
+carries a name, and the homepage endpoint has no name in the row to publish
+even by mistake. It is also the one sentence here with a legal edge, which is
+why R12 now carries a question about it for the lawyer.
 
-The build runs on Expo's machines and takes fifteen to twenty minutes. You can
-close the terminal once it says the build is queued; the link it prints shows
-the progress.
+The 0 to 10 question has no words at its two ends. The old survey labelled them.
+If you want "Not at all likely" and "Extremely likely", or anything else, say
+so and they go in beside the numbers.
 
-**Step 4 is answered: B.** You chose "once they finish their first exercise",
-which is what was already set, so there is nothing to do. Kept here because it
-is the kind of decision someone will want the reasoning for later.
-
-iOS lets an app ask once. If someone says no, we can never ask again in the
-app; they have to find it in their phone's Settings, and almost nobody does. So
-this decided for good how many couples we can reach when their partner
-finishes.
-
-- **A. On the first launch after signing in.** The most asks and the worst
-  answers: most people say no to an app they have used for ninety seconds.
-- **B. Once they finish their first exercise. Your choice, and what is set.**
-  The moment they finish, the next thing that matters is their partner
-  finishing, which is exactly what a notification is for.
-- **C. Only from Settings.** The fewest people, the highest intent.
-
-The switch in Settings exists under all three, so nobody is stuck with the
-answer we caught them on.
-
-**The two splits are approved.** You wrote all six notifications; four split
-naturally into a bold line and a line under it, and these two did not, so the
-split was mine and you have said they are fine:
-
-| | Bold line | Line under it |
-|--|--|--|
-| Journal streak | **Your journal streak is about to expire** | Your streak of 6 days of entries in your relationship journal is about to expire. |
-| Workbook ready | **Your personalized workbook is ready** | For you to explore in your learn tab |
-
-
+---
 
 ## 2. Open
 
@@ -359,11 +238,8 @@ on you.
 
 | # | Built, needs your eye |
 |--|--|
-| B34 | **The word and the insight were turning over at 5pm, not at midnight.** Both were picked by counting days from 1970 in UTC, which rolls at 00:00Z: 5pm in California, 8pm in New York. Two devices opened either side of that hour disagreed while plainly being on the same day, which is what you saw between your phone and the simulator. They are picked by the reader's own calendar day now, from the timezone the app already sends, so a day is a day wherever you are. |
-| D36 | **The In Practice tiles have an edge again.** A white card on a white sheet, with nothing but a soft shadow, loses its bottom half: the title and the reading time had no line between them and the page. Both surfaces draw the hairline this product's own card rule calls for, with the shadow still behind it. |
-| D28 | **The first results card says "Click to begin" on the website and "Tap to begin" in the app.** Both words live in the one module every other sentence on those cards comes from. |
-| D33 | **Two of the three faults were real.** The checkout's "Or pay with card" line now hides itself when the wallet button above it did not draw, and the homepage's three statistics are three rows on a phone instead of two and a stray one. The third was not real: I said the results sidebar indented Physical Intimacy, measured it in the page, and every row sits at the same place. It was the second line of a wrapping label, read off a screenshot. |
-| D34 | **One library on both dashboard screens.** The Resources page drew its own list of twelve rows that linked out to the marketing pages, which is the behaviour you reported as being signed out. It draws the same reading the Home screen does now: shelves, tiles, bookmarks, the saved and read counts, the search, and an article that opens where you are. It matters more than it looks: `view=practice` is an alias for that page, and that is the link every card and every notification about an article uses. |
+| B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
+| B40 | **Three admin pages became one.** Beta Feedback, Survey Explorer and Testimonials all read the rows this migration deletes, and each carried its own copy of the 26 questions. The Survey page replaces all three; the Feedback Overview, the NPS trend and Couple type x outcomes now read the new answers, and the two tiles that measured retired questions say which two questions they measure instead. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -377,6 +253,11 @@ on you.
 
 | Verified by you | What it was |
 |--|--|
+| B34 | The word and the insight turned over at 5pm instead of midnight, because the day was counted in UTC. Both are picked by the reader’s own calendar day now. |
+| D36 | The In Practice tiles lost their bottom half on a white sheet. Both surfaces draw the hairline this product’s card rule calls for. |
+| D28 | The first results card says "Click to begin" on the website and "Tap to begin" in the app, from the one module those cards read. |
+| D33 | Two of three faults were real: the checkout’s wallet line hides itself when no wallet drew, and the homepage’s three statistics are three rows on a phone. The sidebar indent was a wrapping label read off a screenshot. |
+| D34 | One library on both dashboard screens: Resources draws what Home draws, which matters because view=practice is the link every article card uses. |
 | D35 | In Practice would not load in the app: a name I gave a filter collided with the list of posts below it, and the feed threw before its first query. |
 | D17 | The experience survey waits for the last page of the results instead of opening over the first screen. |
 | D18 | Notes clears the tab bar, which was cutting a sentence in half. |
@@ -393,7 +274,7 @@ on you.
 | B25 | The footer feedback and both experience questionnaires reach the admin. |
 | B26 | A 26-question survey nobody could open, deleted. Its replacement is a proposal in section 1. |
 | B27 | Every browser check was measuring a 500 point window; two pages were cut off at 320 and are fixed. |
-| B17b | Push permission asks after the first exercise, and both title splits approved. |
+| B17b | Push permission asks after the first exercise, both title splits approved, and she has run the key, the migration and the build herself. |
 | B19 | Thirteen contrast fixes taken. The brand orange as small print stays as it is: "Leave it." |
 | D20 | Decided against: relabelling the couple map's axes, quadrants and the gap between the two dots. |
 | D21 | Decided against: replacing the homepage's wireframe images with pictures of the real product. |

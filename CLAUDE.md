@@ -1065,6 +1065,15 @@ testflight`. Never "from the app folder, run". Never a fragment to append. A
 file she needs to put somewhere gets `| pbcopy` and the instruction to paste,
 rather than a path to go and open.
 
+**Back up by path, not by basename.** `api/survey.js` and
+`api/_lib/survey.js` both became `survey.js` in a scratch directory, so one
+plant's restore wrote the endpoint over the module and left the planted line
+in place. The gate caught it, which is the only reason it did not ship.
+
+`git checkout --` is not the fallback either: both files were new and untracked,
+so it had nothing to restore and failed silently. When a file is not yet in a
+commit, the copy IS the only backup.
+
 **Say which window a block goes in, every time.** Step 2 of the push
 instructions told her to run `cat <path> | pbcopy` in Terminal and then paste
 into Supabase. She pasted the cat command into Supabase: "ERROR: 42601: syntax

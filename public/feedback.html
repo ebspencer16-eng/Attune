@@ -4,44 +4,24 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attune – Your experience</title>
   <!-- attune:hscroll-lock -->
   <link rel="stylesheet" href="/tokens.css">
-  <style>
-    html { overscroll-behavior-x: none; overflow-x: hidden; max-width: 100%; width: 100%; }
-    body { overflow-x: hidden; max-width: 100%; width: 100%; position: relative; }
-  /* Matrix column headings: label + italic description */
-.grid-head-cell{display:flex;flex-direction:column;gap:.15rem;justify-content:flex-start;text-align:center;padding:var(--s-xs) .35rem}
-.gh-label{font-weight:700}
-.gh-desc{font-size:.6rem;font-style:italic;font-weight:400;color:var(--faint);line-height:1.3}
-/* Per-cell low-score follow-ups */
-.low-follow{margin-top:var(--s-md)}
-.low-item{margin-top:.9rem;padding-left:.85rem;border-left:2px solid var(--orange)}
-.low-item .q-text{font-size:.85rem;margin-bottom:.4rem}
-/* Inline consent inputs */
-.consent-chips{flex-direction:column;align-items:flex-start;gap:var(--s-xs)}
-.consent-row{display:flex;align-items:center;gap:var(--s-xs);flex-wrap:wrap;width:100%}
-.inline-input{width:auto;min-width:120px;max-width:180px;margin:0;padding:.45rem .65rem;font-size:.82rem}
-/* Required warning */
-.req-warn{display:none;background:rgba(232,103,58,.08);border:1px solid rgba(232,103,58,.35);color:var(--ink);border-radius:10px;padding:.8rem var(--s-md);font-size:.82rem;line-height:1.5;margin-bottom:.9rem}
-.req-warn.show{display:block}
-</style>
-
-<title>Attune – Beta Feedback</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{overflow-x:hidden;scroll-behavior:smooth}
+html{overscroll-behavior-x:none;overflow-x:hidden;max-width:100%;width:100%;scroll-behavior:smooth}
+body{overflow-x:hidden;max-width:100%;width:100%;position:relative}
 :root{
   --cream:#F7F4EE;--warm:#FDFCF9;--ink:#1C1A16;--soft:#5A5750;--faint:#6D6A65;
-  --orange:#E8673A;--indigo:#1B5FE8;--purple:#9B5DE5;--green:#10B981;
+  --orange:#E8673A;--indigo:#1B5FE8;
   --border:rgba(28,26,22,.12);--border-soft:rgba(28,26,22,.07);
-  --orange-light:rgba(232,103,58,.1);--indigo-light:rgba(27,95,232,.08);--purple-light:rgba(155,93,229,.08);
+  --orange-light:rgba(232,103,58,.1);
 }
 body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.6;min-height:100vh}
 .page{max-width:660px;margin:0 auto;padding:1.98rem var(--s-xl) 6rem}
 
-/* Header */
-.header{margin-bottom:3rem;opacity:0;animation:fadeUp .7s ease forwards}
+.header{margin-bottom:var(--s-2xl)}
 .header-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-bottom:var(--s-md);display:flex;align-items:center;gap:var(--s-xs)}
 .header-eyebrow::before,.header-eyebrow::after{content:'';width:20px;height:1.5px;flex-shrink:0}
 .header-eyebrow::before{background:linear-gradient(90deg,var(--orange),var(--indigo))}
@@ -49,36 +29,23 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .header h1{font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,5vw,2.5rem);font-weight:400;line-height:1.15;margin-bottom:.85rem;color:var(--ink)}
 .header p{font-size:.9rem;color:var(--soft);line-height:1.75;max-width:500px}
 
-/* Progress */
-.progress-wrap{margin-bottom:var(--s-3xl);opacity:0;animation:fadeUp .7s .1s ease forwards}
+.progress-wrap{margin-bottom:var(--s-2xl)}
 .progress-meta{display:flex;justify-content:space-between;font-size:.7rem;color:var(--faint);margin-bottom:6px}
 .progress-track{height:2px;background:var(--border);border-radius:2px}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--indigo));border-radius:2px;transition:width .5s ease;width:0%}
 
-/* Section */
-.section{margin-bottom:2.75rem;opacity:0;animation:fadeUp .6s ease forwards}
-.section:nth-child(1){animation-delay:.15s}.section:nth-child(2){animation-delay:.22s}
-.section:nth-child(3){animation-delay:.28s}.section:nth-child(4){animation-delay:.34s}
-.section:nth-child(5){animation-delay:.4s}.section:nth-child(6){animation-delay:.46s}
-.section:nth-child(7){animation-delay:.52s}
-.section-label{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:var(--s-xl);padding-bottom:.65rem;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:var(--s-xs)}
-.section-label::before{content:'';width:16px;height:1.5px;background:linear-gradient(90deg,var(--orange),var(--indigo));flex-shrink:0}
+.question{margin-bottom:2.1rem}
+.q-text{font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:400;line-height:1.45;margin-bottom:.75rem;color:var(--ink)}
+.q-hint{font-size:.78rem;color:var(--faint);margin:-.45rem 0 .8rem;line-height:1.5}
 
-/* Question */
-.question{margin-bottom:1.85rem}
-.q-text{font-family:'DM Serif Display',serif;font-size:1rem;font-weight:400;line-height:1.45;margin-bottom:.3rem;color:var(--ink)}
-.q-sub{font-size:.78rem;color:var(--faint);margin-bottom:.85rem;line-height:1.5}
+/* Stars */
+.stars{display:flex;gap:.5rem}
+.star{background:none;border:none;padding:2px 0;font-size:1.9rem;line-height:1;color:var(--border);cursor:pointer;transition:color .15s;font-family:inherit}
+.star.on{color:var(--orange)}
 
-/* 1–5 rating */
-.rating-row{display:flex;gap:6px}
-.rating-btn{flex:1;padding:9px 4px;border:1px solid var(--border);border-radius:8px;background:var(--warm);font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--soft);cursor:pointer;transition:all .15s;text-align:center;line-height:1.3}
-.rating-btn .num{font-size:1.05rem;display:block;margin-bottom:2px;font-weight:500}
-.rating-btn:hover{border-color:var(--orange);color:var(--ink)}
-.rating-btn.sel{background:var(--orange-light);border-color:var(--orange);color:var(--ink)}
-
-/* Chips */
+/* Chips, used for the choice, the scale and the ranking's options */
 .chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{padding:7px 14px;border:1px solid var(--border);border-radius:100px;background:var(--warm);font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--soft);cursor:pointer;transition:all .15s;line-height:1.3}
+.chip{padding:8px 15px;border:1px solid var(--border);border-radius:100px;background:var(--warm);font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--soft);cursor:pointer;transition:all .15s;line-height:1.3;text-align:left}
 .chip:hover{border-color:var(--soft);color:var(--ink)}
 .chip.sel{background:var(--ink);border-color:var(--ink);color:white}
 
@@ -89,88 +56,35 @@ body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .nps-btn.sel{background:var(--orange);border-color:var(--orange);color:white;font-weight:600}
 .nps-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:.68rem;color:var(--faint)}
 
-/* Grid */
-.grid-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:.85rem}
-.grid-head{display:grid;background:rgba(28,26,22,.04);border-bottom:1px solid var(--border)}
-.grid-head-cell{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:.65rem var(--s-xs);text-align:center;line-height:1.3}
-.grid-head-cell:first-child{text-align:left;padding-left:var(--s-md)}
-.grid-row{display:grid;border-bottom:1px solid var(--border-soft)}
-.grid-row:last-child{border-bottom:none}
-.grid-row:nth-child(even){background:rgba(28,26,22,.02)}
-.grid-row-label{font-size:.82rem;color:var(--ink);padding:var(--s-sm) var(--s-xs) var(--s-sm) var(--s-md);display:flex;align-items:center;line-height:1.35}
-.grid-cell{display:flex;align-items:center;justify-content:center;padding:var(--s-xs) .25rem}
-.grid-cell .dots{display:flex;gap:4px}
-.dot{width:26px;height:26px;border:1px solid var(--border);border-radius:50%;background:var(--warm);font-size:.72rem;font-family:'DM Sans',sans-serif;color:var(--faint);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
-.dot:hover{border-color:var(--orange);color:var(--orange)}
-.dot.sel{background:var(--orange);border-color:var(--orange);color:white;font-weight:600}
-/* Single-pick cells (time grid): an empty circle that fills in when chosen. */
-.dot.pick::after{content:'';width:9px;height:9px;border-radius:50%;background:transparent;transition:background .15s}
-.dot.pick.sel::after{background:white}
-/* Long aspect names need room to wrap in the time grid header. */
-#timeGrid .grid-head-cell{text-transform:none;letter-spacing:.02em;font-size:.6rem;line-height:1.25}
-.grid-cell.skip{opacity:.18;pointer-events:none}
+/* Rank: picked rows stack in order, the rest wait below */
+.rank-picked{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.rank-rest{display:flex;flex-direction:column;gap:.4rem}
+.rank-row{display:flex;align-items:center;gap:.7rem;width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:10px;background:var(--warm);font-size:.85rem;font-family:'DM Sans',sans-serif;color:var(--ink);cursor:pointer;text-align:left;transition:all .15s}
+.rank-row:hover{border-color:var(--soft)}
+.rank-row.sel{background:var(--orange-light);border-color:var(--orange)}
+.rank-num{width:22px;height:22px;border-radius:50%;background:var(--orange);color:white;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.rank-left{font-size:.72rem;color:var(--faint);margin-top:.7rem}
 
-/* Textarea */
 textarea{width:100%;padding:13px 15px;border:1px solid var(--border);border-radius:10px;background:var(--warm);font-size:.88rem;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--ink);line-height:1.65;resize:vertical;min-height:90px;outline:none;transition:border-color .15s}
 textarea:focus{border-color:var(--soft)}
 textarea::placeholder{color:var(--faint)}
+.notice{font-size:.72rem;color:var(--faint);line-height:1.55;margin-top:.5rem}
 
-/* Input */
-input[type=text],input[type=email]{width:100%;padding:11px 15px;border:1px solid var(--border);border-radius:10px;background:var(--warm);font-size:.88rem;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--ink);outline:none;transition:border-color .15s;margin-bottom:9px}
-input:focus{border-color:var(--soft)}
-input::placeholder{color:var(--faint)}
-
-/* Conditional blocks */
-.conditional{display:none;margin-top:var(--s-lg);padding:1.1rem var(--s-lg);background:rgba(232,103,58,.06);border:1px solid rgba(232,103,58,.18);border-radius:10px}
-.conditional.show{display:block}
-.conditional .q-text{font-size:.9rem}
-
-/* Lead questions block */
-.lead-block{background:rgba(27,95,232,.05);border:1px solid rgba(27,95,232,.12);border-radius:12px;padding:var(--s-lg) 1.4rem;margin-bottom:var(--s-xl)}
-.lead-block .q-text{font-size:.92rem}
-.lead-block .question{margin-bottom:1.4rem}
-.lead-block .question:last-child{margin-bottom:0}
-
-/* Submit */
 .submit-btn{width:100%;padding:15px 24px;background:var(--ink);color:white;border:none;border-radius:10px;font-size:.95rem;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:background .2s;letter-spacing:.01em}
 .submit-btn:hover{background:var(--orange)}
 .submit-btn:disabled{opacity:.35;cursor:not-allowed}
+.saved-line{font-size:.72rem;color:var(--faint);text-align:center;margin-top:var(--s-md)}
+.warn{display:none;background:rgba(232,103,58,.08);border:1px solid rgba(232,103,58,.35);color:var(--ink);border-radius:10px;padding:.8rem var(--s-md);font-size:.82rem;line-height:1.5;margin-bottom:.9rem}
+.warn.show{display:block}
 
-/* Success */
 .success-state{display:none;text-align:center;padding:2.64rem var(--s-2xl)}
 .success-state.show{display:block}
-.success-mark{width:52px;height:52px;background:rgba(16,185,129,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-xl)}
+.success-mark{width:52px;height:52px;background:rgba(16,185,129,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-xl);font-size:1.4rem}
 .success-state h2{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;margin-bottom:.65rem}
 .success-state p{font-size:.9rem;color:var(--soft)}
 
-/* Divider */
-hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:500px){
   .nps-btn{width:38px;height:38px;font-size:.8rem}
-  .dot{width:22px;height:22px;font-size:.65rem}
-  .grid-head-cell,.grid-row-label{font-size:.72rem;padding-left:var(--s-sm)}
-}
-/* Per-cell aspect labels exist only for the mobile stacked layout */
-.cell-aspect{display:none}
-/* Mobile: matrices stack into labeled rating blocks so every option is reachable without horizontal scroll */
-@media(max-width:560px){
-  .grid-wrap{overflow:visible}
-  .grid-head{display:none}
-  .grid-row{display:block !important;padding:.2rem 0 .8rem}
-  .grid-row:not(:last-child){border-bottom:1px solid var(--border)}
-  .grid-row-label{display:block;font-weight:600;font-size:.92rem;color:var(--ink);padding:var(--s-md) var(--s-md) .3rem}
-  .grid-cell{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-xs);padding:var(--s-xs) var(--s-md);justify-content:flex-start}
-  .grid-cell.skip{display:none}
-  .cell-aspect{display:block}
-  .cell-aspect .ca-label{font-weight:600;color:var(--ink);font-size:.74rem;letter-spacing:.03em;text-transform:uppercase}
-  .cell-aspect .ca-desc{display:block;font-style:italic;color:var(--faint);font-size:.7rem;margin-top:.12rem;line-height:1.35}
-  .grid-cell .dots{gap:9px}
-  .dot{width:34px;height:34px;font-size:.82rem}
-  #timeGrid .grid-cell{flex-direction:row;align-items:center;gap:.65rem}
-  #timeGrid .cell-aspect{order:2}
-  #timeGrid .dot.pick{width:28px;height:28px}
 }
 </style>
 <!-- attune:press-feedback -->
@@ -191,864 +105,346 @@ hr{border:none;border-top:1px solid var(--border-soft);margin:var(--s-2xl) 0}
 </style>
 </head>
 <body>
+
 <div class="page" id="formPage">
+  <div class="header">
+    <div class="header-eyebrow" id="eyebrow">Attune</div>
+    <h1 id="title"></h1>
+    <p id="intro"></p>
+  </div>
 
-<div class="header">
-  <div class="header-eyebrow">Attune · Beta Feedback</div>
-  <h1>What did you <em>actually</em> discover?</h1>
-  <p>Your honest feedback shapes everything from here. About 12 minutes. There are no right answers, only useful ones.</p>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span id="progText"></span><span id="progPct">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+  </div>
+
+  <div id="questions"></div>
+
+  <div class="warn" id="warn"></div>
+  <button class="submit-btn" id="submitBtn" disabled></button>
+  <div class="saved-line" id="savedLine"></div>
 </div>
-
-<div class="progress-wrap">
-  <div class="progress-meta">
-    <span id="progText">Getting started</span>
-    <span id="progPct">0%</span>
-  </div>
-  <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
-</div>
-
-<!-- ─────────────────────────────────────────────────────
-     SECTION 1 – Context & Expectations
-───────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">01 · Context & expectations</div>
-
-  <div class="question">
-    <div class="q-text">What did you expect to get out of Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
-    <div class="chips" id="expectations">
-      <button class="chip" data-g="expectations">Confirmation that my partner and I are a good match</button>
-      <button class="chip" data-g="expectations">Specific things to work on together</button>
-      <button class="chip" data-g="expectations">A framework for future conversations</button>
-      <button class="chip" data-g="expectations">To learn something new about my partner</button>
-      <button class="chip" data-g="expectations">To learn something new about myself</button>
-      <button class="chip" data-g="expectations">Wasn't sure what to expect</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt1">How well did Attune deliver on what you were expecting?</div>
-    <div class="rating-row" id="expectationMatch">
-      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">1</span>Fell short</button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">3</span>About right</button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="expectationMatch" data-s="1"><span class="num">5</span>Exceeded it</button>
-    </div>
-    <div class="conditional" id="fu-expectationMatch">
-      <div class="q-text" id="fuq-expectationMatch"></div>
-      <textarea id="fu_expectationMatch" placeholder="Be as specific as you can..." aria-labelledby="qt1"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Which of the following concerns applied to you prior to completing Attune? <span class="q-sub" style="display:inline;font-style:italic">Pick all that apply</span></div>
-    <div class="chips" id="concerns">
-      <button class="chip" data-g="concerns">I didn't think the questions would feel important or relevant to us</button>
-      <button class="chip" data-g="concerns">I didn't think my partner would engage seriously</button>
-      <button class="chip" data-g="concerns">I didn't think the results would say anything useful</button>
-      <button class="chip" data-g="concerns">I didn't think it would surface anything we didn't already know</button>
-      <button class="chip" data-g="concerns">I didn't have any concerns</button>
-      <button class="chip" data-g="concerns">Something else</button>
-    </div>
-  </div>
-</div>
-
-<!-- ─────────────────────────────────────────────────────
-     SECTION 2 – Communication Exercise
-───────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">02 · The communication exercise</div>
-
-  <div class="question">
-    <div class="q-text" id="qt2">Overall, how would you rate the communication exercise?</div>
-    <div class="rating-row" id="commsOverall">
-      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">1</span>Poor</button>
-      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">3</span>Good</button>
-      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="commsOverall" data-s="1"><span class="num">5</span>Excellent</button>
-    </div>
-    <div class="conditional" id="fu-commsOverall">
-      <div class="q-text" id="fuq-commsOverall"></div>
-      <textarea id="fu_commsOverall" placeholder="Be as specific as you can..." aria-labelledby="qt2"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt3">How honestly were you able to answer?</div>
-    <div class="rating-row" id="commsHonesty">
-      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
-      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">3</span>Somewhat</button>
-      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="commsHonesty" data-s="1"><span class="num">5</span>Completely honest</button>
-    </div>
-    <div class="conditional" id="fu-commsHonesty">
-      <div class="q-text" id="fuq-commsHonesty"></div>
-      <textarea id="fu_commsHonesty" placeholder="Be as specific as you can..." aria-labelledby="qt3"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Rate each aspect of the communication exercise</div>
-    <div class="q-sub">1 = poor · 5 = excellent</div>
-    <div class="grid-wrap" id="commsGrid"></div>
-    <div id="commsGridLows" class="low-follow"></div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt4">Did you notice questions that felt off, too clinical, or beside the point? If so, please share your thoughts.</div>
-    <textarea id="commsQuestionsFeedback" placeholder="Which ones, and why? If nothing stood out, say so." aria-labelledby="qt4"></textarea>
-  </div>
-</div>
-
-<!-- ─────────────────────────────────────────────────────
-     SECTION 3 – Expectations Exercise
-───────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">03 · The expectations exercise</div>
-
-  <div class="question">
-    <div class="q-text" id="qt5">Overall, how would you rate the expectations exercise?</div>
-    <div class="rating-row" id="expOverall">
-      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">1</span>Poor</button>
-      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">3</span>Good</button>
-      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="expOverall" data-s="1"><span class="num">5</span>Excellent</button>
-    </div>
-    <div class="conditional" id="fu-expOverall">
-      <div class="q-text" id="fuq-expOverall"></div>
-      <textarea id="fu_expOverall" placeholder="Be as specific as you can..." aria-labelledby="qt5"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt6">How honestly were you able to answer?</div>
-    <div class="rating-row" id="expHonesty">
-      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">1</span>Held back a lot</button>
-      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">3</span>Somewhat</button>
-      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="expHonesty" data-s="1"><span class="num">5</span>Completely honest</button>
-    </div>
-    <div class="conditional" id="fu-expHonesty">
-      <div class="q-text" id="fuq-expHonesty"></div>
-      <textarea id="fu_expHonesty" placeholder="Be as specific as you can..." aria-labelledby="qt6"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Rate each aspect of the expectations exercise</div>
-    <div class="q-sub">1 = poor · 5 = excellent</div>
-    <div class="grid-wrap" id="expGrid"></div>
-    <div id="expGridLows" class="low-follow"></div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt7">Were there responsibilities not mentioned in this exercise that matter to your relationship?</div>
-    <textarea id="expMissing" placeholder="Anything specific that should have been included. If nothing, say so." aria-labelledby="qt7"></textarea>
-  </div>
-</div>
-
-<!-- ─────────────────────────────────────────────────────
-     SECTION 4 – Overall Experience & Impact
-───────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">04 · Overall experience & impact</div>
-
-  <div class="question">
-    <div class="q-text">About how long did you spend on each of the following aspects of the Attune experience?</div>
-    <div class="q-sub">Pick one time range per row</div>
-    <div class="grid-wrap" id="timeGrid"></div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Rate each part of the Attune experience</div>
-    <div class="q-sub">1 = poor · 5 = excellent &nbsp;·&nbsp; – = didn't receive or use</div>
-    <div class="grid-wrap" id="overallGrid"></div>
-    <div id="overallGridLows" class="low-follow"></div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">You completed the core Attune experience. How interested would you be in the following Attune experiences?</div>
-    <div class="q-sub">1 = not at all interested &nbsp;·&nbsp; 5 = very interested</div>
-    <div class="grid-wrap" id="interestGrid"></div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Which part of Attune produced your biggest moment of recognition?</div>
-    <div class="chips" id="ahaMarker">
-      <button class="chip" data-g="ahaMarker" data-s="1">The communication questions themselves</button>
-      <button class="chip" data-g="ahaMarker" data-s="1">Seeing our communication scores side by side</button>
-      <button class="chip" data-g="ahaMarker" data-s="1">Our couple type</button>
-      <button class="chip" data-g="ahaMarker" data-s="1">The detailed feedback pages</button>
-      <button class="chip" data-g="ahaMarker" data-s="1">The expectations gaps</button>
-      <button class="chip" data-g="ahaMarker" data-s="1">The conversation we had afterward</button>
-      <button class="chip" data-g="ahaMarker" data-s="1">There wasn't one clear moment</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text">Did Attune lead to a conversation you wouldn't have had otherwise?</div>
-    <div class="chips" id="convoHappened">
-      <button class="chip" data-g="convoHappened" data-s="1">Yes, a significant one</button>
-      <button class="chip" data-g="convoHappened" data-s="1">Yes, a smaller one</button>
-      <button class="chip" data-g="convoHappened" data-s="1">It surfaced something – no formal conversation yet</button>
-      <button class="chip" data-g="convoHappened" data-s="1">Not really</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt8">How much did it shift your understanding of how you two operate as a couple?</div>
-    <div class="rating-row" id="shiftCouple">
-      <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">1</span>No shift</button>
-      <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">3</span>Some shift</button>
-      <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="shiftCouple" data-s="1"><span class="num">5</span>Significant shift</button>
-    </div>
-    <div class="conditional" id="fu-shiftCouple">
-      <div class="q-text" id="fuq-shiftCouple"></div>
-      <textarea id="fu_shiftCouple" placeholder="Be as specific as you can..." aria-labelledby="qt8"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt9">How much did it shift your understanding of yourself?</div>
-    <div class="rating-row" id="shiftSelf">
-      <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">1</span>No shift</button>
-      <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">3</span>Some shift</button>
-      <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="shiftSelf" data-s="1"><span class="num">5</span>Significant shift</button>
-    </div>
-    <div class="conditional" id="fu-shiftSelf">
-      <div class="q-text" id="fuq-shiftSelf"></div>
-      <textarea id="fu_shiftSelf" placeholder="Be as specific as you can..." aria-labelledby="qt9"></textarea>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt10">How likely are you to review your results at some point in the next 6 months?</div>
-    <div class="rating-row" id="returnLikelihood">
-      <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">1</span>Very unlikely</button>
-      <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">3</span>Maybe</button>
-      <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="returnLikelihood" data-s="1"><span class="num">5</span>Very likely</button>
-    </div>
-    <div class="conditional" id="fu-returnLikelihood">
-      <div class="q-text" id="fuq-returnLikelihood"></div>
-      <textarea id="fu_returnLikelihood" placeholder="Be as specific as you can..." aria-labelledby="qt10"></textarea>
-    </div>
-  </div>
-
-
-  <div class="question">
-    <div class="q-text">How would you say Attune's value compares to other relationship-building offerings (therapy, books, retreats, and so on)?</div>
-    <div class="rating-row" id="valuePct">
-      <button class="rating-btn" data-g="valuePct" data-s="1"><span class="num">1</span>Much less value</button>
-      <button class="rating-btn" data-g="valuePct" data-s="1"><span class="num">2</span></button>
-      <button class="rating-btn" data-g="valuePct" data-s="1"><span class="num">3</span>About the same</button>
-      <button class="rating-btn" data-g="valuePct" data-s="1"><span class="num">4</span></button>
-      <button class="rating-btn" data-g="valuePct" data-s="1"><span class="num">5</span>Much more value</button>
-    </div>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt11">What's behind that rating?</div>
-    <div class="q-sub">What makes it feel more or less valuable compared to other options?</div>
-    <textarea id="valueWhy" placeholder="What shapes how you think about what Attune is worth..." aria-labelledby="qt11"></textarea>
-  </div>
-</div>
-
-<!-- ─────────────────────────────────────────────────────
-     SECTION 5 – What You Actually Discovered
-───────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">05 · What you actually discovered</div>
-
-  <div class="question">
-    <div class="q-text" id="qt12">In your own words, what did you actually discover or notice?</div>
-    <div class="q-sub">This is the most valuable thing you can share with us.</div>
-    <textarea id="whatDiscovered" placeholder="Anything, big or small. What stuck?" style="min-height:110px" aria-labelledby="qt12"></textarea>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt13">Is there anything you wish you'd known before doing Attune, to be more prepared, or more excited?</div>
-    <div class="q-sub">This helps us with how we explain Attune to new couples.</div>
-    <textarea id="wishKnew" placeholder="Something about the process, the format, what to expect..." aria-labelledby="qt13"></textarea>
-  </div>
-
-</div>
-
-<!-- ─────────────────────────────────────────────────────
-     SECTION 6 – A Word From You & NPS
-───────────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">06 · A word from you</div>
-
-  <div class="question">
-    <div class="q-text" id="qt14">If you were telling a close friend about Attune, what would you say?</div>
-    <div class="q-sub">Write it how you'd actually say it, not a review.</div>
-    <textarea id="testimonial" placeholder="e.g. 'We've been together four years and I still learned something I didn't expect...'" style="min-height:110px" aria-labelledby="qt14"></textarea>
-  </div>
-
-  <div class="question">
-    <div class="q-text" id="qt15">May we use your words and first name on our website's reviews section?</div>
-    <div class="chips consent-chips" id="testimonialConsent">
-      <div class="consent-row">
-        <button class="chip" data-g="testimonialConsent" data-s="1">Yes – use my words and my first name,</button>
-        <input type="text" class="inline-input" id="consentFirstName" placeholder="first name" aria-labelledby="qt15">
-      </div>
-      <div class="consent-row">
-        <button class="chip" data-g="testimonialConsent" data-s="1">Yes – initials only, my initials are</button>
-        <input type="text" class="inline-input" id="consentInitials" placeholder="initials" maxlength="5" aria-label="initials">
-      </div>
-      <button class="chip" data-g="testimonialConsent" data-s="1">Yes – keep it anonymous</button>
-      <button class="chip" data-g="testimonialConsent" data-s="1">No, internal use only</button>
-    </div>
-  </div>
-
-  <hr>
-
-  <div class="question">
-    <div class="q-text" id="qt16">How likely are you to recommend Attune to a couple you know?</div>
-    <div class="q-sub">0 = not at all · 10 = absolutely</div>
-    <div class="nps-row" id="nps"></div>
-    <div class="nps-labels"><span>Not likely</span><span>Very likely</span></div>
-    <div class="conditional" id="npsCond">
-      <div class="q-text">What's holding you back from recommending Attune?</div>
-      <textarea id="npsWhy" placeholder="Be honest. This is exactly what we need to hear..." aria-labelledby="qt16"></textarea>
-    </div>
-  </div>
-
-  <div class="req-warn" id="reqWarn"></div>
-  <button class="submit-btn" id="submitBtn" onclick="submitForm()">Submit feedback →</button>
-  <p style="font-size:.72rem;color:var(--faint);text-align:center;margin-top:var(--s-sm)">Every question is required. Your responses are confidential and used only to improve Attune.</p>
-</div>
-</div><!-- /page -->
 
 <div class="success-state" id="successState">
-  <div class="success-mark">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-  </div>
-  <h2>Thank you, genuinely.</h2>
-  <p>Your responses have been recorded. Your feedback is exactly what we need to make Attune better.<br>We'll be in touch before we launch.</p>
+  <div class="success-mark">✓</div>
+  <h2 id="thanksTitle"></h2>
+  <p id="thanksBody"></p>
 </div>
 
+<script src="/_session.js"></script>
 <script>
-// ── Grid builder ──────────────────────────────────────────────────────────────
-// cols: [{ label, desc }]. skipMap: { rowIndex: [colIndex, ...] } for cells that
-// don't apply (rendered as an em dash, not answerable).
-function buildGrid(containerId, rows, cols, skipMap = {}) {
-  const wrap = document.getElementById(containerId);
-  if (!wrap) return;
-  const headStyle = `grid-template-columns: minmax(120px, 2fr) ${cols.map(() => 'minmax(156px, 1fr)').join(' ')}`;
-  let html = `<div class="grid-head" style="${headStyle}">
-    <div class="grid-head-cell"></div>
-    ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c.label}</span>${c.desc ? `<span class="gh-desc">${c.desc}</span>` : ''}</div>`).join('')}
-  </div>`;
+/**
+ * The survey, for somebody arriving from a link.
+ *
+ * ── THE QUESTIONS ARE NOT IN THIS FILE ────────────────────────────────────
+ * This page used to carry twenty-six of its own, while the results carried six
+ * and the app carried seven. Three question sets, three stores, and no way to
+ * compare an answer from one with an answer from another.
+ *
+ * Ellie, approving the replacement: "Please use this as the regular survey for
+ * everyone at the end of their experience, not just beta users."
+ *
+ * So everything drawn here comes from GET /api/survey: the questions, their
+ * options, the wording around them, and the ranking's list, which is built out
+ * of what this particular couple actually did. Nothing below is a sentence a
+ * customer reads. It is the drawing of whatever the endpoint says to ask.
+ *
+ * ── EVERY ANSWER IS SAVED AS IT IS GIVEN ──────────────────────────────────
+ * Ellie: "Collect incomplete responses." Each answer posts as it is made, so
+ * closing the tab half way through leaves what was written. The old page kept
+ * everything in the DOM until the submit button and threw it all away if that
+ * request failed. Only reaching the end marks the response finished.
+ */
+(function () {
+  var form = null;
+  var answers = {};
+  var sending = false;
+  var savedOnce = false;
+  var timer = null;
 
-  rows.forEach((row, ri) => {
-    html += `<div class="grid-row" style="${headStyle}">
-      <div class="grid-row-label">${row}</div>
-      ${cols.map((col, ci) => {
-        if ((skipMap[ri] || []).includes(ci)) {
-          return `<div class="grid-cell skip"><div class="dots"><div class="dot" style="opacity:.25;pointer-events:none">—</div></div></div>`;
-        }
-        return `<div class="grid-cell">
-          <span class="cell-aspect"><span class="ca-label">${col.label}</span>${col.desc ? `<span class="ca-desc">${col.desc}</span>` : ''}</span>
-          <div class="dots">
-            ${[1,2,3,4,5].map(v => `<div class="dot" data-grid="${containerId}" data-ri="${ri}" data-ci="${ci}" data-v="${v}" onclick="gridClick(this)">${v}</div>`).join('')}
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`;
-  });
-  wrap.innerHTML = html;
-}
+  var el = function (id) { return document.getElementById(id); };
 
-function gridClick(dot) {
-  const {grid, ri, ci} = dot.dataset;
-  document.querySelectorAll(`.dot[data-grid="${grid}"][data-ri="${ri}"][data-ci="${ci}"]`).forEach(d => d.classList.remove('sel'));
-  dot.classList.add('sel');
-  renderGridLows(grid);
-  updateProgress();
-}
+  /* Should this question be asked?
+   *
+   * The condition is data on the question itself, from api/_lib/survey.js, so
+   * this is a matcher rather than a list of question ids. A static page cannot
+   * import that file, which is why these six lines exist at all; what keeps
+   * them honest is check-survey, which lifts this function and runs it against
+   * the server's own `shouldShow` over a sweep of answers.
+   *
+   * A new conditional question needs no change here. */
+  function shouldShow(q, answers) {
+    var w = q && q.showWhen;
+    if (!w || !w.field) return true;
+    var v = answers[w.field];
+    if (typeof w.startsWith === 'string') {
+      return typeof v === 'string' && v.indexOf(w.startsWith) === 0;
+    }
+    if (w.atLeast !== undefined || w.atMost !== undefined) {
+      var n = Number(v);
+      if (!isFinite(n) || v === '' || v === null || v === undefined) return false;
+      if (w.atLeast !== undefined && n < w.atLeast) return false;
+      if (w.atMost !== undefined && n > w.atMost) return false;
+      return true;
+    }
+    return true;
+  }
 
-function getGridData(gridId) {
-  const result = {};
-  document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`).forEach(d => {
-    result[`r${d.dataset.ri}_c${d.dataset.ci}`] = parseInt(d.dataset.v);
-  });
-  return result;
-}
+  function shown() {
+    return form.questions.filter(function (q) { return shouldShow(q, answers); });
+  }
 
-// ── Per-cell low-score follow-ups ─────────────────────────────────────────────
-// Any cell scored 1 or 2 gets its own named question + text box, all inline.
-// Answers are kept in a map so re-rendering never wipes what someone typed.
-const GRID_DEFS = {};   // gridId -> { rows, cols }
-const LOW_ANSWERS = {}; // "gridId_r#_c#" -> text
+  function answered(v) {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'string') return v.trim().length > 0;
+    if (Array.isArray(v)) return v.length > 0;
+    return true;
+  }
 
-function renderGridLows(gridId) {
-  const host = document.getElementById(gridId + 'Lows');
-  const def = GRID_DEFS[gridId];
-  if (!host || !def) return;
-
-  const lows = [...document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`)]
-    .filter(d => parseInt(d.dataset.v) <= 2)
-    .map(d => ({ ri: +d.dataset.ri, ci: +d.dataset.ci, v: +d.dataset.v }))
-    .sort((a, b) => a.ri - b.ri || a.ci - b.ci);
-
-  if (!lows.length) { host.innerHTML = ''; return; }
-
-  host.innerHTML = lows.map(l => {
-    const key = `${gridId}_r${l.ri}_c${l.ci}`;
-    const rowName = def.rows[l.ri];
-    const colName = def.cols[l.ci].label.toLowerCase();
-    const article = /^[aeiou]/.test(colName) ? 'an' : 'a';
-    const val = LOW_ANSWERS[key] ? LOW_ANSWERS[key].replace(/"/g, '&quot;') : '';
-    return `<div class="low-item">
-      <div class="q-text">You gave <strong>${rowName}</strong> ${article} ${colName} score of ${l.v}. Can you tell us more about that?</div>
-      <textarea data-lowkey="${key}" oninput="LOW_ANSWERS[this.dataset.lowkey]=this.value;updateProgress();" placeholder="What specifically didn't work...">${val}</textarea>
-    </div>`;
-  }).join('');
-}
-
-function getLowAnswers(gridId) {
-  const out = {};
-  const def = GRID_DEFS[gridId];
-  [...document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`)]
-    .filter(d => parseInt(d.dataset.v) <= 2)
-    .forEach(d => {
-      const key = `${gridId}_r${d.dataset.ri}_c${d.dataset.ci}`;
-      out[`${def.rows[d.dataset.ri]} · ${def.cols[d.dataset.ci].label}`] = LOW_ANSWERS[key] || '';
+  function save(done) {
+    var payload = { answers: answers, source: 'link' };
+    if (done) payload.done = true;
+    return fetch('/api/survey', {
+      method: 'POST',
+      headers: window.attuneHeaders(),
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      savedOnce = true;
+      el('savedLine').textContent = form.copy.saved;
+      return true;
     });
-  return out;
-}
-
-// Every low-score box that's currently on screen must be filled.
-function lowsComplete(gridId) {
-  return [...document.querySelectorAll(`#${gridId}Lows textarea`)].every(t => t.value.trim().length > 0);
-}
-
-// ── Banded follow-ups (1–2 / 3 / 4–5) ─────────────────────────────────────────
-const BANDS = {
-  expectationMatch: ['What was missing or fell short of what you expected?',
-                     'What would have made this a better match for what you were expecting?',
-                     'Were there any aspects of Attune that particularly exceeded your expectations?'],
-  commsOverall:     ['In what ways did this fall short?',
-                     'How could the communication exercise have been better?',
-                     'Are there any elements of the communications exercise that stood out as positive?'],
-  commsHonesty:     ['What would have helped you answer more openly?',
-                     'What would have helped you answer more openly?',
-                     null],   // 4-5 gets no follow-up
-  expOverall:       ['In what ways did this fall short?',
-                     'How could the expectations exercise have been better?',
-                     'What did you enjoy about the expectations exercise?'],
-  expHonesty:       ['What would have helped you answer more openly?',
-                     'What would have helped you answer more openly?',
-                     null],   // 4-5 gets no follow-up
-  shiftCouple:      ['Why not? What could be done differently to provide more insight into how you operate as a couple?',
-                     'What could be done differently to create more impact for you?',
-                     'Tell us more. What in particular shifted your understanding?'],
-  shiftSelf:        [null, null, null],   // follow-up removed
-  returnLikelihood: [null, null, null],   // follow-up removed
-};
-
-function bandIndex(v) { return v <= 2 ? 0 : (v === 3 ? 1 : 2); }
-
-function checkBand(groupId) {
-  if (!BANDS[groupId]) return;
-  const sel = document.querySelector(`[data-g="${groupId}"].sel`);
-  const cond = document.getElementById('fu-' + groupId);
-  const qEl  = document.getElementById('fuq-' + groupId);
-  if (!cond || !qEl) return;
-  if (!sel) { cond.classList.remove('show'); return; }
-  const v = parseInt(sel.querySelector('.num')?.textContent || sel.textContent);
-  const q = BANDS[groupId][bandIndex(v)];
-  if (!q) { cond.classList.remove('show'); return; }   // this band asks nothing
-  qEl.textContent = q;
-  cond.classList.add('show');
-}
-
-// ── Build NPS ─────────────────────────────────────────────────────────────────
-const npsWrap = document.getElementById('nps');
-for (let i = 0; i <= 10; i++) {
-  const btn = document.createElement('button');
-  btn.className = 'nps-btn';
-  btn.textContent = i;
-  btn.dataset.g = 'nps'; btn.dataset.s = '1'; btn.dataset.v = i;
-  btn.onclick = function() {
-    document.querySelectorAll('[data-g="nps"]').forEach(b => b.classList.remove('sel'));
-    btn.classList.add('sel');
-    document.getElementById('npsCond').classList.toggle('show', i <= 6);
-    updateProgress();
-  };
-  npsWrap.appendChild(btn);
-}
-
-// ── Build grids ───────────────────────────────────────────────────────────────
-const ASPECT_COLS = [
-  { label: 'Design',     desc: 'How was the look and feel?' },
-  { label: 'Accuracy',   desc: 'Was this a good representation of your relationship?' },
-  { label: 'Importance', desc: 'Is this content interesting to you?' },
-];
-
-const COMMS_ROWS = ['The questions themselves', 'Seeing scores side by side', 'Dimension breakdowns', 'Your couple type', 'Detailed feedback pages'];
-// "The questions themselves" isn't rated for importance/interest here.
-const COMMS_SKIP = { 0: [2] };
-
-const EXP_ROWS = ['Life and values questions', 'Responsibilities section', 'Detailed feedback pages'];
-// Same reasoning for the two input-style rows.
-const EXP_SKIP = { 0: [1], 1: [1] };
-
-const OVERALL_ROWS = ['Package selection and checkout process', 'Account creation process', 'Exercise questions', 'Results presentation', 'Couple type experience', 'Detailed feedback pages', 'Workbook', 'Overall flow / UX', 'Time it took'];
-const OVERALL_COLS = [
-  { label: 'Clarity',              desc: 'How easy was this to navigate?' },
-  { label: 'Impact',               desc: 'How much will you think about this going forward in your relationship?' },
-  { label: 'Overall Satisfaction', desc: 'How would you rate your feelings toward this aspect of the Attune experience?' },
-];
-const OVERALL_SKIP = { 0: [1], 1: [1], 2: [1], 7: [1], 8: [0, 1] };
-
-// ── Time-spent grid ───────────────────────────────────────────────────────────
-// Unlike the rating grids, this one is a single pick per row: each aspect of
-// the experience gets exactly one duration.
-const TIME_ROWS = ['Package selection, checkout, account creation', 'Completing communication exercise', 'Completing expectations exercise', 'Reviewing your results', 'Exploring the workbook'];
-const TIME_COLS = ['Less than 10 minutes', '10–20 minutes', '20–45 minutes', '45–60 minutes', 'Over 1 hour'];
-
-function buildChoiceGrid(containerId, rows, cols) {
-  const wrap = document.getElementById(containerId);
-  if (!wrap) return;
-  const gt = `grid-template-columns: minmax(120px, 2fr) ${cols.map(() => 'minmax(0, 1fr)').join(' ')}`;
-  let html = `<div class="grid-head" style="${gt}">
-    <div class="grid-head-cell"></div>
-    ${cols.map(c => `<div class="grid-head-cell"><span class="gh-label">${c}</span></div>`).join('')}
-  </div>`;
-  rows.forEach((row, ri) => {
-    html += `<div class="grid-row" style="${gt}">
-      <div class="grid-row-label">${row}</div>
-      ${cols.map((col, ci) => `<div class="grid-cell"><span class="cell-aspect"><span class="ca-label">${col}</span></span><div class="dots">
-        <div class="dot pick" data-grid="${containerId}" data-ri="${ri}" data-ci="${ci}" onclick="choiceClick(this)"></div>
-      </div></div>`).join('')}
-    </div>`;
-  });
-  wrap.innerHTML = html;
-}
-
-// One selection per ROW, so picking a new cell clears the rest of that row.
-function choiceClick(dot) {
-  const { grid, ri } = dot.dataset;
-  document.querySelectorAll(`.dot[data-grid="${grid}"][data-ri="${ri}"]`).forEach(d => d.classList.remove('sel'));
-  dot.classList.add('sel');
-  updateProgress();
-}
-function choiceGridComplete(gridId, rows) {
-  return rows.every((_, ri) => document.querySelector(`.dot[data-grid="${gridId}"][data-ri="${ri}"].sel`));
-}
-function getChoiceGridData(gridId, rows, cols) {
-  const out = {};
-  rows.forEach((r, ri) => {
-    const sel = document.querySelector(`.dot[data-grid="${gridId}"][data-ri="${ri}"].sel`);
-    out[r] = sel ? cols[parseInt(sel.dataset.ci)] : null;
-  });
-  return out;
-}
-
-const INTEREST_ROWS = ['Relationship Reflection exercise', 'Physical Intimacy Expectations exercise', 'Merging Lives Checklist', 'Build a Budget experience'];
-const INTEREST_COLS = [{ label: 'Interest', desc: '' }];
-
-GRID_DEFS.commsGrid   = { rows: COMMS_ROWS,    cols: ASPECT_COLS,   skip: COMMS_SKIP };
-GRID_DEFS.expGrid     = { rows: EXP_ROWS,      cols: ASPECT_COLS,   skip: EXP_SKIP };
-GRID_DEFS.overallGrid = { rows: OVERALL_ROWS,  cols: OVERALL_COLS,  skip: OVERALL_SKIP };
-GRID_DEFS.interestGrid= { rows: INTEREST_ROWS, cols: INTEREST_COLS, skip: {} };
-
-buildGrid('commsGrid',    COMMS_ROWS,    ASPECT_COLS,  COMMS_SKIP);
-buildGrid('expGrid',      EXP_ROWS,      ASPECT_COLS,  EXP_SKIP);
-buildGrid('overallGrid',  OVERALL_ROWS,  OVERALL_COLS, OVERALL_SKIP);
-buildGrid('interestGrid', INTEREST_ROWS, INTEREST_COLS);
-buildChoiceGrid('timeGrid', TIME_ROWS, TIME_COLS);
-
-// How many answerable cells each grid has — used for "every question required".
-function gridCellCount(gridId) {
-  const d = GRID_DEFS[gridId];
-  let n = 0;
-  d.rows.forEach((_, ri) => d.cols.forEach((__, ci) => { if (!(d.skip[ri] || []).includes(ci)) n++; }));
-  return n;
-}
-function gridComplete(gridId) {
-  return document.querySelectorAll(`.dot[data-grid="${gridId}"].sel`).length >= gridCellCount(gridId);
-}
-
-// ── Chip / rating wiring ───────────────────────────────────────────────────────
-document.querySelectorAll('.chip, .rating-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const g = btn.dataset.g;
-    const isSingle = btn.dataset.s === '1';
-    if (isSingle) {
-      document.querySelectorAll(`[data-g="${g}"]`).forEach(b => b.classList.remove('sel'));
-      btn.classList.add('sel');
-    } else {
-      btn.classList.toggle('sel');
-    }
-    if (BANDS[g]) checkBand(g);
-    updateProgress();
-  });
-});
-
-// ── Required questions ────────────────────────────────────────────────────────
-// Every question must be answered. Each entry: [label, isComplete()].
-const TEXT_REQUIRED = ['commsQuestionsFeedback','expMissing','valueWhy','whatDiscovered','wishKnew','testimonial'];
-
-function selCount(g) { return document.querySelectorAll(`[data-g="${g}"].sel`).length; }
-function txtFilled(id) { const e = document.getElementById(id); return !!(e && e.value.trim().length); }
-function bandFilled(g) {
-  if (!selCount(g)) return false;
-  const cond = document.getElementById('fu-' + g);
-  if (cond && !cond.classList.contains('show')) return true;   // this band asks nothing
-  return txtFilled('fu_' + g);
-}
-
-const REQUIRED = [
-  ['What you expected to get out of Attune',     () => selCount('expectations') > 0],
-  ['How well Attune delivered',                  () => bandFilled('expectationMatch')],
-  ['Concerns before starting',                   () => selCount('concerns') > 0],
-  ['Communication – overall rating',             () => bandFilled('commsOverall')],
-  ['Communication – honesty',                    () => bandFilled('commsHonesty')],
-  ['Communication – rate each aspect',           () => gridComplete('commsGrid') && lowsComplete('commsGrid')],
-  ['Questions that felt off',                    () => txtFilled('commsQuestionsFeedback')],
-  ['Expectations – overall rating',              () => bandFilled('expOverall')],
-  ['Expectations – honesty',                     () => bandFilled('expHonesty')],
-  ['Expectations – rate each aspect',            () => gridComplete('expGrid') && lowsComplete('expGrid')],
-  ['Responsibilities not mentioned',             () => txtFilled('expMissing')],
-  ['Time spent on each part of Attune',          () => choiceGridComplete('timeGrid', TIME_ROWS)],
-  ['Rate each part of the Attune experience',    () => gridComplete('overallGrid') && lowsComplete('overallGrid')],
-  ['Interest in other Attune experiences',       () => gridComplete('interestGrid')],
-  ['Biggest moment of recognition',              () => selCount('ahaMarker') > 0],
-  ['Whether it led to a conversation',           () => selCount('convoHappened') > 0],
-  ['Shift in understanding as a couple',         () => bandFilled('shiftCouple')],
-  ['Shift in understanding of yourself',         () => bandFilled('shiftSelf')],
-  ['Likelihood of reviewing your results',       () => bandFilled('returnLikelihood')],
-  ['How Attune’s value compares',           () => selCount('valuePct') > 0],
-  ['What’s behind that rating',             () => txtFilled('valueWhy')],
-  ['What you discovered',                        () => txtFilled('whatDiscovered')],
-  ['Anything you wish you’d known',         () => txtFilled('wishKnew')],
-  ['What you’d tell a close friend',        () => txtFilled('testimonial')],
-  ['Permission to use your words',               () => consentComplete()],
-  ['How likely you are to recommend Attune',     () => selCount('nps') > 0 && npsFollowOk()],
-];
-
-function npsFollowOk() {
-  const cond = document.getElementById('npsCond');
-  return !cond.classList.contains('show') || txtFilled('npsWhy');
-}
-// If they pick the named or initials option, that inline box has to be filled.
-function consentComplete() {
-  if (!selCount('testimonialConsent')) return false;
-  const sel = document.querySelector('[data-g="testimonialConsent"].sel');
-  const label = sel ? sel.textContent : '';
-  if (/first name/i.test(label))  return txtFilled('consentFirstName');
-  if (/initials/i.test(label))    return txtFilled('consentInitials');
-  return true;
-}
-
-// ── Progress ──────────────────────────────────────────────────────────────────
-function updateProgress() {
-  const done = REQUIRED.filter(r => { try { return r[1](); } catch (e) { return false; } }).length;
-  const pct = Math.round((done / REQUIRED.length) * 100);
-  document.getElementById('progFill').style.width = pct + '%';
-  document.getElementById('progPct').textContent = pct + '%';
-  document.getElementById('progText').textContent =
-    done === REQUIRED.length ? 'Ready to submit' : `${done} of ${REQUIRED.length} complete`;
-}
-
-document.addEventListener('input', function (e) {
-  if (e.target.matches('textarea, input[type=text], input[type=email]')) updateProgress();
-});
-
-// ── Collect all data ──────────────────────────────────────────────────────────
-function valOf(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-function getSelVals(g, single = false) {
-  const sels = [...document.querySelectorAll(`[data-g="${g}"].sel`)].map(b => b.textContent.trim());
-  return single ? (sels[0] || null) : sels;
-}
-function getRatingVal(g) {
-  const sel = document.querySelector(`[data-g="${g}"].sel`);
-  return sel ? parseInt(sel.querySelector('.num')?.textContent || sel.textContent) : null;
-}
-function getNPS() {
-  const sel = document.querySelector('[data-g="nps"].sel');
-  return sel ? parseInt(sel.textContent) : null;
-}
-
-function submitForm() {
-  const missing = REQUIRED.filter(r => { try { return !r[1](); } catch (e) { return true; } });
-  const warn = document.getElementById('reqWarn');
-  if (missing.length) {
-    warn.textContent = missing.length === 1
-      ? `One question still needs an answer: ${missing[0][0]}.`
-      : `${missing.length} questions still need an answer. First one: ${missing[0][0]}.`;
-    warn.classList.add('show');
-    updateProgress();
-    warn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
   }
-  warn.classList.remove('show');
 
-  const data = {
-    submitted: new Date().toISOString(),
-    survey_version: 'beta_v5',
-    // Context
-    expectations: getSelVals('expectations'),
-    expectationMatch: getRatingVal('expectationMatch'),
-    expectationMatchWhy: valOf('fu_expectationMatch'),
-    concerns: getSelVals('concerns'),
-    // Communication
-    commsOverall: getRatingVal('commsOverall'),
-    commsOverallWhy: valOf('fu_commsOverall'),
-    commsHonesty: getRatingVal('commsHonesty'),
-    commsHonestyWhy: valOf('fu_commsHonesty'),
-    commsGrid: getGridData('commsGrid'),
-    commsGridLows: getLowAnswers('commsGrid'),
-    commsQuestionsFeedback: valOf('commsQuestionsFeedback'),
-    // Expectations
-    expOverall: getRatingVal('expOverall'),
-    expOverallWhy: valOf('fu_expOverall'),
-    expHonesty: getRatingVal('expHonesty'),
-    expHonestyWhy: valOf('fu_expHonesty'),
-    expGrid: getGridData('expGrid'),
-    expGridLows: getLowAnswers('expGrid'),
-    expMissing: valOf('expMissing'),
-    // Overall
-    timeGrid: getChoiceGridData('timeGrid', TIME_ROWS, TIME_COLS),
-    overallGrid: getGridData('overallGrid'),
-    overallGridLows: getLowAnswers('overallGrid'),
-    ahaMarker: getSelVals('ahaMarker', true),
-    convoHappened: getSelVals('convoHappened', true),
-    shiftCouple: getRatingVal('shiftCouple'),
-    shiftCoupleWhy: valOf('fu_shiftCouple'),
-    shiftSelf: getRatingVal('shiftSelf'),
-    shiftSelfWhy: valOf('fu_shiftSelf'),
-    returnLikelihood: getRatingVal('returnLikelihood'),
-    returnLikelihoodWhy: valOf('fu_returnLikelihood'),
-    interestGrid: getGridData('interestGrid'),
-    valuePct: getRatingVal('valuePct'),
-    valueWhy: valOf('valueWhy'),
-    // Open
-    whatDiscovered: valOf('whatDiscovered'),
-    wishKnew: valOf('wishKnew'),
-    // Word + NPS
-    testimonial: valOf('testimonial'),
-    testimonialConsent: getSelVals('testimonialConsent', true),
-    consentFirstName: valOf('consentFirstName'),
-    consentInitials: valOf('consentInitials'),
-    nps: getNPS(),
-    npsWhy: valOf('npsWhy'),
-  };
-
-  // Written by the app when the beta tile is clicked. Absent if the survey was
-  // opened directly or on another device, in which case the response is simply
-  // ungrouped rather than blocked.
-  try {
-    const ctx = JSON.parse(localStorage.getItem('attune_feedback_ctx') || 'null');
-    if (ctx && ctx.respondentId) {
-      data.respondentId = ctx.respondentId;
-      if (ctx.coupleType) data.coupleType = ctx.coupleType;
-    }
-    // Fallback: if the survey was opened directly (no beta-tile context), link it
-    // to the logged-in account so it still ties to demographics for slicing.
-    if (!data.respondentId) {
-      try { const acct = JSON.parse(localStorage.getItem('attune_account') || 'null');
-        if (acct) { if (acct.id) data.respondentId = acct.id; if (!data.email && acct.email) data.email = acct.email; } } catch {}
-    }
-  } catch {}
-
-  sendSurvey(data);
-}
-
-// Submission used to fire and forget: it swallowed every error and showed the
-// success screen without waiting for a reply, so a dropped request looked
-// identical to a saved one and the response was gone. Now the payload is
-// stashed first, the send is awaited, and the success screen only appears on a
-// confirmed write. Anything unsent is retried on the next page load.
-const PENDING_KEY = 'attune_feedback_pending';
-
-async function postSurvey(data) {
-  const res = await fetch('/api/submit-beta-survey', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) throw new Error('Server returned ' + res.status);
-  return true;
-}
-
-function showSuccess() {
-  try { localStorage.removeItem(PENDING_KEY); } catch {}
-  try { localStorage.setItem('attune_feedback_submitted', '1'); } catch {}
-  // Clear the dashboard survey prompt (shared same-origin flag).
-  try { localStorage.setItem('attune_survey_done', '1'); } catch {}
-  document.getElementById('formPage').style.display = 'none';
-  const s = document.getElementById('successState');
-  s.classList.add('show');
-  window.scrollTo({top: 0, behavior: 'smooth'});
-}
-
-async function sendSurvey(data) {
-  // Stash before sending, so the answers survive a failure or a closed tab.
-  try { localStorage.setItem(PENDING_KEY, JSON.stringify(data)); } catch {}
-  const btn = document.getElementById('submitBtn');
-  const warn = document.getElementById('reqWarn');
-  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = 'Sending…'; }
-  try {
-    await postSurvey(data);
-    showSuccess();
-  } catch (err) {
-    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || 'Submit'; }
-    if (warn) {
-      warn.textContent = "That didn't send. Your answers are saved on this device, so nothing is lost. Check your connection and press submit again.";
-      warn.classList.add('show');
-      warn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    console.warn('[survey] submit failed:', err);
+  /* Text answers save on a pause rather than on every character. */
+  function saveSoon() {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(function () { save(false).catch(function () {}); }, 900);
   }
-}
 
-// A response stashed by a failed attempt is resent quietly on the next visit.
-// On load: if this device already submitted, show the thanks page (not a blank
-// form). If a prior submission was stashed but never confirmed (e.g. the page
-// was reloaded mid-send), finish it now and show 'saving… -> thanks' rather than
-// dropping the tester back onto an empty form.
-(function initFeedbackState() {
-  const successEl = document.getElementById('successState');
-  const formEl = document.getElementById('formPage');
-  const setThanks = () => {
-    try { successEl.querySelector('h2').textContent = 'Thank you, genuinely.';
-      successEl.querySelector('p').innerHTML = "Your responses have been recorded. Your feedback is exactly what we need to make Attune better.<br>We'll be in touch before we launch."; } catch {}
-  };
-  try { if (localStorage.getItem('attune_feedback_submitted') === '1') { setThanks(); showSuccess(); return; } } catch {}
-  let pending = null;
-  try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch {}
-  if (pending) {
-    if (formEl) formEl.style.display = 'none';
-    try { successEl.querySelector('h2').textContent = 'Saving your feedback\u2026';
-      successEl.querySelector('p').textContent = 'One moment. Please keep this page open.'; } catch {}
-    successEl.classList.add('show');
-    window.scrollTo({ top: 0 });
-    postSurvey(pending)
-      .then(() => { try { localStorage.removeItem(PENDING_KEY); } catch {} setThanks(); showSuccess(); })
-      .catch(() => {
-        successEl.classList.remove('show');
-        if (formEl) formEl.style.display = '';
-        const w = document.getElementById('reqWarn');
-        if (w) { w.textContent = "We couldn't finish saving your last submission. Your answers are still saved on this device. Press submit to try again."; w.classList.add('show'); }
-        updateProgress();
+  function set(id, v) {
+    answers[id] = v;
+    render();
+    save(false).catch(function () {});
+  }
+
+  function progress() {
+    var qs = shown();
+    var n = qs.filter(function (q) { return answered(answers[q.id]); }).length;
+    var pct = qs.length ? Math.round((n / qs.length) * 100) : 0;
+    el('progPct').textContent = pct + '%';
+    el('progFill').style.width = pct + '%';
+    el('progText').textContent = n + ' of ' + qs.length + ' answered';
+    el('submitBtn').disabled = sending || n === 0;
+  }
+
+  function chip(label, on, onClick) {
+    var b = document.createElement('button');
+    b.className = 'chip' + (on ? ' sel' : '');
+    b.type = 'button';
+    b.textContent = label;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function control(q) {
+    var wrap = document.createElement('div');
+    var cur = answers[q.id];
+
+    if (q.kind === 'stars') {
+      var max = q.max || 5;
+      var row = document.createElement('div');
+      row.className = 'stars';
+      for (var i = 1; i <= max; i++) {
+        (function (n) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'star' + (Number(cur) >= n ? ' on' : '');
+          b.textContent = Number(cur) >= n ? '★' : '☆';
+          b.setAttribute('aria-label', n + ' of ' + max);
+          b.addEventListener('click', function () { set(q.id, n); });
+          row.appendChild(b);
+        })(i);
+      }
+      wrap.appendChild(row);
+      return wrap;
+    }
+
+    if (q.kind === 'choice' || q.kind === 'scale') {
+      var opts = q.kind === 'choice' ? (q.options || []) : (q.scale || []);
+      var chips = document.createElement('div');
+      chips.className = 'chips';
+      opts.forEach(function (label, idx) {
+        /* A scale stores its position, one-based, so the admin can average it.
+           A choice stores the words. */
+        var value = q.kind === 'scale' ? idx + 1 : label;
+        chips.appendChild(chip(label, cur === value, function () {
+          set(q.id, cur === value ? '' : value);
+        }));
       });
-    return;
+      wrap.appendChild(chips);
+      return wrap;
+    }
+
+    if (q.kind === 'nps') {
+      var lo = q.min === undefined ? 0 : q.min;
+      var hi = q.max === undefined ? 10 : q.max;
+      var nrow = document.createElement('div');
+      nrow.className = 'nps-row';
+      for (var n2 = lo; n2 <= hi; n2++) {
+        (function (n) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'nps-btn' + (cur === n ? ' sel' : '');
+          b.textContent = String(n);
+          b.addEventListener('click', function () { set(q.id, cur === n ? '' : n); });
+          nrow.appendChild(b);
+        })(n2);
+      }
+      wrap.appendChild(nrow);
+      if (q.ends && q.ends.length === 2) {
+        var labels = document.createElement('div');
+        labels.className = 'nps-labels';
+        var a = document.createElement('span'); a.textContent = q.ends[0];
+        var b2 = document.createElement('span'); b2.textContent = q.ends[1];
+        labels.appendChild(a); labels.appendChild(b2);
+        wrap.appendChild(labels);
+      }
+      return wrap;
+    }
+
+    if (q.kind === 'rank') {
+      var all = q.options || [];
+      var picked = (Array.isArray(cur) ? cur : []).filter(function (o) { return all.indexOf(o) >= 0; });
+      var rest = all.filter(function (o) { return picked.indexOf(o) < 0; });
+      var top = document.createElement('div');
+      top.className = 'rank-picked';
+      picked.forEach(function (o, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'rank-row sel';
+        var num = document.createElement('span');
+        num.className = 'rank-num';
+        num.textContent = String(i + 1);
+        var txt = document.createElement('span');
+        txt.textContent = o;
+        b.appendChild(num); b.appendChild(txt);
+        b.addEventListener('click', function () {
+          set(q.id, picked.filter(function (x) { return x !== o; }));
+        });
+        top.appendChild(b);
+      });
+      var bottom = document.createElement('div');
+      bottom.className = 'rank-rest';
+      rest.forEach(function (o) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'rank-row';
+        b.textContent = o;
+        b.addEventListener('click', function () { set(q.id, picked.concat([o])); });
+        bottom.appendChild(b);
+      });
+      if (picked.length) wrap.appendChild(top);
+      wrap.appendChild(bottom);
+      if (rest.length && picked.length) {
+        var left = document.createElement('p');
+        left.className = 'rank-left';
+        left.textContent = rest.length + ' left to rank.';
+        wrap.appendChild(left);
+      }
+      return wrap;
+    }
+
+    // text
+    var ta = document.createElement('textarea');
+    ta.value = typeof cur === 'string' ? cur : '';
+    ta.placeholder = q.placeholder || '';
+    ta.setAttribute('aria-label', q.label);
+    ta.addEventListener('input', function () { answers[q.id] = ta.value; progress(); saveSoon(); });
+    wrap.appendChild(ta);
+    var note = document.createElement('p');
+    note.className = 'notice';
+    /* The one piece of fine print, and the reason the survey no longer asks
+       for permission question by question: nothing published carries a name. */
+    note.textContent = form.notice;
+    wrap.appendChild(note);
+    return wrap;
   }
-  updateProgress();
+
+  function render() {
+    var host = el('questions');
+    /* Redrawn whole on every answer, because showing a question depends on
+       another answer. A textarea keeps focus by being left alone: it is the
+       one control that is not rebuilt. */
+    var focused = document.activeElement;
+    var keepId = focused && focused.tagName === 'TEXTAREA' ? focused.getAttribute('aria-label') : null;
+    host.textContent = '';
+    shown().forEach(function (q) {
+      var block = document.createElement('div');
+      block.className = 'question';
+      var label = document.createElement('div');
+      label.className = 'q-text';
+      label.textContent = q.label;
+      block.appendChild(label);
+      if (q.hint) {
+        var hint = document.createElement('p');
+        hint.className = 'q-hint';
+        hint.textContent = q.hint;
+        block.appendChild(hint);
+      }
+      block.appendChild(control(q));
+      host.appendChild(block);
+    });
+    if (keepId) {
+      var again = host.querySelector('textarea[aria-label="' + keepId.replace(/"/g, '\\"') + '"]');
+      if (again) { again.focus(); again.selectionStart = again.value.length; }
+    }
+    progress();
+  }
+
+  function submit() {
+    if (sending) return;
+    sending = true;
+    var btn = el('submitBtn');
+    btn.disabled = true;
+    btn.textContent = form.copy.submitting;
+    el('warn').classList.remove('show');
+    save(true).then(function () {
+      try { localStorage.setItem('attune_survey_done', '1'); } catch (e) {}
+      el('formPage').style.display = 'none';
+      el('thanksTitle').textContent = form.copy.thanksTitle;
+      el('thanksBody').textContent = form.copy.thanks;
+      el('successState').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }).catch(function () {
+      sending = false;
+      btn.disabled = false;
+      btn.textContent = form.copy.submit;
+      var w = el('warn');
+      w.textContent = "That didn't send. Everything you answered before now is already saved. Check your connection and press it again.";
+      w.classList.add('show');
+      w.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  fetch('/api/survey', { headers: window.attuneHeaders() })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok) throw new Error('no form');
+      form = data;
+      answers = data.answers || {};
+      el('title').textContent = form.copy.title;
+      el('intro').textContent = form.copy.intro;
+      el('submitBtn').textContent = form.copy.submit;
+      el('submitBtn').addEventListener('click', submit);
+      render();
+    })
+    .catch(function () {
+      var w = el('warn');
+      w.textContent = 'The survey could not load. Refresh the page and it will try again.';
+      w.classList.add('show');
+    });
 })();
 </script>
   <script src="/_flags.js"></script>

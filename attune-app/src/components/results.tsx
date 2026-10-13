@@ -30,7 +30,8 @@ import PageTile, { NeutralGround, ResultsBottomInset } from '@/components/page-t
 import StepCount from '@/components/step-count';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { fetchConflictResults, fetchNotes, fetchTags } from '@/api/client';
+import { fetchConflictResults, fetchNotes, fetchSurvey, fetchTags, type SurveyForm } from '@/api/client';
+import Survey from '@/components/survey';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotation-context';
@@ -3113,6 +3114,32 @@ function mixHex(a: string, b: string, t: number): string {
 function WhatComesNext({
   data, onGoToSection,
 }: { data: { groups: NextStepGroup[] } | null; onGoToSection: (id: string) => void }) {
+  /**
+   * The survey, at the end of the experience.
+   *
+   * The same place the website asks it: this is the page a reader reaches last,
+   * and Ellie asked for one survey "for everyone at the end of their
+   * experience". It opens over the page and closes to it; whether this person
+   * has already finished it comes from /api/survey, so answering on one device
+   * does not mean being asked again on another.
+   */
+  const [surveyOpen, setSurveyOpen] = useState(false);
+  const [surveyDone, setSurveyDone] = useState<boolean | null>(null);
+  /* The words on the opener come from the payload, like every other word in
+     this survey. An Expo app cannot import api/_lib/survey.js, and a title
+     typed here would be the second copy of a sentence. */
+  const [surveyCopy, setSurveyCopy] = useState<SurveyForm['copy'] | null>(null);
+  useEffect(() => {
+    let live = true;
+    fetchSurvey().then((r) => {
+      if (!live) return;
+      /* A request that fails leaves it unknown rather than done: a survey we
+         cannot ask about is one we ask. */
+      setSurveyDone(r.ok ? !!r.data.finished : false);
+      if (r.ok) setSurveyCopy(r.data.copy);
+    });
+    return () => { live = false; };
+  }, []);
   /** Which section is open, if any. Only one ever is. */
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   if (!data?.groups.length) {
@@ -3159,6 +3186,32 @@ function WhatComesNext({
             />
           ))}
         </View>
+
+        {/* The survey. Not drawn until we know they have not already answered
+            it, because a card that appears and then vanishes is worse than one
+            that arrives a moment late. */}
+        {surveyDone === false && surveyCopy ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setSurveyOpen(true)}
+            style={{
+              marginTop: Spacing.xl, borderRadius: Radius.md, borderWidth: 1,
+              borderColor: c.border, backgroundColor: c.surface,
+              paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+            }}>
+            {/* not markable: the label on a control, not results prose. A mark
+                is a copy of the words, and these words change with the survey. */}
+            <Text style={{ ...Type.body, color: c.textStrong }}>{surveyCopy.title}</Text>
+            {/* not markable: as above. */}
+            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>
+              {surveyCopy.intro}
+            </Text>
+          </Pressable>
+        ) : null}
+
+        <Modal visible={surveyOpen} animationType="slide" onRequestClose={() => setSurveyOpen(false)}>
+          <Survey onDone={() => { setSurveyOpen(false); setSurveyDone(true); }} />
+        </Modal>
     </PageTile>
   );
 }

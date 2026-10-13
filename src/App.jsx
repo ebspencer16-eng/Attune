@@ -37,6 +37,7 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
+import { shouldShow } from "../api/_lib/survey.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insights.js";
 /**
@@ -1896,41 +1897,20 @@ export function ConflictExercise({ userName = "You", partnerName = "your partner
         </div>
       )}
 
-      {/* ── rank: tap to add in order, matching Exercise 3's pattern so the
-             interaction is already familiar. Tapping a ranked item removes it
-             and everything after keeps its relative order. ── */}
-      {q.kind === 'rank' && (() => {
-        const picked = Array.isArray(answers[q.id]) ? answers[q.id] : [];
-        const remaining = q.options.filter(o => !picked.includes(o));
-        return (
-          <div>
-            <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.75rem" }}>
-              Tap in order, most helpful first. Tap a ranked item to remove it.
-            </p>
-            {picked.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.9rem" }}>
-                {picked.map((o, i) => (
-                  <button key={o} onClick={() => setAns(q.id, picked.filter(x => x !== o))}
-                    style={{ ...optionBtn(true), display: "flex", alignItems: "center", gap: "0.7rem" }}>
-                    <span style={{ width: 22, height: 22, borderRadius: "50%", background: accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
-                    <span>{o}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              {remaining.map(o => (
-                <button key={o} onClick={() => setAns(q.id, [...picked, o])} style={optionBtn(false)}>{o}</button>
-              ))}
-            </div>
-            {remaining.length > 0 && (
-              <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.7rem" }}>
-                {remaining.length} left to rank.
-              </p>
-            )}
-          </div>
-        );
-      })()}
+      {/* The ordering gesture, from the one component that draws it. The
+             survey asks a ranking question too, and a second implementation of
+             "tap in order, tap again to take it back" is two gestures that
+             drift. */}
+      {q.kind === 'rank' && (
+        <RankInOrder
+          options={q.options}
+          value={answers[q.id]}
+          onChange={(v) => setAns(q.id, v)}
+          accent={accent}
+          optionBtn={optionBtn}
+          hint="Tap in order, most helpful first. Tap a ranked item to remove it."
+        />
+      )}
 
       {/* ── open text: optional, and said so, because an unskippable free-text
              box is where people abandon an exercise ── */}
@@ -7012,9 +6992,9 @@ const JAMES_ANNIVERSARY_DEMO = {
 // The twenty-six question beta survey modal is gone. It posted to
 // an admin-only endpoint that answered 401, and the flag it was
 // gated on was declared false and never set true by anything, so it could not
-// be opened in the first place. The live survey is PostResultsSurvey, further
-// down, which posts to /api/submit-beta-survey and stores what it is told.
-// Removed 2026-10-10.
+// be opened in the first place. Removed 2026-10-10. The survey everybody is
+// asked is ResultsSurvey, further down, which draws whatever /api/survey says
+// to ask and saves each answer as it is given.
 // ─────────────────────────────────────────────────────────────────────────────
 // RETAKE COMPARISON CARD
 // Shows on the results page when the user has completed an exercise more than
@@ -7233,119 +7213,261 @@ function RetakeComparisonCard({ currentEx2, priorEx2, priorAt, userName, partner
   );
 }
 
-// ── Post-results survey (all couples). Mirrors the beta survey's key metrics
-// in a shorter form so beta + general responses land on the same admin charts.
-const POST_Qs = [
-  { id: "rating",      q: "How would you rate your Attune experience?", type: "stars" },
-  { id: "convo",       q: "Did it lead to a real conversation with your partner?", type: "choice", options: ["Yes", "Not yet"] },
-  { id: "nps",         q: "How likely are you to recommend Attune to a friend?", type: "nps" },
-  { id: "expectation", q: "How did it compare to what you expected?", type: "scale", labels: ["Fell short", "About right", "Exceeded"] },
-  { id: "testimonial", q: "Anything you'd like to share about your experience?", sub: "Optional. We may feature your words as a testimonial on our site.", type: "text", optional: true, placeholder: "What stood out, what it opened up…" },
-  { id: "improve",     q: "Anything you'd change?", type: "text", optional: true, placeholder: "Optional" },
-];
+/**
+ * Tap them in order, tap one again to take it back.
+ *
+ * ── WHY IT IS ITS OWN COMPONENT ───────────────────────────────────────────
+ * Two questions in this product ask for a ranking: the repair question in
+ * Conflict Patterns, and the survey's "order these from most to least
+ * interesting". The gesture was written inside the conflict exercise, so the
+ * survey either got a second implementation of it or a different gesture, and
+ * the app has had one shared `RankInOrder` since Conflict shipped.
+ *
+ * The styling comes in as `optionBtn` so each caller keeps the look of the
+ * screen it is on. What is shared is the behaviour: the order, the numbers,
+ * and what tapping a ranked item does.
+ */
+function RankInOrder({ options = [], value, onChange, accent, optionBtn, hint }) {
+  const picked = Array.isArray(value) ? value.filter((o) => options.includes(o)) : [];
+  const remaining = options.filter((o) => !picked.includes(o));
+  return (
+    <div>
+      {hint ? (
+        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.75rem" }}>{hint}</p>
+      ) : null}
+      {picked.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.9rem" }}>
+          {picked.map((o, i) => (
+            <button key={o} onClick={() => onChange(picked.filter((x) => x !== o))}
+              style={{ ...optionBtn(true), display: "flex", alignItems: "center", gap: "0.7rem" }}>
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
+              <span>{o}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+        {remaining.map((o) => (
+          <button key={o} onClick={() => onChange([...picked, o])} style={optionBtn(false)}>{o}</button>
+        ))}
+      </div>
+      {remaining.length > 0 && picked.length > 0 && (
+        <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, marginTop: "0.7rem" }}>
+          {remaining.length} left to rank.
+        </p>
+      )}
+    </div>
+  );
+}
 
-function PostResultsSurvey({ respondentId = null, userName, coupleType, onClose, onDone }) {
-  const [step, setStep] = React.useState(0);
-  const [answers, setAnswers] = React.useState({});
-  const [submitted, setSubmitted] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
-  const q = POST_Qs[step];
-  const total = POST_Qs.length;
-  const ans = answers[q?.id];
-  const canNext = q?.optional ? true : (q?.type === "text" ? true : (ans !== undefined && ans !== null && ans !== ""));
+/**
+ * The survey, at the end of the experience.
+ *
+ * ── ONE, WHERE THERE WERE THREE ───────────────────────────────────────────
+ * A 26-question beta survey on /feedback, a six-question modal here, and a
+ * seven-question card at the end of What Comes Next. Three question sets and
+ * three stores, so no answer could be compared with any other.
+ *
+ * Ellie, approving the replacement: "Please use this as the regular survey for
+ * everyone at the end of their experience, not just beta users."
+ *
+ * ── THE QUESTIONS ARE NOT HERE ────────────────────────────────────────────
+ * They come from /api/survey, which also builds the ranking's options out of
+ * what this particular couple actually did. The app and /feedback read the
+ * same endpoint. A surface with its own copy of the questions is how the
+ * three came to exist.
+ *
+ * ── EVERY ANSWER IS SAVED AS IT IS GIVEN ──────────────────────────────────
+ * Ellie: "Collect incomplete responses." So each answer is posted as it is
+ * made rather than at the end, and closing the survey half way through leaves
+ * what was written. The old one threw away everything before the last screen.
+ */
+function ResultsSurvey({ onClose, onDone }) {
+  const [form, setForm] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [step, setStep] = useState(0);
+  const [phase, setPhase] = useState("asking");   // asking | thanks
+  const [sending, setSending] = useState(false);
 
-  const send = async (completed) => {
+  /* The questions, and anything they have already answered. */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const headers = {};
+        try {
+          const { supabase: sb, hasSupabase } = await import('./supabase.js');
+          if (hasSupabase()) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+          }
+        } catch { /* no session: the survey still asks */ }
+        const res = await fetch('/api/survey', { headers });
+        const data = await res.json();
+        if (cancelled || !data?.ok) return;
+        setForm(data);
+        setAnswers(data.answers || {});
+      } catch { /* a survey that cannot load is a survey nobody is shown */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  /* Which questions are showing, by the server's own rule rather than a copy
+     of it. This file can import from api/, so it does. The app and the static
+     page cannot, and each runs the same matcher over the `showWhen` data the
+     payload carries. */
+  const shown = React.useMemo(
+    () => (form ? form.questions.filter((q) => shouldShow(q, answers)) : []),
+    [form, answers],
+  );
+
+  const save = async (next, done = false) => {
     try {
-      await fetch('/api/submit-beta-survey', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ surveyType: 'post_results', respondentId, userName, coupleType: coupleType?.name || null, answers, completed }),
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const { supabase: sb, hasSupabase } = await import('./supabase.js');
+        if (hasSupabase()) {
+          const { data: { session } } = await sb.auth.getSession();
+          if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+        }
+      } catch { /* answered without a session */ }
+      await fetch('/api/survey', {
+        method: 'POST', headers,
+        body: JSON.stringify({ answers: next, source: 'results', done }),
       });
-    } catch {}
+    } catch { /* keep the answer on screen either way */ }
   };
-  const finish = async () => { setSubmitting(true); await send(true); setSubmitted(true); setSubmitting(false); };
-  const next = () => { if (step < total - 1) setStep(s => s + 1); else finish(); };
-  // Incomplete capture: if they close with anything answered but not submitted,
-  // still persist what we have.
-  const close = () => { if (!submitted && Object.keys(answers).length > 0) { send(false); } onClose && onClose(); };
 
-  if (submitted) return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => { onDone && onDone(); }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 400, textAlign: "center", maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
-        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.3rem", color: "white" }}>✓</div>
-        <div style={{ fontFamily: font.display, fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>Thank you{userName ? `, ${userName}` : ""}.</div>
-        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: font.body, lineHeight: 1.7, marginBottom: "1.5rem" }}>This helps us understand Attune's impact and shape what comes next.</p>
-        <button onClick={() => { onDone && onDone(); }} style={{ background: C.ink, color: "white", border: "none", borderRadius: 11, padding: "0.7rem 2rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: font.body }}>Done</button>
+  const setAns = (id, v) => {
+    const next = { ...answers, [id]: v };
+    setAnswers(next);
+    /* Saved as it is given, which is what makes a half-finished survey worth
+       something. Fire and forget: the next answer resaves everything. */
+    save(next);
+  };
+
+  const q = shown[step];
+  const total = shown.length;
+  const answered = q ? answers[q.id] : null;
+  const isAnswered = Array.isArray(answered) ? answered.length > 0 : (answered !== undefined && answered !== null && answered !== "");
+
+  const finish = async () => { setSending(true); await save(answers, true); setSending(false); setPhase("thanks"); };
+  const next = () => { if (step < total - 1) setStep((n) => n + 1); else finish(); };
+  const close = () => { onClose && onClose(); };
+
+  const shell = (children) => (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={close}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2rem 1.9rem", width: "100%", maxWidth: 440, maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+        {children}
       </div>
     </div>
   );
 
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(14,11,7,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={close}>
-      <div onClick={e => e.stopPropagation()} style={{ background: C.cream, borderRadius: 22, padding: "2.25rem 2rem", width: "100%", maxWidth: 440, maxHeight: "88dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-          <div>
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#E8673A", fontFamily: font.body, fontWeight: 700, marginBottom: "0.2rem" }}>Your experience</div>
-            <div style={{ fontSize: "0.7rem", color: C.muted, fontFamily: font.body }}>{step + 1} of {total}</div>
-          </div>
-          <button onClick={close} aria-label="Close" style={{ background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: C.muted }}>✕</button>
-        </div>
-        <div style={{ height: 3, background: C.stone, borderRadius: 2, marginBottom: "1.6rem", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${((step + 1) / total) * 100}%`, background: "linear-gradient(90deg,#E8673A,#1B5FE8)", borderRadius: 2, transition: "width 0.3s ease" }} />
-        </div>
-        <div style={{ fontFamily: font.display, fontSize: "1.1rem", fontWeight: 700, color: C.ink, lineHeight: 1.3, marginBottom: q.sub ? "0.4rem" : "1.4rem" }}>{q.q}</div>
-        {q.sub && <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginBottom: "1.2rem", lineHeight: 1.5 }}>{q.sub}</div>}
+  if (!form) return null;
 
-        {q.type === "stars" && (
-          <div style={{ display: "flex", gap: "0.4rem", justifyContent: "center", marginBottom: "1.6rem" }}>
-            {[1,2,3,4,5].map(v => (
-              <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))} aria-label={`${v} star`}
-                style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "2rem", lineHeight: 1, color: (ans >= v) ? "#E8673A" : "#D9CFC2", transition: "color .1s" }}>{ans >= v ? "★" : "☆"}</button>
-            ))}
-          </div>
-        )}
-        {q.type === "nps" && (
-          <div style={{ marginBottom: "1.6rem" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(11,1fr)", gap: "0.25rem" }}>
-              {Array.from({ length: 11 }, (_, v) => (
-                <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))}
-                  style={{ aspectRatio: "1", borderRadius: 8, border: `1.5px solid ${ans === v ? "#E8673A" : C.stone}`, background: ans === v ? "#FFF0EB" : "white", color: ans === v ? "#E8673A" : C.muted, fontWeight: ans === v ? 700 : 400, fontSize: "0.72rem", cursor: "pointer", fontFamily: font.body }}>{v}</button>
-              ))}
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.6rem", color: C.muted, fontFamily: font.body, marginTop: "0.4rem" }}><span>Not likely</span><span>Very likely</span></div>
-          </div>
-        )}
-        {q.type === "scale" && (<>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            {[1,2,3,4,5].map(v => (
-              <button key={v} onClick={() => setAnswers(a => ({ ...a, [q.id]: v }))}
-                style={{ flex: 1, aspectRatio: "1", borderRadius: 10, border: `1.5px solid ${ans === v ? "#E8673A" : C.stone}`, background: ans === v ? "#FFF0EB" : "white", color: ans === v ? "#E8673A" : C.muted, fontWeight: ans === v ? 700 : 400, fontSize: "0.85rem", cursor: "pointer", fontFamily: font.body }}>{v}</button>
-            ))}
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.62rem", color: C.muted, fontFamily: font.body, marginBottom: "1.5rem" }}>{q.labels.map((l,i)=><span key={i}>{l}</span>)}</div>
-        </>)}
-        {q.type === "choice" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-            {q.options.map((o,i) => (
-              <button key={i} onClick={() => setAnswers(a => ({ ...a, [q.id]: o }))}
-                style={{ padding: "0.75rem 1rem", borderRadius: 11, border: `1.5px solid ${ans === o ? "#E8673A" : C.stone}`, background: ans === o ? "#FFF0EB" : "white", color: ans === o ? "#E8673A" : C.ink, fontWeight: ans === o ? 600 : 400, fontSize: "0.82rem", cursor: "pointer", textAlign: "left", fontFamily: font.body }}>{o}</button>
-            ))}
-          </div>
-        )}
-        {q.type === "text" && (
-          <textarea placeholder={q.placeholder} value={ans || ""} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
-            style={{ width: "100%", minHeight: 90, borderRadius: 11, border: `1.5px solid ${C.stone}`, padding: "0.75rem", fontSize: "0.82rem", fontFamily: font.body, color: C.ink, resize: "vertical", marginBottom: "1.5rem", boxSizing: "border-box" }} />
-        )}
+  if (phase === "thanks") {
+    return shell(
+      <div style={{ textAlign: "center" }}>
+        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "1.3rem", color: "white" }}>✓</div>
+        <div style={{ fontFamily: HFONT, fontSize: "1.3rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>{form.copy.thanksTitle}</div>
+        <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, marginBottom: "1.5rem" }}>{form.copy.thanks}</p>
+        <button onClick={() => { onDone && onDone(); }} style={{ background: C.ink, color: "white", border: "none", borderRadius: 11, padding: "0.7rem 2rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT }}>Done</button>
+      </div>,
+    );
+  }
+  if (!q) return null;
 
-        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-          {step > 0 && <button onClick={() => setStep(s => s - 1)} style={{ background: "transparent", border: `1.5px solid ${C.stone}`, borderRadius: 11, padding: "0.7rem 1.1rem", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", color: C.muted, fontFamily: font.body }}>Back</button>}
-          <button onClick={next} disabled={!canNext || submitting}
-            style={{ flex: 1, background: (canNext && !submitting) ? C.ink : C.stone, color: "white", border: "none", borderRadius: 11, padding: "0.75rem", fontSize: "0.82rem", fontWeight: 700, cursor: (canNext && !submitting) ? "pointer" : "default", fontFamily: font.body }}>
-            {submitting ? "Sending…" : (step < total - 1 ? "Next" : "Submit")}
-          </button>
+  const optionBtn = (on) => ({
+    width: "100%", textAlign: "left", padding: "0.7rem 0.9rem", borderRadius: 11,
+    border: `1.5px solid ${on ? C.orange : C.stone}`, background: on ? "#FDEEE6" : "white",
+    color: C.ink, fontFamily: BFONT, fontSize: "0.85rem", cursor: "pointer",
+    fontWeight: on ? 700 : 400,
+  });
+
+  return shell(
+    <>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.9rem" }}>
+        <div>
+          <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.orange, fontWeight: 700, fontFamily: BFONT }}>{form.copy.title}</div>
+          <div style={{ fontSize: "0.75rem", color: C.muted, fontFamily: BFONT, marginTop: "0.2rem" }}>{step + 1} of {total}</div>
         </div>
-        <div style={{ fontSize: "0.6rem", color: C.muted, fontStyle: "italic", fontFamily: font.body, textAlign: "center", marginTop: "1rem", lineHeight: 1.5 }}>Responses are used in aggregate to assess the impact of the Attune experience.</div>
+        <button onClick={close} aria-label="Close" style={{ background: "transparent", border: "none", fontSize: "1.1rem", color: C.muted, cursor: "pointer", lineHeight: 1 }}>✕</button>
       </div>
-    </div>
+
+      <div style={{ height: 3, background: C.stone, borderRadius: 999, marginBottom: "1.4rem" }}>
+        <div style={{ width: `${((step + 1) / total) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${C.orange}, ${C.indigo})`, borderRadius: 999 }} />
+      </div>
+
+      <div style={{ fontFamily: HFONT, fontSize: "1.1rem", fontWeight: 700, color: C.ink, marginBottom: "1.1rem", lineHeight: 1.3 }}>{q.label}</div>
+
+      {q.kind === "stars" && (
+        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginBottom: "0.5rem" }}>
+          {Array.from({ length: q.max || 5 }, (_, i) => i + 1).map((n) => (
+            <button key={n} onClick={() => setAns(q.id, n)} aria-label={`${n} of ${q.max || 5}`}
+              style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "2rem", lineHeight: 1, color: Number(answers[q.id]) >= n ? C.orange : C.stone, padding: 0 }}>
+              {Number(answers[q.id]) >= n ? "★" : "☆"}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {q.kind === "choice" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+          {(q.options || []).map((o) => (
+            <button key={o} onClick={() => setAns(q.id, o)} style={optionBtn(answers[q.id] === o)}>{o}</button>
+          ))}
+        </div>
+      )}
+
+      {q.kind === "scale" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+          {(q.scale || []).map((label, i) => (
+            <button key={label} onClick={() => setAns(q.id, i + 1)} style={optionBtn(Number(answers[q.id]) === i + 1)}>{label}</button>
+          ))}
+        </div>
+      )}
+
+      {q.kind === "nps" && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.35rem" }}>
+          {Array.from({ length: (q.max ?? 10) - (q.min ?? 0) + 1 }, (_, i) => (q.min ?? 0) + i).map((n) => (
+            <button key={n} onClick={() => setAns(q.id, n)}
+              style={{ ...optionBtn(Number(answers[q.id]) === n), textAlign: "center", padding: "0.55rem 0" }}>{n}</button>
+          ))}
+        </div>
+      )}
+
+      {q.kind === "rank" && (
+        <RankInOrder
+          options={q.options || []}
+          value={answers[q.id]}
+          onChange={(v) => setAns(q.id, v)}
+          accent={C.orange}
+          optionBtn={optionBtn}
+          hint={q.hint}
+        />
+      )}
+
+      {q.kind === "text" && (
+        <div>
+          <textarea value={answers[q.id] || ""} onChange={(e) => setAns(q.id, e.target.value)}
+            placeholder={q.placeholder || ""} rows={4}
+            style={{ width: "100%", padding: "0.8rem 0.9rem", border: `1.5px solid ${C.stone}`, borderRadius: 12, fontFamily: BFONT, fontSize: "0.88rem", lineHeight: 1.6, color: C.ink, resize: "vertical" }} />
+          {/* The one piece of fine print, and the reason there is no consent
+              checkbox: nothing we publish carries a name. */}
+          <p style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, marginTop: "0.45rem", lineHeight: 1.5 }}>{form.notice}</p>
+        </div>
+      )}
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1.5rem", gap: "0.75rem" }}>
+        <button onClick={() => setStep((n) => Math.max(0, n - 1))} disabled={step === 0}
+          style={{ background: "transparent", border: "none", color: step === 0 ? C.stone : C.muted, fontFamily: BFONT, fontSize: "0.8rem", cursor: step === 0 ? "default" : "pointer" }}>Back</button>
+        <button onClick={next} disabled={sending}
+          style={{ background: C.ink, color: "white", border: "none", borderRadius: 11, padding: "0.7rem 1.6rem", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, opacity: sending ? 0.6 : 1 }}>
+          {sending ? form.copy.submitting : (step === total - 1 ? form.copy.submit : (isAnswered ? "Next" : "Skip"))}
+        </button>
+      </div>
+      <p style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, marginTop: "0.9rem", textAlign: "center", lineHeight: 1.5 }}>{form.copy.intro}</p>
+    </>,
   );
 }
 
@@ -7362,134 +7484,15 @@ function UnifiedResultsRoot(props) {
 }
 
 /**
- * "How was your experience?", at the end of the results.
+ * The seven-question card that used to live here is gone.
  *
- * ── WHY IT IS BACK ────────────────────────────────────────────────────────
- * It was a component here once, already disconnected from anything that
- * rendered it, and d54d7c2 deleted it as unreferenced. Nothing has asked for
- * feedback since. /api/send-feedback and two tiles on the admin kept
- * reporting on it, all showing nothing.
- *
- * Every sentence and every question comes from api/_lib/feedback-copy.js,
- * which the app's screen reads too, so the two surfaces cannot ask different
- * questions. The wording is Ellie's, recovered from the deleted component
- * rather than rewritten.
- *
- * ── WHERE IT SITS ─────────────────────────────────────────────────────────
- * The end of What Comes Next, which is the last page of the whole results
- * experience. Asking before somebody has read their results is asking about
- * something they have not seen.
+ * It asked its own set at the end of What Comes Next while a six-question
+ * modal asked a different set at the same moment and /feedback asked a third,
+ * twenty-six long. Ellie: "Please use this as the regular survey for everyone
+ * at the end of their experience, not just beta users." There is one now:
+ * ResultsSurvey, drawing its questions from api/_lib/survey.js. Removed
+ * 2026-10-13.
  */
-function ExperienceFeedback({ userName }) {
-  const [phase, setPhase] = useState("idle");   // idle | form | thanks
-  const [rating, setRating] = useState(null);
-  const [answers, setAnswers] = useState({});
-  const [sending, setSending] = useState(false);
-
-  const scaleQuestions = FEEDBACK_QUESTIONS.filter(q => q.type === "scale");
-  const allScaleAnswered = scaleQuestions.every(q => answers[q.id] != null);
-
-  function submit() {
-    setSending(true);
-    fetch('/api/send-feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        source: 'app_experience',
-        /* Which surface answered. Both surfaces ask the same questions, and
-           the admin's `source` column is the only thing that can tell them
-           apart once the rows are side by side. */
-        surface: 'website',
-        rating,
-        questionAnswers: answers,
-        stage: answers.q_stage || null,
-        howHeard: answers.q_source || null,
-        message: answers.q_open || null,
-      }),
-    }).catch(() => {});   // non-blocking: a thank you is owed either way
-    setTimeout(() => { setPhase("thanks"); setSending(false); }, 400);
-  }
-
-  if (phase === "thanks") {
-    return (
-      <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg,#0e2a18,#154428)", borderRadius: 18, padding: "2rem", textAlign: "center" }}>
-        <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: "white", marginBottom: "0.4rem" }}>
-          {FEEDBACK_COPY.thanksTitle}{userName ? `, ${userName}` : ""}.
-        </div>
-        <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,.55)", lineHeight: 1.65, margin: 0 }}>{FEEDBACK_COPY.thanks}</p>
-      </div>
-    );
-  }
-
-  if (phase === "idle") {
-    return (
-      <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg,#0f0c29,#1d1a4e)", borderRadius: 18, padding: "2rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#E8673A,#1B5FE8)" }} />
-        <div style={{ fontFamily: HFONT, fontSize: "1.1rem", fontWeight: 700, color: "white", marginBottom: "0.4rem" }}>{FEEDBACK_COPY.title}</div>
-        <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,.75)", lineHeight: 1.65, maxWidth: 400, margin: "0 auto 1.25rem" }}>{FEEDBACK_COPY.invitation}</p>
-        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1rem" }}>
-          {FEEDBACK_RATINGS.map((label, i) => (
-            <button key={label} onClick={() => { setRating(i); setPhase("form"); }}
-              style={{ background: "rgba(255,255,255,.08)", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 10, padding: "0.55rem 1rem", fontSize: "0.8rem", color: "rgba(255,255,255,.75)", cursor: "pointer", fontFamily: BFONT, fontWeight: 500 }}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <button onClick={() => setPhase("form")}
-          style={{ fontSize: "0.7rem", color: "rgba(255,255,255,.4)", background: "transparent", border: "none", cursor: "pointer", fontFamily: BFONT, textDecoration: "underline" }}>
-          {FEEDBACK_COPY.skip}
-        </button>
-      </div>
-    );
-  }
-
-  const chip = (id, value, label) => {
-    const on = answers[id] === value;
-    return (
-      <button key={String(value)} onClick={() => setAnswers(a => ({ ...a, [id]: on ? undefined : value }))}
-        style={{ background: on ? "#1B5FE8" : "white", color: on ? "white" : C.muted, border: `1.5px solid ${on ? "#1B5FE8" : C.stone}`, borderRadius: 999, padding: "0.4rem 0.85rem", fontSize: "0.75rem", fontFamily: BFONT, cursor: "pointer" }}>
-        {label}
-      </button>
-    );
-  };
-
-  return (
-    <div style={{ marginTop: "2.5rem", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.75rem" }}>
-      <div style={{ fontFamily: HFONT, fontSize: "1.05rem", fontWeight: 700, color: C.ink }}>{FEEDBACK_COPY.cta}</div>
-      <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, margin: "0.3rem 0 1.25rem" }}>{FEEDBACK_COPY.reassurance}</p>
-
-      <div style={{ fontSize: "0.62rem", letterSpacing: ".16em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.75rem" }}>{FEEDBACK_COPY.scaleHeading}</div>
-
-      {FEEDBACK_QUESTIONS.map(q => (
-        <div key={q.id} style={{ marginBottom: "1.1rem" }}>
-          <div style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, marginBottom: "0.45rem" }}>{q.label}</div>
-          {q.type === "scale" && (
-            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-              {FEEDBACK_SCALE.map((label, i) => chip(q.id, i + 1, label))}
-            </div>
-          )}
-          {q.type === "choice" && (
-            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-              {(q.options || []).map(opt => chip(q.id, opt, opt))}
-            </div>
-          )}
-          {q.type === "text" && (
-            <textarea value={answers[q.id] || ""} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
-              rows={3}
-              style={{ width: "100%", padding: "0.6rem 0.75rem", border: `1.5px solid ${C.stone}`, borderRadius: 10, fontSize: "0.82rem", fontFamily: BFONT, color: C.ink, resize: "vertical" }} />
-          )}
-        </div>
-      ))}
-
-      <button onClick={submit} disabled={!allScaleAnswered || sending}
-        style={{ marginTop: "0.5rem", background: allScaleAnswered && !sending ? "linear-gradient(135deg,#E8673A,#1B5FE8)" : C.stone, color: allScaleAnswered && !sending ? "white" : C.muted, border: "none", borderRadius: 10, padding: "0.7rem 1.5rem", fontSize: "0.8rem", fontWeight: 700, fontFamily: BFONT, cursor: allScaleAnswered && !sending ? "pointer" : "default" }}>
-        {sending ? FEEDBACK_COPY.submitting : FEEDBACK_COPY.submit}
-      </button>
-
-      <p style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, marginTop: "0.9rem", marginBottom: 0 }}>{FEEDBACK_COPY.privacy}</p>
-    </div>
-  );
-}
 
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
 
@@ -10355,7 +10358,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           </div>
 
           {/* The end of the whole experience is where to ask how it went. */}
-          <ExperienceFeedback userName={userName} />
+          {/* The seven-question card that used to sit here is gone. It asked
+              a third set of questions at the same moment the survey asks its
+              own, which is the product asking twice. One survey, and it opens
+              when this page does. */}
 
           {/* Back out of the last page. Everything before this has a Back;
               without one here the final page of the whole experience could
@@ -11414,7 +11420,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
       // hydration). The previous `|| false` pattern masked an actual
       // user preference of false vs null/missing. Issue 2.3.
       emailOptIn: typeof profile?.email_opt_in === 'boolean' ? profile.email_opt_in : true,
-      betaSurveyAt: profile?.beta_survey_at || null,
       inviteCode: profile?.invite_code || "",
       partnerJoined: profile?.partner_joined || false,
       joinedViaInvite: profile?.joined_via_invite || false,
@@ -14092,9 +14097,31 @@ export default function App() {
         || localStorage.getItem(SURVEY_DISMISSED));
     } catch { return false; }
   });
-  // If the profile records a completed survey (set server-side on submit), treat
-  // it as done even on a device whose localStorage never saw it.
-  useEffect(() => { if (account?.betaSurveyAt) setPostSurveyDone(true); }, [account?.betaSurveyAt]);
+  /* A survey already finished on another device.
+   *
+   * This read a profile column the old survey's endpoint stamped, which
+   * migration 079 clears. /api/survey answers `finished` from the row the
+   * answers are actually in, so there is one thing that knows. */
+  useEffect(() => {
+    let cancelled = false;
+    if (!account?.id || postSurveyDone) return undefined;
+    (async () => {
+      try {
+        const headers = {};
+        try {
+          const { supabase: sb, hasSupabase } = await import('./supabase.js');
+          if (hasSupabase()) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+          }
+        } catch { /* no session: the survey asks again, which is the safe way to be wrong */ }
+        const res = await fetch('/api/survey', { headers });
+        const data = await res.json();
+        if (!cancelled && data?.ok && data.finished) setPostSurveyDone(true);
+      } catch { /* a survey we cannot ask about is one we ask */ }
+    })();
+    return () => { cancelled = true; };
+  }, [account?.id, postSurveyDone]);
   const isMobile = useMobile(680);
 
   // Lock body scroll when results are shown (prevents mobile page drift)
@@ -18194,12 +18221,15 @@ export default function App() {
                     them. From the design review, D17, approved: it waits for
                     What Comes Next, which is the last page of the whole
                     experience and the one place where "how was it" is a
-                    question about something that has happened. */}
-                {activeResult === "what-comes-next" && !postSurveyDone && !isBetaTester ? (
-                  <PostResultsSurvey
-                    respondentId={account?.id || null}
-                    userName={userName}
-                    coupleType={coupleType}
+                    question about something that has happened.
+
+                    ── AND IT IS THE ONLY ONE NOW ──────────────────────────
+                    Ellie: "Please use this as the regular survey for everyone
+                    at the end of their experience, not just beta users." So
+                    the beta-tester exemption is gone with it: there is one
+                    survey and everybody is asked it once. */}
+                {activeResult === "what-comes-next" && !postSurveyDone ? (
+                  <ResultsSurvey
                     onClose={() => {
                       setPostSurveyDone(true);
                       try { localStorage.setItem(SURVEY_DISMISSED, '1'); } catch { /* private window */ }

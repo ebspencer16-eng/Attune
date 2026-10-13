@@ -39,6 +39,7 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.j
 export const config = { runtime: 'edge' };
 
 import { corsHeaders, safeError } from './_lib/http.js';
+import { SURVEY_QUESTIONS } from './_lib/survey.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -219,23 +220,37 @@ const PARTNERABLE = [
 
 // Beta-survey fields joined onto the respondent by their profile id, so survey
 // answers are segmentable by every demographic/type field already in the cube.
-const FB_SCALE = {
-  fb_expectationMatch: 'Feedback · Expectation match', fb_commsOverall: 'Feedback · Communication overall',
-  fb_commsHonesty: 'Feedback · Communication honesty', fb_expOverall: 'Feedback · Expectations overall',
-  fb_expHonesty: 'Feedback · Expectations honesty', fb_shiftCouple: 'Feedback · Shift as a couple',
-  fb_shiftSelf: 'Feedback · Shift in yourself', fb_returnLikelihood: 'Feedback · Likely to revisit',
-  fb_valuePct: 'Feedback · Value vs other spend',
-};
-const FB_SCALE_SRC = { fb_expectationMatch:'expectationMatch', fb_commsOverall:'commsOverall', fb_commsHonesty:'commsHonesty', fb_expOverall:'expOverall', fb_expHonesty:'expHonesty', fb_shiftCouple:'shiftCouple', fb_shiftSelf:'shiftSelf', fb_returnLikelihood:'returnLikelihood', fb_valuePct:'valuePct' };
-const FB_POLES = {
-  fb_expectationMatch:['Fell short','Exceeded it'], fb_commsOverall:['Poor','Excellent'],
-  fb_commsHonesty:['Held back a lot','Completely honest'], fb_expOverall:['Poor','Excellent'],
-  fb_expHonesty:['Held back a lot','Completely honest'], fb_shiftCouple:['No shift','Significant shift'],
-  fb_shiftSelf:['No shift','Significant shift'], fb_returnLikelihood:['Very unlikely','Very likely'],
-  fb_valuePct:['Much less value','Much more value'],
-};
-const FB_CAT = { fb_ahaMarker: 'Feedback · Biggest recognition moment', fb_convoHappened: 'Feedback · Led to a conversation' };
-const FB_CAT_SRC = { fb_ahaMarker:'ahaMarker', fb_convoHappened:'convoHappened' };
+/**
+ * The survey's own questions as explorable fields.
+ *
+ * ── DERIVED, NOT RESTATED ─────────────────────────────────────────────────
+ * This was five hand-typed maps naming nine scales and two categories of the
+ * 26-question beta survey, with their labels and their pole wording. Every one
+ * of those questions is retired, and the maps would have gone on offering them
+ * as filters over rows that can no longer carry an answer.
+ *
+ * So the fields come from SURVEY_QUESTIONS. A rating, a scale and an NPS are
+ * numbers, which the explorer can cross-tab as scales; a choice is a category
+ * whose options are the question's own. The ranking and the open answers are
+ * not fields: an ordering is not a number and a paragraph is not a category.
+ * `fb_<id>` keys are kept so a saved view in somebody's browser still resolves.
+ */
+const FB_NUMERIC = new Set(['stars', 'scale', 'nps']);
+const FB_FIELDS = SURVEY_QUESTIONS
+  .filter((q) => FB_NUMERIC.has(q.kind) || q.kind === 'choice')
+  .map((q) => ({
+    key: `fb_${q.id}`,
+    src: q.id,
+    label: `Survey \u00b7 ${q.label.replace(/\?$/, '')}`,
+    kind: FB_NUMERIC.has(q.kind) ? 'scale' : 'cat',
+    /* A scale's two ends, where the question gives them. The old map typed
+       them out; a five-point scale carries its own labels. */
+    poleLow: q.scale ? q.scale[0] : (q.kind === 'nps' ? '0' : '1'),
+    poleHigh: q.scale ? q.scale[q.scale.length - 1] : String(q.max || 5),
+    options: q.kind === 'choice' ? (q.options || []) : null,
+  }));
+const FB_SCALE_SRC = Object.fromEntries(FB_FIELDS.filter((f) => f.kind === 'scale').map((f) => [f.key, f.src]));
+const FB_CAT_SRC = Object.fromEntries(FB_FIELDS.filter((f) => f.kind === 'cat').map((f) => [f.key, f.src]));
 
 function buildCatalog(fbCatOptions) {
   const f = [];
@@ -287,9 +302,18 @@ function buildCatalog(fbCatOptions) {
     }
     f.push(fld);
   }
-  for (const k of Object.keys(FB_SCALE)) f.push({ key: k, label: FB_SCALE[k], group: 'Beta feedback survey', kind: 'scale', poleLow: (FB_POLES[k]||[])[0], poleHigh: (FB_POLES[k]||[])[1] });
-  for (const k of Object.keys(FB_CAT)) f.push({ key: k, label: FB_CAT[k], group: 'Beta feedback survey', kind: 'cat', options: ((fbCatOptions && fbCatOptions[k]) || []).map((v) => ({ v, label: v })) });
-  f.push({ key: 'fb_nps', label: 'Feedback \u00b7 NPS (raw 0\u201310)', group: 'Beta feedback survey', kind: 'cat', options: Array.from({ length: 11 }, (_, i) => ({ v: String(i), label: String(i) })) });
+  for (const fb of FB_FIELDS) {
+    f.push({
+      key: fb.key, label: fb.label, group: 'Survey', kind: fb.kind,
+      ...(fb.kind === 'scale' ? { poleLow: fb.poleLow, poleHigh: fb.poleHigh } : {}),
+      /* A choice's options come from the question. Anything else actually
+         answered is added too, so a renamed option still filters. */
+      ...(fb.kind === 'cat' ? {
+        options: [...new Set([...(fb.options || []), ...((fbCatOptions && fbCatOptions[fb.key]) || [])])]
+          .map((v) => ({ v, label: v })),
+      } : {}),
+    });
+  }
   /**
    * ── THE JOURNAL, AS A RATE ──────────────────────────────────────────
    * Ellie: "I want a slicer variable for never used journal, uses <3x/mo, or
@@ -374,24 +398,33 @@ export default async function handler(req) {
       journalByOwner = journalUseByOwner(jRows);
     } catch (e) { /* the column arrives with migration 073; before it, nobody has entries. */ }
 
-    // Beta survey responses, keyed by respondent profile id, for the join below.
+    /**
+     * Survey answers, keyed by respondent profile id, for the join below.
+     *
+     * One row per person in survey_responses, including the half-finished
+     * ones: Ellie asked for incomplete responses to be collected, and a person
+     * who answered three questions can be sliced on those three.
+     *
+     * This read feedback_submissions rows of type beta_survey, which migration
+     * 079 deletes. The answers are keyed by question id now, so the join below
+     * needs no translation layer.
+     */
     const surveyByRespondent = {};
-    const fbCatOptions = { fb_ahaMarker: new Set(), fb_convoHappened: new Set() };
+    const fbCatOptions = Object.fromEntries(Object.keys(FB_CAT_SRC).map((k) => [k, new Set()]));
     try {
-      const { data: fbRows = [] } = await admin.from('feedback_submissions').select('id, type, text, submitted_at, featured').eq('type', 'beta_survey');
-      for (const r of fbRows) {
-        let payload = null;
-        try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
-        if (payload && payload.respondentId) {
-          payload._ts = r.submitted_at || payload._ts || null;
-          payload._rowId = r.id; payload._featured = !!r.featured;
-          surveyByRespondent[payload.respondentId] = payload;
-          for (const [fk, src] of Object.entries(FB_CAT_SRC)) { const v = payload[src]; if (v) fbCatOptions[fk].add(v); }
-        }
+      const { data: svRows = [] } = await admin.from('survey_responses')
+        .select('id, respondent_id, answers, updated_at, completed_at, featured_at');
+      for (const r of (svRows || [])) {
+        if (!r.respondent_id) continue;
+        const payload = { ...(r.answers || {}) };
+        payload._ts = r.completed_at || r.updated_at || null;
+        payload._rowId = r.id;
+        surveyByRespondent[r.respondent_id] = payload;
+        for (const [fk, src] of Object.entries(FB_CAT_SRC)) { const v = payload[src]; if (v) fbCatOptions[fk].add(v); }
       }
     } catch (e) {
-      console.error('[admin-explore] beta survey filters:', e?.message || e);
-      couldNotRead.push('the beta survey, so its filter options are missing');
+      console.error('[admin-explore] survey filters:', e?.message || e);
+      couldNotRead.push('the survey, so its filter options are missing');
     }
     const fbCatOpts = Object.fromEntries(Object.entries(fbCatOptions).map(([k, set]) => [k, [...set]]));
 
@@ -512,7 +545,6 @@ export default async function handler(req) {
       if (survey) {
         for (const [fk, src] of Object.entries(FB_SCALE_SRC)) { const v = Number(survey[src]); row[fk] = Number.isFinite(v) ? v : null; }
         for (const [fk, src] of Object.entries(FB_CAT_SRC)) { row[fk] = survey[src] != null && survey[src] !== '' ? survey[src] : null; }
-        { const _nv = parseInt(survey.nps, 10); row.fb_nps = Number.isFinite(_nv) ? String(_nv) : null; }
       }
       rows.push(row);
       // Anonymized segment snapshot for order joins (keyed by id + email; no PII emitted).
@@ -554,65 +586,38 @@ export default async function handler(req) {
       });
     } catch (e) { orderRows = []; }
 
-    // ── Survey responses, anonymized + segment-tagged (NPS / ratings slicing) ──
+    /**
+     * Survey responses, anonymised and segment-tagged.
+     *
+     * One row per person who has answered anything, carrying the numeric
+     * answers the Feedback Overview charts, plus the segment fields it slices
+     * by. The keys are the question ids, so a chart reading `rating` is
+     * reading the star question and nothing has to be translated.
+     *
+     * This was three arrays built from two kinds of feedback_submissions row:
+     * `surveys` for the charts, `betaResponses` for the 26-question tiles, and
+     * `testimonials` for a page that asked for a name. Migration 079 deletes
+     * every row all three read, and the new survey asks for no name at all.
+     */
     const monthOfTs = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
     const surveysAnon = [];
-    const testimonialsAnon = [];
-    const betaResponsesAnon = [];
     for (const [rid, payload] of Object.entries(surveyByRespondent)) {
       const seg = segById[rid] || {};
       const row = {};
       for (const k of SEG_KEYS) row[k] = seg[k] != null ? seg[k] : null;
       row.month = monthOfTs(payload._ts);
       row.ts = payload._ts || null;
-      const nps = parseInt(payload.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
-      const rl = parseInt(payload.returnLikelihood, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
-      row.convo = payload.convoHappened != null && payload.convoHappened !== '' ? String(payload.convoHappened) : null;
+      /* Every numeric answer, by its question id, and every choice as given. */
+      for (const f of FB_FIELDS) {
+        const v = payload[f.src];
+        if (f.kind === 'scale') {
+          const n = parseInt(v, 10);
+          row[f.src] = Number.isFinite(n) ? n : null;
+        } else {
+          row[f.src] = v != null && v !== '' ? String(v) : null;
+        }
+      }
       surveysAnon.push(row);
-      // Full beta response (all answer fields) + segments, PII stripped, for the
-      // segment-sliceable beta feedback charts.
-      { const br = {};
-        for (const k of Object.keys(payload)) { if (['respondentId','userName','email','_ts','_rowId','_featured'].includes(k)) continue; br[k] = payload[k]; }
-        for (const k of SEG_KEYS) br[k] = seg[k] != null ? seg[k] : null;
-        br._ts = payload._ts || null;
-        betaResponsesAnon.push(br); }
-      // Beta-survey testimonial (from the survey's last section) -> Testimonials page.
-      const _btxt = String(payload.testimonial || '').trim();
-      if (_btxt) {
-        const bt = { id: payload._rowId != null ? payload._rowId : ('beta-' + rid), featured: !!payload._featured,
-          name: payload.consentFirstName || payload.consentInitials || payload.userName || '', ts: payload._ts || null,
-          rating: null, nps: row.nps, testimonial: _btxt, coupleTypeName: payload.coupleType || null, source: 'beta' };
-        for (const k of SEG_KEYS) bt[k] = seg[k] != null ? seg[k] : null;
-        testimonialsAnon.push(bt);
-      }
-    }
-    // Post-results survey (general couples) — same shape so NPS/ratings charts
-    // combine both cohorts. Its star rating maps onto the 1-5 rating axis.
-    try {
-      const { data: prRows = [] } = await admin.from('feedback_submissions').select('id, text, submitted_at, featured').eq('type', 'post_results');
-      for (const r of prRows) {
-        let payload = null; try { payload = typeof r.text === 'string' ? JSON.parse(r.text) : r.text; } catch {}
-        if (!payload) continue;
-        const a = payload.answers || {};
-        const seg = (payload.respondentId && segById[payload.respondentId]) || {};
-        const row = {};
-        for (const k of SEG_KEYS) row[k] = seg[k] != null ? seg[k] : null;
-        row.month = monthOfTs(r.submitted_at);
-        row.ts = r.submitted_at || null;
-        const nps = parseInt(a.nps, 10); row.nps = Number.isFinite(nps) ? nps : null;
-        const rl = parseInt(a.rating, 10); row.returnLikelihood = Number.isFinite(rl) ? rl : null;
-        row.convo = a.convo != null && a.convo !== '' ? String(a.convo) : null;
-        surveysAnon.push(row);
-        // Testimonial entry (segment-tagged) for the admin Testimonials page.
-        const t = { id: r.id, featured: !!r.featured, name: payload.userName || '', ts: r.submitted_at || null,
-          rating: Number.isFinite(rl) ? rl : null, nps: Number.isFinite(nps) ? nps : null,
-          testimonial: String(a.testimonial || '').trim(), coupleTypeName: payload.coupleType || null };
-        for (const k of SEG_KEYS) t[k] = seg[k] != null ? seg[k] : null;
-        testimonialsAnon.push(t);
-      }
-    } catch (e) {
-      console.error('[admin-explore] testimonials:', e?.message || e);
-      couldNotRead.push('the testimonials');
     }
 
     return json({
@@ -623,8 +628,6 @@ export default async function handler(req) {
       rows,
       orders: orderRows,
       surveys: surveysAnon,
-      testimonials: testimonialsAnon,
-      betaResponses: betaResponsesAnon,
       /* Empty on a clean run. Anything in it is a question the page cannot
          answer, said out loud rather than drawn as a smaller number. */
       couldNotRead,

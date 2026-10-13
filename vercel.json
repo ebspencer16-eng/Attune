@@ -210,10 +210,6 @@
       "destination": "/start.html"
     },
     {
-      "source": "/api/submit-beta-survey",
-      "destination": "/api/submit-beta-survey.js"
-    },
-    {
       "source": "/api/generate-pdf",
       "destination": "/api/generate-pdf.js"
     },
@@ -300,6 +296,14 @@
     {
       "source": "/api/tool-data",
       "destination": "/api/tool-data.js"
+    },
+    {
+      "source": "/api/survey",
+      "destination": "/api/survey.js"
+    },
+    {
+      "source": "/api/admin-survey",
+      "destination": "/api/admin-survey.js"
     }
   ],
   "headers": [

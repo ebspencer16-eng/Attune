@@ -67,7 +67,10 @@ with checks (migration, object, kind, degraded) as (
      'The Shared Budget and the checklist go back to being one each. Both partners still see their own, neither sees the other, and nothing says so.'),
     ('078_push',
      'push_tokens', 'table',
-     'No push notification can be sent or even asked about. /api/push-token answers that push storage is not set up; the daily cron reports nobody opted in and sends nothing.')
+     'No push notification can be sent or even asked about. /api/push-token answers that push storage is not set up; the daily cron reports nobody opted in and sends nothing.'),
+    ('079_survey',
+     'survey_responses', 'table',
+     'The end-of-experience survey cannot be answered. /api/survey says the storage is not set up and the admin page says the same, so every answer is lost rather than stored.')
 )
 select
   c.migration,

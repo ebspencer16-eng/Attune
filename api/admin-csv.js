@@ -21,6 +21,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { SATISFACTION_QUESTION_IDS } from './_anniversary-questions.js';
+import { SURVEY_QUESTIONS } from './_lib/survey.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 
 import { packageIncludes } from './_lib/ownership.js';
@@ -156,8 +157,6 @@ async function buildCombinedData(admin) {
     if (o.user_id && !ordersByUser[o.user_id]) ordersByUser[o.user_id] = o;
   });
 
-  const feedbackByEmail = await loadFeedbackByEmail(admin);
-
   // Column layout: [category_label, column_name]. Category only appears on
   // the first column of each span.
   const DIMS = Object.keys(DIM_KEYS);
@@ -215,18 +214,6 @@ async function buildCombinedData(admin) {
     ...SAT_KEYS.map(k => ['', `partner_b_satisfaction_${k}`]),
   ];
 
-  // Discover feedback keys dynamically
-  const feedbackKeys = new Set();
-  Object.values(feedbackByEmail).forEach(fb => {
-    Object.keys(fb || {}).forEach(k => feedbackKeys.add(k));
-  });
-  const SKIP_FB = new Set(['email', 'user_id', 'submitted_at']);
-  const feedbackCols = [...feedbackKeys].filter(k => !SKIP_FB.has(k)).sort();
-  if (feedbackCols.length > 0) {
-    // First feedback column gets the 'Feedback' category label
-    cols.push(['Feedback', 'feedback_submitted_at']);
-    feedbackCols.forEach(fk => cols.push(['', `feedback_${fk}`]));
-  }
 
   const categoryRow = cols.map(c => c[0]);
   const nameRow = cols.map(c => c[1]);
@@ -266,7 +253,6 @@ async function buildCombinedData(admin) {
     const hasChecklist  = pkgHasChecklist;
 
     const anonId = (p.id || '').replace(/-/g, '').slice(0, 8);
-    const fb = (o?.buyer_email && feedbackByEmail[o.buyer_email.toLowerCase()]) || null;
 
     const row = [
       anonId,
@@ -307,10 +293,6 @@ async function buildCombinedData(admin) {
       ...SAT_KEYS.map(k => bEx3[k] != null ? bEx3[k] : ''),
     ];
 
-    if (feedbackCols.length > 0) {
-      row.push(fb?.submitted_at || '');
-      feedbackCols.forEach(fk => row.push(fb?.[fk] != null ? fb[fk] : ''));
-    }
     return row;
   });
 
@@ -400,49 +382,20 @@ async function exportCombinedXlsx(admin) {
 }
 
 /**
- * Survey responses, keyed by email where there is one.
+ * The survey is not joined to anybody, on purpose.
  *
- * ── IT READ A STORE THAT HAS GONE ────────────────────────────────────────
- * This asked Vercel KV for `feedback:beta_survey`, and nothing has written
- * that key for a long time: /feedback posts to /api/submit-beta-survey, which
- * stores in Supabase. The KV host stopped resolving at some point, and on
- * 2026-10-10 Ellie deleted the two variables, so this returned {} and the
- * combined export quietly lost its feedback columns.
+ * ── WHAT WAS HERE ─────────────────────────────────────────────────────────
+ * A loader that keyed every survey answer by the email that gave it, so the
+ * combined export carried one column per question beside the order and the
+ * demographics. The old survey asked for an email, so it could.
  *
- * Supabase is where the answers are. `text` holds the whole submission as
- * JSON, which is how submit-beta-survey writes it and how the admin page
- * reads it back.
+ * The survey says, above its first question, that the answers are anonymous.
+ * That promise is kept here or nowhere: a spreadsheet with an answer in the
+ * same row as an order is not anonymous, whatever the questionnaire said.
+ *
+ * The answers are exported on their own by the survey export below, with no
+ * email, no name and no profile id.
  */
-async function loadFeedbackByEmail(admin) {
-  try {
-    const { data, error } = await admin
-      .from('feedback_submissions')
-      .select('text, email, submitted_at')
-      .in('type', ['beta_survey', 'post_results'])
-      .order('submitted_at', { ascending: false });
-    if (error) return {};
-    const entries = (data || []).map((row) => {
-      let parsed = {};
-      try { parsed = typeof row.text === 'string' ? JSON.parse(row.text) : (row.text || {}); } catch { parsed = {}; }
-      return { ...parsed, email: parsed.email || row.email, submitted_at: row.submitted_at };
-    }).filter(Boolean);
-
-    const byEmail = {};
-    entries.forEach(e => {
-      const email = (e.email || '').toLowerCase();
-      if (email) {
-        // Keep the most recent response if a user answered multiple times
-        const prev = byEmail[email];
-        if (!prev || new Date(e.submitted_at || 0) > new Date(prev.submitted_at || 0)) {
-          byEmail[email] = e;
-        }
-      }
-    });
-    return byEmail;
-  } catch {
-    return {};
-  }
-}
 
 // ── 1. ORDERS ──────────────────────────────────────────────────────────
 // Includes each add-on with Y/N + when (initial checkout, pre-results,
@@ -704,44 +657,46 @@ async function exportTyping(admin) {
   return csvResponse(`attune_typing_${new Date().toISOString().slice(0,10)}.csv`, toCSV(headers, rows));
 }
 
-// ── 5. FEEDBACK ────────────────────────────────────────────────────────
-// One column per question, from the table the surveys are actually stored in.
-// This read Vercel KV until 2026-10-10 and answered "KV not configured" once
-// the variables were deleted, which is a button in the admin that returns an
-// error. The rows are in Supabase and always were.
+// ── 5. THE SURVEY ──────────────────────────────────────────────────────
+// One row per response, one column per question, in the order the survey asks
+// them. No email, no name, no profile id: the survey says its answers are
+// anonymous, and this file is one of the two places that promise is kept.
+//
+// It read two retired row types until migration 079 deleted them, and before
+// that it read a Vercel KV key nothing had written for months, which is how a
+// button in the admin came to return an error.
+
 async function exportFeedback(admin) {
   const { data, error } = await admin
-    .from('feedback_submissions')
-    .select('type, text, email, couple_type, submitted_at')
-    .in('type', ['beta_survey', 'post_results'])
-    .order('submitted_at', { ascending: false });
-  if (error) return errResponse(500, 'Could not read the feedback table');
-  const entries = (data || []).map((row) => {
-    let parsed = {};
-    try { parsed = typeof row.text === 'string' ? JSON.parse(row.text) : (row.text || {}); } catch { parsed = {}; }
-    return {
-      submitted_at: row.submitted_at,
-      couple_type: parsed.coupleType || row.couple_type || '',
-      survey: row.type,
-      ...parsed,
-    };
-  }).filter(Boolean);
+    .from('survey_responses')
+    .select('answers, version, source, started_at, updated_at, completed_at')
+    .order('updated_at', { ascending: false });
+  if (error) return errResponse(500, 'Could not read the survey table');
+  const entries = data || [];
 
   if (entries.length === 0) {
-    return csvResponse('attune_feedback_empty.csv', 'No feedback responses yet.');
+    return csvResponse('attune_survey_empty.csv', 'Nobody has answered the survey yet.');
   }
 
-  // Discover all question keys across all responses, plus metadata.
-  const allKeys = new Set();
-  entries.forEach(e => {
-    if (e && typeof e === 'object') {
-      Object.keys(e).forEach(k => allKeys.add(k));
-    }
-  });
-  const metaKeys = ['submitted_at', 'couple_type', 'pkg'];
-  const questionKeys = [...allKeys].filter(k => !metaKeys.includes(k)).sort();
-  const headers = [...metaKeys, ...questionKeys];
-
-  const rows = entries.map(e => headers.map(k => e[k] != null ? e[k] : ''));
-  return csvResponse(`attune_feedback_${new Date().toISOString().slice(0,10)}.csv`, toCSV(headers, rows));
+  /* The questions, in the order they are asked, from the module that defines
+     them. Discovering the columns from the rows would put them in whatever
+     order the first response happened to have, and would silently drop a
+     question nobody has answered yet, which is the one worth noticing. */
+  const metaKeys = ['started', 'last_answered', 'finished', 'where', 'version'];
+  const headers = [...metaKeys, ...SURVEY_QUESTIONS.map((q) => q.id)];
+  const cell = (v) => {
+    if (v == null) return '';
+    if (Array.isArray(v)) return v.join(' > ');   // the ranking, in order
+    return String(v);
+  };
+  const rows = entries.map((r) => [
+    r.started_at || '',
+    r.updated_at || '',
+    r.completed_at || '',
+    r.source || '',
+    r.version || '',
+    ...SURVEY_QUESTIONS.map((q) => cell((r.answers || {})[q.id])),
+  ]);
+  return csvResponse(`attune_survey_${new Date().toISOString().slice(0, 10)}.csv`, toCSV(headers, rows));
 }
+

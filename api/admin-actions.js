@@ -86,13 +86,10 @@ export default async function handler(req) {
     }
 
 
-    if (body.action === 'feature_testimonial') {
-      const id = body.id;
-      if (!id) return json({ error: 'Missing id' }, 400);
-      const { error } = await admin.from('feedback_submissions').update({ featured: !!body.featured }).eq('id', id);
-      if (error) return json({ error: safeError('admin-actions', error, 'Action failed.') }, 500);
-      return json({ ok: true });
-    }
+    /* Featuring a quote on the homepage lives in /api/admin-survey now, next
+       to the answer it publishes. The action that was here set a flag on a
+       feedback_submissions row, and the only page that called it is gone with
+       the survey those rows held. */
 
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {

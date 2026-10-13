@@ -200,6 +200,7 @@
   </div>
 </main>
 
+<script src="/_session.js"></script>
 <script>
 /* Reads and writes /api/privacy-choices.
  *
@@ -215,37 +216,14 @@
   var pill  = document.getElementById('gpc-pill');
   var text  = document.getElementById('gpc-text');
 
-  /* The access token, read straight out of the key supabase-js keeps it in.
+  /* The access token and the headers that carry it come from /_session.js.
    *
-   * The rest of the site calls sb.auth.getSession(), which means loading the
-   * Supabase client. This is a static page and does not otherwise need it, so
-   * it reads the stored session instead. The key is sb-<project-ref>-auth-token
-   * and the project ref is not hardcoded here: it is found by prefix, so this
-   * keeps working if the project ever changes.
-   *
-   * Two shapes are handled. supabase-js v2 stores the session at the top level;
-   * older versions wrapped it in currentSession. Returning null just means the
-   * page shows its signed-out state, which is the safe way to be wrong. */
-  function token() {
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (!k || k.indexOf('sb-') !== 0 || k.indexOf('-auth-token') < 0) continue;
-        var v = JSON.parse(localStorage.getItem(k) || 'null');
-        if (!v) continue;
-        var t = v.access_token || (v.currentSession && v.currentSession.access_token);
-        if (t) return t;
-      }
-    } catch (e) { /* unreadable storage reads as signed out */ }
-    return null;
-  }
-
-  function headers() {
-    var h = { 'Content-Type': 'application/json' };
-    var t = token();
-    if (t) h.Authorization = 'Bearer ' + t;
-    return h;
-  }
+   * They were written here first, and then /feedback needed the same thing.
+   * Two copies of a rule is this codebase's whole failure mode, so the reader
+   * moved into one file that both pages load; check-session-reader.mjs fails
+   * the build on any other page under public/ reading that storage key. */
+  var token = window.attuneToken;
+  var headers = window.attuneHeaders;
 
   function paintGpc(on) {
     pill.textContent = on ? 'Signal received' : 'Not sending';

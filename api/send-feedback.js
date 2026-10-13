@@ -35,7 +35,7 @@ export const config = { runtime: 'edge' };
  *
  * `type` is what the admin filters on: 'quick' for the footer strip and
  * 'app_experience' for the questionnaire. `text` carries the whole record as
- * JSON for the questionnaire, which is how submit-beta-survey stores its
+ * JSON for the questionnaire, which is how the survey endpoint stores its
  * answers and how the admin reads them back.
  */
 async function supabaseStore(entry) {
@@ -107,7 +107,7 @@ export default async function handler(req) {
     questionAnswers,
   } = body;
 
-  // Same rule as /api/submit-beta-survey: a rating, a message or an answer,
+  // Same rule as /api/survey: a rating, a message or an answer,
   // or there is nothing to record. This endpoint is deliberately open, because
   // feedback from someone who is not signed in is still feedback, so the only
   // thing standing between it and a junk row is this.
