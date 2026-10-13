@@ -1065,6 +1065,35 @@ testflight`. Never "from the app folder, run". Never a fragment to append. A
 file she needs to put somewhere gets `| pbcopy` and the instruction to paste,
 rather than a path to go and open.
 
+**A start tag that never closes folds the page up and says nothing.** Fifty
+nine of them were in `public/admin.html`: `<select ... aria-label="Slz tout"<option
+value="">`, where an accessibility pass inserted the attribute just before the
+`>` and took the bracket with it. The browser reads everything after that as
+more attributes until it finds a `>` somewhere later, so the markup after that
+point is nested wherever that lands. Type Analytics laid out at zero by zero
+with eleven tiles inside it; the symptom Ellie reported was "the tiles are
+going all the way to the sides of the window". Sixteen In Practice pages had a
+truncated `<scr` eating their closing tags. `check-tag-closure.mjs` walks every
+start tag to its `>` and fails on a `<` found first, with script and style
+blanked because `'<option value="'+x+'"'` in JavaScript is the same shape and
+is not a bug.
+
+**A CSS cap beats any height you compute in JavaScript, silently.**
+`.chart-body canvas{max-height:220px}` had been there for months. A tile sized
+to its eleven rows grew to 582 points and its chart stayed at 220: the labels
+overlapped and the bottom half was white. Chart.js reports no error for that;
+it draws small. Three readings of the drawing code found nothing, and one
+measurement of canvas height against container height found it in a minute. If
+a computed size does not take, measure both ends before changing the
+computation.
+
+**Removing a function by walking brace depth is not safe.** The walk over
+`renderExperienceFeedback` ran past the end of the function and took forty-one
+kilobytes and thirty-odd functions out of admin.html, with every gate still
+passing. Bound a removal by the next top-level declaration instead, and assert
+the shape of what is left: counting `^function ` before and after would have
+caught it instantly, and now does.
+
 **An assertion about a file trips on the comment explaining the edit.** Four
 times in one session: a script removed `betaResponses`, wrote a comment saying
 what `betaResponses` used to be, and then asserted the name was gone. The

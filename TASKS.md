@@ -8,6 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| B45 | **The question explorer between the footer feedback and the formula diagnostics is deleted.** The experience questionnaire's two tiles are still there, and I need one word from you about them. See the note under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -27,6 +28,26 @@ These two are still waiting on somebody, and neither is waiting on me.
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you here; this row is so it does not get lost. |
 
 ---
+
+### B45, the one word I need
+
+The stretch you pointed at held two things, and only one of them went.
+
+**Gone:** the question explorer. It drew distributions and cross-tabs, which is
+what the slicer on every tile does now, so your reason covers it exactly.
+
+**Still there:** the experience questionnaire, "How was your experience?". It is
+a different and shorter instrument from the survey, it is asked on a card in
+the app, and it still collects answers. Deleting its two tiles would leave it
+collecting into a void, and the build refuses that: a gate exists for precisely
+this, written after three admin pages were found reporting on a question the
+product had stopped asking.
+
+So: **retire it, or keep it?** My recommendation is to retire it. The survey
+asks everyone the same things more precisely, and two instruments collecting
+overlapping answers is how we ended up with three surveys. Say "retire it" and
+the card comes out of the app, the endpoint stops being offered, and the two
+tiles go with it. Say "keep it" and they stay where they are.
 
 ### B38, the migration you ran
 
@@ -221,6 +242,9 @@ on you.
 | B40 | **Three admin pages became one.** Beta Feedback, Survey Explorer and Testimonials all read the rows this migration deletes, and each carried its own copy of the 26 questions. The Survey page replaces all three; the Feedback Overview, the NPS trend and Couple type x outcomes now read the new answers, and the two tiles that measured retired questions say which two questions they measure instead. |
 | B41 | **The admin is two pages now, Feedback and Testimonials, to your layout.** Feedback: a time-period slicer over the whole page, four metrics across the top, then two tiles to a row, one per question, each with its own segment slicer. Written answers get a themes chart with **View full list**, which opens the table of category and volume with every answer under it. Testimonials: every written answer, sortable, with demographic checkboxes, a timeframe, and a search that looks at the words and at the themes. The star that publishes a quote to the homepage lives there, next to the answer you are reading. Every tile is built now and says so while it is empty. |
 | B39 | **Your words are in, on all three surfaces.** One decision to look at: your first line is the heading now, and the sentence I had written above it is gone rather than sitting on top of yours. The 0 to 10 question is labelled at both ends. |
+| B42 | **The admin's formatting, in five parts.** Fifty-nine tags in the admin were missing the `>` that closes them, which is why Type Analytics ran to the edges of your window: the page's structure collapsed. Sixteen In Practice pages carried a truncated `<scr` that ate their closing tags, too. Fixed, plus fluid gutters that scale with the window, padding on the text that was touching a tile's edge, and axes that read at any width. |
+| B43 | **Every invented number out of the admin.** A generator was making 60 orders with names and addresses on page load, and four beta codes carried invented usage counts. Both gone; the pages read from Supabase or say they are empty. |
+| B44 | **Most to least interesting over time is gone**, and the remaining tiles re-paired. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |

@@ -2722,3 +2722,58 @@ Feedback page was checked against 40 made-up responses driven through a
 browser, not against real rows. The tiles, the slicers, the period, the themes
 dialog, the search and the star were all exercised that way; what has not been
 exercised is a real answer arriving from a real couple.
+
+## 2026-10-13, the admin's formatting, and what the markup was doing
+
+**Fifty-nine start tags in public/admin.html never closed.** They looked like
+`<select … aria-label="Slz tout"<option value="">`: an accessibility pass had
+inserted the aria-label just before the `>` and taken the bracket with it. The
+browser reads everything after that as more attributes until it finds a `>`
+somewhere later, so the rest of the page is nested wherever that lands. On Type
+Analytics the whole page measured zero by zero with eleven tiles inside it,
+which is what Ellie was seeing as "the type analytics tiles are going all the
+way to the sides of the window". Sixteen In Practice pages carried a truncated
+`<scr` from a footer-insertion script in 5c707bab, which ate their `</body>`
+and `</html>`.
+
+`check-tag-closure.mjs` walks every start tag in every page under public/ to
+its `>`, respecting quotes, and fails on a `<` found first. Script and style
+blocks are blanked, because `'<option value="'+x+'"'` in JavaScript is the same
+shape and is not a bug. Planted both ways: a bracket removed is caught, and the
+same example written inside an HTML comment is not.
+
+**A CSS cap was quietly winning over every tall tile.** `.chart-body canvas
+{max-height:220px}` meant the ranking tile grew to 582 points and its chart
+stayed at 220: eleven labels crushed into a third of the space with white
+underneath, and no error anywhere. A tile that sets its own height now opts out
+through `.chart-body[style*="height"] canvas{max-height:none}`. I found it only
+by measuring canvas height against container height in a browser; reading the
+file three times did not.
+
+**What else changed.** Page gutters are `clamp()` so they scale with the
+window, grid columns are `minmax(0,1fr)` so one long label cannot push a column
+past the edge, tiles no longer stretch to their neighbour's height, and the
+empty-state note inside a tile is padded instead of sitting flush against the
+card's left edge. Long answers draw as rows with wrapped labels; numbers stay
+as columns.
+
+**No invented data anywhere.** `generateOrders()` was 173 lines inventing sixty
+orders with names, addresses and gift messages on every page load, cleared only
+once Supabase answered; four beta codes carried invented usage whenever their
+real usage was zero. Both are gone, the banner says what is actually true, and
+a probe over all fourteen pages with every endpoint answering empty finds no
+non-zero figure anywhere.
+
+**What I did not delete, and why.** "Delete everything between the footer
+feedback and the formula diagnostics" covers the question explorer, which is
+gone. It also covered the experience questionnaire's two tiles, and deleting
+those leaves "How was your experience?" collecting answers nothing can read:
+check-feedback-reachable fails the build on exactly that, which is how it was
+caught after I had deleted them. They are back, and TASKS.md B45 asks her the
+one-word question, with a recommendation to retire the questionnaire itself.
+
+**And the brace walk bit again.** Removing renderExperienceFeedback by walking
+brace depth ran past the end of the function and took forty-one kilobytes and
+thirty-odd functions with it, silently. Restoring and replaying the whole set
+of edits as one script was the fix, and that script now asserts the function
+count changes by exactly the number of functions it means to change.
