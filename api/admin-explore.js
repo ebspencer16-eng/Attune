@@ -74,13 +74,34 @@ const DIM_LABELS = {
 };
 const TYPE_LABELS = { W: 'W · Initiator', X: 'X · Anchor', Y: 'Y · Feeler', Z: 'Z · Protector' };
 const DEMO_LABELS = {
-  age_range: 'Age range', gender: 'Gender', relationship_status: 'Relationship status',
+  age_range: 'Age range', pronouns: 'Pronouns', relationship_status: 'Relationship status',
   relationship_length: 'Time together', children: 'Children', signup_source: 'Signup source',
 };
 const DEMO_KEYS = Object.keys(DEMO_LABELS);
-function genderFromPronoun(pr) {
-  const v = String(pr || '').toLowerCase();
-  return v === 'he/him' ? 'man' : v === 'she/her' ? 'woman' : v === 'they/them' ? 'nonbinary' : null;
+
+/**
+ * Pronouns, not gender.
+ *
+ * ── WHAT THIS REPLACED ────────────────────────────────────────────────────
+ * genderFromPronoun(): she/her meant woman, he/him meant man, and they/them
+ * meant NON-BINARY. Nothing in the product asks anybody their gender. The
+ * signup form has five demographic questions and gender is not one of them, so
+ * every gender figure in the admin was a pronoun with another word written
+ * over it.
+ *
+ * Ellie: "I think some of the data is wrong, none of our beta testers are non
+ * binary." She was right, and the chart was reporting a person's pronouns as
+ * their gender, which is both a wrong number and the kind of wrong that
+ * matters more than a number.
+ *
+ * So the dimension is what was actually collected. If gender is ever worth
+ * knowing it is a question to ask, not an inference to make.
+ */
+function pronounLabel(pr) {
+  const v = String(pr || '').trim().toLowerCase();
+  if (!v) return null;
+  if (v === 'he/him' || v === 'she/her' || v === 'they/them') return v;
+  return 'other';
 }
 const RESP_OPTS = ['Me', 'Both', 'Partner', 'N/A'];
 const IDIM_LABEL = Object.fromEntries((INTIMACY_DIMENSIONS || []).map((d) => [d.id, d.label]));
@@ -129,8 +150,7 @@ function ownFields(p) {
     has_intimacy: !!(p.intimacy_data && p.intimacy_data.answers && Object.keys(p.intimacy_data.answers).length > 0),
   };
   for (const k of DEMO_KEYS) r[k] = p[k] != null && p[k] !== '' ? p[k] : null;
-  // Gender isn't collected directly; derive it from the person's own pronouns.
-  if (!r.gender && p.pronouns) r.gender = genderFromPronoun(p.pronouns);
+  r.pronouns = pronounLabel(p.pronouns);
   for (const dim of Object.keys(DIM_KEYS)) {
     r['dim_' + dim] = scores[dim] != null ? Number(Number(scores[dim]).toFixed(3)) : null;
   }
@@ -445,7 +465,7 @@ export default async function handler(req) {
     // Pass 2: pairing + partner denormalization.
     // Segment lookups so orders can be joined to a purchaser's demographics
     // server-side (by user_id or email) without ever exposing PII to the client.
-    const SEG_KEYS = ['gender','age_range','relationship_status','relationship_length','children','signup_source','type','axisEngage','axisOpen','couple_type','pkg'];
+    const SEG_KEYS = ['pronouns','age_range','relationship_status','relationship_length','children','signup_source','type','axisEngage','axisOpen','couple_type','pkg'];
     const RETRO_COUPLE_TYPE = { 'ATTUNE-BETA-1':'WZ', 'ATTUNE-BETA-2':'WX', 'ATTUNE-BETA-5':'WY' };
     const segById = {}, segByEmail = {};
     const rows = [];
@@ -532,9 +552,10 @@ export default async function handler(req) {
       if (partner) { for (const k of PARTNERABLE) row['p_' + k] = partner[k]; if (partnerType) row.p_type = partnerType; }
       // Gender fallback: each partner records the other's pronouns, so a person
       // who never set their own can still be filled from their partner's record.
-      if (!row.gender && partnerId && profileById[partnerId]?.partner_pronouns) {
-        const g = genderFromPronoun(profileById[partnerId].partner_pronouns);
-        if (g) row.gender = g;
+      /* Each partner records the other's pronouns at signup, so somebody who
+         never set their own still has them from the person who invited them. */
+      if (!row.pronouns && partnerId && profileById[partnerId]?.partner_pronouns) {
+        row.pronouns = pronounLabel(profileById[partnerId].partner_pronouns);
       }
       {
         const use = journalByOwner.get(p.id) || { ever: 0, recent: 0 };

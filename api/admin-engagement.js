@@ -497,7 +497,10 @@ export default async function handler(req) {
       // What the slicer cuts by. The demographics are columns; the type is
       // scored from ex1_answers, which the exercise columns above already
       // bring along.
-      'age_range', 'gender', 'relationship_status', 'relationship_length',
+      /* `pronouns`, not `gender`: nothing asks anybody their gender, so that
+         column is empty for everybody and the slicer offered a cut with no
+         values in it. */
+      'age_range', 'pronouns', 'relationship_status', 'relationship_length',
       'children', 'signup_source', 'pkg',
     ];
     const EVENT_COLS = 'kind,key,ms,owner_id,created_at';

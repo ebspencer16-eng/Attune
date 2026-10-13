@@ -359,14 +359,18 @@ const problems = [];
       + ' A component that exists and is not drawn is the same as a deleted one, except that'
       + ' reading the file says otherwise.');
   }
-  /* And it is not the experience questionnaire, which is a different and
-     shorter thing with its own card and its own admin tile. Overwriting that
-     screen with this one is a mistake that has been made here once. */
-  const questionnaire = read('attune-app/src/components/feedback.tsx');
-  if (!/fetchFeedbackForm/.test(questionnaire)) {
-    problems.push("the app's \"How was your experience?\" questionnaire no longer asks"
-      + ' /api/send-feedback for its questions. That is a different instrument from the survey,'
-      + ' with its own copy module and its own admin tile; the survey screen is survey.tsx.');
+  /* There is one instrument. The app had a second, "How was your experience?",
+     and I once wrote the survey into its file because that file was called
+     feedback; Ellie has since retired the questionnaire outright. If a second
+     feedback screen appears in the app, it is either that coming back or the
+     survey being written somewhere new, and both are worth stopping. */
+  const second = ['attune-app/src/components/feedback.tsx', 'api/_lib/feedback-copy.js'];
+  for (const f of second) {
+    try {
+      readFileSync(`${ROOT}${f}`, 'utf8');
+      problems.push(`${f} is back. The experience questionnaire was retired at Ellie's word and the`
+        + ' survey is the one instrument; a second one is how there came to be three.');
+    } catch (e) { /* absent, which is the point */ }
   }
 
   /**

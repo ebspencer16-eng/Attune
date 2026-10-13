@@ -1,9 +1,15 @@
 /**
  * GET /api/cron-feedback-synthesis
  *
- * Vercel Cron — weekly (Mondays 09:15 UTC). Pulls the last 7 days of
- * feedback_submissions (live, service-role) and emails a themed synthesis to
- * the team. When ANTHROPIC_API_KEY is set it clusters the free text into
+ * Vercel Cron — weekly (Mondays 09:15 UTC). Pulls the last 7 days of written
+ * survey answers (live, service-role) and emails a themed synthesis to the
+ * team.
+ *
+ * It read feedback_submissions, which was the experience questionnaire and the
+ * footer reaction strip. Both are retired, so that table takes no new rows and
+ * the email would have gone out empty every Monday for ever. The written
+ * answers are in survey_responses now, which is the same question asked of
+ * more people. When ANTHROPIC_API_KEY is set it clusters the free text into
  * ranked themes; without it, it falls back to a plain grouped list so the
  * email still goes out.
  *
@@ -18,21 +24,23 @@ export const config = { runtime: 'edge' };
 import { safeError } from './_lib/http.js';
 
 import { createClient } from '@supabase/supabase-js';
+import { SURVEY_QUESTIONS } from './_lib/survey.js';
 
 const esc = (s) => String(s || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
 
 /**
- * The written half of a feedback row.
+ * Every written answer in a response, as readable lines.
  *
- * This also flattened the old survey's JSON blob, which was how a 26-question
- * response reached the digest. That survey is retired and its rows are deleted
- * by migration 079; the survey's own answers are read on the admin's Survey
- * page, where they can be coded and counted rather than pasted into an email.
- *
- * What is left is what /api/send-feedback stores: a message, in `text`.
+ * The survey keeps its answers as `{question id: answer}`, and four of its
+ * questions are free text. The synthesis reads words, so each response becomes
+ * one line per answer with the question's own label in front of it.
  */
-function extractText(row) {
-  return row.text || '';
+function writtenLines(row, labelFor) {
+  const answers = (row && row.answers) || {};
+  return Object.entries(answers)
+    .filter(([k, v]) => typeof v === 'string' && v.trim().length > 1 && labelFor(k))
+    .map(([k, v]) => `${labelFor(k)}: ${v.trim()}`)
+    .join(' | ');
 }
 
 export default async function handler(req) {
@@ -58,18 +66,23 @@ export default async function handler(req) {
 
   try {
     const { data: rows, error } = await admin
-      .from('feedback_submissions')
-      .select('type, rating, text, couple_type, source, submitted_at')
-      .gte('submitted_at', weekAgo.toISOString())
-      .order('submitted_at', { ascending: false })
+      .from('survey_responses')
+      .select('answers, source, updated_at')
+      .gte('updated_at', weekAgo.toISOString())
+      .order('updated_at', { ascending: false })
       .limit(500);
     if (error) return new Response(JSON.stringify({ error: safeError('cron-feedback-synthesis', error, 'Synthesis failed.') }), { status: 500 });
 
+    /* The question labels come from the module the survey is drawn from, so a
+       question added to the survey appears in the digest by its own name. */
+    const labelById = Object.fromEntries(SURVEY_QUESTIONS.filter((q) => q.kind === 'text').map((q) => [q.id, q.label]));
+    const labelFor = (id) => labelById[id] || null;
+
     const items = (rows || [])
-      .map(r => ({ rating: r.rating, coupleType: r.couple_type, source: r.source, text: extractText(r) }))
+      .map(r => ({ rating: Number((r.answers || {}).rating) || null, source: r.source, text: writtenLines(r, labelFor) }))
       .filter(i => i.text && i.text.trim().length > 1);
 
-    const ratings = (rows || []).map(r => r.rating).filter(n => typeof n === 'number');
+    const ratings = (rows || []).map(r => Number((r.answers || {}).rating)).filter(n => Number.isFinite(n));
     const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : null;
 
     let bodyHtml;

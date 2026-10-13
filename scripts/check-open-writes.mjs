@@ -3,16 +3,16 @@
  * An endpoint that writes without auth has to refuse an empty submission.
  *
  * ── THE PROMISE ───────────────────────────────────────────────────────────
- * /api/send-feedback and /api/survey take a POST from anyone, on
- * purpose: feedback from someone who is not signed in is still feedback, and
- * the survey is answered from a link in an email, with no session. Both write.
- * So both have to tell a submission from an empty one, and refuse the empty
- * one with a 400.
+ * /api/survey takes a POST from anyone, on purpose: it is answered from a link
+ * in an email, with no session, and it writes. So it has to tell a submission
+ * from an empty one, and refuse the empty one with a 400.
+ *
+ * It was two endpoints. /api/send-feedback was the experience questionnaire
+ * and the footer reaction strip, both retired.
  *
  * ── THE BUG IT CAME FROM ──────────────────────────────────────────────────
- * `curl -X POST -d '{}'` at either of them answered 200. The old survey endpoint
- * stored a feedback_submissions row and emailed the admin; send-feedback wrote
- * a KV record. Nothing rate-limits either, nothing checks an origin, and both
+ * `curl -X POST -d '{}'` answered 200. The old survey endpoint stored a row and
+ * emailed the admin; the questionnaire wrote a KV record. Nothing rate-limits either, nothing checks an origin, and both
  * feed the admin screens: the Feedback Overview and the Survey page count
  * these rows. Anyone who found the URL could have moved the numbers
  * Ellie reads, and the first sign of it would have been a survey count that
@@ -67,24 +67,6 @@ const post = (path, body) => new Request(`${SITE_URL}${path}`, {
 });
 
 const CASES = [
-  {
-    path: '/api/send-feedback',
-    module: '../api/send-feedback.js',
-    refuse: [
-      ['an empty body', {}],
-      ['a source and nothing else', { source: 'app_experience' }],
-      ['an empty answers object', { source: 'app_experience', questionAnswers: {} }],
-      ['a message of spaces', { source: 'app_experience', message: '   ' }],
-    ],
-    accept: [
-      // what attune-app/src/api/client.ts sendFeedback posts
-      ['the app experience form', { source: 'app_experience', rating: 3, questionAnswers: { q_overall: 3 }, message: 'It helped.' }],
-      // a rating with no words is still a rating
-      ['a rating alone', { source: 'app_experience', rating: 0 }],
-      // what the website's footer widget posted when it existed
-      ['a footer message', { source: 'footer_quick', message: 'The map is lovely.', page: '/results' }],
-    ],
-  },
   {
     /**
      * The survey, which anybody can POST to.

@@ -7,7 +7,7 @@
  *
  * Supported types:
  *   ?type=orders        — one row per order, with addon + add-when columns
- *   ?type=demographics  — one row per couple: genders, rel length + status,
+ *   ?type=demographics  — one row per couple: pronouns, rel length + status,
  *                         childhood contexts, individual types, couple type
  *   ?type=engagement    — one row per couple: Y/N for each exercise + workbook
  *   ?type=results       — one row per couple: W/O scores + 10 dim scores per
@@ -142,7 +142,7 @@ async function buildCombinedData(admin) {
     { data: workbooks = [] },
     { data: orders = [] },
   ] = await Promise.all([
-    admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, gender, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type'),
+    admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type'),
     admin.from('workbooks').select('user_id, storage_path'),
     admin.from('orders').select('*'),
   ]);
@@ -184,8 +184,10 @@ async function buildCombinedData(admin) {
     ['',              'checklist_purchased'],
     ['',              'checklist_when'],
 
-    ['Demographics', 'partner_a_gender'],
-    ['',             'partner_b_gender'],
+    /* Pronouns, not gender: nothing in the product asks anybody their gender,
+       so these two columns were empty in every row ever exported. */
+    ['Demographics', 'partner_a_pronouns'],
+    ['',             'partner_b_pronouns'],
     ['',             'relationship_length'],
     ['',             'marital_status'],
     ['',             'partner_a_childhood_context'],
@@ -268,8 +270,8 @@ async function buildCombinedData(admin) {
       hasBudget     ? 'Y' : 'N',  hasBudget     ? whenFor(pkgHasBudget, 'addon_budget') : '',
       hasChecklist  ? 'Y' : 'N',  hasChecklist  ? 'initial_checkout' : '',
 
-      p.gender || '',
-      ps?.gender || '',
+      p.pronouns || '',
+      ps?.pronouns || '',
       p.relationship_length || ps?.relationship_length || '',
       p.relationship_status || ps?.relationship_status || '',
       ex2a.childhoodStructure || '',
@@ -477,15 +479,15 @@ async function exportOrders(admin) {
 // invite_code and link to Partner B via partner_profile_id. Both
 // partners' data lives on their respective profile rows.
 async function exportDemographics(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, partner_profile_id, invite_code, joined_via_invite, gender, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type');
+  const { data: profiles } = await admin.from('profiles').select('id, partner_profile_id, invite_code, joined_via_invite, pronouns, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type');
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
 
   const headers = [
     'anon_couple_id',
-    'partner_a_gender',
-    'partner_b_gender',
+    'partner_a_pronouns',
+    'partner_b_pronouns',
     'relationship_length',
     'marital_status',
     'partner_a_childhood_context',
@@ -510,8 +512,8 @@ async function exportDemographics(admin) {
 
     return [
       anonId,
-      p.gender || '',
-      partnerB?.gender || '',
+      p.pronouns || '',
+      partnerB?.pronouns || '',
       p.relationship_length || partnerB?.relationship_length || '',
       p.relationship_status || partnerB?.relationship_status || '',
       ex2a.childhoodStructure || '',
@@ -628,12 +630,12 @@ async function exportResults(admin) {
 async function exportTyping(admin) {
   const { data: profiles } = await admin
     .from('profiles')
-    .select('id, gender, relationship_status, relationship_length, ex1_answers, partner_profile_id');
+    .select('id, pronouns, relationship_status, relationship_length, ex1_answers, partner_profile_id');
   const _byIdScored = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
   const dimCols = Object.keys(DIM_KEYS).map(d => `comms_${d}`);
   const headers = [
-    'anon_id', 'gender', 'relationship_length', 'relationship_status',
+    'anon_id', 'pronouns', 'relationship_length', 'relationship_status',
     'engage_withdraw_score', 'open_guarded_score', 'type_code', 'low_confidence',
     ...dimCols,
   ];
@@ -648,7 +650,7 @@ async function exportTyping(admin) {
       const withdrawScore = _r.axes.withdraw, openScore = _r.axes.open;
       return [
         (p.id || '').replace(/-/g, '').slice(0, 8),
-        p.gender || '', p.relationship_length || '', p.relationship_status || '',
+        p.pronouns || '', p.relationship_length || '', p.relationship_status || '',
         fmt(withdrawScore), fmt(openScore),
         _r.typeCode, _r.lowConfidence ? 'Y' : 'N',
         ...Object.keys(DIM_KEYS).map(d => fmt(scores[d])),

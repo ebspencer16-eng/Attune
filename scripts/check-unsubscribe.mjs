@@ -13,7 +13,7 @@
 //
 // ── WHAT THIS DELIBERATELY DOES NOT COVER ──────────────────────────────────
 // Transactional mail. api/send-order-email.js replies to a purchase, and
-// api/send-feedback.js and the digest crons write to Attune's own inbox.
+// The digest crons write to Attune's own inbox.
 // Those are out of scope here, not because a link would be wrong (the order
 // email carries one) but because the rule that catches the real bug is about
 // mail the recipient did not trigger. Widening this to "all mail" would make

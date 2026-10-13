@@ -8,7 +8,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B45 | **The question explorer between the footer feedback and the formula diagnostics is deleted.** The experience questionnaire's two tiles are still there, and I need one word from you about them. See the note under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -29,206 +28,6 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ---
 
-### B45, the one word I need
-
-The stretch you pointed at held two things, and only one of them went.
-
-**Gone:** the question explorer. It drew distributions and cross-tabs, which is
-what the slicer on every tile does now, so your reason covers it exactly.
-
-**Still there:** the experience questionnaire, "How was your experience?". It is
-a different and shorter instrument from the survey, it is asked on a card in
-the app, and it still collects answers. Deleting its two tiles would leave it
-collecting into a void, and the build refuses that: a gate exists for precisely
-this, written after three admin pages were found reporting on a question the
-product had stopped asking.
-
-So: **retire it, or keep it?** My recommendation is to retire it. The survey
-asks everyone the same things more precisely, and two instruments collecting
-overlapping answers is how we ended up with three surveys. Say "retire it" and
-the card comes out of the app, the endpoint stops being offered, and the two
-tiles go with it. Say "keep it" and they stay where they are.
-
-### B38, the migration you ran
-
-Kept here because the SQL is generated into this file and
-`check-tasks-doc` holds the two to each other. You have run it; nothing below
-needs doing again. It is safe to run twice if you ever need to.
-
-<!-- SQL 079_survey.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 079: one survey, kept as it is written rather than only when it is sent.
---
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie, having approved a replacement for the 26-question beta survey:
---
---   "Please use this as the regular survey for everyone at the end of their
---    experience, not just beta users."
---   "Collect incomplete responses."
---   "Build a page into admin to view responses for each question in this
---    survey... and build a tool to postcode open entry responses and quantify
---    for visuals."
---   "We can delete all prior survey data. Survey and experience are different
---    enough now."
---
--- Three things follow from that. One row per person rather than one per
--- submission, because an answer is saved as it is written and the row is
--- updated; a place to record what a free-text answer is ABOUT, which is the
--- coding tool; and the old rows go.
---
--- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
--- survey_responses: the answers, as jsonb keyed by question id, with the
--- version they were given under. `completed_at` is null until somebody reaches
--- the end, which is the difference between a partial answer and a finished
--- one. Both are counted; only one of them is a response rate.
---
--- survey_codes: what an open answer is about, one row per code per answer, so
--- one sentence can be about two things and a chart can count both. Written by
--- an admin through /api/admin-survey, never by a customer.
---
--- ── WHAT IT DELETES ─────────────────────────────────────────────────────────
--- Every row of the old surveys, at her word. The quick footer reactions and
--- the app's experience answers stay: those are a different question and the
--- Feedback Overview still draws them.
---
--- ── ACCESS ──────────────────────────────────────────────────────────────────
--- Row level security on, no policies. Nothing reaches these tables except the
--- server with the service key. An answer here is anonymous in the sense that
--- it carries no name and no email, but it is linked to a profile so a person
--- can come back to a half-finished survey, and that link is not for anybody
--- else to read.
---
--- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
--- ============================================================================
-
-create table if not exists public.survey_responses (
-  id            bigserial primary key,
-  -- One row per person. Null for somebody answering from an email link with no
-  -- session, which is why it is not the primary key.
-  respondent_id uuid references public.profiles(id) on delete set null,
-  -- The sorted pair, so both halves of a couple can be read together without
-  -- storing anything that says who they are.
-  couple_id     text,
-  -- Question id -> answer. A string, a number, or an array for the ranking.
-  answers       jsonb not null default '{}'::jsonb,
-  -- Which set of questions these answers were given under.
-  version       text,
-  -- Where it was answered: 'results', 'app' or 'link'.
-  source        text,
-  started_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now(),
-  -- Null while it is still being written. A partial answer is still an answer.
-  completed_at  timestamptz,
-  -- ── A quote on the homepage ───────────────────────────────────────────────
-  -- Which open answer an admin picked to publish, and when. The homepage reads
-  -- these two columns and nothing else, so a quote cannot be published without
-  -- somebody choosing both a response and the answer on it.
-  --
-  -- There is no name here, and that is the whole design. Ellie, on the consent
-  -- question the old survey asked: "Do we have to ask this if we don't include
-  -- PII with the testimonials? Is there fine print we could have instead that
-  -- covers us?" The fine print is TESTIMONIAL_NOTICE in api/_lib/survey.js and
-  -- it sits under every open question.
-  featured_question text,
-  featured_at       timestamptz
-);
-
--- One row per person, which is what makes a partial answer resumable.
-create unique index if not exists survey_responses_respondent_idx
-  on public.survey_responses (respondent_id) where respondent_id is not null;
-
--- The admin reads newest first.
-create index if not exists survey_responses_recent_idx
-  on public.survey_responses (updated_at desc);
-
--- The homepage reads only the featured ones.
-create index if not exists survey_responses_featured_idx
-  on public.survey_responses (featured_at desc) where featured_at is not null;
-
--- Added after the table existed, for anybody who ran an earlier copy of this
--- file. `if not exists` makes both paths the same path.
-alter table public.survey_responses add column if not exists featured_question text;
-alter table public.survey_responses add column if not exists featured_at timestamptz;
-
-alter table public.survey_responses enable row level security;
-
-comment on table public.survey_responses is
-  'One row per person for the end-of-experience survey. Updated as they answer, so a half-finished survey is kept. No name and no email: see api/_lib/survey.js.';
-comment on column public.survey_responses.featured_question is
-  'Which open answer on this row an admin published to the homepage. Null for every row that has not been picked. No name is stored anywhere here: see TESTIMONIAL_NOTICE.';
-comment on column public.survey_responses.completed_at is
-  'Null while it is still being written. Both partial and finished rows are counted; only finished ones are a response rate.';
-
--- ── What an open answer is about ────────────────────────────────────────────
-create table if not exists public.survey_codes (
-  id          bigserial primary key,
-  response_id bigint not null references public.survey_responses(id) on delete cascade,
-  -- Which open question this code is on.
-  question_id text not null,
-  -- The code itself, as typed in the admin. Free text on purpose: a fixed list
-  -- would have to be guessed before any answers exist.
-  code        text not null,
-  created_at  timestamptz not null default now()
-);
-
--- One code once per answer. Adding it twice is a tap, not an intention.
-create unique index if not exists survey_codes_once_idx
-  on public.survey_codes (response_id, question_id, code);
-
-create index if not exists survey_codes_question_idx
-  on public.survey_codes (question_id);
-
-alter table public.survey_codes enable row level security;
-
-comment on table public.survey_codes is
-  'What an open survey answer is about, assigned by an admin. One row per code per answer, so one sentence can be about two things.';
-
--- ── The old surveys go ──────────────────────────────────────────────────────
--- Ellie: "We can delete all prior survey data. Survey and experience are
--- different enough now." The quick footer reactions and the app's experience
--- answers are a different question and stay.
-delete from public.feedback_submissions
- where type in ('beta_survey', 'post_results');
-
--- The profile flag that recorded somebody had answered the old one. It gates
--- nothing now; the new survey knows by its own row.
-update public.profiles set beta_survey_at = null where beta_survey_at is not null;
-
--- ── Verification ────────────────────────────────────────────────────────────
-select
-  (select count(*) from public.survey_responses)                                  as responses,
-  (select count(*) from public.survey_responses where completed_at is not null)   as finished,
-  (select count(*) from public.survey_codes)                                      as codes,
-  (select count(*) from public.survey_responses where featured_at is not null)    as featured_quotes,
-  (select count(*) from public.feedback_submissions where type in ('beta_survey','post_results')) as old_rows_left,
-  (select count(*) from public.feedback_submissions)                              as feedback_rows_kept;
-```
-<!-- /SQL -->
-
----
-
-### B39, the words you sent
-
-In, with one decision you should look at. Your first line reads as a heading
-rather than as a line under one, so it IS the heading now and the sentence I
-had written above it is gone rather than sitting on top of yours. If you meant
-it as the smaller line under a title, say so and I will put a title back.
-
-| Where | What it says now |
-|--|--|
-| The heading | Tell us about your Attune Experience |
-| Fine print under every written answer | Your anonymous responses may be used on our website |
-| The button | Send |
-| After they finish, as a heading | Thank you |
-| Under that heading | Your feedback helps us shape the Attune experience! |
-| Under the 0 to 10 question | Not at all likely / Extremely likely |
-
-One word is still mine and is not worth your time unless it bothers you: the
-button says **Sending** while it sends.
-
----
-
 ## 2. Open
 
 **Nothing open.** Everything you have decided is built; what is left is waiting
@@ -239,12 +38,15 @@ on you.
 | # | Built, needs your eye |
 |--|--|
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
-| B40 | **Three admin pages became one.** Beta Feedback, Survey Explorer and Testimonials all read the rows this migration deletes, and each carried its own copy of the 26 questions. The Survey page replaces all three; the Feedback Overview, the NPS trend and Couple type x outcomes now read the new answers, and the two tiles that measured retired questions say which two questions they measure instead. |
-| B41 | **The admin is two pages now, Feedback and Testimonials, to your layout.** Feedback: a time-period slicer over the whole page, four metrics across the top, then two tiles to a row, one per question, each with its own segment slicer. Written answers get a themes chart with **View full list**, which opens the table of category and volume with every answer under it. Testimonials: every written answer, sortable, with demographic checkboxes, a timeframe, and a search that looks at the words and at the themes. The star that publishes a quote to the homepage lives there, next to the answer you are reading. Every tile is built now and says so while it is empty. |
-| B39 | **Your words are in, on all three surfaces.** One decision to look at: your first line is the heading now, and the sentence I had written above it is gone rather than sitting on top of yours. The 0 to 10 question is labelled at both ends. |
-| B42 | **The admin's formatting, in five parts.** Fifty-nine tags in the admin were missing the `>` that closes them, which is why Type Analytics ran to the edges of your window: the page's structure collapsed. Sixteen In Practice pages carried a truncated `<scr` that ate their closing tags, too. Fixed, plus fluid gutters that scale with the window, padding on the text that was touching a tile's edge, and axes that read at any width. |
 | B43 | **Every invented number out of the admin.** A generator was making 60 orders with names and addresses on page load, and four beta codes carried invented usage counts. Both gone; the pages read from Supabase or say they are empty. |
 | B44 | **Most to least interesting over time is gone**, and the remaining tiles re-paired. |
+| B46 | **The "no data yet" sentences are gone from every tile**, and with them the function that wrote them: nothing else read the class it set. |
+| B47 | **The second sweep found the wrong data you spotted.** Nothing in Attune asks anybody their gender. Every gender figure in the admin was a person's PRONOUNS relabelled, with they/them reported as non-binary. The dimension is Pronouns now, everywhere: the tile, the slicers, the Explore field, the couple map, the CSV exports. Also found: the two home cards asking for feedback could never stop asking, because the column that switches them off was never written. The survey writes it now. |
+| B48 | **Engagement, Learning: five articles**, each on one line, with the full title on hover. |
+| B49 | **No diagonal labels anywhere.** The rule is in the one function every chart in the admin is built by, so a new tile cannot opt out of it: labels wrap at word boundaries, a point smaller, never rotated. Checked by asking all 23 charts their rotation after they drew. |
+| B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
+| B51 | **Detailed results: the exercise is a row of pill buttons** under the n count, instead of a dropdown in the corner. |
+| B45 | **The experience questionnaire is retired.** Its screen, its endpoint, its copy module, its card in the app and its two admin tiles are gone, and the home card that asked for it opens the survey. The footer reaction strip's three counters went with it: nothing has posted to that strip since it was removed from the site, so they were counting an instrument that no longer existed. If you want a reaction strip back, that is a new build. The weekly feedback digest now reads the survey's written answers instead of an empty table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -258,6 +60,9 @@ on you.
 
 | Verified by you | What it was |
 |--|--|
+| B42 | Fifty-nine start tags in the admin never closed, which is why Type Analytics laid out at zero by zero; fluid gutters, padded tiles and readable axes with it. |
+| B41 | The admin became two pages, Feedback and Testimonials, to her layout: a period slicer, four metrics, a tile per question with its own slicer, themes with a full list, and the star that publishes a quote. |
+| B40 | Three admin pages that each carried their own copy of the retired survey became one. |
 | B34 | The word and the insight turned over at 5pm instead of midnight, because the day was counted in UTC. Both are picked by the reader’s own calendar day now. |
 | D36 | The In Practice tiles lost their bottom half on a white sheet. Both surfaces draw the hairline this product’s card rule calls for. |
 | D28 | The first results card says "Click to begin" on the website and "Tap to begin" in the app, from the one module those cards read. |

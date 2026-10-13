@@ -155,6 +155,12 @@
   .chart-head{padding:1.1rem 1.35rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .chart-title{font-size:.8rem;font-weight:700;color:var(--text)}
   .chart-subtitle{font-size:.68rem;color:var(--muted);margin-top:.15rem}
+  /* A row of choices that shows what the choices are. */
+  .pill-row{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+  .pill{background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:999px;
+    padding:.22rem .6rem;font-size:.68rem;font-family:inherit;cursor:pointer;transition:all .15s;line-height:1.35}
+  .pill:hover{color:var(--text);border-color:var(--muted)}
+  .pill.on{background:var(--text);border-color:var(--text);color:var(--card);font-weight:600}
   .tile-slicer{align-self:flex-start;min-width:74px;max-width:160px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:7px;font-size:.66rem;padding:.28rem .5rem;cursor:pointer;opacity:.7;font-family:inherit;transition:opacity .15s}
   .tile-slicer:hover,.tile-slicer:focus{opacity:1;color:var(--text);outline:none}
   .tile-slicer.on{opacity:1;color:var(--accent,#5C6DDA);border-color:var(--accent,#5C6DDA)}
@@ -720,23 +726,31 @@
         <div class="chart-body"><canvas id="chart-eng-mk"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-ex" data-tile="ex" title="Cut this tile by a segment" aria-label="Slz eng ex"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Exercises</div><div class="chart-subtitle" id="eng-ex-n">Mean seconds</div></div><select class="tile-slicer eng-slicer" id="slz-eng-ex" data-tile="ex" title="Cut this tile by a segment" aria-label="Slz eng ex"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-ex"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-res" data-tile="res" title="Cut this tile by a segment" aria-label="Slz eng res"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Resources</div><div class="chart-subtitle" id="eng-res-n">Mean seconds</div></div><select class="tile-slicer eng-slicer" id="slz-eng-res" data-tile="res" title="Cut this tile by a segment" aria-label="Slz eng res"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-res"></canvas></div>
       </div>
     </div>
     <div class="chart-grid two">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">app against site</div></div><select class="tile-slicer eng-slicer" id="slz-eng-rs" data-tile="rs" title="Cut this tile by a segment" aria-label="Slz eng rs"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title">Results</div><div class="chart-subtitle" id="eng-rs-n">Mean seconds</div></div><select class="tile-slicer eng-slicer" id="slz-eng-rs" data-tile="rs" title="Cut this tile by a segment" aria-label="Slz eng rs"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-eng-rs"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-head">
-          <div><div class="chart-title">Detailed results pages</div><div class="chart-subtitle" id="eng-det-n">&mdash;</div></div>
-          <select class="tile-slicer" id="eng-det-pick" title="Which section" aria-label="Eng det pick"></select>
+          <!-- Ellie: "Detailed results pages should have pill button selection
+               for exercise, those can be listed below the n count." So the
+               exercise is a row of buttons under the subtitle rather than a
+               dropdown in the corner: it says what the choices are without
+               being opened. -->
+          <div style="min-width:0">
+            <div class="chart-title">Detailed results pages</div>
+            <div class="chart-subtitle" id="eng-det-n">&mdash;</div>
+            <div class="pill-row" id="eng-det-pills"></div>
+          </div>
           <select class="tile-slicer eng-slicer" id="slz-eng-det" data-tile="det" title="Cut this tile by a segment" aria-label="Slz eng det"><option value="">Everyone</option></select>
         </div>
         <div class="chart-body"><canvas id="chart-eng-det"></canvas></div>
@@ -810,8 +824,8 @@
         <div class="chart-body"><canvas id="chart-age"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Gender</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-gender" title="Cut this tile by a segment" aria-label="Slz gender"><option value="">Everyone</option></select></div>
-        <div class="chart-body"><canvas id="chart-gender"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Pronouns</div><div class="chart-subtitle">n=&mdash;</div></div><select class="tile-slicer" id="slz-pronouns" title="Cut this tile by a segment" aria-label="Slz pronouns"><option value="">Everyone</option></select></div>
+        <div class="chart-body"><canvas id="chart-pronouns"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-head"><div><div class="chart-title">Relationship status</div><div class="chart-subtitle">n=—</div></div><select class="tile-slicer" id="slz-relstatus" title="Cut this tile by a segment" aria-label="Slz relstatus"><option value="">Everyone</option></select></div>
@@ -949,36 +963,17 @@
          Every tile carries its own segment slicer, like the rest of admin. -->
     <div id="fb-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
 
-    <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Footer feedback · site-wide reaction strip</div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="kpi-card green"><div class="kpi-label">Love it clicks</div><div class="kpi-val" id="ff-love">—</div><div class="kpi-sub">Footer reaction strip</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Pretty good clicks</div><div class="kpi-val" id="ff-good">—</div><div class="kpi-sub">Footer reaction strip</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">Suggestions</div><div class="kpi-val" id="ff-suggest">—</div><div class="kpi-sub">With a written message</div></div>
-    </div>
-    <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-card-header"><div class="chart-card-title">Suggestions</div><div class="chart-card-sub">Messages sent via the footer strip · also emailed to hello@attune-relationships.com</div></div>
-      <div id="ff-suggestions" style="display:flex;flex-direction:column;gap:.6rem;padding:.6rem 1.4rem 1.2rem;"><div style="color:var(--muted);font-size:.78rem;">Loading…</div></div>
-    </div>
-    <!-- ── WHAT WENT, AND WHAT DID NOT ───────────────────────────────────
-         Ellie: "Delete everything between the footer feedback and the formula
-         diagnostics, not needed since we have slicers."
+    <!-- ── ONE INSTRUMENT ────────────────────────────────────────────────
+         Ellie: "B45. Approved, delete them."
 
-         The question explorer went: it drew distributions and cross-tabs, and
-         every tile above now has its own slicer, which is the same cut made
-         where the number is.
-
-         The experience questionnaire's two tiles are still here, and that is
-         deliberate. "How was your experience?" is a different and shorter
-         instrument from the survey, still asked on a card in the app, and
-         deleting the only place its answers are read would leave it collecting
-         into a void: check-feedback-reachable fails the build on exactly that,
-         which is how this was caught. TASKS.md B45 asks whether to retire the
-         questionnaire itself; one word from her and both go. -->
-    <!-- Experience questionnaire. The questions are NOT written here: they come
-         from /api/send-feedback, which is the module both surfaces ask them
-         from, so this page cannot drift from what was asked. -->
-    <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Experience questionnaire · &ldquo;How was your experience?&rdquo; (<span id="xf-count">0</span> responses)</div>
-    <div id="xf-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
+         Two bands were here and both reported on /api/send-feedback. The
+         experience questionnaire, "How was your experience?", is retired: the
+         survey above asks everybody the same things and is where the answers
+         are read. The footer reaction strip went from the site some time ago
+         and nothing has posted to it since, so its three counters and its
+         suggestions card were reporting on an instrument that no longer
+         existed either. The endpoint, its copy module and the app screen are
+         gone with them. A reaction strip, if it comes back, is a new build. -->
   </div>
 
   <div class="page" id="page-testimonials">
@@ -1459,8 +1454,21 @@ window.adminAuthHeaders = function(extra){
       // Shared Explore presets (via /api/admin-presets). Apply restores the full
       // view (row, col, cell, measure, filters); save writes the current view;
       // right-click a preset to remove it.
+      /* A saved view from before the dimension was named honestly.
+         `gender` was never asked: it was a person's pronouns relabelled, and
+         two of the seeded presets cross-tabbed by it. Translating on read is
+         what keeps those buttons working without a migration; a preset saved
+         from now on carries `pronouns` and never comes through here. */
+      const PRESET_RENAMES = { gender: 'pronouns' };
+      const presetField = (f) => PRESET_RENAMES[f] || f;
+
       function applyPreset(cfg){
         if(!cfg) return;
+        cfg = { ...cfg,
+          row: cfg.row != null ? presetField(cfg.row) : cfg.row,
+          col: cfg.col != null ? presetField(cfg.col) : cfg.col,
+          filters: Array.isArray(cfg.filters)
+            ? cfg.filters.map((f) => ({ ...f, field: presetField(f.field) })) : cfg.filters };
         const R=$('xp-row-field'), C=$('xp-col-field'), cell=$('xp-cell'), meas=$('xp-measure-field');
         if(R && cfg.row!=null) R.value=cfg.row;
         if(C && cfg.col!=null) C.value=cfg.col;
@@ -1609,7 +1617,7 @@ window.adminAuthHeaders = function(extra){
 
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Average placement by gender</div><div class="chart-card-sub">Mean position of each gender on the two axes. Always split by gender, on top of any slice you choose.</div></div><select class="tile-slicer" id="slz-tmap" title="Cut this map by a segment" aria-label="Slz tmap"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Average placement by pronouns</div><div class="chart-card-sub">Mean position of each group on the two axes. Always split by pronouns, on top of any slice you choose.</div></div><select class="tile-slicer" id="slz-tmap" title="Cut this map by a segment" aria-label="Slz tmap"><option value="">Everyone</option></select></div>
         <div id="types-couple-map" style="padding:1rem 1.4rem 1.4rem;"></div>
       </div>
     </div>
@@ -2015,14 +2023,19 @@ function drawTimePerPage() {
   const base = engFor('mk');
   if (!base) return;
   const tp = function (tile) { return (engFor(tile) || {}).timePerPage || {}; };
-  const detPick = document.getElementById('eng-det-pick');
+  const pills = document.getElementById('eng-det-pills');
   const groups = (base.groups || []).filter(function (g) { return g.pages > 1; });
-  if (detPick && !detPick.dataset.pop) {
-    detPick.innerHTML = groups.map(function (g) { return '<option value="' + g.id + '">' + QX_ESC(g.label) + '</option>'; }).join('');
-    detPick.dataset.pop = '1';
-    detPick.onchange = function () { drawTimePerPage(); };
+  if (!window.__engDetPick && groups.length) window.__engDetPick = groups[0].id;
+  const chosen = window.__engDetPick;
+  if (pills) {
+    pills.innerHTML = groups.map(function (g) {
+      return '<button class="pill' + (g.id === chosen ? ' on' : '') + '" data-pick="' + QX_ESC(g.id) + '">'
+        + QX_ESC(g.label) + '</button>';
+    }).join('');
+    pills.querySelectorAll('[data-pick]').forEach(function (b) {
+      b.onclick = function () { window.__engDetPick = b.getAttribute('data-pick'); drawTimePerPage(); };
+    });
   }
-  const chosen = detPick && detPick.value ? detPick.value : (groups[0] && groups[0].id);
   const detailed = (tp('det').detailed || {})[chosen];
 
   // Each of the five may be on a different cut, and the shared ceiling is
@@ -2039,12 +2052,17 @@ function drawTimePerPage() {
   });
   const ceiling = max > 0 ? Math.ceil(max * 1.1) : undefined;
 
+  /* Ellie: "should the categories be web and app not seconds and app?" They
+     should. The first series had no label of its own, so it fell back to the
+     axis name and the legend read "seconds" against "App", which is a unit
+     against a surface. The unit belongs in the subtitle, where it is. */
   const clustered = function (canvasId, subId, measure, subtitle) {
     drawTimeTile(canvasId, subId, measure, 'seconds', function (v) {
       return {
         subtitle: subtitle + (v.n ? (' · n=' + v.n) : ' · nothing timed yet'),
         labels: v.labels,
         data: v.site,
+        firstLabel: 'Web',
         second: { label: 'App', data: v.app, colour: '#E8673A' },
         colour: '#5C6DDA',
         axis: 'seconds',
@@ -2060,10 +2078,10 @@ function drawTimePerPage() {
       colour: '#34D399', axis: 'seconds', max: ceiling,
     };
   });
-  clustered('chart-eng-ex', 'eng-ex-n', t.exercises, 'Site against app');
-  clustered('chart-eng-res', 'eng-res-n', t.resources, 'Site against app');
-  clustered('chart-eng-rs', 'eng-rs-n', t.results, 'Site against app');
-  clustered('chart-eng-det', 'eng-det-n', detailed, 'Site against app');
+  clustered('chart-eng-ex', 'eng-ex-n', t.exercises, 'Mean seconds');
+  clustered('chart-eng-res', 'eng-res-n', t.resources, 'Mean seconds');
+  clustered('chart-eng-rs', 'eng-rs-n', t.results, 'Mean seconds');
+  clustered('chart-eng-det', 'eng-det-n', detailed, 'Mean seconds');
 }
 
 /** The two tables and the two note charts. */
@@ -2079,7 +2097,17 @@ function drawLearning() {
     notesByDetailed: ln('nd').notesByDetailed,
   };
 
-  const table = function (hostId, subId, rows, cols, subtitle) {
+  /**
+   * A table of rows, with the long ones behind a button.
+   *
+   * `show` is how many rows are worth seeing at a glance. Ellie, on the
+   * articles: "only show the top 5 articles, and don't wrap the article title,
+   * but have hover show the full title." A title that wraps makes a row two or
+   * three lines deep and the table stops being scannable, so a text column is
+   * kept to one line with an ellipsis and carries the whole title in its
+   * tooltip.
+   */
+  const table = function (hostId, subId, rows, cols, subtitle, show) {
     const host = document.getElementById(hostId);
     if (!host) return;
     setTileText(subId, subtitle);
@@ -2091,12 +2119,18 @@ function drawLearning() {
     const body = function (list) {
       return list.map(function (r) {
         return '<tr>' + cols.map(function (c) {
-          return '<td style="text-align:' + (c.num ? 'right' : 'left') + ';font-size:.78rem;padding:.42rem .5rem;border-top:1px solid var(--border)">' + QX_ESC(String(c.get(r))) + '</td>';
+          const text = String(c.get(r));
+          const clip = c.num ? ''
+            : 'max-width:0;width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+          return '<td title="' + QX_ESC(text) + '" style="text-align:' + (c.num ? 'right' : 'left')
+            + ';font-size:.78rem;padding:.42rem .5rem;border-top:1px solid var(--border);' + clip + '">'
+            + QX_ESC(text) + '</td>';
         }).join('') + '</tr>';
       }).join('');
     };
-    const first = rows.slice(0, 10), rest = rows.slice(10);
-    host.innerHTML = '<table style="width:100%;border-collapse:collapse">' + head + body(first)
+    const cut = show || 10;
+    const first = rows.slice(0, cut), rest = rows.slice(cut);
+    host.innerHTML = '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' + head + body(first)
       + (rest.length ? '<tbody data-rest hidden>' + body(rest) + '</tbody>' : '') + '</table>'
       + (rest.length ? '<button class="btn" data-expand style="margin-top:.6rem">Show all ' + rows.length + '</button>' : '');
     const btn = host.querySelector('[data-expand]');
@@ -2116,7 +2150,7 @@ function drawLearning() {
     { label: 'In app', num: true, get: function (r) { return r.inApp; } },
     { label: 'On site', num: true, get: function (r) { return r.onSite; } },
     { label: 'Reads', num: true, get: function (r) { return r.reads; } },
-  ], arts.length ? (arts.length + ' articles read') : 'Nothing read yet');
+  ], arts.length ? (arts.length + ' articles read') : 'Nothing read yet', 5);
 
   const tagRows = (L.tags && L.tags.rows) || [];
   table('eng-tags', 'eng-tag-n', tagRows, [
@@ -2939,7 +2973,7 @@ function showPage(id) {
   // Demographics charts depend on async data; redraw on every open so they
   // never sit blank from a data-less initial render.
   if (id==='demographics') { chartsInit.demographics = false; initCharts('demographics'); }
-  if (id==='feedback') { renderFeedback(); renderFooterFeedback(); renderExperienceFeedback(); }
+  if (id==='feedback') renderFeedback();
   if (id==='testimonials') renderTestimonials();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
@@ -2955,108 +2989,6 @@ function restorePageFromHash() {
   if (id && id !== 'overview' && document.getElementById('page-'+id)) showPage(id);
 }
 const chartsInit = {overview:false,orders:false,packages:false,demographics:false,responses:false,satisfaction:false,fulfillment:false,feedback:false,types:false,'survey-explorer':false,'ux-views':true,'explore':true,'promos':true,'engagement':true};
-// ── Feedback tab switcher ─────────────────────────────
-// ── Render a horizontal bar row ───────────────────────
-// ── Feedback Overview high-level metrics, sliceable by any segment ─────────────
-async function renderFooterFeedback(){
-  let rows=[];
-  try { const ad=await fetchAdminData(); rows=((ad&&ad.feedback_submissions)||[]).filter(r=>r.type==='quick'); } catch(e){}
-  const norm=r=>String(r.rating==null?'':r.rating).toLowerCase();
-  const love=rows.filter(r=>norm(r).includes('love')||String(r.rating)==='3').length;
-  const good=rows.filter(r=>norm(r).includes('good')||String(r.rating)==='2').length;
-  const sugg=rows.filter(r=>String(r.text||'').trim());
-  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
-  set('ff-love',love); set('ff-good',good); set('ff-suggest',sugg.length);
-  const el=document.getElementById('ff-suggestions');
-  if(el) el.innerHTML = sugg.length ? sugg.map(r=>renderQuoteCard(String(r.text).trim(), r.source||'Anonymous', 3, '#F59E0B')).join('') : '<div style="color:var(--muted);font-size:.8rem;">No suggestions yet.</div>';
-}
-
-// ── Experience questionnaire ("How was your experience?") ─────────────────────
-// Asked at the end of What Comes Next on the website and from Settings in the
-// app. Both post to /api/send-feedback with source 'app_experience'.
-//
-// Until 2026-10-10 those answers reached a Vercel KV store whose host no longer
-// resolves, and nothing on this page drew them, so the honest state was: asked,
-// emailed, and never counted. The questions come from the endpoint rather than
-// being typed here, which is the same module both surfaces ask them from.
-async function renderExperienceFeedback(){
-  const tiles=document.getElementById('xf-tiles');
-  if(!tiles) return;
-  let form=null, rows=[];
-  try {
-    const [f, ad] = await Promise.all([
-      fetch('/api/send-feedback').then(r=>r.json()),
-      fetchAdminData(),
-    ]);
-    form=f;
-    rows=((ad&&ad.feedback_submissions)||[])
-      .filter(r=>r.type==='app_experience')
-      .map(r=>{ try{ return typeof r.text==='string'?JSON.parse(r.text):r.text; }catch{ return null; } })
-      .filter(Boolean);
-  } catch(e){}
-  const n=rows.length;
-  const cEl=document.getElementById('xf-count'); if(cEl) cEl.textContent=n;
-  if(!form||!form.questions){
-    tiles.innerHTML='<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">Could not load the questions.</div>';
-    return;
-  }
-  if(!n){
-    tiles.innerHTML='<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">No answers yet. Each of the '+form.questions.length+' questions gets its own tile here, plus the overall rating.</div>';
-    return;
-  }
-  const card=(title,sub,inner)=>'<div class="chart-card"><div class="chart-card-header"><div class="chart-card-title">'+title+'</div>'+(sub?'<div class="chart-card-sub">'+sub+'</div>':'')+'</div><div style="padding:.6rem 1.25rem 1.1rem;">'+inner+'</div></div>';
-  const bars=(counts,order,color)=>{ const keys=order||Object.keys(counts); const mx=Math.max(1,...keys.map(k=>counts[k]||0)); return keys.map(k=>renderBar(String(k),(counts[k]||0),mx,color,(counts[k]||0)+' ('+Math.round((counts[k]||0)/n*100)+'%)')).join(''); };
-  let html='';
-
-  // The overall rating, 0 to 3, with the endpoint's own four labels.
-  const rl=(form.ratings||[]);
-  if(rl.length){
-    const c={}; rl.forEach(l=>c[l]=0);
-    rows.forEach(r=>{ const i=parseInt(r.rating,10); if(Number.isFinite(i)&&rl[i]!=null) c[rl[i]]+=1; });
-    const vals=rows.map(r=>parseInt(r.rating,10)).filter(Number.isFinite);
-    const avg=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length+1).toFixed(1):'—';
-    html+=card('Overall','avg '+avg+' of 4 · n='+vals.length, bars(c, rl.slice().reverse(), '#10B981'));
-  }
-
-  form.questions.forEach(q=>{
-    const answered=rows.map(r=>(r.questionAnswers||{})[q.id]).filter(v=>v!=null&&v!=='');
-    if(q.type==='scale'){
-      const scale=form.scale||[];
-      const c={}; scale.forEach(l=>c[l]=0);
-      /* Both surfaces store 1 to 5, the website as a number and the app as a
-         string, so the label is scale[v-1] and the average is the value. */
-      answered.forEach(v=>{ const i=parseInt(v,10); const l=scale[i-1]!=null?scale[i-1]:String(v); if(c[l]==null)c[l]=0; c[l]+=1; });
-      const nums=answered.map(v=>parseInt(v,10)).filter(Number.isFinite);
-      const avg=nums.length?(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1):'—';
-      html+=card(q.label,'avg '+avg+' of 5 · n='+answered.length, bars(c, scale.slice().reverse(), '#1B5FE8'));
-    } else if(q.type==='choice'){
-      const c={}; (q.options||[]).forEach(o=>c[o]=0);
-      answered.forEach(v=>{ if(c[v]==null)c[v]=0; c[v]+=1; });
-      html+=card(q.label,'n='+answered.length, bars(c, q.options||null, '#9B5DE5'));
-    } else {
-      html+=card(q.label,'n='+answered.length, answered.length
-        ? answered.map(t=>renderQuoteCard(String(t).trim(),'Anonymous',3,'#F59E0B')).join('')
-        : '<div style="color:var(--muted);font-size:.8rem;">Nothing written yet.</div>');
-    }
-  });
-  tiles.innerHTML=html;
-}
-
-// ── THE SURVEY, IN THE ADMIN ────────────────────────────────────────────────
-//
-// Two pages. Ellie: "I want 2 pages - Feedback and Testimonials."
-//
-// Feedback is the numbers: four metrics across the top, then one tile per
-// question, two to a row, each with its own segment slicer, under a period
-// slicer that cuts every one of them. Testimonials is the words: every written
-// answer, sortable, filterable, searchable, and codeable.
-//
-// The questions are not written here. They come from /api/admin-survey, which
-// reads the same module the survey itself is drawn from, so a question added to
-// the survey appears on both pages without anyone remembering to add it. Every
-// tile is built whether or not anybody has answered: Ellie asked for that
-// explicitly, and an empty tile that says so is how you can tell a question
-// nobody answers from a question nobody was asked.
 let SURVEY_DATA = null;
 
 async function loadSurvey(force) {
@@ -3071,7 +3003,7 @@ async function loadSurvey(force) {
 /** The segments a response can be cut by, from the fields the endpoint sends. */
 const SV_DIMS = [
   ['relationship_length', 'Together'], ['relationship_status', 'Status'],
-  ['children', 'Children'], ['age_range', 'Age'], ['gender', 'Gender'],
+  ['children', 'Children'], ['age_range', 'Age'], ['pronouns', 'Pronouns'],
   ['signup_source', 'Heard via'], ['pkg', 'Package'],
 ];
 
@@ -3852,19 +3784,19 @@ const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb
 const PKG_COLORS = ['#C55329','#FBBF24','#5C6DDA','#34D399'];
 const PKG_LABELS = ['Assessment','Starting Out','Anniversary','Premium'];
 
-// ── Simulated data ────────────────────────────────────
-// These are mutable (`let`) so loadRealAnalytics() and loadRealPackageTrend()
-// can overwrite them with real data from Supabase feedback_submissions and
-// orders tables when real data exists. The synthetic defaults below render
-// while the real-data fetches are in flight or when no data exists yet.
+// ── Series the real loaders fill in ───────────────────
+// Mutable (`let`) so loadRealPackageTrend() can overwrite them from the orders
+// table. They start at zero and stay at zero until there is something: the
+// word "simulated" was accurate once and is not any more, and a comment that
+// describes a dead path is worse than no comment.
 const revenueData = [0,0,0,0,0,0,0,0,0,0,0,0];
 let pkgMix = [0,0,0,0];
 let pkgTrendMonths = [...MONTHS];
-let pkgTrendStacked = null; // {Assessment:[...12], StartingOut:[...], Anniversary:[...], Premium:[...]} — null means use mock
+let pkgTrendStacked = null; // {Assessment:[...12], StartingOut:[...], Anniversary:[...], Premium:[...]} — null draws twelve zeroes
 const sourceData = {labels:['Friend/family','Social media','Search','Received as gift','Therapist/counselor','Other'],data:[0,0,0,0,0,0]};
 const relLengths = [{l:'Less than 1 year',v:0},{l:'1–2 years',v:0},{l:'3–5 years',v:0},{l:'6–10 years',v:0},{l:'11–20 years',v:0},{l:'20+ years',v:0}];
 const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[0,0,0,0,0]};
-const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[0,0,0,0]};
+const pronounData = {labels:['She/her','He/him','They/them','Other'],data:[0,0,0,0]};
 const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[0,0,0,0,0]};
 const childrenData = {labels:['None','1','2','3+','Expecting'],data:[0,0,0,0,0]};
 let dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
@@ -4051,10 +3983,10 @@ async function loadRealDemographics() {
     const rows = adminData && adminData.profiles && adminData.profiles.demographics;
     if (!rows || rows.length === 0) return;
 
-    // Gender is not asked directly. We back into it from the pronouns each
-    // person selected at setup: she/her -> woman, he/him -> man, they/them -> non-binary.
-    const genderFromPronoun = (pr) => (pr === 'she/her') ? 'woman' : (pr === 'he/him') ? 'man' : (pr === 'they/them') ? 'nonbinary' : null;
-    rows.forEach(r => { if (!r.gender && r.pronouns) r.gender = genderFromPronoun(r.pronouns); });
+    /* Pronouns, as given. This used to turn them into a gender -- they/them
+       into "non-binary" -- and nothing in the product asks anybody their
+       gender. Ellie: "none of our beta testers are non binary." */
+    rows.forEach(r => { r.pronouns = String(r.pronouns || '').trim().toLowerCase() || null; });
 
     // Count distribution. Nulls/empties skip silently.
     const dist = (field, labels) => {
@@ -4068,23 +4000,23 @@ async function loadRealDemographics() {
     };
 
     const age = dist('age_range', [['18-24','18–24'],['25-34','25–34'],['35-44','35–44'],['45-54','45–54'],['55+','55+']]);
-    const gender = dist('gender', [['woman','Woman'],['man','Man'],['nonbinary','Non-binary'],['other','Other']]);
+    const pronouns = dist('pronouns', [['she/her','She/her'],['he/him','He/him'],['they/them','They/them']]);
     const relStatus = dist('relationship_status', [['dating','Dating'],['engaged','Engaged'],['married','Married'],['remarried','Remarried'],['partnership','Partnership']]);
     const relLen = dist('relationship_length', [['<1','Less than 1 year'],['1-2','1–2 years'],['3-5','3–5 years'],['6-10','6–10 years'],['11-20','11–20 years'],['20+','20+ years']]);
     const childrenDist = dist('children', [['none','None'],['1','1'],['2','2'],['3+','3+'],['expecting','Expecting']]);
     const source = dist('signup_source', [['friend','Friend/family'],['social','Social media'],['search','Search'],['gift','Received as gift'],['therapist','Therapist/counselor'],['other','Other']]);
 
     if (age)       { ageData.labels = age.map(x => x.label);       ageData.data = age.map(x => x.pct); }
-    if (gender)    { genderData.labels = gender.map(x => x.label); genderData.data = gender.map(x => x.pct); }
+    if (pronouns)  { pronounData.labels = pronouns.map(x => x.label); pronounData.data = pronouns.map(x => x.pct); }
     if (relStatus) { relStatusData.labels = relStatus.map(x => x.label); relStatusData.data = relStatus.map(x => x.pct); }
     if (relLen)    { relLengths.length = 0; relLen.forEach(x => relLengths.push({ l: x.label, v: x.pct })); }
     if (childrenDist) { childrenData.labels = childrenDist.map(x => x.label); childrenData.data = childrenDist.map(x => x.pct); }
     if (source)    { sourceData.labels = source.map(x => x.label); sourceData.data = source.map(x => x.pct); }
 
     // Update n= captions per field (actual response counts, not total profiles).
-    // A field left blank by a user is not counted — so gender with no answers reads n=0.
+    // A field left blank by a user is not counted, so a field nobody answered reads n=0.
     const fieldByTitle = {
-      'Age range':'age_range', 'Gender':'gender', 'Relationship status':'relationship_status',
+      'Age range':'age_range', 'Pronouns':'pronouns', 'Relationship status':'relationship_status',
       'Length of relationship':'relationship_length', 'Children together':'children'
     };
     document.querySelectorAll('#page-demographics .chart-card').forEach(card => {
@@ -4092,7 +4024,7 @@ async function loadRealDemographics() {
       const field = fieldByTitle[title];
       if (!field) return;
       const n = rows.filter(r => r[field]).length;
-      const suffix = field === 'gender' ? ' · from pronouns' : '';
+      const suffix = '';
       let sub = card.querySelector('.chart-subtitle');
       if (!sub) { sub = document.createElement('div'); sub.className = 'chart-subtitle'; card.querySelector('.chart-head > div')?.appendChild(sub); }
       sub.textContent = 'n=' + n + suffix;
@@ -4138,13 +4070,12 @@ function updateStatsFromRealData(orders) {
   // Completion rate requires partner_sessions data — fetched separately.
   // Async, safe to run in the background.
   loadCompletionRate().catch(() => {});
-  // Real demographics from profiles — async, falls back to mock if empty.
+  // Real demographics from profiles. Async; the series stay at zero if empty.
   loadRealDemographics().catch(() => {});
   // Real package-mix trend from orders table, grouped by pkg_key + month
   loadRealPackageTrend(orders).catch(() => {});
   loadRealResponses().catch(() => {});
   if (typeof initAllSlicers === 'function') initAllSlicers();
-  // Real satisfaction analytics from feedback_submissions (NPS + ratings)
   // Real funnel data from orders + exercise completion on profiles
   loadRealFunnel(orders).catch(() => {});
 }
@@ -4300,11 +4231,11 @@ function renderAddonAttachment() {
 
 // Real package-mix trend: groups orders by pkg_key + month, produces a
 // 12-month stacked dataset (1 series per package). Replaces the static
-// `pkgTrendStacked` mock so the /packages page chart renders real data.
+// `pkgTrendStacked` so the /packages page chart renders real data.
 // Also rebuilds `pkgMix` (the donut) from the full order set.
 async function loadRealPackageTrend(orders) {
   if (!orders || orders.length === 0) {
-    pkgTrendStacked = null; // keep mock
+    pkgTrendStacked = null; // no orders: the chart draws twelve zeroes
     return;
   }
 
@@ -4668,7 +4599,7 @@ const QX_ESC = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&':
 const QX_CROSS = [
   { key: 'type', label: 'Individual type' }, { key: 'couple_type', label: 'Couple type' },
   { key: 'axisEngage', label: 'Engage / Withdraw' }, { key: 'axisOpen', label: 'Open / Guarded' },
-  { key: 'gender', label: 'Gender' }, { key: 'age_range', label: 'Age range' },
+  { key: 'pronouns', label: 'Pronouns' }, { key: 'age_range', label: 'Age range' },
   { key: 'relationship_status', label: 'Relationship status' }, { key: 'relationship_length', label: 'Time together' },
   { key: 'children', label: 'Children' }, { key: 'signup_source', label: 'How they found us' },
   { key: 'journal_use', label: 'Journal use' }, { key: 'journal_entries', label: 'Journal entries' },
@@ -4696,7 +4627,7 @@ function qxPosOf(f, raw){
 }
 // Semantic colour system used across the admin. Money=green. Each demographic
 // breakdown uses one brand hue (the bar height carries the value, not colour).
-// Nominal slices (gender, status) use a fixed palette so a category keeps the
+// Nominal slices (pronouns, status) use a fixed palette so a category keeps the
 // same colour everywhere. Ordinal scales use monochrome gradients (hexRamp).
 const MONEY_CLR = '#34D399';
 const DEMO_HUE  = '#5C6DDA';
@@ -4704,7 +4635,7 @@ const CAT_PALETTE = ['#5C6DDA','#22A5C4','#9B5DE5','#E5578C','#FBBF24','#C55329'
 // Human-readable labels for raw stored segment values, plus a title-case
 // fallback so nothing shows as a bare lowercase code (e.g. "married").
 const QX_VAL_LABELS = {
-  gender: { man: 'Man', woman: 'Woman', nonbinary: 'Non-binary', other: 'Other' },
+  pronouns: { 'he/him': 'He/him', 'she/her': 'She/her', 'they/them': 'They/them', other: 'Other' },
   relationship_status: { dating: 'Dating', engaged: 'Engaged', married: 'Married', remarried: 'Remarried', partnership: 'Partnership' },
   children: { none: 'None', '1': '1', '2': '2', '3+': '3+', expecting: 'Expecting' },
   signup_source: { friend: 'Friend/family', social: 'Social media', search: 'Search', gift: 'Received as gift', therapist: 'Therapist', other: 'Other' },
@@ -4722,7 +4653,7 @@ function qxPretty(key, v) {
 // A greyed dropdown in each tile header. Default "Everyone". Pick a segment
 // value to re-cut that tile's population. All powered by the anonymized cube.
 const SLICE_DIMS = [
-  { key:'gender', label:'Gender' }, { key:'age_range', label:'Age range' },
+  { key:'pronouns', label:'Pronouns' }, { key:'age_range', label:'Age range' },
   { key:'relationship_status', label:'Relationship status' }, { key:'relationship_length', label:'Time together' },
   { key:'children', label:'Children' }, { key:'signup_source', label:'How they found us' },
   { key:'alignment_group', label:'Aligned / Misaligned' },
@@ -4739,7 +4670,7 @@ const SLICE_DIMS = [
 ];
 const SLICE_ORDER = {
   age_range:['18-24','25-34','35-44','45-54','55+'],
-  gender:['man','woman','nonbinary','other'],
+  pronouns:['she/her','he/him','they/them','other'],
   relationship_status:['dating','engaged','married','remarried','partnership'],
   relationship_length:['<1','1-2','3-5','6-10','11-20','20+'],
   children:['none','1','2','3+','expecting'],
@@ -4782,7 +4713,7 @@ function sliceFilter(rows, val){
 // segments; distribution tiles exclude their own dimension.
 const COUPLE_LEVEL_DIMS=['relationship_status','relationship_length','children','couple_type','alignment_group','understanding_group'];
 const SLICER_CFG={
-  'slz-age':{ex:'age_range'},'slz-gender':{ex:'gender'},'slz-relstatus':{ex:'relationship_status'},
+  'slz-age':{ex:'age_range'},'slz-pronouns':{ex:'pronouns'},'slz-relstatus':{ex:'relationship_status'},
   'slz-children':{ex:'children'},'slz-demorellen':{ex:'relationship_length'},'slz-ovrellen':{ex:'relationship_length'},
   'slz-source':{ex:'signup_source'},'slz-revenue':{},'slz-pkgmix':{},'slz-pkgtrend':{},'slz-revpkg':{},
   'slz-addons':{},'slz-geo':{},'slz-pdisc':{},
@@ -4957,13 +4888,13 @@ async function renderTypeCoupleMap(opts){
   const el=document.getElementById(opts.containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
   const sel=document.getElementById(opts.selId);
-  if(sel){ populateSlicer(sel,'gender',cube.rows||[]); sel.classList.toggle('on',!!sel.value);
+  if(sel){ populateSlicer(sel,'pronouns',cube.rows||[]); sel.classList.toggle('on',!!sel.value);
     if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeCoupleMap(opts); } }
-  const rows=sliceFilter(cube.rows||[], sel?sel.value:'').filter(r=>typeof r.axis_w==='number'&&typeof r.axis_o==='number'&&r.gender!=null&&r.gender!=='');
+  const rows=sliceFilter(cube.rows||[], sel?sel.value:'').filter(r=>typeof r.axis_w==='number'&&typeof r.axis_o==='number'&&r.pronouns!=null&&r.pronouns!=='');
   setTileN(el, rows.length);
   const groups={};
-  rows.forEach(r=>{ const g=String(r.gender); (groups[g]=groups[g]||{o:0,w:0,n:0}); groups[g].o+=r.axis_o; groups[g].w+=r.axis_w; groups[g].n++; });
-  const genders=Object.keys(groups).sort((a,b)=>groups[b].n-groups[a].n);
+  rows.forEach(r=>{ const g=String(r.pronouns); (groups[g]=groups[g]||{o:0,w:0,n:0}); groups[g].o+=r.axis_o; groups[g].w+=r.axis_w; groups[g].n++; });
+  const pronounGroups=Object.keys(groups).sort((a,b)=>groups[b].n-groups[a].n);
   const PAL=['#1B5FE8','#E5578C','#10B981','#F59E0B','#9B5DE5'];
   const W=320,H=320,pad=36;
   const X=v=>pad+((5-v)/4)*(W-2*pad); // open: 5 (Open) -> left, 1 (Guarded) -> right, matches results map
@@ -4983,11 +4914,11 @@ async function renderTypeCoupleMap(opts){
   svg+='<text x="'+(pad-16)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(-90 '+(pad-16)+' '+(H/2)+')">Open</text>';
   svg+='<text x="'+(W-pad+18)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(90 '+(W-pad+18)+' '+(H/2)+')">Guarded</text>';
   const legend=[];
-  if(!genders.length){ el.innerHTML='<div style="color:var(--dim);font-size:.75rem;padding:1rem 0;text-align:center;">No gendered placements in this slice yet.</div>'; return; }
-  genders.forEach((g,i)=>{
+  if(!pronounGroups.length){ el.innerHTML='<div style="color:var(--dim);font-size:.75rem;padding:1rem 0;text-align:center;">Nobody in this slice has pronouns recorded.</div>'; return; }
+  pronounGroups.forEach((g,i)=>{
     const GENDER_COL={man:"#1B5FE8",woman:"#E5578C",nonbinary:"#10B981",other:"#F59E0B"};
     const gr=groups[g], ox=gr.o/gr.n, wy=gr.w/gr.n, col=(GENDER_COL[String(g).toLowerCase()]||PAL[i%PAL.length]);
-    const lbl=(typeof sliceLabel==='function'?sliceLabel('gender',g):g);
+    const lbl=(typeof sliceLabel==='function'?sliceLabel('pronouns',g):g);
     svg+='<circle cx="'+X(ox)+'" cy="'+Y(wy)+'" r="7.5" fill="'+col+'" stroke="#fff" stroke-width="2"><title>'+lbl+': open '+ox.toFixed(2)+', withdraw '+wy.toFixed(2)+' (n='+gr.n+')</title></circle>';
     legend.push('<span style="display:inline-flex;align-items:center;gap:.32rem;font-size:.66rem;color:var(--text);"><span style="width:9px;height:9px;border-radius:50%;background:'+col+';"></span>'+lbl+' (n='+gr.n+')</span>');
   });
@@ -5620,7 +5551,7 @@ function exportFulfillmentCSV() {
 // Build a chart, replacing whatever was on that canvas. Chart.js throws
 // "Canvas is already in use" if an existing chart is not destroyed first, and
 // because initCharts builds many charts in sequence, one throw silently killed
-// every chart after it — leaving real data unrendered behind mock values.
+// every chart after it, leaving real data unrendered behind an empty canvas.
 // Shared defaults for every chart on every page, applied here so a new chart
 // cannot be built without them.
 //
@@ -5640,61 +5571,67 @@ function mkChart(el, cfg) {
   o.hover = Object.assign({ animationDuration: 0 }, o.hover);
   o.plugins = o.plugins || {};
   o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
+  flatTicks(cfg);
   const chart = new Chart(el, cfg);
-  markEmptyTile(el, cfg);
   return chart;
 }
 
 /**
- * Say when a tile has nothing in it, rather than drawing an empty one.
+ * No label is ever drawn on the diagonal.
  *
- * Ellie: "Page seems broken, data missing from most visuals."
+ * Ellie: "I don't like the diagonal category labels on charts. Make the font
+ * smaller or wrap the labels or something else throughout." Chart.js rotates a
+ * category label by up to fifty degrees as soon as the axis is crowded, and it
+ * does it per chart, so fixing it tile by tile fixes it until the next tile.
  *
- * Nothing was broken. Every fallback array on this page is zeros, so a chart
- * with no data renders its axes, its labels and its legend, and no bars. That
- * is indistinguishable from a chart of real zeros and from a chart that failed
- * to load, and all three were being drawn the same way.
+ * This is in mkChart because mkChart is the one place every chart in the admin
+ * is built. A label is wrapped onto a second and third line at word
+ * boundaries, the type is a point smaller than the body, and rotation is
+ * pinned at zero. An axis that still cannot fit its labels skips some, which
+ * is Chart.js's own autoSkip and reads far better than a slope.
  *
- * This is in mkChart rather than in each page because mkChart is the one place
- * every chart on every tab goes through. A tile whose numbers are all zero or
- * absent gets a line over it saying so. The chart stays underneath, because
- * the labels are still worth reading: they say what would be there.
+ * A chart that has already set its own ticks keeps them: the survey tiles turn
+ * long answers sideways instead, which is better again, and this must not
+ * undo that.
  */
-function markEmptyTile(el, cfg) {
+function flatTicks(cfg) {
   try {
-    const sets = (cfg.data && cfg.data.datasets) || [];
-    let total = 0;
-    let points = 0;
-    sets.forEach(function (d) {
-      (d.data || []).forEach(function (v) {
-        const n = typeof v === 'object' && v !== null ? (v.y != null ? v.y : v.r) : v;
-        if (n == null || isNaN(Number(n))) return;
-        points += 1;
-        total += Math.abs(Number(n));
-      });
-    });
-
-    const card = el.closest ? el.closest('.chart-card') : null;
-    if (!card) return;
-    const existing = card.querySelector('[data-empty-note]');
-    if (existing) existing.remove();
-
-    if (points > 0 && total > 0) { card.classList.remove('is-empty'); return; }
-    card.classList.add('is-empty');
-
-    const note = document.createElement('div');
-    note.setAttribute('data-empty-note', '1');
-    /* Padded to the tile's own gutter. This was `padding:.35rem 0`, so the
-       sentence sat flush against the card's left edge. */
-    note.style.cssText = 'font-size:.75rem;color:var(--dim);padding:.6rem 1.35rem .2rem;line-height:1.5';
-    note.textContent = points === 0
-      ? 'No data yet. Nothing has been recorded for this.'
-      : 'No data yet. Every value is zero, which here means nobody has done this rather than that the tile is broken.';
-    const head = card.querySelector('.chart-head');
-    if (head && head.parentNode) head.parentNode.insertBefore(note, head.nextSibling);
-    else card.appendChild(note);
-  } catch (e) { /* a note is never worth breaking a chart for */ }
+    const o = cfg.options = cfg.options || {};
+    const horizontal = o.indexAxis === 'y';
+    o.scales = o.scales || {};
+    /* The category axis: x on a column chart, y on a row chart. */
+    const key = horizontal ? 'y' : 'x';
+    const axis = o.scales[key] = o.scales[key] || {};
+    const ticks = axis.ticks = axis.ticks || {};
+    if (ticks.callback) return;          // already wrapped by its own tile
+    ticks.maxRotation = 0;
+    ticks.minRotation = 0;
+    ticks.autoSkipPadding = ticks.autoSkipPadding == null ? 6 : ticks.autoSkipPadding;
+    ticks.font = Object.assign({ size: 10 }, ticks.font);
+    ticks.color = ticks.color || '#5A6478';
+    ticks.callback = function (value) {
+      const text = String(this.getLabelForValue ? this.getLabelForValue(value) : value);
+      if (text.length <= TICK_WRAP) return text;
+      const lines = [];
+      let line = '';
+      for (const w of text.split(' ')) {
+        if ((line + ' ' + w).trim().length > TICK_WRAP) { lines.push(line.trim()); line = w; }
+        else line += ' ' + w;
+      }
+      if (line.trim()) lines.push(line.trim());
+      /* Three lines is the most an axis can carry before the chart is a
+         caption with a picture in it; the tooltip has the whole label. */
+      return lines.slice(0, 3);
+    };
+  } catch (e) { /* a tick is never worth breaking a chart for */ }
 }
+const TICK_WRAP = 14;
+
+/* markEmptyTile was here. It stamped a sentence into a tile that had no data,
+   which Ellie asked for out ("If n=0 that speaks for itself"), and set an
+   is-empty class that no stylesheet, check or probe has ever read. What is
+   left of it would be a function with no effect. Every tile says n=0 in its
+   own subtitle. */
 
 // ── Regrouped rates on the overview ────────────────────────────────────────
 // A big percentage with the count under it, rather than a chart. Two numbers
@@ -5877,7 +5814,7 @@ function initCharts(page) {
   }
   else if (page==='demographics') {
     wireCubeTile({target:'chart-age',field:'age_range',mode:'bar',selId:'slz-age',color:DEMO_HUE});
-    wireCubeTile({target:'chart-gender',field:'gender',mode:'doughnut',selId:'slz-gender',palette:CAT_PALETTE});
+    wireCubeTile({target:'chart-pronouns',field:'pronouns',mode:'doughnut',selId:'slz-pronouns',palette:CAT_PALETTE});
     wireCubeTile({target:'chart-relstatus',field:'relationship_status',mode:'doughnut',selId:'slz-relstatus',palette:CAT_PALETTE});
     wireCubeTile({target:'demo-rellength-bars',field:'relationship_length',mode:'insightbars',selId:'slz-demorellen',color:'#5C6DDA'});
     wireCubeTile({target:'chart-children',field:'children',mode:'bar',selId:'slz-children',color:DEMO_HUE});
@@ -5944,7 +5881,7 @@ async function loadTypesData(force) {
       const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
     });
   };
-  fill('tf-gender', TYPES_DATA.individuals.map(r => r.gender));
+  fill('tf-pronouns', TYPES_DATA.individuals.map(r => r.pronouns));
   fill('tf-rellen', TYPES_DATA.individuals.map(r => r.relLength));
   fill('tf-relstat', TYPES_DATA.individuals.map(r => r.relStatus));
 
@@ -5982,16 +5919,16 @@ function typeFromAxes(w, o) {
 }
 
 function activeFilters() {
-  const g=document.getElementById('tf-gender'), rl=document.getElementById('tf-rellen'), rs=document.getElementById('tf-relstat');
-  return { gender: g?g.value:'', relLength: rl?rl.value:'', relStatus: rs?rs.value:'' };
+  const g=document.getElementById('tf-pronouns'), rl=document.getElementById('tf-rellen'), rs=document.getElementById('tf-relstat');
+  return { pronouns: g?g.value:'', relLength: rl?rl.value:'', relStatus: rs?rs.value:'' };
 }
 function matchIndiv(r, f) {
-  return (!f.gender || r.gender === f.gender) &&
+  return (!f.pronouns || r.pronouns === f.pronouns) &&
          (!f.relLength || r.relLength === f.relLength) &&
          (!f.relStatus || r.relStatus === f.relStatus);
 }
 function matchCouple(c, f) {
-  return (!f.gender || c.genders.includes(f.gender)) &&
+  return (!f.pronouns || (c.pronouns || []).includes(f.pronouns)) &&
          (!f.relLength || c.relLength === f.relLength) &&
          (!f.relStatus || c.relStatus === f.relStatus);
 }
@@ -6003,7 +5940,7 @@ function renderTypes() {
   const cfg = TYPES_DATA.config;
   const indiv = TYPES_DATA.individuals.filter(r => matchIndiv(r, f));
   const couples = TYPES_DATA.couples.filter(c => matchCouple(c, f));
-  const anyFilter = f.gender || f.relLength || f.relStatus;
+  const anyFilter = f.pronouns || f.relLength || f.relStatus;
   { const _ta=document.getElementById('tf-active'); if(_ta) _ta.textContent = anyFilter ? `${indiv.length} individuals · ${couples.length} couples in filter` : ''; }
 
   const small = indiv.length < 8;

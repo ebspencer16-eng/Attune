@@ -190,7 +190,6 @@ import { commsProtocols, commsActionPlan } from "../api/_lib/comms-plan.js";
 import { whatComesNext } from "../api/_lib/what-comes-next.js";
 import { APP_LIVE, APP_STORE_URL, PHYSICAL_ENABLED } from "../api/_lib/flags.js";
 import { ABOUT_YOU } from "../api/_lib/profile-setup-copy.js";
-import { FEEDBACK_COPY, FEEDBACK_QUESTIONS, FEEDBACK_RATINGS, FEEDBACK_SCALE } from "../api/_lib/feedback-copy.js";
 
 /**
  * Every view this file can draw.

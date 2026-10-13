@@ -39,8 +39,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const doc = readFileSync(TASKS, 'utf8');
   const { doc: out, name, changed } = fill(doc);
   if (!name) {
-    console.error('[build-tasks-sql] TASKS.md has no SQL block to fill.');
-    process.exit(1);
+    /* Nothing to run is a state the document is allowed to be in: she has run
+       everything, and the block comes back with the next migration. It used to
+       exit 1 here, which failed `npm run check` for the document being up to
+       date. check-tasks-doc holds the other half, that section 1 may not ask
+       her to run SQL when there is no block. */
+    console.log('[build-tasks-sql] no migration block in TASKS.md; nothing for her to run.');
+    process.exit(0);
   }
   if (changed) writeFileSync(TASKS, out);
   console.log(`[build-tasks-sql] TASKS.md carries ${name}${changed ? ', rewritten' : ', already current'}.`);

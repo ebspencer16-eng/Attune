@@ -36,7 +36,6 @@ export const ENV_VARS = [
   { name: "SUPABASE_ANON_KEY", required: true, readBy: ["api/account-signup.js","api/admin-config.js","api/admin-session.js","api/claim-order.js"] },
   { name: "SUPABASE_SERVICE_KEY", required: true, readBy: ["api/_lib/completion.js","api/_lib/consent.js","api/_lib/notifications.js","api/_lib/push.js"], alsoAccepts: ["SUPABASE_SERVICE_ROLE_KEY","SUPABASE_SERVICE_ROLE"], note: "The server's own database key. Everything needs it." },
   { name: "SUPABASE_URL", required: true, readBy: ["api/_lib/completion.js","api/_lib/consent.js","api/_lib/notifications.js","api/_lib/push.js"] },
-  { name: "SUPPORT_EMAIL", required: false, readBy: ["api/send-feedback.js"] },
   { name: "VERCEL_GIT_COMMIT_SHA", required: false, readBy: ["api/_lib/sentry-edge.js"] },
   { name: "VITE_SENTRY_DSN", required: false, readBy: ["api/_lib/sentry-edge.js"] },
   { name: "VITE_SUPABASE_ANON_KEY", required: false, readBy: ["api/account-signup.js","api/admin-config.js","api/claim-order.js","api/conflict-results.js"] },

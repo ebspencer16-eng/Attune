@@ -248,12 +248,24 @@ for (const sec of sections) {
 {
   const { fill } = await import('./build-tasks-sql.mjs');
   const { doc: filled, name } = fill(doc);
-  if (!name) {
-    fails.push('TASKS.md no longer carries a migration block. If she has nothing to run, take'
-      + ' the step out; if she does, the block is how she gets it.');
-  } else if (filled !== doc) {
+  if (name && filled !== doc) {
     fails.push(`the SQL in TASKS.md is not ${name}. She would paste something that is not the`
       + ' migration. Run: node scripts/build-tasks-sql.mjs');
+  }
+  /**
+   * No block is fine; a block she is told to run and has not been given is not.
+   *
+   * This used to insist on a block at all times, which meant the document could
+   * not say "nothing to run" without failing the build. The rule is the other
+   * way round: if section 1 asks her to run SQL, the SQL has to be there.
+   */
+  if (!name) {
+    const sec1 = doc.slice(doc.indexOf('## 1.'), doc.indexOf('## 2.'));
+    const asks = /migration|SQL editor|run this SQL|paste it into Supabase/i.test(sec1);
+    if (asks) {
+      fails.push('section 1 asks her to run SQL and TASKS.md carries no migration block. The'
+        + ' block is how she gets it: put the marker back, or take the ask out.');
+    }
   }
 }
 

@@ -26,7 +26,7 @@
  * page and TASKS.md carries the decision. A gate that answered that question
  * would be making a product call.
  *
- * Not api/send-feedback.js or the digest crons, which write to Attune's own
+ * Not the digest crons, which write to Attune's own
  * inbox rather than to a customer.
  */
 
@@ -47,7 +47,7 @@ const files = [
 ];
 
 /** Modules that mail Attune rather than a customer. */
-const INTERNAL = new Set(['api/send-feedback.js', 'api/cron-beta-digest.js', 'api/cron-feedback-synthesis.js']);
+const INTERNAL = new Set(['api/cron-beta-digest.js', 'api/cron-feedback-synthesis.js']);
 
 /**
  * Exported names ending in Email that are not an email.

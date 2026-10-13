@@ -62,10 +62,6 @@
       "destination": "/api/orders.js"
     },
     {
-      "source": "/api/send-feedback",
-      "destination": "/api/send-feedback.js"
-    },
-    {
       "source": "/home",
       "destination": "/home.html"
     },

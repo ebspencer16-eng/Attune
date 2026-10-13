@@ -2777,3 +2777,47 @@ brace depth ran past the end of the function and took forty-one kilobytes and
 thirty-odd functions with it, silently. Restoring and replaying the whole set
 of edits as one script was the fix, and that script now asserts the function
 count changes by exactly the number of functions it means to change.
+
+## 2026-10-13, the sweep, and the gender that was never asked
+
+**Nothing in Attune asks anybody their gender.** The signup form has five
+demographic questions and gender is not one of them, so `profiles.gender` is
+null for everybody. Both the server cube and the admin filled the gap by
+reading PRONOUNS and relabelling them: she/her became "woman", he/him became
+"man", and they/them became "non-binary". Ellie: "I think some of the data is
+wrong, none of our beta testers are non binary." She was right, and the error
+was the kind that matters more than a number.
+
+The dimension is Pronouns now, end to end: `api/admin-explore.js`,
+`api/admin-typing.js`, `api/admin-data.js`, `api/admin-engagement.js`,
+`api/admin-csv.js` (three exports that had been printing an always-empty
+column) and every reader in the admin. Two seeded Explore presets still say
+`gender` in the database; `applyPreset` translates that one key on read rather
+than asking her to run a migration for two buttons.
+
+**The feedback card could never stop asking.** `feedback_given_at` has existed
+since migration 050 and nothing has ever written it, so the two home cards
+gated on it would have asked for ever. `/api/survey` stamps it when somebody
+reaches the end.
+
+**The experience questionnaire is retired**, at her word. Screen, endpoint,
+copy module, client functions, admin tiles, and the card target all gone; the
+card opens the survey instead. The footer reaction strip's counters went too:
+nothing has posted to that strip since it left the site, so they were reporting
+on an instrument that did not exist. `cron-feedback-synthesis` read the same
+dead table every Monday and now reads the survey's written answers.
+`check-feedback-reachable` was 268 lines about the questionnaire; it is
+repointed at the rule rather than deleted, and now fails on any retired source
+being read by the admin or by `api/`.
+
+**Formatting.** No tile writes "No data yet" any more ("If n=0 that speaks for
+itself") and `markEmptyTile` went with the sentence, because the class it set
+was read by no stylesheet, check or probe. Axis labels are flat everywhere:
+the rule lives in `mkChart`, which is the one place every chart in the admin is
+built, so a new tile cannot opt out. Verified by asking all 23 charts their
+`labelRotation` after they drew, rather than by reading the source.
+
+**Still unverified:** the Engagement page's Learning table (five rows, one line,
+hover) and the new exercise pills under Detailed results. Both render only when
+there is engagement data, and there is none, so they typecheck and pass the
+gates but nobody has seen them draw.

@@ -174,5 +174,20 @@ export default async function handler(req) {
     });
   }
 
+  /**
+   * Reaching the end stops the home card asking again.
+   *
+   * `feedback_given_at` has existed since migration 050 and nothing has ever
+   * written it, so the two cards that ask for feedback have been asking for
+   * ever: the condition they are gated on could never become true. The
+   * questionnaire that was supposed to set it is retired; the survey is what
+   * the cards open now, so the survey is what records it.
+   */
+  if (me && body.done === true) {
+    try {
+      await admin.from('profiles').update({ feedback_given_at: now }).eq('id', me);
+    } catch (e) { /* the answers are stored; the card asking twice is the lesser loss */ }
+  }
+
   return json(200, { ok: true, saved: Object.keys(clean).length, done: body.done === true });
 }

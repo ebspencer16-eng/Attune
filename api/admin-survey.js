@@ -129,7 +129,7 @@ export default async function handler(req) {
     const demo = {};
     if (ids.length) {
       const { data: profs } = await admin.from('profiles')
-        .select('id, age_range, gender, relationship_status, relationship_length, children, signup_source, pkg')
+        .select('id, age_range, pronouns, relationship_status, relationship_length, children, signup_source, pkg')
         .in('id', ids);
       for (const p of (profs || [])) {
         const { id, ...rest } = p;

@@ -1027,13 +1027,15 @@ up says exactly this and I did it anyway. When matching copy, match
 case-insensitively or match the module's string.
 
 **A definition without a call is not a feature, and it reads like one.**
-`supabaseStore` sat in `api/send-feedback.js`, correct, writing the right
+`supabaseStore` sat in the feedback endpoint, correct, writing the right
 columns, called by nothing. Every footer reaction and every answer to "How was
 your experience?" went to a Vercel KV store whose host no longer resolves, so
 the Feedback Overview, the digest and the testimonials feature all reported on a
 table those senders had never written a row to. Reading the file finds a
 function that looks live. Running the handler and counting the writes is what
-found it, and that is now the shape of `check-feedback-reachable`'s last part.
+found it. (That endpoint and both instruments are retired now, at Ellie's word;
+`check-feedback-reachable` holds the rule they were about: the admin may not
+read a source nothing writes.)
 
 **The same moment, reached two ways, needs one implementation.** Everything that
 happens when a couple's results open lived inside `api/save-exercise.js`, which
@@ -1064,6 +1066,26 @@ with `&&`, and absolute: `cd /Users/Ellie/Projects/unison/attune-app && npm run
 testflight`. Never "from the app folder, run". Never a fragment to append. A
 file she needs to put somewhere gets `| pbcopy` and the instruction to paste,
 rather than a path to go and open.
+
+**An inference presented as an answer is worse than a missing number.** The
+admin reported a Gender breakdown for months. Nothing in Attune asks anybody
+their gender: `profiles.gender` is null for every row, and both the cube and
+the page filled the gap by reading pronouns, so she/her was reported as "woman"
+and they/them as "non-binary". Ellie: "I think some of the data is wrong, none
+of our beta testers are non binary."
+
+The figure was wrong and the labelling was worse: it put a category on a person
+that they never chose. The dimension is Pronouns now, which is what was
+actually collected. The rule: if a field is derived from another field, the
+chart carries the name of the field that was COLLECTED, not the one somebody
+wished they had. A column that nothing fills is a question to ask, not a gap to
+infer across.
+
+**A flag nothing writes is a prompt that never stops.** `feedback_given_at` has
+existed since migration 050 and no code has ever set it, so both home cards
+gated on `!state.feedbackGivenAt` would have asked for ever. The card looked
+correct in every reading of next-action.js, because the bug is not in the
+reader. When a condition reads a column, grep for the write before trusting it.
 
 **A start tag that never closes folds the page up and says nothing.** Fifty
 nine of them were in `public/admin.html`: `<select ... aria-label="Slz tout"<option
@@ -1104,14 +1126,18 @@ comments before asserting, or assert on the shape the code uses
 (`path: '/api/x'`) rather than on the name.
 
 **Two instruments with similar names, and I overwrote one with the other.**
-`attune-app/src/components/feedback.tsx` was the "How was your experience?"
-questionnaire, seven questions from `api/_lib/feedback-copy.js`, with its own
-card and its own admin tile. The survey is a different thing, nine questions
-from `api/_lib/survey.js`, asked at the end of the experience. I wrote the
-survey into that file because it was called feedback, and the app silently
-stopped asking the questionnaire while three surfaces went on reporting on it.
+The app had a "How was your experience?" questionnaire, seven questions with
+its own endpoint, its own copy module, its own screen and its own admin tiles.
+The survey is a different thing, nine questions from `api/_lib/survey.js`,
+asked at the end of the experience. I wrote the survey into the questionnaire's
+file because that file was called feedback, and the app silently stopped asking
+the questionnaire while three surfaces went on reporting on it.
 check-feedback-reachable caught it, which is the only reason it did not ship.
-The survey is `survey.tsx` now and both gates name the file they are about.
+
+Ellie has since retired the questionnaire outright, so there is one instrument
+and `attune-app/src/components/survey.tsx` is the only screen that asks
+anything. The lesson survives the cleanup: before writing into a file, check
+what the file is, not what it is called.
 
 **Back up by path, not by basename.** `api/survey.js` and
 `api/_lib/survey.js` both became `survey.js` in a scratch directory, so one

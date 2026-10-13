@@ -1557,46 +1557,11 @@ export function updateProfile(input: {
   });
 }
 
-/** The feedback questions, as the server sends them. */
-export type FeedbackForm = {
-  copy: {
-    title: string; cta: string; reassurance: string; scaleHeading: string;
-    submit: string; submitting: string; privacy: string; thanks: string;
-  };
-  scale: string[];
-  questions: { id: string; type: 'scale' | 'choice' | 'text'; label: string; options?: string[] }[];
-};
-
-/**
- * The questions Attune asks about itself.
- *
- * Unauthenticated, like the profile setup copy: it is seven question labels,
- * and the screen that asks them should not need a session to draw itself.
- */
-export function fetchFeedbackForm() {
-  return request<{ ok: true } & FeedbackForm>('/api/send-feedback');
-}
-
-/**
- * Send one set of answers.
- *
- * `source` is 'app_experience', which is what the admin's Feedback Overview
- * filters on. Nothing identifying is sent:
- * the endpoint has never taken a name or an email and this does not start.
- */
-export function sendFeedback(input: {
-  rating?: number | null;
-  questionAnswers: Record<string, string | number>;
-  message?: string | null;
-  stage?: string | null;
-  howHeard?: string | null;
-}) {
-  return request<{ ok: true }>('/api/send-feedback', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ source: 'app_experience', surface: 'app', ...input }),
-  });
-}
+/* FeedbackForm, fetchFeedbackForm and sendFeedback were here. They asked and
+   answered "How was your experience?", a seven-question instrument separate
+   from the survey, which Ellie retired: "B45. Approved, delete them." Its
+   endpoint, its copy module, its screen and its two admin tiles went with it.
+   The survey is fetchSurvey/saveSurvey. */
 
 /**
  * This device's push address, and the answer to being asked.

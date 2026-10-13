@@ -39,7 +39,7 @@ import { fetchHome, markNotificationRead, nudgePartner, SITE_URL, insightShareTe
 import type { ApiError, HomeAlert, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
-import Feedback from '@/components/feedback';
+import Survey from '@/components/survey';
 import Settings from '@/components/settings';
 import { forgetLastSection, showResultsFromStart } from '@/components/results';
 import { forgetLastSeen, keepLastSeen, lastSeen } from '@/api/last-seen';
@@ -96,7 +96,7 @@ export default function HomeScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   /** Whether the insight of the day is open as a full card. */
   const [insightOpen, setInsightOpen] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [surveyOpen, setSurveyOpen] = useState(false);
 
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
@@ -216,7 +216,10 @@ export default function HomeScreen() {
         // up your profile" is home plus Settings, because the editor lives
         // there rather than on a route of its own.
         if (target.settings) { setSettingsOpen(true); return; }
-        if (target.feedback) { setFeedbackOpen(true); return; }
+        /* One instrument. The card used to open the "How was your experience?"
+           questionnaire, which Ellie retired: the survey asks the same things
+           of everybody and is the only place answers are read. */
+        if (target.feedback) { setSurveyOpen(true); return; }
         /**
          * "Your results are ready" opens the storycards, not the menu.
          *
@@ -861,8 +864,8 @@ export default function HomeScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      {feedbackOpen ? (
-        <Feedback onDone={() => setFeedbackOpen(false)} />
+      {surveyOpen ? (
+        <Survey onDone={() => setSurveyOpen(false)} />
       ) : null}
 
       {insightOpen && data?.research ? (

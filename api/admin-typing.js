@@ -60,11 +60,21 @@ function profileToRecord(p, partnerAnswers = null) {
     o: r.axes.open,
     type: r.typeCode,
     lowConf: r.lowConfidence,
-    gender: p.gender || null,
+    /* Pronouns, as given. This sent `gender`, which nothing in the product
+       asks: the column is empty for everybody and the admin was filling the
+       gap by reading pronouns and calling they/them non-binary. */
+    pronouns: pronounLabel(p.pronouns),
     relLength: p.relationship_length || null,
     relStatus: p.relationship_status || null,
     createdAt: p.created_at || null,
   };
+}
+
+/** she/her, he/him, they/them as given; anything else is "other". */
+function pronounLabel(pr) {
+  const v = String(pr || '').trim().toLowerCase();
+  if (!v) return null;
+  return (v === 'he/him' || v === 'she/her' || v === 'they/them') ? v : 'other';
 }
 
 const hasAnswers = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).length > 0;
@@ -83,7 +93,7 @@ export default async function handler(req) {
   try {
     const { data: profiles = [] } = await admin
       .from('profiles')
-      .select('id, invite_code, partner_profile_id, joined_via_invite, gender, relationship_status, relationship_length, ex1_answers, created_at');
+      .select('id, invite_code, partner_profile_id, joined_via_invite, pronouns, partner_pronouns, relationship_status, relationship_length, ex1_answers, created_at');
 
     // Partner lookup shared by individual and couple typing below.
     const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
@@ -112,7 +122,7 @@ export default async function handler(req) {
       seenPair.add(key);
       if (!hasAnswers(a) || !hasAnswers(b)) continue;
       // Keep the inviter as "A" for couple-level fields when we can tell, so
-      // gender order and relationship fields stay stable across runs.
+      // the order and the relationship fields stay stable across runs.
       const [pa, pb] = ((a.invite_code && !a.joined_via_invite) || !b.invite_code) ? [a, b] : [b, a];
       pairedIds.add(pa.id); pairedIds.add(pb.id);
       const ra = profileToRecord(pa, pb.ex1_answers), rb = profileToRecord(pb, pa.ex1_answers);
@@ -122,7 +132,8 @@ export default async function handler(req) {
         aScores: ra.scores, bScores: rb.scores,
         relLength: pa.relationship_length || pb.relationship_length || null,
         relStatus: pa.relationship_status || pb.relationship_status || null,
-        genders: [pa.gender || null, pb.gender || null],
+        pronouns: [pronounLabel(pa.pronouns) || pronounLabel(pb.partner_pronouns),
+                   pronounLabel(pb.pronouns) || pronounLabel(pa.partner_pronouns)],
       });
     }
 

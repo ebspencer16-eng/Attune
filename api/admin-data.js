@@ -4,7 +4,7 @@
  * GET ?secret=ADMIN_SECRET
  *
  * One service-role payload for every admin dashboard loader. The admin page
- * previously read orders/profiles/feedback_submissions straight
+ * previously read orders/profiles straight
  * from PostgREST with the anon key; migration 010 (correctly) locked anon out
  * of those tables, which silently broke every real-data section. Migration
  * 010's comments call for exactly this pattern: admin reads via service role
@@ -15,9 +15,8 @@
  *   ok: true,
  *   orders:               [ full order rows, newest first, limit 1000 ],
  *   beta_codes:           [ full rows ],
- *   feedback_submissions: [ full rows, newest first, limit 2000 ],
  *   profiles: {
- *     demographics:        [ {age_range, gender, relationship_status,
+ *     demographics:        [ {age_range, pronouns, relationship_status,
  *                             relationship_length, children, signup_source} ],
  *     started:             count with ex1 or ex2 answers,
  *     both_done_individuals: count with ex1+ex2 answers and a linked partner,
@@ -345,15 +344,14 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
-    const [ordersQ, codesQ, fbQ, profQ, psQ] = await Promise.all([
+    const [ordersQ, codesQ, profQ, psQ] = await Promise.all([
       admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
-      admin.from('feedback_submissions').select('*').order('submitted_at', { ascending: false }).limit(2000),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, gender, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data'),
+      admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data'),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
-    const firstErr = [ordersQ, codesQ, fbQ, profQ, psQ].find(q => q.error);
+    const firstErr = [ordersQ, codesQ, profQ, psQ].find(q => q.error);
     if (firstErr) return json({ error: safeError('admin-data', firstErr.error, 'Could not load admin data.') }, 500);
 
     const profiles = profQ.data || [];
@@ -361,7 +359,7 @@ export default async function handler(req) {
     // Relationship-level demographics (status, length, children) describe the
     // couple, not the individual. If one partner answered and the other left it
     // blank, share the answer across both linked profiles so couple-level facts
-    // aren't undercounted. Individual fields (age, gender/pronouns) stay per-person.
+    // aren't undercounted. Individual fields (age, pronouns) stay per-person.
     const byId = {};
     profiles.forEach(p => { byId[p.id] = p; });
     const sharedFields = ['relationship_status', 'relationship_length', 'children'];
@@ -383,7 +381,7 @@ export default async function handler(req) {
     const responses = buildResponseAggregates(profiles, psQ.data || []);
     // Precompute the same aggregates for each couple-level segment value, reusing
     // the exact formulas on a filtered profile set. Only couple-level fields
-    // (shared by both partners) are sliced — individual fields like gender/age
+    // (shared by both partners) are sliced — individual fields like pronouns/age
     // don't have a single value for a couple, so slicing couple metrics by them
     // would be ambiguous.
     // Annotate each profile with its couple type (sorted pair of both partners'
@@ -490,10 +488,9 @@ export default async function handler(req) {
       responsesBySegment,
       orders: ordersQ.data || [],
       beta_codes: codesQ.data || [],
-      feedback_submissions: fbQ.data || [],
       profiles: {
         demographics: profiles.map(p => ({
-          age_range: p.age_range, gender: p.gender, pronouns: p.pronouns,
+          age_range: p.age_range, pronouns: p.pronouns,
           relationship_status: p.relationship_status,
           relationship_length: p.relationship_length,
           children: p.children, signup_source: p.signup_source,
