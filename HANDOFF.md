@@ -2821,3 +2821,28 @@ built, so a new tile cannot opt out. Verified by asking all 23 charts their
 hover) and the new exercise pills under Detailed results. Both render only when
 there is engagement data, and there is none, so they typecheck and pass the
 gates but nobody has seen them draw.
+
+## 2026-10-13, columns, equal tiles, and gender back
+
+**Columns everywhere.** `svBarChart` no longer turns anything on its side: a
+long answer wraps onto up to three lines under its bar, which `flatTicks` does
+for every chart in the admin. The y axis is gone from the bar tiles at her ask
+and the value is drawn on top of each bar by a small plugin, so nothing is lost
+by dropping the scale. The trend tiles keep their axis: a line without a scale
+says nothing. One other tile in the admin (`mode:'hbar'`, the signup-source
+distribution) had always drawn sideways and is upright now.
+
+**Every tile in a row is the same height, by construction.** Title clamped to
+exactly two lines with the full question in its tooltip, one body height for
+every chart, and a footer of fixed height on every tile whether or not it has a
+"View full list" button. Measured: all eleven tiles report a card height of 348.
+The grey "How people answered" line is gone; what sits under the title is the n.
+
+**Gender is back**, at her word, converted from pronouns in one table in
+`public/admin.html` with the stored value still the pronoun. Every converted
+tile carries a tooltip saying where the word came from. The Explore field is
+labelled Gender too. TASKS.md B56 carries the SELECT that answers "which users
+said they/them", because the admin anonymises and cannot.
+
+**Still unverified:** the Engagement page's Learning table and the exercise
+pills. Both need engagement data to render and there is none.

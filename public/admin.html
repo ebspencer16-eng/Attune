@@ -155,6 +155,15 @@
   .chart-head{padding:1.1rem 1.35rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .chart-title{font-size:.8rem;font-weight:700;color:var(--text)}
   .chart-subtitle{font-size:.68rem;color:var(--muted);margin-top:.15rem}
+  /* A survey tile's title: always two lines, whatever the question's length,
+     so two tiles side by side are the same height before anything is drawn.
+     The whole question is in the tooltip. */
+  .sv-title{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    min-height:2.3em;line-height:1.15}
+  /* Every tile has a footer, so the ones with a button are no taller than the
+     ones without. */
+  .sv-tile-foot{padding:0 1.4rem 1.1rem;height:3.6rem;overflow:hidden}
+  .sv-tile-foot > div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* A row of choices that shows what the choices are. */
   .pill-row{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
   .pill{background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:999px;
@@ -824,7 +833,7 @@
         <div class="chart-body"><canvas id="chart-age"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Pronouns</div><div class="chart-subtitle">n=&mdash;</div></div><select class="tile-slicer" id="slz-pronouns" title="Cut this tile by a segment" aria-label="Slz pronouns"><option value="">Everyone</option></select></div>
+        <div class="chart-head"><div><div class="chart-title" title="Converted from the pronouns each person chose at setup: she/her, he/him, they/them. Nothing in Attune asks gender directly.">Gender</div><div class="chart-subtitle">n=&mdash;</div></div><select class="tile-slicer" id="slz-pronouns" title="Cut this tile by a segment" aria-label="Slz pronouns"><option value="">Everyone</option></select></div>
         <div class="chart-body"><canvas id="chart-pronouns"></canvas></div>
       </div>
       <div class="chart-card">
@@ -954,8 +963,8 @@
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="kpi-card green"><div class="kpi-label">Average rating</div><div class="kpi-val" id="fb-kpi-rating">&mdash;</div><div class="kpi-sub" id="fb-kpi-rating-sub">no answers yet</div></div>
       <div class="kpi-card green"><div class="kpi-label">NPS</div><div class="kpi-val" id="fb-kpi-nps">&mdash;</div><div class="kpi-sub" id="fb-kpi-nps-sub">no answers yet</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Prompted a conversation</div><div class="kpi-val" id="fb-kpi-convo">&mdash;</div><div class="kpi-sub" id="fb-kpi-convo-sub">no answers yet</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">Most important aspect</div><div class="kpi-val" id="fb-kpi-aspect" style="font-size:1.05rem;line-height:1.3">&mdash;</div><div class="kpi-sub" id="fb-kpi-aspect-sub">ranked first most often</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Prompted a Convo</div><div class="kpi-val" id="fb-kpi-convo">&mdash;</div><div class="kpi-sub" id="fb-kpi-convo-sub">no answers yet</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Most important</div><div class="kpi-val" id="fb-kpi-aspect" style="font-size:1.05rem;line-height:1.3">&mdash;</div><div class="kpi-sub" id="fb-kpi-aspect-sub">ranked first most often</div></div>
     </div>
 
     <!-- One tile per question, two to a row, built from the question set so a
@@ -1617,7 +1626,7 @@ window.adminAuthHeaders = function(extra){
 
     <div class="chart-grid chart-grid full">
       <div class="chart-card">
-        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Average placement by pronouns</div><div class="chart-card-sub">Mean position of each group on the two axes. Always split by pronouns, on top of any slice you choose.</div></div><select class="tile-slicer" id="slz-tmap" title="Cut this map by a segment" aria-label="Slz tmap"><option value="">Everyone</option></select></div>
+        <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title" title="Gender is converted from the pronouns each person chose at setup.">Average placement by gender</div><div class="chart-card-sub">Mean position of each group on the two axes. Always split by gender, on top of any slice you choose.</div></div><select class="tile-slicer" id="slz-tmap" title="Cut this map by a segment" aria-label="Slz tmap"><option value="">Everyone</option></select></div>
         <div id="types-couple-map" style="padding:1rem 1.4rem 1.4rem;"></div>
       </div>
     </div>
@@ -3003,7 +3012,7 @@ async function loadSurvey(force) {
 /** The segments a response can be cut by, from the fields the endpoint sends. */
 const SV_DIMS = [
   ['relationship_length', 'Together'], ['relationship_status', 'Status'],
-  ['children', 'Children'], ['age_range', 'Age'], ['pronouns', 'Pronouns'],
+  ['children', 'Children'], ['age_range', 'Age'], ['pronouns', 'Gender'],
   ['signup_source', 'Heard via'], ['pkg', 'Package'],
 ];
 
@@ -3284,32 +3293,46 @@ function svDistOf(q, rows) {
   }
 
   if (q.kind === 'rank') {
-    const worst = Math.max(1, ...labels.map((o) => (counts['__n__' + o] ? counts[o] / counts['__n__' + o] : 0)));
-    const values = labels.map((o) => {
-      const c = counts['__n__' + o];
-      if (!c) return 0;
-      return Math.round((worst - counts[o] / c + 1) * 100) / 100;
-    });
-    return { labels, values, n, note: 'taller is more interesting' };
+    /* The bar is the mean place flipped, so taller is more interesting; the
+       number printed on it is the mean place itself, which is the figure
+       somebody would quote. A flipped score on top of the bar read as a
+       decimal nobody could name. */
+    const mean = (o) => (counts['__n__' + o] ? counts[o] / counts['__n__' + o] : 0);
+    const worst = Math.max(1, ...labels.map(mean));
+    const values = labels.map((o) => (counts['__n__' + o] ? Math.round((worst - mean(o) + 1) * 100) / 100 : 0));
+    const display = labels.map((o) => (counts['__n__' + o] ? (Math.round(mean(o) * 10) / 10).toFixed(1) : ''));
+    return { labels, values, display, n };
   }
   return { labels, values: labels.map((l) => counts[l] || 0), n, note: '' };
 }
 
 /** One tile's markup. Built empty; its chart is drawn after it is in the DOM. */
+/**
+ * One tile's markup. Built empty; its chart is drawn once it is in the DOM.
+ *
+ * ── WHY THE TITLE IS EXACTLY TWO LINES ────────────────────────────────────
+ * Ellie: "I want side-by-side tiles to be the same height. Adjust titles, I
+ * think that's what's creating inconsistencies." She was right: a one-line
+ * title and a three-line title made two tiles in the same row different
+ * heights before a single bar was drawn.
+ *
+ * So the title is clamped to two lines, always occupies two lines, and carries
+ * the whole question in its tooltip. The grey sentence under it is gone, also
+ * at her ask: it said "How people answered", which the chart already shows.
+ * What is left under the title is the count.
+ */
 function svTileHtml(spec, idx) {
   const id = 'fbt' + idx;
   const title = spec.title || spec.q.label;
-  const sub = spec.kind === 'themes'
-    ? 'Themes across the written answers'
-    : (spec.kind === 'dist' ? 'How people answered' : 'By month');
   const body = spec.kind === 'themes'
     ? '<div class="chart-body"><canvas id="' + id + '-c"></canvas></div>'
-      + '<div style="padding:0 1.4rem 1.1rem"><div id="' + id + '-note" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem"></div>'
+      + '<div class="sv-tile-foot"><div id="' + id + '-note" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem"></div>'
       + '<button class="export-btn" onclick="svOpenThemes(&quot;' + svEsc(spec.q.id) + '&quot;)">View full list</button></div>'
-    : '<div class="chart-body"><canvas id="' + id + '-c"></canvas></div>';
+    : '<div class="chart-body"><canvas id="' + id + '-c"></canvas></div><div class="sv-tile-foot"></div>';
   return '<div class="chart-card" id="' + id + '"' + (spec.wide ? ' style="grid-column:1/-1"' : '') + '>'
-    + '<div class="chart-head"><div><div class="chart-title">' + svEsc(title) + '</div>'
-    + '<div class="chart-subtitle">' + svEsc(sub) + '</div></div>'
+    + '<div class="chart-head"><div style="min-width:0">'
+    + '<div class="chart-title sv-title" title="' + svEsc(title) + '">' + svEsc(title) + '</div>'
+    + '<div class="chart-subtitle" id="' + id + '-n"></div></div>'
     + '<select class="tile-slicer" id="' + id + '-s" title="Cut this tile by a segment" aria-label="Segment"></select>'
     + '</div>' + body + '</div>';
 }
@@ -3346,80 +3369,66 @@ function svFit(chart) {
   return chart;
 }
 
-const WRAP_AT = 20;
-function svBarChart(labels, values, color, el, how) {
-  /* Numbers stay columns however many there are: 0 to 10 reads as a row of
-     numbers and nothing else. Words become rows as soon as they are long or
-     many, because a column chart hangs them under the axis at an angle. */
-  const longest = labels.reduce((m, l) => Math.max(m, String(l).length), 0);
-  const horizontal = how === 'rows' ? true
-    : how === 'columns' ? false
-      : (longest > 14 || labels.length > 8);
-
-  /* How tall the tile has to be: every label's own wrapped height, not one
-     row height for all of them. "Physical Intimacy Expectations" is three
-     lines in a half-window tile and was overlapping its neighbours. */
-  const wrap = (text) => {
-    const t = String(text);
-    if (t.length <= WRAP_AT) return [t];
-    const lines = [];
-    let line = '';
-    for (const w of t.split(' ')) {
-      if ((line + ' ' + w).trim().length > WRAP_AT) { lines.push(line.trim()); line = w; }
-      else line += ' ' + w;
-    }
-    if (line.trim()) lines.push(line.trim());
-    return lines.slice(0, 3);
-  };
-  const rows = labels.reduce((h, l) => h + Math.max(1, wrap(l).length), 0);
+/* One height for every chart in the grid. Ellie: "I want side-by-side tiles to
+   be the same height." Two tiles differ only if their titles or their footers
+   differ, and both of those are fixed now. */
+const SV_TILE_BODY = '210px';
+function svBarChart(labels, values, color, el, display) {
+  /* Columns, always. Ellie: "You flipped x and y axis for a few views, I don't
+     want that. Wrap labels, I want column charts." So a long answer wraps onto
+     up to three lines under its bar, which flatTicks does for every chart in
+     the admin, rather than the chart turning sideways. */
   const body = el && el.parentElement;
-  if (body) {
-    body.style.height = !labels.length ? '130px'
-      : horizontal ? Math.max(170, rows * 26 + labels.length * 12 + 60) + 'px'
-        : '250px';
-  }
-  const tick = { color: '#5A6478', font: { size: 11 } };
+  if (body) body.style.height = SV_TILE_BODY;
+
+  /* No y axis. Ellie: "We don't need a y axis if that saves some space." The
+     scale was five numbers down the side of every tile; the value goes on top
+     of its own bar instead, which is the number somebody actually wants. */
+  const onTop = {
+    id: 'svValueOnTop',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      ctx.font = '600 11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+      ctx.fillStyle = '#3B4559';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      for (const meta of chart.getSortedVisibleDatasetMetas()) {
+        meta.data.forEach((bar, i) => {
+          const v = chart.data.datasets[meta.index].data[i];
+          if (v == null || v === 0) return;
+          /* What the bar is worth, which is not always its height: a ranking
+             is drawn flipped so that taller is better, and the number anybody
+             would quote is the average place. */
+          const shown = display && display[i] != null && display[i] !== '' ? display[i] : v;
+          ctx.fillText(String(shown), bar.x, bar.y - 3);
+        });
+      }
+      ctx.restore();
+    },
+  };
+
   return {
     type: 'bar',
+    plugins: [onTop],
     data: {
       labels,
       datasets: [{
         data: values,
         backgroundColor: hexRamp(color, Math.max(labels.length, 2)),
         borderRadius: 6,
-        /* One category must not become a block the size of the tile, which is
-           what a single theme looked like. */
-        maxBarThickness: 34,
-        ...(horizontal ? { barPercentage: 0.8, categoryPercentage: 0.86 } : {}),
+        maxBarThickness: 54,
       }],
     },
     options: {
-      indexAxis: horizontal ? 'y' : 'x',
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
-      layout: { padding: { right: horizontal ? 10 : 0 } },
-      scales: horizontal
-        ? {
-          x: { beginAtZero: true, grid: { color: '#E6ECF6' }, ticks: { ...tick, precision: 0 } },
-          y: {
-            grid: { display: false },
-            ticks: {
-              ...tick, autoSkip: false, crossAlign: 'far',
-              /* The whole label, wrapped onto a second line rather than cut
-                 with an ellipsis: these are sentences people chose between. */
-              callback(value) { return wrap(this.getLabelForValue(value)); },
-            },
-            afterFit(scale) {
-              /* Room for the labels, capped so the bars never become a sliver
-                 in a narrow tile. */
-              scale.width = Math.min(Math.max(scale.width, 90), 210);
-            },
-          },
-        }
-        : {
-          x: { grid: { display: false }, ticks: { ...tick, autoSkip: false, maxRotation: 0 } },
-          y: { beginAtZero: true, grid: { color: '#E6ECF6' }, ticks: { ...tick, precision: 0 } },
-        },
+      /* Room above the tallest bar for its number. */
+      layout: { padding: { top: 14 } },
+      scales: {
+        x: { grid: { display: false }, border: { display: false } },
+        y: { display: false, beginAtZero: true, grace: '12%' },
+      },
     },
   };
 }
@@ -3440,8 +3449,7 @@ function svDrawTile(spec, idx, periodRows) {
   if (spec.kind === 'dist') {
     const d = svDistOf(spec.q, rows);
     setTileN(el, d.n);
-    const numeric = spec.q.kind === 'stars' || spec.q.kind === 'scale' || spec.q.kind === 'nps';
-    svFit(mkChart(el, svBarChart(d.labels, d.values, SV_COLOR[spec.q.kind] || '#5C6DDA', el, numeric ? 'columns' : 'rows')));
+    svFit(mkChart(el, svBarChart(d.labels, d.values, SV_COLOR[spec.q.kind] || '#5C6DDA', el, d.display)));
     return;
   }
 
@@ -3449,7 +3457,7 @@ function svDrawTile(spec, idx, periodRows) {
     const t = svThemeCounts(rows, spec.q.id);
     setTileN(el, t.written);
     const top = t.order.slice(0, 10);
-    svFit(mkChart(el, svBarChart(top, top.map((c) => t.counts[c]), '#E8673A', el, 'rows')));
+    svFit(mkChart(el, svBarChart(top, top.map((c) => t.counts[c]), '#E8673A', el)));
     const note = document.getElementById(id + '-note');
     if (note) {
       note.textContent = t.written
@@ -3476,7 +3484,7 @@ function svDrawTile(spec, idx, periodRows) {
       return Math.round(((p - dt) / vals.length) * 100);
     });
     setTileN(el, points.filter((v) => v != null).length);
-    if (el.parentElement) el.parentElement.style.height = '250px';
+    if (el.parentElement) el.parentElement.style.height = SV_TILE_BODY;
     svFit(mkChart(el, {
       type: 'line',
       data: {
@@ -3796,7 +3804,7 @@ let pkgTrendStacked = null; // {Assessment:[...12], StartingOut:[...], Anniversa
 const sourceData = {labels:['Friend/family','Social media','Search','Received as gift','Therapist/counselor','Other'],data:[0,0,0,0,0,0]};
 const relLengths = [{l:'Less than 1 year',v:0},{l:'1–2 years',v:0},{l:'3–5 years',v:0},{l:'6–10 years',v:0},{l:'11–20 years',v:0},{l:'20+ years',v:0}];
 const ageData = {labels:['18–24','25–34','35–44','45–54','55+'],data:[0,0,0,0,0]};
-const pronounData = {labels:['She/her','He/him','They/them','Other'],data:[0,0,0,0]};
+const genderData = {labels:['Woman','Man','Non-binary','Other'],data:[0,0,0,0]};
 const relStatusData = {labels:['Dating','Engaged','Married','Remarried','Partnership'],data:[0,0,0,0,0]};
 const childrenData = {labels:['None','1','2','3+','Expecting'],data:[0,0,0,0,0]};
 let dimScores = {labels:['Energy','Expression','Needs','Bids','Listening','Conflict','Repair','Love','Stress','Feedback'],data:[0,0,0,0,0,0,0,0,0,0]};
@@ -4000,14 +4008,15 @@ async function loadRealDemographics() {
     };
 
     const age = dist('age_range', [['18-24','18–24'],['25-34','25–34'],['35-44','35–44'],['45-54','45–54'],['55+','55+']]);
-    const pronouns = dist('pronouns', [['she/her','She/her'],['he/him','He/him'],['they/them','They/them']]);
+    /* Gender words, from the pronoun that was actually chosen. */
+    const gender = dist('pronouns', [['she/her','Woman'],['he/him','Man'],['they/them','Non-binary']]);
     const relStatus = dist('relationship_status', [['dating','Dating'],['engaged','Engaged'],['married','Married'],['remarried','Remarried'],['partnership','Partnership']]);
     const relLen = dist('relationship_length', [['<1','Less than 1 year'],['1-2','1–2 years'],['3-5','3–5 years'],['6-10','6–10 years'],['11-20','11–20 years'],['20+','20+ years']]);
     const childrenDist = dist('children', [['none','None'],['1','1'],['2','2'],['3+','3+'],['expecting','Expecting']]);
     const source = dist('signup_source', [['friend','Friend/family'],['social','Social media'],['search','Search'],['gift','Received as gift'],['therapist','Therapist/counselor'],['other','Other']]);
 
     if (age)       { ageData.labels = age.map(x => x.label);       ageData.data = age.map(x => x.pct); }
-    if (pronouns)  { pronounData.labels = pronouns.map(x => x.label); pronounData.data = pronouns.map(x => x.pct); }
+    if (gender)    { genderData.labels = gender.map(x => x.label); genderData.data = gender.map(x => x.pct); }
     if (relStatus) { relStatusData.labels = relStatus.map(x => x.label); relStatusData.data = relStatus.map(x => x.pct); }
     if (relLen)    { relLengths.length = 0; relLen.forEach(x => relLengths.push({ l: x.label, v: x.pct })); }
     if (childrenDist) { childrenData.labels = childrenDist.map(x => x.label); childrenData.data = childrenDist.map(x => x.pct); }
@@ -4016,7 +4025,7 @@ async function loadRealDemographics() {
     // Update n= captions per field (actual response counts, not total profiles).
     // A field left blank by a user is not counted, so a field nobody answered reads n=0.
     const fieldByTitle = {
-      'Age range':'age_range', 'Pronouns':'pronouns', 'Relationship status':'relationship_status',
+      'Age range':'age_range', 'Gender':'pronouns', 'Relationship status':'relationship_status',
       'Length of relationship':'relationship_length', 'Children together':'children'
     };
     document.querySelectorAll('#page-demographics .chart-card').forEach(card => {
@@ -4599,7 +4608,7 @@ const QX_ESC = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&':
 const QX_CROSS = [
   { key: 'type', label: 'Individual type' }, { key: 'couple_type', label: 'Couple type' },
   { key: 'axisEngage', label: 'Engage / Withdraw' }, { key: 'axisOpen', label: 'Open / Guarded' },
-  { key: 'pronouns', label: 'Pronouns' }, { key: 'age_range', label: 'Age range' },
+  { key: 'pronouns', label: 'Gender' }, { key: 'age_range', label: 'Age range' },
   { key: 'relationship_status', label: 'Relationship status' }, { key: 'relationship_length', label: 'Time together' },
   { key: 'children', label: 'Children' }, { key: 'signup_source', label: 'How they found us' },
   { key: 'journal_use', label: 'Journal use' }, { key: 'journal_entries', label: 'Journal entries' },
@@ -4635,7 +4644,12 @@ const CAT_PALETTE = ['#5C6DDA','#22A5C4','#9B5DE5','#E5578C','#FBBF24','#C55329'
 // Human-readable labels for raw stored segment values, plus a title-case
 // fallback so nothing shows as a bare lowercase code (e.g. "married").
 const QX_VAL_LABELS = {
-  pronouns: { 'he/him': 'He/him', 'she/her': 'She/her', 'they/them': 'They/them', other: 'Other' },
+  /* Gender, converted from the pronouns somebody chose at setup. Ellie: "Keep
+     demo titles as gender not pronoun, I know we ask pronoun but I want to
+     convert to gender." Nothing asks gender directly, so this table is the
+     conversion and the only place it happens; the stored value is still the
+     pronoun, and the tiles say on hover where the word came from. */
+  pronouns: { 'she/her': 'Woman', 'he/him': 'Man', 'they/them': 'Non-binary', other: 'Other' },
   relationship_status: { dating: 'Dating', engaged: 'Engaged', married: 'Married', remarried: 'Remarried', partnership: 'Partnership' },
   children: { none: 'None', '1': '1', '2': '2', '3+': '3+', expecting: 'Expecting' },
   signup_source: { friend: 'Friend/family', social: 'Social media', search: 'Search', gift: 'Received as gift', therapist: 'Therapist', other: 'Other' },
@@ -4653,7 +4667,7 @@ function qxPretty(key, v) {
 // A greyed dropdown in each tile header. Default "Everyone". Pick a segment
 // value to re-cut that tile's population. All powered by the anonymized cube.
 const SLICE_DIMS = [
-  { key:'pronouns', label:'Pronouns' }, { key:'age_range', label:'Age range' },
+  { key:'pronouns', label:'Gender' }, { key:'age_range', label:'Age range' },
   { key:'relationship_status', label:'Relationship status' }, { key:'relationship_length', label:'Time together' },
   { key:'children', label:'Children' }, { key:'signup_source', label:'How they found us' },
   { key:'alignment_group', label:'Aligned / Misaligned' },
@@ -4670,7 +4684,7 @@ const SLICE_DIMS = [
 ];
 const SLICE_ORDER = {
   age_range:['18-24','25-34','35-44','45-54','55+'],
-  pronouns:['she/her','he/him','they/them','other'],
+  pronouns:['she/her','he/him','they/them','other'],   // ordered Woman, Man, Non-binary, Other
   relationship_status:['dating','engaged','married','remarried','partnership'],
   relationship_length:['<1','1-2','3-5','6-10','11-20','20+'],
   children:['none','1','2','3+','expecting'],
@@ -4762,7 +4776,9 @@ async function renderCubeDist(opts){
   if(opts.mode==='doughnut'){
     mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
   } else if(opts.mode==='hbar'){
-    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#34D399',borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}});
+    /* Columns, like everything else. Ellie: "I want column charts." This one
+       drew its bars sideways, which is the only tile on the page that did. */
+    mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#34D399',borderRadius:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   } else {
     mkChart(el,{type:'bar',data:{labels,datasets:[{data:dataPct,backgroundColor:opts.color||'#C55329',borderRadius:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'},ticks:{callback:v=>v+'%'}}}}});
   }
@@ -4914,7 +4930,7 @@ async function renderTypeCoupleMap(opts){
   svg+='<text x="'+(pad-16)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(-90 '+(pad-16)+' '+(H/2)+')">Open</text>';
   svg+='<text x="'+(W-pad+18)+'" y="'+(H/2)+'" fill="#586187" font-size="9.5" text-anchor="middle" font-family="monospace" transform="rotate(90 '+(W-pad+18)+' '+(H/2)+')">Guarded</text>';
   const legend=[];
-  if(!pronounGroups.length){ el.innerHTML='<div style="color:var(--dim);font-size:.75rem;padding:1rem 0;text-align:center;">Nobody in this slice has pronouns recorded.</div>'; return; }
+  if(!pronounGroups.length){ el.innerHTML='<div style="color:var(--dim);font-size:.75rem;padding:1rem 0;text-align:center;">Nobody in this slice has pronouns recorded, so no gender can be read from them.</div>'; return; }
   pronounGroups.forEach((g,i)=>{
     const GENDER_COL={man:"#1B5FE8",woman:"#E5578C",nonbinary:"#10B981",other:"#F59E0B"};
     const gr=groups[g], ox=gr.o/gr.n, wy=gr.w/gr.n, col=(GENDER_COL[String(g).toLowerCase()]||PAL[i%PAL.length]);

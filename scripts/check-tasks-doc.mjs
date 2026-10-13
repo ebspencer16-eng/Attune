@@ -262,9 +262,13 @@ for (const sec of sections) {
   if (!name) {
     const sec1 = doc.slice(doc.indexOf('## 1.'), doc.indexOf('## 2.'));
     const asks = /migration|SQL editor|run this SQL|paste it into Supabase/i.test(sec1);
-    if (asks) {
-      fails.push('section 1 asks her to run SQL and TASKS.md carries no migration block. The'
-        + ' block is how she gets it: put the marker back, or take the ask out.');
+    /* A read-only query is not a migration and does not need the generator;
+       what it does need is to BE there. The rule is that she is never asked to
+       paste something the document does not give her. */
+    const gives = /```sql[\s\S]*?```/.test(sec1);
+    if (asks && !gives) {
+      fails.push('section 1 asks her to run SQL and the SQL is nowhere in the document. Put the'
+        + ' migration marker back, paste the query into section 1, or take the ask out.');
     }
   }
 }

@@ -8,12 +8,37 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| B56 | **Who said they/them?** I cannot see it: the admin anonymises by design and I have no database credentials. One paste answers it, in the Supabase SQL editor. The query is under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
+
+### B56, who said they/them
+
+You asked whether the non-binary figure is an error. It is not a made-up
+number, but it is an inference: nothing in Attune asks anybody their gender, so
+every one of those figures is the pronouns somebody chose at setup, converted.
+They/them became non-binary.
+
+You have asked for gender on the titles, so the conversion stays and the tiles
+say Gender again. Hovering any of them says it is converted from pronouns, so
+the page does not claim to have asked.
+
+To see exactly who, in the Supabase SQL editor:
+
+```sql
+-- Everyone whose pronouns are not she/her or he/him, newest first.
+select id, name, pronouns, partner_name, partner_pronouns, created_at
+  from public.profiles
+ where coalesce(pronouns, '') not in ('she/her', 'he/him')
+ order by created_at desc;
+```
+
+If that comes back empty, nobody chose they/them and the chart will show no
+non-binary slice once it is reading live data.
 
 ### Still open from the review
 
@@ -47,6 +72,10 @@ on you.
 | B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
 | B51 | **Detailed results: the exercise is a row of pill buttons** under the n count, instead of a dropdown in the corner. |
 | B45 | **The experience questionnaire is retired.** Its screen, its endpoint, its copy module, its card in the app and its two admin tiles are gone, and the home card that asked for it opens the survey. The footer reaction strip's three counters went with it: nothing has posted to that strip since it was removed from the site, so they were counting an instrument that no longer existed. If you want a reaction strip back, that is a new build. The weekly feedback digest now reads the survey's written answers instead of an empty table. |
+| B52 | **Column charts everywhere**, labels wrapped under the bars, no y axis, and the number on top of each bar instead. One tile elsewhere in the admin was drawing sideways too; it is upright now. |
+| B53 | **Every tile in a row is the same height**: titles are exactly two lines with the whole question on hover, the grey line under them is gone, and the n count stays. The ranking's bars are labelled with the average place, which is the figure you would quote. |
+| B54 | **Gender is back on the titles**, converted from pronouns in one table, with every converted tile saying so on hover. |
+| B55 | **Prompted a Convo** and **Most important**. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |

@@ -1075,11 +1075,20 @@ and they/them as "non-binary". Ellie: "I think some of the data is wrong, none
 of our beta testers are non binary."
 
 The figure was wrong and the labelling was worse: it put a category on a person
-that they never chose. The dimension is Pronouns now, which is what was
-actually collected. The rule: if a field is derived from another field, the
-chart carries the name of the field that was COLLECTED, not the one somebody
-wished they had. A column that nothing fills is a question to ask, not a gap to
-infer across.
+that they never chose. I renamed the dimension to Pronouns, which is what was
+actually collected, and she reversed it the same day: "Keep demo titles as
+gender not pronoun, I know we ask pronoun but I want to convert to gender."
+
+Both quotes are kept here because the round trip is the lesson. The conversion
+is hers to make and it is made in ONE table, in `public/admin.html`, with the
+stored value still the pronoun and every converted tile carrying a tooltip that
+says where the word came from. What was wrong was never the conversion itself;
+it was a conversion done in three places with nothing on the page saying it had
+happened. A derived field needs one derivation and a label that admits to it.
+
+She also asked, in the same message, which accounts had said they/them, which
+is the right question to ask of a number you do not recognise. The admin cannot
+answer it (it anonymises by design) so TASKS.md carries the SELECT.
 
 **A flag nothing writes is a prompt that never stops.** `feedback_given_at` has
 existed since migration 050 and no code has ever set it, so both home cards

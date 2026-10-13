@@ -74,7 +74,11 @@ const DIM_LABELS = {
 };
 const TYPE_LABELS = { W: 'W · Initiator', X: 'X · Anchor', Y: 'Y · Feeler', Z: 'Z · Protector' };
 const DEMO_LABELS = {
-  age_range: 'Age range', pronouns: 'Pronouns', relationship_status: 'Relationship status',
+  /* Labelled Gender at Ellie's ask, converted from the pronoun that was
+     collected: "I know we ask pronoun but I want to convert to gender." The
+     key stays `pronouns` because that is the field, and the admin's one value
+     table turns she/her into Woman. */
+  age_range: 'Age range', pronouns: 'Gender', relationship_status: 'Relationship status',
   relationship_length: 'Time together', children: 'Children', signup_source: 'Signup source',
 };
 const DEMO_KEYS = Object.keys(DEMO_LABELS);
