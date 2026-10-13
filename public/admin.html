@@ -5929,7 +5929,12 @@ async function loadTypesData(force) {
       `<div style="color:#F87171;font-size:.78rem;">Could not load typing data: ${e.message}</div>`;
     return;
   }
-  if (stamp) stamp.textContent = new Date(TYPES_DATA.generatedAt).toLocaleTimeString();
+  /* "Invalid Date" is what a missing timestamp printed, which reads as a bug in
+     the page rather than as an answer that carried no time. */
+  if (stamp) {
+    const at = TYPES_DATA.generatedAt ? new Date(TYPES_DATA.generatedAt) : null;
+    stamp.textContent = at && !isNaN(at) ? at.toLocaleTimeString() : '\u2014';
+  }
 
   // Populate filter dropdowns from the data (once).
   const fill = (id, vals) => {
