@@ -2537,3 +2537,37 @@ store. The App Store sentence is written and held behind APP_BANNER_ENABLED.
 Her note on the review itself: "not sure why there are times listed, they seem
 way longer than what they should take you to execute these." Estimates are out
 of TASKS.md and should not come back.
+
+## 2026-10-12 — the open queue cleared, and one finding of mine that was not real
+
+**The clipboard step crossed two windows and she pasted it into the wrong one.**
+"ERROR: 42601: syntax error at or near cat". The migration is inline in
+TASKS.md now, generated from the file so the two cannot drift, and every block
+in that document says which window it goes in. Planted both directions of the
+drift.
+
+**D33, two of three.** The checkout's "Or pay with card" rule hides itself when
+the wallet button above it mounted with no height, which is what an empty gap
+and an orphan "or" looked like in a capture. The homepage's three statistics
+are three aligned rows on a phone rather than a pair and a stray.
+
+**The third was not a bug and I should not have reported it as one.** I wrote
+that the results sidebar indents Physical Intimacy under Relationship
+Reflection, "measured off the capture at 1280 points: its bullet sits 28 points
+right". Measured in the page instead, every row is at x=197 with its label at
+x=207, including that one. What I read as an indent was the second line of a
+label that wraps. A pixel read off a screenshot is not a measurement, and the
+review said so about other people's numbers while making this one.
+
+**D34 was bigger than it looked.** The dashboard's Resources page drew its own
+list of twelve rows linking out to the static marketing pages, which is exactly
+the behaviour S20 fixed on Home. It draws AppLearnReading now, the same
+component with the same handlers, so an article opens inside the dashboard.
+`view=practice` is an alias for that page, and that is the deep link every card
+and every notification about an article uses.
+
+**Her two answers:** push asks after the first exercise (B), recorded in the
+constant that acts on it; and the brand orange as small print stays, so B19 is
+closed at thirteen of fifteen.
+
+Section 2 is empty. Everything decided is built; what is left is waiting on her.

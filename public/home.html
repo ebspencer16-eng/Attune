@@ -356,8 +356,15 @@
     .story-cards-mobile-scroll > div{flex:0 0 calc(100% - 2.75rem)!important;min-width:0!important;max-width:none!important}
     .carousel-dots{display:flex!important}
     .what-grid{grid-template-columns:1fr!important}
-    .proof-stat-row{display:grid!important;grid-template-columns:1fr 1fr;gap:var(--s-xl) var(--s-2xl);justify-items:center;text-align:center}
-    .proof-stat-row .proof-stat:nth-child(3){grid-column:1 / -1}
+    /* Three statistics in a two column grid leaves the third alone on a row
+       of its own, centred under a pair, which reads as something that failed
+       to fit rather than as a composition. Three rows, each one line, left
+       aligned to a common edge: the numbers line up, which is the thing the
+       eye is comparing. */
+    .proof-stat-row{display:grid!important;grid-template-columns:auto 1fr;gap:var(--s-lg) var(--s-md);justify-items:start;align-items:baseline;text-align:left;max-width:22rem;margin-left:auto;margin-right:auto}
+    .proof-stat-row .proof-stat{display:contents}
+    .proof-stat-row .proof-stat-num{grid-column:1;justify-self:end}
+    .proof-stat-row .proof-stat-label{grid-column:2;text-align:left}
     
     .hero-ctas{justify-content:center!important;flex-wrap:wrap!important}
     .proof-section{padding:1.75rem var(--s-lg)}

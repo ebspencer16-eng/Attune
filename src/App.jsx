@@ -17492,23 +17492,24 @@ export default function App() {
     
         {view === "resources" && (() => {
           /**
-           * ── THE READING LIST, DERIVED ─────────────────────────────────────
-           * Six articles were typed out here while api/_in-practice.js held
-           * twelve, which is the list the app is served through /api/posts. So
-           * the two surfaces offered different libraries, and the website's was
-           * the shorter one by half.
+           * ── THE READING IS THE APP'S, NOT A SECOND LIST ───────────────────
+           * This drew its own: twelve rows, each an eyebrow, a title and an
+           * arrow, linking out to the static marketing pages. The dashboard's
+           * Home has drawn the app's version since L2, with tiles, bookmarks,
+           * the saved and read counts and a search, opening each article
+           * inside the dashboard.
            *
-           * One of the six was not an article at all. "/practice/
-           * understanding-each-other" is a section index, the page that lists
-           * the Understanding Each Other pieces, and it sat in this list under
-           * the tag "Read" as though it were something to read.
+           * So a reader met two different libraries depending on which of the
+           * two screens they were on, and only one of them was the one Ellie
+           * approved. Worse, this one was still the old behaviour S20 fixed:
+           * tapping an article left the dashboard for a marketing page, which
+           * is what she reported as being signed out.
            *
-           * The tag is the section now rather than "Guide" or "Read", which
-           * were a second taxonomy of two words that nothing else used.
+           * It is the same component as Home's now. `view=practice` is an
+           * alias for this view, and that is the deep link every card and
+           * every notification about an article uses, so this is the screen
+           * those land on.
            */
-          const BLOG_POSTS = IN_PRACTICE.map((a) => ({
-            title: a.title, href: a.path, tag: a.categoryLabel,
-          }));
           const ADD_ONS = [
             { name: "The Personalized Workbook", desc: "A structured workbook built around your specific results and couple type.", price: "From $19", onClick: () => setView("workbook"), color: "#9B5DE5" },
             { name: "Shared Budgeting Tool", desc: "A guided financial exercise to surface what you each expect from shared finances.", price: "$20", href: "/offerings", color: "#1B5FE8" },
@@ -17554,39 +17555,20 @@ export default function App() {
                 {/* Divider */}
                 <div style={{ height: 1, background: "#E8DDD0", marginBottom: "2.5rem" }} />
 
-                {/* Blog posts */}
-                <div style={{ marginBottom: "2rem" }}>
-                  <div style={{ fontSize: "0.6rem", letterSpacing: ".18em", textTransform: "uppercase", color: "#0E0B07", fontWeight: 700, marginBottom: "1rem", fontFamily: font.body }}>From In Practice</div>
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.65rem" }}>
-                    {BLOG_POSTS.map(post => (
-                      <a key={post.href} href={post.href}
-                        style={{ display: "flex", alignItems: "flex-start", gap: "0.85rem", background: "white", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1rem 1.1rem", textDecoration: "none", transition: "border-color .15s, box-shadow .15s" }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = "#C8B8A8"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,.05)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = "#E8DDD0"; e.currentTarget.style.boxShadow = "none"; }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.3rem" }}>
-                            <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#9B5DE5", opacity: 0.6, flexShrink: 0 }} />
-                            <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#7A6753", fontFamily: font.body, textTransform: "uppercase", letterSpacing: ".08em" }}>{post.tag}</span>
-                          </div>
-                          <div style={{ fontSize: "0.85rem", fontWeight: 500, color: "#0E0B07", fontFamily: font.body, lineHeight: 1.45 }}>{post.title}</div>
-                        </div>
-                        <span style={{ fontSize: "0.85rem", color: "#C8BFB4", flexShrink: 0, marginTop: 2 }}>→</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                {/* CTA to In Practice */}
-                <a href="/practice"
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(135deg, #FBF8F3, #F3EDE6)", border: "1.5px solid #E8DDD0", borderRadius: 14, padding: "1.25rem 1.4rem", textDecoration: "none" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = "#C8B8A8"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = "#E8DDD0"}>
-                  <div>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0E0B07", fontFamily: font.body, marginBottom: "0.25rem" }}>Explore all Attune publications</div>
-                    <div style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: font.body, fontWeight: 300 }}>Guides, reads, and exercises for every stage of a relationship.</div>
-                  </div>
-                  <span style={{ fontSize: "1.1rem", color: "#A36333", flexShrink: 0, marginLeft: "1rem" }}>→</span>
-                </a>
+                {/* The reading, in the shape Ellie approved, from the module
+                    both surfaces are served. Same component and same handlers
+                    as the dashboard's Home: an article opens here rather than
+                    sending someone out to a marketing page. */}
+                <AppLearnReading
+                  articles={IN_PRACTICE}
+                  isMobile={isMobile}
+                  savedCount={learnState ? Object.values(learnState).filter((x) => x.saved).length : 0}
+                  readCount={learnState ? Object.values(learnState).filter((x) => x.read).length : 0}
+                  state={learnState}
+                  onToggleSave={toggleSavedPost}
+                  onOpenArticle={openLearnArticle}
+                  onPeek={setLearnPeek}
+                />
 
               </div>
             </div>

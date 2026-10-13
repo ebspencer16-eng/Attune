@@ -274,15 +274,15 @@ split was mine and you have said they are fine:
 
 ## 2. Open
 
-| # | Mine to build |
-|--|--|
-| D33 | **The three from the review that need no answer, because they are faults rather than choices.** The "Or pay with card" line on checkout can appear with no wallet button above it; Physical Intimacy is indented in the results sidebar so it reads as part of Relationship Reflection; the homepage's three statistics wrap two and one on a phone. |
-| D34 | **The dashboard's Resources page becomes the app's Learn tab.** You asked for this in L2 and I did it to the marketing page instead. The dashboard's version is still twelve flat rows where the app has tiles, counts, bookmarks and a search. |
+**Nothing open.** Everything you have decided is built; what is left is waiting
+on you.
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
+| D33 | **Two of the three faults were real.** The checkout's "Or pay with card" line now hides itself when the wallet button above it did not draw, and the homepage's three statistics are three rows on a phone instead of two and a stray one. The third was not real: I said the results sidebar indented Physical Intimacy, measured it in the page, and every row sits at the same place. It was the second line of a wrapping label, read off a screenshot. |
+| D34 | **One library on both dashboard screens.** The Resources page drew its own list of twelve rows that linked out to the marketing pages, which is the behaviour you reported as being signed out. It draws the same reading the Home screen does now: shelves, tiles, bookmarks, the saved and read counts, the search, and an article that opens where you are. It matters more than it looks: `view=practice` is an alias for that page, and that is the link every card and every notification about an article uses. |
 | D35 | **In Practice would not load in your app, and it was mine.** Yesterday I pulled the "what counts as published" rule into one place and named it the same as the list of posts two lines below it, so the feed threw before it ran a query. Fixed. The check that runs every endpoint only ever sent it a POST, so the whole GET half of every endpoint was unrun; it sends a plain GET now, and that catches this exact fault. |
 | D17 | **The experience survey waits for the last page of the results now.** It used to open the moment the storycards ended, over the first screen, before anyone had read a section. |
 | D18 | **Notes clears the tab bar.** Its two scrolls ended 48 points above the foot against a bar 84 tall, which is why the sentence in the empty tags box was cut in half. On Learn the sheet is a peek you pull up, and its own content already clears the bar, so nothing changed there. |

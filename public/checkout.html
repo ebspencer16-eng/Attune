@@ -1349,6 +1349,29 @@ function validateForm() {
         wrap.style.display = 'block';
         wrap.dataset.supported = '1';
 
+        /**
+         * ── AND ONLY IF THE BUTTON ACTUALLY DREW ─────────────────────────
+         * `canMakePayment` saying yes and the button rendering are two
+         * different things: it resolves for Link as well as a wallet, and the
+         * mounted iframe can come back with no height. What a person sees then
+         * is an empty gap, a rule, and the words "Or pay with card" with
+         * nothing above them to be an alternative to.
+         *
+         * Seen in a capture while reviewing the page. One frame later is
+         * enough for Stripe to have laid the iframe out; if it has no height,
+         * the whole block goes back to hidden and the card fields stand alone,
+         * which is what they do for everyone without a wallet anyway.
+         */
+        setTimeout(function () {
+          try {
+            var slot = document.getElementById('expressCheckout');
+            if (slot && slot.getBoundingClientRect().height < 8) {
+              wrap.style.display = 'none';
+              delete wrap.dataset.supported;
+            }
+          } catch (e) {}
+        }, 400);
+
         paymentRequest.on('paymentmethod', async (ev) => {
           // User authorized the Apple Pay / Google Pay payment.
           //
