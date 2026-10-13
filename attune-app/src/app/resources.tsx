@@ -2083,11 +2083,23 @@ function PostCard({
         if (post.external) { openExternal(post.external); return; }
         onOpenPost(post.id);
       }}
-      /* Radius and a soft shadow rather than a hairline: the cards in every
-         one of her references float on the ground rather than being drawn on
-         it. `Lift` is shared, so these cannot drift from the tool tiles. */
+      /* ── A SHADOW ALONE DISAPPEARS ON A WHITE SHEET ────────────────────
+         Ellie: "the outline/shading on the bottom half of the in practice
+         tiles on the app are gone now."
+
+         The card is white and the In Practice sheet it sits on is white. The
+         top half reads as a card because it is tinted by its shelf; the bottom
+         half, which is the title and the reading time, had nothing but a ten
+         per cent shadow between it and the page, so the card looked like it
+         stopped at the picture.
+
+         So it takes the hairline this codebase's own card convention calls for
+         and keeps the lift: attune-theme.ts, "cards are a border and a radius,
+         not a shadow". The border is the edge and the shadow is the space
+         beside it, which is the same thing she asked for on the home tile. */
       style={{
         backgroundColor: Palette.white,
+        borderWidth: 1, borderColor: c.border,
         borderRadius: Radius.card, overflow: 'hidden', marginBottom: Spacing.lg,
         ...Lift,
       }}>

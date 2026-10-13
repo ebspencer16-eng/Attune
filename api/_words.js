@@ -37,6 +37,8 @@
  * quote.
  */
 
+import { dayNumber } from './_lib/day-number.js';
+
 export const WORDS = [
   {
     id: 'intentional',
@@ -349,8 +351,17 @@ export const WORDS = [
  *
  * Offset by one against the research finding, so the two tiles do not both
  * turn over on the same days and then both sit still for the same days.
+ *
+ * `now` may be a Date, read as the reader's own calendar day, or the day key
+ * the app sends. It counted days from the epoch in UTC until 2026-10-12, which
+ * turned the word over at 5pm Pacific: see api/_lib/day-number.js.
  */
 export function wordOfTheDay(now = new Date()) {
-  const day = Math.floor(now.getTime() / 86400000);
-  return WORDS[(day + 1) % WORDS.length];
+  const day = typeof now === 'number' ? now : dayNumber(now);
+  /* Wrapped both ways. A day number can be negative once the day is read from
+     the reader's own calendar rather than from the epoch: a Date at the very
+     start of 1970 is 1969 for anyone west of Greenwich, and `-1 % n` is -1 in
+     JavaScript, which indexes nothing. */
+  const n = WORDS.length;
+  return WORDS[(((day + 1) % n) + n) % n];
 }

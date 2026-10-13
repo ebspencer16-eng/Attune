@@ -35,6 +35,7 @@ import { CATALOGUE } from './_catalogue.js';
  */
 import { insightOfTheDay } from './_insights.js';
 import { wordOfTheDay } from './_words.js';
+import { dayNumberForOffset } from './_lib/day-number.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
@@ -58,6 +59,9 @@ export default async function handler(req) {
    */
   const rawTz = Number(new URL(req.url).searchParams.get('tzOffset'));
   const tzOffset = Number.isFinite(rawTz) && Math.abs(rawTz) <= 900 ? rawTz : 0;
+  /* Which calendar day the reader is standing in, for the two things that
+     change once a day. See api/_lib/day-number.js. */
+  const readerDay = dayNumberForOffset(tzOffset);
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY
@@ -419,11 +423,15 @@ export default async function handler(req) {
       // home screen carries it; the copy and the citation live in
       // api/_research.js so they cannot drift from the website's Our Purpose
       // page, which says the same three things.
-      research: insightOfTheDay(),
+      /* The reader's day, from the offset their device already sends. Both of
+         these counted days from the epoch in UTC, so they turned over at 00:00Z,
+         which is 5pm in California: two devices opened either side of that hour
+         disagreed about the day while plainly being on the same one. */
+      research: insightOfTheDay(readerDay),
       /* The word the Notes tab defines today. Same shape and the same reason
          as the research finding: the copy lives on the server so it is one
          copy and so Ellie can change it without an app build. */
-      word: wordOfTheDay(),
+      word: wordOfTheDay(readerDay),
       /**
        * How a storycard is set.
        *

@@ -8,7 +8,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B17b | **Three steps, written out under this table.** The key into Expo, the migration, and a build. You have chosen B for when the app asks permission, which is what was already set, and approved both title splits, so there is nothing else to decide. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -18,14 +17,93 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ### Still open from the review
 
-Everything else is answered: seven built and in section 3, seven you turned
-down and recorded in section 4 so they do not come back, and the illustration
-question is with the designers you have contacted.
+All sixteen are answered. Seven are built and verified, seven you turned down
+and are recorded in section 4 so they do not come back, and this is the one
+that is somebody else's to do.
 
 | # | What I need |
 |--|--|
-| D28 | **"Tap to begin" is the first thing the results say, and on a laptop you click.** The question is only which you want: one word changed for the website, or one sentence that works on a phone and a laptop both. Either way it is your copy. |
+| D27 | **The post-checkout message is written and approved. Left here so the EMAIL gets the same treatment.** The page now says what happens next; the setup email it points at still says what it always said. |
+| B33 | **A survey to replace the 26-question one, for us to agree on.** Eight questions, three of them conditional, written out under this table with what we lose by cutting the rest. Tell me what to change and I will build it. |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you here; this row is so it does not get lost. |
+
+---
+
+### B33, the survey I would replace it with
+
+The old one asked 26 questions with four rating grids in it. Most of them were
+about the exercises rather than about what happened to the couple, and the
+grids are the part people abandon. This is eight, three of them conditional,
+so most people answer five or six.
+
+**1. Did Attune lead to a conversation you would not have had otherwise?**
+One choice: *Yes, and we talked about something new* / *Yes, but nothing we
+had not covered* / *Not yet* / *No*.
+The only question here that measures whether the product worked. Keeps its id,
+so the trendline you already have continues.
+
+**2. If yes: what did you end up talking about?** Free text, shown only to the
+people who said yes.
+This is where the quotes come from, and the only question in the set that
+tells us which part of a relationship Attune actually opens.
+
+**3. What did you learn that surprised you?** Free text.
+Replaces both "what did you actually discover" and "your biggest moment of
+recognition". The answers are the thing you read.
+
+**4. Which part did that come from?** One choice: Communication, Expectations,
+Relationship Reflection, Physical Intimacy, Conflict Patterns, the couple map,
+the workbook, nothing in particular.
+One tap, and it is the signal the four grids were circling: which part of the
+product does the work.
+
+**5. How accurate did your results feel?** One to five.
+The one quality measure that matters. If the results do not feel true, nothing
+else about the experience matters.
+
+**6. If three or less: what was off?** Free text, shown only to them.
+The diagnostic, asked of the people who have something to say rather than of
+everyone.
+
+**7. How likely are you to recommend Attune to a couple you know?** Nought to
+ten, then **what is behind that?** in their own words.
+Unchanged, and the id is unchanged, so the NPS trend survives the swap.
+
+**8. May we use your words and your first name on the site?** Yes or no, and
+the first name.
+Unchanged. It is what the testimonials feature reads.
+
+#### What we lose, said plainly
+
+- **Per-exercise ratings and the four grids.** We stop being able to say "the
+  expectations exercise scores 4.1 for clarity". Question 5 catches results
+  that feel wrong and question 6 asks why; what we give up is the ability to
+  rank the exercises against each other.
+- **"How honestly were you able to answer."** A real signal about whether the
+  product feels safe, and the first one I would add back if you want nine.
+- **Time spent on each part.** Self-reported, and the admin already measures
+  the real thing.
+- **Concerns before buying.** An objection list, which is worth having and is
+  the wrong moment to ask for it: these people have already bought.
+- **"What do you wish you had known."** An onboarding signal. The second one I
+  would add back.
+- **Interest in other Attune experiences.** A roadmap signal that is better
+  asked once, when there is something specific to offer.
+- **"Were there responsibilities we did not mention."** This produced a
+  concrete list of gaps in Expectations. Worth asking again as a one-off
+  rather than on every response.
+- **Return likelihood in six months.** People are bad at predicting this and
+  we can watch what they actually do.
+
+#### One thing to decide with it
+
+The old answers are stored under their question ids. Keeping `convo`, `nps`,
+`testimonial` and the consent fields means those four charts carry straight on
+across the change. Everything else starts a new series, and the admin's
+Survey Explorer will show the old questions with no new answers arriving. I
+would leave the old ones visible and dated rather than delete them.
+
+Tell me what to cut, add or reword and I will build it.
 
 ---
 
@@ -281,25 +359,11 @@ on you.
 
 | # | Built, needs your eye |
 |--|--|
+| B34 | **The word and the insight were turning over at 5pm, not at midnight.** Both were picked by counting days from 1970 in UTC, which rolls at 00:00Z: 5pm in California, 8pm in New York. Two devices opened either side of that hour disagreed while plainly being on the same day, which is what you saw between your phone and the simulator. They are picked by the reader's own calendar day now, from the timezone the app already sends, so a day is a day wherever you are. |
+| D36 | **The In Practice tiles have an edge again.** A white card on a white sheet, with nothing but a soft shadow, loses its bottom half: the title and the reading time had no line between them and the page. Both surfaces draw the hairline this product's own card rule calls for, with the shadow still behind it. |
+| D28 | **The first results card says "Click to begin" on the website and "Tap to begin" in the app.** Both words live in the one module every other sentence on those cards comes from. |
 | D33 | **Two of the three faults were real.** The checkout's "Or pay with card" line now hides itself when the wallet button above it did not draw, and the homepage's three statistics are three rows on a phone instead of two and a stray one. The third was not real: I said the results sidebar indented Physical Intimacy, measured it in the page, and every row sits at the same place. It was the second line of a wrapping label, read off a screenshot. |
 | D34 | **One library on both dashboard screens.** The Resources page drew its own list of twelve rows that linked out to the marketing pages, which is the behaviour you reported as being signed out. It draws the same reading the Home screen does now: shelves, tiles, bookmarks, the saved and read counts, the search, and an article that opens where you are. It matters more than it looks: `view=practice` is an alias for that page, and that is the link every card and every notification about an article uses. |
-| D35 | **In Practice would not load in your app, and it was mine.** Yesterday I pulled the "what counts as published" rule into one place and named it the same as the list of posts two lines below it, so the feed threw before it ran a query. Fixed. The check that runs every endpoint only ever sent it a POST, so the whole GET half of every endpoint was unrun; it sends a plain GET now, and that catches this exact fault. |
-| D17 | **The experience survey waits for the last page of the results now.** It used to open the moment the storycards ended, over the first screen, before anyone had read a section. |
-| D18 | **Notes clears the tab bar.** Its two scrolls ended 48 points above the foot against a bar 84 tall, which is why the sentence in the empty tags box was cut in half. On Learn the sheet is a peek you pull up, and its own content already clears the bar, so nothing changed there. |
-| D19 | **One primary button.** Get started in the nav is the brand orange on all 24 pages, and the packages page has one add-to-cart style instead of three. |
-| D31 | **Get started stays in the bar on a phone.** It was behind the hamburger. Below 361 points it still collapses, because the bar cannot hold the mark, the cart and a button at 320. |
-| D26 | **The four home tiles say where you are, in the four states you described.** Before you finish: "Your exercises", opening the status table. Finished and waiting on your partner: "Action plans", dimmed, with a padlock. Results open: both live. Highlights stays locked until results are ready rather than only until you begin, because there are no highlights until you both finish. |
-| D27 | **Written, for your approval. Two things your version assumed are not true yet.** Checkout only ever asks for one email, so it cannot name both; the partner's is collected at setup, which is when their invite goes. And the app is not in the store, so the download line is written and held behind the same flag the rest of the site uses. Today it reads: "Thank you for your purchase. We sent a link to [your email]. Use it to set up your account. Your partner gets their invite as soon as you add their email." The day the app is live it reads: "Download Attune Relationships from the App Store, then sign in with the link we sent to [your email]. Your partner gets their invite as soon as you add their email." |
-| D29 | **You were right and I was wrong.** The five distinct icons exist and the app draws them. The website's exercise list was drawing its own set, and three of those five were the same heart. It uses the real five now. |
-| B3 | **The style code is gone, and so is everything else that wrote to the store you just deleted.** The endpoint, the axes it used, the two gates that watched them and the script that was going to clear the counters: five files. Nothing to look at; say the word and it moves to done. |
-| B32 | **One admin button was broken by deleting those variables, and is fixed.** "Feedback responses" in the export menu read the dead store and would have returned an error. It reads the survey table in Supabase now, which is where the answers have always been, and the combined export gets its feedback columns back. |
-| B28 | **The thirteen contrast fixes are on the site.** 187 pieces of unreadable text down to 53, and all 53 that are left are the one brand decision in B19. The greys, the greens, the clay, the shelf colours, the faded whites and the three admin colours are all over the line now. |
-| B31 | **The repo had 32 markdown files and now has 18.** Fourteen deleted, three merged into their nearest sibling. What was in them is either in this file, or done, or in git. Nothing you need is in a file you have to go and find. |
-| B17 | **All six push notifications are built, with your copy.** Nothing can reach a phone until B17b. Two of the six titles are splits of your sentences; they are in the B17b section above for you to correct. |
-| B24 | **The workbook starts building the moment results unlock, on both surfaces.** It only ever did in the buyer's own browser, so a couple who finish in the app got nothing. Two other builders are gone; one of them was sending a payload with no expectations data in it. |
-| B25 | **Your footer feedback and both "How was your experience" forms now reach the admin.** They were going to a store that no longer exists. The questionnaire has its own tile on the Feedback Overview page. |
-| B26 | **A 26-question survey nobody could open is deleted.** It posted to an admin-only URL and answered 401, and the flag that would have shown it was never set to true. |
-| B27 | **Every browser check here was measuring a 500 point window, including the ones that said "phone".** macOS has a minimum window width and the tool was asking for a window rather than a viewport. Fixed, and the first honest run at 320 points found the packages page's add-on tiles and three admin charts cut off at the right edge. Both fixed. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -313,6 +377,23 @@ on you.
 
 | Verified by you | What it was |
 |--|--|
+| D35 | In Practice would not load in the app: a name I gave a filter collided with the list of posts below it, and the feed threw before its first query. |
+| D17 | The experience survey waits for the last page of the results instead of opening over the first screen. |
+| D18 | Notes clears the tab bar, which was cutting a sentence in half. |
+| D19 | One primary button: Get started is the brand orange in the nav on all 24 pages, and the packages page has one add-to-cart style. |
+| D31 | Get started stays in the bar on a phone instead of hiding behind the hamburger. |
+| D26 | The four home tiles say where the couple is, in the four states she described, with a padlock on what is not ready. |
+| D29 | The website’s exercise list drew its own icons, three of them the same heart. It draws the five the app has always had. |
+| B3 | The style code and every other path into the dead KV store removed: eight files. |
+| B32 | The admin’s Feedback CSV read the dead store and would have answered an error; it reads Supabase now. |
+| B28 | Thirteen contrast fixes on the site, 187 unreadable runs down to 53. |
+| B31 | 32 markdown files down to 18, with everything she needs in TASKS.md. |
+| B17 | All six push notifications built with her copy, waiting only on the key and a build. |
+| B24 | The workbook starts building the moment results unlock, on both surfaces. |
+| B25 | The footer feedback and both experience questionnaires reach the admin. |
+| B26 | A 26-question survey nobody could open, deleted. Its replacement is a proposal in section 1. |
+| B27 | Every browser check was measuring a 500 point window; two pages were cut off at 320 and are fixed. |
+| B17b | Push permission asks after the first exercise, and both title splits approved. |
 | B19 | Thirteen contrast fixes taken. The brand orange as small print stays as it is: "Leave it." |
 | D20 | Decided against: relabelling the couple map's axes, quadrants and the gap between the two dots. |
 | D21 | Decided against: replacing the homepage's wireframe images with pictures of the real product. |

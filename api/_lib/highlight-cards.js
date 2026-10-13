@@ -92,6 +92,14 @@ function peekDimensions(scored, sortedByGap) {
  */
 export const OPENER_BODY = 'Built from your independent answers\nUse insights to learn and grow together';
 
+/**
+ * The one word on these cards that is not the same on both surfaces.
+ *
+ * A phone is tapped and a laptop is clicked. Ellie asked for the website's to
+ * say click, and for the app's to stay as it is.
+ */
+export const OPENER_FOOTER = { tap: 'Tap to begin', click: 'Click to begin' };
+
 export function highlightCards({
   dimensions = [], coupleTypeId, names, expectations, reflection, intimacy, ex2,
   /** Each partner's pronouns, for the one card that needs a possessive. */
@@ -137,7 +145,21 @@ export function highlightCards({
     eyebrow: 'Your results',
     names: { you, them },
     body: OPENER_BODY,
-    footer: 'Tap to begin',
+    /**
+     * ── ONE WORD THAT DEPENDS ON THE DEVICE ──────────────────────────────
+     * Ellie: "Change to click for the site." You tap a phone and click a
+     * laptop, and this card is the first thing the results say.
+     *
+     * Both words live here rather than one of them being typed into the
+     * website, because every other sentence on these cards is in this file
+     * and a surface that holds one of its own ends up holding three.
+     *
+     * The card itself carries only the app's. A second field for the website's
+     * would be a value on the payload that the app never reads, which is what
+     * check-storycard-fields exists to refuse, and it refused this when I
+     * tried it. The website imports OPENER_FOOTER and takes the other half.
+     */
+    footer: OPENER_FOOTER.tap,
   });
 
   cards.push({

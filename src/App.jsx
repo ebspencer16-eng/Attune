@@ -77,7 +77,7 @@ import { questionCount, progressAnswers, countAnswers } from "../api/_lib/exerci
 import { exerciseComplete } from "../api/_lib/exercise-complete.js";
 import { framingQuestion } from "../api/_lib/intimacy-framing.js";
 import { PART_TWO } from "../api/_lib/part-two.js";
-import { OPENER_BODY } from "../api/_lib/highlight-cards.js";
+import { OPENER_BODY, OPENER_FOOTER } from "../api/_lib/highlight-cards.js";
 import { asksChildhood, GROWING_UP_LABEL, futureLabel as respFutureLabel, categoryIntro as respCategoryIntro, BOTH_DETAIL_LABEL, BOTH_DETAIL_REQUIRED_LABEL } from "../api/_lib/expectations-page.js";
 import { reflectionActionTitle, deriveAnniversaryInsights, isSubstantive, quoted } from "../api/_lib/reflection-insights.js";
 // Default binding for the paths with no couple context: the workbook, the
@@ -4064,7 +4064,13 @@ export function AppLearnReading({
              they sit in a row: the shading was on the ROW. Confined to the
              picture area it is a card with an illustration, which is the app's,
              and the shading behind each tile is the shadow it floats on. */
+          /* The hairline is the card's edge and the shadow is the space beside
+             it. On a white sheet the shadow alone leaves the lower half of the
+             tile, which is the title and the reading time, with nothing
+             between it and the page: Ellie reported exactly that about the
+             app's copy of this card, and this is the same card. */
           display: "block", background: "white", borderRadius: 18, overflow: "hidden",
+          border: "1px solid #E8DDD0",
           textDecoration: "none", boxShadow: "0 6px 14px rgba(42,27,16,0.10)",
         }}>
         <div style={{ height: 72, background: ground, position: "relative" }}>
@@ -10707,7 +10713,10 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
             {OPENER_BODY}
           </p>
         </div>
-        <div style={{ ...scType("footer"), textAlign: "center", padding: "0 0 1.75rem", animation: "fadeUp 0.4s 0.55s both" }}>Tap to begin</div>
+        {/* Click, not tap: this is a laptop. Both words are in
+            api/_lib/highlight-cards.js, which is where every other sentence on
+            these cards lives. Ellie: "Change to click for the site." */}
+        <div style={{ ...scType("footer"), textAlign: "center", padding: "0 0 1.75rem", animation: "fadeUp 0.4s 0.55s both" }}>{OPENER_FOOTER.click}</div>
       </div>
     </WrappedCard>,
 

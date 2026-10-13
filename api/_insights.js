@@ -75,6 +75,8 @@
  * If a claim is wrong, the fix is to cut the entry rather than soften it.
  */
 
+import { dayNumber } from './_lib/day-number.js';
+
 export const INSIGHTS = [
   /* ── THE 49 SENTENCES WE WROTE ARE GONE ─────────────────────────────────
      Ellie: "I want every insight to be quotes, I want to retire all
@@ -624,8 +626,15 @@ const ROTATION = (() => {
 })();
 
 export function insightOfTheDay(now = new Date()) {
-  const day = Math.floor(now.getTime() / 86400000);
-  const pick = ROTATION[day % ROTATION.length];
+  /* The reader's calendar day, not the epoch's. This counted in UTC and turned
+     the insight over at 5pm Pacific; see api/_lib/day-number.js. `now` may be
+     a Date, a day key, or the day number the server works out from the offset
+     the reader's device sends. */
+  const day = typeof now === 'number' ? now : dayNumber(now);
+  /* Wrapped both ways: a day read from the reader's calendar can be negative
+     at the very start of the epoch, and `-1 % n` is -1 in JavaScript. */
+  const n = ROTATION.length;
+  const pick = ROTATION[(((day % n) + n) % n)];
   /**
    * ── A QUOTATION LOOKS LIKE ONE ──────────────────────────────────────────
    * Ellie: "I want the format to be direct quotes in quotation marks, with the

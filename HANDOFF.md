@@ -2571,3 +2571,46 @@ constant that acts on it; and the brand orange as small print stays, so B19 is
 closed at thirteen of fifteen.
 
 Section 2 is empty. Everything decided is built; what is left is waiting on her.
+
+## 2026-10-13 — the day was turning over at 5pm
+
+**Ellie: "Why am I seeing different insight of the day and different word +
+definition on my app on my phone vs on my simulator on the same day?"**
+
+Because it was not the same day to us. Both were picked with
+`Math.floor(now.getTime() / 86400000)`, which counts days from the epoch in
+UTC and turns over at 00:00Z. That is 5pm in California and 8pm in New York, so
+everyone in the United States got a new word and a new insight in the late
+afternoon, and two devices opened either side of that hour disagreed.
+
+The arithmetic is timezone-independent, so it made no difference that one call
+happens in a browser and the other on the server: both rolled at 5pm.
+
+`api/_lib/day-number.js` now owns what a day is. A Date is read by its LOCAL
+parts, which is the reader's own day in a browser; `/api/home` works the
+reader's day out from the `tzOffset` their device has been sending since the
+greeting needed it, so no app release was required. Both rotations wrap in
+either direction, because a day read from a local calendar can be negative at
+the very start of the epoch and `-1 % n` is -1.
+
+**Two plants passed and both were the gate's fault**, which is worth recording
+because it is the second time this week. The first plant was arithmetically
+identical to the code it replaced when called with a number, so it changed
+nothing; the gate only ever passed numbers, so the Date path the website uses
+was never exercised. The second froze one of the two rotations, and the gate
+compared the word and the insight as one joined string, so the other one
+covered for it. Both halves are tested separately now and the Date path has
+its own case.
+
+**And `git checkout --` took an uncommitted fix again**, the seventh time in
+this repo's history. I used it as a restore after a plant on a file I had not
+backed up. The fix was ten minutes to redo; the rule stays: copy first.
+
+Other work: D28 (click on the website, tap in the app, both words in the module
+the cards come from, and the card itself carries only the app's because
+check-storycard-fields refuses a payload field the app never reads); D36, the
+In Practice card gets the hairline the card convention calls for, because a
+white card on a white sheet loses its lower half to a 10 per cent shadow.
+
+B33 in section 1 is the survey proposal she asked for: eight questions, three
+conditional, with what we lose by cutting the other eighteen.
