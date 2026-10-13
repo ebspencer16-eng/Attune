@@ -3202,10 +3202,6 @@ function WhatComesNext({
             {/* not markable: the label on a control, not results prose. A mark
                 is a copy of the words, and these words change with the survey. */}
             <Text style={{ ...Type.body, color: c.textStrong }}>{surveyCopy.title}</Text>
-            {/* not markable: as above. */}
-            <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>
-              {surveyCopy.intro}
-            </Text>
           </Pressable>
         ) : null}
 

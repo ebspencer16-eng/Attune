@@ -39,22 +39,27 @@
 export const SURVEY_VERSION = '2026-10-13';
 
 /** The sentence under the last question, which is what covers us for quoting. */
-export const TESTIMONIAL_NOTICE =
-  'We may quote what you write here on our website. We never publish your name, '
-  + 'your email, or anything that could identify you or your partner.';
+export const TESTIMONIAL_NOTICE = 'Your anonymous responses may be used on our website';
 
+/**
+ * Every word a person reads around the questions, and all of them are Ellie's.
+ *
+ * She wrote these on 2026-10-13 against a list of the five sentences I had
+ * written to build the thing. Her first line reads as a heading rather than as
+ * a line under one, so it is the heading, and the sentence that had been above
+ * it is gone rather than sitting on top of hers. `intro` is therefore not a
+ * field any more: a surface draws the title and then the questions.
+ *
+ * Two words are still mine. `submitting` is the button while it sends, and
+ * `saved` is the line that says an answer is kept. Neither is a sentence
+ * anybody reads on purpose; both are named in TASKS.md under B39.
+ */
 export const SURVEY_COPY = {
-  title: 'How was your experience?',
-  /* No count in it. A number in a sentence is a thing that goes stale the
-     first time a question is added, and this one would be wrong twice: two of
-     the questions only appear for some people. */
-  intro: 'A few questions about how it went. Your answers are anonymous, they are '
-    + 'never shown to your partner, and you can stop at any point.',
+  title: 'Tell us about your Attune Experience',
   submit: 'Send',
   submitting: 'Sending',
   thanksTitle: 'Thank you',
-  thanks: 'This goes straight to the people building Attune. It is the main thing '
-    + 'that decides what we change.',
+  thanks: 'Your feedback helps us shape the Attune experience!',
   saved: 'Saved',
 };
 
@@ -140,6 +145,10 @@ export const SURVEY_QUESTIONS = [
     label: 'How likely are you to recommend Attune to a couple you know?',
     min: 0,
     max: 10,
+    /* Ellie: "I do want the 0-10 labeled with the two poles you just listed."
+       Nought and ten are not self-explanatory, and the old survey labelled
+       them. Every surface draws these under the row of numbers. */
+    ends: ['Not at all likely', 'Extremely likely'],
   },
   {
     id: 'nps_why',

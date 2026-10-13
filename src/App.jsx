@@ -7428,11 +7428,21 @@ function ResultsSurvey({ onClose, onDone }) {
       )}
 
       {q.kind === "nps" && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.35rem" }}>
-          {Array.from({ length: (q.max ?? 10) - (q.min ?? 0) + 1 }, (_, i) => (q.min ?? 0) + i).map((n) => (
-            <button key={n} onClick={() => setAns(q.id, n)}
-              style={{ ...optionBtn(Number(answers[q.id]) === n), textAlign: "center", padding: "0.55rem 0" }}>{n}</button>
-          ))}
+        <div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.35rem" }}>
+            {Array.from({ length: (q.max ?? 10) - (q.min ?? 0) + 1 }, (_, i) => (q.min ?? 0) + i).map((n) => (
+              <button key={n} onClick={() => setAns(q.id, n)}
+                style={{ ...optionBtn(Number(answers[q.id]) === n), textAlign: "center", padding: "0.55rem 0" }}>{n}</button>
+            ))}
+          </div>
+          {/* Nought and ten say nothing on their own. Ellie asked for both ends
+              to be named, and the words are on the question. */}
+          {q.ends && q.ends.length === 2 ? (
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.4rem", fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>
+              <span>{q.ends[0]}</span>
+              <span>{q.ends[1]}</span>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -7466,7 +7476,6 @@ function ResultsSurvey({ onClose, onDone }) {
           {sending ? form.copy.submitting : (step === total - 1 ? form.copy.submit : (isAnswered ? "Next" : "Skip"))}
         </button>
       </div>
-      <p style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT, marginTop: "0.9rem", textAlign: "center", lineHeight: 1.5 }}>{form.copy.intro}</p>
     </>,
   );
 }

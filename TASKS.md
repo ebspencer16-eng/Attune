@@ -8,8 +8,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B38 | **One migration to run, for the survey.** The SQL is in the box under this table. Nothing of the new survey can be stored until it runs, and every surface says so rather than failing quietly. |
-| B39 | **Five sentences around the survey are mine and need to be yours.** The questions are the ones you approved. What I wrote is the wrapper: see the list under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -30,22 +28,11 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ---
 
-### B38, the migration to run
+### B38, the migration you ran
 
-**This box is SQL, and it goes in Supabase, not Terminal.** Open Supabase,
-click **SQL Editor** in the left menu, click **New query**, then copy
-everything in the box below, paste it into the big empty box, and press
-**Run**.
-
-It is safe to run twice. It adds the survey's table, a table for coding the
-written answers, and two columns for publishing one of those answers on the
-homepage. It also deletes every answer to the old survey, which is what you
-asked for: "We can delete all prior survey data."
-
-Until it runs, the survey answers with its questions and refuses to store
-anything, saying so. Nothing else in the product is affected.
-
-**In the Supabase SQL editor:**
+Kept here because the SQL is generated into this file and
+`check-tasks-doc` holds the two to each other. You have run it; nothing below
+needs doing again. It is safe to run twice if you ever need to.
 
 <!-- SQL 079_survey.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
@@ -200,32 +187,24 @@ select
 
 ---
 
-### B39, the five sentences that are mine
+### B39, the words you sent
 
-You write every word a customer reads, and the nine questions are the ones you
-approved one by one. These five are the wrapper I had to write to build it, and
-they are all customer-facing, so they are yours to replace. Each one is a
-single string in `api/_lib/survey.js`; tell me the words and I will put them in.
+In, with one decision you should look at. Your first line reads as a heading
+rather than as a line under one, so it IS the heading now and the sentence I
+had written above it is gone rather than sitting on top of yours. If you meant
+it as the smaller line under a title, say so and I will put a title back.
 
-| Where it shows | What it says now |
+| Where | What it says now |
 |--|--|
-| Under the title, before the first question | A few questions about how it went. Your answers are anonymous, they are never shown to your partner, and you can stop at any point. |
-| Under every written answer, as fine print | We may quote what you write here on our website. We never publish your name, your email, or anything that could identify you or your partner. |
+| The heading | Tell us about your Attune Experience |
+| Fine print under every written answer | Your anonymous responses may be used on our website |
 | The button | Send |
 | After they finish, as a heading | Thank you |
-| Under that heading | This goes straight to the people building Attune. It is the main thing that decides what we change. |
+| Under that heading | Your feedback helps us shape the Attune experience! |
+| Under the 0 to 10 question | Not at all likely / Extremely likely |
 
-Two notes on the second one. It is there instead of the question the old survey
-asked ("May we use your words and your first name on the site?"), which you
-removed: "Do we have to ask this if we don't include PII with the testimonials?
-Is there fine print we could have instead that covers us?" So nothing published
-carries a name, and the homepage endpoint has no name in the row to publish
-even by mistake. It is also the one sentence here with a legal edge, which is
-why R12 now carries a question about it for the lawyer.
-
-The 0 to 10 question has no words at its two ends. The old survey labelled them.
-If you want "Not at all likely" and "Extremely likely", or anything else, say
-so and they go in beside the numbers.
+One word is still mine and is not worth your time unless it bothers you: the
+button says **Sending** while it sends.
 
 ---
 
@@ -240,6 +219,8 @@ on you.
 |--|--|
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
 | B40 | **Three admin pages became one.** Beta Feedback, Survey Explorer and Testimonials all read the rows this migration deletes, and each carried its own copy of the 26 questions. The Survey page replaces all three; the Feedback Overview, the NPS trend and Couple type x outcomes now read the new answers, and the two tiles that measured retired questions say which two questions they measure instead. |
+| B41 | **The admin is two pages now, Feedback and Testimonials, to your layout.** Feedback: a time-period slicer over the whole page, four metrics across the top, then two tiles to a row, one per question, each with its own segment slicer. Written answers get a themes chart with **View full list**, which opens the table of category and volume with every answer under it. Testimonials: every written answer, sortable, with demographic checkboxes, a timeframe, and a search that looks at the words and at the themes. The star that publishes a quote to the homepage lives there, next to the answer you are reading. Every tile is built now and says so while it is empty. |
+| B39 | **Your words are in, on all three surfaces.** One decision to look at: your first line is the heading now, and the sentence I had written above it is gone rather than sitting on top of yours. The 0 to 10 question is labelled at both ends. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |

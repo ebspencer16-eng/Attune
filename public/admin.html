@@ -328,13 +328,13 @@
       Demographics
     </a>
     <div class="sb-section">Feedback</div>
-    <a class="sb-item" onclick="showPage('satisfaction')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-      Feedback Overview
+    <a class="sb-item" onclick="showPage('feedback')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Feedback
     </a>
-    <a class="sb-item" onclick="showPage('feedback-survey')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
-      Survey
+    <a class="sb-item" onclick="showPage('testimonials')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.9H22l-6 4.6 2.3 7L12 16.9 5.7 20.5 8 13.5 2 8.9h7.6z"/></svg>
+      Testimonials
     </a>
     <div class="sb-section">Content</div>
     <a class="sb-item" onclick="showPage('posts'); window.__initPosts && window.__initPosts();">
@@ -900,39 +900,39 @@
   </div>
 
   <!-- ══ SATISFACTION ══ -->
-  <div class="page" id="page-satisfaction">
+  <div class="page" id="page-feedback">
     <div class="topbar">
       <div>
-        <div class="topbar-title">Feedback Overview</div>
-        <div class="topbar-sub">Key metrics across the feedback survey and beta testers</div>
+        <div class="topbar-title">Feedback</div>
+        <div class="topbar-sub">Every answer to the survey &middot; <span id="fb-count">0</span> responses,
+          <span id="fb-done">0</span> finished</div>
+      </div>
+      <div class="topbar-right">
+        <select class="tile-slicer" id="fb-period" title="Every tile below is cut to this period" aria-label="Time period">
+          <option value="">All time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last 12 months</option>
+        </select>
       </div>
     </div>
-    <div style="display:flex;justify-content:flex-end;align-items:center;gap:.5rem;margin-bottom:.6rem;">
-      <span style="font-size:.66rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;">Slice all metrics</span>
-      <select id="sat-kpi-slicer" class="tile-slicer" title="Cut every metric below by a segment" aria-label="Sat kpi slicer"</select>
+
+    <!-- The four numbers, cut by the period above. Every one of them is a
+         question in the survey rather than a derived score, so a number here
+         can always be traced to a tile below it. -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-card green"><div class="kpi-label">Average rating</div><div class="kpi-val" id="fb-kpi-rating">&mdash;</div><div class="kpi-sub" id="fb-kpi-rating-sub">no answers yet</div></div>
+      <div class="kpi-card green"><div class="kpi-label">NPS</div><div class="kpi-val" id="fb-kpi-nps">&mdash;</div><div class="kpi-sub" id="fb-kpi-nps-sub">no answers yet</div></div>
+      <div class="kpi-card indigo"><div class="kpi-label">Prompted a conversation</div><div class="kpi-val" id="fb-kpi-convo">&mdash;</div><div class="kpi-sub" id="fb-kpi-convo-sub">no answers yet</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Most important aspect</div><div class="kpi-val" id="fb-kpi-aspect" style="font-size:1.05rem;line-height:1.3">&mdash;</div><div class="kpi-sub" id="fb-kpi-aspect-sub">ranked first most often</div></div>
     </div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="kpi-card green"><div class="kpi-label">NPS score</div><div class="kpi-val" id="sat-nps">—</div><div class="kpi-sub">World-class benchmark: 50+</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Avg rating</div><div class="kpi-val" id="sat-avg">—</div><div class="kpi-sub">Overall satisfaction</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Felt accurate</div><div class="kpi-val" id="sat-expmatch">—</div><div class="kpi-sub">How accurate the results felt</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Would recommend</div><div class="kpi-val" id="sat-recommend">—</div><div class="kpi-sub">Promoters (9–10 on NPS)</div></div>
-      <div class="kpi-card indigo"><div class="kpi-label">Conversation rate</div><div class="kpi-val" id="sat-convo">—</div><div class="kpi-sub">Led to a real conversation</div></div>
-      <div class="kpi-card"><div class="kpi-label">Responses</div><div class="kpi-val" id="sat-responses">—</div><div class="kpi-sub">Completed feedback surveys</div></div>
-    </div>
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Led to a real conversation</div><div class="chart-subtitle">Did Attune spark a conversation between partners</div></div><select class="tile-slicer" id="slz-sconvo" title="Cut this tile by a segment" aria-label="Slz sconvo"<option value="">Everyone</option></select></div>
-        <div class="chart-body"><canvas id="chart-convo"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Rating distribution</div><div class="chart-subtitle">The survey&rsquo;s first question, out of five stars</div></div><select class="tile-slicer" id="slz-srate" title="Cut this tile by a segment" aria-label="Slz srate"<option value="">Everyone</option></select></div>
-        <div class="chart-body"><canvas id="chart-ratings"></canvas></div>
-      </div>
-    </div>
-    <div class="chart-card" style="margin-top:1.25rem">
-      <div class="chart-head"><div><div class="chart-title">NPS trend</div><div class="chart-subtitle">Monthly Net Promoter Score</div></div><select class="tile-slicer" id="slz-snps" title="Cut this tile by a segment" aria-label="Slz snps"<option value="">Everyone</option></select></div>
-      <div class="chart-body"><canvas id="chart-nps"></canvas></div>
-    </div>
+
+    <!-- One tile per question, two to a row, built from the question set so a
+         question added to the survey appears here without anyone remembering.
+         Every tile carries its own segment slicer, like the rest of admin. -->
+    <div id="fb-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
+
     <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Footer feedback · site-wide reaction strip</div>
     <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="kpi-card green"><div class="kpi-label">Love it clicks</div><div class="kpi-val" id="ff-love">—</div><div class="kpi-sub">Footer reaction strip</div></div>
@@ -948,30 +948,64 @@
          from, so this page cannot drift from what was asked. -->
     <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .75rem;">Experience questionnaire · &ldquo;How was your experience?&rdquo; (<span id="xf-count">0</span> responses)</div>
     <div id="xf-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
-  </div>
-
-  <div class="page" id="page-feedback-survey">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Survey</div>
-        <div class="topbar-sub">Everyone, at the end of their experience · one tile per question
-          (<span id="sv-count">0</span> responses, <span id="sv-done">0</span> finished)</div>
-      </div>
-      <div class="topbar-right">
-        <select class="tile-slicer" id="sv-slicer" title="Cut every tile by a segment" aria-label="Segment">
-          <option value="">Everyone</option>
-        </select>
-      </div>
-    </div>
-    <div id="sv-tiles" class="chart-grid" style="grid-template-columns:1fr 1fr;"></div>
 
     <!-- Every survey answer as a distribution, cross-tabbable against any other
          field, with the same segmentation as the rest of the admin. The fields
          come from api/_lib/survey.js through the explore cube, which is why
-         this needs no question list of its own. It is what the two retired
-         survey pages were for: both carried their own copy of the 26 questions,
-         and both read rows migration 079 deletes. -->
+         this needs no question list of its own. -->
     <div class="qx-section" id="qx-feedback" style="margin-top:1.5rem"></div>
+  </div>
+
+  <!-- ── TESTIMONIALS ────────────────────────────────────────────────────
+       Every written answer, which is the half of the survey a chart cannot
+       show. Ellie: "I want the testimonials page to have all responses but to
+       also have sorting, filter with checkbox demo/timeframe selection, and a
+       search bar with intelligent searches, maybe everything should be
+       postcoded to support that."
+
+       So the search looks at the words AND at the themes somebody has named,
+       which is what makes a search for "money" find an answer that never uses
+       the word. Coding happens here, next to the answer being read. -->
+  <div class="page" id="page-testimonials">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Testimonials</div>
+        <div class="topbar-sub">Every written answer &middot; <span id="ts-count">0</span> showing &middot;
+          star one to publish it on the homepage, with no name</div>
+      </div>
+      <div class="topbar-right">
+        <select class="tile-slicer" id="ts-sort" title="Order" aria-label="Order">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="long">Longest first</option>
+          <option value="rating-high">Highest rating</option>
+          <option value="rating-low">Lowest rating</option>
+          <option value="featured">On the homepage first</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1rem;">
+      <input id="ts-search" type="text" placeholder="Search the words and the themes&hellip;"
+        style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .7rem;font-size:.8rem;box-sizing:border-box;"
+        aria-label="Search the words and the themes" />
+      <select class="tile-slicer" id="ts-period" title="Timeframe" aria-label="Timeframe">
+        <option value="">All time</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="365">Last 12 months</option>
+      </select>
+      <select class="tile-slicer" id="ts-question" title="Which question" aria-label="Which question">
+        <option value="">Every question</option>
+      </select>
+      <details id="ts-filter-dd" style="position:relative;">
+        <summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;white-space:nowrap;">Filter<span id="ts-filter-n" style="color:var(--dim);font-family:var(--mono);font-size:.66rem;"></span> &#9662;</summary>
+        <div id="ts-filter-panel" style="position:absolute;z-index:30;top:100%;right:0;margin-top:.35rem;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem .85rem;box-shadow:0 12px 34px rgba(0,0,0,.18);max-height:360px;overflow:auto;min-width:230px;"></div>
+      </details>
+    </div>
+
+    <div id="ts-list"></div>
   </div>
 
 </div><!-- end main -->
@@ -2911,10 +2945,8 @@ function showPage(id) {
   // Demographics charts depend on async data; redraw on every open so they
   // never sit blank from a data-less initial render.
   if (id==='demographics') { chartsInit.demographics = false; initCharts('demographics'); }
-  if (id==='feedback-survey') renderSurvey();
-  if (id==='satisfaction') renderFooterFeedback();
-  if (id==='satisfaction') renderExperienceFeedback();
-  if (id==='satisfaction') renderOverviewKPIs();
+  if (id==='feedback') { renderFeedback(); renderFooterFeedback(); renderExperienceFeedback(); }
+  if (id==='testimonials') renderTestimonials();
   if (id==='types') loadTypesData();
   if (id==='beta-codes') loadBetaCodes();
   if (id==='promos') renderPromosPage();
@@ -2932,39 +2964,6 @@ const chartsInit = {overview:false,orders:false,packages:false,demographics:fals
 // ── Feedback tab switcher ─────────────────────────────
 // ── Render a horizontal bar row ───────────────────────
 // ── Feedback Overview high-level metrics, sliceable by any segment ─────────────
-async function renderOverviewKPIs(){
-  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  /* cube.surveys, keyed by question id. This read the old payload's own four
-     fields, three of which are retired questions, out of rows that migration
-     079 deletes. */
-  const all=(cube.surveys||[]);
-  const sel=document.getElementById('sat-kpi-slicer');
-  if(sel && sel.dataset.popN!==String(all.length)){ const cur=sel.value; delete sel.dataset.pop; populateSlicer(sel,null,all); sel.dataset.popN=String(all.length); if(cur){try{sel.value=cur;}catch(e){}} if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=renderOverviewKPIs; } }
-  const R=sliceFilter(all, sel?sel.value:'');
-  const n=R.length;
-  const npsVals=R.map(s=>parseInt(s.nps,10)).filter(v=>Number.isFinite(v)&&v>=0&&v<=10);
-  let nps=null, promPct=null;
-  if(npsVals.length){ const prom=npsVals.filter(v=>v>=9).length, det=npsVals.filter(v=>v<=6).length; nps=Math.round(((prom-det)/npsVals.length)*100); promPct=Math.round(prom/npsVals.length*100); }
-  const rl=R.map(s=>parseInt(s.rating,10)).filter(v=>Number.isFinite(v)&&v>=1&&v<=5);
-  const avg=rl.length?Math.round(rl.reduce((a,b)=>a+b,0)/rl.length*10)/10:null;
-  const em=R.map(s=>parseFloat(s.accuracy)).filter(v=>Number.isFinite(v));
-  const emAvg=em.length?Math.round(em.reduce((a,b)=>a+b,0)/em.length*10)/10:null;
-  const cyN=R.filter(s=>/^yes/i.test(String(s.convo||''))).length;
-  const convo=n?Math.round(cyN/n*100):null;
-  const g=id=>document.getElementById(id);
-  const setVal=(id,html,dash)=>{ const e=g(id); if(e) e.innerHTML=(html==null?'<span style="color:var(--muted)">'+(dash||'—')+'</span>':html); };
-  const mut='<span style="font-size:1rem;color:var(--muted)">';
-  setVal('sat-nps', nps==null?null:String(nps));
-  setVal('sat-avg', avg==null?null:(avg+mut+'/5</span>'));
-  setVal('sat-expmatch', emAvg==null?null:(emAvg+mut+'/5</span>'));
-  setVal('sat-recommend', promPct==null?null:(promPct+mut+'%</span>'));
-  setVal('sat-convo', convo==null?null:(convo+mut+'%</span>'));
-  setVal('sat-responses', String(n));
-  const subs={ 'sat-nps':(npsVals.length?'n='+npsVals.length+' responses':'no data'), 'sat-avg':(rl.length?'n='+rl.length+' responses':'no data'), 'sat-expmatch':(em.length?'n='+em.length+' responses':'no data'), 'sat-recommend':(npsVals.length?'Promoters · n='+npsVals.length:'no data'), 'sat-convo':'n='+n, 'sat-responses':'People who answered anything' };
-  Object.entries(subs).forEach(([id,txt])=>{ const e=g(id); const sub=e&&e.parentElement&&e.parentElement.querySelector('.kpi-sub'); if(sub&&id!=='sat-nps'&&id!=='sat-responses') sub.textContent=txt; });
-}
-
-// ── Footer feedback (site-wide reaction strip) -> Feedback Overview ────────────
 async function renderFooterFeedback(){
   let rows=[];
   try { const ad=await fetchAdminData(); rows=((ad&&ad.feedback_submissions)||[]).filter(r=>r.type==='quick'); } catch(e){}
@@ -3049,20 +3048,21 @@ async function renderExperienceFeedback(){
   tiles.innerHTML=html;
 }
 
-// ── The survey: one tile per question, and a coding tool for the writing ─────
+// ── THE SURVEY, IN THE ADMIN ────────────────────────────────────────────────
 //
-// Ellie: "Build a page into admin to view responses for each question in this
-// survey. Slicers on each visual just like the rest of admin, and build a tool
-// to postcode open entry responses and quantify for visuals."
+// Two pages. Ellie: "I want 2 pages - Feedback and Testimonials."
 //
-// Every question gets a tile, one slicer at the top cuts all of them at once,
-// and each open answer can be tagged with what it is ABOUT. Free text is the
-// part nobody reads twice; coding is reading it once on purpose, so that the
-// hundredth answer is a bar rather than another paragraph.
+// Feedback is the numbers: four metrics across the top, then one tile per
+// question, two to a row, each with its own segment slicer, under a period
+// slicer that cuts every one of them. Testimonials is the words: every written
+// answer, sortable, filterable, searchable, and codeable.
 //
 // The questions are not written here. They come from /api/admin-survey, which
-// reads the same module the survey itself is drawn from, so a question added
-// to the survey appears on this page without anyone remembering to add it.
+// reads the same module the survey itself is drawn from, so a question added to
+// the survey appears on both pages without anyone remembering to add it. Every
+// tile is built whether or not anybody has answered: Ellie asked for that
+// explicitly, and an empty tile that says so is how you can tell a question
+// nobody answers from a question nobody was asked.
 let SURVEY_DATA = null;
 
 async function loadSurvey(force) {
@@ -3081,15 +3081,36 @@ const SV_DIMS = [
   ['signup_source', 'Heard via'], ['pkg', 'Package'],
 ];
 
-function svPopulateSlicer(rows) {
-  const sel = document.getElementById('sv-slicer');
+const svEsc = (t) => String(t == null ? '' : t)
+  .replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
+/** When a response was last touched, which is what both periods filter on. */
+const svWhen = (r) => new Date(r.completed_at || r.updated_at || r.started_at || 0).getTime();
+
+/** Cut to a period in days. '' is everything, which is the default. */
+function svPeriod(rows, days) {
+  const n = Number(days);
+  if (!Number.isFinite(n) || n <= 0) return rows;
+  const cutoff = Date.now() - n * 86400000;
+  return rows.filter((r) => svWhen(r) >= cutoff);
+}
+
+/** Cut by one segment, in the same `key::value` shape as every other slicer. */
+function svSlice(rows, val) {
+  if (!val) return rows;
+  const i = val.indexOf('::');
+  const k = val.slice(0, i), v = val.slice(i + 2);
+  return rows.filter((r) => String((r.segment || {})[k]) === v);
+}
+
+/** Fill one tile's slicer from the segments that actually occur. */
+function svFillSlicer(sel, rows) {
   if (!sel || sel.dataset.ready === String(rows.length)) return;
   sel.dataset.ready = String(rows.length);
   const cur = sel.value;
   sel.innerHTML = '<option value="">Everyone</option>';
-  for (const pair of SV_DIMS) {
-    const key = pair[0], label = pair[1];
-    const vals = [...new Set(rows.map(r => (r.segment || {})[key]).filter(Boolean))].sort();
+  for (const [key, label] of SV_DIMS) {
+    const vals = [...new Set(rows.map((r) => (r.segment || {})[key]).filter(Boolean))].sort();
     if (!vals.length) continue;
     const g = document.createElement('optgroup');
     g.label = label;
@@ -3101,17 +3122,9 @@ function svPopulateSlicer(rows) {
     sel.appendChild(g);
   }
   try { sel.value = cur; } catch (e) {}
-  if (!sel.dataset.wired) { sel.dataset.wired = '1'; sel.onchange = function () { renderSurvey(); }; }
 }
 
-function svSlice(rows, val) {
-  if (!val) return rows;
-  const i = val.indexOf('::');
-  const k = val.slice(0, i), v = val.slice(i + 2);
-  return rows.filter(r => String((r.segment || {})[k]) === v);
-}
-
-/** Add or remove a code on one written answer, then redraw. */
+/** Add or remove a theme on one written answer, then redraw both pages. */
 async function svCode(responseId, questionId, code, remove) {
   if (!code) return;
   try {
@@ -3122,7 +3135,8 @@ async function svCode(responseId, questionId, code, remove) {
     });
   } catch (e) {}
   await loadSurvey(true);
-  renderSurvey();
+  renderTestimonials();
+  renderFeedback();
 }
 window.svCode = svCode;
 window.svCodeFromInput = function (id, responseId, questionId) {
@@ -3134,11 +3148,11 @@ window.svCodeFromInput = function (id, responseId, questionId) {
 };
 
 /**
- * Publish one open answer on the homepage, or take it down.
+ * Publish one written answer on the homepage, or take it down.
  *
  * The old survey asked for permission and for a first name to put under the
  * quote. This one asks for neither: what is published carries no name, and the
- * fine print under every open question says so. So featuring is a decision
+ * fine print under every written answer says so. So featuring is a decision
  * made here, on one answer, and /api/featured-testimonials reads nothing but
  * the two columns this writes.
  */
@@ -3151,7 +3165,7 @@ async function svFeature(responseId, questionId, on) {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     await loadSurvey(true);
-    await renderSurvey();
+    renderTestimonials();
     if (typeof showToast === 'function') {
       showToast(on ? 'That quote is on the homepage now.' : 'Quote taken down.');
     }
@@ -3161,161 +3175,575 @@ async function svFeature(responseId, questionId, on) {
 }
 window.svFeature = svFeature;
 
-async function renderSurvey() {
-  const tiles = document.getElementById('sv-tiles');
+// ── The themes, which are what a chart can count ───────────────────────────
+//
+// A written answer becomes a bar by somebody reading it and naming what it is
+// about. Every themes tile says how many answers nobody has read yet, because a
+// chart drawn over a third of the answers looks exactly like a chart drawn over
+// all of them.
+function svThemeCounts(rows, qid) {
+  const counts = {};
+  let written = 0, coded = 0;
+  for (const r of rows) {
+    const v = (r.answers || {})[qid];
+    if (typeof v !== 'string' || !v.trim()) continue;
+    written += 1;
+    const codes = (r.codes || {})[qid] || [];
+    if (codes.length) coded += 1;
+    for (const c of codes) counts[c] = (counts[c] || 0) + 1;
+  }
+  const order = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  return { counts, order, written, coded, uncoded: written - coded };
+}
+
+/** Every written answer to one question, newest first, for the full list. */
+function svAnswersFor(rows, qid) {
+  return rows
+    .filter((r) => typeof (r.answers || {})[qid] === 'string' && (r.answers || {})[qid].trim())
+    .sort((a, b) => svWhen(b) - svWhen(a));
+}
+
+/**
+ * The full list, in a dialog: every theme with its volume, then every answer.
+ *
+ * Ellie: "be able to click 'view full list' and a table-view pops up, organized
+ * most to least with 2 columns being category and volume of responses".
+ */
+function svOpenThemes(qid) {
+  const data = SURVEY_DATA;
+  if (!data) return;
+  const q = (data.questions || []).find((x) => x.id === qid);
+  const rows = svVisibleRows();
+  const t = svThemeCounts(rows, qid);
+  const answers = svAnswersFor(rows, qid);
+  const table = t.order.length
+    ? '<table style="width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:1.4rem">'
+      + '<thead><tr style="background:var(--surface);border-bottom:1px solid var(--border)">'
+      + '<th style="text-align:left;padding:.5rem .75rem;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)">Category</th>'
+      + '<th style="text-align:right;padding:.5rem .75rem;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)">Responses</th></tr></thead><tbody>'
+      + t.order.map((c) => '<tr style="border-bottom:1px solid var(--border)">'
+        + '<td style="padding:.5rem .75rem">' + svEsc(c) + '</td>'
+        + '<td style="padding:.5rem .75rem;text-align:right;font-weight:700">' + t.counts[c] + '</td></tr>').join('')
+      + '</tbody></table>'
+    : '<div style="color:var(--muted);font-size:.8rem;margin-bottom:1.4rem">Nothing has been given a theme yet. '
+      + 'Name what an answer is about on the Testimonials page and it becomes a row here.</div>';
+
+  const list = answers.map((r) => {
+    const codes = ((r.codes || {})[qid] || []).map((c) => '<span style="background:rgba(232,103,58,.12);border:1px solid rgba(232,103,58,.3);border-radius:999px;padding:.1rem .5rem;font-size:.66rem;margin-right:.3rem">' + svEsc(c) + '</span>').join('');
+    return '<div style="padding:.7rem 0;border-top:1px solid var(--border)">'
+      + '<p style="font-size:.82rem;line-height:1.6;margin:0 0 .35rem">' + svEsc((r.answers || {})[qid]) + '</p>'
+      + '<div style="font-size:.68rem;color:var(--muted)">' + (codes || 'no theme yet') + '</div></div>';
+  }).join('');
+
+  svShowModal((q && q.label) || qid,
+    t.written + ' written ' + (t.written === 1 ? 'answer' : 'answers') + ', '
+      + t.coded + ' with a theme, ' + t.uncoded + ' not read yet',
+    table + list);
+}
+window.svOpenThemes = svOpenThemes;
+
+/** One dialog, reused. Built on demand so no page carries dead markup. */
+function svShowModal(title, sub, body) {
+  let wrap = document.getElementById('sv-modal');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'sv-modal';
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(10,12,20,.55);z-index:400;display:flex;'
+      + 'align-items:flex-start;justify-content:center;padding:4vh 1rem;overflow:auto';
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) svCloseModal(); });
+    document.body.appendChild(wrap);
+  }
+  wrap.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;'
+    + 'max-width:760px;width:100%;padding:1.4rem 1.6rem 1.8rem;box-shadow:0 24px 64px rgba(0,0,0,.35)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem">'
+    + '<div><div style="font-size:1rem;font-weight:700;color:var(--text)">' + svEsc(title) + '</div>'
+    + '<div style="font-size:.74rem;color:var(--muted);margin-top:.2rem">' + svEsc(sub) + '</div></div>'
+    + '<button onclick="svCloseModal()" aria-label="Close" style="background:transparent;border:none;color:var(--muted);'
+    + 'font-size:1.1rem;cursor:pointer;line-height:1">&times;</button></div>' + body + '</div>';
+  wrap.style.display = 'flex';
+}
+function svCloseModal() {
+  const wrap = document.getElementById('sv-modal');
+  if (wrap) wrap.style.display = 'none';
+}
+window.svCloseModal = svCloseModal;
+
+/** The rows the Feedback page is showing: everything, cut to the period. */
+function svVisibleRows() {
+  const data = SURVEY_DATA;
+  if (!data) return [];
+  const sel = document.getElementById('fb-period');
+  return svPeriod(data.responses || [], sel ? sel.value : '');
+}
+
+// ── The Feedback page ──────────────────────────────────────────────────────
+
+/** Monthly buckets, newest last, over however long the period is. */
+function svMonths(rows) {
+  const months = [];
+  const now = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+      label: d.toLocaleDateString('en-US', { month: 'short' }),
+    });
+  }
+  return months;
+}
+const svMonthOf = (r) => {
+  const d = new Date(svWhen(r));
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+};
+
+/**
+ * What tiles the Feedback page has, in the order Ellie laid out.
+ *
+ * Derived from the question set: every question gets a tile, and the three she
+ * asked for a trend beside get one. A question added to the survey arrives here
+ * as a tile of the right kind without anyone editing this list.
+ */
+function svTileSpecs(questions) {
+  const specs = [];
+  for (const q of questions) {
+    if (q.kind === 'text') specs.push({ kind: 'themes', q });
+    else specs.push({ kind: 'dist', q });
+    if (q.id === 'rating') specs.push({ kind: 'trend-avg', q, title: 'Average rating over time' });
+    if (q.id === 'nps') specs.push({ kind: 'trend-nps', q, title: 'NPS over time' });
+    if (q.kind === 'rank') specs.push({ kind: 'trend-rank', q, title: 'Most to least interesting, over time' });
+  }
+  return specs;
+}
+
+/** The labels and values one distribution tile counts. */
+function svDistOf(q, rows) {
+  const labels = [];
+  const counts = {};
+  if (q.kind === 'stars') {
+    for (let i = 1; i <= (q.max || 5); i++) { labels.push(String(i)); counts[String(i)] = 0; }
+  } else if (q.kind === 'scale') {
+    (q.scale || []).forEach((l) => { labels.push(l); counts[l] = 0; });
+  } else if (q.kind === 'nps') {
+    for (let i = (q.min == null ? 0 : q.min); i <= (q.max == null ? 10 : q.max); i++) { labels.push(String(i)); counts[String(i)] = 0; }
+  } else if (q.kind === 'choice') {
+    (q.options || []).forEach((o) => { labels.push(o); counts[o] = 0; });
+  } else if (q.kind === 'rank') {
+    (q.options || []).forEach((o) => { labels.push(o); counts[o] = 0; });
+  }
+
+  let n = 0;
+  for (const r of rows) {
+    const v = (r.answers || {})[q.id];
+    if (v == null || v === '') continue;
+    if (q.kind === 'rank') {
+      if (!Array.isArray(v) || !v.length) continue;
+      n += 1;
+      /* A ranking is counted by where each option was put, not by how often it
+         appears: every option appears in every answer. The bar is the mean
+         position, flipped so taller is more interesting, which is the only
+         honest summary of an ordering. */
+      v.forEach((opt, i) => {
+        if (!(opt in counts)) { labels.push(opt); counts[opt] = 0; }
+        counts[opt] += i + 1;
+        counts['__n__' + opt] = (counts['__n__' + opt] || 0) + 1;
+      });
+      continue;
+    }
+    const key = q.kind === 'scale' ? ((q.scale || [])[Number(v) - 1] || String(v)) : String(v);
+    if (!(key in counts)) labels.push(key);
+    counts[key] = (counts[key] || 0) + 1;
+    n += 1;
+  }
+
+  if (q.kind === 'rank') {
+    const worst = Math.max(1, ...labels.map((o) => (counts['__n__' + o] ? counts[o] / counts['__n__' + o] : 0)));
+    const values = labels.map((o) => {
+      const c = counts['__n__' + o];
+      if (!c) return 0;
+      return Math.round((worst - counts[o] / c + 1) * 100) / 100;
+    });
+    return { labels, values, n, note: 'taller is more interesting' };
+  }
+  return { labels, values: labels.map((l) => counts[l] || 0), n, note: '' };
+}
+
+/** One tile's markup. Built empty; its chart is drawn after it is in the DOM. */
+function svTileHtml(spec, idx) {
+  const id = 'fbt' + idx;
+  const title = spec.title || spec.q.label;
+  const sub = spec.kind === 'themes'
+    ? 'Themes across the written answers'
+    : (spec.kind === 'dist' ? 'How people answered' : 'By month');
+  const body = spec.kind === 'themes'
+    ? '<div class="chart-body"><canvas id="' + id + '-c"></canvas></div>'
+      + '<div style="padding:0 1.4rem 1.1rem"><div id="' + id + '-note" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem"></div>'
+      + '<button class="export-btn" onclick="svOpenThemes(&quot;' + svEsc(spec.q.id) + '&quot;)">View full list</button></div>'
+    : '<div class="chart-body"><canvas id="' + id + '-c"></canvas></div>';
+  return '<div class="chart-card" id="' + id + '">'
+    + '<div class="chart-head"><div><div class="chart-title">' + svEsc(title) + '</div>'
+    + '<div class="chart-subtitle">' + svEsc(sub) + '</div></div>'
+    + '<select class="tile-slicer" id="' + id + '-s" title="Cut this tile by a segment" aria-label="Segment"></select>'
+    + '</div>' + body + '</div>';
+}
+
+/** Draw one tile, honouring its own slicer on top of the page's period. */
+function svDrawTile(spec, idx, periodRows) {
+  const id = 'fbt' + idx;
+  const sel = document.getElementById(id + '-s');
+  svFillSlicer(sel, periodRows);
+  if (sel && !sel.dataset.wired) {
+    sel.dataset.wired = '1';
+    sel.onchange = () => { sel.classList.toggle('on', !!sel.value); svDrawTile(spec, idx, svVisibleRows()); };
+  }
+  const rows = svSlice(periodRows, sel ? sel.value : '');
+  const el = document.getElementById(id + '-c');
+  if (!el) return;
+
+  if (spec.kind === 'dist') {
+    const d = svDistOf(spec.q, rows);
+    setTileN(el, d.n);
+    mkChart(el, {
+      type: 'bar',
+      data: {
+        labels: d.labels,
+        datasets: [{ data: d.values, backgroundColor: hexRamp(SV_COLOR[spec.q.kind] || '#5C6DDA', Math.max(d.labels.length, 2)), borderRadius: 6 }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 50, minRotation: 0 } }, y: { beginAtZero: true, grid: { color: '#E6ECF6' } } },
+      },
+    });
+    return;
+  }
+
+  if (spec.kind === 'themes') {
+    const t = svThemeCounts(rows, spec.q.id);
+    setTileN(el, t.written);
+    const top = t.order.slice(0, 10);
+    mkChart(el, {
+      type: 'bar',
+      data: {
+        labels: top,
+        datasets: [{ data: top.map((c) => t.counts[c]), backgroundColor: hexRamp('#E8673A', Math.max(top.length, 2)), borderRadius: 6 }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 50 } }, y: { beginAtZero: true, grid: { color: '#E6ECF6' } } },
+      },
+    });
+    const note = document.getElementById(id + '-note');
+    if (note) {
+      note.textContent = t.written
+        ? (t.coded + ' of ' + t.written + ' read and given a theme'
+           + (t.uncoded ? ' · ' + t.uncoded + ' not read yet' : ''))
+        : 'Nobody has written an answer to this yet.';
+    }
+    return;
+  }
+
+  const months = svMonths(rows);
+  const byMonth = {};
+  months.forEach((m) => { byMonth[m.key] = []; });
+  rows.forEach((r) => { const k = svMonthOf(r); if (byMonth[k]) byMonth[k].push(r); });
+
+  if (spec.kind === 'trend-avg' || spec.kind === 'trend-nps') {
+    const points = months.map((m) => {
+      const vals = byMonth[m.key]
+        .map((r) => parseInt((r.answers || {})[spec.q.id], 10))
+        .filter((v) => Number.isFinite(v));
+      if (!vals.length) return null;
+      if (spec.kind === 'trend-avg') return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+      const p = vals.filter((v) => v >= 9).length, dt = vals.filter((v) => v <= 6).length;
+      return Math.round(((p - dt) / vals.length) * 100);
+    });
+    setTileN(el, points.filter((v) => v != null).length);
+    mkChart(el, {
+      type: 'line',
+      data: {
+        labels: months.map((m) => m.label),
+        datasets: [{
+          data: points, borderColor: spec.kind === 'trend-nps' ? '#F59E0B' : '#10B981',
+          backgroundColor: 'transparent', tension: 0.3, spanGaps: true, pointRadius: 3,
+        }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: spec.kind === 'trend-nps' ? { min: -100, max: 100, grid: { color: '#E6ECF6' } }
+            : { min: 1, max: 5, grid: { color: '#E6ECF6' } },
+        },
+      },
+    });
+    return;
+  }
+
+  // trend-rank: one line per aspect, each the mean position that month.
+  const options = [];
+  rows.forEach((r) => {
+    const v = (r.answers || {})[spec.q.id];
+    if (Array.isArray(v)) v.forEach((o) => { if (!options.includes(o)) options.push(o); });
+  });
+  const ramp = hexRamp('#9B5DE5', Math.max(options.length, 2));
+  const sets = options.map((opt, i) => ({
+    label: opt,
+    data: months.map((m) => {
+      const places = byMonth[m.key]
+        .map((r) => { const v = (r.answers || {})[spec.q.id]; return Array.isArray(v) ? v.indexOf(opt) : -1; })
+        .filter((ix) => ix >= 0)
+        .map((ix) => ix + 1);
+      if (!places.length) return null;
+      return Math.round((places.reduce((a, b) => a + b, 0) / places.length) * 10) / 10;
+    }),
+    borderColor: ramp[i], backgroundColor: 'transparent', tension: 0.3, spanGaps: true, pointRadius: 2,
+  }));
+  setTileN(el, rows.filter((r) => Array.isArray((r.answers || {})[spec.q.id])).length);
+  mkChart(el, {
+    type: 'line',
+    data: { labels: months.map((m) => m.label), datasets: sets.length ? sets : [{ data: months.map(() => null) }] },
+    options: {
+      plugins: { legend: { display: sets.length > 0, position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: {
+        x: { grid: { display: false } },
+        /* Position 1 is the most interesting, so the axis runs the other way
+           up: a line climbing the chart is an aspect people care more about. */
+        y: { reverse: true, grid: { color: '#E6ECF6' }, title: { display: true, text: 'average place' } },
+      },
+    },
+  });
+}
+
+/** The colour a distribution is drawn in, by what kind of question it is. */
+const SV_COLOR = {
+  stars: '#10B981', scale: '#10B981', nps: '#F59E0B', choice: '#1B5FE8', rank: '#9B5DE5',
+};
+
+async function renderFeedback() {
+  const tiles = document.getElementById('fb-tiles');
   if (!tiles) return;
   let data;
   try { data = await loadSurvey(); } catch (e) {
     tiles.innerHTML = '<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:#F87171;font-size:.85rem;">'
-      + 'Could not load the survey: ' + e.message + '</div>';
-    return;
-  }
-  svPopulateSlicer(data.responses || []);
-  const sel = document.getElementById('sv-slicer');
-  const rows = svSlice(data.responses || [], sel ? sel.value : '');
-  const n = rows.length;
-  const setTxt = function (id, v) { const e = document.getElementById(id); if (e) e.textContent = v; };
-  setTxt('sv-count', n);
-  setTxt('sv-done', rows.filter(r => r.completed_at).length);
-
-  if (!n) {
-    tiles.innerHTML = '<div class="chart-card" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted);font-size:.85rem;">'
-      + 'No answers yet. Every question gets its own tile here as couples finish, '
-      + 'including the ones they only partly answered.</div>';
+      + 'Could not load the survey: ' + svEsc(e.message) + '</div>';
     return;
   }
 
-  const card = function (title, sub, inner, wide) {
-    return '<div class="chart-card"' + (wide ? ' style="grid-column:1/-1"' : '')
-      + '><div class="chart-card-header"><div class="chart-card-title">' + title + '</div>'
-      + (sub ? '<div class="chart-card-sub">' + sub + '</div>' : '')
-      + '</div><div style="padding:.6rem 1.25rem 1.1rem;">' + inner + '</div></div>';
-  };
-  const bars = function (counts, order, color) {
-    const keys = order || Object.keys(counts);
-    const mx = Math.max(1, ...keys.map(k => counts[k] || 0));
-    const tot = keys.reduce((a, k) => a + (counts[k] || 0), 0) || 1;
-    return keys.map(k => renderBar(String(k), counts[k] || 0, mx, color,
-      (counts[k] || 0) + ' (' + Math.round((counts[k] || 0) / tot * 100) + '%)')).join('');
-  };
-  const answersFor = function (id) {
-    return rows.map(r => ({
-      id: r.id, v: (r.answers || {})[id], codes: (r.codes || {})[id] || [],
-      featured: r.featured_question,
-    }))
-      .filter(a => a.v != null && a.v !== '' && !(Array.isArray(a.v) && !a.v.length));
-  };
-  const esc = function (t) {
-    return String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  };
-
-  let html = '';
-  for (const q of data.questions) {
-    const got = answersFor(q.id);
-    const sub = got.length + ' of ' + n + ' answered';
-
-    if (q.kind === 'stars' || q.kind === 'nps' || q.kind === 'scale') {
-      const labels = q.kind === 'scale' ? (q.scale || []) : null;
-      const span = q.kind === 'nps'
-        ? Array.from({ length: (q.max == null ? 10 : q.max) - (q.min == null ? 0 : q.min) + 1 },
-          (_, i) => String((q.min == null ? 0 : q.min) + i))
-        : Array.from({ length: q.kind === 'stars' ? (q.max || 5) : (labels ? labels.length : 5) },
-          (_, i) => String(i + 1));
-      const counts = {};
-      span.forEach(k => { counts[labels ? labels[Number(k) - 1] : k] = 0; });
-      let sum = 0;
-      got.forEach(a => {
-        const i = parseInt(a.v, 10);
-        if (!Number.isFinite(i)) return;
-        const key = labels ? (labels[i - 1] || String(i)) : String(i);
-        counts[key] = (counts[key] || 0) + 1;
-        sum += i;
-      });
-      const avg = got.length ? (sum / got.length).toFixed(1) : '—';
-      let extra = ' · avg ' + avg;
-      if (q.kind === 'nps') {
-        const vals = got.map(a => parseInt(a.v, 10)).filter(v => Number.isFinite(v));
-        const prom = vals.filter(v => v >= 9).length, det = vals.filter(v => v <= 6).length;
-        if (vals.length) extra = ' · NPS ' + Math.round((prom - det) / vals.length * 100);
-      }
-      const order = labels ? labels.slice().reverse() : span.slice().reverse();
-      html += card(esc(q.label), sub + extra, bars(counts, order, q.kind === 'nps' ? '#F59E0B' : '#10B981'));
-      continue;
-    }
-
-    if (q.kind === 'choice') {
-      const counts = {};
-      (q.options || []).forEach(o => { counts[o] = 0; });
-      got.forEach(a => { counts[a.v] = (counts[a.v] || 0) + 1; });
-      html += card(esc(q.label), sub, bars(counts, q.options || null, '#1B5FE8'));
-      continue;
-    }
-
-    if (q.kind === 'rank') {
-      // The average position each option was given, best first. A mean rank is
-      // the only honest summary of an ordering: counting first places throws
-      // away everything below the top of each list.
-      const sums = {}, counts = {};
-      got.forEach(a => (Array.isArray(a.v) ? a.v : []).forEach((opt, i) => {
-        sums[opt] = (sums[opt] || 0) + (i + 1);
-        counts[opt] = (counts[opt] || 0) + 1;
-      }));
-      const means = Object.keys(sums).map(k => [k, sums[k] / counts[k], counts[k]]).sort((a, b) => a[1] - b[1]);
-      const worst = Math.max(1, ...means.map(m => m[1]));
-      const inner = means.length
-        ? means.map(m => renderBar(esc(m[0]), worst - m[1] + 1, worst, '#9B5DE5',
-          m[1].toFixed(1) + ' avg · ranked by ' + m[2])).join('')
-        : '<div style="color:var(--muted);font-size:.8rem;">Nobody has ranked these yet.</div>';
-      html += card(esc(q.label), sub + ' · lower is more interesting', inner, true);
-      continue;
-    }
-
-    // Open text: the answers, each with its codes, and a count of the codes.
-    const codeCounts = {};
-    got.forEach(a => a.codes.forEach(c => { codeCounts[c] = (codeCounts[c] || 0) + 1; }));
-    const chart = Object.keys(codeCounts).length
-      ? '<div style="margin-bottom:1rem">' + bars(codeCounts,
-        Object.keys(codeCounts).sort((a, b) => codeCounts[b] - codeCounts[a]), '#E8673A') + '</div>'
-      : '<div style="color:var(--muted);font-size:.78rem;margin-bottom:1rem">Nothing coded yet. '
-        + 'Type a word under an answer and it becomes a bar here.</div>';
-    const list = got.map(a => {
-      const inputId = 'svc-' + q.id + '-' + a.id;
-      const chips = a.codes.map(c => '<button onclick="svCode(' + a.id + ',&quot;' + esc(q.id) + '&quot;,&quot;'
-        + esc(c) + '&quot;,true)" title="Remove this code" '
-        + 'style="background:rgba(232,103,58,.12);border:1px solid rgba(232,103,58,.3);color:var(--text);'
-        + 'border-radius:999px;padding:.15rem .55rem;font-size:.68rem;cursor:pointer;font-family:var(--bfont)">'
-        + esc(c) + ' ×</button>').join(' ');
-      // Publishing this answer on the homepage. The row carries which answer
-      // was picked, so a response can have one quote and the star is on the
-      // answer rather than on the person.
-      const live = a.featured === q.id;
-      const star = '<button onclick="svFeature(' + a.id + ',&quot;' + esc(q.id) + '&quot;,'
-        + (live ? 'false' : 'true') + ')" title="'
-        + (live ? 'Stop showing this on the homepage' : 'Show this quote on the homepage, with no name')
-        + '" style="background:' + (live ? 'rgba(16,185,129,.16)' : 'var(--surface)')
-        + ';border:1px solid ' + (live ? 'rgba(16,185,129,.45)' : 'var(--border)')
-        + ';color:var(--text);border-radius:999px;padding:.15rem .55rem;font-size:.68rem;cursor:pointer;'
-        + 'font-family:var(--bfont)">' + (live ? '\u2605 On the homepage' : '\u2606 Feature') + '</button>';
-      return '<div style="padding:.8rem 0;border-top:1px solid var(--border)">'
-        + '<p style="font-size:.82rem;color:var(--text);line-height:1.6;margin:0 0 .5rem">' + esc(a.v) + '</p>'
-        + '<div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">' + star + chips
-        + '<input id="' + inputId + '" placeholder="add a code" '
-        + 'onkeydown="if(event.key===&quot;Enter&quot;){svCodeFromInput(&quot;' + inputId + '&quot;,'
-        + a.id + ',&quot;' + esc(q.id) + '&quot;)}" '
-        + 'style="background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.15rem .6rem;'
-        + 'font-size:.68rem;color:var(--text);font-family:var(--bfont);width:8rem" />'
-        + '</div></div>';
-    }).join('');
-    html += card(esc(q.label), sub + ' · ' + Object.keys(codeCounts).length + ' codes',
-      chart + (list || '<div style="color:var(--muted);font-size:.8rem;">Nobody has written anything here yet.</div>'), true);
+  const period = document.getElementById('fb-period');
+  if (period && !period.dataset.wired) {
+    period.dataset.wired = '1';
+    period.onchange = () => { period.classList.toggle('on', !!period.value); renderFeedback(); };
   }
+  const rows = svVisibleRows();
 
-  tiles.innerHTML = html;
+  const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  setTxt('fb-count', rows.length);
+  setTxt('fb-done', rows.filter((r) => r.completed_at).length);
 
-  /* The distributions and crosstab, over the same answers, from the explore
-     cube's field catalogue. 'Survey' is the group api/admin-explore.js files
-     these questions under. */
+  // ── The four numbers ────────────────────────────────────────────────────
+  const nums = (qid) => rows.map((r) => parseInt((r.answers || {})[qid], 10)).filter((v) => Number.isFinite(v));
+  const ratings = nums('rating');
+  setTxt('fb-kpi-rating', ratings.length ? (Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10) + ' / 5' : '—');
+  setTxt('fb-kpi-rating-sub', ratings.length ? 'n=' + ratings.length : 'no answers yet');
+
+  const npsVals = nums('nps');
+  if (npsVals.length) {
+    const p = npsVals.filter((v) => v >= 9).length, d = npsVals.filter((v) => v <= 6).length;
+    setTxt('fb-kpi-nps', String(Math.round(((p - d) / npsVals.length) * 100)));
+    setTxt('fb-kpi-nps-sub', 'n=' + npsVals.length + ' · ' + Math.round((p / npsVals.length) * 100) + '% promoters');
+  } else { setTxt('fb-kpi-nps', '—'); setTxt('fb-kpi-nps-sub', 'no answers yet'); }
+
+  const convoAnswers = rows.map((r) => (r.answers || {})[ 'convo' ]).filter((v) => typeof v === 'string' && v);
+  const yes = convoAnswers.filter((v) => /^yes/i.test(v)).length;
+  setTxt('fb-kpi-convo', convoAnswers.length ? Math.round((yes / convoAnswers.length) * 100) + '%' : '—');
+  setTxt('fb-kpi-convo-sub', convoAnswers.length ? 'n=' + convoAnswers.length : 'no answers yet');
+
+  /* The aspect ranked first most often, which is the question the four old
+     rating grids were circling: which part of the product does the work. */
+  const firsts = {};
+  let ranked = 0;
+  rows.forEach((r) => {
+    const v = (r.answers || {})[(data.questions.find((q) => q.kind === 'rank') || {}).id];
+    if (Array.isArray(v) && v.length) { firsts[v[0]] = (firsts[v[0]] || 0) + 1; ranked += 1; }
+  });
+  const topAspect = Object.keys(firsts).sort((a, b) => firsts[b] - firsts[a])[0];
+  setTxt('fb-kpi-aspect', topAspect || '—');
+  setTxt('fb-kpi-aspect-sub', topAspect
+    ? firsts[topAspect] + ' of ' + ranked + ' put it first'
+    : 'ranked first most often');
+
+  // ── The tiles ───────────────────────────────────────────────────────────
+  const specs = svTileSpecs(data.questions || []);
+  if (tiles.dataset.built !== String(specs.length)) {
+    tiles.innerHTML = specs.map((sp, i) => svTileHtml(sp, i)).join('');
+    tiles.dataset.built = String(specs.length);
+  }
+  specs.forEach((sp, i) => svDrawTile(sp, i, rows));
+
   if (typeof renderQuestionExplorer === 'function') renderQuestionExplorer('qx-feedback', ['Survey']);
+}
+
+// ── The Testimonials page ──────────────────────────────────────────────────
+
+/** Every written answer as its own row, which is what this page lists. */
+function svWrittenRows(data) {
+  const out = [];
+  for (const q of (data.textQuestions || [])) {
+    for (const r of (data.responses || [])) {
+      const v = (r.answers || {})[q];
+      if (typeof v !== 'string' || !v.trim()) continue;
+      out.push({
+        id: r.id, qid: q, text: v.trim(),
+        codes: (r.codes || {})[q] || [],
+        segment: r.segment || {},
+        when: svWhen(r),
+        rating: parseInt((r.answers || {}).rating, 10),
+        nps: parseInt((r.answers || {}).nps, 10),
+        featured: r.featured_question === q,
+      });
+    }
+  }
+  return out;
+}
+
+const TS_STATE = { sel: {} };
+
+function svBuildTsFilters(all) {
+  const panel = document.getElementById('ts-filter-panel');
+  if (!panel || panel.dataset.built === String(all.length)) return;
+  panel.dataset.built = String(all.length);
+  let html = '';
+  for (const [key, label] of SV_DIMS) {
+    const vals = [...new Set(all.map((a) => a.segment[key]).filter(Boolean))].sort();
+    if (!vals.length) continue;
+    html += '<div style="font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700;margin:.55rem 0 .25rem;">' + svEsc(label) + '</div>';
+    for (const v of vals) {
+      html += '<label style="display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--muted);padding:.1rem 0;cursor:pointer;">'
+        + '<input type="checkbox" onchange="svTsToggle(&quot;' + svEsc(key) + '&quot;,&quot;' + svEsc(v) + '&quot;,this.checked)"> '
+        + svEsc(v) + '</label>';
+    }
+  }
+  panel.innerHTML = html || '<div style="font-size:.72rem;color:var(--muted)">No demographics on these answers yet.</div>';
+}
+window.svTsToggle = function (dim, val, on) {
+  const set = TS_STATE.sel[dim] || (TS_STATE.sel[dim] = new Set());
+  if (on) set.add(val); else set.delete(val);
+  renderTestimonials();
+};
+
+async function renderTestimonials() {
+  const list = document.getElementById('ts-list');
+  if (!list) return;
+  let data;
+  try { data = await loadSurvey(); } catch (e) {
+    list.innerHTML = '<div style="color:#F87171;font-size:.85rem;padding:1rem 0">Could not load the answers: ' + svEsc(e.message) + '</div>';
+    return;
+  }
+
+  const qSel = document.getElementById('ts-question');
+  if (qSel && qSel.dataset.built !== String((data.textQuestions || []).length)) {
+    qSel.dataset.built = String((data.textQuestions || []).length);
+    qSel.innerHTML = '<option value="">Every question</option>'
+      + (data.textQuestions || []).map((id) => {
+        const q = (data.questions || []).find((x) => x.id === id);
+        return '<option value="' + svEsc(id) + '">' + svEsc((q && q.label) || id) + '</option>';
+      }).join('');
+  }
+  for (const id of ['ts-search', 'ts-sort', 'ts-period', 'ts-question']) {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.wired) {
+      el.dataset.wired = '1';
+      el[id === 'ts-search' ? 'oninput' : 'onchange'] = () => renderTestimonials();
+    }
+  }
+
+  const all = svWrittenRows(data);
+  svBuildTsFilters(all);
+
+  const days = (document.getElementById('ts-period') || {}).value || '';
+  const qid = (document.getElementById('ts-question') || {}).value || '';
+  const sort = (document.getElementById('ts-sort') || {}).value || 'new';
+  const term = ((document.getElementById('ts-search') || {}).value || '').trim().toLowerCase();
+
+  let items = all;
+  const n = Number(days);
+  if (Number.isFinite(n) && n > 0) {
+    const cutoff = Date.now() - n * 86400000;
+    items = items.filter((a) => a.when >= cutoff);
+  }
+  if (qid) items = items.filter((a) => a.qid === qid);
+  for (const dim of Object.keys(TS_STATE.sel)) {
+    const set = TS_STATE.sel[dim];
+    if (set && set.size) items = items.filter((a) => set.has(String(a.segment[dim])));
+  }
+  if (term) {
+    /* The words and the themes. Ellie: "a search bar with intelligent searches,
+       maybe everything should be postcoded to support that." A theme somebody
+       named is the part that makes a search for "money" find an answer that
+       never uses the word, so both are searched and every word in the term has
+       to match something. */
+    const parts = term.split(/\s+/).filter(Boolean);
+    items = items.filter((a) => {
+      const hay = (a.text + ' ' + a.codes.join(' ') + ' ' + Object.values(a.segment).join(' ')).toLowerCase();
+      return parts.every((w) => hay.includes(w));
+    });
+  }
+
+  items = items.slice().sort((a, b) => {
+    if (sort === 'old') return a.when - b.when;
+    if (sort === 'long') return b.text.length - a.text.length;
+    if (sort === 'rating-high') return (b.rating || 0) - (a.rating || 0) || b.when - a.when;
+    if (sort === 'rating-low') return (a.rating || 6) - (b.rating || 6) || b.when - a.when;
+    if (sort === 'featured') return (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || b.when - a.when;
+    return b.when - a.when;
+  });
+
+  const countEl = document.getElementById('ts-count');
+  if (countEl) countEl.textContent = items.length;
+  const nEl = document.getElementById('ts-filter-n');
+  if (nEl) {
+    const picked = Object.values(TS_STATE.sel).reduce((acc, s) => acc + (s ? s.size : 0), 0);
+    nEl.textContent = picked ? ' · ' + picked : '';
+  }
+
+  if (!items.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:1.5rem 0;line-height:1.6">'
+      + (all.length ? 'No answers match these filters.'
+        : 'Nobody has written anything yet. Every written answer to the survey appears here, and the ones you star go on the homepage.')
+      + '</div>';
+    return;
+  }
+
+  list.innerHTML = items.map((a) => {
+    const q = (data.questions || []).find((x) => x.id === a.qid);
+    const inputId = 'tsc-' + a.qid + '-' + a.id;
+    const codes = a.codes.map((c) => '<button onclick="svCode(' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;,&quot;' + svEsc(c) + '&quot;,true)" title="Remove this theme" '
+      + 'style="background:rgba(232,103,58,.12);border:1px solid rgba(232,103,58,.3);color:var(--text);border-radius:999px;'
+      + 'padding:.15rem .55rem;font-size:.68rem;cursor:pointer;font-family:var(--bfont)">' + svEsc(c) + ' &times;</button>').join(' ');
+    const seg = SV_DIMS.map(([k]) => a.segment[k]).filter(Boolean).slice(0, 3).map(svEsc).join(' · ');
+    const date = a.when ? new Date(a.when).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    return '<div style="border:1px solid ' + (a.featured ? 'rgba(16,185,129,.45)' : 'var(--border)') + ';border-radius:10px;'
+      + 'padding:.85rem 1rem;margin-bottom:.7rem;background:' + (a.featured ? 'rgba(16,185,129,.06)' : 'var(--card)') + '">'
+      + '<div style="font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:.35rem">'
+      + svEsc((q && q.label) || a.qid) + '</div>'
+      + '<p style="font-size:.86rem;color:var(--text);line-height:1.6;margin:0 0 .5rem">' + svEsc(a.text) + '</p>'
+      + '<div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.45rem">' + codes
+      + '<input id="' + inputId + '" placeholder="add a theme" '
+      + 'onkeydown="if(event.key===&quot;Enter&quot;){svCodeFromInput(&quot;' + inputId + '&quot;,' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;)}" '
+      + 'style="background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.15rem .6rem;font-size:.68rem;'
+      + 'color:var(--text);font-family:var(--bfont);width:9rem" /></div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap">'
+      + '<div style="font-size:.68rem;color:var(--muted)">'
+      + (Number.isFinite(a.rating) ? '★ ' + a.rating + ' · ' : '')
+      + (Number.isFinite(a.nps) ? 'NPS ' + a.nps + ' · ' : '')
+      + (seg ? seg + ' · ' : '') + date + '</div>'
+      + '<button onclick="svFeature(' + a.id + ',&quot;' + svEsc(a.qid) + '&quot;,' + (a.featured ? 'false' : 'true') + ')" '
+      + 'title="' + (a.featured ? 'Stop showing this on the homepage' : 'Show this quote on the homepage, with no name') + '" '
+      + 'style="background:' + (a.featured ? 'rgba(16,185,129,.16)' : 'var(--surface)') + ';border:1px solid '
+      + (a.featured ? 'rgba(16,185,129,.45)' : 'var(--border)') + ';color:var(--text);border-radius:8px;padding:.3rem .6rem;'
+      + 'font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap">'
+      + (a.featured ? '★ On the homepage' : '☆ Feature') + '</button>'
+      + '</div></div>';
+  }).join('');
 }
 
 function renderBar(label, val, max, color, subLabel='') {
@@ -3390,14 +3818,10 @@ let responsePairs = 0;
 let expGaps = [{l:'Children',v:0},{l:'Finances',v:0},{l:'Where you live',v:0},{l:'Conflict',v:0},{l:'Repair',v:0}];
 const storyGaps = [{l:'Fun & lightness',v:0},{l:'Communication ease',v:0},{l:'Day-to-day connection',v:0},{l:'Overall feel',v:0}];
 let funnelData = [0,0,0,0];
-let ratingsData = {labels:['5 ★','4 ★','3 ★','2 ★','1 ★'],data:[0,0,0,0,0]};
-// npsData: monthly NPS score. Real NPS = %promoters(9-10) - %detractors(0-6), range -100..100
-let npsData = [0,0,0,0,0,0,0,0,0,0,0,0];
-// Real analytics overrides — populated by loadRealAnalytics when real feedback exists
-let realNpsScore = null;      // null when no data yet
-let realAvgRating = null;     // null when no data yet
-let realNpsDist = null;       // {promoters, passives, detractors} percents
-let realRatingN = 0;          // sample size for avg rating
+/* ratingsData, npsData and the four real* overrides were here. They fed the
+   satisfaction page's charts and KPI cards, all of which the Feedback page now
+   draws from /api/admin-survey where it shows them, instead of a loader
+   stamping globals that a chart read later. */
 
 // ── Bar renderer ──────────────────────────────────────
 function renderBars(containerId, items, color='#5C6DDA') {
@@ -3819,7 +4243,6 @@ function updateStatsFromRealData(orders) {
   loadRealResponses().catch(() => {});
   if (typeof initAllSlicers === 'function') initAllSlicers();
   // Real satisfaction analytics from feedback_submissions (NPS + ratings)
-  loadRealAnalytics().catch(() => {});
   // Real funnel data from orders + exercise completion on profiles
   loadRealFunnel(orders).catch(() => {});
 }
@@ -3854,9 +4277,9 @@ async function loadRealFunnel(orders) {
     funnelData = [ordered, started, bothDone, viewed];
 
     // Force re-render if the satisfaction page is currently open
-    if (chartsInit.satisfaction) {
-      chartsInit.satisfaction = false;
-      if (document.getElementById('page-satisfaction')?.classList.contains('active')) initCharts('satisfaction');
+    if (chartsInit.feedback) {
+      chartsInit.feedback = false;
+      if (document.getElementById('page-feedback')?.classList.contains('active')) initCharts('feedback');
     }
   } catch (e) {
     console.warn('[admin] real funnel load failed:', e);
@@ -4035,157 +4458,6 @@ async function loadRealPackageTrend(orders) {
   if (chartsInit.overview) {
     chartsInit.overview = false;
     if (document.getElementById('page-overview')?.classList.contains('active')) initCharts('overview');
-  }
-}
-
-// Real satisfaction analytics, from the one survey.
-//
-// This parsed a JSON blob out of the old survey's rows, which migration 079
-// deletes. It reads the explore cube's `surveys` instead: one row per person
-// who has answered anything, keyed by question id. It produces:
-//   - npsData           (12-month NPS trend, -100..100 scale)
-//   - realNpsScore      (current-period NPS score)
-//   - realNpsDist       ({promoters, passives, detractors} percents)
-//   - realAvgRating     (the star question, 1-5)
-//   - ratingsData       ({labels:[5★..1★], data:[counts]})
-//
-// Leaves the page's empty state alone if nobody has answered yet.
-async function loadRealAnalytics() {
-  try {
-    /* One row per person, answers keyed by question id, already anonymised and
-       segment-tagged by api/admin-explore.js. */
-    const cube = await ensureCube();
-    const surveys = (cube && cube.surveys) || [];
-    if (!surveys.length) return;
-
-    // ── NPS trend by month ──────────────────────────────────────────────
-    // Build 12 month buckets ending at current month. For each, compute NPS:
-    // %promoters(9-10) - %detractors(0-6). Buckets with zero responses inherit
-    // the previous bucket's value to keep the trend line readable (cosmetic).
-    const now = new Date();
-    const monthBuckets = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      monthBuckets.push({
-        key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
-        label: d.toLocaleDateString('en-US', { month: 'short' }),
-        scores: [],
-      });
-    }
-    surveys.forEach(s => {
-      if (!s.ts) return;
-      const d = new Date(s.ts);
-      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-      const b = monthBuckets.find(x => x.key === key);
-      if (!b) return;
-      const nps = parseInt(s.nps, 10);
-      if (Number.isFinite(nps) && nps >= 0 && nps <= 10) b.scores.push(nps);
-    });
-    // Compute bucket NPS scores
-    const bucketNps = monthBuckets.map(b => {
-      if (b.scores.length === 0) return null;
-      const promoters  = b.scores.filter(v => v >= 9).length;
-      const detractors = b.scores.filter(v => v <= 6).length;
-      return Math.round(((promoters - detractors) / b.scores.length) * 100);
-    });
-    // Forward-fill nulls with previous value (or 0 if leading)
-    let lastVal = 0;
-    const filledNps = bucketNps.map(v => { if (v != null) { lastVal = v; return v; } return lastVal; });
-    npsData = filledNps;
-
-    // Overall current-period NPS (last 90 days)
-    const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
-    const recentNps = surveys
-      .filter(s => s.ts && new Date(s.ts).getTime() > cutoff)
-      .map(s => parseInt(s.nps, 10))
-      .filter(v => Number.isFinite(v) && v >= 0 && v <= 10);
-    if (recentNps.length > 0) {
-      const prom = recentNps.filter(v => v >= 9).length;
-      const pas  = recentNps.filter(v => v === 7 || v === 8).length;
-      const det  = recentNps.filter(v => v <= 6).length;
-      realNpsScore = Math.round(((prom - det) / recentNps.length) * 100);
-      realNpsDist = {
-        promoters:  Math.round((prom / recentNps.length) * 100),
-        passives:   Math.round((pas / recentNps.length) * 100),
-        detractors: Math.round((det / recentNps.length) * 100),
-      };
-    }
-
-    // ── Rating distribution ──────────────────────────────
-    // The survey's first question is five stars, so this is the rating rather
-    // than a stand-in for one. It used to be the closest thing asked: how
-    // likely somebody was to look at their results again in six months.
-    const ratings = surveys
-      .map(s => parseInt(s.rating, 10))
-      .filter(v => Number.isFinite(v) && v >= 1 && v <= 5);
-    if (ratings.length > 0) {
-      const counts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
-      ratings.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
-      ratingsData = {
-        labels: ['5 ★','4 ★','3 ★','2 ★','1 ★'],
-        data:   [counts[5], counts[4], counts[3], counts[2], counts[1]],
-      };
-      const sum = ratings.reduce((a,b) => a+b, 0);
-      realAvgRating = Math.round((sum / ratings.length) * 10) / 10;
-      realRatingN = ratings.length;
-    }
-
-    // ── Feedback Overview extra metrics ─────────────────────────────────
-    window.__fbResponseCount = surveys.length;
-    { const cy = surveys.filter(s => /^yes/i.test(String(s.convo || ''))).length;
-      window.__fbConvoRate = surveys.length ? Math.round(cy / surveys.length * 100) : null; }
-    { const em = surveys.map(s => parseFloat(s.accuracy)).filter(v => Number.isFinite(v));
-      window.__fbExpMatch = em.length ? Math.round(em.reduce((a, b) => a + b, 0) / em.length * 10) / 10 : null; }
-
-    // ── Drop-off point (most common stopping exercise) ──────────────────
-    // bothDone responses indicate where things stalled. "Not done" often
-    // correlates with getting stuck at Ex 02 (expectations is longer).
-    /* The drop-off guess is gone rather than left wrong. It read a question
-       this survey does not ask and turned it into "assume Ex 02" above a
-       threshold. The completion funnel on the Orders page measures the same
-       thing from the exercises themselves. */
-
-    // ── Update KPI text live ────────────────────────────────────────────
-    // These are static-text elements on the satisfaction page header. We
-    // update them here so the numbers reflect reality even before the
-    // page is first visited.
-    const el = id => document.getElementById(id);
-    // The NPS KPI card text node is the 2nd element inside the green kpi-card;
-    // we find it by scanning for '.kpi-label' === 'NPS score' and mutating
-    // the sibling .kpi-val + .kpi-sub safely.
-    document.querySelectorAll('#page-satisfaction .kpi-card').forEach(card => {
-      const label = card.querySelector('.kpi-label')?.textContent || '';
-      const val   = card.querySelector('.kpi-val');
-      const sub   = card.querySelector('.kpi-sub');
-      const trend = card.querySelector('.kpi-trend');
-      if (label === 'NPS score' && realNpsScore != null && val) {
-        val.textContent = realNpsScore;
-        if (sub)   sub.textContent = 'Last 90 days · n=' + recentNps.length;
-        if (trend) trend.textContent = realNpsDist ? `P: ${realNpsDist.promoters}% · Pa: ${realNpsDist.passives}% · D: ${realNpsDist.detractors}%` : '';
-      }
-      if (label === 'Avg rating' && realAvgRating != null && val) {
-        val.innerHTML = realAvgRating + '<span style="font-size:1rem;color:var(--muted)">/5</span>';
-        if (sub) sub.textContent = 'n=' + realRatingN + ' responses';
-      }
-      if (label === 'Would recommend' && realNpsDist && val) {
-        val.innerHTML = realNpsDist.promoters + '<span style="font-size:1rem;color:var(--muted)">%</span>';
-        if (sub) sub.textContent = 'Promoters · n=' + recentNps.length;
-      }
-      if (label === 'Conversation rate' && window.__fbConvoRate != null && val) { val.innerHTML = window.__fbConvoRate + '<span style="font-size:1rem;color:var(--muted)">%</span>'; if (sub) sub.textContent = 'n=' + (window.__fbResponseCount||0); }
-      if (label === 'Felt accurate' && window.__fbExpMatch != null && val) { val.innerHTML = window.__fbExpMatch + '<span style="font-size:1rem;color:var(--muted)">/5</span>'; }
-      if (label === 'Responses' && val) { val.textContent = window.__fbResponseCount || 0; }
-    });
-    /* The drop-off label is gone with the question it came from. The funnel's
-       own bars show where couples stop, which is the measurement rather than a
-       sentence about it. */
-
-    // Force re-render if satisfaction page is currently open
-    if (chartsInit.satisfaction) {
-      chartsInit.satisfaction = false;
-      if (document.getElementById('page-satisfaction')?.classList.contains('active')) initCharts('satisfaction');
-    }
-  } catch (e) {
-    console.warn('[admin] real analytics load failed:', e);
   }
 }
 
@@ -4615,7 +4887,7 @@ const SLICER_CFG={
   'slz-tcouple':{ex:'couple_type'},'slz-rcouple':{ex:'couple_type'},'slz-tindiv':{ex:'type'},'slz-teng':{ex:'axisEngage'},'slz-topen':{ex:'axisOpen'},
   'slz-rdim':{exKind:'ex1'},'slz-rexp':{exKind:'ex2'},'slz-rgap':{exKind:'ex2'},'slz-rfeel':{exKind:'ex3'},'slz-ragree':{exKind:'ex2'},
   'slz-intim':{exKind:'intimacy'},
-  'slz-sfunnel':{},'slz-srate':{},'slz-snps':{},'slz-sconvo':{},
+  'slz-sfunnel':{},
 };
 function exFilterRows(rows,k){ if(!k) return rows; return (rows||[]).filter(r=> k==='ex1'?r.has_ex1 : k==='ex2'?r.has_ex2 : k==='ex3'?r.has_ex3 : k==='intimacy'?r.has_intimacy : true); }
 async function initAllSlicers(){
@@ -4741,44 +5013,6 @@ async function renderSatFunnel(selId){
   const viewed=bothDone;
   setTileN(el, started);
   mkChart(el,{type:'bar',data:{labels:['Ordered','Started exercises','Both completed','Results viewed'],datasets:[{data:[ordered,started,bothDone,viewed],backgroundColor:hexRamp(DEMO_HUE,4).reverse(),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
-}
-async function renderSatConvo(selId){
-  const el=document.getElementById('chart-convo'); if(!el) return;
-  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const sel=document.getElementById(selId);
-  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
-    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatConvo(selId); } }
-  const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>x.convo!=null && x.convo!=='');
-  setTileN(el, surveys.length);
-  const counts={}; surveys.forEach(x=>{ const v=String(x.convo); counts[v]=(counts[v]||0)+1; });
-  const labels=Object.keys(counts);
-  if(!labels.length){ mkChart(el,{type:'doughnut',data:{labels:['No responses yet'],datasets:[{data:[1],backgroundColor:['#E6ECF6'],borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{display:false}},cutout:'62%'}}); return; }
-  const ramp=hexRamp('#22A5C4',Math.max(labels.length,2));
-  mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:labels.map(l=>counts[l]),backgroundColor:labels.map((l,i)=>ramp[i]),borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:12,boxWidth:11}}},cutout:'62%'}});
-}
-async function renderSatRatings(selId){
-  const el=document.getElementById('chart-ratings'); if(!el) return;
-  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const sel=document.getElementById(selId);
-  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
-    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatRatings(selId); } }
-  const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>typeof x.rating==='number');
-  setTileN(el, surveys.length);
-  const c={1:0,2:0,3:0,4:0,5:0}; surveys.forEach(x=>{ c[x.rating]=(c[x.rating]||0)+1; });
-  mkChart(el,{type:'bar',data:{labels:['1 ★','2 ★','3 ★','4 ★','5 ★'],datasets:[{data:[c[1],c[2],c[3],c[4],c[5]],backgroundColor:hexRamp(MONEY_CLR,5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
-}
-async function renderSatNps(selId){
-  const el=document.getElementById('chart-nps'); if(!el) return;
-  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const sel=document.getElementById(selId);
-  if(sel){ populateSlicer(sel,null,cube.rows||[]); sel.classList.toggle('on',!!sel.value);
-    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderSatNps(selId); } }
-  const surveys=sliceFilter(cube.surveys||[], sel?sel.value:'').filter(x=>typeof x.nps==='number');
-  setTileN(el, surveys.length);
-  const months=_last12Months(); const buckets=months.map(m=>({key:m.key,scores:[]}));
-  surveys.forEach(x=>{ const b=buckets.find(y=>y.key===x.month); if(b) b.scores.push(x.nps); });
-  let last=0; const data=buckets.map(b=>{ if(!b.scores.length) return last; const p=b.scores.filter(v=>v>=9).length, d=b.scores.filter(v=>v<=6).length; last=Math.round((p-d)/b.scores.length*100); return last; });
-  mkChart(el,{type:'line',data:{labels:months.map(m=>m.label),datasets:[{label:'NPS',data,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,.1)',tension:.4,fill:true,borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#34D399'},{label:'Benchmark (50)',data:Array(12).fill(50),borderColor:'#4B5563',borderDash:[5,5],borderWidth:1.5,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{grid:{color:'#E6ECF6'},min:-20,max:100},x:{grid:{display:false}}}}});
 }
 async function renderPromoDiscount(selId){
   const el=document.getElementById('pr-discount-chart'); if(!el) return;
@@ -5759,12 +5993,6 @@ function initCharts(page) {
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy'], undefined, true);
     ['qx-comm','qx-exp','qx-story','qx-intimacy'].forEach(id => { QX_MODE[id] = 'mean'; const t = document.getElementById(id + '-distmode'); if (t) { t.value = 'mean'; t.classList.remove('on'); } if (QX_REPAINT[id]) QX_REPAINT[id](); });
-  }
-  else if (page==='satisfaction') {
-    renderSatConvo('slz-sconvo');
-    renderSatRatings('slz-srate');
-    // NPS trend — use real-data month labels when available, fall back to rolling 12-month default
-    renderSatNps('slz-snps');
   }
 }
 

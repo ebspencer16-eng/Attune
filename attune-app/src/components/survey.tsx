@@ -176,9 +176,6 @@ export default function Survey({ onDone }: { onDone: () => void }) {
         maxWidth: MaxContentWidth, width: '100%', alignSelf: 'center',
       }}>
       <Text style={{ ...Type.hero, color: c.textStrong }}>{form.copy.title}</Text>
-      <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs, lineHeight: 20 }}>
-        {form.copy.intro}
-      </Text>
 
       {shown.map((q) => (
         <View key={q.id} style={{ marginTop: Spacing.xl }}>
@@ -219,11 +216,21 @@ export default function Survey({ onDone }: { onDone: () => void }) {
           ) : null}
 
           {q.kind === 'nps' ? (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs }}>
-              {Array.from(
-                { length: (q.max ?? 10) - (q.min ?? 0) + 1 },
-                (_, i) => (q.min ?? 0) + i,
-              ).map((n) => chip(q.id, n, String(n)))}
+            <View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs }}>
+                {Array.from(
+                  { length: (q.max ?? 10) - (q.min ?? 0) + 1 },
+                  (_, i) => (q.min ?? 0) + i,
+                ).map((n) => chip(q.id, n, String(n)))}
+              </View>
+              {/* Nought and ten say nothing on their own. Ellie asked for both
+                  ends to be named, and the words are on the question. */}
+              {q.ends && q.ends.length === 2 ? (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs }}>
+                  <Text style={{ ...Type.small, color: c.textMuted }}>{q.ends[0]}</Text>
+                  <Text style={{ ...Type.small, color: c.textMuted }}>{q.ends[1]}</Text>
+                </View>
+              ) : null}
             </View>
           ) : null}
 

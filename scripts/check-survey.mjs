@@ -195,9 +195,22 @@ const problems = [];
         + ' understanding that nothing we publish carries a name; a name field puts it back.');
     }
   }
-  if (!/never publish your name/i.test(TESTIMONIAL_NOTICE)) {
-    problems.push('the notice under the open questions no longer promises that nothing published'
-      + ' carries a name. That promise is the whole reason there is no consent question.');
+  /**
+   * The fine print has to say two things, in whatever words Ellie chooses.
+   *
+   * It is the whole reason the survey asks no consent question: she removed
+   * that question on the understanding that a published answer carries nothing
+   * identifying. So the sentence has to say the responses are anonymous, and
+   * it has to say they may be used publicly. Matching her exact sentence would
+   * make this gate fail every time she rewrites a line that is hers to write.
+   */
+  if (!/anonymous|no name|without your name/i.test(TESTIMONIAL_NOTICE)) {
+    problems.push('the notice under the open questions no longer says the responses are anonymous.'
+      + ' That promise is the whole reason there is no consent question.');
+  }
+  if (!/website|publish|quote|online/i.test(TESTIMONIAL_NOTICE)) {
+    problems.push('the notice under the open questions no longer says the answers may be used'
+      + ' publicly, so a quotation on the homepage is taken without having said so.');
   }
   const adminApi = read('api/admin-survey.js');
   if (!/respondent_id: who, \.\.\.rest/.test(adminApi) && !/const \{ respondent_id/.test(adminApi)) {
@@ -286,6 +299,47 @@ const problems = [];
   if (!/saveSurvey\(\{ answers: next \}\)/.test(read('attune-app/src/components/survey.tsx'))) {
     problems.push('the app does not save an answer as it is given, so a half-finished survey is lost.');
   }
+  /**
+   * The ends of the 0 to 10 row.
+   *
+   * Ellie: "I do want the 0-10 labeled with the two poles you just listed."
+   * Nought and ten mean nothing on their own, and a surface that drops the
+   * labels is asking a different question from the other two.
+   */
+  const nps = SURVEY_QUESTIONS.find((q) => q.kind === 'nps');
+  if (nps && !(nps.ends || []).length) {
+    problems.push('the 0 to 10 question has no words at its ends. Ellie asked for both poles to'
+      + ' be named.');
+  }
+  if (nps && (nps.ends || []).length) {
+    for (const [file, what] of [
+      ['src/App.jsx', 'the website'],
+      ['public/feedback.html', 'the page an emailed link opens'],
+      ['attune-app/src/components/survey.tsx', 'the app'],
+    ]) {
+      const src = read(file);
+      /* Both ends drawn, not just the name mentioned. A first plant replaced
+         the whole block's condition with `false &&` and passed a check for the
+         string "q.ends", which is this file's own lesson about matching a name
+         instead of what the code does with it. */
+      if (!/q\.ends\[0\]/.test(src) || !/q\.ends\[1\]/.test(src)) {
+        problems.push(`${what} (${file}) never draws the words at the ends of the 0 to 10 row, so`
+          + ' it asks a bare scale while the other surfaces label it.');
+        continue;
+      }
+      /* And the block is reached. A guard is checked by what it compares: a
+         boolean literal beside the condition is a branch turned off, which
+         leaves every string in place for any check that only asks whether
+         something appears. */
+      for (const line of src.split('\n')) {
+        if (!/q\.ends/.test(line)) continue;
+        if (/\b(false|true)\b/.test(line)) {
+          problems.push(`${what} (${file}) guards the 0 to 10 labels with a constant:\n      ${line.trim()}`);
+        }
+      }
+    }
+  }
+
   const page = read('public/feedback.html');
   if (!/saveSoon\(\)/.test(page) || !/save\(false\)/.test(page)) {
     problems.push('public/feedback.html does not save an answer as it is given. It used to hold every'
@@ -315,13 +369,111 @@ const problems = [];
       + ' with its own copy module and its own admin tile; the survey screen is survey.tsx.');
   }
 
-  const admin = read('public/admin.html');
+  /**
+   * The two admin pages, and what each one has to be able to do.
+   *
+   * Ellie: "I want 2 pages - Feedback and Testimonials." Feedback is the
+   * numbers and Testimonials is the words, and the division matters: the only
+   * place that can publish a quote is the page where somebody is reading it.
+   *
+   * None of this names a question. The pages are built from whatever
+   * /api/admin-survey sends, which is why a question added to the survey gets
+   * a tile without anyone editing the admin, and why this gate checks the
+   * machinery rather than a list of tile titles.
+   */
+  /* Comments blanked first: a plant that commented out the per-tile slicer
+     passed a scan that only asked whether the line appeared. A gate that reads
+     a comment as code cannot tell a line from a line somebody turned off. */
+  const adminRaw = read('public/admin.html');
+  const admin = adminRaw
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:"'/])\/\/[^\n]*/g, '$1 ');
   if (!/admin-survey/.test(admin)) problems.push('the admin has no page for the survey.');
+
+  for (const [id, label] of [['page-feedback', 'Feedback'], ['page-testimonials', 'Testimonials']]) {
+    if (!new RegExp(`id="${id}"`).test(adminRaw)) {
+      problems.push(`the admin has no ${label} page. Refusing to pass: a gate that has lost its`
+        + ' subject must never report success.');
+    }
+    const nav = id.replace('page-', '');
+    if (!new RegExp(`showPage\\('${nav}'\\)`).test(adminRaw)) {
+      problems.push(`nothing in the admin's nav opens ${label}, so the page exists and cannot be`
+        + ' reached.');
+    }
+  }
+
+  /* One tile per question, built from the question set rather than written
+     out. Ellie: "I want every tile built now even though we don't have data
+     yet", which is why the tiles are drawn from the questions and not from the
+     answers: a question nobody has answered still gets a tile that says so. */
+  if (!/svTileSpecs\(/.test(admin) || !/for \(const q of questions\)/.test(admin)) {
+    problems.push("the Feedback page no longer builds a tile per question from the question set,"
+      + ' so a question added to the survey will be missing from the admin and nothing will say so.');
+  }
+  /* A segment slicer on every tile, and a period over the whole page. */
+  if (!/svFillSlicer\(sel, periodRows\)/.test(admin)) {
+    problems.push('the tiles on the Feedback page no longer carry their own segment slicer.');
+  }
+  if (!/id="fb-period"/.test(admin) || !/function svPeriod\(/.test(admin)) {
+    problems.push('the Feedback page has no time-period slicer, or nothing applies it.');
+  }
+
+  /* The written answers: coded where they are read, and the full list of
+     themes a click away from the tile that counts them. */
   for (const id of TEXT_QUESTIONS) {
     if (!/svCode\(/.test(admin)) {
       problems.push(`the admin cannot code ${id}, so the open answers can only be read one at a time.`);
       break;
     }
+  }
+  if (!/function svOpenThemes\(/.test(admin) || !/View full list/.test(admin)) {
+    problems.push('a themes tile no longer opens the full list, so a chart of the top few is the'
+      + ' only way the written answers can be seen.');
+  }
+  /* And the tile says what it does not know. A chart over a third of the
+     answers looks exactly like a chart over all of them. */
+  /**
+   * Inside the tile drawer, not anywhere in the file.
+   *
+   * The first version of this looked for the sentence in all of admin.html and
+   * passed a plant that removed it from the tile, because the dialog says the
+   * same thing and one occurrence was enough. The subject is the tile, so the
+   * subject is svDrawTile's body.
+   */
+  {
+    const at = admin.indexOf('function svDrawTile(');
+    if (at < 0) {
+      problems.push('svDrawTile is gone from the admin, so nothing draws a tile. Refusing to pass.');
+    } else {
+      let depth = 0, end = -1, seen = false;
+      for (let i = at; i < admin.length; i++) {
+        if (admin[i] === '{') { depth++; seen = true; }
+        else if (admin[i] === '}') { depth--; if (seen && depth === 0) { end = i + 1; break; } }
+      }
+      const body = end > 0 ? admin.slice(at, end) : '';
+      const noteLine = body.split('\n').find((l) => /not read yet/.test(l)) || '';
+      if (!/t\.uncoded/.test(noteLine)) {
+        problems.push('a themes tile no longer says how many answers nobody has read, so a chart'
+          + ' drawn over a third of them reads as the whole picture.');
+      }
+      const assign = body.split('\n').find((l) => /note\.textContent\s*=/.test(l)) || '';
+      if (/\b(false|true)\s*\?/.test(assign)) {
+        problems.push(`the themes tile's note is behind a constant:\n      ${assign.trim()}`);
+      }
+    }
+  }
+
+  /* Publishing a quote belongs to the page where the quote is being read. */
+  const tsBlock = admin.slice(admin.indexOf('async function renderTestimonials'));
+  if (!/svFeature\(/.test(tsBlock)) {
+    problems.push('the Testimonials page cannot publish a quote, which is the one thing it is for.');
+  }
+  /* Search has to look at the themes as well as the words: that is the whole
+     reason the answers are coded. */
+  if (!/a\.codes\.join\(' '\)/.test(admin)) {
+    problems.push("the Testimonials search no longer looks at the themes, so a search for a theme"
+      + ' finds only the answers that happen to use the word.');
   }
 }
 

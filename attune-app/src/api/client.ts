@@ -1634,6 +1634,8 @@ export type SurveyQuestion = {
   hint?: string;
   min?: number;
   max?: number;
+  /** The words under a 0 to 10 row, low end first. */
+  ends?: string[];
   /* The condition under which the question is asked, as data. See
      api/_lib/survey.js: the app cannot import that file, so it runs the same
      matcher over whatever the payload says rather than naming questions. */
@@ -1644,7 +1646,7 @@ export type SurveyForm = {
   /** Whether this person already reached the end of it. */
   finished?: boolean;
   copy: {
-    title: string; intro: string; submit: string; submitting: string;
+    title: string; submit: string; submitting: string;
     thanksTitle: string; thanks: string; saved: string;
   };
   notice: string;

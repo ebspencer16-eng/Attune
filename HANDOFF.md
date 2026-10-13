@@ -2672,3 +2672,53 @@ and the live endpoints were swept with curl.
 **Five sentences in the survey are mine**, listed in TASKS.md as B39 for Ellie
 to replace: the intro, the fine print, the button, and the two lines of the
 thank-you. The nine questions are hers.
+
+## 2026-10-13, the survey's words and the two admin pages
+
+**B39, her copy, is in.** Every sentence around the questions is Ellie's now.
+One decision she should look at and can reverse in a line: her first line reads
+as a heading rather than as a line under one, so it IS the heading and the
+intro I had written is gone rather than sitting on top of hers. `SURVEY_COPY`
+has no `intro` field any more. Two words are still mine and are named in
+TASKS.md: the button while it sends, and the line that says an answer is saved.
+The 0 to 10 question now carries `ends`, and check-survey fails if any surface
+stops drawing both of them.
+
+The gate holds the fine print to its PROMISE rather than to its sentence: it
+has to say the answers are anonymous and that they may be used publicly,
+because those two together are what replaced the consent question. Matching her
+exact words would fail the build every time she rewrites a line that is hers.
+
+**B41, the admin, is two pages.** Feedback is the numbers and Testimonials is
+the words. The old Survey page and the old Feedback Overview are both gone into
+Feedback; with them went renderOverviewKPIs, three satisfaction charts and
+loadRealAnalytics, all of which painted elements that no longer exist.
+
+Feedback: a period slicer over the page, four metrics (average rating, NPS, the
+share who say it prompted a conversation, the aspect ranked first most often),
+then two tiles to a row built from the question set, each with its own segment
+slicer. A written question gets a themes chart plus **View full list**, which
+opens category and volume with every answer under it, and says how many answers
+nobody has read yet. Testimonials: every written answer, sorted, filtered by
+demographic checkboxes and a timeframe, searched across the words AND the
+themes, with the star that publishes one to the homepage.
+
+**Two things worth knowing if you pick this up.**
+
+The first splice of the markup put the new pages inside page-types, because the
+boundary search matched only two-space indentation and five of the fourteen
+page divs start at column 0. The symptom was a page that looked right in a
+screenshot and had a broken tree. Restoring from the copy and replaying the
+three edits was far cheaper than unpicking it, which is what CLAUDE.md already
+says about src/App.jsx and is just as true here. The fixed script asserts the
+block it is about to replace holds exactly one `id="page-`.
+
+And a fullPage screenshot of the admin shows tiles from pages that are
+`display:none`, measured at zero by zero in the same run. The camera, not the
+page: trust `getComputedStyle` over the picture.
+
+**Not verified:** nobody has answered the survey yet, so every number on the
+Feedback page was checked against 40 made-up responses driven through a
+browser, not against real rows. The tiles, the slicers, the period, the themes
+dialog, the search and the star were all exercised that way; what has not been
+exercised is a real answer arriving from a real couple.

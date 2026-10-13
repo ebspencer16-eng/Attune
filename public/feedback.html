@@ -110,7 +110,6 @@ textarea::placeholder{color:var(--faint)}
   <div class="header">
     <div class="header-eyebrow" id="eyebrow">Attune</div>
     <h1 id="title"></h1>
-    <p id="intro"></p>
   </div>
 
   <div class="progress-wrap">
@@ -435,7 +434,6 @@ textarea::placeholder{color:var(--faint)}
       form = data;
       answers = data.answers || {};
       el('title').textContent = form.copy.title;
-      el('intro').textContent = form.copy.intro;
       el('submitBtn').textContent = form.copy.submit;
       el('submitBtn').addEventListener('click', submit);
       render();
