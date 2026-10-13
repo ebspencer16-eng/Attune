@@ -2614,3 +2614,61 @@ white card on a white sheet loses its lower half to a 10 per cent shadow.
 
 B33 in section 1 is the survey proposal she asked for: eight questions, three
 conditional, with what we lose by cutting the other eighteen.
+
+---
+
+## 2026-10-13, the survey
+
+B33 is built and pushed, and an EAS update is published (commit 00b33d11, the
+bundle Expo serves is dated 2026-10-13T05:30Z). **Nothing it collects can be
+stored until Ellie runs migration 079**, which is inline in TASKS.md section 1
+as B38. Until then `/api/survey` answers its questions and refuses to store,
+saying "Survey storage is not set up yet (migration 079)", which is what a
+curl against the live site returns right now.
+
+**The questions live in `api/_lib/survey.js` and nowhere else.** Three surfaces
+draw them: `ResultsSurvey` in `src/App.jsx` at the end of What Comes Next,
+`attune-app/src/components/survey.tsx` opened from the app's version of that
+page, and `public/feedback.html`, which was the 26-question beta survey and is
+now a renderer of whatever the endpoint sends.
+
+**Which questions show is data, not code.** A conditional is `showWhen` on the
+question (`{ field, startsWith }` or `{ field, atLeast, atMost }`). The website
+imports `shouldShow`; the app and the static page cannot import from `api/`, so
+each runs a six-line matcher, and `check-survey` lifts both out of their files,
+runs them, and compares with the server's over 20 sets of answers either side
+of every line. A new conditional question needs no surface change.
+
+**What I took out, which is the part worth checking behind me.** Three admin
+pages read rows migration 079 deletes, and two of them carried their own copy
+of the 26 questions: Beta Feedback, Survey Explorer and Testimonials are gone.
+The Survey page replaces all three, and the question explorer that was on the
+Beta page is on it. The Feedback Overview, the NPS trend, the rating
+distribution and Couple type x outcomes read the new answers; the two tiles
+that measured retired questions are relabelled to the two they measure now
+(the star rating, and how accurate the results felt). `/api/submit-beta-survey`
+is deleted and `check-open-writes` points at `/api/survey` instead.
+
+**The survey is never joined to an email.** It says above its first question
+that the answers are anonymous, so `loadFeedbackByEmail` is gone from
+`api/admin-csv.js` and the combined export no longer carries a column per
+question beside the order. The survey exports on its own, with no email, name
+or profile id.
+
+**Publishing a quote.** A star on any written answer in the admin writes
+`featured_question` and `featured_at`, and `/api/featured-testimonials` reads
+nothing else. No name is published and none is stored: that is what replaced
+the old consent question, at Ellie's ask, and the fine print under every
+written answer is the thing that covers it. R12 now carries a question about
+that sentence for the lawyer.
+
+**What is not verified.** The app's survey screen typechecks and is published,
+and the simulator has no window, so taps cannot be driven and I have not seen
+it render. Everything else is: the rewritten /feedback was driven in a browser
+(seven questions, the conditional appearing on the right answer, each answer
+posting as it is given, no sideways scroll at 390 points), all 240 gates pass,
+and the live endpoints were swept with curl.
+
+**Five sentences in the survey are mine**, listed in TASKS.md as B39 for Ellie
+to replace: the intro, the fine print, the button, and the two lines of the
+thank-you. The nine questions are hers.

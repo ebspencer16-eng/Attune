@@ -194,7 +194,7 @@ export default function Survey({ onDone }: { onDone: () => void }) {
                   onPress={() => setAns(q.id, n)}
                   hitSlop={6}>
                   <SymbolView
-                    name={(Number(answers[q.id]) >= n ? 'star.fill' : 'star') as never}
+                    name={Number(answers[q.id]) >= n ? ('star.fill' as const) : ('star' as const)}
                     size={30}
                     tintColor={Number(answers[q.id]) >= n ? c.accent : c.border}
                     fallback={<Text style={{ fontSize: 26, color: Number(answers[q.id]) >= n ? c.accent : c.border }}>

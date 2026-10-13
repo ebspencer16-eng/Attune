@@ -1065,6 +1065,25 @@ testflight`. Never "from the app folder, run". Never a fragment to append. A
 file she needs to put somewhere gets `| pbcopy` and the instruction to paste,
 rather than a path to go and open.
 
+**An assertion about a file trips on the comment explaining the edit.** Four
+times in one session: a script removed `betaResponses`, wrote a comment saying
+what `betaResponses` used to be, and then asserted the name was gone. The
+assertion is right and the edit is right; the scan is reading prose as code.
+This file already says it about gates, under check-style-codes. It applies to
+the throwaway scripts too, which is where it costs a re-run every time. Strip
+comments before asserting, or assert on the shape the code uses
+(`path: '/api/x'`) rather than on the name.
+
+**Two instruments with similar names, and I overwrote one with the other.**
+`attune-app/src/components/feedback.tsx` was the "How was your experience?"
+questionnaire, seven questions from `api/_lib/feedback-copy.js`, with its own
+card and its own admin tile. The survey is a different thing, nine questions
+from `api/_lib/survey.js`, asked at the end of the experience. I wrote the
+survey into that file because it was called feedback, and the app silently
+stopped asking the questionnaire while three surfaces went on reporting on it.
+check-feedback-reachable caught it, which is the only reason it did not ship.
+The survey is `survey.tsx` now and both gates name the file they are about.
+
 **Back up by path, not by basename.** `api/survey.js` and
 `api/_lib/survey.js` both became `survey.js` in a scratch directory, so one
 plant's restore wrote the endpoint over the module and left the planted line
