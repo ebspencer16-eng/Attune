@@ -48,11 +48,31 @@ const OUT = `${ROOT}WORDS-REVIEW.md`;
  * Said in weeks because "fifty days" is the number and "seven weeks" is what
  * it means for someone opening the app.
  */
+/**
+ * The words Ellie wrote herself, by id.
+ *
+ * She sent 49 back as a table and they replaced the drafts of those words
+ * entirely, so the honest way to say "these are hers" is to name them. A
+ * count would have been wrong the moment a word moved.
+ */
+const HER_WORDS = new Set(WORDS.slice(0, 49).map((w) => w.id));
+
 const weeks = (WORDS.length / 7).toFixed(1);
 
 const rows = WORDS.map((w, i) => `| ${i + 1} | **${w.word}** | ${w.part} | ${w.definition} |`);
 
-const doc = `# Word of the day: fifty for review
+/**
+ * Which of these are hers.
+ *
+ * Counted, not written down: the first run of this document said "the first
+ * four are the words you named, the other forty-six are mine" and stayed
+ * true for exactly one round. HER_WORDS is the boundary and the prose reads
+ * it, so the sentence cannot go stale while the list grows.
+ */
+const hers = WORDS.filter((w) => HER_WORDS.has(w.id)).length;
+const mine = WORDS.length - hers;
+
+const doc = `# Word of the day: ${WORDS.length} for review
 
 Generated from \`api/_words.js\` by \`scripts/build-words-review.mjs\`. Do not
 edit this file. Change a definition in \`api/_words.js\` and run the script, or
@@ -68,7 +88,10 @@ happened to you" is not what a dictionary says and is what this product means.
 Each one is a single sentence, present tense, no hedging and no em dashes, and
 none of them tells a couple which way to be.
 
-The first four are the words you named. The other forty-six are mine.
+The first ${hers} are yours, word for word, from the list you sent back. The
+other ${mine} are mine, written to follow the edits you made to the first
+fifty: a plain word over a careful one, a verb over an abstraction, shorter,
+and never a sentence that tells a couple which way to be.
 
 ## What to tell me
 

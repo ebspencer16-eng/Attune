@@ -1,10 +1,10 @@
-# Word of the day: fifty for review
+# Word of the day: 100 for review
 
 Generated from `api/_words.js` by `scripts/build-words-review.mjs`. Do not
 edit this file. Change a definition in `api/_words.js` and run the script, or
 tell me the change and I will make it.
 
-**50 words**, one a day, so the list comes round about every 7.1
+**100 words**, one a day, so the list comes round about every 14.3
 weeks.
 
 ## What I was going for
@@ -14,7 +14,10 @@ happened to you" is not what a dictionary says and is what this product means.
 Each one is a single sentence, present tense, no hedging and no em dashes, and
 none of them tells a couple which way to be.
 
-The first four are the words you named. The other forty-six are mine.
+The first 49 are yours, word for word, from the list you sent back. The
+other 51 are mine, written to follow the edits you made to the first
+fifty: a plain word over a careful one, a verb over an abstraction, shorter,
+and never a sentence that tells a couple which way to be.
 
 ## What to tell me
 
@@ -70,16 +73,67 @@ over breakfast is not the tone you want.
 | 34 | **Intimacy** | noun | Being known, which takes longer than being close. |
 | 35 | **Desire** | noun | Wanting your partner in a way you would say out loud. |
 | 36 | **Initiation** | noun | Going first, even when you don't know the answer. |
-| 38 | **Resentment** | noun | The bill for everything you have not said. |
-| 39 | **Contempt** | noun | Disagreement with a low opinion or judgement attached. |
-| 40 | **Defensiveness** | noun | Responding to the accusation instead of the person. |
-| 41 | **Appreciation** | noun | Noticing out loud, on a day when nothing is wrong. |
-| 42 | **Compatibility** | noun | Less about being alike and more about how you handle being different. |
-| 43 | **Partnership** | noun | Two people carrying something neither could carry alone. |
-| 44 | **Fairness** | noun | A split you would both still choose if you swapped sides. |
-| 45 | **Grace** | noun | Giving someone the reaction to behavior that you would want for your own. |
-| 46 | **Restraint** | noun | The sentence you had ready and did not use. |
-| 47 | **Humility** | noun | Willingness to be wrong in front of the person you respect. |
-| 48 | **Steadiness** | noun | Being predictable in the ways that your partner depends on. |
-| 49 | **Patience** | noun | Letting something take the time it takes. |
-| 50 | **Generosity** | noun | Giving someone the benefit of the doubt and showing it through your actions. |
+| 37 | **Resentment** | noun | The bill for everything you have not said. |
+| 38 | **Contempt** | noun | Disagreement with a low opinion or judgement attached. |
+| 39 | **Defensiveness** | noun | Responding to the accusation instead of the person. |
+| 40 | **Appreciation** | noun | Noticing out loud, on a day when nothing is wrong. |
+| 41 | **Compatibility** | noun | Less about being alike and more about how you handle being different. |
+| 42 | **Partnership** | noun | Two people carrying something neither could carry alone. |
+| 43 | **Fairness** | noun | A split you would both still choose if you swapped sides. |
+| 44 | **Grace** | noun | Giving someone the reaction to behavior that you would want for your own. |
+| 45 | **Restraint** | noun | The sentence you had ready and did not use. |
+| 46 | **Humility** | noun | Willingness to be wrong in front of the person you respect. |
+| 47 | **Steadiness** | noun | Being predictable in the ways that your partner depends on. |
+| 48 | **Patience** | noun | Letting something take the time it takes. |
+| 49 | **Generosity** | noun | Giving someone the benefit of the doubt and showing it through your actions. |
+| 50 | **Admiration** | noun | Thinking well of someone where they can hear it. |
+| 51 | **Apology** | noun | Naming what you did, without the word but. |
+| 52 | **Attention** | noun | The thing everybody says they want more of and nobody can fake. |
+| 53 | **Avoidance** | noun | Choosing the easier hour and paying for it later. |
+| 54 | **Belonging** | noun | Knowing you do not have to earn your place this week. |
+| 55 | **Blame** | noun | Deciding who is at fault instead of deciding what to do. |
+| 56 | **Candor** | noun | Saying the true thing kindly, while it is still useful. |
+| 57 | **Capacity** | noun | How much you have left, which is not how much you care. |
+| 58 | **Clarity** | noun | Saying it plainly enough that there is nothing left to interpret. |
+| 59 | **Closeness** | noun | Being near someone because you both chose it today. |
+| 60 | **Comfort** | noun | Being with someone and performing nothing. |
+| 61 | **Compassion** | noun | Caring about a struggle you did not cause and cannot fix. |
+| 62 | **Complaint** | noun | Something you want changed, said about the thing rather than the person. |
+| 63 | **Consistency** | noun | Doing it again on a Tuesday when nobody is watching. |
+| 64 | **Courage** | noun | Starting the sentence you have rehearsed all week. |
+| 65 | **Criticism** | noun | A complaint that went after the person instead. |
+| 66 | **Devotion** | noun | Choosing someone long after the choosing stopped being exciting. |
+| 67 | **Disappointment** | noun | The gap between what you pictured and what arrived. |
+| 68 | **Discretion** | noun | Deciding what belongs to the two of you, and keeping it there. |
+| 69 | **Distance** | noun | Space neither of you asked for. |
+| 70 | **Effort** | noun | What love looks like on an ordinary week. |
+| 71 | **Encouragement** | noun | Backing someone before the outcome is known. |
+| 72 | **Flexibility** | noun | Changing the plan without changing how you feel about the person. |
+| 73 | **Flooding** | noun | The point where your body ends the conversation for you. |
+| 74 | **Friendship** | noun | The part of a relationship that outlasts everything else. |
+| 75 | **Gentleness** | noun | Handling someone the way they would handle something breakable. |
+| 76 | **Grief** | noun | Loving something that is not here any more. |
+| 77 | **Humor** | noun | Finding the same thing funny at the same moment. |
+| 78 | **Identity** | noun | Who you are when nobody is describing you. |
+| 79 | **Insecurity** | noun | A question about yourself that you aim at someone else. |
+| 80 | **Integrity** | noun | Being the same person in both rooms. |
+| 81 | **Jealousy** | noun | Fear wearing an accusation. |
+| 82 | **Kindness** | noun | The small version of love, used daily. |
+| 83 | **Longing** | noun | Missing someone who is sitting next to you. |
+| 84 | **Loyalty** | noun | Speaking about someone the same way whether or not they are there. |
+| 85 | **Maintenance** | noun | The unglamorous work that keeps everything else possible. |
+| 86 | **Misunderstanding** | noun | Two people being reasonable about different things. |
+| 87 | **Mutuality** | noun | Both of you doing the reaching. |
+| 88 | **Negotiation** | noun | Finding out what you each actually need, before deciding anything. |
+| 89 | **Openness** | noun | Letting a conversation change your mind. |
+| 90 | **Pace** | noun | The speed one of you is comfortable with, which is rarely the same speed. |
+| 91 | **Perspective** | noun | Your partner’s version, held long enough to be understood. |
+| 92 | **Playfulness** | noun | Not being serious about something that does not need it. |
+| 93 | **Privacy** | noun | What is yours to tell, including inside a marriage. |
+| 94 | **Reciprocity** | noun | Keeping no score, and noticing anyway. |
+| 95 | **Resilience** | noun | Getting back to each other faster than last time. |
+| 96 | **Respect** | noun | Treating someone’s reasons as real before you have agreed with them. |
+| 97 | **Safety** | noun | Being able to say the hard thing and still be here afterward. |
+| 98 | **Stonewalling** | noun | Going quiet and calling it calm. |
+| 99 | **Timing** | noun | The difference between the right sentence and the wrong moment. |
+| 100 | **Tone** | noun | What your partner hears before the words arrive. |
