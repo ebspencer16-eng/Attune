@@ -8,117 +8,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B70 | **One migration to run: the daily notification times.** Settings offers a once-a-day insight and a once-a-day word at a time you pick, 7:30am by default, and neither row appears until you run this. The SQL is in the box under this table. |
-| B79 | **The packages page says the same thing twice, and always has.** Nothing changed; it needs one new sentence from you. See under this table. |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
-
-### B70, the migration to run
-
-Three columns on profiles, all empty, which means off for everybody. Nobody
-starts getting anything because this ran. It adds the two times a person can
-choose, and the one thing the server cannot work out on its own, which is what
-time zone they are in.
-
-Until you run it, the two rows do not appear in Settings at all. A control that
-cannot save is worse than no control.
-
-**In the Supabase SQL editor:**
-
-<!-- SQL 083_daily_push.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 083: a once-a-day insight and a once-a-day word, at a time each person picks.
---
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie: "Notifications settings should offer a once-a-day notification that
--- sends you the insight of the day at a time you select (default should be
--- 7:30am), same for word of the day."
---
--- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
--- Three columns on profiles, all null by default, which means off. Nobody
--- starts receiving anything because this ran.
---
---   daily_insight_at    'HH:MM' in the reader's own clock, or null for off
---   daily_word_at       the same, for the word of the day
---   tz_offset_minutes   what getTimezoneOffset() returns on their device:
---                       minutes to ADD to local time to reach UTC. New York in
---                       summer is 240. Stored because a cron has to know when
---                       somebody's 7:30 is, and the only other place this is
---                       known is the query string of a request they are not
---                       making at 7:30 in the morning.
---
--- A time is text rather than `time`, because what is stored is a wall clock
--- reading in somebody else's day, not an instant. Postgres would happily
--- compare two of these and the comparison would be meaningless.
---
--- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
--- ============================================================================
-
-alter table public.profiles
-  add column if not exists daily_insight_at  text,
-  add column if not exists daily_word_at     text,
-  add column if not exists tz_offset_minutes integer;
-
-comment on column public.profiles.daily_insight_at is
-  'Local HH:MM to send the insight of the day, or null for off. Read by api/cron-daily-push.js.';
-comment on column public.profiles.daily_word_at is
-  'Local HH:MM to send the word of the day, or null for off. Read by api/cron-daily-push.js.';
-comment on column public.profiles.tz_offset_minutes is
-  'Date.getTimezoneOffset() from the reader''s device: minutes to add to local to reach UTC.';
-
--- A shape, not a preference: anything that is not a 24-hour clock reading
--- would silently never match the cron's window and the person would wonder
--- why nothing arrived.
-alter table public.profiles drop constraint if exists profiles_daily_insight_at_shape;
-alter table public.profiles add constraint profiles_daily_insight_at_shape
-  check (daily_insight_at is null or daily_insight_at ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$');
-
-alter table public.profiles drop constraint if exists profiles_daily_word_at_shape;
-alter table public.profiles add constraint profiles_daily_word_at_shape
-  check (daily_word_at is null or daily_word_at ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$');
-
--- The cron reads everybody with either one set, every half hour. Two partial
--- indexes rather than one on both columns: a row is usually in neither.
-create index if not exists profiles_daily_insight_idx
-  on public.profiles (daily_insight_at) where daily_insight_at is not null;
-create index if not exists profiles_daily_word_idx
-  on public.profiles (daily_word_at) where daily_word_at is not null;
-
--- ── Verification ────────────────────────────────────────────────────────────
--- Nobody should be signed up for anything yet. Both counts are 0 on a first run.
-select count(*) filter (where daily_insight_at is not null) as insight_on,
-       count(*) filter (where daily_word_at    is not null) as word_on,
-       count(*) filter (where tz_offset_minutes is not null) as know_their_clock
-  from public.profiles;
-```
-<!-- /SQL -->
-
----
-
-### B79, the hero and the button on the packages page
-
-You asked whether the hero statements or the CTAs changed. They did not. Both
-sentences on that page arrived in one commit and nothing has touched either
-since, which git answers in one command.
-
-You are right that they say the same thing, and only on that page:
-
-- Hero: **The right way to give real understanding.**
-- Under it: For you and your partner, or for a couple you love.
-- At the foot: **The most thoughtful thing you can give is real understanding.**
-- Under that: For you and your partner, or for a couple you love.
-
-Both land on "real understanding", and the last line is the first half of the
-hero's, word for word. Every other page says different things top and bottom.
-
-What it needs is one new sentence from you: whichever of the two titles you
-would rather replace, and a new line under it. Send me the words.
-
----
 
 ### Still open from the review
 
@@ -144,14 +38,41 @@ on you.
 |--|--|
 | C3 | **100 words, and 49 of them are yours.** Your edits replaced my drafts of those words entirely, Consent is gone, and I wrote 51 more following the four moves your edits make. The list comes round every 100 days. In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | C6 | **100 insights, every one a verified quotation.** 69 come from pages a machine can open, and all 69 were checked word for word against the page today; the other 31 are from books and were checked when they were added. In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/INSIGHTS-REVIEW.md` |
-| B69 | **The word of the day opens as a storycard**, on the Notes page ground with the attune link at the foot, sharing a picture rather than a line of text. |
-| B71 | **The app waits 43 per cent less on a refresh.** /api/home asked eight questions one after another; the five that need nothing but your id are asked at once now, and the answer is byte for byte what it was. |
-| B72 | **One mark everywhere, with a solid white heart.** 64 copies across 33 files drew it at 93 per cent, and the app's own file was a different drawing altogether, generated by nothing since September. |
-| B73 | **The insights menu dropdown** sits on the menu's own ground with no coloured edge. |
-| B74 | **The survey's last question asks whether we may use your first name.** The notice above the written answers still says the responses are anonymous, which is now only true when somebody answers no. That sentence is yours to change if you want it changed. |
+| B79 | **The packages page carries your two sentences.** The hero is The most thoughtful thing you can give is real understanding, its description is untouched, and the foot is Begin your Attune Experience over your gift line. |
+| B69 | **The word card is rebuilt from the Notes entry itself**, so the two cannot look different again: same gradient, same two cards, and the attune link is readable because the foot takes ink on a light card instead of white. I rendered it and looked at it this time. |
+| B73 | **Nothing turns white.** The open row's cream ground is gone; the section still reads as open from its arrow and its pages. |
+| B71 | **Every endpoint measured, and two more were worse than the home screen.** The tools tab went from seven round trips to three, Notes from five to four, and the home screen is still four. Detail under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### B71, what the numbers are
+
+Measured by running each endpoint with every database call pegged at the same
+latency, so the clock is the shape of the code rather than the speed of my
+laptop. The number is round trips: how many times the server has to wait for an
+answer before it can ask its next question. Each one is a real wait on a phone.
+
+| Endpoint | Was | Now |
+|--|--|--|
+| The tools tab | 7 | 3 |
+| Notes | 5 | 4 |
+| Home | 7.6 | 4 |
+| Results | 3 | 3 |
+| In Practice | 2 | 2 |
+| Alerts | 2 | 2 |
+
+The tools tab was the worst and you had not asked about it: it wanted the
+partner's name, then the workbook's order, then the couple's shared tools, each
+one waiting for the last, and none of the three needs either of the others.
+
+Three of these are now at their floor, which is the chain that genuinely cannot
+be flattened. Home still waits four times because the profile names the partner,
+the partner's row carries their email, and the beta lookup needs both.
+
+One thing to know, because it is the kind of thing that comes back: making the
+Notes list faster put a read in front of every SAVE. The check counts calls on
+the write paths too now, which is how that was caught before it shipped.
 
 ## 4. Done and verified
 
@@ -166,6 +87,9 @@ on you.
 | B33 | The survey, nine questions in one module, asked in the app, on the website at the end of What Comes Next and from the email link, saving each answer as it is given. |
 | B50 | The engagement time chart's two series had no label of their own, so the legend read "seconds" against "App"; they are Web and App. |
 | R2 | App insights and results, all 29 sections. |
+| B70 | Nobody could choose a time for the insight or the word of the day; Settings offers both now, at any half hour, 7:30am by default. |
+| B72 | The mark was drawn 64 different times with a 93 per cent white heart, and the app's own file was a different drawing generated by nothing since September. |
+| B74 | The survey asks, last, whether we may use a first name if we quote somebody. |
 | B67 | The pill above Starting Out said Starting Out; it says Wedding gift on the preview tiles and on the checkout, held together by a gate. |
 | B66 | The Attune Assessment row in each preview tile had darker type and an orange tick, so one line of four read as a heading; every row looks the same now. |
 | B65 | The hero banners were measured on five pages against the previous build and are identical; what changed above them was the nav. |

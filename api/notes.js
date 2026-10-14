@@ -72,6 +72,37 @@ export default async function handler(req) {
     const rest = (path, init) => fetch(`${supabaseUrl}/rest/v1/${path}`, init);
 
     // Partner, for the couple key and for reading what they shared.
+    /**
+     * ── THE READER'S OWN NOTES DO NOT WAIT FOR THEIR PROFILE ────────────
+     * Ellie: "can we make it faster?"
+     *
+     * This list was auth, then the profile, then the reader's notes, then the
+     * couple's shared ones, then the tags: five round trips, and the third of
+     * them needed nothing the second provided. `owner_id` is the id the token
+     * already gave us.
+     *
+     * The profile is still needed, for the couple key the shared query filters
+     * on and for the ownership columns. It is simply no longer in front of
+     * this.
+     *
+     * Started here and awaited below. `.catch` where it is created, because a
+     * promise that rejects before anything is waiting on it is an unhandled
+     * rejection.
+     */
+    /**
+     * Only for the read this belongs to.
+     *
+     * The first version started it on every request, which put a notes query
+     * in front of every save, every tag edit and every delete: faster on one
+     * path and a wasted round trip on nine. The action is readable from the
+     * query string before anything is parsed, which is all this needs.
+     */
+    const listing = req.method === 'GET'
+      && (new URL(req.url).searchParams.get('action') || 'list') === 'list';
+    const myNotes = listing
+      ? rest(`notes?owner_id=eq.${me}&select=*&order=updated_at.desc`, { headers: svc }).catch(() => null)
+      : null;
+
     const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,pronouns,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
     const profile = (await pRes.json().catch(() => []))?.[0] || {};
     const partnerId = profile.partner_profile_id || null;
@@ -93,8 +124,9 @@ export default async function handler(req) {
 
     // ── Read ───────────────────────────────────────────────────────────────
     if (req.method === 'GET' && action === 'list') {
-      const mineRes = await rest(`notes?owner_id=eq.${me}&select=*&order=updated_at.desc`, { headers: svc });
-      let mine = await mineRes.json().catch(() => []);
+      /* Asked for before the profile read, because it needed nothing from it. */
+      const mineRes = await myNotes;
+      let mine = mineRes ? await mineRes.json().catch(() => []) : [];
 
       let shared = [];
       if (coupleKey) {

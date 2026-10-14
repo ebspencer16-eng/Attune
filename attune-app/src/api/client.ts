@@ -218,6 +218,24 @@ export type HighlightCard = {
     line?: string | null;
   }[];
   dimensions?: { key: string; label: string; left: string | null; right: string | null; a: number | null; b: number | null }[];
+  /**
+   * A page's own wash behind this card, instead of a linear gradient.
+   *
+   * The word of the day sits on the Notes tab's ground, which is two corner
+   * washes over white and is not expressible as the three stops `ground`
+   * carries. The renderer draws the real component rather than an
+   * approximation of it, so the page and the card cannot drift apart.
+   *
+   * Set by the app, never by the server: no results card wants one.
+   */
+  wash?: 'notes';
+  /**
+   * The colour of the wordmark and the address at the foot.
+   *
+   * White on every card, because every card is dark, and the one light card
+   * drew them invisible. Ellie: "I'm not seeing the link at the bottom."
+   */
+  footTone?: 'ink';
 };
 
 /**

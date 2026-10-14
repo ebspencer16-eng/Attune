@@ -65,12 +65,21 @@ const NOTES_PAIRS = {
   recent: 'JUMP_BACK_IN',
   sharedWithMe: 'SHARED_WITH_ME',
   writeEntry: 'WRITE_ENTRY',
-  wordInUse: 'WORD_IN_USE',
   journalTitle: 'JOURNAL_TITLE',
   journalOpen: 'JOURNAL_OPEN',
   mineEmpty: 'PEEK_MINE_EMPTY',
   sharedEmpty: 'PEEK_SHARED_EMPTY',
 };
+/**
+ * The label over the word of the day's second card.
+ *
+ * It moved out of notes.tsx with the entry it labels: Ellie asked for the
+ * word to open as a storycard that looks like the Notes tab's, and the only
+ * way two surfaces draw the same entry is for there to be one of it. This
+ * gate caught the move, which is what it is for, and the answer it asks for
+ * in its own message is this: point it at where the string went.
+ */
+const WORD_PAIRS = { wordInUse: 'WORD_IN_USE' };
 const LOCK_PAIRS = { lockedApp: 'JOURNAL_LOCKED' };
 /**
  * The four sentences on the sheet that keeps an insight.
@@ -148,6 +157,9 @@ for (const [map, pairs, label, src, where] of [
     readFileSync(`${ROOT}attune-app/src/constants/save-copy.ts`, 'utf8'),
     'attune-app/src/constants/save-copy.ts'],
   [NOTES_COPY, NOTES_PAIRS, 'NOTES_COPY', notesApp, 'attune-app/src/app/notes.tsx'],
+  [NOTES_COPY, WORD_PAIRS, 'NOTES_COPY',
+    readFileSync(`${ROOT}attune-app/src/components/word-entry.tsx`, 'utf8'),
+    'attune-app/src/components/word-entry.tsx'],
   [JOURNAL_COPY, LOCK_PAIRS, 'JOURNAL_COPY', notesApp, 'attune-app/src/app/notes.tsx'],
 ]) {
   for (const [key, name] of Object.entries(pairs)) {

@@ -60,6 +60,7 @@ import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import TabScreen from '@/components/tab-screen';
 import { StoryCard, wordCard } from '@/components/highlight-cards';
+import WordEntry, { WORD_IN_USE } from '@/components/word-entry';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
@@ -642,132 +643,11 @@ export default function NotesScreen() {
               the research finding is: one copy of every word a customer
               reads, and Ellie can change it without an app build. */}
           {word ? (
-            <View style={{ marginBottom: Spacing.xxl }}>
-              {/* The entry sits over the usage note, which is what lets the
-                  one below tuck under it. */}
-              <View
-                style={{
-                  /* Ellie: "Less white space on the noun box with the
-                     dictionary definition." */
-                  backgroundColor: Palette.white, borderRadius: Radius.card,
-                  paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl,
-                  zIndex: 2, ...Lift,
-                }}>
-                {/* ── THE ENTRY'S TOP LINE ──────────────────────────────
-                    The reference puts the part of speech small and grey at the
-                    left and a round control opposite it, then the word very
-                    large under both with air beneath it. The control is a
-                    speaker there, which this product has nothing to say
-                    through; sharing the word is a real thing it can do and
-                    needs no words on the button. */}
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ ...Type.body, color: c.textMuted, flex: 1 }}>{word.part}</Text>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Open the word ${word.word} as a card`}
-                    hitSlop={10}
-                    /* Ellie: "When I share the word of the day, I want it to
-                       be a storycard like the insight of the day." So this
-                       opens the card, which has the share that sends a
-                       picture; sharing a line of text from here was the thing
-                       she was asking to replace. */
-                    onPress={() => setWordOpen(true)}
-                    style={{
-                      width: 34, height: 34, borderRadius: 17,
-                      backgroundColor: Palette.warm,
-                      alignItems: 'center', justifyContent: 'center',
-                    }}>
-                    <SymbolView
-                      name={'square.and.arrow.up' as never}
-                      size={15}
-                      tintColor={c.textMuted}
-                      fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{'\u2191'}</Text>}
-                      style={{ width: 17, height: 17 }}
-                    />
-                  </Pressable>
-                </View>
-                {/* ── THE WORD, IN THE BODY FACE ────────────────────────
-                    Ellie: "I asked for the 'Connection' text to not be playfair
-                    display anymore but it still is. you changed the word in use
-                    body text instead."
-
-                    She is right: the instruction was about this line and I
-                    applied it to the definition. This is DM Sans at its bold
-                    weight, set large, which is also what the reference's word
-                    is: a heavy grotesque, not a serif. */}
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  style={{
-                    fontFamily: Fonts.bodyBold, fontSize: 46, lineHeight: 58,
-                    fontWeight: '700', color: c.textStrong,
-                    marginTop: Spacing.xs, marginBottom: Spacing.sm,
-                  }}>
-                  {word.word}
-                </Text>
-              </View>
-              {/* ── DARKER THAN THE CARD ABOVE IT ────────────────────────
-                  In the reference the entry is white and the usage note under
-                  it is a grey card, which is what makes the second one read as
-                  a footnote to the first. This was a lighter white than the
-                  card above, so the two read as one card with a seam. */}
-              {/* ── IT DROPS OUT FROM BEHIND THE ENTRY ───────────────────
-                  Ellie: "Word in use tile should drop down from the word tile.
-                  Just like the screenshot page, the top of the tile should be
-                  hidden behind the word tile, and there should be shading
-                  behind the word in use tile."
-
-                  So a negative margin puts its top under the card above, the
-                  padding puts the text back below that overlap, and it carries
-                  its own shadow, which is what makes the overlap read as depth
-                  rather than as a mistake. */}
-              <View
-                style={{
-                  /* Ellie: "I can see the top rounded corners on the word in
-                     use tile, but I don't want to be able to. I want it to
-                     extend cleanly behind the growth tile."
-
-                     Square at the top, rounded at the foot. Both cards are the
-                     same width, so the grey one's rounded top corners were
-                     showing in the notch either side of the white one's
-                     rounded bottom corners. A straight edge has nothing to
-                     show there. */
-                  backgroundColor: '#EFEAE3',
-                  borderBottomLeftRadius: Radius.card,
-                  borderBottomRightRadius: Radius.card,
-                  paddingTop: Spacing.xl + Spacing.md,
-                  paddingBottom: Spacing.lg, paddingHorizontal: Spacing.xl,
-                  marginTop: -Spacing.xl,
-                  /* Ellie: "Add shading behind the word in use tile so that
-                     there's more contrast." Deeper and tighter, so the card
-                     above it reads as sitting on top of this rather than
-                     beside it. */
-                  shadowColor: '#2A1B10', shadowOpacity: 0.22,
-                  shadowRadius: 14, shadowOffset: { width: 0, height: 10 },
-                }}>
-                {/* The label is the dark, emphatic half and the meaning is the
-                    quiet one. Mine had them exactly the wrong way round: a
-                    muted label over full-strength ink, which reads as a
-                    paragraph with a caption rather than as a usage note. */}
-                <Text
-                  style={{
-                    ...Type.body, fontFamily: Fonts.bodyBoldItalic,
-                    color: c.textStrong,
-                  }}>
-                  {WORD_IN_USE}
-                </Text>
-                {/* Ellie: "Text in the definition tile should be much larger
-                    and a different font from the hero font. Maybe just large
-                    and bold body font." The hero face is Playfair; this is DM
-                    Sans at its bold weight, two sizes up from body. */}
-                {/* Back to body type. It was made large and bold by an
-                    instruction that was about the word above, not this. Grey,
-                    which the reference's is. */}
-                <Text style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm, lineHeight: 24 }}>
-                  {word.definition}
-                </Text>
-              </View>
-            </View>
+            <WordEntry
+              word={word}
+              onShare={() => setWordOpen(true)}
+              style={{ marginBottom: Spacing.xxl }}
+            />
           ) : null}
 
           {/* ── TWO PEEKS, SIDE BY SIDE ────────────────────────────────────
@@ -1126,7 +1006,6 @@ function peekText(n: Note) {
 const JUMP_BACK_IN = 'Recent';
 const WRITE_ENTRY = 'Write a journal entry';
 const SHARED_WITH_ME = 'Shared with me';
-const WORD_IN_USE = 'Word in use';
 /* Only used if /api/home sends a word with no label, which it always does:
    api/_words.js owns the words and their eyebrow. */
 const WORD_OF_THE_DAY = 'Word of the day';

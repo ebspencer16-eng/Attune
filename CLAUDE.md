@@ -407,6 +407,40 @@ reach a stubbed `fetch`, and counting the calls, is what made the ordering
 visible. If a gate is about when something happens, the thing has to be able to
 happen.
 
+**A second surface showing the same thing renders the first one, or it is a
+second drawing of it.** Ellie asked for the word of the day to open as a
+storycard "with the word card centered". I built a card from that sentence
+instead of from the thing the sentence describes, and she sent back three
+faults in one line: "Bg is missing the gradient, word and definition card
+doesn't look like it does on the notes page, and I'm not seeing the link at the
+bottom."
+
+All three were one mistake. The Notes entry is two cards, an entry over a usage
+note that tucks under it, and I drew one box. The Notes ground is two corner
+washes over white, and a card's `ground` is a three-stop linear gradient, so I
+gave it one flat colour three times. And every card in that file draws through
+`t()`, which returns white because every other card is dark, so on a near-white
+ground the wordmark and the address were white on white.
+
+The fix was to extract the Notes entry into a component and render it in both
+places, and to let a card ask for a page's own wash component rather than
+approximate it with a gradient. Both surfaces now draw the same thing because
+they are the same code.
+
+The tell, in advance: I was reading her sentence rather than the screen it
+names. "Looks like X" means go and render X.
+
+**And when a surface cannot be driven by the usual checks, mount it in the web
+build.** The app's storycards are Expo components, which no browser gate here
+renders, so the first version passed every structural check while being wrong
+in three ways. `npx expo start --web` serves the real components through
+react-native-web; the layout renders `<AppTabs />` rather than a router slot, so
+a probe has to be swapped in for that one line and swapped back. Ten minutes,
+and it is the difference between a gate passing and knowing what she will see.
+`adjustsFontSizeToFit` is iOS-only and react-native-web ignores it, so text
+that shrinks on a phone truncates there: measure the width rather than reading
+the screenshot as a bug.
+
 **Before building a renderer, find out whether one exists.** Ellie asked for
 the workbook to open in the app. I converted the .docx into HTML, then into a
 PDF, wrote a font pipeline for it, and shipped both. Her answer: "This does not

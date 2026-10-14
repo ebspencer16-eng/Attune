@@ -84,14 +84,14 @@ const PRESENCE_SECONDS = 12;
  * deleted: a merge nobody asked for should not be able to destroy work, and if
  * anyone reports losing a budget it is still there to look at.
  */
-async function readShared({ rest, svc, me, profile, coupleKey, wantsChecklist, wantsBudget }) {
+async function readShared({ rest, svc, me, profile, coupleKey, wantsChecklist, wantsBudget, started }) {
   const fallback = {
     checklist: profile.checklist_data || null,
     budget: profile.budget_data || null,
     editing: {},
   };
 
-  let row = await sharedRow({ rest, svc, coupleKey });
+  let row = await sharedRow({ rest, svc, coupleKey, started });
 
   if (!row) {
     /* Nothing yet. Seed from both profiles, so a couple who filled one in
@@ -141,11 +141,20 @@ async function readShared({ rest, svc, me, profile, coupleKey, wantsChecklist, w
   };
 }
 
-async function sharedRow({ rest, svc, coupleKey }) {
+/**
+ * The couple's row.
+ *
+ * `started` is the request, already in flight. The caller asks for it at the
+ * same moment it asks for the partner's name and the workbook's order, none
+ * of which depend on each other: all three need the profile and nothing more.
+ * Awaiting them one after another cost two round trips on the one tab that
+ * draws three tools.
+ */
+async function sharedRow({ rest, svc, coupleKey, started }) {
   if (!coupleKey) return null;
   try {
-    const r = await rest(`couple_tools?couple_key=eq.${encodeURIComponent(coupleKey)}&select=*`, { headers: svc });
-    if (!r.ok) return null;
+    const r = await (started || rest(`couple_tools?couple_key=eq.${encodeURIComponent(coupleKey)}&select=*`, { headers: svc }));
+    if (!r || !r.ok) return null;
     return (await r.json().catch(() => []))?.[0] || null;
   } catch { return null; }
 }
@@ -225,10 +234,44 @@ export default async function handler(req) {
        * is what the buyer typed at setup and can differ from what the partner
        * later called themselves.
        */
+      /**
+       * ── THREE QUESTIONS, ONE ROUND TRIP ─────────────────────────────────
+       * Ellie: "Good progress, please check again, every page, can we make it
+       * faster?"
+       *
+       * This tab was the worst of them. Measured with every upstream call at a
+       * fixed latency, it was seven calls and seven round trips deep: the
+       * partner's name, then the workbook's order, then the couple's tools,
+       * each awaited before the next was asked for. None of the three depends
+       * on either of the others. All three need the profile, which has just
+       * arrived, and nothing else.
+       *
+       * So they go out together here and are awaited where their answers are
+       * used, the same shape as /api/home's `early` block. `.catch` at the
+       * point each is created: a promise that rejects before anything waits on
+       * it is an unhandled rejection.
+       */
+      const coupleKey = coupleKeyOf(me, profile.partner_profile_id || me);
+      const owners = [me, profile.partner_profile_id].filter(Boolean)
+        .map((id) => `user_id.eq.${id}`).join(',');
+      const early = {
+        partner: profile.partner_profile_id
+          ? rest(`profiles?id=eq.${profile.partner_profile_id}&select=name`, { headers: svc }).catch(() => null)
+          : null,
+        order: caps.ownsWorkbook
+          ? rest(
+            `orders?or=(${owners})&workbook_url=not.is.null&select=order_num,workbook_url&order=created_at.desc&limit=1`,
+            { headers: svc }).catch(() => null)
+          : null,
+        tools: coupleKey
+          ? rest(`couple_tools?couple_key=eq.${encodeURIComponent(coupleKey)}&select=*`, { headers: svc }).catch(() => null)
+          : null,
+      };
+
       let partnerName = profile.partner_name || null;
-      if (profile.partner_profile_id) {
-        const bRes = await rest(`profiles?id=eq.${profile.partner_profile_id}&select=name`, { headers: svc });
-        const b = (await bRes.json().catch(() => []))?.[0];
+      if (early.partner) {
+        const bRes = await early.partner;
+        const b = bRes ? (await bRes.json().catch(() => []))?.[0] : null;
         if (b?.name) partnerName = b.name;
       }
 
@@ -254,12 +297,9 @@ export default async function handler(req) {
          * same shape of miss as the generation trigger that only ever ran in
          * the buyer's browser.
          */
-        const owners = [me, profile.partner_profile_id].filter(Boolean)
-          .map((id) => `user_id.eq.${id}`).join(',');
-        const oRes = await rest(
-          `orders?or=(${owners})&workbook_url=not.is.null&select=order_num,workbook_url&order=created_at.desc&limit=1`,
-          { headers: svc });
-        const row = (await oRes.json().catch(() => []))?.[0];
+        /* Asked for above, beside the partner's name and the couple's row. */
+        const oRes = await early.order;
+        const row = oRes ? (await oRes.json().catch(() => []))?.[0] : null;
         // The stored URL was signed for seven days when the file was made, so
         // for most couples it is already dead by the time they ask for it. Mint
         // a new signature over the same file; fall back to the stored one only
@@ -293,8 +333,9 @@ export default async function handler(req) {
        * 076 has not been run, which is the behaviour this replaced.
        */
       const shared = await readShared({
-        rest, svc, me, profile, coupleKey: coupleKeyOf(me, profile.partner_profile_id || me),
+        rest, svc, me, profile, coupleKey,
         wantsChecklist: caps.ownsChecklist, wantsBudget: caps.ownsBudget,
+        started: early.tools,
       });
 
       return json({

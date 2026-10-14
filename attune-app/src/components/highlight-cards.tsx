@@ -55,18 +55,9 @@ import type { HighlightCard, PersonResults } from '@/api/client';
 import { SITE_URL } from '@/api/client';
 import ShareButton from '@/components/share-button';
 import CoupleMap from '@/components/couple-map';
+import PageWash from '@/components/page-wash';
+import WordEntry from '@/components/word-entry';
 import { SaveToJournal } from '@/components/journal';
-
-/**
- * ── THE WORD CARD'S COLOURS ────────────────────────────────────────────────
- * The Notes tab's, not this file's idea of them. Ellie asked for "the bg of
- * the notes page with the word card centered", and that tab draws a white
- * entry on the warm page ground. Naming them here from the theme is what stops
- * the storycard becoming a second, slightly different dictionary entry.
- */
-const WORD_CARD_BG = Palette.white;
-const WORD_CARD_INK = Colors.light.textStrong;
-const WORD_CARD_MUTED = Colors.light.textMuted;
 
 /** The control that keeps a quote. A placeholder in Ellie's house style. */
 const KEEP_LABEL = 'Save to journal';
@@ -440,14 +431,31 @@ export function wordCard(
     id: 'word-of-the-day',
     kind: 'word',
     tone: 'day',
-    /* The Notes page's ground, flat rather than a gradient, because that page
-       is one colour. Carried on the card the way the insight carries the home
-       screen's blue, so the renderer decides nothing. */
-    ground: [Colors.light.background, Colors.light.background, Colors.light.background],
+    /**
+     * ── THE NOTES PAGE'S GROUND, DRAWN BY THE NOTES PAGE'S COMPONENT ────
+     * Ellie: "Bg is missing the gradient."
+     *
+     * The first version gave this one flat colour, three times over, because
+     * a card's `ground` is a three-stop linear gradient and that is all it
+     * is. The Notes page is not a linear gradient: it is two corner washes,
+     * orange from the top left and indigo from the top right, each falling to
+     * nothing, over white settling to grey. Nothing with three stops and one
+     * direction can be it.
+     *
+     * So `wash` asks the renderer for PageWash itself, with the arguments the
+     * Notes tab passes. The page and the card cannot look different, because
+     * they are the same component.
+     */
+    wash: 'notes',
+    /* Under the wash, and what shows through where the corners have faded. */
+    ground: [Palette.white, Palette.white, Palette.white],
     eyebrow: label,
     title: word.word,
     lead: word.part || '',
     body: word.definition,
+    /* The foot's wordmark and address are white on every other card, because
+       every other card is dark. This one is near-white. */
+    footTone: 'ink',
   } as HighlightCard;
 }
 
@@ -916,6 +924,9 @@ function Card({
           ? STAT_PAIR_GROUND
           : ground(card.tone);
 
+  /** True when this card's ground is light, so the foot has to be ink. */
+  const ink = (card as { footTone?: string }).footTone === 'ink';
+
   // The entrance the website gives every card: up and in, once, on arrival.
   // An instant swap is what made the app's reel feel like a carousel of
   // panels rather than something being shown to you.
@@ -941,6 +952,15 @@ function Card({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1, borderRadius: Radius.xl, overflow: 'hidden' }}>
+        {/* ── A PAGE'S OWN GROUND, WHERE A CARD ASKS FOR ONE ──────────
+            The word of the day sits on the Notes tab's wash: two corner
+            colours over white, which no three-stop gradient can be. Drawing
+            the component rather than imitating it is what stops the card and
+            the page looking like two different products, which is what Ellie
+            reported of the first version. */}
+        {(card as { wash?: string }).wash === 'notes' ? (
+          <PageWash tint={Palette.orange} second={Palette.indigo} corners />
+        ) : null}
         {/* ── THE SUNRISE ON THE ALIGNMENT CARD ────────────────────────
             Ellie asked for "a circular, attune-orange glow from the bottom
             middle of the page". React Native has no radial gradient and this
@@ -1129,16 +1149,25 @@ function Card({
               these exist to make, and half of them were carrying half a logo.
               The mark is the PNG the rest of the app already uses, so this
               needs no new dependency. */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, opacity: 0.45 }}>
+          {/* ── INK ON A LIGHT CARD ────────────────────────────────────
+              Ellie, of the word of the day: "I'm not seeing the link at the
+              bottom." It was there and it was white on near-white. `t()`
+              returns white for every role, which is right for the eight dark
+              tones and wrong for the one card that carries a page's own
+              ground. The sizes still come from the shared scale; only the
+              colour is overridden, and only where the card says so. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, opacity: ink ? 0.7 : 0.45 }}>
             <Image
               source={require('@/assets/images/attune-mark.png')}
               style={{ width: 22, height: 16 }}
               resizeMode="contain"
             />
-            <Text style={t('wordmark', w)}>{SC.wordmark}</Text>
+            <Text style={[t('wordmark', w), ink ? { color: Colors.light.textStrong } : null]}>
+              {SC.wordmark}
+            </Text>
           </View>
           {/* block: highlights/watermark */}
-          <Text style={t('siteLabel', w)}>
+          <Text style={[t('siteLabel', w), ink ? { color: Colors.light.textMuted } : null]}>
             {SC.siteLabel}
           </Text>
         </View>
@@ -1452,53 +1481,32 @@ function Body({ card, onDone, map, w }: {
      * No new fields. The entry is eyebrow, title, lead and body, which every
      * other card already uses, so nothing the payload gates count changes.
      */
+    /**
+     * ── THE WORD OF THE DAY ────────────────────────────────────────────
+     * Ellie: "When I share the word of the day, I want it to be a storycard
+     * like the insight of the day. I want it to be the bg of the notes page
+     * with the word card centered, with the attune link at the bottom like the
+     * insight of the day storycard uses."
+     *
+     * Then, of what I built: "word and definition card doesn't look like it
+     * does on the notes page."
+     *
+     * It did not, because I had written a second version of it from a
+     * description instead of rendering the one that exists. This draws the
+     * Notes tab's own entry, which is why it cannot look different again.
+     * The component brings its own colours, which is what makes it legible on
+     * the one card in this file with a light ground.
+     *
+     * Centred, which is the other half of what she asked for: the entry sits
+     * in the middle of the card rather than at the top of a page.
+     */
     case 'word':
       return (
-        <View style={{ alignItems: 'center' }}>
-          <Text style={[S.listLabel, { textAlign: 'center' }]}>{card.eyebrow}</Text>
-          {/* The entry, centred, on its own ground. A white card on the Notes
-              cream is exactly what the tab draws, and what makes this read as
-              a dictionary entry rather than as a heading with a paragraph. */}
-          <View
-            style={{
-              backgroundColor: WORD_CARD_BG,
-              borderRadius: Radius.card,
-              paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl,
-              marginTop: Spacing.lg,
-              alignSelf: 'stretch',
-            }}>
-            <Text style={[S.listLabel, { textAlign: 'center', color: WORD_CARD_MUTED }]}>
-              {card.lead}
-            </Text>
-            {/* ── THE SHARED SCALE, NOT A NUMBER ──────────────────────
-                statBig is the card's largest size and it is the one the
-                server sets, so this word is as big as the 90% on the
-                alignment card and shrinks with the card at every width.
-                A `fontSize: 44` here read correctly on this phone and would
-                have been a second idea of how a card is set; check-storycard-type
-                caught it, which is what that gate is for.
-
-                DM Sans bold rather than the scale's own face, because Ellie
-                asked for this word specifically: "I asked for the 'Connection'
-                text to not be playfair display anymore." */}
-            <Text
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              style={[S.statBig, {
-                fontFamily: Fonts.bodyBold, fontWeight: '700',
-                color: WORD_CARD_INK, textAlign: 'center',
-                marginTop: Spacing.xs,
-              }]}>
-              {card.title}
-            </Text>
-            {card.body ? (
-              <Text style={[S.bodyMd, {
-                color: WORD_CARD_MUTED, textAlign: 'center', marginTop: Spacing.md,
-              }]}>
-                {card.body}
-              </Text>
-            ) : null}
-          </View>
+        <View style={{ alignItems: 'stretch', justifyContent: 'center' }}>
+          <Text style={[S.listLabel, { textAlign: 'center', color: Colors.light.textMuted, marginBottom: Spacing.lg }]}>
+            {card.eyebrow}
+          </Text>
+          <WordEntry word={{ word: card.title || '', part: card.lead || '', definition: card.body || '' }} />
         </View>
       );
 

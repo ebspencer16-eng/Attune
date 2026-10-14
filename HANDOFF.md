@@ -3040,7 +3040,7 @@ them" is a fragment on a card that shows nothing before it, and a splitter
 breaks after "Dr." and leaves the next sentence starting mid-name.
 
 **Four gates added**, each planted against: check-hero-band (7 plants),
-check-daily-push (13), check-home-waterfall (7), and check-mark-artwork widened
+check-daily-push (13), check-waterfalls (7, then widened to every endpoint), and check-mark-artwork widened
 to every lockup (5). Three of them were wrong first in ways recorded in their
 own headers, and all three mistakes were mine measuring the machine instead of
 the code, or reading a comment as code.

@@ -44,7 +44,7 @@ import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import type { ResultsNavGroup } from '@/api/client';
-import { AccentFallback, Colors, Fonts, Palette, Spacing, Type } from '@/constants/attune-theme';
+import { AccentFallback, Colors, Fonts, Spacing, Type } from '@/constants/attune-theme';
 import { withAlpha } from '@/components/page-wash';
 
 const c = Colors.light;
@@ -295,10 +295,21 @@ export default function ResultsMenu({
                    exercises close the gap between icon and name to buy some of
                    it back. */
                 flexDirection: 'row', alignItems: 'center', gap: isExercise ? Spacing.md : Spacing.lg,
-                /* No rule between rows. Ellie asked for the hairlines to go;
-                   the open section is still marked, by its ground and by the
-                   colour down the left edge of its pages. */
-                backgroundColor: isOpen ? Palette.warm : 'transparent',
+                /**
+                 * ── NOTHING TURNS WHITE ────────────────────────────────
+                 * Ellie: "Now, when you click a dropdown, the header row
+                 * turns white. I don't want anything to turn white."
+                 *
+                 * The open row carried Palette.warm, which is a cream a
+                 * fraction off white and reads as white against the menu it
+                 * sits in. It is the last thing in here that painted a ground,
+                 * and it goes the same way the dropdown's did: the row is
+                 * whatever is behind it.
+                 *
+                 * The open section is still marked, by the arrow above it
+                 * turning and by its pages appearing underneath. No rule
+                 * between rows either; she asked for the hairlines to go.
+                 */
               }}>
               {/* ── NO WASH ─────────────────────────────────────────────────
                   Ellie: "Menu should just be attune colors, the only exercise
