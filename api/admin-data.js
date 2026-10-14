@@ -29,7 +29,7 @@
 export const config = { runtime: 'edge' };
 
 import { corsHeaders, safeError } from './_lib/http.js';
-import { selectProfiles } from './_lib/demo-accounts.js';
+import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/demo-accounts.js';
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
@@ -358,6 +358,21 @@ export default async function handler(req) {
     const profiles = profQ.data || [];
     const demoFilterApplied = profQ.demoFilterApplied !== false;
 
+    /**
+     * Rows of the other two tables, cut down to the same people.
+     *
+     * B61 filtered this profile read and left the orders whole, so a demo's
+     * test order was in the order count and in revenue, and a demo's invited
+     * partner was in completed_couples. An order carries a user_id when the
+     * buyer had an account and only an email when they did not, so both are
+     * asked for. Invite sessions are keyed by code, and the codes the figures
+     * are about are the ones on these profiles.
+     */
+    const demo = await demoOwners(admin);
+    const orders = withoutDemoOrders(ordersQ.data, demo);
+    const inviteCodes = new Set(profiles.map((p) => p.invite_code).filter(Boolean));
+    const sessions = ownedBy(psQ.data || [], inviteCodes, 'invite_code');
+
     // Relationship-level demographics (status, length, children) describe the
     // couple, not the individual. If one partner answered and the other left it
     // blank, share the answer across both linked profiles so couple-level facts
@@ -378,9 +393,9 @@ export default async function handler(req) {
     const started = profiles.filter(p => hasAnswers(p.ex1_answers) || hasAnswers(p.ex2_answers)).length;
     const bothDoneIndividuals = profiles.filter(p => hasAnswers(p.ex1_answers) && hasAnswers(p.ex2_answers) && p.partner_profile_id).length;
     const invitedTotal = profiles.filter(p => p.invite_code).length;
-    const completedCouples = (psQ.data || []).filter(s => hasAnswers(s.ex1_answers) && hasAnswers(s.ex2_answers)).length;
+    const completedCouples = sessions.filter(s => hasAnswers(s.ex1_answers) && hasAnswers(s.ex2_answers)).length;
 
-    const responses = buildResponseAggregates(profiles, psQ.data || []);
+    const responses = buildResponseAggregates(profiles, sessions);
     // Precompute the same aggregates for each couple-level segment value, reusing
     // the exact formulas on a filtered profile set. Only couple-level fields
     // (shared by both partners) are sliced — individual fields like pronouns/age
@@ -398,7 +413,7 @@ export default async function handler(req) {
     };
     {
       const byIdT = {}; profiles.forEach(p => { byIdT[p.id] = p; });
-      const byInviteT = new Map(); (psQ.data || []).forEach(s => { if (s.invite_code) byInviteT.set(s.invite_code, s); });
+      const byInviteT = new Map(); sessions.forEach(s => { if (s.invite_code) byInviteT.set(s.invite_code, s); });
       profiles.forEach(p => {
         const partner = (p.partner_profile_id && byIdT[p.partner_profile_id]) || (p.invite_code && byInviteT.get(p.invite_code)) || null;
         // Understanding: how accurately these two read each other, which is a
@@ -480,7 +495,7 @@ export default async function handler(req) {
     for (const fld of COUPLE_SEG) {
       const vals = [...new Set(profiles.map(p => p[fld]).filter(v => v != null && v !== ''))];
       for (const v of vals) {
-        responsesBySegment[fld + '::' + v] = buildResponseAggregates(profiles.filter(p => p[fld] === v), psQ.data || []);
+        responsesBySegment[fld + '::' + v] = buildResponseAggregates(profiles.filter(p => p[fld] === v), sessions);
       }
     }
 
@@ -490,7 +505,7 @@ export default async function handler(req) {
       demoFilterApplied,
       responses,
       responsesBySegment,
-      orders: ordersQ.data || [],
+      orders,
       beta_codes: codesQ.data || [],
       profiles: {
         demographics: profiles.map(p => ({

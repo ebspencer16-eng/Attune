@@ -132,12 +132,31 @@ on you.
 
 | # | Built, needs your eye |
 |--|--|
+| B68 | **The admin was still counting the demo accounts in anything measured from a different table.** B61 filtered the people; their notes, article reads, page time, orders, invited partner and survey answers were all still counted. Measured, not guessed: the Engagement page reported two article readers where one of the two was Alex. **This changes a money figure**, so read the note under this table before you trust last month's order count. |
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
 | B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### B68, what moved
+
+The order count and revenue on the admin no longer include a demo's test
+order. If you have written down a figure from that page, it will now be lower
+by whatever those orders were, and the lower number is the right one. The same
+goes for completed couples, article readers, notes, tags and page time.
+
+An order names its buyer two ways, by account and by email, and a demo that
+bought before it had an account is named only by the email. Both are checked,
+so a test purchase cannot come back in through the half nobody filtered.
+
+What is deliberately still counted: a visit to a marketing page with nobody
+attached. Those belong to no account by design, and dropping them would make
+every marketing figure too low.
+
+None of it changes until you run the migration in section 1. Until then each
+admin page says, in amber, that it is still counting demos.
 
 ## 4. Done and verified
 

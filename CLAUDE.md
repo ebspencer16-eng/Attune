@@ -234,6 +234,30 @@ The assertion is not decoration. It caught the next bad edit the same day: a
 brace-depth scan that miscounts self-closing tags returned no end position,
 and the guard stopped it before it touched the file.
 
+**Filtering the people does not filter their rows, and a gate that looks for a
+name cannot see a count.** Excluding the demo accounts from the admin put every
+read of `profiles` behind one module, which fixed the couple types, the
+demographics and the funnel. Every figure built from a DIFFERENT table went on
+counting them: their notes, their tags, their article reads, their page time,
+their orders, their invited partner, their survey answers. The Engagement page
+answered two article readers where one of the two was Alex.
+
+The gate written for the first half could not have caught it. It asked whether
+the demo's id appeared in the answer, and nothing identifying does appear: a
+count is a number, and the number was simply one too high. So the fixture now
+gives the demo one row in every table beside each real person's, which makes
+the right answer 1 and the wrong answer 2, and the gate compares figures rather
+than searching for a name. Any check about whether something is excluded has to
+assert on a total somewhere, because exclusion is invisible in the shape of the
+output.
+
+The rule the code holds now: a row belongs in a figure only if the person who
+owns it is in the list the figures are about. That is better than asking whether
+the owner is a demo, because it also drops a row left behind by an account that
+no longer exists. The exception that proves it is `page_events` with no owner,
+which is an anonymous visit and has to stay counted, so "what to do with an
+ownerless row" is an argument the caller passes rather than a default.
+
 **Absence is also what deletion looks like.** Before reporting that something
 is unreachable, missing or orphaned, check whether it was removed on purpose.
 `git log -S` on the thing takes ten seconds and answers it.

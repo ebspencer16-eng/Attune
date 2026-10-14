@@ -26,7 +26,7 @@ import { jsonBody } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS, SURVEY_VERSION, TEXT_QUESTIONS } from './_lib/survey.js';
-import { demoIds, selectProfiles } from './_lib/demo-accounts.js';
+import { demoOwners, selectProfiles } from './_lib/demo-accounts.js';
 
 export const config = { runtime: 'edge' };
 
@@ -146,7 +146,7 @@ export default async function handler(req) {
 
     /* A demo's demographics being absent would hide them from the slicers and
        leave their answers in every chart, so the rows go too. */
-    const { ids: demoSet, demoFilterApplied } = await demoIds(admin);
+    const { ids: demoSet, demoFilterApplied } = await demoOwners(admin);
 
     const responses = (resQ.data || [])
       .filter((r) => !(r.respondent_id && demoSet.has(r.respondent_id)))

@@ -11,6 +11,12 @@
  * when the column is not there yet the page says it is counting them rather
  * than pretending otherwise.
  *
+ * Both halves of that. The first shipped and covered every read of `profiles`,
+ * which left every figure computed from a DIFFERENT table counting demos:
+ * their notes, their article reads, their page time, their orders, their
+ * invited partner, their survey answers. The Engagement page answered two
+ * article readers where one of the two was Alex.
+ *
  * ── THE BUG IT CAME FROM ──────────────────────────────────────────────────
  * Two demo profiles were rows in `profiles` like anybody else, so they were
  * inside the couple types, the demographics, the engagement, the completion
@@ -27,13 +33,20 @@
  * endpoint exists. It resolves the indirect spellings too: the table named in
  * a constant, a URL path, a template literal.
  *
- * PART 2 runs: three handlers are driven against a stubbed PostgREST holding
+ * PART 2 runs: four handlers are driven against a stubbed PostgREST holding
  * one demo row among three, and the demo must not appear in the answer. That
- * is the half that catches a filter that is present and wrong — applied to a
+ * is the half that catches a filter that is present and wrong: applied to a
  * second query, applied after the rows are counted, or applied to the
  * demographics of a survey respondent while their answers stay in the charts.
  * Each handler is then driven again with the column missing, where it has to
  * answer 200 and say `demoFilterApplied: false`.
+ *
+ * PART 2 also COUNTS. The demo owns a note, an article read, a page event, an
+ * order and a survey answer in the fixture, and every figure built from them
+ * is checked against the figure one real person produces. Looking for the
+ * demo's id could never have caught this: a count is a number, and the number
+ * was simply one too high. That is the lesson of this gate and it is the
+ * reason the fixture gives the demo rows in five other tables.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Not the product. A demo account signs in, answers exercises and reads its
@@ -67,8 +80,8 @@ const notes = [];
 const ADMIN_FILES = readdirSync('api')
   .filter((f) => f.endsWith('.js') && (f.startsWith('admin-') || f === 'orders.js'));
 
-/** The module's three ways in. A read through any of them is filtered. */
-const GATEWAYS = new Set(['selectProfiles', 'fetchProfiles', 'demoIds']);
+/** The module's ways in. A read through any of them is filtered. */
+const GATEWAYS = new Set(['selectProfiles', 'fetchProfiles', 'demoOwners']);
 
 /**
  * Finding the reads by asking Babel rather than by grepping.
@@ -165,7 +178,143 @@ if (filtered < 9) {
 function stripComments(src) {
   return src
     .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
-    .replace(/\/\/[^\n]*/g, (m) => m.replace(/[^\n]/g, ' '));
+    /* Not `://`, or every url in the file loses its closing quote. */
+    .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + m.slice(pre.length).replace(/[^\n]/g, ' '));
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   PART 1b · And every OTHER table whose rows belong to a person
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The tables where a row is somebody's.
+ *
+ * B61 filtered `profiles` and stopped, so every figure built from one of these
+ * went on counting demos. The static half matters more here than it does for
+ * `profiles`: a behavioural test cannot see a table nobody has read yet, and
+ * the next count added to the admin will be read from one of these.
+ *
+ * The value is the column that names the owner, for the message only.
+ */
+const OWNED_TABLES = {
+  notes: 'owner_id',
+  note_tags: 'note_id, through the note',
+  tags: 'owner_id',
+  post_reads: 'owner_id',
+  page_events: 'owner_id, or nobody for an anonymous visit',
+  orders: 'user_id, or buyer_email when there was no account',
+  partner_sessions: 'invite_code',
+  survey_responses: 'respondent_id',
+  survey_codes: 'response_id, through the response',
+  workbooks: 'user_id',
+};
+
+/** The module's ways of holding those rows to one set of people. */
+const OWNER_RULES = ['ownedBy', 'withoutDemoOrders', 'demoOwners'];
+
+/**
+ * Endpoints that read an owned table and are not analytics.
+ *
+ * api/orders.js serves one customer the order they placed. A demo account has
+ * to be able to read its own order like anybody else, so filtering there would
+ * break the thing demos exist for. It is in ADMIN_FILES because checkAdminAuth
+ * guards one of its branches, not because it draws a figure.
+ */
+const NOT_ANALYTICS = {
+  'orders.js': 'serves one customer their own order; a demo must still be able to read its own',
+};
+
+/**
+ * ── WHAT THIS HALF PROVES, AND WHAT IT DOES NOT ───────────────────────────
+ * It proves that every analytics endpoint reading one of those tables has the
+ * module in scope. That is the tripwire for an endpoint added next year, which
+ * no behavioural test can see because it does not know the endpoint exists.
+ *
+ * It does NOT prove that each individual read is filtered. A per-read trace
+ * was written and thrown away: the reads in api/admin-engagement.js arrive
+ * through `await Promise.all([...])` and are destructured twice before they
+ * are used, so a one-hop trace landed on the array and called five filtered
+ * reads unfiltered. Widening it would have meant either a dataflow pass or an
+ * "unresolved, so pass" branch, and the second is the escape hatch this
+ * codebase has already been bitten by.
+ *
+ * What covers that is PART 2, which counts. The demo owns a note, a tag, an
+ * article read, a page event, an order, an invite session and a survey answer
+ * in the fixture, and every figure built from them is checked against the
+ * figure one real person produces. A read that slips past this half shows up
+ * there as a number one too high.
+ */
+function ownedReads(src, file) {
+  const ast = parse(src, { sourceType: 'module', plugins: ['topLevelAwait'], errorRecovery: true });
+  const found = [];
+
+  const tableOf = (node) => {
+    const lit = (v) => {
+      for (const t of Object.keys(OWNED_TABLES)) {
+        if (v === t || v.startsWith(`${t}?`) || v.includes(`rest/v1/${t}?`) || v.endsWith(`rest/v1/${t}`)) return t;
+      }
+      return null;
+    };
+    if (node.type === 'StringLiteral') return lit(node.value);
+    if (node.type === 'TemplateLiteral') {
+      for (const q of node.quasis) { const t = lit(q.value.cooked || ''); if (t) return t; }
+    }
+    return null;
+  };
+
+  const walk = (node) => {
+    if (!node || typeof node.type !== 'string') return;
+    const table = tableOf(node);
+    if (table) found.push({ file, table, line: node.loc ? node.loc.start.line : 0 });
+    for (const k of Object.keys(node)) {
+      if (k === 'loc' || k === 'leadingComments' || k === 'trailingComments') continue;
+      const v = node[k];
+      if (Array.isArray(v)) for (const c of v) walk(c);
+      else if (v && typeof v === 'object' && typeof v.type === 'string') walk(v);
+    }
+  };
+  walk(ast.program);
+  return found;
+}
+
+let ownedChecked = 0;
+for (const f of ADMIN_FILES) {
+  const src = readFileSync(`api/${f}`, 'utf8');
+  const reads = ownedReads(src, f);
+  if (!reads.length) continue;
+  const tables = [...new Set(reads.map((r) => r.table))].sort();
+
+  if (NOT_ANALYTICS[f]) {
+    notes.push(`api/${f}: ${reads.length} read${reads.length === 1 ? '' : 's'} of ${tables.join(', ')}, out of scope (${NOT_ANALYTICS[f]})`);
+    continue;
+  }
+  ownedChecked += reads.length;
+
+  const rules = OWNER_RULES.filter((r) => new RegExp(`\\b${r}\\s*\\(`).test(stripComments(src)));
+  if (!rules.length) {
+    fails.push(`api/${f} reads ${tables.join(', ')}, whose rows belong to a person, and names none of ${OWNER_RULES.join(', ')}. Every figure built from those rows counts the demo accounts, which is the half of B61 that shipped broken. If the read genuinely cannot be filtered, say so in NOT_ANALYTICS with a reason somebody can check.`);
+    continue;
+  }
+  notes.push(`api/${f}: ${reads.length} reads of ${tables.join(', ')}, holding them with ${rules.join(' / ')}`);
+}
+
+/* 18 when this was written: engagement 6, explore 4, data 2, survey 5,
+   csv 5, less the one in orders.js which is out of scope. A number below this
+   means either a read was removed, which is fine and this figure comes down
+   with it, or the walk has lost its subject, which is not. */
+if (ownedChecked < 18) {
+  fails.push(`Found only ${ownedChecked} reads of an owned table across the analytics endpoints, and there were 22 when this was written. If reads were removed, lower this figure in the same commit; otherwise the walk has lost its subject, and a gate that has lost its subject must not pass.`);
+}
+
+/* An endpoint named as out of scope that no longer reads one is an excuse
+   nobody rechecked. */
+for (const [f, why] of Object.entries(NOT_ANALYTICS)) {
+  let src = '';
+  try { src = readFileSync(`api/${f}`, 'utf8'); }
+  catch { fails.push(`NOT_ANALYTICS names api/${f}, which is not in the tree.`); continue; }
+  if (!ownedReads(src, f).length) {
+    fails.push(`NOT_ANALYTICS excuses api/${f} (${why}) and it reads none of those tables any more. Delete the entry: an excuse nobody rechecks is how a real gap hides.`);
+  }
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -191,7 +340,7 @@ const REAL_A = {
   partner_profile_id: 'real-b', joined_via_invite: false, pronouns: 'she/her',
   partner_pronouns: 'he/him', relationship_status: 'engaged', relationship_length: '1-3',
   children: 'no', signup_source: 'friend', pkg: 'premium', age_range: '25-34',
-  ex1_answers: answers(4), ex2_answers: {}, ex3_answers: {}, created_at: '2026-01-01T00:00:00Z',
+  ex1_answers: answers(4), ex2_answers: {}, ex3_answers: {}, created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
   is_demo: false,
 };
 const REAL_B = {
@@ -208,8 +357,67 @@ const DEMO = {
   relationship_length: '10+', ex1_answers: answers(1), is_demo: true,
 };
 
+/**
+ * The demo owns a row in every table the admin counts.
+ *
+ * One real person and one demo in each, so every figure built from them has a
+ * right answer of 1 and a wrong answer of 2. That is what the count cases
+ * below compare, and it is the shape no name-matching check can see.
+ */
+/* Two days ago, not a fixed date: the engagement headlines compare the last
+   30 days against the 30 before, so a hardcoded timestamp falls out of the
+   window as the months pass and every count silently becomes zero. The first
+   version of this fixture used 2026-03-01 and measured nothing. */
+const NOW = new Date(Date.now() - 2 * 86400000).toISOString();
 const TABLES = {
   profiles: [REAL_A, REAL_B, DEMO],
+  notes: [
+    { id: 'n-real', owner_id: 'real-a', anchor_type: 'results', anchor_key: 'overview', visibility: 'private', kind: 'highlight', created_at: NOW },
+    { id: 'n-demo', owner_id: 'demo-alex', anchor_type: 'results', anchor_key: 'overview', visibility: 'private', kind: 'highlight', created_at: NOW },
+  ],
+  tags: [
+    { id: 't-real', owner_id: 'real-a', name: 'worth rereading', standard_key: null },
+    { id: 't-demo', owner_id: 'demo-alex', name: 'worth rereading', standard_key: null },
+  ],
+  note_tags: [
+    { note_id: 'n-real', tag_id: 't-real' },
+    { note_id: 'n-demo', tag_id: 't-demo' },
+  ],
+  posts: [{ id: 'p1', title: 'A piece' }],
+  post_reads: [
+    { post_id: 'p1', owner_id: 'real-a', read_at: NOW },
+    { post_id: 'p1', owner_id: 'demo-alex', read_at: NOW },
+  ],
+  page_events: [
+    { kind: 'results', key: 'overview', ms: 1000, owner_id: 'real-a', created_at: NOW, surface: 'web' },
+    { kind: 'results', key: 'overview', ms: 9000, owner_id: 'demo-alex', created_at: NOW, surface: 'web' },
+    /* Nobody's, on purpose: an anonymous visit to a marketing page. These must
+       survive every filter here, or every marketing figure undercounts.
+       The kinds are the ones the page actually counts: `visit` for the headline
+       and `page_time` for the time chart. The first version of this fixture
+       said `kind: 'page'`, which nothing counts, and reported a working page as
+       broken. */
+    { kind: 'visit', key: '/offerings', ms: 0, owner_id: null, created_at: NOW, surface: 'web' },
+    { kind: 'page_time', key: '/offerings', ms: 500, owner_id: null, created_at: NOW, surface: 'web' },
+  ],
+  orders: [
+    { id: 'o-real', user_id: 'real-a', buyer_email: 'lanae@example.com', pkg_key: 'premium', total: 295, created_at: NOW },
+    { id: 'o-demo', user_id: 'demo-alex', buyer_email: 'alex@demo.invalid', pkg_key: 'premium', total: 295, created_at: NOW },
+    /* A buyer with no account, named only by an email nobody marked. Real. */
+    { id: 'o-guest', user_id: null, buyer_email: 'guest@example.org', pkg_key: 'core', total: 99, created_at: NOW },
+    /* The demo named by email alone, having bought before it had an account,
+       and the demo named by id alone, having paid with a different address.
+       An order is the one table with two ways to name its buyer, so a filter
+       that knows one of them lets the other through. */
+    { id: 'o-demo-email', user_id: null, buyer_email: 'ALEX@demo.invalid', pkg_key: 'core', total: 99, created_at: NOW },
+    { id: 'o-demo-id', user_id: 'demo-alex', buyer_email: 'work-card@example.org', pkg_key: 'core', total: 99, created_at: NOW },
+  ],
+  partner_sessions: [
+    { invite_code: 'AAA111', ex1_answers: answers(4), ex2_answers: { a: 1 } },
+    { invite_code: 'ZZZ999', ex1_answers: answers(1), ex2_answers: { a: 1 } },
+  ],
+  beta_codes: [],
+  workbooks: [],
   survey_responses: [
     { id: 'r-real', answers: { rating: 5 }, version: 'v', source: 'web', started_at: '2026-02-01T00:00:00Z', updated_at: '2026-02-01T00:00:00Z', completed_at: '2026-02-01T00:00:00Z', couple_id: null, respondent_id: 'real-a', featured_question: null, featured_at: null },
     { id: 'r-demo', answers: { rating: 1 }, version: 'v', source: 'web', started_at: '2026-02-02T00:00:00Z', updated_at: '2026-02-02T00:00:00Z', completed_at: '2026-02-02T00:00:00Z', couple_id: null, respondent_id: 'demo-alex', featured_question: null, featured_at: null },
@@ -270,6 +478,13 @@ const mentionsDemo = (payload) => {
   return /demo-alex|r-demo|"Alex"|alex@demo/.test(text);
 };
 
+/**
+ * The figures, and what one real person's worth of them looks like.
+ *
+ * `expect` returns a complaint or null. Every count here has a right answer of
+ * 1 or 2 and a wrong answer one higher, because the fixture gives the demo
+ * exactly one row in every table beside each real one.
+ */
 const CASES = [
   {
     name: 'admin-typing',
@@ -298,8 +513,82 @@ const CASES = [
     file: '../api/admin-data.js',
     path: '/api/admin-data',
     expect: (p) => {
-      const text = JSON.stringify(p.demographics || p);
+      const text = JSON.stringify(p.profiles || p);
       if (/they\/them/.test(text)) return 'the demographics still carry they/them, which only the demo answered';
+      /* Orders: the real buyer and the guest, not the demo's test order. */
+      const ords = (p.orders || []).map((o) => o.id).sort();
+      if (ords.join(',') !== 'o-guest,o-real') {
+        return `the orders are ${JSON.stringify(ords)}; expected the real buyer and the account-less guest only. o-demo is the demo's by id, o-demo-email is the demo's by email alone, and a guest named by an unmarked email is a customer`;
+      }
+      /* Invite sessions: the demo's invited partner is not a couple. */
+      const couples = p.profiles && p.profiles.completed_couples;
+      if (couples !== 1) return `completed_couples is ${couples}; one of the two invite sessions belongs to the demo`;
+      return null;
+    },
+  },
+  {
+    name: 'admin-engagement',
+    file: '../api/admin-engagement.js',
+    path: '/api/admin-engagement',
+    /**
+     * This is the case that only a count can make. Every figure here is built
+     * from a table other than `profiles`, keyed to a person by owner_id, and
+     * all of it was counted whole: the page answered two article readers where
+     * one of the two was Alex.
+     */
+    expect: (p) => {
+      const readers = p.headlines && p.headlines.articleReaders && p.headlines.articleReaders.value;
+      if (readers !== 1) return `articleReaders is ${readers}; one of the two post_reads rows is the demo's`;
+      const article = ((p.learning && p.learning.articles && p.learning.articles.rows) || [])[0];
+      if (!article) return 'no article row came back, so the read count could not be measured';
+      if (article.reads !== 1) return `the article shows ${article.reads} reads; one of the two is the demo's`;
+      /* And the rows that belong to nobody have to survive. An anonymous visit
+         to a marketing page is not a demo's, and dropping it would undercount
+         every marketing figure. Two kinds, because the headline and the time
+         chart count different ones. */
+      const visits = p.headlines && p.headlines.siteVisits && p.headlines.siteVisits.value;
+      if (visits !== 1) return `siteVisits is ${visits}; the anonymous visit was dropped, and an owner-less page view belongs to nobody by design`;
+      const marketing = p.timePerPage && p.timePerPage.marketing;
+      if (!marketing || !marketing.rows || !marketing.rows.length) {
+        return 'marketing time has no rows, so the anonymous page_time event was dropped with the demos';
+      }
+      /* Every collection this page counts, from the line the page prints. One
+         real person's note, one tag, one read, and three events: theirs plus
+         the two that belong to nobody. */
+      const want = { profiles: 2, notes: 1, tags: 1, articleReads: 1, events: 3 };
+      const got = p.rowsRead || {};
+      for (const [k, v] of Object.entries(want)) {
+        if (got[k] !== v) return `it is counting ${got[k]} ${k} and should be counting ${v}: the demo owns one row in each of those tables`;
+      }
+      return null;
+    },
+  },
+  {
+    name: 'admin-explore',
+    file: '../api/admin-explore.js',
+    path: '/api/admin-explore',
+    /* The cube. Its rows are people, its orders are orders, and its surveys
+       were every respondent including the ones no figure is about. */
+    expect: (p) => {
+      if (p.count !== 2) return `the cube holds ${p.count} rows; the fixture has 2 real people and 1 demo`;
+      const ords = (p.orders || []).length;
+      if (ords !== 2) return `the cube holds ${ords} orders; three of the five belong to the demo`;
+      const sv = (p.surveys || []).length;
+      if (sv !== 1) return `the cube holds ${sv} survey rows; one of the two is the demo's`;
+      return null;
+    },
+  },
+  {
+    name: 'admin-csv (survey export)',
+    file: '../api/admin-csv.js',
+    path: '/api/admin-csv?type=feedback',
+    text: true,
+    /* A CSV, not JSON: one header line and one row, because one of the two
+       answers is the demo's. The export deliberately writes no id, so the
+       only way to see the demo in it is to count the lines. */
+    expect: (text) => {
+      const lines = String(text).trim().split('\n').filter(Boolean);
+      if (lines.length !== 2) return `the survey export has ${lines.length} lines (a header and ${lines.length - 1} answers); one of the two answers is the demo's`;
       return null;
     },
   },
@@ -312,14 +601,17 @@ for (const c of CASES) {
   const handler = mod.default;
   if (typeof handler !== 'function') { fails.push(`${c.name}: has no default handler to drive.`); continue; }
 
+  /* A CSV download answers text, not JSON. Read whichever it sends. */
+  const read = (r) => (c.text ? r.text() : r.json());
+
   /* With the column there. */
   asked = []; columnMissing = false;
   let res, payload;
-  try { res = await handler(get(c.path)); payload = await res.json(); }
+  try { res = await handler(get(c.path)); payload = await read(res); }
   catch (e) { fails.push(`${c.name}: threw (${e.message}).`); continue; }
 
   if (res.status !== 200) {
-    fails.push(`${c.name}: answered ${res.status}, so nothing about the filter could be measured. ${JSON.stringify(payload).slice(0, 200)}`);
+    fails.push(`${c.name}: answered ${res.status}, so nothing about the filter could be measured. ${String(c.text ? payload : JSON.stringify(payload)).slice(0, 200)}`);
     continue;
   }
   const profileAsks = asked.filter((a) => a.startsWith('profiles?'));
@@ -330,7 +622,9 @@ for (const c of CASES) {
   if (unfiltered.length) {
     fails.push(`${c.name}: asked for profiles without naming is_demo: ${unfiltered.map((a) => a.slice(0, 90)).join(' | ')}`);
   }
-  if (payload.demoFilterApplied !== true) {
+  /* A download has no payload to carry the flag; the pages that draw figures
+     do, and Part 3 holds every one of those to reading it. */
+  if (!c.text && payload.demoFilterApplied !== true) {
     fails.push(`${c.name}: the column is there and it reported demoFilterApplied ${JSON.stringify(payload.demoFilterApplied)}. The page draws its banner off that.`);
   }
   if (mentionsDemo(payload)) {
@@ -343,10 +637,12 @@ for (const c of CASES) {
   /* And with it missing, which is every minute between a deploy and her
      running the migration. 400 on every admin page is not the answer. */
   asked = []; columnMissing = true;
-  try { res = await handler(get(c.path)); payload = await res.json(); }
+  try { res = await handler(get(c.path)); payload = await read(res); }
   catch (e) { fails.push(`${c.name}: threw with the column missing (${e.message}). That is the state between a deploy and migration 082.`); continue; }
   if (res.status !== 200) {
     fails.push(`${c.name}: answered ${res.status} with the column missing. The page has to keep working until migration 082 runs.`);
+  } else if (c.text) {
+    notes.push(`${c.name}: column missing → 200`);
   } else if (payload.demoFilterApplied !== false) {
     fails.push(`${c.name}: the column is missing and it reported demoFilterApplied ${JSON.stringify(payload.demoFilterApplied)}, so the admin counts demos and says nothing.`);
   } else {

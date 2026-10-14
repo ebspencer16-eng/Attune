@@ -40,7 +40,7 @@ export const config = { runtime: 'edge' };
 
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS } from './_lib/survey.js';
-import { selectProfiles } from './_lib/demo-accounts.js';
+import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/demo-accounts.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -401,7 +401,10 @@ export default async function handler(req) {
     try {
       const _ps = await admin.from('partner_sessions').select('invite_code, ex1_answers');
       if (_ps.error) throw _ps.error;
-      partnerSessions = _ps.data || [];
+      /* Keyed by code, so the codes the figures are about are the ones on
+         these profiles. A demo's invited partner was otherwise a person. */
+      const _codes = new Set(profiles.map((p) => p.invite_code).filter(Boolean));
+      partnerSessions = ownedBy(_ps.data || [], _codes, 'invite_code');
     } catch (e) {
       console.error('[admin-explore] partner_sessions:', e?.message || e);
       couldNotRead.push('invited partners, so some couples may read as unpaired');
@@ -584,7 +587,9 @@ export default async function handler(req) {
     // ── Orders, joined to purchaser demographics, fully anonymized ───────────
     let orderRows = [];
     try {
-      const { data: ords = [] } = await admin.from('orders').select('*').limit(2000);
+      /* A demo's test order was a row in the cube, unsegmented but counted. */
+      const { data: _ords = [] } = await admin.from('orders').select('*').limit(2000);
+      const ords = withoutDemoOrders(_ords, await demoOwners(admin));
       const monthOf = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
       orderRows = (ords || []).map((o) => {
         const email = o.buyer_email ? String(o.buyer_email).toLowerCase() : null;
@@ -630,6 +635,12 @@ export default async function handler(req) {
     const monthOfTs = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
     const surveysAnon = [];
     for (const [rid, payload] of Object.entries(surveyByRespondent)) {
+      /* A respondent the figures are not about: a demo, or an account that no
+         longer exists. Either way there is nobody to count the answer under. */
+      if (!segById[rid]) continue;
+      /* `|| {}` after the guard looks redundant and is not: without it, a
+         disabled guard throws instead of over-counting, and a gate that
+         catches a 500 has not measured the count it was written for. */
       const seg = segById[rid] || {};
       const row = {};
       for (const k of SEG_KEYS) row[k] = seg[k] != null ? seg[k] : null;

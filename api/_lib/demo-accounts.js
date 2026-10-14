@@ -73,17 +73,84 @@ export async function fetchProfiles(run, path) {
 }
 
 /**
- * The demo ids, for a surface that filters rows of another table by who owns
- * them. The survey's responses are the case: dropping the demographics of a
- * demo respondent would leave their answers in the charts.
+ * The demo ids and emails, for a surface that filters rows of another table by
+ * who owns them.
  *
- * Returns { ids: Set, demoFilterApplied }. An unmarked database answers with
- * an empty set and false, which counts demos and says so.
+ * Two cases need it. The survey's responses: dropping the demographics of a
+ * demo respondent would have left their answers in the charts. And orders,
+ * which carry a `user_id` when the buyer had an account and only a
+ * `buyer_email` when they did not, so both have to be known.
+ *
+ * Returns { ids: Set, emails: Set, demoFilterApplied }. An unmarked database
+ * answers with two empty sets and false, which counts demos and says so.
  */
-export async function demoIds(admin) {
-  const { data, error } = await admin.from('profiles').select('id').eq(DEMO_COLUMN, true);
-  if (error) return { ids: new Set(), demoFilterApplied: false };
-  return { ids: new Set((data || []).map((r) => r.id)), demoFilterApplied: true };
+export async function demoOwners(admin) {
+  const { data, error } = await admin.from('profiles').select('id, email').eq(DEMO_COLUMN, true);
+  if (error) return { ids: new Set(), emails: new Set(), demoFilterApplied: false };
+  const rows = data || [];
+  return {
+    ids: new Set(rows.map((r) => r.id)),
+    emails: new Set(rows.map((r) => r.email).filter(Boolean).map((e) => String(e).toLowerCase())),
+    demoFilterApplied: true,
+  };
+}
+
+/**
+ * Rows of another table, with the demos' removed.
+ *
+ * ── WHY THIS IS A SECOND FUNCTION ─────────────────────────────────────────
+ * B61 filtered every read of `profiles` and left every figure computed from a
+ * DIFFERENT table counting demos: their notes, their article reads, their page
+ * time, their orders. The Engagement page answered two article readers where
+ * one of the two was Alex. A row keyed to a person by an id is that person's
+ * row, whatever table it sits in.
+ *
+ * ── THE RULE ──────────────────────────────────────────────────────────────
+ * A row belongs in a figure only if the person who owns it is in the list the
+ * figures are about. That is strictly better than asking whether the owner is
+ * a demo: it also drops a row belonging to an account that no longer exists,
+ * which was being counted under nobody.
+ *
+ * ── THE EXCEPTION, WHICH IS NOT ONE ───────────────────────────────────────
+ * A row with no owner at all is kept. An anonymous page view belongs to
+ * nobody by design, and dropping it would undercount every marketing page.
+ * That is why `ownerless` is a choice the caller makes rather than a default
+ * buried in here: a note with no owner would be a bug, an event with no owner
+ * is the normal case.
+ *
+ * @param rows      the other table's rows
+ * @param owners    Set of ids the figures are about, usually the filtered profiles
+ * @param key       the column holding the owner's id
+ * @param ownerless 'keep' or 'drop' for a row whose owner column is empty
+ */
+export function ownedBy(rows, owners, key = 'owner_id', ownerless = 'drop') {
+  if (!Array.isArray(rows)) return [];
+  return rows.filter((r) => {
+    const who = r && r[key];
+    if (!who) return ownerless === 'keep';
+    return owners.has(who);
+  });
+}
+
+/**
+ * Orders, with the demos' removed.
+ *
+ * An order is the one table that names its buyer two ways: `user_id` when they
+ * had an account, and only `buyer_email` when they bought before making one.
+ * So this cannot be `ownedBy`, and it is here rather than in the three
+ * endpoints that need it, because one rule written out three times is the
+ * failure this codebase is organised against.
+ *
+ * `demo` is what demoOwners returned.
+ */
+export function withoutDemoOrders(orders, demo) {
+  const ids = (demo && demo.ids) || new Set();
+  const emails = (demo && demo.emails) || new Set();
+  return (orders || []).filter((o) => {
+    if (o && o.user_id && ids.has(o.user_id)) return false;
+    const email = o && o.buyer_email ? String(o.buyer_email).toLowerCase() : '';
+    return !(email && emails.has(email));
+  });
 }
 
 /** For rows already in hand: true when this profile is a demo. */

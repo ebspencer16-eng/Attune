@@ -35,7 +35,7 @@ import { checkAdminAuth } from './_lib/admin-auth.js';
 import { EXERCISES } from './_exercises.js';
 import { resultsNav } from './_lib/results-sections.js';
 import { axisScores, calcDimScores, typeCodeFromAxes } from './_type-engine.js';
-import { fetchProfiles } from './_lib/demo-accounts.js';
+import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
 
 export const config = { runtime: 'edge' };
 
@@ -564,19 +564,46 @@ export default async function handler(req) {
       return { field, value };
     })();
 
-    let sliced = { profiles, notes, reads, events };
+    /**
+     * Before anything is counted: a row belongs to the people the figures are
+     * about, or to nobody.
+     *
+     * B61 filtered the profile read and left this whole and counting demos.
+     * Driven against a stub with one real person and one demo, the page
+     * answered two article readers. An event with no owner is an anonymous
+     * visit and stays; a note or a read with no owner would be a row with no
+     * person, and there is nothing to count it under.
+     */
+    /**
+     * Everything this page counts, cut down to one set of people.
+     *
+     * `note_tags` has no owner of its own: it joins a note to a tag, so it
+     * belongs to whoever owns the note. That is why this is one function
+     * rather than five filters at five call sites.
+     */
+    const forPeople = (people) => {
+      const myNotes = ownedBy(notes, people);
+      const mine = new Set(myNotes.map((n) => n.id));
+      return {
+        profiles: profiles.filter((p) => people.has(p.id)),
+        notes: myNotes,
+        tags: ownedBy(tags, people),
+        noteTags: ownedBy(noteTags, mine, 'note_id'),
+        reads: ownedBy(reads, people),
+        events: ownedBy(events, people, 'owner_id', 'keep'),
+      };
+    };
+
+    const people = new Set(profiles.map((p) => p.id));
+    let sliced = forPeople(people);
     if (slice) {
       const keep = new Set(
         profiles.filter((p) => String(typeOf(p, slice.field) ?? '') === slice.value).map((p) => p.id),
       );
-      sliced = {
-        profiles: profiles.filter((p) => keep.has(p.id)),
-        notes: notes.filter((n) => keep.has(n.owner_id)),
-        reads: reads.filter((r) => keep.has(r.owner_id)),
-        // An event with no owner cannot be attributed to anybody, so a slice
-        // drops it rather than counting it under whichever segment was picked.
-        events: events.filter((e) => e.owner_id && keep.has(e.owner_id)),
-      };
+      sliced = forPeople(keep);
+      // An event with no owner cannot be attributed to anybody, so a slice
+      // drops it rather than counting it under whichever segment was picked.
+      sliced.events = ownedBy(sliced.events, keep);
     }
 
     // post_reads dates its rows read_at, and everything else here uses
@@ -590,10 +617,12 @@ export default async function handler(req) {
     const nav = resultsNav({ hasReflection: true, intimacyReady: true, conflictListed: true });
 
     const core = engagementFromEvents(sliced.events, {
-      profiles: sliced.profiles, notes: sliced.notes, tags, noteTags, reads: sliced.reads, nav,
+      profiles: sliced.profiles, notes: sliced.notes, tags: sliced.tags,
+      noteTags: sliced.noteTags, reads: sliced.reads, nav,
     });
     const learning = learningFromData({
-      events: sliced.events, notes: sliced.notes, tags, noteTags, reads: sliced.reads, posts,
+      events: sliced.events, notes: sliced.notes, tags: sliced.tags,
+      noteTags: sliced.noteTags, reads: sliced.reads, posts,
       groups: core.groups,
     });
 
@@ -616,12 +645,16 @@ export default async function handler(req) {
       // these, because a chart of zeros drawn from a rejected query is the
       // most misleading thing this tab could do.
       queryErrors,
+      /* What is COUNTED, not what the queries returned. `profiles` was always
+         the filtered figure, so a sentence pairing it with a raw note count
+         mixed two meanings: "5 people, 3 notes" where one of the notes was a
+         demo's. The page's line says Counting rather than Read. */
       rowsRead: {
-        profiles: profiles.length,
-        notes: notes.length,
-        tags: tags.length,
-        articleReads: reads.length,
-        events: events.length,
+        profiles: sliced.profiles.length,
+        notes: sliced.notes.length,
+        tags: sliced.tags.length,
+        articleReads: sliced.reads.length,
+        events: sliced.events.length,
       },
     });
   } catch (e) {

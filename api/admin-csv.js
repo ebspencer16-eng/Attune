@@ -43,7 +43,7 @@ const scoresOf = (self, other) => {
 };
 import { DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
 /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
-import { selectProfiles } from './_lib/demo-accounts.js';
+import { demoOwners, selectProfiles, withoutDemoOrders } from './_lib/demo-accounts.js';
 
 // Thin wrapper preserving this file's null-guard: a couple with no Exercise 1
 // answers yields null axes/type rather than a midpoint default.
@@ -142,16 +142,21 @@ async function buildCombinedData(admin) {
   const [
     { data: profiles = [] },
     { data: workbooks = [] },
-    { data: orders = [] },
+    { data: _orders = [] },
+    _demo,
   ] = await Promise.all([
     selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type')),
     admin.from('workbooks').select('user_id, storage_path'),
     admin.from('orders').select('*'),
+    demoOwners(admin),
   ]);
 
   // Two lookups — one by id (for joining Partner A→B), one filtered to Partner A
   const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
   const partnerAList = profiles.filter(p => p.invite_code && !p.joined_via_invite);
+
+  /* A demo's test order is not a sale, here or on the pages. */
+  const orders = withoutDemoOrders(_orders, _demo);
 
   const wbByUser   = Object.fromEntries(workbooks.map(w => [w.user_id, w]));
   const ordersByUser = {};
@@ -407,7 +412,9 @@ async function exportCombinedXlsx(admin) {
 // initial checkout. Added later via upsell = post-results. We don't track
 // pre-results upsells separately yet — flagged as TODO below.
 async function exportOrders(admin) {
-  const { data: orders } = await admin.from('orders').select('*').order('created_at', { ascending: false });
+  /* A demo's test order is not a sale. The same rule as the admin pages. */
+  const { data: _orders } = await admin.from('orders').select('*').order('created_at', { ascending: false });
+  const orders = withoutDemoOrders(_orders, await demoOwners(admin));
 
   const headers = [
     'order_num', 'order_date', 'package',
@@ -670,12 +677,18 @@ async function exportTyping(admin) {
 // button in the admin came to return an error.
 
 async function exportFeedback(admin) {
+  /* `respondent_id` is read and never written, the same way api/admin-survey.js
+     reads it: it is how a demo's answers are left out, and the row that reaches
+     the file carries no id, no name and no email. */
   const { data, error } = await admin
     .from('survey_responses')
-    .select('answers, version, source, started_at, updated_at, completed_at')
+    .select('answers, version, source, started_at, updated_at, completed_at, respondent_id')
     .order('updated_at', { ascending: false });
   if (error) return errResponse(500, 'Could not read the survey table');
-  const entries = data || [];
+  const { ids: demoRespondents } = await demoOwners(admin);
+  const entries = (data || [])
+    .filter((r) => !(r.respondent_id && demoRespondents.has(r.respondent_id)))
+    .map(({ respondent_id: _who, ...rest }) => rest);
 
   if (entries.length === 0) {
     return csvResponse('attune_survey_empty.csv', 'Nobody has answered the survey yet.');
