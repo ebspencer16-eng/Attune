@@ -17,6 +17,28 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
+### B62, what else changed on the marketing pages
+
+Two rounds of work touched them, and you approved both, so nothing here is a
+surprise except the tiles. If any of it is not what you wanted, say which and
+it goes back the same way.
+
+**From the design review (D19, D31, D36):**
+- Get started in the top bar is the brand orange on every page. It was near
+  black.
+- Get started stays in the bar on a phone rather than hiding behind the menu;
+  Sign in is the one that hides.
+- The In Practice cards have a hairline border again, so they do not lose
+  their bottom half on a white page.
+- The four package tiles got the button treatment. That is what has gone back.
+
+**From the contrast pass (B19, B28):** thirteen colours, all of them text that
+was too pale to read against its background. The footer's small print went from
+40 to 60 per cent white, one review avatar's gradient darkened by a shade, and
+the rest were similar. Nothing moved and nothing changed size.
+
+---
+
 ### B60, the migration to run
 
 Two gaps filled: Lanae as she/her, Spencer as he/him. It only touches a field
@@ -132,6 +154,7 @@ on you.
 
 | # | Built, needs your eye |
 |--|--|
+| B62 | **The four package tiles are back to what they were.** D19 asked for one add-to-cart style on that page and I applied it to the overview tiles as well, which turned four quiet links into four orange blocks, made the tiles uneven, and left "Add to registry" as orange text on an orange button: unreadable. The buttons further down the page, which are the real add-to-cart controls, keep the one style. What else changed on the marketing pages is listed under this table. |
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
 | B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |

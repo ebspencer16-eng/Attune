@@ -304,7 +304,6 @@
        padding was not enough on its own: nowrap means the button sets a floor
        under the tile's width whatever the padding is, so at this size it is
        allowed to wrap. */
-    .pov-cta{padding:.4rem .7rem;font-size:.7rem;white-space:normal;max-width:100%}
   }
   @media(max-width:600px){
     .cmp-note{text-align:center}
@@ -340,12 +339,26 @@
      Two styles for one verb on one page, and the one a person is scanning for
      looked different depending on where they were looking. D19, approved.
      Same shape as .byo-add, a size larger because this is the package. */
-  .pov-cta{display:inline-block;margin-top:.5rem;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:.42rem .95rem;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:filter .15s}
-  .pov-cta:hover{filter:brightness(1.06)}
+  /* ── THE OVERVIEW TILES ARE NOT BUTTONS ────────────────────────────────
+     Ellie: "I especially don't like the way the 4 package overview tiles look
+     at the top of the packages page. Can we revert to whatever it was before?"
+
+     D19 asked for one add-to-cart style on this page and I applied it to these
+     four as well, which turned four quiet links into four solid orange blocks
+     and made the tiles uneven: the Starting Out tile carries two, so its row
+     sat a line higher than its neighbours. Worse, the second one was orange
+     text on an orange button, which is a label nobody could read.
+
+     The buttons lower down, on the exercises and the resources, are the real
+     add-to-cart controls and they keep the one style. These four are an
+     overview whose job is to take you to a package. */
+  .pov-cta{font-size:.72rem;font-weight:600;color:var(--clay);margin-top:.25rem;display:inline-block;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .15s}
+  .pov-cta:hover{text-decoration-color:var(--clay)}
   /* On the dark premium tile the orange still carries; white on it is the one
      combination B19 leaves as a decision, so the words stay white here and the
      tile keeps its own ground. */
-  .pov-premium .pov-cta{background:var(--orange);color:#fff}
+  .pov-premium .pov-cta{color:rgba(180,188,255,.8)}
+  .pov-premium .pov-cta:hover{text-decoration-color:rgba(180,188,255,.8)}
   /* HAMBURGER */
   .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
   .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px}
@@ -661,7 +674,7 @@
     <div class="pov-desc">Everything in the Assessment plus a practical checklist for name changes, finances, and household logistics.</div>
     <div style="display:flex;gap:.85rem;align-items:center;flex-wrap:wrap;margin-top:.25rem;">
       <span class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('newlywed')">Add to cart →</span>
-      <a href="/wedding-registry" onclick="event.stopPropagation()" class="pov-cta" style="color:var(--orange);">Add to registry →</a>
+      <a href="/wedding-registry" onclick="event.stopPropagation()" class="pov-cta">Add to registry →</a>
     </div>
   </div>
   <div class="pov-tile pov-indigo" onclick="scrollToPkg('#pkg-anniversary')" style="cursor:pointer">

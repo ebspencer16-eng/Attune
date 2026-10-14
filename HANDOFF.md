@@ -2901,3 +2901,30 @@ TASKS.md B61 asks for one word: an `is_demo` column set on the accounts she
 names, filtered out by the four admin endpoints.
 
 Everything from B43 to B59 is approved and filed in section 4.
+
+## 2026-10-13, the package tiles go back
+
+Ellie: "Why do marketing sites look different than they did? I especially don't
+like the way the 4 package overview tiles look at the top of the packages page.
+Can we revert to whatever it was before?"
+
+It was D19, "one primary button: the packages page has one add-to-cart style",
+which she approved. I applied it to the four overview tiles as well as to the
+real add-to-cart controls further down, and that was the over-reach: four quiet
+clay links became four solid orange blocks, the Starting Out tile carries two
+of them so its row sat a line higher than its neighbours, and the second one
+was orange text on an orange button. "Add to registry" was unreadable on the
+live site for six days and no gate saw it: check-ground-contrast covers the
+results grounds and the app, not a link's own inline colour.
+
+The tiles are back to the text links. The buttons on the exercises and the
+resources rows keep the one style, which is where D19's point actually bites:
+those are the controls that put something in a cart.
+
+Screenshots of before, after and reverted are in the scratch directory for this
+session; the reverted shot and the pre-D19 shot are the same layout.
+
+The rest of what changed on those pages is listed in TASKS.md under B62: the
+orange Get started, Get started staying in the bar on a phone, the In Practice
+hairline, and thirteen contrast fixes that only darkened pale text. All of it
+is hers to reverse the same way.
