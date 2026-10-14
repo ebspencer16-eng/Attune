@@ -2954,3 +2954,31 @@ the commit before this round and from the tree as it stands, come back
 identical: same height, background, typeface, size, weight, colour. The last
 hero change was 9 September. What sits directly above every hero and did change
 is the nav, which is in TASKS.md under B62.
+
+## 2026-10-14, Alex and Sam stop being people
+
+Every figure the admin draws was counting two demo accounts and anything called
+test. They are rows in `profiles` like anybody else, so they were in the couple
+types, the demographics, the engagement, the funnel, the survey segments and
+all five CSV exports. The symptom was a demographic breakdown that described us.
+
+`api/_lib/demo-accounts.js` is the one place that knows the column and the
+filter. Eleven reads across six endpoints go through `selectProfiles`,
+`fetchProfiles` or `demoIds`, so the table is named nowhere else in the admin.
+Migration 082 marks the rows and is in TASKS.md for Ellie to run; it matches the
+whole name, not a prefix, because `alex%` catches Alexandra.
+
+**Not done until she runs it.** The code is deployed and every admin page now
+carries an amber line saying demos are still being counted, which is what the
+`demoFilterApplied: false` fallback is for: asking PostgREST for a column that
+does not exist is a 400, and that would have taken every admin page down
+between the deploy and the SQL.
+
+One lesson worth keeping, now in CLAUDE.md. The gate written in the same sitting
+grepped for `from('profiles')` and reported ONE read across the admin with
+eleven in front of it, because the fix had moved the table name inside the
+module. A gate can be blinded by the abstraction it was written to protect, on
+the same afternoon. `check-demo-excluded.mjs` counts calls to the module instead
+and keeps the literal only as a thing to forbid, drives three handlers against a
+stubbed PostgREST, and holds the page to reading the flag. Nine plants, all
+caught.
