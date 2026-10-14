@@ -3056,3 +3056,36 @@ says so.
 her phone. Nothing in this round needed a rebuild: no native module was added,
 which is why the notification time picker is a list of half hours rather than
 a clock.
+
+## 2026-10-14, the second pass on her six
+
+She ran migration 083, sent the packages page copy, approved two, and sent back
+three faults on the word storycard plus "can we make it faster?" again.
+
+**The word card was wrong because I built it from her sentence rather than from
+the screen her sentence named.** All three faults were one mistake. There is a
+`WordEntry` component now, rendered by the Notes tab and by the card, and a
+card can ask for a page's own wash component instead of approximating it with a
+three-stop gradient. The foot takes ink on a light card; it was white on white,
+which is why she could not see the link.
+
+**How to look at an Expo screen without the Simulator.** No browser gate here
+renders app components, which is how the first version passed everything. The
+app has a web build: `cd attune-app && npx expo start --web --port 8099`, then
+swap a probe in for `<AppTabs />` in `src/app/_layout.tsx` for the screenshot
+and swap it back. Ten minutes. Two traps: every URL renders the tabs because
+the layout has no router slot, so a route file alone is never reached; and
+`adjustsFontSizeToFit` is iOS-only, so text that shrinks on a phone truncates
+there. Measure the width rather than reading the truncation as a bug.
+
+**The performance round went wider.** The first pass measured /api/home alone,
+which found a real thing and missed two worse ones. The tools tab was seven
+round trips deep, worse than home had been, and nothing had looked at it. It is
+three now; Notes is four, from five.
+
+Making Notes faster put a read in front of every save, because the promise
+started before the action was known. `check-waterfalls` counts calls on the
+write paths for exactly that reason.
+
+**Still waiting on her: nothing.** Section 2 is empty and section 1 holds only
+the long-standing items. The app update is published and current.
