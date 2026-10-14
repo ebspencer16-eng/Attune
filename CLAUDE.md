@@ -645,6 +645,21 @@ disagreed with it, and an hour went into chasing a divergence that does not
 exist. Prose beside code is not checked by anything, so when a path dies, the
 sentence describing it is the part that goes on doing damage.
 
+**A quotation extracted by a script cannot be mistyped; one retyped can.**
+Fifty-one more insights were needed and every one had to be a real sentence
+from a real page. They were not transcribed: a script fetched each page, split
+its text, and took sentences by index, so the stored body is the page's own
+bytes and a curly apostrophe or a doubled space cannot differ from it.
+check-quotes-verbatim then opened all 69 urls and proved it again, which is the
+half that matters because it is independent of how the text got there.
+
+Two rules came out of choosing among the candidates, and both are in the
+builder rather than in my judgement. A card shows one sentence and nothing
+before it, so anything opening "This means" or "Recognizing them" reads as a
+fragment: there is no this and no them. And a sentence splitter breaks after
+"Dr.", which leaves the next one starting mid-name. Nine candidates went that
+way, caught by a rule after I had caught eight of them by reading.
+
 **Check the quotation against the page.** Six were organised under
 "direct quotes from these publications, cited accurately". Two were not
 quotations. The product showed "Contempt is the single greatest predictor of

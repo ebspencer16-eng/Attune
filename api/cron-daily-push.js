@@ -98,7 +98,8 @@ export function localMinutesFor(nowMs, offsetMinutes) {
 
 export default async function handler(req) {
   const secret = process.env.CRON_SECRET;
-  const auth = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  const auth = (req.headers.get('authorization') || req.headers.get('Authorization') || '')
+    .replace(/^Bearer\s+/i, '').trim();
   if (!secret || auth !== secret) return json({ ok: false, error: 'Unauthorized' }, 401);
 
   const url = process.env.SUPABASE_URL;

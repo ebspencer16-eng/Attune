@@ -20,7 +20,7 @@ export const ENV_VARS = [
   { name: "ATTUNE_PHYSICAL_ENABLED", required: false, readBy: ["api/create-payment-intent.js"] },
   { name: "BROWSERLESS_TOKEN", required: false, readBy: ["api/generate-pdf.js"], note: "Optional. Without it the workbook prints in the browser instead." },
   { name: "CONSENT_PEPPER", required: false, readBy: ["api/_lib/consent.js"] },
-  { name: "CRON_SECRET", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-prune-events.js"] },
+  { name: "CRON_SECRET", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-daily-push.js","api/cron-feedback-synthesis.js"] },
   { name: "DIGEST_TO", required: false, readBy: ["api/cron-beta-digest.js","api/cron-feedback-synthesis.js"] },
   { name: "EXPO_ACCESS_TOKEN", required: false, readBy: ["api/_lib/push.js"] },
   { name: "FROM_EMAIL", required: false, readBy: ["api/cron-beta-digest.js","api/cron-checkin.js","api/cron-feedback-synthesis.js","api/cron-survey-nudge.js"] },

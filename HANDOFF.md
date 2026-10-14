@@ -3013,3 +3013,46 @@ B68 is in TASKS.md section 3 rather than section 4: it lowers an order count
 and a revenue figure, and she should see that before trusting a number she
 wrote down. Still nothing changes on the live admin until she runs migration
 082, and every page says so in amber until she does.
+
+## 2026-10-14, eighteen items and two lists of a hundred
+
+Ellie sent one long message: her edited word list, a request for 100 of each
+list, and eighteen numbered fixes. All of it is done except what is waiting on
+her, which is one migration and one sentence of copy.
+
+**Two things are blocked on her.** Migration 083, in TASKS.md section 1, which
+is what makes the daily notification rows appear in Settings. And the packages
+page, where the hero and the foot both land on "real understanding" and the
+line under each is the same sentence: nothing changed there, it has been that
+way since the commit that wrote it, and it needs one new sentence from her.
+
+**Two lists of 100.** The words are 49 of hers, verbatim, with Consent deleted,
+plus 51 written to the four moves her edits make. The insights are 100
+verified quotations: 69 from pages, all 69 checked word for word today, and 31
+from books checked when added. The book half cannot be rechecked here because
+GOOGLE_BOOKS_KEY is in Vercel and not on this machine, which is why every new
+one came from a page that can be opened.
+
+None of the insight text was typed. A script fetched each page, split it and
+took sentences by index, so the stored body is the page's bytes. Two rules in
+that script are worth keeping: a sentence opening "This means" or "Recognizing
+them" is a fragment on a card that shows nothing before it, and a splitter
+breaks after "Dr." and leaves the next sentence starting mid-name.
+
+**Four gates added**, each planted against: check-hero-band (7 plants),
+check-daily-push (13), check-home-waterfall (7), and check-mark-artwork widened
+to every lockup (5). Three of them were wrong first in ways recorded in their
+own headers, and all three mistakes were mine measuring the machine instead of
+the code, or reading a comment as code.
+
+**One latent bug worth knowing about.** build-tasks-sql.mjs pasted a migration
+into TASKS.md with String.replace and a string replacement. Migration 083 has
+`[0-5][0-9]$'` in a CHECK constraint, and `$'` means "everything after the
+match", so the document came back carrying the whole of itself three times.
+Right for eighteen migrations. It uses a replacer function now and CLAUDE.md
+says so.
+
+**The app needs an update published** for any of B69, B70, B72 or B73 to reach
+her phone. Nothing in this round needed a rebuild: no native module was added,
+which is why the notification time picker is a list of half hours rather than
+a clock.
