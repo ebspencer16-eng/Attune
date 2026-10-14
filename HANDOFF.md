@@ -2928,3 +2928,29 @@ The rest of what changed on those pages is listed in TASKS.md under B62: the
 orange Get started, Get started staying in the bar on a phone, the In Practice
 hairline, and thirteen contrast fixes that only darkened pale text. All of it
 is hers to reverse the same way.
+
+## 2026-10-13, one description of the packages
+
+The checkout tiles and the overview tiles on /offerings described the same four
+packages differently: /start listed what was in each one, /offerings wrote a
+sentence about it, and Premium's first line said "Everything in the Assessment"
+where the other three said "Attune Assessment". Ellie asked for the second to
+match the first, and for Premium's line to match its neighbours.
+
+Both done, with her words from /start. `check-package-tiles.mjs` holds the two
+pages to the same name, the same price from the catalogue, and the same list in
+the same order, reading both lists out of the files rather than keeping a third
+copy in the gate. Five plants: the old Premium wording, a changed line, a price
+off the catalogue, a reordered list, and the overview tile reverting to prose.
+
+The gift-box line on the new tiles carries `gift-feat`, and /offerings' flag
+block now hides it while physical is off, which is what /start has always done.
+That was missing from the flag block and would have promised a box nobody can
+send.
+
+**The hero banners have not changed.** She asked; I measured rather than
+answering from memory. Purpose, FAQ, Contact, In Practice and Legal, built from
+the commit before this round and from the tree as it stands, come back
+identical: same height, background, typeface, size, weight, colour. The last
+hero change was 9 September. What sits directly above every hero and did change
+is the nav, which is in TASKS.md under B62.

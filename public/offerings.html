@@ -327,6 +327,16 @@
   .pov-indigo:hover{border-color:var(--indigo)}
   .pov-premium{background:linear-gradient(145deg,#1c1940,#2c2860);border-color:rgba(255,255,255,.12)}
   .pov-premium:hover{border-color:rgba(91,109,248,.5);box-shadow:0 6px 24px rgba(91,109,248,.25)}
+  /* The badge and the list, matching the checkout's tiles. */
+  .pov-badge{display:inline-block;align-self:flex-start;padding:.24rem .6rem;border-radius:999px;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .pov-feats{list-style:none;margin:.35rem 0 0;padding:0;display:flex;flex-direction:column;gap:.3rem;flex:1}
+  .pov-feats li{position:relative;padding-left:1rem;font-size:.76rem;color:var(--muted);line-height:1.5}
+  .pov-feats li::before{content:'✓';position:absolute;left:0;top:0;color:var(--clay);font-size:.7rem}
+  .pov-feats li.bold-feat{color:var(--ink);font-weight:500}
+  .pov-feats li.bold-feat::before{color:var(--orange)}
+  .pov-premium .pov-feats li{color:rgba(255,255,255,.55)}
+  .pov-premium .pov-feats li.bold-feat{color:white}
+  .pov-premium .pov-feats li::before{color:rgba(180,188,255,.8)}
   .pov-name{font-family:var(--hfont);font-size:.92rem;font-weight:700;color:var(--ink);line-height:1.2}
   .pov-premium .pov-name{color:white}
   .pov-price{font-size:1.1rem;font-weight:700;color:var(--ink);font-family:var(--hfont)}
@@ -659,36 +669,68 @@
   drops the reader at the top of the page with no sign of what they clicked
   for. The packages are what those links are for, so that is where they land.
 -->
+<!-- ── THE SAME FOUR TILES AS THE CHECKOUT ──────────────────────────────────
+     Ellie: "Make the 4 package overview tiles on the packages page match the
+     tile content on the get started checkout popup."
+
+     Same badge, same name, same price, same list of what is in it, in her
+     words from /start. The prose that was here said the same thing in
+     sentences, which is how the two pages came to describe the packages
+     differently; check-package-tiles.mjs holds them to each other now.
+
+     The Gift box line carries `gift-feat`, which the flag block at the foot of
+     this page hides while physical is off, exactly as /start does. -->
 <div class="pkg-overview" id="gift">
   <div class="pov-tile" onclick="scrollToPkg('#pkg-core')" style="cursor:pointer">
+    <span class="pov-badge" style="background:#FFF0EB;color:#E8673A;">The Foundation</span>
     <div class="pov-name">The Attune Assessment</div>
     <div class="pov-price">$89</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For any couple ready to understand each other better.</div>
-    <div class="pov-desc">Two exercises that map how you communicate and what you each expect, and surface the assumptions shaping both.</div>
+    <ul class="pov-feats">
+      <li>Communication assessment</li>
+      <li>Expectations comparison</li>
+      <li>Couple type + map</li>
+      <li>Results portal, yours to keep</li>
+      <li class="gift-feat">Gift box</li>
+    </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('core')">Add to cart →</div>
   </div>
   <div class="pov-tile pov-orange" onclick="scrollToPkg('#pkg-newlywed')" style="cursor:pointer">
+    <span class="pov-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
     <div class="pov-name">Starting Out Collection</div>
     <div class="pov-price">$139</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For couples just starting out, or who want to start right.</div>
-    <div class="pov-desc">Everything in the Assessment plus a practical checklist for name changes, finances, and household logistics.</div>
+    <ul class="pov-feats">
+      <li class="bold-feat">Attune Assessment</li>
+      <li>Merging Lives Checklist</li>
+      <li>Build a Budget tool</li>
+      <li class="gift-feat">Gift box</li>
+    </ul>
     <div style="display:flex;gap:.85rem;align-items:center;flex-wrap:wrap;margin-top:.25rem;">
       <span class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('newlywed')">Add to cart →</span>
       <a href="/wedding-registry" onclick="event.stopPropagation()" class="pov-cta">Add to registry →</a>
     </div>
   </div>
   <div class="pov-tile pov-indigo" onclick="scrollToPkg('#pkg-anniversary')" style="cursor:pointer">
+    <span class="pov-badge" style="background:#EEEFFF;color:#5161DD;">Anniversary</span>
     <div class="pov-name">Relationship Reflection</div>
     <div class="pov-price">$139</div>
-    <div style="font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.5;">For couples with a chapter or two behind them.</div>
-    <div class="pov-desc">The Assessment plus a third exercise built around shared history, meaningful moments, and where you're headed next.</div>
+    <ul class="pov-feats">
+      <li class="bold-feat">Attune Assessment</li>
+      <li>Relationship Reflection exercise</li>
+      <li class="gift-feat">Gift box</li>
+    </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('anniversary')">Add to cart →</div>
   </div>
   <div class="pov-tile pov-premium" onclick="scrollToPkg('#pkg-premium')" style="cursor:pointer">
+    <span class="pov-badge" style="background:rgba(91,109,248,.1);color:#5161DD;">Most Complete</span>
     <div class="pov-name">Attune Premium</div>
     <div class="pov-price">$198</div>
-    <div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:.2rem;line-height:1.5;">Everything, in one place.</div>
-    <div class="pov-desc">Two bonus exercises and the personalized workbook, bundled with the full Assessment.</div>
+    <ul class="pov-feats">
+      <li class="bold-feat">Attune Assessment</li>
+      <li>Relationship Reflection</li>
+      <li>Budget + conflict patterns exercises</li>
+      <li>Personalized workbook</li>
+      <li class="gift-feat">Gift box</li>
+    </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('premium')">Add to cart →</div>
   </div>
 </div>
@@ -1040,6 +1082,9 @@ document.addEventListener('click', function(e) {
     });
     // Printed workbook is a shipped item — phase 2 only.
     document.querySelectorAll('.phys-only').forEach(function(e){ e.style.display='none'; });
+    /* The gift box line in the overview tiles, hidden the same way /start
+       hides it: there is no box to send while physical is off. */
+    document.querySelectorAll('.gift-feat').forEach(function(e){ e.style.display='none'; });
   }
 })();
 </script>

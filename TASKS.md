@@ -17,6 +17,25 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
+### B65, the hero banners
+
+They have not changed. I measured rather than guessing: the same page, built
+from the commit before this round of work and from the tree as it stands, side
+by side in a browser.
+
+Purpose, FAQ, Contact, In Practice and Legal all come back identical: the same
+banner height, the same background, the same typeface, the same 54 point title
+in the same weight and colour.
+
+The last change to a hero was 9 September, when you asked for hero text to be
+black and upright and it was still rendering italic. What HAS changed directly
+above the banner, in the round you approved, is the nav: Get started went from
+near black to the brand orange, and on a phone Get started now stays in the bar
+while Sign in hides. That sits a few points above the hero on every page and
+may be what you are seeing. One word and the orange goes back.
+
+---
+
 ### B62, what else changed on the marketing pages
 
 Two rounds of work touched them, and you approved both, so nothing here is a
@@ -155,6 +174,9 @@ on you.
 | # | Built, needs your eye |
 |--|--|
 | B62 | **The four package tiles are back to what they were.** D19 asked for one add-to-cart style on that page and I applied it to the overview tiles as well, which turned four quiet links into four orange blocks, made the tiles uneven, and left "Add to registry" as orange text on an orange button: unreadable. The buttons further down the page, which are the real add-to-cart controls, keep the one style. What else changed on the marketing pages is listed under this table. |
+| B64 | **The four tiles on the packages page carry the same content as the four on the checkout popup**: same badge, same name, same price, same list of what is in it, in your words from the popup. The sentences that were there described the packages differently from the page next to them. A gate holds the two together. |
+| B63 | **Premium's first line reads Attune Assessment**, like the other three. |
+| B65 | **The hero banners have not changed.** Measured on five pages against the build before this round: identical height, background, typeface, size, weight and colour. What changed above them is the nav. See under section 1. |
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
 | B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
