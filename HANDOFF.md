@@ -2982,3 +2982,34 @@ the same afternoon. `check-demo-excluded.mjs` counts calls to the module instead
 and keeps the literal only as a thing to forbid, drives three handlers against a
 stubbed PostgREST, and holds the page to reading the flag. Nine plants, all
 caught.
+
+## 2026-10-14, the half of B61 that was not done
+
+B61 filtered every read of `profiles`, so the couple types, the demographics
+and the funnel stopped counting demos. Everything measured from a DIFFERENT
+table went on counting them: notes, tags, article reads, page time, orders,
+invited partners, survey answers. Found by driving the engagement endpoint
+against a stub rather than by reading it, which answered two article readers
+where one of the two was Alex.
+
+The rule now lives beside the other one in `api/_lib/demo-accounts.js`: a row
+belongs in a figure only if its owner is in the list the figures are about.
+`ownedBy` for the owner_id tables, `withoutDemoOrders` for orders, which are
+the one table that names a buyer twice (by account and by email alone).
+
+Two things to know if this comes up again. An ownerless `page_events` row is an
+anonymous visit and must stay counted, so "what to do with no owner" is an
+argument rather than a default. And the engagement page's count line said
+"Read 5 people, 3 notes" with the people filtered and the notes not; it says
+Counting now, and both halves mean the same thing.
+
+**The gate lesson, which is in CLAUDE.md.** A check about something being
+excluded has to assert on a total. The old one looked for the demo's id in the
+answer and nothing identifying appears in an aggregate, so it passed while the
+numbers were wrong. The fixture gives the demo one row in every table beside
+each real person's, so the right answer is 1 and the wrong answer is 2.
+
+B68 is in TASKS.md section 3 rather than section 4: it lowers an order count
+and a revenue figure, and she should see that before trusting a number she
+wrote down. Still nothing changes on the live admin until she runs migration
+082, and every page says so in amber until she does.
