@@ -562,6 +562,12 @@
 
   .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
   .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  /* Ellie: "Add a gradient line to the bottom of each marketing page's hero
+     banner - should separate navy section from the rest of the page content".
+     The same three colours as the line above, in the same order, because a
+     second gradient would be a seventh idea of what Attune's gradient is.
+     check-hero-band.mjs holds all six pages to carrying both. */
+  .page-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:2}
   .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
   .page-header-inner{max-width:780px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
   .page-header .page-title{color:white;text-align:center}
@@ -596,7 +602,7 @@
 
 <nav>
   <a href="/home" class="logo">
-    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_3_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_3_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_3_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_3_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_3_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_3_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_3_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_3_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
     <span class="logo-text">Attune</span>
   </a>
   <ul class="nav-center">
@@ -688,10 +694,10 @@
     <div class="pov-name">The Attune Assessment</div>
     <div class="pov-price">$89</div>
     <ul class="pov-feats">
-      <li>Communication assessment</li>
-      <li>Expectations comparison</li>
-      <li>Couple type + map</li>
-      <li>Results portal, yours to keep</li>
+      <li>Communication Styles Exercise</li>
+      <li>Expectations Exercise</li>
+      <li>Couple Type + Map</li>
+      <li>Results Portal, Yours to Keep</li>
       <li class="gift-feat">Gift box</li>
     </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('core')">Add to cart →</div>
@@ -703,7 +709,7 @@
     <ul class="pov-feats">
       <li>Attune Assessment</li>
       <li>Merging Lives Checklist</li>
-      <li>Build a Budget tool</li>
+      <li>Build a Budget Tool</li>
       <li class="gift-feat">Gift box</li>
     </ul>
     <div style="display:flex;gap:.85rem;align-items:center;flex-wrap:wrap;margin-top:.25rem;">
@@ -717,7 +723,7 @@
     <div class="pov-price">$139</div>
     <ul class="pov-feats">
       <li>Attune Assessment</li>
-      <li>Relationship Reflection exercise</li>
+      <li>Relationship Reflection Exercise</li>
       <li class="gift-feat">Gift box</li>
     </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('anniversary')">Add to cart →</div>
@@ -728,9 +734,9 @@
     <div class="pov-price">$198</div>
     <ul class="pov-feats">
       <li>Attune Assessment</li>
-      <li>Relationship Reflection</li>
-      <li>Budget + conflict patterns exercises</li>
-      <li>Personalized workbook</li>
+      <li>Relationship Reflection and Conflict Patterns Exercises</li>
+      <li>Build a Budget Tool</li>
+      <li>Personalized Workbook</li>
       <li class="gift-feat">Gift box</li>
     </ul>
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('premium')">Add to cart →</div>
@@ -843,7 +849,7 @@
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">
-        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sfLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sfLogoGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sfLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sfLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sfLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sfLogoGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sfLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sfLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
         <span class="logo-text">Attune</span>
       </a>
       <p class="sf-tagline">Because understanding takes intention.</p>

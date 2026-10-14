@@ -156,13 +156,16 @@
 
   @media(max-width:640px){section{padding-top:1.75rem!important;padding-bottom:1.75rem!important}.si{padding-left:1.25rem!important;padding-right:1.25rem!important}}  .page-header{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:calc(58px + 3.5rem) clamp(1.25rem,5vw,2.5rem) 3rem;position:relative;overflow:hidden;max-width:none;margin:0;width:100%;box-sizing:border-box}
   .page-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:1}
+  /* Ellie: "Add a gradient line to the bottom of each marketing page's hero
+     banner - should separate navy section from the rest of the page content".
+     The same three colours as the line above, in the same order, because a
+     second gradient would be a seventh idea of what Attune's gradient is.
+     check-hero-band.mjs holds all six pages to carrying both. */
+  .page-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#E8673A,#9B5DE5,#1B5FE8);z-index:2}
   .page-header-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 100%,rgba(232,103,58,.12),transparent);pointer-events:none}
   .page-header-inner{max-width:780px;margin-left:auto;margin-right:auto;position:relative;z-index:1;text-align:center}
   .page-header .page-title{color:white;text-align:center}
   .page-header .page-sub{color:rgba(255,255,255,.65);text-align:center;margin-top:var(--s-sm)}
-  .hero-actions{display:flex;align-items:center;justify-content:center;gap:var(--s-xl);margin-top:1.75rem;flex-wrap:wrap}
-  .gift-link{font-size:.88rem;color:rgba(232,103,58,.8);font-family:var(--bfont);font-weight:500;text-decoration:none;transition:color .15s}
-  .gift-link:hover{color:var(--orange)}
   @media(max-width:780px){input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select{font-size:16px!important}}</style>
 <script type="application/ld+json">
 {
@@ -306,7 +309,7 @@
 
 <nav>
   <a href="/home" class="logo">
-    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_5_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_5_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_5_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_5_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+    <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spark_logo_5_2" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#spark_logo_5_2)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#spark_logo_5_2)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#spark_logo_5_2)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
     <span class="logo-text">Attune</span>
   </a>
   <ul class="nav-center">
@@ -357,11 +360,7 @@
   <div class="page-header-glow"></div>
     <div class="page-header-inner">
   <h1 class="page-title">Learn more about <em>the Attune experience.</em></h1>
-  <p class="page-sub">Everything you'd want to know before starting. If you still have questions, <a href="mailto:hello@attune-relationships.com" style="color:var(--orange);text-decoration:none;font-weight:500;">reach out</a> and we can help.</p>
-    <div class="hero-actions">
-      <a href="/start" class="btn-primary">GET STARTED →</a>
-      <a href="/offerings#gift" class="gift-link">Give it as a gift →</a>
-    </div>
+  <p class="page-sub">Everything you'd want to know before starting. If you still have questions, <a href="mailto:hello@attune-relationships.com" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">reach out</a> and we can help.</p>
   </div>
 </div>
 <div class="faq-wrap">
@@ -455,131 +454,6 @@
 
 </div>
 
-<!-- REVIEWS SECTION (from /reviews) -->
-<div id="reviews">
-
-  <!-- Inject review styles -->
-  <style>
-  .reviews-wrap{max-width:1080px;margin:0 auto;padding:0 var(--s-3xl) 3rem}
-  .reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-xl)}
-  .review-card{background:white;border:1.5px solid var(--stone);border-radius:18px;padding:var(--s-xl);display:flex;flex-direction:column;gap:.85rem}
-  .review-stars{color:#E8673A;font-size:1rem;letter-spacing:.1em}
-  .review-pkg{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.25rem .65rem;border-radius:6px;margin-bottom:.25rem}
-  .review-text{font-size:.85rem;color:var(--muted);line-height:1.75;flex:1;font-style:italic}
-  .review-person{display:flex;align-items:center;gap:.7rem;margin-top:.25rem}
-  .review-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--hfont);font-size:.85rem;font-weight:700;color:white;flex-shrink:0}
-  .review-name{font-size:.82rem;font-weight:600;color:var(--ink)}
-  .review-detail{font-size:.72rem;color:var(--muted)}
-  .stats-bar{background:var(--warm);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:var(--s-3xl) var(--s-3xl)}
-  .stats-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-xl)}
-  .stat-num{font-family:var(--hfont);font-size:2.4rem;font-weight:700;color:var(--ink);line-height:1;margin-bottom:.35rem}
-  .stat-label{font-size:.76rem;color:var(--muted);line-height:1.5;max-width:140px}
-  .featured-quote{background:linear-gradient(150deg,#1c1940 0%,#282560 60%,#1e3a6e 100%);padding:2.31rem var(--s-3xl);text-align:center}
-  .fq-inner{max-width:720px;margin:0 auto}
-  .leave-review{background:var(--warm);border-top:1px solid var(--stone);padding:1.98rem var(--s-3xl);text-align:center}
-  .leave-review-inner{max-width:520px;margin:0 auto}
-  @media(max-width:768px){
-    .reviews-grid{grid-template-columns:1fr!important}
-    .stats-inner{grid-template-columns:1fr 1fr!important;gap:1rem!important}
-    .reviews-wrap{padding:0 1.25rem 2rem!important}
-    .stats-bar{padding:2rem 1.25rem!important}
-    .featured-quote,.leave-review{padding:2.5rem 1.25rem!important}
-  }
-  </style>
-
-  <!-- Stats bar -->
-  <div style="border-top:1.5px solid var(--stone);padding:var(--s-2xl) 0 0;margin-bottom:0;">
-    <div class="faq-wrap" style="padding-bottom:0;">
-      <p class="s-eye" style="margin-bottom:var(--s-xs);">What couples say</p>
-      <h2 class="s-title">What couples found when they looked.</h2>
-    </div>
-  </div>
-
-  <div class="stats-bar">
-    <div class="stats-inner">
-      <div style="border-left:2.5px solid var(--orange);padding-left:1.1rem;">
-        <div class="stat-num">2,400<span style="font-size:1.4rem;color:var(--clay);">+</span></div>
-        <div class="stat-label">couples have completed Attune since launch</div>
-      </div>
-      <div style="border-left:2.5px solid var(--indigo);padding-left:1.1rem;">
-        <div class="stat-num">73<span style="font-size:1.4rem;color:var(--clay);">%</span></div>
-        <div class="stat-label">learned something that surprised them about their partner</div>
-      </div>
-      <div style="border-left:2.5px solid var(--orange);padding-left:1.1rem;">
-        <div class="stat-num">4.9<span style="font-size:1.4rem;color:var(--clay);">/5</span></div>
-        <div class="stat-label">average rating across all packages</div>
-      </div>
-      <div style="border-left:2.5px solid var(--indigo);padding-left:1.1rem;">
-        <div class="stat-num">91<span style="font-size:1.4rem;color:var(--clay);">%</span></div>
-        <div class="stat-label">would recommend it to a couple they know</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reviews grid -->
-  <div class="reviews-wrap" style="padding-top:var(--s-3xl);">
-    <div class="reviews-grid">
-      <div class="review-card">
-        <span class="review-pkg" style="background:#FFF0EB;color:var(--orange);">Anniversary package</span>
-        <div class="review-stars">★ ★ ★ ★ ★</div>
-        <p class="review-text">"We've been together for eight years and I still learned things about my husband I didn't know. The communication section especially, seeing his answers next to mine made something click that I'd been trying to put into words for years."</p>
-        <div class="review-person">
-          <div class="review-avatar" style="background:linear-gradient(135deg,var(--orange),#f59e0b);">S</div>
-          <div><div class="review-name">Sarah M.</div><div class="review-detail">Married 8 years</div></div>
-        </div>
-      </div>
-      <div class="review-card">
-        <span class="review-pkg" style="background:#EEEFFF;color:var(--indigo);">Starting Out</span>
-        <div class="review-stars">★ ★ ★ ★ ★</div>
-        <p class="review-text">"We're engaged and felt like we'd talked about everything. This showed us we hadn't, not because we'd avoided things, but because some questions never come up naturally. The finances and family sections opened up the best conversation we've had."</p>
-        <div class="review-person">
-          <div class="review-avatar" style="background:linear-gradient(135deg,var(--indigo),#2563EB);">A</div>
-          <div><div class="review-name">Alex & Jordan T.</div><div class="review-detail">Engaged · getting married this fall</div></div>
-        </div>
-      </div>
-      <div class="review-card">
-        <span class="review-pkg" style="background:#FBF8F3;color:var(--clay);">Core</span>
-        <div class="review-stars">★ ★ ★ ★ ★</div>
-        <p class="review-text">"Simple, clean, and genuinely useful. I was skeptical because I've tried other relationship apps and they felt gimmicky. This felt like something I could actually use. The side-by-side comparison is exactly the right format."</p>
-        <div class="review-person">
-          <div class="review-avatar" style="background:linear-gradient(135deg,#A36333,#E8673A);">D</div>
-          <div><div class="review-name">David & Priya L.</div><div class="review-detail">Together 3 years</div></div>
-        </div>
-      </div>
-      <div class="review-card">
-        <span class="review-pkg" style="background:#FFF0EB;color:var(--orange);">Anniversary package</span>
-        <div class="review-stars">★ ★ ★ ★ ★</div>
-        <p class="review-text">"We gave this to ourselves as a 5th anniversary gift and I'm so glad we did. The 'Our Story' exercises brought up things we hadn't thought about in years, in the best way. The physical gift box was beautiful too."</p>
-        <div class="review-person">
-          <div class="review-avatar" style="background:linear-gradient(135deg,#1B5FE8,#10b981);">K</div>
-          <div><div class="review-name">Keisha & Marcus W.</div><div class="review-detail">Married 5 years</div></div>
-        </div>
-      </div>
-      <div class="review-card">
-        <span class="review-pkg" style="background:#EEEFFF;color:var(--indigo);">Starting Out</span>
-        <div class="review-stars">★ ★ ★ ★ ★</div>
-        <p class="review-text">"We did this before moving in together. So many of our 'arguments' early on were just expectations that hadn't been said out loud, finances especially. Wish we'd done it sooner."</p>
-        <div class="review-person">
-          <div class="review-avatar" style="background:linear-gradient(135deg,#f59e0b,#E8673A);">T</div>
-          <div><div class="review-name">Tom & Sophie A.</div><div class="review-detail">Dating 2 years · recently moved in together</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Leave a review -->
-  <div class="leave-review">
-    <div class="leave-review-inner">
-      <p style="font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:var(--s-md);">Have you completed Attune?</p>
-      <h2 style="font-family:var(--hfont);font-size:1.9rem;font-weight:700;color:var(--ink);margin-bottom:var(--s-sm);line-height:1.1;letter-spacing:-.02em;">Share your experience.</h2>
-      <p style="font-size:.88rem;color:var(--muted);line-height:1.75;margin-bottom:1.75rem;font-weight:300;">We'd love to hear what Attune was like for you and your partner. Reviews help other couples decide if it's right for them.</p>
-      <a href="mailto:hello@attune-relationships.com?subject=My Attune review" class="btn-ghost">Leave a review →</a>
-    </div>
-  </div>
-
-</div>
-
 <div class="cta-wrap" style="text-align:center;padding:2.64rem var(--s-3xl);background:var(--warm);border-top:1px solid var(--stone);">
   <div style="max-width:860px;margin:0 auto;">
     <h2 style="font-family:var(--hfont);font-size:clamp(1.4rem,4vw,3rem);font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:var(--s-md);letter-spacing:-.02em;">Ready to understand each other<br>more deeply?</h2>
@@ -646,7 +520,7 @@
   <div class="sf-inner">
     <div class="sf-brand">
       <a href="/home" class="logo">
-        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sfLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sfLogoGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sfLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sfLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
+        <svg width="46" height="33" viewBox="0 0 103 76" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sfLogoGrad" x1="0" y1="0" x2="103" y2="76" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E8673A"/><stop offset="100%" stop-color="#1B5FE8"/></linearGradient></defs><path d="M14,4 L44,4 A9,9 0 0,1 53,13 L53,42 A9,9 0 0,1 44,51 L20,51 L6,61 L11,51 A6,6 0 0,1 5,45 L5,13 A9,9 0 0,1 14,4 Z" fill="url(#sfLogoGrad)"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="white" transform="translate(13.16,11.3) scale(0.72)"/><path d="M89,14 L59,14 A9,9 0 0,0 50,23 L50,52 A9,9 0 0,0 59,61 L83,61 L97,71 L92,61 A6,6 0 0,0 98,55 L98,23 A9,9 0 0,0 89,14 Z" fill="white" stroke="url(#sfLogoGrad)" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 11 C20 8.5 16.5 5 11.5 5 C5.5 5 2 9.5 2 14.5 C2 23 11 30 22 40 C33 30 42 23 42 14.5 C42 9.5 38.5 5 32.5 5 C27.5 5 24 8.5 22 11 Z" fill="url(#sfLogoGrad)" transform="translate(58.16,21.3) scale(0.72)"/></svg>
         <span class="logo-text">Attune</span>
       </a>
       <p class="sf-tagline">Because understanding takes intention.</p>

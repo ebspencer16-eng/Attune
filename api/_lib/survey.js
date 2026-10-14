@@ -36,7 +36,7 @@
  * Bumped when a question changes meaning, so two answers filed under one id
  * can still be told apart. The admin shows it beside the count.
  */
-export const SURVEY_VERSION = '2026-10-13';
+export const SURVEY_VERSION = '2026-10-14';
 
 /** The sentence under the last question, which is what covers us for quoting. */
 export const TESTIMONIAL_NOTICE = 'Your anonymous responses may be used on our website';
@@ -155,6 +155,27 @@ export const SURVEY_QUESTIONS = [
     kind: 'text',
     label: 'What is behind that?',
     placeholder: 'Optional.',
+  },
+  /**
+   * Last, and last on purpose.
+   *
+   * Ellie: "Add back the y/n can we use your first name if we choose to use
+   * your words on our website. Should be the last question in the survey."
+   *
+   * It comes after the written answers rather than before them, because a
+   * question about publishing asked first changes what somebody writes.
+   *
+   * What it does NOT do is hand the admin a name. The survey's promise is that
+   * who answered never leaves api/admin-survey.js, and this answer is a yes or
+   * a no sitting in the response like any other. Attaching the name to a
+   * published quote is a separate and deliberate step, and it is Ellie's to
+   * ask for.
+   */
+  {
+    id: 'name_ok',
+    kind: 'choice',
+    label: 'Can we use your first name if we choose to use your words on our website?',
+    options: ['Yes', 'No'],
   },
 ];
 

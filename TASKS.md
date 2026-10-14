@@ -8,107 +8,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B61 | **One migration to run: fence off the demo accounts.** The admin stops counting Alex, Sam and the test profiles the moment you run it. The SQL is in the box under this table. |
-| C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
-
-### B61, the migration to run
-
-Alex, Sam and anything calling itself a test get one flag on their row, and
-every admin figure skips them: the couple types, the demographics, the
-engagement, the funnel, the survey and all five CSV exports. Nothing a customer
-sees changes, and a demo account still signs in and works.
-
-It prints two lists when it finishes. The first is everybody it marked, so you
-can see it caught who you meant; the second is how many real profiles are left,
-which is what the figures are about from then on. If it ever catches a real
-customer, tell me the name and one line puts them back.
-
-Until you run it, every admin page shows an amber line saying it is still
-counting them. That is deliberate: counting demos quietly is how this started.
-
-**In the Supabase SQL editor:**
-
-<!-- SQL 082_demo_accounts.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 082: demo accounts stop being counted as people.
---
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie: "Alex and sam and test profiles should not be included in admin."
---
--- They are rows in profiles like anybody else, so every figure the admin draws
--- has been counting them: couple types, demographics, engagement, the
--- completion funnel, the survey's segments. With a handful of real couples that
--- is a large share of every number on the page.
---
--- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
--- One column, `is_demo`, false for everybody by default. The admin endpoints
--- filter on it; nothing else in the product reads it, and no customer-facing
--- surface changes.
---
--- ── WHO IT MARKS ────────────────────────────────────────────────────────────
--- The two she named, and anything that calls itself a test. The match is on
--- the name and the email together, and the last statement prints every row it
--- marked so you can see it caught what you meant and nobody else. If a real
--- customer is ever caught by it, one update puts them back:
---
---   update public.profiles set is_demo = false where id = '<the id>';
---
--- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
--- ============================================================================
-
-alter table public.profiles add column if not exists is_demo boolean not null default false;
-
-comment on column public.profiles.is_demo is
-  'True for demo and test accounts. Every admin analytics endpoint excludes these rows; nothing else reads the column.';
-
--- The admin reads the whole table, so the index pays for itself at once.
-create index if not exists profiles_is_demo_idx on public.profiles (is_demo) where is_demo;
-
--- ── The two she named ───────────────────────────────────────────────────────
--- The whole name, not a prefix. `alex%` catches Alexandra and `sam%` catches
--- Samantha, and a rule that quietly drops a customer out of every figure with
--- nobody the wiser is worse than counting two demos.
-update public.profiles
-   set is_demo = true
- where is_demo = false
-   and (name ilike 'alex' or name ilike 'sam');
-
--- ── And anything that says it is a test ─────────────────────────────────────
--- Deliberately narrow: "test" as a whole word in a name, or a test-looking
--- email. `%test%` alone would catch Testa and protest.
-update public.profiles
-   set is_demo = true
- where is_demo = false
-   and (
-        name ~* '(^|[^a-z])test([^a-z]|$)'
-     or email ilike '%@example.com'
-     or email ilike '%+test@%'
-     or email ilike 'test@%'
-     or email ilike '%@test.%'
-   );
-
--- ── Verification ────────────────────────────────────────────────────────────
--- Everybody now marked as a demo. Read this list: it is what the admin will
--- stop counting.
-select id, name, email, created_at
-  from public.profiles
- where is_demo
- order by created_at;
-
--- And what is left, which is what the figures are about.
-select count(*) filter (where not is_demo) as real_profiles,
-       count(*) filter (where is_demo)     as demo_profiles
-  from public.profiles;
-```
-<!-- /SQL -->
-
----
 
 ### Still open from the review
 
@@ -125,38 +29,86 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** Everything you have decided is built; what is left is waiting
-on you.
+| # | What I am doing |
+|--|--|
+| C3 | **Your 49 words are in, replacing my draft.** Writing 51 more to make 100, in the voice of your edits. Detail under this table. |
+| C6 | **100 insights of the day.** There are 49 and every one is a verified quotation, which is a constraint worth reading before you expect 51 more quickly. Detail under this table. |
+| B69 | **Word of the day as a storycard**: the Notes page ground, the word card centred, the attune link at the foot, the same shape the insight of the day uses. |
+| B70 | **A once-a-day notification for each**, at a time you pick, 7:30am by default: one for the insight, one for the word. |
+| B71 | **The app takes too long to load on a refresh.** Measuring what it waits for before changing anything. Detail under this table. |
+| B72 | **One mark everywhere**, with the heart in the left bubble solid white rather than ghosted. |
+| B73 | **The insights menu dropdown rows** lose the white ground and the coloured border, and sit on the menu's own ground. |
+| B74 | **The survey's last question comes back**: may we use your first name if we quote you. Yes or no. |
+| B75 | **The FAQ hero loses its button**, so that banner is the height of every other one. |
+| B76 | **The reviews block at the foot of the FAQ page goes.** The home page's is enough. |
+| B77 | **A gradient line under every marketing hero**, where the navy stops and the page starts. |
+| B78 | **The FAQ hero description** stops using orange and bold. |
+| B79 | **Did the hero sentences or the buttons change?** Measuring against the build before this round rather than answering from memory. |
+| B80 | **The registry page's Starting Out tile** takes the shape of the other two and the words from What You Actually Receive, and that section goes. |
+| B81 | **"See the full package" comes off** the registry CTA. |
+| B82 | **The registry CTA scrolls to the title**, not past it into the Zola row. |
+| B83 | **Premium stops showing the Your Included Workbook callout** in the checkout. |
+| B84 | **Premium's tile**: line 2 becomes the Relationship Reflection and Conflict Patterns exercises, line 3 the Build a Budget tool. |
+| B85 | **Title case in the four tiles' bullets**, prepositions left alone. |
+| B86 | **The Attune Assessment tile**: line 1 the Communication Styles Exercise, line 2 the Expectations Exercise. |
+| B87 | **Both lists cycle at 100**, so nothing repeats inside a hundred days. |
+
+### C3, the words
+
+Your 49 are in the file as written, with my draft of those words gone. Consent
+is out. I read the edits as four moves and the 51 new ones follow them: say it
+in plain words, prefer a verb to an abstraction, keep the sentence short enough
+to read on a tile, and never tell a couple which way to be.
+
+The review document is generated from the file, so a word edited in the product
+is edited there, and the two cannot drift.
+
+**In Terminal:**
+
+```
+open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md
+```
+
+### C6, the insights, and why these are slower than words
+
+You asked for every insight to be a quotation: "I want every insight to be
+quotes, I want to retire all AI-generated sentences." So there are 49, each one
+checked against the thing it quotes rather than against a transcription of it.
+31 are from four books, 18 from articles.
+
+That is the constraint. A word I can write. A quotation I have to find and then
+prove, and the proof is what stops the product putting a sentence in a named
+researcher's mouth. Two of the first six were not quotations at all.
+
+The article half I can verify here: the gate opens the page and matches the
+words. The book half needs the Google Books key, which is set in Vercel and not
+on this machine, so a book quotation I add today cannot be proved today.
+
+So: I am writing the next 51 from pages that can be opened and checked, and
+I will tell you plainly how many got through. A quotation that cannot be
+verified does not go in the file.
+
+### B71, what I am measuring
+
+A slow load is usually one request everything else waits behind, not the whole
+app being slow. So: how long until the first screen is readable, what the app
+asks for before it draws, which of those it could draw without, and what is
+fetched twice. Then the fix, with the before and after times.
+
+### B79, how I will answer it
+
+Build the commit before this round, build the tree as it stands, and compare
+the hero sentence and the button on every marketing page. That is how the same
+question about the banners was settled last week, and the answer there was that
+nothing had changed. Measuring is cheaper than remembering.
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| B68 | **The admin was still counting the demo accounts in anything measured from a different table.** B61 filtered the people; their notes, article reads, page time, orders, invited partner and survey answers were all still counted. Measured, not guessed: the Engagement page reported two article readers where one of the two was Alex. **This changes a money figure**, so read the note under this table before you trust last month's order count. |
-| B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
-| B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
-| R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-
-### B68, what moved
-
-The order count and revenue on the admin no longer include a demo's test
-order. If you have written down a figure from that page, it will now be lower
-by whatever those orders were, and the lower number is the right one. The same
-goes for completed couples, article readers, notes, tags and page time.
-
-An order names its buyer two ways, by account and by email, and a demo that
-bought before it had an account is named only by the email. Both are checked,
-so a test purchase cannot come back in through the half nobody filtered.
-
-What is deliberately still counted: a visit to a marketing page with nobody
-attached. Those belong to no account by design, and dropping them would make
-every marketing figure too low.
-
-None of it changes until you run the migration in section 1. Until then each
-admin page says, in amber, that it is still counting demos.
 
 ## 4. Done and verified
 
@@ -166,6 +118,11 @@ admin page says, in amber, that it is still counting demos.
 
 | Verified by you | What it was |
 |--|--|
+| B61 | Alex, Sam and the test profiles were counted as people in every admin figure; one column marks them and every admin read of the profiles table filters them out. |
+| B68 | B61 filtered the people and not the rows they own, so their notes, tags, article reads, page time, orders, invited partner and survey answers were all still counted. |
+| B33 | The survey, nine questions in one module, asked in the app, on the website at the end of What Comes Next and from the email link, saving each answer as it is given. |
+| B50 | The engagement time chart's two series had no label of their own, so the legend read "seconds" against "App"; they are Web and App. |
+| R2 | App insights and results, all 29 sections. |
 | B67 | The pill above Starting Out said Starting Out; it says Wedding gift on the preview tiles and on the checkout, held together by a gate. |
 | B66 | The Attune Assessment row in each preview tile had darker type and an orange tick, so one line of four read as a heading; every row looks the same now. |
 | B65 | The hero banners were measured on five pages against the previous build and are identical; what changed above them was the nav. |

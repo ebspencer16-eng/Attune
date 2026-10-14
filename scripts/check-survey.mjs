@@ -180,19 +180,64 @@ const problems = [];
 
 // ── 4. Nothing identifying ────────────────────────────────────────────────
 {
-  /* Comments stripped first. This file explains at length why there is no
-     consent question, and a scan for the word "consent" finds that sentence:
-     the gate flagged its own subject's reasoning the first time it ran. */
+  /**
+   * ── THE RULE REVERSED, AND BOTH INSTRUCTIONS ARE KEPT ─────────────────
+   * This forbade the words "first name" outright. Ellie had removed a consent
+   * question on the understanding that a published answer carries nothing
+   * identifying, and this gate held that.
+   *
+   * She has since asked for it back: "Add back the y/n can we use your first
+   * name if we choose to use your words on our website. Should be the last
+   * question in the survey."
+   *
+   * Both quotes are here because the round trip is a better argument for the
+   * rule than the original was. What was never allowed, and still is not, is
+   * the survey ASKING for a name or carrying one. A yes-or-no about whether a
+   * name may be used is a different thing from a name: the answer is two
+   * letters, the response still has nothing identifying in it, and attaching
+   * a real first name to a published quote is a separate step that needs a
+   * join this file forbids elsewhere.
+   *
+   * So the forbidden shapes are a field that holds a name, not the sentence
+   * that asks permission.
+   */
   const survey = read('api/_lib/survey.js')
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
   /* The notice itself says the words "your name", which is the promise rather
      than a field. Everything but the notice is scanned. */
   const withoutNotice = survey.replace(/TESTIMONIAL_NOTICE[\s\S]*?;/, ' ');
-  for (const word of ['consent', 'firstName', 'first name', 'your name']) {
-    if (new RegExp(word, 'i').test(withoutNotice)) {
-      problems.push(`the survey module mentions "${word}". Ellie removed the consent question on the`
-        + ' understanding that nothing we publish carries a name; a name field puts it back.');
+
+  /* A field that would HOLD a name, in any of the spellings a tidy-up
+     produces: a question whose kind collects one, or an id that stores one. */
+  for (const shape of [
+    /id:\s*['"][^'"]*(?:first_?name|fullname|your_?name)[^'"]*['"]/i,
+    /kind:\s*['"]name['"]/i,
+    /placeholder:\s*['"][^'"]*your (?:first )?name/i,
+    /label:\s*['"][^'"]*What is your name/i,
+  ]) {
+    if (shape.test(withoutNotice)) {
+      problems.push(`the survey has a field that collects a name (${shape}). The permission question`
+        + ' is a yes or a no; a name in the response is what she removed and has not asked back.');
+    }
+  }
+
+  /* And the permission question is a yes-or-no, last, or it is not the thing
+     she asked for. */
+  const last = SURVEY_QUESTIONS[SURVEY_QUESTIONS.length - 1];
+  if (!last || last.id !== 'name_ok') {
+    problems.push(`the last survey question is ${last ? last.id : '(none)'}. Ellie: "Add back the y/n`
+      + ' can we use your first name if we choose to use your words on our website. Should be the'
+      + ' last question in the survey." Asked before the written answers, a question about'
+      + ' publishing changes what somebody writes.');
+  } else {
+    if (last.kind !== 'choice' || String(last.options || '') !== 'Yes,No') {
+      problems.push(`the permission question is a ${last.kind} offering ${JSON.stringify(last.options)}.`
+        + ' She asked for a y/n.');
+    }
+    if (!/first name/i.test(last.label) || !/website/i.test(last.label)) {
+      problems.push(`the permission question reads "${last.label}", which no longer says what it is`
+        + ' asking permission for. It is her sentence: a first name, on the website.');
     }
   }
   /**

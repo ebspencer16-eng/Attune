@@ -71,7 +71,7 @@ export function AttuneMark({ width = 28, tone = 'gradient', title, style }) {
           ? { stroke: 'white', strokeWidth: '2.2', strokeLinejoin: 'round' }
           : null)}
       />
-      <path d={HEART} fill="white" opacity="0.93" transform="translate(13.16,11.3) scale(0.72)" />
+      <path d={HEART} fill="white" transform="translate(13.16,11.3) scale(0.72)" />
       <path d={BUBBLE_R} fill="white" stroke={`url(#${id})`} strokeWidth="2.2" strokeLinejoin="round" />
       <path d={HEART} fill={`url(#${id})`} transform="translate(58.16,21.3) scale(0.72)" />
     </svg>

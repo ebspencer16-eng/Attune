@@ -29,12 +29,30 @@
  * The app's mark, which is a PNG asset rather than paths, and the PNG the
  * emails use. Those are files; this is about a drawing being retyped.
  *
- * public/*.html, which carry their own marks in static pages that ship without
- * React. Those are worth doing and are a separate job: this one is about the
- * surface Ellie reported, and a gate that quietly widens its subject is how
- * the last one got pointed at the wrong half.
+ * 3. Every inline mark anywhere, and every generated PNG, draws the left
+ *    bubble's heart the way the favicon does. That was out of scope and said
+ *    so here, on the grounds that this gate was about the one surface Ellie
+ *    reported. She has since reported the wider thing: "Please make all
+ *    lockups the same mark, with the heart in the left bubble white not
+ *    ghost." So the scope is hers rather than quietly widened.
+ *
+ *    64 copies across 33 files drew that heart at 93 per cent white, and the
+ *    app's own attune-mark.png was a different drawing altogether: generated
+ *    by nothing, dated September, a cream heart on a pale square. Four screens
+ *    asked for it.
+ *
+ * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
+ * Whether the whole of each inline mark matches. They legitimately differ: the
+ * gradient id has to be unique per document, and the width and height are the
+ * lockup's business. What is held is the heart Ellie named.
+ *
+ * Not the right bubble's fill, which is white on cream and is the thing the
+ * dark variant deliberately changes. Two of the three generated variants
+ * differ from the base on purpose and at her request, and a gate insisting on
+ * one file would undo that.
  */
 
+import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -84,6 +102,122 @@ const ART = 'public/favicon.svg';
         + ' reported, and declaring the path without drawing it looks identical in the'
         + ' source.');
     }
+  }
+}
+
+// ── 3. One left heart, everywhere ───────────────────────────────────────────
+{
+  /**
+   * Ellie: "Please make all lockups the same mark, with the heart in the left
+   * bubble white not ghost."
+   *
+   * The heart is one path drawn twice: white inside the left bubble, gradient
+   * inside the right. So the thing to look for is that path with a white fill,
+   * and what must not be beside it is an opacity. A cut-out, a tint or a 93
+   * per cent white are each a different left heart, and the mark then reads as
+   * a different logo on every ground it sits on.
+   */
+  const art = read(ART);
+  const heartPath = [...art.matchAll(/\sd="([^"]+)"/g)].map((m) => m[1])
+    .find((d) => /C27\.5 5 24 8\.5 22 11 Z$/.test(d.trim()));
+  if (!heartPath) {
+    fails.push(`${ART} no longer carries the heart path this check is about. Refusing to pass:`
+      + ' a gate that has lost its subject must never report success.');
+  } else {
+    /* The favicon itself first: it is the source every other copy comes from. */
+    const faviconHeart = new RegExp(`d="${heartPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*`, 'g');
+    for (const m of art.matchAll(faviconHeart)) {
+      if (/fill="white"/.test(m[0]) && /opacity=/.test(m[0])) {
+        fails.push(`${ART} draws the left heart with an opacity (${m[0].match(/opacity="[^"]*"/)[0]}).`
+          + ' Ellie asked for white, not ghost, and this file is where every other copy comes from.');
+      }
+    }
+
+    /* And every copy of it that is typed into a page. */
+    const ghosted = [];
+    let scanned = 0;
+    const walkAll = (dir) => {
+      for (const name of readdirSync(dir)) {
+        if (name.startsWith('.') || name === 'node_modules' || name === 'dist') continue;
+        const full = join(dir, name);
+        if (statSync(full).isDirectory()) { walkAll(full); continue; }
+        if (!/\.(html|jsx?|tsx?|svg)$/.test(name)) continue;
+        const rel = full.slice(ROOT.length);
+        const src = readFileSync(full, 'utf8');
+        if (!src.includes(heartPath)) continue;
+        scanned += 1;
+        const esc = heartPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        /**
+         * The path written out, AND the path reached through a constant.
+         *
+         * src/attune-mark.jsx holds it in `const HEART = '...'` and draws
+         * `<path d={HEART} ... />`, so a scan for the literal found the file,
+         * found the declaration, and never looked at either of the two places
+         * the heart is actually drawn. A plant that ghosted the component's
+         * heart walked straight through. That is this codebase's oldest
+         * lesson, pointed at a gate written ten minutes earlier: when a
+         * scanner looks for a string, ask what the indirection for it is.
+         */
+        const aliases = [...src.matchAll(
+          new RegExp(`(?:const|let|var)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*['"\`]${esc}['"\`]`, 'g'),
+        )].map((m) => m[1]);
+
+        const tails = [
+          ...[...src.matchAll(new RegExp(`${esc}"[^>/]*`, 'g'))].map((m) => m[0]),
+          ...aliases.flatMap((name) => [...src.matchAll(
+            new RegExp(`d=\\{\\s*${name}\\s*\\}[^>/]*`, 'g'),
+          )].map((m) => m[0])),
+        ];
+
+        for (const tail of tails) {
+          if (!/fill="white"/.test(tail) && !/fill=\{?["']?white/.test(tail)) continue;   // the gradient heart
+          const op = tail.match(/opacity=["{]?["']?([\d.]+)/);
+          if (op && Number(op[1]) < 1) ghosted.push(`${rel} (opacity ${op[1]})`);
+          if (/mask=/.test(tail)) ghosted.push(`${rel} (masked out)`);
+        }
+      }
+    };
+    for (const dir of ['public', 'src', 'scripts']) walkAll(join(ROOT, dir));
+
+    if (scanned < 30) {
+      fails.push(`Found the mark in only ${scanned} files and there were 35 when this was written.`
+        + ' If marks were removed, lower this figure in the same commit; otherwise the walk has'
+        + ' lost its subject.');
+    }
+    if (ghosted.length) {
+      fails.push(`${ghosted.length} lockup${ghosted.length === 1 ? ' draws' : 's draw'} the left heart as a`
+        + ` ghost rather than white:\n      ${[...new Set(ghosted)].slice(0, 8).join('\n      ')}`
+        + (ghosted.length > 8 ? `\n      ...and ${ghosted.length - 8} more` : ''));
+    }
+  }
+
+  /**
+   * The app's lockups are PNGs, so the check there is that they were built
+   * from this artwork rather than exported by hand.
+   *
+   * By hash, not by modification time. The first version compared mtimes and
+   * that is not a fact git keeps: a clone stamps every file with the checkout
+   * time, so the comparison passed on this machine and would have been a coin
+   * toss on Vercel. build-mark-variants.mjs writes the hash of the SVG it
+   * read beside the files it produced.
+   */
+  const stamp = 'attune-app/assets/images/.mark-source';
+  for (const png of ['attune-mark', 'attune-mark@2x', 'attune-mark@3x',
+    'attune-mark-light', 'attune-mark-dark', 'attune-mark-dark-plain']) {
+    try { statSync(`${ROOT}attune-app/assets/images/${png}.png`); }
+    catch { fails.push(`attune-app/assets/images/${png}.png is missing, and screens ask for it.`); }
+  }
+  const want = createHash('sha256').update(read(ART)).digest('hex');
+  let got = null;
+  try { got = read(stamp).trim().split(/\s+/)[0]; } catch { /* never built */ }
+  if (!got) {
+    fails.push(`${stamp} is missing, so nothing records which artwork the app's lockups were`
+      + ' built from. Run `node scripts/build-mark-variants.mjs`.');
+  } else if (got !== want) {
+    fails.push(`The app's lockups were built from a different ${ART} (${got.slice(0, 12)} against`
+      + ` ${want.slice(0, 12)}), so the app is drawing a mark from before the artwork changed.`
+      + ' Run `node scripts/build-mark-variants.mjs`.');
   }
 }
 
