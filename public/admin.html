@@ -78,6 +78,7 @@
   .demo-banner svg{flex-shrink:0;margin-top:1px;color:var(--amber)}
   .demo-banner p{font-size:.72rem;color:#8A6512;line-height:1.55;margin:0}
   .demo-banner strong{color:#7A5A0F;font-weight:700}
+  .demo-filter-banner{background:rgba(251,191,36,.14)}
 
   /* EMPTY STATE — for tables/charts without real data */
   .empty-state{text-align:center;padding:1.98rem 1rem;color:var(--dim);font-size:.82rem;font-family:var(--bfont);background:var(--surface);border:1px dashed var(--border);border-radius:10px}
@@ -1444,7 +1445,7 @@ window.adminAuthHeaders = function(extra){
     try {
       const s = adminSecret();
       const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
-      const data = await res.json();
+      const data = noteDemoFilter(await res.json());
       if (data.error) throw new Error(data.error);
       CUBE = data; FIELDS = {}; data.fields.forEach(f => FIELDS[f.key] = f); loaded = true;
       /* Before anything is drawn from it. */
@@ -1810,7 +1811,7 @@ function fetchAdminData(force) {
   const secret = window.adminApiSecret();
   __adminDataPromise = fetch('/api/admin-data', { headers: window.adminAuthHeaders() })
     .then(r => r.json())
-    .then(d => (d && d.ok) ? d : null)
+    .then(d => (d && d.ok) ? noteDemoFilter(d) : null)
     .catch(() => null);
   return __adminDataPromise;
 }
@@ -1846,7 +1847,7 @@ async function engFetch(slice, force) {
   if (__engBySlice[slice] && !force) return __engBySlice[slice];
   const url = '/api/admin-engagement' + (slice ? ('?slice=' + encodeURIComponent(slice)) : '');
   const res = await fetch(url, { headers: window.adminAuthHeaders() });
-  const j = await res.json();
+  const j = noteDemoFilter(await res.json());
   if (!j || !j.ok) throw new Error((j && j.error) || ('request failed with ' + res.status));
   __engBySlice[slice] = j;
   return j;
@@ -3003,7 +3004,7 @@ let SURVEY_DATA = null;
 async function loadSurvey(force) {
   if (SURVEY_DATA && !force) return SURVEY_DATA;
   const res = await fetch('/api/admin-survey', { headers: window.adminAuthHeaders() });
-  const j = await res.json();
+  const j = noteDemoFilter(await res.json());
   if (!j || !j.ok) throw new Error((j && j.error) || ('request failed with ' + res.status));
   SURVEY_DATA = j;
   return j;
@@ -3878,6 +3879,39 @@ window.__attuneHasRealData = false;
 // invented orders were on the screen behind it. Nothing is invented any more,
 // so it says what is actually the case. Called on every loadRealData tick, so
 // it appears and disappears with the flag.
+/* ── Demo accounts ─────────────────────────────────────────────────────────
+   Ellie: "Alex and sam and test profiles should not be included in admin."
+   Every admin endpoint that reads profiles now filters them out and says so,
+   and `demoFilterApplied: false` means the endpoint asked and the column was
+   not there yet. The alternative to saying so is counting demos quietly,
+   which is how this started. One flag for all of them: if any endpoint is
+   unfiltered, every figure on the page is suspect. */
+window.__attuneDemoFilter = true;
+
+/** Called with any admin payload. Lowers the flag and draws the line. */
+function noteDemoFilter(payload) {
+  if (!payload || typeof payload !== 'object') return payload;
+  if (payload.demoFilterApplied === false) {
+    window.__attuneDemoFilter = false;
+    syncDemoFilterBanner();
+  }
+  return payload;
+}
+
+/** An amber line on every page while demo accounts are still being counted. */
+function syncDemoFilterBanner() {
+  if (window.__attuneDemoFilter) return;
+  document.querySelectorAll('.page').forEach((page) => {
+    if (page.querySelector('.demo-filter-banner')) return;
+    const banner = document.createElement('div');
+    banner.className = 'demo-banner demo-filter-banner';
+    banner.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p><strong>Demo accounts are still counted.</strong> Migration 082 marks them and has not run yet, so Alex, Sam and the test profiles are inside every number here.</p>';
+    const topbar = page.querySelector('.topbar');
+    if (topbar) topbar.parentNode.insertBefore(banner, topbar.nextSibling);
+    else page.prepend(banner);
+  });
+}
+
 function syncDemoBanner() {
   const demo = !window.__attuneHasRealData;
   const pages = document.querySelectorAll('.page');
@@ -3885,7 +3919,9 @@ function syncDemoBanner() {
     // The Type Analytics page computes its own real/empty state from profiles
     // (independent of orders), so the orders-based demo banner doesn't apply.
     if (page.id === 'page-types') return;
-    let banner = page.querySelector('.demo-banner');
+    /* Not the demo-accounts line, which is about a migration rather than
+       about orders and is removed by nothing. */
+    let banner = page.querySelector('.demo-banner:not(.demo-filter-banner)');
     if (demo) {
       if (!banner) {
         banner = document.createElement('div');
@@ -4597,7 +4633,7 @@ let __cubeCache = null;
 async function ensureCube() {
   if (__cubeCache) return __cubeCache;
   const res = await fetch('/api/admin-explore', { headers: window.adminAuthHeaders() });
-  const j = await res.json();
+  const j = noteDemoFilter(await res.json());
   if (j.error) throw new Error(j.error);
   __cubeCache = j;
   const _cnr = explorerCouldNotRead(j);
@@ -5874,7 +5910,7 @@ async function loadTypesData(force) {
   const stamp = document.getElementById('types-last-updated');
   try {
     const res = await fetch('/api/admin-typing', { headers: window.adminAuthHeaders() });
-    TYPES_DATA = await res.json();
+    TYPES_DATA = noteDemoFilter(await res.json());
     if (TYPES_DATA.error) throw new Error(TYPES_DATA.error);
   } catch (e) {
     if (stamp) stamp.textContent = 'Error';

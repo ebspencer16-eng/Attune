@@ -42,6 +42,8 @@ const scoresOf = (self, other) => {
   return Object.fromEntries(Object.entries(r.dimensions).map(([d, v]) => [d, v.blended]));
 };
 import { DIM_KEYS, calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, lowConfidence } from './_type-engine.js';
+/* Demo accounts are not people: see api/_lib/demo-accounts.js. */
+import { selectProfiles } from './_lib/demo-accounts.js';
 
 // Thin wrapper preserving this file's null-guard: a couple with no Exercise 1
 // answers yields null axes/type rather than a midpoint default.
@@ -142,7 +144,7 @@ async function buildCombinedData(admin) {
     { data: workbooks = [] },
     { data: orders = [] },
   ] = await Promise.all([
-    admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type'),
+    selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type')),
     admin.from('workbooks').select('user_id, storage_path'),
     admin.from('orders').select('*'),
   ]);
@@ -479,7 +481,7 @@ async function exportOrders(admin) {
 // invite_code and link to Partner B via partner_profile_id. Both
 // partners' data lives on their respective profile rows.
 async function exportDemographics(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, partner_profile_id, invite_code, joined_via_invite, pronouns, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type');
+  const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, joined_via_invite, pronouns, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type'));
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
@@ -529,7 +531,7 @@ async function exportDemographics(admin) {
 // ── 3. ENGAGEMENT ──────────────────────────────────────────────────────
 // One row per couple. Y/N for each exercise + workbook download/ship.
 async function exportEngagement(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, pkg, budget_data, ex1_answers, ex2_answers, ex3_answers');
+  const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, budget_data, ex1_answers, ex2_answers, ex3_answers'));
   const { data: workbooks } = await admin.from('workbooks').select('user_id, storage_path, generated_at');
   const { data: orders } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, card_status');
 
@@ -574,7 +576,7 @@ async function exportEngagement(admin) {
 // Full scored results. Per-partner axis scores + 10 dim scores +
 // ex3 satisfaction scale questions.
 async function exportResults(admin) {
-  const { data: profiles } = await admin.from('profiles').select('id, invite_code, partner_profile_id, joined_via_invite, couple_type, ex1_answers, ex3_answers');
+  const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, couple_type, ex1_answers, ex3_answers'));
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
@@ -628,9 +630,8 @@ async function exportResults(admin) {
 // low-confidence flag, and demographics. For offline factor/correlation work.
 // Anonymized: an 8-char id slice, no name/email.
 async function exportTyping(admin) {
-  const { data: profiles } = await admin
-    .from('profiles')
-    .select('id, pronouns, relationship_status, relationship_length, ex1_answers, partner_profile_id');
+  const { data: profiles } = await selectProfiles(admin, (q) => q
+    .select('id, pronouns, relationship_status, relationship_length, ex1_answers, partner_profile_id'));
   const _byIdScored = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
   const dimCols = Object.keys(DIM_KEYS).map(d => `comms_${d}`);

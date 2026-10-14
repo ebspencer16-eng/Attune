@@ -40,6 +40,7 @@ export const config = { runtime: 'edge' };
 
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS } from './_lib/survey.js';
+import { selectProfiles } from './_lib/demo-accounts.js';
 
 // No Access-Control-Allow-Origin.
 //
@@ -388,7 +389,9 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
-    const { data: profiles = [], error } = await admin.from('profiles').select('*');
+    /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
+    const { data: profiles = [], error, demoFilterApplied } =
+      await selectProfiles(admin, (q) => q.select('*'));
     if (error) return json({ error: safeError('admin-explore', error, 'Query failed.') }, 500);
     const profileById = {}; for (const p of profiles) profileById[p.id] = p;
     // Invited partners answer via partner_sessions (keyed by invite_code) and may
@@ -647,6 +650,8 @@ export default async function handler(req) {
 
     return json({
       generatedAt: new Date().toISOString(),
+      /* False until migration 082 has run, and the page says so when it is. */
+      demoFilterApplied,
       count: rows.length,
       paired: rows.filter((r) => r.couple_id).length,
       fields: buildCatalog(fbCatOpts),

@@ -18,6 +18,7 @@ import {
 export const config = { runtime: 'edge' };
 
 import { safeError } from './_lib/http.js';
+import { selectProfiles } from './_lib/demo-accounts.js';
 
 const DIMS = Object.keys(DIM_KEYS);
 const TYPES = ['W', 'X', 'Y', 'Z'];
@@ -91,9 +92,9 @@ export default async function handler(req) {
   const admin = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   try {
-    const { data: profiles = [] } = await admin
-      .from('profiles')
-      .select('id, invite_code, partner_profile_id, joined_via_invite, pronouns, partner_pronouns, relationship_status, relationship_length, ex1_answers, created_at');
+    /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
+    const { data: profiles = [], demoFilterApplied } = await selectProfiles(admin, (q) => q
+      .select('id, invite_code, partner_profile_id, joined_via_invite, pronouns, partner_pronouns, relationship_status, relationship_length, ex1_answers, created_at'));
 
     // Partner lookup shared by individual and couple typing below.
     const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
@@ -162,6 +163,8 @@ export default async function handler(req) {
       blend: PARTNER_VIEW_BLEND,
       dims: DIMS,
       generatedAt: new Date().toISOString(),
+      /* False until migration 082 has run, and the page says so when it is. */
+      demoFilterApplied,
       summary: summarize(individuals, couples),
       dataQuality,
       individuals,

@@ -26,6 +26,7 @@ import { jsonBody } from './_lib/http.js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS, SURVEY_VERSION, TEXT_QUESTIONS } from './_lib/survey.js';
+import { demoIds, selectProfiles } from './_lib/demo-accounts.js';
 
 export const config = { runtime: 'edge' };
 
@@ -128,9 +129,9 @@ export default async function handler(req) {
     const ids = [...new Set((resQ.data || []).map((r) => r.respondent_id).filter(Boolean))];
     const demo = {};
     if (ids.length) {
-      const { data: profs } = await admin.from('profiles')
+      const { data: profs } = await selectProfiles(admin, (q) => q
         .select('id, age_range, pronouns, relationship_status, relationship_length, children, signup_source, pkg')
-        .in('id', ids);
+        .in('id', ids));
       for (const p of (profs || [])) {
         const { id, ...rest } = p;
         demo[id] = rest;
@@ -143,7 +144,13 @@ export default async function handler(req) {
       (codesBy[k] = codesBy[k] || []).push(c.code);
     }
 
-    const responses = (resQ.data || []).map((r) => {
+    /* A demo's demographics being absent would hide them from the slicers and
+       leave their answers in every chart, so the rows go too. */
+    const { ids: demoSet, demoFilterApplied } = await demoIds(admin);
+
+    const responses = (resQ.data || [])
+      .filter((r) => !(r.respondent_id && demoSet.has(r.respondent_id)))
+      .map((r) => {
       const { respondent_id: who, ...rest } = r;
       return {
         ...rest,
@@ -158,6 +165,8 @@ export default async function handler(req) {
     return json(200, {
       ok: true,
       version: SURVEY_VERSION,
+      /* False until migration 082 has run, and the page says so when it is. */
+      demoFilterApplied,
       questions: SURVEY_QUESTIONS,
       textQuestions: TEXT_QUESTIONS,
       responses,

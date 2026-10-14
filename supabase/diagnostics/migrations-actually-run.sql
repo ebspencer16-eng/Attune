@@ -70,7 +70,10 @@ with checks (migration, object, kind, degraded) as (
      'No push notification can be sent or even asked about. /api/push-token answers that push storage is not set up; the daily cron reports nobody opted in and sends nothing.'),
     ('079_survey',
      'survey_responses', 'table',
-     'The end-of-experience survey cannot be answered. /api/survey says the storage is not set up and the admin page says the same, so every answer is lost rather than stored.')
+     'The end-of-experience survey cannot be answered. /api/survey says the storage is not set up and the admin page says the same, so every answer is lost rather than stored.'),
+    ('082_demo_accounts',
+     'profiles.is_demo', 'column',
+     'Alex, Sam and the test profiles are counted as people in every admin figure. Each admin page carries an amber line saying so.')
 )
 select
   c.migration,

@@ -163,6 +163,16 @@ just means any scanner has to resolve the derivation too. When you write a gate
 that looks for a column, a route, an exercise key or a package name, ask what
 the indirection for that thing is, and match on both.
 
+The fastest version of this took an hour. Excluding demo accounts from the
+admin put every profile read behind `selectProfiles`, so the table name moved
+inside `api/_lib/demo-accounts.js` and out of all six endpoints. The gate
+written in the same sitting grepped for `from('profiles')` and reported ONE
+read across the admin with eleven sitting in front of it. A gate can be blinded
+by the abstraction it was written to protect, on the same afternoon. The fix
+was to stop counting the literal and count calls to the module instead, and to
+keep the literal only as a thing to forbid: named outside a gateway, it is a
+read that went around the filter.
+
 **iOS does not slant a registered typeface, and says nothing.** `fontStyle:
 'italic'` on a named family draws the upright face and reports no error, so
 eighteen places in the app asked for italic and every one of them was upright,

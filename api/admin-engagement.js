@@ -35,6 +35,7 @@ import { checkAdminAuth } from './_lib/admin-auth.js';
 import { EXERCISES } from './_exercises.js';
 import { resultsNav } from './_lib/results-sections.js';
 import { axisScores, calcDimScores, typeCodeFromAxes } from './_type-engine.js';
+import { fetchProfiles } from './_lib/demo-accounts.js';
 
 export const config = { runtime: 'edge' };
 
@@ -505,7 +506,7 @@ export default async function handler(req) {
     ];
     const EVENT_COLS = 'kind,key,ms,owner_id,created_at';
     const results = await Promise.all([
-      all(url, key, `profiles?select=${columns.join(',')}`),
+      fetchProfiles((path) => all(url, key, path), `profiles?select=${columns.join(',')}`),
       all(url, key, 'notes?select=id,owner_id,anchor_type,anchor_key,visibility,kind,created_at'),
       all(url, key, 'tags?select=id,owner_id,name,standard_key'),
       all(url, key, 'note_tags?select=note_id,tag_id'),
@@ -533,6 +534,7 @@ export default async function handler(req) {
     ];
 
     const profiles = profilesR.rows;
+    const demoFilterApplied = profilesR.demoFilterApplied !== false;
     const notes = notesR.rows;
     const tags = tagsR.rows;
     const noteTags = noteTagsR.rows;
@@ -598,6 +600,8 @@ export default async function handler(req) {
     return json({
       ok: true,
       generatedAt: new Date().toISOString(),
+      /* False until migration 082 has run, and the page says so when it is. */
+      demoFilterApplied,
       window: core.window,
       slice: slice ? { ...slice, people: sliced.profiles.length } : null,
       headlines: core.headlines,

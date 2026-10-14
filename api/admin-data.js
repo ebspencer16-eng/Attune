@@ -29,6 +29,7 @@
 export const config = { runtime: 'edge' };
 
 import { corsHeaders, safeError } from './_lib/http.js';
+import { selectProfiles } from './_lib/demo-accounts.js';
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
@@ -347,7 +348,7 @@ export default async function handler(req) {
     const [ordersQ, codesQ, profQ, psQ] = await Promise.all([
       admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
-      admin.from('profiles').select('id, partner_profile_id, invite_code, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data'),
+      selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data')),
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
@@ -355,6 +356,7 @@ export default async function handler(req) {
     if (firstErr) return json({ error: safeError('admin-data', firstErr.error, 'Could not load admin data.') }, 500);
 
     const profiles = profQ.data || [];
+    const demoFilterApplied = profQ.demoFilterApplied !== false;
 
     // Relationship-level demographics (status, length, children) describe the
     // couple, not the individual. If one partner answered and the other left it
@@ -484,6 +486,8 @@ export default async function handler(req) {
 
     return json({
       ok: true,
+      /* False until migration 082 has run, and the page says so when it is. */
+      demoFilterApplied,
       responses,
       responsesBySegment,
       orders: ordersQ.data || [],

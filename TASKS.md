@@ -8,8 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B60 | **One migration to run: Lanae and Spencer's pronouns.** The SQL is in the box under this table. |
-| B61 | **The demo accounts are counted as real people.** Alex and Sam sit in the same table as everybody else, so they are in every figure the admin draws. One word and I will fence them off. See under this table. |
+| B61 | **One migration to run: fence off the demo accounts.** The admin stops counting Alex, Sam and the test profiles the moment you run it. The SQL is in the box under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -17,137 +16,97 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### B65, the hero banners
+### B61, the migration to run
 
-They have not changed. I measured rather than guessing: the same page, built
-from the commit before this round of work and from the tree as it stands, side
-by side in a browser.
+Alex, Sam and anything calling itself a test get one flag on their row, and
+every admin figure skips them: the couple types, the demographics, the
+engagement, the funnel, the survey and all five CSV exports. Nothing a customer
+sees changes, and a demo account still signs in and works.
 
-Purpose, FAQ, Contact, In Practice and Legal all come back identical: the same
-banner height, the same background, the same typeface, the same 54 point title
-in the same weight and colour.
+It prints two lists when it finishes. The first is everybody it marked, so you
+can see it caught who you meant; the second is how many real profiles are left,
+which is what the figures are about from then on. If it ever catches a real
+customer, tell me the name and one line puts them back.
 
-The last change to a hero was 9 September, when you asked for hero text to be
-black and upright and it was still rendering italic. What HAS changed directly
-above the banner, in the round you approved, is the nav: Get started went from
-near black to the brand orange, and on a phone Get started now stays in the bar
-while Sign in hides. That sits a few points above the hero on every page and
-may be what you are seeing. One word and the orange goes back.
-
----
-
-### B62, what else changed on the marketing pages
-
-Two rounds of work touched them, and you approved both, so nothing here is a
-surprise except the tiles. If any of it is not what you wanted, say which and
-it goes back the same way.
-
-**From the design review (D19, D31, D36):**
-- Get started in the top bar is the brand orange on every page. It was near
-  black.
-- Get started stays in the bar on a phone rather than hiding behind the menu;
-  Sign in is the one that hides.
-- The In Practice cards have a hairline border again, so they do not lose
-  their bottom half on a white page.
-- The four package tiles got the button treatment. That is what has gone back.
-
-**From the contrast pass (B19, B28):** thirteen colours, all of them text that
-was too pale to read against its background. The footer's small print went from
-40 to 60 per cent white, one review avatar's gradient darkened by a shade, and
-the rest were similar. Nothing moved and nothing changed size.
-
----
-
-### B60, the migration to run
-
-Two gaps filled: Lanae as she/her, Spencer as he/him. It only touches a field
-that is empty, so nothing anybody chose is overwritten, and it reports every
-row it matched so you can see it hit the two you meant.
+Until you run it, every admin page shows an amber line saying it is still
+counting them. That is deliberate: counting demos quietly is how this started.
 
 **In the Supabase SQL editor:**
 
-<!-- SQL 081_pronouns_for_records.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 082_demo_accounts.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 081: two people's pronouns, for the record.
+-- 082: demo accounts stop being counted as people.
 --
 -- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie, having looked at who the admin was counting as non-binary: "Alex and
--- Sam were demos, not sure why lanae and spencer didn't have pronouns, but
--- lanae is she/her and spencer is he/him, please update for our records."
+-- Ellie: "Alex and sam and test profiles should not be included in admin."
 --
--- Nothing in Attune asks anybody their gender; the admin converts the pronouns
--- somebody chose at setup. A blank is not a category, so these two were in no
--- slice at all rather than in a wrong one. This fills them in.
+-- They are rows in profiles like anybody else, so every figure the admin draws
+-- has been counting them: couple types, demographics, engagement, the
+-- completion funnel, the survey's segments. With a handful of real couples that
+-- is a large share of every number on the page.
 --
--- ── WHAT IT TOUCHES ─────────────────────────────────────────────────────────
--- Two fields, in two places each, because each partner records the other's
--- pronouns as well as their own:
+-- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
+-- One column, `is_demo`, false for everybody by default. The admin endpoints
+-- filter on it; nothing else in the product reads it, and no customer-facing
+-- surface changes.
 --
---   profiles.pronouns          the person's own
---   profiles.partner_pronouns  what their partner is recorded as
+-- ── WHO IT MARKS ────────────────────────────────────────────────────────────
+-- The two she named, and anything that calls itself a test. The match is on
+-- the name and the email together, and the last statement prints every row it
+-- marked so you can see it caught what you meant and nobody else. If a real
+-- customer is ever caught by it, one update puts them back:
 --
--- Matching is on the first name, case-insensitively, and only where the field
--- is empty. A row where somebody has chosen something is never overwritten:
--- the point of this is to fill two gaps, not to decide for anybody.
+--   update public.profiles set is_demo = false where id = '<the id>';
 --
--- Run in the Supabase SQL Editor and click Run. Safe to run more than once;
--- the second run matches nothing because the fields are no longer empty.
+-- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
 -- ============================================================================
 
--- ── Their own pronouns ──────────────────────────────────────────────────────
-update public.profiles
-   set pronouns = 'she/her'
- where name ilike 'lanae%'
-   and coalesce(pronouns, '') = '';
+alter table public.profiles add column if not exists is_demo boolean not null default false;
 
-update public.profiles
-   set pronouns = 'he/him'
- where name ilike 'spencer%'
-   and coalesce(pronouns, '') = '';
+comment on column public.profiles.is_demo is
+  'True for demo and test accounts. Every admin analytics endpoint excludes these rows; nothing else reads the column.';
 
--- ── And what their partner has recorded about them ──────────────────────────
-update public.profiles
-   set partner_pronouns = 'she/her'
- where partner_name ilike 'lanae%'
-   and coalesce(partner_pronouns, '') = '';
+-- The admin reads the whole table, so the index pays for itself at once.
+create index if not exists profiles_is_demo_idx on public.profiles (is_demo) where is_demo;
 
+-- ── The two she named ───────────────────────────────────────────────────────
+-- The whole name, not a prefix. `alex%` catches Alexandra and `sam%` catches
+-- Samantha, and a rule that quietly drops a customer out of every figure with
+-- nobody the wiser is worse than counting two demos.
 update public.profiles
-   set partner_pronouns = 'he/him'
- where partner_name ilike 'spencer%'
-   and coalesce(partner_pronouns, '') = '';
+   set is_demo = true
+ where is_demo = false
+   and (name ilike 'alex' or name ilike 'sam');
+
+-- ── And anything that says it is a test ─────────────────────────────────────
+-- Deliberately narrow: "test" as a whole word in a name, or a test-looking
+-- email. `%test%` alone would catch Testa and protest.
+update public.profiles
+   set is_demo = true
+ where is_demo = false
+   and (
+        name ~* '(^|[^a-z])test([^a-z]|$)'
+     or email ilike '%@example.com'
+     or email ilike '%+test@%'
+     or email ilike 'test@%'
+     or email ilike '%@test.%'
+   );
 
 -- ── Verification ────────────────────────────────────────────────────────────
--- Both rows should now carry a pronoun, and nobody else is touched. If a name
--- matched more than one account, every match is listed here.
-select id, name, pronouns, partner_name, partner_pronouns, created_at
+-- Everybody now marked as a demo. Read this list: it is what the admin will
+-- stop counting.
+select id, name, email, created_at
   from public.profiles
- where name ilike 'lanae%'
-    or name ilike 'spencer%'
-    or partner_name ilike 'lanae%'
-    or partner_name ilike 'spencer%'
- order by created_at desc;
+ where is_demo
+ order by created_at;
 
--- Everyone still without pronouns, which is what the Gender tile cannot place.
-select count(*) as profiles_without_pronouns
-  from public.profiles
- where coalesce(pronouns, '') = '';
+-- And what is left, which is what the figures are about.
+select count(*) filter (where not is_demo) as real_profiles,
+       count(*) filter (where is_demo)     as demo_profiles
+  from public.profiles;
 ```
 <!-- /SQL -->
-
----
-
-### B61, the demo accounts
-
-Alex and Sam are rows in the same table as everybody else, so they are counted
-in every figure the admin draws: the couple types, the demographics, the
-engagement, the funnel. With four or five real couples that is a large share of
-the numbers.
-
-There is no marker on them. My recommendation is one column, `is_demo`, set on
-the accounts you name, and every admin query filtering them out. That is a
-migration plus a line in four endpoints. Say the word and I will build it, or
-tell me which accounts are demos and I will start the list.
 
 ---
 
@@ -173,12 +132,6 @@ on you.
 
 | # | Built, needs your eye |
 |--|--|
-| B62 | **The four package tiles are back to what they were.** D19 asked for one add-to-cart style on that page and I applied it to the overview tiles as well, which turned four quiet links into four orange blocks, made the tiles uneven, and left "Add to registry" as orange text on an orange button: unreadable. The buttons further down the page, which are the real add-to-cart controls, keep the one style. What else changed on the marketing pages is listed under this table. |
-| B67 | **The pill above Starting Out says Wedding gift**, on the preview tiles and on the checkout. The gate holds the two pills together now as well as the words under them: a pill with a meaning that differs between two pages is the thing that gate is for. |
-| B66 | **Every row in a preview tile looks like every other row.** The Attune Assessment line had darker type and an orange tick, which made one line of four read as a heading over the rest. Changed on the checkout tiles too, since they are the same four tiles. |
-| B64 | **The four tiles on the packages page carry the same content as the four on the checkout popup**: same badge, same name, same price, same list of what is in it, in your words from the popup. The sentences that were there described the packages differently from the page next to them. A gate holds the two together. |
-| B63 | **Premium's first line reads Attune Assessment**, like the other three. |
-| B65 | **The hero banners have not changed.** Measured on five pages against the build before this round: identical height, background, typeface, size, weight and colour. What changed above them is the nav. See under section 1. |
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
 | B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
@@ -194,6 +147,13 @@ on you.
 
 | Verified by you | What it was |
 |--|--|
+| B67 | The pill above Starting Out said Starting Out; it says Wedding gift on the preview tiles and on the checkout, held together by a gate. |
+| B66 | The Attune Assessment row in each preview tile had darker type and an orange tick, so one line of four read as a heading; every row looks the same now. |
+| B65 | The hero banners were measured on five pages against the previous build and are identical; what changed above them was the nav. |
+| B64 | The four tiles on the packages page described the packages differently from the checkout popup; they carry the same badge, name, price and list now, with a gate holding them together. |
+| B63 | Premium's first line read "everything in the assessment" and now reads Attune Assessment, like the other three. |
+| B62 | The four package overview tiles were turned into orange blocks by a one-style-everywhere change meant for the add-to-cart buttons; reverted to the quiet links, with "Add to registry" readable again. |
+| B60 | Lanae and Spencer had no pronouns recorded, so they were in no demographic breakdown; the migration filled both. |
 | B59 | The whole flow driven end to end before the designer demo: every results section, every app view, 37 static pages, all five exercises to their completion screens. |
 | B58 | The hamburger was shown only below 361 points while the nav links hide at 640 to 900, so every iPhone had no menu; seventeen pages also had a button that opened nothing. |
 | B55 | Prompted a Convo, and Most important. |
