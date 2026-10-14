@@ -2846,3 +2846,37 @@ said they/them", because the admin anonymises and cannot.
 
 **Still unverified:** the Engagement page's Learning table and the exercise
 pills. Both need engagement data to render and there is none.
+
+## 2026-10-13, the hamburger, the gift code, and the flow
+
+**CONGRATSMYA** is migration 080: one free Starting Out package (`newlywed`),
+`max_uses` 1, no workbook. Nothing is live until she runs it. Verified by
+running `create-payment-intent` with the row stubbed in: Starting Out comes
+back `free: true` with an order number and Stripe is never called, any other
+package is refused by name, a second use is refused, and the promo field
+accepts it in lower case.
+
+**The hamburger was missing on every phone**, two faults deep. The button was
+shown only below 361 points while the inline links are hidden from 640 to 900,
+so the whole phone range had neither. And seventeen pages had a button that
+opened nothing: twelve carried the menu markup and its styles with no
+`toggleMenu` behind it, five had the button alone, one had the styles alone.
+
+`check-mobile-menu.mjs` drives it now: at 390, 430 and 820 points it finds the
+button, clicks it, and counts the links that appear. check-chrome compares the
+same markup across pages as text, which is why identical menus that nothing
+could open passed it for months. Nine pages are exempt by name, each with its
+reason (checkout, the app shell, print targets).
+
+**The flow runs end to end.** `npm run smoke`: 29 of 29 results sections, 12 of
+13 app views (home cannot render signed out, which is documented), 37 static
+pages including checkout, nothing scrolling sideways at 320 or 360, every
+control named, and all five exercises driven to their completion screens with
+their answers stored. It found one real fault: `/feedback`'s Send button is
+filled in by the fetch, so a slow or failed endpoint left a button with no
+words in it. It is hidden until the questions arrive now.
+
+**What the smoke does not cover**, for the demo: a real Stripe payment, and the
+partner invite handshake between two accounts. The arithmetic either side of
+both is gated (check-checkout-pricing, check-promo-totals, the entitlement
+matrix, check-invite-path), but nobody has driven a card through it.

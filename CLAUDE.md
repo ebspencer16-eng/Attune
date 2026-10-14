@@ -1067,6 +1067,19 @@ testflight`. Never "from the app folder, run". Never a fragment to append. A
 file she needs to put somewhere gets `| pbcopy` and the instruction to paste,
 rather than a path to go and open.
 
+**Identical markup that nothing can open passes a text comparison.**
+check-chrome holds the nav, the footer and the mobile menu to one copy across
+29 pages, and all 29 passed while the menu was unreachable on every phone. Two
+faults under it: the button was shown only below 361 points, where the links it
+replaces are hidden from 640 to 900, so the entire phone range had neither; and
+seventeen pages had a button with no `toggleMenu` behind it, twelve of those
+carrying the menu markup and its styles unused, so the tap threw.
+
+Comparing chrome across pages is worth doing and cannot see any of that. The
+gate that can is `check-mobile-menu.mjs`: at three phone widths it finds the
+button, clicks it, and counts the links that appear. When a check compares
+markup, ask what the markup is supposed to DO, and whether anything does it.
+
 **An inference presented as an answer is worse than a missing number.** The
 admin reported a Gender breakdown for months. Nothing in Attune asks anybody
 their gender: `profiles.gender` is null for every row, and both the cube and

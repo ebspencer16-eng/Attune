@@ -138,7 +138,12 @@
        cart are in it too. */
     .nav-signin{display:none}
     .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
-  }
+  
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+}
   /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
      320, where it stood 33 points past the right edge. The hamburger has it
      there, which is what every phone narrower than an iPhone SE gets. */
@@ -404,5 +409,21 @@
   </div>
 </footer>
 
+<script>
+/* The menu the hamburger opens. Copied from offerings.html, which is the page
+   check-chrome holds the others to: seventeen pages had the button and no way
+   to open it, and twelve of those had the menu markup sitting there unused. */
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function (e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target)
+      && burger && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+</script>
 </body>
 </html>

@@ -36,6 +36,16 @@
   .art-time{font-size:.72rem;color:var(--muted);padding-top:.65rem;border-top:1px solid var(--stone);display:flex;align-items:center;justify-content:space-between}
   .art-arrow{color:#DD1C5E;font-size:.85rem}
   @media(max-width:640px){.articles-grid{grid-template-columns:1fr;padding:0 var(--s-lg) 3rem}.page-hdr{padding:var(--s-3xl) var(--s-lg) var(--s-2xl)}.cat-bar-inner{padding:0 var(--s-md)}.nav-links{display:none}}
+
+  .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-md);z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
+
+  .mobile-menu.open{display:flex}
+
+  .mobile-menu a{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;padding:var(--s-xs) .65rem;border-radius:8px;transition:all .15s}
+
+  .mobile-menu a:last-child{}
+
+  .mobile-menu .mm-cta{color:var(--orange);font-weight:700}
 </style>
   <link rel="stylesheet" href="/cart.css">
 <!-- attune:press-feedback -->
@@ -88,6 +98,22 @@
     </button>
   </div>
 </nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+    <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+  </div>
+  <div class="mm-section">
+    <span class="mm-label">Browse</span>
+    <a href="/offerings" class="mm-sub" style="color:var(--ink);font-weight:600">Browse Packages</a>
+    <a href="/wedding-registry" class="mm-sub">Wedding Registry</a>
+  </div>
+  <a href="/app?signin=1">Sign in</a>
+  <a href="/start" class="mm-cta">Get started →</a>
+</div>
 <div class="cat-bar">
   <div class="cat-bar-inner">
     <a href="/practice" class="cat-pill">All</a>
@@ -166,7 +192,12 @@
        cart are in it too. */
     .nav-signin{display:none}
     .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
-  }
+  
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+}
   /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
      320, where it stood 33 points past the right edge. The hamburger has it
      there, which is what every phone narrower than an iPhone SE gets. */
@@ -208,5 +239,21 @@
   </div>
 </footer>
 
+<script>
+/* The menu the hamburger opens. Copied from offerings.html, which is the page
+   check-chrome holds the others to: seventeen pages had the button and no way
+   to open it, and twelve of those had the menu markup sitting there unused. */
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function (e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target)
+      && burger && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+</script>
 </body>
 </html>

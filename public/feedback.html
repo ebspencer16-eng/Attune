@@ -120,7 +120,11 @@ textarea::placeholder{color:var(--faint)}
   <div id="questions"></div>
 
   <div class="warn" id="warn"></div>
-  <button class="submit-btn" id="submitBtn" disabled></button>
+  <!-- Hidden until the questions arrive. It used to sit there empty with its
+       words filled in by the fetch, so a slow or failed endpoint left a button
+       that said nothing, to a screen reader as well as to a reader. There is
+       nothing to submit before there is something to answer. -->
+  <button class="submit-btn" id="submitBtn" disabled hidden></button>
   <div class="saved-line" id="savedLine"></div>
 </div>
 
@@ -435,6 +439,7 @@ textarea::placeholder{color:var(--faint)}
       answers = data.answers || {};
       el('title').textContent = form.copy.title;
       el('submitBtn').textContent = form.copy.submit;
+      el('submitBtn').hidden = false;
       el('submitBtn').addEventListener('click', submit);
       render();
     })

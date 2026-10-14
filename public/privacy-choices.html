@@ -131,6 +131,22 @@
     <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="/home">Home</a>
+    <div class="mm-section">
+    <span class="mm-label">Learn</span>
+    <a href="/purpose" class="mm-sub">Our Purpose</a>
+    <a href="/practice" class="mm-sub">In Practice</a>
+    <a href="/faq" class="mm-sub">FAQs</a>
+  </div>
+  <div class="mm-section">
+    <span class="mm-label">Browse</span>
+    <a href="/offerings" class="mm-sub" style="color:var(--ink);font-weight:600">Browse Packages</a>
+    <a href="/wedding-registry" class="mm-sub">Wedding Registry</a>
+  </div>
+  <a href="/app?signin=1">Sign in</a>
+  <a href="/start" class="mm-cta">Get started →</a>
+</div>
 <main>
   <h1>Your privacy choices</h1>
   <p class="doc-meta">Attune Relationships LLC</p>
@@ -351,7 +367,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
        cart are in it too. */
     .nav-signin{display:none}
     .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
-  }
+  
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+}
   /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
      320, where it stood 33 points past the right edge. The hamburger has it
      there, which is what every phone narrower than an iPhone SE gets. */
@@ -394,5 +415,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
 </footer>
 <script src="/_flags.js"></script>
 <script src="/_track.js"></script>
+<script>
+/* The menu the hamburger opens. Copied from offerings.html, which is the page
+   check-chrome holds the others to: seventeen pages had the button and no way
+   to open it, and twelve of those had the menu markup sitting there unused. */
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+document.addEventListener('click', function (e) {
+  var menu = document.getElementById('mobile-menu');
+  var burger = document.getElementById('hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target)
+      && burger && !burger.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+</script>
 </body>
 </html>

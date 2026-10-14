@@ -243,7 +243,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
        cart are in it too. */
     .nav-signin{display:none}
     .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
-  }
+  
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+}
   /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
      320, where it stood 33 points past the right edge. The hamburger has it
      there, which is what every phone narrower than an iPhone SE gets. */

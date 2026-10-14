@@ -8,6 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| B57 | **One migration to run: the CONGRATSMYA code.** One free Starting Out package, single use. The SQL is in the box under this table. |
 | B56 | **Who said they/them?** I cannot see it: the admin anonymises by design and I have no database credentials. One paste answers it, in the Supabase SQL editor. The query is under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
@@ -15,6 +16,73 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
+
+### B57, the code
+
+A free Starting Out package, usable once, under the name CONGRATSMYA. Nothing
+about it is live until this runs: the checkout reads the codes table, and a
+code that is not in it is simply not a code.
+
+**In the Supabase SQL editor:**
+
+<!-- SQL 080_congrats_code.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 080: CONGRATSMYA — one free Starting Out package, usable once.
+--
+-- ── WHAT IT IS ──────────────────────────────────────────────────────────────
+-- Ellie: "Build me a discount code for a free starting out package (one use)
+-- called CONGRATSMYA".
+--
+-- Starting Out is `newlywed` in the code: see PKG_CAPS in
+-- api/_lib/entitlements.js and DIGITAL_PRICES in api/_catalogue.js, where that
+-- key carries the shared budget and the merging lives checklist. The package
+-- is 080_congrats_code.sql39 digital, and this makes it nothing.
+--
+-- ── HOW IT BEHAVES ──────────────────────────────────────────────────────────
+-- `discount_mode = 'free'` with `package_key = 'newlywed'` means the checkout
+-- takes the package to zero and refuses the code against any other package: a
+-- cart holding anything but Starting Out is rejected with a message naming
+-- what the code unlocks. See api/create-payment-intent.js.
+--
+-- `max_uses = 1` is single use. The first redemption raises uses_count and
+-- every attempt after it is answered "This code has already been used", both
+-- at the promo field and again at purchase. Two people cannot race it: the
+-- count is read and written on the same row at redemption.
+--
+-- It does NOT include the workbook. Starting Out does not come with one, and a
+-- code that quietly added it would be a different gift from the one she asked
+-- for.
+--
+-- Run in the Supabase SQL Editor and click Run. Safe to run more than once:
+-- re-running resets it to these terms but leaves uses_count alone, so a code
+-- that has been redeemed stays redeemed.
+-- ============================================================================
+
+insert into public.beta_codes
+  (code, package_key, discount_mode, discount_value, applies_to,
+   includes_workbook, max_uses, uses_count, active, note)
+values
+  ('CONGRATSMYA', 'newlywed', 'free', 0, 'package', false, 1, 0, true, 'Gift - Mya')
+on conflict (code) do update set
+  package_key       = excluded.package_key,
+  discount_mode     = excluded.discount_mode,
+  discount_value    = excluded.discount_value,
+  applies_to        = excluded.applies_to,
+  includes_workbook = excluded.includes_workbook,
+  max_uses          = excluded.max_uses,
+  active            = excluded.active,
+  note              = excluded.note;
+
+-- ── Verification ────────────────────────────────────────────────────────────
+-- uses_count 0 and active true is a code nobody has redeemed yet.
+select code, package_key, discount_mode, max_uses, uses_count, active, note
+  from public.beta_codes
+ where code = 'CONGRATSMYA';
+```
+<!-- /SQL -->
+
+---
 
 ### B56, who said they/them
 
@@ -76,6 +144,8 @@ on you.
 | B53 | **Every tile in a row is the same height**: titles are exactly two lines with the whole question on hover, the grey line under them is gone, and the n count stays. The ranking's bars are labelled with the average place, which is the figure you would quote. |
 | B54 | **Gender is back on the titles**, converted from pronouns in one table, with every converted tile saying so on hover. |
 | B55 | **Prompted a Convo** and **Most important**. |
+| B58 | **The hamburger is back on every phone.** It was shown only below 361 points while the nav links disappear at 640 to 900, so every iPhone had no menu at all. Seventeen pages also had a button that opened nothing: twelve had the menu markup and no function behind it, five had neither. All 29 pages now open a menu with links in it, checked by tapping it at three phone widths. |
+| B59 | **The whole flow runs.** All 29 results sections and 12 of 13 app views render, 37 static pages render including checkout, nothing scrolls sideways at 320 or 360, every control has a name, and all five exercises drive to their completion screens with their answers stored. One real fault found and fixed on the way: the survey page's Send button had no words in it until the questions loaded. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |

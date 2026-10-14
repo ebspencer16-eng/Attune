@@ -65,7 +65,12 @@
   .btn-nav:hover{background:#d45a2e}
   .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
-  @media(max-width:768px){.nav-center{display:none}.hamburger{display:flex}}
+  @media(max-width:768px){.nav-center{display:none}.hamburger{display:none}
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+}
   .mobile-menu{display:none;position:fixed;top:58px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-md);z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
   .mobile-menu.open{display:flex}
   .mobile-menu a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.6rem 0;border-bottom:1px solid var(--stone);transition:color .15s}

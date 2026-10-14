@@ -67,9 +67,14 @@
   .mobile-menu.open{display:flex}
   @media(max-width:780px){
     .nav-center,.btn-nav,.nav-signin{display:none}
-    .hamburger{display:flex}
+    .hamburger{display:none}
     .nav-right{gap:var(--s-sm)}
-  }
+  
+    /* The way in, at the width the links go. Without this the menu
+       button only appeared below 361 points, so every phone wider
+       than that had no nav at all. */
+    .hamburger{display:flex}
+}
 
   /* ── HERO ─────────────────────────────────────────────────────────── */
   .page-header{
