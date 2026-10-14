@@ -332,10 +332,12 @@
   .pov-feats{list-style:none;margin:.35rem 0 0;padding:0;display:flex;flex-direction:column;gap:.3rem;flex:1}
   .pov-feats li{position:relative;padding-left:1rem;font-size:.76rem;color:var(--muted);line-height:1.5}
   .pov-feats li::before{content:'✓';position:absolute;left:0;top:0;color:var(--clay);font-size:.7rem}
-  .pov-feats li.bold-feat{color:var(--ink);font-weight:500}
-  .pov-feats li.bold-feat::before{color:var(--orange)}
+  /* Ellie: "I don't want the attune assessement bullet and checklist to be
+     different colors from the other rows in the package preview tiles." The
+     Assessment row carried darker type and an orange tick, which made one line
+     of four read as a heading over the other three. Every row is the same row
+     now, here and on the checkout. */
   .pov-premium .pov-feats li{color:rgba(255,255,255,.55)}
-  .pov-premium .pov-feats li.bold-feat{color:white}
   .pov-premium .pov-feats li::before{color:rgba(180,188,255,.8)}
   .pov-name{font-family:var(--hfont);font-size:.92rem;font-weight:700;color:var(--ink);line-height:1.2}
   .pov-premium .pov-name{color:white}
@@ -695,11 +697,11 @@
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('core')">Add to cart →</div>
   </div>
   <div class="pov-tile pov-orange" onclick="scrollToPkg('#pkg-newlywed')" style="cursor:pointer">
-    <span class="pov-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
+    <span class="pov-badge" style="background:#FFF0EB;color:#E8673A;">Wedding gift</span>
     <div class="pov-name">Starting Out Collection</div>
     <div class="pov-price">$139</div>
     <ul class="pov-feats">
-      <li class="bold-feat">Attune Assessment</li>
+      <li>Attune Assessment</li>
       <li>Merging Lives Checklist</li>
       <li>Build a Budget tool</li>
       <li class="gift-feat">Gift box</li>
@@ -714,7 +716,7 @@
     <div class="pov-name">Relationship Reflection</div>
     <div class="pov-price">$139</div>
     <ul class="pov-feats">
-      <li class="bold-feat">Attune Assessment</li>
+      <li>Attune Assessment</li>
       <li>Relationship Reflection exercise</li>
       <li class="gift-feat">Gift box</li>
     </ul>
@@ -725,7 +727,7 @@
     <div class="pov-name">Attune Premium</div>
     <div class="pov-price">$198</div>
     <ul class="pov-feats">
-      <li class="bold-feat">Attune Assessment</li>
+      <li>Attune Assessment</li>
       <li>Relationship Reflection</li>
       <li>Budget + conflict patterns exercises</li>
       <li>Personalized workbook</li>

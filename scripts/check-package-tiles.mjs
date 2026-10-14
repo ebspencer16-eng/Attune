@@ -18,10 +18,15 @@
  * are read out of the two files rather than written down here: a list in a
  * gate is a third copy, and the third copy is the one that goes stale.
  *
+ * The pill above each name is held to the same words too. It was out of scope
+ * when the badges were only a visual label; Ellie then renamed one of them
+ * ("The pill button above starting out package title should say wedding gift
+ * not starting out"), which makes it a label with a meaning, and a label with
+ * a meaning that differs between two pages is the thing this file is for.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ────────────────────────────────────
  * The long package cards further down /offerings, which carry a fuller
- * description on purpose, and the badges, which are a visual label rather than
- * a claim about what you get.
+ * description on purpose.
  */
 
 import { readFileSync } from 'node:fs';
@@ -80,6 +85,16 @@ for (const key of PACKAGES) {
   const oName = nameOf(offerings[key], 'pov-name');
   if (sName !== oName) {
     problems.push(`${key} is called "${oName}" on /offerings and "${sName}" on /start.`);
+  }
+
+  const badge = (block, cls) => {
+    const m = new RegExp(`<span class="${cls}"[^>]*>([\\s\\S]*?)</span>`).exec(block);
+    return m ? strip(m[1]) : null;
+  };
+  const sBadge = badge(start[key], 'pkg-badge');
+  const oBadge = badge(offerings[key], 'pov-badge');
+  if (sBadge !== oBadge) {
+    problems.push(`${key}'s pill says "${oBadge}" on /offerings and "${sBadge}" on /start.`);
   }
 
   const sFeat = features(start[key]);

@@ -62,8 +62,10 @@ nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(255,253,249,.9
 .pkg-features{list-style:none;flex:1}
 .pkg-features li{font-size:.78rem;color:var(--muted);line-height:1.6;padding:.18rem 0;display:flex;gap:var(--s-xs);align-items:flex-start}
 .pkg-features li::before{content:'—';color:var(--clay);flex-shrink:0;font-size:.7rem;margin-top:.15rem}
-.pkg-features li.bold-feat::before{color:var(--orange)}
-.pkg-features li.bold-feat{color:var(--ink);font-weight:500}
+/* The Assessment row reads like every other row. It had darker type and an
+   orange tick, which made one line of four look like a heading over the rest;
+   Ellie asked for them even on the preview tiles and these are the same four
+   tiles. */
 
 /* POPULAR BADGE */
 .pkg-tile.popular{overflow:visible}
@@ -291,12 +293,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="pkg-check">
       <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Starting Out</span>
+    <span class="pkg-badge" style="background:#FFF0EB;color:#E8673A;">Wedding gift</span>
     <div class="pkg-name-row"><div class="pkg-name">Starting Out Collection</div><span class="popular-inline">Most popular</span></div>
     <div class="pkg-price" id="price-newlywed">$139</div>
     <div class="pkg-price-sub" id="pricesub-newlywed">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Attune Assessment</li>
+      <li>Attune Assessment</li>
       <li>Merging Lives Checklist</li>
       <li>Build a Budget tool</li>
       <li class="gift-feat">Gift box</li>
@@ -314,7 +316,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="pkg-price" id="price-anniversary">$139</div>
     <div class="pkg-price-sub" id="pricesub-anniversary">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Attune Assessment</li>
+      <li>Attune Assessment</li>
       <li>Relationship Reflection exercise</li>
       <li class="gift-feat">Gift box</li>
     </ul>
@@ -331,7 +333,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
     <div class="pkg-price" id="price-premium">$198</div>
     <div class="pkg-price-sub" id="pricesub-premium">Digital · instant access · yours to keep</div>
     <ul class="pkg-features">
-      <li class="bold-feat">Attune Assessment</li>
+      <li>Attune Assessment</li>
       <li>Relationship Reflection</li>
       <li>Budget + conflict patterns exercises</li>
       <li>Personalized workbook</li>

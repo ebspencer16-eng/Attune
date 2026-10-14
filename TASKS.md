@@ -174,6 +174,8 @@ on you.
 | # | Built, needs your eye |
 |--|--|
 | B62 | **The four package tiles are back to what they were.** D19 asked for one add-to-cart style on that page and I applied it to the overview tiles as well, which turned four quiet links into four orange blocks, made the tiles uneven, and left "Add to registry" as orange text on an orange button: unreadable. The buttons further down the page, which are the real add-to-cart controls, keep the one style. What else changed on the marketing pages is listed under this table. |
+| B67 | **The pill above Starting Out says Wedding gift**, on the preview tiles and on the checkout. The gate holds the two pills together now as well as the words under them: a pill with a meaning that differs between two pages is the thing that gate is for. |
+| B66 | **Every row in a preview tile looks like every other row.** The Attune Assessment line had darker type and an orange tick, which made one line of four read as a heading over the rest. Changed on the checkout tiles too, since they are the same four tiles. |
 | B64 | **The four tiles on the packages page carry the same content as the four on the checkout popup**: same badge, same name, same price, same list of what is in it, in your words from the popup. The sentences that were there described the packages differently from the page next to them. A gate holds the two together. |
 | B63 | **Premium's first line reads Attune Assessment**, like the other three. |
 | B65 | **The hero banners have not changed.** Measured on five pages against the build before this round: identical height, background, typeface, size, weight and colour. What changed above them is the nav. See under section 1. |
