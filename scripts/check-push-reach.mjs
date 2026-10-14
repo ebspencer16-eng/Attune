@@ -169,10 +169,21 @@ if (pushable.length < 3) {
       if (!/\.(js|mjs)$/.test(f)) continue;
       if (rel === 'api/_lib/notifications.js') continue;   // where the copy lives
       const src = code(rel);
-      for (const m of src.matchAll(/kind:\s*'([a-z0-9_]+)'/g)) {
-        const list = raisedIn.get(m[1]) || [];
-        list.push(rel);
-        raisedIn.set(m[1], list);
+      /**
+       * Two spellings of raising a kind, because there are two.
+       *
+       * `kind: 'x'` is how a trigger builds an alert object. The daily pair
+       * are raised by calling notificationFor('daily_word', ...) directly,
+       * where the kind is the first argument and the word `kind` appears
+       * nowhere. A scan for one spelling reported both as having no caller
+       * while api/cron-daily-push.js was sending them every half hour.
+       */
+      for (const re of [/kind:\s*'([a-z0-9_]+)'/g, /notificationFor\(\s*'([a-z0-9_]+)'/g]) {
+        for (const m of src.matchAll(re)) {
+          const list = raisedIn.get(m[1]) || [];
+          if (!list.includes(rel)) list.push(rel);
+          raisedIn.set(m[1], list);
+        }
       }
     }
   })('api');

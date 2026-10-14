@@ -400,6 +400,10 @@
     {
       "path": "/api/cron-push",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron-daily-push",
+      "schedule": "*/30 * * * *"
     }
   ]
 }

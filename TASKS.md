@@ -8,11 +8,117 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| B70 | **One migration to run: the daily notification times.** Nothing appears in Settings until you do. The SQL is in the box under this table. |
+| B79 | **The packages page says the same thing twice, and always has.** Nothing changed; it needs one new sentence from you. See under this table. |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
+
+### B70, the migration to run
+
+Three columns on profiles, all empty, which means off for everybody. Nobody
+starts getting anything because this ran. It adds the two times a person can
+choose, and the one thing the server cannot work out on its own, which is what
+time zone they are in.
+
+Until you run it, the two rows do not appear in Settings at all. A control that
+cannot save is worse than no control.
+
+**In the Supabase SQL editor:**
+
+<!-- SQL 083_daily_push.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- ============================================================================
+-- 083: a once-a-day insight and a once-a-day word, at a time each person picks.
+--
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- Ellie: "Notifications settings should offer a once-a-day notification that
+-- sends you the insight of the day at a time you select (default should be
+-- 7:30am), same for word of the day."
+--
+-- ── WHAT IT ADDS ────────────────────────────────────────────────────────────
+-- Three columns on profiles, all null by default, which means off. Nobody
+-- starts receiving anything because this ran.
+--
+--   daily_insight_at    'HH:MM' in the reader's own clock, or null for off
+--   daily_word_at       the same, for the word of the day
+--   tz_offset_minutes   what getTimezoneOffset() returns on their device:
+--                       minutes to ADD to local time to reach UTC. New York in
+--                       summer is 240. Stored because a cron has to know when
+--                       somebody's 7:30 is, and the only other place this is
+--                       known is the query string of a request they are not
+--                       making at 7:30 in the morning.
+--
+-- A time is text rather than `time`, because what is stored is a wall clock
+-- reading in somebody else's day, not an instant. Postgres would happily
+-- compare two of these and the comparison would be meaningless.
+--
+-- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
+-- ============================================================================
+
+alter table public.profiles
+  add column if not exists daily_insight_at  text,
+  add column if not exists daily_word_at     text,
+  add column if not exists tz_offset_minutes integer;
+
+comment on column public.profiles.daily_insight_at is
+  'Local HH:MM to send the insight of the day, or null for off. Read by api/cron-daily-push.js.';
+comment on column public.profiles.daily_word_at is
+  'Local HH:MM to send the word of the day, or null for off. Read by api/cron-daily-push.js.';
+comment on column public.profiles.tz_offset_minutes is
+  'Date.getTimezoneOffset() from the reader''s device: minutes to add to local to reach UTC.';
+
+-- A shape, not a preference: anything that is not a 24-hour clock reading
+-- would silently never match the cron's window and the person would wonder
+-- why nothing arrived.
+alter table public.profiles drop constraint if exists profiles_daily_insight_at_shape;
+alter table public.profiles add constraint profiles_daily_insight_at_shape
+  check (daily_insight_at is null or daily_insight_at ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$');
+
+alter table public.profiles drop constraint if exists profiles_daily_word_at_shape;
+alter table public.profiles add constraint profiles_daily_word_at_shape
+  check (daily_word_at is null or daily_word_at ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$');
+
+-- The cron reads everybody with either one set, every half hour. Two partial
+-- indexes rather than one on both columns: a row is usually in neither.
+create index if not exists profiles_daily_insight_idx
+  on public.profiles (daily_insight_at) where daily_insight_at is not null;
+create index if not exists profiles_daily_word_idx
+  on public.profiles (daily_word_at) where daily_word_at is not null;
+
+-- ── Verification ────────────────────────────────────────────────────────────
+-- Nobody should be signed up for anything yet. Both counts are 0 on a first run.
+select count(*) filter (where daily_insight_at is not null) as insight_on,
+       count(*) filter (where daily_word_at    is not null) as word_on,
+       count(*) filter (where tz_offset_minutes is not null) as know_their_clock
+  from public.profiles;
+```
+<!-- /SQL -->
+
+---
+
+### B79, the hero and the button on the packages page
+
+You asked whether the hero statements or the CTAs changed. They did not. Both
+sentences on that page arrived in one commit and nothing has touched either
+since, which git answers in one command.
+
+You are right that they say the same thing, and only on that page:
+
+- Hero: **The right way to give real understanding.**
+- Under it: For you and your partner, or for a couple you love.
+- At the foot: **The most thoughtful thing you can give is real understanding.**
+- Under that: For you and your partner, or for a couple you love.
+
+Both land on "real understanding", and the last line is the first half of the
+hero's, word for word. Every other page says different things top and bottom.
+
+What it needs is one new sentence from you: whichever of the two titles you
+would rather replace, and a new line under it. Send me the words.
+
+---
 
 ### Still open from the review
 
@@ -31,43 +137,8 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| C3 | **Your 49 words are in, replacing my draft.** Writing 51 more to make 100, in the voice of your edits. Detail under this table. |
 | C6 | **100 insights of the day.** There are 49 and every one is a verified quotation, which is a constraint worth reading before you expect 51 more quickly. Detail under this table. |
-| B69 | **Word of the day as a storycard**: the Notes page ground, the word card centred, the attune link at the foot, the same shape the insight of the day uses. |
-| B70 | **A once-a-day notification for each**, at a time you pick, 7:30am by default: one for the insight, one for the word. |
 | B71 | **The app takes too long to load on a refresh.** Measuring what it waits for before changing anything. Detail under this table. |
-| B72 | **One mark everywhere**, with the heart in the left bubble solid white rather than ghosted. |
-| B73 | **The insights menu dropdown rows** lose the white ground and the coloured border, and sit on the menu's own ground. |
-| B74 | **The survey's last question comes back**: may we use your first name if we quote you. Yes or no. |
-| B75 | **The FAQ hero loses its button**, so that banner is the height of every other one. |
-| B76 | **The reviews block at the foot of the FAQ page goes.** The home page's is enough. |
-| B77 | **A gradient line under every marketing hero**, where the navy stops and the page starts. |
-| B78 | **The FAQ hero description** stops using orange and bold. |
-| B79 | **Did the hero sentences or the buttons change?** Measuring against the build before this round rather than answering from memory. |
-| B80 | **The registry page's Starting Out tile** takes the shape of the other two and the words from What You Actually Receive, and that section goes. |
-| B81 | **"See the full package" comes off** the registry CTA. |
-| B82 | **The registry CTA scrolls to the title**, not past it into the Zola row. |
-| B83 | **Premium stops showing the Your Included Workbook callout** in the checkout. |
-| B84 | **Premium's tile**: line 2 becomes the Relationship Reflection and Conflict Patterns exercises, line 3 the Build a Budget tool. |
-| B85 | **Title case in the four tiles' bullets**, prepositions left alone. |
-| B86 | **The Attune Assessment tile**: line 1 the Communication Styles Exercise, line 2 the Expectations Exercise. |
-| B87 | **Both lists cycle at 100**, so nothing repeats inside a hundred days. |
-
-### C3, the words
-
-Your 49 are in the file as written, with my draft of those words gone. Consent
-is out. I read the edits as four moves and the 51 new ones follow them: say it
-in plain words, prefer a verb to an abstraction, keep the sentence short enough
-to read on a tile, and never tell a couple which way to be.
-
-The review document is generated from the file, so a word edited in the product
-is edited there, and the two cannot drift.
-
-**In Terminal:**
-
-```
-open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md
-```
 
 ### C6, the insights, and why these are slower than words
 
@@ -94,13 +165,6 @@ A slow load is usually one request everything else waits behind, not the whole
 app being slow. So: how long until the first screen is readable, what the app
 asks for before it draws, which of those it could draw without, and what is
 fetched twice. Then the fix, with the before and after times.
-
-### B79, how I will answer it
-
-Build the commit before this round, build the tree as it stands, and compare
-the hero sentence and the button on every marketing page. That is how the same
-question about the banners was settled last week, and the answer there was that
-nothing had changed. Measuring is cheaper than remembering.
 
 ## 3. For you to review
 

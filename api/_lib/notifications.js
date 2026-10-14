@@ -73,6 +73,25 @@ const PUSHABLE = {
   // the previous week. That condition lives with the trigger, in
   // api/cron-push.js, because it is a query rather than a wording.
   new_post:          { urgency: 4,  quiet: true,  seenIfOpened: true },
+  /**
+   * ── THE TWO THE READER ASKED FOR BY NAME ──────────────────────────────
+   * Ellie: "Notifications settings should offer a once-a-day notification
+   * that sends you the insight of the day at a time you select (default
+   * should be 7:30am), same for word of the day."
+   *
+   * `asked` is what makes these different from the other six. Those are the
+   * product deciding somebody would want to know something, so a cooldown and
+   * a monthly cap are the right manners. These are a person setting an alarm.
+   * Four a month would mean a daily notification arriving on four days, and a
+   * cooldown of four days would mean it arriving on one in five, both without
+   * saying so.
+   *
+   * What still applies: push has to be on, the device has to have handed us a
+   * token, and the person has to have set a time. Turning it off is removing
+   * the time, which is the same control that set it.
+   */
+  daily_insight:     { urgency: 3,  quiet: false, seenIfOpened: false, asked: true },
+  daily_word:        { urgency: 3,  quiet: false, seenIfOpened: false, asked: true },
 };
 
 /**
@@ -101,13 +120,17 @@ export function shouldNotify(event, history = {}, now = Date.now()) {
   if (!history.pushEnabled) return { send: false, reason: 'push_disabled' };
   if (!rule) return { send: false, reason: 'in_app_only' };
 
-  const sent = (history.sentAt || []).map(s => new Date(s).getTime()).filter(n => !isNaN(n));
-  const lastSent = sent.length ? Math.max(...sent) : null;
-  if (lastSent != null && (t - lastSent) < COOLDOWN_DAYS * DAY) {
-    return { send: false, reason: 'cooldown' };
-  }
-  if (sent.filter(s => t - s < 30 * DAY).length >= MAX_PER_MONTH) {
-    return { send: false, reason: 'monthly_cap' };
+  /* A schedule the reader set is not the product deciding to interrupt them,
+     so the cooldown and the cap do not apply to it. Everything else does. */
+  if (!rule.asked) {
+    const sent = (history.sentAt || []).map(s => new Date(s).getTime()).filter(n => !isNaN(n));
+    const lastSent = sent.length ? Math.max(...sent) : null;
+    if (lastSent != null && (t - lastSent) < COOLDOWN_DAYS * DAY) {
+      return { send: false, reason: 'cooldown' };
+    }
+    if (sent.filter(s => t - s < 30 * DAY).length >= MAX_PER_MONTH) {
+      return { send: false, reason: 'monthly_cap' };
+    }
   }
 
   // Content only goes to people who read the last one. Nobody should be pushed
@@ -157,6 +180,8 @@ export function notificationFor(kind, {
      sentence by the caller, because a renderer that is handed a finished
      string cannot be held to the wording. */
   streakDays, exerciseLabel, exerciseView, postTitle, readMinutes,
+  /* And the two the reader scheduled carry the thing itself. */
+  dailyLabel, dailyTitle, dailyBody,
 } = {}) {
   const them = partnerName || 'Your partner';
   /* Possessive of a name, or of the fallback, which is not capitalised
@@ -164,6 +189,32 @@ export function notificationFor(kind, {
   const theirs = partnerName ? `${partnerName}'s` : 'your partner\u2019s';
   const pos = pronounForm(partnerPronouns, 'pos');
   switch (kind) {
+    /**
+     * ── THE DAILY TWO WRITE NO SENTENCE OF THEIR OWN ──────────────────────
+     * Every other kind here has a line Ellie wrote. These two do not need one,
+     * and inventing one would be a second place the product describes the
+     * insight of the day.
+     *
+     * The title is the label the tile already carries (INSIGHT_EYEBROW,
+     * WORD_EYEBROW), and the body is the insight or the word itself. So the
+     * lock screen shows the thing rather than an advertisement for it, and
+     * there is no copy here to go stale against the list.
+     *
+     * A lock screen is a public place, and both of these are published
+     * product content rather than anything the reader or their partner wrote.
+     */
+    case 'daily_insight':
+      /* The same destination new_post uses: the Learn tab, which is
+         /?view=practice to appTargetFor and /resources to the router. */
+      return { kind, title: dailyLabel || 'Insight of the day', body: dailyBody || '', deepLink: '/?view=practice' };
+    case 'daily_word':
+      return {
+        kind,
+        title: dailyLabel || 'Word of the day',
+        /* The word and what it means, which is the whole of the tile. */
+        body: dailyTitle ? `${dailyTitle}: ${dailyBody || ''}` : (dailyBody || ''),
+        deepLink: '/?view=notes',
+      };
     case 'partner_finished':
       return { kind, title: `${them} completed ${pos} exercises`, body: 'Explore your results', deepLink: '/?view=results' };
     case 'partner_nudged_you':

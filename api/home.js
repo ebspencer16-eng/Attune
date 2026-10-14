@@ -35,6 +35,7 @@ import { CATALOGUE } from './_catalogue.js';
  */
 import { insightOfTheDay } from './_insights.js';
 import { wordOfTheDay } from './_words.js';
+import { DAILY_DEFAULT_AT } from './daily-push.js';
 import { dayNumberForOffset } from './_lib/day-number.js';
 import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
@@ -106,7 +107,26 @@ export default async function handler(req) {
       'results_last_opened_at', 'partner_nudged_at', 'feedback_given_at',
     ].join(',');
 
-    const meRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc });
+    /**
+     * ── THE TWO THAT MIGRATION 083 ADDS ─────────────────────────────────
+     * Asked for separately, and allowed to be missing.
+     *
+     * PostgREST fails the WHOLE select on one unknown column, so adding these
+     * to the list above would have answered 400 to every app open between the
+     * deploy and Ellie running the SQL. That is migration 061's lesson, where
+     * `surface` took every engagement chart to zero.
+     *
+     * So the select is tried with them and run again without on exactly that
+     * failure, which costs a second round trip once and nothing afterwards.
+     */
+    const DAILY_COLUMNS = ['daily_insight_at', 'daily_word_at'];
+    const profileUrl = (list) => `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${list}`;
+    let meRes = await fetch(profileUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc });
+    let dailyKnown = true;
+    if (!meRes.ok) {
+      dailyKnown = false;
+      meRes = await fetch(profileUrl(cols), { headers: svc });
+    }
     const me = (await meRes.json().catch(() => []))?.[0];
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
@@ -432,6 +452,24 @@ export default async function handler(req) {
          as the research finding: the copy lives on the server so it is one
          copy and so Ellie can change it without an app build. */
       word: wordOfTheDay(readerDay),
+      /**
+       * When this reader has asked for the two of them, as stored.
+       *
+       * Settings draws the two rows from this rather than asking for it
+       * separately: that screen already waits on this payload, and a second
+       * request for two strings is a second thing that can fail on a slow
+       * connection. `defaultAt` is the time the picker opens on, from the
+       * endpoint that stores it, so the default is not written twice.
+       */
+      dailyPush: {
+        insight: me.daily_insight_at || null,
+        word: me.daily_word_at || null,
+        defaultAt: DAILY_DEFAULT_AT,
+        /* False until migration 083 has run. Settings draws nothing rather
+           than a control that cannot save, because a switch that silently
+           fails is worse than one that is not there. */
+        available: dailyKnown,
+      },
       /**
        * How a storycard is set.
        *

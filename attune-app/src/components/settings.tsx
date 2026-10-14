@@ -23,7 +23,7 @@ import { Pressable } from '@/components/pressable';
 import { openExternal } from '@/api/open-external';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { deleteAccount, fetchHome, SITE_URL } from '@/api/client';
+import { deleteAccount, fetchHome, setDailyPush, SITE_URL } from '@/api/client';
 import Admin from '@/components/admin';
 import type { HomeResponse } from '@/api/client';
 import { clearToken } from '@/api/session';
@@ -154,6 +154,17 @@ function AdminRow() {
  * In a build with no notifications module in it, the row is not drawn at all.
  * Showing a control that cannot work is worse than showing nothing.
  */
+/**
+ * ── THREE STRINGS THAT NEED ELLIE'S EYE ───────────────────────────────────
+ * Placeholders in her house style, listed in TASKS.md with the rest of this
+ * screen's copy. The two labels name the things themselves, which are already
+ * hers: "Insight of the day" and "Word of the day" come from api/_insights.js
+ * and api/_words.js and are the words on the tiles.
+ */
+const DAILY_HEADING = 'Once a day';
+const DAILY_INSIGHT_LABEL = 'Insight of the day';
+const DAILY_WORD_LABEL = 'Word of the day';
+
 function NotificationsRow() {
   const [state, setState] = useState<PushState | null>(null);
   const [busy, setBusy] = useState(false);
@@ -191,6 +202,141 @@ function NotificationsRow() {
         </Text>
         <Text style={{ ...Type.body, color: c.textMuted }}>{busy ? '' : label}</Text>
       </Pressable>
+    </View>
+  );
+}
+
+/**
+ * ── THE TWO DAILY ONES ────────────────────────────────────────────────────
+ * Ellie: "Notifications settings should offer a once-a-day notification that
+ * sends you the insight of the day at a time you select (default should be
+ * 7:30am), same for word of the day."
+ *
+ * ── WHY A LIST OF HALF HOURS AND NOT A CLOCK ──────────────────────────────
+ * A native time picker is a native module, and a native module is an App Store
+ * build rather than an over-the-air update: Ellie would have to build and
+ * submit before anybody could set a time.
+ *
+ * It is also the honest control. The server sends these from a cron that runs
+ * every thirty minutes, so a picker offering 7:37 would be offering something
+ * the product cannot deliver and the reader would never know which way it had
+ * rounded. The list is what can actually happen.
+ *
+ * ── WHAT IT DOES NOT DO ───────────────────────────────────────────────────
+ * It does not turn notifications on. That is the row above, which owns the
+ * system prompt; a time set with permission refused sends nothing, which is
+ * why this is drawn under it rather than beside it.
+ */
+
+/** Every half hour of the day, which is the resolution the cron can send at. */
+const DAILY_SLOTS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 ? '30' : '00';
+  return `${String(h).padStart(2, '0')}:${m}`;
+});
+
+/** 'HH:MM' as a reader reads it. The list is long and has to scan quickly. */
+function clockLabel(at: string) {
+  const [h, m] = at.split(':').map(Number);
+  const suffix = h < 12 ? 'AM' : 'PM';
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${suffix}`;
+}
+
+function DailyRow({ label, kind, at, onPick }: {
+  label: string;
+  kind: 'insight' | 'word';
+  at: string | null;
+  onPick: (kind: 'insight' | 'word', at: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${at ? clockLabel(at) : 'off'}`}
+        onPress={() => setOpen(true)}
+        style={{
+          paddingVertical: Spacing.md,
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+        <Text style={{ ...Type.body, color: c.text }}>{label}</Text>
+        <Text style={{ ...Type.body, color: at ? c.accent : c.textMuted }}>
+          {at ? clockLabel(at) : 'Off'}
+        </Text>
+      </Pressable>
+
+      {open ? (
+        <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
+          <View style={{ flex: 1, backgroundColor: c.background }}>
+            <View style={{
+              flexDirection: 'row', alignItems: 'center',
+              paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl, paddingBottom: Spacing.md,
+            }}>
+              <Text style={{ ...Type.title, color: c.textStrong, flex: 1 }}>{label}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={() => setOpen(false)}>
+                <Text style={{ ...Type.title, color: c.textMuted }}>{'\u2715'}</Text>
+              </Pressable>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingHorizontal: Spacing.xl, paddingBottom: Spacing.xxxl }}>
+              {/* Off first, because it is the state everybody starts in and
+                  the one somebody opening this sheet twice is looking for. */}
+              {[null, ...DAILY_SLOTS].map((slot) => {
+                const on = slot === at;
+                return (
+                  <Pressable
+                    key={slot ?? 'off'}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                    onPress={() => { onPick(kind, slot); setOpen(false); }}
+                    style={{
+                      paddingVertical: Spacing.md,
+                      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                    }}>
+                    <Text style={{ ...Type.body, color: on ? c.accent : c.text, fontWeight: on ? '700' : '400' }}>
+                      {slot ? clockLabel(slot) : 'Off'}
+                    </Text>
+                    {on ? <Text style={{ ...Type.body, color: c.accent }}>{'\u2713'}</Text> : null}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </Modal>
+      ) : null}
+    </>
+  );
+}
+
+function DailyPushRows() {
+  const [state, setState] = useState<HomeResponse['dailyPush'] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetchHome();
+      if (!cancelled && res.ok) setState(res.data.dailyPush ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  /* Nothing to draw until the payload answers, and nothing at all until
+     migration 083 has run: a control that cannot save is worse than none. */
+  if (!state || state.available === false) return null;
+
+  const pick = (kind: 'insight' | 'word', at: string | null) => {
+    /* The row moves at once and the write follows it. A list of 49 options is
+       a sheet somebody closes expecting it to have taken. */
+    setState((prev) => (prev ? { ...prev, [kind]: at } : prev));
+    setDailyPush(kind, at).catch(() => undefined);
+  };
+
+  return (
+    <View style={{ ...card(), marginTop: Spacing.lg }}>
+      <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>{DAILY_HEADING}</Text>
+      <DailyRow label={DAILY_INSIGHT_LABEL} kind="insight" at={state.insight} onPick={pick} />
+      <DailyRow label={DAILY_WORD_LABEL} kind="word" at={state.word} onPick={pick} />
     </View>
   );
 }
@@ -332,6 +478,7 @@ export default function Settings({
       </View>
 
       <NotificationsRow />
+      <DailyPushRows />
 
       <View style={{ ...card(), marginTop: Spacing.xl }}>
         <Text style={{ ...Type.eyebrow, color: c.accentQuiet, marginBottom: Spacing.sm }}>Privacy</Text>

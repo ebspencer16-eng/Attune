@@ -767,6 +767,14 @@ export type HomeResponse = {
    * one copy of every word a customer reads.
    */
   word?: { id: string; word: string; part: string; definition: string; label?: string } | null;
+  /**
+   * The two daily schedules, as stored. Null means off.
+   *
+   * Sent with the home payload rather than fetched by Settings, because
+   * Settings already waits on /api/home for the exercise status and a second
+   * request for two strings is a second thing that can fail.
+   */
+  dailyPush?: { insight: string | null; word: string | null; defaultAt: string; available?: boolean } | null;
   /** How a storycard is set, for the insight card this tab can open. */
   storycardStyle?: Record<string, unknown> | null;
   /* `label` is what to call it, sent with it so both surfaces agree; `url`
@@ -1585,6 +1593,27 @@ export function savePushToken(input: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
+  });
+}
+
+/**
+ * When to send the insight of the day and the word of the day.
+ *
+ * Ellie: "Notifications settings should offer a once-a-day notification that
+ * sends you the insight of the day at a time you select (default should be
+ * 7:30am), same for word of the day."
+ *
+ * `at` is a 24-hour local clock reading, or null to turn it off. The device's
+ * offset goes with it because the server cannot otherwise know when somebody's
+ * 7:30 is, and this is the one moment a reader is deliberately setting it: the
+ * alternative is a write on every app open, which is what check-poll-writes
+ * exists to stop.
+ */
+export function setDailyPush(kind: 'insight' | 'word', at: string | null) {
+  return request<{ ok: true; kind: string; at: string | null }>('/api/daily-push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind, at, tzOffsetMinutes: new Date().getTimezoneOffset() }),
   });
 }
 

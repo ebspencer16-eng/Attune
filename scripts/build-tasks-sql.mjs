@@ -32,7 +32,21 @@ export function fill(doc, read = (f) => readFileSync(`${ROOT}supabase/migrations
   const sql = read(m[1]).replace(/\s+$/, '');
   const block = `<!-- SQL ${m[1]}: written by scripts/build-tasks-sql.mjs. Do not edit. -->\n`
     + '```sql\n' + sql + '\n```\n<!-- /SQL -->';
-  return { doc: doc.replace(OPEN, block), name: m[1], changed: doc.replace(OPEN, block) !== doc };
+  /**
+   * ── A REPLACER FUNCTION, NOT A STRING ─────────────────────────────────
+   * String.prototype.replace reads $&, $', $` and $1 inside a STRING
+   * replacement as instructions. Migration 083 contains the regular
+   * expression '^([01][0-9]|2[0-3]):[0-5][0-9]$' in a CHECK constraint, and
+   * the `$'` in it means "everything after the match": TASKS.md came back
+   * with the whole of itself from that point pasted in again, three times
+   * over, and every gate about the document failed at once.
+   *
+   * A function replacement is handed the text literally. This had been right
+   * for eighteen migrations and was waiting for the first one with a dollar
+   * sign in it.
+   */
+  const out = doc.replace(OPEN, () => block);
+  return { doc: out, name: m[1], changed: out !== doc };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

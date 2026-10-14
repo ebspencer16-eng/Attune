@@ -54,7 +54,13 @@ if (!routeList) fail('could not find APP_ROUTES in the home screen');
 const routes = new Set([...(routeList?.[1] || '').matchAll(/'([^']+)'/g)].map((m) => m[1]));
 
 for (const kind of kinds) {
-  const alert = notificationFor(kind, { partnerName: 'Sam', postTitle: 'A post', dimensionLabel: 'Conflict' });
+  /* The facts each kind needs, the way a trigger supplies them. The daily
+     pair carry the insight or the word rather than a sentence of their own,
+     so the fixture has to hand them one or they read as having no body. */
+  const alert = notificationFor(kind, {
+    partnerName: 'Sam', postTitle: 'A post', dimensionLabel: 'Conflict',
+    dailyLabel: 'Word of the day', dailyTitle: 'Attunement', dailyBody: 'A definition.',
+  });
   if (!alert) { fail(`${kind}: notificationFor returned nothing`); continue; }
   if (!alert.title?.trim()) fail(`${kind}: no title`);
   if (!alert.body?.trim()) fail(`${kind}: no body`);

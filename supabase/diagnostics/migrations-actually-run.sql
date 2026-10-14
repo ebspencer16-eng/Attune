@@ -73,7 +73,10 @@ with checks (migration, object, kind, degraded) as (
      'The end-of-experience survey cannot be answered. /api/survey says the storage is not set up and the admin page says the same, so every answer is lost rather than stored.'),
     ('082_demo_accounts',
      'profiles.is_demo', 'column',
-     'Alex, Sam and the test profiles are counted as people in every admin figure. Each admin page carries an amber line saying so.')
+     'Alex, Sam and the test profiles are counted as people in every admin figure. Each admin page carries an amber line saying so.'),
+    ('083_daily_push',
+     'profiles.daily_insight_at', 'column',
+     'Nobody can choose a time for the insight of the day or the word of the day. The rows do not appear in Settings at all, and the half-hourly cron answers that the storage is not set up.')
 )
 select
   c.migration,

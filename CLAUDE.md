@@ -214,6 +214,21 @@ Everywhere else is fine: between siblings, before a conditional, inside a
 fragment. When in doubt put the marker on the line above the block's outermost
 element rather than inside it.
 
+**`String.replace` reads `$&`, `` $` ``, `$'` and `$1` inside the REPLACEMENT
+string.** A migration carrying the regular expression `'...[0-5][0-9]$'` in a
+CHECK constraint was pasted into TASKS.md by `build-tasks-sql.mjs`, and the
+`$'` in it means "everything after the match": the document came back with the
+whole of itself from that point appended, three times over, and every gate
+about the document failed at once. The generator had been right for eighteen
+migrations and was waiting for the first one with a dollar sign in it.
+
+A function replacement is handed the text literally:
+
+    doc.replace(RE, () => block)     // not doc.replace(RE, block)
+
+Any place a file's contents are substituted into another file is this bug
+waiting. The tell is a diff far larger than the edit.
+
 **Never write a file in the same expression that computes its contents.**
 
     open(p, 'w').write(build_the_string())     # do not

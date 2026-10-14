@@ -7,6 +7,8 @@
  */
 
 export const NOTIFICATION_TRIGGERS = {
+  "daily_insight": [],
+  "daily_word": [],
   "partner_finished": [
     "api/_lib/completion.js:96"
   ],
@@ -40,6 +42,8 @@ export const NOTIFICATION_TRIGGERS = {
  * above the card would be the same prompt printed twice.
  */
 export const PUSH_TRIGGERS = {
+  "daily_insight": [],
+  "daily_word": [],
   "partner_finished": [],
   "partner_nudged_you": [],
   "partner_joined": [],
