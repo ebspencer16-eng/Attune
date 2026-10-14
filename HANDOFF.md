@@ -2880,3 +2880,24 @@ words in it. It is hidden until the questions arrive now.
 partner invite handshake between two accounts. The arithmetic either side of
 both is gated (check-checkout-pricing, check-promo-totals, the entitlement
 matrix, check-invite-path), but nobody has driven a card through it.
+
+## 2026-10-13, who the non-binary figure was
+
+Ellie ran the query: "Alex and Sam were demos, not sure why lanae and spencer
+didn't have pronouns, but lanae is she/her and spencer is he/him."
+
+So the figure was not a bug in the conversion. It was two demo accounts
+choosing they/them and two real people with the field blank, which is no slice
+at all rather than a wrong one. Migration 081 fills the two gaps, matching on
+the first name, only where the field is empty, and reporting every row it
+matched so a second Lanae could not be filled in silently.
+
+**The demo accounts are the live finding.** Alex and Sam are rows in `profiles`
+like anybody else, so they are counted in every figure the admin draws: couple
+types, demographics, engagement, the funnel. With four or five real couples
+that is a large share of every number on the page, and it is the same complaint
+she has now made twice about data that is not real. There is no marker on them.
+TASKS.md B61 asks for one word: an `is_demo` column set on the accounts she
+names, filtered out by the four admin endpoints.
+
+Everything from B43 to B59 is approved and filed in section 4.

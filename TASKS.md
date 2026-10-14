@@ -8,8 +8,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| B57 | **One migration to run: the CONGRATSMYA code.** One free Starting Out package, single use. The SQL is in the box under this table. |
-| B56 | **Who said they/them?** I cannot see it: the admin anonymises by design and I have no database credentials. One paste answers it, in the Supabase SQL editor. The query is under this table. |
+| B60 | **One migration to run: Lanae and Spencer's pronouns.** The SQL is in the box under this table. |
+| B61 | **The demo accounts are counted as real people.** Alex and Sam sit in the same table as everybody else, so they are in every figure the admin draws. One word and I will fence them off. See under this table. |
 | C3 | **Fifty words for the Notes tab, waiting on you.** In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -17,96 +17,98 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### B57, the code
+### B60, the migration to run
 
-A free Starting Out package, usable once, under the name CONGRATSMYA. Nothing
-about it is live until this runs: the checkout reads the codes table, and a
-code that is not in it is simply not a code.
+Two gaps filled: Lanae as she/her, Spencer as he/him. It only touches a field
+that is empty, so nothing anybody chose is overwritten, and it reports every
+row it matched so you can see it hit the two you meant.
 
 **In the Supabase SQL editor:**
 
-<!-- SQL 080_congrats_code.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 081_pronouns_for_records.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 080: CONGRATSMYA — one free Starting Out package, usable once.
+-- 081: two people's pronouns, for the record.
 --
--- ── WHAT IT IS ──────────────────────────────────────────────────────────────
--- Ellie: "Build me a discount code for a free starting out package (one use)
--- called CONGRATSMYA".
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- Ellie, having looked at who the admin was counting as non-binary: "Alex and
+-- Sam were demos, not sure why lanae and spencer didn't have pronouns, but
+-- lanae is she/her and spencer is he/him, please update for our records."
 --
--- Starting Out is `newlywed` in the code: see PKG_CAPS in
--- api/_lib/entitlements.js and DIGITAL_PRICES in api/_catalogue.js, where that
--- key carries the shared budget and the merging lives checklist. The package
--- is 080_congrats_code.sql39 digital, and this makes it nothing.
+-- Nothing in Attune asks anybody their gender; the admin converts the pronouns
+-- somebody chose at setup. A blank is not a category, so these two were in no
+-- slice at all rather than in a wrong one. This fills them in.
 --
--- ── HOW IT BEHAVES ──────────────────────────────────────────────────────────
--- `discount_mode = 'free'` with `package_key = 'newlywed'` means the checkout
--- takes the package to zero and refuses the code against any other package: a
--- cart holding anything but Starting Out is rejected with a message naming
--- what the code unlocks. See api/create-payment-intent.js.
+-- ── WHAT IT TOUCHES ─────────────────────────────────────────────────────────
+-- Two fields, in two places each, because each partner records the other's
+-- pronouns as well as their own:
 --
--- `max_uses = 1` is single use. The first redemption raises uses_count and
--- every attempt after it is answered "This code has already been used", both
--- at the promo field and again at purchase. Two people cannot race it: the
--- count is read and written on the same row at redemption.
+--   profiles.pronouns          the person's own
+--   profiles.partner_pronouns  what their partner is recorded as
 --
--- It does NOT include the workbook. Starting Out does not come with one, and a
--- code that quietly added it would be a different gift from the one she asked
--- for.
+-- Matching is on the first name, case-insensitively, and only where the field
+-- is empty. A row where somebody has chosen something is never overwritten:
+-- the point of this is to fill two gaps, not to decide for anybody.
 --
--- Run in the Supabase SQL Editor and click Run. Safe to run more than once:
--- re-running resets it to these terms but leaves uses_count alone, so a code
--- that has been redeemed stays redeemed.
+-- Run in the Supabase SQL Editor and click Run. Safe to run more than once;
+-- the second run matches nothing because the fields are no longer empty.
 -- ============================================================================
 
-insert into public.beta_codes
-  (code, package_key, discount_mode, discount_value, applies_to,
-   includes_workbook, max_uses, uses_count, active, note)
-values
-  ('CONGRATSMYA', 'newlywed', 'free', 0, 'package', false, 1, 0, true, 'Gift - Mya')
-on conflict (code) do update set
-  package_key       = excluded.package_key,
-  discount_mode     = excluded.discount_mode,
-  discount_value    = excluded.discount_value,
-  applies_to        = excluded.applies_to,
-  includes_workbook = excluded.includes_workbook,
-  max_uses          = excluded.max_uses,
-  active            = excluded.active,
-  note              = excluded.note;
+-- ── Their own pronouns ──────────────────────────────────────────────────────
+update public.profiles
+   set pronouns = 'she/her'
+ where name ilike 'lanae%'
+   and coalesce(pronouns, '') = '';
+
+update public.profiles
+   set pronouns = 'he/him'
+ where name ilike 'spencer%'
+   and coalesce(pronouns, '') = '';
+
+-- ── And what their partner has recorded about them ──────────────────────────
+update public.profiles
+   set partner_pronouns = 'she/her'
+ where partner_name ilike 'lanae%'
+   and coalesce(partner_pronouns, '') = '';
+
+update public.profiles
+   set partner_pronouns = 'he/him'
+ where partner_name ilike 'spencer%'
+   and coalesce(partner_pronouns, '') = '';
 
 -- ── Verification ────────────────────────────────────────────────────────────
--- uses_count 0 and active true is a code nobody has redeemed yet.
-select code, package_key, discount_mode, max_uses, uses_count, active, note
-  from public.beta_codes
- where code = 'CONGRATSMYA';
+-- Both rows should now carry a pronoun, and nobody else is touched. If a name
+-- matched more than one account, every match is listed here.
+select id, name, pronouns, partner_name, partner_pronouns, created_at
+  from public.profiles
+ where name ilike 'lanae%'
+    or name ilike 'spencer%'
+    or partner_name ilike 'lanae%'
+    or partner_name ilike 'spencer%'
+ order by created_at desc;
+
+-- Everyone still without pronouns, which is what the Gender tile cannot place.
+select count(*) as profiles_without_pronouns
+  from public.profiles
+ where coalesce(pronouns, '') = '';
 ```
 <!-- /SQL -->
 
 ---
 
-### B56, who said they/them
+### B61, the demo accounts
 
-You asked whether the non-binary figure is an error. It is not a made-up
-number, but it is an inference: nothing in Attune asks anybody their gender, so
-every one of those figures is the pronouns somebody chose at setup, converted.
-They/them became non-binary.
+Alex and Sam are rows in the same table as everybody else, so they are counted
+in every figure the admin draws: the couple types, the demographics, the
+engagement, the funnel. With four or five real couples that is a large share of
+the numbers.
 
-You have asked for gender on the titles, so the conversion stays and the tiles
-say Gender again. Hovering any of them says it is converted from pronouns, so
-the page does not claim to have asked.
+There is no marker on them. My recommendation is one column, `is_demo`, set on
+the accounts you name, and every admin query filtering them out. That is a
+migration plus a line in four endpoints. Say the word and I will build it, or
+tell me which accounts are demos and I will start the list.
 
-To see exactly who, in the Supabase SQL editor:
-
-```sql
--- Everyone whose pronouns are not she/her or he/him, newest first.
-select id, name, pronouns, partner_name, partner_pronouns, created_at
-  from public.profiles
- where coalesce(pronouns, '') not in ('she/her', 'he/him')
- order by created_at desc;
-```
-
-If that comes back empty, nobody chose they/them and the chart will show no
-non-binary slice once it is reading live data.
+---
 
 ### Still open from the review
 
@@ -131,21 +133,7 @@ on you.
 | # | Built, needs your eye |
 |--|--|
 | B33 | **The survey is built and asks your nine questions, in the app, on the website at the end of What Comes Next, and on the link in the email.** Every answer saves as it is given, so a survey somebody abandons is still three answers. The admin has one tile per question with the same slicers as every other page, a tool for coding the written answers into counted themes, and a star on any written answer that publishes it to the homepage with no name. |
-| B43 | **Every invented number out of the admin.** A generator was making 60 orders with names and addresses on page load, and four beta codes carried invented usage counts. Both gone; the pages read from Supabase or say they are empty. |
-| B44 | **Most to least interesting over time is gone**, and the remaining tiles re-paired. |
-| B46 | **The "no data yet" sentences are gone from every tile**, and with them the function that wrote them: nothing else read the class it set. |
-| B47 | **The second sweep found the wrong data you spotted.** Nothing in Attune asks anybody their gender. Every gender figure in the admin was a person's PRONOUNS relabelled, with they/them reported as non-binary. The dimension is Pronouns now, everywhere: the tile, the slicers, the Explore field, the couple map, the CSV exports. Also found: the two home cards asking for feedback could never stop asking, because the column that switches them off was never written. The survey writes it now. |
-| B48 | **Engagement, Learning: five articles**, each on one line, with the full title on hover. |
-| B49 | **No diagonal labels anywhere.** The rule is in the one function every chart in the admin is built by, so a new tile cannot opt out of it: labels wrap at word boundaries, a point smaller, never rotated. Checked by asking all 23 charts their rotation after they drew. |
 | B50 | **Engagement times: the two series are Web and App.** The first had no label of its own and fell back to the axis name, so the legend read "seconds" against "App". |
-| B51 | **Detailed results: the exercise is a row of pill buttons** under the n count, instead of a dropdown in the corner. |
-| B45 | **The experience questionnaire is retired.** Its screen, its endpoint, its copy module, its card in the app and its two admin tiles are gone, and the home card that asked for it opens the survey. The footer reaction strip's three counters went with it: nothing has posted to that strip since it was removed from the site, so they were counting an instrument that no longer existed. If you want a reaction strip back, that is a new build. The weekly feedback digest now reads the survey's written answers instead of an empty table. |
-| B52 | **Column charts everywhere**, labels wrapped under the bars, no y axis, and the number on top of each bar instead. One tile elsewhere in the admin was drawing sideways too; it is upright now. |
-| B53 | **Every tile in a row is the same height**: titles are exactly two lines with the whole question on hover, the grey line under them is gone, and the n count stays. The ranking's bars are labelled with the average place, which is the figure you would quote. |
-| B54 | **Gender is back on the titles**, converted from pronouns in one table, with every converted tile saying so on hover. |
-| B55 | **Prompted a Convo** and **Most important**. |
-| B58 | **The hamburger is back on every phone.** It was shown only below 361 points while the nav links disappear at 640 to 900, so every iPhone had no menu at all. Seventeen pages also had a button that opened nothing: twelve had the menu markup and no function behind it, five had neither. All 29 pages now open a menu with links in it, checked by tapping it at three phone widths. |
-| B59 | **The whole flow runs.** All 29 results sections and 12 of 13 app views render, 37 static pages render including checkout, nothing scrolls sideways at 320 or 360, every control has a name, and all five exercises drive to their completion screens with their answers stored. One real fault found and fixed on the way: the survey page's Send button had no words in it until the questions loaded. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R2 | App insights and results. All 29 sections. |
 | R10 | Privacy policy. |
@@ -159,6 +147,22 @@ on you.
 
 | Verified by you | What it was |
 |--|--|
+| B59 | The whole flow driven end to end before the designer demo: every results section, every app view, 37 static pages, all five exercises to their completion screens. |
+| B58 | The hamburger was shown only below 361 points while the nav links hide at 640 to 900, so every iPhone had no menu; seventeen pages also had a button that opened nothing. |
+| B55 | Prompted a Convo, and Most important. |
+| B54 | Gender back on the admin titles, converted from pronouns in one table, with every converted tile saying so on hover. |
+| B53 | Side-by-side tiles made one height: two-line titles with the question on hover, the grey line gone, the n count kept. |
+| B52 | Column charts everywhere, labels wrapped under the bars, no y axis, the value on top of each bar. |
+| B51 | Detailed results picks its exercise with pill buttons under the n count. |
+| B49 | No axis label is drawn on the diagonal anywhere; the rule lives in the one function every chart is built by. |
+| B48 | Engagement, Learning: five articles, one line each, full title on hover. |
+| B47 | The second sweep: every gender figure was a pronoun relabelled, and the feedback card could never stop asking because nothing wrote the column it reads. |
+| B46 | The "no data yet" sentences out of every tile, and the function that wrote them. |
+| B45 | The experience questionnaire retired: screen, endpoint, copy module, card and tiles, with the dead footer-reaction counters. |
+| B44 | Most to least interesting over time removed and the remaining tiles re-paired. |
+| B43 | Every invented number out of the admin: sixty generated orders and four beta codes with made-up usage. |
+| B57 | CONGRATSMYA: one free Starting Out package, single use, verified against the real checkout handler before she ran it. |
+| B56 | Who the admin was counting as non-binary: two demo accounts, and two people whose pronouns were simply blank. |
 | B42 | Fifty-nine start tags in the admin never closed, which is why Type Analytics laid out at zero by zero; fluid gutters, padded tiles and readable axes with it. |
 | B41 | The admin became two pages, Feedback and Testimonials, to her layout: a period slicer, four metrics, a tile per question with its own slicer, themes with a full list, and the star that publishes a quote. |
 | B40 | Three admin pages that each carried their own copy of the retired survey became one. |
