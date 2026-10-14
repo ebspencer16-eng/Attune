@@ -102,7 +102,23 @@ for (const role of roles) {
 // viewer above `Card` is out of scope on purpose: Close, Full results and Save
 // are app furniture around the card, not the card, and the website's
 // equivalents are its own too.
-const cards = read('attune-app/src/components/highlight-cards.tsx');
+/**
+ * ── COMMENTS BLANKED FIRST ──────────────────────────────────────────────
+ * This gate caught a real thing (a raw fontSize on the word card), the size
+ * was changed to the shared scale, and then it failed again on the COMMENT
+ * written above the fix explaining what had been wrong. CLAUDE.md says this
+ * about check-style-codes and it is true here: a gate that reads a comment as
+ * code punishes a file for saying what went wrong, and the cost is that
+ * nobody writes it down.
+ *
+ * Blanked rather than removed, so every line number still points at the line
+ * it came from.
+ */
+const stripComments = (src) => src
+  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + m.slice(pre.length).replace(/[^\n]/g, ' '));
+
+const cards = stripComments(read('attune-app/src/components/highlight-cards.tsx'));
 const faceAt = cards.indexOf('\nfunction Card(');
 if (faceAt < 0) {
   problems.push('cannot find `function Card(` in the app, so this is scanning nothing.');
@@ -126,7 +142,7 @@ for (const line of cards.slice(Math.max(faceAt, 0)).split('\n')) {
 // The earlier version of this checked that each role's size still appeared
 // somewhere in src/App.jsx, which was right while the scale was a transcript
 // and wrong the moment it became the source.
-const site = read('src/App.jsx');
+const site = stripComments(read('src/App.jsx'));
 const lines = site.split('\n');
 const first = lines.findIndex((l) => l.includes('<WrappedCard key={0}'));
 const last = lines.findIndex((l, i) => i > first && l.trim() === '];');

@@ -57,6 +57,17 @@ import ShareButton from '@/components/share-button';
 import CoupleMap from '@/components/couple-map';
 import { SaveToJournal } from '@/components/journal';
 
+/**
+ * ── THE WORD CARD'S COLOURS ────────────────────────────────────────────────
+ * The Notes tab's, not this file's idea of them. Ellie asked for "the bg of
+ * the notes page with the word card centered", and that tab draws a white
+ * entry on the warm page ground. Naming them here from the theme is what stops
+ * the storycard becoming a second, slightly different dictionary entry.
+ */
+const WORD_CARD_BG = Palette.white;
+const WORD_CARD_INK = Colors.light.textStrong;
+const WORD_CARD_MUTED = Colors.light.textMuted;
+
 /** The control that keeps a quote. A placeholder in Ellie's house style. */
 const KEEP_LABEL = 'Save to journal';
 import { ResultsScroll } from '@/components/results-scroll';
@@ -407,6 +418,36 @@ export function insightCard(
     eyebrow: label,
     quote: finding.body,
     body: finding.source,
+  } as HighlightCard;
+}
+
+/**
+ * The word of the day, as a card.
+ *
+ * Ellie: "When I share the word of the day, I want it to be a storycard like
+ * the insight of the day. I want it to be the bg of the notes page with the
+ * word card centered, with the attune link at the bottom like the insight of
+ * the day storycard uses."
+ *
+ * Built here for the same reason insightCard is: two surfaces will want it and
+ * neither of them should assemble a storycard out of a word.
+ */
+export function wordCard(
+  word: { word: string; part?: string; definition: string },
+  label: string,
+): HighlightCard {
+  return {
+    id: 'word-of-the-day',
+    kind: 'word',
+    tone: 'day',
+    /* The Notes page's ground, flat rather than a gradient, because that page
+       is one colour. Carried on the card the way the insight carries the home
+       screen's blue, so the renderer decides nothing. */
+    ground: [Colors.light.background, Colors.light.background, Colors.light.background],
+    eyebrow: label,
+    title: word.word,
+    lead: word.part || '',
+    body: word.definition,
   } as HighlightCard;
 }
 
@@ -1393,6 +1434,71 @@ function Body({ card, onDone, map, w }: {
               {card.body}
             </Text>
           ) : null}
+        </View>
+      );
+
+    /**
+     * ── THE WORD OF THE DAY ────────────────────────────────────────────
+     * Ellie: "When I share the word of the day, I want it to be a storycard
+     * like the insight of the day. I want it to be the bg of the notes page
+     * with the word card centered, with the attune link at the bottom like the
+     * insight of the day storycard uses."
+     *
+     * So it is the Notes tab's own dictionary entry, lifted onto a card: the
+     * part of speech small, the word very large under it, the meaning below.
+     * The ground is the Notes page's, carried on the card rather than decided
+     * here, the same way the insight carries the home screen's blue.
+     *
+     * No new fields. The entry is eyebrow, title, lead and body, which every
+     * other card already uses, so nothing the payload gates count changes.
+     */
+    case 'word':
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={[S.listLabel, { textAlign: 'center' }]}>{card.eyebrow}</Text>
+          {/* The entry, centred, on its own ground. A white card on the Notes
+              cream is exactly what the tab draws, and what makes this read as
+              a dictionary entry rather than as a heading with a paragraph. */}
+          <View
+            style={{
+              backgroundColor: WORD_CARD_BG,
+              borderRadius: Radius.card,
+              paddingVertical: Spacing.xl, paddingHorizontal: Spacing.xl,
+              marginTop: Spacing.lg,
+              alignSelf: 'stretch',
+            }}>
+            <Text style={[S.listLabel, { textAlign: 'center', color: WORD_CARD_MUTED }]}>
+              {card.lead}
+            </Text>
+            {/* ── THE SHARED SCALE, NOT A NUMBER ──────────────────────
+                statBig is the card's largest size and it is the one the
+                server sets, so this word is as big as the 90% on the
+                alignment card and shrinks with the card at every width.
+                A `fontSize: 44` here read correctly on this phone and would
+                have been a second idea of how a card is set; check-storycard-type
+                caught it, which is what that gate is for.
+
+                DM Sans bold rather than the scale's own face, because Ellie
+                asked for this word specifically: "I asked for the 'Connection'
+                text to not be playfair display anymore." */}
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={[S.statBig, {
+                fontFamily: Fonts.bodyBold, fontWeight: '700',
+                color: WORD_CARD_INK, textAlign: 'center',
+                marginTop: Spacing.xs,
+              }]}>
+              {card.title}
+            </Text>
+            {card.body ? (
+              <Text style={[S.bodyMd, {
+                color: WORD_CARD_MUTED, textAlign: 'center', marginTop: Spacing.md,
+              }]}>
+                {card.body}
+              </Text>
+            ) : null}
+          </View>
         </View>
       );
 

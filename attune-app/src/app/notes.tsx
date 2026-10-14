@@ -59,6 +59,7 @@ import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import TabScreen from '@/components/tab-screen';
+import { StoryCard, wordCard } from '@/components/highlight-cards';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
 import {
@@ -114,6 +115,8 @@ export default function NotesScreen() {
   const [partnerName, setPartnerName] = useState<string | null>(null);
   /** Today's word and its definition, from the server. See api/_words.js. */
   const [word, setWord] = useState<HomeResponse['word']>(null);
+  /** The word as a full card, which is what its control opens. */
+  const [wordOpen, setWordOpen] = useState(false);
   /** Whether the journal is open over this screen. */
   const [journalOpen, setJournalOpen] = useState(pendingJournal);
   /** Which of the three list pages is open over this screen, if any. */
@@ -661,9 +664,14 @@ export default function NotesScreen() {
                   <Text style={{ ...Type.body, color: c.textMuted, flex: 1 }}>{word.part}</Text>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`Share the word ${word.word}`}
+                    accessibilityLabel={`Open the word ${word.word} as a card`}
                     hitSlop={10}
-                    onPress={() => Share.share({ message: `${word.word} \u00b7 ${word.definition}` })}
+                    /* Ellie: "When I share the word of the day, I want it to
+                       be a storycard like the insight of the day." So this
+                       opens the card, which has the share that sends a
+                       picture; sharing a line of text from here was the thing
+                       she was asking to replace. */
+                    onPress={() => setWordOpen(true)}
                     style={{
                       width: 34, height: 34, borderRadius: 17,
                       backgroundColor: Palette.warm,
@@ -951,6 +959,23 @@ export default function NotesScreen() {
           onSaved={(msg) => { setEditing(null); if (msg) say(msg); load(); }}
         />
       ) : null}
+
+      {/* ── THE WORD, FULL SIZE ──────────────────────────────────────────
+          Ellie: "When I share the word of the day, I want it to be a storycard
+          like the insight of the day. I want it to be the bg of the notes page
+          with the word card centered, with the attune link at the bottom like
+          the insight of the day storycard uses."
+
+          The same component the insight uses, so the attune link at the foot,
+          the share that sends a picture and the swipe down to leave are all
+          the ones that already exist rather than a second set. */}
+      {wordOpen && word ? (
+        <StoryCard
+          card={wordCard(word, word.label || WORD_OF_THE_DAY)}
+          share={`${word.word} \u00b7 ${word.definition}`}
+          onClose={() => setWordOpen(false)}
+        />
+      ) : null}
     </Shell>
   );
 }
@@ -1102,6 +1127,9 @@ const JUMP_BACK_IN = 'Recent';
 const WRITE_ENTRY = 'Write a journal entry';
 const SHARED_WITH_ME = 'Shared with me';
 const WORD_IN_USE = 'Word in use';
+/* Only used if /api/home sends a word with no label, which it always does:
+   api/_words.js owns the words and their eyebrow. */
+const WORD_OF_THE_DAY = 'Word of the day';
 /**
  * Exported, because the home screen's quick link had typed it out too.
  *

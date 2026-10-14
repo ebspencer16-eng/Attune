@@ -356,6 +356,16 @@ export const WORDS = [
  * the app sends. It counted days from the epoch in UTC until 2026-10-12, which
  * turned the word over at 5pm Pacific: see api/_lib/day-number.js.
  */
+/**
+ * What the tile and the storycard call this.
+ *
+ * Sent with the word rather than typed into the app, the same way
+ * INSIGHT_EYEBROW is: Ellie asked for the word to open "a storycard like the
+ * insight of the day", and two surfaces naming the same thing is how a label
+ * ends up saying two things.
+ */
+export const WORD_EYEBROW = 'Word of the day';
+
 export function wordOfTheDay(now = new Date()) {
   const day = typeof now === 'number' ? now : dayNumber(now);
   /* Wrapped both ways. A day number can be negative once the day is read from
@@ -363,5 +373,6 @@ export function wordOfTheDay(now = new Date()) {
      start of 1970 is 1969 for anyone west of Greenwich, and `-1 % n` is -1 in
      JavaScript, which indexes nothing. */
   const n = WORDS.length;
-  return WORDS[(((day + 1) % n) + n) % n];
+  const pick = WORDS[(((day + 1) % n) + n) % n];
+  return { ...pick, label: WORD_EYEBROW };
 }

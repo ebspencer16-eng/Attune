@@ -183,7 +183,7 @@ export type CoupleResults = {
 export type HighlightCard = {
   id: string;
   kind: 'opener' | 'couple-type' | 'dimensions' | 'stat-pair' | 'stat-rings'
-      | 'admired' | 'named-dimension' | 'quote' | 'sendoff';
+      | 'admired' | 'named-dimension' | 'quote' | 'word' | 'sendoff';
   tone: string;
   accent?: string | null;
   eyebrow?: string;
@@ -766,7 +766,7 @@ export type HomeResponse = {
    * is on the server for the same reason the research finding is, so there is
    * one copy of every word a customer reads.
    */
-  word?: { id: string; word: string; part: string; definition: string } | null;
+  word?: { id: string; word: string; part: string; definition: string; label?: string } | null;
   /** How a storycard is set, for the insight card this tab can open. */
   storycardStyle?: Record<string, unknown> | null;
   /* `label` is what to call it, sent with it so both surfaces agree; `url`

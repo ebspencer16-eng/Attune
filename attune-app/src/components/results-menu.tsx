@@ -418,9 +418,23 @@ export default function ResultsMenu({
               ) : null}
             </Pressable>
 
-            {/* The pages inside it, indented under the label they belong to. */}
+            {/* The pages inside it, indented under the label they belong to.
+
+                ── NO GROUND OF THEIR OWN, AND NO EDGE ────────────────────
+                Ellie: "When I click the dropdown in the insights menu, the
+                rows shouldn't be white or have the colored border, the bg
+                should match the rest of the menu."
+
+                They carried Palette.warm and a three point rule in the
+                section's colour, which is a tinted block with a coloured edge
+                sitting inside a menu that has neither. Setting no background
+                is what makes them match: the menu is drawn on a white sheet in
+                the dropdown and on a tile on the landing page, and a colour
+                named here would be right on one of those and wrong on the
+                other. The open section is still marked, by the ground on its
+                own row. */}
             {isOpen && kids.length ? (
-              <View style={{ backgroundColor: Palette.warm, borderLeftWidth: 3, borderLeftColor: color }}>
+              <View>
                 {/* The cover is where the row itself goes, so listing it here
                     would be the same destination twice in one menu. */}
                 {kids.filter((ch) => !ch.cover).map((ch) => {
