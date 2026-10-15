@@ -106,14 +106,52 @@ for (const width of WIDTHS) {
          not need a button. */
       const inline = [...document.querySelectorAll('nav a')].filter(vis).length;
       if (!btn) return JSON.stringify({ button: false, inline, links: 0 });
+      /**
+       * ── AND BIG ENOUGH TO HIT ────────────────────────────────────────
+       * A sweep of every control on every page at 390 points found the
+       * hamburger at 32 by 26, the cart at 72 by 31 and the consent banner's
+       * two buttons at about 75 by 31. These are the controls a thumb goes
+       * for first and they were all under the 44 Apple asks for.
+       *
+       * Measured, not read: the drawn box is the hit area, and three
+       * different `.hamburger` rules were in the tree across 29 pages.
+       *
+       * NOT the consent banner's two buttons, which were the same size and are
+       * fixed in public/_flags.js. That banner is written by a script which
+       * does not run under this harness, so an assertion about it here would
+       * have measured nothing and reported success. A check that cannot see
+       * its subject is worse than no check.
+       */
+      const box = (el) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { w: Math.round(r.width), h: Math.round(r.height) };
+      };
+      const cart = [...document.querySelectorAll('.cart-btn, #nav-cart-btn')].find(vis);
       let threw = '';
       try { btn.click(); } catch (e) { threw = String(e && e.message || e); }
       const menu = [...document.querySelectorAll('.mobile-menu, #mobile-menu')].filter(vis);
       const links = menu.reduce((n, m) => n + [...m.querySelectorAll('a')].filter(vis).length, 0);
-      return JSON.stringify({ button: true, inline, links, threw });
+      return JSON.stringify({
+        button: true, inline, links, threw,
+        taps: [
+          ['the menu button', box(btn)],
+          ...(cart ? [['the cart button', box(cart)]] : []),
+        ],
+      });
     });
     const d = JSON.parse(out);
     checked += 1;
+
+    /* 44 is Apple's figure and the one every phone guideline settles on. */
+    for (const [what, b] of (d.taps || [])) {
+      if (!b) continue;
+      if (b.w < 44 || b.h < 44) {
+        problems.push(`${p} at ${width}: ${what} is ${b.w} by ${b.h}. A thumb needs 44 by 44, and this is`
+          + ' the control people reach for first on a phone. min-height and min-width widen the box'
+          + ' a tap has to find without moving anything that is drawn.');
+      }
+    }
     if (!d.button) {
       /* No button is fine only if every section is already in the bar. Four
          links is the smallest full nav this site draws. */

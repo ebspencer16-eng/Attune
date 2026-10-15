@@ -177,10 +177,19 @@ window.ATTUNE_FLAGS = {
       + 'align-items:center;gap:.9rem;padding:.85rem 1.1rem;background:#1E1610;color:rgba(255,255,255,.82);'
       + 'font-family:"DM Sans",system-ui,sans-serif;font-size:.8rem;line-height:1.5;'
       + 'box-shadow:0 -2px 20px rgba(14,11,7,.18)';
+    /**
+     * ── BIG ENOUGH TO HIT ──────────────────────────────────────────────
+     * These were 73 by 30 and 77 by 32, on 34 pages, measured at a phone
+     * width. Apple asks for 44 by 44, and these are the first two controls
+     * anybody touches on the site: the consent the privacy policy promises.
+     *
+     * min-height rather than more padding, so the words sit where they sat
+     * and only the box a thumb has to find gets bigger.
+     */
     var btn = function (label, bg, color) {
       return '<button type="button" data-a="' + label + '" style="flex-shrink:0;background:' + bg
         + ';color:' + color + ';border:' + (bg === 'transparent' ? '1px solid rgba(255,255,255,.35)' : 'none')
-        + ';border-radius:8px;padding:.45rem .9rem;font-weight:700;font-size:.78rem;cursor:pointer;'
+        + ';border-radius:8px;padding:.45rem 1.1rem;min-height:44px;font-weight:700;font-size:.78rem;cursor:pointer;'
         + 'font-family:inherit">' + label + '</button>';
     };
 

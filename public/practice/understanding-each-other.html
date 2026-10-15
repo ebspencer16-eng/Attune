@@ -169,6 +169,24 @@
       .site-footer .sf-copy,.site-footer .sf-email{font-size:.7rem!important}
     }
   
+/* The button itself, outside any media query.
+   It lived inside the 640 block, so above 640 it had no rule at all: a
+   <button> defaults to inline-block, the three bars inside it were
+   unstyled, and the result was a four by four nub in the nav at every
+   desktop width. The twelve article pages beside these five have always
+   had it out here. */
+/* The one action the site is for. `.nav-right a` sets a muted colour and is
+   more specific than a bare `.btn-nav`, so on two pages this button was a
+   brown-on-orange 1.65 against the 4.5 it needs, and on five In Practice
+   index pages it had no orange at all and read as plain text. Measured on
+   every page, not reasoned about.
+
+   Outside any media query: on those same five pages it first landed inside
+   the 640 block, which is the identical mistake their hamburger had. */
+.nav-right a.btn-nav{background:var(--orange,#E8673A);color:#fff;border-radius:10px;font-weight:600;text-decoration:none;display:inline-block}
+.hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;min-width:44px;min-height:44px}
+.hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
+
 /* The nav collapses to the hamburger on a phone. Without this the full nav
    stays and the page scrolls sideways: these five index pages had no such
    rule, and the canonical nav is wider than the one they used to carry, so
@@ -181,7 +199,7 @@
        Smaller here, because the bar is 390 points wide and the mark and the
        cart are in it too. */
     .nav-signin{display:none}
-    .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
+ .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
   
     /* The way in, at the width the links go. Without this the menu
        button only appeared below 361 points, so every phone wider

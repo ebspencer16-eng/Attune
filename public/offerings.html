@@ -76,6 +76,12 @@
   .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
+  /* The one action the site is for. `.nav-right a` sets a muted colour and is
+     more specific than a bare `.btn-nav`, so on two pages this button was a
+     brown-on-orange 1.65 against the 4.5 it needs, and on five In Practice
+     index pages it had no orange at all and read as plain text. Measured on
+     every page, not reasoned about. */
+  .nav-right a.btn-nav{background:var(--orange,#E8673A);color:#fff;border-radius:10px;font-weight:600;text-decoration:none;display:inline-block}
   .btn-nav{background:var(--orange);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
   .btn-nav:hover{background:#d45a2e}
 
@@ -328,6 +334,18 @@
   .pov-premium{background:linear-gradient(145deg,#1c1940,#2c2860);border-color:rgba(255,255,255,.12)}
   .pov-premium:hover{border-color:rgba(91,109,248,.5);box-shadow:0 6px 24px rgba(91,109,248,.25)}
   /* The badge and the list, matching the checkout's tiles. */
+/* The colours are inline, one per package, because each pill is its own
+   pair. What is shared is the rule below and this reason: the brand
+   orange on its own ten per cent wash measured 2.94 against the 4.5 WCAG
+   asks for at this size, so these are the same hues darkened until they
+   clear. The grounds are unchanged.
+
+   Except Premium's, which sits on a dark gradient rather than a cream
+   wash. Darkening that one took it from 2.92 to 1.97: a fix for three
+   pills made the fourth worse, because the sweep that found them walks
+   up for a background colour and a gradient has none, so it skipped the
+   one tile that is not cream. It is a light blue now, 7.75 against the
+   tile's lighter end. */
   .pov-badge{display:inline-block;align-self:flex-start;padding:.24rem .6rem;border-radius:999px;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
   .pov-feats{list-style:none;margin:.35rem 0 0;padding:0;display:flex;flex-direction:column;gap:.3rem;flex:1}
   .pov-feats li{position:relative;padding-left:1rem;font-size:.76rem;color:var(--muted);line-height:1.5}
@@ -372,7 +390,7 @@
   .pov-premium .pov-cta{color:rgba(180,188,255,.8)}
   .pov-premium .pov-cta:hover{text-decoration-color:rgba(180,188,255,.8)}
   /* HAMBURGER */
-  .hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px}
+  .hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;min-width:44px;min-height:44px}
   .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px}
   .mobile-menu{display:none;position:fixed;top:66px;right:1rem;left:auto;width:240px;background:rgba(255,253,249,.99);backdrop-filter:blur(20px);border:1.5px solid var(--stone);border-radius:14px;padding:var(--s-md);z-index:200;flex-direction:column;gap:.15rem;box-shadow:0 12px 40px rgba(14,11,7,.14)}
   .mobile-menu.open{display:flex}
@@ -690,7 +708,7 @@
      this page hides while physical is off, exactly as /start does. -->
 <div class="pkg-overview" id="gift">
   <div class="pov-tile" onclick="scrollToPkg('#pkg-core')" style="cursor:pointer">
-    <span class="pov-badge" style="background:#FFF0EB;color:#E8673A;">The Foundation</span>
+    <span class="pov-badge" style="background:#FFF0EB;color:#8A4A22;">The Foundation</span>
     <div class="pov-name">The Attune Assessment</div>
     <div class="pov-price">$89</div>
     <ul class="pov-feats">
@@ -703,7 +721,7 @@
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('core')">Add to cart →</div>
   </div>
   <div class="pov-tile pov-orange" onclick="scrollToPkg('#pkg-newlywed')" style="cursor:pointer">
-    <span class="pov-badge" style="background:#FFF0EB;color:#E8673A;">Wedding gift</span>
+    <span class="pov-badge" style="background:#FFF0EB;color:#8A4A22;">Wedding gift</span>
     <div class="pov-name">Starting Out Collection</div>
     <div class="pov-price">$139</div>
     <ul class="pov-feats">
@@ -718,7 +736,7 @@
     </div>
   </div>
   <div class="pov-tile pov-indigo" onclick="scrollToPkg('#pkg-anniversary')" style="cursor:pointer">
-    <span class="pov-badge" style="background:#EEEFFF;color:#5161DD;">Anniversary</span>
+    <span class="pov-badge" style="background:#EEEFFF;color:#3B49B0;">Anniversary</span>
     <div class="pov-name">Relationship Reflection</div>
     <div class="pov-price">$139</div>
     <ul class="pov-feats">
@@ -729,7 +747,7 @@
     <div class="pov-cta" onclick="event.stopPropagation();addToCartWithIntent('anniversary')">Add to cart →</div>
   </div>
   <div class="pov-tile pov-premium" onclick="scrollToPkg('#pkg-premium')" style="cursor:pointer">
-    <span class="pov-badge" style="background:rgba(91,109,248,.1);color:#5161DD;">Most Complete</span>
+    <span class="pov-badge" style="background:rgba(91,109,248,.18);color:#C7CEFF;">Most Complete</span>
     <div class="pov-name">Attune Premium</div>
     <div class="pov-price">$198</div>
     <ul class="pov-feats">

@@ -1,5 +1,8 @@
 /* Shared Attune cart widget styles. Mirror of the cart CSS on offerings.html. */
-  .cart-btn{position:relative;background:none;border:1.5px solid var(--stone);border-radius:10px;padding:.42rem .7rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-family:var(--bfont);font-size:.78rem;font-weight:600;color:var(--ink);transition:border-color .15s,background .15s;margin-right:.5rem}
+  /* 44 is the smallest a thumb reliably finds, and this was 72 by 31 on 25
+     pages. min-height rather than padding: the words and the border stay where
+     they are and only the box gets bigger. */
+  .cart-btn{position:relative;background:none;border:1.5px solid var(--stone);border-radius:10px;padding:.42rem .7rem;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-family:var(--bfont);font-size:.78rem;font-weight:600;color:var(--ink);transition:border-color .15s,background .15s;margin-right:.5rem}
   .cart-btn:hover{border-color:var(--clay);background:var(--warm)}
   .cart-badge{position:absolute;top:-6px;right:-6px;background:var(--orange);color:white;border-radius:999px;font-size:.52rem;font-weight:700;width:16px;height:16px;display:flex;align-items:center;justify-content:center;display:none}
   .cart-badge.show{display:flex}

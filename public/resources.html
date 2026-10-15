@@ -47,9 +47,15 @@
   .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
+  /* The one action the site is for. `.nav-right a` sets a muted colour and is
+     more specific than a bare `.btn-nav`, so on two pages this button was a
+     brown-on-orange 1.65 against the 4.5 it needs, and on five In Practice
+     index pages it had no orange at all and read as plain text. Measured on
+     every page, not reasoned about. */
+  .nav-right a.btn-nav{background:var(--orange,#E8673A);color:#fff;border-radius:10px;font-weight:600;text-decoration:none;display:inline-block}
   .btn-nav{background:var(--orange);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:background .15s}
   .btn-nav:hover{background:#d45a2e}
-  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
+  .hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;min-width:44px;min-height:44px}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
   @media(max-width:768px){.nav-center{display:none}.hamburger{display:none}.nav-signin,.btn-nav{display:none}
     /* The way in, at the width the links go. Without this the menu

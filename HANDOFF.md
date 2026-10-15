@@ -3089,3 +3089,44 @@ write paths for exactly that reason.
 
 **Still waiting on her: nothing.** Section 2 is empty and section 1 holds only
 the long-standing items. The app update is published and current.
+
+## 2026-10-15, eight sweeps
+
+Ellie, after the round-trip work: "can we run more sweeps like this throughout
+our products? As many as you can please."
+
+A sweep is one property measured over every instance of its thing. Eight so
+far: payload size per endpoint, unbounded queries, page weight, fonts, every
+dollar amount, every link followed, every endpoint's error path, every tap
+target, every piece of text's contrast. Six found something real.
+
+**The biggest was the type.** Thirty-five places where text was drawn in a face
+the page never loaded, so the browser faked bold or italic, on ten and thirteen
+pages respectively. The admin's bold monospace cannot be fixed by asking harder
+because DM Mono has no bold. And three weights of Syne were downloaded for text
+that does not exist. The site had eight different font requests; it has one,
+in the range form, and check-web-fonts drives every page.
+
+**Then the nav.** The Get started button was brown-on-orange at 1.65 on two
+pages and had no orange at all on five more, because `.nav-right a` is more
+specific than `.btn-nav`. The hamburger was 32 by 26 everywhere and a four
+pixel nub on five In Practice pages, where its rule sat inside a phone-width
+media query. Both fixed on all 29, both gated in check-mobile-menu.
+
+**What to carry forward.** Five of the eight sweeps were wrong before they were
+right, and every one was the harness rather than the product: a column headed
+"weight" that hid the word italic, a sweep reading rewrites and not redirects,
+a nodejs handler given one argument, a background walk that started at the
+parent, a wait that raced a stylesheet. The first hypothesis for a surprising
+result is the measurement.
+
+And the one that matters most: the contrast sweep silently skipped text on
+gradients, so darkening three pills to clear the threshold made the fourth
+worse, in exactly the place the sweep was blind. It reports what it cannot
+measure now.
+
+**Nothing is waiting on her.** Section 2 is empty, section 1 holds only the
+long-standing items, and the sweep findings are in section 3 under S26 with the
+numbers for the ones I did not fix: 459 tap targets under 44 (mostly footer
+links), 110 pieces of text between 3.0 and 3.5 contrast (muted grey on cream),
+and the 1.4MB app-shell bundle. All three are design calls, not bugs.

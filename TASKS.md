@@ -31,13 +31,13 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S26 | **Six sweeps across the product, four found something.** The biggest: thirty-five places where text was drawn in a typeface the page never loaded, so the browser faked bold and italic. Detail under this table. |
+| S26 | **Eight sweeps across the product, six found something.** The biggest: thirty-five places where text was drawn in a typeface the page never loaded, so the browser faked bold and italic. Detail under this table. |
 
-### S26, what the six sweeps found
+### S26, what the sweeps found
 
-Each one measured one property across every instance of its thing. Four found
-something real, two found nothing, and one of the two that found nothing is
-worth as much: it turned "the prices are probably fine" into a figure.
+Each one measured one property across every instance of its thing. Six found
+something real, two found nothing, and one of those two is worth as much: it
+turned "the prices are probably fine" into a figure.
 
 **1. How much each screen downloads.** The Notes endpoint sent every column of
 every note, including two the app has never read. One of them is a key made of
@@ -81,6 +81,53 @@ each. Nothing threw, nothing answered a 500 it should not, and nothing put a
 stack trace or a key in an answer. Two endpoints had never been checked at all,
 because they use the other of Vercel's two runtimes and the gate said so out
 loud; they are covered now.
+
+**7. How big every control is, on a phone.** 730 controls measured at 390
+points. Apple asks for 44 by 44; 581 were smaller. Most of those are footer
+links, which are small by convention and are your call. The four that are not:
+
+- The menu button, 32 by 26 on 17 pages. The one control a phone user needs.
+- The cart button, 72 by 31 on 25 pages.
+- Accept and Decline on the privacy banner, about 75 by 31 on 34 pages. The
+  first two controls anybody touches.
+
+All four are 44 now. The words did not move: only the box a thumb has to find
+got bigger.
+
+And the menu button was worse than small on five In Practice pages. Its styling
+sat inside a phone-width media query, so above 640 points it had no rule at all
+and rendered as a four-pixel nub in the nav, on every desktop. Those five pages
+were the ones that never had the rule in the first place. Now hidden above 640
+and 44 by 44 below it, measured at four widths.
+
+The remaining 459 are mostly footer links at 16 points tall. Making those 44
+would change how the footer looks, so I have left them and am telling you the
+number instead.
+
+**8. The contrast of every piece of text, against what is painted behind it.**
+1973 pieces measured. Three real ones, all now fixed:
+
+- **The Get started button in the nav, on seven pages.** On Legal and Your
+  privacy choices it was brown on orange at 1.65 against the 4.5 it needs:
+  close to unreadable. On the five In Practice index pages it had no orange at
+  all and read as plain text. A rule called `.nav-right a` is more specific
+  than `.btn-nav`, so it won. One rule now, specific enough, on all 29 pages.
+- **The category pill on twelve In Practice articles**, brand orange on a wash
+  of itself, 2.93. The same hue darkened to 6.11.
+- **The pill above each package name** on both the packages page and the
+  checkout, 2.94. Same fix.
+
+One of those three nearly cost a fourth. The pill on the Premium tile is the
+only one on a dark ground, and darkening all four took it from 2.92 to 1.97. It
+is a light blue now and reads at 4.8, measured from the painted pixels. The
+sweep had been skipping it silently, because a gradient has no background
+colour for the usual method to find; it counts and reports them now.
+
+137 are still below the standard. 35 of those are on the workbook's print
+template, which is a page nobody visits. Of the rest, 110 sit between 3.0 and
+3.5, which is muted grey text on cream: legible, and below the line. That is a
+palette decision rather than a bug, so I have left it and am telling you the
+number.
 
 **And the prices.** Every dollar amount on the site is a catalogue price or the
 one derived number, which is right in all four places it appears and already

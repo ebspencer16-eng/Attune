@@ -173,6 +173,42 @@ was to stop counting the literal and count calls to the module instead, and to
 keep the literal only as a thing to forbid: named outside a gateway, it is a
 read that went around the filter.
 
+**A sweep is one property measured over every instance of its thing, and the
+harness is usually what is broken.** Ellie, after the round-trip sweep: "can we
+run more sweeps like this throughout our products? As many as you can please."
+
+Eight so far: payload size per endpoint, unbounded queries, page weight, fonts,
+every dollar amount, every link followed, every endpoint's error path, every
+tap target, every piece of text's contrast. Six found something real. What is
+worth writing down is that five of the eight were WRONG before they were right,
+and every one of those was the measurement rather than the product:
+
+| What it said | What was actually true |
+|---|---|
+| DM Sans 500 missing on seven pages | They were italic, and a column headed "weight" hid the word for three runs |
+| /privacy dead on twelve pages | It is a redirect, and the sweep read only rewrites |
+| Two endpoints throw on every input | They take `(req, res)`: the harness gave one argument |
+| Every button at contrast 1.0 | The background walk started at the parent, and a button paints its own |
+| 404 loads no fonts | The wait was racing Google's stylesheet |
+
+So: when a sweep reports something surprising, the first hypothesis is the
+harness. Print one case end to end before believing the column. The ratio here
+was five harness bugs to six real findings, and the real findings were worth
+the whole exercise.
+
+**And what a sweep cannot see, it has to say it cannot see.** The contrast
+sweep walks up the tree for a background colour, and a gradient has none, so it
+skipped those nodes and reported nothing about them. Three pills on cream were
+darkened to clear the threshold and the fourth, the only one on a dark
+gradient, went from 2.92 to 1.97 by the same edit: a fix made one thing worse
+in the one place the measurement was blind. It counts and reports them now, and
+a pixel reading settles the ones it cannot compute. A silent skip is how a
+sweep becomes evidence for something it never looked at.
+
+The other half of the lesson: a sweep that finds nothing is still worth running
+once, because it converts "probably fine" into a figure. The price sweep found
+nothing and that is now a sentence with a number in it.
+
 **A browser smears a face it was not given, and says nothing either.** The web
 half of the bug below. A page that asks for `font-weight: 700` in a family it
 loaded only up to 600 gets a synthetic bold; italic in a family with no italic

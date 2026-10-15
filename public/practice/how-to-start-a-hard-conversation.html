@@ -37,9 +37,15 @@
   .nav-right{display:flex;align-items:center;gap:var(--s-lg)}
   .nav-signin{font-size:.8rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .15s}
   .nav-signin:hover{color:var(--ink)}
+  /* The one action the site is for. `.nav-right a` sets a muted colour and is
+     more specific than a bare `.btn-nav`, so on two pages this button was a
+     brown-on-orange 1.65 against the 4.5 it needs, and on five In Practice
+     index pages it had no orange at all and read as plain text. Measured on
+     every page, not reasoned about. */
+  .nav-right a.btn-nav{background:var(--orange,#E8673A);color:#fff;border-radius:10px;font-weight:600;text-decoration:none;display:inline-block}
   .btn-nav{background:var(--orange);color:white;padding:var(--s-xs) 1.2rem;border-radius:10px;font-size:.78rem;font-weight:600;text-decoration:none;display:inline-block;transition:opacity .15s}
   .btn-nav:hover{opacity:.82}
-  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.3rem}
+  .hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;min-width:44px;min-height:44px}
   .hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
   .mobile-menu{display:none;position:fixed;top:58px;left:0;right:0;background:rgba(255,253,249,.98);backdrop-filter:blur(16px);border-bottom:1px solid var(--stone);padding:var(--s-lg) var(--s-2xl) var(--s-xl);z-index:99;flex-direction:column;gap:.2rem}
   .mobile-menu.open{display:flex}
@@ -60,7 +66,11 @@
 
   /* ARTICLE HEADER */
   .article-tag-row{display:flex;align-items:center;gap:.65rem;margin-bottom:var(--s-lg)}
-  .article-tag{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.3rem .8rem;border-radius:999px;background:rgba(232,103,58,.1);color:var(--orange);border:1px solid rgba(232,103,58,.25)}
+  /* The brand orange on a ten per cent wash of itself is 2.93 against the 4.5
+   WCAG asks for at this size, measured on the painted colour rather than
+   read off the stylesheet. #8A4A22 is the same hue darkened until it
+   clears, at 6.11. The pill and its border are unchanged. */
+.article-tag{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.3rem .8rem;border-radius:999px;background:rgba(232,103,58,.1);color:#8A4A22;border:1px solid rgba(232,103,58,.25)}
   .article-meta-note{font-size:.72rem;color:var(--muted)}
   .article-title{font-family:var(--hfont);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:700;color:var(--ink);line-height:1.05;letter-spacing:-.025em;margin-bottom:var(--s-md)}
   .article-title em{font-style:italic;color:var(--clay)}
