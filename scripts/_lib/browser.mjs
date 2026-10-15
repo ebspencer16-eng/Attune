@@ -25,7 +25,7 @@
  */
 
 import { spawn } from 'child_process';
-import { mkdtempSync, rmSync, existsSync } from 'fs';
+import { mkdtempSync, rmSync, existsSync, readdirSync, statSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -101,6 +101,29 @@ function installReaper() {
  * CLAUDE.md records a sweep of forty routes where several measurements were
  * the checkpoint and nobody noticed.
  */
+/** Two hours. A live run's profile is minutes old; anything older is litter. */
+const ABANDONED_AFTER_MS = 2 * 60 * 60 * 1000;
+
+function sweepAbandonedProfiles() {
+  try {
+    const dir = tmpdir();
+    const now = Date.now();
+    let gone = 0;
+    for (const name of readdirSync(dir)) {
+      if (!name.startsWith('attune-smoke-')) continue;
+      const full = join(dir, name);
+      try {
+        if (now - statSync(full).mtimeMs < ABANDONED_AFTER_MS) continue;
+        rmSync(full, { recursive: true, force: true });
+        gone += 1;
+      } catch { /* in use, or gone already: leave it */ }
+    }
+    if (gone && process.env.BROWSER_SWEEP_VERBOSE) {
+      console.error(`[browser] removed ${gone} abandoned Chrome profile(s)`);
+    }
+  } catch { /* housekeeping must never fail a gate */ }
+}
+
 export async function launch({ width = 1280, height = 1200, userAgent = null } = {}) {
   const chrome = findChrome();
   if (!chrome) {
@@ -109,8 +132,25 @@ export async function launch({ width = 1280, height = 1200, userAgent = null } =
       + 'Checked: /Applications/Google Chrome.app, /Applications/Chromium.app, /usr/bin/google-chrome, /usr/bin/chromium.');
   }
 
-  // A throwaway profile, so this never touches the developer's real one and
-  // never inherits its cookies, extensions or logged-in sessions.
+  /**
+   * ── THE PROFILES AN INTERRUPTED RUN LEAVES BEHIND ──────────────────────
+   * Each launch gets a throwaway profile, so this never touches the
+   * developer's real one and never inherits its cookies, extensions or
+   * logged-in sessions. The reaper below removes it on the way out.
+   *
+   * A run that is killed does not get that far, and this had accumulated 2850
+   * abandoned profile directories in the temp folder. They are not free: one
+   * launch took 1109ms with them present and 554ms with the folder clean,
+   * measured rather than assumed, and every browser gate here opens one per
+   * width.
+   *
+   * So each launch sweeps what earlier runs abandoned. Older than two hours
+   * only: a profile belonging to a run that is still going is minutes old, and
+   * deleting a live one would break whichever gate owns it. Best effort, and
+   * silent, because a gate must not fail over housekeeping.
+   */
+  sweepAbandonedProfiles();
+
   const profile = mkdtempSync(join(tmpdir(), 'attune-smoke-'));
 
   const proc = spawn(chrome, [

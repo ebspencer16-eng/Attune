@@ -1415,6 +1415,23 @@ real browser alone. `pkill -f 'Google Chrome for Testing'` does not match them
 on this machine. Worth suspecting first when a browser check stops producing
 output.
 
+**An interrupted browser check leaves its Chrome profile behind, and 2850 of
+them had accumulated.** `browser.mjs` creates a throwaway profile per launch
+and removes it on the way out; a run that is killed never gets there. One
+launch took 1109ms with that litter in the temp directory and 554ms with it
+cleared, measured twice each way. `launch` now sweeps `attune-smoke-*`
+directories older than two hours, which cannot touch a live run's profile
+because that one is minutes old. Planted against: twenty backdated directories
+and one fresh, and the fresh one survives.
+
+What that does NOT explain is the thing it was found while chasing, and the
+distinction is the point. `check-mobile-menu` took 3m08 standalone, then 13
+minutes standalone an hour later with the temp directory clean, and over 20
+inside `npm run check` twice. Same machine, same commit, no load to speak of.
+So the profile sweep is worth having and is not the fix for a browser gate that
+has gone quiet; that variance is still unexplained, and anyone timing these
+should take a figure from the run in front of them rather than from here.
+
 **`npm run check` drives Chrome too, so do not run it beside `npm run smoke`.**
 Four checks in `npm run check` launch a browser. Starting the smoke and then
 running the check produces two Chromes competing on a machine already at load
