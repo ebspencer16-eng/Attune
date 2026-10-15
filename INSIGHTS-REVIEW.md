@@ -4,8 +4,8 @@ Generated from `api/_insights.js` by `scripts/build-insights-review.mjs`. Do
 not edit this file. Change an insight in `api/_insights.js` and run the
 script, or tell me the change and I will make it.
 
-**74 insights**, one a day, so the list comes round about every
-10.6 weeks. 74 are quotations and 0 are ours.
+**100 insights**, one a day, so the list comes round about every
+14.3 weeks. 100 are quotations and 0 are ours.
 
 ## What changed, and why you are seeing two tables
 
@@ -54,17 +54,18 @@ so you can check the wording yourself.
 
 ## Quotations
 
-The **Subject** column is the postcode you asked for. Every quotation carries
-its writer and its subject, and the order they are posted in is dealt from
-those two, so no two days running share either. `check-insight-rotation.mjs`
-fails the build on a repeat. Twelve subjects at the moment; the largest is
-attachment with eleven.
+The **Subject** column is the postcode you asked for. Every quotation carries a
+writer, a publication and a subject, and the posting order is dealt from all
+three: no two days running share any of them, and the list wraps, so the last
+day does not collide with the first either. `check-insight-rotation.mjs` fails
+the build on a repeat.
 
-Two days running can still share a *publication*, and that is arithmetic rather
-than a choice: 47 of these 74 are Gottman Institute articles, by thirteen
-different writers, and anything holding more than half a list has to touch
-itself somewhere. The 26 new ones are what fixes it, which is the strongest
-argument for your instinct about sources.
+20 subjects, the largest being attachment with
+11 of 100. 26 writers across
+10 publications, the largest being The Gottman Institute
+with 47. That last number is the one that matters: anything
+holding more than half the list has to touch itself somewhere whatever the
+order, so it is also the limit to keep an eye on when adding more.
 
 | # | Quotation | Source | Subject | Checked |
 |--|--|--|--|--|
@@ -142,6 +143,32 @@ argument for your instinct about sources.
 | Q72 | One of the best ways to create shared meaning is to talk about each other’s dreams, which are often deeply connected to your pasts. | Dr. Ellie Wilde, The Gottman Institute | meaning | [read it](https://www.gottman.com/blog/create-shared-meaning-examining-rituals/) |
 | Q73 | [One] way to create shared meaning is to create traditions and rituals for your life together as a couple. | Dr. Ellie Wilde, The Gottman Institute | meaning | [read it](https://www.gottman.com/blog/create-shared-meaning-examining-rituals/) |
 | Q74 | The more shared meaning you can find, the deeper, richer, and more rewarding your relationship will be. | Dr. Ellie Wilde, The Gottman Institute | meaning | [read it](https://www.gottman.com/blog/create-shared-meaning-examining-rituals/) |
+| Q75 | Those ties protect people from life’s discontents, help to delay mental and physical decline, and are better predictors of long and happy lives than social class, IQ, or even genes. | Liz Mineo, Harvard Gazette | belonging | [read it](https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/) |
+| Q76 | Several studies found that people’s level of satisfaction with their relationships at age 50 was a better predictor of physical health than their cholesterol levels were. | Liz Mineo, Harvard Gazette | belonging | [read it](https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/) |
+| Q77 | The researchers also found that marital satisfaction has a protective effect on people's mental health. | Liz Mineo, Harvard Gazette | care | [read it](https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/) |
+| Q78 | Taking care of your body is important, but tending to your relationships is a form of self-care too. | Robert Waldinger, Harvard Gazette | care | [read it](https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/) |
+| Q79 | Researchers have argued that kindness is like a muscle that needs to be strengthened through repeated use. | Juliana Breines, Greater Good Magazine | kindness | [read it](https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life) |
+| Q80 | It’s important to give yourself the option to say no, and to give others the same option when requesting help. | Juliana Breines, Greater Good Magazine | kindness | [read it](https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life) |
+| Q81 | Intentionally practicing kindness in our everyday lives, even on days when we’re not in a particularly generous mood, can go a long way toward turning kindness into a habit. | Juliana Breines, Greater Good Magazine | kindness | [read it](https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life) |
+| Q82 | Making someone you’re arguing with feel that you’re listening can calm the troubled waters, allowing both parties to get safely to the opposite shore. | Julia Minson, Greater Good Magazine | listening | [read it](https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to) |
+| Q83 | Rather than trying to change how you think of or feel about your counterpart, our work suggests that you should focus on changing your own behavior. | Julia Minson, Greater Good Magazine | listening | [read it](https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to) |
+| Q84 | Rather than jumping in to your own argument, devote a few seconds to restating the other person’s position to demonstrate that you did indeed hear and understand it. | Julia Minson, Greater Good Magazine | listening | [read it](https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to) |
+| Q85 | Sometimes, friendship is about helping just because your friend is in need and you care about their well-being. | Jessica D. Ayers and Athena Aktipis, Greater Good Magazine | friendship | [read it](https://greatergood.berkeley.edu/article/item/how_our_friends_act_like_social_insurance) |
+| Q86 | Keeping track of what a friend does for you isn’t what friendships are about. | Jessica D. Ayers and Athena Aktipis, Greater Good Magazine | friendship | [read it](https://greatergood.berkeley.edu/article/item/how_our_friends_act_like_social_insurance) |
+| Q87 | The results suggest that our acts of kindness and generosity, online or offline, can have meaningful ripple effects in our communities. | Jill Suttie, Greater Good Magazine | generosity | [read it](https://greatergood.berkeley.edu/article/item/how_kindness_spreads_in_a_community) |
+| Q88 | This suggests people are prosocial by nature, waiting for inspiration to act. | Jill Suttie, Greater Good Magazine | generosity | [read it](https://greatergood.berkeley.edu/article/item/how_kindness_spreads_in_a_community) |
+| Q89 | That means that when people model kind and helpful behavior, it has a healthy impact on spreading goodness in a community. | Jill Suttie, Greater Good Magazine | generosity | [read it](https://greatergood.berkeley.edu/article/item/how_kindness_spreads_in_a_community) |
+| Q90 | The complexity of love has much to do with how people experience it differently and how it can change over time. | Gery Karantzas, The Conversation | love | [read it](https://theconversation.com/what-is-love-139212) |
+| Q91 | It’s reductions in companionate love, moreso than passionate love, that can negatively affect the longevity of a romantic relationship. | Gery Karantzas, The Conversation | love | [read it](https://theconversation.com/what-is-love-139212) |
+| Q92 | Love is an emotion that keeps people bonded and committed to one another. | Gery Karantzas, The Conversation | love | [read it](https://theconversation.com/what-is-love-139212) |
+| Q93 | Impossibly high standards can make an excellent relationship seem average. | Gary W. Lewandowski Jr., The Conversation | expectations | [read it](https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152) |
+| Q94 | Relationship science suggests that the problem is that people tend to overemphasize the negative and underappreciate the positive when looking at their romantic partners. | Gary W. Lewandowski Jr., The Conversation | expectations | [read it](https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152) |
+| Q95 | Rather than be thankful for the relative calm, people manufacture problems where none previously existed. | Gary W. Lewandowski Jr., The Conversation | expectations | [read it](https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152) |
+| Q96 | Listening in conflict does not require agreement; it requires a willingness to understand. | Guy Itzchakov, Psychology Today | understanding | [read it](https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship) |
+| Q97 | Quick advice often backfires because it solves the problem before addressing the person. | Guy Itzchakov, Psychology Today | understanding | [read it](https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship) |
+| Q98 | Feeling heard can reduce defensiveness and make difficult conversations feel emotionally safer. | Guy Itzchakov, Psychology Today | understanding | [read it](https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship) |
+| Q99 | Enduring connection in marriage results more from the intentional efforts of the spouses than it does from spontaneous love and emotional spark. | Adam M. Galovan and others, Institute for Family Studies | practice | [read it](https://ifstudies.org/blog/flourishing-marriages-are-made-not-found) |
+| Q100 | Flourishing marriages include deeper elements such as personal virtues, life meaning and purpose, a sense of belonging, growth and improvement, and a couple identity that includes a sense of togetherness and permanence. | Adam M. Galovan and others, Institute for Family Studies | belonging | [read it](https://ifstudies.org/blog/flourishing-marriages-are-made-not-found) |
 
 ## Ours
 

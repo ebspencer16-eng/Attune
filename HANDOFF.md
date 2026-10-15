@@ -3130,3 +3130,64 @@ long-standing items, and the sweep findings are in section 3 under S26 with the
 numbers for the ones I did not fix: 459 tap targets under 44 (mostly footer
 links), 110 pieces of text between 3.0 and 3.5 contrast (muted grey on cream),
 and the 1.4MB app-shell bundle. All three are design calls, not bugs.
+
+---
+
+## 2026-10-15, the round after the sweeps
+
+Four things landed: B88, B89, C6 and B90. The tree is clean and pushed, the
+site is deployed and verified by a marker, and the app update is published and
+confirmed against `u.expo.dev` rather than assumed.
+
+**What to carry forward, in order of how much it would cost to learn again.**
+
+**Her review of the hundred insights was written into a generated document, and
+`npm run check` erased it.** INSIGHTS-REVIEW.md is built from
+`api/_insights.js` by a script that runs in the check chain, so her 74 kept
+quotations and 14 edits were overwritten the next time the checks ran. They
+were recovered from the session transcript. Nothing in the repo had them.
+
+The gate cannot see this either: `check-insights-review` runs AFTER the builder
+in the same chain, so it compares a file the builder has just written. A
+committed document that disagrees with the module passes every time. Any answer
+she gives has to go into the module the moment it arrives.
+
+**A gate that cannot read an ellipsis forces a choice between her editing and a
+passing build.** Three of her edits were an elision, a bracketed clarification
+and a dropped opening clause with the next word capitalised, all ordinary
+practice, and check-quotes-verbatim called all three a misquotation. It splits
+on those marks now and compares the pieces exactly, in order. The loosening
+kept the thing worth catching: the same review dropped one word from the middle
+of a sentence with nothing marking it, and that is the one finding that
+survived.
+
+**Specificity beats order, and the check found it rather than the reading.**
+B88 hides the nav pill at the width each page collapses its nav. Written as
+`.nav-right .btn-nav{display:none}` it lost to the base rule
+`.nav-right a.btn-nav`, which names an element, so the pill stayed in the bar
+on all 29 pages while the file looked right.
+
+**The app opened every tab's requests at once.** The tab bar is the UIKit one,
+so all four screens mount at launch, and each called its loader from a mount
+effect: about ten requests, several of them cold functions, on one phone's
+connection. Every screen already reloads on focus and a focus effect fires on
+mount for the focused screen, so the mount effect did one useful thing and
+three wasteful ones. That, not the volume of data, is why her Notes tab was
+slow with no marks in it.
+
+**A rotation keyed on the wrong field strands the biggest pile.** Dealing the
+insights so no two days share a writer or subject was easy; adding the
+publication was not, because ordering candidates by the writer's pile split the
+Gottman Institute into thirteen small piles and left nothing but Gottman at the
+end. Ordering by how many of a PUBLICATION remain fixed it: 0 repeats in 100.
+
+**What is waiting on her.** One word in Q12 of the insights, and her list of
+100 words, which has now failed to paste twice. Both are at the top of
+TASKS.md. Section 2 is empty.
+
+**What I did not do.** Book quotations. Verifying one needs GOOGLE_BOOKS_KEY,
+which is in Vercel and not on this machine, and the Vercel build command does
+not run that check, so a book quotation added now is unverified by anything
+until somebody runs the check by hand with the key. The 27 already in the list
+are counted as unchecked on every local run rather than passed. All 73 web ones
+are verified on every run.

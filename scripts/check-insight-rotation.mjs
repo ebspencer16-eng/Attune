@@ -26,21 +26,27 @@
  *
  * So the subject is the sentence a reader actually meets on day n.
  *
- * ── WHAT IT PROMISES, AND THE PROMISE IT CANNOT MAKE YET ──────────────────
- * It fails on two consecutive days by the same WRITER, or about the same
- * subject. It does not fail on two consecutive days from the same publication,
- * because that cannot be dealt: 47 of these 74 quotations are Gottman
- * Institute articles, by thirteen different writers, and a value held by more
- * than half a list has to touch itself somewhere whatever the order.
+ * ── WHAT IT PROMISES, AND THE ARITHMETIC UNDER IT ─────────────────────────
+ * No two consecutive days share a writer, a subject, or a publication. The wrap
+ * counts: day 99 is followed by day 0.
  *
- * So the publication is counted and printed instead of asserted. That number is
- * the argument for the 26 quotations Ellie asked for next: at 100 entries, 47
- * is under half and this becomes a promise worth making. When they land, the
- * count below turns into an assertion.
+ * The third of those was impossible for a while and the gate said so rather
+ * than claiming it: 47 of the 74 quotations were Gottman Institute articles,
+ * and anything held by more than half a list has to touch itself somewhere
+ * whatever the order. The 26 Ellie asked for are what fixed it. 47 of 100 is
+ * under half, and the deal comes out clean.
  *
- * A gate that claims a rule it cannot keep gets loosened until it means
- * nothing. One that states the rule, the exception, and the arithmetic behind
- * the exception survives the next edit.
+ * Getting it to clean took one change to the deal and it is worth recording:
+ * ordering candidates by the writer's pile alone split that publication into
+ * thirteen small piles, so the deal under-used it early and was left holding
+ * nothing but Gottman at the end. Two days in a hundred followed another from
+ * the same publication. Ordering by how many of a PUBLICATION are left places
+ * those 47 evenly.
+ *
+ * If a publication ever passes half the list again, this fails and the message
+ * says which and by how much, because the fix is a quotation from somewhere
+ * else rather than a looser gate. A gate that claims a rule it cannot keep gets
+ * loosened until it means nothing.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Whether the topic on an entry is the right word for it. That is editorial and
@@ -104,9 +110,21 @@ for (let k = 0; k < days.length; k += 1) {
   if (a.topic && a.topic === b.topic) {
     problems.push(`${day} are both about ${a.topic}. (${a.id}, then ${b.id})`);
   }
-  /* Counted, not asserted. See the header: 47 of 74 are from one publication. */
-  if (a.work && a.work === b.work) samePublication += 1;
+  if (a.work && a.work === b.work) {
+    samePublication += 1;
+    problems.push(`${day} are both from ${a.work}, by different writers.`
+      + ` (${a.id}, then ${b.id})`);
+  }
 }
+
+const tally = (key) => {
+  const m = new Map();
+  for (const i of INSIGHTS) m.set(key(i), (m.get(key(i)) || 0) + 1);
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+};
+const pubsNow = tally((i) => i.work);
+const topicsNow = tally((i) => i.topic);
+const writersNow = tally((i) => i.author || i.work);
 
 if (problems.length) {
   console.error('[check-insight-rotation] the insight of the day repeats itself:');
@@ -116,24 +134,25 @@ if (problems.length) {
   console.error('  The deal is greedy and takes the largest pile first, which is what keeps a');
   console.error('  big source from being stranded at the end. If it cannot find a legal next');
   console.error('  entry it takes one anyway rather than hanging, and this is what tells you.');
-  console.error('  A subject holding more than half the list cannot be dealt without a repeat.');
+  console.error('  A writer, subject or publication holding more than half the list cannot be');
+  console.error('  dealt without a repeat, whatever the order. Counts now:');
+  for (const [what, rows] of [['publication', pubsNow], ['subject', topicsNow], ['writer', writersNow]]) {
+    console.error(`    largest ${what}: ${rows[0][0]} with ${rows[0][1]} of ${n}`);
+  }
+  console.error('  If one of those is over half, the fix is a quotation from somewhere else.');
   process.exit(1);
 }
 
 const writers = new Set(INSIGHTS.map((i) => i.author || i.work));
-const count = (key) => {
-  const m = new Map();
-  for (const i of INSIGHTS) m.set(key(i), (m.get(key(i)) || 0) + 1);
-  return [...m.entries()].sort((a, b) => b[1] - a[1]);
-};
-const topics = count((i) => i.topic);
-const pubs = count((i) => i.work);
+const topics = topicsNow;
+const pubs = pubsNow;
+const count = tally;
 const half = Math.floor(n / 2);
 
 console.log(`[check-insight-rotation] ${n} quotations by ${writers.size} writers in`
   + ` ${topics.length} subjects: no two days running share a writer or a subject, wrap`
   + ` included. Largest subject ${topics[0][0]} with ${topics[0][1]}, largest writer`
   + ` ${count((i) => i.author || i.work)[0][1]}; above ${half} of ${n} no deal exists.`);
-console.log(`  The publication is counted, not asserted: ${samePublication} of ${n} days`
-  + ` follow one from the same publication, because ${pubs[0][1]} of ${n} are`
-  + ` ${pubs[0][0]}. Under ${half} and this becomes an assertion.`);
+console.log(`  No two days running come from the same publication either, which was`
+  + ` impossible at 74: ${pubs[0][1]} of ${n} are ${pubs[0][0]}, and above ${half} of ${n}`
+  + ' there is no such order.');

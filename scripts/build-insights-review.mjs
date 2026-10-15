@@ -27,6 +27,19 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const OUT = `${ROOT}INSIGHTS-REVIEW.md`;
 
 const onPage = new Set(RESEARCH.map((r) => r.id));
+
+/**
+ * The figures in the prose below are computed rather than typed.
+ *
+ * They were typed once, read "47 of these 74", and were wrong the same day the
+ * list went to 100. A number in a generated document should come from the thing
+ * the document is generated from.
+ */
+const tally = (rows, key) => {
+  const m = new Map();
+  for (const r of rows) m.set(key(r), (m.get(key(r)) || 0) + 1);
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+};
 const weeks = (INSIGHTS.length / 7).toFixed(1);
 
 const quotes = INSIGHTS.filter((i) => i.kind === 'quote');
@@ -55,6 +68,10 @@ const checkAt = (i) => {
   return `https://www.google.com/books/edition/_/${i.volumeId}`
     + `?gbpv=1&bsq=${encodeURIComponent(run.slice(0, 120))}`;
 };
+
+const subjects = tally(quotes, (i) => i.topic || '(none)');
+const publications = tally(quotes, (i) => i.work);
+const writers = new Set(quotes.map((i) => i.author || i.work));
 
 const quoteRows = quotes.map((i, n) => {
   const where = checkAt(i);
@@ -123,17 +140,18 @@ so you can check the wording yourself.
 
 ## Quotations
 
-The **Subject** column is the postcode you asked for. Every quotation carries
-its writer and its subject, and the order they are posted in is dealt from
-those two, so no two days running share either. \`check-insight-rotation.mjs\`
-fails the build on a repeat. Twelve subjects at the moment; the largest is
-attachment with eleven.
+The **Subject** column is the postcode you asked for. Every quotation carries a
+writer, a publication and a subject, and the posting order is dealt from all
+three: no two days running share any of them, and the list wraps, so the last
+day does not collide with the first either. \`check-insight-rotation.mjs\` fails
+the build on a repeat.
 
-Two days running can still share a *publication*, and that is arithmetic rather
-than a choice: 47 of these 74 are Gottman Institute articles, by thirteen
-different writers, and anything holding more than half a list has to touch
-itself somewhere. The 26 new ones are what fixes it, which is the strongest
-argument for your instinct about sources.
+${subjects.length} subjects, the largest being ${subjects[0][0]} with
+${subjects[0][1]} of ${quotes.length}. ${writers.size} writers across
+${publications.length} publications, the largest being ${publications[0][0]}
+with ${publications[0][1]}. That last number is the one that matters: anything
+holding more than half the list has to touch itself somewhere whatever the
+order, so it is also the limit to keep an eye on when adding more.
 
 | # | Quotation | Source | Subject | Checked |
 |--|--|--|--|--|

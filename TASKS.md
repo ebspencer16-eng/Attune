@@ -8,11 +8,49 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| C9 | **One word in Q12 of the insights, and it is your call.** Detail under this table. The other 99 need nothing from you. |
+| C8 | **Your 100 words.** The list did not come through as text. Paste it into a message and I will put it in the same day. |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
+
+### C9, the one word in Q12
+
+Q12 read "a dynamic that keeps negative thoughts and feelings" and the book
+says "keeps their negative thoughts and feelings". I put "their" back, because
+the sentence runs in quotation marks under Gottman's name and that one word is
+all that stood between it and being verbatim. Say the word and it comes out
+with an ellipsis in its place instead.
+
+Everything else of yours is in exactly as you wrote it, ellipses and brackets
+included.
+
+### C6 is done, and here is where the 26 new ones came from
+
+Five publications the list had never used, ten writers, and none of them from a
+book:
+
+- **Harvard Gazette**, on the eighty-year study: Liz Mineo, and Robert
+  Waldinger who runs it. Four quotations.
+- **Greater Good Magazine**, Berkeley: Juliana Breines on kindness, Julia
+  Minson on being heard in an argument, Jessica Ayers and Athena Aktipis on
+  friendship, Jill Suttie on how kindness spreads. Eleven.
+- **The Conversation**: Gery Karantzas on what love is, Gary Lewandowski on
+  what we expect of a partner. Six.
+- **Psychology Today**: Guy Itzchakov on listening. Three.
+- **Institute for Family Studies**: Adam Galovan and two colleagues on what
+  makes a marriage flourish. Two.
+
+Subjects the list had none of before: kindness, listening, generosity, love
+itself, expectations, belonging. Twenty subjects now, where there were twelve.
+
+Books stayed out of this round, and not because they are worse. Checking one
+needs a Google Books key, which is set in Vercel and not on the machine I work
+on, and the Vercel build does not run that check. A book quotation added now
+would be unverified by anything until somebody ran the check by hand. All 73
+web ones are checked on every run, for ever.
 
 ### Still open from the review
 
@@ -31,50 +69,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| C6 | **26 more quotations, from writers we have not used.** Your 74 are in and live. What is left is the other 26, on love, kindness, understanding and peacemaking rather than conflict. Detail under this table. |
-
-### C6, the quotations
-
-**Your 74 are in, and they were one build away from being lost.** Your edits
-were in INSIGHTS-REVIEW.md, and that file is written by a script from the list
-the product actually reads. The next time I ran the checks, the script
-regenerated it and wiped every one of them. I recovered them from our
-conversation, not from the repo. They are now in the list itself, and the
-document is built back out of it, which is the way round it should always have
-been.
-
-**Your edits are in as you made them, and the check learned to read them.**
-An ellipsis where you cut the middle, a bracketed word where the original only
-implies one, an opening clause dropped. All three are ordinary quotation
-practice and the check that opens each page called all three a misquotation. It
-now splits on those marks and matches the pieces exactly, in order. All 47 of
-the ones citing a web page verify word for word.
-
-**One word, and it is your call.** Q12 read "a dynamic that keeps negative
-thoughts and feelings" and the book says "keeps their negative thoughts and
-feelings". I put "their" back, because the sentence is in quotation marks under
-Gottman's name and that is the only word between it and being verbatim. Say the
-word and it comes out, with an ellipsis in its place instead.
-
-**Variety, which is the postcode you asked for.** Every quotation now carries a
-subject as well as a writer, and the posting order is dealt from both: no two
-days running share either. A check fails the build if they ever do.
-
-One thing it cannot do yet, and your instinct about sources is the reason. 47 of
-the 74 are Gottman Institute articles, by thirteen different writers. Anything
-that holds more than half a list has to touch itself somewhere, so two days
-running can still come from the same publication even though they are never by
-the same person. At 100 quotations, 47 is under half and that goes away too.
-
-**The 27 book quotations.** The check asks Google Books whether the sentence is
-in that exact volume, and it needs GOOGLE_BOOKS_KEY, which is set in Vercel and
-not on this machine. So they are reported as unchecked rather than counted as
-passed. The 47 from web pages are checked on every run.
-
-**And the dead links are fixed.** Every book quotation's "read it" link said
-`undefined`, because a book carries a volume id rather than a url and the
-generator only knew about urls. They now open Google Books at the sentence, so
-you can check those 27 the way you check the rest.
+| | **Nothing open.** Everything from your last message is in section 4. The two things waiting on you are at the top of this file. |
 
 ### S26, what the sweeps found
 
@@ -181,7 +176,6 @@ held by a check.
 | # | Built, needs your eye |
 |--|--|
 | S26 | **Eight sweeps, six found something, and your five questions about them are answered under this table.** |
-| C3 | **100 words, 49 of them yours.** Waiting on your list, which did not come through: see the note under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
@@ -216,7 +210,7 @@ that had been renamed. `/privacy` was reported dead by the sweep and was not:
 it is a redirect, and the sweep had only read the rewrite rules. That was the
 sweep being wrong, not the site.
 
-### C3, your word list did not reach me
+### C8, your word list did not reach me
 
 Your message shows it as an attachment rather than as text, and all that came
 through is the placeholder. None of the list itself reached me.
@@ -232,6 +226,7 @@ table, I will put it in and regenerate the review document the same day.
 
 | Verified by you | What it was |
 |--|--|
+| C6 | Your 74 kept quotations, in the list the product reads rather than the document a build erases, plus 26 from five new publications, posted in an order that repeats no writer, subject or source on consecutive days. |
 | B88 | The Get started pill and the hamburger were both in the top bar on every phone; the pill now goes wherever the links go, and stays in the bar at desktop width. |
 | B89 | The founders' section on Our Purpose carries your two paragraphs and has lost the dash and the eyebrow above them. |
 | B90 | Opening the app started every tab's requests at once, about ten; each tab loads when opened, and Notes asks for three marks, ten behind a tap, a tag's contents on opening it. |

@@ -789,6 +789,274 @@ export const INSIGHTS = [
     topic: 'meaning',
     url: 'https://www.gottman.com/blog/create-shared-meaning-examining-rituals/',
   },
+
+  /* ── THE 26 SHE ASKED FOR, FROM FIVE PUBLICATIONS WE HAD NOT USED ───────
+     Ellie: "I worry about only having a handful of sources. When you build the
+     remaining insights to get us back to 100, please find sources we haven't
+     used yet, I want a wide variety. I don't only want insights about conflict,
+     I want good, general quotes about love, kindness, understanding,
+     peacemaking, etc."
+
+     Harvard Gazette, Greater Good Magazine, The Conversation, Psychology Today
+     and the Institute for Family Studies. Ten writers, none of whom was in the
+     list before, and subjects the list had none of: kindness, listening,
+     generosity, love itself, what we expect of a partner, and belonging.
+
+     Every one was taken off the page it cites rather than from memory, with the
+     page's own text stripped of its markup the same way check-quotes-verbatim
+     strips it, so what is stored here is what that check will find. Candidates
+     that could not be matched exactly were dropped rather than tidied.
+
+     Two are quotations OF someone inside an article rather than BY the writer
+     of it. Robert Waldinger runs the Harvard study and the Gazette is where he
+     said this; the citation names the person whose words they are and the place
+     they were published, which is what a reader needs to check either.
+
+     Books stayed out of this round on purpose, and that is not a judgement
+     about books. Verifying one needs GOOGLE_BOOKS_KEY, which lives in Vercel,
+     and the Vercel build does not run that check: a book quotation added here
+     would be unverified by anything until somebody ran the check by hand with
+     the key. Everything below is checked on every run, for ever.
+  */
+  {
+    kind: 'quote',
+    id: 'q-ties-protect-discontents',
+    body: 'Those ties protect people from life’s discontents, help to delay mental and physical decline, and are better predictors of long and happy lives than social class, IQ, or even genes.',
+    author: 'Liz Mineo',
+    work: 'Harvard Gazette',
+    topic: 'belonging',
+    url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-satisfaction-fifty-cholesterol',
+    body: 'Several studies found that people’s level of satisfaction with their relationships at age 50 was a better predictor of physical health than their cholesterol levels were.',
+    author: 'Liz Mineo',
+    work: 'Harvard Gazette',
+    topic: 'belonging',
+    url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+  },
+  {
+    /* This was "Close relationships, more than money or fame, are what keep
+       people happy throughout their lives", which is where the page's sentence
+       stops being the claim and starts being the attribution, so the quotation
+       had no full stop in it. A quotation that ends mid-sentence needs an
+       ellipsis or a different sentence; this is the different sentence. */
+    kind: 'quote',
+    id: 'q-marital-satisfaction-protective',
+    body: 'The researchers also found that marital satisfaction has a protective effect on people\'s mental health.',
+    author: 'Liz Mineo',
+    work: 'Harvard Gazette',
+    topic: 'care',
+    url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-tending-relationships-self-care',
+    body: 'Taking care of your body is important, but tending to your relationships is a form of self-care too.',
+    author: 'Robert Waldinger',
+    work: 'Harvard Gazette',
+    topic: 'care',
+    url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+  },
+  {
+    kind: 'quote',
+    id: 'q-kindness-like-a-muscle',
+    body: 'Researchers have argued that kindness is like a muscle that needs to be strengthened through repeated use.',
+    author: 'Juliana Breines',
+    work: 'Greater Good Magazine',
+    topic: 'kindness',
+    url: 'https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life',
+  },
+  {
+    kind: 'quote',
+    id: 'q-option-to-say-no',
+    body: 'It’s important to give yourself the option to say no, and to give others the same option when requesting help.',
+    author: 'Juliana Breines',
+    work: 'Greater Good Magazine',
+    topic: 'kindness',
+    url: 'https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life',
+  },
+  {
+    kind: 'quote',
+    id: 'q-kindness-into-a-habit',
+    body: 'Intentionally practicing kindness in our everyday lives, even on days when we’re not in a particularly generous mood, can go a long way toward turning kindness into a habit.',
+    author: 'Juliana Breines',
+    work: 'Greater Good Magazine',
+    topic: 'kindness',
+    url: 'https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life',
+  },
+  {
+    kind: 'quote',
+    id: 'q-calm-the-troubled-waters',
+    body: 'Making someone you’re arguing with feel that you’re listening can calm the troubled waters, allowing both parties to get safely to the opposite shore.',
+    author: 'Julia Minson',
+    work: 'Greater Good Magazine',
+    topic: 'listening',
+    url: 'https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to',
+  },
+  {
+    kind: 'quote',
+    id: 'q-change-your-own-behavior',
+    body: 'Rather than trying to change how you think of or feel about your counterpart, our work suggests that you should focus on changing your own behavior.',
+    author: 'Julia Minson',
+    work: 'Greater Good Magazine',
+    topic: 'listening',
+    url: 'https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to',
+  },
+  {
+    kind: 'quote',
+    id: 'q-restate-the-other-position',
+    body: 'Rather than jumping in to your own argument, devote a few seconds to restating the other person’s position to demonstrate that you did indeed hear and understand it.',
+    author: 'Julia Minson',
+    work: 'Greater Good Magazine',
+    topic: 'listening',
+    url: 'https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to',
+  },
+  {
+    kind: 'quote',
+    id: 'q-helping-because-they-need-it',
+    body: 'Sometimes, friendship is about helping just because your friend is in need and you care about their well-being.',
+    author: 'Jessica D. Ayers and Athena Aktipis',
+    work: 'Greater Good Magazine',
+    topic: 'friendship',
+    url: 'https://greatergood.berkeley.edu/article/item/how_our_friends_act_like_social_insurance',
+  },
+  {
+    kind: 'quote',
+    id: 'q-keeping-track-not-friendship',
+    body: 'Keeping track of what a friend does for you isn’t what friendships are about.',
+    author: 'Jessica D. Ayers and Athena Aktipis',
+    work: 'Greater Good Magazine',
+    topic: 'friendship',
+    url: 'https://greatergood.berkeley.edu/article/item/how_our_friends_act_like_social_insurance',
+  },
+  {
+    kind: 'quote',
+    id: 'q-ripple-effects-communities',
+    body: 'The results suggest that our acts of kindness and generosity, online or offline, can have meaningful ripple effects in our communities.',
+    author: 'Jill Suttie',
+    work: 'Greater Good Magazine',
+    topic: 'generosity',
+    url: 'https://greatergood.berkeley.edu/article/item/how_kindness_spreads_in_a_community',
+  },
+  {
+    kind: 'quote',
+    id: 'q-prosocial-waiting-inspiration',
+    body: 'This suggests people are prosocial by nature, waiting for inspiration to act.',
+    author: 'Jill Suttie',
+    work: 'Greater Good Magazine',
+    topic: 'generosity',
+    url: 'https://greatergood.berkeley.edu/article/item/how_kindness_spreads_in_a_community',
+  },
+  {
+    kind: 'quote',
+    id: 'q-model-kind-behaviour',
+    body: 'That means that when people model kind and helpful behavior, it has a healthy impact on spreading goodness in a community.',
+    author: 'Jill Suttie',
+    work: 'Greater Good Magazine',
+    topic: 'generosity',
+    url: 'https://greatergood.berkeley.edu/article/item/how_kindness_spreads_in_a_community',
+  },
+  {
+    kind: 'quote',
+    id: 'q-complexity-of-love',
+    body: 'The complexity of love has much to do with how people experience it differently and how it can change over time.',
+    author: 'Gery Karantzas',
+    work: 'The Conversation',
+    topic: 'love',
+    url: 'https://theconversation.com/what-is-love-139212',
+  },
+  {
+    kind: 'quote',
+    id: 'q-companionate-more-than-passionate',
+    body: 'It’s reductions in companionate love, moreso than passionate love, that can negatively affect the longevity of a romantic relationship.',
+    author: 'Gery Karantzas',
+    work: 'The Conversation',
+    topic: 'love',
+    url: 'https://theconversation.com/what-is-love-139212',
+  },
+  {
+    kind: 'quote',
+    id: 'q-love-keeps-people-bonded',
+    body: 'Love is an emotion that keeps people bonded and committed to one another.',
+    author: 'Gery Karantzas',
+    work: 'The Conversation',
+    topic: 'love',
+    url: 'https://theconversation.com/what-is-love-139212',
+  },
+  {
+    kind: 'quote',
+    id: 'q-impossibly-high-standards',
+    body: 'Impossibly high standards can make an excellent relationship seem average.',
+    author: 'Gary W. Lewandowski Jr.',
+    work: 'The Conversation',
+    topic: 'expectations',
+    url: 'https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152',
+  },
+  {
+    kind: 'quote',
+    id: 'q-overemphasize-the-negative',
+    body: 'Relationship science suggests that the problem is that people tend to overemphasize the negative and underappreciate the positive when looking at their romantic partners.',
+    author: 'Gary W. Lewandowski Jr.',
+    work: 'The Conversation',
+    topic: 'expectations',
+    url: 'https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152',
+  },
+  {
+    kind: 'quote',
+    id: 'q-manufacture-problems',
+    body: 'Rather than be thankful for the relative calm, people manufacture problems where none previously existed.',
+    author: 'Gary W. Lewandowski Jr.',
+    work: 'The Conversation',
+    topic: 'expectations',
+    url: 'https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152',
+  },
+  {
+    kind: 'quote',
+    id: 'q-listening-not-agreement',
+    body: 'Listening in conflict does not require agreement; it requires a willingness to understand.',
+    author: 'Guy Itzchakov',
+    work: 'Psychology Today',
+    topic: 'understanding',
+    url: 'https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship',
+  },
+  {
+    kind: 'quote',
+    id: 'q-quick-advice-backfires',
+    body: 'Quick advice often backfires because it solves the problem before addressing the person.',
+    author: 'Guy Itzchakov',
+    work: 'Psychology Today',
+    topic: 'understanding',
+    url: 'https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship',
+  },
+  {
+    kind: 'quote',
+    id: 'q-feeling-heard-reduces-defensiveness',
+    body: 'Feeling heard can reduce defensiveness and make difficult conversations feel emotionally safer.',
+    author: 'Guy Itzchakov',
+    work: 'Psychology Today',
+    topic: 'understanding',
+    url: 'https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship',
+  },
+  {
+    kind: 'quote',
+    id: 'q-enduring-connection-intentional',
+    body: 'Enduring connection in marriage results more from the intentional efforts of the spouses than it does from spontaneous love and emotional spark.',
+    author: 'Adam M. Galovan and others',
+    work: 'Institute for Family Studies',
+    topic: 'practice',
+    url: 'https://ifstudies.org/blog/flourishing-marriages-are-made-not-found',
+  },
+  {
+    kind: 'quote',
+    id: 'q-flourishing-deeper-elements',
+    body: 'Flourishing marriages include deeper elements such as personal virtues, life meaning and purpose, a sense of belonging, growth and improvement, and a couple identity that includes a sense of togetherness and permanence.',
+    author: 'Adam M. Galovan and others',
+    work: 'Institute for Family Studies',
+    topic: 'belonging',
+    url: 'https://ifstudies.org/blog/flourishing-marriages-are-made-not-found',
+  },
 ];
 
 /**
@@ -895,11 +1163,29 @@ const ROTATION = (() => {
   const out = [];
   while (out.length < INSIGHTS.length) {
     const prev = out[out.length - 1];
-    /* The writer with the most still to place goes first, so no pile is left
-       holding more entries than there are gaps to put them in. Ties keep the
-       order the piles were built in, which is the order of the list. */
+    /**
+     * The most-constrained thing goes first, and the publication is the most
+     * constrained thing here.
+     *
+     * Ordering by the writer's pile alone split the Gottman Institute into
+     * thirteen small piles, so the deal under-used it early and was left with
+     * nothing but Gottman at the end: two days in a hundred followed another
+     * from the same publication. Ordering by how many of a PUBLICATION are
+     * left, and then by the writer's pile, places those 47 evenly and the
+     * answer comes out clean.
+     *
+     * Ties keep the order the piles were built in, which is the order of the
+     * list, so the hand is the same everywhere.
+     */
+    const remainingByWork = new Map();
+    for (const p of left) {
+      for (const i of p.items) {
+        remainingByWork.set(i.work, (remainingByWork.get(i.work) || 0) + 1);
+      }
+    }
     const order = [...left].filter((p) => p.items.length)
-      .sort((x, y) => y.items.length - x.items.length);
+      .sort((x, y) => (remainingByWork.get(y.items[0].work) || 0) - (remainingByWork.get(x.items[0].work) || 0)
+        || y.items.length - x.items.length);
     /* Two standards. The first also keeps the publication apart, which is not
        always possible; the second is the promise the gate holds. */
     const ok = (p, i, alsoWork) => !prev || (
