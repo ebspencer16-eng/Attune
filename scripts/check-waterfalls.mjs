@@ -101,6 +101,29 @@ const BUDGETS = [
     chain: 'auth, profile, shared notes, their tags',
   },
   {
+    /**
+     * The same endpoint, asked the way the Notes tab asks it.
+     *
+     * Ellie: "only load the previous 3 marks in the tile on notes page... but
+     * those click to see pages don't have to load when the user initially opens
+     * their notes page."
+     *
+     * A limit takes three things away from the screen that it used to count out
+     * of the whole list: how many of the partner's notes are unread, the days
+     * the journal streak is made of, and how many marks carry each tag. Those
+     * are three more queries and they all go out beside the rows, so the depth
+     * is what matters and it is unchanged. Both paths are measured, because the
+     * budget for one says nothing about the other: the default path is the
+     * marking layer on a results page and it must stay at five.
+     */
+    name: '/api/notes?limit=3',
+    file: '../api/notes.js',
+    path: '/api/notes?limit=3',
+    deep: 4,
+    calls: 8,
+    chain: 'auth, profile, then the rows and the three figures at once, then their tags',
+  },
+  {
     name: '/api/results',
     file: '../api/results.js',
     path: '/api/results',

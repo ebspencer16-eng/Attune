@@ -31,32 +31,50 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| C6 | **Your 74 insights stay as you wrote them, and 26 more are coming from sources we have not used.** Wider subjects too: love, kindness, understanding, peacemaking, not only conflict. Then both lists get coded so no two days running share a source or a subject. Detail under this table. |
-| B88 | **The Get started pill comes off the top bar on a phone.** It is in the hamburger and that is enough. |
-| B89 | **The founders' section on Our Purpose** loses its dash and eyebrow and takes your two paragraphs. |
-| B90 | **Notes loads only what you can see.** Three marks in each tile, ten behind a tap, a tag's contents only when you open it. And I am measuring why your Notes page is slow with no marks at all, which is a different problem. |
+| C6 | **26 more quotations, from writers we have not used.** Your 74 are in and live. What is left is the other 26, on love, kindness, understanding and peacemaking rather than conflict. Detail under this table. |
 
 ### C6, the quotations
 
-**The edits you made.** Several now carry an ellipsis or a bracketed word,
-which is ordinary quotation practice and is exactly what the gate that opens
-each page and matches the words cannot read. It will learn to: it checks the
-parts outside the brackets, so a clarification you add is allowed and a
-sentence nobody wrote is still caught.
+**Your 74 are in, and they were one build away from being lost.** Your edits
+were in INSIGHTS-REVIEW.md, and that file is written by a script from the list
+the product actually reads. The next time I ran the checks, the script
+regenerated it and wiped every one of them. I recovered them from our
+conversation, not from the repo. They are now in the list itself, and the
+document is built back out of it, which is the way round it should always have
+been.
 
-**New sources.** Everything we have is from four books and one institute. The
-26 I add come from writers we have not used, and I will tell you who they are
-and how each was checked. Anything I cannot verify against the page or the book
-does not go in.
+**Your edits are in as you made them, and the check learned to read them.**
+An ellipsis where you cut the middle, a bracketed word where the original only
+implies one, an opening clause dropped. All three are ordinary quotation
+practice and the check that opens each page called all three a misquotation. It
+now splits on those marks and matches the pieces exactly, in order. All 47 of
+the ones citing a web page verify word for word.
 
-**Variety.** Each quote gets two codes, its source and its subject, and the
-rotation walks the list so neither repeats on consecutive days. The same for
-the words. I will show you the first fortnight so you can see it working.
+**One word, and it is your call.** Q12 read "a dynamic that keeps negative
+thoughts and feelings" and the book says "keeps their negative thoughts and
+feelings". I put "their" back, because the sentence is in quotation marks under
+Gottman's name and that is the only word between it and being verbatim. Say the
+word and it comes out, with an ellipsis in its place instead.
 
-**And a bug of mine.** In the document you just read, every book quotation's
-"read it" link says `undefined`. A book has a volume id rather than a url and
-the generator only knew about urls. Fixed, so you can check those 27 the way
-you check the rest.
+**Variety, which is the postcode you asked for.** Every quotation now carries a
+subject as well as a writer, and the posting order is dealt from both: no two
+days running share either. A check fails the build if they ever do.
+
+One thing it cannot do yet, and your instinct about sources is the reason. 47 of
+the 74 are Gottman Institute articles, by thirteen different writers. Anything
+that holds more than half a list has to touch itself somewhere, so two days
+running can still come from the same publication even though they are never by
+the same person. At 100 quotations, 47 is under half and that goes away too.
+
+**The 27 book quotations.** The check asks Google Books whether the sentence is
+in that exact volume, and it needs GOOGLE_BOOKS_KEY, which is set in Vercel and
+not on this machine. So they are reported as unchecked rather than counted as
+passed. The 47 from web pages are checked on every run.
+
+**And the dead links are fixed.** Every book quotation's "read it" link said
+`undefined`, because a book carries a volume id rather than a url and the
+generator only knew about urls. They now open Google Books at the sentence, so
+you can check those 27 the way you check the rest.
 
 ### S26, what the sweeps found
 
@@ -162,11 +180,41 @@ held by a check.
 
 | # | Built, needs your eye |
 |--|--|
-| S26 | **Eight sweeps, six found something.** Fonts faked on 23 pages, a nav button at 1.65 contrast, a menu button four pixels wide on five pages, a dead Terms link, two unread columns on every notes payload. Detail under section 2. |
+| S26 | **Eight sweeps, six found something, and your five questions about them are answered under this table.** |
 | C3 | **100 words, 49 of them yours.** Waiting on your list, which did not come through: see the note under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### S26, your questions
+
+**2. Why is Notes slow when you have no marks?** It was not the marks. All four
+tabs mount the moment the app opens, and every one of them used to start its
+own requests there and then: about ten, each a separate function on the server,
+several of them cold, over one phone's connection. The tab you were waiting for
+was queued behind three you had not asked for. Each tab now loads when you open
+it. Opening the app makes three requests instead of ten.
+
+Your paging is in too, and it is the right shape for later: three marks per
+tile, ten when you tap through, and a tag's contents only when you open that
+tag. The tile still says how many there are, because the number comes from the
+server rather than from counting the rows on screen.
+
+**3. The unbounded queries: is this a problem?** Not yet, and it is the kind
+that only shows up once it is one. Every one of them was a read with no ceiling,
+so the cost grows with the person's own library. Notes was the worst and it is
+the one now capped. The others read lists that cannot grow past a few dozen
+rows.
+
+**4. The fonts: fixed, and does it make loading faster?** Fixed, and yes, a
+little. Thirty-five places asked for a weight the page never loaded, so the
+browser faked it. The stylesheet now asks for a range rather than twenty
+separate weights, which is four font-face rules where there were twenty.
+
+**5. The links: did you fix this?** Yes. The Terms anchor pointed at a section
+that had been renamed. `/privacy` was reported dead by the sweep and was not:
+it is a redirect, and the sweep had only read the rewrite rules. That was the
+sweep being wrong, not the site.
 
 ### C3, your word list did not reach me
 
@@ -184,6 +232,9 @@ table, I will put it in and regenerate the review document the same day.
 
 | Verified by you | What it was |
 |--|--|
+| B88 | The Get started pill and the hamburger were both in the top bar on every phone; the pill now goes wherever the links go, and stays in the bar at desktop width. |
+| B89 | The founders' section on Our Purpose carries your two paragraphs and has lost the dash and the eyebrow above them. |
+| B90 | Opening the app started every tab's requests at once, about ten; each tab loads when opened, and Notes asks for three marks, ten behind a tap, a tag's contents on opening it. |
 | B61 | Alex, Sam and the test profiles were counted as people in every admin figure; one column marks them and every admin read of the profiles table filters them out. |
 | B68 | B61 filtered the people and not the rows they own, so their notes, tags, article reads, page time, orders, invited partner and survey answers were all still counted. |
 | B33 | The survey, nine questions in one module, asked in the app, on the website at the end of What Comes Next and from the email link, saving each answer as it is given. |

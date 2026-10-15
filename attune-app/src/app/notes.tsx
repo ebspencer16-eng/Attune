@@ -79,6 +79,19 @@ const c = Colors.light;
  */
 const SHOW_ALL_LIMIT = 10;
 
+/**
+ * How many a tile holds.
+ *
+ * Ellie: "What if we only load the previous 3 marks in the tile on notes page,
+ * and you can click to see previous 10." Three rows arrive with the screen and
+ * the ten are fetched when the page behind the tile is opened, so opening Notes
+ * downloads three marks rather than every mark anybody ever made.
+ *
+ * The tile draws two of them. The third is the one the page behind it starts
+ * from being warm rather than empty, and it costs a row.
+ */
+const TILE_MARKS = 3;
+
 /** A note plus the two things the list has to know that the row itself does not. */
 type Row = { note: Note; readOnly: boolean };
 
@@ -122,6 +135,30 @@ export default function NotesScreen() {
   const [journalOpen, setJournalOpen] = useState(pendingJournal);
   /** Which of the three list pages is open over this screen, if any. */
   const [openList, setOpenList] = useState<'recent' | 'shared' | 'tags' | null>(null);
+  /**
+   * ── THE TILE HOLDS THREE AND KNOWS THE NUMBER ───────────────────────────
+   * Ellie: "What if we only load the previous 3 marks in the tile on notes
+   * page, and you can click to see previous 10... but those click to see pages
+   * don't have to load when the user initially opens their notes page. The tags
+   * list needs to load, but each individual tags list with all the marks with
+   * that tag only need to load when a user opens that tag list."
+   *
+   * So the screen holds three rows per tile and the counts come from the
+   * server, because a tile that holds three has to be able to say twelve. The
+   * page behind a tile fetches its ten when it opens, and a tag fetches its
+   * marks when it is opened.
+   */
+  const [counts, setCounts] = useState({ marks: 0, shared: 0, unopened: 0, journal: 0 });
+  /** The days the journal has an entry on. The streak is made of these. */
+  const [journalDays, setJournalDays] = useState<string[]>([]);
+  /** How many marks carry each tag, and when the newest was touched. */
+  const [tagStats, setTagStats] = useState<Record<string, { count: number; latest: number }>>({});
+  /** The ten behind a tile, fetched when the page opens rather than on arrival. */
+  const [deeper, setDeeper] = useState<{ mine: Note[]; shared: Note[] } | null>(null);
+  const [deeperLoading, setDeeperLoading] = useState(false);
+  /** One tag's marks, fetched when that tag is opened. */
+  const [tagMarks, setTagMarks] = useState<{ mine: Note[]; shared: Note[] } | null>(null);
+  const [tagLoading, setTagLoading] = useState(false);
 
   /* The other half of showJournal: if home set the flag while this tab was
      already mounted, nothing would have re-rendered without this. */
@@ -196,6 +233,44 @@ export default function NotesScreen() {
     setEditing(note);
   }, [router]);
 
+  /**
+   * What a mark was made ON, for the marks in hand.
+   *
+   * An article mark needs the article's title and a results mark needs the
+   * version the results were on, to say whether the words have moved since. Two
+   * requests, each made only when something on screen needs it, and each made
+   * once: most people have no marks at all and a tab that opens five
+   * connections to draw three cards is a tab that feels slow on a train.
+   *
+   * Called again when the page behind a tile fetches its ten, and when a tag
+   * fetches its marks. It used to run once, over the whole library, which was
+   * the same thing while the whole library arrived with the screen. Now that
+   * three rows arrive, a mark on the fourth would have drawn with no title and
+   * no idea whether its paragraph had moved.
+   */
+  const askedPosts = useRef(false);
+  const askedResults = useRef(false);
+  const fillSources = useCallback(async (anns: Note[]) => {
+    // post_block carries its post id too, so both kinds need the titles.
+    if (!askedPosts.current
+      && anns.some((a) => a.anchor_type === 'post' || a.anchor_type === 'post_block')) {
+      askedPosts.current = true;
+      const p = await fetchPosts();
+      if (p.ok) {
+        setPostTitles(Object.fromEntries(p.data.posts.map((post) => [post.id, post.title])));
+      } else {
+        askedPosts.current = false;
+      }
+    }
+    if (!askedResults.current
+      && anns.some((a) => a.anchor_type?.startsWith('results_') && a.anchor_version != null)) {
+      askedResults.current = true;
+      const r = await fetchResults();
+      if (r.ok) setResultsVersion(r.data.ready ? r.data.results.version : null);
+      else askedResults.current = false;
+    }
+  }, []);
+
   const loadingRef = useRef(false);
   const load = useCallback(async () => {
     /**
@@ -231,7 +306,10 @@ export default function NotesScreen() {
        */
       const tagsSoon = fetchTags();
       const homeSoon = fetchHome();
-      const n = await fetchNotes();
+      /* Three rows per tile. Everything the tiles print beyond those rows,
+         which is three counts, the journal's days and the per-tag figures,
+         comes back with them: see fetchNotes and api/notes.js. */
+      const n = await fetchNotes({ limit: TILE_MARKS });
   
       if (!n.ok) {
         setError(n.error);
@@ -251,6 +329,13 @@ export default function NotesScreen() {
          hand. The same shape Ellie hit on Learn, where In Practice said
          "nothing published yet" while its request was still in flight. */
       setShared(n.data.sharedWithMe);
+      setCounts(n.data.counts);
+      setJournalDays(n.data.journalDays);
+      setTagStats(n.data.tagStats);
+      /* What was held from the last visit is a different set of rows from the
+         ones just fetched, so it goes rather than being shown beside them. */
+      setDeeper(null);
+      setTagMarks(null);
       /* Drawable now. The tags and the partner's name fill in behind. */
       setLoading(false);
       const t = await tagsSoon;
@@ -272,27 +357,35 @@ export default function NotesScreen() {
       // The next two are only worth the round trip when something on screen needs
       // them. Most people have no annotations at all, and a tab that opens five
       // connections to render three cards is a tab that feels slow on a train.
-      const anns = n.data.annotations;
-      // post_block carries its post id too, so both kinds need the titles.
-      if (anns.some((a) => a.anchor_type === 'post' || a.anchor_type === 'post_block')) {
-        const p = await fetchPosts();
-        if (p.ok) {
-          setPostTitles(Object.fromEntries(p.data.posts.map((post) => [post.id, post.title])));
-        }
-      }
-      if (anns.some((a) => a.anchor_type?.startsWith('results_') && a.anchor_version != null)) {
-        const r = await fetchResults();
-        setResultsVersion(r.ok && r.data.ready ? r.data.results.version : null);
-      }
-  
+      await fillSources(n.data.annotations);
+
     } finally {
       setLoading(false);
       setRefreshing(false);
       loadingRef.current = false;
     }
-  }, []);
+  }, [fillSources]);
 
-  useEffect(() => { load(); }, [load]);
+  /**
+   * ── THE OTHER THREE TABS DO NOT LOAD UNTIL YOU OPEN THEM ────────────────
+   * Ellie: "what's the problem now, because I have no marks so my notes page
+   * shouldn't be so slow?"
+   *
+   * She is right that it is not the data. All four tabs mount when the app
+   * starts, because this is a UIKit tab bar rather than a lazy one, and each
+   * of them used to call load() from a mount effect. So opening the app fired
+   * every tab's requests at once: ten of them, each a serverless function,
+   * several cold, competing for the same connection on a phone.
+   *
+   * The focus effect below already loads a tab when it is opened, and it fires
+   * on mount for the tab that IS focused, so the mount effect was doing one
+   * useful thing and three wasteful ones. Removing it leaves the first screen
+   * loading exactly as before and the other three loading when they are first
+   * looked at.
+   *
+   * check-tab-loads.mjs is what keeps it that way: a new tab, or a tidy-up
+   * that puts load() back in a mount effect, is a failing build.
+   */
 
   /**
    * The two deletes for a tag.
@@ -459,22 +552,18 @@ export default function NotesScreen() {
    * nothing about whether the habit is alive. A streak says both: it is the
    * thing people keep, and it is the thing they notice breaking.
    *
-   * From the anchored list, by anchor type, which is the same rule the journal
-   * itself reads by. It is not a second definition of what an entry is: both
-   * ask JOURNAL_ANCHOR. Reading the loose list instead is the mistake
-   * check-annotation-source.mjs exists for.
+   * The days come from the server now, in `journalDays`, and they used to be
+   * read out of the anchored list on this screen. That list holds three rows
+   * since the tile started asking for three, and a streak worked out of three
+   * rows reads as three days whatever the truth is: the longest streak anybody
+   * has would have been capped at the size of a tile.
    *
-   * The day comes from the entry's anchor key, which is the day it was written
-   * on in the writer's own timezone. Parsing created_at here would be the
-   * server's midnight rather than theirs.
+   * Still one definition of what an entry is. The server asks the same
+   * JOURNAL_ANCHOR this screen used to filter on, which is what
+   * check-annotation-source.mjs is about: the day comes from the entry's anchor
+   * key, the day it was written on in the writer's own timezone, rather than
+   * from created_at, which is the server's midnight.
    */
-  const journalDays = useMemo(
-    () => annotations
-      .filter((n) => n.anchor_type === JOURNAL_ANCHOR)
-      .map((n) => n.anchor_key)
-      .filter((k): k is string => !!k),
-    [annotations],
-  );
   const streak = useMemo(() => journalStreak(journalDays, journalDay()), [journalDays]);
 
   /**
@@ -490,11 +579,18 @@ export default function NotesScreen() {
     [mineRecent],
   );
 
-  /** How many of the partner's notes this reader has not opened. */
-  const unopenedCount = useMemo(
-    () => sharedRecent.filter((n) => !n.opened_at).length,
-    [sharedRecent],
-  );
+  /**
+   * How many of the partner's notes this reader has not opened.
+   *
+   * From the server's count, not from the rows on screen. The tile holds three
+   * and the badge is about all of them: counting the three would have said "2"
+   * to somebody with nine unread.
+   *
+   * Marking one as opened takes it off this number without a reload, because
+   * the row it happened to is one of the three in hand and the number beside it
+   * has to agree with what the reader just did.
+   */
+  const unopenedCount = counts.unopened;
 
   /**
    * Mark one of the partner's notes as opened.
@@ -506,11 +602,75 @@ export default function NotesScreen() {
    */
   const markOpened = useCallback((note: Note) => {
     if (note.opened_at) return;
-    setShared((prev) => prev.map(
+    const seen = (rows: Note[]) => rows.map(
       (n) => (n.id === note.id ? { ...n, opened_at: new Date().toISOString() } : n),
-    ));
+    );
+    setShared(seen);
+    /* And in the ten behind the tile, if they have been fetched. Two lists hold
+       the same row and only one of them was being marked, so a note opened from
+       the page behind the tile came back unread the moment the sheet closed. */
+    setDeeper((prev) => (prev ? { ...prev, shared: seen(prev.shared) } : prev));
+    setTagMarks((prev) => (prev ? { ...prev, shared: seen(prev.shared) } : prev));
+    /* The badge is a server count, so it has to be told. One fewer unread, not
+       a reload: the reader is looking at the thing that changed. */
+    setCounts((prev) => ({ ...prev, unopened: Math.max(0, prev.unopened - 1) }));
     openSharedNote(note.id);
   }, []);
+
+  /** Newest first, which is the order every list on this screen is in. */
+  const byNewest = (a: Note, b: Note) => Date.parse(b.updated_at) - Date.parse(a.updated_at);
+
+  /**
+   * ── THE TEN ARRIVE WHEN THE PAGE DOES ──────────────────────────────────
+   * Ellie: "those click to see pages don't have to load when the user initially
+   * opens their notes page."
+   *
+   * So the page behind a tile asks for its rows as it opens, once, and holds
+   * them until the screen next reloads. Opening Notes costs three marks; asking
+   * for ten is the cost of wanting ten.
+   *
+   * The tags page is not one of these: the tags themselves arrive with the
+   * screen, because the list of them is what the tab shows.
+   */
+  const openDeeper = useCallback(async (which: 'recent' | 'shared' | 'tags') => {
+    setOpenList(which);
+    if (which === 'tags' || deeper || deeperLoading) return;
+    setDeeperLoading(true);
+    const r = await fetchNotes({ limit: SHOW_ALL_LIMIT });
+    setDeeperLoading(false);
+    if (!r.ok) return;
+    setDeeper({
+      mine: [...r.data.notes, ...r.data.annotations]
+        .filter((n) => n.anchor_type !== JOURNAL_ANCHOR).sort(byNewest),
+      shared: [...r.data.sharedWithMe].sort(byNewest),
+    });
+    fillSources([...r.data.annotations, ...r.data.sharedWithMe]);
+    /* The figures came back with them and may have moved since the screen
+       loaded. Taking them is free and keeps the numbers agreeing. */
+    setCounts(r.data.counts);
+  }, [deeper, deeperLoading, fillSources]);
+
+  /**
+   * One tag's marks, fetched when the tag is opened.
+   *
+   * Ellie: "each individual tags list with all the marks with that tag only
+   * need to load when a user opens that tag list, so again, shouldn't load
+   * initially." This used to filter the whole library in the browser, which is
+   * only possible if the whole library is on the phone.
+   */
+  const showTag = useCallback(async (tag: Tag) => {
+    setOpenTag(tag);
+    setTagMarks(null);
+    setTagLoading(true);
+    const r = await fetchNotes({ tagId: tag.id, limit: SHOW_ALL_LIMIT });
+    setTagLoading(false);
+    if (!r.ok) return;
+    setTagMarks({
+      mine: [...r.data.notes, ...r.data.annotations].sort(byNewest),
+      shared: [...r.data.sharedWithMe].sort(byNewest),
+    });
+    fillSources([...r.data.annotations, ...r.data.sharedWithMe]);
+  }, [fillSources]);
 
   /**
    * Tapping Notes while already on Notes closes the editor and collapses the
@@ -547,12 +707,12 @@ export default function NotesScreen() {
    * though they are filtered too.
    */
   if (openTag) {
-    const has = (n: Note) => (n.tagIds || []).includes(openTag.id);
-    // Whose a note is comes from which list it was in, not from comparing ids:
-    // the two lists are already the answer to that question.
+    /* What this tag holds, from the request that went out when it was opened.
+       Whose a note is comes from which list it arrived in, not from comparing
+       ids: the two lists are already the answer to that question. */
     const inTag = [
-      ...mineRecent.filter(has).map((note) => ({ note, mine: true })),
-      ...sharedRecent.filter(has).map((note) => ({ note, mine: false })),
+      ...(tagMarks?.mine || []).map((note) => ({ note, mine: true })),
+      ...(tagMarks?.shared || []).map((note) => ({ note, mine: false })),
     ].sort((a, b) => Date.parse(b.note.updated_at) - Date.parse(a.note.updated_at));
     return (
       <Shell>
@@ -572,7 +732,14 @@ export default function NotesScreen() {
               />
               <Text style={{ ...Type.display, color: c.textStrong, flex: 1 }}>{openTag.name}</Text>
             </View>
-            {inTag.length ? (
+            {tagLoading && !tagMarks ? (
+              /* Said rather than left blank. An empty tag and a tag still
+                 arriving look identical, and this screen used to be able to
+                 draw "nothing is filed here" over marks that were in flight:
+                 the same fault as the Shared peek, and as In Practice saying
+                 nothing is published while its request was open. */
+              <ScreenLoading label={LOADING.notes} />
+            ) : inTag.length ? (
               <Tile>
                 {inTag.map(({ note, mine }, i) => (
                   <MarkRow
@@ -667,9 +834,9 @@ export default function NotesScreen() {
           <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.lg }}>
             <Peek
               title={JUMP_BACK_IN}
-              count={recentMarks.length}
+              count={counts.marks}
               empty={PEEK_MINE_EMPTY}
-              onAll={() => setOpenList('recent')}
+              onAll={() => openDeeper('recent')}
               rows={recentMarks.slice(0, 2).map((n) => ({
                 id: n.id,
                 text: peekText(n),
@@ -678,10 +845,10 @@ export default function NotesScreen() {
             />
             <Peek
               title={SHARED_WITH_ME}
-              count={sharedRecent.length}
+              count={counts.shared}
               badge={unopenedCount || undefined}
               empty={PEEK_SHARED_EMPTY}
-              onAll={() => setOpenList('shared')}
+              onAll={() => openDeeper('shared')}
               rows={sharedRecent.slice(0, 2).map((n) => ({
                 id: n.id,
                 text: peekText(n),
@@ -733,12 +900,12 @@ export default function NotesScreen() {
           <View style={{ marginTop: Spacing.lg }}>
             <TagList
               tags={tags}
-              notes={[...mineRecent, ...sharedRecent]}
+              stats={tagStats}
               sort={tagSort}
               onChangeSort={setTagSort}
               placeholder={tagPlaceholder}
               onAdd={addTag}
-              onOpen={setOpenTag}
+              onOpen={showTag}
               onPurge={purgeTagForGood}
               onRestore={restoreTagFromArchive}
             />
@@ -768,11 +935,16 @@ export default function NotesScreen() {
                 </Pressable>
               </View>
 
-              {/* Recent: up to ten, which is the number on the link. */}
+              {/* Recent: up to ten, fetched as this page opened. The three
+                  the tile holds are drawn until they arrive, so the page is
+                  never empty and never says it is. */}
               {openList === 'recent' ? (
-                recentMarks.length ? (
+                deeperLoading && !deeper ? <ScreenLoading label={LOADING.notes} /> : null
+              ) : null}
+              {openList === 'recent' ? (
+                (deeper?.mine || recentMarks).length ? (
                   <Tile accent={c.accent}>
-                    {recentMarks.slice(0, SHOW_ALL_LIMIT).map((note, i) => (
+                    {(deeper?.mine || recentMarks).slice(0, SHOW_ALL_LIMIT).map((note, i) => (
                       <MarkRow
                         key={note.id}
                         note={note}
@@ -786,7 +958,11 @@ export default function NotesScreen() {
               ) : null}
 
               {openList === 'shared' ? (
-                sharedRecent.length ? sharedRecent.map((note) => (
+                deeperLoading && !deeper ? <ScreenLoading label={LOADING.notes} /> : null
+              ) : null}
+              {openList === 'shared' ? (
+                (deeper?.shared || sharedRecent).length
+                  ? (deeper?.shared || sharedRecent).slice(0, SHOW_ALL_LIMIT).map((note) => (
                   <NoteCard
                     key={note.id}
                     note={note}
@@ -804,12 +980,12 @@ export default function NotesScreen() {
               {openList === 'tags' ? (
                 <TagList
                   tags={tags}
-                  notes={[...mineRecent, ...sharedRecent]}
+                  stats={tagStats}
                   sort={tagSort}
                   onChangeSort={setTagSort}
                   placeholder={tagPlaceholder}
                   onAdd={addTag}
-                  onOpen={(t) => { setOpenList(null); setOpenTag(t); }}
+                  onOpen={(t) => { setOpenList(null); showTag(t); }}
                   onPurge={purgeTagForGood}
                   onRestore={restoreTagFromArchive}
                 />
@@ -1113,10 +1289,20 @@ function tagColor(tag: Tag): string {
 }
 
 function TagList({
-  tags, notes, sort, onChangeSort, placeholder, onAdd, onOpen, onPurge, onRestore,
+  tags, stats, sort, onChangeSort, placeholder, onAdd, onOpen, onPurge, onRestore,
 }: {
   tags: Tag[];
-  notes: Note[];
+  /**
+   * How many marks carry each tag and when the newest was touched, from the
+   * server.
+   *
+   * This took a list of notes and counted them here, which only works if the
+   * phone is holding every note there is. The tile asks for three now, so a
+   * tag with twelve marks under it would have printed 1, or 0, depending on
+   * which three came back. api/notes.js counts them in one query over the
+   * taggings rather than the notes.
+   */
+  stats: Record<string, { count: number; latest: number }>;
   sort: TagSort;
   onChangeSort: (s: TagSort) => void;
   /**
@@ -1156,20 +1342,14 @@ function TagList({
   };
 
 
-  // Count and freshness per tag, from the notes already on screen.
-  const stats = useMemo(() => {
+  /* Count and freshness per tag, from the server, as a Map so the rest of this
+     component reads exactly as it did. A tag with no marks is absent from the
+     payload rather than zero, so every tag is seeded first. */
+  const figures = useMemo(() => {
     const m = new Map<string, { count: number; latest: number }>();
-    for (const t of tags) m.set(t.id, { count: 0, latest: 0 });
-    for (const n of notes) {
-      for (const id of n.tagIds || []) {
-        const row = m.get(id);
-        if (!row) continue;
-        row.count += 1;
-        row.latest = Math.max(row.latest, Date.parse(n.updated_at) || 0);
-      }
-    }
+    for (const t of tags) m.set(t.id, stats[t.id] || { count: 0, latest: 0 });
     return m;
-  }, [tags, notes]);
+  }, [tags, stats]);
 
   /**
    * The bin, and the list above it.
@@ -1183,7 +1363,7 @@ function TagList({
   const live = useMemo(() => tags.filter((t) => !t.deleted_at), [tags]);
 
   const ordered = useMemo(() => {
-    const st = (t: Tag) => stats.get(t.id) || { count: 0, latest: 0 };
+    const st = (t: Tag) => figures.get(t.id) || { count: 0, latest: 0 };
     const byName = (a: Tag, b: Tag) => a.name.localeCompare(b.name);
     const q = query.trim().toLowerCase();
     const list = q ? live.filter((t) => t.name.toLowerCase().includes(q)) : [...live];
@@ -1197,7 +1377,7 @@ function TagList({
       case 'fewest': return list.sort((a, b) => (st(a).count - st(b).count) || byName(a, b));
       default: return list.sort(byName);
     }
-  }, [live, stats, sort, query]);
+  }, [live, figures, sort, query]);
 
   return (
     <View style={{ marginBottom: Spacing.xxl }}>
@@ -1347,7 +1527,7 @@ function TagList({
           ...Lift,
         }}>
         {ordered.map((t, i) => {
-          const st = stats.get(t.id) || { count: 0, latest: 0 };
+          const st = figures.get(t.id) || { count: 0, latest: 0 };
           return (
             <Pressable
               key={t.id}

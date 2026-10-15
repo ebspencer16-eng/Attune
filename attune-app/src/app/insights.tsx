@@ -187,7 +187,26 @@ export default function InsightsScreen() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  /**
+   * ── THE OTHER THREE TABS DO NOT LOAD UNTIL YOU OPEN THEM ────────────────
+   * Ellie: "what's the problem now, because I have no marks so my notes page
+   * shouldn't be so slow?"
+   *
+   * She is right that it is not the data. All four tabs mount when the app
+   * starts, because this is a UIKit tab bar rather than a lazy one, and each
+   * of them used to call load() from a mount effect. So opening the app fired
+   * every tab's requests at once: ten of them, each a serverless function,
+   * several cold, competing for the same connection on a phone.
+   *
+   * The focus effect below already loads a tab when it is opened, and it fires
+   * on mount for the tab that IS focused, so the mount effect was doing one
+   * useful thing and three wasteful ones. Removing it leaves the first screen
+   * loading exactly as before and the other three loading when they are first
+   * looked at.
+   *
+   * check-tab-loads.mjs is what keeps it that way: a new tab, or a tidy-up
+   * that puts load() back in a mount effect, is a failing build.
+   */
 
   // Reload when this tab comes into focus, not only when it mounts.
   //

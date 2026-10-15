@@ -115,9 +115,20 @@ export default async function handler(req) {
      */
     const NOTE_COLS = 'id,owner_id,title,body,visibility,anchor_type,anchor_key,anchor_context,anchor_version,kind,color,opened_at,created_at,updated_at';
 
+    const url = new URL(req.url);
+    /**
+     * The reader's own notes, asked for before the profile read because they
+     * need nothing from it.
+     *
+     * Only when the caller wants all of them. A caller that asked for a limit,
+     * or for one tag, gets a different query inside the list branch, and firing
+     * this one as well would be a full download nobody reads: the request a
+     * limit exists to avoid, made anyway, in parallel.
+     */
     const listing = req.method === 'GET'
-      && (new URL(req.url).searchParams.get('action') || 'list') === 'list';
-    const myNotes = listing
+      && (url.searchParams.get('action') || 'list') === 'list';
+    const narrowed = !!url.searchParams.get('limit') || !!url.searchParams.get('tagId');
+    const myNotes = listing && !narrowed
       ? rest(`notes?owner_id=eq.${me}&select=${NOTE_COLS}&order=updated_at.desc`, { headers: svc }).catch(() => null)
       : null;
 
@@ -126,7 +137,6 @@ export default async function handler(req) {
     const partnerId = profile.partner_profile_id || null;
     const coupleKey = partnerId ? coupleKeyOf(me, partnerId) : null;
 
-    const url = new URL(req.url);
     // Read the body exactly once. Reading it, then cloning to read again, gives
     // an empty object on the second read because the stream is already
     // consumed, and every field silently arrives undefined.
@@ -142,16 +152,126 @@ export default async function handler(req) {
 
     // ── Read ───────────────────────────────────────────────────────────────
     if (req.method === 'GET' && action === 'list') {
-      /* Asked for before the profile read, because it needed nothing from it. */
-      const mineRes = await myNotes;
+      /**
+       * ── WHAT A TILE NEEDS IS THREE ROWS AND A NUMBER ────────────────────
+       * Ellie: "What if we only load the previous 3 marks in the tile on notes
+       * page, and you can click to see previous 10, then same with shared
+       * notes... but those click to see pages don't have to load when the user
+       * initially opens their notes page. The tags list needs to load, but each
+       * individual tags list with all the marks with that tag only need to load
+       * when a user opens that tag list."
+       *
+       * So `limit` is a parameter and it is OPT IN. The default is still every
+       * row, because this endpoint has a second caller: the marking layer on a
+       * results page reads the anchored list to draw highlights, and a default
+       * of three would have silently rubbed out every mark past the third on
+       * every results page. check-annotation-source.mjs is about that list; a
+       * limit applied to it would be the same bug from the other end.
+       *
+       * What a limited caller loses is the counts and the per-tag figures it
+       * used to work out from the whole list, so those are computed here and
+       * sent. They are four more queries and they cost nothing: every one of
+       * them goes out with the rows rather than after them, so the depth of
+       * this handler is unchanged. check-waterfalls is what says so.
+       */
+      const want = Number(url.searchParams.get('limit'));
+      const limit = Number.isFinite(want) && want > 0 ? Math.min(Math.floor(want), 50) : null;
+      /* One tag's marks, for the page behind a tag row. Nothing else changes:
+         the same rows, filtered to the notes carrying that tag. */
+      const onlyTag = (url.searchParams.get('tagId') || '').trim() || null;
+      const narrow = !!(limit || onlyTag);
+
+      /* A journal entry is a mark with an anchor, and it has its own screen and
+         its own count. The tile does not show them, so a limit of three that
+         spent itself on three diary entries would show an empty tile to someone
+         with marks. Loose notes have no anchor_type at all, and `neq` does not
+         match null in SQL, so both halves have to be said. */
+      const notJournal = `or=(anchor_type.is.null,anchor_type.neq.${JOURNAL_ANCHOR})`;
+      const cap = limit ? `&limit=${limit}` : '';
+      /**
+       * The total comes back with the rows.
+       *
+       * `count=exact` puts `0-2/212` in content-range, so the tile's number
+       * costs nothing beyond the rows it was already fetching. The first
+       * version asked for each count in its own HEAD request and took this
+       * handler from five upstream calls to ten.
+       */
+      const counting = { ...svc, Prefer: 'count=exact' };
+      const totalOf = (res) => {
+        const range = res && res.headers.get('content-range');
+        const total = range ? Number(String(range).split('/')[1]) : NaN;
+        return Number.isFinite(total) ? total : null;
+      };
+
+      let tagged = null;
+      if (onlyTag) {
+        /* Which notes carry this tag, asked first because the rows are then
+           filtered to those ids. One extra trip, and only on this path. */
+        const tRes = await rest(`note_tags?tag_id=eq.${encodeURIComponent(onlyTag)}&select=note_id`, { headers: svc });
+        tagged = (await tRes.json().catch(() => [])).map((r) => r.note_id);
+        if (!tagged.length) {
+          return json({
+            ok: true, notes: [], annotations: [], sharedWithMe: [],
+            counts: { marks: 0, shared: 0, unopened: 0, journal: 0 },
+            tagStats: {}, journalDays: [], limited: !!limit,
+          });
+        }
+      }
+      const onlyThese = tagged ? `&id=in.(${tagged.map((id) => `"${encodeURIComponent(id)}"`).join(',')})` : '';
+
+      /* Everything this screen needs, out at once. */
+      const mineSoon = narrow
+        ? rest(`notes?owner_id=eq.${me}&${notJournal}&select=${NOTE_COLS}&order=updated_at.desc${onlyThese}${cap}`, { headers: counting })
+        : myNotes;
+      const sharedSoon = coupleKey
+        ? rest(`notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=${NOTE_COLS}&order=updated_at.desc${onlyThese}${cap}`,
+          { headers: narrow ? counting : svc })
+        : null;
+      /**
+       * Three things a limited caller cannot work out for itself, and an
+       * unlimited one can.
+       *
+       * The screen prints how many of the partner's notes are unread, how many
+       * days in a row the journal has an entry, and how many marks carry each
+       * tag. All three used to be counted out of the whole list in the app,
+       * which is exactly what a limit takes away.
+       *
+       * So they are asked for here, and only when something narrows the rows.
+       * The default path is the marking layer on a results page, which holds
+       * every row already and needs none of this: it stays at the five upstream
+       * calls it has always made, and check-waterfalls holds both paths to
+       * their own figure.
+       */
+      const unopenedSoon = narrow && coupleKey
+        ? rest(`notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&opened_at=is.null&select=id&limit=1`,
+          { headers: counting }).catch(() => null)
+        : null;
+      const journalSoon = narrow
+        ? rest(`notes?owner_id=eq.${me}&anchor_type=eq.${JOURNAL_ANCHOR}&select=anchor_key&order=anchor_key.desc`, { headers: svc })
+          .catch(() => null)
+        : null;
+      /**
+       * How many marks carry each tag, and when the most recent was touched.
+       *
+       * One row per tagging rather than per note, with an inner join on notes
+       * so a partner's taggings cannot be counted, and two columns rather than
+       * a body. Small whatever the library grows to.
+       */
+      const tagStatsSoon = narrow
+        ? rest(`note_tags?select=tag_id,notes!inner(owner_id,updated_at)&notes.owner_id=eq.${me}`,
+          { headers: svc }).catch(() => null)
+        : null;
+
+      const mineRes = await mineSoon;
       let mine = mineRes ? await mineRes.json().catch(() => []) : [];
+      const mineTotal = totalOf(mineRes);
 
       let shared = [];
-      if (coupleKey) {
-        const sRes = await rest(
-          `notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=${NOTE_COLS}&order=updated_at.desc`,
-          { headers: svc });
+      let sharedTotal = null;
+      if (sharedSoon) {
+        const sRes = await sharedSoon;
         shared = await sRes.json().catch(() => []);
+        sharedTotal = totalOf(sRes);
       }
 
       // Which tags are on which note.
@@ -172,6 +292,43 @@ export default async function handler(req) {
       const withTags = (n) => ({ ...n, tagIds: tagsByNote[n.id] || [] });
       mine = mine.map(withTags);
       shared = shared.map(withTags);
+
+      /* The journal's days: from its own query when the rows are narrowed, and
+         out of the rows themselves when they are not. One answer either way. */
+      let journalDays;
+      if (journalSoon) {
+        const jRes = await journalSoon;
+        const rows = jRes ? await jRes.json().catch(() => []) : [];
+        journalDays = rows.map((r) => r.anchor_key).filter(Boolean);
+      } else {
+        journalDays = mine.filter((n) => n.anchor_type === JOURNAL_ANCHOR)
+          .map((n) => n.anchor_key).filter(Boolean);
+      }
+
+      const tagStats = {};
+      const addStat = (tagId, at) => {
+        const cell = (tagStats[tagId] ||= { count: 0, latest: 0 });
+        cell.count += 1;
+        if (at > cell.latest) cell.latest = at;
+      };
+      if (tagStatsSoon) {
+        const statsRes = await tagStatsSoon;
+        for (const row of (statsRes ? await statsRes.json().catch(() => []) : [])) {
+          addStat(row.tag_id, Date.parse(row.notes?.updated_at || '') || 0);
+        }
+      } else {
+        for (const n of mine) {
+          for (const id of n.tagIds) addStat(id, Date.parse(n.updated_at || '') || 0);
+        }
+      }
+
+      let unopened = shared.filter((n) => !n.opened_at).length;
+      if (unopenedSoon) {
+        const uRes = await unopenedSoon;
+        const total = totalOf(uRes);
+        if (total !== null) unopened = total;
+      }
+
       // Annotations separated out, because the app lists them by what they are
       // attached to rather than chronologically.
       return json({
@@ -179,6 +336,22 @@ export default async function handler(req) {
         notes: mine.filter(n => !n.anchor_type),
         annotations: mine.filter(n => n.anchor_type),
         sharedWithMe: shared,
+        /**
+         * What the tiles print. Sent whether or not a limit was asked for, so a
+         * screen reads one number rather than sometimes a number and sometimes
+         * the length of a list it happens to hold.
+         */
+        counts: {
+          marks: mineTotal !== null ? mineTotal
+            : mine.filter((n) => n.anchor_type !== JOURNAL_ANCHOR).length,
+          shared: sharedTotal !== null ? sharedTotal : shared.length,
+          unopened,
+          journal: journalDays.length,
+        },
+        tagStats,
+        journalDays,
+        /* So a screen knows whether what it holds is everything. */
+        limited: !!limit,
       });
     }
 

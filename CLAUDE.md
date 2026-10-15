@@ -535,6 +535,32 @@ gone and the website is the page's one caller.
 fails on a document that names a file not in the tree, and it caught this
 sentence doing exactly that while describing the deletion.)
 
+**A generated document is not a place a decision can live.** Her review of the
+hundred insights was 74 kept and 14 edited, and it was pasted into
+INSIGHTS-REVIEW.md, which `build-insights-review.mjs` writes from
+`api/_insights.js`. The next `npm run check` regenerated it and wiped all of it.
+Her edits were recovered from the session transcript, not from the repo, and the
+only reason they existed anywhere was that the transcript is kept.
+
+Worse, the gate cannot see it. `check-insights-review` runs after the builder in
+the same chain, so it compares a file the builder has just written: a committed
+document that disagrees with the module passes every time, because by the time
+the check looks, it agrees. A review document is write-only from the product's
+side, and anything a person writes into one is in the bin on the next run.
+
+So: her answer goes into the module the moment it arrives, and the document is
+rebuilt from it. If an answer cannot be applied yet, it goes in TASKS.md where
+nothing regenerates it, quoted.
+
+**A quotation she has edited is still a quotation, and a gate that cannot read
+an ellipsis forces a choice between her editing and a passing build.** Three of
+her fourteen edits were an elision, a bracketed clarification and a dropped
+opening clause with the next word capitalised. All three are ordinary practice
+and `check-quotes-verbatim` called all three a misquotation. It splits on those
+marks now and compares the pieces exactly, in order, which keeps the thing worth
+catching: the same review also dropped one word from the middle of a sentence
+with nothing to mark it, and that is the one finding that survived.
+
 **A page that shows people what the product does is a copy of the product.**
 /email-preview held six hand-written mock-ups of emails while the product sent
 nineteen from five modules. Five real emails had no preview at all, one

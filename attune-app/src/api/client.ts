@@ -1227,9 +1227,41 @@ export function markPostRead(id: string) {
  * and shared notes are read-only, so a screen that merged them would have to
  * pull them apart again.
  */
-export function fetchNotes() {
-  return request<{ ok: true; notes: Note[]; annotations: Note[]; sharedWithMe: Note[] }>(
-    '/api/notes?action=list');
+export type NotesResponse = {
+  ok: true;
+  notes: Note[];
+  annotations: Note[];
+  sharedWithMe: Note[];
+  /**
+   * What the tiles print, from the server rather than from the length of a
+   * list. A limited caller holds three rows and has to be able to say 212.
+   */
+  counts: { marks: number; shared: number; unopened: number; journal: number };
+  /** How many marks carry each tag, and when the newest was touched. */
+  tagStats: Record<string, { count: number; latest: number }>;
+  /** The days the journal has an entry on, which is what the streak is made of. */
+  journalDays: string[];
+  /** True when rows were capped, so a screen knows it does not hold everything. */
+  limited: boolean;
+};
+
+/**
+ * Notes, annotations, and what the partner shared.
+ *
+ * Three lists rather than one: annotations are grouped by what they attach to,
+ * and shared notes are read-only, so a screen that merged them would have to
+ * pull them apart again.
+ *
+ * `limit` is opt in and the default is still every row. The marking layer on a
+ * results page reads the anchored list to draw highlights, and a default of
+ * three would have rubbed out every mark past the third, silently, on every
+ * results page. `tagId` is the page behind a tag row.
+ */
+export function fetchNotes(opts: { limit?: number; tagId?: string } = {}) {
+  const q = new URLSearchParams({ action: 'list' });
+  if (opts.limit) q.set('limit', String(opts.limit));
+  if (opts.tagId) q.set('tagId', opts.tagId);
+  return request<NotesResponse>(`/api/notes?${q.toString()}`);
 }
 
 export type Tag = {
