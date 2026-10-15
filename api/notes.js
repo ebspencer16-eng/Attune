@@ -97,10 +97,28 @@ export default async function handler(req) {
      * path and a wasted round trip on nine. The action is readable from the
      * query string before anything is parsed, which is all this needs.
      */
+    /**
+     * ── THE COLUMNS THE APP ACTUALLY READS ──────────────────────────────
+     * Named, not `*`.
+     *
+     * A sweep of every query in api/ that reads a table which grows with use
+     * turned this up: both notes reads asked for every column, and two of
+     * them are read by nothing. `folder_id` is from a feature that was never
+     * built, and `couple_key` is two user ids joined together, which has no
+     * business on a phone at all: nothing in the app or the website reads it
+     * and it identifies the pair.
+     *
+     * Seventeen per cent off every notes payload, which at two hundred notes
+     * is twenty kilobytes a person stops downloading every time they open the
+     * tab. The list is the app's own Note type, so a field it adds has to be
+     * added here, which is the trade for not sending two it never asked for.
+     */
+    const NOTE_COLS = 'id,owner_id,title,body,visibility,anchor_type,anchor_key,anchor_context,anchor_version,kind,color,opened_at,created_at,updated_at';
+
     const listing = req.method === 'GET'
       && (new URL(req.url).searchParams.get('action') || 'list') === 'list';
     const myNotes = listing
-      ? rest(`notes?owner_id=eq.${me}&select=*&order=updated_at.desc`, { headers: svc }).catch(() => null)
+      ? rest(`notes?owner_id=eq.${me}&select=${NOTE_COLS}&order=updated_at.desc`, { headers: svc }).catch(() => null)
       : null;
 
     const pRes = await rest(`profiles?id=eq.${me}&select=partner_profile_id,name,pronouns,${OWNERSHIP_COLUMNS.join(',')}`, { headers: svc });
@@ -131,7 +149,7 @@ export default async function handler(req) {
       let shared = [];
       if (coupleKey) {
         const sRes = await rest(
-          `notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=*&order=updated_at.desc`,
+          `notes?couple_key=eq.${encodeURIComponent(coupleKey)}&visibility=eq.shared&owner_id=neq.${me}&select=${NOTE_COLS}&order=updated_at.desc`,
           { headers: svc });
         shared = await sRes.json().catch(() => []);
       }
@@ -165,7 +183,7 @@ export default async function handler(req) {
     }
 
     if (req.method === 'GET' && action === 'tags') {
-      const tRes = await rest(`tags?owner_id=eq.${me}&select=*&order=created_at.asc`, { headers: svc });
+      const tRes = await rest(`tags?owner_id=eq.${me}&select=id,name,color,standard_key,deleted_at&order=created_at.asc`, { headers: svc });
       const tags = await tRes.json().catch(() => []);
 
       /**

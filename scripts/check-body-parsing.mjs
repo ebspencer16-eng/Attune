@@ -41,8 +41,10 @@
  * 405 is a fine answer to that; a 500 is a handler falling over.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The nodejs handlers, which take (req, res) and need a different harness.
- * check-runtime-shape.mjs is what keeps those honest about which they are.
+ * Nothing. The two nodejs handlers used to be skipped here, with that said
+ * out loud; they are driven now, through a shim that gives them the `res`
+ * they expect. check-runtime-shape.mjs is what keeps every handler honest
+ * about which runtime it declares.
  *
  * Endpoints whose configuration is absent here rather than broken: a webhook
  * with no signing secret answers 500 because it is not configured, which is
@@ -63,7 +65,19 @@ globalThis.fetch = async (u) => new Response(
   { status: 200, headers: { 'content-type': 'application/json' } });
 
 /** Not broken, unconfigured: these need a secret this harness cannot invent. */
-const UNCONFIGURED = new Set(['admin-login.js', 'stripe-webhook.js', 'recompute-entitlements.js']);
+/**
+ * Endpoints that refuse on a missing environment variable before they ever
+ * look at the body. Their 5xx is the right answer to "you have not set this
+ * up", not a handler falling over, and on the live site the variable is set
+ * so the path never runs.
+ *
+ * generate-pdf.js joined them when the two nodejs handlers stopped being
+ * skipped: it answers 503 "PDF renderer not configured" with no Browserless
+ * key, which is exactly this.
+ */
+const UNCONFIGURED = new Set([
+  'admin-login.js', 'stripe-webhook.js', 'recompute-entitlements.js', 'generate-pdf.js',
+]);
 
 const BODIES = [
   ['a string where an object goes', '"hello"'],
@@ -86,6 +100,45 @@ const quiet = [console.log, console.warn, console.error];
 const problems = [];
 let called = 0;
 
+/**
+ * ── THE TWO NODEJS HANDLERS, WHICH USED TO BE SKIPPED ───────────────────
+ * This file said, for months, that they "need a different harness". A sweep
+ * of every endpoint's error path wrote one, so they are no longer a blind
+ * spot: both answer 503 to a body they cannot use and neither throws.
+ *
+ * Vercel's two runtimes take different handlers. Edge receives (req) and
+ * returns a Response; nodejs receives (req, res) and writes to res. Calling a
+ * nodejs handler with one argument throws on `res.status`, which is what the
+ * sweep reported as eight failures in two files before it knew the
+ * difference.
+ */
+function nodeShim() {
+  const out = { status: 200, body: '' };
+  const res = {
+    status(c) { out.status = c; return res; },
+    setHeader() { return res; },
+    json(o) { out.body += JSON.stringify(o); return res; },
+    send(o) { out.body += typeof o === 'string' ? o : JSON.stringify(o); return res; },
+    end(o) { if (o) out.body += String(o); return res; },
+    write(o) { out.body += String(o); return res; },
+  };
+  return { out, res };
+}
+
+/**
+ * What must never be in an answer, however badly the request went.
+ *
+ * A stack frame tells an attacker the shape of the server; a key tells them
+ * everything. api/_lib/http.js has safeError for exactly this and the point
+ * of checking is that one endpoint will forget to use it.
+ *
+ * Values, never names. The first version matched the string SUPABASE_SERVICE
+ * and flagged api/admin-env.js, whose entire job is to list which variables
+ * are set: the name of a secret is not a secret, and a check that cannot tell
+ * them apart gets switched off. So this looks for the shapes a real key has.
+ */
+const LEAK = /\bat\s+\w+\s*\(|\.js:\d+:\d+|node_modules|eyJ[A-Za-z0-9_-]{16}|sk_live_[A-Za-z0-9]{8}|sk_test_[A-Za-z0-9]{8}|whsec_[A-Za-z0-9]{8}|service_role/;
+
 console.log = () => {}; console.warn = () => {}; console.error = () => {};
 for (const f of files) {
   if (UNCONFIGURED.has(f)) continue;
@@ -95,7 +148,7 @@ for (const f of files) {
     continue;
   }
   if (typeof mod.default !== 'function') continue;
-  if (mod.config?.runtime === 'nodejs') continue;
+  const isNode = mod.config?.runtime === 'nodejs';
   for (const [name, body] of BODIES) {
     const req = new Request(`${SITE_URL}/api/${f.replace(/\.js$/, '')}`, {
       method: 'POST',
@@ -107,9 +160,24 @@ for (const f of files) {
     });
     called++;
     try {
-      const res = await mod.default(req);
-      if (res && res.status >= 500) {
-        problems.push(`api/${f} answered ${res.status} to ${name}. A body it cannot use is a 400.`);
+      let status; let text = '';
+      if (isNode) {
+        const { out, res } = nodeShim();
+        await mod.default({
+          method: 'POST', url: req.url,
+          headers: Object.fromEntries(req.headers), body: undefined,
+        }, res);
+        status = out.status; text = out.body;
+      } else {
+        const res = await mod.default(req);
+        status = res && res.status;
+        text = res ? await res.clone().text().catch(() => '') : '';
+      }
+      if (status >= 500) {
+        problems.push(`api/${f} answered ${status} to ${name}. A body it cannot use is a 400.`);
+      }
+      if (LEAK.test(text)) {
+        problems.push(`api/${f} put something in its answer to ${name} that belongs in a log: ${text.replace(/\s+/g, ' ').slice(0, 80)}`);
       }
     } catch (e) {
       problems.push(`api/${f} threw on ${name}: ${String(e.message).slice(0, 70)}`);
@@ -125,10 +193,25 @@ for (const f of files) {
   });
   called++;
   try {
-    const res = await mod.default(get);
-    if (res && res.status >= 500) {
-      problems.push(`api/${f} answered ${res.status} to a plain GET. Refusing is a 400, a 401`
+    let status; let text = '';
+    if (isNode) {
+      const { out, res } = nodeShim();
+      await mod.default({
+        method: 'GET', url: get.url,
+        headers: Object.fromEntries(get.headers), body: undefined,
+      }, res);
+      status = out.status; text = out.body;
+    } else {
+      const res = await mod.default(get);
+      status = res && res.status;
+      text = res ? await res.clone().text().catch(() => '') : '';
+    }
+    if (status >= 500) {
+      problems.push(`api/${f} answered ${status} to a plain GET. Refusing is a 400, a 401`
         + ' or a 405; a 500 is the handler falling over before it declined.');
+    }
+    if (LEAK.test(text)) {
+      problems.push(`api/${f} put something in its answer to a plain GET that belongs in a log: ${text.replace(/\s+/g, ' ').slice(0, 80)}`);
     }
   } catch (e) {
     problems.push(`api/${f} threw on a plain GET: ${String(e.message).slice(0, 70)}`);

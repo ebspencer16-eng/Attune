@@ -15,7 +15,7 @@
 
 <title>Attune Analytics, Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -25,6 +25,9 @@
     --orange:#C55329;--indigo:#5C6DDA;--green:#34D399;--amber:#FBBF24;--rose:#F87171;
     --hfont:'Playfair Display',Georgia,serif;
     --bfont:'DM Sans',sans-serif;
+    /* DM Mono ships 300, 400 and 500 and nothing heavier: Google silently
+       drops a request for 700 and the browser smears 400 instead, which is
+       what 44 rules in here were getting. 500 is its bold. */
     --mono:'DM Mono',monospace;
   }
   html{scroll-behavior:smooth}
@@ -38,7 +41,7 @@
   .sb-logo-text{font-family:var(--hfont);font-size:1rem;font-weight:700;color:var(--text)}
   .sb-subtitle{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;font-family:var(--mono)}
   .sb-nav{padding:1rem 0;flex:1}
-  .sb-section{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:.5rem 1.25rem .35rem;font-family:var(--mono)}
+  .sb-section{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);font-weight:500;padding:.5rem 1.25rem .35rem;font-family:var(--mono)}
   .sb-item{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.25rem;font-size:.8rem;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none}
   .sb-item:hover{color:var(--text);background:rgba(27,37,71,.05)}
   .sb-item.active{color:var(--text);border-left-color:var(--orange);background:rgba(255,107,53,.06);font-weight:600}
@@ -87,7 +90,7 @@
   /* KPI CARDS */
   /* A heading between bands of tiles on a long page. The Engagement page has
      three bands and without these it reads as one undifferentiated wall. */
-  .section-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;font-family:var(--mono);margin:1.75rem 0 .85rem}
+  .section-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:500;font-family:var(--mono);margin:1.75rem 0 .85rem}
   .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem;margin-bottom:1.75rem}
   .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.5rem 1.5rem;position:relative;overflow:hidden}
   .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
@@ -96,7 +99,7 @@
   .kpi-card.green::before{background:var(--green)}
   .kpi-card.amber::before{background:var(--amber)}
   .kpi-card.rose::before{background:var(--rose)}
-  .kpi-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;font-family:var(--mono);margin-bottom:.5rem;line-height:1.4;overflow-wrap:anywhere}
+  .kpi-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:500;font-family:var(--mono);margin-bottom:.5rem;line-height:1.4;overflow-wrap:anywhere}
   .kpi-val{font-size:2rem;font-weight:700;color:var(--text);font-family:var(--hfont);line-height:1.05;overflow-wrap:anywhere}
   #types-maxshare{font-size:1.4rem;line-height:1.14;overflow-wrap:normal}
   .kpi-sub{font-size:.7rem;color:var(--muted);margin-top:.4rem;line-height:1.5;overflow-wrap:anywhere}
@@ -198,10 +201,10 @@
 
   /* RESPONSE TABLE */
   .response-table{width:100%;border-collapse:collapse;font-size:.78rem}
-  .response-table th{text-align:left;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono)}
+  .response-table th{text-align:left;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:500;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-family:var(--mono)}
   .response-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(27,37,71,.08);color:var(--muted);vertical-align:middle}
   .response-table tr:hover td{background:rgba(27,37,71,.03);color:var(--text)}
-  .pkg-tag{display:inline-block;padding:.2rem .55rem;border-radius:5px;font-size:.62rem;font-weight:700;font-family:var(--mono)}
+  .pkg-tag{display:inline-block;padding:.2rem .55rem;border-radius:5px;font-size:.62rem;font-weight:500;font-family:var(--mono)}
   .score-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;width:60px;display:inline-block;vertical-align:middle;margin-left:.4rem}
   .score-fill{height:100%;border-radius:3px}
 

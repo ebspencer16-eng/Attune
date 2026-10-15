@@ -173,6 +173,31 @@ was to stop counting the literal and count calls to the module instead, and to
 keep the literal only as a thing to forbid: named outside a gateway, it is a
 read that went around the filter.
 
+**A browser smears a face it was not given, and says nothing either.** The web
+half of the bug below. A page that asks for `font-weight: 700` in a family it
+loaded only up to 600 gets a synthetic bold; italic in a family with no italic
+gets a synthetic slant. Both render, both are wrong, and nothing errors.
+
+A sweep that loaded every page and compared the computed family, weight and
+style of every piece of visible text against the faces that actually arrived
+found 35: bold DM Sans on ten pages, italic DM Sans on thirteen, and the
+admin's bold monospace, which cannot be fixed by asking harder because DM Mono
+has no bold and Google drops the request without a word. The other direction
+too: three weights of Syne downloaded by two surfaces and drawn by nothing.
+
+Three things about measuring it, each of which cost an hour.
+`document.fonts.check()` answers whether text can be DRAWN, which is true for
+a face about to be synthesised, so it cannot see this at all.
+`document.fonts.status` is 'loaded' at t=0, before the stylesheet has arrived,
+because nothing is pending yet: poll the face count until it stops growing. And
+a results column headed "weight" hid the word italic for three runs, which is
+this file's own rule about stating the method next to the number, pointed at a
+table I printed myself.
+
+`check-web-fonts.mjs` runs it. The fix that made it cheap is the range form:
+`wght@0,300..800` gets one variable file per style where enumerating the
+weights got twenty font-face rules.
+
 **iOS does not slant a registered typeface, and says nothing.** `fontStyle:
 'italic'` on a named family draws the upright face and reports no error, so
 eighteen places in the app asked for italic and every one of them was upright,

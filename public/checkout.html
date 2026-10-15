@@ -18,7 +18,7 @@
 <!-- Stripe.js – must load before payment form -->
 <script src="https://js.stripe.com/v3/"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <style>
   :root{--cream:#FFFDFA}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1263,7 +1263,7 @@ function validateForm() {
   try {
     stripe = Stripe(key);
     const elements = stripe.elements({
-      fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap' }]
+      fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap' }]
     });
     // Mobile needs 16px to prevent iOS from zooming on input focus
     const isMobileWidth = window.matchMedia('(max-width:780px)').matches;

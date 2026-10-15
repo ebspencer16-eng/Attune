@@ -29,8 +29,62 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** Everything you have decided is built; what is left is waiting
-on you.
+| # | What I am doing |
+|--|--|
+| S26 | **Six sweeps across the product, four found something.** The biggest: thirty-five places where text was drawn in a typeface the page never loaded, so the browser faked bold and italic. Detail under this table. |
+
+### S26, what the six sweeps found
+
+Each one measured one property across every instance of its thing. Four found
+something real, two found nothing, and one of the two that found nothing is
+worth as much: it turned "the prices are probably fine" into a figure.
+
+**1. How much each screen downloads.** The Notes endpoint sent every column of
+every note, including two the app has never read. One of them is a key made of
+both your user ids, which had no business leaving the server. Seventeen per
+cent off that payload; at two hundred notes it is twenty kilobytes a person
+stops downloading every time they open the tab.
+
+**2. Queries with no ceiling.** Thirty-three reads of a table that grows with
+use. Fifteen have no limit; eleven of those are the admin reading everything on
+purpose and are fine. The notes list is the one a customer waits for, and it is
+honest to say it will get slower for somebody with hundreds of marks. I have
+not capped it, because a cap on a list of marks means older marks silently stop
+drawing, and that is worse than slow.
+
+**3. What each page weighs.** The app shell is 1.4MB of JavaScript, which is
+the biggest single number in the product and is its own piece of work. The
+marketing pages are 160 to 260k, most of it fonts, which led to:
+
+**4. Fonts.** The real find. Thirty-five places where text was drawn in a face
+the page never loaded, so the browser faked it:
+
+- Bold DM Sans on ten pages, 203 pieces of text. Those pages asked for 600 and
+  below and drew 700, so every bold line on them was a smeared 600.
+- Italic DM Sans on thirteen pages. No page loaded any italic DM Sans at all.
+- The admin's bold monospace, 55 places. DM Mono has no bold; Google drops the
+  request silently and the browser smears 400. Its heaviest is 500.
+- And the other way: three weights of a font called Syne were downloaded by the
+  app shell and by the portal, and no text in the product is set in it.
+
+The site also had eight different font requests, so moving between pages
+downloaded a different subset each time. There is one now, and everything it
+asks for is drawn and everything drawn is asked for.
+
+**5. Every link, followed.** 1136 links across 38 pages. One went nowhere: the
+Terms of Service link inside the EULA, which worked when the script ran and
+landed on nothing when it did not, because that document was missing the plain
+anchor the other four have. Privacy was missing it too.
+
+**6. What each endpoint does when it goes wrong.** 240 calls, four bad inputs
+each. Nothing threw, nothing answered a 500 it should not, and nothing put a
+stack trace or a key in an answer. Two endpoints had never been checked at all,
+because they use the other of Vercel's two runtimes and the gate said so out
+loud; they are covered now.
+
+**And the prices.** Every dollar amount on the site is a catalogue price or the
+one derived number, which is right in all four places it appears and already
+held by a check.
 
 ## 3. For you to review
 
@@ -38,41 +92,9 @@ on you.
 |--|--|
 | C3 | **100 words, and 49 of them are yours.** Your edits replaced my drafts of those words entirely, Consent is gone, and I wrote 51 more following the four moves your edits make. The list comes round every 100 days. In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
 | C6 | **100 insights, every one a verified quotation.** 69 come from pages a machine can open, and all 69 were checked word for word against the page today; the other 31 are from books and were checked when they were added. In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/INSIGHTS-REVIEW.md` |
-| B79 | **The packages page carries your two sentences.** The hero is The most thoughtful thing you can give is real understanding, its description is untouched, and the foot is Begin your Attune Experience over your gift line. |
-| B69 | **The word card is rebuilt from the Notes entry itself**, so the two cannot look different again: same gradient, same two cards, and the attune link is readable because the foot takes ink on a light card instead of white. I rendered it and looked at it this time. |
-| B73 | **Nothing turns white.** The open row's cream ground is gone; the section still reads as open from its arrow and its pages. |
-| B71 | **Every endpoint measured, and two more were worse than the home screen.** The tools tab went from seven round trips to three, Notes from five to four, and the home screen is still four. Detail under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-
-### B71, what the numbers are
-
-Measured by running each endpoint with every database call pegged at the same
-latency, so the clock is the shape of the code rather than the speed of my
-laptop. The number is round trips: how many times the server has to wait for an
-answer before it can ask its next question. Each one is a real wait on a phone.
-
-| Endpoint | Was | Now |
-|--|--|--|
-| The tools tab | 7 | 3 |
-| Notes | 5 | 4 |
-| Home | 7.6 | 4 |
-| Results | 3 | 3 |
-| In Practice | 2 | 2 |
-| Alerts | 2 | 2 |
-
-The tools tab was the worst and you had not asked about it: it wanted the
-partner's name, then the workbook's order, then the couple's shared tools, each
-one waiting for the last, and none of the three needs either of the others.
-
-Three of these are now at their floor, which is the chain that genuinely cannot
-be flattened. Home still waits four times because the profile names the partner,
-the partner's row carries their email, and the beta lookup needs both.
-
-One thing to know, because it is the kind of thing that comes back: making the
-Notes list faster put a read in front of every SAVE. The check counts calls on
-the write paths too now, which is how that was caught before it shipped.
 
 ## 4. Done and verified
 
@@ -87,6 +109,10 @@ the write paths too now, which is how that was caught before it shipped.
 | B33 | The survey, nine questions in one module, asked in the app, on the website at the end of What Comes Next and from the email link, saving each answer as it is given. |
 | B50 | The engagement time chart's two series had no label of their own, so the legend read "seconds" against "App"; they are Web and App. |
 | R2 | App insights and results, all 29 sections. |
+| B79 | The packages page said the same thing in its hero and at its foot; it carries her two new sentences. |
+| B69 | The word storycard was built from a description of the Notes entry instead of from the entry; there is one component now, rendered by both. |
+| B73 | Opening a group in the insights menu painted its row cream, which read as white. |
+| B71 | The app waited on questions it had already answered: the tools tab went from seven round trips to three, Notes from five to four, home from 7.6 to four. |
 | B70 | Nobody could choose a time for the insight or the word of the day; Settings offers both now, at any half hour, 7:30am by default. |
 | B72 | The mark was drawn 64 different times with a 93 per cent white heart, and the app's own file was a different drawing generated by nothing since September. |
 | B74 | The survey asks, last, whether we may use a first name if we quote somebody. |

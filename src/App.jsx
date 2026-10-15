@@ -248,7 +248,22 @@ const C = {
   dAccent: ["#E8673A","#1B5FE8","#2AB07F","#E040A0","#F5A623","#9B5DE5","#00B4CC","#E8503A"],
 };
 const font = { display: "'Playfair Display', Georgia, serif", body: "'DM Sans', system-ui, sans-serif" };
-const FONT_LINK = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap";
+/**
+ * ── ONE FONT REQUEST FOR THE WHOLE WEBSITE ──────────────────────────────
+ * The same string every static page carries and index.html carries, which
+ * is what check-web-fonts holds them to.
+ *
+ * This file had four different ones. A sweep that loaded every page and
+ * compared the computed family of every piece of text against the faces
+ * that arrived found that the portal drew DM Sans 700 while asking for 600
+ * and below, so every bold line in it was the browser smearing, and that
+ * three weights of Syne were downloaded for text that does not exist.
+ *
+ * Ranges rather than a list of weights: Google answers a range with one
+ * variable file per style instead of one per weight, which is four
+ * font-face rules where the enumeration was twenty.
+ */
+const FONT_LINK = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..800;1,300..600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap";
 
 // ── User-bound localStorage keys ─────────────────────────────────────────────
 // Single source of truth. When you add a new user-bound key elsewhere in the
@@ -607,7 +622,21 @@ let _navScrollTop = 0;
 
 const BFONT = "'DM Sans', sans-serif";
 const HFONT = "'Playfair Display', Georgia, serif";
-const FONT_URL = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap";
+/**
+ * ── ONE FONT URL FOR THE WHOLE WEBSITE ──────────────────────────────────
+ * The same string index.html and every static page carries, which is what
+ * check-web-fonts holds them to.
+ *
+ * It used to ask for three weights of Syne, which nothing in this file has
+ * ever drawn, and Playfair 900, which nothing draws either: two faces
+ * downloaded on the heaviest page in the product for no text at all. It also
+ * asked for DM Sans up to 600 while the portal draws 700, so every bold line
+ * in here was the browser smearing 600. That was true on ten pages of the
+ * marketing site as well, and the only way to see it is to load a page and
+ * compare what the text asks for against the faces that arrived.
+ */
+/** The same request, under the name the rest of this file uses for it. */
+const FONT_URL = FONT_LINK;
 
 
 // PERSONALITY_QUESTIONS — Communication Exercise (Exercise 01)
@@ -2892,7 +2921,7 @@ function GiftLandingScreen({ p1, p2, pkg, orderId, onCreateAccount }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+      <link href={FONT_LINK} rel="stylesheet"/>
       <div style={{ background: C.warm, borderRadius: 22, padding: '2.25rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)' }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
@@ -15951,7 +15980,7 @@ export default function App() {
   if (showConfirmedLanding) {
     return (
       <div style={{ minHeight: '100vh', background: '#F3EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', fontFamily: "'DM Sans', sans-serif" }}>
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+        <link href={FONT_LINK} rel="stylesheet"/>
         <div style={{ background: '#FFFDF9', borderRadius: 22, padding: '2.5rem 2rem', width: '100%', maxWidth: 400, boxShadow: '0 24px 64px rgba(0,0,0,0.1)', textAlign: 'center' }}>
           <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #E8673A, #1B5FE8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.35rem', fontSize: '1.7rem', color: 'white' }}>✓</div>
           <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.5rem', fontWeight: 700, color: '#0E0B07', marginBottom: '0.5rem', lineHeight: 1.2 }}>Your email is confirmed.</div>
