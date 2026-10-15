@@ -72,7 +72,7 @@
   .mobile-menu .mm-cta{background:var(--ink);color:white;text-align:center;border-radius:8px;padding:var(--s-sm);border:none;margin-top:var(--s-xs)}
   .mobile-menu.open{display:flex}
   @media(max-width:780px){
-    .nav-center,.btn-nav,.nav-signin{display:none}
+    .nav-center,.nav-signin{display:none}
     .hamburger{display:none}
     .nav-right{gap:var(--s-sm)}
   
@@ -80,6 +80,21 @@
        button only appeared below 361 points, so every phone wider
        than that had no nav at all. */
     .hamburger{display:flex}
+
+    /* The pill goes where the links go. Ellie, 2026-10-15: "Remove get started
+       orange pill from site's top toolbar on mobile, it's in the hamburger nav
+       and that's enough." That reverses D19 and D31, which put it in the bar on
+       a phone on purpose, so both readings are kept here: the earlier one was
+       that the one action the site is for should not sit behind a menu. Her
+       answer is that the menu is enough. One rule now, at the width the nav
+       collapses: if the hamburger is showing, the pill is not.
+
+       The selector outranks the pill's own rule rather than merely following
+       it. The base rule is `.nav-right a.btn-nav`, which names an element and
+       sets display:inline-block, so a bare `.nav-right .btn-nav{display:none}`
+       loses on specificity at every width and the pill stayed in the bar on
+       all 29 pages. Found by the check, not by reading. */
+    nav .nav-right a.btn-nav{display:none}
 }
 
   /* ── HERO ─────────────────────────────────────────────────────────── */

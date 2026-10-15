@@ -22,6 +22,24 @@
  * drives the page instead: at a phone width, find the button, click it, and
  * count the links that became visible.
  *
+ * ── AND WHAT ELSE IS IN THAT BAR ───────────────────────────────────────────
+ * Ellie, 2026-10-15: "Remove get started orange pill from site's top toolbar
+ * on mobile, it's in the hamburger nav and that's enough." That reverses D19
+ * and D31, which had put the pill in the bar on a phone on purpose, so both
+ * quotes are kept: the earlier reading was that the one action the site is for
+ * should not sit behind a menu.
+ *
+ * The rule is now one sentence and it is checked here rather than in a gate of
+ * its own, because a second fixture serving the same bar at the same widths is
+ * the mirrored-fixture failure CLAUDE.md warns about. This harness already
+ * knows whether the menu button is showing, which is the whole condition:
+ *
+ *   wherever the menu button is visible, the pill is not;
+ *   at desktop width, where there is no button, the pill is.
+ *
+ * The second half is not decoration. The rule could be satisfied by hiding the
+ * pill at every width, and nothing else here would notice.
+ *
  * ── WHAT IS EXEMPT, AND WHY ────────────────────────────────────────────────
  * Pages with no site nav at all, each named rather than pattern-matched: the
  * checkout flow, which deliberately offers no way out; the app shell, which
@@ -84,7 +102,10 @@ const pages = [
    largest, and 820 the width where several pages still hide their links. 320
    is in the list because the first repair of this bug turned the button off
    below 361 while turning it on above, and three widths did not see it. */
-const WIDTHS = [320, 390, 430, 820];
+const WIDTHS = [320, 390, 430, 820, 1280];
+/* The one width where every page shows its links inline, which is where the
+   pill belongs. */
+const DESKTOP = 1280;
 const problems = [];
 let checked = 0;
 
@@ -105,7 +126,16 @@ for (const width of WIDTHS) {
       /* The links in the bar itself: a page wide enough to show them all does
          not need a button. */
       const inline = [...document.querySelectorAll('nav a')].filter(vis).length;
-      if (!btn) return JSON.stringify({ button: false, inline, links: 0 });
+      /* The Get started pill in the bar. Both halves are reported: whether the
+         page carries one at all, and whether it is drawn at this width. One
+         reader for both exits, rather than a second copy by the cart. */
+      const navPill = () => {
+        const el = document.querySelector('.nav-right .btn-nav, .nav-right a.btn-nav');
+        const s = el && getComputedStyle(el);
+        const r = el && el.getBoundingClientRect();
+        return { has: !!el, shown: !!(el && s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0) };
+      };
+      if (!btn) return JSON.stringify({ button: false, inline, links: 0, pill: navPill() });
       /**
        * ── AND BIG ENOUGH TO HIT ────────────────────────────────────────
        * A sweep of every control on every page at 390 points found the
@@ -133,7 +163,7 @@ for (const width of WIDTHS) {
       const menu = [...document.querySelectorAll('.mobile-menu, #mobile-menu')].filter(vis);
       const links = menu.reduce((n, m) => n + [...m.querySelectorAll('a')].filter(vis).length, 0);
       return JSON.stringify({
-        button: true, inline, links, threw,
+        button: true, inline, links, threw, pill: navPill(),
         taps: [
           ['the menu button', box(btn)],
           ...(cart ? [['the cart button', box(cart)]] : []),
@@ -152,6 +182,19 @@ for (const width of WIDTHS) {
           + ' a tap has to find without moving anything that is drawn.');
       }
     }
+    /* Wherever the menu button is showing, the pill is not. The pill is in the
+       menu, and `mm-cta` in every one of those menus is the same link. */
+    if (d.button && d.pill && d.pill.shown) {
+      problems.push(`${p} at ${width} points: the menu button and the Get started pill are both in`
+        + ' the bar. Ellie asked for the pill to go wherever the hamburger is showing, because the'
+        + ' menu already carries it.');
+    }
+    /* And the other way, which is what stops the rule becoming "never show it". */
+    if (width === DESKTOP && d.pill && d.pill.has && !d.pill.shown) {
+      problems.push(`${p} at ${width} points: no menu button and no Get started pill either.`
+        + ' The pill belongs in the bar at the widths that show the links inline.');
+    }
+
     if (!d.button) {
       /* No button is fine only if every section is already in the bar. Four
          links is the smallest full nav this site draws. */
@@ -177,5 +220,7 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-mobile-menu] ${checked} page loads across ${WIDTHS.length} phone widths:`
-  + ` every page with a nav opens a menu, ${EXEMPT.size} named pages have none on purpose.`);
+console.log(`[check-mobile-menu] ${checked} page loads across ${WIDTHS.length} widths`
+  + ` (${WIDTHS.join(', ')}): every page with a nav opens a menu, the Get started pill is never in`
+  + ` the bar beside the menu button and always in it at ${DESKTOP},`
+  + ` and ${EXEMPT.size} named pages have no nav on purpose.`);

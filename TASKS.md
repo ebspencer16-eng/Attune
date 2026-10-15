@@ -31,7 +31,32 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S26 | **Eight sweeps across the product, six found something.** The biggest: thirty-five places where text was drawn in a typeface the page never loaded, so the browser faked bold and italic. Detail under this table. |
+| C6 | **Your 74 insights stay as you wrote them, and 26 more are coming from sources we have not used.** Wider subjects too: love, kindness, understanding, peacemaking, not only conflict. Then both lists get coded so no two days running share a source or a subject. Detail under this table. |
+| B88 | **The Get started pill comes off the top bar on a phone.** It is in the hamburger and that is enough. |
+| B89 | **The founders' section on Our Purpose** loses its dash and eyebrow and takes your two paragraphs. |
+| B90 | **Notes loads only what you can see.** Three marks in each tile, ten behind a tap, a tag's contents only when you open it. And I am measuring why your Notes page is slow with no marks at all, which is a different problem. |
+
+### C6, the quotations
+
+**The edits you made.** Several now carry an ellipsis or a bracketed word,
+which is ordinary quotation practice and is exactly what the gate that opens
+each page and matches the words cannot read. It will learn to: it checks the
+parts outside the brackets, so a clarification you add is allowed and a
+sentence nobody wrote is still caught.
+
+**New sources.** Everything we have is from four books and one institute. The
+26 I add come from writers we have not used, and I will tell you who they are
+and how each was checked. Anything I cannot verify against the page or the book
+does not go in.
+
+**Variety.** Each quote gets two codes, its source and its subject, and the
+rotation walks the list so neither repeats on consecutive days. The same for
+the words. I will show you the first fortnight so you can see it working.
+
+**And a bug of mine.** In the document you just read, every book quotation's
+"read it" link says `undefined`. A book has a volume id rather than a url and
+the generator only knew about urls. Fixed, so you can check those 27 the way
+you check the rest.
 
 ### S26, what the sweeps found
 
@@ -137,11 +162,19 @@ held by a check.
 
 | # | Built, needs your eye |
 |--|--|
-| C3 | **100 words, and 49 of them are yours.** Your edits replaced my drafts of those words entirely, Consent is gone, and I wrote 51 more following the four moves your edits make. The list comes round every 100 days. In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md` |
-| C6 | **100 insights, every one a verified quotation.** 69 come from pages a machine can open, and all 69 were checked word for word against the page today; the other 31 are from books and were checked when they were added. In Terminal: `open -a TextEdit /Users/Ellie/Projects/unison/INSIGHTS-REVIEW.md` |
+| S26 | **Eight sweeps, six found something.** Fonts faked on 23 pages, a nav button at 1.65 contrast, a menu button four pixels wide on five pages, a dead Terms link, two unread columns on every notes payload. Detail under section 2. |
+| C3 | **100 words, 49 of them yours.** Waiting on your list, which did not come through: see the note under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### C3, your word list did not reach me
+
+Your message shows it as an attachment rather than as text, and all that came
+through is the placeholder. None of the list itself reached me.
+
+If you paste it straight into the message the way you did last time, as the
+table, I will put it in and regenerate the review document the same day.
 
 ## 4. Done and verified
 

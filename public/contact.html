@@ -241,25 +241,30 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;background:rgba(
 .mm-section{display:flex;flex-direction:column;border-bottom:1px solid var(--stone);padding-bottom:.25rem;margin-bottom:.25rem}
 .mm-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.55rem 0 .2rem var(--s-sm)}
 .mm-sub{padding-left:1.25rem !important;font-size:.85rem !important;border-bottom:none !important;font-style:italic;color:var(--muted)}
-@media(max-width:900px){nav{padding:0 var(--s-lg)}.nav-center{display:none}/* D19 and D31: the one action the site is for stays in the bar on a phone.
-       It was hidden behind the hamburger, so the main call to action
-       disappeared on the device most people arrive on. Sign in still goes:
-       somebody signing in will look for the menu, somebody starting will not.
-       Smaller here, because the bar is 390 points wide and the mark and the
-       cart are in it too. */
-    .nav-signin{display:none}
-    .nav-right .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
+@media(max-width:900px){nav{padding:0 var(--s-lg)}.nav-center{display:none}    .nav-signin{display:none}
   
     /* The way in, at the width the links go. Without this the menu
        button only appeared below 361 points, so every phone wider
        than that had no nav at all. */
     .hamburger{display:flex}
+
+    /* The pill goes where the links go. Ellie, 2026-10-15: "Remove get started
+       orange pill from site's top toolbar on mobile, it's in the hamburger nav
+       and that's enough." That reverses D19 and D31, which put it in the bar on
+       a phone on purpose, so both readings are kept here: the earlier one was
+       that the one action the site is for should not sit behind a menu. Her
+       answer is that the menu is enough. One rule now, at the width the nav
+       collapses: if the hamburger is showing, the pill is not.
+
+       The selector outranks the pill's own rule rather than merely following
+       it. The base rule is `.nav-right a.btn-nav`, which names an element and
+       sets display:inline-block, so a bare `.nav-right .btn-nav{display:none}`
+       loses on specificity at every width and the pill stayed in the bar on
+       all 29 pages. Found by the check, not by reading. */
+    nav .nav-right a.btn-nav{display:none}
 }
-  /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
-     320, where it stood 33 points past the right edge. The hamburger has it
-     there, which is what every phone narrower than an iPhone SE gets. */
   @media(max-width:360px){
-    .nav-right .btn-nav{display:none}.hamburger{display:flex}}
+    .hamburger{display:flex}}
 </style>
   <div class="sf-inner">
     <div class="sf-brand">

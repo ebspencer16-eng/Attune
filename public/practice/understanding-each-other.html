@@ -192,25 +192,30 @@
    rule, and the canonical nav is wider than the one they used to carry, so
    putting it on them pushed 11 points past the right edge at 360. The
    twelve article pages beside them have had this rule all along. */
-@media(max-width:640px){.nav-center,/* D19 and D31: the one action the site is for stays in the bar on a phone.
-       It was hidden behind the hamburger, so the main call to action
-       disappeared on the device most people arrive on. Sign in still goes:
-       somebody signing in will look for the menu, somebody starting will not.
-       Smaller here, because the bar is 390 points wide and the mark and the
-       cart are in it too. */
-    .nav-signin{display:none}
- .btn-nav{padding:var(--s-xs) .85rem;font-size:.72rem}
+@media(max-width:640px){.nav-center,.nav-signin{display:none}
   
     /* The way in, at the width the links go. Without this the menu
        button only appeared below 361 points, so every phone wider
        than that had no nav at all. */
     .hamburger{display:flex}
+
+    /* The pill goes where the links go. Ellie, 2026-10-15: "Remove get started
+       orange pill from site's top toolbar on mobile, it's in the hamburger nav
+       and that's enough." That reverses D19 and D31, which put it in the bar on
+       a phone on purpose, so both readings are kept here: the earlier one was
+       that the one action the site is for should not sit behind a menu. Her
+       answer is that the menu is enough. One rule now, at the width the nav
+       collapses: if the hamburger is showing, the pill is not.
+
+       The selector outranks the pill's own rule rather than merely following
+       it. The base rule is `.nav-right a.btn-nav`, which names an element and
+       sets display:inline-block, so a bare `.nav-right .btn-nav{display:none}`
+       loses on specificity at every width and the pill stayed in the bar on
+       all 29 pages. Found by the check, not by reading. */
+    nav .nav-right a.btn-nav{display:none}
 }
-  /* Below 361 the bar cannot hold the mark, the cart and a button: measured at
-     320, where it stood 33 points past the right edge. The hamburger has it
-     there, which is what every phone narrower than an iPhone SE gets. */
   @media(max-width:360px){
-    .nav-right .btn-nav{display:none}.hamburger{display:flex}}
+    .hamburger{display:flex}}
 </style>
   <div class="sf-inner">
     <div class="sf-brand">
