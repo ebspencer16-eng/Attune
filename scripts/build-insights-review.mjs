@@ -32,8 +32,35 @@ const weeks = (INSIGHTS.length / 7).toFixed(1);
 const quotes = INSIGHTS.filter((i) => i.kind === 'quote');
 const ours = INSIGHTS.filter((i) => i.kind !== 'quote');
 
-const quoteRows = quotes.map((i, n) =>
-  `| Q${n + 1} | ${i.body} | ${i.author}, ${i.work} | [read it](${i.url}) |`);
+/**
+ * Where to go and check the wording.
+ *
+ * A page has its url. A book has a Google Books volume, and the link that is
+ * actually useful is the one that opens the book AT the sentence: `gbpv=1`
+ * turns the preview on and `bsq` is the phrase to find. The column read
+ * `[read it](undefined)` for all 31 book quotations until this was written,
+ * because books carry `volumeId` and the row asked for `url`. Twenty-seven of
+ * her hundred rows offered her a dead link to check a quotation with.
+ *
+ * `bsq` takes the longest run between her own ellipses and brackets, for the
+ * same reason check-quotes-verbatim does: a phrase with an elision in the
+ * middle of it is in no book.
+ */
+const checkAt = (i) => {
+  if (String(i.url || '').trim()) return i.url;
+  if (!i.volumeId) return '';
+  const run = i.body
+    .split(/\s*(?:\.\.\.|…|\[[^\]]*\])\s*/)
+    .reduce((a, b) => (b.trim().length > a.length ? b.trim() : a), '');
+  return `https://www.google.com/books/edition/_/${i.volumeId}`
+    + `?gbpv=1&bsq=${encodeURIComponent(run.slice(0, 120))}`;
+};
+
+const quoteRows = quotes.map((i, n) => {
+  const where = checkAt(i);
+  return `| Q${n + 1} | ${i.body} | ${i.author}, ${i.work} | ${i.topic || ''} `
+    + `| ${where ? `[read it](${where})` : 'no link'} |`;
+});
 
 const oursRows = ours.map((i, n) => {
   const mark = onPage.has(i.id) ? ' *' : '';
@@ -96,8 +123,20 @@ so you can check the wording yourself.
 
 ## Quotations
 
-| # | Quotation | Source | Checked |
-|--|--|--|--|
+The **Subject** column is the postcode you asked for. Every quotation carries
+its writer and its subject, and the order they are posted in is dealt from
+those two, so no two days running share either. \`check-insight-rotation.mjs\`
+fails the build on a repeat. Twelve subjects at the moment; the largest is
+attachment with eleven.
+
+Two days running can still share a *publication*, and that is arithmetic rather
+than a choice: 47 of these 74 are Gottman Institute articles, by thirteen
+different writers, and anything holding more than half a list has to touch
+itself somewhere. The 26 new ones are what fixes it, which is the strongest
+argument for your instinct about sources.
+
+| # | Quotation | Source | Subject | Checked |
+|--|--|--|--|--|
 ${quoteRows.join('\n')}
 
 ## Ours

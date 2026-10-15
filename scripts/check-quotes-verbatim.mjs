@@ -45,6 +45,30 @@
  * generators failed" on every run for so long that nobody read it, and a real
  * break hid inside the noise.
  *
+ * ── AN ELISION AND A BRACKET ARE NOT A MISQUOTATION ───────────────────────
+ * Ellie reviewed all 100 and edited 14 of the 74 she kept. Three kinds of edit,
+ * all of them ordinary quotation practice:
+ *
+ *   "Contempt... is the number one predictor"     the middle of a sentence cut
+ *   "Bids [for connection] can be verbal"         a word the original implies
+ *   "Research revealed that..."                   the opening clause dropped,
+ *                                                 and the next word capitalised
+ *
+ * The first version of this check read all three as misquotation, which would
+ * have left her a choice between her own editing and a passing build. So an
+ * ellipsis and a bracketed span are wildcards now: the quotation is split on
+ * them and each piece has to appear on the page, in order. The capital at the
+ * start is allowed to differ, and only there.
+ *
+ * What is NOT allowed, and is the reason this is pieces-in-order rather than a
+ * loose match: dropping or changing a word inside a piece. Her Q12 did that
+ * once, cutting "their" from the middle of a sentence with nothing to mark it,
+ * and this check is what found it.
+ *
+ * A piece of fewer than three words is not evidence of anything, so an entry
+ * whose longest piece is that short is reported as unverifiable rather than
+ * passed. A quotation that is mostly brackets is a paraphrase.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Whether the author is the right one. The byline is on the page and this does
  * not read it, because publishers rename and re-attribute: the four horsemen
@@ -92,6 +116,50 @@ const textOf = (html) => flatten(
 
 const wrong = [];
 const unreachable = [];
+/**
+ * A quotation she has edited, split into the runs that have to be verbatim.
+ *
+ * `...`, a unicode ellipsis, and anything in square brackets are the two marks
+ * that say "something is different here", so they are the only places this will
+ * accept a difference. Everything between them is compared exactly.
+ */
+const piecesOf = (want) => want
+  .split(/\s*(?:\.\.\.|…|\[[^\]]*\])\s*/)
+  .map((p) => p.replace(/^[\s,;:]+|[\s,;:]+$/g, '').trim())
+  .filter(Boolean);
+
+/** The longest run, which is the one worth asking a book about. */
+const longestPiece = (want) => piecesOf(want).reduce((a, b) => (b.length > a.length ? b : a), '');
+
+const wordCount = (p) => p.split(' ').filter(Boolean).length;
+
+/**
+ * Does `text` carry every run of this quotation, in order?
+ *
+ * Returns the piece it stopped on, so the report can say where rather than
+ * that something is wrong. The first piece is matched case-insensitively at
+ * its first character only: a quotation starting mid-sentence is capitalised,
+ * which is typesetting. Every other character, in every piece, is exact.
+ */
+function carries(text, want) {
+  const ps = piecesOf(want);
+  if (!ps.length) return { ok: false, stopped: want, thin: true };
+  if (wordCount(longestPiece(want)) < 3) return { ok: false, stopped: longestPiece(want), thin: true };
+  let at = 0;
+  for (const [n, piece] of ps.entries()) {
+    const forms = n === 0 && piece
+      ? [piece, piece[0].toLowerCase() + piece.slice(1), piece[0].toUpperCase() + piece.slice(1)]
+      : [piece];
+    let found = -1;
+    for (const f of forms) {
+      const i = text.indexOf(f, at);
+      if (i !== -1 && (found === -1 || i < found)) found = i;
+    }
+    if (found === -1) return { ok: false, stopped: piece, before: ps.slice(0, n) };
+    at = found + piece.length;
+  }
+  return { ok: true, pieces: ps.length };
+}
 /**
  * Quotations from books, which no check can open.
  *
@@ -162,6 +230,14 @@ for (const q of quotes) {
     /* The stored body has no display quotation marks on it yet; the outer pair is
        added on the way out, the same as for a page. */
     const want = flatten(q.body).replace(/^'|'$/g, '').trim();
+    /* The longest run between her marks, for the same reason the page path
+       compares runs: Google is being asked for a phrase, and a phrase with an
+       ellipsis in the middle of it is in no book. */
+    const phrase = longestPiece(want);
+    if (wordCount(phrase) < 3) {
+      wrong.push(`${q.id} has no run of three words to check: ${want.slice(0, 120)}`);
+      continue;
+    }
     let out;
     try {
       /* Surnames rather than the whole byline: "John Gottman and others" is
@@ -170,7 +246,7 @@ for (const q of quotes) {
       const surnames = String(q.author).replace(/ and others$/, '')
         .split(/,| and /).map((n) => n.trim().split(/\s+/).pop().toLowerCase())
         .filter((n) => n.length > 2);
-      out = await inVolume(want, q.work, surnames);
+      out = await inVolume(phrase, q.work, surnames);
     } catch (err) {
       inBooks.push(`${where} [${String(err.message || err).slice(0, 60)}]`);
       continue;
@@ -209,14 +285,22 @@ for (const q of quotes) {
      the outer pair comes off before looking for it on the page. */
   const want = flatten(q.body).replace(/^'|'$/g, '').trim();
 
-  if (page.includes(want)) { verified += 1; continue; }
+  const got = carries(page, want);
+  if (got.ok) { verified += 1; continue; }
+  if (got.thin) {
+    wrong.push(`${q.id} is too broken up to check against its page.\n`
+      + `      shown as : ${want.slice(0, 150)}\n`
+      + `      Its longest unmarked run is "${got.stopped}", which is not evidence of anything.`);
+    continue;
+  }
 
   /* Where it stops matching, so the report says what to fix rather than that
-     something is wrong. */
-  const words = want.split(' ');
+     something is wrong. Walked over the run that failed, not the whole
+     quotation, because the runs before it have already matched. */
+  const ws = got.stopped.split(' ');
   let longest = '';
-  for (let n = 4; n <= words.length; n += 1) {
-    const head = words.slice(0, n).join(' ');
+  for (let n = 1; n <= ws.length; n += 1) {
+    const head = ws.slice(0, n).join(' ');
     if (!page.includes(head)) break;
     longest = head;
   }
@@ -224,6 +308,7 @@ for (const q of quotes) {
   wrong.push(
     `${q.id} is not on the page it cites.\n`
     + `      shown as : ${want.slice(0, 150)}\n`
+    + `      the run that fails: ${got.stopped.slice(0, 120)}\n`
     + `      cited to : ${q.author}, ${q.work}\n`
     + `      ${q.url}\n`
     + (at === -1
