@@ -125,68 +125,49 @@ the phone app, and it is the one page where that matters least because people
 arrive at it signed in and stay. Splitting it is a day's work and would change
 nothing you can see.
 
-### B91 to B105, what each one means in detail
+### B91 to B105, where to look
 
-Written out before starting, in your words where you gave them, so none of the
-sixteen goes missing. Every one of these exists on the website and in the app
-unless it says otherwise, and the copy for all of them lives on the server, so
-each change is made once and both surfaces read it.
+All sixteen are built and on both surfaces unless a row says otherwise. The
+website is live. **The app needs two launches:** open it, close it, open it
+again, because an update downloads on the first and runs on the second.
 
-**B91, the couple type page.** "Remove 'your individual types' section
-entirely, add the description of each person if you tap on the person's dot.
-Make it like a pop up next to the dot. Tap outside the pop up tile to make it
-go away. Pop up tile should have the paragraph from the individual type section
-but we don't need the axes bars." The paragraph is the one that section already
-shows; it moves rather than being rewritten.
+**The couple type page is where four of them are.** Open it in the app or on
+the site. The map now answers a tap: each dot opens that person's paragraph
+beside it, and a tap anywhere else closes it. There are no axis bars in the
+tile, at your word, and "Your individual types" is gone altogether (B91). The
+grey question mark beside Open and beside Withdraw opens that axis's sentence,
+and the two sentences that used to sit under the chart are only there now
+(B92). The slider dots have a crisp white ring rather than a coloured halo
+(B93); I could not reproduce the blur on an iPad, so tell me if your friend
+still sees it.
 
-**B92, the axes.** A light grey question mark in a circle beside Open and
-beside Withdraw, each opening that axis's description. The descriptions come
-off the area below the chart, so the page loses two paragraphs and gains two
-controls.
+**What Comes Next is the biggest change (B105).** Four tiles: What to keep in
+mind, What to discuss together, Phrases to try, and the relationship journal.
+Tapping one fills the space below it and the tiles stay where they are. Every
+row has a grey arrow that opens the page in Insights it came from, and nothing
+on the page says which exercise feeds which bucket. Tell us about your Attune
+Experience is a coloured button at the foot. The communication rows are the
+action items rather than the category (B102), that section is called
+Communication styles (B103), and the couple type rows are the three phrases to
+try (B104).
 
-**B93, the slider dots on an iPad.** Your friend reports them fuzzy or blurry.
-Likely a half-pixel border or a shadow on a non-integer size; I measure it on
-an iPad-sized screen before changing anything.
+**The smaller ones.** Exercise covers list the pages inside them (B94). The
+expectations pages count the same way, 1/7 through 7/7 (B95), and the three
+lines you asked to remove are gone (B96, B97, B98). On the storycards, a tap in
+the right margin goes forward (B99), the last card exits Highlights (B101), and
+the most-admired-for card is cream with orange from the top left and blue from
+the bottom right (B100).
 
-**B94, the exercise cover pages.** Each one names the pages inside that
-section, as a short contents list. The section list is already on the server in
-`results-sections.js`, so the contents derive from it rather than being typed.
+**What is checked rather than looked at.** A new gate drives the couple map in
+a real browser at phone and desktop width: it proves nothing is printed under
+the chart, that each question mark opens its own axis, that each dot opens its
+own paragraph, and that a tap elsewhere closes whichever is open. Eleven
+deliberate breakages, eleven failures. The app half was driven on an iPhone in
+the simulator, which is how the tile numbers turned out to be clipped: 9 was
+drawing as 0.
 
-**B95, 1 of 7 against 1 of 6.** The overview and the first page disagree about
-how many pages there are. I find which is counting wrong rather than changing
-the number that looks odd.
-
-**B96, B97 and B98** are three lines to delete, one on the expectations
-overview's header, one above its area list, and one above the dropdowns on What
-Comes Next.
-
-**B99, the storycard tap zones.** A tap in the right margin went back instead
-of forward. I measure the zones at a phone width rather than reading them.
-
-**B100, the most-admired-for card.** Cream, with blue coming from the bottom
-right corner and orange from the top left, and strong colour behind the words
-rather than a flat wash.
-
-**B101, the last storycard.** Tapping it should leave Highlights and it does
-not.
-
-**B102 to B104, the action plans.** The communication plan lists its action
-items rather than its category name. It is called Communication styles. The
-couple type plan is the three phrases to try.
-
-**B105, What Comes Next.** Your words: "I want to take all of the action items
-we currently list, and present them not grouped by exercise/section but rather
-by: What to keep in mind, What to discuss together, Phrases to try." Four
-quick-access tiles formatted like the home page's, one per bucket plus the
-relationship journal. Tapping a tile shows that content in the space below
-while the tiles stay put. Each row carries a grey arrow on the right that opens
-the page in Insights the row came from. Tell us about your Attune experience
-stays a coloured button at the foot. Nothing on the page names which exercise
-feeds which bucket.
-
-**C12** is a review document, not a change: the four paragraphs as they are,
-each beside a shorter version, for you to choose. Nothing ships from it until
-you pick.
+**C12** is a review document, not a change: sixty paragraphs, each beside a
+shorter version, for you to choose. Nothing ships from it until you pick.
 
 ### S29, the demo path
 

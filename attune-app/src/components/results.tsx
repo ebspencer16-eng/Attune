@@ -3373,6 +3373,7 @@ function NextTile({ label, count, icon, active, onPress }: {
           phone are about eighty points each, and "What to keep in mind" came
           out as "What to keep in m…" while "Relationship" broke mid-word into
           "Relationshi p". Measured on the simulator rather than guessed. */}
+      {/* not markable: the label on a control. */}
       <Text
         numberOfLines={3}
         style={{

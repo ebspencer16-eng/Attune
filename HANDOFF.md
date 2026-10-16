@@ -3342,3 +3342,52 @@ Gottman and Nan Silver", an injected regex whose backslashes collapsed into a
 line comment, three request shapes guessed instead of read, and an assertion
 about who sends the confirmation email that was looking at the endpoint when
 the client sends it.
+
+---
+
+## 2026-10-16, her sixteen: the couple map answers a tap
+
+Everything in section 2 is done and section 2 says so. The website is live at
+7c668152 and an EAS update went to the production branch from the same commit,
+so the app needs two launches on her phone rather than a build.
+
+**B91 and B92 moved two blocks of the couple type page onto the map itself.**
+Each dot opens that person's paragraph beside it; a grey question mark beside
+Open and beside Withdraw opens that axis's sentence; both used to be printed
+under the chart. The pole names were typed into the website's SVG and again
+into the app's map, so they are `poles` and `helpAt` in api/_axes.js now and
+the payload carries them. The axis bars went with the panel at her word, which
+left `axisRows` and the payload's `rows` with no consumer: both deleted rather
+than left as a producer nothing reads.
+
+**B105 rebuilt What Comes Next as three buckets behind four tiles,** the
+grouping decided once in api/_lib/what-comes-next.js so neither surface can
+disagree about which bucket conflict belongs in. The survey is a coloured
+button at the foot of both; the website had no button at all, because
+dismissing its dialog wrote a flag nothing could undo.
+
+**check-map-controls.mjs drives the website half** at 390 and 1280 in the
+smoke: no description printed on the page, two marks opening their own axis,
+two dots opening their own paragraph, a click elsewhere and a tap on the map
+both closing it. Eleven plants, eleven failures. The app half was driven in the
+simulator with scripts/sim.mjs.
+
+**Four things cost an hour each and are in CLAUDE.md:**
+
+- `const BRAND_GRADIENT = BRAND_GRADIENT;` built clean and served a blank page.
+  A script extracted a repeated literal into a constant, then replaced every
+  occurrence of the literal including the one in the declaration it had just
+  written. check-server-undefined fails on a self-initialised declarator now,
+  seven forms planted.
+- A dispatched click with no coordinates is a click at x=0, which is inside the
+  results column's page-back zone. Every dismissal assertion passed because the
+  page had navigated away.
+- Measuring a popup by geometry was wrong twice before a `data-map-panel`
+  attribute ended it.
+- The app's tile numbers were clipped: `Type.display` at 22 points keeps the
+  line height it carries for its usual size, so 9 drew as 0. Found by looking
+  at a simulator screenshot, not by reading the style.
+
+**What is left for her**, all in section 3: the sixteen to look at, C11's 150
+insights, C12's sixty paragraphs, S30's checkout-price refactor, and S27's
+three measured non-fixes.
