@@ -546,6 +546,21 @@ export default function Results({
     return i >= 0 && kids.length > 1 ? { index: i + 1, total: kids.length } : null;
   })();
 
+  /**
+   * ── B94: WHAT IS IN THIS SECTION, ON ITS COVER ─────────────────────────
+   * Ellie: "I want insights exercise cover pages to have a mini table of
+   * contents that tells you each of the pages in that section."
+   *
+   * The same set the step counter walks, which is the nav group's children
+   * without the cover. Derived rather than written out: five covers with a
+   * typed list each is five lists to keep in step with the nav, and the nav is
+   * already the thing that decides what pages exist.
+   */
+  const coverContents = (activeGroup?.children || [])
+    .filter((ch) => !ch.cover)
+    .map((ch) => ch.label)
+    .filter(Boolean);
+
   /* Reported after render rather than during: calling a parent's setState
      while this one is rendering is the warning every React app earns once. */
   useEffect(() => { onAccent?.(activeGroup?.color || null); }, [activeGroup?.color, onAccent]);
@@ -982,6 +997,7 @@ export default function Results({
           /* The cover's title is the nav entry's own label, which is the
              exercise's full name from the registry. */
           coverTitle={navEntry?.label || ''}
+          coverContents={coverContents}
           coverIcon={activeGroup ? GROUP_ICON[activeGroup.id] || null : null}
           /* The active nav group's colour, which the server sends. Sections
              that need their own accent take it from here rather than writing
@@ -1163,13 +1179,15 @@ export default function Results({
  * the same screen.
  */
 function SectionBody({
-  section, step, coverTitle, coverIcon, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
+  section, step, coverTitle, coverContents, coverIcon, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
   intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
 }: {
   section: string;
   /** Which of its section's detail pages this is, from the nav. */
   step: { index: number; total: number } | null;
+  /** The pages inside this section, for the cover's contents list. */
+  coverContents?: string[];
   /** What a cover page is called: the nav entry's own label. */
   coverTitle: string;
   /** The section's icon, the same one the menu draws. */
@@ -1258,6 +1276,7 @@ function SectionBody({
     return (
       <Cover
         title={coverTitle}
+        contents={coverContents}
         accent={accent || c.accent}
         icon={coverIcon}
         startLabel={pageCopy('coverStart', 'See insights')}
@@ -3884,8 +3903,8 @@ function CoupleType({ results, you, them, title }: {
  * too. Ellie: "Mirror cover pages for exercises and results on both web and
  * app." What is left here is what a chapter puts inside it.
  */
-function Cover({ title, accent, icon, onStart, startLabel }: {
-  title: string; accent: string; icon?: string | null; onStart?: () => void;
+function Cover({ title, contents, accent, icon, onStart, startLabel }: {
+  title: string; contents?: string[]; accent: string; icon?: string | null; onStart?: () => void;
   /* From the server's PAGE_COPY, so the website's cover says the same word. */
   startLabel: string;
 }) {
@@ -3900,6 +3919,25 @@ function Cover({ title, accent, icon, onStart, startLabel }: {
       <Prose style={{ ...Type.hero, color: c.textStrong, textAlign: 'center', marginTop: Spacing.lg }}>
         {title}
       </Prose>
+
+      {/* ── WHAT IS INSIDE ────────────────────────────────────────────
+          A mini table of contents, at Ellie's ask. Quiet: the page's job is
+          still the name and the way in, and this is the sentence under it
+          that says how far it goes. The names are the nav's own, so a page
+          added to the section turns up here without anyone typing it. */}
+      {contents?.length ? (
+        <View style={{ marginTop: Spacing.xl, alignItems: 'center', gap: Spacing.xs }}>
+          {contents.map((label) => (
+            /* not markable: a list of page names, which are labels rather than
+               findings. A mark anchored to one would follow the word. */
+            <Text
+              key={label}
+              style={{ ...Type.small, color: c.textMuted, textAlign: 'center' }}>
+              {label}
+            </Text>
+          ))}
+        </View>
+      ) : null}
 
       {onStart ? (
         <Pressable
@@ -4306,8 +4344,22 @@ function SbsDot({
         width: size, height: size, borderRadius: size / 2,
         backgroundColor: color, opacity: small ? 0.9 : 1,
         alignItems: 'center', justifyContent: 'center',
-        shadowColor: color, shadowOpacity: small ? 0 : 0.5,
-        shadowRadius: small ? 0 : 6, shadowOffset: { width: 0, height: 0 },
+        /**
+         * ── B93: A RING, NOT A GLOW ──────────────────────────────────────
+         * Ellie: "my friend is looking at the app on an ipad and says the dots
+         * on the sliding bars look fuzzy/blurry. Can we fix the outlines?"
+         *
+         * The outline was a shadow in the dot's OWN colour, six points of
+         * blur at half opacity and no offset. That is a coloured halo around a
+         * coloured circle, which is what a blurred edge looks like, and the
+         * bigger the screen draws it the more of it there is to see.
+         *
+         * The other dot on these pages, `Dot` below, has always been a crisp
+         * white ring. This is that: one way of drawing a person on a track,
+         * not two. The ring is thinner on the small dots, which are the read
+         * of the other person and are 10 points across.
+         */
+        borderColor: Palette.white, borderWidth: small ? 1.5 : 2.5,
       }}>
       {label ? (
         <Text style={{ fontSize: 8, fontWeight: '800', color: Palette.white }}>{label}</Text>

@@ -58,8 +58,8 @@ These two are still waiting on somebody, and neither is waiting on me.
 |--|--|
 | B91 | **Couple type: the individual types section goes, and each person's paragraph moves into a popup beside their dot.** Tap outside to dismiss, no axis bars in it. Both surfaces. |
 | B92 | **A grey question mark beside Open and Withdraw**, opening that axis's description, and the descriptions come off the chart. Both surfaces. |
-| B93 | **The slider dots look fuzzy on an iPad.** Fix the outlines. |
-| B94 | **Each exercise cover page in Insights gets a mini table of contents** naming the pages in that section. Both surfaces. |
+| B93 | **Done, and here is what it was.** The outline was a shadow in the dot's own colour, six points of blur at half opacity: a coloured halo round a coloured circle. It is a crisp white ring now, the same one the other dot on those pages has always had. I could not reproduce on an actual iPad, so tell me if your friend still sees it. |
+| B94 | **Done, both surfaces.** The contents are the nav's own page names, so a page added to a section turns up on its cover without anyone typing it. |
 | B95 | **Done.** Both were right about what they counted, which was the bug: the overview counted itself plus six conversations, the conversation pages ran a second counter over the six alone. One denominator now, 1/7 through 7/7. |
 | B96 | **Done, app only.** The website's overview had already lost that line, so this was the app catching up. |
 | B97 | **Done, both surfaces.** Each area row already carries its own topic count. |
@@ -71,7 +71,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 | B103 | **"Communication action plan" is called "Communication styles."** Both surfaces. |
 | B104 | **The couple type action plan is the three phrases to try.** Both surfaces. |
 | B105 | **What Comes Next, rebuilt around three buckets and four tiles.** The largest item here. Detail under this table. |
-| C12 | **A table of the four paragraphs under What Comes Naturally and What's Worth Being Aware Of, each beside a shorter version**, for you to pick from. Goes to section 3 when it is ready. |
+
 | S29 | **The demo path, buttoned up.** Purchase, account setup, exercises, completion and results all driven end to end. One real gap found and closed. Detail under this table. |
 | S28 | **The earlier sweep.** Two stale comments, fixed, and the app driven for real. Detail under this table. |
 
@@ -238,10 +238,30 @@ changed, one at a time, rather than a run that would have taken an hour.
 |--|--|
 | C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
 | S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
+| C12 | **60 paragraphs, each beside a shorter version, for you to choose from.** Not four: three of each for all ten couple types, and you only ever see your own six. `COUPLE-TYPE-COPY-REVIEW.md`. Nothing is live until you say. Detail under this table. |
 | S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. Detail under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### C12, the long and the short of it
+
+**Where it is.** `COUPLE-TYPE-COPY-REVIEW.md`, one table for What comes
+naturally and one for What's worth being aware of. Left column what ships
+today, right column a proposal. 128 characters now, 51 proposed.
+
+**Why sixty and not four.** Each of the ten couple types has three of each.
+You see your own six, which is why it reads as a handful. A decision about the
+shape of this copy is a decision about all sixty, so they are all there.
+
+**Nothing is live.** The proposals are in a file the product does not read.
+Tell me which column you want, per row or in bulk, and it goes into the module.
+
+**One thing it does that the insights review did not.** Each proposal records
+the sentence it was written against. If you rewrite one in the module, the
+table marks that row STALE instead of showing my shorter version beside a
+sentence it was never about. That is the failure that nearly lost your 74
+insights, caught by a check this time rather than by me.
 
 ### S27, the three I left alone
 

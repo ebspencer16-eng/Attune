@@ -8524,6 +8524,26 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <h1 style={{ fontFamily: font.display, fontSize: "clamp(1.7rem, 4vw, 2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.15, margin: 0, maxWidth: 460 }}>
                 {RESULTS_SECTION_LABELS[section] || group?.label || ""}
               </h1>
+              {/* ── B94: WHAT IS INSIDE ────────────────────────────────
+                  Ellie: "I want insights exercise cover pages to have a mini
+                  table of contents that tells you each of the pages in that
+                  section."
+
+                  The nav group's own children, minus the cover itself and the
+                  headers that are labels rather than pages. Derived, because
+                  five covers with a typed list each is five lists to keep in
+                  step with a nav that already decides what pages exist. */}
+              {(group?.children || []).filter(ch => !ch.isDomainHeader && !ch.id?.endsWith("-cover")).length > 0 && (
+                <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: "0.3rem", alignItems: "center" }}>
+                  {(group.children || [])
+                    .filter(ch => !ch.isDomainHeader && !ch.id?.endsWith("-cover"))
+                    .map(ch => (
+                      <span key={ch.id} style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: BFONT, lineHeight: 1.5 }}>
+                        {ch.label}
+                      </span>
+                    ))}
+                </div>
+              )}
               {/* block: cover/start */}
               <button
                 onClick={() => go(section.replace("-cover", "-overview"))}

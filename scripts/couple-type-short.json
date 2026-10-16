@@ -1,0 +1,302 @@
+{
+ "WW": {
+  "S": [
+   {
+    "was": "{U} and {P} are easy to be known by each other. ",
+    "short": "Both of you are easy to know, and it goes both ways."
+   },
+   {
+    "was": "Neither of you has to decode the other. You're b",
+    "short": "Neither of you has to decode the other."
+   },
+   {
+    "was": "Hard conversations don't get avoided as often be",
+    "short": "Hard conversations get avoided less often."
+   }
+  ],
+  "P": [
+   {
+    "was": "High expressiveness on both sides can create amp",
+    "short": "Two strong feelings can amplify each other."
+   },
+   {
+    "was": "Difficult emotions can land harder than intended",
+    "short": "A hard moment lands at full force."
+   },
+   {
+    "was": "Not every feeling needs to go into the shared sp",
+    "short": "Not every feeling has to be said straight away."
+   }
+  ]
+ },
+ "XX": {
+  "S": [
+   {
+    "was": "{U} and {P} make decisions efficiently once the ",
+    "short": "Once the information is in, you decide quickly."
+   },
+   {
+    "was": "Arguments between you tend to be structured. You",
+    "short": "Arguments between you stay structured."
+   },
+   {
+    "was": "There's very little translation required. You're",
+    "short": "Little translation needed. You track the same things."
+   }
+  ],
+  "P": [
+   {
+    "was": "Two people who both process internally can go a ",
+    "short": "Two internal processors can go a long time without surfacing anything."
+   },
+   {
+    "was": "Efficient repair isn't the same as complete repa",
+    "short": "Quick repair is not always complete repair."
+   },
+   {
+    "was": "The relationship can be strong on logistics and ",
+    "short": "Strong on logistics, lighter on emotional texture."
+   }
+  ]
+ },
+ "YY": {
+  "S": [
+   {
+    "was": "Things don't escalate in the moment. {U} and {P}",
+    "short": "Neither of you escalates in the moment."
+   },
+   {
+    "was": "When the conversation does happen, it tends to b",
+    "short": "The later conversation is calmer and more substantive."
+   },
+   {
+    "was": "Both of you understand the need for space, so yo",
+    "short": "Neither of you takes the other's need for space personally."
+   }
+  ],
+  "P": [
+   {
+    "was": "{U} and {P} can both wait a long time for the ot",
+    "short": "Both of you can wait a long time for the other to come back."
+   },
+   {
+    "was": "Open-ended space is harder to sit with than boun",
+    "short": "Open-ended space is harder to sit with than a set time."
+   },
+   {
+    "was": "Two people who both default to withdrawal after ",
+    "short": "Things that need addressing can wait a long time."
+   }
+  ]
+ },
+ "ZZ": {
+  "S": [
+   {
+    "was": "When {U} and {P} share something, it carries wei",
+    "short": "When either of you shares something, it carries weight."
+   },
+   {
+    "was": "The relationship has real privacy and respect fo",
+    "short": "You both respect each other's interior life."
+   },
+   {
+    "was": "What you've built together is real even if it's ",
+    "short": "The depth is real even when it is not performed."
+   }
+  ],
+  "P": [
+   {
+    "was": "Important things can go unsaid for a very long t",
+    "short": "Comfort with silence can become avoidance."
+   },
+   {
+    "was": "Neither of you naturally initiates the harder co",
+    "short": "Neither of you starts the harder conversation."
+   },
+   {
+    "was": "The relationship can look more okay from the out",
+    "short": "It can look more okay from outside than it is."
+   }
+  ]
+ },
+ "WX": {
+  "S": [
+   {
+    "was": "{U} and {P} are rarely stuck in a standoff. You ",
+    "short": "You both want to resolve things, so you pull the same way."
+   },
+   {
+    "was": "You bring complementary processing styles. One k",
+    "short": "One holds the emotional temperature, one thinks first."
+   },
+   {
+    "was": "The relationship has both warmth and steadiness.",
+    "short": "Warmth and steadiness, covering different ground."
+   }
+  ],
+  "P": [
+   {
+    "was": "{EXP} can feel like {EXP_isC} always the one ini",
+    "short": "{EXP} can feel like the one always doing the emotional work."
+   },
+   {
+    "was": "{GRD} can feel pressure to match an emotional ex",
+    "short": "{GRD} can feel pressure to match an expressiveness that is not natural."
+   },
+   {
+    "was": "What the expressive partner reads as withholding",
+    "short": "One reads withholding where the other is still forming it."
+   }
+  ]
+ },
+ "WY": {
+  "S": [
+   {
+    "was": "Once you understand each other's conflict clock,",
+    "short": "Knowing each other's conflict clock removes most of the friction."
+   },
+   {
+    "was": "You bring complementary instincts, one keeps thi",
+    "short": "One keeps things from festering, one keeps them from escalating."
+   },
+   {
+    "was": "This dynamic, when named, often produces repair ",
+    "short": "Named, this dynamic produces repair that works for both."
+   }
+  ],
+  "P": [
+   {
+    "was": "Without a framework, whoever needs space reads u",
+    "short": "Urgency reads as pressure, distance reads as avoidance."
+   },
+   {
+    "was": "The pursuer-withdrawer loop: one presses for res",
+    "short": "One presses, the other retreats, and it escalates."
+   },
+   {
+    "was": "Repair happens on one person's timeline, usually",
+    "short": "Repair starts on the initiator's timeline."
+   }
+  ]
+ },
+ "WZ": {
+  "S": [
+   {
+    "was": "The reaching partner creates space for emotional",
+    "short": "One creates space for honesty, one creates depth under it."
+   },
+   {
+    "was": "When {WDR} does share, it carries real weight, a",
+    "short": "When {WDR} does share, it carries weight."
+   },
+   {
+    "was": "You've both had to stretch toward each other in ",
+    "short": "You have both stretched toward each other."
+   }
+  ],
+  "P": [
+   {
+    "was": "{RCH} can feel like {RCH_isC} always the one ini",
+    "short": "{RCH} can feel like the one always making the first move."
+   },
+   {
+    "was": "The reserved partner can feel pressure to match ",
+    "short": "{GRD} can feel pressure to match an expressiveness that is not natural."
+   },
+   {
+    "was": "The translation gap is real. What {U} means and ",
+    "short": "What {U} means and what {P} hears can differ."
+   }
+  ]
+ },
+ "XY": {
+  "S": [
+   {
+    "was": "{U} and {P} have strong, complementary instincts",
+    "short": "Named and managed, your instincts produce repair that works."
+   },
+   {
+    "was": "You cover very different emotional territory, on",
+    "short": "One tracks the logic, one tracks the feeling."
+   },
+   {
+    "was": "The dynamic is highly solvable once it's named. ",
+    "short": "The dynamic is highly solvable once it is named."
+   }
+  ],
+  "P": [
+   {
+    "was": "{RCH_pos} move toward resolution can close off t",
+    "short": "The conversation can start before {WDR} is ready."
+   },
+   {
+    "was": "{WDR_pos} visible emotion during withdrawal can ",
+    "short": "{WDR_pos} visible emotion can look like something to fix."
+   },
+   {
+    "was": "It can feel like one person cares more than the ",
+    "short": "It can look like one of you cares more."
+   }
+  ]
+ },
+ "XZ": {
+  "S": [
+   {
+    "was": "{U} and {P} can coexist in quiet without it feel",
+    "short": "Silence between you is comfortable rather than tense."
+   },
+   {
+    "was": "Neither of you puts things into the shared space",
+    "short": "What either of you says has been considered first."
+   },
+   {
+    "was": "The relationship has real privacy and mutual res",
+    "short": "You both respect each other's interior life."
+   }
+  ],
+  "P": [
+   {
+    "was": "Neither partner is offering a lot of emotional v",
+    "short": "Neither of you offers much emotional visibility."
+   },
+   {
+    "was": "When something is wrong, neither of you naturall",
+    "short": "When something is wrong, neither of you reaches first."
+   },
+   {
+    "was": "Two people who both process privately can coexis",
+    "short": "You can coexist without landing in the interior."
+   }
+  ]
+ },
+ "YZ": {
+  "S": [
+   {
+    "was": "Things don't escalate in the moment. {U} and {P}",
+    "short": "Neither of you escalates in the moment."
+   },
+   {
+    "was": "When the conversation does happen, it tends to b",
+    "short": "The later conversation is calmer and more real."
+   },
+   {
+    "was": "Both of you understand the need for space, so yo",
+    "short": "Neither of you takes the other's need for space personally."
+   }
+  ],
+  "P": [
+   {
+    "was": "{U} and {P} can both wait a long time for the ot",
+    "short": "Both of you can wait a long time for the other to come back."
+   },
+   {
+    "was": "{EXP_pos} visible emotion during withdrawal can ",
+    "short": "{EXP_pos} visible emotion is hard to read during withdrawal."
+   },
+   {
+    "was": "Hard things can sit for a very long time before ",
+    "short": "Hard things can sit a long time before either of you raises them."
+   }
+  ]
+ }
+}
