@@ -3226,3 +3226,36 @@ blocked on nothing but the key. Verify each against the scan before it goes in.
 **Her word list has now failed to arrive twice**, as an attachment that reaches
 me as a placeholder. TASKS.md gives her `pbpaste > ellie-paste.txt`, which is
 gitignored, and the file is read, applied and deleted.
+
+### The books round
+
+**Her key is stored and the insight list is 150.** `check-quotes-verbatim`
+reads `GOOGLE_BOOKS_KEY` or, failing that, the login keychain under
+`attune-google-books`. Before it, 27 book quotations were unverifiable on this
+machine; now 73 are checked against the page they cite and 75 against Google's
+scan of the volume, with 2 reported unchecked on the run that added them
+because Google answered 503. Both verify on a retry.
+
+**The 50 she asked for came from 20 books the list had never used:** bell
+hooks, Fromm, Perel, Lerner, Brown, Tatkin, Rosenberg, Chapman, Peck, de
+Botton, Thich Nhat Hanh, Rollo May, Gibran, Rilke, Waldinger and Schulz,
+Goleman, Gottlieb, Patterson, and two more Gottman works.
+
+**The rate is the thing to remember.** 139 candidates, 63 found in the book
+they claimed. Ones I remembered and typed verified at about 45 per cent; ones
+lifted off a page that quotes the book at length verified at 75. Several
+failures were sentences that circulate everywhere under an author's name and
+are nobody's actual words, which is exactly what the scan is for.
+
+**An existing gate caught my data, not my code.** check-insight-provenance
+found six works cited under more than one edition, because the verifier records
+whichever edition Google surfaced for that phrase and that differs between
+calls. One edition per work now, the one most of its quotations matched.
+
+**Her words carry seven edits** and nothing else changed; the other 93 she left
+alone. They arrived through `pbpaste > ellie-paste.txt` after two attempts that
+reached me as an empty attachment, and that recipe is in CLAUDE.md now.
+
+**What she still has to do:** nothing. Section 2 is empty. Section 3 has the
+150 insights to read, the three sweep findings I left alone, and the lawyer's
+two documents.

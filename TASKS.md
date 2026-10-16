@@ -8,70 +8,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| C10 | **A Google Books key, so books can be cited.** One command under this table takes it off your clipboard into the keychain. Do not paste the key to me. |
-| C8 | **Your 100 words.** Two pastes have reached me as an empty attachment. One command under this table sends the list instead. |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
-
-### C10, the Google Books key
-
-Yes, and the way to hand it over keeps it out of this chat and out of the repo.
-Do not paste it into a message to me.
-
-**You already have one.** It is in Vercel as `GOOGLE_BOOKS_KEY`. Open the
-project, Settings, Environment Variables, find that name and copy the value, so
-it is on your clipboard.
-
-**Then one command in Terminal.** It takes the key off the clipboard, so the
-key itself is never typed anywhere that keeps a copy:
-
-```
-security add-generic-password -U -a "$USER" -s attune-google-books -w "$(pbpaste | tr -d '[:space:]')" && echo stored
-```
-
-It prints `stored`. That is all I need to hear; do not send me the value.
-
-**What it buys.** The check that proves every quotation is real can only check
-the 73 that cite a web page. The 27 that cite a book need to ask Google whether
-that sentence is in that volume, and that needs the key. With it stored, the
-same check covers all 100 and says where the key came from in its own summary,
-so a run that checked nothing cannot read like a run that checked everything.
-
-**And then books.** You said you would rather cite books. Once the key is
-stored I will take the next batch from books and verify each one against the
-scan before it goes in, the same standard the web ones are held to. Tell me if
-you want me to replace some of the 26 web quotations with book ones rather than
-add to them.
-
-The key is read from the login keychain, or from `GOOGLE_BOOKS_KEY` in the
-environment if it is set. Neither is a file in the repo, which is the point.
-
-### C8, sending me your word list
-
-Your paste arrives at my end as an attachment, and the attachment does not
-reach me: all I get is a placeholder saying how many lines it had. That has now
-happened twice, so here is a way round it rather than a third try.
-
-**Copy the list, then run this in Terminal:**
-
-```
-pbpaste > /Users/Ellie/Projects/unison/ellie-paste.txt && wc -l /Users/Ellie/Projects/unison/ellie-paste.txt
-```
-
-It prints the number of lines it saved. Tell me that number and I will read the
-file, put the words into the list the product serves, and delete the file. It is
-gitignored, so it cannot be committed by accident.
-
-**One thing not to do:** do not edit WORDS-REVIEW.md. It is written by a script
-from the word list, so the next time I run the checks it is overwritten. That is
-exactly how your 74 insights were nearly lost. If you want to read it:
-
-```
-open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md
-```
 
 ### C6 is done, and here is where the 26 new ones came from
 
@@ -115,152 +56,35 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| | **Nothing open.** The two things at the top of this file are both yours, and both are one command. |
+| | **Nothing open.** Both of yours are done and are in section 4. The list is 150 insights now and the words carry your seven edits. |
 
 ## 3. For you to review
 
 | # | Built, needs your eye |
 |--|--|
-| S26 | **Eight sweeps, six found something, and your five questions about them are answered under this table.** |
+| C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
+| S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. Detail under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
-### S26, the sweeps and your five questions
+### S27, the three I left alone
 
-**Where this went wrong.** You answered every one of these and I wrote the
-answers under this section, while the long account of what the sweeps found
-stayed under section 2 where you had already read it. So you went to the S26
-you knew and found the same words as before. One S26 section now: your
-questions first, the full account below them.
+Each is a number rather than a fix, because fixing it would change how
+something looks and that is yours to decide.
 
-**2. Why is Notes slow when you have no marks?** It was not the marks. All four
-tabs mount the moment the app opens, and every one of them used to start its
-own requests there and then: about ten, each a separate function on the server,
-several of them cold, over one phone's connection. The tab you were waiting for
-was queued behind three you had not asked for. Each tab now loads when you open
-it. Opening the app makes three requests instead of ten.
+**459 controls under 44 points on a phone.** Mostly footer links at 16 points
+tall. Apple asks for 44 by 44. Making them that would change the footer's
+shape, so I measured them and left them.
 
-Your paging is in too, and it is the right shape for later: three marks per
-tile, ten when you tap through, and a tag's contents only when you open that
-tag. The tile still says how many there are, because the number comes from the
-server rather than from counting the rows on screen.
+**110 pieces of text between 3.0 and 3.5 contrast.** Muted grey on cream:
+legible, and under the 4.5 the standard asks for. That is the palette rather
+than a mistake. The three that were genuinely unreadable are fixed.
 
-**3. The unbounded queries: is this a problem?** Not yet, and it is the kind
-that only shows up once it is one. Every one of them was a read with no ceiling,
-so the cost grows with the person's own library. Notes was the worst and it is
-the one now capped. The others read lists that cannot grow past a few dozen
-rows.
-
-**4. The fonts: fixed, and does it make loading faster?** Fixed, and yes, a
-little. Thirty-five places asked for a weight the page never loaded, so the
-browser faked it. The stylesheet now asks for a range rather than twenty
-separate weights, which is four font-face rules where there were twenty.
-
-**5. The links: did you fix this?** Yes. The Terms anchor pointed at a section
-that had been renamed. `/privacy` was reported dead by the sweep and was not:
-it is a redirect, and the sweep had only read the rewrite rules. That was the
-sweep being wrong, not the site.
-
-### S26, what the sweeps found
-
-Each one measured one property across every instance of its thing. Six found
-something real, two found nothing, and one of those two is worth as much: it
-turned "the prices are probably fine" into a figure.
-
-**1. How much each screen downloads.** The Notes endpoint sent every column of
-every note, including two the app has never read. One of them is a key made of
-both your user ids, which had no business leaving the server. Seventeen per
-cent off that payload; at two hundred notes it is twenty kilobytes a person
-stops downloading every time they open the tab.
-
-**2. Queries with no ceiling.** Thirty-three reads of a table that grows with
-use. Fifteen have no limit; eleven of those are the admin reading everything on
-purpose and are fine. The notes list is the one a customer waits for, and it is
-honest to say it will get slower for somebody with hundreds of marks. I have
-not capped it, because a cap on a list of marks means older marks silently stop
-drawing, and that is worse than slow.
-
-**3. What each page weighs.** The app shell is 1.4MB of JavaScript, which is
-the biggest single number in the product and is its own piece of work. The
-marketing pages are 160 to 260k, most of it fonts, which led to:
-
-**4. Fonts.** The real find. Thirty-five places where text was drawn in a face
-the page never loaded, so the browser faked it:
-
-- Bold DM Sans on ten pages, 203 pieces of text. Those pages asked for 600 and
-  below and drew 700, so every bold line on them was a smeared 600.
-- Italic DM Sans on thirteen pages. No page loaded any italic DM Sans at all.
-- The admin's bold monospace, 55 places. DM Mono has no bold; Google drops the
-  request silently and the browser smears 400. Its heaviest is 500.
-- And the other way: three weights of a font called Syne were downloaded by the
-  app shell and by the portal, and no text in the product is set in it.
-
-The site also had eight different font requests, so moving between pages
-downloaded a different subset each time. There is one now, and everything it
-asks for is drawn and everything drawn is asked for.
-
-**5. Every link, followed.** 1136 links across 38 pages. One went nowhere: the
-Terms of Service link inside the EULA, which worked when the script ran and
-landed on nothing when it did not, because that document was missing the plain
-anchor the other four have. Privacy was missing it too.
-
-**6. What each endpoint does when it goes wrong.** 240 calls, four bad inputs
-each. Nothing threw, nothing answered a 500 it should not, and nothing put a
-stack trace or a key in an answer. Two endpoints had never been checked at all,
-because they use the other of Vercel's two runtimes and the gate said so out
-loud; they are covered now.
-
-**7. How big every control is, on a phone.** 730 controls measured at 390
-points. Apple asks for 44 by 44; 581 were smaller. Most of those are footer
-links, which are small by convention and are your call. The four that are not:
-
-- The menu button, 32 by 26 on 17 pages. The one control a phone user needs.
-- The cart button, 72 by 31 on 25 pages.
-- Accept and Decline on the privacy banner, about 75 by 31 on 34 pages. The
-  first two controls anybody touches.
-
-All four are 44 now. The words did not move: only the box a thumb has to find
-got bigger.
-
-And the menu button was worse than small on five In Practice pages. Its styling
-sat inside a phone-width media query, so above 640 points it had no rule at all
-and rendered as a four-pixel nub in the nav, on every desktop. Those five pages
-were the ones that never had the rule in the first place. Now hidden above 640
-and 44 by 44 below it, measured at four widths.
-
-The remaining 459 are mostly footer links at 16 points tall. Making those 44
-would change how the footer looks, so I have left them and am telling you the
-number instead.
-
-**8. The contrast of every piece of text, against what is painted behind it.**
-1973 pieces measured. Three real ones, all now fixed:
-
-- **The Get started button in the nav, on seven pages.** On Legal and Your
-  privacy choices it was brown on orange at 1.65 against the 4.5 it needs:
-  close to unreadable. On the five In Practice index pages it had no orange at
-  all and read as plain text. A rule called `.nav-right a` is more specific
-  than `.btn-nav`, so it won. One rule now, specific enough, on all 29 pages.
-- **The category pill on twelve In Practice articles**, brand orange on a wash
-  of itself, 2.93. The same hue darkened to 6.11.
-- **The pill above each package name** on both the packages page and the
-  checkout, 2.94. Same fix.
-
-One of those three nearly cost a fourth. The pill on the Premium tile is the
-only one on a dark ground, and darkening all four took it from 2.92 to 1.97. It
-is a light blue now and reads at 4.8, measured from the painted pixels. The
-sweep had been skipping it silently, because a gradient has no background
-colour for the usual method to find; it counts and reports them now.
-
-137 are still below the standard. 35 of those are on the workbook's print
-template, which is a page nobody visits. Of the rest, 110 sit between 3.0 and
-3.5, which is muted grey text on cream: legible, and below the line. That is a
-palette decision rather than a bug, so I have left it and am telling you the
-number.
-
-**And the prices.** Every dollar amount on the site is a catalogue price or the
-one derived number, which is right in all four places it appears and already
-held by a check.
+**The app shell is 1.4MB of JavaScript.** It is the website's dashboard, not
+the phone app, and it is the one page where that matters least because people
+arrive at it signed in and stay. Splitting it is a day's work and would change
+nothing you can see.
 
 ## 4. Done and verified
 
@@ -270,6 +94,9 @@ held by a check.
 
 | Verified by you | What it was |
 |--|--|
+| C10 | 50 insights from 20 books the list had never used, each one verified against Google's scan of the volume it cites with the key you stored; 76 candidates failed that check and were dropped rather than softened. |
+| C8 | Your seven edits to the word definitions, in word for word; the other 93 you left alone, and the review document is rebuilt from the list the product reads. |
+| S26 | Eight sweeps, six found something: two unread columns on the notes payload, 35 places drawing text in a face the page never loaded, a nav button at 1.65 contrast, a four-pixel menu button, a dead Terms anchor. |
 | C9 | Q12 cut a word from the middle of a quotation with nothing marking the cut; your answer was an ellipsis, and it carries one. |
 | C6 | Your 74 kept quotations, in the list the product reads rather than the document a build erases, plus 26 from five new publications, posted in an order that repeats no writer, subject or source on consecutive days. |
 | B88 | The Get started pill and the hamburger were both in the top bar on every phone; the pill now goes wherever the links go, and stays in the bar at desktop width. |

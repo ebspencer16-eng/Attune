@@ -484,7 +484,7 @@ export const WORDS = [
     id: 'encouragement',
     word: 'Encouragement',
     part: 'noun',
-    definition: 'Backing someone before the outcome is known.',
+    definition: 'Supporting someone before the outcome is known.',
   },
   {
     id: 'flexibility',
@@ -538,7 +538,7 @@ export const WORDS = [
     id: 'integrity',
     word: 'Integrity',
     part: 'noun',
-    definition: 'Being the same person in both rooms.',
+    definition: 'Being the same person no matter the situation you are in.',
   },
   {
     id: 'jealousy',
@@ -568,7 +568,7 @@ export const WORDS = [
     id: 'maintenance',
     word: 'Maintenance',
     part: 'noun',
-    definition: 'The unglamorous work that keeps everything else possible.',
+    definition: 'The unglamorous work that keeps the relationship possible.',
   },
   {
     id: 'misunderstanding',
@@ -580,7 +580,7 @@ export const WORDS = [
     id: 'mutuality',
     word: 'Mutuality',
     part: 'noun',
-    definition: 'Both of you doing the reaching.',
+    definition: 'Both of you reaching for each other, even if you reach in different ways.',
   },
   {
     id: 'negotiation',
@@ -604,7 +604,7 @@ export const WORDS = [
     id: 'perspective',
     word: 'Perspective',
     part: 'noun',
-    definition: 'Your partner’s version, held long enough to be understood.',
+    definition: 'Your partner’s version, considered for long enough to be understood.',
   },
   {
     id: 'playfulness',
@@ -616,7 +616,7 @@ export const WORDS = [
     id: 'privacy',
     word: 'Privacy',
     part: 'noun',
-    definition: 'What is yours to tell, including inside a marriage.',
+    definition: 'What is yours to tell, which is fine as long as that expectation is set.',
   },
   {
     id: 'reciprocity',
@@ -634,7 +634,7 @@ export const WORDS = [
     id: 'respect',
     word: 'Respect',
     part: 'noun',
-    definition: 'Treating someone’s reasons as real before you have agreed with them.',
+    definition: 'Treating someone’s reasons as real before you agree with them.',
   },
   {
     id: 'safety',

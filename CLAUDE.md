@@ -867,6 +867,23 @@ That process was already written in the file, in those three steps, and I had no
 been following it. Working first and recording afterwards is how an item gets
 recorded as whatever it turned into rather than as what she asked for.
 
+**A row she has answered must not come back wearing the same words.** Ellie:
+"After I have read and responded to something, it should not stay in tasks the
+same way, there should be an updated version. All of this is approved now and
+should be moved to section 4 of tasks."
+
+Two things in that. An approved item moves to section 4 the same turn, which
+this file already says. The other half is new: a row she has READ has done its
+job, so leaving it identical makes her read it twice to find out nothing
+changed. Rewrite it to say what moved, or move it.
+
+The same rule caught me from the other side in the same round. She had answered
+all five questions under S26 and I wrote the answers into a new section while
+the long account she had already read stayed where it was, under a different
+heading. She went to the S26 she knew, found the same words, and said so: "Not
+seeing any new content or explanations here." One id, one section, and the new
+part at the top of it.
+
 **Design and copy belong in section 3, never section 4.** Section 4 is "done and
 verified", and what verifies a row there is a check. Nothing can check whether a
 screen looks right, so a design pass filed there is a pass nobody will ever
@@ -887,6 +904,42 @@ were both real improvements and neither was the request. When an instruction
 names a thing to mirror, go and read that thing, list what makes it recognisable,
 and do those. For a screen that is usually the ground, the type on it, and the
 shape of the blocks, in that order of what a person notices.
+
+**A key she owns goes into her keychain, not into a file and not into chat.**
+She offered one: "Can I give you a key to run a google books check? I would
+rather cite books." The answer that keeps it out of the transcript and out of
+git is one command she runs, which takes the value off her clipboard:
+
+    security add-generic-password -U -a "$USER" -s attune-google-books \
+      -w "$(pbpaste | tr -d '[:space:]')" && echo stored
+
+`check-quotes-verbatim` reads `GOOGLE_BOOKS_KEY` from the environment first and
+falls back to `security find-generic-password -s attune-google-books -w`, and
+its summary says which of the two it used. Before the key there were 27 book
+quotations nothing on this machine could check; now all 150 are verified, 73
+against the page they cite and 77 against Google's scan of the volume.
+
+Planted with a deliberately wrong key: the gate read it, Google answered 400,
+and the entries were reported unchecked rather than as misquotations. A bad
+credential is not evidence about a quotation.
+
+**And a list she sends arrives as an attachment that is empty when it gets
+here.** Twice. The clipboard is the way round it, the same trick in the other
+direction:
+
+    pbpaste > /Users/Ellie/Projects/unison/ellie-paste.txt && wc -l /Users/Ellie/Projects/unison/ellie-paste.txt
+
+She tells me the line count, I read the file, apply it, and delete it.
+`ellie-paste.txt` is gitignored. Her 100 words came through this way on the
+first try after two failed pastes.
+
+**Where a candidate quotation comes from changes how often it is real.** 139
+candidates went through the Google Books check for the 50 book insights she
+asked for. The ones I remembered and typed out verified at about 45 per cent;
+the ones lifted off a page that quotes the book at length verified at 75. Both
+are legitimate ways in, because the scan is what adjudicates, but the second is
+cheaper even counting the fetch. The 76 that failed included several sentences
+that circulate widely under an author's name and are nobody's actual words.
 
 **Never ask her to paste a secret.** Ellie: "If you want me to do that in the
 future you have to tell me instead of just saying 'send it to me'." I asked her

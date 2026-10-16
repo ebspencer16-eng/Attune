@@ -107,7 +107,7 @@ over breakfast is not the tone you want.
 | 68 | **Discretion** | noun | Deciding what belongs to the two of you, and keeping it there. |
 | 69 | **Distance** | noun | Space neither of you asked for. |
 | 70 | **Effort** | noun | What love looks like on an ordinary week. |
-| 71 | **Encouragement** | noun | Backing someone before the outcome is known. |
+| 71 | **Encouragement** | noun | Supporting someone before the outcome is known. |
 | 72 | **Flexibility** | noun | Changing the plan without changing how you feel about the person. |
 | 73 | **Flooding** | noun | The point where your body ends the conversation for you. |
 | 74 | **Friendship** | noun | The part of a relationship that outlasts everything else. |
@@ -116,23 +116,23 @@ over breakfast is not the tone you want.
 | 77 | **Humor** | noun | Finding the same thing funny at the same moment. |
 | 78 | **Identity** | noun | Who you are when nobody is describing you. |
 | 79 | **Insecurity** | noun | A question about yourself that you aim at someone else. |
-| 80 | **Integrity** | noun | Being the same person in both rooms. |
+| 80 | **Integrity** | noun | Being the same person no matter the situation you are in. |
 | 81 | **Jealousy** | noun | Fear wearing an accusation. |
 | 82 | **Kindness** | noun | The small version of love, used daily. |
 | 83 | **Longing** | noun | Missing someone who is sitting next to you. |
 | 84 | **Loyalty** | noun | Speaking about someone the same way whether or not they are there. |
-| 85 | **Maintenance** | noun | The unglamorous work that keeps everything else possible. |
+| 85 | **Maintenance** | noun | The unglamorous work that keeps the relationship possible. |
 | 86 | **Misunderstanding** | noun | Two people being reasonable about different things. |
-| 87 | **Mutuality** | noun | Both of you doing the reaching. |
+| 87 | **Mutuality** | noun | Both of you reaching for each other, even if you reach in different ways. |
 | 88 | **Negotiation** | noun | Finding out what you each actually need, before deciding anything. |
 | 89 | **Openness** | noun | Letting a conversation change your mind. |
 | 90 | **Pace** | noun | The speed one of you is comfortable with, which is rarely the same speed. |
-| 91 | **Perspective** | noun | Your partner’s version, held long enough to be understood. |
+| 91 | **Perspective** | noun | Your partner’s version, considered for long enough to be understood. |
 | 92 | **Playfulness** | noun | Not being serious about something that does not need it. |
-| 93 | **Privacy** | noun | What is yours to tell, including inside a marriage. |
+| 93 | **Privacy** | noun | What is yours to tell, which is fine as long as that expectation is set. |
 | 94 | **Reciprocity** | noun | Keeping no score, and noticing anyway. |
 | 95 | **Resilience** | noun | Getting back to each other faster than last time. |
-| 96 | **Respect** | noun | Treating someone’s reasons as real before you have agreed with them. |
+| 96 | **Respect** | noun | Treating someone’s reasons as real before you agree with them. |
 | 97 | **Safety** | noun | Being able to say the hard thing and still be here afterward. |
 | 98 | **Stonewalling** | noun | Going quiet and calling it calm. |
 | 99 | **Timing** | noun | The difference between the right sentence and the wrong moment. |
