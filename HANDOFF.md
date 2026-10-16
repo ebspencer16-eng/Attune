@@ -3259,3 +3259,47 @@ reached me as an empty attachment, and that recipe is in CLAUDE.md now.
 **What she still has to do:** nothing. Section 2 is empty. Section 3 has the
 150 insights to read, the three sweep findings I left alone, and the lawyer's
 two documents.
+
+### The sweep she asked for while away
+
+"Can't engage rn, sweep for bugs and breaks." Nothing is broken. What the
+sweep actually produced was one verification I had been missing and three
+sentences that described code which does not exist.
+
+**The verification worth keeping.** The Notes screen can be driven with data
+behind it, through react-native-web, and that is the only way to check a figure
+that moved from being counted on the phone to being read off the payload. All
+four draw from the payload, and the request pattern is exactly what she asked
+for: three on arrival, ten on opening the list, a tag's rows on opening the
+tag. `scripts/probe-notes-screen.mjs`, with both traps written into its header.
+
+It also settles the lazy-tab question. Signed out, the screen reaches sign-in
+rather than sitting on a spinner, which proves the focus effect fires for the
+tab you are looking at. That was the one change this week that could have
+bricked the app on launch and only a driven check could answer it.
+
+**Three dead sentences, fixed:** a `valenceUnknown` flag in src/App.jsx that
+nothing sets, a `seenHighlights` name in results.tsx for a flag really called
+`cameFromHighlights` with a different rule, and next-action.js still describing
+the retired questionnaire when the code opens the survey.
+`scripts/probe-dead-comments.mjs` finds the shape; it cannot read tense or a
+parenthetical denial, so read its output rather than its count.
+
+**CLAUDE.md named a gate that does not exist.** check-style-codes and
+track-type.js went in b2dd2312 with the style code. The lesson stands and now
+says so.
+
+**The one app commit newer than the published bundle is comments only**, proved
+by stripping comments from both versions and comparing: identical. No EAS
+update published, because a comment is not a fix and an update costs every
+reader a download.
+
+**The residual risk, named rather than papered over.** The new Notes queries
+execute against Supabase and nothing local can run them. The foreign key the
+tag-stats embed needs is in migration 044 and the syntax is right, but the
+first real proof is Ellie opening the Notes tab on her phone. If it is wrong,
+the symptom is an empty Notes tab with an error card, not silent bad data.
+
+**And the machine.** 6GB into swap, where the browser gates crawl, so the full
+suite was not run as one chain; the gates covering every changed file were run
+individually instead. `sysctl vm.swapusage` before trusting any timing here.
