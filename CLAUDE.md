@@ -491,6 +491,27 @@ they are the same code.
 The tell, in advance: I was reading her sentence rather than the screen it
 names. "Looks like X" means go and render X.
 
+**The app screen can be driven with data behind it, and that is the only way
+to check a figure that moved.** The Notes tab's counts moved off the phone and
+onto the payload, and tsc and a server-side gate both passed while saying
+nothing about what the screen draws. Mounting the real screen through
+react-native-web with a stubbed fetch showed all four figures drawing from the
+payload, and the three requests on arrival that Ellie asked for, with the ten
+and the tag's rows arriving only when those pages open.
+`scripts/probe-notes-screen.mjs` is that probe, named probe- rather than check-
+because it needs the Expo web server and a one-line swap in `_layout.tsx`, and
+a check that edits app source is a check that leaves the repo modified when it
+throws.
+
+Two traps in it, each of which cost a run. `request()` in client.ts returns
+unauthorized WITHOUT fetching when there is no token, so a stub over fetch
+answers nothing until the session module holds one, and expo-secure-store is
+not localStorage on web so it cannot be seeded from the browser: the probe host
+calls `setToken`, which caches in memory. And the stub is injected as a
+template literal, so every backslash in it needs doubling: `/\/api\//` written
+with single backslashes becomes `//`, a line comment, which silently removed
+the rest of the stub and left the screen reporting "You're offline".
+
 **And when a surface cannot be driven by the usual checks, mount it in the web
 build.** The app's storycards are Expo components, which no browser gate here
 renders, so the first version passed every structural check while being wrong
@@ -736,6 +757,11 @@ wrong.** check-style-codes flagged track-type.js for carrying a four-letter code
 pattern, and the pattern it found was quoted inside the comment explaining that
 the four-letter pattern had been the bug. Blank comments before scanning, or the
 cost of writing down what happened is a failing build.
+
+(Both are gone: Ellie had the style code removed in b2dd2312 and the gate and
+the file went with it. The example is history, so do not go looking for either.
+The rule it taught is live, and `probe-dead-comments.mjs` is the thing that now
+finds this shape, including once in its own header.)
 
 **A gate that nothing runs is not a gate.** Two were sitting in `scripts/`
 connected to nothing: `check-section-aliases`, which stops a page rename making
@@ -1380,7 +1406,8 @@ caught it instantly, and now does.
 times in one session: a script removed `betaResponses`, wrote a comment saying
 what `betaResponses` used to be, and then asserted the name was gone. The
 assertion is right and the edit is right; the scan is reading prose as code.
-This file already says it about gates, under check-style-codes. It applies to
+This file already says it about gates, under check-style-codes, which was
+itself deleted along with the thing it checked. It applies to
 the throwaway scripts too, which is where it costs a re-run every time. Strip
 comments before asserting, or assert on the shape the code uses
 (`path: '/api/x'`) rather than on the name.

@@ -800,11 +800,17 @@ export default function Results({
               just did). So just start with couple type, then the next time
               they see the menu, highlights will be listed as well."
 
-              `seenHighlights` is set when the cards hand over, and it is
-              module state for the same reason `lastSection` is: it has to
-              survive this screen unmounting behind a tab bar. It is not
-              persisted, so a fresh launch offers Highlights again, which is
-              right: the reason to hide it is that they just watched it. */}
+              `cameFromHighlights` is set when the cards hand over, and it is
+              module state because it has to survive this screen unmounting
+              behind a tab bar. It is read once and cleared, so the very next
+              visit to this menu lists Highlights again, which is what she
+              asked for: the only reason to hide it is that they just watched
+              it.
+
+              This comment named it `seenHighlights` for a while, which is a
+              flag nothing sets and a different rule from the one that ships:
+              "seen" reads as a fact about the session and the real one is
+              cleared the moment it is used. */}
           <ResultsMenu
             groups={groups.filter((g) => !(g.id === 'highlights' && hideHighlights))}
             current={null}

@@ -56,7 +56,60 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| | **Nothing open.** Both of yours are done and are in section 4. The list is 150 insights now and the words carry your seven edits. |
+| S28 | **A sweep for bugs and breaks while you were away.** Two real findings, both stale comments rather than broken behaviour, and one verification I had been missing. Detail under this table. |
+
+### S28, the sweep
+
+**Nothing is broken.** Every figure below is from a run, not a reading.
+
+**The app, driven for real.** The Notes tab is the biggest thing I changed this
+week and I had only checked it by types and by gates. I mounted the real screen
+in a browser, with answers behind it, and it draws what it should: 212 recent,
+37 shared with 9 unread, a 5 day streak, 14 against the tag. Counted the old
+way, on the rows in hand, those would have read 2, 2, 2 and 3.
+
+It also makes exactly the requests you asked for and no others. On arrival:
+the tags, the home payload, and three marks. The ten arrive when you open the
+full list. A tag's marks arrive when you open that tag.
+
+And it answered the question the lazy-tab change raised, which no amount of
+reading could: every tab now loads when you open it and nothing loads on
+launch, so if that had not fired for the tab you are looking at, the app would
+have opened to a spinner for ever. It reaches the sign-in screen signed out,
+which is the proof it ran.
+
+**Every live route, from outside.** 39 of 39 answer. Five looked thin and all
+five are meant to be: the 404 page returning 404, the workbook's print target,
+the portal's redirect, the email preview, and the survey, which builds itself
+in the browser.
+
+**Every link in the insight review document.** 107 of 107 answer. Every one of
+the 26 book ids resolves to the book it cites, by that author.
+
+**Two real findings, both comments.** Neither changes what the product does,
+and both would have cost somebody an hour:
+
+- `src/App.jsx` claimed a flag was set to mark a low-confidence score. Nothing
+  ever set it. A reader would have gone looking, or worse, assumed thin answers
+  are flagged somewhere.
+- The app's results menu called a flag by a name nothing uses, and described a
+  different rule from the one that ships.
+
+A third was mine from last week: a comment in the home-screen router still
+described the feedback questionnaire you retired. What that code does is open
+the survey, which is correct; only the sentence was dead.
+
+**And CLAUDE.md named a gate that does not exist.** check-style-codes and the
+file it checked were deleted when you had the style code removed, and the
+lesson that cites them is still right, so it now says they are history rather
+than sending the next session looking.
+
+**What I could not check from here.** The new Notes queries run against your
+database and nothing local can execute them; the foreign key they rely on is in
+migration 044 and the syntax is right, but the first real proof is you opening
+the Notes tab. The full check suite also could not finish: this machine is
+6 GB into swap and its browser checks crawl, so I ran the ones covering what
+changed, one at a time, rather than a run that would have taken an hour.
 
 ## 3. For you to review
 

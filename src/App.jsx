@@ -3218,8 +3218,13 @@ const LIFE_QUESTIONS_ANNIVERSARY = LIFE_QUESTIONS;
 // Question counts per dimension are uneven; listening has 1 (flagged for
 // methodology review with the LMFT). avg returns 3 (neutral) when no answers
 // are present so partial completion still produces a usable score, and
-// `valenceUnknown` flag is set on the result so callers can surface that
-// the score is low-confidence.
+// no flag is set on the result. A `valenceUnknown` was described here for a
+// while and nothing ever produced it, so no caller could surface anything.
+// What does exist is `lowConfidence`, in api/_type-engine.js and again at the
+// couple-type level in this file, and it is about a different thing: scores
+// sitting near an axis line or clustered near the midpoint, not answers that
+// are missing. Missing answers score 3 and are not marked, which is safe only
+// because results are gated on completion before any of this runs.
 function calcDimScores(answers) {
   if (!answers) return {};
   // Mirrors calcDimScores in api/_type-engine.js. Questions inside a dimension

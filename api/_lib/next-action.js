@@ -144,8 +144,9 @@ export function webTargetFor(deepLink, renderable) {
    */
   if (!link || link === '/' || link === '/?view=home') return { view: 'home' };
 
-  /* A page of its own. /feedback is the questionnaire; anything else that is
-     not a ?view= link is a page too, and navigating is the honest answer. */
+  /* A page of its own. /feedback is the survey, which is the one instrument
+     this product has; anything else that is not a ?view= link is a page too,
+     and navigating is the honest answer. */
   if (!link.startsWith('/?')) return { href: link };
 
   const view = /[?&]view=([^&]+)/.exec(link)?.[1] || '';
@@ -188,10 +189,24 @@ export function webTargetFor(deepLink, renderable) {
 }
 
 export function appTargetFor(deepLink) {
-  // The feedback questionnaire runs in the app now. It is a page on the
-  // website rather than a view, so it is matched here rather than in the view
-  // list below. Nothing had asked these questions anywhere since the component
-  // was deleted as dead code.
+  /**
+   * `/feedback` opens the SURVEY in the app.
+   *
+   * This comment used to say "the feedback questionnaire runs in the app now",
+   * and it described something that no longer exists: Ellie retired the
+   * questionnaire outright, and `attune-app/src/components/survey.tsx` is the
+   * only screen in the app that asks anything. The flag below is still called
+   * `feedback` because that is the word on the card, the page and the deep
+   * link, and renaming it would touch the payload the app reads.
+   *
+   * What it does is what index.tsx does with it: `setSurveyOpen(true)`. A
+   * reader chasing the questionnaire through this file would have found
+   * nothing, which is the failure CLAUDE.md names as worse than no comment at
+   * all. The route is live and verified; only the sentence was dead.
+   *
+   * It is a page on the website rather than a view, so it is matched here
+   * rather than in the view list below.
+   */
   if (deepLink === '/feedback') return { route: '/', feedback: true };
 
   const view = /[?&]view=([^&]+)/.exec(deepLink || '')?.[1] || '';
