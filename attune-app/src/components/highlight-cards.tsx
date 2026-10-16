@@ -55,7 +55,7 @@ import type { HighlightCard, PersonResults } from '@/api/client';
 import { SITE_URL } from '@/api/client';
 import ShareButton from '@/components/share-button';
 import CoupleMap from '@/components/couple-map';
-import PageWash from '@/components/page-wash';
+import PageWash, { withAlpha } from '@/components/page-wash';
 import WordEntry from '@/components/word-entry';
 import { SaveToJournal } from '@/components/journal';
 
@@ -213,7 +213,7 @@ type TypeSpec = {
  * card's width, because on these cards that is what vw always meant: a fixed
  * 9:16 box whose text should size to the box, not to the screen around it.
  */
-function t(role: string, cardWidth: number, over?: Partial<TypeSpec>): Record<string, unknown> {
+function tRole(role: string, cardWidth: number, over?: Partial<TypeSpec>, onLight = false): Record<string, unknown> {
   const base = SC.type?.[role];
   /**
    * ── LEGIBLE WITHOUT THE SCALE ─────────────────────────────────────────
@@ -226,7 +226,7 @@ function t(role: string, cardWidth: number, over?: Partial<TypeSpec>): Record<st
    * This is not a second scale, which is what this file's header is about. It
    * is one colour, so a card that is early is readable rather than invisible.
    */
-  if (!base) return { color: '#FFFFFF' };
+  if (!base) return { color: onLight ? Colors.light.textStrong : '#FFFFFF' };
   const spec = over ? { ...base, ...over } : base;
   const px = Array.isArray(spec.size)
     ? Math.min(Math.max(spec.size[0] * 16, (spec.size[1] / 100) * cardWidth), spec.size[2] * 16)
@@ -269,9 +269,33 @@ function t(role: string, cardWidth: number, over?: Partial<TypeSpec>): Record<st
       : {}),
     ...(spec.upper ? { textTransform: 'uppercase' as const } : {}),
     ...(spec.lower ? { textTransform: 'lowercase' as const } : {}),
-    color: spec.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${spec.alpha})`,
+    /**
+     * ── WHITE, UNLESS THE CARD IS LIGHT ──────────────────────────────────
+     * Every card in this file was dark, so every role was white and the alpha
+     * was the only variable. The admired card is cream now, at Ellie's ask, so
+     * a card can say which way round it is and the whole scale follows. One
+     * decision per card rather than a colour beside every Text.
+     *
+     * The same trap this file already met with the word card: "every card in
+     * that file draws through t(), which returns white because every other
+     * card is dark, so on a near-white ground the wordmark and the address
+     * were white on white."
+     */
+    color: onLight
+      ? (spec.alpha >= 1 ? Colors.light.textStrong : withAlpha(Colors.light.textStrong, spec.alpha))
+      : (spec.alpha >= 1 ? '#FFFFFF' : `rgba(255,255,255,${spec.alpha})`),
   };
 }
+
+/**
+ * One role of the storycard scale, at this card's width, on a dark ground.
+ *
+ * The alias exists because this file calls t() in a few places outside
+ * cardStyles, and those are all on dark cards: the foot's wordmark, the close
+ * row, the page dots. A light card asks through cardStyles(w, true), which is
+ * one decision for the whole card rather than a flag at every Text.
+ */
+const t = (role: string, cardWidth: number, over?: Partial<TypeSpec>) => tRole(role, cardWidth, over);
 
 /**
  * The couple-type card's ground, from the couple's own colour.
@@ -300,13 +324,24 @@ function ground(tone: string): Ground {
 }
 
 /**
- * The orange half of the admired card, which is the card's own ground.
+ * The admired card is cream.
  *
- * The navy half is a rotated square laid over it. Two gradients rather than
- * one so the divide is a hard edge: a single gradient between the two hues
- * would be a blend, and Ellie asked for a divide.
+ * ── IT WAS A DIAGONAL DIVIDE ───────────────────────────────────────────────
+ * Orange on one side of a hard edge and navy on the other, from "Diagonal
+ * divide from bottom left to top right of the screen, top left is the attune
+ * orange gradient and bottom right is the attune navy gradient."
+ *
+ * Ellie replaced that: "Storycard about 'most admired for' should be cream
+ * with a blue gradient coming from the bottom right corner and an orange
+ * gradient coming from the top left. Middle is cream but there's strong color
+ * behind the words." So the ground is cream and the two colours are corner
+ * washes over it, drawn by PageWash's diagonal arrangement, with the rotated
+ * navy square gone.
+ *
+ * Both quotes are kept because the card has now been asked for twice, and the
+ * second ask is the one that ships.
  */
-const ADMIRED_GROUND: Ground = ['#F08A4B', Palette.orange, '#C2410C'];
+const ADMIRED_GROUND: Ground = [Palette.cream, Palette.cream, Palette.cream];
 
 /**
  * The last card: the brand's two ends, orange into blue.
@@ -815,9 +850,33 @@ function Reel({
              * how someone decides a thing is broken, and it has its own button.
              */
             onPress={(e) => {
-              const backward = e.nativeEvent.locationX < width / 3;
-              if (backward) { goTo(i - 1); return; }
-              if (i === cards.length - 1) return;
+              /**
+               * ── B99: pageX, NOT locationX ─────────────────────────────────
+               * Ellie: "I tried to tap to the next page on a highlight
+               * storycard and it brought me to the previous one even though my
+               * click was in the margin of the right hand side."
+               *
+               * `locationX` is measured inside whichever view RECEIVED the
+               * touch, and the card is a child of this Pressable, narrower
+               * than it and centred in it. So the same physical point reports
+               * one x when the touch lands on the card and another when it
+               * lands on the margin beside it, and a tap on the right of the
+               * card could read as less than a third of the page.
+               *
+               * `pageX` is measured from the root view, which for this modal
+               * is the screen. One origin, whatever the touch hits.
+               *
+               * ── B101: THE LAST CARD LEAVES ───────────────────────────────
+               * Ellie: "When I tap the last storycard in highlights it doesn't
+               * exit out." It used to return and do nothing, on the argument
+               * that the card has its own button. Tapping into nothing is how
+               * someone decides a thing is broken, which is the argument the
+               * other way, and the Next control on that card already calls
+               * onDone. A forward tap does the same thing now.
+               */
+              const x = e.nativeEvent.pageX ?? e.nativeEvent.locationX;
+              if (x < width / 3) { goTo(i - 1); return; }
+              if (i === cards.length - 1) { onDone(); return; }
               goTo(i + 1);
             }}
             style={{ width, alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -924,8 +983,13 @@ function Card({
           ? STAT_PAIR_GROUND
           : ground(card.tone);
 
-  /** True when this card's ground is light, so the foot has to be ink. */
-  const ink = (card as { footTone?: string }).footTone === 'ink';
+  /**
+   * True when this card's ground is light, so the type has to be ink.
+   *
+   * The word card declares it with footTone because only its foot was ever
+   * white-on-white; the admired card is light all over, so every role flips.
+   */
+  const ink = (card as { footTone?: string }).footTone === 'ink' || card.kind === 'admired';
 
   // The entrance the website gives every card: up and in, once, on arrival.
   // An instant swap is what made the app's reel feel like a carousel of
@@ -960,6 +1024,12 @@ function Card({
             reported of the first version. */}
         {(card as { wash?: string }).wash === 'notes' ? (
           <PageWash tint={Palette.orange} second={Palette.indigo} corners />
+        ) : null}
+        {/* The admired card: orange from the top left, blue from the bottom
+            right, cream between them. The same component the word card draws,
+            in its other arrangement. */}
+        {card.kind === 'admired' ? (
+          <PageWash tint={Palette.orange} second={Palette.indigo} diagonal />
         ) : null}
         {/* ── THE SUNRISE ON THE ALIGNMENT CARD ────────────────────────
             Ellie asked for "a circular, attune-orange glow from the bottom
@@ -1034,85 +1104,17 @@ function Card({
           </View>
         ) : null}
 
-        {/* ── THE DIAGONAL ON THE ADMIRED CARD ─────────────────────────
-            Ellie: "Diagonal divide from bottom left to top right of the
-            screen, top left is the attune orange gradient and bottom right is
-            the attune navy gradient."
+        {/* ── THE DIAGONAL IS GONE ────────────────────────────────────
+            This card was a hard diagonal edge: orange one side, navy the
+            other, drawn as a square rotated forty-five degrees and placed so
+            its edge passed through the card's centre, because a hard edge
+            needs no SVG library and this project has none.
 
-            Drawn as one square rotated forty-five degrees, which is the only
-            way to get a hard diagonal edge without an SVG library, and this
-            project has none. The orange is the card's ground underneath.
-
-            The first version put the square in the bottom right corner by eye
-            and got the other diagonal: the divide ran from the top left corner
-            down to the bottom right, so the orange was the top RIGHT and the
-            navy the bottom LEFT. Both halves were on the wrong side of the
-            line she asked for, and the name in the top left sat across both of
-            them.
-
-            So the placement is derived rather than nudged. Rotating a square
-            by -45 degrees turns its top edge into a line running up and to the
-            right, with the square itself covering everything below and right
-            of that line, which is the navy half. The square is then placed so
-            that edge passes through the card's bottom left corner: its centre
-            has to sit at (0, h) plus half a side along the inward normal
-            (0.7071, 0.7071), and `left`/`top` are that centre less half a
-            side. Hence the 0.14645, which is 0.5 - 0.35355 and nothing else.
-
-            SIDE is twice the card's perimeter-ish so the square's own corners
-            are always far outside the card.
-
-            ── AND IT PASSES THROUGH THE MIDDLE ───────────────────────────
-            Ellie: "the blue and orange are currently very uneven. Can we make
-            those 50/50 (move the diagonal split up a lot)."
-
-            The edge ran through the bottom left corner, which put about four
-            fifths of the card in the orange. Any straight line through a
-            rectangle's centre cuts it into two equal halves, whatever its
-            angle, so the fix is the centre point and nothing else: the
-            geometry below is unchanged except for which point the edge is
-            made to pass through. */}
-        {card.kind === 'admired' ? (() => {
-          const SIDE = (w + h) * 2;
-          /**
-           * Where the card sits along the square's own gradient.
-           *
-           * The square is several times the card's width, so without this the
-           * card sees a sliver of the ramp and the navy reads as one flat
-           * blue. The stops have to follow the square: moving it to the centre
-           * for the 50/50 split shifted the card's slice by half a card width,
-           * which clamped most of the visible half to the first colour and
-           * turned the navy bright. Derived from LEFT rather than written down
-           * so the next time the placement moves, this moves with it.
-           */
-          const LEFT = w / 2 - 0.14645 * SIDE;
-          const FROM = -LEFT / SIDE;
-          const SPAN = w / SIDE;
-          return (
-            <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-              <LinearGradient
-                colors={[Palette.indigo, '#2A3C86', '#16224F']}
-                /* The square's own diagonal, rotated back by 45 degrees, runs
-                   left to right in the card's space. But the square is several
-                   times the card's width, so without locations the card sees a
-                   sliver of the ramp and the navy reads as one flat blue. The
-                   stops are pinned to the slice the card actually covers,
-                   which is from the square's left inset to one card width
-                   further along it. */
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                locations={[FROM, FROM + SPAN / 2, FROM + SPAN]}
-                style={{
-                  position: 'absolute',
-                  width: SIDE, height: SIDE,
-                  left: LEFT,
-                  top: h / 2 - 0.14645 * SIDE,
-                  transform: [{ rotate: '-45deg' }],
-                }}
-              />
-            </View>
-          );
-        })() : null}
+            Ellie replaced it with cream and two corner washes, which the
+            PageWash above draws. The square, the rotation and the arithmetic
+            that placed it along its own gradient are in git rather than
+            commented out here: a geometry nobody draws is a geometry the next
+            reader has to rule out. */}
 
         {/* The stripe across the top. It is on the website's opener and it is
             the first thing anyone sees of this product. */}
@@ -1167,7 +1169,12 @@ function Card({
             </Text>
           </View>
           {/* block: highlights/watermark */}
-          <Text style={[t('siteLabel', w), ink ? { color: Colors.light.textMuted } : null]}>
+          {/* ── THE ADDRESS ON A LIGHT CARD IS INK, NOT THE WARM MUTED ──
+              Colors.light.textMuted is #7A6753, a warm brown that is 1.04:1
+              against the indigo corner of the admired card and 1.72:1 against
+              the orange. It read as an orange address sitting on a blue
+              ground. Ink at three quarters is 4.5:1 or better over both. */}
+          <Text style={[t('siteLabel', w), ink ? { color: withAlpha(Colors.light.textStrong, 0.75) } : null]}>
             {SC.siteLabel}
           </Text>
         </View>
@@ -1181,7 +1188,7 @@ function Body({ card, onDone, map, w }: {
 }) {
   // Every size on this card comes from the shared scale, evaluated against
   // this card's width. Nothing below sets a font size of its own.
-  const S = cardStyles(w);
+  const S = cardStyles(w, card.kind === 'admired');
   switch (card.kind) {
     case 'opener':
       return (
@@ -1724,7 +1731,8 @@ function Eyebrow({ children, w, role = 'eyebrow' }: { children?: string; w: numb
  * the two surfaces drifted: the tokens are right for the rest of the app and
  * were never the website's storycard sizes.
  */
-function cardStyles(w: number) {
+function cardStyles(w: number, onLight = false) {
+  const t = (role: string, width: number, over?: Partial<TypeSpec>) => tRole(role, width, over, onLight);
   return {
     hero: t('names', w),
     amp: t('amp', w),

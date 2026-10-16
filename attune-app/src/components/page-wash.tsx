@@ -33,7 +33,7 @@ export function withAlpha(hex: string, alpha: number) {
 /** What the two corners fall away to. Neutral, not the app's warm cream. */
 const CORNER_SETTLE = '#EFEFEF';
 
-export default function PageWash({ tint, second, corners = false }: {
+export default function PageWash({ tint, second, corners = false, diagonal = false }: {
   /**
    * The colour in the corner. The brand orange by default.
    *
@@ -67,8 +67,71 @@ export default function PageWash({ tint, second, corners = false }: {
    * the top read as a sky rather than as two stains.
    */
   corners?: boolean;
+  /**
+   * The same two washes, on a diagonal: `tint` from the top left and `second`
+   * from the BOTTOM right, over the app's cream.
+   *
+   * Ellie, of the most-admired storycard: "should be cream with a blue
+   * gradient coming from the bottom right corner and an orange gradient coming
+   * from the top left. Middle is cream but there's strong color behind the
+   * words."
+   *
+   * An arrangement rather than a second component. `corners` puts both at the
+   * top because that is what the Notes and Insights grounds are; this puts them
+   * opposite because that is what the card is. How a corner wash is drawn stays
+   * in one place either way, which is the whole reason the word card draws this
+   * component instead of approximating it.
+   */
+  diagonal?: boolean;
 } = {}) {
   const hue = tint || Palette.orange;
+  if (diagonal) {
+    return (
+      <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        {/* Cream, which is the middle of the card. The two corners are laid
+            over it and each falls to nothing before it reaches the other, so
+            the centre stays cream rather than becoming a blend of the two. */}
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: Palette.cream }} />
+        {/* Top left, falling toward the bottom right. Stronger than the
+            `corners` arrangement at its near edge: she asked for strong colour
+            behind the words, and the words sit in the corners here rather than
+            in the middle. */}
+        {/* ── EACH ONE STOPS BEFORE THE MIDDLE ──────────────────────
+            The first version ran both to 0.68 of the diagonal, so they met and
+            the card was a continuous orange-to-blue ramp with no cream in it
+            at all. Ellie asked for the opposite: "Middle is cream but there's
+            strong color behind the words."
+
+            So each falls to nothing by 0.42, which leaves the middle fifth of
+            the diagonal as cream, and holds most of its strength through the
+            first sixth, which is where the two sentences sit.
+
+            ── AND THE PEAK IS WHERE THE TEXT STAYS READABLE ──────────────
+            The words on this card are ink, and ink over the indigo at full
+            strength is 3.80:1 against the 4.5 the standard asks for. At 0.80
+            it is 5.16:1, and the orange at the same alpha is 7.60:1. Measured
+            by compositing each wash over the cream rather than read off the
+            screenshot, because a gradient has no background colour for the
+            usual method to find. */}
+        <LinearGradient
+          colors={[withAlpha(hue, 0.80), withAlpha(hue, 0.52), withAlpha(hue, 0)]}
+          locations={[0, 0.17, 0.42]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+        {second ? (
+          <LinearGradient
+            colors={[withAlpha(second, 0.80), withAlpha(second, 0.52), withAlpha(second, 0)]}
+            locations={[0, 0.17, 0.42]}
+            start={{ x: 1, y: 1 }}
+            end={{ x: 0, y: 0 }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+        ) : null}
+      </View>
+    );
+  }
   if (corners) {
     return (
       <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>

@@ -76,8 +76,18 @@ const CARDS = `${ROOT}attune-app/src/components/highlight-cards.tsx`;
  */
 async function appType() {
   const src = readFileSync(CARDS, 'utf8');
-  const at = src.indexOf('function t(');
-  if (at < 0) throw new Error('cannot find `function t(` in highlight-cards.tsx');
+  /**
+   * `tRole`, which this was called `t` when the gate was written.
+   *
+   * It gained a fourth argument and a new name when the admired card went
+   * light: every role on a card is white unless the card says otherwise, so
+   * the colour decision moved into the function and the old `t` is now a thin
+   * alias beside it. This gate threw rather than passing when the name moved,
+   * which is the behaviour its header promises and the reason the rename was
+   * caught in the same minute it was made.
+   */
+  const at = src.indexOf('function tRole(');
+  if (at < 0) throw new Error('cannot find `function tRole(` in highlight-cards.tsx');
   let depth = 0, end = -1, seen = false;
   for (let i = at; i < src.length; i++) {
     if (src[i] === '{') { depth++; seen = true; }
@@ -86,7 +96,7 @@ async function appType() {
   if (end < 0) throw new Error('cannot find the end of `t()` in highlight-cards.tsx');
 
   const { code } = await transform(src.slice(at, end), { loader: 'ts' });
-  const make = new Function('SC', 'Fonts', `${code}; return t;`);
+  const make = new Function('SC', 'Fonts', `${code}; return tRole;`);
   const Fonts = {
     display: 'PlayfairDisplay', body: 'DMSans', bodyLight: 'DMSansLight',
     bodyMedium: 'DMSansMedium', bodySemiBold: 'DMSansSemiBold', bodyBold: 'DMSansBold',

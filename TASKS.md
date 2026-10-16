@@ -64,9 +64,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 | B96 | **Done, app only.** The website's overview had already lost that line, so this was the app catching up. |
 | B97 | **Done, both surfaces.** Each area row already carries its own topic count. |
 | B98 | **Done, both surfaces.** |
-| B99 | **A tap in the right margin of a highlight storycard goes back instead of forward.** |
-| B100 | **The "most admired for" storycard ground**: cream, with blue from the bottom right corner and orange from the top left, strong colour behind the words. |
-| B101 | **Tapping the last storycard in Highlights does not exit.** |
+| B99 | **Done.** The handler read locationX, which is measured inside whichever view the touch landed on, so the same point reported one x on the card and another in the margin beside it. It reads pageX now: one origin, whatever is hit. |
+| B100 | **Done, and rendered to check.** Cream through the middle, orange from the top left, blue from the bottom right. The old diagonal divide and the rotated square that drew it are gone. |
+| B101 | **Done.** It used to return and do nothing on the argument that the card has its own button; a forward tap now does what that button does. |
 | B102 | **The communication action plan lists its category instead of its action items.** Both surfaces. |
 | B103 | **"Communication action plan" is called "Communication styles."** Both surfaces. |
 | B104 | **The couple type action plan is the three phrases to try.** Both surfaces. |
