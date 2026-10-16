@@ -1338,7 +1338,24 @@ function SectionBody({
            colour, falling back to orange. Passed in rather than hardcoded:
            the app was using expectations blue, on a violet ground. */
         introColor={results.content?.coupleType?.color || '#E8673A'}
-        position={at >= 0 ? { index: at + 1, total: all.length } : null}
+        /**
+         * ── B95: ONE DENOMINATOR FOR THE SECTION ──────────────────────────
+         * Ellie: "Expectations overview page says 1/7 but then next page says
+         * 1/6."
+         *
+         * Both were right about what they counted and that was the bug. The
+         * overview takes the generic step, which is every page in the nav group
+         * except the cover: the overview plus six conversations, so 1 of 7. This
+         * line ran a second counter over `expectations.categories`, which is the
+         * six conversations alone, so the page after 1 of 7 was 1 of 6 and the
+         * reader went backwards.
+         *
+         * It takes the same step as every other page now. The overview is 1 of 7
+         * and the first conversation is 2 of 7, which is also the order the nav
+         * walks them in; the old counter used the payload's order, which is not
+         * necessarily that.
+         */
+        position={step}
               tipLabel={pageCopy('expectationsTip', `A tip for ${you} and ${them}`)}
       />
     );
@@ -1456,14 +1473,10 @@ function ExpectationsOverview({
       <>
           <Prose style={{ ...Type.hero, color: Palette.white }}>{title}</Prose>
 
-          <View style={{ flexDirection: 'row', gap: Spacing.xl, marginTop: Spacing.md }}>
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)' }}>
-              Already aligned: <Text style={{ fontWeight: '700', color: Palette.white }}>{summary.aligned}</Text>
-            </Text>
-            <Text style={{ ...Type.body, color: 'rgba(255,255,255,0.7)' }}>
-              Worth discussing: <Text style={{ fontWeight: '700', color: Palette.white }}>{summary.differences}</Text>
-            </Text>
-          </View>
+          {/* B96. Ellie: "Remove 'already aligned:20 worth discussing:12' line
+              from top of expectations overview page." The website's overview had
+              already lost it, so this is the app catching up. The per-category
+              bars below carry the same thing in a form a reader can act on. */}
 
           {/* ── ALIGNMENT BY CATEGORY: ONE TILE ──────────────────────────
               The website puts every category in a single panel as a row of
@@ -1516,9 +1529,8 @@ function ExpectationsOverview({
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.75)', marginBottom: Spacing.sm }}>
                 Conversations to have
               </Text>
-              <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.62)', marginBottom: Spacing.md, lineHeight: 19 }}>
-                {`${gaps.length} topic${gaps.length !== 1 ? 's' : ''} where your assumptions differ, across ${conversations.length} area${conversations.length !== 1 ? 's' : ''}. Open an area to see its full list.`}
-              </Prose>
+              {/* B97: the topics-differ line is gone from both surfaces. Each
+                  area row below already carries its own topic count. */}
               <View style={{ gap: Spacing.md }}>
                 {conversations.map((cat) => (
                   <CategoryDrawer
@@ -3165,11 +3177,8 @@ function WhatComesNext({
         {/* Ellie: "Change hero for what comes next action page to 'What comes
             next' on app and site." */}
         <Text style={{ ...Type.hero, color: c.textStrong }}>What comes next</Text>
-        <Text style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.md, marginBottom: Spacing.lg, lineHeight: 20 }}>
-          Each part of your results ends in something to do. They are gathered here,
-          grouped by where they came from. Open one to see its items and the words to
-          start with.
-        </Text>
+        {/* B98. Ellie: "Remove explanation paragraph above dropdowns on what
+            comes next page." Gone from both surfaces. */}
 
         {/* ── ONE OPEN AT A TIME ──────────────────────────────────────
             Ellie: "on both app and site, clicking on a new section in 'what

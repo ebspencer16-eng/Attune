@@ -56,8 +56,87 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
+| B91 | **Couple type: the individual types section goes, and each person's paragraph moves into a popup beside their dot.** Tap outside to dismiss, no axis bars in it. Both surfaces. |
+| B92 | **A grey question mark beside Open and Withdraw**, opening that axis's description, and the descriptions come off the chart. Both surfaces. |
+| B93 | **The slider dots look fuzzy on an iPad.** Fix the outlines. |
+| B94 | **Each exercise cover page in Insights gets a mini table of contents** naming the pages in that section. Both surfaces. |
+| B95 | **Done.** Both were right about what they counted, which was the bug: the overview counted itself plus six conversations, the conversation pages ran a second counter over the six alone. One denominator now, 1/7 through 7/7. |
+| B96 | **Done, app only.** The website's overview had already lost that line, so this was the app catching up. |
+| B97 | **Done, both surfaces.** Each area row already carries its own topic count. |
+| B98 | **Done, both surfaces.** |
+| B99 | **A tap in the right margin of a highlight storycard goes back instead of forward.** |
+| B100 | **The "most admired for" storycard ground**: cream, with blue from the bottom right corner and orange from the top left, strong colour behind the words. |
+| B101 | **Tapping the last storycard in Highlights does not exit.** |
+| B102 | **The communication action plan lists its category instead of its action items.** Both surfaces. |
+| B103 | **"Communication action plan" is called "Communication styles."** Both surfaces. |
+| B104 | **The couple type action plan is the three phrases to try.** Both surfaces. |
+| B105 | **What Comes Next, rebuilt around three buckets and four tiles.** The largest item here. Detail under this table. |
+| C12 | **A table of the four paragraphs under What Comes Naturally and What's Worth Being Aware Of, each beside a shorter version**, for you to pick from. Goes to section 3 when it is ready. |
 | S29 | **The demo path, buttoned up.** Purchase, account setup, exercises, completion and results all driven end to end. One real gap found and closed. Detail under this table. |
 | S28 | **The earlier sweep.** Two stale comments, fixed, and the app driven for real. Detail under this table. |
+
+### B91 to B105, what each one means in detail
+
+Written out before starting, in your words where you gave them, so none of the
+sixteen goes missing. Every one of these exists on the website and in the app
+unless it says otherwise, and the copy for all of them lives on the server, so
+each change is made once and both surfaces read it.
+
+**B91, the couple type page.** "Remove 'your individual types' section
+entirely, add the description of each person if you tap on the person's dot.
+Make it like a pop up next to the dot. Tap outside the pop up tile to make it
+go away. Pop up tile should have the paragraph from the individual type section
+but we don't need the axes bars." The paragraph is the one that section already
+shows; it moves rather than being rewritten.
+
+**B92, the axes.** A light grey question mark in a circle beside Open and
+beside Withdraw, each opening that axis's description. The descriptions come
+off the area below the chart, so the page loses two paragraphs and gains two
+controls.
+
+**B93, the slider dots on an iPad.** Your friend reports them fuzzy or blurry.
+Likely a half-pixel border or a shadow on a non-integer size; I measure it on
+an iPad-sized screen before changing anything.
+
+**B94, the exercise cover pages.** Each one names the pages inside that
+section, as a short contents list. The section list is already on the server in
+`results-sections.js`, so the contents derive from it rather than being typed.
+
+**B95, 1 of 7 against 1 of 6.** The overview and the first page disagree about
+how many pages there are. I find which is counting wrong rather than changing
+the number that looks odd.
+
+**B96, B97 and B98** are three lines to delete, one on the expectations
+overview's header, one above its area list, and one above the dropdowns on What
+Comes Next.
+
+**B99, the storycard tap zones.** A tap in the right margin went back instead
+of forward. I measure the zones at a phone width rather than reading them.
+
+**B100, the most-admired-for card.** Cream, with blue coming from the bottom
+right corner and orange from the top left, and strong colour behind the words
+rather than a flat wash.
+
+**B101, the last storycard.** Tapping it should leave Highlights and it does
+not.
+
+**B102 to B104, the action plans.** The communication plan lists its action
+items rather than its category name. It is called Communication styles. The
+couple type plan is the three phrases to try.
+
+**B105, What Comes Next.** Your words: "I want to take all of the action items
+we currently list, and present them not grouped by exercise/section but rather
+by: What to keep in mind, What to discuss together, Phrases to try." Four
+quick-access tiles formatted like the home page's, one per bucket plus the
+relationship journal. Tapping a tile shows that content in the space below
+while the tiles stay put. Each row carries a grey arrow on the right that opens
+the page in Insights the row came from. Tell us about your Attune experience
+stays a coloured button at the foot. Nothing on the page names which exercise
+feeds which bucket.
+
+**C12** is a review document, not a change: the four paragraphs as they are,
+each beside a shorter version, for you to choose. Nothing ships from it until
+you pick.
 
 ### S29, the demo path
 

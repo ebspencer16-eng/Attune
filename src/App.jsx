@@ -5809,9 +5809,9 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               <div style={{ marginBottom: "1rem" }}>
                 {/* block: exp-overview/conversations */}
                 <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>Conversations to have</div>
-                <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.62)", fontFamily: BFONT, lineHeight: 1.55, margin: "0 0 0.75rem" }}>
-                  {gaps.length} topic{gaps.length !== 1 ? "s" : ""} where your assumptions differ, across {checklistItems.length} area{checklistItems.length !== 1 ? "s" : ""}. Open an area to see its full list.
-                </p>
+                {/* B97. Ellie: "Remove '12 topics where your assumptions differ,
+                    across 5 areas. Open an area to see its full list.'" Each area
+                    row already carries its own count. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {/* Collapsed by default so the page stays scannable. The
                       summary row carries the count, the word "topics", and a
@@ -10093,9 +10093,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             if (!groups.length) return null;
             return (
               <div style={{ marginBottom: "1.75rem" }}>
-                <p style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.6, margin: "0 0 0.85rem" }}>
-                  Each part of your results ends in something to do. They are gathered here, grouped by where they came from. Open one to see its items and the words to start with.
-                </p>
+                {/* B98. Ellie: "Remove explanation paragraph above dropdowns on what
+                    comes next page." The page is a list of things to do; a paragraph
+                    explaining that it is a list of things to do is one more thing to
+                    read before reading it. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                   {/* block: what-comes-next/groups */}
                   {/* ── ONE OPEN AT A TIME ────────────────────────────────
