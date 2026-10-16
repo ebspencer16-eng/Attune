@@ -97,10 +97,36 @@ const IGNORED = new Set([
  * An entry appearing here without a task number is this list being used as a
  * place to put problems.
  */
-const KNOWN_GAPS = new Map();
+const KNOWN_GAPS = new Map([
+  /**
+   * B96. Ellie: "Remove 'already aligned:20 worth discussing:12' line from top
+   * of expectations overview page."
+   *
+   * That line was the only place either surface drew a count of differences.
+   * The top-level one is gone from the payload entirely, because nothing read
+   * it. The per-category one stays and is read on the SERVER: What Comes Next
+   * picks the three categories with the most differences and sorts by it, in
+   * api/_lib/what-comes-next.js.
+   *
+   * So this is a field the app is sent and does not draw, on purpose, rather
+   * than one being cut from the app. Those are different things and this list
+   * is where the difference gets written down.
+   */
+  ['differences', 'B96: the line that drew it was removed at her ask. The server '
+    + 'reads it to order What Comes Next; neither surface prints it.'],
+]);
 
-/** The result types the payload is described by. */
-const TYPES = ['CommsPlan', 'ReflectionResults', 'ExpectationsSummary', 'IntimacyResults'];
+/**
+ * The result types the payload is described by.
+ *
+ * IndividualProfile joined them when B91 stopped drawing half of it: each
+ * person's paragraph moved into a popup behind their dot and the two axis bars
+ * were cut at her word, which left `rows` on the payload with nothing reading
+ * it. That is exactly the thing this check exists to make visible, so the type
+ * is read and the field is written down below rather than quietly dropped.
+ */
+const TYPES = ['CommsPlan', 'ReflectionResults', 'ExpectationsSummary', 'IntimacyResults',
+  'IndividualProfile', 'AxisCopy'];
 const problems = [];
 const gaps = [];
 let checked = 0;

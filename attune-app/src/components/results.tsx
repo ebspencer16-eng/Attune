@@ -37,10 +37,15 @@ import { runOnJS } from 'react-native-reanimated';
 import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotation-context';
 import type {
   ConflictResults, CoupleResults, ExpectationRow, ExpectationsSummary,
-  CommsPlan, HighlightCard, IntimacyDomain, IntimacyResults, NextStepGroup,
+  CommsPlan, HighlightCard, IntimacyDomain, IntimacyResults, NextStepBucket, NextStepGroup,
   ReflectionInsight, ReflectionRating, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
   Note, Tag,
 } from '@/api/client';
+import { router } from 'expo-router';
+/* The journal's one-slot handle, for What Comes Next's fourth tile. The Notes
+   tab exports it for exactly this: the home screen's quick link uses the same
+   pair, so a tile that opens the journal is not a second way of opening it. */
+import { showJournal } from '@/app/notes';
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import ResultsMenu, { GROUP_ICON } from '@/components/results-menu';
@@ -361,7 +366,7 @@ export default function Results({
   expectations?: ExpectationsSummary | null;
   intimacy?: IntimacyResults | null;
   reflection?: ReflectionResults | null;
-  whatComesNext?: { groups: NextStepGroup[] } | null;
+  whatComesNext?: { groups: NextStepGroup[]; buckets?: NextStepBucket[] } | null;
 }) {
   // The spine comes from the server, in the server's order, with the server's
   // names. It used to be six entries written here against the website's
@@ -1017,6 +1022,10 @@ export default function Results({
           intimacy={intimacy}
           reflection={reflection}
           whatComesNext={whatComesNext}
+          /* The journal tile on What Comes Next. The same one-slot handle the
+             home screen's quick link uses: set the flag, then switch tabs. The
+             Notes tab picks it up whether or not it is already mounted. */
+          onOpenJournal={() => { showJournal(); router.push('/notes'); }}
           onGoToSection={rememberSection}
           pageTitle={pageTitle}
           pageCopy={pageCopy}
@@ -1181,7 +1190,7 @@ export default function Results({
 function SectionBody({
   section, step, coverTitle, coverContents, coverIcon, accent, ground, groundStops, results, conflict, conflictWaiting, byDomain, you, them, viewer, wideGap,
   expectations, highlights, commsPlan, commDomains, commResponses, storycardStyle, reflectionPlan,
-  intimacy, reflection, whatComesNext, onGoToSection, pageTitle, pageCopy,
+  intimacy, reflection, whatComesNext, onGoToSection, onOpenJournal, pageTitle, pageCopy,
 }: {
   section: string;
   /** Which of its section's detail pages this is, from the nav. */
@@ -1211,7 +1220,9 @@ function SectionBody({
   reflectionPlan: ReflectionInsight[] | null;
   intimacy: IntimacyResults | null;
   reflection: ReflectionResults | null;
-  whatComesNext: { groups: NextStepGroup[] } | null;
+  whatComesNext: { groups: NextStepGroup[]; buckets?: NextStepBucket[] } | null;
+  /** Opens the relationship journal, for What Comes Next's fourth tile. */
+  onOpenJournal: () => void;
   onGoToSection: (id: string) => void;
   results: CoupleResults;
   conflict: ConflictResults | null;
@@ -1381,7 +1392,7 @@ function SectionBody({
   }
 
   if (section === 'what-comes-next') {
-    return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} />;
+    return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} onOpenJournal={onOpenJournal} />;
   }
 
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} step={step} />;
@@ -3149,8 +3160,14 @@ function mixHex(a: string, b: string, t: number): string {
  * introduces a fresh claim is a claim nothing else supports.
  */
 function WhatComesNext({
-  data, onGoToSection,
-}: { data: { groups: NextStepGroup[] } | null; onGoToSection: (id: string) => void }) {
+  data, onGoToSection, onOpenJournal,
+}: {
+  data: { groups: NextStepGroup[]; buckets?: NextStepBucket[] } | null;
+  onGoToSection: (id: string) => void;
+  /** Opens the relationship journal. The fourth tile, and the only one that
+      does not fill the space below. */
+  onOpenJournal: () => void;
+}) {
   /**
    * The survey, at the end of the experience.
    *
@@ -3177,7 +3194,7 @@ function WhatComesNext({
     });
     return () => { live = false; };
   }, []);
-  /** Which section is open, if any. Only one ever is. */
+  /** Which bucket is open, if any. Only one ever is. */
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   if (!data?.groups.length) {
     return (
@@ -3187,11 +3204,22 @@ function WhatComesNext({
       />
     );
   }
+  /**
+   * The three buckets, from the server.
+   *
+   * A stored results row written before the buckets existed carries only
+   * `groups`, and results are frozen once written: see CLAUDE.md on
+   * `withContent`. So a payload with no buckets falls back to one bucket per
+   * group, which is the page as it was, rather than an empty screen.
+   */
+  const buckets: NextStepBucket[] = data.buckets?.length
+    ? data.buckets
+    : data.groups.map((g) => ({ id: g.id, label: g.label, color: g.color, items: g.items }));
+  const open = buckets.find((b) => b.id === openGroup) || null;
+
   return (
-    /* Cream, which is what the website uses here, and one collapsed group per
-       source rather than every item of every group laid out flat. The app
-       listed them all open with a paragraph under each title, which is three
-       screens of scrolling for a page whose job is to gather things up. */
+    /* Cream, which is what the website uses here. Four tiles that stay put,
+       and the open one's rows underneath. */
     <PageTile>
         {/* Ellie: "Change hero for what comes next action page to 'What comes
             next' on app and site." */}
@@ -3199,27 +3227,55 @@ function WhatComesNext({
         {/* B98. Ellie: "Remove explanation paragraph above dropdowns on what
             comes next page." Gone from both surfaces. */}
 
-        {/* ── ONE OPEN AT A TIME ──────────────────────────────────────
-            Ellie: "on both app and site, clicking on a new section in 'what
-            comes next' should close the other dropdown."
+        {/* ── B105: FOUR TILES, AND ONE OF THEM IS OPEN ──────────────
+            Ellie: "Four quick-access tiles formatted like the ones on the home
+            page. One for each bucket listed above and one for the relationship
+            journal. When a user taps one of the tiles, that content appears in
+            the space below, but the 4 tiles stay in place."
 
-            The website gets this from the browser, by naming its <details>
-            elements; here it is one piece of state held above the rows, which
-            is the same behaviour written out. */}
-        <View style={{ gap: Spacing.sm }}>
-          {/* block: what-comes-next/groups */}
-          {data.groups.map((group) => (
-            <NextGroup
-              key={group.id}
-              label={group.label}
-              color={group.color || c.accent}
-              items={group.items}
-              open={openGroup === group.id}
-              onToggle={() => setOpenGroup((cur) => (cur === group.id ? null : group.id))}
-              onOpenItem={onGoToSection}
+            So the tiles are a row that does not move, and the space under them
+            is whichever bucket is open. The journal tile is the odd one out: it
+            opens the journal rather than filling that space, which is why it
+            carries an icon the others do not.
+
+            Which bucket an item is in is the server's decision, in
+            api/_lib/what-comes-next.js. Nothing here names an exercise, which
+            is the other half of what she asked for. */}
+        <View style={{ flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.lg }}>
+          {buckets.map((b) => (
+            <NextTile
+              key={b.id}
+              label={b.label}
+              count={b.items.length}
+              active={openGroup === b.id}
+              onPress={() => setOpenGroup((cur) => (cur === b.id ? null : b.id))}
             />
           ))}
+          <NextTile
+            label={'Relationship\njournal'}
+            icon="book"
+            active={false}
+            onPress={onOpenJournal}
+          />
         </View>
+
+        {/* The open bucket's rows, under the tiles. Each one opens the page in
+            Insights it came from, which is the only thing on this page that
+            says where it came from. */}
+        {open ? (
+          <View style={{ marginTop: Spacing.lg, gap: Spacing.xs }}>
+            {/* block: what-comes-next/groups */}
+            {open.items.map((item, i) => (
+              <NextRow
+                key={`${open.id}-${i}`}
+                title={item.title}
+                quote={item.quote || null}
+                say={item.say || null}
+                onOpen={item.section ? () => onGoToSection(item.section as string) : null}
+              />
+            ))}
+          </View>
+        ) : null}
 
         {/* The survey. Not drawn until we know they have not already answered
             it, because a card that appears and then vanishes is worse than one
@@ -3228,14 +3284,23 @@ function WhatComesNext({
           <Pressable
             accessibilityRole="button"
             onPress={() => setSurveyOpen(true)}
+            /* B105. Ellie: "Tell us about your attune experience should be a
+               colored button at the bottom of the page, just like it is now."
+               It was a bordered card in the surface colour, which is how every
+               other row on this page is drawn, so the one control at the foot
+               of the whole experience read as another row. */
             style={{
-              marginTop: Spacing.xl, borderRadius: Radius.md, borderWidth: 1,
-              borderColor: c.border, backgroundColor: c.surface,
+              /* accentQuiet, not accent: white on the brand orange is 3.27 to
+                 1 and this label is a sentence, which needs 4.5. The quiet
+                 accent is the same hue two steps down and measures 4.79. */
+              marginTop: Spacing.xl, borderRadius: Radius.md,
+              backgroundColor: c.accentQuiet,
               paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+              alignItems: 'center',
             }}>
             {/* not markable: the label on a control, not results prose. A mark
                 is a copy of the words, and these words change with the survey. */}
-            <Text style={{ ...Type.body, color: c.textStrong }}>{surveyCopy.title}</Text>
+            <Text style={{ ...Type.body, color: Palette.white, fontFamily: Fonts.bodyBold, fontWeight: '700', textAlign: 'center' }}>{surveyCopy.title}</Text>
           </Pressable>
         ) : null}
 
@@ -3254,107 +3319,123 @@ function WhatComesNext({
  * chevron, and inside, one row per item with its title and the phrase to try
  * under a small "Try".
  */
-function NextGroup({
-  label, color, items, open, onToggle, onOpenItem,
-}: {
-  label: string; color: string;
-  items: {
-    title: string; quote?: string | null; body?: string | null; say?: string | null;
-    /** The page this row is about, when it has one of its own. */
-    section?: string | null;
-  }[];
-  open: boolean;
-  onToggle: () => void;
-  onOpenItem: (id: string) => void;
+/**
+ * One of the four tiles on What Comes Next.
+ *
+ * Ellie: "Four quick-access tiles formatted like the ones on the home page."
+ * So the shape is the home screen's QuickLink: a barely-there square, the
+ * label inside it on two lines, nothing drawn underneath. The differences are
+ * that three of these four toggle the space below rather than navigating, and
+ * that the open one says so, because a tile that changes what is under it has
+ * to look different from one that has not been pressed.
+ */
+function NextTile({ label, count, icon, active, onPress }: {
+  label: string; count?: number; icon?: string; active: boolean; onPress: () => void;
 }) {
-  /**
-   * ── EVERY ROW CARRIES ITS OWN ARROW ─────────────────────────────────────
-   * Ellie: "Copy this setup on each row in the what comes next page. No links
-   * at the bottom of sections, just arrows in each row that bring you to that
-   * results page."
-   *
-   * So there is no group-level Open link at all any more, and every row the
-   * builder emits carries the page it is about. check-next-steps-mirror fails
-   * on a row that does not, because a row without one is a dead end and the
-   * link at the foot is what used to cover for it.
-   */
   return (
-    <View
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={count != null ? `${label.replace('\n', ' ')}, ${count} item${count === 1 ? '' : 's'}` : label.replace('\n', ' ')}
+      onPress={onPress}
       style={{
-        backgroundColor: c.surface, borderColor: c.border, borderWidth: 1,
-        borderLeftColor: color, borderLeftWidth: 4,
-        borderRadius: Radius.lg, overflow: 'hidden',
+        flex: 1, aspectRatio: 0.92, borderRadius: Radius.lg,
+        backgroundColor: active ? withAlpha(c.accent, 0.12) : 'rgba(14,11,7,0.045)',
+        borderWidth: 1, borderColor: active ? withAlpha(c.accent, 0.5) : 'transparent',
+        paddingTop: Spacing.sm, paddingBottom: Spacing.md,
+        paddingHorizontal: Spacing.xs, alignItems: 'center',
       }}>
-      <Pressable
-        onPress={onToggle}
-        accessibilityRole="button"
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        {icon ? (
+          <SymbolView
+            name={icon as never}
+            size={26}
+            tintColor={active ? c.accent : '#8F8071'}
+            fallback={<View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#8F8071' }} />}
+            style={{ width: 30, height: 30 }}
+          />
+        ) : (
+          /* The count, which is what this tile has to offer. The home page's
+             tiles carry an icon here; a number is the honest equivalent for a
+             tile whose whole content is a list. */
+          <Text style={{ ...Type.display, fontSize: 22, color: active ? c.accent : '#8F8071' }}>
+            {count ?? ''}
+          </Text>
+        )}
+      </View>
+      {/* not markable: the label on a control. */}
+      <Text
+        numberOfLines={2}
         style={{
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-          gap: Spacing.sm, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+          ...Type.small, fontSize: 11, lineHeight: 14,
+          color: active ? c.textStrong : c.textMuted, textAlign: 'center', width: '86%',
         }}>
-        {/* not markable: the header of a collapsible section, which is a control. */}
-        <Text style={{ ...Type.cardTitle, color: c.textStrong, flex: 1 }}>{label}</Text>
-        {/* not markable: a count of what is inside that section. */}
-        <Text style={{ ...Type.small, color: c.textMuted }}>
-          {`${items.length} item${items.length !== 1 ? 's' : ''}`}
-        </Text>
-        <Text style={{ ...Type.small, color, fontWeight: '700' }}>Show</Text>
-        <Text style={{ color, fontSize: 13 }}>{open ? '\u25B4' : '\u25BE'}</Text>
-      </Pressable>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
-      {open ? (
-        <View style={{ borderTopColor: c.border, borderTopWidth: 1 }}>
-          {items.map((item, i) => (
-            <View
-              key={`${label}-${i}`}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                borderBottomColor: c.border,
-                borderBottomWidth: i < items.length - 1 ? 1 : 0,
-              }}>
-              <View style={{ flex: 1 }}>
-              {/* Title and phrase. No description paragraph: the website prints
-                  none here either. */}
-              <Text style={{ ...Type.small, fontWeight: '700', color: c.textStrong, lineHeight: 19 }}>
-                {item.title}
-                {/* Nested rather than a second block, so "Ellie wrote:" and
-                    what Ellie wrote stay one sentence that wraps as one. */}
-                {item.quote ? (
-                  <Text style={{ fontWeight: '400', fontFamily: Fonts.bodyItalic }}>{` ${item.quote}`}</Text>
-                ) : null}
-              </Text>
-              {/* ── THE TRY LINE IS GONE ────────────────────────────────
-                  Ellie, having asked for it twice and then read it on the page:
-                  "Remove the try lines, sorry."
-
-                  A row is its heading and the arrow to the page it came from.
-                  That page is where the advice lives and always was; this line
-                  was the summary repeating it, and for the comms rows it was
-                  the only place in this app some of those sentences appeared,
-                  which is exactly what this page is not supposed to do.
-
-                  `say` stays on the payload: check-plans-agree compares it to
-                  prove a row came from its own section's plan. */}
-              </View>
-              {item.section ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Open ${item.title}`}
-                  hitSlop={10}
-                  onPress={() => onOpenItem(item.section as string)}>
-                  {/* not markable: a control, and its name is the row beside it. */}
-                  <Text style={{ color, fontSize: 17 }}>{'\u203A'}</Text>
-                </Pressable>
-              ) : null}
-            </View>
-          ))}
-
-        </View>
+/**
+ * One action item, with the arrow that opens where it came from.
+ *
+ * Ellie: "The content / action items for the three buckets should appear in
+ * rows, each with a grey arrow on the right hand side that takes you to the
+ * page in insights where that row's content is coming from."
+ *
+ * The arrow is the only thing on this page that says where a row came from,
+ * which is the other half of her ask: no bucket names an exercise.
+ */
+function NextRow({ title, quote, say, onOpen }: {
+  title: string; quote?: string | null; say?: string | null; onOpen: (() => void) | null;
+}) {
+  const body = (
+    <View style={{ flex: 1 }}>
+      <Prose style={{ ...Type.body, color: c.textStrong }}>{title}</Prose>
+      {quote ? (
+        <Prose style={{ ...Type.body, color: c.textMuted, fontFamily: Fonts.bodyItalic, marginTop: Spacing.xs }}>
+          {quote}
+        </Prose>
+      ) : null}
+      {say ? (
+        <Prose style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{say}</Prose>
       ) : null}
     </View>
   );
+  const shell = {
+    flexDirection: 'row' as const, alignItems: 'center' as const, gap: Spacing.md,
+    backgroundColor: c.surface, borderRadius: Radius.md,
+    borderWidth: 1, borderColor: c.border,
+    paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+  };
+  if (!onOpen) return <View style={shell}>{body}</View>;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. Open where this comes from`}
+      onPress={onOpen}
+      style={shell}>
+      {body}
+      {/* Grey, at her word, and the same chevron the rest of the app uses for
+          "this opens somewhere else". */}
+      <SymbolView
+        name={'chevron.right' as never}
+        size={14}
+        tintColor={c.textMuted}
+        /* not markable: a chevron. The fallback when SF Symbols has no
+           chevron.right is the character itself, which is an arrow rather
+           than words. */
+        fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>}
+        style={{ width: 16, height: 16 }}
+      />
+    </Pressable>
+  );
 }
+
+/* NextGroup, the collapsed card with a group's label and its items, was here.
+   What Comes Next is four tiles and three buckets now, so nothing drew it. A
+   component nobody renders is a component the next reader has to rule out, so
+   it is in git rather than above this line. */
 
 function Waiting({ title, body }: { title: string; body: string }) {
   return (
@@ -3662,78 +3743,38 @@ function CoupleType({ results, you, them, title }: {
             coords, and a wrapper with a margin around nothing leaves a hole in
             the page that looks like a failed image. */}
         {/* block: couple-type/map */}
+        {/* block: couple-type/axes */}
+        {/* block: couple-type/individual-types */}
+        {/* The map draws three of this page's blocks now, not one: itself,
+            what each axis means (behind the question mark beside Open and
+            beside Withdraw) and each person's own paragraph (behind their
+            dot). B91 and B92, on both surfaces. */}
         <CoupleMap
           a={results.partners?.a ?? null}
           b={results.partners?.b ?? null}
           aName={results.content?.names?.a || 'You'}
           bName={results.content?.names?.b || 'Your partner'}
           quadrants={results.content?.mapQuadrants}
+          axes={results.content?.axes}
+          profiles={results.content?.individualTypes}
+          interactive
         />
 
-        {/* block: couple-type/axes
+        {/* ── THE AXIS DESCRIPTIONS ARE NOT HERE ANY MORE ───────────────
+            B92. Ellie: "Remove axis descriptions from below the chart." They
+            were two columns under it, one sentence each. They are behind the
+            question marks on the map now, which is where the
+            `couple-type/axes` marker went with them. */}
 
-            What the two axes mean. The map without these is a picture: two
-            dots in different corners and no way to know what the corners are.
-            The copy is api/_axes.js, which the website reads too. */}
-        {/* Side by side, which is what Ellie asked for and what the website
-            does on a wide screen. The two are halves of one explanation and
-            reading them stacked means holding the first while you read the
-            second. Type steps down because a column is half the measure.
+        {/* ── "YOUR INDIVIDUAL TYPES" IS GONE ───────────────────────────
+            B91. Ellie: "remove 'your individual types' section entirely, add
+            the description of each person if you tap on the person's dot."
+            It was an eyebrow and two cards, each with the person's name, their
+            type, the paragraph and two axis bars. The paragraph is behind the
+            dot now and the bars are nowhere: "we don't need the axes bars."
 
-            One sentence each now. The pole lines that used to follow, with the
-            up and down arrows spelling out Engage versus Withdraw, were cut
-            from both surfaces: the label names both ends already. */}
-        <View
-          style={{
-            flexDirection: 'row', alignItems: 'stretch', gap: 10,
-            marginTop: results.content?.axes?.length ? Spacing.xl : 0,
-          }}>
-          {(results.content?.axes || []).map((ax) => (
-            <View key={ax.id} style={{ flex: 1, borderLeftColor: ax.color, borderLeftWidth: 3, paddingLeft: Spacing.sm }}>
-              <Text style={{ ...Type.eyebrow, color: ax.color, marginBottom: Spacing.xs }}>{ax.label}</Text>
-              <Prose style={{ ...Type.small, color: c.text }}>{ax.desc}</Prose>
-            </View>
-          ))}
-        </View>
-
-        {/* block: couple-type/individual-types
-
-            Each partner on their own, before the pairing. The website has had
-            this panel all along; the app had nothing, because the blurb and
-            the bands were written inline in the website's source and had never
-            been anywhere the app could read them. They are in
-            api/_lib/individual-profile.js now and arrive on the payload. */}
-        {results.content?.individualTypes?.a || results.content?.individualTypes?.b ? (
-          <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl, marginBottom: Spacing.sm }}>
-            Your individual types
-          </Text>
-        ) : null}
-        {[results.content?.individualTypes?.a, results.content?.individualTypes?.b]
-          .filter((p): p is NonNullable<typeof p> => !!p)
-          .map((p) => (
-            <View key={p.name} style={{ ...card(), marginBottom: Spacing.sm, borderTopColor: p.color, borderTopWidth: 4 }}>
-              <Text style={{ ...Type.eyebrow, color: p.color }}>{p.name}</Text>
-              <Prose style={{ ...Type.title, color: c.textStrong, marginTop: Spacing.xs }}>{p.typeName}</Prose>
-              <Prose style={{ ...Type.body, color: c.textMuted, marginTop: Spacing.sm }}>{p.blurb}</Prose>
-              <View style={{ marginTop: Spacing.md, gap: Spacing.sm }}>
-                {p.rows.map((r) => (
-                  <View key={r.axis}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
-                      {/* not markable: a row label in a key. */}
-                      <Text style={{ ...Type.small, color: c.textMuted }}>{r.label}</Text>
-                      {/* not markable: the value in a key, beside its label. */}
-                      <Text style={{ ...Type.small, color: p.color, fontWeight: '600' }}>{r.value}</Text>
-                    </View>
-                    {/* The bar is the same 0..1 the website draws, so a reader
-                        comparing the two screens sees the same fill. */}
-                    <View style={{ height: 4, borderRadius: 2, backgroundColor: c.border, overflow: 'hidden' }}>
-                      <View style={{ height: '100%', width: `${Math.round(r.score * 100)}%`, backgroundColor: p.color, borderRadius: 2 }} />
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          ))}
+            `rows` is still on the payload and still drawn by the workbook, so
+            nothing was removed from the server. */}
 
         <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl }}>Your couple type</Text>
 

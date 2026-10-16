@@ -107,8 +107,14 @@ const summary = expectationsSummary({
 // One agreement and one difference on each side, so the halves are still
 // distinguishable in the totals.
 ok('four rows compared', summary.answered === 4);
-ok('two agreements, two differences', summary.aligned === 2 && summary.differences === 2);
-// The alignment percentage is gone: the server computed it and neither
+// `summary.differences` is gone with the line that drew it. B96, her words:
+// "Remove 'already aligned:20 worth discussing:12' line from top of
+// expectations overview page." So the count is derived here the way a reader
+// would derive it, and this line went on asserting the old field for one run
+// after the field stopped existing.
+ok('two agreements, two differences',
+  summary.aligned === 2 && summary.answered - summary.aligned === 2);
+// The alignment percentage is gone too: the server computed it and neither
 // surface drew it, so Ellie asked for it to stop being sent. The two counts
 // it was derived from are checked on the line above, and they are what the
 // surfaces actually use.

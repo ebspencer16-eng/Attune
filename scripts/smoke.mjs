@@ -49,6 +49,12 @@ for (;;) {
 let code = 0;
 try {
   await run(process.execPath, ['scripts/check-render.mjs'], { env: { ...process.env, BASE } });
+  /* Rendering proves the couple type page draws. It cannot prove the two
+     things on it that are now behind a tap: each person's paragraph, behind
+     their dot, and each axis's sentence, behind a question mark. B91 and B92.
+     Here rather than in `npm run check` because it drives the demo results
+     path, which needs this preview. */
+  await run(process.execPath, ['scripts/check-map-controls.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }

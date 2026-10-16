@@ -54,11 +54,24 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-| # | What I am doing |
+**Nothing open.** Everything from your sixteen is built and sitting in section 3.
+
+---
+
+## 3. For you to review
+
+| # | Built, needs your eye |
 |--|--|
-| B91 | **Couple type: the individual types section goes, and each person's paragraph moves into a popup beside their dot.** Tap outside to dismiss, no axis bars in it. Both surfaces. |
-| B92 | **A grey question mark beside Open and Withdraw**, opening that axis's description, and the descriptions come off the chart. Both surfaces. |
-| B93 | **Done, and here is what it was.** The outline was a shadow in the dot's own colour, six points of blur at half opacity: a coloured halo round a coloured circle. It is a crisp white ring now, the same one the other dot on those pages has always had. I could not reproduce on an actual iPad, so tell me if your friend still sees it. |
+| C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
+| S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
+| C12 | **60 paragraphs, each beside a shorter version, for you to choose from.** Not four: three of each for all ten couple types, and you only ever see your own six. `COUPLE-TYPE-COPY-REVIEW.md`. Nothing is live until you say. Detail under this table. |
+| S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. Detail under this table. |
+| R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
+| R10 | Privacy policy. |
+| R11 | Terms of service. |
+| B91 | **Done, both surfaces.** Your individual types is gone. Tapping a person's dot opens a tile beside it with their paragraph and no axis bars; tapping anywhere else closes it. |
+| B92 | **Done, both surfaces.** A grey question mark beside Open and beside Withdraw, each opening that axis's sentence, and both sentences are off the page below the chart. |
+| B93 | **Done.** The outline was a shadow in the dot's own colour, six points of blur at half opacity: a coloured halo round a coloured circle. It is a crisp white ring now. I could not reproduce it on an actual iPad, so tell me if your friend still sees it. |
 | B94 | **Done, both surfaces.** The contents are the nav's own page names, so a page added to a section turns up on its cover without anyone typing it. |
 | B95 | **Done.** Both were right about what they counted, which was the bug: the overview counted itself plus six conversations, the conversation pages ran a second counter over the six alone. One denominator now, 1/7 through 7/7. |
 | B96 | **Done, app only.** The website's overview had already lost that line, so this was the app catching up. |
@@ -67,13 +80,50 @@ These two are still waiting on somebody, and neither is waiting on me.
 | B99 | **Done.** The handler read locationX, which is measured inside whichever view the touch landed on, so the same point reported one x on the card and another in the margin beside it. It reads pageX now: one origin, whatever is hit. |
 | B100 | **Done, and rendered to check.** Cream through the middle, orange from the top left, blue from the bottom right. The old diagonal divide and the rotated square that drew it are gone. |
 | B101 | **Done.** It used to return and do nothing on the argument that the card has its own button; a forward tap now does what that button does. |
-| B102 | **The communication action plan lists its category instead of its action items.** Both surfaces. |
-| B103 | **"Communication action plan" is called "Communication styles."** Both surfaces. |
-| B104 | **The couple type action plan is the three phrases to try.** Both surfaces. |
-| B105 | **What Comes Next, rebuilt around three buckets and four tiles.** The largest item here. Detail under this table. |
+| B102 | **Done, both surfaces.** Each communication row is the advice itself, and its arrow goes to the page the advice came from. |
+| B103 | **Done, both surfaces.** Communication styles, from the server, so neither surface can call it anything else. |
+| B104 | **Done, both surfaces.** Three rows, each a phrase to try, in the couple type's own words. |
+| B105 | **Done, both surfaces.** Four tiles, three buckets and the journal; tapping a tile fills the space under it and the tiles stay put. Detail under this table. |
+| S29 | **The demo path, driven end to end.** Purchase, account setup, exercises, completion and results. One real gap found and closed. Detail under this table. |
+| S28 | **The earlier sweep.** Two stale comments fixed, and the app driven for real rather than read. Detail under this table. |
 
-| S29 | **The demo path, buttoned up.** Purchase, account setup, exercises, completion and results all driven end to end. One real gap found and closed. Detail under this table. |
-| S28 | **The earlier sweep.** Two stale comments, fixed, and the app driven for real. Detail under this table. |
+
+### C12, the long and the short of it
+
+**Where it is.** `COUPLE-TYPE-COPY-REVIEW.md`, one table for What comes
+naturally and one for What's worth being aware of. Left column what ships
+today, right column a proposal. 128 characters now, 51 proposed.
+
+**Why sixty and not four.** Each of the ten couple types has three of each.
+You see your own six, which is why it reads as a handful. A decision about the
+shape of this copy is a decision about all sixty, so they are all there.
+
+**Nothing is live.** The proposals are in a file the product does not read.
+Tell me which column you want, per row or in bulk, and it goes into the module.
+
+**One thing it does that the insights review did not.** Each proposal records
+the sentence it was written against. If you rewrite one in the module, the
+table marks that row STALE instead of showing my shorter version beside a
+sentence it was never about. That is the failure that nearly lost your 74
+insights, caught by a check this time rather than by me.
+
+### S27, the three I left alone
+
+Each is a number rather than a fix, because fixing it would change how
+something looks and that is yours to decide.
+
+**459 controls under 44 points on a phone.** Mostly footer links at 16 points
+tall. Apple asks for 44 by 44. Making them that would change the footer's
+shape, so I measured them and left them.
+
+**110 pieces of text between 3.0 and 3.5 contrast.** Muted grey on cream:
+legible, and under the 4.5 the standard asks for. That is the palette rather
+than a mistake. The three that were genuinely unreadable are fixed.
+
+**The app shell is 1.4MB of JavaScript.** It is the website's dashboard, not
+the phone app, and it is the one page where that matters least because people
+arrive at it signed in and stay. Splitting it is a day's work and would change
+nothing you can see.
 
 ### B91 to B105, what each one means in detail
 
@@ -231,55 +281,6 @@ migration 044 and the syntax is right, but the first real proof is you opening
 the Notes tab. The full check suite also could not finish: this machine is
 6 GB into swap and its browser checks crawl, so I ran the ones covering what
 changed, one at a time, rather than a run that would have taken an hour.
-
-## 3. For you to review
-
-| # | Built, needs your eye |
-|--|--|
-| C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
-| S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
-| C12 | **60 paragraphs, each beside a shorter version, for you to choose from.** Not four: three of each for all ten couple types, and you only ever see your own six. `COUPLE-TYPE-COPY-REVIEW.md`. Nothing is live until you say. Detail under this table. |
-| S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. Detail under this table. |
-| R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
-| R10 | Privacy policy. |
-| R11 | Terms of service. |
-
-### C12, the long and the short of it
-
-**Where it is.** `COUPLE-TYPE-COPY-REVIEW.md`, one table for What comes
-naturally and one for What's worth being aware of. Left column what ships
-today, right column a proposal. 128 characters now, 51 proposed.
-
-**Why sixty and not four.** Each of the ten couple types has three of each.
-You see your own six, which is why it reads as a handful. A decision about the
-shape of this copy is a decision about all sixty, so they are all there.
-
-**Nothing is live.** The proposals are in a file the product does not read.
-Tell me which column you want, per row or in bulk, and it goes into the module.
-
-**One thing it does that the insights review did not.** Each proposal records
-the sentence it was written against. If you rewrite one in the module, the
-table marks that row STALE instead of showing my shorter version beside a
-sentence it was never about. That is the failure that nearly lost your 74
-insights, caught by a check this time rather than by me.
-
-### S27, the three I left alone
-
-Each is a number rather than a fix, because fixing it would change how
-something looks and that is yours to decide.
-
-**459 controls under 44 points on a phone.** Mostly footer links at 16 points
-tall. Apple asks for 44 by 44. Making them that would change the footer's
-shape, so I measured them and left them.
-
-**110 pieces of text between 3.0 and 3.5 contrast.** Muted grey on cream:
-legible, and under the 4.5 the standard asks for. That is the palette rather
-than a mistake. The three that were genuinely unreadable are fixed.
-
-**The app shell is 1.4MB of JavaScript.** It is the website's dashboard, not
-the phone app, and it is the one page where that matters least because people
-arrive at it signed in and stay. Splitting it is a day's work and would change
-nothing you can see.
 
 ## 4. Done and verified
 

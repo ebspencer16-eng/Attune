@@ -77,7 +77,26 @@ const WEBSITE_ONLY = [
   'Download not available. Take a screenshot instead.',
 ];
 
-const lines = site.split('\n');
+/**
+ * ── COMMENTS ARE NOT COPY ─────────────────────────────────────────────────
+ * A block comment that quotes Ellie's instruction, which is what the comment
+ * above a change made at her ask looks like in this file, reads to the
+ * scanner below exactly like a sentence typed into the page: her words, in
+ * quotation marks, long enough to be prose. So B92's comment failed the build
+ * for saying why B92 happened.
+ *
+ * CLAUDE.md already states this rule about another gate: blank the comments
+ * before scanning, or the cost of writing down what happened is a failing
+ * build. The line-start test below catches `//` and a continuation `*`, which
+ * is most comments in this file and not the ones written as a JSX block.
+ *
+ * Blanked rather than removed, so every line number still points at the line
+ * it did.
+ */
+const blankComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g,
+  (m) => m.replace(/[^\n]/g, ' '));
+
+const lines = blankComments(site).split('\n');
 const start = lines.findIndex((l) => l.includes('function UnifiedResults('));
 const end = lines.findIndex((l, i) => i > start && l.includes('// ── PAGE: WHAT COMES NEXT'));
 if (start === -1) {
@@ -104,7 +123,11 @@ lines.slice(start, end > start ? end : start + 4000).forEach((line, i) => {
    * certifies the other.
    */
   const candidates = [
-    ...[...line.matchAll(/>([A-Z][^<>{}]{34,220}?)</g)].map((m) => m[1]),
+    /* `\s*` after the `>`, because a text node does not have to start in the
+       same column as its tag and a blanked comment can leave whitespace in
+       front of one. Without it, `<p>/* why *\/ A sentence.</p>` walked past
+       this gate: a plant found it the same afternoon the blanking went in. */
+    ...[...line.matchAll(/>\s*([A-Z][^<>{}]{34,220}?)</g)].map((m) => m[1]),
     ...[...line.matchAll(/["']([A-Z][^"'<>{}]{34,220}?)["']/g)].map((m) => m[1]),
   ];
 

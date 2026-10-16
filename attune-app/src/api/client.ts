@@ -33,12 +33,35 @@ export type DimensionScore = {
   inverted: boolean;
 };
 
+/**
+ * One axis of the couple map, described, with the words at each end of it.
+ *
+ * `poles` and `helpAt` arrive from api/_axes.js. The four pole names used to
+ * be typed into the app's map and typed again into the website's SVG; the
+ * server sends them now, so the two maps cannot label themselves differently.
+ * `helpAt` is the end that carries the question mark: Ellie asked for one
+ * beside Open and one beside Withdraw.
+ *
+ * Both are optional because a cached payload from before B92 has neither, and
+ * the map falls back to its own four words rather than drawing an unlabelled
+ * square.
+ */
+export type AxisCopy = {
+  id: string;
+  label: string;
+  color: string;
+  desc: string;
+  poles?: { high: string; low: string };
+  helpAt?: 'high' | 'low';
+};
+
 export type IndividualProfile = {
   name: string | null;
   typeName: string;
   color: string;
   blurb: string;
-  rows: { axis: string; label: string; value: string; score: number }[];
+  /* No `rows`: the two axis bars were removed from both surfaces with the
+     panel they sat in. B91, her words: "we don't need the axes bars." */
 };
 
 export type PersonResults = {
@@ -148,7 +171,7 @@ export type ResultsContent = {
     ratio: number; stripe: string[]; wordmark: string; siteLabel: string;
   };
   /** What the two axes mean, so the map reads as a finding and not a picture. */
-  axes?: { id: string; label: string; color: string; desc: string }[];
+  axes?: AxisCopy[];
   /** The small print under the couple map. Ellie's copy, from api/_axes.js. */
   mapCaption?: string[];
   /** Each partner's own placement, in words. Null until that person has one. */
@@ -526,6 +549,24 @@ export type ReflectionResults = {
  * nothing here is a new claim about the couple. `section` is where each group
  * came from, which is where the app links back to.
  */
+/**
+ * One of the three buckets What Comes Next is laid out in.
+ *
+ * Ellie asked for the action items "not grouped by exercise/section but
+ * rather by: What to keep in mind, What to discuss together, Phrases to try".
+ * The server decides which bucket each item is in, because two surfaces
+ * deciding that independently is this codebase's whole failure mode.
+ */
+export type NextStepBucket = {
+  id: string;
+  label: string;
+  color?: string;
+  items: {
+    title: string; quote?: string | null; body: string | null; say: string | null;
+    section?: string | null;
+  }[];
+};
+
 export type NextStepGroup = {
   id: string;
   label: string;
@@ -555,7 +596,10 @@ export type ExpectationsSummary = {
   /** What the life questions are called. One string, shared with the site. */
   answered: number;
   aligned: number;
-  differences: number;
+  /* The top-level `differences` was here. The only thing that drew it was the
+     "Already aligned / Worth discussing" line Ellie had removed from the
+     expectations overview, so the server stopped sending it. The per-category
+     one below is still read, by What Comes Next. */
   categories: {
     /** The section id this bucket belongs to, e.g. exp-convo-2. */
     section: string;

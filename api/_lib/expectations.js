@@ -325,7 +325,20 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
   return {
     answered,
     aligned,
-    differences: answered - aligned,
+    /**
+     * ── THE TOP-LEVEL `differences` IS GONE ──────────────────────────────
+     * Ellie: "Remove 'already aligned:20 worth discussing:12' line from top of
+     * expectations overview page."
+     *
+     * That line was the only thing on either surface that drew this number.
+     * The per-category `differences` above is still read, by What Comes Next,
+     * which is why it stays.
+     *
+     * A field nothing draws is the thing check-app-draws-payload exists to
+     * find, and it found this one the same afternoon the line was deleted.
+     * Sending a number to two surfaces that neither of them shows is how a
+     * payload becomes a place to look for answers that are not there.
+     */
     categories,
     // `life` used to be sent here as its own array, from the days when the
     // category list was the five responsibility categories and Life & Values

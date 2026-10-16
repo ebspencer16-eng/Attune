@@ -27,7 +27,7 @@ import { expectationsSummary } from './_lib/expectations.js';
 import { INDIVIDUAL_TYPE_DISPLAY, MAP_QUADRANTS } from './_individual-types.js';
 import { AXES, MAP_CAPTION } from './_axes.js';
 import { coupleTypeProse } from './_lib/near-axis.js';
-import { individualBlurb, axisRows } from './_lib/individual-profile.js';
+import { individualBlurb } from './_lib/individual-profile.js';
 import { mapCoords } from './_lib/results.js';
 import { resolveRoleTokens } from './_lib/role-tokens.js';
 import { intimacyResults } from './_lib/intimacy-results.js';
@@ -402,7 +402,9 @@ function individualProfile(person, name, pronouns) {
     typeName: display.name,
     color: display.color,
     blurb: individualBlurb(name || 'They', pronouns, coords.engage, coords.open),
-    rows: axisRows(name || 'They', coords),
+    /* No `rows`. The two axis bars they drew are gone from both surfaces at
+       her ask (B91), and a field nothing draws is a field that reads as
+       content somebody is missing. */
   };
 }
 

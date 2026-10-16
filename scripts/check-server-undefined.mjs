@@ -25,6 +25,10 @@
  * deployed endpoint and reading the 500.
  *
  * ── HOW IT IS CHECKED ─────────────────────────────────────────────────────
+ * It also fails on a declaration initialised from itself, which is the same
+ * bug one step further on: the name IS declared, so resolving scopes says
+ * nothing, and the module throws from the binding's own temporal dead zone.
+ *
  * Babel parses the file and resolves scopes, and the program scope's set of
  * unresolved references is exactly this question asked properly. That is real
  * scope analysis, not a grep: a name declared in an inner block is bound, a
@@ -148,6 +152,83 @@ for (const file of files) {
     UnaryExpression(path) {
       if (path.node.operator === 'typeof' && path.node.argument.type === 'Identifier') {
         featureDetected.add(path.node.argument.name);
+      }
+    },
+  });
+
+  /**
+   * ── AND A NAME THAT RESOLVES TO ITSELF ──────────────────────────────────
+   * `const BRAND_GRADIENT = BRAND_GRADIENT;` declares the name, so the scope
+   * check above is satisfied, and esbuild compiles it without a word. At run
+   * time it throws ReferenceError before anything else in the module runs:
+   * the binding is in its temporal dead zone while its own initialiser is
+   * evaluated. In src/App.jsx that means a blank page.
+   *
+   * Written by a script that extracted a repeated literal into a constant and
+   * then replaced every occurrence of the literal, including the one inside
+   * the declaration it had just written. `npx vite build` passed, every gate
+   * passed, and the site served an empty root.
+   *
+   * Only a direct self-reference in the initialiser, which is never anything
+   * but a mistake. `const a = () => a` is fine and common, so function bodies
+   * are not looked into.
+   */
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const { id, init } = path.node;
+      if (!init || id.type !== 'Identifier') return;
+      /* Every mention of the name inside the initialiser, whatever shape the
+         expression is. The first version listed the shapes it knew, and the
+         fourth plant, `X = X.slice(0)`, walked straight past it: that is a
+         call expression wrapping a member expression, and enumerating forms
+         is how a matcher ends up knowing one spelling. */
+      /* A function assigned to a name may call itself: `const walk = (n) =>
+         n.map(walk)` is recursion, and the body does not run while the
+         binding is being initialised. The visitor below skips NESTED
+         functions, and the init being a function itself is not nested, so it
+         is skipped here. */
+      if (init.type === 'ArrowFunctionExpression' || init.type === 'FunctionExpression') return;
+      const found = [];
+      path.get('init').traverse({
+        /* Not into a function, because `const f = () => f()` is ordinary
+           recursion: the body does not run while the binding is being
+           initialised.
+
+           Unless it is called on the spot. An IIFE's body DOES run during
+           initialisation, so `const X = (() => X)()` throws exactly like the
+           plain form, and this file uses IIFEs everywhere. */
+        Function(p2) {
+          const callee = p2.parentPath
+            && (p2.parentPath.isCallExpression() || p2.parentPath.isOptionalCallExpression())
+            && p2.parentPath.node.callee === p2.node;
+          if (!callee) p2.skip();
+        },
+        Identifier(p2) {
+          if (p2.node.name !== id.name) return;
+          /* `x.X` is a property called X, not the binding, and so is `x?.X`.
+             The optional form is a different node type, OptionalMemberExpression,
+             and leaving it out produced 38 findings in files that are fine:
+             `const you = names?.you` reads as self-reference to a matcher that
+             only knows the one spelling. */
+          const pp = p2.parent;
+          const isProp = (pp.type === 'MemberExpression' || pp.type === 'OptionalMemberExpression')
+            && pp.property === p2.node && !pp.computed;
+          if (isProp) return;
+          const isKey = (pp.type === 'ObjectProperty' || pp.type === 'ObjectMethod'
+            || pp.type === 'ClassProperty' || pp.type === 'ClassMethod')
+            && pp.key === p2.node && !pp.computed;
+          if (isKey) return;
+          found.push(p2.node);
+        },
+      });
+      if (init.type === 'Identifier' && init.name === id.name) found.push(init);
+      for (const n of found) {
+        const line = n.loc ? n.loc.start.line : '?';
+        problems.push(
+          `${file.replace(ROOT, '')}:${line}: \`${id.name}\` is initialised from itself. `
+          + 'The name is declared, so a scope check and the build are both happy; at run time '
+          + 'it throws ReferenceError from its own temporal dead zone and nothing after it runs.'
+        );
       }
     },
   });

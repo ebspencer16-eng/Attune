@@ -22,20 +22,52 @@
  * the app had nothing, because there was nowhere an app could read it from.
  */
 
+/**
+ * ── THE POLE NAMES LIVE HERE TOO ──────────────────────────────────────────
+ * The four words drawn on the edges of the map: ENGAGE at the top, WITHDRAW
+ * at the foot, OPEN on the left, GUARDED on the right. They were typed into
+ * the website's SVG and typed again into the app's map component, which is
+ * two copies of a rule with nothing holding them together, and the labels on
+ * the two maps were therefore free to disagree.
+ *
+ * `helpAt` is the pole that carries the question mark. Ellie: "Put a light
+ * grey question mark icon in a circle next to Open and Withdraw that pop up
+ * with the description of that axis. Remove axis descriptions from below the
+ * chart." One marker per axis, at the pole she named, and `desc` is what it
+ * opens. Which is also why `desc` is still one sentence per axis: it is now
+ * read in a small panel beside a chart rather than in a column under it.
+ *
+ * `high` is the end a coordinate of 1 sits at. The map puts Engage at the top
+ * and Open on the left, so both renderers invert for the screen; that
+ * arithmetic stays with the renderer, and only the words are here.
+ */
 export const AXES = [
   {
     id: 'engage',
     label: 'Engage / Withdraw',
     color: '#9B5DE5',
     desc: 'How you respond when something is hard or unresolved.',
+    poles: { high: 'Engage', low: 'Withdraw' },
+    helpAt: 'low',
   },
   {
     id: 'open',
     label: 'Open / Guarded',
     color: '#1B5FE8',
     desc: "How freely you express what's going on inside.",
+    poles: { high: 'Open', low: 'Guarded' },
+    helpAt: 'high',
   },
 ];
+
+/** The axis the map's vertical edge is, and the one its horizontal edge is. */
+export const ENGAGE_AXIS = AXES[0];
+export const OPEN_AXIS = AXES[1];
+
+/** The word at one end of an axis, and whether that end carries the help. */
+export function pole(axis, end) {
+  return { label: axis.poles[end], help: axis.helpAt === end ? axis : null };
+}
 
 /**
  * The small print under the map.

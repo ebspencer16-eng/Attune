@@ -55,14 +55,26 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       color: '#9B5DE5',
       label: 'Couple type',
       section: 'couple-type',
-      items: type.tips.slice(0, 3).map((t) => ({
-        title: named(t.title),
-        body: named(t.body) || null,
-        // The sentence to actually say. On a page of advice this is the only
-        // part that survives contact with a real evening.
-        say: named(t.phraseTry) || null,
-        section: 'couple-type',
-      })),
+      /**
+       * ── B104: THE ROWS ARE THE PHRASES ──────────────────────────────────
+       * Ellie: "Couple type action plan should be the three phrases to try."
+       *
+       * They were a title, a paragraph and the phrase underneath, which is the
+       * shape every other group has. In the bucket layout this group IS the
+       * bucket called Phrases to try, so the phrase is the row and the advice
+       * around it stays on the couple type page where it was met in context.
+       *
+       * A tip with no phrase is dropped rather than shown as a heading with
+       * nothing to say, which is what the conflict rows used to be.
+       */
+      items: type.tips.slice(0, 3)
+        .filter((t) => t.phraseTry)
+        .map((t) => ({
+          title: named(t.phraseTry),
+          body: null,
+          say: null,
+          section: 'couple-type',
+        })),
     });
   }
 
@@ -102,7 +114,12 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     groups.push({
       id: 'comm',
       color: '#E8673A',
-      label: 'Communication',
+      /* B103. Ellie: "Communication action plan should be called communication
+         styles." It is the exercise's own full name, which is what the nav has
+         always called it. The bucket layout does not print a group label at
+         all, so this now only reaches a surface that lists sources; it is
+         corrected rather than left wrong. */
+      label: 'Communication Styles',
       section: 'comm-overview',
       /**
        * ── EXACTLY WHAT THE COMMUNICATION OVERVIEW SAYS ──────────────────
@@ -125,12 +142,30 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
        * The domain's page is still where the row's arrow goes, which is what
        * `section` is for and is the half of her earlier ask that survives.
        */
+      /**
+       * ── B102: THE ROW IS THE ACTION, NOT THE CATEGORY ──────────────────
+       * Ellie: "Comms action plans in what comes next should list the action
+       * items not the category."
+       *
+       * The row was the domain's name, which is a category: "When things get
+       * hard". What to DO was underneath it as the Try line. They are the
+       * other way round now, so the row reads as something to do and the
+       * domain is where its arrow goes.
+       *
+       * This is the third instruction about these rows and all three are kept
+       * because the round trip is the argument. She asked for the detail
+       * page's name with the website's Try line under it; then "Revert, make
+       * the action items for comms match the comms overview page's action
+       * items exactly", which is the tile's advice; and now that the advice is
+       * the row itself.
+       */
       items: commTiles.map((tile) => {
         const domain = COMM_DOMAINS.find((d) => d.id === tile.domain);
+        const action = [tile.body, tile.reflect].filter(Boolean).join(' ');
         return {
-          title: tile.title || tile.label,
+          title: action || tile.title || tile.label,
           body: null,
-          say: [tile.body, tile.reflect].filter(Boolean).join(' ') || null,
+          say: null,
           section: domain ? `comm-${domain.id}` : 'comm-overview',
         };
       }),
@@ -327,5 +362,57 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     });
   }
 
-  return { groups };
+  /**
+   * ── B105: THREE BUCKETS, NOT SIX SECTIONS ────────────────────────────────
+   * Ellie: "I want to take all of the action items we currently list, and
+   * present them not grouped by exercise/section but rather by: What to keep
+   * in mind, What to discuss together, Phrases to try."
+   *
+   * And: "Do not list which exercises populate each bucket on what comes
+   * next." So the bucket carries no source names, and a row's arrow is the
+   * only thing that says where it came from, which is also the only part a
+   * reader needs: it takes them to the page they met it on.
+   *
+   * The grouping lives here rather than in either renderer. Two surfaces
+   * deciding independently which bucket conflict belongs in is the shape of
+   * bug this codebase is mostly made of.
+   *
+   * `groups` is still returned beside the buckets. It is what the workbook and
+   * the email read, and those are not this page; a bucket is a decision about
+   * one screen rather than about what the results contain.
+   */
+  const BUCKETS = [
+    {
+      id: 'keep-in-mind',
+      label: 'What to keep in mind',
+      /* The three that describe how you already are with each other. */
+      from: ['comm', 'conflict', 'reflection'],
+      color: '#E8673A',
+    },
+    {
+      id: 'discuss',
+      label: 'What to discuss together',
+      /* The two that are lists of conversations to have. */
+      from: ['exp', 'intimacy'],
+      color: '#1B5FE8',
+    },
+    {
+      id: 'phrases',
+      label: 'Phrases to try',
+      from: ['couple-type'],
+      color: '#9B5DE5',
+    },
+  ];
+
+  const buckets = BUCKETS.map((b) => ({
+    id: b.id,
+    label: b.label,
+    color: b.color,
+    items: b.from
+      .map((id) => groups.find((g) => g.id === id))
+      .filter(Boolean)
+      .flatMap((g) => g.items || []),
+  })).filter((b) => b.items.length);
+
+  return { groups, buckets };
 }

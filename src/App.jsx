@@ -37,7 +37,7 @@ const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerN
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
 import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
-import { shouldShow } from "../api/_lib/survey.js";
+import { shouldShow, SURVEY_COPY } from "../api/_lib/survey.js";
 /* One insight a day, the same one the app shows, from one module. */
 import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insights.js";
 /**
@@ -141,7 +141,7 @@ import {
 import { COUPLE_TYPES as NEW_COUPLE_TYPES } from "../api/_couple-types.js";
 import { pairingLabel, pairingTier } from "../api/_lib/pairing.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
-import { AXES, MAP_CAPTION } from "../api/_axes.js";
+import { AXES, MAP_CAPTION, ENGAGE_AXIS, OPEN_AXIS } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
 import { EXERCISES, ownedExercises } from "../api/_exercises.js";
 import { sarahEx1, sarahEx2, jamesEx1, jamesEx2 } from "../api/_lib/demo-couple.js";
@@ -184,7 +184,7 @@ import { STRIPE as SC_STRIPE, SITE_LABEL as SC_SITE, CALLOUT_TONES as SC_CALLOUT
 // cards still carry their values inline, and those values are what the scale
 // was transcribed from, which is why the app matches them today.
 import { cardTypeCss as scType, PERSON_COLORS as SC_PEOPLE, CARD_REF_WIDTH as SC_REF_WIDTH, CARD_MAP_PCT as SC_MAP_PCT, PERSON_GLANCE_COLORS as GLANCE_COLORS } from "../api/_lib/storycard-style.js";
-import { individualBlurb, axisBand, axisRows } from "../api/_lib/individual-profile.js";
+import { individualBlurb } from "../api/_lib/individual-profile.js";
 import { pronounForm } from "../api/_lib/role-tokens.js";
 import { commsProtocols, commsActionPlan } from "../api/_lib/comms-plan.js";
 import { whatComesNext } from "../api/_lib/what-comes-next.js";
@@ -247,6 +247,16 @@ const C = {
   // Dimension accent palette -- used on exercise cards
   dAccent: ["#E8673A","#1B5FE8","#2AB07F","#E040A0","#F5A623","#9B5DE5","#00B4CC","#E8503A"],
 };
+/**
+ * The brand's three colours in one sweep: the mobile top bar, the dashboard's
+ * header band, and the survey button at the foot of What Comes Next.
+ *
+ * It was typed out twice before that third use, which is how every duplicated
+ * rule in this file started. White type needs 4.5 to 1 and the burnt orange
+ * end gives 4.17 on its own; the text in all three places starts far enough
+ * in that the colour under its first letter is already mixed past 4.9.
+ */
+const BRAND_GRADIENT = "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)";
 const font = { display: "'Playfair Display', Georgia, serif", body: "'DM Sans', system-ui, sans-serif" };
 /**
  * ── ONE FONT REQUEST FOR THE WHOLE WEBSITE ──────────────────────────────
@@ -2114,7 +2124,60 @@ const NEAR_AXIS_PROSE = NEAR_AXIS_PROSE_SHARED;
 // Shareable couple type card component
 
 // ── COUPLE MAP SVG COMPONENT ──────────────────────────────────────────────────
-function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false, axisLabelColor = "#7A6753" }) {
+/**
+ * The light grey question mark beside a pole label on the couple map.
+ *
+ * B92. Drawn in the SVG rather than over it, so it keeps its place beside the
+ * word at every size the map is rendered at. The circle is 9 of a 460 viewBox,
+ * which is about 12 points on a phone, and the transparent circle behind it is
+ * 16, which is the finger.
+ */
+function AxisHelpMark({ cx, cy, axis, onOpen }) {
+  return (
+    <g style={{ cursor: "pointer" }} role="button" tabIndex={0}
+      aria-label={`What ${axis.label} means`}
+      onClick={(e) => { e.stopPropagation(); onOpen(); }}>
+      {/* The finger, not the glyph. 24 of a 460 viewBox is 48 units across,
+          which is about 33 points on a phone where the circle itself is 12. */}
+      <circle cx={cx} cy={cy} r="24" fill="transparent" />
+      <circle cx={cx} cy={cy} r="9" fill="#EFE9E1" stroke="#CFC5B8" strokeWidth="1" />
+      <text x={cx} y={cy + 4} textAnchor="middle" fontSize="12" fontWeight="700"
+        fill="#8F8071" fontFamily="Arial">?</text>
+    </g>
+  );
+}
+
+function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCaption = false, axisLabelColor = "#7A6753", interactive = false, userPronouns = "", partnerPronouns = "" }) {
+  /* ── B91 AND B92: WHAT THE MAP ANSWERS WHEN IT IS TAPPED ───────────
+     Ellie, B91: "remove 'your individual types' section entirely, add the
+     description of each person if you tap on the person's dot. Make it like
+     a pop up next to the dot. Tap outside the pop up tile to make it go
+     away. Pop up tile should have the paragraph from the individual type
+     section but we don't need the axes bars."
+
+     And B92: "Put a light grey question mark icon in a circle next to Open
+     and Withdraw that pop up with the description of that axis. Remove axis
+     descriptions from below the chart."
+
+     Both are the same control: one thing open at a time, over the map,
+     dismissed by a tap anywhere else. `interactive` is off by default
+     because this component also draws the storycard, which is a picture
+     somebody screenshots and cannot be tapped. */
+  const [opened, setOpened] = useState(null);   // { kind: 'dot'|'axis', id }
+  const wrapRef = useRef(null);
+  useEffect(() => {
+    if (!opened) return undefined;
+    /* A tap outside the map closes it. The overlay below covers the map
+       itself; this is everything else on the page, which is what "tap
+       outside" means to a reader whose finger has landed on a paragraph. */
+    const away = (e) => { if (!wrapRef.current?.contains(e.target)) setOpened(null); };
+    document.addEventListener("mousedown", away);
+    document.addEventListener("touchstart", away);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("touchstart", away);
+    };
+  }, [opened]);
   const typeInfoA = computeIndividualType(myS);
   const typeInfoB = computeIndividualType(partS);
   const itA = INDIVIDUAL_TYPES[typeInfoA.typeCode];
@@ -2192,8 +2255,16 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
   const idB = `gB_${typeInfoB.typeCode}`;
   const idQW = "qgW", idQX = "qgX", idQY = "qgY", idQZ = "qgZ";
 
+  /* The dots, as the popup needs them: who, what colour, where on the map,
+     and the paragraph the individual types section used to carry. */
+  const people = [
+    { id: "a", name: userName, it: itA, info: typeInfoA, at: axA, pron: userPronouns },
+    { id: "b", name: partnerName, it: itB, info: typeInfoB, at: axB, pron: partnerPronouns },
+  ];
+  const H = cy1 + 42;
+
   return (
-    <div style={{ width: "100%" }}>
+    <div ref={wrapRef} style={{ width: "100%", position: "relative" }}>
       {/* SVG Map */}
       <svg viewBox={`0 0 ${VB} ${cy1 + 42}`} style={{ width: "100%", display: "block", overflow: "visible" }} aria-label="Couple map showing partner positions">
         <defs>
@@ -2256,13 +2327,32 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
             QN is still used by the tag placement below, which nudges a name
             tag clear of a corner. It stays for that. */}
 
-        {/* ── AXIS LABELS ── */}
+        {/* ── AXIS LABELS ──────────────────────────────────────────────
+            The four words are api/_axes.js's, not this file's. They were
+            typed here and typed again in the app's map, which is the one
+            failure this codebase is organised against: two copies of four
+            words, free to disagree, with the storycard drawing a third
+            copy of the same labels through this same component. */}
         {/* Vertical axis: Engage (top) / Withdraw (bottom) */}
-        <text x={midX} y={cy0 - 16} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2">ENGAGE</text>
-        <text x={midX} y={cy1 + 30} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2">WITHDRAW</text>
+        <text x={midX} y={cy0 - 16} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2">{ENGAGE_AXIS.poles.high.toUpperCase()}</text>
+        <text x={midX} y={cy1 + 30} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2">{ENGAGE_AXIS.poles.low.toUpperCase()}</text>
         {/* Horizontal axis: Open (left) / Guarded (right) — rotated to run along each side */}
-        <text x={cx0 - 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2" transform={`rotate(-90 ${cx0 - 14} ${midY})`}>OPEN</text>
-        <text x={cx1 + 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2" transform={`rotate(90 ${cx1 + 14} ${midY})`}>GUARDED</text>
+        <text x={cx0 - 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2" transform={`rotate(-90 ${cx0 - 14} ${midY})`}>{OPEN_AXIS.poles.high.toUpperCase()}</text>
+        <text x={cx1 + 14} y={midY} textAnchor="middle" fontSize="11" fontWeight="700" fill={axisLabelColor} fontFamily="Arial" letterSpacing="2" transform={`rotate(90 ${cx1 + 14} ${midY})`}>{OPEN_AXIS.poles.low.toUpperCase()}</text>
+
+        {/* ── AND A QUESTION MARK BESIDE TWO OF THEM ───────────────────
+            B92. Beside Withdraw, which is the foot of the Engage axis, and
+            beside Open, which is the left of the Open axis: the two poles
+            Ellie named. Light grey, because it is a thing to notice only
+            when you want it. */}
+        {interactive && (
+          <>
+            <AxisHelpMark cx={midX + 52} cy={cy1 + 26} axis={ENGAGE_AXIS}
+              onOpen={() => setOpened((o) => (o?.id === ENGAGE_AXIS.id ? null : { kind: "axis", id: ENGAGE_AXIS.id }))} />
+            <AxisHelpMark cx={cx0 - 14} cy={midY + 34} axis={OPEN_AXIS}
+              onOpen={() => setOpened((o) => (o?.id === OPEN_AXIS.id ? null : { kind: "axis", id: OPEN_AXIS.id }))} />
+          </>
+        )}
 
 
         {/* ── CONNECTING LINE ── */}
@@ -2286,6 +2376,19 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
         <circle cx={axA.x} cy={axA.y} r="15" fill={itA.color} filter="url(#dotShadow)"/>
         <circle cx={axA.x} cy={axA.y} r="15" fill="none" stroke="white" strokeWidth="2.5"/>
         <circle cx={axA.x - 4} cy={axA.y - 4} r="4.5" fill="white" opacity="0.38"/>
+
+        {/* ── THE DOTS ARE THE CONTROL ──────────────────────────────────
+            B91. One transparent circle per dot, over the top of both, rather
+            than wrapping the four circles each dot is made of: the drawing
+            stays exactly as it was and the hit area is bigger than the dot,
+            which is what a finger needs. 24 of a 460 viewBox is about 32
+            points on a phone. */}
+        {interactive && people.map((pp) => (
+          <circle key={`hit-${pp.id}`} cx={pp.at.x} cy={pp.at.y} r="24" fill="transparent"
+            style={{ cursor: "pointer" }} role="button" tabIndex={0}
+            aria-label={`${pp.name}: ${pp.it.name}`}
+            onClick={() => setOpened((o) => (o?.id === pp.id ? null : { kind: "dot", id: pp.id }))} />
+        ))}
         {/* ── NAME TAGS — upper dot's tag above it, lower dot's tag below it ── */}
         <rect x={upperTagX} y={upperTagY} width={upperTag.w} height={tagH} rx={tagR} fill={upperTag.color} filter="url(#tagShadow)"/>
         <text x={upperTagX + upperTag.w / 2} y={upperTagY + 15} textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Arial">{upperTag.name}</text>
@@ -2294,6 +2397,81 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
         <text x={lowerTagX + lowerTag.w / 2} y={lowerTagY + 15} textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="Arial">{lowerTag.name}</text>
         <polygon points={`${lowerTag.x},${lowerTagY} ${lowerTag.x - 5},${lowerTagY + 6} ${lowerTag.x + 5},${lowerTagY + 6}`} fill={lowerTag.color}/>
       </svg>
+
+      {/* ── WHAT A TAP OPENS ─────────────────────────────────────────────
+          One panel at a time, over the map, positioned beside whatever was
+          tapped. The transparent sheet under it is the "tap outside to make
+          it go away" half: it covers the map, and the document listener at
+          the top of this component covers the rest of the page.
+
+          Both the axis descriptions and each person's paragraph are here,
+          behind the two controls. They were a column under the chart and a
+          pair of tiles under that; the words are the same words, from the
+          same modules. Their section-block markers sit beside the map's, at
+          the point in the page where this component is rendered, because
+          that is where a reader meets them and it is the order the page is
+          checked in. */}
+      {interactive && opened && (
+        <>
+          {/* stopPropagation, because the results column pages back on a click
+              in its left sixth and forward on its right sixth. Without this,
+              the tap that closes a panel near either edge of the map also
+              turns the page, and the reader loses the page they were on for
+              having dismissed something. */}
+          <div data-map-sheet onClick={(e) => { e.stopPropagation(); setOpened(null); }}
+            style={{ position: "absolute", inset: 0, zIndex: 2, cursor: "default" }} />
+          {(() => {
+            const card = {
+              position: "absolute", zIndex: 3, background: "white",
+              border: `1.5px solid ${C.stone}`, borderRadius: 14,
+              boxShadow: "0 14px 40px rgba(0,0,0,0.16)",
+              padding: "0.9rem 1rem", width: 236, maxWidth: "78%",
+              fontFamily: BFONT, textAlign: "left",
+            };
+            if (opened.kind === "axis") {
+              const ax = [ENGAGE_AXIS, OPEN_AXIS].find((a) => a.id === opened.id);
+              if (!ax) return null;
+              /* Beside the mark that opened it: the foot of the vertical axis
+                 sits under the map, the left of the horizontal axis halfway
+                 down it. */
+              const place = ax.id === ENGAGE_AXIS.id
+                ? { left: "50%", bottom: 8, transform: "translateX(-50%)" }
+                : { left: 10, top: "50%", transform: "translateY(-50%)" };
+              return (
+                <div data-map-panel="axis" style={{ ...card, ...place, borderTop: `4px solid ${ax.color}` }}>
+                  <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontWeight: 700, marginBottom: "0.35rem" }}>{ax.label}</div>
+                  <p style={{ fontSize: "0.8rem", color: C.ink, lineHeight: 1.6, margin: 0 }}>{ax.desc}</p>
+                </div>
+              );
+            }
+            const pp = people.find((x) => x.id === opened.id);
+            if (!pp) return null;
+            /* To the right of a dot on the left half, to the left of one on
+               the right half, so the panel never hangs off the edge the dot
+               is nearest. */
+            const onLeft = pp.at.x <= midX;
+            const place = {
+              top: `${Math.min(88, Math.max(12, (pp.at.y / H) * 100))}%`,
+              transform: "translateY(-50%)",
+              ...(onLeft
+                ? { left: `calc(${(pp.at.x / VB) * 100}% + 26px)` }
+                : { right: `calc(${((VB - pp.at.x) / VB) * 100}% + 26px)` }),
+            };
+            return (
+              <div data-map-panel="dot" style={{ ...card, ...place, borderTop: `4px solid ${pp.it.color}` }}>
+                <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: pp.it.color, fontWeight: 700, marginBottom: "0.25rem" }}>{pp.name}</div>
+                <div style={{ fontFamily: HFONT, fontSize: "1.02rem", fontWeight: 700, color: C.ink, marginBottom: "0.45rem" }}>{pp.it.name}</div>
+                {/* The paragraph, and not the axis bars: "we don't need the
+                    axes bars". individualBlurb is the module the app reads
+                    too, so the two surfaces cannot word this differently. */}
+                <p style={{ fontSize: "0.79rem", color: C.muted, lineHeight: 1.65, margin: 0 }}>
+                  {individualBlurb(pp.name, pp.pron, pp.info.engageCoord, pp.info.openCoord)}
+                </p>
+              </div>
+            );
+          })()}
+        </>
+      )}
 
       {/* MAP_CAPTION, not the words. It was written out here, which is why
           the app printed nothing under its map: there was nowhere to read it
@@ -7536,7 +7714,7 @@ function UnifiedResultsRoot(props) {
  * 2026-10-13.
  */
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false, onOpenJournal = null, onOpenSurvey = null, surveyAnswered = false }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -7693,6 +7871,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const [reflExpanded, setReflExpanded] = useState(section.startsWith("reflection"));
   const [intimExpanded, setIntimExpanded] = useState(section.startsWith("intimacy"));
   const [conflictExpanded, setConflictExpanded] = useState(section.startsWith("conflict"));
+  /* B105. Which of What Comes Next's four tiles is open. The accordion this
+     replaced got one-open-at-a-time from <details name>; a tile is not a
+     disclosure, so it is state. Null is all four closed, which is how the
+     page opens. */
+  const [openBucket, setOpenBucket] = useState(null);
   // section is internal state seeded once from initialSection. The mobile
   // sub-nav lives outside this component and can only set the parent's
   // activeResult, so without this every mobile tab was a no-op. Deliberately
@@ -8748,60 +8931,37 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
               <div style={{ width: "100%", maxWidth: isMobile ? 340 : 420 }}>
                 {/* block: couple-type/map */}
-                <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={isMobile ? 320 : 400} />
+                {/* block: couple-type/axes */}
+                {/* block: couple-type/individual-types */}
+                {/* The map draws three of this page's blocks now, not one:
+                    itself, what each axis means (behind the question mark
+                    beside Open and beside Withdraw) and each person's own
+                    paragraph (behind their dot). B91 and B92. */}
+                <CoupleMapSVG myS={myS} partS={partS} userName={userName} partnerName={partnerName} size={isMobile ? 320 : 400}
+                  interactive userPronouns={userPronouns} partnerPronouns={partnerPronouns} />
               </div>
             </div>
-            <div style={{ height: 1, background: C.stone, opacity: 0.6, margin: "0 0 1.25rem" }} />
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "1.1rem" }}>
-              {/* block: couple-type/axes */}
-              {AXES.map(ax => (
-                <div key={ax.label} style={{ borderLeft: `3px solid ${ax.color}`, paddingLeft: "0.9rem" }}>
-                  <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: ax.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.5rem" }}>{ax.label}</div>
-                  {/* One sentence per axis. The pole lines that used to sit
-                      here, with the up and down arrows, were cut from both
-                      surfaces: the label names both ends already. */}
-                  <p style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{ax.desc}</p>
-                </div>
-              ))}
-            </div>
+            {/* ── THE AXIS DESCRIPTIONS ARE NOT HERE ANY MORE ────────────
+                B92. Ellie: "Remove axis descriptions from below the chart."
+                They are behind the two question marks on the map itself, in
+                CoupleMapSVG, which is where the `couple-type/axes` marker
+                went with them. The rule that divided them from the chart
+                went too: there is nothing under the chart to divide. */}
           </div>
 
-          <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
-            Your individual types
-          </div>
-          {/* block: couple-type/individual-types */}
-          {/* 4. INDIVIDUAL TILES */}
-          {/* ── INDIVIDUAL TYPES (merged: identity + placement blurb + bars) ── */}
-          {(() => {
-            const blurbFor = (name, pron, info) => individualBlurb(name, pron, info.engageCoord, info.openCoord);
-            return (
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: isMobile ? "1rem" : "1rem", marginBottom: "1.5rem" }}>
-              {[
-                { name: userName, it: itA, info: newType.typeInfoA, pron: userPronouns },
-                { name: partnerName, it: itB, info: newType.typeInfoB, pron: partnerPronouns },
-              ].map(({ name, it, info, pron }) => (
-                <div key={name} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: isMobile ? "1.1rem" : "1.4rem", borderTop: `4px solid ${it.color}` }}>
-                  <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: it.color, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.35rem" }}>{name}</div>
-                  <div style={{ fontFamily: HFONT, fontSize: isMobile ? "1.05rem" : "1.2rem", fontWeight: 700, color: C.ink, marginBottom: "0.6rem" }}>{it.name}</div>
-                  <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.7, margin: "0 0 1.1rem" }}>{blurbFor(name, pron, info)}</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-                    {axisRows(name, { engage: info.engageCoord, open: info.openCoord }).map(({ label, value, score }) => (
-                      <div key={label}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
-                          <span style={{ fontSize: "0.6rem", color: C.muted, fontFamily: BFONT, fontWeight: 600 }}>{label}</span>
-                          <span style={{ fontSize: "0.6rem", color: it.color, fontFamily: BFONT, fontWeight: 600 }}>{value}</span>
-                        </div>
-                        <div style={{ height: 4, background: C.stone, borderRadius: 2, overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${Math.round(score * 100)}%`, background: it.color, borderRadius: 2 }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            );
-          })()}
+          {/* ── "YOUR INDIVIDUAL TYPES" IS GONE ───────────────────────────
+              B91. Ellie: "remove 'your individual types' section entirely,
+              add the description of each person if you tap on the person's
+              dot." It was two tiles, each with an eyebrow, a type name, the
+              paragraph and two axis bars. The paragraph is in the dot's
+              popup now and the bars are not anywhere: "we don't need the
+              axes bars."
+
+              The `couple-type/individual-types` marker moved into
+              CoupleMapSVG with the paragraph. axisRows went with the bars:
+              nothing on either surface drew them any more, so it is deleted
+              rather than left as a producer with no consumer, and `rows` is
+              off the payload. */}
 
           <div style={{ fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.muted, fontFamily: BFONT, fontWeight: 700, marginTop: "1.75rem", marginBottom: "1rem" }}>
             Your couple type
@@ -10097,7 +10257,19 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                payload says title and say, which is what the app reads, so the
                names are mapped here rather than changed on the payload and
                broken for the app. */
-            const groups = (wcn.groups || []).map(g => ({
+            /* ── B105: THE THREE BUCKETS THE SERVER DECIDED ──────────
+               Ellie: "I want to take all of the action items we currently
+               list, and present them not grouped by exercise/section but
+               rather by: What to keep in mind, What to discuss together,
+               Phrases to try."
+
+               The grouping is the server's, in api/_lib/what-comes-next.js,
+               so this page and the app cannot disagree about which bucket
+               conflict belongs in. A stored results row written before the
+               buckets existed carries only `groups`, and results are frozen,
+               so that falls back to one bucket per group. */
+            const source = (wcn.buckets?.length ? wcn.buckets : wcn.groups) || [];
+            const groups = source.map(g => ({
               id: g.id,
               label: g.label,
               color: g.color || "#E8673A",
@@ -10117,76 +10289,115 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     comes next page." The page is a list of things to do; a paragraph
                     explaining that it is a list of things to do is one more thing to
                     read before reading it. */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                  {/* block: what-comes-next/groups */}
-                  {/* ── ONE OPEN AT A TIME ────────────────────────────────
-                      Ellie: "on both app and site, clicking on a new section in
-                      'what comes next' should close the other dropdown."
+                {/* ── B105: FOUR TILES, AND ONE OF THEM IS OPEN ────────
+                    Ellie: "Four quick-access tiles formatted like the ones on
+                    the home page. One for each bucket listed above and one for
+                    the relationship journal. When a user taps one of the
+                    tiles, that content appears in the space below, but the 4
+                    tiles stay in place."
 
-                      `name` on a <details> is what the browser already has for
-                      this: elements sharing a name behave as one accordion. No
-                      state, no handler, and it keeps working if someone opens
-                      one with a keyboard. */}
-                  {groups.map(g => (
-                    <details key={g.id} name="what-comes-next" style={{ background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 14, overflow: "hidden" }}>
-                      <summary style={{ listStyle: "none", cursor: "pointer", padding: "0.85rem 1.1rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
-                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{g.label}</span>
-                        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
-                          <span style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>{g.items.length} item{g.items.length !== 1 ? "s" : ""}</span>
-                          <span style={{ fontSize: "0.62rem", color: g.color, fontFamily: BFONT, fontWeight: 700 }}>Show</span>
-                          <span style={{ fontSize: "0.8rem", color: g.color, lineHeight: 1 }}>▾</span>
+                    The same square the home page's quick links are: three per
+                    cent ink, the same radius and aspect, the label on two
+                    lines. The accordion this replaced is gone, and with it the
+                    <details name> trick that gave it one-open-at-a-time; that
+                    is state here, because a tile is not a disclosure. */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
+                  {groups.map(g => {
+                    const open = openBucket === g.id;
+                    return (
+                      <button key={g.id} onClick={() => setOpenBucket(cur => cur === g.id ? null : g.id)}
+                        aria-pressed={open}
+                        aria-label={`${g.label}, ${g.items.length} item${g.items.length !== 1 ? "s" : ""}`}
+                        style={{
+                          background: open ? `${g.color}1F` : "rgba(14,11,7,0.045)",
+                          border: open ? `1px solid ${g.color}80` : "1px solid transparent",
+                          borderRadius: 14, aspectRatio: "0.92", maxHeight: 132,
+                          padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
+                          fontFamily: BFONT, display: "flex", flexDirection: "column",
+                          alignItems: "center", justifyContent: "flex-end",
+                        }}>
+                        {/* The count, which is what this tile has to offer. The
+                            home page's squares carry an icon here; a number is
+                            the honest equivalent for a tile whose content is a
+                            list. */}
+                        <span style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                          fontFamily: HFONT, fontSize: "1.4rem", fontWeight: 700,
+                          color: open ? g.color : "#8F8071" }}>
+                          {g.items.length}
                         </span>
-                      </summary>
-                      <div style={{ borderTop: `1px solid ${C.stone}` }}>
-                        {/* ── A ROW WITH ITS OWN PAGE CARRIES ITS OWN ARROW ──
-                            Ellie: "each row should have a little arrow on the
-                            right side of the row to open that page directly."
-                            The app draws the same arrow from the same field. */}
-                        {g.items.map((it, i) => (
-                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.85rem 1.1rem", borderBottom: i < g.items.length - 1 ? `1px solid ${C.stone}` : "none" }}>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: 0, lineHeight: 1.4 }}>
-                                {it.tip}
-                                {/* Their own words, in the same sentence as the
-                                    name, set apart so it reads as a quotation.
-                                    The app draws these two rows the same way. */}
-                                {it.quote ? (
-                                  <span style={{ fontWeight: 400, fontStyle: "italic" }}>{` \u201C${it.quote}\u201D`}</span>
-                                ) : null}
-                              </div>
-                              {/* ── THE TRY LINE IS GONE ──────────────────
-                                  Ellie, having asked for it twice and then read
-                                  it on the page: "Remove the try lines, sorry."
-
-                                  A row is its heading and the arrow to the page
-                                  it came from. That page is where the advice
-                                  lives and always was; this line was the
-                                  summary repeating it, and for the comms rows
-                                  it was the only place in the app some of those
-                                  sentences appeared at all, which is the thing
-                                  this page is not supposed to do.
-
-                                  `say` stays on the payload: check-plans-agree
-                                  compares it to prove a row came from its own
-                                  section's plan rather than a second list, and
-                                  the moment it is not sent nothing can tell
-                                  those two apart again. */}
-                            </div>
-                            {it.section ? (
-                              <button
-                                onClick={() => go(it.section)}
-                                aria-label={`Open ${it.tip}`}
-                                title={it.tip}
-                                style={{ background: "transparent", border: "none", cursor: "pointer", color: g.color, fontSize: "1.1rem", lineHeight: 1, padding: "0.2rem 0.3rem", flexShrink: 0 }}>
-                                {"\u203A"}
-                              </button>
-                            ) : null}
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  ))}
+                        <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
+                          color: open ? C.ink : C.muted, whiteSpace: "pre-line", width: "86%" }}>
+                          {g.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {/* The journal, which opens rather than filling the space
+                      below. The dashboard already has a Notes tab and the home
+                      page's fourth square goes to the same place. */}
+                  <button onClick={() => {
+                      /* The dashboard owns the Notes tab, so the move is the
+                         parent's to make. Without a handler (a demo, or a
+                         future surface that mounts the results alone) the URL
+                         gets there too, because dashTab reads ?tab=. */
+                      if (onOpenJournal) onOpenJournal();
+                      else window.location.assign('/app?tab=notes');
+                    }}
+                    aria-label="Relationship journal"
+                    style={{
+                      background: "rgba(14,11,7,0.045)", border: "1px solid transparent",
+                      borderRadius: 14, aspectRatio: "0.92", maxHeight: 132,
+                      padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
+                      fontFamily: BFONT, display: "flex", flexDirection: "column",
+                      alignItems: "center", justifyContent: "flex-end",
+                    }}>
+                    <span style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {QuickIcons.book()}
+                    </span>
+                    <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
+                      color: C.muted, whiteSpace: "pre-line", width: "86%" }}>
+                      {"Relationship\njournal"}
+                    </span>
+                  </button>
                 </div>
+
+                {/* The open bucket's rows, under the tiles. Each one opens the
+                    page in Insights it came from, which is the only thing on
+                    this page that says where it came from. */}
+                {(() => {
+                  const g = groups.find(x => x.id === openBucket);
+                  if (!g) return null;
+                  return (
+                    <div style={{ marginTop: "0.9rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                      {/* block: what-comes-next/groups */}
+                      {g.items.map((it, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.8rem 1rem" }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.45 }}>
+                              {it.tip}
+                              {it.quote ? (
+                                <span style={{ fontStyle: "italic", color: C.muted }}>{` \u201C${it.quote}\u201D`}</span>
+                              ) : null}
+                            </div>
+                          </div>
+                          {/* Ellie: "each with a grey arrow on the right hand
+                              side that takes you to the page in insights where
+                              that row's content is coming from." Grey, at her
+                              word, rather than the bucket's colour. */}
+                          {it.section ? (
+                            <button
+                              onClick={() => go(it.section)}
+                              aria-label={`Open ${it.tip}`}
+                              title={it.tip}
+                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: "1.1rem", lineHeight: 1, padding: "0.2rem 0.3rem", flexShrink: 0 }}>
+                              {"\u203A"}
+                            </button>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Download — one plain-text file with every item above. */}
                 <button onClick={() => {
@@ -10425,6 +10636,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               a third set of questions at the same moment the survey asks its
               own, which is the product asking twice. One survey, and it opens
               when this page does. */}
+          {/* ── B105: AND A WAY BACK TO IT ──────────────────────────
+              Ellie: "Tell us about your attune experience should be a colored
+              button at the bottom of the page, just like it is now." The
+              survey opens by itself when this page does, and closing it wrote
+              a dismissal that nothing could undo, so the one surface where
+              that sentence belongs had no button on it at all. It is drawn
+              until the survey has actually been ANSWERED, which is a
+              different fact from having been put away.
+
+              The words are the survey's own, from the module that asks it. */}
+          {onOpenSurvey && !surveyAnswered ? (
+            <div style={{ marginTop: "2.5rem" }}>
+              <button onClick={onOpenSurvey}
+                style={{ background: BRAND_GRADIENT, border: "none", borderRadius: 12, padding: "0.85rem 1.6rem", fontSize: "0.82rem", fontWeight: 700, color: "white", fontFamily: BFONT, cursor: "pointer", letterSpacing: ".01em" }}>
+                {SURVEY_COPY.title}
+              </button>
+            </div>
+          ) : null}
 
           {/* Back out of the last page. Everything before this has a Back;
               without one here the final page of the whole experience could
@@ -14160,6 +14389,17 @@ export default function App() {
         || localStorage.getItem(SURVEY_DISMISSED));
     } catch { return false; }
   });
+  /* Whether it was ANSWERED, which is the other half of the pair of keys
+     above. postSurveyDone means "do not open it again", and a dismissal sets
+     that; it is not an answer, and B105's button at the foot of What Comes
+     Next is drawn on this one so somebody who closed the dialog can still
+     reach it. */
+  const [surveyAnswered, setSurveyAnswered] = useState(() => {
+    try {
+      return !!(localStorage.getItem('attune_survey_done')
+        || localStorage.getItem('attune_post_survey_done'));
+    } catch { return false; }
+  });
   /* A survey already finished on another device.
    *
    * This read a profile column the old survey's endpoint stamped, which
@@ -14180,7 +14420,7 @@ export default function App() {
         } catch { /* no session: the survey asks again, which is the safe way to be wrong */ }
         const res = await fetch('/api/survey', { headers });
         const data = await res.json();
-        if (!cancelled && data?.ok && data.finished) setPostSurveyDone(true);
+        if (!cancelled && data?.ok && data.finished) { setPostSurveyDone(true); setSurveyAnswered(true); }
       } catch { /* a survey we cannot ask about is one we ask */ }
     })();
     return () => { cancelled = true; };
@@ -16131,7 +16371,7 @@ export default function App() {
         }
       `}</style>
       {/* Top Nav — on mobile non-home/non-results: full gradient banner with ← Dashboard folded in */}
-      <div style={{ position: "sticky", top: 0, zIndex: 100, background: (isMobile && view !== "home" && view !== "results") ? "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)" : view === "home" ? "rgba(30,26,53,0.97)" : "rgba(255,253,249,0.97)", backdropFilter: (isMobile && view !== "home" && view !== "results") ? "none" : "blur(12px)", borderBottom: ("1px solid " + (view === "home" ? "rgba(255,255,255,0.1)" : (isMobile && view !== "results") ? "transparent" : C.stone)), padding: (isMobile && view !== "home" && view !== "results") ? "0.7rem 1.25rem 0.6rem" : "0 1.5rem", display: view === "home" ? "none" : "flex", flexDirection: (isMobile && view !== "results") ? "column" : "row", alignItems: (isMobile && view !== "results") ? "stretch" : "center", justifyContent: "space-between", minHeight: 56 }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 100, background: (isMobile && view !== "home" && view !== "results") ? BRAND_GRADIENT : view === "home" ? "rgba(30,26,53,0.97)" : "rgba(255,253,249,0.97)", backdropFilter: (isMobile && view !== "home" && view !== "results") ? "none" : "blur(12px)", borderBottom: ("1px solid " + (view === "home" ? "rgba(255,255,255,0.1)" : (isMobile && view !== "results") ? "transparent" : C.stone)), padding: (isMobile && view !== "home" && view !== "results") ? "0.7rem 1.25rem 0.6rem" : "0 1.5rem", display: view === "home" ? "none" : "flex", flexDirection: (isMobile && view !== "results") ? "column" : "row", alignItems: (isMobile && view !== "results") ? "stretch" : "center", justifyContent: "space-between", minHeight: 56 }}>
         {/* Logo + auth on one row at every breakpoint (mobile parent is a column) */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
           <div onClick={() => { if (isLoggedIn) { setView('home'); } else { window.location.href = '/home'; } }} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
@@ -16281,7 +16521,7 @@ export default function App() {
               }}>
 
               {/* ── GRADIENT BANNER (mobile: full nav bar; desktop: banner only) ── */}
-              <div style={{ background: "linear-gradient(120deg, #C8522E 0%, #6B3FA0 52%, #1B5FE8 100%)", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+              <div style={{ background: BRAND_GRADIENT, flexShrink: 0, position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)", pointerEvents: "none" }} />
                 <div style={{ position: "absolute", top: "-30%", right: "8%", width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%)", pointerEvents: "none" }} />
                 <div style={{ position: "absolute", bottom: "-40%", left: "20%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,200,120,0.14), transparent 70%)", pointerEvents: "none" }} />
@@ -18250,6 +18490,14 @@ export default function App() {
                   partnerIntimacy={hasRealPartner ? (partnerSession?.intimacy || null) : jamesIntimacyDemo}
                   intimacyVariant={(hasRealPartner ? partnerSession?.intimacy?.variant : null) || intimacyData?.variant || 'premarital'}
                   isBetaTester={isBetaTester}
+                  /* B105's fourth tile. The journal is the dashboard's Notes
+                     tab, which is the same place the home page's fourth
+                     square goes. */
+                  onOpenJournal={() => { setDashTab("notes"); setView("home"); }}
+                  /* The survey's button at the foot of What Comes Next.
+                     Reopening is the same thing as not being done with it. */
+                  onOpenSurvey={() => setPostSurveyDone(false)}
+                  surveyAnswered={surveyAnswered}
                   onNavigateTool={(tool) => {
                     if (typeof tool === 'string' && tool.endsWith('-upsell')) {
                       setUpsellModal({ product: tool.replace('-upsell', ''), cartAdded: false });
@@ -18299,6 +18547,7 @@ export default function App() {
                     }}
                     onDone={() => {
                       setPostSurveyDone(true);
+                      setSurveyAnswered(true);
                       try { localStorage.setItem('attune_survey_done', '1'); } catch { /* private window */ }
                     }}
                   />

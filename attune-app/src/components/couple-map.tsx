@@ -24,10 +24,17 @@
  * its own colour whichever slot it lands in.
  */
 
+import { useEffect, useState } from 'react';
 import { Text, View, useWindowDimensions } from 'react-native';
+/* The app's own Pressable, which dims and sinks on press. React Native's has
+   no pressed appearance, and check-press-feedback is right to insist: a dot
+   that does nothing visible when touched reads as a dot that is not a
+   control. */
+import { Pressable } from '@/components/pressable';
 
-import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
-import type { PersonResults } from '@/api/client';
+import { Colors, Fonts, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Prose } from '@/components/annotation-context';
+import type { AxisCopy, IndividualProfile, PersonResults } from '@/api/client';
 
 const c = Colors.light;
 
@@ -48,7 +55,7 @@ const SIDE = 22;
 const AXIS = { left: 'Open', right: 'Guarded', top: 'Engage', bottom: 'Withdraw' };
 
 export default function CoupleMap({
-  a, b, aName, bName, quadrants, size: fixedSize, onDark,
+  a, b, aName, bName, quadrants, size: fixedSize, onDark, axes, profiles, interactive,
 }: {
   a: PersonResults | null;
   b: PersonResults | null;
@@ -58,7 +65,37 @@ export default function CoupleMap({
   /** Drawn on a storycard rather than on the cream page. */
   onDark?: boolean;
   size?: number;
+  /**
+   * What the two axes mean, from the payload. The pole names come with them,
+   * so the four words on the edges of this map are the same four words the
+   * website's map draws rather than a second copy of them.
+   */
+  axes?: AxisCopy[];
+  /** Each person's own paragraph, shown behind their dot. */
+  profiles?: { a: IndividualProfile | null; b: IndividualProfile | null };
+  /**
+   * Whether the dots and the question marks do anything.
+   *
+   * Off on a storycard, which is a picture somebody screenshots: a control
+   * nobody can press is a control that looks broken.
+   */
+  interactive?: boolean;
 }) {
+  /* ── B91 AND B92: ONE PANEL, OVER THE MAP ─────────────────────────────
+     Ellie, B91: "add the description of each person if you tap on the
+     person's dot. Make it like a pop up next to the dot. Tap outside the pop
+     up tile to make it go away. Pop up tile should have the paragraph from
+     the individual type section but we don't need the axes bars."
+
+     B92: "Put a light grey question mark icon in a circle next to Open and
+     Withdraw that pop up with the description of that axis. Remove axis
+     descriptions from below the chart."
+
+     Both replaced a block that used to sit under the chart, so the page is
+     the map and the couple type now, with everything else a tap away. */
+  const [opened, setOpened] = useState<{ kind: 'dot' | 'axis'; id: string } | null>(null);
+  /* Nothing stays open across a change of couple or of orientation. */
+  useEffect(() => { if (!interactive) setOpened(null); }, [interactive]);
   const { width } = useWindowDimensions();
   // Full width inside the page's 24pt gutters, less the two side margins the
   // rotated axis labels sit in, capped so it does not become a huge square on
@@ -111,14 +148,79 @@ export default function CoupleMap({
   };
   const labelInk = onDark ? 'rgba(255,255,255,0.8)' : c.textMuted;
 
+  /* ── THE WORDS ON THE EDGES ─────────────────────────────────────────────
+     From the payload, falling back to AXIS for a cached payload that has no
+     poles. The vertical axis is Engage over Withdraw and the horizontal one
+     is Open to Guarded; which end is which is the server's to say, and the
+     inversion for the screen is this component's. */
+  const vert = axes?.find((x) => x.id === 'engage');
+  const horz = axes?.find((x) => x.id === 'open');
+  const words = {
+    top: vert?.poles?.high || AXIS.top,
+    bottom: vert?.poles?.low || AXIS.bottom,
+    left: horz?.poles?.high || AXIS.left,
+    right: horz?.poles?.low || AXIS.right,
+  };
+  /* The axis whose question mark sits at a given pole, or nothing. */
+  const helpFor = (axis: AxisCopy | undefined, end: 'high' | 'low') =>
+    (interactive && axis?.desc && axis.helpAt === end ? axis : null);
+  const helpBottom = helpFor(vert, 'low');
+  const helpLeft = helpFor(horz, 'high');
+
+  /* ── WHERE A PANEL GOES ─────────────────────────────────────────────────
+     Inside the row that holds the two side labels and the map, because that
+     row is exactly `size` tall and the map starts exactly SIDE in from its
+     left edge. So a dot at (x, y) on the map is at (SIDE + x, y) here, with
+     nothing to measure at runtime.
+
+     The panel goes on the side of the dot with room for it and is clamped to
+     the row either way, so a dot in a corner does not push it off screen. */
+  const rowW = size + SIDE * 2;
+  const panelW = Math.min(240, rowW - 4);
+  const panelAt = (x: number, y: number) => {
+    const onLeft = x <= size / 2;
+    const raw = onLeft ? SIDE + x + dot : SIDE + x - dot - panelW;
+    return {
+      left: Math.max(2, Math.min(rowW - panelW - 2, raw)),
+      top: Math.max(0, Math.min(size - 90, y - 44)),
+    };
+  };
+  const openPanel = (() => {
+    if (!interactive || !opened) return null;
+    if (opened.kind === 'axis') {
+      const ax = axes?.find((x) => x.id === opened.id);
+      if (!ax) return null;
+      /* Beside the mark that opened it: the foot of the vertical axis sits
+         under the middle of the map, the left of the horizontal axis halfway
+         down its edge. */
+      const place = ax.id === vert?.id
+        ? { left: Math.max(2, (rowW - panelW) / 2), top: Math.max(0, size - 150) }
+        : { left: 2, top: Math.max(0, size / 2 - 60) };
+      return { place, color: ax.color, eyebrow: ax.label, title: null as string | null, body: ax.desc };
+    }
+    const pp = opened.id === 'a'
+      ? { profile: profiles?.a, at: A }
+      : { profile: profiles?.b, at: B };
+    if (!pp.profile) return null;
+    return {
+      place: panelAt(pp.at.x, pp.at.y),
+      color: pp.profile.color || pp.at.color,
+      eyebrow: pp.profile.name || pp.at.name,
+      title: pp.profile.typeName,
+      body: pp.profile.blurb,
+    };
+  })();
+
   return (
     <View style={{ alignItems: 'center', marginTop: Spacing.sm }}>
       <Text style={{ ...label, color: labelInk, marginBottom: Spacing.xs }}>
-        {AXIS.top.toUpperCase()}
+        {words.top.toUpperCase()}
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <SideLabel text={AXIS.left.toUpperCase()} side="left" height={size} onDark={onDark} />
+        <SideLabel text={words.left.toUpperCase()} side="left" height={size} onDark={onDark}
+          help={helpLeft}
+          onHelp={() => setOpened((o) => (o?.id === helpLeft?.id ? null : { kind: 'axis', id: helpLeft!.id }))} />
       <View style={{ width: size, height: size, borderRadius: Radius.lg, overflow: 'hidden' }}>
         {/* Four quadrants, in the server's order: W X Y Z. */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: size, height: size }}>
@@ -167,9 +269,20 @@ export default function CoupleMap({
             }}
           />
         ))}
-        {[A, B].map((p) => (
-          <View
+        {[A, B].map((p, i) => (
+          <Pressable
             key={p.name}
+            /* B91. The dot is the control. Not a wrapper around the halo and
+               the dot both: the drawing stays as it was and only the press
+               area is new, which is the dot itself plus its border, about 40
+               points on a phone. */
+            accessibilityRole={interactive ? 'button' : undefined}
+            accessibilityLabel={interactive ? `${p.name}: what this placement means` : undefined}
+            disabled={!interactive || !(i === 0 ? profiles?.a : profiles?.b)}
+            onPress={() => {
+              const id = i === 0 ? 'a' : 'b';
+              setOpened((o) => (o?.kind === 'dot' && o.id === id ? null : { kind: 'dot', id }));
+            }}
             style={{
               position: 'absolute', left: p.x - dot / 2, top: p.y - dot / 2,
               width: dot, height: dot, borderRadius: dot / 2,
@@ -188,18 +301,66 @@ export default function CoupleMap({
               }}>
               {(p.name || '?').trim().charAt(0).toUpperCase()}
             </Text>
-          </View>
+          </Pressable>
         ))}
       </View>
-        <SideLabel text={AXIS.right.toUpperCase()} side="right" height={size} onDark={onDark} />
+        <SideLabel text={words.right.toUpperCase()} side="right" height={size} onDark={onDark} />
+
+        {/* ── THE PANEL, AND THE TAP THAT CLOSES IT ──────────────────────
+            The sheet covers the map and both margins, which is "tap outside
+            the pop up tile" for a finger that has landed near it. It is
+            inside the row rather than over the whole screen because a panel
+            positioned against the screen would have to measure where the map
+            had ended up; this way a dot's coordinates are the panel's. */}
+        {openPanel ? (
+          <>
+            <Pressable
+              accessibilityLabel="Close"
+              onPress={() => setOpened(null)}
+              style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, zIndex: 5 }} />
+            <View
+              style={{
+                position: 'absolute', zIndex: 10,
+                left: openPanel.place.left, top: openPanel.place.top, width: panelW,
+                backgroundColor: c.surface, borderRadius: Radius.md,
+                borderTopColor: openPanel.color, borderTopWidth: 4,
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.md,
+                shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 14,
+                shadowOffset: { width: 0, height: 6 }, elevation: 6,
+              }}>
+              {/* not markable: a label naming whose panel this is. */}
+              <Text style={{ ...Type.eyebrow, color: openPanel.color }}>{openPanel.eyebrow}</Text>
+              {openPanel.title ? (
+                <Prose style={{ ...Type.title, color: c.textStrong, marginTop: 2 }}>{openPanel.title}</Prose>
+              ) : null}
+              {/* Markable, as it was when it sat in a tile under the chart: a
+                  mark made on it draws its margin icon whenever this panel is
+                  open, which is the only time the words are on screen. */}
+              <Prose style={{ ...Type.small, color: c.text, marginTop: Spacing.xs, fontFamily: Fonts.body }}>
+                {openPanel.body}
+              </Prose>
+            </View>
+          </>
+        ) : null}
       </View>
 
       {/* Withdraw alone under the map. Open and Guarded are on their sides in
           the margins, so the bottom row is the foot of the vertical axis
-          rather than three labels that look like they belong to one axis. */}
-      <Text style={{ ...label, color: labelInk, marginTop: Spacing.xs }}>
-        {AXIS.bottom.toUpperCase()}
-      </Text>
+          rather than three labels that look like they belong to one axis.
+
+          And the question mark beside it, which is one of the two poles Ellie
+          named. The other is beside Open, in the left margin. */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: Spacing.xs }}>
+        <Text style={{ ...label, color: labelInk }}>
+          {words.bottom.toUpperCase()}
+        </Text>
+        {helpBottom ? (
+          <HelpMark
+            axis={helpBottom}
+            onDark={onDark}
+            onPress={() => setOpened((o) => (o?.id === helpBottom.id ? null : { kind: 'axis', id: helpBottom.id }))} />
+        ) : null}
+      </View>
 
       {/* No name key. Each dot carries its own initial and each name sits in
           its own colour on the tiles below, so a key underneath was a third
@@ -214,8 +375,11 @@ export default function CoupleMap({
  * Left reads bottom to top and right reads top to bottom, which is the
  * convention for a chart's vertical margins and keeps both facing outward.
  */
-function SideLabel({ text, side, height, onDark }: {
+function SideLabel({ text, side, height, onDark, help, onHelp }: {
   text: string; side: 'left' | 'right'; height: number; onDark?: boolean;
+  /** The axis this label's question mark opens, if this pole carries one. */
+  help?: AxisCopy | null;
+  onHelp?: () => void;
 }) {
   return (
     <View style={{ width: SIDE, height, alignItems: 'center', justifyContent: 'center' }}>
@@ -233,6 +397,50 @@ function SideLabel({ text, side, height, onDark }: {
         }}>
         {text}
       </Text>
+      {/* Below the word, along the axis it belongs to, so it reads as part of
+          that label rather than as something floating in the margin. The
+          label is rotated and this is not: a rotated question mark reads as
+          a glyph that has fallen over. */}
+      {help && onHelp ? (
+        <View style={{ position: 'absolute', top: height / 2 + 34 }}>
+          <HelpMark axis={help} onDark={onDark} onPress={onHelp} />
+        </View>
+      ) : null}
     </View>
+  );
+}
+
+/**
+ * The light grey question mark beside a pole label.
+ *
+ * B92. Ellie: "Put a light grey question mark icon in a circle next to Open
+ * and Withdraw." Light grey on the page; on a storycard it would be invisible,
+ * which is one of the reasons the card does not draw these at all.
+ *
+ * The circle is 16 points and the press area is 32, because a 16 point target
+ * is half what a finger needs and this map already cost a round of "the dots
+ * look fuzzy".
+ */
+function HelpMark({ axis, onDark, onPress }: {
+  axis: AxisCopy; onDark?: boolean; onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`What ${axis.label} means`}
+      onPress={onPress}
+      hitSlop={8}
+      style={{
+        width: 16, height: 16, borderRadius: 8,
+        alignItems: 'center', justifyContent: 'center',
+        backgroundColor: onDark ? 'rgba(255,255,255,0.18)' : '#EFE9E1',
+        borderWidth: 1,
+        borderColor: onDark ? 'rgba(255,255,255,0.3)' : '#CFC5B8',
+      }}>
+      <Text style={{
+        ...Type.small, fontSize: 11, lineHeight: 14, fontWeight: '700',
+        color: onDark ? 'rgba(255,255,255,0.85)' : '#8F8071',
+      }}>?</Text>
+    </Pressable>
   );
 }

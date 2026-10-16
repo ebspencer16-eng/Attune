@@ -460,6 +460,29 @@ on every price calculation. `node --check` passes all four, because none is a
 syntax error. `check-server-undefined.mjs` asks Babel to resolve scopes and
 fails on anything the program scope cannot bind.
 
+**And a name can resolve to itself.** The same gate was satisfied, the build
+was green, and the website served an empty page: `const BRAND_GRADIENT =
+BRAND_GRADIENT;`. The name is declared, so resolving scopes says nothing, and
+at run time the module throws ReferenceError from that binding's own temporal
+dead zone before anything else in the file executes.
+
+It was written by a script, which is the only way this gets written. The
+gradient was typed out in two places, so the script lifted it into a constant
+and then replaced every occurrence of the literal with the constant's name,
+including the occurrence inside the declaration it had just added. The tell was
+`rd=rd` in the minified bundle, found by grepping the bundle for the identifier
+the browser named in its error.
+
+`check-server-undefined` fails on it now. Seven forms were planted: the plain
+one, `X || 'x'`, a template literal, `X.slice(0)`, `[X].join('')`, an object
+property, and an IIFE. The first version listed the shapes it knew and walked
+straight past `X.slice(0)`, which is a call wrapping a member expression:
+enumerating forms is how a matcher ends up knowing one spelling. Walking every
+identifier in the initialiser is the version that holds. Two exemptions, both
+real: a property called X is not the binding, in `x.X` and in `x?.X` (missing
+the optional form produced 38 findings in files that are fine), and a function
+assigned to a name may call itself, unless it is invoked on the spot.
+
 **A gate that disables the side effect cannot see where the guard sits.** The
 first version of `check-open-writes.mjs` ran the handlers with no Supabase
 credentials, so the write was skipped, so moving the guard below the write
@@ -1233,6 +1256,37 @@ its last child is pushed flush to its bottom edge, and every point taken out of
 the quotation's budget was more space for that rule to spread. A gap that has to
 survive a layout belongs in padding on the container, which spreading cannot
 reach. Three reports is the signal that the number was never the subject.
+
+**A dispatched click with no coordinates is a click at x=0.** The results
+column pages back on a click in its left sixth, Ellie's own rule from the
+storycards. `new MouseEvent('click', { bubbles: true })` has clientX 0, so
+every "click away from the panel" in a new gate turned the page instead, and
+every assertion that the panel had closed passed: the panel was gone because
+the whole page was gone. Passing for the wrong reason, in the one gate written
+to prove a tap works.
+
+Two habits. Clicks in a browser gate carry clientX and clientY, in the middle
+of the element. And after a click, the gate asks where it is: a navigation is a
+failure, not a pass. The same check now deliberately clicks the far left of the
+map, which is inside that paging zone, so it also proves the dismissing tap
+does not turn the page.
+
+**React is not on screen when dispatchEvent returns.** The first run of that
+gate reported every control dead. Click, wait, then read.
+
+**A node a check can name beats a node it has to find.** Measuring the popup by
+geometry took two wrong answers. The smallest box containing the type name is
+the line of type itself, 22 points tall, so a working panel read as invisible.
+The biggest box under 320 wide, at a phone width, is the map tile, so every
+point on the map read as inside the panel. A `data-map-panel` attribute on the
+thing itself ended it. A test handle in the markup is not a convenience here:
+it is the difference between measuring the thing and measuring something near
+it.
+
+And a box says nothing about z-order. A panel rendered under the map has the
+same rectangle as one rendered over it, so the check asks
+`document.elementFromPoint` at the middle of the panel whether what is there
+belongs to the panel. Planting `zIndex: -1` is what proves that line works.
 
 **A harness that is wrong about the layout reports a working page as broken.**
 This cost two rounds in one stretch. check-learn-peek's first version took the

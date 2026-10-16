@@ -87,25 +87,20 @@ export function individualBlurb(name, pronouns, ec, oc) {
  * the spec, not a dead branch to revive.
  */
 
-/**
- * The two axis rows for one person: label, band, 0..1 score and the driver.
+/*
+ * And the two axis bars are not here any anymore either.
  *
- * @param {string} name
- * @param {{engage: number, open: number}} coords 0..1 each
+ * axisRows built a label, a band and a 0..1 score per axis, and both surfaces
+ * drew them as a pair of bars under each person's paragraph. B91 removed the
+ * panel they sat in: Ellie, of the paragraph moving into a popup beside the
+ * dot, "we don't need the axes bars."
+ *
+ * So the function went with the bars rather than staying as a producer with no
+ * consumer, and `rows` came off the payload. It also held a third copy of the
+ * axis labels, 'Engage/Withdraw' and 'Open/Guarded', which are api/_axes.js's
+ * words and are now only there.
+ *
+ * axisBand stays: it is the five-band wording, it is the thing a future bar or
+ * sentence would need, and it is one line. If the bars come back they come back
+ * from here, once, and both surfaces read them.
  */
-export function axisRows(name, coords) {
-  return [
-    {
-      axis: 'engage',
-      label: 'Engage/Withdraw',
-      value: axisBand(coords.engage, 'engaged', 'withdrawn'),
-      score: coords.engage,
-    },
-    {
-      axis: 'open',
-      label: 'Open/Guarded',
-      value: axisBand(coords.open, 'open', 'guarded'),
-      score: coords.open,
-    },
-  ];
-}

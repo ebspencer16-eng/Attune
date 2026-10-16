@@ -33,6 +33,15 @@
  * carries the page it is about, because the arrow on each row is drawn from
  * that and a row without one is a dead end.
  *
+ * And, since B105, the three buckets: that they are the three she named, in
+ * her order, that every action item in every group lands in exactly one of
+ * them, and that both surfaces draw the buckets rather than the groups.
+ *
+ * The bucket half is asserted as a COUNT, not as a search for a name. A group
+ * that belongs to no bucket does not appear anywhere in the output as an
+ * absence: the page simply has fewer rows on it, and the only way to see that
+ * is to add the rows up on both sides.
+ *
  * ── WHAT IT REPLACED ──────────────────────────────────────────────────────
  * check-what-comes-next.mjs, which held the two implementations to the same set
  * of group ids by scanning src/App.jsx for `groups.push({ id: ... })`. With one
@@ -160,12 +169,125 @@ if (conflict && conflict.items.some((i) => i.body && !i.say)) {
  */
 const comms = built.groups.find((g) => g.id === 'comm');
 if (comms) {
-  if (comms.items.some((i) => !i.say)) {
-    fails.push('a Communication row has nothing under its heading. The glance tile\'s advice goes'
-      + ' in `say`, which both surfaces draw; `body` is on the payload and neither draws it here.');
+  /**
+   * ── THE ROW IS THE ADVICE NOW ──────────────────────────────────────────
+   * This asked that every Communication row carry something in `say`, because
+   * the row was the domain's name and the advice sat under it.
+   *
+   * Ellie: "Comms action plans in what comes next should list the action items
+   * not the category." So the advice IS the row, `say` is empty on purpose,
+   * and asserting on `say` would now fail the thing she asked for.
+   *
+   * What still has to be true is that the row says something. An empty title
+   * is the fault this was really protecting against: a heading with nothing
+   * under it, which is what the conflict rows once were.
+   */
+  if (comms.items.some((i) => !String(i.title || '').trim())) {
+    fails.push('a Communication row has no words in it. The glance tile\'s advice is the row'
+      + ' itself now; a row with an empty title is a row that says nothing.');
   }
   if (comms.items.some((i) => !/^comm-/.test(i.section || ''))) {
     fails.push('a Communication row does not open a communication page.');
+  }
+}
+
+// ── 4. The three buckets ────────────────────────────────────────────────────
+/*
+ * Ellie: "I want to take all of the action items we currently list, and present
+ * them not grouped by exercise/section but rather by: What to keep in mind
+ * (Comms, conflict, rel relf), What to discuss together (expectations,
+ * physical intimacy), Phrases to try (Couple type)."
+ *
+ * Her three, in her order. The labels are what the tiles say, so they are held
+ * to her words rather than to a shape.
+ */
+const WANTED = [
+  { id: 'keep-in-mind', label: 'What to keep in mind' },
+  { id: 'discuss', label: 'What to discuss together' },
+  { id: 'phrases', label: 'Phrases to try' },
+];
+const got = (built.buckets || []).map((b) => `${b.id}:${b.label}`);
+const want = WANTED.map((b) => `${b.id}:${b.label}`);
+if (got.join(' | ') !== want.join(' | ')) {
+  fails.push(`the buckets are not the three she asked for, in her order.\n`
+    + `      wanted: ${want.join(' | ')}\n`
+    + `      got:    ${got.join(' | ') || '(none)'}`);
+}
+
+/*
+ * ── EVERY ACTION ITEM REACHES A BUCKET ────────────────────────────────────
+ * The page draws buckets now, so a group belonging to no bucket is a group
+ * nobody sees. Nothing says so: the page renders, the other rows are correct,
+ * and the only symptom is that it is shorter than the results it summarises.
+ *
+ * So this adds up rather than looking for a name. The inputs above produce one
+ * row in every group on purpose.
+ */
+const inGroups = built.groups.flatMap((g) => g.items || []);
+const inBuckets = (built.buckets || []).flatMap((b) => b.items || []);
+if (inBuckets.length !== inGroups.length) {
+  const bucketed = new Set(inBuckets);
+  const lost = built.groups.filter((g) => (g.items || []).some((i) => !bucketed.has(i)));
+  fails.push(`${inGroups.length} action items across the groups and ${inBuckets.length} in the`
+    + ' buckets. Every item has to land in exactly one bucket, because the buckets are what\n'
+    + '      the page draws.'
+    + (lost.length ? `\n      Not in any bucket: ${lost.map((g) => g.label).join(', ')}.` : ''));
+}
+
+/* And in exactly one. A group named by two buckets double-counts its rows,
+   which reads as the product repeating itself rather than as a bug. */
+const seen = new Map();
+for (const b of built.buckets || []) {
+  for (const it of b.items || []) seen.set(it, (seen.get(it) || 0) + 1);
+}
+const twice = [...seen.entries()].filter(([, n]) => n > 1);
+if (twice.length) {
+  fails.push(`${twice.length} action item(s) appear in more than one bucket, starting with`
+    + ` "${twice[0][0].title}".`);
+}
+
+/* Every bucket row still carries its page, same as every group row. The arrow
+   is the only thing on this page that says where a row came from. */
+for (const b of built.buckets || []) {
+  const blind = (b.items || []).filter((i) => !i.section);
+  if (blind.length) {
+    fails.push(`${blind.length} of ${b.items.length} rows in the "${b.label}" bucket carry no`
+      + ' section, so they draw no arrow.');
+  }
+}
+
+/*
+ * ── AND THE BUCKET DOES NOT SAY WHERE IT CAME FROM ────────────────────────
+ * Ellie: "Do not list (like I did for the list above) which exercises populate
+ * each bucket on what comes next." She wrote the mapping out in her own
+ * instruction and then said not to print it, which is the kind of thing that
+ * gets copied into a label by accident.
+ */
+const sourceNames = built.groups.map((g) => g.label);
+for (const b of built.buckets || []) {
+  const named = sourceNames.filter((n) => b.label.includes(n));
+  if (named.length) {
+    fails.push(`the "${b.label}" bucket names the exercise it comes from (${named.join(', ')}).`);
+  }
+}
+
+/*
+ * ── BOTH SURFACES DRAW THE BUCKETS ────────────────────────────────────────
+ * A surface still reading `groups` shows the six sections she asked to be rid
+ * of. Matched with the fallback each one legitimately has: a stored row from
+ * before the buckets existed carries only groups, so `buckets?.length ? ... :`
+ * is the correct shape and `groups` alone is not.
+ */
+const APP = 'attune-app/src/components/results.tsx';
+const app = readFileSync(`${ROOT}${APP}`, 'utf8');
+for (const [file, src, re] of [
+  [WEB, web, /wcn\.buckets\?\.length \? wcn\.buckets : wcn\.groups/],
+  [APP, app, /data\.buckets\?\.length\s*\?\s*data\.buckets/],
+]) {
+  if (!re.test(src)) {
+    fails.push(`${file} does not read the server's buckets with a fallback to groups.`
+      + ' What Comes Next is three buckets now; a surface reading groups draws the six'
+      + ' sections she asked to be rid of.');
   }
 }
 
@@ -176,4 +298,6 @@ if (fails.length) {
 }
 
 console.log(`[check-next-steps-mirror] one builder for both surfaces, ${labels.length} groups in`
-  + ' the order she asked for, every row carrying the page it opens.');
+  + ` the order she asked for, every row carrying the page it opens, and all`
+  + ` ${inGroups.length} of their action items landing in exactly one of her three buckets,`
+  + ' which both surfaces draw.');

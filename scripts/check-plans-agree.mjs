@@ -190,11 +190,26 @@ for (const [who, pairs] of Object.entries(COUPLES)) {
      */
     const drawn = `${item.title || ''} ${item.say || ''}`;
     /*
-     * Both halves of the tile, because the overview draws both: its heading
-     * and the advice under it. Checking only the advice is how the heading
-     * came to be a sentence on one page and a domain name on the other.
+     * ── THE ADVICE, NOT THE HEADING ───────────────────────────────────────
+     * This asked for both halves of the tile: the heading and the advice under
+     * it. Ellie has now asked for the row to be the action rather than the
+     * category: "Comms action plans in what comes next should list the action
+     * items not the category."
+     *
+     * Three instructions about these rows, and all three are kept because the
+     * round trip is the argument:
+     *
+     *   the detail page's name with the website's Try line under it;
+     *   "Revert, make the action items for comms match the comms overview
+     *    page's action items exactly", which is the tile's advice;
+     *   and now the advice as the row itself, with the heading gone.
+     *
+     * What this still proves is the thing worth proving: the advice a reader
+     * meets on What Comes Next is the advice on the overview page, word for
+     * word. The heading is where the row's arrow goes instead, which the
+     * section assertion below covers.
      */
-    for (const [what, wanted] of [['heading', tile.label], ['advice', tile.body], ['title', tile.title]]) {
+    for (const [what, wanted] of [['advice', tile.body]]) {
       if (wanted && !drawn.includes(wanted)) {
         fails.push(`Communication row ${i + 1} does not carry the glance tile's ${what}:`
           + ` "${String(wanted).slice(0, 48)}" ${where}`);
@@ -239,5 +254,6 @@ if (fails.length) {
 
 console.log(`[check-plans-agree] ${Object.keys(COUPLES).length} couples, including one with tied`
   + ` gaps in every domain; Communication and Physical Intimacy carry exactly their own`
-  + ` section's plan, heading and advice. The advice is carried rather than drawn,`
-  + ` at her word: "Remove the try lines, sorry."`);
+  + ` section's plan. The row is the advice itself now, at her word: "Comms action plans`
+  + ` in what comes next should list the action items not the category." The heading is`
+  + ` where the row's arrow goes.`);

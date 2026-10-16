@@ -305,8 +305,14 @@ export const SECTION_BLOCKS = {
   'couple-type': [
     { id: 'lead', note: 'The page\u2019s opening line: what the responses uncover.' },
     { id: 'map', note: 'Where each partner sits on the two axes.' },
-    { id: 'axes', note: 'What each axis means, both poles. Without it the map is a picture.' },
-    { id: 'individual-types', note: 'Each partner alone: their type, a blurb, a bar per axis.' },
+    /* Both of these were columns and tiles under the chart. B91 and B92 moved
+       them onto the map itself: the axis descriptions are behind a question
+       mark beside Open and beside Withdraw, and each person's paragraph is
+       behind their own dot. Still blocks, because a reader who taps gets the
+       same words and a surface that drew neither would be telling them less;
+       marked where the map is rendered, since that is where they are met. */
+    { id: 'axes', note: 'What each axis means. Behind the question mark beside its pole.' },
+    { id: 'individual-types', note: "Each partner alone: their type and a paragraph, behind their dot. No bars: \"we don't need the axes bars\"." },
     { id: 'name', note: 'The type name and its tagline.' },
     { id: 'strengths', optional: true, note: 'What comes naturally.' },
     { id: 'sticking-points', optional: true, note: "What's worth being aware of." },
