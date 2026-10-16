@@ -3358,17 +3358,26 @@ function NextTile({ label, count, icon, active, onPress }: {
           /* The count, which is what this tile has to offer. The home page's
              tiles carry an icon here; a number is the honest equivalent for a
              tile whose whole content is a list. */
-          <Text style={{ ...Type.display, fontSize: 22, color: active ? c.accent : '#8F8071' }}>
+          /* lineHeight with the size, not without it. Type.display carries
+             its own, which is set for the size it is normally used at, and a
+             22 point number in a smaller box is drawn with its top ring cut
+             off. That is the same clipping Ellie reported three times on the
+             storycards. */
+          <Text style={{ ...Type.display, fontSize: 22, lineHeight: 28, color: active ? c.accent : '#8F8071' }}>
             {count ?? ''}
           </Text>
         )}
       </View>
       {/* not markable: the label on a control. */}
+      {/* Three lines at ten points, not two at eleven. Four tiles across a
+          phone are about eighty points each, and "What to keep in mind" came
+          out as "What to keep in m…" while "Relationship" broke mid-word into
+          "Relationshi p". Measured on the simulator rather than guessed. */}
       <Text
-        numberOfLines={2}
+        numberOfLines={3}
         style={{
-          ...Type.small, fontSize: 11, lineHeight: 14,
-          color: active ? c.textStrong : c.textMuted, textAlign: 'center', width: '86%',
+          ...Type.small, fontSize: 10, lineHeight: 13,
+          color: active ? c.textStrong : c.textMuted, textAlign: 'center', width: '92%',
         }}>
         {label}
       </Text>
