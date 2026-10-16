@@ -1427,10 +1427,24 @@ and one fresh, and the fresh one survives.
 What that does NOT explain is the thing it was found while chasing, and the
 distinction is the point. `check-mobile-menu` took 3m08 standalone, then 13
 minutes standalone an hour later with the temp directory clean, and over 20
-inside `npm run check` twice. Same machine, same commit, no load to speak of.
-So the profile sweep is worth having and is not the fix for a browser gate that
-has gone quiet; that variance is still unexplained, and anyone timing these
-should take a figure from the run in front of them rather than from here.
+inside `npm run check` twice. Same machine, same commit, load under 4. So the
+profile sweep is worth having and is not the fix for a browser gate that has
+gone quiet.
+
+**The candidate for that, found an hour later, is swap.** The harness's own
+waiting shells were killed by the OS with "the system is running low on
+memory", and `vm.swapusage` then read 6044 of 7168 MB used against 3.28 million
+lifetime pageouts. Load average says nothing about this: the machine was at
+load 4 and paging, which is exactly how a page load that takes 200ms becomes
+one that takes ten seconds. Headless Chrome is the most memory-hungry thing
+these checks do, and a long chain holds one open while the next gate opens
+another.
+
+So before timing any browser gate, read `sysctl vm.swapusage` as well as
+`uptime`. A figure taken while the machine is in swap is a figure about the
+machine. And prefer running the browser gates one at a time on a loaded
+machine, which is the same advice as the paragraph below for a different
+reason.
 
 **`npm run check` drives Chrome too, so do not run it beside `npm run smoke`.**
 Four checks in `npm run check` launch a browser. Starting the smoke and then
