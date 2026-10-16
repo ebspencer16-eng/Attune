@@ -3303,3 +3303,42 @@ the symptom is an empty Notes tab with an error card, not silent bad data.
 **And the machine.** 6GB into swap, where the browser gates crawl, so the full
 suite was not run as one chain; the gates covering every changed file were run
 individually instead. `sysctl vm.swapusage` before trusting any timing here.
+
+### Buttoning up the demo path
+
+Ellie: "My designer should be demoing soon, please ensure all
+purchase/checkout/accountsetup/exercise completion/results generation is
+entirely buttoned up."
+
+**It is, and here is what was actually run rather than read.** The smoke drove
+all five exercises to their completion screens with the answers stored, all 29
+results sections rendered, and 37 static pages rendered at three widths with no
+sideways scroll. 38 gates over her five areas passed. A new probe drove the
+whole journey end to end against a stubbed outside: buy, create profile, home,
+save, complete, results, tools, notes, fourteen steps, every one answering.
+
+**The beta codes are the demo's purchase path and they work.** All five take
+the free path with zero Stripe calls, write an order and issue a number. A paid
+add-on beside a code charges for the add-on alone.
+
+**One real gap, found by planting and now closed.** public/checkout.html keeps
+its own copy of every price because a static page cannot import from `api/`,
+and two of those copies are customer-facing: the order summary and the line
+items that become the confirmation email's breakdown. Planting $25 against the
+$40 Conflict Patterns costs was passed by SEVEN existing gates.
+check-checkout-page-prices.mjs holds all 23 to the catalogue now, planted five
+ways. S30 in TASKS.md is the real fix: let the page read prices the way it
+already reads package rules, through a generated file.
+
+**Three probes now live in scripts/,** named probe- so check-gates-run leaves
+them alone: probe-notes-screen (the app screen with data behind it),
+probe-demo-journey (the whole purchase-to-results sequence) and
+probe-beta-codes. None asserts anything it cannot see, and each carries the
+harness mistakes it made first.
+
+**The harness was wrong before the product, four times in this round**, which
+is the running ratio in this file: a surname taken from the wrong end of "John
+Gottman and Nan Silver", an injected regex whose backslashes collapsed into a
+line comment, three request shapes guessed instead of read, and an assertion
+about who sends the confirmation email that was looking at the endpoint when
+the client sends it.

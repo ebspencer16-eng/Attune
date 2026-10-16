@@ -601,6 +601,24 @@ anywhere; the page says so next to each, from a generated record, because a
 list that mixes live copy with retired copy costs review attention on the wrong
 half.
 
+**The page that takes the money keeps its own prices, and two of those copies
+are what the customer reads.** public/checkout.html is static and cannot import
+from `api/`, so it carries a package table and seven add-on prices. One builds
+the order summary. The other is posted to /api/send-order-email and becomes the
+breakdown in the confirmation email.
+
+Nothing held either to the catalogue. Planting 25 against the 40 that Conflict
+Patterns costs was passed by check-prices-on-page, check-package-prices,
+check-one-cart-price, check-checkout-pricing, check-addon-params,
+check-copy-tokens and check-email-preview: all seven. The receipt would have
+said 25 while the card was charged 40, which is the 198/295 bug wearing a
+different hat.
+
+They agreed, which is why nobody had looked. `check-checkout-page-prices.mjs`
+holds all 23 of them now and reports a label it cannot map rather than skipping
+it. The derivation is still the better answer, and the road exists: PKG_CAPS
+already reaches the browser through a generated `public/_pkg-rules.js`.
+
 **A number that is right in one endpoint is not right.** `create-payment-intent`
 priced premium at 198 and `calculate-tax` priced the same package at 295. The
 checkout page reads only the tax figure back from the second, so the subtotal

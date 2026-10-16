@@ -56,9 +56,51 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S28 | **A sweep for bugs and breaks while you were away.** Two real findings, both stale comments rather than broken behaviour, and one verification I had been missing. Detail under this table. |
+| S29 | **The demo path, buttoned up.** Purchase, account setup, exercises, completion and results all driven end to end. One real gap found and closed. Detail under this table. |
+| S28 | **The earlier sweep.** Two stale comments, fixed, and the app driven for real. Detail under this table. |
 
-### S28, the sweep
+### S29, the demo path
+
+Your designer can walk this. Every line below is a run, not a reading.
+
+**Buying with a beta code, which is what a demo uses.** All five codes take the
+free path: no card, no Stripe call, an order written and a number issued. A
+code with a paid add-on beside it correctly charges for the add-on alone and
+not the package. `scripts/probe-beta-codes.mjs`.
+
+**The whole journey, step by step.** Buy, create the profile, load the home
+screen, save an exercise, complete it, read results, load the tools, load
+notes. Fourteen steps, every one answering, with the number of database calls
+each makes printed beside it. `scripts/probe-demo-journey.mjs`.
+
+**All five exercises driven to their completion screen** in a real browser,
+with the answers stored: Communication 50, Expectations 80, Reflection 14,
+Intimacy 16, Conflict 12. All 29 results sections render. 37 static pages
+render at desktop, 360 and 320, none scrolling sideways, every image with alt
+text and every field with a label.
+
+**38 gates over the five areas you named**, all passing: prices, carts, promos,
+entitlements, the invite path, profile setup, completion, scoring, the
+alignment rule, results freezing, and the four engine tests.
+
+**The one real gap, now closed.** The checkout page keeps its own copy of every
+price, because a static page cannot read `api/`. Two of those copies are what a
+customer sees: the order summary and the line items that become the breakdown
+in their confirmation email. Nothing held them to the catalogue. I planted $25
+against the $40 that Conflict Patterns costs and seven existing gates passed
+it: the receipt would have said 25 while the card was charged 40.
+
+`check-checkout-page-prices.mjs` now holds all 23 prices on that page to
+`api/_catalogue.js`, and I planted five ways round it before trusting it.
+The better fix is for the page to read the prices the way it already reads the
+package rules, through a generated file. That is a change to the page that
+takes money, so it is a task rather than something I do hours before a demo.
+
+**What I did not touch.** Nothing in the purchase or results code changed. The
+only product change in this round is that new gate, which cannot alter
+behaviour, plus three comment corrections.
+
+### S28, the earlier sweep
 
 **Nothing is broken.** Every figure below is from a run, not a reading.
 
@@ -116,6 +158,7 @@ changed, one at a time, rather than a run that would have taken an hour.
 | # | Built, needs your eye |
 |--|--|
 | C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
+| S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
 | S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. Detail under this table. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
