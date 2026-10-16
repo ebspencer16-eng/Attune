@@ -8,3 +8,6 @@ __pycache__/
 .doc-out/
 .vercel
 .env*
+
+# A file for Ellie to paste into. Read, applied, then deleted; never committed.
+ellie-paste.txt

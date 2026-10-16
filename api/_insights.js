@@ -90,6 +90,12 @@ export const INSIGHTS = [
      life with someone", which is an escaped newline that survived the paste,
      so it is in as "When". If that was deliberate, say so and it goes back.
 
+     Q12 is hers twice over. She cut "their" from the middle of the sentence
+     with nothing marking the cut, which is the one thing this file's check
+     does not allow, so it shipped for a day with the word restored and the
+     question put to her. Her answer: "Use an ellipsis please." So the cut is
+     marked and the words are hers, which is the right way round.
+
      What she asked for next is in TASKS.md as C6: 26 more from sources we have
      not used, on love, kindness, understanding and peacemaking rather than
      conflict, and no two days running from one source or one subject.
@@ -189,7 +195,7 @@ export const INSIGHTS = [
   {
     kind: 'quote',
     id: 'q-lives-upon-dynamic',
-    body: '[An emotionally intelligent marriage has] a dynamic that keeps their negative thoughts and feelings about each other (which all couples have) from overwhelming their positive ones.',
+    body: '[An emotionally intelligent marriage has] a dynamic that keeps... negative thoughts and feelings about each other (which all couples have) from overwhelming their positive ones.',
     author: 'John Gottman and Nan Silver',
     work: 'The Seven Principles for Making Marriage Work',
     topic: 'repair',

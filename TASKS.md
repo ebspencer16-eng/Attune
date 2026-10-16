@@ -8,24 +8,70 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| C9 | **One word in Q12 of the insights, and it is your call.** Detail under this table. The other 99 need nothing from you. |
-| C8 | **Your 100 words.** The list did not come through as text. Paste it into a message and I will put it in the same day. |
+| C10 | **A Google Books key, so books can be cited.** One command under this table takes it off your clipboard into the keychain. Do not paste the key to me. |
+| C8 | **Your 100 words.** Two pastes have reached me as an empty attachment. One command under this table sends the list instead. |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### C9, the one word in Q12
+### C10, the Google Books key
 
-Q12 read "a dynamic that keeps negative thoughts and feelings" and the book
-says "keeps their negative thoughts and feelings". I put "their" back, because
-the sentence runs in quotation marks under Gottman's name and that one word is
-all that stood between it and being verbatim. Say the word and it comes out
-with an ellipsis in its place instead.
+Yes, and the way to hand it over keeps it out of this chat and out of the repo.
+Do not paste it into a message to me.
 
-Everything else of yours is in exactly as you wrote it, ellipses and brackets
-included.
+**You already have one.** It is in Vercel as `GOOGLE_BOOKS_KEY`. Open the
+project, Settings, Environment Variables, find that name and copy the value, so
+it is on your clipboard.
+
+**Then one command in Terminal.** It takes the key off the clipboard, so the
+key itself is never typed anywhere that keeps a copy:
+
+```
+security add-generic-password -U -a "$USER" -s attune-google-books -w "$(pbpaste | tr -d '[:space:]')" && echo stored
+```
+
+It prints `stored`. That is all I need to hear; do not send me the value.
+
+**What it buys.** The check that proves every quotation is real can only check
+the 73 that cite a web page. The 27 that cite a book need to ask Google whether
+that sentence is in that volume, and that needs the key. With it stored, the
+same check covers all 100 and says where the key came from in its own summary,
+so a run that checked nothing cannot read like a run that checked everything.
+
+**And then books.** You said you would rather cite books. Once the key is
+stored I will take the next batch from books and verify each one against the
+scan before it goes in, the same standard the web ones are held to. Tell me if
+you want me to replace some of the 26 web quotations with book ones rather than
+add to them.
+
+The key is read from the login keychain, or from `GOOGLE_BOOKS_KEY` in the
+environment if it is set. Neither is a file in the repo, which is the point.
+
+### C8, sending me your word list
+
+Your paste arrives at my end as an attachment, and the attachment does not
+reach me: all I get is a placeholder saying how many lines it had. That has now
+happened twice, so here is a way round it rather than a third try.
+
+**Copy the list, then run this in Terminal:**
+
+```
+pbpaste > /Users/Ellie/Projects/unison/ellie-paste.txt && wc -l /Users/Ellie/Projects/unison/ellie-paste.txt
+```
+
+It prints the number of lines it saved. Tell me that number and I will read the
+file, put the words into the list the product serves, and delete the file. It is
+gitignored, so it cannot be committed by accident.
+
+**One thing not to do:** do not edit WORDS-REVIEW.md. It is written by a script
+from the word list, so the next time I run the checks it is overwritten. That is
+exactly how your 74 insights were nearly lost. If you want to read it:
+
+```
+open -a TextEdit /Users/Ellie/Projects/unison/WORDS-REVIEW.md
+```
 
 ### C6 is done, and here is where the 26 new ones came from
 
@@ -69,7 +115,52 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| | **Nothing open.** Everything from your last message is in section 4. The two things waiting on you are at the top of this file. |
+| | **Nothing open.** The two things at the top of this file are both yours, and both are one command. |
+
+## 3. For you to review
+
+| # | Built, needs your eye |
+|--|--|
+| S26 | **Eight sweeps, six found something, and your five questions about them are answered under this table.** |
+| R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
+| R10 | Privacy policy. |
+| R11 | Terms of service. |
+
+### S26, the sweeps and your five questions
+
+**Where this went wrong.** You answered every one of these and I wrote the
+answers under this section, while the long account of what the sweeps found
+stayed under section 2 where you had already read it. So you went to the S26
+you knew and found the same words as before. One S26 section now: your
+questions first, the full account below them.
+
+**2. Why is Notes slow when you have no marks?** It was not the marks. All four
+tabs mount the moment the app opens, and every one of them used to start its
+own requests there and then: about ten, each a separate function on the server,
+several of them cold, over one phone's connection. The tab you were waiting for
+was queued behind three you had not asked for. Each tab now loads when you open
+it. Opening the app makes three requests instead of ten.
+
+Your paging is in too, and it is the right shape for later: three marks per
+tile, ten when you tap through, and a tag's contents only when you open that
+tag. The tile still says how many there are, because the number comes from the
+server rather than from counting the rows on screen.
+
+**3. The unbounded queries: is this a problem?** Not yet, and it is the kind
+that only shows up once it is one. Every one of them was a read with no ceiling,
+so the cost grows with the person's own library. Notes was the worst and it is
+the one now capped. The others read lists that cannot grow past a few dozen
+rows.
+
+**4. The fonts: fixed, and does it make loading faster?** Fixed, and yes, a
+little. Thirty-five places asked for a weight the page never loaded, so the
+browser faked it. The stylesheet now asks for a range rather than twenty
+separate weights, which is four font-face rules where there were twenty.
+
+**5. The links: did you fix this?** Yes. The Terms anchor pointed at a section
+that had been renamed. `/privacy` was reported dead by the sweep and was not:
+it is a redirect, and the sweep had only read the rewrite rules. That was the
+sweep being wrong, not the site.
 
 ### S26, what the sweeps found
 
@@ -171,53 +262,6 @@ number.
 one derived number, which is right in all four places it appears and already
 held by a check.
 
-## 3. For you to review
-
-| # | Built, needs your eye |
-|--|--|
-| S26 | **Eight sweeps, six found something, and your five questions about them are answered under this table.** |
-| R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
-| R10 | Privacy policy. |
-| R11 | Terms of service. |
-
-### S26, your questions
-
-**2. Why is Notes slow when you have no marks?** It was not the marks. All four
-tabs mount the moment the app opens, and every one of them used to start its
-own requests there and then: about ten, each a separate function on the server,
-several of them cold, over one phone's connection. The tab you were waiting for
-was queued behind three you had not asked for. Each tab now loads when you open
-it. Opening the app makes three requests instead of ten.
-
-Your paging is in too, and it is the right shape for later: three marks per
-tile, ten when you tap through, and a tag's contents only when you open that
-tag. The tile still says how many there are, because the number comes from the
-server rather than from counting the rows on screen.
-
-**3. The unbounded queries: is this a problem?** Not yet, and it is the kind
-that only shows up once it is one. Every one of them was a read with no ceiling,
-so the cost grows with the person's own library. Notes was the worst and it is
-the one now capped. The others read lists that cannot grow past a few dozen
-rows.
-
-**4. The fonts: fixed, and does it make loading faster?** Fixed, and yes, a
-little. Thirty-five places asked for a weight the page never loaded, so the
-browser faked it. The stylesheet now asks for a range rather than twenty
-separate weights, which is four font-face rules where there were twenty.
-
-**5. The links: did you fix this?** Yes. The Terms anchor pointed at a section
-that had been renamed. `/privacy` was reported dead by the sweep and was not:
-it is a redirect, and the sweep had only read the rewrite rules. That was the
-sweep being wrong, not the site.
-
-### C8, your word list did not reach me
-
-Your message shows it as an attachment rather than as text, and all that came
-through is the placeholder. None of the list itself reached me.
-
-If you paste it straight into the message the way you did last time, as the
-table, I will put it in and regenerate the review document the same day.
-
 ## 4. Done and verified
 
 <!-- One line per row: what the task was, in enough words to recognise it.
@@ -226,6 +270,7 @@ table, I will put it in and regenerate the review document the same day.
 
 | Verified by you | What it was |
 |--|--|
+| C9 | Q12 cut a word from the middle of a quotation with nothing marking the cut; your answer was an ellipsis, and it carries one. |
 | C6 | Your 74 kept quotations, in the list the product reads rather than the document a build erases, plus 26 from five new publications, posted in an order that repeats no writer, subject or source on consecutive days. |
 | B88 | The Get started pill and the hamburger were both in the top bar on every phone; the pill now goes wherever the links go, and stays in the bar at desktop width. |
 | B89 | The founders' section on Our Purpose carries your two paragraphs and has lost the dash and the eyebrow above them. |

@@ -84,6 +84,8 @@
  * check-insight-provenance is for.
  */
 
+import { execFileSync } from 'node:child_process';
+
 import { INSIGHTS } from '../api/_insights.js';
 
 const quotes = INSIGHTS.filter((i) => i.kind === 'quote');
@@ -189,8 +191,42 @@ let volumesChecked = 0;
  * key is reported as unchecked rather than failing: a machine with no credential
  * is not evidence about a quotation, the same rule this file already applies to
  * a page it cannot reach.
+ *
+ * ── WHERE THE KEY LIVES ───────────────────────────────────────────────────
+ * Ellie: "Can I give you a key to run a google books check? I would rather
+ * cite books."
+ *
+ * Two places, in this order, and neither of them is a file in this repo.
+ *
+ *   GOOGLE_BOOKS_KEY in the environment, which is how Vercel has it.
+ *
+ *   the login keychain, under the service name below, which is how a
+ *   developer's machine has it. `security find-generic-password` reads it, so
+ *   the key is never in a file, never in shell history and never in a
+ *   transcript. She stores it once with the command in TASKS.md, which takes it
+ *   from the clipboard so the value is not typed anywhere it would be kept.
+ *
+ * The rule this follows is the one in CLAUDE.md: never ask her to paste a
+ * secret. The clipboard is hers, the keychain is hers, and what reaches me is
+ * the word that it is stored.
  */
-const BOOKS_KEY = process.env.GOOGLE_BOOKS_KEY || '';
+const KEYCHAIN_SERVICE = 'attune-google-books';
+
+function keyFromKeychain() {
+  try {
+    return execFileSync('security', ['find-generic-password', '-s', KEYCHAIN_SERVICE, '-w'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    /* No item, no keychain, not a Mac: all the same answer, which is that this
+       machine cannot check a book. */
+    return '';
+  }
+}
+
+const BOOKS_KEY = process.env.GOOGLE_BOOKS_KEY || keyFromKeychain();
+/** Said in the summary, so a run that checked nothing cannot read as a run that checked. */
+const KEY_FROM = process.env.GOOGLE_BOOKS_KEY ? 'the environment'
+  : BOOKS_KEY ? 'the login keychain' : '';
 
 async function inVolume(phrase, title, surname) {
   const url = 'https://www.googleapis.com/books/v1/volumes?'
@@ -226,7 +262,10 @@ const norm = (t) => String(t).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/
 for (const q of quotes) {
   if (!String(q.url || '').trim()) {
     const where = `${q.id}: ${q.author}, ${q.work} (${q.edition})`;
-    if (!BOOKS_KEY) { inBooks.push(`${where} [no GOOGLE_BOOKS_KEY set]`); continue; }
+    if (!BOOKS_KEY) {
+      inBooks.push(`${where} [no key: not in the environment, not in the keychain]`);
+      continue;
+    }
     /* The stored body has no display quotation marks on it yet; the outer pair is
        added on the way out, the same as for a page. */
     const want = flatten(q.body).replace(/^'|'$/g, '').trim();
@@ -328,7 +367,10 @@ if (wrong.length) {
 
 const onPages = quotes.filter((q) => String(q.url || '').trim()).length;
 const parts = [`${verified} of ${onPages} quotations with a url found verbatim on the page they cite`];
-if (volumesChecked) parts.push(`${volumesChecked} found in the Google Books scan of the volume they cite`);
+if (volumesChecked) {
+  parts.push(`${volumesChecked} found in the Google Books scan of the volume they cite`
+    + ` (key from ${KEY_FROM})`);
+}
 if (unreachable.length) {
   parts.push(unreachable.length === 1
     ? '1 could not be reached, so it was not checked'
@@ -340,5 +382,9 @@ if (inBooks.length) {
     : `${inBooks.length} book quotations could not be checked`);
 }
 console.log(`[check-quotes-verbatim] ${parts.join('; ')}.`);
+if (!BOOKS_KEY && inBooks.length) {
+  console.log('  To check the books too: store a Google Books key once with the command in'
+    + ` TASKS.md, which puts it in the login keychain under "${KEYCHAIN_SERVICE}".`);
+}
 for (const u of unreachable) console.log(`  unchecked  ${u}`);
 for (const b of inBooks) console.log(`  unchecked  ${b}`);

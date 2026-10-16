@@ -3191,3 +3191,38 @@ not run that check, so a book quotation added now is unverified by anything
 until somebody runs the check by hand with the key. The 27 already in the list
 are counted as unchecked on every local run rather than passed. All 73 web ones
 are verified on every run.
+
+### The round after that, same day
+
+Four answers from Ellie, all applied.
+
+**Q12 carries an ellipsis.** She was asked whether the word she cut should come
+back or the cut should be marked: "Use an ellipsis please." So the body reads
+"a dynamic that keeps... negative thoughts", which the quote check splits on and
+matches in two pieces against the book's own sentence.
+
+**My answers to her five S26 questions were in the wrong place, and she told me
+so.** She had answered each one; I wrote the replies under section 3 of TASKS.md
+while the long account of the sweeps, which she had already read, stayed under
+section 2. She went to the S26 she knew and found nothing new. There is one S26
+section now, under the row that points at it, her questions first.
+
+The general shape, worth more than the fix: a document with two sections about
+one id is a document that answers in a place nobody looks. Put the new thing
+under the row that names it.
+
+**She offered a Google Books key so books can be cited.**
+`check-quotes-verbatim` reads `GOOGLE_BOOKS_KEY` from the environment or, if
+that is unset, from the login keychain under `attune-google-books`, so the key
+never touches the repo, a shell history or a transcript. TASKS.md has the one
+command, which takes the value off her clipboard. Verified by planting a fake
+key in the keychain: the gate picked it up, Google answered 400, and the gate
+reported the entries as unchecked rather than as misquotations, which is the
+right failure for a bad credential.
+
+**The next batch of insights should come from books**, at her ask, and that is
+blocked on nothing but the key. Verify each against the scan before it goes in.
+
+**Her word list has now failed to arrive twice**, as an attachment that reaches
+me as a placeholder. TASKS.md gives her `pbpaste > ellie-paste.txt`, which is
+gitignored, and the file is read, applied and deleted.
