@@ -64,6 +64,14 @@ export default async function handler(req) {
           addon_workbook:   order.addonWorkbook || null,
           addon_reflection: order.addonReflection || false,
           addon_budget:     order.addonBudget || false,
+          /* All six, not the three this listed. Nothing calls this branch
+             today, which is exactly why it was missing half the add-ons: an
+             order written through it would have granted the package and three
+             of its six extras, and the person who paid would have had no way
+             to tell which. */
+          addon_checklist:  order.addonChecklist || false,
+          addon_intimacy:   order.addonIntimacy || false,
+          addon_conflict:   order.addonConflict || false,
           gift_note:        order.giftNote || null,
           workbook_status:  'pending',
           card_status:      'pending',

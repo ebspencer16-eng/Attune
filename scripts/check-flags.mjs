@@ -95,7 +95,11 @@ for (const rel of files) {
   //     || FLAG_PHYSICAL_ENABLED;
   //
   // so the environment can widen the flag but the flag is still the source.
-  const imported = src.match(/import\s*\{([^}]*)\}\s*from\s*'[^']*_lib\/flags\.js'/);
+  /* `[^']*flags.js`, not `_lib/flags.js`: a file inside _lib imports its
+     sibling as './flags.js', and the stricter pattern read that as no import
+     at all, so moving a derived flag into the library looked like a second
+     copy of it. */
+  const imported = src.match(/import\s*\{([^}]*)\}\s*from\s*'[^']*flags\.js'/);
   if (imported) {
     const bindings = imported[1]
       .split(',')

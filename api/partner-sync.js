@@ -161,7 +161,11 @@ async function handlePartnerSync(req) {
     // Resolve Partner A's full entitlement so Partner B inherits the same
     // experience. Package is copied onto Partner B's profile below; add-ons
     // live on Partner A's order and are returned for the client to apply.
-    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false };
+    /* Every add-on, including conflict, which was set further down and not
+       declared here: if the order lookup below throws, the write at the end
+       sends an undefined for it. The default is the same `false` as the
+       others, and now it says so. */
+    let inherited = { pkg: partnerA.pkg || 'core', partnerPronouns: partnerA.pronouns || '', addonReflection: false, addonBudget: false, addonChecklist: false, addonWorkbook: '', addonIntimacy: false, addonConflict: false };
     try {
       // Union ALL of Partner A's orders (never newest-wins) and match on
       // buyer_email too, since guest-checkout orders can have a null user_id.

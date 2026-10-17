@@ -8,11 +8,75 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| T1 | **Your design tester needs a code, and every existing one is single use.** Run the SQL under this table: it adds two fresh codes that unlock everything, `ATTUNE-DESIGN-1` and `ATTUNE-DESIGN-2`, and then lists every code still unredeemed. Two because results only open once both partners finish, so a tester needs both sides. |
+| T2 | **Check whether anyone bought Conflict Patterns before today.** Until this afternoon it was quoted at $40, charged at $0, and never unlocked. Download the orders CSV from the admin; if any row has addon_conflict = Y, tell me and I will write the grant for those couples. |
 | R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
+
+### T1, the code for your tester
+
+Paste this into the **Supabase SQL editor** (not Terminal), press Run, and
+send me what the last query prints:
+
+<!-- SQL 084_tester_codes.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+```sql
+-- Migration 084: two fresh full-bundle beta codes for design testing.
+--
+-- Every existing code is single use (max_uses 1), so a tester needs one that
+-- has not been redeemed. These two unlock the complete experience in one go:
+--
+--   premium package        -> Communication, Expectations, Relationship
+--                             Reflection and Conflict Patterns
+--   + includes_intimacy    -> Physical Intimacy Expectations, the fifth
+--   + includes_workbook    -> the personalised workbook
+--   + budget and checklist -> both tools
+--
+-- Conflict Patterns has no includes_ column because no code can bundle it:
+-- the premium package already carries it, which is why these are premium.
+--
+-- Two of them, because results only open once BOTH partners have finished,
+-- so a design tester needs an account on each side of the couple.
+--
+-- Safe to run more than once (idempotent upsert).
+insert into public.beta_codes
+  (code, package_key, includes_workbook, workbook_variant, includes_intimacy,
+   includes_reflection, includes_budget, includes_checklist,
+   discount_mode, discount_value, applies_to, max_uses, uses_count, active, note)
+values
+  ('ATTUNE-DESIGN-1', 'premium', true, 'digital', true,
+   true, true, true,
+   'free', 0, 'package', 1, 0, true, 'Design tester - full bundle'),
+  ('ATTUNE-DESIGN-2', 'premium', true, 'digital', true,
+   true, true, true,
+   'free', 0, 'package', 1, 0, true, 'Design tester - full bundle, partner side')
+on conflict (code) do update set
+  package_key         = excluded.package_key,
+  includes_workbook   = excluded.includes_workbook,
+  workbook_variant    = excluded.workbook_variant,
+  includes_intimacy   = excluded.includes_intimacy,
+  includes_reflection = excluded.includes_reflection,
+  includes_budget     = excluded.includes_budget,
+  includes_checklist  = excluded.includes_checklist,
+  discount_mode       = excluded.discount_mode,
+  discount_value      = excluded.discount_value,
+  applies_to          = excluded.applies_to,
+  active              = true;
+
+-- Which codes are still unredeemed, including these two.
+select code, package_key, max_uses, uses_count, active, note
+from public.beta_codes
+where active = true and uses_count < max_uses
+order by code;
+```
+<!-- /SQL -->
+
+Then the tester signs up at attune-relationships.com with `ATTUNE-DESIGN-1`,
+and the partner side uses `ATTUNE-DESIGN-2` or joins from the first one's
+invite link. Either way both of them have to finish their exercises before the
+results open; that is the product working, not a fault.
 
 ### Still open from the review
 
@@ -61,8 +125,9 @@ one property measured over every instance of its thing.
 
 ### S32, what these sweeps found
 
-**Three money bugs, all live, all fixed.** They are B136, B137 and B138
-above. Everything else below came back clean, with a figure.
+**Four money bugs, all live, all fixed.** They are B136 to B139 above. Three
+are about what a cart costs and one about the tax on it, and every one of them
+was a list of add-ons written out by hand with a member missing. Everything else below came back clean, with a figure.
 
 **The one thing that might need you:** whether Premium is meant to include
 Physical Intimacy. Three places in the code said it does, and the two places
@@ -140,6 +205,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B139 | **Sales tax was computed on a cart missing two add-ons.** The tax endpoint kept its own idea of what was in the cart and had left Physical Intimacy and Conflict Patterns out of it, so tax on an order with either was calculated on a base up to $40 too low. Both endpoints now read the same cart. |
 | B136 | **Conflict Patterns was sold and never charged for, and never delivered.** Adding it to a cart quoted $40 and the card was charged nothing for it, so the order recorded nothing and the exercise never unlocked. One missing line in the code that prepares a cart for payment. Fixed, and a check now prices all 24 package-and-add-on combinations off the real page against the real server. |
 | B137 | **A promo code on a Premium cart showed the wrong discount.** The page took Premium's base from an old table that still said $295, so applying BETA-PREMIUM to a $198 package drew "−$295". Fixed, and there is now one price table on that page instead of two. |
 | B138 | **Carts were charged for things the package already includes.** A Premium cart with Physical Intimacy quoted $218 and was charged $198 with nothing granted; Starting Out with the budget tool was charged $20 for a tool it includes. Both sides now read the one list of what each package covers. Your Premium tiles and the offerings page are unchanged, because they already said the right thing. |

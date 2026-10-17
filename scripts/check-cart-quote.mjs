@@ -28,7 +28,10 @@
  *
  * ── HOW IT CHECKS ─────────────────────────────────────────────────────────
  * It runs the shipped normaliser, imported rather than reimplemented, because
- * a gate holding two implementations together must not be a third. The page's
+ * a gate holding two implementations together must not be a third. That
+ * function now lives in api/_lib/cart-pricing.js, with the rest of what a cart
+ * costs, because api/calculate-tax.js had grown its own copy of it that was
+ * missing two add-ons. The page's
  * number comes from the page itself, in a browser, because that is what a
  * customer reads.
  *
@@ -36,9 +39,8 @@
  * `npm run check`.
  */
 import { launch } from './_lib/browser.mjs';
-import { itemSubtotal } from '../api/_lib/cart-pricing.js';
+import { itemSubtotal, normalizeItem } from '../api/_lib/cart-pricing.js';
 import { PKG_CAPS, computeEntitlements } from '../api/_lib/entitlements.js';
-import { normalizeItem } from '../api/create-payment-intent.js';
 
 const BASE = process.env.BASE || 'http://localhost:4173';
 

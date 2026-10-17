@@ -29,6 +29,19 @@
  */
 
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from '../_catalogue.js';
+import { PKG_CAPS } from './entitlements.js';
+import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './flags.js';
+
+/**
+ * Physical fulfilment, with the environment able to widen it.
+ *
+ * This moved here with normalizeItem, from api/create-payment-intent.js, and
+ * the override came with it: the flag is still the source, and
+ * ATTUNE_PHYSICAL_ENABLED=1 turns it on without a deploy. Dropping the env
+ * half would have quietly refused every physical order on a site that had the
+ * variable set.
+ */
+const PHYSICAL_ENABLED = process.env.ATTUNE_PHYSICAL_ENABLED === '1' || FLAG_PHYSICAL_ENABLED;
 
 /** The package itself, digital or printed. */
 export function itemBasePrice(item) {
@@ -65,4 +78,61 @@ export function itemAddonTotal(item) {
 /** The whole item. */
 export function itemSubtotal(item) {
   return itemBasePrice(item) + itemAddonTotal(item);
+}
+
+/**
+ * A cart item, with anything the package already includes taken off it.
+ *
+ * ── WHAT THIS RESTATED, AND WHAT IT COST ──────────────────────────────────
+ * It used to name premium three times: reflection, budget and intimacy were
+ * zeroed for a premium item, under a comment saying premium bundles all
+ * three. PKG_CAPS grants premium reflection, budget, conflict and the
+ * workbook, and NOT intimacy, so two of those three were wrong and one was
+ * missing. Measured over every package with every add-on, at the page and at
+ * the server:
+ *
+ *   premium + intimacy      quoted 218, billed 198, granted nothing
+ *   premium + conflict      quoted 238, billed 198  (it is included, so the
+ *                           quote was the wrong half)
+ *   core + conflict         quoted 129, billed  89, granted nothing
+ *
+ * The last one is the worst and has nothing to do with premium:
+ * `addonConflict` was not in this object at all. Every downstream read of a
+ * normalised item saw undefined, so a $40 exercise was left out of the
+ * charge, out of the tax lines, out of the metadata and therefore out of the
+ * order row that grants it. Bought, not billed, not delivered.
+ *
+ * So the inclusion rule is read from PKG_CAPS rather than written again, and
+ * every add-on in the catalogue is carried through. Adding a sixth add-on to
+ * a package is now one edit in entitlements.js.
+ *
+ * ── AND IT LIVES HERE, NOT IN AN ENDPOINT ─────────────────────────────────
+ * api/calculate-tax.js had its own version of this, listing four add-ons and
+ * missing intimacy and conflict, so its own tax lines for those two could
+ * never fire: Stripe was asked to tax a base that left a $40 exercise out.
+ * That is the 198/295 bug's shape exactly, and the answer is the same one
+ * this file already exists for.
+ */
+export function normalizeItem(item) {
+  const pkgKey = item.pkgKey || item.pkg;
+  const caps = PKG_CAPS[pkgKey] || PKG_CAPS.core;
+  /* Included in the package = never billed again as an add-on. */
+  const addon = (included, asked) => (included ? false : !!asked);
+  return {
+    pkgKey,
+    isPhysical:      PHYSICAL_ENABLED && (!!item.isPhysical || item.format === 'physical'),
+    isGift:          !!item.isGift,
+    partner1Name:    item.partner1Name || null,
+    partner2Name:    item.partner2Name || null,
+    giftNote:        item.giftNote || null,
+    addonWorkbook:   item.addonWorkbook || null,     // 'digital' | 'print' | null
+    // Phase-1: digital-only. Never bill for physical even if
+    // the request asks for it.
+    addonReflection: addon(caps.hasReflection, item.addonReflection),
+    addonBudget:     addon(caps.hasBudget, item.addonBudget),
+    addonChecklist:  addon(caps.hasChecklist, item.addonChecklist),
+    addonIntimacy:   addon(caps.hasIntimacy, item.addonIntimacy),
+    addonConflict:   addon(caps.hasConflict, item.addonConflict),
+    shipping:        item.shipping || null,
+  };
 }

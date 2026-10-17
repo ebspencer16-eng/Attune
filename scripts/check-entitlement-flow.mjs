@@ -15,7 +15,8 @@
 // against the fields the client carries, so a granted add-on cannot silently
 // stop at the boundary again.
 
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync, statSync } from 'fs';
+import { join } from 'path';
 
 const engine = readFileSync(new URL('../api/_lib/entitlements.js', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
@@ -44,6 +45,7 @@ for (const { n, l } of assignLines) {
 }
 
 const problems = [];
+let serverSites = 0;
 for (const b of blocks) {
   const present = granted.filter(k => new RegExp(`\\b${k}\\b`).test(b.text));
   // A block mentioning several add-ons is building an order object. One
@@ -73,6 +75,97 @@ const grabProfileGrant = (text) => {
   const j = text.indexOf('created_at: null', i);
   return [...new Set([...text.slice(i, j).matchAll(/addon_[a-z]+/g)].map(m => m[0]))].sort();
 };
+/**
+ * ── AND THE SERVER'S OWN ORDER OBJECTS ────────────────────────────────────
+ * Everything above reads src/App.jsx, and its summary line said "carried
+ * through 11 order-building sites" while a twelfth, on the server, dropped an
+ * add-on entirely: `normalizeItem` in api/create-payment-intent.js had no
+ * addonConflict field, so a $40 exercise fell out of the charge, the tax
+ * lines, the Stripe metadata and the order row that grants it. The promo
+ * path's own row write was missing the same field.
+ *
+ * Same rule, more files, rather than a second gate.
+ *
+ * ── WHAT COUNTS AS AN ORDER OBJECT ────────────────────────────────────────
+ * One that names the package: `pkgKey` or `pkg_key`. The first version asked
+ * only whether an object mentioned two add-ons and reported nine findings,
+ * every one of them something else: a sample payload for the email preview, an
+ * analytics projection, a tax line builder reading flags it bills separately.
+ * A gate that matches too much is not the safe direction, so the subject is
+ * the thing that decides what somebody bought.
+ *
+ * Rows use snake_case and code uses camelCase, so both spellings count.
+ */
+{
+  const snake = (k) => k.replace(/([A-Z])/g, (m) => '_' + m.toLowerCase());
+  const files = [];
+  const walk = (dir) => {
+    for (const name of readdirSync(dir)) {
+      const full = join(dir, name);
+      if (statSync(full).isDirectory()) { if (!/node_modules/.test(name)) walk(full); continue; }
+      if (/\.(js|mjs)$/.test(name)) files.push(full);
+    }
+  };
+  walk(new URL('../api', import.meta.url).pathname);
+
+  /** The object literal containing this position, by brace depth. */
+  const enclosing = (src, at) => {
+    let depth = 0, open = -1;
+    for (let i = at; i >= 0; i -= 1) {
+      if (src[i] === '}') depth += 1;
+      else if (src[i] === '{') { if (!depth) { open = i; break; } depth -= 1; }
+    }
+    if (open < 0) return null;
+    depth = 0;
+    for (let i = open; i < src.length; i += 1) {
+      if (src[i] === '{') depth += 1;
+      else if (src[i] === '}') { depth -= 1; if (!depth) return { open, text: src.slice(open, i + 1) }; }
+    }
+    return null;
+  };
+
+  for (const file of files) {
+    const src = readFileSync(file, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + ' '.repeat(m.length - pre.length));
+    const seen = new Set();
+    /* A sample payload for the email preview is not an order the product
+       writes. api/_lib/email-samples.js exists to show Ellie what an order
+       email looks like; which add-ons that pretend order carries is a copy
+       decision, not an entitlement one. Named here rather than skipped
+       silently. */
+    if (/email-samples\.js$/.test(file)) continue;
+    /* `pkgKey:` and the shorthand `pkgKey,`. The first version wanted the
+       colon, and normalizeItem writes the shorthand, so a plant that deleted
+       addonConflict from the one object this whole check exists for passed. */
+    for (const m of src.matchAll(/\b(pkgKey|pkg_key)\s*[:,}]/g)) {
+      const obj = enclosing(src, m.index);
+      if (!obj || seen.has(obj.open)) continue;
+      seen.add(obj.open);
+      const present = granted.filter((k) => new RegExp(`\\b(${k}|${snake(k)})\\s*:`).test(obj.text));
+      if (present.length < 2) continue;      // not an object that carries add-ons
+      serverSites += 1;
+      const missing = granted.filter((k) => !present.includes(k));
+      if (missing.length) {
+        problems.push({
+          line: `api/${file.slice(file.indexOf('/api/') + 5)}:${src.slice(0, obj.open).split('\n').length}`,
+          missing,
+        });
+      }
+    }
+  }
+}
+
+if (problems.length) {
+  console.error('[check-entitlement-flow] add-ons the engine grants but something drops:');
+  for (const p of problems) {
+    console.error(`  ${typeof p.line === 'string' ? p.line : `src/App.jsx:${p.line}`}  missing: ${p.missing.join(', ')}`);
+  }
+  console.error(`  engine grants: ${granted.join(', ')}`);
+  console.error('Add the missing field, or a purchased add-on never reaches the person who paid.');
+  process.exit(1);
+}
+
 const clientGrant = grabProfileGrant(app);
 const serverGrant = grabProfileGrant(engine);
 if (clientGrant && serverGrant && clientGrant.join(',') !== serverGrant.join(',')) {
@@ -83,4 +176,6 @@ if (clientGrant && serverGrant && clientGrant.join(',') !== serverGrant.join(','
   process.exit(1);
 }
 
-console.log(`[check-entitlement-flow] ${granted.length} add-ons carried through ${blocks.filter(b => granted.filter(k => b.text.includes(k)).length >= 2).length} order-building sites.`);
+console.log(`[check-entitlement-flow] ${granted.length} add-ons carried through`
+  + ` ${blocks.filter((b) => granted.filter((k) => b.text.includes(k)).length >= 2).length} order-building`
+  + ` sites in src/App.jsx and ${serverSites} under api/, the ones that name a package.`);

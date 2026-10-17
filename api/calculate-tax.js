@@ -21,7 +21,7 @@
 
 import { jsonBody } from './_lib/http.js';
 import { ADDON_PRICES } from './_catalogue.js';
-import { itemBasePrice, itemAddonTotal, workbookAmount } from './_lib/cart-pricing.js';
+import { itemBasePrice, itemAddonTotal, normalizeItem, workbookAmount } from './_lib/cart-pricing.js';
 import { reportToSentry } from './_lib/sentry-edge.js';
 
 export const config = { runtime: 'edge' };
@@ -77,8 +77,12 @@ function buildTaxLines(items, promoCoversBase, promoFixedAmount = null, includes
     if (wb > 0 && it.addonWorkbook === 'digital') lines.push({ amount: wb, tax_code: TAX_CODES.workbookDigital, reference: `item-${idx}-wbdigital`, quantity: 1 });
     if (it.addonReflection) lines.push({ amount: ADDON_PRICES.reflection*100, tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-reflection`, quantity: 1 });
     if (it.addonBudget)     lines.push({ amount: ADDON_PRICES.budget*100,     tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-budget`,     quantity: 1 });
-    if (it.addonIntimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: 'addon_intimacy' });
-    if (it.addonConflict)   lines.push({ amount: ADDON_PRICES.conflict*100,   tax_code: TAX_CODES.digitalAddon, reference: 'addon_conflict' });
+    /* These two had no quantity and a reference without the item index, which
+       is what a line written and never executed looks like: the mapping below
+       dropped both flags, so neither line had ever run. Two items with the
+       same reference would also have collided in Stripe's payload. */
+    if (it.addonIntimacy)   lines.push({ amount: ADDON_PRICES.intimacy*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-intimacy`,  quantity: 1 });
+    if (it.addonConflict)   lines.push({ amount: ADDON_PRICES.conflict*100,   tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-conflict`,  quantity: 1 });
     if (it.addonChecklist)  lines.push({ amount: ADDON_PRICES.checklist*100,  tax_code: TAX_CODES.digitalAddon, reference: `item-${idx}-checklist`,  quantity: 1 });
   });
   return lines;
@@ -100,14 +104,20 @@ export default async function handler(req) {
         status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
-    const items = (body.items || []).map(it => ({
-      pkgKey:          it.pkgKey || it.pkg,
-      isPhysical:      !!it.isPhysical || it.format === 'physical',
-      addonWorkbook:   it.addonWorkbook || null,
-      addonReflection: !!it.addonReflection,
-      addonBudget:     !!it.addonBudget,
-      addonChecklist:  !!it.addonChecklist,
-    }));
+    /**
+     * ── THE SAME ITEM THE CHARGE IS COMPUTED FROM ─────────────────────────
+     * This was its own mapping of six fields, and it listed four: intimacy
+     * and conflict were missing, so the two tax lines above for them could
+     * never fire and the subtotal this endpoint reports left them out.
+     * Conflict Patterns is $40, which is the base Stripe was asked to tax
+     * being short by exactly that.
+     *
+     * It is normalizeItem from the pricer now, the same function
+     * create-payment-intent charges from, which is the whole reason that file
+     * exists: the tax and the charge cannot be computed from two different
+     * ideas of what is in the cart.
+     */
+    const items = (body.items || []).map(normalizeItem);
 
     if (items.length === 0) {
       return new Response(JSON.stringify({ subtotalCents: 0, taxCents: 0, totalCents: 0 }), {
