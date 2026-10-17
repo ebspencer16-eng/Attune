@@ -16,6 +16,29 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
+### Is anything in your tester's way
+
+Short answer: no, once you have run T1. I drove the whole path end to end
+against the real code with nothing but the network faked: the code redeems and
+writes a free order, the account is created as Premium, all five exercises
+open with their questions and their finish screens, an answer is stored in the
+right place, and the results open with every chapter once both partners have
+finished.
+
+Three things to know rather than fix.
+
+**Results need both of them.** One person finishing shows a waiting screen
+until the other does. That is the product, not a fault, and it is why T1 adds
+two codes.
+
+**The app on their phone is current.** The latest TestFlight build is from the
+13th and today's app update is published to it, so a tester who installs from
+TestFlight gets everything from this week. Nothing more to publish.
+
+**Conflict Patterns only became buyable properly today.** If your tester
+redeems a code for Premium they get it either way, because Premium includes
+it. T2 is about anyone who bought it before this afternoon.
+
 ### T1, the code for your tester
 
 Paste this into the **Supabase SQL editor** (not Terminal), press Run, and
