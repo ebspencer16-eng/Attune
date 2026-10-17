@@ -49,6 +49,7 @@ import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { ResultsScroll } from '@/components/results-scroll';
+import { useMarkRail } from '@/components/annotation-context';
 import {
   BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing,
 } from '@/constants/attune-theme';
@@ -89,6 +90,10 @@ export default function PageTile({
   children: React.ReactNode;
 }) {
   const dark = !!ground?.length;
+  /* The rail of mark icons, and the view every marked paragraph measures
+     itself against. Both come from the annotation provider; outside one they
+     are null and nothing changes. */
+  const { railRef, rail } = useMarkRail();
 
   return (
     <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>
@@ -123,7 +128,10 @@ export default function PageTile({
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{ borderRadius: Radius.xl, padding }}>
-            {children}
+            <View ref={railRef} collapsable={false}>
+              {children}
+              {rail}
+            </View>
           </LinearGradient>
           </View>
         ) : (
@@ -139,7 +147,20 @@ export default function PageTile({
                  menu's bands, has to be cut to the corner radius. */
               overflow: 'hidden',
             }}>
-            {children}
+            {/* ── THE MARGIN THE MARKS LIVE IN ──────────────────────────
+                B121. Ellie: "The tag icons should appear outside of the tile
+                in the margin on the edge of the background card, not in the
+                tile with the content."
+
+                This view is the card's content box and the rail is drawn
+                inside it, hard right, in the padding the card already has.
+                Every paragraph with a mark measures itself against this same
+                view, so a mark sits on its own line however many tiles deep
+                the words are. */}
+            <View ref={railRef} collapsable={false}>
+              {children}
+              {rail}
+            </View>
           </View>
         )}
       </View>

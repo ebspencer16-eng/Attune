@@ -83,6 +83,26 @@ type Ctx = {
    * note. The paragraph holding them scrolls itself into view once.
    */
   focus?: string | null;
+  /**
+   * ── THE RAIL ────────────────────────────────────────────────────────────
+   * The page card registers itself here, and every paragraph with a mark
+   * measures itself against it and reports the line its icon belongs on. The
+   * card draws them all in its own margin. See useMarkRail.
+   *
+   * A page that is not a card leaves `railHost.current` null, and a paragraph
+   * that cannot find a host draws its own marker where it always did.
+   */
+  railHost: React.RefObject<View | null>;
+  reportMarker: (id: string, at: RailMark | null) => void;
+  markers?: RailMark[];
+};
+
+/** One icon on the rail: which mark, how far down the card, and in what ink. */
+export type RailMark = {
+  id: string;
+  y: number;
+  color: string;
+  tagged: boolean;
 };
 
 /**
@@ -109,6 +129,14 @@ type Ctx = {
  */
 const MARKER_INSET = 18;
 
+/**
+ * The strip the icons live in, at the right edge of the page card.
+ *
+ * The card pads itself by 24, so an icon 17 wide sits in that padding with a
+ * couple of points either side and takes nothing from the words.
+ */
+const RAIL_WIDTH = 22;
+
 /** Whether a paragraph's own colour is a light one, so the marker matches. */
 function textIsLight(style: StyleProp<TextStyle>): boolean {
   const flat = StyleSheet.flatten(style) as TextStyle | undefined;
@@ -122,10 +150,65 @@ function textIsLight(style: StyleProp<TextStyle>): boolean {
 const AnnotationCtx = createContext<Ctx>({
   marks: [], select: () => {}, remove: () => {}, openMark: () => {},
   enabled: false, focus: null, claim: () => {}, unplaced: false,
+  railHost: { current: null }, reportMarker: () => {},
 });
 
 export function useAnnotations() {
   return useContext(AnnotationCtx);
+}
+
+/**
+ * The rail: every mark's icon, in the page card's own margin.
+ *
+ * ── WHY IT IS NOT DRAWN BY THE PARAGRAPH ──────────────────────────────────
+ * Ellie: "The tag icons should appear outside of the tile in the margin on the
+ * edge of the background card, not in the tile with the content."
+ *
+ * A paragraph can only draw its own marker inside itself, or a few points
+ * outside, and a few points outside is still inside whichever tile the
+ * paragraph is in. Most results prose sits in a tile within the page's card:
+ * an action row, a glance tile, a side-by-side panel. So the icon was in the
+ * content with the words, which is what she is pointing at.
+ *
+ * It had been outside before and was pulled in because tiles with a radius
+ * clip their children, and a marker that is visible on most pages and missing
+ * on the rest reads as "there is no note here". Both of those are true at
+ * once, so the answer is neither: the icons are not children of the paragraph
+ * any more. Each paragraph reports where its mark sits and the page card draws
+ * all of them, in its own margin, where nothing can clip them.
+ *
+ * `useMarkRail` is what the card calls. The ref it returns is what every
+ * paragraph measures itself against, so the two agree about where a line is
+ * even inside a scroll view: both are in the same coordinate space, which is
+ * the card's own box.
+ */
+export function useMarkRail() {
+  const { railHost, markers, openMark } = useAnnotations();
+  const rail = markers && markers.length ? (
+    <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: RAIL_WIDTH }}>
+      {markers.map((m) => (
+        <Pressable
+          key={m.id}
+          accessibilityRole="button"
+          accessibilityLabel={m.tagged ? 'Open this tag' : 'Open this note'}
+          hitSlop={10}
+          onPress={() => openMark(m.id)}
+          style={{ position: 'absolute', top: m.y, right: 2 }}>
+          {/* ── THE ICON, AND NOTHING ROUND IT ────────────────────────────
+              Ellie: "I don't want the icon in a circle like it currently is,
+              just the icon." */}
+          <SymbolView
+            name={(m.tagged ? 'tag' : 'square.and.pencil') as never}
+            size={16}
+            tintColor={m.color}
+            fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: m.color }} />}
+            style={{ width: 17, height: 17 }}
+          />
+        </Pressable>
+      ))}
+    </View>
+  ) : null;
+  return { railRef: railHost, rail };
 }
 
 /**
@@ -137,7 +220,7 @@ export function useAnnotations() {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, remove, openMark, enabled, focus, claim } = useAnnotations();
+  const { marks, select, remove, openMark, enabled, focus, claim, railHost, reportMarker } = useAnnotations();
   const text = children || '';
   /**
    * ── EVERY HOOK RUNS, EVEN WHEN THIS DRAWS A PLAIN TEXT ──────────────────
@@ -194,6 +277,9 @@ export function Prose({
    */
   const silent = mine.filter((m) => m.kind === 'note' || m.tagged);
   const tone = annotationColor(mine.find((m) => m.color)?.color);
+  /* Whether the icon is a tag or a note: a paragraph carrying both shows the
+     tag, because the tag is the thing you would be scanning for. */
+  const tagged = silent.some((m) => m.tagged);
 
   /**
    * ── LANDING ON THE LINE ─────────────────────────────────────────────────
@@ -236,6 +322,60 @@ export function Prose({
    */
   const [markTops, setMarkTops] = useState<Map<string, number> | null>(null);
 
+  /**
+   * The colour is the paragraph's own.
+   *
+   * White on the coloured grounds, where she could not see it at all, and the
+   * mark's own ink on the cream pages, where white would be a blank space.
+   * Taken from the style the paragraph was given rather than from a list of
+   * which sections are dark, which would be a second copy of a fact the style
+   * already carries.
+   */
+  const markerColor = textIsLight(style) ? Palette.white : tone.ink;
+
+  /**
+   * The line the marker sits on: the first line of the first mark that has
+   * something to announce, and the top of the paragraph until the words have
+   * measured themselves.
+   */
+  const markerTop = silent.reduce((top, m) => {
+    const y = markTops?.get(m.id);
+    return y == null ? top : Math.min(top, y);
+  }, Number.POSITIVE_INFINITY);
+
+  /**
+   * ── THE ICON GOES TO THE CARD, NOT IN THE TILE ────────────────────────
+   * B121. Ellie: "The tag icons should appear outside of the tile in the
+   * margin on the edge of the background card, not in the tile with the
+   * content."
+   *
+   * So this paragraph measures where its marker belongs, in the card's own
+   * coordinates, and the card draws it. Measured rather than guessed, because
+   * the paragraph may be several tiles deep and each one has its own padding.
+   *
+   * When there is no card to report to, which is an In Practice article, it
+   * draws its own as it always has. The fallback is the whole reason this
+   * reports rather than being moved: a mark with nowhere to be drawn is the
+   * bug every change to this marker has been about.
+   */
+  const railed = !!railHost?.current;
+  const markerY = Number.isFinite(markerTop) ? markerTop : 2;
+  useEffect(() => {
+    const host = railHost?.current;
+    const node = block.current;
+    const id = silent[0]?.id;
+    if (!host || !node || !id) return undefined;
+    try {
+      (node as unknown as {
+        measureLayout: (h: unknown, ok: (x: number, y: number) => void, fail: () => void) => void;
+      }).measureLayout(host, (_x: number, y: number) => {
+        reportMarker(id, { id, y: y + markerY, color: markerColor, tagged });
+      }, () => {});
+    } catch { /* a view that has gone before the measurement lands */ }
+    return () => reportMarker(id, null);
+  }, [railHost, silent, markerY, markerColor, tagged, reportMarker]);
+
+
   /* Every hook above has run. Now the plain case, which is a Prose with no
      words or one outside the provider. See the note at the top of this
      function for why it is here rather than where it reads better. */
@@ -272,7 +412,6 @@ export function Prose({
    * a sign, not a control, and tapping it would be a second way to open
    * something the words already open.
    */
-  const tagged = silent.some((m) => m.tagged);
 
   /**
    * ── WHY THE MARKER SITS INSIDE THE BLOCK ─────────────────────────────────
@@ -288,26 +427,7 @@ export function Prose({
    * few points of line width on the paragraphs that have one, and it cannot be
    * clipped by anything.
    */
-  /**
-   * The colour is the paragraph's own.
-   *
-   * White on the coloured grounds, where she could not see it at all, and the
-   * mark's own ink on the cream pages, where white would be a blank space.
-   * Taken from the style the paragraph was given rather than from a list of
-   * which sections are dark, which would be a second copy of a fact the style
-   * already carries.
-   */
-  const markerColor = textIsLight(style) ? Palette.white : tone.ink;
 
-  /**
-   * The line the marker sits on: the first line of the first mark that has
-   * something to announce, and the top of the paragraph until the words have
-   * measured themselves.
-   */
-  const markerTop = silent.reduce((top, m) => {
-    const y = markTops?.get(m.id);
-    return y == null ? top : Math.min(top, y);
-  }, Number.POSITIVE_INFINITY);
 
   /**
    * ── WHY IT MOVED BACK INSIDE THE BLOCK ───────────────────────────────────
@@ -326,7 +446,7 @@ export function Prose({
    * has already stopped at.
    */
   return (
-    <View ref={block} onLayout={onLaidOut}>
+    <View ref={block} onLayout={onLaidOut} collapsable={false}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={tagged ? 'Open this tag' : 'Open this note'}
@@ -334,7 +454,10 @@ export function Prose({
         onPress={() => openMark(silent[0].id)}
         style={{
           position: 'absolute', right: -MARKER_INSET, zIndex: 2,
-          top: Number.isFinite(markerTop) ? markerTop : 2,
+          /* Drawn here only when there is no card to draw it in the margin
+             of. See the rail above. */
+          opacity: railed ? 0 : 1,
+          top: markerY,
         }}>
         {/* ── THE ICON, AND NOTHING ROUND IT ────────────────────────────
             Ellie: "I don't want the icon in a circle like it currently is,
@@ -469,8 +592,38 @@ export function AnnotationProvider({
   const settled = settledFor.current === markIds;
   const unplaced = settled && unplacedMarks(marks, placed.current).length > 0;
 
+  /**
+   * ── THE RAIL'S HOST, AND WHAT IS ON IT ────────────────────────────────
+   * The card registers itself through useMarkRail; paragraphs report against
+   * it. Kept in a ref beside the state so a report during layout does not
+   * have to wait for a render to find the host.
+   */
+  const railHost = useRef<View | null>(null);
+  const [markers, setMarkers] = useState<RailMark[]>([]);
+  const reportMarker = useCallback((id: string, at: RailMark | null) => {
+    setMarkers((prev) => {
+      const without = prev.filter((m) => m.id !== id);
+      if (!at) return without.length === prev.length ? prev : without;
+      const old = prev.find((m) => m.id === id);
+      /* A re-report of the same line is not a change. Without this every
+         layout pass would set state and every state change would cause a
+         layout pass, which is the loop this codebase has already paid for
+         once on the website. */
+      if (old && Math.abs(old.y - at.y) < 1 && old.color === at.color
+        && old.tagged === at.tagged) return prev;
+      return [...without, at];
+    });
+  }, []);
+  /* A new page's marks are a new rail. Cleared on a change of section, so a
+     stale icon cannot sit at whatever line it was on before. The ids are
+     watched further down, where this component already joins them. */
+  useEffect(() => { setMarkers([]); }, [section]);
+
   const value = useMemo<Ctx>(() => ({
     marks,
+    railHost,
+    reportMarker,
+    markers,
     claim,
     unplaced,
     select: (text: string, action: MarkAction) => setSelected({ text, action }),
@@ -490,7 +643,7 @@ export function AnnotationProvider({
     openMark: setOpenId,
     enabled: true,
     focus,
-  }), [marks, onRemoved, focus, claim, unplaced]);
+  }), [marks, onRemoved, focus, claim, unplaced, markers, reportMarker]);
 
   /**
    * The row behind the mark the reader tapped.

@@ -1257,6 +1257,34 @@ the quotation's budget was more space for that rule to spread. A gap that has to
 survive a layout belongs in padding on the container, which spreading cannot
 reach. Three reports is the signal that the number was never the subject.
 
+**A tab that never unmounts is a tab holding whatever it loaded once.** Every
+tab in this app mounts at launch and stays mounted, which is what makes
+switching instant. The results screen read the reader's tags in a mount effect,
+so a tag made on the Notes tab a minute later did not exist as far as marking
+was concerned: Ellie made two, and neither was offered. The Learn tab had
+always reloaded on focus and was fine, which is why this looked like a tags bug
+rather than a lifecycle one.
+
+Anything a screen holds that another screen can change belongs in a focus
+effect, not a mount effect. The tell is a list that is right after a restart
+and wrong after a visit somewhere else.
+
+**A paragraph cannot draw a marker outside the tile it is in.** The margin
+icon for a note or a tag has now been inside the paragraph, outside it, and
+inside again, each time for a real reason: outside, a tile with a corner
+radius clips it and the mark looks absent; inside, it is in the content with
+the words, which is what Ellie reported last. Both are true, so the answer is
+neither. The paragraph measures where its icon belongs, against the page card,
+and the CARD draws every icon in its own padding. One rail, outside every
+inner tile, clipped by nothing.
+
+Two things that cost a run. `measureLayout` is the only way to get a
+paragraph's position in the card's coordinates when it may be several tiles
+deep, and the two views have to be in the same scroll context or the number is
+relative to the wrong thing. And the effect that reports has to sit ABOVE the
+component's early return for a plain paragraph: check-hook-order caught it
+pointed at exactly the rule this file's own comment states.
+
 **A component declared inside another one remounts everything under it, on
 every render.** `const Layout = ({ children }) => (...)` sits inside
 `UnifiedResults`, so each render makes a new component type and React throws

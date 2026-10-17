@@ -7720,7 +7720,7 @@ function UnifiedResultsRoot(props) {
  * 2026-10-13.
  */
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false, onOpenJournal = null, onOpenSurvey = null, surveyAnswered = false }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false, onOpenJournal = null, onOpenSurvey = null }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -8758,12 +8758,20 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   step with a nav that already decides what pages exist. */}
               {(group?.children || []).filter(ch => !ch.isDomainHeader && !ch.id?.endsWith("-cover")).length > 0 && (
                 <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: "0.3rem", alignItems: "center" }}>
+                  {/* B124. Ellie: "On the cover pages, the mini table of
+                      contents should be functional, if I click on one of the
+                      listed pages it should bring me to that Page." Which is
+                      also the way in, now that the cover's one button is
+                      gone. */}
                   {(group.children || [])
                     .filter(ch => !ch.isDomainHeader && !ch.id?.endsWith("-cover"))
                     .map(ch => (
-                      <span key={ch.id} style={{ fontSize: "0.78rem", color: "#7A6753", fontFamily: BFONT, lineHeight: 1.5 }}>
+                      <button key={ch.id}
+                        onClick={() => go(ch.id)}
+                        aria-label={`Open ${ch.label}`}
+                        style={{ background: "none", border: "none", padding: "0.15rem 0.3rem", cursor: "pointer", fontSize: "0.78rem", color: accent, fontFamily: BFONT, lineHeight: 1.5 }}>
                         {ch.label}
-                      </span>
+                      </button>
                     ))}
                 </div>
               )}
@@ -10368,6 +10376,15 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                           color: open ? C.ink : C.text, whiteSpace: "pre-line", width: "86%" }}>
                           {g.label}
                         </span>
+                        {/* B126. Ellie: "Can we put a little arrow icon or
+                            something on each of the four tiles on the what
+                            comes next page so that it is clear that that
+                            content will show if you click on the button?"
+                            Down for a tile that opens below, up when it is the
+                            one that is open. */}
+                        <span aria-hidden="true" style={{ fontSize: "0.6rem", lineHeight: 1, marginTop: "0.2rem", color: open ? g.color : C.muted }}>
+                          {open ? "\u02C4" : "\u02C5"}
+                        </span>
                       </button>
                     );
                   })}
@@ -10400,6 +10417,10 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
                       color: C.text, whiteSpace: "pre-line", width: "86%" }}>
                       {"Relationship\njournal"}
+                    </span>
+                    {/* Pointing right, because this one leaves the page. */}
+                    <span aria-hidden="true" style={{ fontSize: "0.6rem", lineHeight: 1, marginTop: "0.2rem", color: C.muted }}>
+                      {"\u203A"}
                     </span>
                   </button>
                 </div>
@@ -10747,7 +10768,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               different fact from having been put away.
 
               The words are the survey's own, from the module that asks it. */}
-          {onOpenSurvey && !surveyAnswered ? (
+          {/* B125. Drawn whether or not it has been answered: a button that
+              disappears on the one page it belongs to reads as a page that
+              lost something. The survey opens on whatever was answered
+              before. */}
+          {onOpenSurvey ? (
             <div style={{ marginTop: "2.5rem" }}>
               <button onClick={onOpenSurvey}
                 style={{ background: BRAND_GRADIENT, border: "none", borderRadius: 12, padding: "0.85rem 1.6rem", fontSize: "0.82rem", fontWeight: 700, color: "white", fontFamily: BFONT, cursor: "pointer", letterSpacing: ".01em" }}>
@@ -18596,9 +18621,11 @@ export default function App() {
                      square goes. */
                   onOpenJournal={() => { setDashTab("notes"); setView("home"); }}
                   /* The survey's button at the foot of What Comes Next.
-                     Reopening is the same thing as not being done with it. */
+                     Reopening is the same thing as not being done with it.
+                     B125: it is drawn whether or not it has been answered, so
+                     `surveyAnswered` is no longer passed down; the dialog
+                     still only OPENS ITSELF for somebody who has not. */
                   onOpenSurvey={() => setPostSurveyDone(false)}
-                  surveyAnswered={surveyAnswered}
                   onNavigateTool={(tool) => {
                     if (typeof tool === 'string' && tool.endsWith('-upsell')) {
                       setUpsellModal({ product: tool.replace('-upsell', ''), cartAdded: false });

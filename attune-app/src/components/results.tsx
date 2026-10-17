@@ -563,9 +563,11 @@ export default function Results({
    * already the thing that decides what pages exist.
    */
   const coverContents = (activeGroup?.children || [])
-    .filter((ch) => !ch.cover)
-    .map((ch) => ch.label)
-    .filter(Boolean);
+    .filter((ch) => !ch.cover && ch.id && ch.label)
+    /* The id as well as the label, since B124: each name on a cover opens its
+       page, and a label matched back to an id by its words would break the
+       moment two pages shared one. */
+    .map((ch) => ({ id: ch.id, label: ch.label }));
 
   /* Reported after render rather than during: calling a parent's setState
      while this one is rendering is the warning every React app earns once. */
@@ -610,10 +612,32 @@ export default function Results({
    */
   const [notes, setNotes] = useState<Note[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
-  useEffect(() => {
+  /**
+   * ── AND AGAIN EVERY TIME THIS TAB COMES BACK ──────────────────────────
+   * Ellie: "I added a test tag on the Notes page, then I went and marked
+   * something, and the test tag did not appear as an option to tag the mark.
+   * I then created a different tag for that mark called test two, and then I
+   * went to mark something else and neither test nor test two showed as tag
+   * options."
+   *
+   * This ran once, on mount, and the tab stays mounted for the life of the
+   * app: every tab is built when the app starts and kept. So the list of tags
+   * here was whatever existed when the app opened, and a tag made on Notes
+   * five seconds ago did not exist as far as marking was concerned. The same
+   * staleness is why a mark tagged with one of those drew no icon: the page
+   * had never heard of the tag the mark names.
+   *
+   * On focus, which is when a reader comes back from Notes. The Learn tab has
+   * always done this; this one did not.
+   */
+  const loadMarks = useCallback(async () => {
+    const [n, t] = await Promise.all([fetchNotes(), fetchTags()]);
+    return { n, t };
+  }, []);
+  useFocusEffect(useCallback(() => {
     let cancelled = false;
     (async () => {
-      const [n, t] = await Promise.all([fetchNotes(), fetchTags()]);
+      const { n, t } = await loadMarks();
       if (cancelled) return;
       /**
        * ── ANNOTATIONS, NOT NOTES ──────────────────────────────────────────
@@ -637,7 +661,7 @@ export default function Results({
       if (t.ok) setTags(t.data.tags);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadMarks]));
 
   const content = results.content;
   const dims = content?.dimensions ?? [];
@@ -1197,7 +1221,7 @@ function SectionBody({
   /** Which of its section's detail pages this is, from the nav. */
   step: { index: number; total: number } | null;
   /** The pages inside this section, for the cover's contents list. */
-  coverContents?: string[];
+  coverContents?: { id: string; label: string }[];
   /** What a cover page is called: the nav entry's own label. */
   coverTitle: string;
   /** The section's icon, the same one the menu draws. */
@@ -1292,6 +1316,11 @@ function SectionBody({
       <Cover
         title={coverTitle}
         contents={coverContents}
+        /* B124. Ellie: "On the cover pages, the mini table of contents should
+           be functional, if I click on one of the listed pages it should bring
+           me to that Page." The nav entry carries the id; the label alone
+           could only be matched back by name. */
+        onOpen={onGoToSection}
         accent={accent || c.accent}
         icon={coverIcon}
       />
@@ -3337,10 +3366,25 @@ function WhatComesNext({
           </View>
         ) : null}
 
-        {/* The survey. Not drawn until we know they have not already answered
-            it, because a card that appears and then vanishes is worse than one
-            that arrives a moment late. */}
-        {surveyDone === false && surveyCopy ? (
+        {/* ── B125: THE BUTTON IS ALWAYS THERE ─────────────────────────
+            Ellie: "The tell us about your experience Button is now missing
+            from my what comes next page."
+
+            It was drawn on two conditions: that the server had answered, and
+            that the answer was no. So it was missing while the request was in
+            flight, missing if the request failed, and missing for ever once
+            somebody had answered. Three ways to have no button, and from the
+            page they all look the same.
+
+            It is drawn whenever the words for it exist, which is the only
+            thing it actually needs. The survey remembers what was answered
+            and opens on it, so somebody who has already done it finds their
+            own answers rather than an empty form.
+
+            The words come from the server, so there is still no button before
+            the first reply of the app's life. `lastSurvey` keeps that reply,
+            so that is once rather than once per page. */}
+        {surveyCopy ? (
           <Pressable
             accessibilityRole="button"
             onPress={() => setSurveyOpen(true)}
@@ -3453,6 +3497,23 @@ function NextTile({ label, count, icon, color, active, onPress }: {
         }}>
         {label}
       </Text>
+      {/* ── B126: AND A CHEVRON, SO IT READS AS A CONTROL ──────────────
+          Ellie: "Can we put a little arrow icon or something on each of the
+          four tiles on the what comes next page so that it is clear that that
+          content will show if you click on the button?"
+
+          It points down on a tile whose content opens underneath, and turns
+          up when that tile is the open one, which is the ordinary way a
+          disclosure says which way it goes. The journal's points right,
+          because it leaves the page. */}
+      <SymbolView
+        name={(icon ? 'chevron.right' : active ? 'chevron.up' : 'chevron.down') as never}
+        size={9}
+        tintColor={active ? color : c.textMuted}
+        /* not markable: an arrow on a control. */
+        fallback={<Text style={{ ...Type.small, fontSize: 9, color: c.textMuted }}>{icon ? '\u203A' : active ? '\u02C4' : '\u02C5'}</Text>}
+        style={{ width: 10, height: 10, marginTop: 3 }}
+      />
     </Pressable>
   );
 }
@@ -4108,8 +4169,9 @@ function CoupleType({ results, you, them, title }: {
  * too. Ellie: "Mirror cover pages for exercises and results on both web and
  * app." What is left here is what a chapter puts inside it.
  */
-function Cover({ title, contents, accent, icon }: {
-  title: string; contents?: string[]; accent: string; icon?: string | null;
+function Cover({ title, contents, accent, icon, onOpen }: {
+  title: string; contents?: { id: string; label: string }[]; accent: string;
+  icon?: string | null; onOpen?: (id: string) => void;
 }) {
   return (
     /* The bottom line has to clear the tab bar: a frame whose edge runs
@@ -4129,15 +4191,23 @@ function Cover({ title, contents, accent, icon }: {
           that says how far it goes. The names are the nav's own, so a page
           added to the section turns up here without anyone typing it. */}
       {contents?.length ? (
-        <View style={{ marginTop: Spacing.xl, alignItems: 'center', gap: Spacing.xs }}>
-          {contents.map((label) => (
-            /* not markable: a list of page names, which are labels rather than
-               findings. A mark anchored to one would follow the word. */
-            <Text
-              key={label}
-              style={{ ...Type.small, color: c.textMuted, textAlign: 'center' }}>
-              {label}
-            </Text>
+        <View style={{ marginTop: Spacing.xl, alignItems: 'center', gap: Spacing.sm }}>
+          {contents.map((page) => (
+            /* B124: each name opens its page. The cover lost its one button,
+               so this is now the way in as well as the way of saying how far
+               the chapter goes. */
+            <Pressable
+              key={page.id}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${page.label}`}
+              onPress={() => onOpen?.(page.id)}
+              hitSlop={6}>
+              {/* not markable: a list of page names, which are labels rather
+                  than findings. A mark anchored to one would follow the word. */}
+              <Text style={{ ...Type.small, color: accent, textAlign: 'center' }}>
+                {page.label}
+              </Text>
+            </Pressable>
           ))}
         </View>
       ) : null}

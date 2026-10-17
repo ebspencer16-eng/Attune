@@ -12,6 +12,7 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
+import { forgetEverything } from '@/lib/payload-cache';
 import { configureApi, SITE_URL } from '@/api/client';
 
 const TOKEN_KEY = 'attune.session.token';
@@ -48,6 +49,10 @@ export async function setToken(token: string): Promise<void> {
 export async function clearToken(): Promise<void> {
   cached = null;
   try { await SecureStore.deleteItemAsync(TOKEN_KEY); } catch { /* already gone */ }
+  /* And what the server last sent. A phone gets lent; the next person to sign
+     in must not meet the last one's results on screen while their own load.
+     See lib/payload-cache.ts. */
+  try { forgetEverything(); } catch { /* best effort, as the cache is */ }
 }
 
 export function isSignedIn(): boolean {

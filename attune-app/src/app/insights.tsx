@@ -40,6 +40,7 @@ import {
 import { WAITING } from '@/constants/waiting';
 import TabScreen, { TOP_LEFT } from '@/components/tab-screen';
 import { LOADING } from '@/constants/loading-copy';
+import { recall } from '@/lib/payload-cache';
 
 const c = Colors.light;
 
@@ -61,8 +62,10 @@ const COL = { label: '46%', person: '27%' } as const;
 
 export default function InsightsScreen() {
   useScreenTime('insights');
-  const [home, setHome] = useState<HomeResponse | null>(null);
-  const [results, setResults] = useState<ResultsResponse | null>(null);
+  /* B122. What the server last said, so the page is there while it is asked
+     again. Null on a first run, which is the spinner this always had. */
+  const [home, setHome] = useState<HomeResponse | null>(() => recall<HomeResponse>('home'));
+  const [results, setResults] = useState<ResultsResponse | null>(() => recall<ResultsResponse>('results'));
   /** The colour of the results section on screen, for the wash behind it. */
   const [accent, setAccent] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);

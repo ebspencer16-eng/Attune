@@ -43,6 +43,7 @@ import { buildWorkbook, fetchToolData, type ToolData } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
 import { LOADING } from '@/constants/loading-copy';
+import { recall } from '@/lib/payload-cache';
 import {
   AccentFallback, AccentFor, BottomTabInset, Colors, Fonts, inputType, Lift, LearnGround, MaxContentWidth, Palette, Radius, SectionColor, Spacing, TabTopInset, Type,
 } from '@/constants/attune-theme';
@@ -107,8 +108,12 @@ export function showTool(key: string) {
 
 export default function ResourcesScreen() {
   useScreenTime('resources');
-  const [home, setHome] = useState<HomeResponse | null>(null);
-  const [posts, setPosts] = useState<PostSummary[]>([]);
+  /* B122. Both kept on the phone, so the Learn tab opens on the shelf it
+     showed last rather than on an empty one. */
+  const [home, setHome] = useState<HomeResponse | null>(() => recall<HomeResponse>('home'));
+  const [posts, setPosts] = useState<PostSummary[]>(
+    () => recall<{ posts: PostSummary[] }>('posts')?.posts || [],
+  );
   /**
    * ── SEARCHING, AND THE TWO LISTS ────────────────────────────────────────
    * Ellie: "Can we have a search bar for the articles?" and "My lists" with
@@ -155,7 +160,7 @@ export default function ResourcesScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [partnerName, setPartnerName] = useState('your partner');
-  const [tools, setTools] = useState<ToolData | null>(null);
+  const [tools, setTools] = useState<ToolData | null>(() => recall<ToolData>('tools'));
   const [workbookNote, setWorkbookNote] = useState<string | null>(null);
   /** Which tool is opening, so its tile can say the tap was heard. */
   const [busyTool, setBusyTool] = useState<string | null>(null);

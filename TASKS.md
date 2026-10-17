@@ -14,31 +14,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### C6 is done, and here is where the 26 new ones came from
-
-Five publications the list had never used, ten writers, and none of them from a
-book:
-
-- **Harvard Gazette**, on the eighty-year study: Liz Mineo, and Robert
-  Waldinger who runs it. Four quotations.
-- **Greater Good Magazine**, Berkeley: Juliana Breines on kindness, Julia
-  Minson on being heard in an argument, Jessica Ayers and Athena Aktipis on
-  friendship, Jill Suttie on how kindness spreads. Eleven.
-- **The Conversation**: Gery Karantzas on what love is, Gary Lewandowski on
-  what we expect of a partner. Six.
-- **Psychology Today**: Guy Itzchakov on listening. Three.
-- **Institute for Family Studies**: Adam Galovan and two colleagues on what
-  makes a marriage flourish. Two.
-
-Subjects the list had none of before: kindness, listening, generosity, love
-itself, expectations, belonging. Twenty subjects now, where there were twelve.
-
-Books stayed out of this round, and not because they are worse. Checking one
-needs a Google Books key, which is set in Vercel and not on the machine I work
-on, and the Vercel build does not run that check. A book quotation added now
-would be unverified by anything until somebody ran the check by hand. All 73
-web ones are checked on every run, for ever.
-
 ### Still open from the review
 
 Every one is answered. Eighteen of them are in section 4: eleven built and
@@ -54,111 +29,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** The five from your last message are built and in section 3.
-
-### B115 to B119, the detail
-
-**B115.** Your words: "I left the app and clicked back in and went to learn,
-then back to what's next and things to consider was still open. It should auto
-close whatever dropdown is open if you leave the what comes next page." Moving
-between insights pages already closes it, because each page is a fresh mount.
-Leaving the tab does not, because the tab stays mounted, so this closes it when
-the screen loses focus.
-
-**B116.** Above the Open label rather than below it, and turned to lie the same
-way the label does.
-
-**B117.** You asked for the whole couple type tile to be on screen when the
-page opens, and suggested the heading. Two changes: the heading becomes "Your
-unique dynamic", which is one line instead of two, and the map is sized from
-the height of the window rather than fixed, so the tile has room on a small
-phone as well as a large one. You removed "unique" from this heading once
-before, so tell me if it should read differently now that it is not the names.
-
-**B118.** Gone from both surfaces. The arrows at the foot of the page still
-move you on, and the nav still opens any page directly.
-
-**B119.** Your words: "I clicked to a different insights page then back to
-what's next and the leave feedback button went away." Each page is a fresh
-mount, so coming back asks the server again whether you have answered the
-survey, and the button is not drawn until that answer arrives. If the request
-fails it never arrives. The answer is remembered now, so the button is there
-the moment the page is.
-
-**And one thing I found while checking B115, which was not yours to report.**
-The Side by Side panel on the three Communication pages could not be opened at
-all on the website. Clicking it opened it and something closed it again within
-fifty milliseconds, every time.
-
-Those pages were rebuilding themselves about forty-eight times a second. Two
-pieces of housekeeping in the results renderer had no instruction to say when
-to run, so both ran after every render: one restored the nav's scroll
-position, the other listened for scrolling, and each kept setting the other
-off. Nothing errored and the page looked still. Both now run when the page
-changes, which is what they are for, and the panel stays open. It had been
-like that since before this week.
-
-
-### B108 to B114, where to look
-
-All seven are the What Comes Next page, on both surfaces. **The site is live
-and the app needs two launches.**
-
-The tiles now read Things to consider, Discussions to have, Phrases to try,
-each on two lines, with the journal beside them. Open one and the rows are
-numbered, each with the note icon above the arrow on the right, which gives
-the words most of the width.
-
-The conflict rows are their advice now, with no heading, like the
-communication rows. Relationship Reflection carries one row, yours, under
-"When asked to reflect, you said"; his copy says the same about his. Physical
-Intimacy says "Talk about what physical intimacy is for". The phrases to try
-are in italics inside quotation marks with nothing above them.
-
-**One thing I could not check.** The simulator lost its window part-way
-through and would not get it back, so the app side of these seven is verified
-by its types, by the gates, and by the fact that both surfaces draw the same
-fields from the same server, but I did not see it on a phone. The website half
-I did drive and screenshot. If a row looks wrong on your phone, that is where
-it will be.
-
-### B106, the note icon, in detail
-
-Your words: "On the right side of each action item row on the whats next page,
-there should be the grey arrow, but also a note icon. If the user taps the note
-icon, the action item should be exported to their relationship journal where
-they can leave commentary, just like we offer for the insight of the day export
-to journal."
-
-So the row gets two controls: the arrow that opens the page it came from, and a
-note icon that opens the same save sheet the insight of the day opens, with the
-action item as the thing being kept. It writes the same kind of journal entry,
-through the same endpoint, so nothing new is stored and the entry appears in
-the journal under today's date with your commentary under it.
-
-### B107, colour, in detail
-
-The page is four grey tiles and white rows. Each bucket already has a colour on
-the server, and the three are the ones the rest of the results use: the
-communication orange, the expectations blue and the couple type purple. So the
-tile takes its own colour rather than the one accent, and each row carries it
-too, which also says at a glance which bucket a row belongs to once you have
-opened one.
-
-Tell me if you want more than that. This is the restrained version: colour that
-means something rather than colour for its own sake.
-
-### C13, what I did with your list
-
-You sent 119 rows where the document has 150, so 31 are out. I applied exactly
-that: the ones you left out are deleted from `api/_insights.js`, which is what
-the app and the site read, and the review document is rebuilt from the module
-afterwards rather than edited.
-
-I compared your rows against the document's wording and found no changes, only
-the deletions. If you also edited the words of a quotation, tell me which and
-it goes in verbatim; nothing in a generated document survives the next run, so
-your edits have to land in the module and they do.
+**Nothing open.** The eight from your last message are built and in section 3.
 
 ---
 
@@ -168,43 +39,51 @@ your edits have to land in the module and they do.
 |--|--|
 | C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
 | S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
-| C12 | **60 paragraphs, each beside a shorter version, for you to choose from.** Not four: three of each for all ten couple types, and you only ever see your own six. `COUPLE-TYPE-COPY-REVIEW.md`. Nothing is live until you say. Detail under this table. |
-| S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. Detail under this table. |
+| C12 | **60 paragraphs, each beside a shorter version, for you to choose from.** Not four: three of each for all ten couple types, and you only ever see your own six. `COUPLE-TYPE-COPY-REVIEW.md`. Nothing is live until you say. |
+| S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-| B115 | **Done, both surfaces.** An open bucket closes when you leave What Comes Next, including when you leave the tab and come back to it. |
-| B116 | **Done, both surfaces.** The question mark is above the Open label and lies the same way it does. |
-| B117 | **Done, both surfaces.** The heading is "Your unique dynamic" and the map takes a third of the window rather than a fixed square. Tell me if the tile still does not fit on your phone, and tell me about the heading: you asked me to take "unique" out of it once before. |
-| B118 | **Done, both surfaces.** The cover is the chapter's name and what is inside it; the arrows at the foot of the page move you on. |
-| B119 | **Done.** The answer about the survey is remembered, so the button is there the moment the page is rather than after a round trip, and a failed request no longer removes it. |
-| B108 | **Done, both surfaces.** Things to consider, Discussions to have, Phrases to try, each broken onto two lines where you broke it. |
-| B109 | **Done, both surfaces.** The note icon sits above the arrow and the words start further left and run further right. |
-| B110 | **Done, both surfaces.** Numbered within whichever bucket is open. |
-| B111 | **Done, both surfaces.** A conflict row is its advice, with the pattern's name gone; the name is still on the Conflict Patterns page, which is where the arrow goes. |
-| B112 | **Done, both surfaces.** One row, yours, under "When asked to reflect, you said". Preston sees his own on his copy. |
-| B113 | **Done, both surfaces.** "Talk about what physical intimacy is for." The dimension keeps its short name on its own page. |
-| B114 | **Done, both surfaces.** Italic, in quotation marks, and with no heading above the phrase. |
-| B106 | **Done, both surfaces.** Every action item now has a note icon beside its arrow, and it opens the same sheet the insight of the day opens, with the item already in it and a box for your commentary. |
-| B107 | **Done, both surfaces.** Each tile and each row carries its bucket's own colour: the communication orange, the expectations blue, the couple type purple, and a warm brown for the journal. Say if you want more. |
-| C13 | **Done.** 31 of the 150 are out of the module the product reads, and the review document is rebuilt from it. All 119 that remain are verified against the page or the scan they cite. |
-| B91 | **Done, both surfaces.** Your individual types is gone. Tapping a person's dot opens a tile beside it with their paragraph and no axis bars; tapping anywhere else closes it. |
-| B92 | **Done, both surfaces.** A grey question mark beside Open and beside Withdraw, each opening that axis's sentence, and both sentences are off the page below the chart. |
-| B93 | **Done.** The outline was a shadow in the dot's own colour, six points of blur at half opacity: a coloured halo round a coloured circle. It is a crisp white ring now. I could not reproduce it on an actual iPad, so tell me if your friend still sees it. |
-| B94 | **Done, both surfaces.** The contents are the nav's own page names, so a page added to a section turns up on its cover without anyone typing it. |
-| B95 | **Done.** Both were right about what they counted, which was the bug: the overview counted itself plus six conversations, the conversation pages ran a second counter over the six alone. One denominator now, 1/7 through 7/7. |
-| B96 | **Done, app only.** The website's overview had already lost that line, so this was the app catching up. |
-| B97 | **Done, both surfaces.** Each area row already carries its own topic count. |
-| B98 | **Done, both surfaces.** |
-| B99 | **Done.** The handler read locationX, which is measured inside whichever view the touch landed on, so the same point reported one x on the card and another in the margin beside it. It reads pageX now: one origin, whatever is hit. |
-| B100 | **Done, and rendered to check.** Cream through the middle, orange from the top left, blue from the bottom right. The old diagonal divide and the rotated square that drew it are gone. |
-| B101 | **Done.** It used to return and do nothing on the argument that the card has its own button; a forward tap now does what that button does. |
-| B102 | **Done, both surfaces.** Each communication row is the advice itself, and its arrow goes to the page the advice came from. |
-| B103 | **Done, both surfaces.** Communication styles, from the server, so neither surface can call it anything else. |
-| B104 | **Done, both surfaces.** Three rows, each a phrase to try, in the couple type's own words. |
-| B105 | **Done, both surfaces.** Four tiles, three buckets and the journal; tapping a tile fills the space under it and the tiles stay put. Detail under this table. |
-| S29 | **The demo path, driven end to end.** Purchase, account setup, exercises, completion and results. One real gap found and closed. Detail under this table. |
-| S28 | **The earlier sweep.** Two stale comments fixed, and the app driven for real rather than read. Detail under this table. |
+| B120 | A tag made on Notes is offered the next time you mark something: Insights reloads your tags when you come back to it. |
+| B121 | The mark icons are drawn by the page card, in its own margin, rather than by the paragraph inside its tile. |
+| B122 | **The app keeps what the server last sent and draws it straight away**, then refreshes behind you. Home, results, In Practice and the tools. Not the journal or the tags: a copy of those on disk is a copy behind no passcode. |
+| B123 | Most likely the same as B121: the icon was drawn inside a tile that clips. **Tell me if that tag still has no icon.** |
+| B124 | Each page name on a cover opens that page. |
+| B125 | Tell us about your Attune Experience is drawn whether or not it has been answered. |
+| B126 | A chevron on each of the four tiles, pointing down, up when that tile is the open one. |
+| B127 | Done: the read-and-approved context is out of this file. |
+| B115 | An open bucket closes when you leave What Comes Next, tab switches included. |
+| B116 | The question mark is above the Open label and lies the way it does. |
+| B117 | Heading is "Your unique dynamic" and the map takes a third of the window. **Does the tile fit on your phone now, and is that heading right?** You took "unique" out of it once before. |
+| B118 | No See insights button on the cover pages. |
+| B119 | The survey button stays put; the answer about it is remembered. |
+| B108 | Things to consider, Discussions to have, Phrases to try, each on two lines. |
+| B109 | Note icon above the arrow, words further left and right. |
+| B110 | Rows numbered within the open bucket. |
+| B111 | A conflict row is its advice, no heading. |
+| B112 | One reflection row, yours, under "When asked to reflect, you said". |
+| B113 | "Talk about what physical intimacy is for." |
+| B114 | Phrases to try in italics, in quotation marks. |
+| B106 | A note icon on every action item, opening the insight of the day’s own save sheet. |
+| B107 | Each tile and row in its bucket’s colour. **Say if you want more colour than that.** |
+| C13 | 31 of the 150 insights removed; the 119 left are all verified against their source. |
+| B91 | Your individual types is gone; each dot opens that person’s paragraph. |
+| B92 | A question mark beside Open and Withdraw; the axis copy is off the page. |
+| B93 | The slider dots have a crisp white ring rather than a coloured halo. **Does your friend still see them blurred on the iPad?** |
+| B94 | Cover pages list what is inside them. |
+| B95 | 1/7 through 7/7, one denominator. |
+| B96 | The aligned/discussing line is off the expectations overview in the app too. |
+| B97 | The 12-topics line is gone. |
+| B98 | The paragraph above the What Comes Next dropdowns is gone. |
+| B99 | A tap in the storycard’s right margin goes forward. |
+| B100 | The most-admired card is cream with orange top left and blue bottom right. |
+| B101 | The last storycard exits Highlights. |
+| B102 | Communication rows are the action items. |
+| B103 | Called Communication styles. |
+| B104 | Couple type rows are the three phrases. |
+| B105 | What Comes Next is four tiles over three buckets. |
+| S29 | The demo path driven end to end: purchase, setup, exercises, completion, results. One gap found and closed. |
+| S28 | The earlier sweep: two stale comments fixed, the app driven rather than read. |
 
 
 ### C12, the long and the short of it
@@ -243,144 +122,6 @@ than a mistake. The three that were genuinely unreadable are fixed.
 the phone app, and it is the one page where that matters least because people
 arrive at it signed in and stay. Splitting it is a day's work and would change
 nothing you can see.
-
-### B91 to B105, where to look
-
-All sixteen are built and on both surfaces unless a row says otherwise. The
-website is live. **The app needs two launches:** open it, close it, open it
-again, because an update downloads on the first and runs on the second.
-
-**The couple type page is where four of them are.** Open it in the app or on
-the site. The map now answers a tap: each dot opens that person's paragraph
-beside it, and a tap anywhere else closes it. There are no axis bars in the
-tile, at your word, and "Your individual types" is gone altogether (B91). The
-grey question mark beside Open and beside Withdraw opens that axis's sentence,
-and the two sentences that used to sit under the chart are only there now
-(B92). The slider dots have a crisp white ring rather than a coloured halo
-(B93); I could not reproduce the blur on an iPad, so tell me if your friend
-still sees it.
-
-**What Comes Next is the biggest change (B105).** Four tiles: What to keep in
-mind, What to discuss together, Phrases to try, and the relationship journal.
-Tapping one fills the space below it and the tiles stay where they are. Every
-row has a grey arrow that opens the page in Insights it came from, and nothing
-on the page says which exercise feeds which bucket. Tell us about your Attune
-Experience is a coloured button at the foot. The communication rows are the
-action items rather than the category (B102), that section is called
-Communication styles (B103), and the couple type rows are the three phrases to
-try (B104).
-
-**The smaller ones.** Exercise covers list the pages inside them (B94). The
-expectations pages count the same way, 1/7 through 7/7 (B95), and the three
-lines you asked to remove are gone (B96, B97, B98). On the storycards, a tap in
-the right margin goes forward (B99), the last card exits Highlights (B101), and
-the most-admired-for card is cream with orange from the top left and blue from
-the bottom right (B100).
-
-**What is checked rather than looked at.** A new gate drives the couple map in
-a real browser at phone and desktop width: it proves nothing is printed under
-the chart, that each question mark opens its own axis, that each dot opens its
-own paragraph, and that a tap elsewhere closes whichever is open. Eleven
-deliberate breakages, eleven failures. The app half was driven on an iPhone in
-the simulator, which is how the tile numbers turned out to be clipped: 9 was
-drawing as 0.
-
-**C12** is a review document, not a change: sixty paragraphs, each beside a
-shorter version, for you to choose. Nothing ships from it until you pick.
-
-### S29, the demo path
-
-Your designer can walk this. Every line below is a run, not a reading.
-
-**Buying with a beta code, which is what a demo uses.** All five codes take the
-free path: no card, no Stripe call, an order written and a number issued. A
-code with a paid add-on beside it correctly charges for the add-on alone and
-not the package. `scripts/probe-beta-codes.mjs`.
-
-**The whole journey, step by step.** Buy, create the profile, load the home
-screen, save an exercise, complete it, read results, load the tools, load
-notes. Fourteen steps, every one answering, with the number of database calls
-each makes printed beside it. `scripts/probe-demo-journey.mjs`.
-
-**All five exercises driven to their completion screen** in a real browser,
-with the answers stored: Communication 50, Expectations 80, Reflection 14,
-Intimacy 16, Conflict 12. All 29 results sections render. 37 static pages
-render at desktop, 360 and 320, none scrolling sideways, every image with alt
-text and every field with a label.
-
-**38 gates over the five areas you named**, all passing: prices, carts, promos,
-entitlements, the invite path, profile setup, completion, scoring, the
-alignment rule, results freezing, and the four engine tests.
-
-**The one real gap, now closed.** The checkout page keeps its own copy of every
-price, because a static page cannot read `api/`. Two of those copies are what a
-customer sees: the order summary and the line items that become the breakdown
-in their confirmation email. Nothing held them to the catalogue. I planted $25
-against the $40 that Conflict Patterns costs and seven existing gates passed
-it: the receipt would have said 25 while the card was charged 40.
-
-`check-checkout-page-prices.mjs` now holds all 23 prices on that page to
-`api/_catalogue.js`, and I planted five ways round it before trusting it.
-The better fix is for the page to read the prices the way it already reads the
-package rules, through a generated file. That is a change to the page that
-takes money, so it is a task rather than something I do hours before a demo.
-
-**What I did not touch.** Nothing in the purchase or results code changed. The
-only product change in this round is that new gate, which cannot alter
-behaviour, plus three comment corrections.
-
-### S28, the earlier sweep
-
-**Nothing is broken.** Every figure below is from a run, not a reading.
-
-**The app, driven for real.** The Notes tab is the biggest thing I changed this
-week and I had only checked it by types and by gates. I mounted the real screen
-in a browser, with answers behind it, and it draws what it should: 212 recent,
-37 shared with 9 unread, a 5 day streak, 14 against the tag. Counted the old
-way, on the rows in hand, those would have read 2, 2, 2 and 3.
-
-It also makes exactly the requests you asked for and no others. On arrival:
-the tags, the home payload, and three marks. The ten arrive when you open the
-full list. A tag's marks arrive when you open that tag.
-
-And it answered the question the lazy-tab change raised, which no amount of
-reading could: every tab now loads when you open it and nothing loads on
-launch, so if that had not fired for the tab you are looking at, the app would
-have opened to a spinner for ever. It reaches the sign-in screen signed out,
-which is the proof it ran.
-
-**Every live route, from outside.** 39 of 39 answer. Five looked thin and all
-five are meant to be: the 404 page returning 404, the workbook's print target,
-the portal's redirect, the email preview, and the survey, which builds itself
-in the browser.
-
-**Every link in the insight review document.** 107 of 107 answer. Every one of
-the 26 book ids resolves to the book it cites, by that author.
-
-**Two real findings, both comments.** Neither changes what the product does,
-and both would have cost somebody an hour:
-
-- `src/App.jsx` claimed a flag was set to mark a low-confidence score. Nothing
-  ever set it. A reader would have gone looking, or worse, assumed thin answers
-  are flagged somewhere.
-- The app's results menu called a flag by a name nothing uses, and described a
-  different rule from the one that ships.
-
-A third was mine from last week: a comment in the home-screen router still
-described the feedback questionnaire you retired. What that code does is open
-the survey, which is correct; only the sentence was dead.
-
-**And CLAUDE.md named a gate that does not exist.** check-style-codes and the
-file it checked were deleted when you had the style code removed, and the
-lesson that cites them is still right, so it now says they are history rather
-than sending the next session looking.
-
-**What I could not check from here.** The new Notes queries run against your
-database and nothing local can execute them; the foreign key they rely on is in
-migration 044 and the syntax is right, but the first real proof is you opening
-the Notes tab. The full check suite also could not finish: this machine is
-6 GB into swap and its browser checks crawl, so I ran the ones covering what
-changed, one at a time, rather than a run that would have taken an hour.
 
 ## 4. Done and verified
 

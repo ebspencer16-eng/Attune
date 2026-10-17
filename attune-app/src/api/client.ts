@@ -11,6 +11,10 @@
  * error states that exist instead of screens that spin forever.
  */
 
+/* The one import this file has: what the server last said, kept on the
+   phone so a screen has something to draw while this asks again. B122. */
+import { remember, type CacheKey } from '@/lib/payload-cache';
+
 export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: ApiError };
@@ -1112,10 +1116,25 @@ function requestHome() {
    * says so. getTimezoneOffset() is minutes to add to local to reach UTC.
    */
   const tzOffset = new Date().getTimezoneOffset();
-  return request<HomeResponse & { ok: true }>(`/api/home?tzOffset=${tzOffset}`);
+  return remembering('home', request<HomeResponse & { ok: true }>(`/api/home?tzOffset=${tzOffset}`));
 }
 
 /** The landing screen, in one call. */
+/**
+ * Keep a good answer, and hand it back unchanged.
+ *
+ * B122. The screens draw what was kept while the request below is still in
+ * the air; see lib/payload-cache.ts for what is kept and what deliberately is
+ * not. A failure keeps nothing, so the last good answer stays the last good
+ * answer rather than being replaced by an error.
+ */
+function remembering<T>(key: CacheKey, p: Promise<ApiResult<T>>): Promise<ApiResult<T>> {
+  return p.then((r) => {
+    if (r.ok) remember(key, r.data);
+    return r;
+  });
+}
+
 export function fetchHome() {
   const now = Date.now();
   if (homeShared && now - homeShared.at < HOME_SHARE_MS) return homeShared.promise;
@@ -1133,7 +1152,7 @@ export function fetchHome() {
  * not finished, and the screen should say so rather than showing a failure.
  */
 export function fetchResults() {
-  return request<ResultsResponse & { ok: true }>('/api/results');
+  return remembering('results', request<ResultsResponse & { ok: true }>('/api/results'));
 }
 
 // ── The rest of the surface ────────────────────────────────────────────────
@@ -1248,8 +1267,8 @@ export type Note = {
 /** In Practice feed. Drafts and scheduled posts are filtered server-side. */
 /** The feed, plus the shelves it can be filtered by. */
 export function fetchPosts() {
-  return request<{ ok: true; posts: PostSummary[]; categories: string[] }>(
-    '/api/posts?action=feed');
+  return remembering('posts', request<{ ok: true; posts: PostSummary[]; categories: string[] }>(
+    '/api/posts?action=feed'));
 }
 
 export function fetchPost(id: string) {
@@ -1774,7 +1793,7 @@ export function saveSurvey(input: {
 }
 
 export function fetchToolData() {
-  return request<ToolData>('/api/tool-data');
+  return remembering('tools', request<ToolData>('/api/tool-data'));
 }
 
 /**

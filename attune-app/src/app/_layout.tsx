@@ -8,6 +8,7 @@ import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { initSession } from '@/api/session';
 import { refreshSession } from '@/api/auth';
+import { primeCache } from '@/lib/payload-cache';
 
 // Once, before any screen renders. Keeps auth out of every call site.
 //
@@ -16,6 +17,16 @@ import { refreshSession } from '@/api/auth';
 // token, which happens about hourly, dumps the person back at a password
 // prompt with a session that could have been renewed silently.
 initSession({ refresh: refreshSession });
+
+/**
+ * And what the server last said, read off the phone before the tabs draw.
+ *
+ * B122. Ellie: "My pages take a long long time to load every time I open the
+ * app." Every screen asks for what it needs on open; this is what it draws
+ * while that is in the air. One file read, started here so it is finished by
+ * the time the first screen renders. See lib/payload-cache.ts.
+ */
+primeCache();
 
 SplashScreen.preventAutoHideAsync();
 

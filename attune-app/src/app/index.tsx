@@ -51,6 +51,7 @@ import { showSection } from '@/components/results';
 import { showJournal, JOURNAL_TITLE } from '@/app/notes';
 import PageWash, { withAlpha } from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
+import { recall } from '@/lib/payload-cache';
 import {
   BlueGround, BottomTabInset, Colors, Fonts, HomeGroundFoot, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
@@ -89,7 +90,8 @@ export default function HomeScreen() {
    * milliseconds against a cold start of seconds, so on any launch after the
    * first the dashboard is simply there. See api/last-seen.ts.
    */
-  const [data, setData] = useState<HomeResponse | null>(null);
+  /* B122. The last home payload, drawn while this one loads. */
+  const [data, setData] = useState<HomeResponse | null>(() => recall<HomeResponse>('home'));
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
