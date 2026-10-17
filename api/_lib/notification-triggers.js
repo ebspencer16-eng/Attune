@@ -16,7 +16,7 @@ export const NOTIFICATION_TRIGGERS = {
     "api/partner-nudge.js:96"
   ],
   "partner_joined": [
-    "api/partner-sync.js:285"
+    "api/partner-sync.js:289"
   ],
   "partner_shared": [
     "api/notes.js:634",

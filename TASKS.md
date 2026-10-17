@@ -228,6 +228,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| C16 | **One word for you, in the workbook.** The Energy gap paragraph ends "Understanding what you each need is crucial." CLAUDE.md lists "crucial" as a word to avoid and you own every word a customer reads, so I have left it. A shorter ending would be yours to write. Everything else came back clean: I measured 3,632 sentences across 21 copy modules for hedging, for the words on that list and for anything over 30 words, and the rest of what it flagged was either a book title, a quotation that has to stay verbatim, or your own answer labels. |
 | B139 | **Sales tax was computed on a cart missing two add-ons.** The tax endpoint kept its own idea of what was in the cart and had left Physical Intimacy and Conflict Patterns out of it, so tax on an order with either was calculated on a base up to $40 too low. Both endpoints now read the same cart. |
 | B136 | **Conflict Patterns was sold and never charged for, and never delivered.** Adding it to a cart quoted $40 and the card was charged nothing for it, so the order recorded nothing and the exercise never unlocked. One missing line in the code that prepares a cart for payment. Fixed, and a check now prices all 24 package-and-add-on combinations off the real page against the real server. |
 | B137 | **A promo code on a Premium cart showed the wrong discount.** The page took Premium's base from an old table that still said $295, so applying BETA-PREMIUM to a $198 package drew "−$295". Fixed, and there is now one price table on that page instead of two. |

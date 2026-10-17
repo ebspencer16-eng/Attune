@@ -1052,7 +1052,7 @@ export const INSIGHTS = [
     author: 'Stan Tatkin',
     work: 'Wired for Love',
     topic: 'commitment',
-    edition: 'New Harbinger  Publications 2024',
+    edition: 'New Harbinger Publications 2024',
     volumeId: 'q_3SEAAAQBAJ',
   },
   {
