@@ -29,7 +29,18 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** The eight from your last message are built and in section 3.
+**Nothing open.** Your sixty new lines are in.
+
+### C14, two words that are yours to settle
+
+Both are in exactly as you wrote them, and both are one-word changes if you
+want them:
+
+- WW, worth being aware of, 2: "Hard moments lands at full force for you two."
+  Did you mean "land"?
+- WW, comes naturally, 3: "Hard conversations aren't avoided as often" uses a
+  curly apostrophe where the rest of the file uses a straight one. Identical
+  on screen; say the word and I will match the others.
 
 ---
 
@@ -39,7 +50,8 @@ These two are still waiting on somebody, and neither is waiting on me.
 |--|--|
 | C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
 | S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
-| C12 | **60 paragraphs, each beside a shorter version, for you to choose from.** Not four: three of each for all ten couple types, and you only ever see your own six. `COUPLE-TYPE-COPY-REVIEW.md`. Nothing is live until you say. |
+| C12 | **Answered and applied.** You rewrote all sixty; they are in the module both surfaces read and `COUPLE-TYPE-COPY-REVIEW.md` now shows one column, which is what ships. |
+| C14 | **Your sixty new lines are live**, word for word, 51 characters each where the paragraphs averaged 128. Two words I did not touch: detail under this table. |
 | S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |

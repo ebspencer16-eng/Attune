@@ -596,6 +596,19 @@ So: her answer goes into the module the moment it arrives, and the document is
 rebuilt from it. If an answer cannot be applied yet, it goes in TASKS.md where
 nothing regenerates it, quoted.
 
+**A review document the build regenerates before checking it is a comparison
+of a file with itself.** CLAUDE.md has said this about the insights review for
+a week; the couple type review was doing it too, and I found out by planting a
+changed sentence and watching the gate pass. `npm run check` ran the generator
+and then the check, so by the time the check looked, the document agreed.
+
+Two changes, and the second is the one that matters. The generator is out of
+the check chain, so the committed document is the one being judged. And the
+gate reads the file, runs the generator, and compares: different means the
+committed document is stale, which fails the build and leaves the fresh one in
+place to commit. Three plants now fail it, including the one that used to walk
+through.
+
 **A quotation she has edited is still a quotation, and a gate that cannot read
 an ellipsis forces a choice between her editing and a passing build.** Three of
 her fourteen edits were an elision, a bracketed clarification and a dropped
