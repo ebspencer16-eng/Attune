@@ -65,9 +65,14 @@ const ROOT = new URL('..', import.meta.url).pathname;
 /** Tables whose rows are about a person. A stranger must not read these. */
 const PERSONAL = new Set([
   'orders', 'profiles', 'partner_sessions', 'notes', 'note_tags', 'tags',
-  'feedback_submissions', 'notifications', 'workbooks', 'post_reads',
+  'feedback_submissions', 'notifications', 'post_reads',
   'privacy_preferences', 'consent_events', 'page_events', 'lmft_requests',
 ]);
+/* `workbooks` was in that list and is not a table. It is a storage bucket, and
+   this set is only ever consulted for a table that has a policy in SQL, so the
+   entry did nothing except suggest the table exists. Two admin exports queried
+   it on the strength of that belief and reported no workbook for anybody; see
+   check-selected-columns. */
 
 /**
  * Tables anyone may read, each for a reason.

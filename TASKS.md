@@ -31,7 +31,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S31 | **Sweeps, while you are away.** Six properties so far, each measured over every instance rather than spot-checked. Two found something real and both are fixed. Details under the table. |
+| S31 | **Sweeps, while you are away.** Seven properties so far, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
 
 ### S31, what the sweeps found
 
@@ -62,6 +62,15 @@ charges the card, and the rule that turns a stored pronoun into a label, which
 two admin endpoints each carried a copy of. Both now have one home and a check
 behind them. The pronoun one turned up the Gender tile bug, B132.
 
+**Every column a query asks for.** 84 queries under api/ and 199 column
+references, checked against the schema this repo builds. One was asking a
+table that does not exist: both admin CSV exports looked up a `workbooks`
+table for whether a couple's workbook had been made, so that column said no
+for everybody, always. That is B133. The check that found it is now a gate,
+including the three column lists that are passed around as constants rather
+than typed into the query, and it says out loud how many selects are built at
+run time and cannot be read.
+
 **The survey's answer.** Added after the fourth: the button cannot be drawn
 until the server says whether you have answered, so the app now asks on the
 first screen of every launch and keeps the reply. check-survey proves it by
@@ -74,6 +83,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B133 | **Your two admin CSV exports said no couple had a workbook.** Both asked a `workbooks` table for it and there is no such table: workbooks are files in storage, and the answer lives on the order. The column now reads from there. Worth re-downloading either export if you used the workbook column. |
 | B132 | **Your Gender tile was undercounting, and it is fixed.** Anyone whose pronoun is not one of the three was in the total and in no bar, so the percentages could add up to less than 100 with nothing saying why. Driven in a browser: four people, three bars, 75 per cent. Now four bars and 100. |
 | B128 | **Fixed and seen on your simulator.** The icon is in the card's margin, outside the tile. It also had a loop in it that said "Maximum update depth exceeded"; that is gone. |
 | B129 | **Fixed and timed on your simulator.** Insights draws in about half a second from what is kept on the phone, with no spinner. |

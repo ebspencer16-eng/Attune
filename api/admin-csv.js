@@ -139,14 +139,23 @@ async function buildCombinedData(admin) {
   //
   // Exercise answers are read directly from profiles.ex{1,2,3}_answers —
   // no more partner_sessions or exercise_sessions lookups.
+  /* ── THERE IS NO WORKBOOKS TABLE ────────────────────────────────────────
+     Both exports used to ask one for `user_id, storage_path`. api/
+     delete-account.js says so in a comment, having gone looking: workbook
+     files live in the `workbooks` STORAGE BUCKET, and nothing in this product
+     has ever written a row to a table of that name. The query comes back with
+     an error that is never read, `workbooks` defaults to [], and the
+     workbook_generated column has been N for every couple since the day it
+     was added, including the ones holding a finished workbook.
+
+     Where it actually lives is the order: store-workbook-pdf.js writes
+     workbook_url and sets workbook_status to 'ready'. */
   const [
     { data: profiles = [] },
-    { data: workbooks = [] },
     { data: _orders = [] },
     _demo,
   ] = await Promise.all([
     selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type')),
-    admin.from('workbooks').select('user_id, storage_path'),
     admin.from('orders').select('*'),
     demoOwners(admin),
   ]);
@@ -158,7 +167,6 @@ async function buildCombinedData(admin) {
   /* A demo's test order is not a sale, here or on the pages. */
   const orders = withoutDemoOrders(_orders, _demo);
 
-  const wbByUser   = Object.fromEntries(workbooks.map(w => [w.user_id, w]));
   const ordersByUser = {};
   orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(o => {
     if (o.user_id && !ordersByUser[o.user_id]) ordersByUser[o.user_id] = o;
@@ -232,7 +240,6 @@ async function buildCombinedData(admin) {
   const dataRows = partnerAList.map(p => {
     // p = Partner A profile. Partner B is the linked profile row.
     const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
-    const w = wbByUser[p.id];
     const o = ordersByUser[p.id];
     const ex2a = p.ex2_answers || {};
     const ex2b = ps?.ex2_answers || {};
@@ -291,7 +298,7 @@ async function buildCombinedData(admin) {
       p.ex2_answers ? 'Y' : 'N',  ps?.ex2_answers ? 'Y' : 'N',
       p.ex3_answers ? 'Y' : 'N',  ps?.ex3_answers ? 'Y' : 'N',
       budgetComplete ? 'Y' : 'N',
-      w ? 'Y' : 'N',
+      workbookReady(o) ? 'Y' : 'N',
       (o?.is_physical && o?.card_status === 'shipped') ? 'Y' : 'N',
 
       fmt(aAxes.withdrawScore), fmt(aAxes.openScore),
@@ -537,15 +544,25 @@ async function exportDemographics(admin) {
 
 // ── 3. ENGAGEMENT ──────────────────────────────────────────────────────
 // One row per couple. Y/N for each exercise + workbook download/ship.
+/**
+ * Whether a couple's workbook has actually been made.
+ *
+ * store-workbook-pdf.js writes both of these together, so either answers it;
+ * the url is the one that survives a status column somebody forgot to set.
+ */
+function workbookReady(order) {
+  return !!order && (order.workbook_status === 'ready' || !!order.workbook_url);
+}
+
 async function exportEngagement(admin) {
   const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, budget_data, ex1_answers, ex2_answers, ex3_answers'));
-  const { data: workbooks } = await admin.from('workbooks').select('user_id, storage_path, generated_at');
-  const { data: orders } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, card_status');
+  /* No workbooks table: see the note in the research export above. The order
+     carries it. */
+  const { data: orders } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, workbook_url, card_status');
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
 
-  const wbByUser = Object.fromEntries((workbooks || []).map(w => [w.user_id, w]));
   const ordersByUser = {};
   (orders || []).forEach(o => { if (o.user_id) ordersByUser[o.user_id] = o; });
 
@@ -561,7 +578,6 @@ async function exportEngagement(admin) {
 
   const rows = partnerAList.map(p => {
     const ps = p.partner_profile_id ? byId[p.partner_profile_id] : null;
-    const w = wbByUser[p.id];
     const o = ordersByUser[p.id];
     const budgetComplete = p.budget_data && Object.keys(p.budget_data).length > 0;
     const anonId = (p.id || '').replace(/-/g, '').slice(0, 8);
@@ -572,7 +588,7 @@ async function exportEngagement(admin) {
       p.ex2_answers ? 'Y' : 'N',   ps?.ex2_answers ? 'Y' : 'N',
       p.ex3_answers ? 'Y' : 'N',   ps?.ex3_answers ? 'Y' : 'N',
       budgetComplete ? 'Y' : 'N',
-      w ? 'Y' : 'N',
+      workbookReady(o) ? 'Y' : 'N',
       (o?.is_physical && o?.card_status === 'shipped') ? 'Y' : 'N',
     ];
   });
