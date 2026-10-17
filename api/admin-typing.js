@@ -9,6 +9,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { pronounLabel } from './_lib/pronouns.js';
 import { personResults } from './_lib/results.js';
 import { QUESTION_WEIGHTS, FLIPPED_QUESTIONS, PARTNER_VIEW_BLEND } from './_type-engine.js';
 import {
@@ -69,13 +70,6 @@ function profileToRecord(p, partnerAnswers = null) {
     relStatus: p.relationship_status || null,
     createdAt: p.created_at || null,
   };
-}
-
-/** she/her, he/him, they/them as given; anything else is "other". */
-function pronounLabel(pr) {
-  const v = String(pr || '').trim().toLowerCase();
-  if (!v) return null;
-  return (v === 'he/him' || v === 'she/her' || v === 'they/them') ? v : 'other';
 }
 
 const hasAnswers = (p) => p && p.ex1_answers && Object.keys(p.ex1_answers).length > 0;

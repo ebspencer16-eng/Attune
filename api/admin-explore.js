@@ -17,6 +17,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { pronounLabel } from './_lib/pronouns.js';
 import { calcDimScores, blendedDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, understandingBandFor } from './_lib/results.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
@@ -84,30 +85,9 @@ const DEMO_LABELS = {
 };
 const DEMO_KEYS = Object.keys(DEMO_LABELS);
 
-/**
- * Pronouns, not gender.
- *
- * ── WHAT THIS REPLACED ────────────────────────────────────────────────────
- * genderFromPronoun(): she/her meant woman, he/him meant man, and they/them
- * meant NON-BINARY. Nothing in the product asks anybody their gender. The
- * signup form has five demographic questions and gender is not one of them, so
- * every gender figure in the admin was a pronoun with another word written
- * over it.
- *
- * Ellie: "I think some of the data is wrong, none of our beta testers are non
- * binary." She was right, and the chart was reporting a person's pronouns as
- * their gender, which is both a wrong number and the kind of wrong that
- * matters more than a number.
- *
- * So the dimension is what was actually collected. If gender is ever worth
- * knowing it is a question to ask, not an inference to make.
- */
-function pronounLabel(pr) {
-  const v = String(pr || '').trim().toLowerCase();
-  if (!v) return null;
-  if (v === 'he/him' || v === 'she/her' || v === 'they/them') return v;
-  return 'other';
-}
+/* Pronouns, not gender: `pronounLabel` is in _lib/pronouns.js, with the whole
+   story of why. This file used to carry its own copy of it, identical to the
+   one in admin-typing.js. */
 const RESP_OPTS = ['Me', 'Both', 'Partner', 'N/A'];
 const IDIM_LABEL = Object.fromEntries((INTIMACY_DIMENSIONS || []).map((d) => [d.id, d.label]));
 

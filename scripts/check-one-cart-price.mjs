@@ -57,7 +57,7 @@ const fails = [];
 /* A gate that has lost its subject must never report success. */
 {
   const src = readFileSync(join(ROOT, PRICER), 'utf8');
-  const wanted = ['itemBasePrice', 'workbookAmount', 'itemAddonTotal'];
+  const wanted = ['itemBasePrice', 'workbookAmount', 'itemAddonTotal', 'itemSubtotal'];
   const absent = wanted.filter((n) => !new RegExp(`export function ${n}\\b`).test(src));
   if (absent.length) {
     console.error(`[check-one-cart-price] ${PRICER} no longer exports ${absent.join(', ')}.`
@@ -104,6 +104,25 @@ function bodies(src) {
 const lineOf = (src, i) => src.slice(0, i).split('\n').length;
 let scanned = 0;
 
+/**
+ * What a file calls the pricer's exports.
+ *
+ * `import { itemBasePrice as b }` is the same call under another name, and the
+ * second person to re-add a subtotal will not keep the names. Returns a map
+ * from the pricer's export to whatever this file calls it, so the scan below
+ * matches on what the code does rather than on a spelling.
+ */
+function aliases(src) {
+  const m = src.match(/import\s*\{([^}]*)\}\s*from\s*['"][^'"]*cart-pricing\.js['"]/);
+  const out = {};
+  if (!m) return out;
+  for (const part of m[1].split(',')) {
+    const [orig, local] = part.trim().split(/\s+as\s+/).map((x) => x && x.trim());
+    if (orig) out[orig] = local || orig;
+  }
+  return out;
+}
+
 for (const rel of files('api')) {
   if (rel === PRICER) continue;
   scanned += 1;
@@ -111,7 +130,40 @@ for (const rel of files('api')) {
   const stripped = src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
     .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + ' '.repeat(m.length - p.length));
 
+  const alias = aliases(stripped);
   for (const { name, at, body } of bodies(stripped)) {
+    /**
+     * A subtotal assembled out of the pricer's own parts.
+     *
+     * `base + add-ons` is one line, which is how this one outlived the move
+     * that took the other three out of create-payment-intent.js: nobody counts
+     * a line as a copy. It agreed with the library's, so nothing could see it,
+     * and a term added to the library's subtotal would simply not have reached
+     * the endpoint that takes the money.
+     *
+     * Matched on the two calls rather than on the shape of the sum, so
+     * hoisting either half into a variable first does not get past it, and
+     * under whatever names this file imported them as.
+     */
+    {
+      const base = alias.itemBasePrice;
+      const add = alias.itemAddonTotal;
+      /**
+       * Without the header. The first version tested the whole slice, which
+       * starts at `function itemSubtotal(`, so a function that rebuilt the
+       * subtotal excused itself by being called itemSubtotal and all three
+       * plants walked past. Matching a name rather than what follows it, in
+       * the gate written to stop exactly that.
+       */
+      const inner = body.slice(body.indexOf('{'));
+      const calls = (n) => n && new RegExp(`\\b${n}\\s*\\(`).test(inner);
+      if (calls(base) && calls(add) && !/\bitemSubtotal\s*\(/.test(inner)) {
+        fails.push(`${rel}:${lineOf(stripped, at)} \`${name}\` adds a base price to an add-on`
+          + ` total, which is itemSubtotal in ${PRICER}.`
+          + '\n      Call it rather than rebuilding it: a term added there would never have'
+          + '\n      reached this file, and this file is the one that charges the card.');
+      }
+    }
     /* A base price: either price table indexed by a package key. */
     if (/(DIGITAL_PRICES|PHYSICAL_PRICES)\s*\[/.test(body)) {
       fails.push(`${rel}:${lineOf(stripped, at)} \`${name}\` prices a package itself.`
@@ -170,4 +222,5 @@ if (fails.length) {
 }
 
 console.log(`[check-one-cart-price] ${scanned} files under api/; one cart pricer, and both the`
-  + ' payment and the tax endpoint price a cart through it, workbook rule included.');
+  + ' payment and the tax endpoint price a cart through it, workbook rule included, with nothing'
+  + ' rebuilding a subtotal out of its parts.');

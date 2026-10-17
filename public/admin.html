@@ -4047,8 +4047,14 @@ async function loadRealDemographics() {
     };
 
     const age = dist('age_range', [['18-24','18–24'],['25-34','25–34'],['35-44','35–44'],['45-54','45–54'],['55+','55+']]);
-    /* Gender words, from the pronoun that was actually chosen. */
-    const gender = dist('pronouns', [['she/her','Woman'],['he/him','Man'],['they/them','Non-binary']]);
+    /* Gender words, from the pronoun that was actually chosen, through the one
+       table that makes that conversion. This line used to carry its own copy
+       of it, three pairs typed out, under a comment three thousand lines below
+       saying the table was "the only place it happens". They agreed, so
+       nothing could see it; what the copy did not have was the fourth row, so
+       anybody whose pronoun is not one of the three was counted in the total
+       and drawn in no bar. */
+    const gender = dist('pronouns', SLICE_ORDER.pronouns.map((k) => [k, qxPretty('pronouns', k)]));
     const relStatus = dist('relationship_status', [['dating','Dating'],['engaged','Engaged'],['married','Married'],['remarried','Remarried'],['partnership','Partnership']]);
     const relLen = dist('relationship_length', [['<1','Less than 1 year'],['1-2','1–2 years'],['3-5','3–5 years'],['6-10','6–10 years'],['11-20','11–20 years'],['20+','20+ years']]);
     const childrenDist = dist('children', [['none','None'],['1','1'],['2','2'],['3+','3+'],['expecting','Expecting']]);

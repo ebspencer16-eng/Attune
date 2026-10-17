@@ -31,7 +31,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S31 | **Sweeps, while you are away.** Five properties so far, each measured over every instance rather than spot-checked. Two found something real and both are fixed. Details under the table. |
+| S31 | **Sweeps, while you are away.** Six properties so far, each measured over every instance rather than spot-checked. Two found something real and both are fixed. Details under the table. |
 
 ### S31, what the sweeps found
 
@@ -55,6 +55,13 @@ rather than a fault: the product pins each couple's results to the version of
 the copy they were written under, and nothing anywhere tells them so. Say the
 word if you want a sentence for it.
 
+**One rule in two places.** Every function defined twice across the website,
+the app and the server. Most are already held together by a check. Two were
+not: the cart's subtotal, rebuilt out of its own parts inside the endpoint that
+charges the card, and the rule that turns a stored pronoun into a label, which
+two admin endpoints each carried a copy of. Both now have one home and a check
+behind them. The pronoun one turned up the Gender tile bug, B132.
+
 **The survey's answer.** Added after the fourth: the button cannot be drawn
 until the server says whether you have answered, so the app now asks on the
 first screen of every launch and keeps the reply. check-survey proves it by
@@ -67,6 +74,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B132 | **Your Gender tile was undercounting, and it is fixed.** Anyone whose pronoun is not one of the three was in the total and in no bar, so the percentages could add up to less than 100 with nothing saying why. Driven in a browser: four people, three bars, 75 per cent. Now four bars and 100. |
 | B128 | **Fixed and seen on your simulator.** The icon is in the card's margin, outside the tile. It also had a loop in it that said "Maximum update depth exceeded"; that is gone. |
 | B129 | **Fixed and timed on your simulator.** Insights draws in about half a second from what is kept on the phone, with no spinner. |
 | B123 | **Seen working.** Your tag on the communication overview has its icon, in the margin. |

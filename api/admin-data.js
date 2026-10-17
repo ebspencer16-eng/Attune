@@ -33,6 +33,7 @@ import { demoOwners, ownedBy, selectProfiles, withoutDemoOrders } from './_lib/d
 
 import { createClient } from '@supabase/supabase-js';
 import { checkAdminAuth } from './_lib/admin-auth.js';
+import { pronounLabel } from './_lib/pronouns.js';
 import { RESPONSIBILITY_CATEGORIES, LIFE_QUESTIONS } from './_questions.js';
 import { axisScores, typeCodeFromAxes, blendedDimScores, calcDimScores as engineDimScores, DIM_KEYS } from './_type-engine.js';
 import { personResults, readAccuracy, ALIGNMENT_THRESHOLD, readBandFor, understandingBandFor } from './_lib/results.js';
@@ -509,7 +510,12 @@ export default async function handler(req) {
       beta_codes: codesQ.data || [],
       profiles: {
         demographics: profiles.map(p => ({
-          age_range: p.age_range, pronouns: p.pronouns,
+          /* Normalised the way the other two admin endpoints normalise it, so
+             the page's buckets are the values it is sent. Raw, a pronoun
+             nobody is offered any more sat in the total and in no bar: four
+             people, three bars, and the percentages summed to 75 with nothing
+             saying why. */
+          age_range: p.age_range, pronouns: pronounLabel(p.pronouns),
           relationship_status: p.relationship_status,
           relationship_length: p.relationship_length,
           children: p.children, signup_source: p.signup_source,

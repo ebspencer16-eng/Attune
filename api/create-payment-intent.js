@@ -18,7 +18,7 @@ import { reportToSentry } from './_lib/sentry-edge.js';
 import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
-import { itemBasePrice, itemAddonTotal, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
+import { itemBasePrice, itemAddonTotal, itemSubtotal, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
 
 export const config = { runtime: 'edge' };
 
@@ -276,14 +276,16 @@ function itemsTotalCents(items, promoCovered) {
 }
 
 
-/* itemBasePrice, wbAmount and itemAddonTotal were here. They are in
-   _lib/cart-pricing.js now, because calculate-tax.js had its own copy of all
-   three and the workbook rule was only in this one: premium includes the
-   workbook, so a premium cart was taxed on 19 to 39 dollars more than it was
-   charged. check-one-cart-price forbids a second copy. */
-function itemSubtotal(item) {
-  return itemBasePrice(item) + itemAddonTotal(item);
-}
+/* itemBasePrice, wbAmount, itemAddonTotal and itemSubtotal were here. They
+   are in _lib/cart-pricing.js now, because calculate-tax.js had its own copy
+   of all three and the workbook rule was only in this one: premium includes
+   the workbook, so a premium cart was taxed on 19 to 39 dollars more than it
+   was charged. check-one-cart-price forbids a second copy.
+
+   itemSubtotal outlived that move by being one line, `base + add-ons`, which
+   is the kind of copy nobody counts as a copy. It agreed with the library's,
+   which is why nothing noticed: a term added to the library's version would
+   have been missing from the one this file actually charged. */
 
 function normalizeItem(item) {
   return {
