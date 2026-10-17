@@ -104,6 +104,7 @@ Existing single sources of truth:
 | Where the site lives | `SITE_URL` in `api/_lib/site.js`; the app's own copy is `SITE_URL` in `attune-app/src/api/client.ts` |
 | Which views the website can draw | `RENDERABLE_VIEWS` in `src/App.jsx` |
 | The unsubscribe link | `api/_lib/email-footer.js` |
+| What a stored pronoun is called | `pronounLabel` in `api/_lib/pronouns.js`; the one conversion to a gender word is `QX_VAL_LABELS` in `public/admin.html` |
 | Package prices, digital and physical | `DIGITAL_PRICES` and `PHYSICAL_PRICES` in `api/_catalogue.js` |
 | Add-on prices | `ADDON_PRICES` in `api/_catalogue.js` |
 | What each email says | the `*_EMAILS` map in the module that sends it, joined by `api/_lib/email-catalogue.js` |
@@ -177,11 +178,16 @@ read that went around the filter.
 harness is usually what is broken.** Ellie, after the round-trip sweep: "can we
 run more sweeps like this throughout our products? As many as you can please."
 
-Eight so far: payload size per endpoint, unbounded queries, page weight, fonts,
-every dollar amount, every link followed, every endpoint's error path, every
-tap target, every piece of text's contrast. Six found something real. What is
-worth writing down is that five of the eight were WRONG before they were right,
-and every one of those was the measurement rather than the product:
+Sixteen so far: payload size per endpoint, unbounded queries, page weight,
+fonts, every dollar amount, every link followed, every endpoint's error path,
+every tap target, every piece of text's contrast, components declared inside
+components, effects with no dependency list, every results page driven on a
+signed-in simulator, exported code nothing calls, every function defined twice,
+every column a query asks for, and every endpoint answered from outside.
+
+Nine found something real. What is worth writing down is that seven were WRONG
+before they were right, and every one of those was the measurement rather than
+the product:
 
 | What it said | What was actually true |
 |---|---|
@@ -190,11 +196,23 @@ and every one of those was the measurement rather than the product:
 | Two endpoints throw on every input | They take `(req, res)`: the harness gave one argument |
 | Every button at contrast 1.0 | The background walk started at the parent, and a button paints its own |
 | 404 loads no fonts | The wait was racing Google's stylesheet |
+| 78 queries ask for a column that is not there | 72 of them were one add-column clause read per ALTER, where a migration adds three, and a `.from()` paired with the next query's `.select()` |
+| 21 exported names nothing calls | True, and all but one an alias or a spare helper. Dead exports are clutter; the bug-shaped version is a definition that READS like a feature |
 
 So: when a sweep reports something surprising, the first hypothesis is the
 harness. Print one case end to end before believing the column. The ratio here
-was five harness bugs to six real findings, and the real findings were worth
+was seven harness bugs to nine real findings, and the real findings were worth
 the whole exercise.
+
+The three from the latest round, for the shape rather than the detail. The
+results shell was a component declared inside another, so every page change
+replaced the page rather than its contents; a MutationObserver over one page
+change is what showed it, before and after. The Gender tile converted pronouns
+to gender words in two places that agreed, and the second had no fourth row, so
+four people made three bars adding up to 75 per cent with nothing saying why.
+And both admin CSV exports asked a `workbooks` table whether a couple's
+workbook had been made: there is no such table, api/delete-account.js says so
+in a comment, and the column read N for everybody since the day it shipped.
 
 **And what a sweep cannot see, it has to say it cannot see.** The contrast
 sweep walks up the tree for a background colour, and a gradient has none, so it
@@ -1240,6 +1258,25 @@ set. A rule with two implementations is this codebase's whole failure mode, and
 the cheapest version of looking for it is:
 
     grep -rn "^\(export \)\?function " api/ | awk ... | sort | uniq -d
+
+Run over the website, the app and the server at once, that found 28 names
+defined more than once. Most already had a gate holding the copies together.
+The two that did not are the two shapes worth knowing. One was six identical
+lines in two sibling endpoints, each under its own copy of the same comment,
+which is the obvious kind. The other was ONE LINE: `base + add-ons`, in the
+endpoint that charges the card, beside the library's identical version. It
+survived a refactor that moved the other three functions out of that file,
+because nobody counts a line as a copy, and it agreed, so nothing could see
+it. A term added to the library's subtotal would simply never have reached the
+money.
+
+**A broken query answers like an empty one.** `const { data: rows = [] } =
+await admin.from('workbooks').select(...)` against a table that does not exist
+returns an error in a field nobody reads and a `data` of null, so the default
+fires and every downstream answer is "none". Both admin CSV exports reported
+that no couple had ever had a workbook made, for every couple, and the shape of
+that output is indistinguishable from the truth. When a figure is uniformly
+negative, check that its source exists before checking the logic.
 
 **A gate's own baseline can swallow the thing it measures.** Teaching
 check-render to notice a view that renders nothing took three attempts. Counting

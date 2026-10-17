@@ -3391,3 +3391,46 @@ simulator with scripts/sim.mjs.
 **What is left for her**, all in section 3: the sixteen to look at, C11's 150
 insights, C12's sixty paragraphs, S30's checkout-price refactor, and S27's
 three measured non-fixes.
+
+---
+
+## 2026-10-17, the sweep round
+
+She could not engage and asked for sweeps. Eight properties, each measured over
+every instance of its thing. The tree is clean, everything is pushed, and the
+EAS update went out on the production channel.
+
+**Three real findings, all fixed and all verified.**
+
+- The results shell was a component declared inside `UnifiedResults`, so a page
+  change replaced the page rather than its contents. Hoisted to `ResultsLayout`
+  at module scope. Measured with a MutationObserver before and after:
+  `pageReplaced: true` to `pageReplaced: false, topLevelAdds: 0`. Two gates
+  caught regressions from the hoist in the same minute, which is the argument
+  for them.
+- The admin's Gender tile converted pronouns to gender words in two places. The
+  second had no fourth row, so anybody off the list was in the total and in no
+  bar: four people, three bars, 75 per cent. Driven in a browser both ways.
+  `api/_lib/pronouns.js` is the rule now and `check-pronoun-conversion.mjs`
+  holds it.
+- Both admin CSV exports asked a `workbooks` table whether a couple's workbook
+  had been made. There is no such table; it is a storage bucket, and
+  api/delete-account.js says so in a comment. The column read N for everybody
+  since it shipped. It reads the order now, and
+  `check-selected-columns.mjs` is the sweep that found it, kept as a gate.
+
+**And B131, the survey button.** It draws only for somebody who has not
+answered, which is her rule, so it cannot be drawn until /api/survey answers.
+The memo for that answer lived in the page that reads it, so the first visit of
+an app's life had no button: "Still nothing". It lives in `client.ts` now, home
+and Insights both warm it, and a cold start of her simulator shows the button.
+
+**Three new gates, all planted against:** check-pronoun-conversion (7),
+check-selected-columns (6), and a seventh section in check-survey (7).
+check-one-cart-price gained a rule about a subtotal rebuilt out of its parts
+(4 plants, and its first version excused a function for being named
+itemSubtotal, because the body it tested began at the declaration).
+
+**Where it stopped.** Nothing half-done. The open sweeps worth running next,
+if nobody has a better idea: fields the payload carries that no surface draws,
+and the app's error paths driven rather than read.

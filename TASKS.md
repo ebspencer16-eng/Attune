@@ -31,7 +31,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S31 | **Sweeps, while you are away.** Seven properties so far, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
+| S31 | **Sweeps, while you are away.** Eight properties, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
 
 ### S31, what the sweeps found
 
@@ -70,6 +70,11 @@ for everybody, always. That is B133. The check that found it is now a gate,
 including the three column lists that are passed around as constants rather
 than typed into the query, and it says out loud how many selects are built at
 run time and cannot be read.
+
+**Every endpoint, answered from outside.** All 60, signed out, with a browser
+pretending to be a person. No 500s: every one gives a proper 401, 405 or 400,
+and the eight that answer 200 carry only what is meant to be public. Nothing
+to do, and it is now a figure rather than an assumption.
 
 **The survey's answer.** Added after the fourth: the button cannot be drawn
 until the server says whether you have answered, so the app now asks on the
