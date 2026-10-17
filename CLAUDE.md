@@ -1270,6 +1270,21 @@ the quotation's budget was more space for that rule to spread. A gap that has to
 survive a layout belongs in padding on the container, which spreading cannot
 reach. Three reports is the signal that the number was never the subject.
 
+**An effect that depends on an array rebuilt every render runs every render,
+and its cleanup undoes its own work.** The margin rail reported each mark's
+line to the provider and removed it again on cleanup, with the paragraph's
+list of marks in the dependencies. That list is `filter()`'s output, a new
+array each time, so the effect re-ran after every render: add, remove, add,
+remove, each one a state change and each state change another render. The app
+said "Maximum update depth exceeded" the first time it drew a page with a mark
+on it.
+
+The deps are the id, the line, the colour and the kind now, all primitives.
+check-effect-deps did not catch it because nothing here depends on state it
+sets; the loop is through the cleanup. It showed up in one second on a
+simulator, which is the argument for driving the app rather than typechecking
+it: this shipped twice without being seen.
+
 **A ref is null during the render that fills it.** The margin rail shipped not
 working and Ellie said so in four words: "Still seeing it by the paragraph."
 Each paragraph decided whether to draw its own icon by reading

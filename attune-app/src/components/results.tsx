@@ -4004,7 +4004,11 @@ function CoupleType({ results, you, them, title }: {
             `rows` is still on the payload and still drawn by the workbook, so
             nothing was removed from the server. */}
 
-        <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.xxl }}>Your couple type</Text>
+        {/* The gap before the reveal is the one piece of space on this page
+            that can go: she asked for the whole tile to be on screen when the
+            page opens, and with a two-line heading it was 27 points short.
+            Measured on an iPhone 17. */}
+        <Text style={{ ...Type.eyebrow, color: accent, marginTop: Spacing.lg }}>Your couple type</Text>
 
         {/* block: couple-type/name */}
         {/* The website's type reveal: the name set large in white on a tile

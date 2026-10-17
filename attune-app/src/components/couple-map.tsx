@@ -115,7 +115,12 @@ export default function CoupleMap({
   const size = fixedSize ?? Math.min(
     320,
     width - Spacing.xl * 2 - SIDE * 2,
-    Math.round(height * 0.32),
+    /* A quarter of the window, not a third. "Your relationship dynamic" is
+       two lines on a phone where "Your unique dynamic" was one, and the type
+       reveal went back under the fold; the map is where the room is. Measured
+       on an iPhone 17 rather than guessed: at 0.32 the tile's tagline sat
+       behind the tab bar, at 0.26 the whole tile is on screen. */
+    Math.round(height * 0.26),
   );
   const qs = quadrants?.length === 4 ? quadrants : null;
   const pa = a?.coords;

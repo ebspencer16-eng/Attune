@@ -379,13 +379,15 @@ export function Prose({
    * fallback honest rather than theoretical: a paragraph whose measurement
    * never lands keeps its marker, because the rail never reports having it.
    */
-  const railed = (markers || []).some((m) => m.id === silent[0]?.id);
+  /** The mark this paragraph announces, if any. One id, not the array. */
+  const markId = silent[0]?.id ?? null;
+  const railed = (markers || []).some((m) => m.id === markId);
   const markerY = Number.isFinite(markerTop) ? markerTop : 2;
   useEffect(() => {
     const host = railHost?.current;
     const node = block.current;
-    const id = silent[0]?.id;
-    if (!host || !node || !id) return undefined;
+    if (!host || !node || !markId) return undefined;
+    const id = markId;
     try {
       (node as unknown as {
         measureLayout: (h: unknown, ok: (x: number, y: number) => void, fail: () => void) => void;
@@ -394,7 +396,18 @@ export function Prose({
       }, () => {});
     } catch { /* a view that has gone before the measurement lands */ }
     return () => reportMarker(id, null);
-  }, [railHost, silent, markerY, markerColor, tagged, reportMarker]);
+    /**
+     * ── PRIMITIVES, NOT THE ARRAY ──────────────────────────────────────
+     * `silent` is rebuilt on every render, so an effect depending on it ran
+     * on every render, and its cleanup takes the icon off the rail. Add,
+     * remove, add, remove: each one a state change, each state change
+     * another render. The app said "Maximum update depth exceeded" the first
+     * time this ran on a page with a mark on it.
+     *
+     * The id, the line, the colour and the kind are what this effect is
+     * actually about, and all four are primitives.
+     */
+  }, [railHost, markId, markerY, markerColor, tagged, reportMarker]);
 
 
   /* Every hook above has run. Now the plain case, which is a Prose with no

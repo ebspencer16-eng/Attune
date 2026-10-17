@@ -38,10 +38,10 @@ because I cannot sign into one.
 
 | # | Built, needs your eye |
 |--|--|
-| B128 | **The rail was never used.** Each paragraph asked a ref whether the card had registered, during the render that fills that ref, so the answer was always no. It asks the rail itself now, and the icons sit in the card's padding. **Still by the paragraph, or in the margin?** |
-| B129 | **The cache was being covered up.** The page was seeded from the phone and then the first line of the screen returned a spinner until the request landed. The spinner is for having nothing now. **Is Insights quick on the second open?** |
-| B123 | Should follow B128: the icon had nowhere to be drawn inside a tile that clips. **Does that tag have an icon now?** |
-| B130 | "Your relationship dynamic", your heading. |
+| B128 | **Fixed and seen on your simulator.** The icon is in the card's margin, outside the tile. It also had a loop in it that said "Maximum update depth exceeded"; that is gone. |
+| B129 | **Fixed and timed on your simulator.** Insights draws in about half a second from what is kept on the phone, with no spinner. |
+| B123 | **Seen working.** Your tag on the communication overview has its icon, in the margin. |
+| B130 | **"Your relationship dynamic", and it still fits.** The longer heading is two lines, which pushed the couple type tile back under the fold, so the map takes a quarter of the window rather than a third and one gap is tighter. The whole tile is on screen. |
 | B131 | The survey button is back to being drawn only when you have not answered, and it no longer goes missing while the app asks. |
 | C15 | "Land", and the straight apostrophe. Both of your corrections are in. |
 | C11 | **Yes, I got it, and it is live.** Your 119-row table was applied the day you sent it: the 31 you left out are gone from the module the product reads. That is C13, which you have approved. Nothing of yours is waiting here. |
