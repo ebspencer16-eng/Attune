@@ -3476,3 +3476,33 @@ not, and the code now agrees with them.
 check-web-fonts with the machine at load 10 and 7GB of swap in use. Killing it,
 reaping Chrome and running that one gate alone took three minutes and passed.
 That is the swap paragraph in CLAUDE.md, met again.
+
+---
+
+## 2026-10-17, evening: is anything in the design tester's way
+
+No, once Ellie runs the migration in TASKS.md T1. `probe-tester-journey.mjs`
+drives the whole path against the real handlers with only the network stubbed:
+a full-bundle code redeems and writes a free order, the account lands on
+Premium, all five exercises open, an answer stores in the right column, and
+the results open with every chapter once both partners have finished.
+
+Two things wait on her, both in section 1: run T1 for a fresh tester code
+(every existing code is single-use), and check T2, whether anyone bought
+Conflict Patterns before today's fix.
+
+**More money found on the way in.** Widening check-entitlement-flow from
+src/App.jsx to api/ found three more hand-written add-on lists with a member
+missing. The one that mattered: api/calculate-tax.js kept its own cart-item
+mapping without intimacy or conflict, so its own tax lines for those two could
+never fire and Stripe was asked to tax a base up to $40 short. normalizeItem
+now lives in api/_lib/cart-pricing.js and both endpoints import it.
+
+**Two sweeps came back clean and are now figures.** Every image on every page:
+there are none, so nothing can arrive broken. And the editorial sweep, 3,632
+sentences, which left exactly one word for Ellie (C16).
+
+**Four of the journey probe's findings were the probe**, which is the usual
+ratio: a missing STRIPE_SECRET_KEY in the test environment, the Relationship
+Reflection capability being called hasAnniversary, /api/home answering with
+`primary` rather than `cards`, and `exercises` being keyed rather than a list.
