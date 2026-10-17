@@ -31,8 +31,10 @@
  *    sweep of answers either side of every threshold.
  */
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 
+import { parse } from '@babel/parser';
+import traverse from '@babel/traverse';
 import { transform } from 'esbuild';
 
 import { EXERCISES } from '../api/_exercises.js';
@@ -44,6 +46,28 @@ import {
 const ROOT = new URL('..', import.meta.url).pathname;
 const read = (f) => readFileSync(`${ROOT}${f}`, 'utf8');
 const problems = [];
+/** The tab screens that ask /api/survey before anybody can reach the button. */
+let warmers = [];
+
+/**
+ * A named declaration and everything inside its braces, by depth.
+ *
+ * Shared by sections 6 and 7, both of which run code the app ships because
+ * neither surface can import the module the rule lives in. It throws rather
+ * than returning nothing when the subject is missing: a gate that has lost
+ * what it was checking must never report success.
+ */
+const lift = (src, needle, where) => {
+  const at = src.indexOf(needle);
+  if (at < 0) throw new Error(`check-survey: cannot find \`${needle}\` in ${where}`);
+  let depth = 0, end = -1, seen = false;
+  for (let i = at; i < src.length; i++) {
+    if (src[i] === '{') { depth++; seen = true; }
+    else if (src[i] === '}') { depth--; if (seen && depth === 0) { end = i + 1; break; } }
+  }
+  if (end < 0) throw new Error(`check-survey: cannot find the end of \`${needle}\` in ${where}`);
+  return src.slice(at, end);
+};
 
 // ── 1. The question set ───────────────────────────────────────────────────
 {
@@ -560,18 +584,6 @@ const problems = [];
    * brace depth and throw rather than pass if the function cannot be found,
    * because a gate that has lost its subject must never report success.
    */
-  const lift = (src, needle, where) => {
-    const at = src.indexOf(needle);
-    if (at < 0) throw new Error(`check-survey: cannot find \`${needle}\` in ${where}`);
-    let depth = 0, end = -1, seen = false;
-    for (let i = at; i < src.length; i++) {
-      if (src[i] === '{') { depth++; seen = true; }
-      else if (src[i] === '}') { depth--; if (seen && depth === 0) { end = i + 1; break; } }
-    }
-    if (end < 0) throw new Error(`check-survey: cannot find the end of \`${needle}\` in ${where}`);
-    return src.slice(at, end);
-  };
-
   const pageSrc = lift(read('public/feedback.html'), 'function shouldShow(q, answers)', 'public/feedback.html');
   const pageShow = new Function(`${pageSrc}; return shouldShow;`)();
 
@@ -622,6 +634,137 @@ const problems = [];
   }
 }
 
+// ── 7. The button is there when the page is ───────────────────────────────
+/**
+ * Ellie, three times, of one control: "The tell us about your experience
+ * Button is now missing from my what comes next page", "I clicked to a
+ * different insights page then back to what's next and the leave feedback
+ * button went away", and then "Still nothing".
+ *
+ * Her rule for it is the reason it is hard: "Should only draw if it hasn't
+ * been answered." So the button cannot be drawn until /api/survey has said
+ * which, every results page is keyed on its section and therefore remounts,
+ * and a remount with nothing kept is a page with a missing control on it.
+ *
+ * What holds it: client.ts keeps the server's last reply for the life of the
+ * app, the page seeds its state from that rather than from null, and a screen
+ * EARLIER than this page asks, so the first visit of an app's life has an
+ * answer too. That last one is what "Still nothing" was: the memo was kept in
+ * the page that reads it, so nothing had ever warmed it.
+ *
+ * Run, not read. The memo is lifted out of client.ts with a stubbed request
+ * in front of it, because "a reply is kept" is a behaviour and three lines
+ * that look right are how this got shipped twice.
+ */
+{
+  const client = read('attune-app/src/api/client.ts');
+  const results = read('attune-app/src/components/results.tsx');
+
+  /* The memo, lifted from its declaration through the end of fetchSurvey and
+     run over a stub. Everything between them comes with it, which is the
+     reader. */
+  const from = client.indexOf('let surveyReply');
+  const fnAt = client.indexOf('export function fetchSurvey(', from);
+  if (from < 0 || fnAt < 0) {
+    throw new Error('check-survey: client.ts no longer declares a survey memo in front of'
+      + ' fetchSurvey. If the memo moved, this section has lost its subject.');
+  }
+  const region = client.slice(from, fnAt) + lift(client, 'export function fetchSurvey(', 'client.ts');
+  const { code: memoJs } = await transform(region.replace(/^export /gm, ''), { loader: 'ts' });
+  const build = (reply) => new Function('request', `${memoJs}; return { fetchSurvey, recallSurvey };`)(
+    () => Promise.resolve(reply),
+  );
+
+  const COPY = { title: 'Tell us about your Attune experience', body: 'x' };
+  {
+    const m = build({ ok: true, data: { finished: false, copy: COPY } });
+    if (m.recallSurvey() !== null) problems.push('the survey memo starts out holding something.');
+    await m.fetchSurvey();
+    const held = m.recallSurvey();
+    if (!held || held.done !== false || held.copy !== COPY) {
+      problems.push('a reply from /api/survey is not kept, so every remount of What Comes Next'
+        + ` draws no button until its own request comes back. Held: ${JSON.stringify(held)}`);
+    }
+  }
+  {
+    const m = build({ ok: true, data: { finished: true, copy: COPY } });
+    await m.fetchSurvey();
+    if (m.recallSurvey()?.done !== true) {
+      problems.push('a finished survey is not kept as finished, so the button comes back for'
+        + ' somebody who has already answered.');
+    }
+  }
+  {
+    /* A dropped request must not throw away a known answer. That was the
+       first version of this page: `done` went false with no copy, which is
+       the one outcome that draws nothing. */
+    const m = new Function('request', `${memoJs}; return { fetchSurvey, recallSurvey };`)(
+      (() => { let n = 0; return () => Promise.resolve(++n === 1
+        ? { ok: true, data: { finished: false, copy: COPY } }
+        : { ok: false, error: { message: 'offline' } }); })(),
+    );
+    await m.fetchSurvey();
+    await m.fetchSurvey();
+    if (m.recallSurvey()?.copy !== COPY) {
+      problems.push('a failed request wipes the kept reply, so one dropped request removes the'
+        + ' button until the next one comes back.');
+    }
+  }
+
+  /* The page seeds from it. `useState(null)` is the shape that shipped. */
+  for (const name of ['surveyDone', 'surveyCopy']) {
+    const line = results.split('\n').find((l) => new RegExp(`\\[${name},`).test(l)) || '';
+    if (!line) { problems.push(`results.tsx no longer holds ${name}.`); continue; }
+    if (!/recallSurvey\(\)/.test(line)) {
+      problems.push(`results.tsx opens with no idea what the server last said about the survey:`
+        + `\n      ${line.trim()}\n    It has to seed ${name} from recallSurvey(), or the button is`
+        + ' missing on every remount of the page.');
+    }
+    if (/\b(false|true)\s*[?&]/.test(line)) {
+      problems.push(`${name} is seeded behind a constant:\n      ${line.trim()}`);
+    }
+  }
+
+  /* And somebody earlier asks. Without this the memo is empty on the first
+     launch of the app, which is exactly what she saw. */
+  /**
+   * Parsed rather than grepped, because `if (false) fetchSurvey()` leaves the
+   * call exactly where a scan would find it. check-ab-scale met that shape
+   * first and it has recurred five times since: a guard is checked by what it
+   * compares, so a call under a constant test does not count as a call.
+   */
+  const callers = [];
+  for (const f of readdirSync(`${ROOT}attune-app/src/app`).filter((n) => /\.tsx$/.test(n))) {
+    const ast = parse(read(`attune-app/src/app/${f}`), {
+      sourceType: 'module', plugins: ['typescript', 'jsx'],
+    });
+    const isDead = (test) => test
+      && ((test.type === 'BooleanLiteral' && test.value === false)
+        || (test.type === 'UnaryExpression' && test.operator === '!' && test.argument.type === 'BooleanLiteral' && test.argument.value === true));
+    traverse.default(ast, {
+      CallExpression(path) {
+        if (path.node.callee.type !== 'Identifier' || path.node.callee.name !== 'fetchSurvey') return;
+        const dead = path.findParent((p) => (p.isIfStatement() && isDead(p.node.test))
+          || (p.isConditionalExpression() && isDead(p.node.test))
+          || (p.isLogicalExpression() && p.node.operator === '&&' && isDead(p.node.left)));
+        if (!dead) callers.push(f);
+      },
+    });
+  }
+  warmers = callers;
+  if (!callers.length) {
+    problems.push('nothing outside What Comes Next asks /api/survey, so on the first launch of'
+      + ' the app the page is the first to ask and has no button while it waits. A tab the reader'
+      + ' passes through has to warm it.');
+  }
+
+  /* Her rule, still in force: only for somebody who has not answered. */
+  if (!/surveyDone === false && surveyCopy/.test(results)) {
+    problems.push('the survey card is no longer gated on an unanswered survey. Ellie: "Should'
+      + ' only draw if it hasn\'t been answered."');
+  }
+}
+
 if (problems.length) {
   console.error('[check-survey] the survey is not one survey:');
   for (const p of problems) console.error(`  ${p}`);
@@ -634,4 +777,6 @@ console.log(`[check-survey] ${SURVEY_QUESTIONS.length} questions in one module a
   + ` question of its own. ${conditionals} conditionals, and both surfaces that cannot import the rule`
   + ' agree with it on every question across 20 sets of answers either side of each line. A ranking'
   + ' built from what the couple actually did, a partial answer stored as partial, and nothing'
-  + ' identifying in the row or on the page.');
+  + ' identifying in the row or on the page. The app keeps the server\'s last word on whether'
+  + ' this reader has answered, proved by running the memo over a stub, so the opener is drawn'
+  + ` the moment the page is, warmed by ${warmers.length} screen(s) ahead of it: ${warmers.join(', ')}.`);

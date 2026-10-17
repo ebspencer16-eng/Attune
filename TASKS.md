@@ -29,8 +29,37 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** All five are built; three of them need your eye on a phone,
-because I cannot sign into one.
+| # | What I am doing |
+|--|--|
+| S31 | **Sweeps, while you are away.** Five properties so far, each measured over every instance rather than spot-checked. Two found something real and both are fixed. Details under the table. |
+
+### S31, what the sweeps found
+
+**Components declared inside components.** Eighteen, and one of them mattered:
+the whole results shell was being rebuilt on every page change, so each page
+was a fresh mount rather than new content in the same frame. Measured before
+and after with a watcher on the page itself. Fixed.
+
+**Effects with no dependency list.** Two, both in the website's Learn
+measurements, both settle on their own. Left alone, written down.
+
+**Every results page, on your simulator.** Thirty pages opened one after
+another. No errors, and one thing visibly wrong: the survey button missing
+from What comes next. That is B131, fixed.
+
+**Exported code nothing calls.** 863 exported names across 555 files. 92 are
+imported by no other file; 21 of those are called nowhere at all. Opening them
+one by one, they are aliases and spare helpers rather than features nobody
+reached, so nothing here is a bug. One is worth your eye and is a decision
+rather than a fault: the product pins each couple's results to the version of
+the copy they were written under, and nothing anywhere tells them so. Say the
+word if you want a sentence for it.
+
+**The survey's answer.** Added after the fourth: the button cannot be drawn
+until the server says whether you have answered, so the app now asks on the
+first screen of every launch and keeps the reply. check-survey proves it by
+running that code rather than reading it, and seven planted bugs each failed
+it.
 
 ---
 
@@ -42,7 +71,7 @@ because I cannot sign into one.
 | B129 | **Fixed and timed on your simulator.** Insights draws in about half a second from what is kept on the phone, with no spinner. |
 | B123 | **Seen working.** Your tag on the communication overview has its icon, in the margin. |
 | B130 | **"Your relationship dynamic", and it still fits.** The longer heading is two lines, which pushed the couple type tile back under the fold, so the map takes a quarter of the window rather than a third and one gap is tighter. The whole tile is on screen. |
-| B131 | The survey button is back to being drawn only when you have not answered, and it no longer goes missing while the app asks. |
+| B131 | **Fixed and seen on a cold start of your simulator.** The survey button is drawn only when you have not answered, your rule, and it is there the moment the page opens. Killing the app and going straight to Action plans now shows it. |
 | C15 | "Land", and the straight apostrophe. Both of your corrections are in. |
 | C11 | **Yes, I got it, and it is live.** Your 119-row table was applied the day you sent it: the 31 you left out are gone from the module the product reads. That is C13, which you have approved. Nothing of yours is waiting here. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |

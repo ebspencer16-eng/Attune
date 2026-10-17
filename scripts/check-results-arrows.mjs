@@ -44,35 +44,49 @@ const SRC = 'src/App.jsx';
 const src = readFileSync(`${ROOT}${SRC}`, 'utf8');
 const fails = [];
 
-/** Lines that render it, with the line number. */
-const renders = src.split('\n')
+/**
+ * Where the pair comes from.
+ *
+ * ── IT IS CALLED, NOT RENDERED ──────────────────────────────────────────
+ * The shell used to be declared inside UnifiedResults, which made it a new
+ * component type on every render and rebuilt the whole page each time. It is
+ * `ResultsLayout` at module scope now, and the three pieces of chrome it
+ * draws arrive as elements built once per render: `prevNext: PrevNext()`.
+ *
+ * So the subject of this gate is that one call and the one place the shell
+ * puts it, rather than a `<PrevNext />` element. The rule is unchanged: one
+ * pair, drawn for every page, with no way for a page to opt out.
+ */
+/* Comments blanked first. The note above the shell's props explains why these
+   three are called rather than rendered, and names PrevNext() while doing it;
+   a scan that reads prose as code punishes a file for saying what it does. */
+const bareSrc = src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/^\s*\/\/.*$/gm, ' ');
+const renders = bareSrc.split('\n')
   .map((l, i) => ({ line: i + 1, text: l }))
-  .filter(({ text }) => /<PrevNext\b/.test(text));
+  .filter(({ text }) => /\bPrevNext\(\)/.test(text));
 
 if (!renders.length) {
-  console.error(`[check-results-arrows] nothing in ${SRC} renders <PrevNext />.`
+  console.error(`[check-results-arrows] nothing in ${SRC} draws the arrows: no PrevNext() call.`
     + ' Refusing to pass: a gate that has lost its subject must never report success.');
   process.exit(1);
 }
+if (!/\{prevNext\}/.test(src)) {
+  console.error(`[check-results-arrows] ${SRC} builds the arrows and the shell never draws them.`
+    + ' Refusing to pass.');
+  process.exit(1);
+}
 
-/** The Layout component, by brace depth from its arrow. */
+/** The shell, from its declaration to the next top-level one. */
 const layout = (() => {
-  const m = /const Layout = \(\{[^}]*\}\) => \(/.exec(src);
-  if (!m) return null;
-  let depth = 0;
-  for (let i = m.index + m[0].length - 1; i < src.length; i += 1) {
-    const ch = src[i];
-    if (ch === '(') depth += 1;
-    else if (ch === ')') {
-      depth -= 1;
-      if (depth === 0) return { from: m.index, to: i };
-    }
-  }
-  return null;
+  const at = src.indexOf('function ResultsLayout(');
+  if (at < 0) return null;
+  const next = src.indexOf('\nfunction ', at + 10);
+  return { from: at, to: next < 0 ? src.length : next };
 })();
 
 if (!layout) {
-  console.error(`[check-results-arrows] the Layout component is not where this expects it in ${SRC}.`
+  console.error(`[check-results-arrows] ResultsLayout is not where this expects it in ${SRC}.`
     + ' Refusing to pass: a gate that has lost its subject must never report success.');
   process.exit(1);
 }
@@ -86,9 +100,14 @@ if (!layout) {
  * the second half is one line away. A parameter nothing passes is either about
  * to be wired up or is dead; neither is worth leaving in the signature.
  */
-const params = /const Layout = \(\{([^}]*)\}\)/.exec(src)[1]
+const params = /function ResultsLayout\(\{([^}]*)\}\)/.exec(src)[1]
   .split(',').map((x) => x.trim().split(/[=:]/)[0].trim()).filter(Boolean);
-const EXPECTED = ['children', 'accent'];
+/* The shell's own parts, which every page gets identically through `shell`,
+   plus the one thing a page chooses: its accent. A new name here is either a
+   piece of chrome or a way for a page to opt out of one, and the second is
+   the bug this gate exists for. */
+const EXPECTED = ['children', 'accent', 'sidebar', 'tabs', 'prevNext', 'sidebarRef',
+  'onNavScroll', 'contentRef', 'onColumnClick', 'pageKey'];
 if (params.join() !== EXPECTED.join()) {
   fails.push(`Layout takes (${params.join(', ')}). It takes ${EXPECTED.join(' and ')}:\n`
     + '      anything else is a page telling it what to leave out, and what got left out was\n'
@@ -100,9 +119,11 @@ const layoutLines = [lineOf(layout.from), lineOf(layout.to)];
 
 // ── One renderer, and it is Layout's ────────────────────────────────────────
 for (const r of renders) {
-  const inside = r.line >= layoutLines[0] && r.line <= layoutLines[1];
+  /* Built once, in the shell's props. Anywhere else is a page making its own
+     pair, which is how twelve pages came to differ. */
+  const inside = /shell/.test(bareSrc.split('\n').slice(Math.max(0, r.line - 12), r.line).join('\n'));
   if (!inside) {
-    fails.push(`${SRC}:${r.line} renders the arrows outside Layout:\n`
+    fails.push(`${SRC}:${r.line} draws the arrows outside the shell's own props:\n`
       + `      ${r.text.trim()}\n`
       + '      A page with its own pair is a page that can lose them on its own. Layout draws\n'
       + '      them for everyone; delete this one.');
@@ -121,7 +142,7 @@ if (renders.length > 1) {
  * five recurrences of that shape. So the render has to be the whole line.
  */
 for (const r of renders) {
-  if (r.text.trim() !== '<PrevNext />') {
+  if (r.text.trim() !== 'prevNext: PrevNext(),') {
     fails.push(`${SRC}:${r.line} draws the arrows conditionally:\n`
       + `      ${r.text.trim()}\n`
       + '      Twelve of the eighteen pages used to opt out and that is what she reported.\n'
@@ -136,8 +157,8 @@ for (const r of renders) {
  * the arrows off. `hideNav`, `bare`, `noArrows` would all be this bug with a
  * different spelling.
  */
-const ALLOWED = new Set(['accent', 'children', 'key']);
-for (const m of src.matchAll(/<Layout\b([^>]*)>/g)) {
+const ALLOWED = new Set(['accent', 'children', 'key', 'shell']);
+for (const m of src.matchAll(/<ResultsLayout\b([^>]*)>/g)) {
   /* Values first, or the identifiers inside them read as props: the couple
      type page passes `accent={coupleType?.color || "..."}` and the first
      version of this reported `color`. Strings and braced expressions out,
@@ -146,9 +167,9 @@ for (const m of src.matchAll(/<Layout\b([^>]*)>/g)) {
   const props = [...bare.matchAll(/(?:^|\s)([A-Za-z_$][\w$]*)/g)].map((p) => p[1]);
   const extra = props.filter((p) => !ALLOWED.has(p));
   if (extra.length) {
-    fails.push(`${SRC}:${lineOf(m.index)} passes Layout ${extra.map((e) => `\`${e}\``).join(', ')}:\n`
+    fails.push(`${SRC}:${lineOf(m.index)} passes the shell ${extra.map((e) => `\`${e}\``).join(', ')}:\n`
       + `      ${m[0].trim().slice(0, 110)}\n`
-      + '      Layout takes an accent and its children. A page that can tell it what to leave\n'
+      + '      A page passes the shell and its accent. A page that can tell it what to leave\n'
       + '      out is a page that can leave the arrows out, which is the bug she reported.\n'
       + '      If this prop is something else, add it to ALLOWED here and say what it is for.');
   }
@@ -279,6 +300,10 @@ if (fails.length) {
   process.exit(1);
 }
 
-const layouts = [...src.matchAll(/<Layout\b/g)].length;
-console.log(`[check-results-arrows] ${layouts} results pages, one pair of arrows, drawn by Layout`
+const layouts = [...bareSrc.matchAll(/<ResultsLayout\b/g)].length;
+if (!layouts) {
+  console.error('[check-results-arrows] no page renders the shell at all. Refusing to pass.');
+  process.exit(1);
+}
+console.log(`[check-results-arrows] ${layouts} results pages, one pair of arrows, drawn by the shell`
   + ' for all of them and fixed to the viewport.');

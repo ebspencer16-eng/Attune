@@ -7720,6 +7720,102 @@ function UnifiedResultsRoot(props) {
  * 2026-10-13.
  */
 
+/**
+ * The results shell: the nav, the column, and the two arrows.
+ *
+ * ── WHY IT IS OUT HERE ────────────────────────────────────────────────────
+ * It was declared inside UnifiedResults, which makes it a NEW component type
+ * on every render, so React threw the whole page away and built it again
+ * every time anything changed. Opening a bucket on What Comes Next replaced
+ * the entire results page in the DOM; so did opening a popup on the couple
+ * map. Measured with a MutationObserver on the one div the page hangs from,
+ * which reports a remount as a remove and an add of the same node.
+ *
+ * That cost more than the work: a <details> opened anywhere else shuts, a
+ * text selection is lost, and the scroll position is at the mercy of the new
+ * tree. It is also what made the Communication pages, which were re-rendering
+ * about fifty times a second, impossible to open the Side by Side panel on.
+ *
+ * Everything it used to reach for is a prop now, and the three pieces of
+ * chrome arrive as elements rather than as components, because a component
+ * declared inside the caller has exactly the same problem one level down.
+ */
+function ResultsLayout({
+  children, accent, sidebar, tabs, prevNext, sidebarRef, onNavScroll, contentRef, onColumnClick,
+  pageKey,
+}) {
+  return (
+    <div>
+      {/* Mobile tabs */}
+      <div style={{ display: "none" }} className="mobile-tabs">{tabs}</div>
+      <style>{`@media(max-width:680px){.mobile-tabs{display:block!important}.desktop-sidebar{display:none!important}}`}</style>
+      <div style={{ display: "flex", gap: "0", alignItems: "flex-start" }}>
+        {/* Sidebar: sticky + its own scroll context so wheel events stay in the nav */}
+        <div className="desktop-sidebar" ref={sidebarRef} onScroll={onNavScroll} style={{
+          position: "sticky",
+          top: 0,
+          paddingTop: "1.25rem",
+          maxHeight: "calc(100vh - 116px)",
+          overflowY: "auto",
+          overflowX: "hidden",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(193,127,71,0.35) transparent",
+          /* Fade mask at top/bottom so it's visually obvious the nav scrolls
+             rather than looking like it's cut off. */
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%)",
+          maskImage: "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%)",
+        }}>
+          {sidebar}
+          {/* Extra bottom padding so last nav item doesn't sit flush at the edge */}
+          <div style={{ height: "2rem" }} />
+        </div>
+        {/* ── THE EDGES PAGE, AS THE STORYCARDS DO ─────────────────────
+            Ellie: "Clicking the left or right edge of the results pages should
+            move you forward or backward, in both the app and the site, just
+            like the storycard highlights do."
+
+            The storycards' own rule, which is hers from when she asked for it
+            there: "if I tap the left hand side of the page I want it to go back
+            a page." A sixth of the width on each side here rather than a third,
+            because a results page is a column of text somebody is reading and
+            the middle has to stay theirs.
+
+            Anything that is itself a control still wins: a click on a button,
+            a link or a marked sentence stops before it reaches this handler,
+            which is why it sits on the column and not on a layer over it. And a
+            click that finished a text selection pages nothing, or marking a
+            sentence would cost you the page you marked. */}
+        <div ref={contentRef} onClick={onColumnClick} style={{ flex: 1, minWidth: 0, padding: "0 1.5rem" }}>
+          {/* ── A NEW PAGE IS A NEW SUBTREE ──────────────────────────────
+              Ellie: "Dropdowns should always close when you leave the page."
+
+              A <details> keeps its open state in the DOM, so the only thing
+              that shuts one is the element going away. That used to happen by
+              accident, because this whole shell was rebuilt on every render;
+              now that it is not, the page has to say so. Keyed on the
+              section, which is what the app does for the same reason.
+
+              The key is on a Fragment rather than a div: it remounts the page
+              without adding anything to the layout. */}
+          <React.Fragment key={pageKey}>{children}</React.Fragment>
+          {/* ── EVERY PAGE, WITHOUT ASKING ───────────────────────────────
+              Ellie: "Not seeing these on cover pages, overview pages, or any
+              detailed pages."
+
+              She was right on twelve of the eighteen. Each page used to opt out
+              of the shared pair and four of them then drew their own lower
+              down, which is this file's recurring failure in miniature: one
+              rule kept in several places with nothing checking that they agree.
+              The pair is fixed to the viewport now, so where it sits in the
+              markup decides nothing, and there is no reason for a page to have
+              an opinion about it. check-results-arrows holds that. */}
+          {prevNext}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false, onOpenJournal = null, onOpenSurvey = null, surveyAnswered = false }) {
 
   // Compute all the data we need up front
@@ -8609,83 +8705,41 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   }
 
   // Layout wrapper
-  const Layout = ({ children, accent }) => (
-    <div>
-      {/* Mobile tabs */}
-      <div style={{ display: "none" }} className="mobile-tabs"><MobileTabBar /></div>
-      <style>{`@media(max-width:680px){.mobile-tabs{display:block!important}.desktop-sidebar{display:none!important}}`}</style>
-      <div style={{ display: "flex", gap: "0", alignItems: "flex-start" }}>
-        {/* Sidebar: sticky + its own scroll context so wheel events stay in the nav */}
-        <div className="desktop-sidebar" ref={sidebarRef} onScroll={onNavScroll} style={{
-          position: "sticky",
-          top: 0,
-          paddingTop: "1.25rem",
-          maxHeight: "calc(100vh - 116px)",
-          overflowY: "auto",
-          overflowX: "hidden",
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(193,127,71,0.35) transparent",
-          /* Fade mask at top/bottom so it's visually obvious the nav scrolls
-             rather than looking like it's cut off. */
-          WebkitMaskImage: "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%)",
-          maskImage: "linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%)",
-        }}>
-          <Sidebar />
-          {/* Extra bottom padding so last nav item doesn't sit flush at the edge */}
-          <div style={{ height: "2rem" }} />
-        </div>
-        {/* ── THE EDGES PAGE, AS THE STORYCARDS DO ─────────────────────
-            Ellie: "Clicking the left or right edge of the results pages should
-            move you forward or backward, in both the app and the site, just
-            like the storycard highlights do."
-
-            The storycards' own rule, which is hers from when she asked for it
-            there: "if I tap the left hand side of the page I want it to go back
-            a page." A sixth of the width on each side here rather than a third,
-            because a results page is a column of text somebody is reading and
-            the middle has to stay theirs.
-
-            Anything that is itself a control still wins: a click on a button,
-            a link or a marked sentence stops before it reaches this handler,
-            which is why it sits on the column and not on a layer over it. And a
-            click that finished a text selection pages nothing, or marking a
-            sentence would cost you the page you marked. */}
-        <div
-          ref={contentRef}
-          onClick={(e) => {
-            if (!allPages.length || curIdx < 0) return;
-            const sel = typeof window !== "undefined" && window.getSelection
-              ? String(window.getSelection() || "") : "";
-            if (sel.trim()) return;
-            /* A summary is a control: it opens the Side by Side panel. It was
-               not in this list, so a tap on one in the column's outer sixth
-               opened the panel AND turned the page, which looks like the panel
-               refusing to open. A label is a control for the same reason. */
-            if (e.target.closest("button, a, input, textarea, select, label, summary, [role=button]")) return;
-            const box = e.currentTarget.getBoundingClientRect();
-            const edge = box.width / 6;
-            const x = e.clientX - box.left;
-            if (x < edge) { if (curIdx > 0) go(allPages[curIdx - 1]); return; }
-            if (x > box.width - edge && curIdx < allPages.length - 1) go(allPages[curIdx + 1]);
-          }}
-          style={{ flex: 1, minWidth: 0, padding: "0 1.5rem" }}>
-          {children}
-          {/* ── EVERY PAGE, WITHOUT ASKING ───────────────────────────────
-              Ellie: "Not seeing these on cover pages, overview pages, or any
-              detailed pages."
-
-              She was right on twelve of the eighteen. Each page used to opt out
-              of the shared pair and four of them then drew their own lower
-              down, which is this file's recurring failure in miniature: one
-              rule kept in several places with nothing checking that they agree.
-              The pair is fixed to the viewport now, so where it sits in the
-              markup decides nothing, and there is no reason for a page to have
-              an opinion about it. check-results-arrows holds that. */}
-          <PrevNext />
-        </div>
-      </div>
-    </div>
-  );
+  /**
+   * The shell's props, built once per render.
+   *
+   * `Sidebar()`, `MobileTabBar()` and `PrevNext()` are CALLED rather than
+   * rendered: each is declared inside this component, so rendering one as
+   * <Sidebar /> would make a new component type every render and remount it,
+   * which is the whole bug this hoisting is about, one level down. Called,
+   * their output is part of this render with no boundary of its own.
+   */
+  const onColumnClick = (e) => {
+    if (!allPages.length || curIdx < 0) return;
+    const sel = typeof window !== "undefined" && window.getSelection
+      ? String(window.getSelection() || "") : "";
+    if (sel.trim()) return;
+    /* A summary is a control: it opens the Side by Side panel. It was
+       not in this list, so a tap on one in the column's outer sixth
+       opened the panel AND turned the page, which looks like the panel
+       refusing to open. A label is a control for the same reason. */
+    if (e.target.closest("button, a, input, textarea, select, label, summary, [role=button]")) return;
+    const box = e.currentTarget.getBoundingClientRect();
+    const edge = box.width / 6;
+    const x = e.clientX - box.left;
+    if (x < edge) { if (curIdx > 0) go(allPages[curIdx - 1]); return; }
+    if (x > box.width - edge && curIdx < allPages.length - 1) go(allPages[curIdx + 1]);
+  };
+  const shell = {
+    pageKey: section,
+    sidebar: Sidebar(),
+    tabs: MobileTabBar(),
+    prevNext: PrevNext(),
+    sidebarRef,
+    onNavScroll,
+    contentRef,
+    onColumnClick,
+  };
 
   /*
    * ── PAGE: A CHAPTER COVER ───────────────────────────────────────────────
@@ -8708,7 +8762,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const group = sidebarSections.find((x) => x.id === section.replace("-cover", ""));
     const accent = group?.color || coupleType?.color || "#E8673A";
     return (
-      <Layout accent={accent}>
+      <ResultsLayout {...shell} accent={accent}>
         {/* block: cover/frame */}
         <div style={{ padding: "1.5rem 0.5rem" }}>
           <div style={{ borderRadius: 26, padding: 1.5, background: "linear-gradient(135deg, #E8673A, #9B5DE5, #1B5FE8)" }}>
@@ -8784,14 +8838,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
         </div>
-      </Layout>
+      </ResultsLayout>
     );
   }
 
   // ── PAGE: HIGHLIGHTS ─────────────────────────────────────────────────────────
   if (section === "highlights") {
     return (
-      <Layout accent={coupleType?.color || "#E8673A"}>
+      <ResultsLayout {...shell} accent={coupleType?.color || "#E8673A"}>
         {/* block: highlights/storycards */}
         <div style={{ maxWidth: 620 }}>
           {/* Retake comparison — renders only when the user has a prior
@@ -8821,14 +8875,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             inline={true}
           />
         </div>
-      </Layout>
+      </ResultsLayout>
     );
   }
 
   // ── PAGE: COUPLE TYPE ────────────────────────────────────────────────────────
   if (section === "couple-type") {
     const ct = coupleType;
-    if (!ct) return <Layout accent="#E8673A"><p style={{fontFamily:BFONT,color:C.muted}}>Complete all exercises to see your couple type.</p></Layout>;
+    if (!ct) return <ResultsLayout {...shell} accent="#E8673A"><p style={{fontFamily:BFONT,color:C.muted}}>Complete all exercises to see your couple type.</p></ResultsLayout>;
     // Resolve "the expressive/guarded partner" role labels to real names when
     // the two partners actually differ on the Open/Guarded axis. Open-leaning
     // (openScore >= 3) reads as expressive; below that, guarded. If both sit on
@@ -8954,7 +9008,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const itA = INDIVIDUAL_TYPES[newType.typeInfoA.typeCode];
     const itB = INDIVIDUAL_TYPES[newType.typeInfoB.typeCode];
     return (
-      <Layout accent={ct.color}>
+      <ResultsLayout {...shell} accent={ct.color}>
         <div style={{ maxWidth: 660 }}>
 
           {/* 1. HEADER */}
@@ -9105,7 +9159,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           </div>
 
         </div>
-      </Layout>
+      </ResultsLayout>
     );
   }
 
@@ -9123,7 +9177,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       return i >= 0 ? i + 1 : 0;
     })();
     return (
-      <Layout accent="#E8673A">
+      <ResultsLayout {...shell} accent="#E8673A">
         <PersonalityResultsPage
           myAnswers={ex1Answers} partnerAnswers={partnerEx1}
           userName={userName} partnerName={partnerName}
@@ -9141,7 +9195,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             else if (s >= 1 && s <= nUR) go(`comm-${UR_DOMAINS[s-1].id}`);
           }}
         />
-      </Layout>
+      </ResultsLayout>
     );
   }
 
@@ -9155,7 +9209,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       : section.startsWith("exp-convo-") ? `convo-${Math.max(0, FIXED_CATS.findIndex(fc => fc.section === section))}`
       : "overview";
     return (
-      <Layout accent="#1B5FE8">
+      <ResultsLayout {...shell} accent="#1B5FE8">
         <ExpectationsResultsPage
           myAnswers={ex2Answers} partnerAnswers={partnerEx2}
           coupleTypeCode={(() => { try { const t = deriveNewCoupleType(myS, partS); return (t?.typeInfoA?.typeCode || "") + (t?.typeInfoB?.typeCode || ""); } catch { return null; } })()}
@@ -9178,7 +9232,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             }
           }}
         />
-      </Layout>
+      </ResultsLayout>
     );
   }
 
@@ -9209,7 +9263,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const myAdmire = mine.a8;
       const theirAdmire = theirs.a8;
       return (
-        <Layout accent="#1B5FE8">
+        <ResultsLayout {...shell} accent="#1B5FE8">
           {/* Brighter than the detail pages, which keep the darker ground.
               Matches the comms and expectations glance pages. */}
           <ResultsSlide bg={gradientCss("reflection-overview")}>
@@ -9315,7 +9369,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
             </div>
           </ResultsSlide>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -9417,7 +9471,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
 
       return (
-        <Layout accent="#1B5FE8">
+        <ResultsLayout {...shell} accent="#1B5FE8">
           <div style={{ maxWidth: 660 }}>
             {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.ratings.title}</h2>
@@ -9525,7 +9579,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               );
             })()}
           </div>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -9538,7 +9592,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const PROMPTS = REFLECTION_PROMPTS;
 
       return (
-        <Layout accent="#1B5FE8">
+        <ResultsLayout {...shell} accent="#1B5FE8">
           <div style={{ maxWidth: 660 }}>
             {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.story.title}</h2>
@@ -9580,7 +9634,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             })}
 
           </div>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -9619,7 +9673,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     // ── OVERVIEW ──
     if (section === "intimacy-overview" || section === "intimacy") {
       return (
-        <Layout accent={ROSE}>
+        <ResultsLayout {...shell} accent={ROSE}>
           {/* Brighter than the detail pages, which keep the darker ground. */}
           <ResultsSlide bg={gradientCss("intimacy-overview")}>
             <link href={FONT_URL} rel="stylesheet" />
@@ -9726,7 +9780,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
 
             </div>
           </ResultsSlide>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -9745,7 +9799,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const domainMatch = INTIMACY_DOMAINS.find(dm => section === `intimacy-${dm.id}`);
     if (domainMatch) {
       return (
-        <Layout>
+        <ResultsLayout {...shell}>
           <ResultsSlide>
             <IntimacyDomainPage
               domain={domainMatch}
@@ -9759,7 +9813,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               onGo={go}
             />
           </ResultsSlide>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -9782,7 +9836,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       // The tints live in api/_lib/intimacy-results.js so the app can paint
       // the same six pages from the same numbers.
       return (
-        <Layout accent={ROSE}>
+        <ResultsLayout {...shell} accent={ROSE}>
           <ResultsSlide bg={`linear-gradient(145deg, ${groundForDimension(dimMatch).join(", ")})`}>
             <link href={FONT_URL} rel="stylesheet" />
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
@@ -9842,7 +9896,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               nextLabel={(idx < dimIds.length - 1 ? INTIMACY_DIMENSIONS[idx + 1].label : "Conversations Worth Having") + " →"}
             />
           </ResultsSlide>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -9888,7 +9942,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           ? WAITING.LOCKED_BY_YOU
           : WAITING.LOCKED_BY_THEM;
       return (
-        <Layout accent="#1B5FE8">
+        <ResultsLayout {...shell} accent="#1B5FE8">
           <div style={{ maxWidth: 560 }}>
             <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", fontWeight: 700, fontFamily: BFONT, marginBottom: "0.6rem" }}>Conflict patterns</div>
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.75rem" }}>{title}</div>
@@ -9902,7 +9956,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               Take the exercise
             </button>
           </div>
-        </Layout>
+        </ResultsLayout>
       );
     }
     const BLUE = "#1B5FE8";
@@ -9986,7 +10040,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       // to connect a question to its answers.
       const COLS = isMobile ? "1fr" : "minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)";
       return (
-        <Layout accent={BLUE}>
+        <ResultsLayout {...shell} accent={BLUE}>
           <div style={{ maxWidth: 760 }}>
             {/* block: conflict-snapshot/head */}
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "1rem" }}>{cc.snapshotTitle}</div>
@@ -10063,14 +10117,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </Card>
             </div>
           </div>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
     // ── Patterns: private, always. Never rendered for the partner. ──
     if (section === "conflict-patterns") {
       return (
-        <Layout accent={BLUE}>
+        <ResultsLayout {...shell} accent={BLUE}>
           <div style={{ maxWidth: 660 }}>
             {/* block: conflict-patterns/head */}
             <div style={{ fontSize: "clamp(1.4rem,3.5vw,1.85rem)", fontWeight: 700, fontFamily: HFONT, color: C.ink, marginBottom: "0.5rem" }}>{cc.patternsTitle}</div>
@@ -10089,7 +10143,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               )}
             </Card>
           </div>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -10111,7 +10165,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
         </div>
       );
       return (
-        <Layout accent={BLUE}>
+        <ResultsLayout {...shell} accent={BLUE}>
           <div style={{ maxWidth: 720 }}>
             {/* block: conflict-wrote/head */}
             <Head title={cc.wroteTitle} shared={true} />
@@ -10126,7 +10180,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               </div>
             ))}
           </div>
-        </Layout>
+        </ResultsLayout>
       );
     }
 
@@ -10144,7 +10198,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const c0Aligned = Math.abs(myC0 - theirC0) <= 1;
 
     return (
-      <Layout accent={BLUE}>
+      <ResultsLayout {...shell} accent={BLUE}>
         <ResultsSlide bg={gradientCss("conflict-overview")}>
           <link href={FONT_URL} rel="stylesheet" />
           <div style={{ color: "white" }}>
@@ -10203,7 +10257,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           </div>
         </ResultsSlide>
-      </Layout>
+      </ResultsLayout>
     );
 
 
@@ -10235,7 +10289,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       );
     };
     return (
-      <Layout accent="#E8673A">
+      <ResultsLayout {...shell} accent="#E8673A">
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: "1.5rem" }}>What comes next</h2>
 
@@ -10794,7 +10848,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             </div>
           )}
         </div>
-      </Layout>
+      </ResultsLayout>
     );
   }
 

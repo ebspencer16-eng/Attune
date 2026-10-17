@@ -24,7 +24,7 @@ import { useTabReset } from '@/hooks/use-tab-reset';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchHome, fetchResults } from '@/api/client';
+import { fetchHome, fetchResults, fetchSurvey } from '@/api/client';
 import type { ApiError, ExerciseState, HomeResponse, ResultsResponse } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ResultsExperience, { showFirstSection } from '@/components/results';
@@ -158,6 +158,22 @@ export default function InsightsScreen() {
        * said there is something to use.
        */
       const resultsSoon = fetchResults();
+
+      /**
+       * ── ASKING ABOUT THE SURVEY BEFORE ANYBODY CAN SEE THE BUTTON ─────────
+       * What Comes Next draws "Tell us about your Attune experience" only for
+       * a reader who has not answered, which is Ellie's rule: "Should only
+       * draw if it hasn't been answered." That means there is no button until
+       * /api/survey has answered, and she met the gap twice: "the tell us
+       * about your experience Button is now missing from my what comes next
+       * page".
+       *
+       * Nothing here reads the reply. It warms the memo in client.ts, which is
+       * what that page seeds its state from, and this tab is several taps
+       * earlier than the page. Deliberately not awaited: it must not hold up a
+       * screen that does not use it.
+       */
+      void fetchSurvey();
       const res = await fetchHome();
       if (!current()) return;
       if (res.ok) { setHome(res.data); setError(null); }

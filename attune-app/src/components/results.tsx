@@ -30,7 +30,7 @@ import PageTile, { NeutralGround, ResultsBottomInset } from '@/components/page-t
 import StepCount from '@/components/step-count';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { fetchConflictResults, fetchNotes, fetchSurvey, fetchTags, type SurveyForm } from '@/api/client';
+import { fetchConflictResults, fetchNotes, fetchSurvey, fetchTags, recallSurvey, type SurveyForm } from '@/api/client';
 import Survey from '@/components/survey';
 import { SaveToJournal } from '@/components/journal';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -3185,13 +3185,6 @@ function mixHex(a: string, b: string, t: number): string {
 }
 
 /**
- * What /api/survey last said: whether this reader has answered it, and the
- * words on the opener. Held for the life of the app so a page that remounts
- * draws its button straight away rather than after a round trip. See B119.
- */
-let lastSurvey: { done: boolean; copy: SurveyForm['copy'] } | null = null;
-
-/**
  * The closing page.
  *
  * Everything the results ask this couple to do, in the order worth doing it,
@@ -3233,16 +3226,22 @@ function WhatComesNext({
    * a request that fails leaves none at all: `surveyDone` goes false, the
    * copy stays null, and the card's second condition is never met.
    *
-   * `lastSurvey` is what the server last said, kept for the life of the app.
-   * The page opens on it and the request refreshes it, so the control is
-   * there the moment the page is. It is not a second copy of the words: it is
-   * the server's own reply, held rather than thrown away.
+   * `recallSurvey()` is what the server last said, kept for the life of the
+   * app by client.ts. The page opens on it and the request refreshes it, so
+   * the control is there the moment the page is. It is not a second copy of
+   * the words: it is the server's own reply, held rather than thrown away.
+   *
+   * It is kept beside the request rather than here so that a reply from
+   * anywhere warms it. B123, "Still nothing": she was reaching this page on
+   * the first launch of the app, where nothing had asked yet and the memo was
+   * empty, so the first visit of an app's life still had no button. The
+   * Insights tab asks on its own load, which is several taps earlier.
    */
-  const [surveyDone, setSurveyDone] = useState<boolean | null>(lastSurvey ? lastSurvey.done : null);
+  const [surveyDone, setSurveyDone] = useState<boolean | null>(recallSurvey()?.done ?? null);
   /* The words on the opener come from the payload, like every other word in
      this survey. An Expo app cannot import api/_lib/survey.js, and a title
      typed here would be the second copy of a sentence. */
-  const [surveyCopy, setSurveyCopy] = useState<SurveyForm['copy'] | null>(lastSurvey ? lastSurvey.copy : null);
+  const [surveyCopy, setSurveyCopy] = useState<SurveyForm['copy'] | null>(recallSurvey()?.copy ?? null);
   useEffect(() => {
     let live = true;
     fetchSurvey().then((r) => {
@@ -3250,10 +3249,9 @@ function WhatComesNext({
       /* A request that fails leaves what we already knew. It used to set
          `done` false and no copy, which draws nothing: the one outcome that
          removes the button rather than keeping it. */
-      if (!r.ok) { if (!lastSurvey) setSurveyDone(false); return; }
-      lastSurvey = { done: !!r.data.finished, copy: r.data.copy };
-      setSurveyDone(lastSurvey.done);
-      setSurveyCopy(lastSurvey.copy);
+      if (!r.ok) { if (!recallSurvey()) setSurveyDone(false); return; }
+      setSurveyDone(!!r.data.finished);
+      setSurveyCopy(r.data.copy);
     });
     return () => { live = false; };
   }, []);
@@ -3379,7 +3377,7 @@ function WhatComesNext({
             I made it unconditional, which fixed the first two and changed the
             third, and she reversed that half: "Should only draw if it hasn't
             been answered." So the condition is back and only the flakiness is
-            gone: `lastSurvey` holds the server's last reply for the life of
+            gone: the client holds the server's last reply for the life of
             the app, so a page that opens again does not go blank while it
             asks, and a request that fails leaves what was already known.
 

@@ -35,7 +35,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
-import { fetchHome, markNotificationRead, nudgePartner, SITE_URL, insightShareText } from '@/api/client';
+import { fetchHome, fetchSurvey, markNotificationRead, nudgePartner, SITE_URL, insightShareText } from '@/api/client';
 import type { ApiError, HomeAlert, HomeCard, HomeResponse } from '@/api/client';
 import { ScreenError, ScreenLoading, needsProfileSetup } from '@/components/screen-states';
 import SignIn from '@/components/sign-in';
@@ -117,6 +117,16 @@ export default function HomeScreen() {
      * promise between tabs, which is exactly the shape that turns one bad
      * request into every tab spinning.
      */
+    /**
+     * ── THE SURVEY'S ANSWER, ASKED FOR AT THE DOOR ───────────────────────
+     * What Comes Next draws its opener only for somebody who has not answered
+     * ("Should only draw if it hasn't been answered"), so there is no button
+     * until /api/survey has said which. Home is the screen every launch opens
+     * on, and Action plans is one tap from here, so this is the earliest
+     * honest place to ask. Nothing here reads the reply; client.ts keeps it.
+     * Not awaited: it must not hold up a screen that does not use it.
+     */
+    void fetchSurvey();
     try {
       const res = await fetchHome();
       if (res.ok) { setData(res.data); setError(null); keepLastSeen('home', res.data); }

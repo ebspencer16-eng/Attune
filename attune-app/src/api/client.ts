@@ -1770,8 +1770,32 @@ export type SurveyForm = {
  * own, which is why this is a request rather than a constant: a list built in
  * the app would be the same list for everybody.
  */
+/**
+ * ── THE LAST REPLY, KEPT ──────────────────────────────────────────────────
+ * The survey's button is drawn only for somebody who has not answered, which
+ * is Ellie's rule: "Should only draw if it hasn't been answered." So there is
+ * no button until the server has said which it is, and on the first visit of
+ * an app's life that is a page with something missing from it.
+ *
+ * Kept here rather than in the screen, so a reply from anywhere warms it: the
+ * Insights tab asks on its own load, seconds before anybody can reach What
+ * Comes Next, and the page then opens on an answer it already has.
+ *
+ * Only `finished` and the copy. Nothing anybody wrote is kept anywhere; see
+ * lib/payload-cache.ts for the same rule about the journal.
+ */
+let surveyReply: { done: boolean; copy: SurveyForm['copy'] } | null = null;
+
+/** What /api/survey last said, if it has answered at all this run. */
+export function recallSurvey() {
+  return surveyReply;
+}
+
 export function fetchSurvey() {
-  return request<{ ok: true } & SurveyForm>('/api/survey');
+  return request<{ ok: true } & SurveyForm>('/api/survey').then((r) => {
+    if (r.ok) surveyReply = { done: !!r.data.finished, copy: r.data.copy };
+    return r;
+  });
 }
 
 /**
