@@ -55,6 +55,11 @@ try {
      Here rather than in `npm run check` because it drives the demo results
      path, which needs this preview. */
   await run(process.execPath, ['scripts/check-map-controls.mjs'], { env: { ...process.env, BASE } });
+  /* And the other page whose controls are the whole of the change: every
+     action item on What Comes Next carries a note icon that keeps it in the
+     journal. B106. Here for the same reason as the line above: it drives the
+     demo results path, which needs this preview. */
+  await run(process.execPath, ['scripts/check-journal-export.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }

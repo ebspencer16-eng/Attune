@@ -54,7 +54,45 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** Everything from your sixteen is built and sitting in section 3.
+**Nothing open.** The three from your last message are built and in section 3.
+
+### B106, the note icon, in detail
+
+Your words: "On the right side of each action item row on the whats next page,
+there should be the grey arrow, but also a note icon. If the user taps the note
+icon, the action item should be exported to their relationship journal where
+they can leave commentary, just like we offer for the insight of the day export
+to journal."
+
+So the row gets two controls: the arrow that opens the page it came from, and a
+note icon that opens the same save sheet the insight of the day opens, with the
+action item as the thing being kept. It writes the same kind of journal entry,
+through the same endpoint, so nothing new is stored and the entry appears in
+the journal under today's date with your commentary under it.
+
+### B107, colour, in detail
+
+The page is four grey tiles and white rows. Each bucket already has a colour on
+the server, and the three are the ones the rest of the results use: the
+communication orange, the expectations blue and the couple type purple. So the
+tile takes its own colour rather than the one accent, and each row carries it
+too, which also says at a glance which bucket a row belongs to once you have
+opened one.
+
+Tell me if you want more than that. This is the restrained version: colour that
+means something rather than colour for its own sake.
+
+### C13, what I did with your list
+
+You sent 119 rows where the document has 150, so 31 are out. I applied exactly
+that: the ones you left out are deleted from `api/_insights.js`, which is what
+the app and the site read, and the review document is rebuilt from the module
+afterwards rather than edited.
+
+I compared your rows against the document's wording and found no changes, only
+the deletions. If you also edited the words of a quotation, tell me which and
+it goes in verbatim; nothing in a generated document survives the next run, so
+your edits have to land in the module and they do.
 
 ---
 
@@ -69,6 +107,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+| B106 | **Done, both surfaces.** Every action item now has a note icon beside its arrow, and it opens the same sheet the insight of the day opens, with the item already in it and a box for your commentary. |
+| B107 | **Done, both surfaces.** Each tile and each row carries its bucket's own colour: the communication orange, the expectations blue, the couple type purple, and a warm brown for the journal. Say if you want more. |
+| C13 | **Done.** 31 of the 150 are out of the module the product reads, and the review document is rebuilt from it. All 119 that remain are verified against the page or the scan they cite. |
 | B91 | **Done, both surfaces.** Your individual types is gone. Tapping a person's dot opens a tile beside it with their paragraph and no axis bars; tapping anywhere else closes it. |
 | B92 | **Done, both surfaces.** A grey question mark beside Open and beside Withdraw, each opening that axis's sentence, and both sentences are off the page below the chart. |
 | B93 | **Done.** The outline was a shadow in the dot's own colour, six points of blur at half opacity: a coloured halo round a coloured circle. It is a crisp white ring now. I could not reproduce it on an actual iPad, so tell me if your friend still sees it. |

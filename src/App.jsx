@@ -7876,6 +7876,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
      disclosure, so it is state. Null is all four closed, which is how the
      page opens. */
   const [openBucket, setOpenBucket] = useState(null);
+  /* B106. The action item being kept, or null. The same sheet the insight of
+     the day opens, writing the same kind of journal entry. */
+  const [keepingAction, setKeepingAction] = useState(null);
   // section is internal state seeded once from initialSection. The mobile
   // sub-nav lives outside this component and can only set the parent's
   // activeResult, so without this every mobile tab was a no-op. Deliberately
@@ -10309,7 +10312,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                         aria-pressed={open}
                         aria-label={`${g.label}, ${g.items.length} item${g.items.length !== 1 ? "s" : ""}`}
                         style={{
-                          background: open ? `${g.color}1F` : "rgba(14,11,7,0.045)",
+                          /* B107. The tile is its bucket's colour, closed as
+                             well as open. It was three greys on white, and
+                             Ellie: "I want color on the what's next page.
+                             Feels bland currently." */
+                          background: open ? `${g.color}24` : `${g.color}0F`,
                           border: open ? `1px solid ${g.color}80` : "1px solid transparent",
                           borderRadius: 14, aspectRatio: "0.92", maxHeight: 132,
                           padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
@@ -10322,11 +10329,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                             list. */}
                         <span style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
                           fontFamily: HFONT, fontSize: "1.4rem", fontWeight: 700,
-                          color: open ? g.color : "#8F8071" }}>
+                          color: g.color }}>
                           {g.items.length}
                         </span>
                         <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
-                          color: open ? C.ink : C.muted, whiteSpace: "pre-line", width: "86%" }}>
+                          color: open ? C.ink : C.text, whiteSpace: "pre-line", width: "86%" }}>
                           {g.label}
                         </span>
                       </button>
@@ -10345,17 +10352,21 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     }}
                     aria-label="Relationship journal"
                     style={{
-                      background: "rgba(14,11,7,0.045)", border: "1px solid transparent",
+                      /* Not one of the three section colours: the journal is a
+                         place to write rather than a bucket of findings, and
+                         borrowing a section's colour would say it belongs to
+                         that section. */
+                      background: `${C.clay}0F`, border: "1px solid transparent",
                       borderRadius: 14, aspectRatio: "0.92", maxHeight: 132,
                       padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
                       fontFamily: BFONT, display: "flex", flexDirection: "column",
                       alignItems: "center", justifyContent: "flex-end",
                     }}>
                     <span style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {QuickIcons.book()}
+                      {QuickIcons.book(C.clay)}
                     </span>
                     <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
-                      color: C.muted, whiteSpace: "pre-line", width: "86%" }}>
+                      color: C.text, whiteSpace: "pre-line", width: "86%" }}>
                       {"Relationship\njournal"}
                     </span>
                   </button>
@@ -10371,7 +10382,9 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     <div style={{ marginTop: "0.9rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
                       {/* block: what-comes-next/groups */}
                       {g.items.map((it, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 12, padding: "0.8rem 1rem" }}>
+                        /* B107: the bucket's colour down the left edge, which
+                           is also what says which bucket a row belongs to. */
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.35rem", background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 12, padding: "0.8rem 0.6rem 0.8rem 1rem" }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.45 }}>
                               {it.tip}
@@ -10380,6 +10393,29 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                               ) : null}
                             </div>
                           </div>
+                          {/* ── B106: KEEP THIS ONE ───────────────────────
+                              Ellie: "If the user taps the note icon, the
+                              action item should be exported to their
+                              relationship journal where they can leave
+                              commentary, just like we offer for the insight of
+                              the day export to journal."
+
+                              So it opens the insight's own sheet, which writes
+                              a journal entry anchored to the item's words. A
+                              second way to save a thing is a second thing to
+                              keep in step; this is the first one. */}
+                          <button
+                            onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
+                            aria-label={`Keep "${it.tip}" in your relationship journal`}
+                            title={JOURNAL_COPY.saveTitle}
+                            style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.2rem 0.3rem", flexShrink: 0, display: "inline-flex", alignItems: "center" }}>
+                            {/* A page with a pencil: the same picture the app
+                                draws with square.and.pencil. */}
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                              <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
+                            </svg>
+                          </button>
                           {/* Ellie: "each with a grey arrow on the right hand
                               side that takes you to the page in insights where
                               that row's content is coming from." Grey, at her
@@ -10398,6 +10434,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     </div>
                   );
                 })()}
+
+                {/* B106's sheet, which is the insight of the day's sheet. */}
+                {keepingAction ? (
+                  <SaveInsightToJournal
+                    quote={keepingAction}
+                    onClose={() => setKeepingAction(null)}
+                  />
+                ) : null}
 
                 {/* Download — one plain-text file with every item above. */}
                 <button onClick={() => {

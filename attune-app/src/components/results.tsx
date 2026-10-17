@@ -32,6 +32,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { fetchConflictResults, fetchNotes, fetchSurvey, fetchTags, type SurveyForm } from '@/api/client';
 import Survey from '@/components/survey';
+import { SaveToJournal } from '@/components/journal';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotation-context';
@@ -3177,6 +3178,10 @@ function WhatComesNext({
    * has already finished it comes from /api/survey, so answering on one device
    * does not mean being asked again on another.
    */
+  /* B106. The action item being kept, or null. The same sheet the insight of
+     the day opens, so an item lands in the journal as an entry with their own
+     commentary under it. */
+  const [keeping, setKeeping] = useState<string | null>(null);
   const [surveyOpen, setSurveyOpen] = useState(false);
   const [surveyDone, setSurveyDone] = useState<boolean | null>(null);
   /* The words on the opener come from the payload, like every other word in
@@ -3247,6 +3252,7 @@ function WhatComesNext({
               key={b.id}
               label={b.label}
               count={b.items.length}
+              color={b.color || c.accent}
               active={openGroup === b.id}
               onPress={() => setOpenGroup((cur) => (cur === b.id ? null : b.id))}
             />
@@ -3254,6 +3260,10 @@ function WhatComesNext({
           <NextTile
             label={'Relationship\njournal'}
             icon="book"
+            /* Not one of the three section colours: the journal is a place to
+               write, not a bucket of findings, and borrowing a section's
+               colour for it would say it belongs to that section. */
+            color={Palette.clayInk}
             active={false}
             onPress={onOpenJournal}
           />
@@ -3271,7 +3281,10 @@ function WhatComesNext({
                 title={item.title}
                 quote={item.quote || null}
                 say={item.say || null}
+                color={open.color}
                 onOpen={item.section ? () => onGoToSection(item.section as string) : null}
+                onKeep={() => setKeeping([item.title, item.quote, item.say]
+                  .filter(Boolean).join(' '))}
               />
             ))}
           </View>
@@ -3307,6 +3320,12 @@ function WhatComesNext({
         <Modal visible={surveyOpen} animationType="slide" onRequestClose={() => setSurveyOpen(false)}>
           <Survey onDone={() => { setSurveyOpen(false); setSurveyDone(true); }} />
         </Modal>
+
+        {/* B106's sheet. `quote` is the action item, which is what the entry is
+            anchored to; whatever they write goes under it. */}
+        {keeping ? (
+          <SaveToJournal quote={keeping} onClose={() => setKeeping(null)} />
+        ) : null}
     </PageTile>
   );
 }
@@ -3329,8 +3348,9 @@ function WhatComesNext({
  * that the open one says so, because a tile that changes what is under it has
  * to look different from one that has not been pressed.
  */
-function NextTile({ label, count, icon, active, onPress }: {
-  label: string; count?: number; icon?: string; active: boolean; onPress: () => void;
+function NextTile({ label, count, icon, color, active, onPress }: {
+  label: string; count?: number; icon?: string; color: string;
+  active: boolean; onPress: () => void;
 }) {
   return (
     <Pressable
@@ -3339,9 +3359,13 @@ function NextTile({ label, count, icon, active, onPress }: {
       accessibilityLabel={count != null ? `${label.replace('\n', ' ')}, ${count} item${count === 1 ? '' : 's'}` : label.replace('\n', ' ')}
       onPress={onPress}
       style={{
+        /* B107. Each tile is its bucket's colour rather than one accent:
+           the communication orange, the expectations blue, the couple type
+           purple, all from the server, and a warm brown for the journal,
+           which is a place rather than a section. */
         flex: 1, aspectRatio: 0.92, borderRadius: Radius.lg,
-        backgroundColor: active ? withAlpha(c.accent, 0.12) : 'rgba(14,11,7,0.045)',
-        borderWidth: 1, borderColor: active ? withAlpha(c.accent, 0.5) : 'transparent',
+        backgroundColor: active ? withAlpha(color, 0.14) : withAlpha(color, 0.06),
+        borderWidth: 1, borderColor: active ? withAlpha(color, 0.5) : 'transparent',
         paddingTop: Spacing.sm, paddingBottom: Spacing.md,
         paddingHorizontal: Spacing.xs, alignItems: 'center',
       }}>
@@ -3350,7 +3374,7 @@ function NextTile({ label, count, icon, active, onPress }: {
           <SymbolView
             name={icon as never}
             size={26}
-            tintColor={active ? c.accent : '#8F8071'}
+            tintColor={color}
             fallback={<View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#8F8071' }} />}
             style={{ width: 30, height: 30 }}
           />
@@ -3363,7 +3387,7 @@ function NextTile({ label, count, icon, active, onPress }: {
              22 point number in a smaller box is drawn with its top ring cut
              off. That is the same clipping Ellie reported three times on the
              storycards. */
-          <Text style={{ ...Type.display, fontSize: 22, lineHeight: 28, color: active ? c.accent : '#8F8071' }}>
+          <Text style={{ ...Type.display, fontSize: 22, lineHeight: 28, color }}>
             {count ?? ''}
           </Text>
         )}
@@ -3378,7 +3402,7 @@ function NextTile({ label, count, icon, active, onPress }: {
         numberOfLines={3}
         style={{
           ...Type.small, fontSize: 10, lineHeight: 13,
-          color: active ? c.textStrong : c.textMuted, textAlign: 'center', width: '92%',
+          color: active ? c.textStrong : c.text, textAlign: 'center', width: '92%',
         }}>
         {label}
       </Text>
@@ -3396,8 +3420,29 @@ function NextTile({ label, count, icon, active, onPress }: {
  * The arrow is the only thing on this page that says where a row came from,
  * which is the other half of her ask: no bucket names an exercise.
  */
-function NextRow({ title, quote, say, onOpen }: {
-  title: string; quote?: string | null; say?: string | null; onOpen: (() => void) | null;
+/**
+ * One action item: the words, the arrow that opens where it came from, and the
+ * note icon that keeps it.
+ *
+ * B106. Ellie: "On the right side of each action item row on the whats next
+ * page, there should be the grey arrow, but also a note icon. If the user taps
+ * the note icon, the action item should be exported to their relationship
+ * journal where they can leave commentary, just like we offer for the insight
+ * of the day export to journal."
+ *
+ * "Just like" is the instruction that matters: this opens SaveToJournal, the
+ * same sheet the insight of the day opens, writing the same kind of entry
+ * through the same endpoint. A second way to save a thing is a second thing to
+ * keep in step.
+ *
+ * The row is three targets rather than one, because it now does two things.
+ * The words and the chevron both open the section; the note icon does not, and
+ * a nested control inside one big Pressable is how a tap ends up doing the
+ * other thing.
+ */
+function NextRow({ title, quote, say, color, onOpen, onKeep }: {
+  title: string; quote?: string | null; say?: string | null; color?: string;
+  onOpen: (() => void) | null; onKeep: (() => void) | null;
 }) {
   const body = (
     <View style={{ flex: 1 }}>
@@ -3413,32 +3458,67 @@ function NextRow({ title, quote, say, onOpen }: {
     </View>
   );
   const shell = {
-    flexDirection: 'row' as const, alignItems: 'center' as const, gap: Spacing.md,
+    flexDirection: 'row' as const, alignItems: 'center' as const, gap: Spacing.sm,
     backgroundColor: c.surface, borderRadius: Radius.md,
     borderWidth: 1, borderColor: c.border,
-    paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+    /* B107. The bucket's own colour down the left edge, which is also what
+       says which bucket a row belongs to once one is open. Ellie: "I want
+       color on the what's next page. Feels bland currently." */
+    borderLeftWidth: color ? 4 : 1,
+    borderLeftColor: color || c.border,
+    paddingVertical: Spacing.md, paddingLeft: Spacing.lg, paddingRight: Spacing.md,
   };
-  if (!onOpen) return <View style={shell}>{body}</View>;
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${title}. Open where this comes from`}
-      onPress={onOpen}
-      style={shell}>
-      {body}
-      {/* Grey, at her word, and the same chevron the rest of the app uses for
-          "this opens somewhere else". */}
-      <SymbolView
-        name={'chevron.right' as never}
-        size={14}
-        tintColor={c.textMuted}
-        /* not markable: a chevron. The fallback when SF Symbols has no
-           chevron.right is the character itself, which is an arrow rather
-           than words. */
-        fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>}
-        style={{ width: 16, height: 16 }}
-      />
-    </Pressable>
+    <View style={shell}>
+      {onOpen ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${title}. Open where this comes from`}
+          onPress={onOpen}
+          style={{ flex: 1 }}>
+          {body}
+        </Pressable>
+      ) : body}
+      {onKeep ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Keep "${title}" in your relationship journal`}
+          onPress={onKeep}
+          hitSlop={8}
+          style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+          <SymbolView
+            name={'square.and.pencil' as never}
+            size={16}
+            tintColor={c.textMuted}
+            /* not markable: an icon. The fallback when SF Symbols has no
+               square.and.pencil is a pencil character, not words. */
+            fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u270E'}</Text>}
+            style={{ width: 18, height: 18 }}
+          />
+        </Pressable>
+      ) : null}
+      {onOpen ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Open the page "${title}" comes from`}
+          onPress={onOpen}
+          hitSlop={8}
+          style={{ width: 24, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+          {/* Grey, at her word, and the same chevron the rest of the app uses
+              for "this opens somewhere else". */}
+          <SymbolView
+            name={'chevron.right' as never}
+            size={14}
+            tintColor={c.textMuted}
+            /* not markable: a chevron. The fallback when SF Symbols has no
+               chevron.right is the character itself, which is an arrow rather
+               than words. */
+            fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>}
+            style={{ width: 16, height: 16 }}
+          />
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
