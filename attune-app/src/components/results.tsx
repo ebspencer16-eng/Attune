@@ -3278,6 +3278,7 @@ function WhatComesNext({
             {open.items.map((item, i) => (
               <NextRow
                 key={`${open.id}-${i}`}
+                n={i + 1}
                 title={item.title}
                 quote={item.quote || null}
                 say={item.say || null}
@@ -3440,16 +3441,24 @@ function NextTile({ label, count, icon, color, active, onPress }: {
  * a nested control inside one big Pressable is how a tap ends up doing the
  * other thing.
  */
-function NextRow({ title, quote, say, color, onOpen, onKeep }: {
-  title: string; quote?: string | null; say?: string | null; color?: string;
+function NextRow({ n, title, quote, say, color, onOpen, onKeep }: {
+  n: number; title?: string | null; quote?: string | null; say?: string | null; color?: string;
   onOpen: (() => void) | null; onKeep: (() => void) | null;
 }) {
   const body = (
     <View style={{ flex: 1 }}>
-      <Prose style={{ ...Type.body, color: c.textStrong }}>{title}</Prose>
+      {title ? <Prose style={{ ...Type.body, color: c.textStrong }}>{title}</Prose> : null}
+      {/* B114. In quotation marks as well as in italics, which is how the
+          website has always set this field. A phrase to try and a line
+          somebody wrote are both things said, so both are set as quotations.
+          The marks are drawn here rather than stored, because they are
+          typography: the words are the words. */}
       {quote ? (
-        <Prose style={{ ...Type.body, color: c.textMuted, fontFamily: Fonts.bodyItalic, marginTop: Spacing.xs }}>
-          {quote}
+        <Prose style={{
+          ...Type.body, color: c.textMuted, fontFamily: Fonts.bodyItalic,
+          marginTop: title ? Spacing.xs : 0,
+        }}>
+          {`\u201C${quote}\u201D`}
         </Prose>
       ) : null}
       {say ? (
@@ -3458,7 +3467,7 @@ function NextRow({ title, quote, say, color, onOpen, onKeep }: {
     </View>
   );
   const shell = {
-    flexDirection: 'row' as const, alignItems: 'center' as const, gap: Spacing.sm,
+    flexDirection: 'row' as const, alignItems: 'flex-start' as const, gap: Spacing.sm,
     backgroundColor: c.surface, borderRadius: Radius.md,
     borderWidth: 1, borderColor: c.border,
     /* B107. The bucket's own colour down the left edge, which is also what
@@ -3468,55 +3477,74 @@ function NextRow({ title, quote, say, color, onOpen, onKeep }: {
     borderLeftColor: color || c.border,
     paddingVertical: Spacing.md, paddingLeft: Spacing.lg, paddingRight: Spacing.md,
   };
+  /* What the controls announce. The row may have no title now (a phrase to
+     try is a quotation and nothing else), so the words are whichever half it
+     has. */
+  const said = (title || quote || '').trim();
   return (
     <View style={shell}>
+      {/* B110. Ellie: "Please number each row for clarity." Counted within the
+          open bucket, which is the list a reader is looking at. */}
+      {/* not markable: a row number, not words. */}
+      <Text style={{ ...Type.small, color: c.textMuted, width: 18, textAlign: 'right' }}>
+        {`${n}.`}
+      </Text>
       {onOpen ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${title}. Open where this comes from`}
+          accessibilityLabel={`${said}. Open where this comes from`}
           onPress={onOpen}
           style={{ flex: 1 }}>
           {body}
         </Pressable>
       ) : body}
-      {onKeep ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Keep "${title}" in your relationship journal`}
-          onPress={onKeep}
-          hitSlop={8}
-          style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
-          <SymbolView
-            name={'square.and.pencil' as never}
-            size={16}
-            tintColor={c.textMuted}
-            /* not markable: an icon. The fallback when SF Symbols has no
-               square.and.pencil is a pencil character, not words. */
-            fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u270E'}</Text>}
-            style={{ width: 18, height: 18 }}
-          />
-        </Pressable>
-      ) : null}
-      {onOpen ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Open the page "${title}" comes from`}
-          onPress={onOpen}
-          hitSlop={8}
-          style={{ width: 24, height: 32, alignItems: 'center', justifyContent: 'center' }}>
-          {/* Grey, at her word, and the same chevron the rest of the app uses
-              for "this opens somewhere else". */}
-          <SymbolView
-            name={'chevron.right' as never}
-            size={14}
-            tintColor={c.textMuted}
-            /* not markable: a chevron. The fallback when SF Symbols has no
-               chevron.right is the character itself, which is an arrow rather
-               than words. */
-            fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>}
-            style={{ width: 16, height: 16 }}
-          />
-        </Pressable>
+      {/* ── B109: THE TWO CONTROLS, STACKED ──────────────────────────────
+          Ellie: "Journal icon looks good, but can we put that and the arrow
+          vertically stacked so the content margin can be brought further to
+          the right?" Side by side they took two columns of a phone's width
+          from the words; one above the other they take one. */}
+      {onKeep || onOpen ? (
+        <View style={{ width: 28, alignItems: 'center', gap: 2 }}>
+          {onKeep ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Keep "${said}" in your relationship journal`}
+              onPress={onKeep}
+              hitSlop={8}
+              style={{ width: 28, height: 26, alignItems: 'center', justifyContent: 'center' }}>
+              <SymbolView
+                name={'square.and.pencil' as never}
+                size={16}
+                tintColor={c.textMuted}
+                /* not markable: an icon. The fallback when SF Symbols has no
+                   square.and.pencil is a pencil character, not words. */
+                fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u270E'}</Text>}
+                style={{ width: 18, height: 18 }}
+              />
+            </Pressable>
+          ) : null}
+          {onOpen ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Open the page "${said}" comes from`}
+              onPress={onOpen}
+              hitSlop={8}
+              style={{ width: 28, height: 26, alignItems: 'center', justifyContent: 'center' }}>
+              {/* Grey, at her word, and the same chevron the rest of the app
+                  uses for "this opens somewhere else". */}
+              <SymbolView
+                name={'chevron.right' as never}
+                size={14}
+                tintColor={c.textMuted}
+                /* not markable: a chevron. The fallback when SF Symbols has no
+                   chevron.right is the character itself, which is an arrow
+                   rather than words. */
+                fallback={<Text style={{ ...Type.body, color: c.textMuted }}>{'\u203A'}</Text>}
+                style={{ width: 16, height: 16 }}
+              />
+            </Pressable>
+          ) : null}
+        </View>
       ) : null}
     </View>
   );

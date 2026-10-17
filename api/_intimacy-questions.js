@@ -60,7 +60,19 @@ export const INTIMACY_DIMENSIONS = [
   { id: 'comfort',     label: 'Comfort & Safety', poles: ['Needs time', 'At ease quickly'] },
   { id: 'communication', label: 'Communication',  poles: ['Would rather show', 'Likes to talk it through'] },
   { id: 'adventure',   label: 'Adventurousness',  poles: ['Prefers the familiar', 'Wants novelty'] },
-  { id: 'meaning',     label: 'What It Is For',   poles: ['Release and play', 'Closeness and connection'] },
+  /**
+   * `standalone` is the name to use where the section around it is not there
+   * to say what "it" is.
+   *
+   * Ellie: 'Intimacy "talk about what it is for" should say physical intimacy
+   * not it.' On its own page the short name is right and the long one would
+   * read as shouting; on What Comes Next the row sits among fifteen others
+   * about five exercises, and "Talk about what it is for" names nothing.
+   *
+   * Only this one has it, because only this one is a pronoun. A dimension
+   * whose label is already a noun needs no second name and does not get one.
+   */
+  { id: 'meaning',     label: 'What It Is For',   standalone: 'What physical intimacy is for', poles: ['Release and play', 'Closeness and connection'] },
 ];
 
 // value: 0..1 directional position; null = prefer not to say

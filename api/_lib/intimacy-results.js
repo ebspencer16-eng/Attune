@@ -277,6 +277,10 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       section: 'intimacy-' + d.id,
       id: d.id,
       label: d.label,
+      /* The name to use away from this section, when a dimension has one.
+         What It Is For is the only one, because it is the only label that is
+         a pronoun. See api/_intimacy-questions.js. */
+      ...(d.standalone ? { standalone: d.standalone } : {}),
       // The gradient the website paints this dimension's page. Sent so the app
       // stops drawing all six on cream while the website tints each one.
       ground: groundForDimension(d.id),

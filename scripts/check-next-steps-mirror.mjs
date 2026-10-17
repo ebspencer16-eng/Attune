@@ -198,14 +198,27 @@ if (comms) {
  * (Comms, conflict, rel relf), What to discuss together (expectations,
  * physical intimacy), Phrases to try (Couple type)."
  *
- * Her three, in her order. The labels are what the tiles say, so they are held
- * to her words rather than to a shape.
+ * Then, of the names themselves: "Change titles and make each split to 2
+ * lines: Things to consider, Discussions to have, Phrases to try."
+ *
+ * Both are kept because the first is the grouping and the second is the
+ * wording, and only the wording changed. Her three, in her order, with her
+ * line breaks: a tile that wraps where its width runs out breaks
+ * "Discussions to have" in the wrong place, so the break is in the string.
  */
 const WANTED = [
-  { id: 'keep-in-mind', label: 'What to keep in mind' },
-  { id: 'discuss', label: 'What to discuss together' },
-  { id: 'phrases', label: 'Phrases to try' },
+  { id: 'keep-in-mind', label: 'Things to\nconsider' },
+  { id: 'discuss', label: 'Discussions\nto have' },
+  { id: 'phrases', label: 'Phrases\nto try' },
 ];
+/* Every one on two lines, which is the half of that instruction a label
+   comparison would not notice if the newline were dropped. */
+for (const b of built.buckets || []) {
+  if ((b.label.match(/\n/g) || []).length !== 1) {
+    fails.push(`the "${b.label.replace(/\n/g, ' ')}" bucket is not on two lines.`
+      + ' Ellie asked for each name split in two, and where it splits is hers.');
+  }
+}
 const got = (built.buckets || []).map((b) => `${b.id}:${b.label}`);
 const want = WANTED.map((b) => `${b.id}:${b.label}`);
 if (got.join(' | ') !== want.join(' | ')) {
@@ -244,6 +257,52 @@ const twice = [...seen.entries()].filter(([, n]) => n > 1);
 if (twice.length) {
   fails.push(`${twice.length} action item(s) appear in more than one bucket, starting with`
     + ` "${twice[0][0].title}".`);
+}
+
+/*
+ * ── AND EVERY ROW SAYS SOMETHING ──────────────────────────────────────────
+ * A row's words used to be its title, so an empty title was an empty row.
+ * Since B114 a phrase to try has no title at all: it is a quotation, and the
+ * quote is the whole of it. So the rule is that a row has words, in whichever
+ * of the two fields it uses, rather than that it has a title.
+ */
+for (const b of built.buckets || []) {
+  const mute = (b.items || []).filter((i) => !String(i.title || i.quote || '').trim());
+  if (mute.length) {
+    fails.push(`${mute.length} row(s) in the "${b.label.replace(/\n/g, ' ')}" bucket have no`
+      + ' words in either their title or their quote, so they draw as an empty line.');
+  }
+}
+
+/*
+ * ── THE REFLECTION ROW IS THE READER'S OWN ────────────────────────────────
+ * Ellie: "My action plan should only have my row from rel relf, not Preston's.
+ * And retitle it, say 'when asked to reflect, you said'."
+ *
+ * This reverses an earlier instruction of hers, "I want them to say 'Ellie
+ * wrote: [insert what I wrote]' then 'Preston wrote: [insert what Preston
+ * wrote]'", and both are in api/_lib/what-comes-next.js for the reason this
+ * file keeps round trips: the pair of rows was right for a page that gathers
+ * up what was said and wrong for one that lists what to do.
+ *
+ * The fixture gives both people a commitment, so a builder that still sends
+ * the partner's produces two rows here.
+ */
+const reflection = built.groups.find((g) => g.id === 'reflection');
+if (reflection) {
+  if (reflection.items.length !== 1) {
+    fails.push(`Relationship Reflection carries ${reflection.items.length} rows and should carry`
+      + " one: the reader's own. The partner's commitment is on the Reflection page itself.");
+  }
+  const row = reflection.items[0];
+  if (row && row.title !== 'When asked to reflect, you said') {
+    fails.push(`the reflection row is titled "${row.title}". Her words for it are`
+      + ' "When asked to reflect, you said".');
+  }
+  if (row && row.quote !== 'Be kinder') {
+    fails.push(`the reflection row quotes ${JSON.stringify(row.quote)}, which is not what the`
+      + " reader wrote. It must be the reader's own answer, not the partner's.");
+  }
 }
 
 /* Every bucket row still carries its page, same as every group row. The arrow

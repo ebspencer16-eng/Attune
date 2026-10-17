@@ -10384,12 +10384,22 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       {g.items.map((it, i) => (
                         /* B107: the bucket's colour down the left edge, which
                            is also what says which bucket a row belongs to. */
-                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.35rem", background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 12, padding: "0.8rem 0.6rem 0.8rem 1rem" }}>
+                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 12, padding: "0.8rem 0.5rem 0.8rem 0.85rem" }}>
+                          {/* B110. Ellie: "Please number each row for clarity."
+                              Counted within the bucket that is open, which is
+                              the list in front of the reader. */}
+                          <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, width: "1.1rem", textAlign: "right", flexShrink: 0 }}>
+                            {`${i + 1}.`}
+                          </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.45 }}>
                               {it.tip}
+                              {/* B114: a phrase to try arrives as the quoted
+                                  half of its row and has no heading, so the
+                                  space before the quotation is only drawn when
+                                  there is something to separate it from. */}
                               {it.quote ? (
-                                <span style={{ fontStyle: "italic", color: C.muted }}>{` \u201C${it.quote}\u201D`}</span>
+                                <span style={{ fontStyle: "italic", color: C.muted }}>{`${it.tip ? " " : ""}\u201C${it.quote}\u201D`}</span>
                               ) : null}
                             </div>
                           </div>
@@ -10404,31 +10414,39 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                               a journal entry anchored to the item's words. A
                               second way to save a thing is a second thing to
                               keep in step; this is the first one. */}
-                          <button
-                            onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
-                            aria-label={`Keep "${it.tip}" in your relationship journal`}
-                            title={JOURNAL_COPY.saveTitle}
-                            style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.2rem 0.3rem", flexShrink: 0, display: "inline-flex", alignItems: "center" }}>
-                            {/* A page with a pencil: the same picture the app
-                                draws with square.and.pencil. */}
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                              <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
-                            </svg>
-                          </button>
-                          {/* Ellie: "each with a grey arrow on the right hand
-                              side that takes you to the page in insights where
-                              that row's content is coming from." Grey, at her
-                              word, rather than the bucket's colour. */}
-                          {it.section ? (
+                          {/* ── B109: THE TWO CONTROLS, STACKED ──────────
+                              Ellie: "Journal icon looks good, but can we put
+                              that and the arrow vertically stacked so the
+                              content margin can be brought further to the
+                              right?" Side by side they took two columns from
+                              the words; one above the other they take one. */}
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.1rem", flexShrink: 0 }}>
                             <button
-                              onClick={() => go(it.section)}
-                              aria-label={`Open ${it.tip}`}
-                              title={it.tip}
-                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: "1.1rem", lineHeight: 1, padding: "0.2rem 0.3rem", flexShrink: 0 }}>
-                              {"\u203A"}
+                              onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
+                              aria-label={`Keep "${it.tip || it.quote}" in your relationship journal`}
+                              title={JOURNAL_COPY.saveTitle}
+                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.15rem 0.25rem", display: "inline-flex", alignItems: "center" }}>
+                              {/* A page with a pencil: the same picture the app
+                                  draws with square.and.pencil. */}
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                                <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
+                              </svg>
                             </button>
-                          ) : null}
+                            {/* Ellie: "each with a grey arrow on the right hand
+                                side that takes you to the page in insights
+                                where that row's content is coming from." Grey,
+                                at her word, rather than the bucket's colour. */}
+                            {it.section ? (
+                              <button
+                                onClick={() => go(it.section)}
+                                aria-label={`Open ${it.tip || it.quote}`}
+                                title={it.tip || it.quote}
+                                style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: "1.1rem", lineHeight: 1, padding: "0 0.25rem 0.1rem" }}>
+                                {"\u203A"}
+                              </button>
+                            ) : null}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -10448,7 +10466,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   const out = ["ATTUNE ACTION PLAN", "=".repeat(40), `${userName} & ${partnerName}`, ""];
                   groups.forEach(g => {
                     out.push(g.label.toUpperCase());
-                    g.items.forEach(it => { out.push("- " + it.tip); if (it.phrase) out.push('  Try: "' + it.phrase + '"'); });
+                    /* A phrase to try has no heading, so a row's words are
+                       whichever halves it has. This pushed `it.tip` alone and
+                       would have written "- " for every phrase. */
+                    g.items.forEach(it => {
+                      const words = [it.tip, it.quote ? `\u201C${it.quote}\u201D` : null].filter(Boolean).join(" ");
+                      out.push("- " + words);
+                      if (it.phrase && it.phrase !== it.quote) out.push('  Try: "' + it.phrase + '"');
+                    });
                     out.push("");
                   });
                   const blob = new Blob([out.join("\n")], { type: "text/plain" });

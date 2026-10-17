@@ -84,7 +84,12 @@ if (!both) {
    * looser rules than the thing it groups.
    */
   const ALLOWED_TOP = ['overallState', 'overallDistancePct', 'dimensions', 'domains', 'actionPlan', 'promptLabel', 'allAlignedNote'];
-  const ALLOWED_DOMAIN = ['section', 'id', 'label', 'ground', 'dimensions', 'prompt', 'promptFrom', 'picks'];
+  /* `standalone` is a second NAME for a dimension, for use where the section
+     around it is not there to say what "it" means: What It Is For becomes
+     What physical intimacy is for on What Comes Next. A name is not an
+     answer, which is what this gate is about, and it comes from the question
+     registry rather than from either person. See api/_intimacy-questions.js. */
+  const ALLOWED_DOMAIN = ['section', 'id', 'label', 'standalone', 'ground', 'dimensions', 'prompt', 'promptFrom', 'picks'];
   // `positions` is the two partners' averages over the questions in this
   // dimension. It is an aggregate of `questions`, which is already listed
   // below and is the whole point of the screen, so it exposes nothing new: it
@@ -124,7 +129,7 @@ if (!both) {
    * unless both answer sets exist, so nothing crosses before both have
    * finished, and the comparison still goes only to the two of them.
    */
-  const ALLOWED_DIM = ['section', 'id', 'label', 'intro', 'poles', 'state', 'distancePct', 'alignedPct',
+  const ALLOWED_DIM = ['section', 'id', 'label', 'standalone', 'intro', 'poles', 'state', 'distancePct', 'alignedPct',
     'positions', 'ground', 'body', 'reason', 'prompt', 'questions', 'picks'];
   const ALLOWED_PICK = ['id', 'text', 'topic', 'you', 'them'];
   const ALLOWED_ROW = ['id', 'text', 'low', 'high', 'you', 'them'];

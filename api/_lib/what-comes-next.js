@@ -67,10 +67,21 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
        * A tip with no phrase is dropped rather than shown as a heading with
        * nothing to say, which is what the conflict rows used to be.
        */
+      /**
+       * ── B114: AND IT IS A QUOTATION, SO IT IS SET AS ONE ───────────────
+       * Ellie: "Put phrases to try in quotes and italics."
+       *
+       * `quote` rather than `title`, because that is the field both surfaces
+       * already draw in italics inside quotation marks: it is what the
+       * reflection rows use for the words somebody wrote. A phrase to try is
+       * the same kind of thing, something said, so it gets the same treatment
+       * rather than a second one.
+       */
       items: type.tips.slice(0, 3)
         .filter((t) => t.phraseTry)
         .map((t) => ({
-          title: named(t.phraseTry),
+          title: null,
+          quote: named(t.phraseTry),
           body: null,
           say: null,
           section: 'couple-type',
@@ -269,9 +280,25 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
      * check-what-comes-next.mjs says out loud that it does not cover. This
      * changes the app only, and that is the surface she is reading.
      */
+    /**
+     * ── B112: AND IT IS THE READER'S OWN LINE ONLY ────────────────────────
+     * Ellie: "My action plan should only have my row from rel relf, not
+     * Preston's. And retitle it, say 'when asked to reflect, you said'."
+     *
+     * This page is built per reader, so "you" is whoever is holding it and
+     * each of them gets their own sentence. The partner's commitment is still
+     * on the Relationship Reflection page, side by side with theirs, which is
+     * where comparing the two belongs; an action plan is a list of things for
+     * the person reading it to do.
+     *
+     * Her earlier instruction, "I want them to say 'Ellie wrote: [insert what
+     * I wrote]' then 'Preston wrote: [insert what Preston wrote]'", is
+     * reversed by this one. Both are kept because the round trip is the
+     * argument: the two rows were right for a page that gathers up what was
+     * said, and wrong for one that lists what to do.
+     */
     const items = [];
-    if (commitment.you) items.push({ title: `${you} wrote:`, quote: commitment.you, body: null, say: null, section: 'reflection-overview' });
-    if (commitment.them) items.push({ title: `${them} wrote:`, quote: commitment.them, body: null, say: null, section: 'reflection-overview' });
+    if (commitment.you) items.push({ title: 'When asked to reflect, you said', quote: commitment.you, body: null, say: null, section: 'reflection-overview' });
     groups.push({
       id: 'reflection',
       color: '#10B981',
@@ -299,8 +326,19 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
        * it happens", which is the dimension's name rather than something to do.
        * Its prompt is the same on both.
        */
+      /**
+       * ── B113: THE NOUN, NOT THE PRONOUN ────────────────────────────────
+       * Ellie: 'Intimacy "talk about what it is for" should say physical
+       * intimacy not it.'
+       *
+       * What It Is For reads correctly on its own page, where everything
+       * around it says what "it" is. Here it is one row among fifteen about
+       * five different exercises, so the question carries a second name for
+       * use outside its section and this reads that. See `standalone` in
+       * api/_intimacy-questions.js.
+       */
       items: convos.map((d) => ({
-        title: `Talk about ${String(d.label || '').toLowerCase()}`,
+        title: `Talk about ${String(d.standalone || d.label || '').toLowerCase()}`,
         body: null,
         say: named(d.prompt),
         section: d.section || 'intimacy-overview',
@@ -338,10 +376,20 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
        `title` and `say` and nothing else, so on a phone every conflict row was
        a heading with nothing under it. It is the Try line on both surfaces
        now, which is where the website has always printed it. */
+    /**
+     * ── B111: THE ADVICE IS THE ROW ────────────────────────────────────
+     * Ellie: "Remove titles on conflict ones, just make the description the
+     * content and format it the same way the other rows are formatted."
+     *
+     * The same change the communication rows had in B102, for the same
+     * reason: the heading was the pattern's name, which is a category, and
+     * what to do was the line under it. The pattern's name is still on the
+     * Conflict Patterns page, which is where the arrow goes.
+     */
     .map((a) => ({
-      title: a.title,
+      title: (a.body || a.title || '').replace(/\{partner\}/g, them),
       body: null,
-      say: (a.body || '').replace(/\{partner\}/g, them),
+      say: null,
       section: 'conflict-overview',
     }));
 
@@ -352,11 +400,12 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       section: 'conflict-overview',
       items: conflictItems.length ? conflictItems : [{
         // Nothing in a band worth watching is a real answer, not an empty one.
-        // Its sentence is the Try line, like every other row here, and it opens
-        // the same page: a row with no way out is the thing the arrows replaced.
+        // One sentence and no line under it, which is how every conflict row
+        // reads since B111, and it opens the same page: a row with no way out
+        // is the thing the arrows replaced.
         title: 'Reread your patterns before the next hard conversation',
         body: null,
-        say: 'Not during one. The point of knowing them is recognising one early.',
+        say: null,
         section: 'conflict-overview',
       }],
     });
@@ -382,23 +431,31 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
    * one screen rather than about what the results contain.
    */
   const BUCKETS = [
+    /* ── B108: HER NAMES, AND HER LINE BREAKS ────────────────────────────
+       Ellie: "Change titles and make each split to 2 lines: Things to
+       consider, Discussions to have, Phrases to try."
+
+       The break is in the string because it is hers: a tile that wraps where
+       the width happens to run out breaks "Discussions to have" after
+       "Discussions to", which is not where she put it. Both surfaces honour
+       the newline, so the two tiles read the same. */
     {
       id: 'keep-in-mind',
-      label: 'What to keep in mind',
+      label: 'Things to\nconsider',
       /* The three that describe how you already are with each other. */
       from: ['comm', 'conflict', 'reflection'],
       color: '#E8673A',
     },
     {
       id: 'discuss',
-      label: 'What to discuss together',
+      label: 'Discussions\nto have',
       /* The two that are lists of conversations to have. */
       from: ['exp', 'intimacy'],
       color: '#1B5FE8',
     },
     {
       id: 'phrases',
-      label: 'Phrases to try',
+      label: 'Phrases\nto try',
       from: ['couple-type'],
       color: '#9B5DE5',
     },

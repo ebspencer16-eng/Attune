@@ -54,7 +54,30 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** The three from your last message are built and in section 3.
+**Nothing open.** The seven from your last message are built and in section 3.
+
+### B108 to B114, where to look
+
+All seven are the What Comes Next page, on both surfaces. **The site is live
+and the app needs two launches.**
+
+The tiles now read Things to consider, Discussions to have, Phrases to try,
+each on two lines, with the journal beside them. Open one and the rows are
+numbered, each with the note icon above the arrow on the right, which gives
+the words most of the width.
+
+The conflict rows are their advice now, with no heading, like the
+communication rows. Relationship Reflection carries one row, yours, under
+"When asked to reflect, you said"; his copy says the same about his. Physical
+Intimacy says "Talk about what physical intimacy is for". The phrases to try
+are in italics inside quotation marks with nothing above them.
+
+**One thing I could not check.** The simulator lost its window part-way
+through and would not get it back, so the app side of these seven is verified
+by its types, by the gates, and by the fact that both surfaces draw the same
+fields from the same server, but I did not see it on a phone. The website half
+I did drive and screenshot. If a row looks wrong on your phone, that is where
+it will be.
 
 ### B106, the note icon, in detail
 
@@ -107,6 +130,13 @@ your edits have to land in the module and they do.
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+| B108 | **Done, both surfaces.** Things to consider, Discussions to have, Phrases to try, each broken onto two lines where you broke it. |
+| B109 | **Done, both surfaces.** The note icon sits above the arrow and the words start further left and run further right. |
+| B110 | **Done, both surfaces.** Numbered within whichever bucket is open. |
+| B111 | **Done, both surfaces.** A conflict row is its advice, with the pattern's name gone; the name is still on the Conflict Patterns page, which is where the arrow goes. |
+| B112 | **Done, both surfaces.** One row, yours, under "When asked to reflect, you said". Preston sees his own on his copy. |
+| B113 | **Done, both surfaces.** "Talk about what physical intimacy is for." The dimension keeps its short name on its own page. |
+| B114 | **Done, both surfaces.** Italic, in quotation marks, and with no heading above the phrase. |
 | B106 | **Done, both surfaces.** Every action item now has a note icon beside its arrow, and it opens the same sheet the insight of the day opens, with the item already in it and a box for your commentary. |
 | B107 | **Done, both surfaces.** Each tile and each row carries its bucket's own colour: the communication orange, the expectations blue, the couple type purple, and a warm brown for the journal. Say if you want more. |
 | C13 | **Done.** 31 of the 150 are out of the module the product reads, and the review document is rebuilt from it. All 119 that remain are verified against the page or the scan they cite. |
