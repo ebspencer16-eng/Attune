@@ -42,7 +42,7 @@ import type {
   ReflectionInsight, ReflectionRating, ReflectionResults, ResultDimension, ResultsNavGroup, ResultsSection,
   Note, Tag,
 } from '@/api/client';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 /* The journal's one-slot handle, for What Comes Next's fourth tile. The Notes
    tab exports it for exactly this: the home screen's quick link uses the same
    pair, so a tile that opens the journal is not a second way of opening it. */
@@ -1286,13 +1286,14 @@ function SectionBody({
    */
   if (section.endsWith('-cover')) {
     return (
+      /* B118. Ellie: "Remove the 'see insights' button from the exercise
+         cover pages." The cover is the chapter's name and what is inside it;
+         the arrows at the foot of the page move you on. */
       <Cover
         title={coverTitle}
         contents={coverContents}
         accent={accent || c.accent}
         icon={coverIcon}
-        startLabel={pageCopy('coverStart', 'See insights')}
-        onStart={() => onGoToSection(section.replace('-cover', '-overview'))}
       />
     );
   }
@@ -1301,7 +1302,9 @@ function SectionBody({
     return (
       <CoupleType
         results={results} you={you} them={them}
-        title={pageCopy('coupleTypeTitle', `${you} and ${them}'s relationship dynamic`)}
+        /* The fallback is the same words the server sends, for a cached
+           payload written before this line changed. B117. */
+        title={pageCopy('coupleTypeTitle', 'Your unique dynamic')}
       />
     );
   }
@@ -3153,6 +3156,13 @@ function mixHex(a: string, b: string, t: number): string {
 }
 
 /**
+ * What /api/survey last said: whether this reader has answered it, and the
+ * words on the opener. Held for the life of the app so a page that remounts
+ * draws its button straight away rather than after a round trip. See B119.
+ */
+let lastSurvey: { done: boolean; copy: SurveyForm['copy'] } | null = null;
+
+/**
  * The closing page.
  *
  * Everything the results ask this couple to do, in the order worth doing it,
@@ -3183,24 +3193,60 @@ function WhatComesNext({
      commentary under it. */
   const [keeping, setKeeping] = useState<string | null>(null);
   const [surveyOpen, setSurveyOpen] = useState(false);
-  const [surveyDone, setSurveyDone] = useState<boolean | null>(null);
+  /**
+   * ── B119: AND THE ANSWER IS REMEMBERED ────────────────────────────────
+   * Ellie: "I clicked to a different insights page then back to what's next
+   * and the leave feedback button went away."
+   *
+   * Every page of results is keyed on its section, so coming back here is a
+   * fresh mount and a fresh request. The button is drawn on the answer to
+   * that request, so between the mount and the reply there is no button, and
+   * a request that fails leaves none at all: `surveyDone` goes false, the
+   * copy stays null, and the card's second condition is never met.
+   *
+   * `lastSurvey` is what the server last said, kept for the life of the app.
+   * The page opens on it and the request refreshes it, so the control is
+   * there the moment the page is. It is not a second copy of the words: it is
+   * the server's own reply, held rather than thrown away.
+   */
+  const [surveyDone, setSurveyDone] = useState<boolean | null>(lastSurvey ? lastSurvey.done : null);
   /* The words on the opener come from the payload, like every other word in
      this survey. An Expo app cannot import api/_lib/survey.js, and a title
      typed here would be the second copy of a sentence. */
-  const [surveyCopy, setSurveyCopy] = useState<SurveyForm['copy'] | null>(null);
+  const [surveyCopy, setSurveyCopy] = useState<SurveyForm['copy'] | null>(lastSurvey ? lastSurvey.copy : null);
   useEffect(() => {
     let live = true;
     fetchSurvey().then((r) => {
       if (!live) return;
-      /* A request that fails leaves it unknown rather than done: a survey we
-         cannot ask about is one we ask. */
-      setSurveyDone(r.ok ? !!r.data.finished : false);
-      if (r.ok) setSurveyCopy(r.data.copy);
+      /* A request that fails leaves what we already knew. It used to set
+         `done` false and no copy, which draws nothing: the one outcome that
+         removes the button rather than keeping it. */
+      if (!r.ok) { if (!lastSurvey) setSurveyDone(false); return; }
+      lastSurvey = { done: !!r.data.finished, copy: r.data.copy };
+      setSurveyDone(lastSurvey.done);
+      setSurveyCopy(lastSurvey.copy);
     });
     return () => { live = false; };
   }, []);
   /** Which bucket is open, if any. Only one ever is. */
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  /**
+   * ── B115: AND IT CLOSES WHEN YOU LEAVE ────────────────────────────────
+   * Ellie: "I left the app and clicked back in and went to learn, then back
+   * to what's next and things to consider was still open. It should auto
+   * close whatever dropdown is open if you leave the what comes next page."
+   *
+   * Moving between insights pages already closes it: every page is keyed on
+   * its section, so the next one is a fresh mount. Leaving the TAB is not,
+   * because the tab keeps its screen mounted, which is what makes going back
+   * to it instant. So the close happens on losing focus.
+   *
+   * This is the same rule she gave once before, of a different control:
+   * "Dropdowns should always close when you leave the page."
+   */
+  useFocusEffect(
+    useCallback(() => () => setOpenGroup(null), []),
+  );
   if (!data?.groups.length) {
     return (
       <Waiting
@@ -4062,10 +4108,8 @@ function CoupleType({ results, you, them, title }: {
  * too. Ellie: "Mirror cover pages for exercises and results on both web and
  * app." What is left here is what a chapter puts inside it.
  */
-function Cover({ title, contents, accent, icon, onStart, startLabel }: {
-  title: string; contents?: string[]; accent: string; icon?: string | null; onStart?: () => void;
-  /* From the server's PAGE_COPY, so the website's cover says the same word. */
-  startLabel: string;
+function Cover({ title, contents, accent, icon }: {
+  title: string; contents?: string[]; accent: string; icon?: string | null;
 }) {
   return (
     /* The bottom line has to clear the tab bar: a frame whose edge runs
@@ -4098,23 +4142,14 @@ function Cover({ title, contents, accent, icon, onStart, startLabel }: {
         </View>
       ) : null}
 
-      {onStart ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onStart}
-          style={{
-            marginTop: Spacing.xxl,
-            backgroundColor: accent,
-            borderRadius: Radius.pill,
-            paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl,
-          }}>
-          {/* block: cover/start */}
-          {/* not markable: the word on a button. A mark anchored to a control
-              would follow the control rather than sit on a sentence, and there
-              is nothing here to think about. */}
-          <Text style={{ ...Type.cardTitle, color: Palette.white }}>{startLabel}</Text>
-        </Pressable>
-      ) : null}
+      {/* ── NO BUTTON ───────────────────────────────────────────────
+          B118. Ellie: "Remove the 'see insights' button from the exercise
+          cover pages." It said See insights, in the section's colour, and
+          went to the first page inside. The arrows at the foot of every
+          results page do that, and the nav opens any page directly, so it
+          was a third way to do one thing on the one page that has nothing
+          else on it. The `cover/start` block went with it on both surfaces,
+          and PAGE_COPY.coverStart with that. */}
     </CoverPage>
   );
 }

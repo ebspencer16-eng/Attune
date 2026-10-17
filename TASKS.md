@@ -54,7 +54,50 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** The seven from your last message are built and in section 3.
+**Nothing open.** The five from your last message are built and in section 3.
+
+### B115 to B119, the detail
+
+**B115.** Your words: "I left the app and clicked back in and went to learn,
+then back to what's next and things to consider was still open. It should auto
+close whatever dropdown is open if you leave the what comes next page." Moving
+between insights pages already closes it, because each page is a fresh mount.
+Leaving the tab does not, because the tab stays mounted, so this closes it when
+the screen loses focus.
+
+**B116.** Above the Open label rather than below it, and turned to lie the same
+way the label does.
+
+**B117.** You asked for the whole couple type tile to be on screen when the
+page opens, and suggested the heading. Two changes: the heading becomes "Your
+unique dynamic", which is one line instead of two, and the map is sized from
+the height of the window rather than fixed, so the tile has room on a small
+phone as well as a large one. You removed "unique" from this heading once
+before, so tell me if it should read differently now that it is not the names.
+
+**B118.** Gone from both surfaces. The arrows at the foot of the page still
+move you on, and the nav still opens any page directly.
+
+**B119.** Your words: "I clicked to a different insights page then back to
+what's next and the leave feedback button went away." Each page is a fresh
+mount, so coming back asks the server again whether you have answered the
+survey, and the button is not drawn until that answer arrives. If the request
+fails it never arrives. The answer is remembered now, so the button is there
+the moment the page is.
+
+**And one thing I found while checking B115, which was not yours to report.**
+The Side by Side panel on the three Communication pages could not be opened at
+all on the website. Clicking it opened it and something closed it again within
+fifty milliseconds, every time.
+
+Those pages were rebuilding themselves about forty-eight times a second. Two
+pieces of housekeeping in the results renderer had no instruction to say when
+to run, so both ran after every render: one restored the nav's scroll
+position, the other listened for scrolling, and each kept setting the other
+off. Nothing errored and the page looked still. Both now run when the page
+changes, which is what they are for, and the panel stays open. It had been
+like that since before this week.
+
 
 ### B108 to B114, where to look
 
@@ -130,6 +173,11 @@ your edits have to land in the module and they do.
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+| B115 | **Done, both surfaces.** An open bucket closes when you leave What Comes Next, including when you leave the tab and come back to it. |
+| B116 | **Done, both surfaces.** The question mark is above the Open label and lies the same way it does. |
+| B117 | **Done, both surfaces.** The heading is "Your unique dynamic" and the map takes a third of the window rather than a fixed square. Tell me if the tile still does not fit on your phone, and tell me about the heading: you asked me to take "unique" out of it once before. |
+| B118 | **Done, both surfaces.** The cover is the chapter's name and what is inside it; the arrows at the foot of the page move you on. |
+| B119 | **Done.** The answer about the survey is remembered, so the button is there the moment the page is rather than after a round trip, and a failed request no longer removes it. |
 | B108 | **Done, both surfaces.** Things to consider, Discussions to have, Phrases to try, each broken onto two lines where you broke it. |
 | B109 | **Done, both surfaces.** The note icon sits above the arrow and the words start further left and run further right. |
 | B110 | **Done, both surfaces.** Numbered within whichever bucket is open. |

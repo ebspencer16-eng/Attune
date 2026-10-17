@@ -188,34 +188,42 @@ export const PAGE_COPY = {
    * back to the reader two inches under it.
    */
   commPlacements: 'Overview',
-  /**
-   * The one control on a chapter's cover page.
+  /*
+   * `coverStart` was here: the word on a chapter cover's one button, See
+   * insights, shared so both surfaces said it.
    *
-   * ── WHY IT IS HERE AND NOT IN THE SCREEN ────────────────────────────────
-   * It was `<Text>See insights</Text>` inside the app's results.tsx, which was
-   * fine while the app was the only surface with cover pages. Ellie: "Mirror
-   * cover pages for exercises and results on both web and app." The moment the
-   * website draws the same page, a word typed into one renderer is a word the
-   * other has to guess, and that is how "Back to dashboard" and "Back to
-   * insights" came to be two endings for one exercise.
-   *
-   * The cover carries the chapter's name and this. Everything else on it would
-   * be copy, and copy is Ellie's.
+   * Ellie: "Remove the 'see insights' button from the exercise cover pages."
+   * So the button is gone from both and the word went with it, rather than
+   * staying as a string nothing draws. The cover is the chapter's name and
+   * the list of what is inside it; the arrows at the foot of every results
+   * page are how a reader moves on.
    */
-  coverStart: 'See insights',
 
   /** The tip tiles on an expectations conversation page. Takes both names. */
   expectationsTip: (you, them) => `A tip for ${you} and ${them}`,
   /**
    * The couple type page's heading.
    *
-   * Ellie: "any way to make this title fit on 3 lines? Maybe just [Partner
-   * name] and [Partner name]'s unique relationship dynamic". Her wording. The
-   * old line, "What your responses uncover about your unique relationship
-   * dynamic", ran to five on a phone and said the same thing.
+   * ── IT HAS BEEN FOUR THINGS, AND EACH CHANGE IS HERS ──────────────────
+   * "What your responses uncover about your unique relationship dynamic" ran
+   * to five lines on a phone. Then: "any way to make this title fit on 3
+   * lines? Maybe just [Partner name] and [Partner name]'s unique relationship
+   * dynamic". Then: "remove 'unique' from hero of couple type results page".
+   *
+   * And now, of the page as a whole: "I would love for the 'money slide' when
+   * you open the couple type page to fit the full couple type tile on the
+   * screen. I've attached the screenshot of the current page, maybe if we said
+   * 'Your unique dynamic' it would fit?"
+   *
+   * Two lines on a phone became one, which is most of what the tile needed;
+   * the map giving back some height is the rest. The names are gone from it,
+   * which is the trade she proposed: the page is addressed to the reader and
+   * their names are on the tile below it.
+   *
+   * It takes both names still, because a caller that has them should not have
+   * to know this line stopped using them.
    */
-  // Ellie: "remove 'unique' from hero of couple type results page".
-  coupleTypeTitle: (you, them) => `${you} and ${them}'s relationship dynamic`,
+  coupleTypeTitle: () => 'Your unique dynamic',
 };
 
 export const RESULTS_SECTION_LABELS = {

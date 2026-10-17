@@ -164,12 +164,18 @@ export const SECTION_BLOCKS = {
    *
    * The mark is not a block. It is the chapter's glyph, and a reader who could
    * not see it would not be missing anything they were told. The frame is,
-   * because without it this is not a cover; so are the name and the way in.
+   * because without it this is not a cover; so is the name.
+   *
+   * `start` was a block here: the one button, See insights, going to the
+   * chapter's overview. Ellie: "Remove the 'see insights' button from the
+   * exercise cover pages." It is gone from both surfaces, so it is gone from
+   * the spec rather than left as something neither draws. Both marks were
+   * removed in the same commit, which is what stops this becoming a block one
+   * surface quietly dropped.
    */
   cover: [
     { id: 'frame', note: 'The gradient rule around the page, which is what makes it a cover.' },
     { id: 'title', note: "The chapter's name." },
-    { id: 'start', note: 'The one way in, to that chapter\u2019s overview.' },
   ],
 
   // Split deliberately. `groups` is on both surfaces and is enforced;

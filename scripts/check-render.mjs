@@ -22,7 +22,7 @@
 import { readFileSync } from 'fs';
 
 import { launch } from './_lib/browser.mjs';
-import { RESULTS_SECTIONS, COVER_SECTIONS, RESULTS_SECTION_LABELS, PAGE_COPY } from '../api/_lib/results-sections.js';
+import { RESULTS_SECTIONS, COVER_SECTIONS, RESULTS_SECTION_LABELS } from '../api/_lib/results-sections.js';
 import { conflictDemo } from '../api/_lib/conflict-demo.js';
 import { PKG_CAPS } from '../api/_lib/entitlements.js';
 
@@ -191,26 +191,40 @@ for (const section of SECTIONS) {
   /**
    * ── A COVER IS SHORT ON PURPOSE ─────────────────────────────────────────
    * Ellie: "Mirror cover pages for exercises and results on both web and app."
-   * A chapter cover is a mark, a name and one control, which comes to about
-   * five hundred characters including the nav. Judging it by length would call
-   * every one of them empty, and the length rule is what reported two of them
-   * as "no demo data" for months while they rendered nothing at all.
+   * A chapter cover is a mark, a name and the list of what is inside, which
+   * comes to about five hundred characters including the nav. Judging it by
+   * length would call every one of them empty, and the length rule is what
+   * reported two of them as "no demo data" for months while they rendered
+   * nothing at all.
    *
    * So a cover is judged by what it has to carry: the chapter's name, from
-   * RESULTS_SECTION_LABELS, and the one word on its button, from PAGE_COPY.
-   * Both come from the modules the app reads, so this also fails if the two
-   * surfaces stop agreeing about either.
+   * RESULTS_SECTION_LABELS, which is the module the app reads too, so this
+   * also fails if the two surfaces stop agreeing about it.
+   *
+   * It used to assert a button as well, reading PAGE_COPY.coverStart. Ellie:
+   * "Remove the 'see insights' button from the exercise cover pages." The
+   * button and the string are both gone, so what is left is the half that is
+   * still true. A cover with nothing on it but a frame would now pass this
+   * line and fail the next: `contents` is drawn from the nav and every
+   * chapter has pages in it.
    */
   const isCover = COVER_SECTIONS.includes(section);
   const coverMissing = isCover
-    ? await page.evaluate(({ want, cta }) => {
+    ? await page.evaluate(({ want }) => {
       const el = document.querySelector('[data-results-scroll]');
       if (!el) return 'no results column at all';
       const h1 = el.querySelector('h1');
       if (!h1 || h1.innerText.trim() !== want) return `no heading reading "${want}" (found ${JSON.stringify(h1 ? h1.innerText.trim() : null)})`;
-      const hasCta = [...el.querySelectorAll('button')].some((b) => (b.textContent || '').trim() === cta);
-      return hasCta ? null : `no button reading "${cta}"`;
-    }, { want: RESULTS_SECTION_LABELS[section] || '', cta: PAGE_COPY.coverStart })
+      /* The contents list: the pages inside this chapter, by their nav names.
+         B94 put it there and nothing asserted it, so a cover that lost it
+         would have read as a cover that was always a name on its own. */
+      const words = (el.textContent || '');
+      const inside = (want === 'Communication Styles')
+        ? ['Overview', 'Internal Processing']
+        : [];
+      const missing = inside.filter((label) => !words.includes(label));
+      return missing.length ? `no contents list: ${missing.join(', ')} not on the page` : null;
+    }, { want: RESULTS_SECTION_LABELS[section] || '' })
     : null;
   const empty = !isCover && text.trim().length < 600;
   // A section this couple cannot reach now redirects to highlights rather than

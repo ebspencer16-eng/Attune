@@ -60,6 +60,10 @@ try {
      journal. B106. Here for the same reason as the line above: it drives the
      demo results path, which needs this preview. */
   await run(process.execPath, ['scripts/check-journal-export.mjs'], { env: { ...process.env, BASE } });
+  /* Her rule, given twice: a dropdown closes when you leave the page it is
+     on. Driven, because nothing about what survives a navigation is visible
+     in the source. B115. */
+  await run(process.execPath, ['scripts/check-dropdowns-close.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }

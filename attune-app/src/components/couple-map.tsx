@@ -96,11 +96,27 @@ export default function CoupleMap({
   const [opened, setOpened] = useState<{ kind: 'dot' | 'axis'; id: string } | null>(null);
   /* Nothing stays open across a change of couple or of orientation. */
   useEffect(() => { if (!interactive) setOpened(null); }, [interactive]);
-  const { width } = useWindowDimensions();
-  // Full width inside the page's 24pt gutters, less the two side margins the
-  // rotated axis labels sit in, capped so it does not become a huge square on
-  // a tablet.
-  const size = fixedSize ?? Math.min(320, width - Spacing.xl * 2 - SIDE * 2);
+  const { width, height } = useWindowDimensions();
+  /**
+   * Full width inside the page's 24pt gutters, less the two side margins the
+   * rotated axis labels sit in, capped so it does not become a huge square on
+   * a tablet.
+   *
+   * ── AND CAPPED BY THE HEIGHT TOO ──────────────────────────────────────
+   * Ellie: "I would love for the 'money slide' when you open the couple type
+   * page to fit the full couple type tile on the screen."
+   *
+   * The square was sized from the width alone, so on a tall phone it took
+   * about a third of the screen and pushed the type reveal, which is the
+   * thing the page is for, under the fold. A third of the window height is
+   * the budget it gets now, which also means a small phone gets a smaller
+   * map rather than a map that fits and a tile that does not.
+   */
+  const size = fixedSize ?? Math.min(
+    320,
+    width - Spacing.xl * 2 - SIDE * 2,
+    Math.round(height * 0.32),
+  );
   const qs = quadrants?.length === 4 ? quadrants : null;
   const pa = a?.coords;
   const pb = b?.coords;
@@ -397,12 +413,20 @@ function SideLabel({ text, side, height, onDark, help, onHelp }: {
         }}>
         {text}
       </Text>
-      {/* Below the word, along the axis it belongs to, so it reads as part of
-          that label rather than as something floating in the margin. The
-          label is rotated and this is not: a rotated question mark reads as
-          a glyph that has fallen over. */}
+      {/* ── B116: ABOVE THE WORD, AND TURNED THE SAME WAY ──────────────
+          Ellie: "On couple type page, move the question icon above the open
+          axis label and turn it to have the same orientation as the label."
+
+          It was below it and upright, on the argument that a rotated glyph
+          reads as one that has fallen over. Hers is the better call: a mark
+          in a rotated margin that is not rotated reads as something that does
+          not belong to the label it is beside. */}
       {help && onHelp ? (
-        <View style={{ position: 'absolute', top: height / 2 + 34 }}>
+        <View style={{
+          position: 'absolute',
+          bottom: height / 2 + 26,
+          transform: [{ rotate: side === 'left' ? '-90deg' : '90deg' }],
+        }}>
           <HelpMark axis={help} onDark={onDark} onPress={onHelp} />
         </View>
       ) : null}

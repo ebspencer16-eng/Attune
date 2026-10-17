@@ -1257,6 +1257,40 @@ the quotation's budget was more space for that rule to spread. A gap that has to
 survive a layout belongs in padding on the container, which spreading cannot
 reach. Three reports is the signal that the number was never the subject.
 
+**A component declared inside another one remounts everything under it, on
+every render.** `const Layout = ({ children }) => (...)` sits inside
+`UnifiedResults`, so each render makes a new component type and React throws
+the whole page away and builds it again. That is survivable while renders are
+rare. It was not: two effects in the same component had no dependency array,
+so both re-ran after every render, one wrote the sidebar's scrollTop and the
+other listened for scroll in the CAPTURE phase, and between them the
+Communication detail pages rebuilt themselves about forty-eight times a second.
+
+The symptom was that the Side by Side panel could not be opened. A `<details>`
+keeps its open state in the DOM, so a reader's click opened it and the next
+remount, fifty milliseconds later, replaced it with a fresh shut one. Nothing
+errored, the console was clean, and the page looked still.
+
+Three things worth keeping from finding it. A MutationObserver on the one div
+the page hangs from reports a remount as a remove and an add of the same node,
+which is how to tell a remount from a re-render. Disabling one suspect at a
+time and measuring, rather than reading, found the pair in two builds; either
+one alone stops the loop, which is also why planting one of them back does not
+reproduce it. And the fix is a dependency array on each, `[section]`, because
+both are things to do when the page changes.
+
+**A gate that navigates by reloading is not testing navigation.** The first
+version of `check-dropdowns-close` went from page to page with `page.goto`,
+which throws the application away and builds it again, so every piece of state
+is gone for reasons that have nothing to do with the rule. Deleting the close
+outright passed it. Moving inside the page, through the arrows a reader uses,
+is what made the plant fail.
+
+And the arrows are a trap of their own: an action item's own arrow is the same
+character as the page arrow, so matching on the glyph pressed a row and
+navigated to the page that row came from. The gate now takes only the two
+arrows whose computed position is fixed.
+
 **A dispatched click with no coordinates is a click at x=0.** The results
 column pages back on a click in its left sixth, Ellie's own rule from the
 storycards. `new MouseEvent('click', { bubbles: true })` has clientX 0, so

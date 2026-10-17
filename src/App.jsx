@@ -2132,10 +2132,13 @@ const NEAR_AXIS_PROSE = NEAR_AXIS_PROSE_SHARED;
  * which is about 12 points on a phone, and the transparent circle behind it is
  * 16, which is the finger.
  */
-function AxisHelpMark({ cx, cy, axis, onOpen }) {
+function AxisHelpMark({ cx, cy, axis, onOpen, rotate = 0 }) {
   return (
     <g style={{ cursor: "pointer" }} role="button" tabIndex={0}
       aria-label={`What ${axis.label} means`}
+      /* Turned about its own centre, so a mark beside a rotated label lies
+         the same way the label does. */
+      transform={rotate ? `rotate(${rotate} ${cx} ${cy})` : undefined}
       onClick={(e) => { e.stopPropagation(); onOpen(); }}>
       {/* The finger, not the glyph. 24 of a 460 viewBox is 48 units across,
           which is about 33 points on a phone where the circle itself is 12. */}
@@ -2349,7 +2352,10 @@ function CoupleMapSVG({ myS, partS, userName, partnerName, size = 480, hideCapti
           <>
             <AxisHelpMark cx={midX + 52} cy={cy1 + 26} axis={ENGAGE_AXIS}
               onOpen={() => setOpened((o) => (o?.id === ENGAGE_AXIS.id ? null : { kind: "axis", id: ENGAGE_AXIS.id }))} />
-            <AxisHelpMark cx={cx0 - 14} cy={midY + 34} axis={OPEN_AXIS}
+            {/* B116. Ellie: "move the question icon above the open axis
+                label and turn it to have the same orientation as the label."
+                Above it, and rotated the same quarter turn the label is. */}
+            <AxisHelpMark cx={cx0 - 14} cy={midY - 40} axis={OPEN_AXIS} rotate={-90}
               onOpen={() => setOpened((o) => (o?.id === OPEN_AXIS.id ? null : { kind: "axis", id: OPEN_AXIS.id }))} />
           </>
         )}
@@ -7876,6 +7882,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
      disclosure, so it is state. Null is all four closed, which is how the
      page opens. */
   const [openBucket, setOpenBucket] = useState(null);
+  /* ── B115: AND IT CLOSES WHEN YOU LEAVE THE PAGE ──────────────────────
+     Ellie: "It should auto close whatever dropdown is open if you leave the
+     what comes next page."
+
+     The app gets this from a fresh mount per page and a close on losing
+     focus. Here one component draws every results page, so the state
+     survives a page change unless something clears it. */
+  useEffect(() => {
+    if (section !== "what-comes-next") setOpenBucket(null);
+  }, [section]);
   /* B106. The action item being kept, or null. The same sheet the insight of
      the day opens, writing the same kind of journal entry. */
   const [keepingAction, setKeepingAction] = useState(null);
@@ -8168,7 +8184,19 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     apply();
     const raf = requestAnimationFrame(() => { apply(); navRestoring.current = false; });
     return () => { cancelAnimationFrame(raf); navRestoring.current = false; };
-  });
+    /* ── IT RUNS WHEN THE PAGE CHANGES, NOT ON EVERY RENDER ──────────────
+       This had no dependency array, so it re-ran after every render and
+       wrote the sidebar's scrollTop each time. That write raises a scroll
+       event, the effect below listens for scroll in the capture phase, and
+       between them they re-rendered this component about fifty times a
+       second on the Communication detail pages. `Layout` is declared inside
+       this component, so every one of those renders was a full remount of
+       the page: a <details> opened by a reader was destroyed within 50ms,
+       which is why the Side by Side panel could not be opened at all.
+
+       Restoring the nav's scroll position is a thing to do when the page
+       changes, which is what `section` says. */
+  }, [section]);
 
   const go = (sec) => {
     if (sec !== section) writeSectionToUrl(sec);
@@ -8492,7 +8520,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       window.removeEventListener("resize", report);
       if (ro) ro.disconnect();
     };
-  });
+    /* Also keyed on the page rather than running after every render. It
+       listens for scroll in the capture phase, so it hears the sidebar being
+       restored by the effect above; with both of them re-running on every
+       render the two kept each other going. The ResizeObserver still catches
+       a page whose content grows, which is what this is for. */
+  }, [section]);
 
   const arrowStyle = (side) => ({
     position: "fixed",
@@ -8624,7 +8657,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             const sel = typeof window !== "undefined" && window.getSelection
               ? String(window.getSelection() || "") : "";
             if (sel.trim()) return;
-            if (e.target.closest("button, a, input, textarea, select, [role=button]")) return;
+            /* A summary is a control: it opens the Side by Side panel. It was
+               not in this list, so a tap on one in the column's outer sixth
+               opened the panel AND turned the page, which looks like the panel
+               refusing to open. A label is a control for the same reason. */
+            if (e.target.closest("button, a, input, textarea, select, label, summary, [role=button]")) return;
             const box = e.currentTarget.getBoundingClientRect();
             const edge = box.width / 6;
             const x = e.clientX - box.left;
@@ -8730,17 +8767,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                     ))}
                 </div>
               )}
-              {/* block: cover/start */}
-              <button
-                onClick={() => go(section.replace("-cover", "-overview"))}
-                style={{
-                  marginTop: "2.25rem", background: accent, color: "white", border: "none",
-                  borderRadius: 999, padding: "0.85rem 2.25rem", fontSize: "0.8rem",
-                  fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-                  fontFamily: font.body, cursor: "pointer",
-                }}>
-                {SC_COPY.coverStart}
-              </button>
+              {/* ── B118: NO BUTTON ────────────────────────────────────
+                  Ellie: "Remove the 'see insights' button from the exercise
+                  cover pages." The page is the chapter's name and the list of
+                  what is inside it; the arrows at the foot of every results
+                  page move you on, and the nav opens any page directly. The
+                  `cover/start` block went with it on both surfaces. */}
             </div>
           </div>
         </div>
@@ -8921,7 +8953,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* block: couple-type/lead */}
           <div style={{ marginBottom: "1.25rem" }}>
             <div style={{ fontFamily: HFONT, fontSize: "clamp(1.7rem,4vw,2.3rem)", fontWeight: 700, color: C.ink, lineHeight: 1.08, letterSpacing: "-0.02em" }}>
-              {SC_COPY.coupleTypeTitle(userName, partnerName)}
+              {SC_COPY.coupleTypeTitle()}
             </div>
           </div>
 
