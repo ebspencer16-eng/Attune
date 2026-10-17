@@ -392,6 +392,20 @@ and the second was hiding inside the first. So: separate "broken" from
 "unavailable here" in any check that shells out, and treat a long-standing
 failure as a question about the check, not just about the thing it checks.
 
+**A hand-typed answer set is a guess about what the product stores.** Every
+fixture standing in for a finished couple in this repo was typed by somebody.
+Sweeping the chain from an exercise to its results with one of those spent two
+runs discovering the fixture was wrong rather than the product: numbers where
+a pick stores an option string, which crashed the insight builder on
+`.toLowerCase()`, and no `completedAt`, which is what makes a record-shaped
+exercise count as finished.
+
+check-exercise-flow already drives all five exercises in a real browser, so it
+now writes what it stored to a file when `EXERCISE_FLOW_DUMP` is set, and
+probe-exercise-chain feeds exactly those bytes to /api/results. The question
+"do the answers a person gives produce results" is then asked of the same
+bytes rather than of an invented object.
+
 **State the method next to the number.** A precise figure invites less
 scrutiny than a vague one, which is exactly backwards when the precision came
 from one grep over one file.
@@ -1269,6 +1283,28 @@ survived a refactor that moved the other three functions out of that file,
 because nobody counts a line as a copy, and it agreed, so nothing could see
 it. A term added to the library's subtotal would simply never have reached the
 money.
+
+**A field missing from a normaliser is missing from everything downstream.**
+`normalizeItem` in api/create-payment-intent.js builds the object every later
+step reads, and it had no `addonConflict` key. Not a wrong value: no key. So a
+$40 exercise fell out of the subtotal, out of the tax lines, out of the Stripe
+metadata and out of the order row that grants it, and the page went on quoting
+$129 while the card was charged $89. Every one of those reads was correct.
+
+Two habits. When a function's job is to produce the canonical shape of
+something, check it against the list of what that something can contain: the
+add-ons are a list in `api/_catalogue.js`, and the object was missing one.
+And when a rule like "the package already includes this" appears inside such a
+function, it must read the capability table rather than name a package: the
+same function named premium three times, got two right, one wrong, and missed
+one.
+
+**A generated file the browser loads and nothing reads is worse than no file.**
+`public/_pkg-rules.js` puts PKG_CAPS in front of every static page so none of
+them has to restate what a package includes. checkout.html has had the script
+tag since the file was created and never read the global, so it charged list
+price for add-ons the package had already bought. The tag is what made it look
+handled. Grep for the global, not the script tag.
 
 **A broken query answers like an empty one.** `const { data: rows = [] } =
 await admin.from('workbooks').select(...)` against a table that does not exist

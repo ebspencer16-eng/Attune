@@ -3434,3 +3434,45 @@ itemSubtotal, because the body it tested began at the declaration).
 **Where it stopped.** Nothing half-done. The open sweeps worth running next,
 if nobody has a better idea: fields the payload carries that no surface draws,
 and the app's error paths driven rather than read.
+
+---
+
+## 2026-10-17, later: the chain from setup to results
+
+Her ask: make sure everything from account setup wires into the exercises, and
+that exercise results populate. Four sweeps. The exercises and the results came
+back clean; the money on the way in did not.
+
+**Three live bugs, all fixed and all measured.**
+
+- Conflict Patterns was quoted at $40 and billed at $0, because
+  `normalizeItem` had no `addonConflict` field. That flag is what reaches the
+  Stripe metadata and therefore the order row, so the exercise was never
+  granted either. It has never been in that object; `git log -S` says so.
+- The same function named premium three times to zero the add-ons premium
+  includes. It reads PKG_CAPS now, which is the one place that decides.
+- checkout.html had a second price table with premium at the old 295, so a
+  promo on a premium cart drew "−$295" under a $198 package.
+
+`check-cart-quote.mjs` prices all 24 package-and-add-on carts off the real page
+against the real server and asserts the order grants what was paid for. It is
+in the smoke, not the check, because it needs a browser and a server.
+
+**Two new instruments worth knowing about.** `check-question-ids.mjs` holds
+every name shaped like a question id to resolving against a real question.
+`scripts/probe-exercise-chain.mjs` takes the answers check-exercise-flow stores
+when run with `EXERCISE_FLOW_DUMP=<file>` and feeds them to /api/results and
+/api/conflict-results:
+
+    npx vite preview --port 4173
+    EXERCISE_FLOW_DUMP=/tmp/ex.json BASE=http://localhost:4173 node scripts/check-exercise-flow.mjs
+    node scripts/probe-exercise-chain.mjs /tmp/ex.json
+
+**One thing waiting on Ellie**, in TASKS.md under S32: whether Premium is meant
+to include Physical Intimacy. The offerings page and PKG_CAPS both say it is
+not, and the code now agrees with them.
+
+**A note on running the gates here.** `npm run check` stalled for 25 minutes on
+check-web-fonts with the machine at load 10 and 7GB of swap in use. Killing it,
+reaping Chrome and running that one gate alone took three minutes and passed.
+That is the swap paragraph in CLAUDE.md, met again.
