@@ -93,7 +93,7 @@ export default function PageTile({
   /* The rail of mark icons, and the view every marked paragraph measures
      itself against. Both come from the annotation provider; outside one they
      are null and nothing changes. */
-  const { railRef, rail } = useMarkRail();
+  const { railRef, rail } = useMarkRail(padding);
 
   return (
     <ResultsScroll style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: ResultsBottomInset }}>

@@ -29,18 +29,8 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** Your sixty new lines are in.
-
-### C14, two words that are yours to settle
-
-Both are in exactly as you wrote them, and both are one-word changes if you
-want them:
-
-- WW, worth being aware of, 2: "Hard moments lands at full force for you two."
-  Did you mean "land"?
-- WW, comes naturally, 3: "Hard conversations aren't avoided as often" uses a
-  curly apostrophe where the rest of the file uses a straight one. Identical
-  on screen; say the word and I will match the others.
+**Nothing open.** All five are built; three of them need your eye on a phone,
+because I cannot sign into one.
 
 ---
 
@@ -48,54 +38,16 @@ want them:
 
 | # | Built, needs your eye |
 |--|--|
-| C11 | **150 insights to read when you have time.** 24 books and 6 publications now, 28 subjects, and every one verified against the page or the scan it cites. INSIGHTS-REVIEW.md, and the Subject column is the posting order's postcode. |
-| S30 | **The checkout page should read prices rather than keep its own copy.** A gate holds them together now, so this is tidy-up rather than a risk. It is a change to the page that takes money, so it wants a quiet afternoon, not the hours before a demo. |
-| C12 | **Answered and applied.** You rewrote all sixty; they are in the module both surfaces read and `COUPLE-TYPE-COPY-REVIEW.md` now shows one column, which is what ships. |
-| C14 | **Your sixty new lines are live**, word for word, 51 characters each where the paragraphs averaged 128. Two words I did not touch: detail under this table. |
-| S27 | **The three things the sweeps found that I deliberately did not fix.** Carried out of S26 so they are not lost when it moves to done. All three are design calls, not bugs. |
+| B128 | **The rail was never used.** Each paragraph asked a ref whether the card had registered, during the render that fills that ref, so the answer was always no. It asks the rail itself now, and the icons sit in the card's padding. **Still by the paragraph, or in the margin?** |
+| B129 | **The cache was being covered up.** The page was seeded from the phone and then the first line of the screen returned a spinner until the request landed. The spinner is for having nothing now. **Is Insights quick on the second open?** |
+| B123 | Should follow B128: the icon had nowhere to be drawn inside a tile that clips. **Does that tag have an icon now?** |
+| B130 | "Your relationship dynamic", your heading. |
+| B131 | The survey button is back to being drawn only when you have not answered, and it no longer goes missing while the app asks. |
+| C15 | "Land", and the straight apostrophe. Both of your corrections are in. |
+| C11 | **Yes, I got it, and it is live.** Your 119-row table was applied the day you sent it: the 31 you left out are gone from the module the product reads. That is C13, which you have approved. Nothing of yours is waiting here. |
 | R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-| B120 | A tag made on Notes is offered the next time you mark something: Insights reloads your tags when you come back to it. |
-| B121 | The mark icons are drawn by the page card, in its own margin, rather than by the paragraph inside its tile. |
-| B122 | **The app keeps what the server last sent and draws it straight away**, then refreshes behind you. Home, results, In Practice and the tools. Not the journal or the tags: a copy of those on disk is a copy behind no passcode. |
-| B123 | Most likely the same as B121: the icon was drawn inside a tile that clips. **Tell me if that tag still has no icon.** |
-| B124 | Each page name on a cover opens that page. |
-| B125 | Tell us about your Attune Experience is drawn whether or not it has been answered. |
-| B126 | A chevron on each of the four tiles, pointing down, up when that tile is the open one. |
-| B127 | Done: the read-and-approved context is out of this file. |
-| B115 | An open bucket closes when you leave What Comes Next, tab switches included. |
-| B116 | The question mark is above the Open label and lies the way it does. |
-| B117 | Heading is "Your unique dynamic" and the map takes a third of the window. **Does the tile fit on your phone now, and is that heading right?** You took "unique" out of it once before. |
-| B118 | No See insights button on the cover pages. |
-| B119 | The survey button stays put; the answer about it is remembered. |
-| B108 | Things to consider, Discussions to have, Phrases to try, each on two lines. |
-| B109 | Note icon above the arrow, words further left and right. |
-| B110 | Rows numbered within the open bucket. |
-| B111 | A conflict row is its advice, no heading. |
-| B112 | One reflection row, yours, under "When asked to reflect, you said". |
-| B113 | "Talk about what physical intimacy is for." |
-| B114 | Phrases to try in italics, in quotation marks. |
-| B106 | A note icon on every action item, opening the insight of the day’s own save sheet. |
-| B107 | Each tile and row in its bucket’s colour. **Say if you want more colour than that.** |
-| C13 | 31 of the 150 insights removed; the 119 left are all verified against their source. |
-| B91 | Your individual types is gone; each dot opens that person’s paragraph. |
-| B92 | A question mark beside Open and Withdraw; the axis copy is off the page. |
-| B93 | The slider dots have a crisp white ring rather than a coloured halo. **Does your friend still see them blurred on the iPad?** |
-| B94 | Cover pages list what is inside them. |
-| B95 | 1/7 through 7/7, one denominator. |
-| B96 | The aligned/discussing line is off the expectations overview in the app too. |
-| B97 | The 12-topics line is gone. |
-| B98 | The paragraph above the What Comes Next dropdowns is gone. |
-| B99 | A tap in the storycard’s right margin goes forward. |
-| B100 | The most-admired card is cream with orange top left and blue bottom right. |
-| B101 | The last storycard exits Highlights. |
-| B102 | Communication rows are the action items. |
-| B103 | Called Communication styles. |
-| B104 | Couple type rows are the three phrases. |
-| B105 | What Comes Next is four tiles over three buckets. |
-| S29 | The demo path driven end to end: purchase, setup, exercises, completion, results. One gap found and closed. |
-| S28 | The earlier sweep: two stale comments fixed, the app driven rather than read. |
 
 
 ### C12, the long and the short of it
@@ -143,6 +95,45 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| S30 | The checkout page keeps its own copy of every price because a static page cannot import from api/; a gate now holds all 23 to the catalogue, and reading them from a generated file is the next step. |
+| C12 | Sixty couple type paragraphs put beside a shorter version each, for you to choose; you rewrote all sixty yourself and those are what ship. |
+| C13 | Your edited insights list applied: 31 of the 150 removed from the module the product reads, the 119 left all verified against the page or the scan they cite. |
+| B120 | A tag made on Notes was not offered when marking: the Insights tab read your tags once at launch and never again. It reloads them when you come back to it. |
+| B124 | The contents list on a chapter cover opens its pages, which is also the way in now that the cover has no button. |
+| B126 | A chevron on each of the four What Comes Next tiles, down for a bucket that opens below, up when that one is open. |
+| B127 | TASKS.md lost the context you had already read: the per-round explanations went and each finished row is one line. |
+| B115 | An open bucket on What Comes Next closes when you leave the page, including leaving the tab and coming back. |
+| B116 | The question mark on the couple map sits above the Open label and lies the same way the label does. |
+| B118 | The See insights button is off the exercise cover pages on both surfaces, and the word it used went with it. |
+| B119 | The survey button stopped disappearing: the answer about whether you have taken it is remembered rather than asked for on every page open. |
+| B108 | The What Comes Next tiles are Things to consider, Discussions to have, Phrases to try, each broken onto two lines where you broke it. |
+| B109 | The note icon and the arrow are stacked on each action row, which gave the words the column the second icon was taking. |
+| B110 | Every action item is numbered, within whichever bucket is open. |
+| B111 | A conflict row is its advice rather than the pattern name, the same change the communication rows had. |
+| B112 | Relationship Reflection carries your own line only, under "When asked to reflect, you said"; the partner sees theirs on their copy. |
+| B113 | "Talk about what physical intimacy is for", where the dimension keeps its short name on its own page. |
+| B114 | The phrases to try are set in italics inside quotation marks, with no heading above them. |
+| B106 | A note icon on every action item that keeps it in the relationship journal, through the same sheet the insight of the day uses. |
+| B107 | Colour on What Comes Next: each tile and each row in its bucket’s own colour, and a warm brown for the journal. |
+| S27 | The three things the sweeps measured and left: 459 small tap targets, 110 pieces of low-contrast text, and the 1.4MB dashboard bundle. |
+| B91 | Your individual types came off the couple type page; each dot opens that person’s paragraph beside it, and the axis bars are gone. |
+| B92 | A grey question mark beside Open and beside Withdraw opens that axis’s sentence; the two descriptions came off the page. |
+| B94 | Exercise cover pages list the pages inside them, derived from the nav so a new page turns up without anyone typing it. |
+| B95 | The expectations overview and its conversations counted differently, 1/7 against 1/6; one denominator now. |
+| B96 | The aligned and worth-discussing line came off the expectations overview in the app, where the website had already lost it. |
+| B97 | The line about 12 topics across 5 areas came off the expectations overview; each area row carries its own count. |
+| B98 | The explanation paragraph above the What Comes Next dropdowns is gone. |
+| B99 | A tap in a storycard’s right margin went back instead of forward: the handler read a coordinate measured inside whichever view was hit. |
+| B100 | The most-admired-for storycard is cream with orange from the top left and blue from the bottom right, with the old divide gone. |
+| B101 | Tapping the last storycard leaves Highlights, which it used to refuse to do. |
+| B102 | The communication rows on What Comes Next are the action items rather than the category name. |
+| B103 | The communication action plan is called Communication styles, from the server, so neither surface can call it anything else. |
+| B104 | The couple type action plan is the three phrases to try. |
+| B105 | What Comes Next rebuilt as four tiles over three buckets, with every row carrying an arrow to the page it came from. |
+| S28 | A sweep that drove the app rather than reading it, fixed two stale comments, and checked every live route and every link in the insight review. |
+| S29 | The demo path driven end to end, purchase to results, with one real gap found and closed: the checkout page’s own copy of every price. |
+| B93 | The slider dots had a coloured halo six points wide at half opacity; they have a crisp white ring now, the same one the other dot has. |
+| C14 | Your sixty rewritten couple type lines, in the module both surfaces read, word for word and with your role tokens kept. |
 | C10 | 50 insights from 20 books the list had never used, each one verified against Google's scan of the volume it cites with the key you stored; 76 candidates failed that check and were dropped rather than softened. |
 | C8 | Your seven edits to the word definitions, in word for word; the other 93 you left alone, and the review document is rebuilt from the list the product reads. |
 | S26 | Eight sweeps, six found something: two unread columns on the notes payload, 35 places drawing text in a face the page never loaded, a nav button at 1.65 contrast, a four-pixel menu button, a dead Terms anchor. |

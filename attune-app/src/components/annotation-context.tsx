@@ -182,10 +182,16 @@ export function useAnnotations() {
  * even inside a scroll view: both are in the same coordinate space, which is
  * the card's own box.
  */
-export function useMarkRail() {
+export function useMarkRail(padding = 0) {
   const { railHost, markers, openMark } = useAnnotations();
+  /* Out in the card's padding, which is the margin Ellie means: "outside of
+     the tile in the margin on the edge of the background card". The card's
+     own padding is the room, so the rail is pushed out by it, less two points
+     so the icon is not against the edge. A card with no padding keeps the
+     rail inside, where there is at least somewhere to draw. */
+  const out = padding >= RAIL_WIDTH ? -(padding - 2) : 0;
   const rail = markers && markers.length ? (
-    <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: RAIL_WIDTH }}>
+    <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, bottom: 0, right: out, width: RAIL_WIDTH }}>
       {markers.map((m) => (
         <Pressable
           key={m.id}
@@ -220,7 +226,7 @@ export function useMarkRail() {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, remove, openMark, enabled, focus, claim, railHost, reportMarker } = useAnnotations();
+  const { marks, select, remove, openMark, enabled, focus, claim, railHost, reportMarker, markers } = useAnnotations();
   const text = children || '';
   /**
    * ── EVERY HOOK RUNS, EVEN WHEN THIS DRAWS A PLAIN TEXT ──────────────────
@@ -358,7 +364,22 @@ export function Prose({
    * reports rather than being moved: a mark with nowhere to be drawn is the
    * bug every change to this marker has been about.
    */
-  const railed = !!railHost?.current;
+  /**
+   * ── WHETHER THE RAIL HAS THIS ONE ──────────────────────────────────────
+   * B128. Ellie, after the rail shipped: "Still seeing it by the paragraph."
+   *
+   * This read `railHost.current` during render, and a ref is null during the
+   * render that fills it: React attaches refs when it commits, which is after
+   * every child has already rendered. So the answer was false on the first
+   * pass of every page and nothing re-rendered to change it, and each
+   * paragraph went on drawing its own marker exactly as before.
+   *
+   * The rail's own list is state, so asking IT is a question that has an
+   * answer and that updates when the answer changes. It also makes the
+   * fallback honest rather than theoretical: a paragraph whose measurement
+   * never lands keeps its marker, because the rail never reports having it.
+   */
+  const railed = (markers || []).some((m) => m.id === silent[0]?.id);
   const markerY = Number.isFinite(markerTop) ? markerTop : 2;
   useEffect(() => {
     const host = railHost?.current;
@@ -452,10 +473,11 @@ export function Prose({
         accessibilityLabel={tagged ? 'Open this tag' : 'Open this note'}
         hitSlop={10}
         onPress={() => openMark(silent[0].id)}
+        /* Drawn here only when the rail does not have it: on an article,
+           which is not a card, or before a measurement has landed. */
+        disabled={railed}
         style={{
           position: 'absolute', right: -MARKER_INSET, zIndex: 2,
-          /* Drawn here only when there is no card to draw it in the margin
-             of. See the rail above. */
           opacity: railed ? 0 : 1,
           top: markerY,
         }}>
@@ -614,10 +636,19 @@ export function AnnotationProvider({
       return [...without, at];
     });
   }, []);
-  /* A new page's marks are a new rail. Cleared on a change of section, so a
-     stale icon cannot sit at whatever line it was on before. The ids are
-     watched further down, where this component already joins them. */
-  useEffect(() => { setMarkers([]); }, [section]);
+  /**
+   * A new page's marks are a new rail, so a change of section empties it.
+   *
+   * Not on the first run. A parent's effect runs after its children's, so an
+   * unconditional clear here would throw away the first page's reports: the
+   * paragraphs report during their own effects, and this would fire after
+   * them. Keyed on the section having actually changed.
+   */
+  const railFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (railFor.current !== null && railFor.current !== section) setMarkers([]);
+    railFor.current = section;
+  }, [section]);
 
   const value = useMemo<Ctx>(() => ({
     marks,

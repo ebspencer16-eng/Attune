@@ -69,7 +69,19 @@ export default function InsightsScreen() {
   /** The colour of the results section on screen, for the wash behind it. */
   const [accent, setAccent] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(true);
+  /**
+   * ── B129: NOT WHILE THERE IS SOMETHING TO DRAW ────────────────────────
+   * Ellie, after the cache shipped: "This sounds good, but insights just took
+   * a long time to load still."
+   *
+   * Keeping the last payload and DRAWING it are two different things. This
+   * was true until the request came back, and the first thing the screen does
+   * with it is return a spinner, so the cache was read and then covered up.
+   *
+   * The spinner is for having nothing. With results on the phone the page
+   * draws, and the request that is still running updates it in place.
+   */
+  const [loading, setLoading] = useState(() => !recall<ResultsResponse>('results'));
   const [refreshing, setRefreshing] = useState(false);
   // Which exercise is open, if any. Only ex1 is answerable in the app so far;
   // the rest still live on the website and the row says so rather than opening

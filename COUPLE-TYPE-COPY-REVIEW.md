@@ -10,7 +10,7 @@ types. A couple only ever sees their own six, and you only ever see your own,
 which is why it reads as four or six rather than sixty.
 
 This is what ships. You rewrote all 60 of them on 17 October and they went
-into the module the same day, word for word: **51 characters each, where the
+into the module the same day, word for word: **50 characters each, where the
 paragraphs they replaced averaged 128**.
 
 Two of your lines I left exactly as you wrote them and asked about in TASKS.md
@@ -29,7 +29,7 @@ of them to a name before anyone reads them.
 |--|--|--|
 | WW | 1 | Emotional availability is a strong suit for you two |
 | WW | 2 | You are both readable and willing to be read |
-| WW | 3 | Hard conversations aren’t avoided as often |
+| WW | 3 | Hard conversations aren't avoided as often |
 | XX | 1 | Efficient decision making as a unit |
 | XX | 2 | Arguments tend to be structured and reasonable |
 | XX | 3 | You often understand where the other is coming from |
@@ -63,7 +63,7 @@ of them to a name before anyone reads them.
 | Type | # | What it says |
 |--|--|--|
 | WW | 1 | Two strong feelings can amplify each other |
-| WW | 2 | Hard moments lands at full force for you two |
+| WW | 2 | Hard moments land at full force for you two |
 | WW | 3 | Not every feeling has to be said straight away |
 | XX | 1 | Two internal processors can go too long without sharing |
 | XX | 2 | Quick repair is not always complete repair |

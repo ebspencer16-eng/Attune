@@ -36,11 +36,11 @@ export const COUPLE_TYPES = [
     strengths: [
       "Emotional availability is a strong suit for you two",
       "You are both readable and willing to be read",
-      "Hard conversations aren’t avoided as often",
+      "Hard conversations aren't avoided as often",
     ],
     stickingPoints: [
       "Two strong feelings can amplify each other",
-      "Hard moments lands at full force for you two",
+      "Hard moments land at full force for you two",
       "Not every feeling has to be said straight away",
     ],
     patterns: [

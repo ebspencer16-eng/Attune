@@ -7720,7 +7720,7 @@ function UnifiedResultsRoot(props) {
  * 2026-10-13.
  */
 
-function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false, onOpenJournal = null, onOpenSurvey = null }) {
+function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Answers, partnerEx3, ex2AnswersPrior = null, ex2PriorAt = null, hasAnniversary, userName, partnerName, initialSection, onSectionChange = null, isMobile = false, portrait = null, hasChecklist = false, hasBudget = false, hasWorkbook = false, hasIntimacy = false, intimacyAnswers = null, partnerIntimacy = null, hasConflict = false, conflictAnswers = null, conflictResults = null, intimacyVariant = 'premarital', onNavigateTool = null, userPronouns = "", partnerPronouns = "", isBetaTester = false, onOpenJournal = null, onOpenSurvey = null, surveyAnswered = false }) {
 
   // Compute all the data we need up front
   const myS = typingDimScores(ex1Answers, partnerEx1);
@@ -10768,11 +10768,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               different fact from having been put away.
 
               The words are the survey's own, from the module that asks it. */}
-          {/* B125. Drawn whether or not it has been answered: a button that
-              disappears on the one page it belongs to reads as a page that
-              lost something. The survey opens on whatever was answered
-              before. */}
-          {onOpenSurvey ? (
+          {/* Drawn only when it has not been answered. Ellie: "Should only
+              draw if it hasn't been answered." It was briefly unconditional,
+              to stop it disappearing mid-session on the app; that half is
+              solved by remembering the server's answer rather than by
+              drawing the button regardless. */}
+          {onOpenSurvey && !surveyAnswered ? (
             <div style={{ marginTop: "2.5rem" }}>
               <button onClick={onOpenSurvey}
                 style={{ background: BRAND_GRADIENT, border: "none", borderRadius: 12, padding: "0.85rem 1.6rem", fontSize: "0.82rem", fontWeight: 700, color: "white", fontFamily: BFONT, cursor: "pointer", letterSpacing: ".01em" }}>
@@ -18622,10 +18623,12 @@ export default function App() {
                   onOpenJournal={() => { setDashTab("notes"); setView("home"); }}
                   /* The survey's button at the foot of What Comes Next.
                      Reopening is the same thing as not being done with it.
-                     B125: it is drawn whether or not it has been answered, so
-                     `surveyAnswered` is no longer passed down; the dialog
-                     still only OPENS ITSELF for somebody who has not. */
+                     `surveyAnswered` is whether it was ANSWERED rather than
+                     dismissed, which is the pair of keys this file keeps: the
+                     button is for somebody who has not answered, and closing
+                     the dialog is not answering it. */
                   onOpenSurvey={() => setPostSurveyDone(false)}
+                  surveyAnswered={surveyAnswered}
                   onNavigateTool={(tool) => {
                     if (typeof tool === 'string' && tool.endsWith('-upsell')) {
                       setUpsellModal({ product: tool.replace('-upsell', ''), cartAdded: false });

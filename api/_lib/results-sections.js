@@ -210,10 +210,14 @@ export const PAGE_COPY = {
    * lines? Maybe just [Partner name] and [Partner name]'s unique relationship
    * dynamic". Then: "remove 'unique' from hero of couple type results page".
    *
-   * And now, of the page as a whole: "I would love for the 'money slide' when
+   * And then, of the page as a whole: "I would love for the 'money slide' when
    * you open the couple type page to fit the full couple type tile on the
    * screen. I've attached the screenshot of the current page, maybe if we said
    * 'Your unique dynamic' it would fit?"
+   *
+   * It did fit, and seeing it she settled the words: "It fits, but let's
+   * rename to 'Your relationship dynamic'." Which is also where "unique" goes
+   * for the second time, so that instruction of hers stands after all.
    *
    * Two lines on a phone became one, which is most of what the tile needed;
    * the map giving back some height is the rest. The names are gone from it,
@@ -223,7 +227,7 @@ export const PAGE_COPY = {
    * It takes both names still, because a caller that has them should not have
    * to know this line stopped using them.
    */
-  coupleTypeTitle: () => 'Your unique dynamic',
+  coupleTypeTitle: () => 'Your relationship dynamic',
 };
 
 export const RESULTS_SECTION_LABELS = {

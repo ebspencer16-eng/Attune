@@ -1270,6 +1270,30 @@ the quotation's budget was more space for that rule to spread. A gap that has to
 survive a layout belongs in padding on the container, which spreading cannot
 reach. Three reports is the signal that the number was never the subject.
 
+**A ref is null during the render that fills it.** The margin rail shipped not
+working and Ellie said so in four words: "Still seeing it by the paragraph."
+Each paragraph decided whether to draw its own icon by reading
+`railHost.current` during render, and React attaches refs when it commits,
+which is after every child has rendered. So the answer was false on the first
+pass of every page and nothing re-rendered to change it.
+
+Ask the state, not the ref: the rail's list of icons is state, so a paragraph
+asking whether the rail has its mark gets an answer that updates. That also
+turns the fallback from theoretical into real, because a paragraph whose
+measurement never lands keeps its own marker.
+
+The same ordering bites one line further on. A parent's effect runs AFTER its
+children's, so the provider's "a new page is a new rail" clear was throwing
+away the reports the paragraphs had just made. It only clears when the section
+actually changes now.
+
+**Keeping a payload and drawing it are two different things.** The app caches
+what the server last sent, and Ellie: "This sounds good, but insights just took
+a long time to load still." The cache was read, the screen was seeded from it,
+and then the first line of the render said `if (loading) return <spinner/>`,
+which covered it up until the request landed. A spinner is for having nothing;
+its condition has to be "nothing to draw", not "a request is running".
+
 **A tab that never unmounts is a tab holding whatever it loaded once.** Every
 tab in this app mounts at launch and stays mounted, which is what makes
 switching instant. The results screen read the reader's tags in a mount effect,

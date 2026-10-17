@@ -1333,7 +1333,7 @@ function SectionBody({
         results={results} you={you} them={them}
         /* The fallback is the same words the server sends, for a cached
            payload written before this line changed. B117. */
-        title={pageCopy('coupleTypeTitle', 'Your unique dynamic')}
+        title={pageCopy('coupleTypeTitle', 'Your relationship dynamic')}
       />
     );
   }
@@ -3366,7 +3366,7 @@ function WhatComesNext({
           </View>
         ) : null}
 
-        {/* ── B125: THE BUTTON IS ALWAYS THERE ─────────────────────────
+        {/* ── THE BUTTON, AND WHEN IT IS THERE ─────────────────────────
             Ellie: "The tell us about your experience Button is now missing
             from my what comes next page."
 
@@ -3376,15 +3376,18 @@ function WhatComesNext({
             somebody had answered. Three ways to have no button, and from the
             page they all look the same.
 
-            It is drawn whenever the words for it exist, which is the only
-            thing it actually needs. The survey remembers what was answered
-            and opens on it, so somebody who has already done it finds their
-            own answers rather than an empty form.
+            I made it unconditional, which fixed the first two and changed the
+            third, and she reversed that half: "Should only draw if it hasn't
+            been answered." So the condition is back and only the flakiness is
+            gone: `lastSurvey` holds the server's last reply for the life of
+            the app, so a page that opens again does not go blank while it
+            asks, and a request that fails leaves what was already known.
 
-            The words come from the server, so there is still no button before
-            the first reply of the app's life. `lastSurvey` keeps that reply,
-            so that is once rather than once per page. */}
-        {surveyCopy ? (
+            Both of her instructions are here because the round trip is the
+            argument: a button that vanishes mid-session is a bug, and a
+            button that asks somebody who has already answered is a different
+            one. */}
+        {surveyDone === false && surveyCopy ? (
           <Pressable
             accessibilityRole="button"
             onPress={() => setSurveyOpen(true)}

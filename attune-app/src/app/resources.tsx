@@ -128,7 +128,9 @@ export default function ResourcesScreen() {
   /** Which shelf is open as a page of its own, if any. */
   const [openShelf, setOpenShelf] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  /* B129. Same as the other tabs: a spinner only when there is nothing
+     kept to draw. */
+  const [loading, setLoading] = useState(() => !recall<{ posts: unknown[] }>('posts'));
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState<string>(ALL);
   const [sort, setSort] = useState<PostSort>('featured');

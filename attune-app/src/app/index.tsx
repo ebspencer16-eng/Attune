@@ -93,7 +93,10 @@ export default function HomeScreen() {
   /* B122. The last home payload, drawn while this one loads. */
   const [data, setData] = useState<HomeResponse | null>(() => recall<HomeResponse>('home'));
   const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(true);
+  /* B129. The spinner is for having nothing to draw. The last home payload
+     is on the phone, so the page opens on it and the request behind it
+     updates in place. */
+  const [loading, setLoading] = useState(() => !recall<HomeResponse>('home'));
   const [refreshing, setRefreshing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   /** Whether the insight of the day is open as a full card. */
