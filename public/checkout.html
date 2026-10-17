@@ -551,6 +551,28 @@ function wbCharge(it) {
   if (it.pkg === 'premium') return (it.format === 'digital' && print) ? 20 : 0;
   return print ? ADDON_WORKBOOK.print.price : ADDON_WORKBOOK.digital.price;
 }
+/**
+ * What an add-on is billed at on this item: its price, or nothing when the
+ * package already includes it.
+ *
+ * ── WHY IT READS A GENERATED FILE ─────────────────────────────────────────
+ * Which package includes what is PKG_CAPS in api/_lib/entitlements.js, and
+ * this page cannot import it, so the build writes it to /_pkg-rules.js. The
+ * page has loaded that file since it was created and never read it: every
+ * add-on line was charged at list price whatever the package already bought,
+ * and the server was zeroing some of them on its own list. Driven over every
+ * package with every add-on, seven of twenty-four carts quoted one number and
+ * charged another, premium + conflict among them: $238 on the page, $198 on
+ * the card.
+ *
+ * The workbook is not in here because it has its own rule: premium includes
+ * the digital one and pays $20 to upgrade to print. See wbCharge.
+ */
+function addonCharge(it, name, price) {
+  const inc = (window.ATTUNE_PKG_INCLUDED && window.ATTUNE_PKG_INCLUDED[it.pkg]) || {};
+  return inc[name] ? 0 : price;
+}
+
 // Display label + price for the workbook line on an item.
 function wbLine(it) {
   const print = forceWbVariant(it.addons.workbookVariant) === 'print';
@@ -1053,21 +1075,13 @@ function renderSummary() {
   const totalEl = document.getElementById('totalPrice');
 
   // Compute total across all items in cart
-  // NOTE: this duplicates cartItemPrice() further down the file. The two got
-  // out of step when the conflict add-on was added: cartItemPrice knew about it
-  // and this one did not, so the button showed the wrong total while every
-  // other computation was right. Any new add-on has to be added to BOTH.
+  /* This used to be a second copy of cartItemPrice, and the note here said so:
+     the two got out of step when the conflict add-on was added, so the button
+     showed one total while every other computation showed another. Two copies
+     of a sum is the failure this codebase is organised against, so it calls
+     the one below rather than repeating it. */
   function itemPrice(it) {
-    const p = PACKAGES[it.pkg] || PACKAGES.core;
-    let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
-    let add = 0;
-    add += wbCharge(it);
-    if (it.addons.reflection) add += ADDON_REFLECTION.price;
-    if (it.addons.budget)     add += 20;
-    if (it.addons.intimacy)   add += 20;
-    if (it.addons.conflict)   add += 40;
-    if (it.addons.checklist)  add += 20;
-    return base + add;
+    return cartItemPrice(it);
   }
 
   let total = 0;
@@ -1101,11 +1115,13 @@ function renderSummary() {
     if (g.item.addons.workbook) {
       addonLines.push(wbLine(g.item));
     }
-    if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: ADDON_REFLECTION.price });
-    if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: 20 });
-    if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: 20 });
-    if (g.item.addons.conflict)   addonLines.push({ label: 'Conflict Patterns', price: 40 });
-    if (g.item.addons.checklist)  addonLines.push({ label: 'Merging Lives Checklist', price: 20 });
+    /* Each line is charged at what this package pays for it: an add-on the
+       package already includes shows as $0 rather than at list price. */
+    if (g.item.addons.reflection) addonLines.push({ label: ADDON_REFLECTION.label, price: addonCharge(g.item, 'reflection', ADDON_REFLECTION.price) });
+    if (g.item.addons.budget)     addonLines.push({ label: 'Shared Budgeting Activity', price: addonCharge(g.item, 'budget', 20) });
+    if (g.item.addons.intimacy)   addonLines.push({ label: 'Physical Intimacy Expectations', price: addonCharge(g.item, 'intimacy', 20) });
+    if (g.item.addons.conflict)   addonLines.push({ label: 'Conflict Patterns', price: addonCharge(g.item, 'conflict', 40) });
+    if (g.item.addons.checklist)  addonLines.push({ label: 'Merging Lives Checklist', price: addonCharge(g.item, 'checklist', 20) });
     for (const a of addonLines) {
       rows += `
       <div class="co-card-detail" style="padding-left:.7rem;box-shadow:inset 3px 0 0 #F0E1CE">
@@ -1122,12 +1138,22 @@ function renderSummary() {
   //   free  — package costs $0, discount = full base
   //   fixed — package costs exactly $appliedPromoAmount, discount = base − amount
   if (appliedPromoCode) {
-    // Package base total (digital or physical) for all items in cart.
-    // Matches PRICES structure above.
-    const PKG_BASE = { core: {digital:89, physical:124}, newlywed:{digital:139,physical:174}, anniversary:{digital:139,physical:174}, premium:{digital:295,physical:330} };
+    /* Package base total (digital or physical) for all items in cart.
+       ── THE SECOND PRICE TABLE ────────────────────────────────────────────
+       This was a PKG_BASE literal of its own, and it had premium at 295/330
+       while the package costs 198/233: the number from before the price
+       change, kept in the one place nothing compared. Applying BETA-PREMIUM
+       to a premium cart drew "−$295" under a $198 package, measured in a
+       browser. A fixed-price code would have been worse, because the
+       discount is subtracted from a real subtotal and the server charges the
+       fixed amount: quoted one number, charged another.
+
+       PACKAGES is the table check-checkout-page-prices holds to
+       api/_catalogue.js, so reading it here means there is one price per
+       package on this page. */
     const baseTotal = _items.reduce((s, it) => {
-      const p = PKG_BASE[it.pkg];
-      return s + (p ? (it.format === 'physical' ? p.physical : p.digital) : 0);
+      const p = PACKAGES[it.pkg];
+      return s + (p ? (it.format === 'physical' ? p.physicalPrice : p.digitalPrice) : 0);
     }, 0);
     // For fixed-price codes, the user still owes appliedPromoAmount per package.
     // Discount = base − (per-item fixed amount × num items).
@@ -1890,11 +1916,11 @@ function cartItemPrice(it) {
   let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
   let add = 0;
   if (it.addons.workbook)   add += wbCharge(it);
-  if (it.addons.reflection) add += ADDON_REFLECTION.price;
-  if (it.addons.budget)     add += 20;
-  if (it.addons.intimacy)     add += 20;
-  if (it.addons.conflict)     add += 40;
-  if (it.addons.checklist)  add += 20;
+  if (it.addons.reflection) add += addonCharge(it, 'reflection', ADDON_REFLECTION.price);
+  if (it.addons.budget)     add += addonCharge(it, 'budget', 20);
+  if (it.addons.intimacy)   add += addonCharge(it, 'intimacy', 20);
+  if (it.addons.conflict)   add += addonCharge(it, 'conflict', 40);
+  if (it.addons.checklist)  add += addonCharge(it, 'checklist', 20);
   return base + add;
 }
 

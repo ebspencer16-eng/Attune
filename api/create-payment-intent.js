@@ -19,6 +19,8 @@ import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
+/* What each package already includes, so this file does not say it again. */
+import { PKG_CAPS } from './_lib/entitlements.js';
 
 export const config = { runtime: 'edge' };
 
@@ -287,9 +289,42 @@ function itemsTotalCents(items, promoCovered) {
    which is why nothing noticed: a term added to the library's version would
    have been missing from the one this file actually charged. */
 
-function normalizeItem(item) {
+/**
+ * A cart item, with anything the package already includes taken off it.
+ *
+ * ── WHAT THIS RESTATED, AND WHAT IT COST ──────────────────────────────────
+ * It used to name premium three times: reflection, budget and intimacy were
+ * zeroed for a premium item, under a comment saying premium bundles all
+ * three. PKG_CAPS grants premium reflection, budget, conflict and the
+ * workbook, and NOT intimacy, so two of those three were wrong and one was
+ * missing. Measured over every package with every add-on, at the page and at
+ * the server:
+ *
+ *   premium + intimacy      quoted 218, billed 198, granted nothing
+ *   premium + conflict      quoted 238, billed 198  (it is included, so the
+ *                           quote was the wrong half)
+ *   core + conflict         quoted 129, billed  89, granted nothing
+ *
+ * The last one is the worst and has nothing to do with premium:
+ * `addonConflict` was not in this object at all. Every downstream read of a
+ * normalised item saw undefined, so a $40 exercise was left out of the
+ * charge, out of the tax lines, out of the metadata and therefore out of the
+ * order row that grants it. Bought, not billed, not delivered.
+ *
+ * So the inclusion rule is read from PKG_CAPS rather than written again, and
+ * every add-on in the catalogue is carried through. Adding a sixth add-on to
+ * a package is now one edit in entitlements.js.
+ */
+/* Exported so check-cart-quote can run THIS function rather than its own copy
+   of the rule. A gate pointed at a second implementation reports success about
+   code nobody runs. */
+export function normalizeItem(item) {
+  const pkgKey = item.pkgKey || item.pkg;
+  const caps = PKG_CAPS[pkgKey] || PKG_CAPS.core;
+  /* Included in the package = never billed again as an add-on. */
+  const addon = (included, asked) => (included ? false : !!asked);
   return {
-    pkgKey:          item.pkgKey || item.pkg,
+    pkgKey,
     isPhysical:      PHYSICAL_ENABLED && (!!item.isPhysical || item.format === 'physical'),
     isGift:          !!item.isGift,
     partner1Name:    item.partner1Name || null,
@@ -298,13 +333,11 @@ function normalizeItem(item) {
     addonWorkbook:   item.addonWorkbook || null,     // 'digital' | 'print' | null
     // Phase-1: digital-only. Never bill for physical even if
     // the request asks for it.
-    // Premium bundles reflection, budget, and intimacy into its base price, so
-    // they are never billed again as add-ons on a premium item.
-    _premiumBundled: (item.pkgKey || item.pkg) === 'premium',
-    addonReflection: (item.pkgKey||item.pkg)==='premium' ? false : !!item.addonReflection,
-    addonBudget:     (item.pkgKey||item.pkg)==='premium' ? false : !!item.addonBudget,
-    addonChecklist:  !!item.addonChecklist,
-    addonIntimacy:   (item.pkgKey||item.pkg)==='premium' ? false : !!item.addonIntimacy,
+    addonReflection: addon(caps.hasReflection, item.addonReflection),
+    addonBudget:     addon(caps.hasBudget, item.addonBudget),
+    addonChecklist:  addon(caps.hasChecklist, item.addonChecklist),
+    addonIntimacy:   addon(caps.hasIntimacy, item.addonIntimacy),
+    addonConflict:   addon(caps.hasConflict, item.addonConflict),
     shipping:        item.shipping || null,
   };
 }

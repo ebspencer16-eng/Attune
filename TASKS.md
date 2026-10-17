@@ -31,7 +31,59 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
+| S32 | **Setup to exercise to results, swept end to end.** Seven properties over the whole chain: what setup collects, what the exercises ask, what gets stored, and what the results draw. The list of what each one measures is under the table. |
 | S31 | **Sweeps, while you are away.** Eight properties, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
+
+### S32, what I am measuring
+
+Your ask: that everything from account setup wires correctly into the
+exercises, and that exercise results populate correctly. Seven sweeps, each
+one property measured over every instance of its thing.
+
+1. **Every token in every question resolves.** The exercise copy carries
+   `{userName}`, `{partnerName}` and pronoun tokens. Substitute them for every
+   pronoun combination and a name that is missing, and assert no brace
+   survives into something a person reads.
+2. **Every question id anything asks for exists.** Five of six keys in one
+   list were wrong once and each produced a valid-looking empty answer. Check
+   every id named anywhere against the question sets.
+3. **Every field setup collects is read, and every field read is collected.**
+   Both directions, so a question nobody uses and a lookup of something nobody
+   asked both show up.
+4. **Every answer an exercise stores is read on the way out.** One column per
+   exercise, and the keys inside it.
+5. **What the package buys reaches both ends.** The exercises offered and the
+   results sections drawn, from the same entitlement.
+6. **A half-finished setup does not break an exercise.** Drive the real
+   screens with the fields empty, one at a time.
+7. **Both partners' answers reach one set of results.** The completion path
+   from either side.
+
+### S32, what these sweeps found
+
+**Three money bugs, all live, all fixed.** They are B136, B137 and B138
+above. Everything else below came back clean, with a figure.
+
+**The one thing that might need you:** whether Premium is meant to include
+Physical Intimacy. Three places in the code said it does, and the two places
+that decide, the offerings page you wrote and the list of what each package
+unlocks, both say it does not. I made the code agree with those two, so
+Premium + Physical Intimacy is now a $20 add-on that is charged and delivered.
+Say the word if it was meant to be included and I will move it the other way.
+
+**Worth one look in the admin:** any order that bought Conflict Patterns
+before today was charged nothing for it and never had it unlocked. The orders
+export has an addon_conflict column; if any row says Y, tell me and I will
+write the grant.
+
+**What the sweeps measured, and what they found.**
+
+| What was measured | Result |
+|--|--|
+| Answers the real exercise screens store, driven in a browser, fed to the real results | 4 couples, 5,482 strings, 59 checks: no gaps |
+| Every name in the code shaped like a question id | 403 names across 28 files, all resolve |
+| Every exercise asked for through the app's own endpoint | 20 asks, 392 questions, every intro, every saved answer came back |
+| Every package with every add-on, page against server | 24 carts, 7 disagreed, now 0 |
 
 ### S31, what the sweeps found
 
@@ -88,6 +140,9 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B136 | **Conflict Patterns was sold and never charged for, and never delivered.** Adding it to a cart quoted $40 and the card was charged nothing for it, so the order recorded nothing and the exercise never unlocked. One missing line in the code that prepares a cart for payment. Fixed, and a check now prices all 24 package-and-add-on combinations off the real page against the real server. |
+| B137 | **A promo code on a Premium cart showed the wrong discount.** The page took Premium's base from an old table that still said $295, so applying BETA-PREMIUM to a $198 package drew "−$295". Fixed, and there is now one price table on that page instead of two. |
+| B138 | **Carts were charged for things the package already includes.** A Premium cart with Physical Intimacy quoted $218 and was charged $198 with nothing granted; Starting Out with the budget tool was charged $20 for a tool it includes. Both sides now read the one list of what each package covers. Your Premium tiles and the offerings page are unchanged, because they already said the right thing. |
 | B133 | **Your two admin CSV exports said no couple had a workbook.** Both asked a `workbooks` table for it and there is no such table: workbooks are files in storage, and the answer lives on the order. The column now reads from there. Worth re-downloading either export if you used the workbook column. |
 | B132 | **Your Gender tile was undercounting, and it is fixed.** Anyone whose pronoun is not one of the three was in the total and in no bar, so the percentages could add up to less than 100 with nothing saying why. Driven in a browser: four people, three bars, 75 per cent. Now four bars and 100. |
 | B128 | **Fixed and seen on your simulator.** The icon is in the card's margin, outside the tile. It also had a loop in it that said "Maximum update depth exceeded"; that is gone. |

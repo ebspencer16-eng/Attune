@@ -79,6 +79,13 @@ try {
      measure", which is the right failure in the wrong place. */
   await run(process.execPath, ['scripts/check-no-sideways-scroll.mjs'], { env: { ...process.env, BASE } });
   await run(process.execPath, ['scripts/check-control-names.mjs'], { env: { ...process.env, BASE } });
+  /* The checkout page is the one static page where being wrong costs money.
+     This prices every package with every add-on off the page itself and
+     against the server's own normaliser: it found seven carts of twenty-four
+     quoting one number while the card was charged another. Here rather than
+     in `npm run check` for the same reason as the two above: it needs a
+     browser and a server. */
+  await run(process.execPath, ['scripts/check-cart-quote.mjs'], { env: { ...process.env, BASE } });
 } catch {
   code = 1;
 }

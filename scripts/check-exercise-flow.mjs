@@ -689,7 +689,7 @@ async function runOne(name) {
     };
     const done = read(key), part = read(progress);
     const count = o => o ? leaves(o.answers || o) : 0;
-    return { completed: !!done, doneCount: count(done), progressCount: count(part) };
+    return { completed: !!done, doneCount: count(done), progressCount: count(part), value: done };
   }, { key: cfg.key, progress: cfg.progress });
 
   const tail = await page.evaluate(() =>
@@ -790,9 +790,23 @@ async function runOne(name) {
 const only = process.argv[2];
 const names = only ? [only] : Object.keys(EXERCISES);
 let failed = 0;
+/**
+ * ── WHAT IT STORED, KEPT FOR WHOEVER ASKS ────────────────────────────────
+ * This is the only thing in the repo that produces a real answer set by
+ * driving the real screens, which makes it the only honest fixture for
+ * anything downstream of an exercise. probe-exercise-chain.mjs feeds exactly
+ * these objects to /api/results, so the question "do the answers a person
+ * gives produce results" is asked of the same bytes rather than of an
+ * invented object.
+ *
+ * Off by default, and nothing in the pass or fail decision reads it.
+ */
+const dumpTo = process.env.EXERCISE_FLOW_DUMP || null;
+const dumped = {};
 for (const name of names) {
   const r = await runOne(name);
   const cfg = EXERCISES[name];
+  if (dumpTo && r.stored?.value) dumped[name] = { key: cfg.key, value: r.stored.value };
   if (r.ok) {
     console.log(`  ok    ${name.padEnd(10)} ${cfg.label.padEnd(24)} ${r.stored.doneCount} answers stored`);
   } else {
@@ -802,6 +816,12 @@ for (const name of names) {
   }
 }
 
+
+if (dumpTo) {
+  const { writeFileSync } = await import('node:fs');
+  writeFileSync(dumpTo, JSON.stringify(dumped, null, 2));
+  console.log(`  dumped ${Object.keys(dumped).length} stored answer set(s) to ${dumpTo}`);
+}
 
 if (failed) {
   console.error(`\n[check-exercise-flow] ${failed} of ${names.length} exercises did not complete.`);

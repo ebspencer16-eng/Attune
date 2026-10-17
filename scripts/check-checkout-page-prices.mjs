@@ -87,6 +87,57 @@ for (const m of src.matchAll(/(\w+):\s*\{[^}]*?\n\s*price:\s*(\d+),\s*priceLabel
   }
 }
 
+/**
+ * ── AND ONE TABLE, NOT TWO ────────────────────────────────────────────────
+ * Every price above was right, and the page still drew "−$295" under a $198
+ * package, measured in a browser with BETA-PREMIUM on a premium cart. A
+ * second table, `PKG_BASE`, sat inside the promo branch with premium at
+ * 295/330: the price from before the change, in the one place nothing
+ * compared. Free-mode codes clamp the total to zero so only the discount line
+ * was wrong; a fixed-price code subtracts that discount from a real subtotal
+ * while the server charges the fixed amount, which is quoting one number and
+ * charging another.
+ *
+ * So: any object in this page that maps package keys to numbers has to BE the
+ * one the checks above read. Counted by what it contains rather than by its
+ * name, because the next one will not be called PKG_BASE.
+ */
+{
+  const keys = Object.keys(DIGITAL_PRICES);
+  const code = src.replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + ' '.repeat(m.length - pre.length));
+  /* By brace depth: PACKAGES is nested and 1,500 characters long, and a lazy
+     regex stopped at its first inner `}`, so the first version of this found
+     no table at all and said so rather than passing. */
+  const tables = [];
+  for (const m of code.matchAll(/(?:const|let|var)\s+(\w+)\s*=\s*\{/g)) {
+    const name = m[1];
+    let depth = 0, end = -1;
+    for (let i = code.indexOf('{', m.index); i < code.length; i += 1) {
+      if (code[i] === '{') depth += 1;
+      else if (code[i] === '}') { depth -= 1; if (!depth) { end = i; break; } }
+    }
+    if (end < 0) continue;
+    const bodyText = code.slice(code.indexOf('{', m.index) + 1, end);
+    const named = keys.filter((k) => new RegExp(`(^|[^\\w.])${k}\\s*:`).test(bodyText));
+    if (named.length < keys.length) continue;        // not a table of all packages
+    if (!/\d{2,}/.test(bodyText)) continue;          // no prices in it
+    tables.push({ name, line: code.slice(0, m.index).split('\n').length });
+  }
+  if (!tables.length) {
+    console.error('[check-checkout-page-prices] no package price table found in the page at all.'
+      + ' A gate that has lost its subject must never report success.');
+    process.exit(1);
+  }
+  if (tables.length > 1) {
+    problems.push(`${tables.length} package price tables in the page: `
+      + tables.map((t) => `${t.name} at line ${t.line}`).join(', ')
+      + '\n      One of them is what the checks above read and the others are a second opinion.'
+      + '\n      PKG_BASE was exactly this, with premium a hundred dollars out.');
+  }
+}
+
 if (!checked) {
   console.error(`[check-checkout-page-prices] found no prices in ${PAGE}, so this checked nothing.`
     + ' A gate that has lost its subject must never report success.');
