@@ -3509,3 +3509,40 @@ sentences, which left exactly one word for Ellie (C16).
 ratio: a missing STRIPE_SECRET_KEY in the test environment, the Relationship
 Reflection capability being called hasAnniversary, /api/home answering with
 `primary` rather than `cards`, and `exercises` being keyed rather than a list.
+
+---
+
+## 2026-10-17, night: the thorough round
+
+Ten sweeps. Four real findings, all fixed, and two corrections to things this
+file and CLAUDE.md had said.
+
+**Found and fixed.** The dashboard's Completion rate counted rows in a table
+nothing writes, so it read 0% for every couple. The results payload carried a
+per-person reading accuracy block, nine fields, that the app's own type says is
+never shown and neither surface draws: it reached every phone and the offline
+cache, and now stops at the response. The app's share sheet sent every In
+Practice article to `/in-practice/<id>` when the pages are at
+`/practice/<slug>`, so every share was a 404. And a Pressable behind the
+results menu was announcing the whole menu as one unnamed button.
+
+**Came back clean, with figures.** 540 malformed calls across 60 endpoints, no
+crash and no leak. 28 tables asked with the public key, no rows for a stranger.
+13 emails rendered from their own samples, 33 links whole. 7 scheduled jobs,
+all refusing an unauthenticated call. 172 app controls, three without words
+(C17, hers to write). 39 pages with no images at all.
+
+**Two corrections.** The `workbooks` table does exist; nothing writes to it,
+which is a different fact and the one that mattered. And api/send-email.js
+builds four emails now rather than ten, so the "five have no trigger" sentence
+in three places was history rather than fact.
+
+**New gates:** check-live-tables (a table something reads is a table something
+writes), and two widenings rather than new files: check-entitlement-flow now
+reads api/ as well as src/App.jsx, and check-internal-links now follows the
+addresses the app sends somebody to.
+
+**Still true about this machine:** `npm run check` stalls on check-mobile-menu
+inside the chain, twice today, for 20 to 35 minutes with the machine in swap.
+Standalone it takes 46 seconds. Kill it, reap Chrome, run that gate alone and
+the rest in batches.

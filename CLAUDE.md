@@ -113,6 +113,8 @@ Existing single sources of truth:
 | How long a nudge lasts | `NUDGE_COOLDOWN_DAYS` in `api/_lib/next-action.js` |
 | Who may make the server send mail | `guardMailOrigin` in `api/_lib/origin.js` |
 | Whether a page has drawn every mark on it | `attune-app/src/constants/mark-reach.ts` |
+| Where an In Practice article lives on the web | `path` in `api/_in-practice.js`, sent to the app as `webUrl` |
+| Which add-ons a package already includes | `PKG_CAPS` → `normalizeItem` in `api/_lib/cart-pricing.js` for the server, `public/_pkg-rules.js` for the browser |
 
 ---
 
@@ -1309,6 +1311,26 @@ them has to restate what a package includes. checkout.html has had the script
 tag since the file was created and never read the global, so it charged list
 price for add-ons the package had already bought. The tag is what made it look
 handled. Grep for the global, not the script tag.
+
+**A gate that names one file holds one surface, and the rule usually has
+three.** Two in one afternoon. check-entitlement-flow printed "6 add-ons
+carried through 11 order-building sites" while reading only `src/App.jsx`; the
+twelfth site was on the server, dropped an add-on entirely, and cost a $40
+exercise its charge and its delivery. check-internal-links held 1,088 links on
+the website and knew nothing about the addresses the APP sends somebody to,
+one of which was a 404 on every share.
+
+Both were fixed by widening the gate rather than writing a second one: the
+same rule, over more files. Before writing a new check, look for the one that
+already encodes the rule and ask which surfaces it can see.
+
+**An address built on the client is a guess about the server.** The app's
+share sheet wrote `${SITE_URL}/in-practice/${post.id}`. Those pages live at
+`/practice/<slug>`, so every article anybody shared from a phone sent their
+friend to a 404, for as long as the feature has existed. The list the website
+builds those pages from already carries each one's `path`; the endpoint sends
+it now and the app shares what it is given. Anywhere one surface assembles
+another surface's URL, the parts have to come from the surface that owns it.
 
 **An empty table answers like a working one.** Both admin CSV exports read a
 `workbooks` table for whether a couple's workbook had been made, and reported
