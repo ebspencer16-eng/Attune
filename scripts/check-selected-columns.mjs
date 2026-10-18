@@ -104,6 +104,7 @@ const fails = [];
 const dynamic = [];
 const unseen = new Set();
 let queries = 0, columns = 0;
+let written = 0, builtElsewhere = 0;
 
 function check(rel, line, table, cols, how) {
   if (!created.has(table)) {
@@ -172,6 +173,60 @@ for (const f of files(join(ROOT, 'api'))) {
   }
 }
 
+// ── And every column WRITTEN ──────────────────────────────────────────────
+/**
+ * The other half, and the half that fails more quietly.
+ *
+ * A read for a column that is not there comes back as an error in a field
+ * most callers do not look at. A WRITE does the same, and the code carries on
+ * as though it had happened: api/delete-account.js nulled
+ * `feedback_submissions.user_id`, which is not a column on that table. The
+ * update answered 42703, the catch never ran, the summary said zero rows and
+ * meant "no such column", and a legacy feedback row kept a person's email
+ * address after they asked to be forgotten.
+ *
+ * The comment beside it recorded the same mistake being made once before on
+ * the same line, with the table name instead of the column.
+ *
+ * Only writes whose object is written out here can be checked. A write built
+ * up in a variable, which is what api/save-exercise.js does on purpose, is
+ * counted and said out loud rather than skipped silently.
+ */
+{
+  const objectAt = (src, at) => {
+    let depth = 0;
+    for (let i = at; i < src.length; i += 1) {
+      if (src[i] === '{') depth += 1;
+      else if (src[i] === '}') { depth -= 1; if (!depth) return src.slice(at, i + 1); }
+    }
+    return null;
+  };
+
+  for (const f of files(join(ROOT, 'api'))) {
+    const src = blank(readFileSync(f, 'utf8'));
+    const rel = f.slice(ROOT.length);
+    for (const m of src.matchAll(/\.from\(\s*['"](\w+)['"]\s*\)/g)) {
+      const table = m[1];
+      if (!created.has(table)) continue;
+      const after = src.slice(m.index, m.index + 400);
+      const call = after.match(/\.(insert|update|upsert)\s*\(\s*(\{|\w)/);
+      if (!call) continue;
+      if (call[2] !== '{') { builtElsewhere += 1; continue; }
+      const obj = objectAt(src, m.index + after.indexOf(call[0]) + call[0].length - 1);
+      if (!obj) continue;
+      written += 1;
+      for (const k of obj.matchAll(/(?:^|[{,\s])([a-z_][a-z0-9_]*)\s*:/gi)) {
+        if (!tables.get(table).has(k[1])) {
+          fails.push(`${rel}:${lineOf(src, m.index)} writes ${table}.${k[1]}, and that table has no`
+            + ' such column.'
+            + '\n      A write to a column that is not there answers 42703 into a field nobody'
+            + '\n      reads, and the code goes on as if it had happened.');
+        }
+      }
+    }
+  }
+}
+
 // ── The column lists that are passed as constants ─────────────────────────
 /**
  * The scan above reads literals, and the biggest selects in this codebase are
@@ -214,5 +269,6 @@ console.log(`[check-selected-columns] ${queries} queries under api/, ${columns} 
   + ` all present on the table asked; ${created.size} tables built by supabase/schema.sql and`
   + ` ${sqlFiles.length} migrations. ${dynamic.length} select(s) built at run time, which this`
   + ' cannot read, of which the three column lists passed as constants are resolved from their'
-  + ' own modules and checked.'
+  + ` own modules and checked. ${written} writes with their columns written out, every one of them a`
+  + ` real column; ${builtElsewhere} more build the row in a variable, which this cannot read.`
   + (unseen.size ? ` Tables it could not find: ${[...unseen].join(', ')}.` : ''));

@@ -299,17 +299,38 @@ export default async function handler(req) {
     if (markErr) console.warn('[delete-account] results not marked (migration 059 may not be run):', markErr.message);
   } catch (e) { console.warn('[delete-account] results not marked:', e?.message); }
 
-  // ── 5. Null out feedback attribution ──────────────────────────────────────
-  // The table is feedback_submissions (an earlier version of this code
-  // referenced 'feedback' which doesn't exist — silent failure). We null
-  // user_id rather than deleting so aggregate/anonymous feedback survives
-  // for product analysis.
+  /**
+   * ── 5. Take the person off any feedback they left ───────────────────────
+   * The instrument that wrote this table is retired, so there are no new
+   * rows; the old ones are the point. What identifies somebody in them is
+   * `email`, and the row carries what they wrote.
+   *
+   * This used to null `user_id`, which is not a column on this table: the
+   * update answered 42703, the error went into a field nobody reads, the
+   * catch below never ran, and `feedbackNulled` stayed 0. So a legacy
+   * feedback row kept that person's address after they asked to be forgotten,
+   * for as long as this has existed.
+   *
+   * The comment above it said the same mistake had already been made once
+   * here, with the table name rather than the column: "an earlier version of
+   * this code referenced 'feedback' which doesn't exist — silent failure".
+   * Found by checking every column written against the schema, which is the
+   * only way this shows up: it does not throw, and it does not log.
+   *
+   * Nulled rather than deleted, so what somebody said about the product
+   * survives without saying who said it, which is the same choice the survey
+   * makes.
+   */
   try {
-    const { count } = await admin.from('feedback_submissions')
-      .update({ user_id: null }, { count: 'exact' })
-      .eq('user_id', userId);
-    summary.feedbackNulled = count || 0;
-  } catch (e) { console.warn('[delete-account] feedback null failed:', e?.message); }
+    const address = notify.self?.email || caller.email || null;
+    if (address) {
+      const { count, error } = await admin.from('feedback_submissions')
+        .update({ email: null }, { count: 'exact' })
+        .eq('email', address);
+      if (error) console.warn('[delete-account] feedback anonymise failed:', error.message);
+      summary.feedbackNulled = count || 0;
+    }
+  } catch (e) { console.warn('[delete-account] feedback anonymise failed:', e?.message); }
 
   // ── 6. Delete auth user ───────────────────────────────────────────────────
   // This cascades: profiles (FK on delete cascade), exercise_sessions
