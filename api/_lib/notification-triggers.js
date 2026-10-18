@@ -23,7 +23,7 @@ export const NOTIFICATION_TRIGGERS = {
     "api/notes.js:739"
   ],
   "partner_deleted": [
-    "api/delete-account.js:344"
+    "api/delete-account.js:365"
   ],
   "results_ready": [],
   "workbook_ready": [

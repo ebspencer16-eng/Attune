@@ -3546,3 +3546,39 @@ addresses the app sends somebody to.
 inside the chain, twice today, for 20 to 35 minutes with the machine in swap.
 Standalone it takes 46 seconds. Kill it, reap Chrome, run that gate alone and
 the rest in batches.
+
+---
+
+## 2026-10-17, late: UX and data storage
+
+Six sweeps. Four findings, all fixed, and one of them was in a document rather
+than the code.
+
+**Deletion leaves nothing behind**, measured: 17 tables hold a row belonging
+to a person and every one cascades or loses the link. The first run called
+four of them leaks because it only counted `on delete cascade` and ignored
+`on delete set null`, which is the better answer and what three of them do.
+
+**What it did find was the lawyer's document.** LEGAL-VS-CODE.md listed nine
+problems and all nine have been built or settled since. It now opens with
+where each stands.
+
+**Five log lines carried a customer's email and two their first name.** Logs
+live ninety days. api/_lib/log-redact.js gives a log the domain and the fault;
+check-log-privacy holds all 148 console lines under api/.
+
+**Deletion nulled a column that does not exist** on feedback_submissions, so
+it failed quietly and left an address behind. check-selected-columns reads the
+write side now.
+
+**Signing out left two things in memory**, one of which decides whether
+somebody is asked for feedback. forgetSession clears them; check-cache-privacy
+watches for the next one.
+
+**The bin in the marking toolbar deleted a note with one tap.** It asks now,
+for a note and not for a highlight, in the words that were already in the note
+sheet, which now have one home.
+
+New gates: check-log-privacy, check-destructive-confirm. Widened:
+check-selected-columns (writes), check-cache-privacy (memory),
+check-email-preview (one exemption).

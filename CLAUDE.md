@@ -1332,6 +1332,32 @@ builds those pages from already carries each one's `path`; the endpoint sends
 it now and the app shares what it is given. Anywhere one surface assembles
 another surface's URL, the parts have to come from the surface that owns it.
 
+**A write to a column that does not exist is as quiet as a read from one.**
+`api/delete-account.js` took a person's name off their feedback by nulling
+`feedback_submissions.user_id`, and that table has no user_id column. The
+update answered 42703 into a field nobody reads, the catch never ran, and the
+summary reported zero rows cleared, which is also what success looks like for
+somebody who left no feedback. So a legacy row kept their email address after
+they asked to be forgotten. The comment directly above that line recorded the
+same mistake being made once before on the same statement, with the table name
+instead of the column. check-selected-columns reads both directions now.
+
+**Memory is storage.** Signing out cleared the token, the files on the phone
+and the last screen, and left two things in the app's own `client.ts`: the last reply
+from /api/survey, which decides whether somebody is asked for feedback at all,
+and the shared home promise. Lend the phone, and the next person is not asked
+because the last one answered. Anything a module holds about a person belongs
+in the same clearing as the disk, and check-cache-privacy now fails on a
+module-level `let` that forgetSession does not reset.
+
+**An alert that asks has a cancel button; one that reports does not.** Every
+destructive path in the app has two alerts near it, the question and the
+"that did not delete". A check that matched `Alert.alert` anywhere nearby
+called a one-tap deletion confirmed. And a window of lines ABOVE a call
+reaches into the previous handler, which has its own confirmation: scope to
+the enclosing declaration, or the gate passes a plant that removed the
+question entirely.
+
 **An empty table answers like a working one.** Both admin CSV exports read a
 `workbooks` table for whether a couple's workbook had been made, and reported
 no for every couple since the day it shipped. The table exists and nothing has
