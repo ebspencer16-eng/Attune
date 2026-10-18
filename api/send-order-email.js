@@ -22,6 +22,7 @@ import { guardMailOrigin } from './_lib/origin.js';
 import { brandedEmail, _esc } from './_lib/branded-email.js';
 import { APP_LIVE } from './_lib/flags.js';
 import { SITE_URL } from './_lib/site.js';
+import { redactEmail, redactEmails, providerError } from './_lib/log-redact.js';
 
 export const config = { runtime: 'edge' };
 
@@ -143,11 +144,15 @@ export default async function handler(req) {
       results.push({ status: r.ok ? 'fulfilled' : 'rejected', value: data });
       if (!r.ok) {
         failed++;
-        console.error('[send-order-email] Resend rejected:', email.subject, data);
+        /* Which email and which domain, not the subject: two of the three
+           order subjects carry the customer's first name, and Resend's error
+           body repeats the address we sent it. */
+        console.error('[send-order-email] Resend rejected:',
+          redactEmails(email.to), providerError(data));
       }
     } catch (err) {
       failed++;
-      console.error('[send-order-email] fetch threw:', email.subject, err);
+      console.error('[send-order-email] fetch threw:', redactEmails(email.to), err?.message || err);
       results.push({ status: 'rejected', reason: String(err) });
     }
   }

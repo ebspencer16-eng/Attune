@@ -22,6 +22,7 @@ import { SITE_URL } from './_lib/site.js';
 import { unsubscribeUrl } from './_lib/email-footer.js';
 /* Whether there is an app to tell anyone to download. See partnerInviteEmail. */
 import { APP_LIVE } from './_lib/flags.js';
+import { redactEmails } from './_lib/log-redact.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -457,7 +458,7 @@ export default async function handler(req) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     // Dev mode — log and return mock success
-    console.log('[send-email] No RESEND_API_KEY — would send:', { type, to: email.to, subject: email.subject });
+    console.log('[send-email] No RESEND_API_KEY — would send:', { type, to: redactEmails(email.to) });
     return new Response(JSON.stringify({ ok: true, mock: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
 

@@ -14,6 +14,7 @@ import { capabilitiesFor } from './_lib/ownership.js';
 
 export const config = { runtime: 'edge' };
 import { SITE_URL } from './_lib/site.js';
+import { redactEmail } from './_lib/log-redact.js';
 
 const DISCOUNT_PERCENT = 30;
 const VALID_DAYS = 30;
@@ -177,7 +178,7 @@ export default async function handler(req) {
           code, checkoutUrl, discountPercent: DISCOUNT_PERCENT,
         }),
       });
-    } catch (e) { console.warn('[wb-promo] email failed:', toEmail, e); }
+    } catch (e) { console.warn('[wb-promo] email failed:', redactEmail(toEmail), e?.message || e); }
   }
   await sendTo(accountEmail, toName, partnerName);
   await sendTo(partnerEmail, partnerName, toName);

@@ -15,6 +15,7 @@ import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 
 import { unsubscribeLink } from './_lib/email-footer.js';
 import { SITE_URL } from './_lib/site.js';
+import { redactEmail } from './_lib/log-redact.js';
 
 export const config = { runtime: 'edge' };
 
@@ -117,7 +118,7 @@ export default async function handler(req) {
       const mail = CHECKIN_EMAILS.cron_checkin_6mo(EMAIL_CONTEXT(user, hasRefl));
       const ok = await sendEmail(user.email, mail.subject, mail.html);
       if (ok) { await markSent(user.id, 'checkin_sent_at'); sent6mo++; sentSoFar.sent6mo = sent6mo; }
-      else { console.error('[cron-checkin] 6mo email failed:', user.email); failed++; sentSoFar.failed = failed; }
+      else { console.error('[cron-checkin] 6mo email failed:', redactEmail(user.email)); failed++; sentSoFar.failed = failed; }
     }
 
     // ── 1-year check-in ───────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ export default async function handler(req) {
       const mail = CHECKIN_EMAILS.cron_checkin_12mo(EMAIL_CONTEXT(user, hasRefl));
       const ok = await sendEmail(user.email, mail.subject, mail.html);
       if (ok) { await markSent(user.id, 'checkin_1yr_sent_at'); sent1yr++; sentSoFar.sent1yr = sent1yr; }
-      else { console.error('[cron-checkin] 1yr email failed:', user.email); failed++; sentSoFar.failed = failed; }
+      else { console.error('[cron-checkin] 1yr email failed:', redactEmail(user.email)); failed++; sentSoFar.failed = failed; }
     }
 
     console.log(`[cron-checkin] 6mo: sent ${sent6mo}, 1yr: sent ${sent1yr}, failed: ${failed}`);

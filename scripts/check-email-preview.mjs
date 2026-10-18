@@ -58,7 +58,16 @@ const INTERNAL = new Set(['api/cron-beta-digest.js', 'api/cron-feedback-synthesi
  * make the build pass, the thing it names is probably an email nobody can
  * preview.
  */
-const NOT_AN_EMAIL = new Set(['brandedEmail', 'renderEmail']);
+/**
+ * Named like a builder and not one.
+ *
+ * `redactEmail` takes an address and gives back its domain, for a log line.
+ * The scan matches on the name, which is the right trade for catching a new
+ * email that skips the preview, and the cost is an exemption like this one
+ * every time a helper is named after the thing it handles rather than after
+ * what it makes.
+ */
+const NOT_AN_EMAIL = new Set(['brandedEmail', 'renderEmail', 'redactEmail']);
 
 let found = 0;
 for (const rel of files) {

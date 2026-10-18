@@ -123,6 +123,20 @@ These two are still waiting on somebody, and neither is waiting on me.
 | S32 | **Setup to exercise to results, swept end to end.** Seven properties over the whole chain: what setup collects, what the exercises ask, what gets stored, and what the results draw. The list of what each one measures is under the table. |
 | S31 | **Sweeps, while you are away.** Eight properties, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
 
+### S34, what these sweeps found so far
+
+**Deleting an account leaves nothing behind.** 17 tables hold a row belonging
+to a person, and every one either goes with the account or loses the link to
+it. Measured, not assumed.
+
+**That sweep found something in the documents instead.** The file TASKS.md
+tells you to send a lawyer listed nine problems and all nine have been built
+or settled since. It now opens with where each one stands; R12 above says the
+rest.
+
+**Five log lines carried an email address and two a first name.** B143. Logs
+live ninety days.
+
 ### S34, what I am measuring
 
 1. **Deleting an account clears everything.** Every table that holds a row
@@ -285,6 +299,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B143 | **Five log lines carried a customer's email address, and two carried their first name.** Server logs are kept for ninety days. Nothing personal was ever needed to debug a failed send: they say which domain refused it and what the fault was now. A check holds the whole of `api/` to that, and the published policy's promise about logs is now measured rather than assumed. |
 | B142 | **Sharing an article from the app sent your friend to a dead page.** The share sheet built its own web address and the pages live somewhere else, so every share was a 404. The app now shares the address the server gives it, and a piece that only exists in the app shares its title with no link. The check that watches the website's links watches the app's now too. |
 | B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. The app's own code says "never shown to customers" and nothing draws it, so it was landing on every phone, and in the offline cache, for nothing. It stays in your records and is no longer sent to the device. |
 | B140 | **Your dashboard's Completion rate has read 0% for every couple.** It counted rows in the table an invited partner's answers used to go into; they go on that partner's own account now, and nothing has written to that table since. It counts finished couples off the accounts themselves now. The same sweep that found the workbook column, run over every table this product reads. |
