@@ -3,11 +3,14 @@
  * Works out which emails anything actually sends, and writes it down.
  *
  * ── WHY ───────────────────────────────────────────────────────────────────
- * api/send-email.js can build ten emails. Four of them have no trigger
- * anywhere in the codebase: workbook_ready and partner_joined_notification
- * were retired at their triggers in 2793bba, beta_survey went the same way in
- * the same commit, and checkin_1yr is sent by api/cron-checkin.js from its own
- * template rather than through this endpoint. The templates stayed.
+ * api/send-email.js once built ten emails, four of which had no trigger
+ * anywhere: workbook_ready and partner_joined_notification were retired at
+ * their triggers in 2793bba, beta_survey went the same way in the same
+ * commit, and checkin_1yr is sent by api/cron-checkin.js from its own
+ * template. The templates stayed behind, which is what this file was written
+ * to make visible. They are gone now: that module builds four emails and all
+ * four are sent. The count is still generated, because the next retirement
+ * will leave a template behind the same way.
  *
  * That matters because /email-preview is where Ellie reads email copy, and she
  * writes every word a customer sees. A page that lists ten emails when four of

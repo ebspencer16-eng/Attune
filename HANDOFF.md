@@ -3414,10 +3414,13 @@ EAS update went out on the production channel.
   `api/_lib/pronouns.js` is the rule now and `check-pronoun-conversion.mjs`
   holds it.
 - Both admin CSV exports asked a `workbooks` table whether a couple's workbook
-  had been made. There is no such table; it is a storage bucket, and
-  api/delete-account.js says so in a comment. The column read N for everybody
-  since it shipped. It reads the order now, and
+  had been made, and the column read N for everybody since it shipped. The
+  table exists and nothing has ever written a row to it; what records that a
+  workbook was made is the order. It reads the order now, and
   `check-selected-columns.mjs` is the sweep that found it, kept as a gate.
+  (A later probe with the public key corrected the reason: an earlier note
+  here said the table did not exist, which a comment in delete-account.js had
+  said and nothing had checked.)
 
 **And B131, the survey button.** It draws only for somebody who has not
 answered, which is her rule, so it cannot be drawn until /api/survey answers.

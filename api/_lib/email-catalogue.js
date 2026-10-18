@@ -15,11 +15,13 @@
  *
  * ── THE `sends` FIELD ─────────────────────────────────────────────────────
  * Where each one is triggered from, read from the generated record in
- * email-triggers.js. Five of the ten types api/send-email.js can build have no
- * trigger at all: three were retired at their triggers in 2793bba, one is sent
- * by the cron from a different template, and one never had one. Showing those
- * beside the live ones without saying so is how copy gets approved that nobody
- * will ever read.
+ * email-triggers.js. This note used to say that five of the ten types
+ * api/send-email.js can build had no trigger at all, three of them retired at
+ * their triggers in 2793bba. Those templates have since been deleted: that
+ * module builds four emails now and every one of them is sent from somewhere.
+ * The field stays, because showing a retired email beside the live ones
+ * without saying so is how copy gets approved that nobody will ever read, and
+ * that is a thing that happens again.
  */
 
 import { SEND_EMAILS } from '../send-email.js';

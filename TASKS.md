@@ -118,8 +118,46 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
+| S33 | **A thorough round: the things nothing has measured yet.** Five properties: every endpoint given bad input, whether a stranger can read a couple's data, every email rendered from its own sample, every scheduled job's guard, and every control in the app having a name a screen reader can say. Detail under the table. |
 | S32 | **Setup to exercise to results, swept end to end.** Seven properties over the whole chain: what setup collects, what the exercises ask, what gets stored, and what the results draw. The list of what each one measures is under the table. |
 | S31 | **Sweeps, while you are away.** Eight properties, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
+
+### S33, what these sweeps found
+
+Nothing broken. Four of the five came back clean with a figure, which is the
+point of running them; the fifth left three labels for you, C17 above.
+
+| What was measured | Result |
+|--|--|
+| Every endpoint given nine kinds of bad input | 60 endpoints, 540 calls, no crash, nothing leaked, and the three that write on a junk body write only what they should |
+| Whether a stranger can read a couple's data | 28 tables asked with the public key, 0 rows came back. The only readable table is the list of promo codes, which is deliberate |
+| Every email rendered from its own sample | 13 emails, 33 links, no holes, no stray tokens, and every one of them is sent from somewhere |
+| Every scheduled job | 7, all refusing a call with no credential. The three that could run twice are team digests and a cleanup, where a repeat is harmless |
+| Every control in the app | 172, three without words, in C17 |
+
+One correction came out of it. I told you last round that the `workbooks`
+table does not exist. It does; nothing has ever written a row to it, which is
+a different fact and the reason the column said no for everybody. The fix was
+the same either way. The record is corrected in the three places that repeated
+it.
+
+### S33, what I am measuring
+
+1. **Every endpoint, given bad input.** Null body, wrong types, a string where
+   a number goes, a very long string. None may answer 500, and none may put a
+   stack trace or a table name in what it answers. Twenty of them once
+   answered 500 to a body of `null`.
+2. **Whether a stranger can read anything.** The key the browser carries is
+   public by design, and what stops it reading another couple's answers is
+   row-level security. I will ask every table for rows with that key and
+   expect nothing back. Reads only; nothing is written.
+3. **Every email, rendered.** Each one built from its own sample and walked
+   for a token that did not resolve, a link that goes nowhere, an "undefined",
+   and a missing unsubscribe.
+4. **Every scheduled job.** Each cron endpoint refuses an unauthenticated
+   call, and running it twice in a row does not do the same thing twice.
+5. **Every control in the app.** A touchable with no accessible name is a
+   button a screen reader calls "button".
 
 ### S32, what I am measuring
 
@@ -228,12 +266,13 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none, so it says "button": the row of progress dots at the bottom, the card itself, and the tap zones that page back and forward. They need a short phrase each, which is yours to write (something like "card 2 of 6" for a dot). 172 controls across the app, these three are the only ones without words, and they are only reached by someone using a screen reader. |
 | C16 | **One word for you, in the workbook.** The Energy gap paragraph ends "Understanding what you each need is crucial." CLAUDE.md lists "crucial" as a word to avoid and you own every word a customer reads, so I have left it. A shorter ending would be yours to write. Everything else came back clean: I measured 3,632 sentences across 21 copy modules for hedging, for the words on that list and for anything over 30 words, and the rest of what it flagged was either a book title, a quotation that has to stay verbatim, or your own answer labels. |
 | B139 | **Sales tax was computed on a cart missing two add-ons.** The tax endpoint kept its own idea of what was in the cart and had left Physical Intimacy and Conflict Patterns out of it, so tax on an order with either was calculated on a base up to $40 too low. Both endpoints now read the same cart. |
 | B136 | **Conflict Patterns was sold and never charged for, and never delivered.** Adding it to a cart quoted $40 and the card was charged nothing for it, so the order recorded nothing and the exercise never unlocked. One missing line in the code that prepares a cart for payment. Fixed, and a check now prices all 24 package-and-add-on combinations off the real page against the real server. |
 | B137 | **A promo code on a Premium cart showed the wrong discount.** The page took Premium's base from an old table that still said $295, so applying BETA-PREMIUM to a $198 package drew "−$295". Fixed, and there is now one price table on that page instead of two. |
 | B138 | **Carts were charged for things the package already includes.** A Premium cart with Physical Intimacy quoted $218 and was charged $198 with nothing granted; Starting Out with the budget tool was charged $20 for a tool it includes. Both sides now read the one list of what each package covers. Your Premium tiles and the offerings page are unchanged, because they already said the right thing. |
-| B133 | **Your two admin CSV exports said no couple had a workbook.** Both asked a `workbooks` table for it and there is no such table: workbooks are files in storage, and the answer lives on the order. The column now reads from there. Worth re-downloading either export if you used the workbook column. |
+| B133 | **Your two admin CSV exports said no couple had a workbook.** Both asked a `workbooks` table that nothing has ever written a row to; the workbook is a file in storage and what records that it was made is the order. The column now reads from there. Worth re-downloading either export if you used the workbook column. |
 | B132 | **Your Gender tile was undercounting, and it is fixed.** Anyone whose pronoun is not one of the three was in the total and in no bar, so the percentages could add up to less than 100 with nothing saying why. Driven in a browser: four people, three bars, 75 per cent. Now four bars and 100. |
 | B128 | **Fixed and seen on your simulator.** The icon is in the card's margin, outside the tile. It also had a loop in it that said "Maximum update depth exceeded"; that is gone. |
 | B129 | **Fixed and timed on your simulator.** Insights draws in about half a second from what is kept on the phone, with no spinner. |

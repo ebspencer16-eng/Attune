@@ -1177,8 +1177,14 @@ export default function Results({
               /* It swallows the tap that would close the section dropdown and is not a
                  control. Without this the whole card dims and sinks when a finger
                  lands anywhere on it, because the press feedback added for O524
-                 applies to every Pressable, which is the point of it. */
+                 applies to every Pressable, which is the point of it.
+
+                 And it is not an accessibility element either: a Pressable is
+                 one by default, so VoiceOver announced the whole menu as a
+                 single unnamed button and the rows inside it could not be
+                 reached. accessible={false} hands the focus back to them. */
               noPressFeedback
+              accessible={false}
               style={{
                 position: 'absolute',
                 left: dropLeft,

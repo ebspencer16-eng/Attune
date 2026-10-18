@@ -211,8 +211,9 @@ change is what showed it, before and after. The Gender tile converted pronouns
 to gender words in two places that agreed, and the second had no fourth row, so
 four people made three bars adding up to 75 per cent with nothing saying why.
 And both admin CSV exports asked a `workbooks` table whether a couple's
-workbook had been made: there is no such table, api/delete-account.js says so
-in a comment, and the column read N for everybody since the day it shipped.
+workbook had been made, and the column read N for everybody since the day it
+shipped, because nothing has ever written a row to that table. The order
+carries the answer and one of those exports was already selecting it.
 
 **And what a sweep cannot see, it has to say it cannot see.** The contrast
 sweep walks up the tree for a background colour, and a gradient has none, so it
@@ -664,10 +665,13 @@ what the product does has to read the product, not restate it. Every email is
 now built through a named map in the module that sends it, with a sample beside
 it, and the preview renders those.
 
-It also has to say what it cannot show. Five of those emails have no trigger
-anywhere; the page says so next to each, from a generated record, because a
-list that mixes live copy with retired copy costs review attention on the wrong
-half.
+It also has to say what it cannot show. Five of those emails had no trigger
+anywhere, and the page said so next to each, from a generated record, because
+a list that mixes live copy with retired copy costs review attention on the
+wrong half. Those five templates have since been deleted and all thirteen
+emails in the catalogue now render and are sent from somewhere, measured by
+rendering every one of them and asking where it is sent from. The record is
+still generated: the point was never the number.
 
 **The page that takes the money keeps its own prices, and two of those copies
 are what the customer reads.** public/checkout.html is static and cannot import
@@ -1306,13 +1310,23 @@ tag since the file was created and never read the global, so it charged list
 price for add-ons the package had already bought. The tag is what made it look
 handled. Grep for the global, not the script tag.
 
-**A broken query answers like an empty one.** `const { data: rows = [] } =
-await admin.from('workbooks').select(...)` against a table that does not exist
-returns an error in a field nobody reads and a `data` of null, so the default
-fires and every downstream answer is "none". Both admin CSV exports reported
-that no couple had ever had a workbook made, for every couple, and the shape of
-that output is indistinguishable from the truth. When a figure is uniformly
-negative, check that its source exists before checking the logic.
+**An empty table answers like a working one.** Both admin CSV exports read a
+`workbooks` table for whether a couple's workbook had been made, and reported
+no for every couple since the day it shipped. The table exists and nothing has
+ever written a row to it: the workbook is a file in a storage bucket, and what
+records that it was made is `orders.workbook_status`.
+
+Two things in that. A uniformly negative figure is a question about the source
+before it is a question about the logic. And `const { data: rows = [] } = await
+...` cannot tell an empty table from a failed query, because a PostgREST error
+puts its message in a field nobody reads and leaves `data` null, so the default
+fires either way. If it matters which, read the error.
+
+It also took a measurement to settle. This file said for a day that there is
+no workbooks table, on the strength of a comment in api/delete-account.js that
+said so. Asked with the public key, that table answers 200 and an empty list;
+a table that does not exist answers PGRST205, which is what `lmft_requests`
+answers. A comment is not evidence about a database.
 
 **A gate's own baseline can swallow the thing it measures.** Teaching
 check-render to notice a view that renders nothing took three attempts. Counting

@@ -215,9 +215,17 @@ export default async function handler(req) {
   } catch (e) { console.warn('[delete-account] archive step failed:', e?.message); }
 
   // ── 2. Remove personalized workbook files from storage ────────────────────
-  // There is no `workbooks` table. Workbook files live in the `workbooks`
-  // Supabase Storage bucket, keyed by order_num. We pull the user's order
-  // numbers, then delete each `workbooks/<order_num>/...` prefix.
+  // Workbook files live in the `workbooks` Supabase Storage bucket, keyed by
+  // order_num. We pull the user's order numbers, then delete each
+  // `workbooks/<order_num>/...` prefix.
+  //
+  // This used to say "there is no workbooks table". There is: it carries
+  // user_id, storage_path and generated_at, and nothing in this product has
+  // ever written a row to it, which is a different fact and was worth getting
+  // right. Asked with the public key, it answers 200 and an empty list, where
+  // a table that does not exist answers PGRST205. Both admin CSV exports read
+  // it for whether a couple's workbook had been made and therefore said no
+  // for everybody; they read the order now.
   // Workbooks contain names, personalized language, and couple-specific
   // content — they're PII even though the underlying couple_type is not.
   try {
