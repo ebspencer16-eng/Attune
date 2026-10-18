@@ -35,6 +35,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { recall } from '@/lib/payload-cache';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -128,8 +129,22 @@ export default function NotesScreen() {
   const [postTitles, setPostTitles] = useState<Record<string, string>>({});
   const [resultsVersion, setResultsVersion] = useState<number | null>(null);
   const [partnerName, setPartnerName] = useState<string | null>(null);
-  /** Today's word and its definition, from the server. See api/_words.js. */
-  const [word, setWord] = useState<HomeResponse['word']>(null);
+  /**
+   * Today's word and its definition, from the server. See api/_words.js.
+   *
+   * ── SEEDED FROM WHAT IS ALREADY ON THE PHONE ────────────────────────────
+   * Ellie: "Notes just took 10 seconds to load."
+   *
+   * Timed on her simulator: warm, the tab draws in about half a second; cold,
+   * the spinner sits there while three serverless functions wake up. The
+   * journal and the tags are deliberately not cached, which is her own rule
+   * and stays, but the word at the top of this tab comes from /api/home,
+   * which IS cached. It was being thrown away and asked for again, behind a
+   * spinner that covered the whole screen.
+   */
+  const [word, setWord] = useState<HomeResponse['word']>(
+    () => recall<HomeResponse>('home')?.word ?? null,
+  );
   /** The word as a full card, which is what its control opens. */
   const [wordOpen, setWordOpen] = useState(false);
   /** Whether the journal is open over this screen. */
@@ -684,7 +699,17 @@ export default function NotesScreen() {
     setShowAllShared(false);
   }, []));
 
-  if (loading) return <Shell><ScreenLoading label={LOADING.notes} /></Shell>;
+  /**
+   * ── THE PAGE, THEN THE NOTES ───────────────────────────────────────────
+   * The spinner used to cover everything, including the word card that was
+   * already in hand from the cached home payload. Now the screen draws, and
+   * the part that is still coming says so where it will appear.
+   *
+   * Only on a cold first load: once the notes have arrived there is nothing
+   * to wait for, and an error still takes the whole screen because a page
+   * with a dead region is worse than a page that says what happened.
+   */
+  if (loading && !word) return <Shell><ScreenLoading label={LOADING.notes} /></Shell>;
 
   if (error?.kind === 'unauthorized') {
     return (
@@ -833,10 +858,16 @@ export default function NotesScreen() {
               chapter, so the gap between them was reading as a page break.
           */}
           <View style={{ flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.lg }}>
+            {/* ── WHAT IT SAYS WHILE IT IS STILL COMING ──────────────────
+                The page draws before the notes arrive now, so these two tiles
+                would have said "Nothing yet" about rows that were in flight.
+                That is the empty state drawn over data in hand, which is the
+                thing Ellie met on Learn: "nothing published yet" while the
+                request was still going. While it is loading they say so. */}
             <Peek
               title={JUMP_BACK_IN}
               count={counts.marks}
-              empty={PEEK_MINE_EMPTY}
+              empty={loading ? LOADING.notes : PEEK_MINE_EMPTY}
               onAll={() => openDeeper('recent')}
               rows={recentMarks.slice(0, 2).map((n) => ({
                 id: n.id,
@@ -848,7 +879,7 @@ export default function NotesScreen() {
               title={SHARED_WITH_ME}
               count={counts.shared}
               badge={unopenedCount || undefined}
-              empty={PEEK_SHARED_EMPTY}
+              empty={loading ? LOADING.notes : PEEK_SHARED_EMPTY}
               onAll={() => openDeeper('shared')}
               rows={sharedRecent.slice(0, 2).map((n) => ({
                 id: n.id,
@@ -901,6 +932,9 @@ export default function NotesScreen() {
           <View style={{ marginTop: Spacing.lg }}>
             <TagList
               tags={tags}
+              /* Still coming, so the list says that rather than "add a tag to
+                 get started" to somebody who has twenty. */
+              loading={loading}
               stats={tagStats}
               sort={tagSort}
               onChangeSort={setTagSort}
@@ -1291,8 +1325,11 @@ function tagColor(tag: Tag): string {
 
 function TagList({
   tags, stats, sort, onChangeSort, placeholder, onAdd, onOpen, onPurge, onRestore,
+  loading = false,
 }: {
   tags: Tag[];
+  /** The tags have not arrived yet, so an empty list is not an empty list. */
+  loading?: boolean;
   /**
    * How many marks carry each tag and when the newest was touched, from the
    * server.
@@ -1577,7 +1614,9 @@ function TagList({
         <Blank
           body={query
             ? 'No tag by that name. Clear the search to see them all.'
-            : 'Add a tag to get started. Keep track of your tags in this section, with how many notes are filed under each.'}
+            : loading
+              ? LOADING.notes
+              : 'Add a tag to get started. Keep track of your tags in this section, with how many notes are filed under each.'}
         />
       )}
 

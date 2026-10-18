@@ -139,12 +139,21 @@ async function run(label, setup) {
   }
 }
 
-/* 4. The preference cannot be read: treated as no, on both sides. */
+/**
+ * 4. The preference cannot be read: the copy is kept.
+ *
+ * This used to assert the opposite. Ellie, asked which way it should fall:
+ * "I want the default to be to keep responses." Somebody who has never opened
+ * the privacy choices page has no row at all, which is not a failure and
+ * already meant keep; what changed is a database that will not answer. An
+ * explicit opt-out is still honoured, and cases 2 and 3 above are what hold
+ * that.
+ */
 {
   const r = await run('the preference could not be read', { mineOptOut: false, theirsOptOut: false, prefsFail: true });
-  if (r && r.row) {
-    problems.push('the research preference could not be read and an archive row was written'
-      + ' anyway. A preference we cannot confirm has to be an opt-out.');
+  if (r && !r.row) {
+    problems.push('the research preference could not be read and nothing was archived. A database'
+      + ' that will not answer is not somebody opting out.');
   }
 }
 
@@ -156,4 +165,4 @@ if (problems.length) {
 
 console.log('[check-research-consent] 4 runs of the real endpoint: both agreeing archives the'
   + " couple's answers with no name, email or id on the row; either person's opt-out removes"
-  + ' their own half; and a preference that cannot be read is an opt-out.');
+  + ' their own half; and a preference that cannot be read keeps it, which is the default Ellie asked for.');

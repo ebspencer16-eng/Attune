@@ -402,6 +402,20 @@ function typeGround(accent?: string | null): Ground {
  * happens to carry: they are not all the same shape, and a card that gained a
  * field later should not need this changed.
  */
+/**
+ * What to call a card out loud.
+ *
+ * Its eyebrow is the line above the number, which is the closest thing a card
+ * has to a name: "Your results", "Word of the day". Falls back to the title
+ * and then to the kind, so a card that carries neither still says something.
+ */
+function cardName(card: HighlightCard | undefined) {
+  if (!card) return 'Highlight';
+  const words = [card.eyebrow, card.title, card.typeName]
+    .find((line): line is string => typeof line === 'string' && line.trim().length > 0);
+  return (words || card.kind || 'Highlight').trim();
+}
+
 function shareTextFor(card: HighlightCard | undefined) {
   if (!card) return '';
   const lines = [card.title, card.typeName, card.lead, card.body, card.footer]
@@ -678,7 +692,13 @@ export default function HighlightCards({
         width: e.nativeEvent.layout.width,
         height: e.nativeEvent.layout.height - BottomTabInset - Spacing.xl,
       })}>
-      <Pressable onPress={() => setOpen(true)} accessibilityRole="button">
+      {/* The name of the card, then what it is, which is Ellie's wording for
+          C17: "[storycard name] highlight card". A screen reader said
+          "button" here. */}
+      <Pressable
+        onPress={() => setOpen(true)}
+        accessibilityRole="button"
+        accessibilityLabel={`${cardName(cards[0])} highlight card`}>
         <Card card={cards[0]} onDone={() => setOpen(true)} w={cardW} h={cardH} active map={map} />
       </Pressable>
 
@@ -812,7 +832,12 @@ function Reel({
         }}>
         {cards.map((card, i) => (
           <Pressable
-      accessibilityRole="button" key={card.id} onPress={() => goTo(i)} hitSlop={8}>
+            accessibilityRole="button"
+            /* "Card 2 of 6", her words. A dot has nothing to read. */
+            accessibilityLabel={`Card ${i + 1} of ${cards.length}`}
+            key={card.id}
+            onPress={() => goTo(i)}
+            hitSlop={8}>
             <View
               style={{
                 height: 4, width: i === index ? 28 : 18, borderRadius: 2,
@@ -834,6 +859,16 @@ function Reel({
         {cards.map((card, i) => (
           <Pressable
             accessibilityRole="button"
+            /**
+             * Ellie's wording for C17: "tap to move [forward/back]".
+             *
+             * One control does both: the left third goes back and the rest
+             * goes on. A screen reader activates the middle, so the label is
+             * what that does, and the other half is the hint. The round
+             * Previous and Next buttons below carry their own names.
+             */
+            accessibilityLabel={i === cards.length - 1 ? 'Tap to finish' : 'Tap to move forward'}
+            accessibilityHint="Tap the left side to move back"
             key={card.id}
             /**
              * ── WHICH SIDE WAS TAPPED ──────────────────────────────────────

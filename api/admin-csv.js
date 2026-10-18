@@ -32,7 +32,9 @@ import { safeError } from './_lib/http.js';
 
 // ── Scoring + typing now live in the shared engine (single source of truth,
 // also used by the app, workbook, and admin typing endpoint). ──
-import { personResults } from './_lib/results.js';
+import {
+  personResults, readAccuracy, understandingBandFor, readBandFor, ALIGNMENT_THRESHOLD,
+} from './_lib/results.js';
 // Dimension scores for one person, blended against their partner's reads when
 // those exist. Wraps the shared implementation so the exports below cannot
 // drift from what couples actually see.
@@ -229,6 +231,28 @@ async function buildCombinedData(admin) {
     ...DIMS.map(d => ['', `partner_b_comms_${d}`]),
     ...SAT_KEYS.map(k => ['', `partner_a_satisfaction_${k}`]),
     ...SAT_KEYS.map(k => ['', `partner_b_satisfaction_${k}`]),
+    /**
+     * ── ALIGNMENT AND UNDERSTANDING, FOR ELLIE ONLY ──────────────────────
+     * Ellie: "I want this score available through admin and included in the
+     * csv export and tied to users backend data so that I can dive into data
+     * if I want, but I don't want users to be able to access those scores
+     * (alignment and understanding) at all."
+     *
+     * So they are here and in the admin, and /api/results stops carrying the
+     * understanding block to the device. Both figures come from
+     * api/_lib/results.js rather than being worked out again: the gap that
+     * counts as wide, how many wide dimensions make a couple misaligned, and
+     * the bands that turn a mean error into a word.
+     */
+    ['Alignment', 'wide_gap_dimensions'],
+    ['',          'alignment_group'],
+    ['Understanding', 'partner_a_read_error'],
+    ['',              'partner_b_read_error'],
+    ['',              'understanding_error'],
+    ['',              'understanding_band'],
+    ['',              'partner_a_reads_partner'],
+    ['',              'partner_b_reads_partner'],
+    ['',              'understanding_lopsided'],
   ];
 
 
@@ -307,6 +331,7 @@ async function buildCombinedData(admin) {
       ...DIMS.map(d => fmt(bScores[d])),
       ...SAT_KEYS.map(k => aEx3[k] != null ? aEx3[k] : ''),
       ...SAT_KEYS.map(k => bEx3[k] != null ? bEx3[k] : ''),
+      ...alignmentAndUnderstanding(p, ps),
     ];
 
     return row;
@@ -550,6 +575,66 @@ async function exportDemographics(admin) {
  * store-workbook-pdf.js writes both of these together, so either answers it;
  * the url is the one that survives a status column somebody forgot to set.
  */
+/**
+ * The nine figures at the end of a research row.
+ *
+ * ── WHY THEY ARE HERE AND NOWHERE A CUSTOMER CAN REACH ──────────────────
+ * Ellie: "I want this score available through admin and included in the csv
+ * export and tied to users backend data so that I can dive into data if I
+ * want, but I don't want users to be able to access those scores (alignment
+ * and understanding) at all."
+ *
+ * ── AND WHY NOTHING HERE DECIDES ANYTHING ───────────────────────────────
+ * The gap that counts as wide, the number of wide dimensions that makes a
+ * couple misaligned, and the bands that turn a mean error into a word all
+ * come from api/_lib/results.js. This file scored with a plain average once,
+ * where the engine weights, and the two answers were a point and a quarter
+ * apart on a five point scale.
+ *
+ * Empty strings rather than zeros when a couple has not both answered: a zero
+ * is a score and an empty cell is a couple who have not finished.
+ */
+function alignmentAndUnderstanding(a, b) {
+  const blank = ['', '', '', '', '', '', '', '', ''];
+  if (!a?.ex1_answers || !b?.ex1_answers) return blank;
+
+  const mineScores = calcDimScores(a.ex1_answers);
+  const theirScores = calcDimScores(b.ex1_answers);
+  if (!mineScores || !theirScores) return blank;
+
+  let wide = 0;
+  let scored = 0;
+  /* The dimensions from the engine, not the local alias inside the export
+     function, which is not in scope here. */
+  for (const d of Object.keys(DIM_KEYS)) {
+    const x = mineScores[d];
+    const y = theirScores[d];
+    if (x == null || y == null) continue;
+    scored += 1;
+    if (Math.abs(x - y) >= ALIGNMENT_THRESHOLD.gap) wide += 1;
+  }
+  const alignment = scored
+    ? [String(wide), wide >= ALIGNMENT_THRESHOLD.dims ? 'Misaligned' : 'Aligned']
+    : ['', ''];
+
+  /* How well each read the other, which needs the cross-view answers. */
+  const aReads = readAccuracy(a.ex1_answers, b.ex1_answers);
+  const bReads = readAccuracy(b.ex1_answers, a.ex1_answers);
+  if (!aReads || !bReads) return [...alignment, '', '', '', '', '', '', ''];
+
+  const mean = (aReads.meanError + bReads.meanError) / 2;
+  return [
+    ...alignment,
+    aReads.meanError.toFixed(2),
+    bReads.meanError.toFixed(2),
+    mean.toFixed(2),
+    understandingBandFor(mean).label,
+    readBandFor(aReads.meanError).label,
+    readBandFor(bReads.meanError).label,
+    Math.abs(aReads.meanError - bReads.meanError) >= 0.4 ? 'Lopsided' : 'Even',
+  ];
+}
+
 function workbookReady(order) {
   return !!order && (order.workbook_status === 'ready' || !!order.workbook_url);
 }

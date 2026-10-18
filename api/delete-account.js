@@ -144,22 +144,31 @@ export default async function handler(req) {
       .eq('id', userId)
       .maybeSingle();
 
-    // Has this person opted out of research use, on the privacy choices page or
-    // by sending Global Privacy Control? If so the archive is skipped entirely.
-    // The opt-out is only honoured if it is actually read somewhere, and this is
-    // the one place that keeps anything after deletion.
-    //
-    // Read failure means no archive. A preference we cannot confirm is treated
-    // as opt-out, because the reverse keeps data from someone who may have
-    // asked us not to.
-    let optedOutOfResearch = true;
+    /**
+     * Has this person opted out of research use, on the privacy choices page
+     * or by sending Global Privacy Control? If so the archive is skipped.
+     *
+     * ── WHAT HAPPENS WHEN THE ANSWER CANNOT BE READ ────────────────────────
+     * Somebody who has never touched that page has no row, which is not the
+     * same as the read failing. No row means they never turned it off, and
+     * the archive is kept: that is what the page says happens by default.
+     *
+     * A read that ERRORS used to be treated as an opt-out, on the grounds
+     * that it is the safer way to be wrong. Ellie: "I want the default to be
+     * to keep responses." So a database that will not answer no longer
+     * silently discards the research copy; only an answer that says opt out
+     * does that. An explicit opt-out is still honoured, which is the promise
+     * on the page and the one thing that cannot bend.
+     */
+    let optedOutOfResearch = false;
     try {
       const { data: prefs, error: prefsErr } = await admin.from('privacy_preferences')
         .select('opt_out_research')
         .eq('owner_id', userId)
         .maybeSingle();
       if (!prefsErr) optedOutOfResearch = !!prefs?.opt_out_research;
-    } catch (e) { /* stays true: no archive */ }
+      else console.warn('[delete-account] research preference unreadable; keeping the copy:', prefsErr.message);
+    } catch (e) { console.warn('[delete-account] research preference unreadable; keeping the copy:', e?.message); }
     summary.researchOptOut = optedOutOfResearch;
 
     // Only write the archive row if there's something worth archiving.
@@ -184,12 +193,12 @@ export default async function handler(req) {
          * answers": theirs was never read, so one person's deletion could put
          * the other person's answers into the archive against their choice.
          *
-         * Read fail-closed, the same way the deleter's own preference is
-         * read a few lines up: a preference we cannot confirm is treated as
-         * an opt-out, because the other way round keeps answers from someone
-         * who may have asked us not to.
+         * Read the same way as the deleter's, a few lines up: no row means
+         * they never turned it off and their half is kept, and only an answer
+         * that says opt out removes it. Ellie: "I want the default to be to
+         * keep responses."
          */
-        let partnerOptedOut = true;
+        let partnerOptedOut = false;
         if (own?.partner_profile_id) {
           try {
             const { data: pPrefs, error: pErr } = await admin.from('privacy_preferences')
@@ -197,7 +206,7 @@ export default async function handler(req) {
               .eq('owner_id', own.partner_profile_id)
               .maybeSingle();
             if (!pErr) partnerOptedOut = !!pPrefs?.opt_out_research;
-          } catch (e) { /* stays true: no partner answers in the archive */ }
+          } catch (e) { /* unreadable: the copy is kept */ }
         }
         summary.partnerResearchOptOut = partnerOptedOut;
         if (own?.partner_profile_id && !partnerOptedOut) {

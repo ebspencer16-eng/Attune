@@ -8,99 +8,75 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| T1 | **Your design tester needs a code, and every existing one is single use.** Run the SQL under this table: it adds two fresh codes that unlock everything, `ATTUNE-DESIGN-1` and `ATTUNE-DESIGN-2`, and then lists every code still unredeemed. Two because results only open once both partners finish, so a tester needs both sides. |
-| T2 | **Check whether anyone bought Conflict Patterns before today.** Until this afternoon it was quoted at $40, charged at $0, and never unlocked. Download the orders CSV from the admin; if any row has addon_conflict = Y, tell me and I will write the grant for those couples. |
-| R13 | **Two published lines disagree about what deletion keeps, and you own both.** The deletion policy's list says "Your assessment responses are permanently deleted." The privacy section two pages down, and the privacy choices page, both say we normally keep a de-identified copy of the answers and profile details unless somebody turns it off. The code does the second. One of those sentences has to change; which one is yours, and the lawyer should see it either way. |
-| R12 | **Privacy and Terms: the document to send the lawyer is now accurate, and it was not.** It listed nine problems; all nine have been built or settled since, and it still read as current. It now opens with where each one stands and what is genuinely left, which is four questions rather than nine defects. Still waiting on the lawyer. |
+| W11a | **Who are the three non-binary rows?** The demo filter works and the tile reads the filtered list, so these are accounts nobody has marked as demos. Run the SQL under this table and send me what it prints: it names them and changes nothing. If they are test accounts I will mark them, and if one is a customer we leave them alone. |
+| R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
 
-### Is anything in your tester's way
+### W11a, the three rows
 
-Short answer: no, once you have run T1. I drove the whole path end to end
-against the real code with nothing but the network faked: the code redeems and
-writes a free order, the account is created as Premium, all five exercises
-open with their questions and their finish screens, an answer is stored in the
-right place, and the results open with every chapter once both partners have
-finished.
+Paste this into the **Supabase SQL editor** (not Terminal) and press Run. It
+reads and changes nothing. Send me both tables it prints.
 
-Three things to know rather than fix.
-
-**Results need both of them.** One person finishing shows a waiting screen
-until the other does. That is the product, not a fault, and it is why T1 adds
-two codes.
-
-**The app on their phone is current.** The latest TestFlight build is from the
-13th and today's app update is published to it, so a tester who installs from
-TestFlight gets everything from this week. Nothing more to publish.
-
-**Conflict Patterns only became buyable properly today.** If your tester
-redeems a code for Premium they get it either way, because Premium includes
-it. T2 is about anyone who bought it before this afternoon.
-
-### T1, the code for your tester
-
-Paste this into the **Supabase SQL editor** (not Terminal), press Run, and
-send me what the last query prints:
-
-<!-- SQL 084_tester_codes.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 085_who_is_non_binary.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
--- Migration 084: two fresh full-bundle beta codes for design testing.
+-- ============================================================================
+-- 085: which accounts the Gender tile is counting as non-binary.
 --
--- Every existing code is single use (max_uses 1), so a tester needs one that
--- has not been redeemed. These two unlock the complete experience in one go:
+-- ── WHY ─────────────────────────────────────────────────────────────────────
+-- Ellie: "Didn't I ask for demos to be removed from admin? I'm still seeing 3
+-- non-binary testers."
 --
---   premium package        -> Communication, Expectations, Relationship
---                             Reflection and Conflict Patterns
---   + includes_intimacy    -> Physical Intimacy Expectations, the fifth
---   + includes_workbook    -> the personalised workbook
---   + budget and checklist -> both tools
+-- The demo filter works and the tile reads the filtered list: every admin read
+-- of profiles goes through api/_lib/demo-accounts.js, and check-demo-excluded
+-- proves it over sixteen of them. So the three rows are accounts that are not
+-- marked as demos. Migration 082 marks a narrow set on purpose: the two she
+-- named, and anything that calls itself a test. A test account called Mya,
+-- or one on a Gmail alias, is not caught by that and should not have been:
+-- a rule that guesses drops real customers out of the figures silently.
 --
--- Conflict Patterns has no includes_ column because no code can bundle it:
--- the premium package already carries it, which is why these are premium.
+-- So this asks the database who they are rather than guessing from here.
 --
--- Two of them, because results only open once BOTH partners have finished,
--- so a design tester needs an account on each side of the couple.
+-- ── WHAT TO DO WITH IT ──────────────────────────────────────────────────────
+-- Run it, read the list, and send it back. The second statement is the one
+-- that marks a row, by id, commented out: nothing is marked until you say
+-- which. A row marked as a demo disappears from every figure in the admin and
+-- from nothing else.
 --
--- Safe to run more than once (idempotent upsert).
-insert into public.beta_codes
-  (code, package_key, includes_workbook, workbook_variant, includes_intimacy,
-   includes_reflection, includes_budget, includes_checklist,
-   discount_mode, discount_value, applies_to, max_uses, uses_count, active, note)
-values
-  ('ATTUNE-DESIGN-1', 'premium', true, 'digital', true,
-   true, true, true,
-   'free', 0, 'package', 1, 0, true, 'Design tester - full bundle'),
-  ('ATTUNE-DESIGN-2', 'premium', true, 'digital', true,
-   true, true, true,
-   'free', 0, 'package', 1, 0, true, 'Design tester - full bundle, partner side')
-on conflict (code) do update set
-  package_key         = excluded.package_key,
-  includes_workbook   = excluded.includes_workbook,
-  workbook_variant    = excluded.workbook_variant,
-  includes_intimacy   = excluded.includes_intimacy,
-  includes_reflection = excluded.includes_reflection,
-  includes_budget     = excluded.includes_budget,
-  includes_checklist  = excluded.includes_checklist,
-  discount_mode       = excluded.discount_mode,
-  discount_value      = excluded.discount_value,
-  applies_to          = excluded.applies_to,
-  active              = true;
+-- Run in the Supabase SQL Editor and click Run. It changes nothing.
+-- ============================================================================
 
--- Which codes are still unredeemed, including these two.
-select code, package_key, max_uses, uses_count, active, note
-from public.beta_codes
-where active = true and uses_count < max_uses
-order by code;
+select p.id,
+       p.name,
+       p.email,
+       p.is_demo,
+       p.created_at,
+       p.pronouns,
+       (p.ex1_answers is not null) as answered_communication,
+       (p.ex2_answers is not null) as answered_expectations,
+       exists (select 1 from public.orders o where o.user_id = p.id) as has_order
+  from public.profiles p
+ where lower(trim(p.pronouns)) = 'they/them'
+ order by p.created_at;
+
+-- And the same question for everybody, so the three have a denominator.
+select coalesce(nullif(lower(trim(pronouns)), ''), '(not set)') as pronouns,
+       count(*) filter (where not is_demo) as counted_in_admin,
+       count(*) filter (where is_demo)     as marked_demo
+  from public.profiles
+ group by 1
+ order by 2 desc;
+
+-- ── To mark one, once you have read the list ────────────────────────────────
+-- Put the ids in and uncomment. This is the only thing that changes a row.
+--
+-- update public.profiles
+--    set is_demo = true
+--  where id in ('00000000-0000-0000-0000-000000000000');
 ```
 <!-- /SQL -->
-
-Then the tester signs up at attune-relationships.com with `ATTUNE-DESIGN-1`,
-and the partner side uses `ATTUNE-DESIGN-2` or joins from the first one's
-invite link. Either way both of them have to finish their exercises before the
-results open; that is the product working, not a fault.
 
 ### Still open from the review
 
@@ -119,195 +95,16 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| S34 | **UX and data storage, swept.** Six properties: whether deleting an account really clears every table that holds that person, whether anything personal reaches a log, whether every column written exists, what the app keeps on the phone, whether every destructive tap asks first, and whether every control is big enough to hit. Detail under the table. |
-| S33 | **A thorough round: the things nothing has measured yet.** Five properties: every endpoint given bad input, whether a stranger can read a couple's data, every email rendered from its own sample, every scheduled job's guard, and every control in the app having a name a screen reader can say. Detail under the table. |
-| S32 | **Setup to exercise to results, swept end to end.** Seven properties over the whole chain: what setup collects, what the exercises ask, what gets stored, and what the results draw. The list of what each one measures is under the table. |
-| S31 | **Sweeps, while you are away.** Eight properties, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
-
-### S34, what these sweeps found so far
-
-**Deleting an account leaves nothing behind.** 17 tables hold a row belonging
-to a person, and every one either goes with the account or loses the link to
-it. Measured, not assumed.
-
-**That sweep found something in the documents instead.** The file TASKS.md
-tells you to send a lawyer listed nine problems and all nine have been built
-or settled since. It now opens with where each one stands; R12 above says the
-rest.
-
-**Five log lines carried an email address and two a first name.** B143. Logs
-live ninety days.
-
-**Every column written exists**, which is the other half of a check I added
-yesterday, and one did not: deleting an account tried to take a person's name
-off their feedback by clearing a column that is not on that table, so it
-failed quietly and left their email there. B144.
-
-**What the app keeps on the phone** is the token, the admin passcode, the last
-home screen and four payloads, all cleared at sign-out. What it kept in MEMORY
-was not. B145.
-
-**Every destructive tap asks first**, except one that did not: B146.
-
-**Every control is big enough to hit.** Six controls set their own size and
-none is under 44 points without a bigger touch area. The rest take their size
-from their padding, which this cannot measure and says so.
-
-### S34, what I am measuring
-
-1. **Deleting an account clears everything.** Every table that holds a row
-   belonging to a person, against what /api/delete-account actually deletes.
-   A table added later and not added there keeps that person's rows for ever.
-2. **Nothing personal reaches a log.** Vercel keeps what the server prints.
-   Every console line that could carry an email, a name, an answer or a token.
-3. **Every column written exists.** The other half of the check I added
-   yesterday, which only reads: a write to a column the schema does not have
-   fails quietly in a field nobody reads.
-4. **What the app keeps on the phone.** Every write to the device, and
-   whether what it holds is what we said we would hold.
-5. **Every destructive tap asks first.** Delete, remove, unsave, clear.
-6. **Every control is big enough to hit.** 44 points is the number Apple uses.
-
-### S33, what these sweeps found
-
-Nothing broken. Four of the five came back clean with a figure, which is the
-point of running them; the fifth left three labels for you, C17 above.
-
-| What was measured | Result |
-|--|--|
-| Every endpoint given nine kinds of bad input | 60 endpoints, 540 calls, no crash, nothing leaked, and the three that write on a junk body write only what they should |
-| Whether a stranger can read a couple's data | 28 tables asked with the public key, 0 rows came back. The only readable table is the list of promo codes, which is deliberate |
-| Every email rendered from its own sample | 13 emails, 33 links, no holes, no stray tokens, and every one of them is sent from somewhere |
-| Every scheduled job | 7, all refusing a call with no credential. The three that could run twice are team digests and a cleanup, where a repeat is harmless |
-| Every control in the app | 172, three without words, in C17 |
-| Every table something reads, and whether anything writes it | 25 tables, one dead: the Completion rate tile, B140 |
-| Every field the results payload carries, against what either surface names | 246 fields, 14 named nowhere. Nine were one block, now not sent |
-| Every link out of the app and the emails, followed | 11 addresses, one dead: sharing an article, B142 |
-
-One correction came out of it. I told you last round that the `workbooks`
-table does not exist. It does; nothing has ever written a row to it, which is
-a different fact and the reason the column said no for everybody. The fix was
-the same either way. The record is corrected in the three places that repeated
-it.
-
-### S33, what I am measuring
-
-1. **Every endpoint, given bad input.** Null body, wrong types, a string where
-   a number goes, a very long string. None may answer 500, and none may put a
-   stack trace or a table name in what it answers. Twenty of them once
-   answered 500 to a body of `null`.
-2. **Whether a stranger can read anything.** The key the browser carries is
-   public by design, and what stops it reading another couple's answers is
-   row-level security. I will ask every table for rows with that key and
-   expect nothing back. Reads only; nothing is written.
-3. **Every email, rendered.** Each one built from its own sample and walked
-   for a token that did not resolve, a link that goes nowhere, an "undefined",
-   and a missing unsubscribe.
-4. **Every scheduled job.** Each cron endpoint refuses an unauthenticated
-   call, and running it twice in a row does not do the same thing twice.
-5. **Every control in the app.** A touchable with no accessible name is a
-   button a screen reader calls "button".
-
-### S32, what I am measuring
-
-Your ask: that everything from account setup wires correctly into the
-exercises, and that exercise results populate correctly. Seven sweeps, each
-one property measured over every instance of its thing.
-
-1. **Every token in every question resolves.** The exercise copy carries
-   `{userName}`, `{partnerName}` and pronoun tokens. Substitute them for every
-   pronoun combination and a name that is missing, and assert no brace
-   survives into something a person reads.
-2. **Every question id anything asks for exists.** Five of six keys in one
-   list were wrong once and each produced a valid-looking empty answer. Check
-   every id named anywhere against the question sets.
-3. **Every field setup collects is read, and every field read is collected.**
-   Both directions, so a question nobody uses and a lookup of something nobody
-   asked both show up.
-4. **Every answer an exercise stores is read on the way out.** One column per
-   exercise, and the keys inside it.
-5. **What the package buys reaches both ends.** The exercises offered and the
-   results sections drawn, from the same entitlement.
-6. **A half-finished setup does not break an exercise.** Drive the real
-   screens with the fields empty, one at a time.
-7. **Both partners' answers reach one set of results.** The completion path
-   from either side.
-
-### S32, what these sweeps found
-
-**Four money bugs, all live, all fixed.** They are B136 to B139 above. Three
-are about what a cart costs and one about the tax on it, and every one of them
-was a list of add-ons written out by hand with a member missing. Everything else below came back clean, with a figure.
-
-**The one thing that might need you:** whether Premium is meant to include
-Physical Intimacy. Three places in the code said it does, and the two places
-that decide, the offerings page you wrote and the list of what each package
-unlocks, both say it does not. I made the code agree with those two, so
-Premium + Physical Intimacy is now a $20 add-on that is charged and delivered.
-Say the word if it was meant to be included and I will move it the other way.
-
-**Worth one look in the admin:** any order that bought Conflict Patterns
-before today was charged nothing for it and never had it unlocked. The orders
-export has an addon_conflict column; if any row says Y, tell me and I will
-write the grant.
-
-**What the sweeps measured, and what they found.**
-
-| What was measured | Result |
-|--|--|
-| Answers the real exercise screens store, driven in a browser, fed to the real results | 4 couples, 5,482 strings, 59 checks: no gaps |
-| Every name in the code shaped like a question id | 403 names across 28 files, all resolve |
-| Every exercise asked for through the app's own endpoint | 20 asks, 392 questions, every intro, every saved answer came back |
-| Every package with every add-on, page against server | 24 carts, 7 disagreed, now 0 |
-
-### S31, what the sweeps found
-
-**Components declared inside components.** Eighteen, and one of them mattered:
-the whole results shell was being rebuilt on every page change, so each page
-was a fresh mount rather than new content in the same frame. Measured before
-and after with a watcher on the page itself. Fixed.
-
-**Effects with no dependency list.** Two, both in the website's Learn
-measurements, both settle on their own. Left alone, written down.
-
-**Every results page, on your simulator.** Thirty pages opened one after
-another. No errors, and one thing visibly wrong: the survey button missing
-from What comes next. That is B131, fixed.
-
-**Exported code nothing calls.** 863 exported names across 555 files. 92 are
-imported by no other file; 21 of those are called nowhere at all. Opening them
-one by one, they are aliases and spare helpers rather than features nobody
-reached, so nothing here is a bug. One is worth your eye and is a decision
-rather than a fault: the product pins each couple's results to the version of
-the copy they were written under, and nothing anywhere tells them so. Say the
-word if you want a sentence for it.
-
-**One rule in two places.** Every function defined twice across the website,
-the app and the server. Most are already held together by a check. Two were
-not: the cart's subtotal, rebuilt out of its own parts inside the endpoint that
-charges the card, and the rule that turns a stored pronoun into a label, which
-two admin endpoints each carried a copy of. Both now have one home and a check
-behind them. The pronoun one turned up the Gender tile bug, B132.
-
-**Every column a query asks for.** 84 queries under api/ and 199 column
-references, checked against the schema this repo builds. One was asking a
-table that does not exist: both admin CSV exports looked up a `workbooks`
-table for whether a couple's workbook had been made, so that column said no
-for everybody, always. That is B133. The check that found it is now a gate,
-including the three column lists that are passed around as constants rather
-than typed into the query, and it says out loud how many selects are built at
-run time and cannot be read.
-
-**Every endpoint, answered from outside.** All 60, signed out, with a browser
-pretending to be a person. No 500s: every one gives a proper 401, 405 or 400,
-and the eight that answer 200 carry only what is meant to be public. Nothing
-to do, and it is now a figure rather than an assumption.
-
-**The survey's answer.** Added after the fourth: the button cannot be drawn
-until the server says whether you have answered, so the app now asks on the
-first screen of every launch and keeps the reply. check-survey proves it by
-running that code rather than reading it, and seven planted bugs each failed
-it.
+| W11 | **Demos out of the admin, properly.** You are still seeing three non-binary testers. Find which accounts those rows are, whether they are flagged as demos, and close whichever hole they came through. |
+| W12 | **Notes takes ten seconds.** Time every request the tab makes, find what is slow, and make it draw from what is already on the phone the way Insights does. |
+| W13 | **A tag in the margin.** Tapping it selects the words it is on. Holding it offers to delete the tag. |
+| W14 | **The citation on today's insight.** It says The Gottman Institute and nothing else. Give every quotation the publication and the date it already has stored, wherever one is shown. |
+| W15 | **What Comes Next, rebuilt.** Four wide stacked rows, alternating icon side, big outline icons in the brand gradient, the number larger than the words, an orange sunrise gradient behind the tile that grows with it, and the experience button in the brand gradient. Taller rows so nothing is cut off. |
+| W16 | **Word of the day gets Save to journal**, the same control the insight of the day has. |
+| W17 | **A download banner on anything shared** from the app. |
+| W18 | **Alignment and understanding, for you only.** Both scores in the admin and in the CSV export, tied to the account, and reachable by nobody using the product. |
+| W19 | **The couple type hero gets the names back.** "[Name] and [name]'s unique relationship dynamic", and "unique" comes out when the names are long enough that it would run to three lines. |
+| W20 | **Three spoken labels on the storycards**, in your words from C17. |
 
 ---
 
@@ -316,29 +113,8 @@ it.
 | # | Built, needs your eye |
 |--|--|
 | B147 | **One person's deletion could archive their partner's answers.** The de-identified copy includes the couple's answers side by side, which means the partner's. Their own "do not keep a copy of my answers" setting was never read, and they had not deleted anything. It is read now, and a preference we cannot confirm counts as no. Proved by running the real deletion four ways. |
-| B146 | **Deleting a note from the marking toolbar did not ask.** The bin took any mark off with one tap. For a highlight that is right. For a note it is the reader's own writing, and the same deletion asks first in the two other places it is offered. It asks now, in the words that were already there, and the three places share one copy of them. A highlight and an underline still come off with one tap. |
-| B145 | **Signing out emptied the phone and left two things in memory.** One of them decides whether somebody is asked for feedback, so on a lent phone the next person would not have been asked, because the last one had answered. Both are cleared at sign-out now, and the check that watches what the app keeps on the phone watches what it keeps in memory too. |
-| B144 | **Deleting an account left the person's email on any feedback they had left.** The step that was meant to take their name off it nulled a column that does not exist on that table, so it failed into a field nobody reads and reported that it had cleared nothing, which is also what success looks like. It clears the address now. The check that holds every column a query READS now holds every column written too. |
-| B143 | **Five log lines carried a customer's email address, and two carried their first name.** Server logs are kept for ninety days. Nothing personal was ever needed to debug a failed send: they say which domain refused it and what the fault was now. A check holds the whole of `api/` to that, and the published policy's promise about logs is now measured rather than assumed. |
-| B142 | **Sharing an article from the app sent your friend to a dead page.** The share sheet built its own web address and the pages live somewhere else, so every share was a 404. The app now shares the address the server gives it, and a piece that only exists in the app shares its title with no link. The check that watches the website's links watches the app's now too. |
 | B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. The app's own code says "never shown to customers" and nothing draws it, so it was landing on every phone, and in the offline cache, for nothing. It stays in your records and is no longer sent to the device. |
-| B140 | **Your dashboard's Completion rate has read 0% for every couple.** It counted rows in the table an invited partner's answers used to go into; they go on that partner's own account now, and nothing has written to that table since. It counts finished couples off the accounts themselves now. The same sweep that found the workbook column, run over every table this product reads. |
 | C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none, so it says "button": the row of progress dots at the bottom, the card itself, and the tap zones that page back and forward. They need a short phrase each, which is yours to write (something like "card 2 of 6" for a dot). 172 controls across the app, these three are the only ones without words, and they are only reached by someone using a screen reader. |
-| C16 | **One word for you, in the workbook.** The Energy gap paragraph ends "Understanding what you each need is crucial." CLAUDE.md lists "crucial" as a word to avoid and you own every word a customer reads, so I have left it. A shorter ending would be yours to write. Everything else came back clean: I measured 3,632 sentences across 21 copy modules for hedging, for the words on that list and for anything over 30 words, and the rest of what it flagged was either a book title, a quotation that has to stay verbatim, or your own answer labels. |
-| B139 | **Sales tax was computed on a cart missing two add-ons.** The tax endpoint kept its own idea of what was in the cart and had left Physical Intimacy and Conflict Patterns out of it, so tax on an order with either was calculated on a base up to $40 too low. Both endpoints now read the same cart. |
-| B136 | **Conflict Patterns was sold and never charged for, and never delivered.** Adding it to a cart quoted $40 and the card was charged nothing for it, so the order recorded nothing and the exercise never unlocked. One missing line in the code that prepares a cart for payment. Fixed, and a check now prices all 24 package-and-add-on combinations off the real page against the real server. |
-| B137 | **A promo code on a Premium cart showed the wrong discount.** The page took Premium's base from an old table that still said $295, so applying BETA-PREMIUM to a $198 package drew "−$295". Fixed, and there is now one price table on that page instead of two. |
-| B138 | **Carts were charged for things the package already includes.** A Premium cart with Physical Intimacy quoted $218 and was charged $198 with nothing granted; Starting Out with the budget tool was charged $20 for a tool it includes. Both sides now read the one list of what each package covers. Your Premium tiles and the offerings page are unchanged, because they already said the right thing. |
-| B133 | **Your two admin CSV exports said no couple had a workbook.** Both asked a `workbooks` table that nothing has ever written a row to; the workbook is a file in storage and what records that it was made is the order. The column now reads from there. Worth re-downloading either export if you used the workbook column. |
-| B132 | **Your Gender tile was undercounting, and it is fixed.** Anyone whose pronoun is not one of the three was in the total and in no bar, so the percentages could add up to less than 100 with nothing saying why. Driven in a browser: four people, three bars, 75 per cent. Now four bars and 100. |
-| B128 | **Fixed and seen on your simulator.** The icon is in the card's margin, outside the tile. It also had a loop in it that said "Maximum update depth exceeded"; that is gone. |
-| B129 | **Fixed and timed on your simulator.** Insights draws in about half a second from what is kept on the phone, with no spinner. |
-| B123 | **Seen working.** Your tag on the communication overview has its icon, in the margin. |
-| B130 | **"Your relationship dynamic", and it still fits.** The longer heading is two lines, which pushed the couple type tile back under the fold, so the map takes a quarter of the window rather than a third and one gap is tighter. The whole tile is on screen. |
-| B131 | **Fixed and seen on a cold start of your simulator.** The survey button is drawn only when you have not answered, your rule, and it is there the moment the page opens. Killing the app and going straight to Action plans now shows it. |
-| C15 | "Land", and the straight apostrophe. Both of your corrections are in. |
-| C11 | **Yes, I got it, and it is live.** Your 119-row table was applied the day you sent it: the 31 you left out are gone from the module the product reads. That is C13, which you have approved. Nothing of yours is waiting here. |
-| R183 | Shelf arrows and the Saved/Read pills. I could not tap them reliably. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -388,6 +164,32 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| S34 | Six sweeps over UX and data storage: deletion leaves nothing behind, nothing personal reaches a log, every column written exists, what the phone keeps, destructive taps, tap targets. |
+| S33 | Five sweeps: every endpoint given bad input, whether a stranger can read a table, every email rendered, every scheduled job, every control named. |
+| S32 | The chain from account setup into the exercises and out into results, swept end to end on the answers the real screens store. |
+| S31 | Eight sweeps while you were away, including the results shell being rebuilt on every page change and the survey button that went missing. |
+| B146 | The bin in the marking toolbar deleted a note with one tap; it asks first now, and a highlight still comes off with one. |
+| B145 | Signing out emptied the phone and left the survey memo in memory, so a lent phone would not have asked the next person for feedback. |
+| B144 | Deleting an account left the email on any feedback they had left, because the step that removed it cleared a column that does not exist. |
+| B143 | Five server log lines carried a customer email and two their first name; logs now carry the domain and the fault. |
+| B142 | Sharing an article from the app sent the recipient to a 404, because the app built the address instead of being given it. |
+| B140 | The dashboard Completion rate read 0% for every couple: it counted rows in a table nothing writes any more. |
+| B139 | Sales tax was computed on a cart missing Physical Intimacy and Conflict Patterns, so the base was up to $40 short. |
+| B138 | Carts were charged for add-ons the package already includes, and Premium with Physical Intimacy was quoted $218 and charged $198. |
+| B137 | A promo code on a Premium cart drew a $295 discount against a $198 package, from a second price table nothing watched. |
+| B136 | Conflict Patterns was quoted at $40, charged at $0 and never unlocked, from one missing field in the cart normaliser. |
+| B133 | Both admin CSV exports said no couple had a workbook, because they asked a table nothing has ever written to. |
+| B132 | The Gender tile left anyone off the three pronouns out of every bar while counting them in the total. |
+| B131 | The survey button on What Comes Next was missing on a cold start, because the answer it waits for was kept in the page that draws it. |
+| B130 | The couple type heading became "Your relationship dynamic" and the tile still fits on one screen. |
+| B129 | Insights draws in about half a second from what is kept on the phone, with no spinner. |
+| B128 | The tag icon moved into the card margin, and the render loop it came with is gone. |
+| B123 | Your tag on the communication overview draws its icon. |
+| C16 | The word "crucial" in the workbook Energy paragraph: you kept it. |
+| C15 | "Land", and the straight apostrophe. |
+| C11 | Your edited insights list was already live the day you sent it. |
+| R183 | Shelf arrows and the Saved/Read pills, which I could not tap reliably. |
+| T2 | Nobody bought Conflict Patterns before the fix, so there is no grant to write. |
 | S30 | The checkout page keeps its own copy of every price because a static page cannot import from api/; a gate now holds all 23 to the catalogue, and reading them from a generated file is the next step. |
 | C12 | Sixty couple type paragraphs put beside a shorter version each, for you to choose; you rewrote all sixty yourself and those are what ship. |
 | C13 | Your edited insights list applied: 31 of the 150 removed from the module the product reads, the 119 left all verified against the page or the scan they cite. |
