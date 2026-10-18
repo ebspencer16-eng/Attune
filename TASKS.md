@@ -134,6 +134,7 @@ point of running them; the fifth left three labels for you, C17 above.
 | Every email rendered from its own sample | 13 emails, 33 links, no holes, no stray tokens, and every one of them is sent from somewhere |
 | Every scheduled job | 7, all refusing a call with no credential. The three that could run twice are team digests and a cleanup, where a repeat is harmless |
 | Every control in the app | 172, three without words, in C17 |
+| Every table something reads, and whether anything writes it | 25 tables, one dead: the Completion rate tile, B140 |
 
 One correction came out of it. I told you last round that the `workbooks`
 table does not exist. It does; nothing has ever written a row to it, which is
@@ -266,6 +267,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B140 | **Your dashboard's Completion rate has read 0% for every couple.** It counted rows in the table an invited partner's answers used to go into; they go on that partner's own account now, and nothing has written to that table since. It counts finished couples off the accounts themselves now. The same sweep that found the workbook column, run over every table this product reads. |
 | C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none, so it says "button": the row of progress dots at the bottom, the card itself, and the tap zones that page back and forward. They need a short phrase each, which is yours to write (something like "card 2 of 6" for a dot). 172 controls across the app, these three are the only ones without words, and they are only reached by someone using a screen reader. |
 | C16 | **One word for you, in the workbook.** The Energy gap paragraph ends "Understanding what you each need is crucial." CLAUDE.md lists "crucial" as a word to avoid and you own every word a customer reads, so I have left it. A shorter ending would be yours to write. Everything else came back clean: I measured 3,632 sentences across 21 copy modules for hedging, for the words on that list and for anything over 30 words, and the rest of what it flagged was either a book title, a quotation that has to stay verbatim, or your own answer labels. |
 | B139 | **Sales tax was computed on a cart missing two add-ons.** The tax endpoint kept its own idea of what was in the cart and had left Physical Intimacy and Conflict Patterns out of it, so tax on an order with either was calculated on a base up to $40 too low. Both endpoints now read the same cart. |

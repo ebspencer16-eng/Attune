@@ -340,7 +340,12 @@ const REAL_A = {
   partner_profile_id: 'real-b', joined_via_invite: false, pronouns: 'she/her',
   partner_pronouns: 'he/him', relationship_status: 'engaged', relationship_length: '1-3',
   children: 'no', signup_source: 'friend', pkg: 'premium', age_range: '25-34',
-  ex1_answers: answers(4), ex2_answers: {}, ex3_answers: {}, created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
+  /* ex2_answers used to be an empty object here, which was enough while
+     completed_couples was counted off partner_sessions. That figure is
+     counted off these profiles now, and a couple with no expectations
+     answers is not a finished couple, so both sides carry a real one. */
+  ex1_answers: answers(4), ex2_answers: { household__Cooking: 'Both of us' }, ex3_answers: {},
+  created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
   is_demo: false,
 };
 const REAL_B = {
@@ -352,9 +357,22 @@ const REAL_B = {
    every scale, so including it moves any average that touches it. */
 const DEMO = {
   ...REAL_A, id: 'demo-alex', name: 'Alex', email: 'alex@demo.invalid',
-  invite_code: 'ZZZ999', partner_profile_id: null, joined_via_invite: false,
+  invite_code: 'ZZZ999', partner_profile_id: 'demo-b', joined_via_invite: false,
   pronouns: 'they/them', partner_pronouns: 'they/them', relationship_status: 'married',
   relationship_length: '10+', ex1_answers: answers(1), is_demo: true,
+};
+/**
+ * The demo's partner, so the demo is a COUPLE and not a lone row.
+ *
+ * completed_couples counts pairs now. With the demo unpaired, leaving it in
+ * or taking it out gave the same 1, and a figure that cannot tell those apart
+ * proves nothing about exclusion: the right answer has to be 1 where the
+ * wrong answer is 2. Same shape as every other row in this fixture.
+ */
+const DEMO_B = {
+  ...DEMO, id: 'demo-b', name: 'Riley', email: 'riley@demo.invalid',
+  invite_code: null, partner_profile_id: 'demo-alex', joined_via_invite: true,
+  ex1_answers: answers(1), is_demo: true,
 };
 
 /**
@@ -370,7 +388,7 @@ const DEMO = {
    version of this fixture used 2026-03-01 and measured nothing. */
 const NOW = new Date(Date.now() - 2 * 86400000).toISOString();
 const TABLES = {
-  profiles: [REAL_A, REAL_B, DEMO],
+  profiles: [REAL_A, REAL_B, DEMO, DEMO_B],
   notes: [
     { id: 'n-real', owner_id: 'real-a', anchor_type: 'results', anchor_key: 'overview', visibility: 'private', kind: 'highlight', created_at: NOW },
     { id: 'n-demo', owner_id: 'demo-alex', anchor_type: 'results', anchor_key: 'overview', visibility: 'private', kind: 'highlight', created_at: NOW },

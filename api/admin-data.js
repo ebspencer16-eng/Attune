@@ -350,6 +350,10 @@ export default async function handler(req) {
       admin.from('orders').select('*').order('created_at', { ascending: false }).limit(1000),
       admin.from('beta_codes').select('*').order('code', { ascending: true }),
       selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, name, partner_name, age_range, pronouns, partner_pronouns, relationship_status, relationship_length, children, signup_source, ex1_answers, ex2_answers, ex3_answers, intimacy_data, conflict_data')),
+      /* Legacy. Nothing has written a row to partner_sessions since the
+         invited partner got a profile of their own, so this comes back empty;
+         it is kept only as a fallback for any couple whose rows predate that.
+         See the note on completedCouples below for what it used to decide. */
       admin.from('partner_sessions').select('invite_code, ex1_answers, ex2_answers'),
     ]);
 
@@ -394,7 +398,36 @@ export default async function handler(req) {
     const started = profiles.filter(p => hasAnswers(p.ex1_answers) || hasAnswers(p.ex2_answers)).length;
     const bothDoneIndividuals = profiles.filter(p => hasAnswers(p.ex1_answers) && hasAnswers(p.ex2_answers) && p.partner_profile_id).length;
     const invitedTotal = profiles.filter(p => p.invite_code).length;
-    const completedCouples = sessions.filter(s => hasAnswers(s.ex1_answers) && hasAnswers(s.ex2_answers)).length;
+    /**
+     * ── COUPLES WHO HAVE BOTH FINISHED ───────────────────────────────────
+     * This counted rows in `partner_sessions`, which is where an invited
+     * partner's answers used to go. They go on that partner's own profile
+     * now, and nothing has written a row to that table since: every read of
+     * it in this file is a leftover, and this figure was the one that had
+     * nothing else to fall back on.
+     *
+     * So the Completion rate tile on the dashboard has read 0% for every
+     * couple since the invited partner got an account of their own. Found by
+     * listing every table this product reads and asking which of them
+     * anything writes.
+     *
+     * Counted off the profiles, pairing on partner_profile_id and counting
+     * each couple once, which is the same rule bothDoneIndividuals uses one
+     * line up, applied to the pair rather than the person.
+     */
+    const bothDone = new Set(profiles
+      .filter((p) => hasAnswers(p.ex1_answers) && hasAnswers(p.ex2_answers))
+      .map((p) => p.id));
+    const countedCouple = new Set();
+    let completedCouples = 0;
+    for (const p of profiles) {
+      if (!p.partner_profile_id || countedCouple.has(p.id)) continue;
+      if (bothDone.has(p.id) && bothDone.has(p.partner_profile_id)) {
+        completedCouples += 1;
+        countedCouple.add(p.id);
+        countedCouple.add(p.partner_profile_id);
+      }
+    }
 
     const responses = buildResponseAggregates(profiles, sessions);
     // Precompute the same aggregates for each couple-level segment value, reusing
