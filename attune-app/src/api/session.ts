@@ -13,7 +13,7 @@
 
 import * as SecureStore from 'expo-secure-store';
 import { forgetEverything } from '@/lib/payload-cache';
-import { configureApi, SITE_URL } from '@/api/client';
+import { configureApi, forgetSession, SITE_URL } from '@/api/client';
 
 const TOKEN_KEY = 'attune.session.token';
 
@@ -53,6 +53,9 @@ export async function clearToken(): Promise<void> {
      in must not meet the last one's results on screen while their own load.
      See lib/payload-cache.ts. */
   try { forgetEverything(); } catch { /* best effort, as the cache is */ }
+  /* And what the client is holding in memory for this person: the survey's
+     last answer, which decides whether they are asked for feedback at all. */
+  try { forgetSession(); } catch { /* best effort */ }
 }
 
 export function isSignedIn(): boolean {

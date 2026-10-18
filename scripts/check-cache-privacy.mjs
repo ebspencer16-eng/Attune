@@ -99,6 +99,39 @@ if (!/Paths\.cache/.test(cache)) {
     + ' other devices; this is a copy of somebody\'s results.');
 }
 
+/**
+ * ── AND WHAT THE CLIENT HOLDS IN MEMORY ───────────────────────────────────
+ * The files are only half of what a lent phone carries. api/client.ts keeps
+ * two things that belong to a person for the life of the app: the last reply
+ * from /api/survey, which decides whether they are asked for feedback at all,
+ * and a short-lived shared home promise. Signing out emptied the disk and
+ * left both.
+ *
+ * Read rather than run, because importing the app's client here would pull
+ * expo-secure-store into node. What is asserted is the wiring: a function
+ * that clears them, and the sign-out path calling it.
+ */
+{
+  const forget = client.match(/export function forgetSession\(\)[\s\S]*?\n\}/);
+  if (!forget) {
+    fails.push('api/client.ts has no forgetSession(), so nothing clears what the client holds in'
+      + ' memory about a person when they sign out.');
+  } else {
+    const held = [...client.matchAll(/^let (\w+)(?::[^=]*)?=\s*null;/gm)].map((m) => m[1])
+      .filter((n) => !/^(getToken|refresh|refreshInFlight)$/.test(n));
+    for (const name of held) {
+      if (!new RegExp(`\\b${name}\\s*=\\s*null`).test(forget[0])) {
+        fails.push(`api/client.ts keeps \`${name}\` for the life of the app and forgetSession()`
+          + ' does not clear it. A phone gets lent.');
+      }
+    }
+  }
+  if (!/forgetSession\(\)/.test(session)) {
+    fails.push('signing out does not call forgetSession(), so the survey memo and the shared home'
+      + ' promise survive it.');
+  }
+}
+
 if (fails.length) {
   console.error('\n check-cache-privacy: the app is keeping something it should not.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
@@ -106,4 +139,4 @@ if (fails.length) {
 }
 
 console.log(`[check-cache-privacy] ${keys.length} payloads kept on the phone (${keys.join(', ')}),`
-  + ' nothing from the journal or the tags, emptied on sign-out, in the cache directory.');
+  + ' nothing from the journal or the tags, emptied on sign-out, in the cache directory, and nothing the client holds in memory survives a sign-out either.');

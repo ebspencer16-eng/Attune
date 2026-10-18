@@ -1806,6 +1806,24 @@ export function recallSurvey() {
   return surveyReply;
 }
 
+/**
+ * ── WHAT A SIGN-OUT HAS TO FORGET IN MEMORY ───────────────────────────────
+ * Signing out clears the token, the files on disk and the last screen. It did
+ * not clear what this module is holding, and this module holds two things
+ * that belong to a person: the last reply from /api/survey, which decides
+ * whether they are asked for feedback, and the shared home promise.
+ *
+ * The home one is a 1.5 second window and nobody signs in that fast. The
+ * survey memo lasts the life of the app: lend the phone, and the next person
+ * is not asked because the last one answered.
+ *
+ * Memory is storage. api/session.ts calls this where it empties the cache.
+ */
+export function forgetSession(): void {
+  surveyReply = null;
+  homeShared = null;
+}
+
 export function fetchSurvey() {
   return request<{ ok: true } & SurveyForm>('/api/survey').then((r) => {
     if (r.ok) surveyReply = { done: !!r.data.finished, copy: r.data.copy };

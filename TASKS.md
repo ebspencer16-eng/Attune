@@ -137,6 +137,15 @@ rest.
 **Five log lines carried an email address and two a first name.** B143. Logs
 live ninety days.
 
+**Every column written exists**, which is the other half of a check I added
+yesterday, and one did not: deleting an account tried to take a person's name
+off their feedback by clearing a column that is not on that table, so it
+failed quietly and left their email there. B144.
+
+**What the app keeps on the phone** is the token, the admin passcode, the last
+home screen and four payloads, all cleared at sign-out. What it kept in MEMORY
+was not. B145.
+
 ### S34, what I am measuring
 
 1. **Deleting an account clears everything.** Every table that holds a row
@@ -299,6 +308,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B145 | **Signing out emptied the phone and left two things in memory.** One of them decides whether somebody is asked for feedback, so on a lent phone the next person would not have been asked, because the last one had answered. Both are cleared at sign-out now, and the check that watches what the app keeps on the phone watches what it keeps in memory too. |
 | B144 | **Deleting an account left the person's email on any feedback they had left.** The step that was meant to take their name off it nulled a column that does not exist on that table, so it failed into a field nobody reads and reported that it had cleared nothing, which is also what success looks like. It clears the address now. The check that holds every column a query READS now holds every column written too. |
 | B143 | **Five log lines carried a customer's email address, and two carried their first name.** Server logs are kept for ninety days. Nothing personal was ever needed to debug a failed send: they say which domain refused it and what the fault was now. A check holds the whole of `api/` to that, and the published policy's promise about logs is now measured rather than assumed. |
 | B142 | **Sharing an article from the app sent your friend to a dead page.** The share sheet built its own web address and the pages live somewhere else, so every share was a 404. The app now shares the address the server gives it, and a piece that only exists in the app shares its title with no link. The check that watches the website's links watches the app's now too. |
