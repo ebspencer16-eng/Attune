@@ -226,6 +226,19 @@ export default async function handler(req) {
          * which is the one case where the website is still the better answer.
          */
         external: IN_PRACTICE_BODIES[a.slug]?.blocks?.length ? null : `${SITE_URL}${a.path}`,
+        /**
+         * ── WHERE THIS LIVES ON THE WEB, FOR SHARING ─────────────────────
+         * The app's share sheet built its own address, `/in-practice/<id>`,
+         * and these pages are at `/practice/<slug>`: every article anybody
+         * shared from a phone sent their friend to a 404. Found by following
+         * every link the app and the emails can produce.
+         *
+         * `a.path` is the article's own address, from api/_in-practice.js,
+         * which is the list the website's pages are built from. The app
+         * shares what it is given rather than assembling a URL out of a
+         * shape it believes in.
+         */
+        webUrl: `${SITE_URL}${a.path}`,
       }));
       const posts = [...published, ...fromSite];
 

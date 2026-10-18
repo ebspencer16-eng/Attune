@@ -131,9 +131,21 @@ function ShareArticle({ post }: { post: Post }) {
       accessibilityLabel={`Share ${post.title}`}
       hitSlop={12}
       onPress={() => {
+        /**
+         * ── THE ADDRESS COMES FROM THE SERVER ────────────────────────────
+         * This built `${SITE_URL}/in-practice/${post.id}`. These pages are at
+         * /practice/<slug>, so every article anyone shared from a phone sent
+         * their friend to a 404, and nothing here could have known: the shape
+         * was invented on this side.
+         *
+         * /api/posts sends `webUrl` from the article's own entry in
+         * api/_in-practice.js now. A post that exists only in the app has
+         * none, and then the share carries the title and no link rather than
+         * an address that does not resolve.
+         */
         Share.share({
           title: post.title,
-          message: `${post.title} — ${SITE_URL}/in-practice/${post.id}`,
+          message: post.webUrl ? `${post.title} — ${post.webUrl}` : post.title,
         }).catch(() => { /* the sheet was dismissed, which is not a failure */ });
       }}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>

@@ -1190,6 +1190,12 @@ export type PostSummary = {
   hero_color: string | null;
   /** An illustration for the card, when the post has one. */
   hero_image?: string | null;
+  /**
+   * Where this piece lives on the website, for sharing. Null for a post that
+   * exists only in the app: the share sheet then sends the title and no link,
+   * rather than an address nobody can open.
+   */
+  webUrl?: string | null;
   /** Search terms the server built from the title, shelf, tags and keywords. */
   search?: string;
   published_at: string;

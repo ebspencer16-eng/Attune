@@ -136,6 +136,7 @@ point of running them; the fifth left three labels for you, C17 above.
 | Every control in the app | 172, three without words, in C17 |
 | Every table something reads, and whether anything writes it | 25 tables, one dead: the Completion rate tile, B140 |
 | Every field the results payload carries, against what either surface names | 246 fields, 14 named nowhere. Nine were one block, now not sent |
+| Every link out of the app and the emails, followed | 11 addresses, one dead: sharing an article, B142 |
 
 One correction came out of it. I told you last round that the `workbooks`
 table does not exist. It does; nothing has ever written a row to it, which is
@@ -268,6 +269,7 @@ it.
 
 | # | Built, needs your eye |
 |--|--|
+| B142 | **Sharing an article from the app sent your friend to a dead page.** The share sheet built its own web address and the pages live somewhere else, so every share was a 404. The app now shares the address the server gives it, and a piece that only exists in the app shares its title with no link. The check that watches the website's links watches the app's now too. |
 | B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. The app's own code says "never shown to customers" and nothing draws it, so it was landing on every phone, and in the offline cache, for nothing. It stays in your records and is no longer sent to the device. |
 | B140 | **Your dashboard's Completion rate has read 0% for every couple.** It counted rows in the table an invited partner's answers used to go into; they go on that partner's own account now, and nothing has written to that table since. It counts finished couples off the accounts themselves now. The same sweep that found the workbook column, run over every table this product reads. |
 | C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none, so it says "button": the row of progress dots at the bottom, the card itself, and the tap zones that page back and forward. They need a short phrase each, which is yours to write (something like "card 2 of 6" for a dot). 172 controls across the app, these three are the only ones without words, and they are only reached by someone using a screen reader. |

@@ -101,6 +101,54 @@ for (const rel of files) {
   }
 }
 
+/**
+ * ── AND THE LINKS THE APP SENDS SOMEBODY TO ───────────────────────────────
+ * The app opens the website for the things it deliberately does not do:
+ * legal, privacy choices, buying an add-on, an article's page. Those are
+ * addresses too, and this gate did not look at them.
+ *
+ * The share sheet in the post reader built `${SITE_URL}/in-practice/${id}`.
+ * These pages are at /practice/<slug>, so every article anyone shared from a
+ * phone sent their friend to a 404. Nothing on this side could have known,
+ * because the shape was assembled in the app out of a belief about the site.
+ *
+ * Paths only: a query string or a fragment is for the page to read. The local
+ * alias counts, because half the app writes `const SITE = SITE_URL` and then
+ * `${SITE}/legal`.
+ */
+const appFiles = [];
+(function walkApp(dir) {
+  for (const f of readdirSync(join(ROOT, dir))) {
+    const rel = join(dir, f);
+    if (statSync(join(ROOT, rel)).isDirectory()) {
+      if (/node_modules|\.expo|dist|ios|android/.test(f)) continue;
+      walkApp(rel);
+      continue;
+    }
+    if (/\.(ts|tsx)$/.test(f)) appFiles.push(rel);
+  }
+}('attune-app/src'));
+
+let appChecked = 0;
+for (const rel of appFiles) {
+  const src = readFileSync(join(ROOT, rel), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:])\/\/[^\n]*/g, (m, pre) => pre + ' '.repeat(m.length - pre.length));
+  const aliased = /const SITE = SITE_URL/.test(src);
+  const patterns = [/\$\{SITE_URL\}(\/[A-Za-z0-9\-._/]*)/g];
+  if (aliased) patterns.push(/\$\{SITE\}(\/[A-Za-z0-9\-._/]*)/g);
+  for (const re of patterns) {
+    for (const m of src.matchAll(re)) {
+      const href = m[1].split(/[?#]/)[0];
+      if (!href || href === '/') continue;
+      appChecked += 1;
+      if (resolves(href)) continue;
+      if (!dead.has(href)) dead.set(href, new Set());
+      dead.get(href).add(rel);
+    }
+  }
+}
+
 if (checked < 100) {
   console.error(`[check-internal-links] only found ${checked} links; refusing to pass.`);
   process.exit(1);
@@ -116,4 +164,6 @@ if (dead.size) {
   process.exit(1);
 }
 
-console.log(`[check-internal-links] ${checked} internal links across ${files.length} files; every one resolves.`);
+console.log(`[check-internal-links] ${checked} internal links across ${files.length} files, and`
+  + ` ${appChecked} addresses the app sends somebody to across ${appFiles.length} app files;`
+  + ' every one resolves.');
