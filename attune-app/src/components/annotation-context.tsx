@@ -23,7 +23,7 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
+import { Alert, StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 import { scrollIntoResultsView } from '@/components/results-scroll';
@@ -35,6 +35,7 @@ import AnnotationSheet from '@/components/annotation-sheet';
 import MarkSheet from '@/components/mark-sheet';
 import { marksIn, unplacedMarks } from '@/constants/mark-reach';
 import { deleteNote, type Note, type Tag } from '@/api/client';
+import { DELETE_NOTE } from '@/constants/delete-copy';
 
 type Ctx = {
   /** Marks on the section currently on screen, by the text they sit on. */
@@ -680,9 +681,27 @@ export function AnnotationProvider({
      * the next load, which is the right way round: the words are never wrong,
      * only briefly out of date.
      */
+    /**
+     * ── A NOTE IS ASKED ABOUT, A HIGHLIGHT IS NOT ──────────────────────
+     * The bin in the toolbar took any mark off with one tap. For a highlight
+     * or an underline that is right: it is a mark on somebody else's words,
+     * and a confirmation on every one would make the feature tiresome.
+     *
+     * A note is the reader's own writing, and the same deletion is asked
+     * about in the two other places it is offered, the note sheet and the
+     * journal. Here it was not, so the words went with one tap and nothing
+     * said so. The wording is theirs, from the sheet that already asked.
+     */
     remove: (mark: Mark) => {
-      onRemoved?.(mark.id);
-      deleteNote(mark.id);
+      const go = () => {
+        onRemoved?.(mark.id);
+        deleteNote(mark.id);
+      };
+      if (mark.kind !== 'note') { go(); return; }
+      Alert.alert(DELETE_NOTE.title, DELETE_NOTE.body, [
+        { text: DELETE_NOTE.keep, style: 'cancel' },
+        { text: DELETE_NOTE.confirm, style: 'destructive', onPress: go },
+      ]);
     },
     openMark: setOpenId,
     enabled: true,

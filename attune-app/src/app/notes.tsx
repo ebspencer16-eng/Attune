@@ -56,6 +56,7 @@ import SignIn from '@/components/sign-in';
 import Journal, { JOURNAL_ANCHOR, journalDay, journalStreak, lockAvailable } from '@/components/journal';
 import { SymbolView } from 'expo-symbols';
 import { annotationColor, ANNOTATION_COLORS } from '@/constants/annotations';
+import { DELETE_FAILED, DELETE_NOTE } from '@/constants/delete-copy';
 import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import TabScreen from '@/components/tab-screen';
@@ -2064,16 +2065,16 @@ function Editor({
 
   const remove = () => {
     if (!note) return;
-    Alert.alert('Delete this note?', 'This cannot be undone.', [
-      { text: 'Keep', style: 'cancel' },
+    Alert.alert(DELETE_NOTE.title, DELETE_NOTE.body, [
+      { text: DELETE_NOTE.keep, style: 'cancel' },
       {
-        text: 'Delete',
+        text: DELETE_NOTE.confirm,
         style: 'destructive',
         onPress: async () => {
           setBusy(true);
           const res = await deleteNote(note.id);
           setBusy(false);
-          if (!res.ok) return Alert.alert('Not deleted', 'That did not delete. Try again in a moment.');
+          if (!res.ok) return Alert.alert(DELETE_FAILED.title, DELETE_FAILED.body);
           onSaved('✓ Note deleted');
         },
       },
