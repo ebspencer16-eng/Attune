@@ -284,8 +284,26 @@ export function withContent(results, viewer, contentVersion, pronouns = {}) {
    * this existed, why it went, and which module to read instead.
    */
 
+  /**
+   * ── WHAT IS NOT SENT ──────────────────────────────────────────────────
+   * `understanding` is a per-person reading accuracy: how well each partner
+   * read the other, who read whom better, and by how much. The app's own type
+   * has said "never shown to customers" since it was added, and neither
+   * surface draws any part of it; the admin's In tune / Misunderstood slicer
+   * recomputes it from the answers rather than reading this.
+   *
+   * So it went to every device on every request, and into the payload cache
+   * on the phone, to be drawn by nothing. It stays in the stored row, which
+   * is frozen and must not change shape, and it stops here.
+   *
+   * Found by listing every field in the payload and asking which of them
+   * either surface ever names: 246 fields, 14 named nowhere, and this block
+   * is nine of them.
+   */
+  const { understanding: _notSent, ...sendable } = results;
+
   return {
-    ...results,
+    ...sendable,
     content: {
       /**
        * Which side of `partners` is the person asking.

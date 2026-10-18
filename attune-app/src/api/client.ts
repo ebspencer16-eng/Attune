@@ -194,8 +194,17 @@ export type CoupleResults = {
   /** Widest gaps first. `label` is the customer-facing dimension name; the app
    *  renders that and never keeps its own map of dimension names. */
   rankedGaps: { dim: string; gap: number; label?: string }[];
-  /** Present only when both partners answered Part 2. Never shown to customers. */
-  understanding: unknown | null;
+  /**
+   * No longer sent, and never drawn.
+   *
+   * It is a per-person reading accuracy: who read whom better, and by how
+   * much. This type said "never shown to customers" from the day it was
+   * added, and nothing on either surface drew any part of it, so it was
+   * arriving on every device, and in the payload cache, for nothing.
+   * api/results.js keeps it in the stored row and stops it there. Kept
+   * optional here so an older cached payload still typechecks.
+   */
+  understanding?: unknown | null;
   /** Optional so an older cached payload still typechecks. */
   content?: ResultsContent;
 };
