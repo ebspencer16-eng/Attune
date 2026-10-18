@@ -176,7 +176,31 @@ export default async function handler(req) {
           .select('partner_profile_id')
           .eq('id', userId)
           .maybeSingle();
+        /**
+         * ── THE PARTNER DID NOT ASK FOR THIS ────────────────────────────
+         * These two fields carry the PARTNER's raw answers, so that a couple
+         * can be studied as a couple. The partner has not deleted anything
+         * and has their own answer to "keep a de-identified copy of my
+         * answers": theirs was never read, so one person's deletion could put
+         * the other person's answers into the archive against their choice.
+         *
+         * Read fail-closed, the same way the deleter's own preference is
+         * read a few lines up: a preference we cannot confirm is treated as
+         * an opt-out, because the other way round keeps answers from someone
+         * who may have asked us not to.
+         */
+        let partnerOptedOut = true;
         if (own?.partner_profile_id) {
+          try {
+            const { data: pPrefs, error: pErr } = await admin.from('privacy_preferences')
+              .select('opt_out_research')
+              .eq('owner_id', own.partner_profile_id)
+              .maybeSingle();
+            if (!pErr) partnerOptedOut = !!pPrefs?.opt_out_research;
+          } catch (e) { /* stays true: no partner answers in the archive */ }
+        }
+        summary.partnerResearchOptOut = partnerOptedOut;
+        if (own?.partner_profile_id && !partnerOptedOut) {
           const { data: partner } = await admin.from('profiles')
             .select('ex1_answers, ex2_answers')
             .eq('id', own.partner_profile_id)

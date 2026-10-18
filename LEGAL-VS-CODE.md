@@ -39,6 +39,17 @@ to be taken on trust.
 - Whether the banner's behaviour satisfies GDPR consent, as built.
 - Whether the survey's fine print covers quoting an answer, where nothing
   published carries a name. This is R12 in TASKS.md.
+- **Two published lines disagree about what a deletion keeps.** The Data
+  Retention and Deletion Policy, section 4, says "Your assessment responses
+  are permanently deleted". The Privacy Policy's own section on research, and
+  the Your privacy choices page, both say that when an account is deleted we
+  normally keep a de-identified copy of the exercise answers and profile
+  details, with no name, email or invite code attached, unless the person
+  turns it off. The code does the second: `deleted_user_archive` carries the
+  demographics and the three exercise answer sets, with no column that points
+  back at a person, and the archive is skipped entirely for anyone who has
+  opted out, including by Global Privacy Control. One of those two sentences
+  has to change. This is R13 in TASKS.md.
 - The retention table lists seven categories of data. The product also keeps a
   relationship journal, annotations and tags, saved and read articles, and
   product analytics tied to an account while it exists. All of them go when
