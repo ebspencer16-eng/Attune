@@ -207,7 +207,17 @@ for (const c of cases) {
 
   const btn = bare(readFile('attune-app/src/components/share-button.tsx'));
   if (!/captureRef\(/.test(btn)) bad.push('share-button.tsx captures nothing, so no picture can go.');
-  if (!/picture && url \?[^\n]*\$\{url\}/.test(btn)) {
+  /**
+   * The address, under whatever name the button has it.
+   *
+   * It was `url`, the caller's own. It is `footer` now: the line the server
+   * sends with the home payload, which is the address today and a link to the
+   * App Store the day the listing goes live, and which falls back to the
+   * caller's url when the server has not spoken. The rule is unchanged and it
+   * is the rule that matters: with a picture, the way in goes in the WORDS,
+   * because iOS takes one url and the picture has to be it.
+   */
+  if (!/picture && (?:url|footer) \?[^\n]*\$\{(?:url|footer)\}/.test(btn)) {
     bad.push('share-button.tsx does not put the address into the message when it sends a picture.'
       + ' iOS takes one url and the picture is it, so a link left in that slot never leaves.'
       + ' This is for the callers that DO send one; the insight is not one of them.');

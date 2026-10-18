@@ -1849,6 +1849,9 @@ export function recallSurvey() {
 export function forgetSession(): void {
   surveyReply = null;
   homeShared = null;
+  /* Not about a person, but the rule is the rule: anything this module holds
+     goes when the account does, and it comes back with the next home. */
+  footer = null;
 }
 
 export function fetchSurvey() {
