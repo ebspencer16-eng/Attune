@@ -10,7 +10,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 |--|--|
 | T1 | **Your design tester needs a code, and every existing one is single use.** Run the SQL under this table: it adds two fresh codes that unlock everything, `ATTUNE-DESIGN-1` and `ATTUNE-DESIGN-2`, and then lists every code still unredeemed. Two because results only open once both partners finish, so a tester needs both sides. |
 | T2 | **Check whether anyone bought Conflict Patterns before today.** Until this afternoon it was quoted at $40, charged at $0, and never unlocked. Download the orders CSV from the admin; if any row has addon_conflict = Y, tell me and I will write the grant for those couples. |
-| R12 | Privacy and Terms: waiting on the lawyer. `LEGAL-VS-CODE.md` is what to send them. Add one question to it: whether the survey's fine print covers quoting an answer when nothing published carries a name. |
+| R12 | **Privacy and Terms: the document to send the lawyer is now accurate, and it was not.** It listed nine problems; all nine have been built or settled since, and it still read as current. It now opens with where each one stands and what is genuinely left, which is four questions rather than nine defects. Still waiting on the lawyer. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
@@ -118,9 +118,25 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
+| S34 | **UX and data storage, swept.** Six properties: whether deleting an account really clears every table that holds that person, whether anything personal reaches a log, whether every column written exists, what the app keeps on the phone, whether every destructive tap asks first, and whether every control is big enough to hit. Detail under the table. |
 | S33 | **A thorough round: the things nothing has measured yet.** Five properties: every endpoint given bad input, whether a stranger can read a couple's data, every email rendered from its own sample, every scheduled job's guard, and every control in the app having a name a screen reader can say. Detail under the table. |
 | S32 | **Setup to exercise to results, swept end to end.** Seven properties over the whole chain: what setup collects, what the exercises ask, what gets stored, and what the results draw. The list of what each one measures is under the table. |
 | S31 | **Sweeps, while you are away.** Eight properties, each measured over every instance rather than spot-checked. Three found something real and all three are fixed. Details under the table. |
+
+### S34, what I am measuring
+
+1. **Deleting an account clears everything.** Every table that holds a row
+   belonging to a person, against what /api/delete-account actually deletes.
+   A table added later and not added there keeps that person's rows for ever.
+2. **Nothing personal reaches a log.** Vercel keeps what the server prints.
+   Every console line that could carry an email, a name, an answer or a token.
+3. **Every column written exists.** The other half of the check I added
+   yesterday, which only reads: a write to a column the schema does not have
+   fails quietly in a field nobody reads.
+4. **What the app keeps on the phone.** Every write to the device, and
+   whether what it holds is what we said we would hold.
+5. **Every destructive tap asks first.** Delete, remove, unsave, clear.
+6. **Every control is big enough to hit.** 44 points is the number Apple uses.
 
 ### S33, what these sweeps found
 

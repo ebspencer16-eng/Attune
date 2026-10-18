@@ -6,8 +6,45 @@ month; it is the second half of this file now, folded in on 2026-10-10 because
 two files for one conversation with one lawyer is one more than the
 conversation needs.
 
-Every line quoted below is published. Every line of code named is in the repo
-today.
+Every line quoted below is published.
+
+**Read the next section before the rest of this file.** Everything below it
+was true when it was written and most of it is not true now: all four of the
+first half's findings and all five of the deletion half's have been built or
+settled since. The claims are kept because the history is the useful part for
+whoever reads this, not because they describe the product today.
+
+---
+
+## Where this stands, 2026-10-17
+
+Re-measured claim by claim. Each line names the evidence, so nothing here has
+to be taken on trust.
+
+| What this file reported | Where it stands now |
+|---|---|
+| 1. Consent records promised for seven years, none kept | **Built.** `consent_events` (migration 058) holds a timestamped row with a one-way hash of the address rather than the address, written from `api/stripe-webhook.js` at checkout and `api/create-profile.js` at account creation, through `api/_lib/consent.js`. The row loses its link to the profile on deletion and survives, which is what "retained even after account deletion" asks for. |
+| 2. Payment records promised for seven years, we delete ours | **Settled in the copy.** The published paragraph now says Stripe holds the transaction and that deleting an account deletes our order row, which is what the code does. |
+| 3. The EU and UK banner is a US notice | **Built.** `/api/region` answers where the visitor is, the notice becomes a consent gate where consent is required, and a refusal stops error reporting and tracking. Held by check-consent-gate, check-region-once and check-tracking-consent. |
+| 4. The app sees no notice | **Built.** `index.html` loads `/_flags.js`. check-notice-reach: 33 customer-facing pages, every one loads it. |
+| Deletion 1. The surviving partner loses every result | **Built.** The frozen row survives, the departed partner's name is gone from it and the survivor's results stay. check-results-survive-deletion. |
+| Deletion 2, 3, 4 | **Built**, recorded at the end of this file. |
+| Deletion 5. Deletion is otherwise thorough | **Still true, and measured again today.** Every table that holds a row belonging to a person either cascades with the account or loses the link to it: 17 tables, nothing left carrying a name. |
+
+**What is genuinely open**, and all of it is a question rather than a defect:
+
+- Whether the consent record's design satisfies the published promise: a hash
+  rather than an address, kept for seven years, the link to the account
+  dropped at deletion.
+- Whether the banner's behaviour satisfies GDPR consent, as built.
+- Whether the survey's fine print covers quoting an answer, where nothing
+  published carries a name. This is R12 in TASKS.md.
+- The retention table lists seven categories of data. The product also keeps a
+  relationship journal, annotations and tags, saved and read articles, and
+  product analytics tied to an account while it exists. All of them go when
+  the account does, so nothing outlives the promise; whether the table should
+  name them is a copy question for Ellie and a completeness question for a
+  lawyer.
 
 ---
 
