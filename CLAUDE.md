@@ -1420,6 +1420,38 @@ sets; the loop is through the cleanup. It showed up in one second on a
 simulator, which is the argument for driving the app rather than typechecking
 it: this shipped twice without being seen.
 
+**A Pressable does not compete with a gesture on an ancestor, and nothing
+says so.** The results page turns on a tap in its right sixth, which is
+Ellie's own rule from the storycards. The rail of note and tag icons is drawn
+in the card's right padding, which is inside that sixth. So when she asked for
+a tap on a margin tag to show the words it sits on, the tap turned the page
+instead: both handlers fired, because a Pressable answers React Native's
+responder system and the page's tap is a gesture handler above it, and the two
+have no relation to resolve.
+
+`Gesture.Native().blocksExternalGesture()` around the Pressable does not fix
+it either, which is the part worth knowing: a native gesture blocks an
+external one only once it ACTIVATES, and it activates for a view that handles
+touches natively. A plain View with JS handlers never does, so there is
+nothing to block with. Both versions were driven on the simulator and the page
+turned both times.
+
+What works is a `Gesture.Tap()` and a `Gesture.LongPress()` on the icon
+itself, each naming the page's gesture through `blocksExternalGesture`. Two
+details cost a run each. A composed gesture takes no relations of its own, so
+`Gesture.Exclusive(hold, tap).blocksExternalGesture(...)` does not typecheck
+and each half has to declare it. And a composed gesture cannot carry
+`withRef` either, so the ref the icons block goes on the edge tap rather than
+on the pair.
+
+The gesture callbacks are worklets, so the handler is `runOnJS(fn)(arg)`, the
+same as the page's own. And a gesture has no `hitSlop`: the 17 point icon
+needs a box around it, which the Pressable used to give it for free.
+
+`check-mark-rail-tappable.mjs` holds the four links, and
+`scripts/sim.mjs hold <x> <y> [ms]` is what drives a long press. There was no
+way to express one before: the driver could tap and drag and nothing else.
+
 **A ref is null during the render that fills it.** The margin rail shipped not
 working and Ellie said so in four words: "Still seeing it by the paragraph."
 Each paragraph decided whether to draw its own icon by reading

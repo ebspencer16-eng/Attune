@@ -163,6 +163,22 @@ function isCitation(line) {
     && /\(\d{4}\)/.test(line);
 }
 
+/**
+ * Is this the headline of somebody else's article?
+ *
+ * `articleTitle` in api/_insights.js is the published headline of the page an
+ * insight is quoted from, and it is part of the citation drawn under the
+ * quotation. It is not ours to edit: check-quotes-verbatim opens the url and
+ * holds the quotation to the page, and a headline retyped without its dash is
+ * a misquotation of a title.
+ *
+ * Narrow on purpose, like the citation rule above: the key by name, and a
+ * quoted value. A sentence in any other field is not exempt.
+ */
+function isHeadline(line) {
+  return /\barticleTitle:\s*['"]/.test(line);
+}
+
 const problems = [];
 let scanned = 0;
 
@@ -180,6 +196,7 @@ for (const root of ROOTS) {
       if (!EM.test(code)) return;
       if (/console\.(log|warn|error|info)/.test(code)) return;
       if (isCitation(code)) return;
+      if (isHeadline(code)) return;
       if (isPlaceholder(code)) return;
       const bare = code.replace(/<[^>]*>/g, '').trim();
       if (isLabelSeparator(bare)) return;

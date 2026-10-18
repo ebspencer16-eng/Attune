@@ -48,7 +48,7 @@
  * check-annotation-palette.mjs asserts it.
  */
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, type LayoutRectangle, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -246,11 +246,21 @@ export function clearSelectionAt(pageX?: number, pageY?: number) {
 }
 
 export default function Annotatable({
-  text, style, marks = [], onSelect, onRemove, onMarkTops,
+  text, style, marks = [], onSelect, onRemove, onMarkTops, reveal = null,
 }: {
   text: string;
   style?: StyleProp<TextStyle>;
   marks?: Mark[];
+  /**
+   * A mark to show as selected, without anybody having touched the words.
+   *
+   * Ellie: "If I tap a tag in the margin, the text that is tagged should
+   * select so I can see it." A tag leaves no paint of its own, so the only
+   * way to know which sentence it is on was to open the sheet and read it
+   * back. Tapping the icon in the margin paints its words instead, exactly
+   * as a finger would, and the toolbar comes up over them.
+   */
+  reveal?: string | null;
   /** A fragment was chosen, and what to do with it. */
   onSelect?: (fragment: string, action: MarkAction) => void;
   /**
@@ -300,6 +310,13 @@ export default function Annotatable({
    * and the text may sit mid-token at either end after a copy edit. Anything
    * overlapping the mark's range is painted.
    */
+  /**
+   * The margin icon asking for its words to be shown.
+   *
+   * Sets the same anchor and head a drag would, so there is one selection in
+   * this file and not a second kind that paints like it.
+   */
+
   const marked = useMemo(() => {
     const out = new Map<number, Mark>();
     for (const m of marks) {
@@ -351,6 +368,34 @@ export default function Annotatable({
      lets the registry compare identities across renders. */
   const clearRef = useRef(clear);
   clearRef.current = clear;
+
+  const revealRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!reveal || revealRef.current === reveal) return;
+    const m = marks.find((x) => x.id === reveal);
+    if (!m?.text) return;
+    const at = text.indexOf(m.text);
+    if (at === -1) return;
+    let first: number | null = null;
+    let last: number | null = null;
+    const end = at + m.text.length;
+    tokens.forEach((tok, i) => {
+      const st = starts[i];
+      if (st < end && st + tok.length > at) {
+        if (first == null) first = i;
+        last = i;
+      }
+    });
+    if (first == null) return;
+    revealRef.current = reveal;
+    /* Whatever was selected before, wherever it was, is over: the same line
+       the gesture runs when a finger lands. */
+    clearSelectionAt();
+    active = { owner: ownerId, clear: () => clearRef.current(), rect: null };
+    setSettled(true);
+    setAnchor(first);
+    setHead(last);
+  }, [reveal, marks, text, tokens, starts, ownerId]);
 
   /**
    * ── WHY THIS IS NOT A PANRESPONDER ────────────────────────────────────────

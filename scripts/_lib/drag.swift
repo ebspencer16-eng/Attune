@@ -5,7 +5,11 @@
 // This is the smallest thing that can, and it needs no dependency beyond the
 // Swift that ships with Xcode.
 //
-//   swift drag.swift x1 y1 x2 y2 [steps]
+//   swift drag.swift x1 y1 x2 y2 [steps] [holdMs]
+//
+// holdMs waits with the button down before letting go, which is the only way
+// to drive a long press: a tag in the results margin offers to delete itself
+// on a hold, and nothing else here can express that.
 import CoreGraphics
 import Foundation
 
@@ -17,6 +21,7 @@ guard a.count >= 5,
     exit(1)
 }
 let steps = a.count > 5 ? (Int(a[5]) ?? 24) : 24
+let holdMs = a.count > 6 ? (Int(a[6]) ?? 0) : 0
 
 func post(_ type: CGEventType, _ p: CGPoint) {
     CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: p, mouseButton: .left)?
@@ -39,4 +44,5 @@ for i in stride(from: 1, through: steps, by: 1) {
     usleep(8_000)
 }
 usleep(40_000)
+if holdMs > 0 { usleep(UInt32(holdMs) * 1000) }
 post(.leftMouseUp, CGPoint(x: x2, y: y2))

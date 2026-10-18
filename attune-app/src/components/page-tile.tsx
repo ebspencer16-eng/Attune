@@ -76,8 +76,22 @@ export const ResultsBottomInset = BottomTabInset + Spacing.xxl;
 export const NeutralGround = [Palette.ink, Palette.ink] as const;
 
 export default function PageTile({
-  ground, locations, children, padding = Spacing.xl,
+  ground, locations, children, padding = Spacing.xl, glow = null,
 }: {
+  /**
+   * A sunrise behind the page, for the one page that asks for one.
+   *
+   * Ellie, of What Comes Next: "I want the tile on the what comes next page
+   * to have its own orange gradient in it, starting from the bottom middle of
+   * the tile, should look like a sunrise eminating from there. Size of
+   * gradient should adjust when users open a dropdown and the tile grows, I
+   * always want to see the gradient in the bg from the top of the page."
+   *
+   * So it fills the tile rather than sitting at the bottom of it: the layer is
+   * the height of whatever the tile turns out to be, which is what makes it
+   * grow with an open bucket and stay visible from the top.
+   */
+  glow?: 'sunrise' | null;
   /**
    * The page's gradient, from the server, which is where the website paints
    * its own from. Absent means the page is a light one, which is most of them.
@@ -147,6 +161,34 @@ export default function PageTile({
                  menu's bands, has to be cut to the corner radius. */
               overflow: 'hidden',
             }}>
+            {glow === 'sunrise' ? (
+              <>
+                {/* Up from the bottom edge, strongest where it starts. */}
+                <LinearGradient
+                  pointerEvents="none"
+                  colors={[
+                    'rgba(232,103,58,0)', 'rgba(232,103,58,0.14)',
+                    'rgba(232,103,58,0.42)', 'rgba(240,138,86,0.72)',
+                  ]}
+                  locations={[0, 0.45, 0.82, 1]}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                  style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+                />
+                {/* And in from the sides, so it rises from the middle rather
+                    than from the whole foot of the tile. Two linear layers
+                    rather than a radial one, which expo-linear-gradient does
+                    not draw and which is not worth a native dependency. */}
+                <LinearGradient
+                  pointerEvents="none"
+                  colors={[c.surface, 'rgba(255,255,255,0)', 'rgba(255,255,255,0)', c.surface]}
+                  locations={[0, 0.3, 0.7, 1]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, opacity: 0.85 }}
+                />
+              </>
+            ) : null}
             {/* ── THE MARGIN THE MARKS LIVE IN ──────────────────────────
                 B121. Ellie: "The tag icons should appear outside of the tile
                 in the margin on the edge of the background card, not in the

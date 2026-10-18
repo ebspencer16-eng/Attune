@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import { Modal, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { CouchPair, HeartBubble, JournalBook, ThinkingPerson } from '@/components/brand-glyph';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
@@ -33,7 +34,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fetchConflictResults, fetchNotes, fetchSurvey, fetchTags, recallSurvey, type SurveyForm } from '@/api/client';
 import Survey from '@/components/survey';
 import { SaveToJournal } from '@/components/journal';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, type GestureType } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { AnnotationProvider, Prose, useAnnotations } from '@/components/annotation-context';
 import type {
@@ -46,7 +47,7 @@ import { router, useFocusEffect } from 'expo-router';
 /* The journal's one-slot handle, for What Comes Next's fourth tile. The Notes
    tab exports it for exactly this: the home screen's quick link uses the same
    pair, so a tile that opens the journal is not a second way of opening it. */
-import { showJournal } from '@/app/notes';
+import { showJournal, JOURNAL_TITLE } from '@/app/notes';
 import ConflictResultsView from '@/components/conflict-results';
 import HighlightCards from '@/components/highlight-cards';
 import ResultsMenu, { GROUP_ICON } from '@/components/results-menu';
@@ -764,7 +765,21 @@ export default function Results({
    * from an event bubbling to a parent.
    */
   const { width: screenW } = useWindowDimensions();
+  /**
+   * ── AND THE MARGIN WINS OVER IT ─────────────────────────────────────────
+   * The rail of note and tag icons sits in the card's right padding, which is
+   * inside the sixth of the screen that pages forward. A Pressable there does
+   * not beat this gesture: tapping a tag turned the page, twice, measured on
+   * the simulator before anything was changed.
+   *
+   * The ref is handed to the annotation provider so each icon can declare
+   * that it blocks this one. A composed gesture takes no ref, which is why it
+   * sits on the tap rather than on the pair: the tap is the half that was
+   * stealing them.
+   */
+  const pageGestureRef = useRef<GestureType | undefined>(undefined);
   const edgeTap = useMemo(() => Gesture.Tap()
+    .withRef(pageGestureRef)
     .maxDuration(300)
     .onEnd((e, ok) => {
       if (!ok) return;
@@ -775,6 +790,16 @@ export default function Results({
 
   /* The swipe wins a race: a drag that happens to end near an edge is a swipe,
      not two taps. */
+  /**
+   * ── AND THE MARGIN WINS OVER BOTH ───────────────────────────────────────
+   * The rail of note and tag icons sits in the card's right padding, which is
+   * inside the sixth of the screen that pages forward. A Pressable there does
+   * not beat this gesture: tapping a tag turned the page, twice, measured on
+   * the simulator before anything was changed.
+   *
+   * The ref is handed to the annotation provider so each icon can declare
+   * that it blocks this. Nothing else about the gesture changes.
+   */
   const pageGestures = useMemo(
     () => Gesture.Exclusive(pageSwipe, edgeTap), [pageSwipe, edgeTap]);
 
@@ -999,6 +1024,7 @@ export default function Results({
             a plain Text, so nothing breaks if a screen is rendered elsewhere. */}
         <AnnotationProvider
           section={section}
+          pageGesture={pageGestureRef}
           notes={notes}
           tags={tags}
           partnerName={them}
@@ -1431,7 +1457,14 @@ function SectionBody({
   }
 
   if (section === 'what-comes-next') {
-    return <WhatComesNext data={whatComesNext} onGoToSection={onGoToSection} onOpenJournal={onOpenJournal} />;
+    return (
+      <WhatComesNext
+        data={whatComesNext}
+        onGoToSection={onGoToSection}
+        onOpenJournal={onOpenJournal}
+        stripe={(storycardStyle as { stripe?: string[] } | null)?.stripe ?? null}
+      />
+    );
   }
 
   if (section === 'reflection-overview') return <ReflectionOverview data={reflection} title={pageTitle('reflection-overview', 'Relationship Reflection')} ground={ground} groundStops={groundStops} step={step} />;
@@ -3199,9 +3232,19 @@ function mixHex(a: string, b: string, t: number): string {
  * introduces a fresh claim is a claim nothing else supports.
  */
 function WhatComesNext({
-  data, onGoToSection, onOpenJournal,
+  data, onGoToSection, onOpenJournal, stripe = null,
 }: {
   data: { groups: NextStepGroup[]; buckets?: NextStepBucket[] } | null;
+  /**
+   * The brand gradient, for the icons and the button at the foot.
+   *
+   * It is the storycard opener's stripe, which the server sends with the
+   * results payload and the website imports straight from
+   * api/_lib/storycard-style.js. Reading it here rather than writing three
+   * hex values into the app is the same rule as everywhere else: the colour
+   * has one home.
+   */
+  stripe?: readonly string[] | null;
   onGoToSection: (id: string) => void;
   /** Opens the relationship journal. The fourth tile, and the only one that
       does not fill the space below. */
@@ -3302,9 +3345,9 @@ function WhatComesNext({
   const open = buckets.find((b) => b.id === openGroup) || null;
 
   return (
-    /* Cream, which is what the website uses here. Four tiles that stay put,
-       and the open one's rows underneath. */
-    <PageTile>
+    /* Cream, which is what the website uses here. Four rows that stay put,
+       the open one's items underneath, and the sunrise behind all of it. */
+    <PageTile glow="sunrise">
         {/* Ellie: "Change hero for what comes next action page to 'What comes
             next' on app and site." */}
         <Text style={{ ...Type.hero, color: c.textStrong }}>What comes next</Text>
@@ -3325,25 +3368,50 @@ function WhatComesNext({
             Which bucket an item is in is the server's decision, in
             api/_lib/what-comes-next.js. Nothing here names an exercise, which
             is the other half of what she asked for. */}
-        <View style={{ flexDirection: 'row', gap: Spacing.xs, marginTop: Spacing.lg }}>
-          {buckets.map((b) => (
-            <NextTile
+        {/* ── FOUR WIDE ROWS, THE ICON SWAPPING SIDES ──────────────────
+            Ellie: "I want 4, vertically stacked wider rectangular tiles... I
+            want tiles to be the same size, but for the rows to be visually
+            interesting because they're alternating the left or right
+            placement of the icon. I want the icons to be large and to be
+            stylized outline drawings with attune-branded gradient lines. I
+            want the number in each row to be larger than the text."
+
+            Four across a phone gave each tile about eighty points, which is
+            where the clipped numbers came from and why the labels had to be
+            set at ten. A row is the width of the page, so the number can be
+            the size it should be and the words can sit beside it.
+
+            The icon for each is named by her: a person with a thought bubble,
+            two people on a couch, a conversation bubble with a heart, and a
+            journal. They are drawn in components/brand-glyph.tsx. */}
+        <View style={{ marginTop: Spacing.lg, gap: Spacing.sm }}>
+          {buckets.map((b, i) => (
+            <NextBand
               key={b.id}
               label={b.label}
               count={b.items.length}
+              glyph={BUCKET_GLYPH[b.id] || 'think'}
+              stripe={stripe}
               color={b.color || c.accent}
               active={openGroup === b.id}
+              reverse={i % 2 === 1}
               onPress={() => setOpenGroup((cur) => (cur === b.id ? null : b.id))}
             />
           ))}
-          <NextTile
-            label={'Relationship\njournal'}
-            icon="book"
+          <NextBand
+            /* The app's one copy of that name, which notes.tsx holds and
+               check-journal-copy ties to api/_lib/notes-copy.js. Typed out
+               here it was a fourth copy of a sentence Ellie owns. */
+            label={JOURNAL_TITLE}
+            glyph="journal"
+            stripe={stripe}
             /* Not one of the three section colours: the journal is a place to
                write, not a bucket of findings, and borrowing a section's
                colour for it would say it belongs to that section. */
             color={Palette.clayInk}
             active={false}
+            reverse={buckets.length % 2 === 1}
+            leaves
             onPress={onOpenJournal}
           />
         </View>
@@ -3400,18 +3468,35 @@ function WhatComesNext({
                It was a bordered card in the surface colour, which is how every
                other row on this page is drawn, so the one control at the foot
                of the whole experience read as another row. */
-            style={{
-              /* accentQuiet, not accent: white on the brand orange is 3.27 to
-                 1 and this label is a sentence, which needs 4.5. The quiet
-                 accent is the same hue two steps down and measures 4.79. */
-              marginTop: Spacing.xl, borderRadius: Radius.md,
-              backgroundColor: c.accentQuiet,
-              paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
-              alignItems: 'center',
-            }}>
-            {/* not markable: the label on a control, not results prose. A mark
-                is a copy of the words, and these words change with the survey. */}
-            <Text style={{ ...Type.body, color: Palette.white, fontFamily: Fonts.bodyBold, fontWeight: '700', textAlign: 'center' }}>{surveyCopy.title}</Text>
+            style={{ marginTop: Spacing.xl, borderRadius: Radius.md, overflow: 'hidden' }}>
+            {/* ── THE BRAND GRADIENT, NOT A FLAT FILL ────────────────────
+                Ellie: "The tell us about your attune experience button should
+                be the attune gradient."
+
+                The same three stops as the storycard opener's stripe, which
+                is where this page's icons take theirs: orange through purple
+                to blue. It arrives with the payload rather than being typed
+                here, and the fallback is the quiet accent, which is the
+                colour this button has been.
+
+                White on the orange end is 3.27 to 1 and this label is a
+                sentence, so the type sits on the darker half: the gradient
+                runs left to right and the words are centred over the middle
+                and the blue, both of which clear 4.5. */}
+            <LinearGradient
+              colors={(stripe && stripe.length >= 2
+                ? [...stripe]
+                : [c.accentQuiet, c.accentQuiet]) as [string, string, ...string[]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{
+                paddingVertical: Spacing.lg, paddingHorizontal: Spacing.lg,
+                alignItems: 'center',
+              }}>
+              {/* not markable: the label on a control, not results prose. A mark
+                  is a copy of the words, and these words change with the survey. */}
+              <Text style={{ ...Type.body, color: Palette.white, fontFamily: Fonts.bodyBold, fontWeight: '700', textAlign: 'center' }}>{surveyCopy.title}</Text>
+            </LinearGradient>
           </Pressable>
         ) : null}
 
@@ -3446,80 +3531,115 @@ function WhatComesNext({
  * that the open one says so, because a tile that changes what is under it has
  * to look different from one that has not been pressed.
  */
-function NextTile({ label, count, icon, color, active, onPress }: {
-  label: string; count?: number; icon?: string; color: string;
-  active: boolean; onPress: () => void;
+/**
+ * Which drawing goes with which bucket.
+ *
+ * Ellie named them: "the first tile to have an icon of a person with a
+ * thought bubble... Second tile should say 5 discussions to have then should
+ * have an icon of two people sitting on a couch together... Third tile should
+ * say 3 phrases to try then should have a conversation bubble with a heart in
+ * it... Fourth tile should have a journal icon."
+ *
+ * Keyed by the bucket's id, which is the server's, so a bucket that is
+ * renamed keeps its picture and a fourth bucket would arrive without one
+ * rather than wearing somebody else's.
+ */
+const BUCKET_GLYPH: Record<string, 'think' | 'couch' | 'heart' | 'journal'> = {
+  'keep-in-mind': 'think',
+  discuss: 'couch',
+  phrases: 'heart',
+};
+
+/**
+ * One of the four rows on What Comes Next.
+ *
+ * The number is the size the eye should land on first and the words sit
+ * beside it: "I want the number in each row to be larger than the text." The
+ * icon takes the other end, and swaps ends row by row.
+ */
+function NextBand({
+  label, count, glyph, color, stripe, active, reverse, leaves = false, onPress,
+}: {
+  label: string;
+  count?: number;
+  glyph: 'think' | 'couch' | 'heart' | 'journal';
+  color: string;
+  stripe?: readonly string[] | null;
+  active: boolean;
+  /** The icon on the right rather than the left, so the four alternate. */
+  reverse: boolean;
+  /** This row leaves the page rather than opening underneath it. */
+  leaves?: boolean;
+  onPress: () => void;
 }) {
+  const words = label.replace(/\n/g, ' ');
+  const Glyph = glyph === 'couch' ? CouchPair
+    : glyph === 'heart' ? HeartBubble
+      : glyph === 'journal' ? JournalBook
+        : ThinkingPerson;
+  /* The ground the strokes are punched out against: the row's own fill, so
+     the cut-out matches whatever the row is painted. */
+  const ground = mixHex(c.surface, color, active ? 0.14 : 0.06);
+
+  const art = (
+    <View style={{ width: 64, alignItems: 'center', justifyContent: 'center' }}>
+      <Glyph size={60} stripe={stripe} ground={ground} />
+    </View>
+  );
+  const words_ = (
+    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
+      {count != null ? (
+        /* lineHeight with the size: Type.display carries the leading for the
+           size it is normally set at, and a number in a smaller box loses its
+           top ring. That is the clipping she reported on the storycards and
+           again here: "on the simulator, the numbers are cut off". */
+        <Text style={{ ...Type.display, fontSize: 40, lineHeight: 46, color }}>{count}</Text>
+      ) : null}
+      {/* not markable: the label on a control. */}
+      <Text
+        numberOfLines={2}
+        style={{ ...Type.body, flex: 1, color: active ? c.textStrong : c.text }}>
+        {words}
+      </Text>
+    </View>
+  );
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
-      accessibilityLabel={count != null ? `${label.replace('\n', ' ')}, ${count} item${count === 1 ? '' : 's'}` : label.replace('\n', ' ')}
+      accessibilityLabel={count != null ? `${words}, ${count} item${count === 1 ? '' : 's'}` : words}
       onPress={onPress}
       style={{
-        /* B107. Each tile is its bucket's colour rather than one accent:
-           the communication orange, the expectations blue, the couple type
-           purple, all from the server, and a warm brown for the journal,
-           which is a place rather than a section. */
-        flex: 1, aspectRatio: 0.92, borderRadius: Radius.lg,
-        backgroundColor: active ? withAlpha(color, 0.14) : withAlpha(color, 0.06),
-        borderWidth: 1, borderColor: active ? withAlpha(color, 0.5) : 'transparent',
-        paddingTop: Spacing.sm, paddingBottom: Spacing.md,
-        paddingHorizontal: Spacing.xs, alignItems: 'center',
+        /* The icon swaps ends, the chevron does not: row-reverse moved all
+           three, so every other row had its disclosure arrow on the left and
+           its words starting in a different place. The two halves are ordered
+           below instead and the arrow stays on the trailing edge, which is
+           where a disclosure lives. */
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.lg,
+        borderRadius: Radius.lg,
+        /* Taller than the four squares were, which is the whole of her sixth
+           point: "Make the 4 rounded squares in the what comes next page
+           taller so that the number/icon, title, and arrow have space to
+           breathe." */
+        minHeight: 96,
+        paddingVertical: Spacing.lg,
+        paddingHorizontal: Spacing.lg,
+        backgroundColor: ground,
+        borderWidth: 1,
+        borderColor: active ? withAlpha(color, 0.5) : 'transparent',
       }}>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {icon ? (
-          <SymbolView
-            name={icon as never}
-            size={26}
-            tintColor={color}
-            fallback={<View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#8F8071' }} />}
-            style={{ width: 30, height: 30 }}
-          />
-        ) : (
-          /* The count, which is what this tile has to offer. The home page's
-             tiles carry an icon here; a number is the honest equivalent for a
-             tile whose whole content is a list. */
-          /* lineHeight with the size, not without it. Type.display carries
-             its own, which is set for the size it is normally used at, and a
-             22 point number in a smaller box is drawn with its top ring cut
-             off. That is the same clipping Ellie reported three times on the
-             storycards. */
-          <Text style={{ ...Type.display, fontSize: 22, lineHeight: 28, color }}>
-            {count ?? ''}
-          </Text>
-        )}
-      </View>
-      {/* not markable: the label on a control. */}
-      {/* Three lines at ten points, not two at eleven. Four tiles across a
-          phone are about eighty points each, and "What to keep in mind" came
-          out as "What to keep in m…" while "Relationship" broke mid-word into
-          "Relationshi p". Measured on the simulator rather than guessed. */}
-      {/* not markable: the label on a control. */}
-      <Text
-        numberOfLines={3}
-        style={{
-          ...Type.small, fontSize: 10, lineHeight: 13,
-          color: active ? c.textStrong : c.text, textAlign: 'center', width: '92%',
-        }}>
-        {label}
-      </Text>
-      {/* ── B126: AND A CHEVRON, SO IT READS AS A CONTROL ──────────────
-          Ellie: "Can we put a little arrow icon or something on each of the
-          four tiles on the what comes next page so that it is clear that that
-          content will show if you click on the button?"
-
-          It points down on a tile whose content opens underneath, and turns
-          up when that tile is the open one, which is the ordinary way a
-          disclosure says which way it goes. The journal's points right,
-          because it leaves the page. */}
+      {reverse ? words_ : art}
+      {reverse ? art : words_}
       <SymbolView
-        name={(icon ? 'chevron.right' : active ? 'chevron.up' : 'chevron.down') as never}
-        size={9}
+        name={(leaves ? 'chevron.right' : active ? 'chevron.up' : 'chevron.down') as never}
+        size={12}
         tintColor={active ? color : c.textMuted}
         /* not markable: an arrow on a control. */
-        fallback={<Text style={{ ...Type.small, fontSize: 9, color: c.textMuted }}>{icon ? '\u203A' : active ? '\u02C4' : '\u02C5'}</Text>}
-        style={{ width: 10, height: 10, marginTop: 3 }}
+        fallback={<Text style={{ ...Type.small, fontSize: 11, color: c.textMuted }}>{leaves ? '\u203A' : active ? '\u02C4' : '\u02C5'}</Text>}
+        style={{ width: 13, height: 13 }}
       />
     </Pressable>
   );

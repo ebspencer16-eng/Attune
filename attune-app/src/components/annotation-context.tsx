@@ -25,6 +25,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Alert, StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { Pressable } from '@/components/pressable';
+import { Gesture, GestureDetector, type GestureType } from 'react-native-gesture-handler';
+/* The gesture callbacks are worklets, the same as the page's own. */
+import { runOnJS } from 'react-native-reanimated';
 import { SymbolView } from 'expo-symbols';
 import { scrollIntoResultsView } from '@/components/results-scroll';
 
@@ -35,7 +38,7 @@ import AnnotationSheet from '@/components/annotation-sheet';
 import MarkSheet from '@/components/mark-sheet';
 import { marksIn, unplacedMarks } from '@/constants/mark-reach';
 import { deleteNote, type Note, type Tag } from '@/api/client';
-import { DELETE_NOTE } from '@/constants/delete-copy';
+import { DELETE_NOTE, REMOVE_MARK } from '@/constants/delete-copy';
 
 type Ctx = {
   /** Marks on the section currently on screen, by the text they sit on. */
@@ -64,6 +67,15 @@ type Ctx = {
    * components/mark-sheet.tsx for what it opens.
    */
   openMark: (id: string) => void;
+  /**
+   * Show a mark's words as selected, without opening anything.
+   *
+   * Ellie: "If I tap a tag in the margin, the text that is tagged should
+   * select so I can see it."
+   */
+  revealMark: (id: string) => void;
+  /** Which mark is being shown that way, if any. */
+  revealed: string | null;
   /** Whether anything can be marked at all. False outside the provider. */
   enabled: boolean;
   /**
@@ -96,6 +108,20 @@ type Ctx = {
   railHost: React.RefObject<View | null>;
   reportMarker: (id: string, at: RailMark | null) => void;
   markers?: RailMark[];
+  /**
+   * The results page's own tap-and-swipe gesture, so a rail icon can block it.
+   *
+   * Ellie asked for a tap on a margin tag to show the words it is on. The
+   * first version was a Pressable and the page turned instead, every time:
+   * the rail sits in the card's right padding, which is inside the sixth of
+   * the screen that pages forward, and a gesture-handler Tap on an ancestor
+   * does not lose to a Pressable child the way a DOM listener loses to a
+   * button. Measured on the simulator twice before changing anything.
+   *
+   * So the icon declares that it blocks that gesture. Null outside a results
+   * page, where there is nothing to block.
+   */
+  pageGesture?: React.MutableRefObject<GestureType | undefined> | null;
 };
 
 /** One icon on the rail: which mark, how far down the card, and in what ink. */
@@ -150,8 +176,9 @@ function textIsLight(style: StyleProp<TextStyle>): boolean {
 
 const AnnotationCtx = createContext<Ctx>({
   marks: [], select: () => {}, remove: () => {}, openMark: () => {},
+  revealMark: () => {}, revealed: null,
   enabled: false, focus: null, claim: () => {}, unplaced: false,
-  railHost: { current: null }, reportMarker: () => {},
+  railHost: { current: null }, reportMarker: () => {}, pageGesture: null,
 });
 
 export function useAnnotations() {
@@ -184,7 +211,50 @@ export function useAnnotations() {
  * the card's own box.
  */
 export function useMarkRail(padding = 0) {
-  const { railHost, markers, openMark } = useAnnotations();
+  const { railHost, markers, openMark, revealMark, marks, remove, pageGesture } = useAnnotations();
+  /**
+   * ── WHY THESE ARE GESTURES AND NOT A PRESSABLE ──────────────────────────
+   * The icons were a Pressable and a tap on one turned the page instead,
+   * measured twice on the simulator. A Pressable answers to React Native's
+   * own responder system; the page's tap-to-page is a gesture handler on an
+   * ancestor, and the two do not compete, so both fired and the page change
+   * is what you saw.
+   *
+   * Wrapping the Pressable in `Gesture.Native().blocksExternalGesture()` did
+   * not help either, and that is the part worth writing down: a native
+   * gesture blocks an external one only once it activates, and it activates
+   * for a view that handles touches natively. A Pressable is a plain View
+   * with JS handlers, so there was nothing to activate and nothing to block.
+   *
+   * A Tap gesture on the icon does both: it carries the press, and it names
+   * the page gesture as the one it blocks. The accessibility role, label and
+   * hint stay on the View, which is where a screen reader looks.
+   */
+  const handlers = (m: RailMark) => {
+    /* Each half names the page gesture: a composed gesture takes no
+       relations of its own, so the pair cannot declare this between them. */
+    let tap = Gesture.Tap().onEnd((_e, ok) => {
+      if (ok) runOnJS(m.tagged ? revealMark : openMark)(m.id);
+    });
+    let hold = Gesture.LongPress().minDuration(450).onStart(() => {
+      runOnJS(holdMark)(m);
+    });
+    if (pageGesture) {
+      tap = tap.blocksExternalGesture(pageGesture);
+      hold = hold.blocksExternalGesture(pageGesture);
+    }
+    return Gesture.Exclusive(hold, tap);
+  };
+  /* What a long press offers. Off the UI thread, so it is a plain function. */
+  const holdMark = (m: RailMark) => {
+    const mark = marks.find((x) => x.id === m.id);
+    if (!mark) return;
+    if (!m.tagged) { openMark(m.id); return; }
+    Alert.alert(REMOVE_MARK.tagTitle, REMOVE_MARK.tagBody, [
+      { text: REMOVE_MARK.keep, style: 'cancel' },
+      { text: REMOVE_MARK.confirm, style: 'destructive', onPress: () => remove(mark) },
+    ]);
+  };
   /* Out in the card's padding, which is the margin Ellie means: "outside of
      the tile in the margin on the edge of the background card". The card's
      own padding is the room, so the rail is pushed out by it, less two points
@@ -194,24 +264,41 @@ export function useMarkRail(padding = 0) {
   const rail = markers && markers.length ? (
     <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, bottom: 0, right: out, width: RAIL_WIDTH }}>
       {markers.map((m) => (
-        <Pressable
-          key={m.id}
-          accessibilityRole="button"
-          accessibilityLabel={m.tagged ? 'Open this tag' : 'Open this note'}
-          hitSlop={10}
-          onPress={() => openMark(m.id)}
-          style={{ position: 'absolute', top: m.y, right: 2 }}>
-          {/* ── THE ICON, AND NOTHING ROUND IT ────────────────────────────
-              Ellie: "I don't want the icon in a circle like it currently is,
-              just the icon." */}
-          <SymbolView
-            name={(m.tagged ? 'tag' : 'square.and.pencil') as never}
-            size={16}
-            tintColor={m.color}
-            fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: m.color }} />}
-            style={{ width: 17, height: 17 }}
-          />
-        </Pressable>
+        <GestureDetector key={m.id} gesture={handlers(m)}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={m.tagged ? 'Show the tagged words' : 'Open this note'}
+            accessibilityHint={m.tagged ? 'Press and hold to remove the tag' : undefined}
+            /* ── A TAP SHOWS THE WORDS, A HOLD TAKES THE TAG OFF ──────────
+               Ellie: "If I tap a tag in the margin, the text that is tagged
+               should select so I can see it. Also, if I hold down on the tag,
+               I should have an option to delete that tag."
+
+               A tag paints nothing on the words, so the only way to know
+               which sentence carried it was to open the sheet and read it
+               back. A tap paints them now, the way a finger would. A note
+               still opens: its words are already underlined and what a reader
+               wants is what they wrote. */
+            style={{
+              position: 'absolute', top: m.y - 8, right: -4,
+              /* The icon is 17 points. The box around it is a finger, which
+                 hitSlop used to give a Pressable and a gesture does not. */
+              width: 30, height: 32, alignItems: 'flex-end', justifyContent: 'center',
+              paddingRight: 6,
+            }}>
+            {/* ── THE ICON, AND NOTHING ROUND IT ──────────────────────────
+                Ellie: "I don't want the icon in a circle like it currently
+                is, just the icon." */}
+            <SymbolView
+              name={(m.tagged ? 'tag' : 'square.and.pencil') as never}
+              size={16}
+              tintColor={m.color}
+              fallback={<View style={{ width: 3, height: 16, borderRadius: 2, backgroundColor: m.color }} />}
+              style={{ width: 17, height: 17 }}
+            />
+          </View>
+        </GestureDetector>
       ))}
     </View>
   ) : null;
@@ -227,7 +314,10 @@ export function useMarkRail(padding = 0) {
 export function Prose({
   children, style,
 }: { children: string | null | undefined; style?: StyleProp<TextStyle> }) {
-  const { marks, select, remove, openMark, enabled, focus, claim, railHost, reportMarker, markers } = useAnnotations();
+  const {
+    marks, select, remove, openMark, enabled, focus, claim, railHost, reportMarker, markers,
+    revealed,
+  } = useAnnotations();
   const text = children || '';
   /**
    * ── EVERY HOOK RUNS, EVEN WHEN THIS DRAWS A PLAIN TEXT ──────────────────
@@ -424,6 +514,8 @@ export function Prose({
       onSelect={select}
       onRemove={remove}
       onMarkTops={setMarkTops}
+      /* Which mark the margin was tapped on, if it is one of ours. */
+      reveal={revealed && mine.some((m) => m.id === revealed) ? revealed : null}
     />
   );
   if (!silent.length) {
@@ -516,9 +608,16 @@ export function Prose({
 
 export function AnnotationProvider({
   children, section, notes, tags, partnerName, onCreated, onRemoved, onChanged, focus = null,
-  anchorType = 'results_section', anchorKey,
+  anchorType = 'results_section', anchorKey, pageGesture = null,
 }: {
   children: ReactNode;
+  /**
+   * The page's own swipe-and-tap gesture, if it has one.
+   *
+   * Passed down so a rail icon can block it. See the note on `pageGesture` in
+   * the context type: without it a tap on a margin tag turns the page.
+   */
+  pageGesture?: React.MutableRefObject<GestureType | undefined> | null;
   /** The results section on screen. Becomes the anchor key. */
   section: string;
   /**
@@ -559,6 +658,7 @@ export function AnnotationProvider({
   const [selected, setSelected] = useState<{ text: string; action: MarkAction } | null>(null);
   /** Which existing mark the reader has opened from the margin, if any. */
   const [openId, setOpenId] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState<string | null>(null);
   const key = anchorKey || section;
 
   const marks = useMemo<Mark[]>(() => notes
@@ -669,6 +769,7 @@ export function AnnotationProvider({
     railHost,
     reportMarker,
     markers,
+    pageGesture,
     claim,
     unplaced,
     select: (text: string, action: MarkAction) => setSelected({ text, action }),
@@ -704,9 +805,11 @@ export function AnnotationProvider({
       ]);
     },
     openMark: setOpenId,
+    revealMark: setRevealed,
+    revealed,
     enabled: true,
     focus,
-  }), [marks, onRemoved, focus, claim, unplaced, markers, reportMarker]);
+  }), [marks, onRemoved, focus, claim, unplaced, markers, reportMarker, revealed, pageGesture]);
 
   /**
    * The row behind the mark the reader tapped.

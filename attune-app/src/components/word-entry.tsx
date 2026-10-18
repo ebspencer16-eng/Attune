@@ -37,7 +37,7 @@ export const WORD_IN_USE = 'Word in use';
 
 export type WordOfTheDay = { word: string; part?: string; definition: string };
 
-export default function WordEntry({ word, onShare, style }: {
+export default function WordEntry({ word, onShare, onKeep, style }: {
   word: WordOfTheDay;
   /**
    * The round control opposite the part of speech, when there is one.
@@ -46,6 +46,19 @@ export default function WordEntry({ word, onShare, style }: {
    * for it to open, so it is left out rather than drawn and made inert.
    */
   onShare?: (() => void) | null;
+  /**
+   * Keeps the word in the relationship journal.
+   *
+   * Ellie: "Word of the day card should have a save to journal button the
+   * same as the insight of the day does." The insight carries its Save on the
+   * tile itself, beside Share, so this one does too rather than only on the
+   * card the share control opens.
+   *
+   * Optional for the same reason `onShare` is: on the storycard the journal
+   * button is drawn below the card by StoryCard, and two of them on one
+   * screen is the same control twice.
+   */
+  onKeep?: (() => void) | null;
   style?: ViewStyle;
 }) {
   return (
@@ -67,8 +80,28 @@ export default function WordEntry({ word, onShare, style }: {
             speaker there, which this product has nothing to say
             through; sharing the word is a real thing it can do and
             needs no words on the button. */}
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
           <Text style={{ ...Type.body, color: c.textMuted, flex: 1 }}>{word.part}</Text>
+          {onKeep ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Save the word ${word.word} to your relationship journal`}
+              hitSlop={10}
+              onPress={onKeep}
+              style={{
+                width: 34, height: 34, borderRadius: 17,
+                backgroundColor: Palette.warm,
+                alignItems: 'center', justifyContent: 'center',
+              }}>
+              <SymbolView
+                name={'bookmark' as never}
+                size={15}
+                tintColor={c.textMuted}
+                fallback={<Text style={{ ...Type.small, color: c.textMuted }}>{'\u2605'}</Text>}
+                style={{ width: 17, height: 17 }}
+              />
+            </Pressable>
+          ) : null}
           {/* Ellie: "When I share the word of the day, I want it to be a
               storycard like the insight of the day." So on the Notes tab this
               opens the card, which has the share that sends a picture.

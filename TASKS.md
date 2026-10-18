@@ -8,7 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| W11a | **Who are the three non-binary rows?** The demo filter works and the tile reads the filtered list, so these are accounts nobody has marked as demos. Run the SQL under this table and send me what it prints: it names them and changes nothing. If they are test accounts I will mark them, and if one is a customer we leave them alone. |
+| W11a | **Who are the three non-binary rows?** Checked: the demo filter works and the tile reads the filtered list, so these are accounts nobody has marked as demos. Run the SQL under this table and send me what it prints: it names them and changes nothing. If they are test accounts I will mark them, and if one is a customer we leave them alone. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
@@ -93,18 +93,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W11 | **Demos out of the admin, properly.** You are still seeing three non-binary testers. Find which accounts those rows are, whether they are flagged as demos, and close whichever hole they came through. |
-| W12 | **Notes takes ten seconds.** Time every request the tab makes, find what is slow, and make it draw from what is already on the phone the way Insights does. |
-| W13 | **A tag in the margin.** Tapping it selects the words it is on. Holding it offers to delete the tag. |
-| W14 | **The citation on today's insight.** It says The Gottman Institute and nothing else. Give every quotation the publication and the date it already has stored, wherever one is shown. |
-| W15 | **What Comes Next, rebuilt.** Four wide stacked rows, alternating icon side, big outline icons in the brand gradient, the number larger than the words, an orange sunrise gradient behind the tile that grows with it, and the experience button in the brand gradient. Taller rows so nothing is cut off. |
-| W16 | **Word of the day gets Save to journal**, the same control the insight of the day has. |
-| W17 | **A download banner on anything shared** from the app. |
-| W18 | **Alignment and understanding, for you only.** Both scores in the admin and in the CSV export, tied to the account, and reachable by nobody using the product. |
-| W19 | **The couple type hero gets the names back.** "[Name] and [name]'s unique relationship dynamic", and "unique" comes out when the names are long enough that it would run to three lines. |
-| W20 | **Three spoken labels on the storycards**, in your words from C17. |
+**Nothing open.** The nine things in your last message are built. They are in
+section 3 for your eye, and the one that needs you is W11a at the top of this
+file.
 
 ---
 
@@ -117,6 +108,13 @@ These two are still waiting on somebody, and neither is waiting on me.
 | C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none, so it says "button": the row of progress dots at the bottom, the card itself, and the tap zones that page back and forward. They need a short phrase each, which is yours to write (something like "card 2 of 6" for a dot). 172 controls across the app, these three are the only ones without words, and they are only reached by someone using a screen reader. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+| W12 | **Notes opens instantly now.** It waited on three requests before drawing anything; it opens from what the phone already has and fills in behind. Cold start of the notes request was 2.5 seconds, so the wait was real. |
+| W13 | **Tap a tag in the margin and the words it sits on light up. Hold it and it offers to remove the tag.** A tap used to turn the page: the margin is inside the sixth of the screen that pages forward, and the icon was losing that fight. |
+| W14 | **Citations carry the publication and the year now.** An article reads `Author, "Headline," The Gottman Institute, 2024`; a book reads `Author, Title (Publisher 2015)`. Tell me if you want a different order or something shorter. |
+| W15 | **What Comes Next, rebuilt.** Four wide stacked rows, the icon swapping sides down the page, outline drawings in the brand gradient, the number set large beside the words, an orange sunrise behind the tile that grows when a row opens, and the experience button in the brand gradient. |
+| W16 | **Word of the day has a Save button** beside Share, opening the same journal sheet the insight of the day opens. |
+| W17 | **Anything shared now carries a line home, and the line is yours.** It says `Attune Relationships: attune-relationships.com` today and `Download Attune Relationships in the App Store: [link]` once the app is live. Both are mine as placeholders. Send me the words you want. |
+| W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
 
 ### C12, the long and the short of it
@@ -164,6 +162,8 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| W18 | Alignment and understanding now reach the admin and the CSV export tied to the account, and no longer reach the phone at all: nine columns in the export, nothing in the payload. |
+| W20 | The three storycard controls a screen reader could not name now say your words: "card 2 of 6" for a dot, "[name] highlight card" for the card, and "tap to move forward" for a tap zone. |
 | S34 | Six sweeps over UX and data storage: deletion leaves nothing behind, nothing personal reaches a log, every column written exists, what the phone keeps, destructive taps, tap targets. |
 | S33 | Five sweeps: every endpoint given bad input, whether a stranger can read a table, every email rendered, every scheduled job, every control named. |
 | S32 | The chain from account setup into the exercises and out into results, swept end to end on the answers the real screens store. |

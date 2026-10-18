@@ -30,3 +30,19 @@ export const DELETE_FAILED = {
   title: 'Not deleted',
   body: 'That did not delete. Try again in a moment.',
 } as const;
+
+/**
+ * Taking a tag off the words it is on, from the margin.
+ *
+ * Ellie: "if I hold down on the tag, I should have an option to delete that
+ * tag." What a hold offers is removing this mark, which for a tag-only mark
+ * is the tag itself and for a note is the note: the sheet says which.
+ *
+ * These four lines are mine and are hers to change.
+ */
+export const REMOVE_MARK = {
+  tagTitle: 'Remove this tag?',
+  tagBody: 'The words stay. The tag comes off them.',
+  keep: 'Keep',
+  confirm: 'Remove',
+} as const;

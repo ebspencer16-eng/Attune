@@ -22,6 +22,7 @@
  * survives the window being moved or the simulator being a different device.
  *
  *   node scripts/sim.mjs tap 474 2470
+ *   node scripts/sim.mjs hold 1117 1906 900             # a long press
  *   node scripts/sim.mjs swipe 600 1800 600 900        # drag up = scroll down
  *   node scripts/sim.mjs shot out.png
  *
@@ -105,6 +106,16 @@ if (cmd === 'shot') {
   const swift = new URL('_lib/drag.swift', import.meta.url).pathname;
   execFileSync('swift', [swift, String(sx), String(sy), String(sx), String(sy), '0'], { stdio: 'inherit' });
   console.log(`tapped device(${args[0]},${args[1]}) -> screen(${sx},${sy})`);
+} else if (cmd === 'hold') {
+  // A long press: down, wait, up, without moving. The margin tag offers to
+  // remove itself on a hold, and a tap and a hold are different gestures, so
+  // one cannot stand in for the other.
+  const [sx, sy] = mapper()(+args[0], +args[1]);
+  const ms = args[2] || '900';
+  const swift = new URL('_lib/drag.swift', import.meta.url).pathname;
+  execFileSync('swift', [swift, String(sx), String(sy), String(sx), String(sy), '0', ms],
+    { stdio: 'inherit' });
+  console.log(`held device(${args[0]},${args[1]}) for ${ms}ms -> screen(${sx},${sy})`);
 } else if (cmd === 'swipe') {
   const to = mapper();
   const [x1, y1] = to(+args[0], +args[1]);
@@ -116,6 +127,6 @@ if (cmd === 'shot') {
     { stdio: 'inherit' });
   console.log(`swiped device(${args[0]},${args[1]}) -> (${args[2]},${args[3]})`);
 } else {
-  console.error('usage: sim.mjs tap <x> <y> | swipe <x1> <y1> <x2> <y2> [steps] | shot <file>');
+  console.error('usage: sim.mjs tap <x> <y> | hold <x> <y> [ms] | swipe <x1> <y1> <x2> <y2> [steps] | shot <file>');
   process.exit(1);
 }

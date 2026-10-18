@@ -75,6 +75,7 @@ import { resolveAnchor } from '@/constants/anchors';
 import type { AnchorContext, ResolvedAnchor } from '@/constants/anchors';
 import TabScreen from '@/components/tab-screen';
 import { StoryCard, wordCard } from '@/components/highlight-cards';
+import { SaveToJournal } from '@/components/journal';
 import WordEntry, { WORD_IN_USE } from '@/components/word-entry';
 import PageWash from '@/components/page-wash';
 import { LOADING } from '@/constants/loading-copy';
@@ -160,6 +161,11 @@ export default function NotesScreen() {
   );
   /** The word as a full card, which is what its control opens. */
   const [wordOpen, setWordOpen] = useState(false);
+  /* The word being kept, or null. Ellie: "Word of the day card should have a
+     save to journal button the same as the insight of the day does." The
+     insight's Save is on the tile as well as on the card it opens, so this is
+     too. The sheet is the same one. */
+  const [keepingWord, setKeepingWord] = useState(false);
   /** Whether the journal is open over this screen. */
   const [journalOpen, setJournalOpen] = useState(pendingJournal);
   /** Which of the three list pages is open over this screen, if any. */
@@ -852,6 +858,7 @@ export default function NotesScreen() {
             <WordEntry
               word={word}
               onShare={() => setWordOpen(true)}
+              onKeep={() => setKeepingWord(true)}
               style={{ marginBottom: Spacing.xxl }}
             />
           ) : null}
@@ -1073,6 +1080,12 @@ export default function NotesScreen() {
           The same component the insight uses, so the attune link at the foot,
           the share that sends a picture and the swipe down to leave are all
           the ones that already exist rather than a second set. */}
+      {keepingWord && word ? (
+        <SaveToJournal
+          quote={wordJournalText(word)}
+          onClose={() => setKeepingWord(false)}
+        />
+      ) : null}
       {wordOpen && word ? (
         <StoryCard
           card={wordCard(word, word.label || WORD_OF_THE_DAY)}
