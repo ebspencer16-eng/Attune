@@ -852,6 +852,14 @@ export type HomeResponse = {
   dailyPush?: { insight: string | null; word: string | null; defaultAt: string; available?: boolean } | null;
   /** How a storycard is set, for the insight card this tab can open. */
   storycardStyle?: Record<string, unknown> | null;
+  /**
+   * The line that goes under anything shared out of the app.
+   *
+   * Sent rather than written here: it becomes a link to the App Store the day
+   * the listing goes live, which is a flag on the server and not an app
+   * release. See api/_lib/share-footer.js.
+   */
+  shareFooter?: string | null;
   /* `label` is what to call it, sent with it so both surfaces agree; `url`
      is where a quotation can be read. Optional because a payload cached
      from before either existed still has to render. */
@@ -1125,7 +1133,12 @@ function requestHome() {
    * says so. getTimezoneOffset() is minutes to add to local to reach UTC.
    */
   const tzOffset = new Date().getTimezoneOffset();
-  return remembering('home', request<HomeResponse & { ok: true }>(`/api/home?tzOffset=${tzOffset}`));
+  return remembering('home', request<HomeResponse & { ok: true }>(`/api/home?tzOffset=${tzOffset}`))
+    .then((res) => {
+      /* The share footer travels with home; see recallShareFooter. */
+      if (res.ok && typeof res.data.shareFooter === 'string') footer = res.data.shareFooter;
+      return res;
+    });
 }
 
 /** The landing screen, in one call. */
@@ -1801,6 +1814,20 @@ export type SurveyForm = {
  */
 let surveyReply: { done: boolean; copy: SurveyForm['copy'] } | null = null;
 
+/**
+ * The last line the server gave us for a share, kept for the life of the app.
+ *
+ * Every share goes through one button, and that button is opened from screens
+ * that may never have read the home payload themselves. The footer arrives
+ * with home, which every launch asks for first.
+ */
+let footer: string | null = null;
+
+/** The share footer, or null if the server has not said one yet. */
+export function recallShareFooter() {
+  return footer;
+}
+
 /** What /api/survey last said, if it has answered at all this run. */
 export function recallSurvey() {
   return surveyReply;
@@ -2299,6 +2326,27 @@ export function insightShareText(r: { body: string; source?: string | null }) {
   const cite = (r.source || '').trim();
   return cite ? `${r.body}\n\n${cite}` : r.body;
 }
+
+/**
+ * The word of the day, as an entry in the journal.
+ *
+ * ── WHY IT IS NOT THE SHARE TEXT ─────────────────────────────────────────
+ * Ellie: "Word of the day card should have a save to journal button the same
+ * as the insight of the day does." The share line is one line, for a message.
+ * An entry is read back weeks later with no card around it, so it carries the
+ * word, what it means and the label it was shown under, in the order the card
+ * says them.
+ *
+ * It is here beside insightShareText because both are the words the app keeps
+ * on somebody's behalf, and the two have to look like each other.
+ */
+export function wordJournalText(word: {
+  word: string; part?: string | null; definition: string; label?: string | null;
+}) {
+  const head = [word.word, word.part ? `(${word.part})` : ''].filter(Boolean).join(' ');
+  return [head, word.definition].filter(Boolean).join('\n\n');
+}
+
 
 export async function saveExercise(input: {
   exercise: string;

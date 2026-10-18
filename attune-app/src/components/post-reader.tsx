@@ -32,7 +32,7 @@ import { ScrollView, Share, Text, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
-import { fetchPost, markPostRead, SITE_URL, type ApiError, type Note, type Post, type PostBlock, type Tag } from '@/api/client';
+import { fetchPost, markPostRead, recallShareFooter, SITE_URL, type ApiError, type Note, type Post, type PostBlock, type Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
 import ScreenFrame from '@/components/screen-frame';
 import { AnnotationProvider, Prose } from '@/components/annotation-context';
@@ -143,9 +143,15 @@ function ShareArticle({ post }: { post: Post }) {
          * none, and then the share carries the title and no link rather than
          * an address that does not resolve.
          */
+        /* The same footer every other share carries: see share-button.tsx
+           and api/_lib/share-footer.js. An article has its own address as
+           well, and both go. */
         Share.share({
           title: post.title,
-          message: post.webUrl ? `${post.title} — ${post.webUrl}` : post.title,
+          message: [
+            post.webUrl ? `${post.title} — ${post.webUrl}` : post.title,
+            recallShareFooter(),
+          ].filter(Boolean).join('\n\n'),
         }).catch(() => { /* the sheet was dismissed, which is not a failure */ });
       }}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>

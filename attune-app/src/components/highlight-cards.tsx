@@ -550,13 +550,17 @@ export function StoryCard({ card, onClose, style, journal, share }: {
    * The words to keep, when this card is one a reader can keep.
    *
    * Ellie: "there should be a button on the insight of the day page that
-   * allows users to save this to relationship journal." Only the insight has
-   * one: a highlight card is a picture of the reader's own results, which are
-   * already theirs and already on a page they can mark. A quote from somebody
-   * else's book is the thing that goes away.
+   * allows users to save this to relationship journal." Then, of the other
+   * card the product shows daily: "Word of the day card should have a save to
+   * journal button the same as the insight of the day does."
+   *
+   * So the two daily cards have one. A highlight card does not: it is a
+   * picture of the reader's own results, which are already theirs and already
+   * on a page they can mark. Somebody else's sentence, and a word that
+   * changes tomorrow, are the things that go away.
    */
   journal?: string | null;
-  /** What Share sends. Only the insight of the day has one. */
+  /** What Share sends. The two daily cards have one. */
   share?: string | null;
   /**
    * How a card is set, from the payload. Without it every role falls back to

@@ -43,7 +43,7 @@
 import { readFileSync } from 'node:fs';
 import { transform } from 'esbuild';
 
-import { INSIGHTS } from '../api/_insights.js';
+import { INSIGHTS, insightOfTheDay } from '../api/_insights.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const SRC = 'attune-app/src/app/resources.tsx';
@@ -189,6 +189,40 @@ for (const insight of INSIGHTS) {
   if (fit.cite >= fit.size) {
     cited.push(`"${insight.id || '(no id)'}" sets its quotation at ${fit.size}pt and its citation`
       + ` at ${fit.cite}pt, so the attribution is not smaller than the words.`);
+  }
+}
+
+/**
+ * ── AND THE CITATION FITS THE LINES IT IS GIVEN ─────────────────────────
+ * The attribution learned to carry the article's headline and its year, which
+ * Ellie asked for: "shouldn't it also include a publication or date or
+ * something?" One of them then ran to 132 characters against two lines that
+ * hold 128, and the layout would have clipped it.
+ *
+ * api/_insights.js elides the headline to a constant called CITATION_ROOM.
+ * This computes the same number from the app's own constants, so the two
+ * cannot drift: if the card ever gives the citation more or less room, the
+ * number in the other file is wrong and this says so.
+ */
+{
+  const perLine = Math.floor(SCREEN.insightW / (FIT.CITE_FLOOR * FIT.CHAR_RATIO));
+  const room = perLine * FIT.CITE_LINES;
+  const long = [];
+  for (const insight of INSIGHTS) {
+    const cite = String(insight.source || insight.citation || '').trim();
+    if (cite.length > room) long.push(`${insight.id || '(no id)'}: ${cite.length} characters`);
+  }
+  /* Every citation the rotation can produce, not only the ones on the list. */
+  for (let day = 0; day < 400; day += 1) {
+    const r = insightOfTheDay(new Date(2026, 0, 1 + day));
+    const cite = String(r?.source || '').trim();
+    if (cite.length > room) long.push(`${r.id || '(no id)'}: ${cite.length} characters`);
+  }
+  if (long.length) {
+    fails.push(`${new Set(long).size} citation(s) are longer than the ${room} characters the card's`
+      + ` ${FIT.CITE_LINES} lines hold at ${FIT.CITE_FLOOR}pt:\n      `
+      + [...new Set(long)].slice(0, 4).join('\n      ')
+      + '\n      CITATION_ROOM in api/_insights.js is what elides them; it says 128.');
   }
 }
 

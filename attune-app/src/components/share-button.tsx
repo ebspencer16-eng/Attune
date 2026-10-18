@@ -16,6 +16,7 @@ import { File, Paths } from 'expo-file-system';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
+import { recallShareFooter } from '@/api/client';
 import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -152,9 +153,24 @@ export default function ShareButton({
             console.warn('[share] could not capture the card', e);
           }
         }
-        /* With a picture, the address goes in the words, because iOS takes one
-           url and the picture has to be it. */
-        const body = picture && url ? `${message}\n\n${url}` : message;
+        /**
+         * ── AND WHERE TO GET IT ────────────────────────────────────────
+         * Ellie: "When you share something from the app (like a storycard,
+         * insight of the day, etc.) It should be accompanied by a 'download
+         * attune relationships in the app store' banner like some links
+         * have."
+         *
+         * Somebody handed a picture has no way in without one. The sentence
+         * comes from the server with the home payload, because it becomes a
+         * link to the store the day the listing goes live, and that is a flag
+         * rather than an app release. Until the server has spoken it is the
+         * address the caller passed, which is what shares carried before.
+         *
+         * With a picture the words carry the link, because iOS takes one url
+         * and the picture has to be it.
+         */
+        const footer = recallShareFooter() || url || null;
+        const body = picture && footer ? `${message}\n\n${footer}` : message;
         try {
           await Share.share(
             { title, message: body, ...(picture || url ? { url: picture || url } : null) },

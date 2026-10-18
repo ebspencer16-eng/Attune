@@ -41,6 +41,7 @@ import { STORYCARD_STYLE } from './_lib/storycard-style.js';
 import { pickUp } from './_lib/pick-up.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
+import { shareFooter } from './_lib/share-footer.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -512,6 +513,14 @@ export default async function handler(req) {
        * disagree about how a card is set.
        */
       storycardStyle: STORYCARD_STYLE,
+      /**
+       * The line under anything the app shares.
+       *
+       * Sent rather than written in the app because it changes the day the
+       * store listing goes live, and that is a flag here rather than an app
+       * release. See api/_lib/share-footer.js.
+       */
+      shareFooter: shareFooter(),
       /**
        * The home screen's third row: a note to return to, or the newest In
        * Practice post when there is none. Two states, decided server-side so

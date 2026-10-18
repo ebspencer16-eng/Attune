@@ -45,8 +45,21 @@ import { Pressable } from '@/components/pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
-  createNote, createTag, deleteNote, deleteTag, fetchHome, fetchNotes, fetchPosts,
-  fetchResults, fetchTags, openSharedNote, purgeTag, restoreTag, shareNote, updateNote,
+  createNote,
+  createTag,
+  deleteNote,
+  deleteTag,
+  fetchHome,
+  fetchNotes,
+  fetchPosts,
+  fetchResults,
+  fetchTags,
+  openSharedNote,
+  purgeTag,
+  restoreTag,
+  shareNote,
+  updateNote,
+  wordJournalText,
 } from '@/api/client';
 import type { ApiError, HomeResponse, Note, Tag } from '@/api/client';
 import { ScreenError, ScreenLoading } from '@/components/screen-states';
@@ -1063,6 +1076,12 @@ export default function NotesScreen() {
       {wordOpen && word ? (
         <StoryCard
           card={wordCard(word, word.label || WORD_OF_THE_DAY)}
+          /* Ellie: "Word of the day card should have a save to journal button
+             the same as the insight of the day does." The same prop on the
+             same component, so it is the same sheet, the same tags and the
+             same entry; what is kept is the word, what it means and the
+             sentence that shows it in use, which is what the card says. */
+          journal={wordJournalText(word)}
           share={`${word.word} \u00b7 ${word.definition}`}
           onClose={() => setWordOpen(false)}
         />

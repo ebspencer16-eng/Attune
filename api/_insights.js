@@ -380,6 +380,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'perpetual',
     url: 'https://www.gottman.com/blog/the-magic-relationship-ratio-according-science/',
+    articleTitle: 'The Magic Relationship Ratio, According to Science',
+    published: '2017-10-04',
   },
   {
     kind: 'quote',
@@ -389,6 +391,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/turn-toward-instead-of-away/',
+    articleTitle: 'Turn Towards Instead of Away',
+    published: '2015-04-01',
   },
   {
     kind: 'quote',
@@ -398,6 +402,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/softening-startup/',
+    articleTitle: 'How to Fight Smarter: Soften Your Start-Up',
+    published: '2013-03-16',
   },
   {
     kind: 'quote',
@@ -407,6 +413,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'horsemen',
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+    articleTitle: 'The Four Horsemen: Criticism, Contempt, Defensiveness, and Stonewalling',
+    published: '2013-04-24',
   },
   {
     kind: 'quote',
@@ -416,6 +424,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'horsemen',
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+    articleTitle: 'The Four Horsemen: Criticism, Contempt, Defensiveness, and Stonewalling',
+    published: '2013-04-24',
   },
   {
     kind: 'quote',
@@ -425,6 +435,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'horsemen',
     url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+    articleTitle: 'The Four Horsemen: Criticism, Contempt, Defensiveness, and Stonewalling',
+    published: '2013-04-24',
   },
   {
     kind: 'quote',
@@ -434,6 +446,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'friendship',
     url: 'https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/',
+    articleTitle: 'The Sound Relationship House: Build Love Maps',
+    published: '2012-11-07',
   },
   {
     kind: 'quote',
@@ -443,6 +457,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'friendship',
     url: 'https://www.gottman.com/blog/the-sound-relationship-house-build-love-maps/',
+    articleTitle: 'The Sound Relationship House: Build Love Maps',
+    published: '2012-11-07',
   },
   {
     kind: 'quote',
@@ -452,6 +468,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+    articleTitle: 'The Four Horsemen: The Antidotes',
+    published: '2013-04-26',
   },
   {
     kind: 'quote',
@@ -461,6 +479,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+    articleTitle: 'The Four Horsemen: The Antidotes',
+    published: '2013-04-26',
   },
   {
     kind: 'quote',
@@ -470,6 +490,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+    articleTitle: 'The Four Horsemen: The Antidotes',
+    published: '2013-04-26',
   },
   {
     kind: 'quote',
@@ -479,6 +501,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'horsemen',
     url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+    articleTitle: 'The Four Horsemen: The Antidotes',
+    published: '2013-04-26',
   },
   {
     kind: 'quote',
@@ -488,6 +512,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'horsemen',
     url: 'https://www.gottman.com/blog/the-four-horsemen-the-antidotes/',
+    articleTitle: 'The Four Horsemen: The Antidotes',
+    published: '2013-04-26',
   },
   {
     kind: 'quote',
@@ -497,6 +523,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'perpetual',
     url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
+    articleTitle: 'Managing vs. Resolving Conflict in Relationships',
+    published: '2024-11-19',
   },
   {
     kind: 'quote',
@@ -506,6 +534,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'perpetual',
     url: 'https://www.gottman.com/blog/managing-vs-resolving-conflict-relationships-blueprints-success/',
+    articleTitle: 'Managing vs. Resolving Conflict in Relationships',
+    published: '2024-11-19',
   },
   {
     kind: 'quote',
@@ -515,6 +545,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/an-introduction-to-emotional-bids-and-trust/',
+    articleTitle: 'An Introduction to Emotional Bids and Trust',
+    published: '2012-09-01',
   },
   {
     kind: 'quote',
@@ -524,6 +556,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/an-introduction-to-emotional-bids-and-trust/',
+    articleTitle: 'An Introduction to Emotional Bids and Trust',
+    published: '2012-09-01',
   },
   {
     kind: 'quote',
@@ -533,6 +567,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/3-ways-to-make-a-better-bid-for-connection/',
+    articleTitle: '3 Ways to Make a Better Bid for Connection',
+    published: '2021-05-11',
   },
   {
     kind: 'quote',
@@ -542,6 +578,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/3-ways-to-make-a-better-bid-for-connection/',
+    articleTitle: '3 Ways to Make a Better Bid for Connection',
+    published: '2021-05-11',
   },
   {
     kind: 'quote',
@@ -551,6 +589,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/3-ways-to-make-a-better-bid-for-connection/',
+    articleTitle: '3 Ways to Make a Better Bid for Connection',
+    published: '2021-05-11',
   },
   {
     kind: 'quote',
@@ -560,6 +600,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'trust',
     url: 'https://www.gottman.com/blog/4-tips-to-build-everyday-trust-in-relationships/',
+    articleTitle: '4 Tips to Build Everyday Trust in Relationships',
+    published: '2025-01-10',
   },
   {
     kind: 'quote',
@@ -569,6 +611,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'trust',
     url: 'https://www.gottman.com/blog/3-betrayals-ruin-relationships-arent-infidelity/',
+    articleTitle: '3 Betrayals That Ruin Relationships (That Aren’t Infidelity)',
+    published: '2016-09-09',
   },
   {
     kind: 'quote',
@@ -578,6 +622,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'trust',
     url: 'https://www.gottman.com/blog/3-betrayals-ruin-relationships-arent-infidelity/',
+    articleTitle: '3 Betrayals That Ruin Relationships (That Aren’t Infidelity)',
+    published: '2016-09-09',
   },
   {
     kind: 'quote',
@@ -587,6 +633,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'trust',
     url: 'https://www.gottman.com/blog/3-betrayals-ruin-relationships-arent-infidelity/',
+    articleTitle: '3 Betrayals That Ruin Relationships (That Aren’t Infidelity)',
+    published: '2016-09-09',
   },
   {
     kind: 'quote',
@@ -596,6 +644,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/4-mindful-listening-principles-to-better-navigate-conflict/',
+    articleTitle: '4 Mindful Listening Principles to Better Navigate Conflict',
+    published: '2020-09-30',
   },
   {
     kind: 'quote',
@@ -605,6 +655,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/4-mindful-listening-principles-to-better-navigate-conflict/',
+    articleTitle: '4 Mindful Listening Principles to Better Navigate Conflict',
+    published: '2020-09-30',
   },
   {
     kind: 'quote',
@@ -614,6 +666,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/4-mindful-listening-principles-to-better-navigate-conflict/',
+    articleTitle: '4 Mindful Listening Principles to Better Navigate Conflict',
+    published: '2020-09-30',
   },
   {
     kind: 'quote',
@@ -623,6 +677,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'perpetual',
     url: 'https://www.gottman.com/blog/3-ways-to-keep-your-relationship-in-the-positive-perspective/',
+    articleTitle: '3 Ways to Keep Your Relationship in the Positive Perspective',
+    published: '2016-11-16',
   },
   {
     kind: 'quote',
@@ -632,6 +688,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'perpetual',
     url: 'https://www.gottman.com/blog/3-ways-to-keep-your-relationship-in-the-positive-perspective/',
+    articleTitle: '3 Ways to Keep Your Relationship in the Positive Perspective',
+    published: '2016-11-16',
   },
   {
     kind: 'quote',
@@ -641,6 +699,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/4-conflict-styles-that-hurt-your-relationship/',
+    articleTitle: '4 Conflict Styles that Hurt Your Relationship',
+    published: '2021-01-25',
   },
   {
     kind: 'quote',
@@ -650,6 +710,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'conflict',
     url: 'https://www.gottman.com/blog/everything-turns-into-an-argument/',
+    articleTitle: 'Everything Turns Into an Argument: How to Break the Conflict Cycle',
+    published: '2025-06-24',
   },
   {
     kind: 'quote',
@@ -659,6 +721,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'horsemen',
     url: 'https://www.gottman.com/blog/everything-turns-into-an-argument/',
+    articleTitle: 'Everything Turns Into an Argument: How to Break the Conflict Cycle',
+    published: '2025-06-24',
   },
   {
     kind: 'quote',
@@ -668,6 +732,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'perpetual',
     url: 'https://www.gottman.com/blog/the-gifts-of-showing-your-gratitude-for-each-other/',
+    articleTitle: 'The Gifts of Showing Your Gratitude for Each Other',
+    published: '2021-11-23',
   },
   {
     kind: 'quote',
@@ -677,6 +743,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'gratitude',
     url: 'https://www.gottman.com/blog/the-gifts-of-showing-your-gratitude-for-each-other/',
+    articleTitle: 'The Gifts of Showing Your Gratitude for Each Other',
+    published: '2021-11-23',
   },
   {
     kind: 'quote',
@@ -686,6 +754,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'gratitude',
     url: 'https://www.gottman.com/blog/the-gifts-of-showing-your-gratitude-for-each-other/',
+    articleTitle: 'The Gifts of Showing Your Gratitude for Each Other',
+    published: '2021-11-23',
   },
   {
     kind: 'quote',
@@ -695,6 +765,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'gratitude',
     url: 'https://www.gottman.com/blog/the-gifts-of-showing-your-gratitude-for-each-other/',
+    articleTitle: 'The Gifts of Showing Your Gratitude for Each Other',
+    published: '2021-11-23',
   },
   {
     kind: 'quote',
@@ -704,6 +776,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'meaning',
     url: 'https://www.gottman.com/blog/debunking-5-myths-about-premarital-conflict/',
+    articleTitle: 'Debunking 5 Myths About Premarital Conflict',
+    published: '2016-11-11',
   },
   {
     kind: 'quote',
@@ -713,6 +787,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/bid-busters-ways-you-unintentionally-turn-away-from-connection/',
+    articleTitle: 'Bid Busters: Ways You Unintentionally Turn Away from Connection',
+    published: '2024-08-06',
   },
   {
     kind: 'quote',
@@ -722,6 +798,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/bid-busters-ways-you-unintentionally-turn-away-from-connection/',
+    articleTitle: 'Bid Busters: Ways You Unintentionally Turn Away from Connection',
+    published: '2024-08-06',
   },
   {
     kind: 'quote',
@@ -731,6 +809,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'friendship',
     url: 'https://www.gottman.com/blog/build-love-maps/',
+    articleTitle: 'Build Love Maps',
+    published: '2015-03-11',
   },
   {
     kind: 'quote',
@@ -740,6 +820,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'friendship',
     url: 'https://www.gottman.com/blog/build-love-maps/',
+    articleTitle: 'Build Love Maps',
+    published: '2015-03-11',
   },
   {
     kind: 'quote',
@@ -749,6 +831,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'meaning',
     url: 'https://www.gottman.com/blog/5-simple-ways-strengthen-friendship-marriage/',
+    articleTitle: 'Simple Ways to Strengthen the Friendship in Your Relationship',
+    published: '2016-12-19',
   },
   {
     kind: 'quote',
@@ -758,6 +842,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'friendship',
     url: 'https://www.gottman.com/blog/5-simple-ways-strengthen-friendship-marriage/',
+    articleTitle: 'Simple Ways to Strengthen the Friendship in Your Relationship',
+    published: '2016-12-19',
   },
   {
     kind: 'quote',
@@ -767,6 +853,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'turning-toward',
     url: 'https://www.gottman.com/blog/5-simple-ways-strengthen-friendship-marriage/',
+    articleTitle: 'Simple Ways to Strengthen the Friendship in Your Relationship',
+    published: '2016-12-19',
   },
   {
     kind: 'quote',
@@ -776,6 +864,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'meaning',
     url: 'https://www.gottman.com/blog/create-shared-meaning-examining-rituals/',
+    articleTitle: 'Create Shared Meaning: Examining Your Rituals',
+    published: '2013-01-29',
   },
   {
     kind: 'quote',
@@ -785,6 +875,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'meaning',
     url: 'https://www.gottman.com/blog/create-shared-meaning-examining-rituals/',
+    articleTitle: 'Create Shared Meaning: Examining Your Rituals',
+    published: '2013-01-29',
   },
   {
     kind: 'quote',
@@ -794,6 +886,8 @@ export const INSIGHTS = [
     work: 'The Gottman Institute',
     topic: 'meaning',
     url: 'https://www.gottman.com/blog/create-shared-meaning-examining-rituals/',
+    articleTitle: 'Create Shared Meaning: Examining Your Rituals',
+    published: '2013-01-29',
   },
 
   /* ── THE 26 SHE ASKED FOR, FROM FIVE PUBLICATIONS WE HAD NOT USED ───────
@@ -832,6 +926,8 @@ export const INSIGHTS = [
     work: 'Harvard Gazette',
     topic: 'belonging',
     url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+    articleTitle: 'Over nearly 80 years, Harvard study has been showing how to live a healthy and happy life',
+    published: '2017-04-11',
   },
   {
     kind: 'quote',
@@ -841,6 +937,8 @@ export const INSIGHTS = [
     work: 'Harvard Gazette',
     topic: 'belonging',
     url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+    articleTitle: 'Over nearly 80 years, Harvard study has been showing how to live a healthy and happy life',
+    published: '2017-04-11',
   },
   {
     kind: 'quote',
@@ -850,6 +948,8 @@ export const INSIGHTS = [
     work: 'Harvard Gazette',
     topic: 'care',
     url: 'https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/',
+    articleTitle: 'Over nearly 80 years, Harvard study has been showing how to live a healthy and happy life',
+    published: '2017-04-11',
   },
   {
     kind: 'quote',
@@ -859,6 +959,7 @@ export const INSIGHTS = [
     work: 'Greater Good Magazine',
     topic: 'kindness',
     url: 'https://greatergood.berkeley.edu/article/item/three_strategies_for_bringing_more_kindness_into_your_life',
+    articleTitle: 'Three Strategies for Bringing More Kindness into Your Life',
   },
   {
     kind: 'quote',
@@ -868,6 +969,7 @@ export const INSIGHTS = [
     work: 'Greater Good Magazine',
     topic: 'listening',
     url: 'https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to',
+    articleTitle: 'Four Steps to Help People Feel Listened To',
   },
   {
     kind: 'quote',
@@ -877,6 +979,7 @@ export const INSIGHTS = [
     work: 'Greater Good Magazine',
     topic: 'listening',
     url: 'https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to',
+    articleTitle: 'Four Steps to Help People Feel Listened To',
   },
   {
     kind: 'quote',
@@ -886,6 +989,7 @@ export const INSIGHTS = [
     work: 'Greater Good Magazine',
     topic: 'listening',
     url: 'https://greatergood.berkeley.edu/article/item/four_steps_to_help_people_feel_listened_to',
+    articleTitle: 'Four Steps to Help People Feel Listened To',
   },
   {
     kind: 'quote',
@@ -895,6 +999,8 @@ export const INSIGHTS = [
     work: 'The Conversation',
     topic: 'love',
     url: 'https://theconversation.com/what-is-love-139212',
+    articleTitle: 'What is love?',
+    published: '20200714',
   },
   {
     kind: 'quote',
@@ -904,6 +1010,8 @@ export const INSIGHTS = [
     work: 'The Conversation',
     topic: 'expectations',
     url: 'https://theconversation.com/your-relationship-may-be-better-than-you-think-find-the-knot-111152',
+    articleTitle: 'Your relationship may be better than you think – find the knot',
+    published: '20190208',
   },
   {
     kind: 'quote',
@@ -913,6 +1021,7 @@ export const INSIGHTS = [
     work: 'Psychology Today',
     topic: 'understanding',
     url: 'https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship',
+    articleTitle: 'Why Feeling Heard Can Make or Break a Relationship',
   },
   {
     kind: 'quote',
@@ -922,6 +1031,7 @@ export const INSIGHTS = [
     work: 'Psychology Today',
     topic: 'understanding',
     url: 'https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship',
+    articleTitle: 'Why Feeling Heard Can Make or Break a Relationship',
   },
   {
     kind: 'quote',
@@ -931,6 +1041,7 @@ export const INSIGHTS = [
     work: 'Psychology Today',
     topic: 'understanding',
     url: 'https://www.psychologytoday.com/us/blog/the-listening-lens/202604/why-feeling-heard-can-make-or-break-a-relationship',
+    articleTitle: 'Why Feeling Heard Can Make or Break a Relationship',
   },
   {
     kind: 'quote',
@@ -940,6 +1051,7 @@ export const INSIGHTS = [
     work: 'Institute for Family Studies',
     topic: 'belonging',
     url: 'https://ifstudies.org/blog/flourishing-marriages-are-made-not-found',
+    articleTitle: 'Flourishing Marriages Are Made, Not Found',
   },
 
   /* ── THE 50 FROM BOOKS ──────────────────────────────────────────────────
@@ -1356,11 +1468,78 @@ export function insightShareText(r) {
   return cite ? `${r.body}\n\n${cite}` : r.body;
 }
 
-/** "Author, Work" for a page; "Author, Work (publisher year)" for a book. */
+/**
+ * How many characters of citation the insight card holds.
+ *
+ * Two lines at eleven point over the card's width, which is
+ * CITE_LINES × CITE_FLOOR in attune-app/src/lib/insight-fit.js against the
+ * same width that file wraps the quotation to. It is written here because an
+ * Expo module and a server module cannot import each other, and
+ * check-insight-fits computes it from the app's own constants and fails if
+ * the two stop agreeing.
+ */
+const CITATION_ROOM = 128;
+
+/**
+ * How a quotation is attributed, wherever one is shown.
+ *
+ * ── WHAT IT USED TO SAY ───────────────────────────────────────────────────
+ * Ellie, of the insight of the day: "Is the citation for today right? It just
+ * says the gottman institute, shouldn't it also include a publication or date
+ * or something? I want to make sure we are citing things appropriately."
+ *
+ * She was right. Ten of these are unbylined blog posts where the author and
+ * the publication are the same name, so the line collapsed to one: the
+ * publication, with no article and no date. A reader could not have found the
+ * piece from it.
+ *
+ * ── WHERE THE NEW PARTS CAME FROM ─────────────────────────────────────────
+ * Not typed. A script opened each of the 28 distinct pages and took the
+ * headline from its own og:title, and the date from its own
+ * article:published_time: 28 of 28 titles, 24 of 28 dates. A citation
+ * transcribed by hand can be wrong about the page it cites, which is the
+ * mistake check-quotes-verbatim exists to catch.
+ *
+ * ── THE SHAPES ────────────────────────────────────────────────────────────
+ *   a book            Author, Work (Publisher Year)
+ *   a bylined page    Author, "Headline," Publication, Year
+ *   an unbylined page "Headline," Publication, Year
+ *
+ * The year is dropped when the page does not publish one rather than guessed,
+ * and the headline is dropped when a page did not answer, which leaves the
+ * line exactly as it was before.
+ */
 function citation(pick) {
-  const who = pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;
   const edition = String(pick.edition || '').trim();
-  return edition ? `${who} (${edition})` : who;
+  const article = String(pick.articleTitle || '').trim();
+  const year = String(pick.published || '').slice(0, 4);
+
+  if (edition) {
+    const who = pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;
+    return `${who} (${edition})`;
+  }
+  if (!article) return pick.author === pick.work ? pick.work : `${pick.author}, ${pick.work}`;
+
+  /* The comma sits inside the closing quotation mark, which is the house
+     style everywhere else on this product and in the publications cited. */
+  const tail = [pick.work, year].filter(Boolean).join(', ');
+  const head = pick.author && pick.author !== pick.work ? `${pick.author}, ` : '';
+  const whole = `${head}“${article},” ${tail}`;
+  if (whole.length <= CITATION_ROOM) return whole;
+
+  /**
+   * ── TOO LONG FOR THE CARD, SO THE HEADLINE GIVES WAY ──────────────────
+   * One of these is 132 characters: a Harvard Gazette piece whose headline is
+   * a sentence. The card gives a citation two lines, and two lines hold 128.
+   *
+   * What gets shortened is the headline and never the author, the publication
+   * or the year: those are the attribution, and a citation that drops them to
+   * fit is the problem this was written to fix. An elided title is ordinary
+   * practice and still finds the piece.
+   */
+  const room = CITATION_ROOM - (`${head}“,” ${tail}`.length + 1);
+  const cut = article.slice(0, Math.max(12, room)).replace(/[\s,;:.]+$/, '');
+  return `${head}“${cut}…,” ${tail}`;
 }
 
 /**
