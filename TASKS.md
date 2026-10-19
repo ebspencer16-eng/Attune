@@ -95,8 +95,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| W39 | **Is the two seconds paid once or three times?** The app asks three endpoints the moment it opens. Each is a separate server. If each pays its own first-connection cost, merging them is worth seconds; if they share it, merging them is worth nothing. Measure before building. |
-| W40 | **Then act on what it says.** Either fold the launch into one request, or go after the connection itself. |
+| W41 | **Where the server runs.** Every database read costs 200 to 600 milliseconds, which is a long way for a lookup by id. The server runs wherever you are: your request lands in San Francisco and the database is somewhere else, so every read crosses the country. Pinning it next to the database is one line. It is an experiment, so I will measure it and put it back if it is worse. |
 
 ---
 

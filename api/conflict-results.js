@@ -22,7 +22,28 @@
  * a partner who has not finished are both normal states, not failures.
  */
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Ellie: "Keep trying to speed things up."
+ *
+ * An edge function runs near whoever is asking, which is the right default
+ * when the answer is already at the edge. It is the wrong default when every
+ * answer has to come from one database somewhere else: the request lands in
+ * San Francisco, measured, and then each read crosses the country and back.
+ * A lookup by primary key measured 200 to 600ms, which is most of what is
+ * left of the wait and far more than the query itself can account for.
+ *
+ * `regions` pins it. The customer's own hop gets longer by a few tens of
+ * milliseconds and the two database hops get much shorter, which is the right
+ * trade when there are more of the second kind than the first.
+ *
+ * iad1 is the guess, because it is where Supabase puts a project by default.
+ * It IS a guess: the region is not visible from outside, so this is an
+ * experiment with a measurement either side of it rather than a fact. If the
+ * numbers get worse it comes straight back out, and the Server-Timing header
+ * is what says which.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { summarizeConflict } from './_lib/conflict-results.js';
 import { partnerView } from './_lib/conflict-partner-view.js';
