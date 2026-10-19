@@ -197,7 +197,18 @@ globalThis.fetch = async (u, init) => {
     start: Date.now() - t0,
     end: 0,
   };
-  calls.push(rec);
+  /**
+   * ── THE KEY SET IS NOT A ROUND TRIP PER REQUEST ─────────────────────────
+   * api/_lib/verify-token.js fetches the project's public key once per server
+   * instance and keeps it, which is how it takes the auth round trip OFF
+   * every request. Counting it here would report the fix as a regression.
+   *
+   * Not counted, and not stubbed either: letting it fail is what makes every
+   * endpoint fall back to the auth call these fixtures already answer, which
+   * is the path under test. See the comment in verify-token.js about having
+   * no key set and therefore no opinion.
+   */
+  if (!/\.well-known\/jwks/.test(url)) calls.push(rec);
   await new Promise((r) => setTimeout(r, TICK));
   rec.end = Date.now() - t0;
   const body = /\/auth\/v1\/user/.test(url) ? { id: 'u1', email: 'a@example.com' }

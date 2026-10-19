@@ -93,10 +93,10 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** Nine of your ten are built and in section 3. The tenth, the
-slow loading, is measured and diagnosed in section 3 as W33: I know where the
-time goes and what to do about it, and I have deliberately not done it yet
-because it is the code that decides who you are.
+| # | What I am doing |
+|--|--|
+| W34 | **Taking the first network hop out of every request.** The server asks Supabase over the network who your token belongs to before it does anything else, on every single call the app makes. Your project publishes the public key, so it can check the token itself in under a millisecond. Nothing for you to set up. |
+| W35 | **A gate that tries to get past it.** A token signed with the wrong key, one with the signature stripped off, a backdated one, one from another project, one with the payload edited. All five have to be refused before W34 ships. |
 
 ---
 

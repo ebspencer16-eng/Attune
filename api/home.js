@@ -42,6 +42,7 @@ import { pickUp } from './_lib/pick-up.js';
 import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { shareFooter } from './_lib/share-footer.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -76,11 +77,20 @@ export default async function handler(req) {
   if (!token) return json({ ok: false, error: 'missing auth token' }, 401);
 
   try {
-    const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-    });
-    if (!userRes.ok) return json({ ok: false, error: 'invalid auth token' }, 401);
-    const user = await userRes.json().catch(() => null);
+    /**
+     * ── WHO THIS IS, WITHOUT A ROUND TRIP ─────────────────────────────
+     * This was a fetch to Supabase asking who the token belonged to,
+     * before any work started, on every request. Ellie: "My pages are
+     * still taking a long time to load." Measured at 4.1s for this
+     * endpoint on a cold launch against 238ms for a static file in the
+     * same run, so the time was here.
+     *
+     * The token is a JWT signed with the project's own key and the
+     * project publishes the public half, so it is checked in memory.
+     * The round trip is still the fall-back for anything the local
+     * check cannot decide. See api/_lib/verify-token.js.
+     */
+    const user = await userForRequest({ token: token, supabaseUrl, anonKey });
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };

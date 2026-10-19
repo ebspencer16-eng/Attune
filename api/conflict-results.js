@@ -34,6 +34,7 @@ import {
   interpConflict,
 } from './_conflict-results-prose.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 /**
  * Put the real names into every string in the content tree.
@@ -75,11 +76,22 @@ export default async function handler(req) {
   if (!token) return json({ ok: false, error: 'missing auth token' }, 401);
 
   try {
-    const uRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-    });
-    if (!uRes.ok) return json({ ok: false, error: 'invalid auth token' }, 401);
-    const user = await uRes.json().catch(() => null);
+    /**
+     * ── WHO THIS IS, WITHOUT A ROUND TRIP ─────────────────────────────
+     * Identity comes from the verified token, never from the request body.
+     *
+     * This was a fetch to Supabase asking who the token belonged to,
+     * before any work started, on every request. Ellie: "My pages are
+     * still taking a long time to load." Measured at 6.3s for this
+     * endpoint on a cold launch against 238ms for a static file in the
+     * same run, so the time was here.
+     *
+     * The token is a JWT signed with the project's own key and the
+     * project publishes the public half, so it is checked in memory.
+     * The round trip is still the fall-back for anything the local
+     * check cannot decide. See api/_lib/verify-token.js.
+     */
+    const user = await userForRequest({ token: token, supabaseUrl, anonKey });
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
