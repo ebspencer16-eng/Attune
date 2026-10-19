@@ -13,17 +13,17 @@ export const NOTIFICATION_TRIGGERS = {
     "api/_lib/completion.js:96"
   ],
   "partner_nudged_you": [
-    "api/partner-nudge.js:96"
+    "api/partner-nudge.js:104"
   ],
   "partner_joined": [
-    "api/partner-sync.js:289"
+    "api/partner-sync.js:297"
   ],
   "partner_shared": [
-    "api/notes.js:646",
-    "api/notes.js:751"
+    "api/notes.js:658",
+    "api/notes.js:763"
   ],
   "partner_deleted": [
-    "api/delete-account.js:398"
+    "api/delete-account.js:406"
   ],
   "results_ready": [],
   "workbook_ready": [

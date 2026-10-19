@@ -12,7 +12,19 @@ import { userForRequest } from './_lib/verify-token.js';
  * belongs in the list.
  */
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the right default when the answer is already at the edge and the
+ * wrong one when every answer comes from one database somewhere else: the
+ * request landed in San Francisco and each read crossed the country.
+ *
+ * Measured, not guessed any more. Pinning the home screen's endpoints took a
+ * lookup by primary key from 200-600ms to 98ms, which is same-region speed.
+ * See api/_lib/db-region.js for the one place that says where, and
+ * check-edge-region.mjs, which holds every endpoint the app calls to it.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });

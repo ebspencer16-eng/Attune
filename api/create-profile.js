@@ -20,7 +20,15 @@ import { ABOUT_YOU, PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
 import { recordConsent } from './_lib/consent.js';
 import { PKG_CAPS } from './_lib/entitlements.js';
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database, like every other endpoint the app calls. An
+ * edge function runs near whoever is asking, which is the wrong default when
+ * every answer comes from one database somewhere else. See
+ * api/_lib/db-region.js for the measurement, and check-edge-region.mjs, which
+ * is what noticed this one was not.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { safeError, jsonBody } from './_lib/http.js';
 

@@ -28,7 +28,15 @@
 import { isAdminAddress } from './_lib/admins.js';
 import { mintAdminTicket, ADMIN_TICKET_TTL_SECONDS } from './_lib/admin-ticket.js';
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database, like every other endpoint the app calls. An
+ * edge function runs near whoever is asking, which is the wrong default when
+ * every answer comes from one database somewhere else. See
+ * api/_lib/db-region.js for the measurement, and check-edge-region.mjs, which
+ * is what noticed this one was not.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
   status, headers: { 'Content-Type': 'application/json' },
