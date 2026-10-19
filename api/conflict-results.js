@@ -115,9 +115,26 @@ export default async function handler(req) {
     // Conflict Patterns at checkout were told they do not own it.
     const cols = ['id', 'name', 'partner_name', 'partner_profile_id', 'conflict_data', ...OWNERSHIP_COLUMNS].join(',');
 
+    /**
+     * ── BOTH ROWS IN ONE READ ───────────────────────────────────────────
+     * Ellie: "Keep trying to speed things up."
+     *
+     * This read this person's row and then their partner's, one after the
+     * other, and a single read of this table measures between 200ms and
+     * 1500ms on the live site. api/partner-sync.js writes
+     * `partner_profile_id` on BOTH rows, so the partner is "whoever points
+     * back at me" and the pair comes back together. The same change as
+     * api/home.js, for the same reason.
+     */
     const meRes = await t.mark('profile', () => fetch(
-      `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc }));
-    const me = (await meRes.json().catch(() => []))?.[0];
+      `${supabaseUrl}/rest/v1/profiles`
+      + `?or=${encodeURIComponent(`(id.eq.${user.id},partner_profile_id.eq.${user.id})`)}`
+      + `&select=${cols}`, { headers: svc }));
+    const rows = (await meRes.json().catch(() => [])) || [];
+    /* By id, not by position: the pair comes back in whatever order the table
+       felt like, and taking the first row would hand somebody their partner's
+       results. */
+    const me = rows.find((r) => r.id === user.id) || null;
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
     // Premium bundles Conflict Patterns; otherwise it is an explicit add-on.
@@ -126,9 +143,15 @@ export default async function handler(req) {
 
     let partner = null;
     if (me.partner_profile_id) {
-      const pRes = await t.mark('partner', () => fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc }));
-      partner = (await pRes.json().catch(() => []))?.[0] || null;
+      partner = rows.find((r) => r.id === me.partner_profile_id) || null;
+      if (!partner) {
+        /* A link written only one way, which should not exist. Kept so it
+           costs a round trip rather than silently losing the partner, and
+           named so it is visible in the timing if it ever happens. */
+        const pRes = await t.mark('partner-fallback', () => fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc }));
+        partner = (await pRes.json().catch(() => []))?.[0] || null;
+      }
     }
 
     // conflict_data is record-shaped: { answers, completedAt }. Opening the

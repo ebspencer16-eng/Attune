@@ -198,10 +198,34 @@ export default async function handler(req) {
     };
 
     const DAILY_COLUMNS = ['daily_insight_at', 'daily_word_at'];
-    const profileUrl = (list) => `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${list}`;
+    /**
+     * ── BOTH ROWS IN ONE READ ───────────────────────────────────────────
+     * Ellie: "Keep trying to speed things up."
+     *
+     * This read this person's row, then read their partner's, one after the
+     * other, because the partner's id is a column on the first row. Measured
+     * on the live site, a single read of this table costs between 200ms and
+     * 1500ms, so doing it twice in a row is the most expensive thing this
+     * endpoint does.
+     *
+     * It does not have to be twice. api/partner-sync.js writes
+     * `partner_profile_id` on BOTH rows when two people are linked, so the
+     * partner's row is "whoever points back at me" and the pair can be asked
+     * for together.
+     *
+     * The second read is kept as a fall-back for a link that is only written
+     * one way, which should not exist and would otherwise silently drop a
+     * partner from the home screen. It reports itself as `partner-fallback`,
+     * so if that ever starts appearing the data has a problem worth knowing
+     * about rather than a performance regression nobody can see.
+     */
+    const bothUrl = (list) => `${supabaseUrl}/rest/v1/profiles`
+      + `?or=${encodeURIComponent(`(id.eq.${user.id},partner_profile_id.eq.${user.id})`)}`
+      + `&select=${list}`;
     let dailyKnown = true;
+    let rows = [];
     const me = await (async () => {
-      let meRes = await t.mark('profile', () => fetch(profileUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc }));
+      let meRes = await t.mark('profile', () => fetch(bothUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc }));
       if (!meRes.ok) {
         /**
          * Marked separately on purpose.
@@ -214,18 +238,27 @@ export default async function handler(req) {
          * header means the migration is outstanding.
          */
         dailyKnown = false;
-        meRes = await t.mark('profile-retry', () => fetch(profileUrl(cols), { headers: svc }));
+        meRes = await t.mark('profile-retry', () => fetch(bothUrl(cols), { headers: svc }));
       }
-      return await t.mark('profile-read', async () => (await meRes.json().catch(() => []))?.[0]);
+      return await t.mark('profile-read', async () => {
+        rows = (await meRes.json().catch(() => [])) || [];
+        /* By id, not by position: the pair comes back in whatever order the
+           table felt like, and taking the first row would hand somebody their
+           partner's home screen. */
+        return rows.find((r) => r.id === user.id) || null;
+      });
     })();
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
     let partner = null;
     if (me.partner_profile_id) {
-      partner = await t.mark('partner', async () => {
-        const pRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
-        return (await pRes.json().catch(() => []))?.[0] || null;
-      });
+      partner = rows.find((r) => r.id === me.partner_profile_id) || null;
+      if (!partner) {
+        partner = await t.mark('partner-fallback', async () => {
+          const pRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
+          return (await pRes.json().catch(() => []))?.[0] || null;
+        });
+      }
     }
 
     // What the couple owns. Premium bundles reflection and intimacy; add-ons

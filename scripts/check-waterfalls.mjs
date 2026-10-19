@@ -71,11 +71,14 @@ const BUDGETS = [
     name: '/api/home',
     file: '../api/home.js',
     path: '/api/home?tzOffset=420',
-    deep: 4,
-    calls: 8,
-    /* Auth, the profile, the partner it names, the beta lookup that needs
-       both. Everything else is asked for beside the profile. */
-    chain: 'auth, profile, partner, beta lookup',
+    deep: 3,
+    calls: 7,
+    /* Auth, both profiles in one read, then the beta lookup. Everything else
+       is asked for beside the profiles. Three here rather than two because
+       the auth call is still in the chain in this harness: there is no key
+       set to be had, so verify-token falls back to asking the server. In
+       production it is checked in memory. */
+    chain: 'auth, both profiles, beta lookup',
   },
   {
     /**
@@ -85,10 +88,10 @@ const BUDGETS = [
      * round: both need the partner's row and neither needs the other, so they
      * are started together.
      *
-     * Four here rather than three because the auth call is still in the chain
+     * Three here rather than two because the auth call is still in the chain
      * in this harness: there is no key set to be had, so verify-token falls
      * back to asking the server. In production it is checked in memory and
-     * this chain is three.
+     * this chain is two.
      */
     name: '/api/home (finished couple)',
     file: '../api/home.js',
@@ -96,9 +99,9 @@ const BUDGETS = [
     /* Named rather than referenced: the fixtures are declared below this
        table and a const cannot be read before it exists. */
     profile: 'finished',
-    deep: 4,
-    calls: 9,
-    chain: 'auth, profile, partner, then the results and the beta lookup together',
+    deep: 3,
+    calls: 8,
+    chain: 'auth, both profiles in one read, then the results and the beta lookup together',
   },
   {
     name: '/api/tool-data',
@@ -225,6 +228,12 @@ const FINISHED = { ...PROFILE, pkg: 'core' };
 /** Which profile the stub answers with, set per case before driving. */
 let profileFixture = PROFILE;
 
+/** The other half of the couple, from whichever fixture is in play. */
+const PARTNER = () => ({
+  ...profileFixture, id: 'u2', name: 'Spencer', invite_code: null,
+  email: 'b@example.com', partner_profile_id: 'u1',
+});
+
 let calls = [];
 let t0 = 0;
 globalThis.fetch = async (u, init) => {
@@ -251,7 +260,16 @@ globalThis.fetch = async (u, init) => {
   rec.end = Date.now() - t0;
   const body = /\/auth\/v1\/user/.test(url) ? { id: 'u1', email: 'a@example.com' }
     : /profiles\?id=eq\.u1/.test(url) ? [profileFixture]
-    : /profiles\?id=eq\.u2/.test(url) ? [{ ...profileFixture, id: 'u2', name: 'Spencer', invite_code: null, email: 'b@example.com' }]
+    : /profiles\?id=eq\.u2/.test(url) ? [PARTNER()]
+    /**
+     * Both rows at once.
+     *
+     * api/partner-sync.js writes partner_profile_id on both rows, so "me and
+     * whoever points back at me" is one query rather than two. The stub has to
+     * answer it that way or the endpoint falls back to the second read and the
+     * saving is invisible here.
+     */
+    : /profiles\?or=/.test(url) ? [profileFixture, PARTNER()]
     /* A finished couple has a stored results row, which is the read the
        part-way fixture never reaches. */
     : /\/couple_results/.test(url) ? [{ couple_type: 'WX', results: { rankedGaps: [{ dim: 'conflict' }] } }]
