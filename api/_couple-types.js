@@ -165,7 +165,7 @@ export const COUPLE_TYPES = [
     ],
     strengths: [
       "You both strive for resolution",
-      "Complementary processors, thoughtful and eager",
+      "You are complementary processors, thoughtful and eager",
       "Your relationship has warmth and steadiness",
     ],
     stickingPoints: [
@@ -261,7 +261,7 @@ export const COUPLE_TYPES = [
     ],
     strengths: [
       "Named and managed, your instincts produce repair that works",
-      "Emotionally complementary, logical and feeling",
+      "You are emotionally complementary, logical and feeling",
       "The dynamic is highly solvable once it is understood",
     ],
     stickingPoints: [

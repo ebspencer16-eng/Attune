@@ -2841,8 +2841,10 @@ function RatedRow({ r, names }: { r: ReflectionRating; names: { you: string; the
                 />
               ) : null}
             </View>
-            <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(names.you)} dy={dyYou} />
-            <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(names.them)} dy={dyThem} />
+            <DotRange size={20}>
+              <Marker pct={r.you.pct} color={YOU_COLOR} label={initial(names.you)} dy={dyYou} />
+              <Marker pct={r.them.pct} color={THEM_COLOR} label={initial(names.them)} dy={dyThem} />
+            </DotRange>
             {/* The marks keep the brand blue: they are filled shapes with a
                 white initial on them, which reads at any size on any ground.
                 It is only type that has to move. */}
@@ -4745,12 +4747,14 @@ function SbsQuestion({
             3% clamp hangs 10pt past the bar's end. */}
         <View style={{ width: 128, paddingHorizontal: 10 }}>
           <View style={{ height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)', marginVertical: 16 }}>
-            {/* readOfYou is the partner's answer ABOUT the reader, so it takes
-                the reader's colour and sits by the reader's own dot. */}
-            <SbsDot pct={pct(row.readOfYou)} dy={dyReadOfYou} color={U} small />
-            <SbsDot pct={pct(row.readOfThem)} dy={dyReadOfThem} color={P} small />
-            <SbsDot pct={pYou} dy={dyYou} color={U} label={uInit} />
-            <SbsDot pct={pThem} dy={dyThem} color={P} label={pInit} />
+            <DotRange size={20}>
+              {/* readOfYou is the partner's answer ABOUT the reader, so it
+                  takes the reader's colour and sits by the reader's own dot. */}
+              <SbsDot pct={pct(row.readOfYou)} dy={dyReadOfYou} color={U} small />
+              <SbsDot pct={pct(row.readOfThem)} dy={dyReadOfThem} color={P} small />
+              <SbsDot pct={pYou} dy={dyYou} color={U} label={uInit} />
+              <SbsDot pct={pThem} dy={dyThem} color={P} label={pInit} />
+            </DotRange>
           </View>
         </View>
         {/* not markable: the right-hand pole of a scale, which is a scale label. */}
@@ -4855,8 +4859,10 @@ function Slider({
   return (
     <View>
       <View style={{ height: 5, borderRadius: 3, backgroundColor: onDark ? 'rgba(255,255,255,0.18)' : c.border, marginVertical: 15 }}>
-        {tPct != null ? <Dot pct={tPct} dy={tDy} color={THEM_COLOR} label={same ? '' : initial(themName)} /> : null}
-        {yPct != null ? <Dot pct={yPct} dy={yDy} color={YOU_COLOR} label={same ? '' : initial(youName)} /> : null}
+        <DotRange size={22}>
+          {tPct != null ? <Dot pct={tPct} dy={tDy} color={THEM_COLOR} label={same ? '' : initial(themName)} /> : null}
+          {yPct != null ? <Dot pct={yPct} dy={yDy} color={YOU_COLOR} label={same ? '' : initial(youName)} /> : null}
+        </DotRange>
       </View>
       {same ? (
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: Spacing.lg, marginTop: Spacing.xs }}>
@@ -4872,6 +4878,42 @@ function Slider({
           ))}
         </View>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * Where a dot may travel, so a dot at the end of a bar sits flush with it.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Ellie: "If a person responds at one far end of the bar, the edge of their
+ * dot should be aligned with the edge of the bar, not the middle of their
+ * dot... It makes it look like the bars are different lengths, when in
+ * reality, the bar just ends partway through the P on the bottom row. Please
+ * extend the bars slightly rather than condensing the space for dot
+ * placement."
+ *
+ * A dot was placed at `left: pct%` of the track with its own width taken off
+ * the left, so its CENTRE sat on the end and half of it hung over. Four bars
+ * stacked, one with a dot at each extreme, read as four bars of different
+ * lengths.
+ *
+ * This is her second instruction rather than her first: the bar keeps every
+ * point of its width, and the dot's travel is inset by half a dot at each
+ * end, so the dot sweeps the visible bar edge to edge. Nothing is condensed
+ * that a reader can see; what changes is that the bar now covers the whole
+ * span a dot can occupy.
+ *
+ * `size` is the widest dot on the track. A smaller dot on the same track
+ * stops a few points short of the end, which is right: it is the other
+ * person's read of you, and it is not the thing being measured.
+ */
+function DotRange({ size, children }: { size: number; children: React.ReactNode }) {
+  return (
+    <View
+      pointerEvents="box-none"
+      style={{ position: 'absolute', left: size / 2, right: size / 2, top: 0, bottom: 0 }}>
+      {children}
     </View>
   );
 }

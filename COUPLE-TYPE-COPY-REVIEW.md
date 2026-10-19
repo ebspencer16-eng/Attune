@@ -10,7 +10,7 @@ types. A couple only ever sees their own six, and you only ever see your own,
 which is why it reads as four or six rather than sixty.
 
 This is what ships. You rewrote all 60 of them on 17 October and they went
-into the module the same day, word for word: **50 characters each, where the
+into the module the same day, word for word: **51 characters each, where the
 paragraphs they replaced averaged 128**.
 
 Two of your lines I left exactly as you wrote them and asked about in TASKS.md
@@ -40,7 +40,7 @@ of them to a name before anyone reads them.
 | ZZ | 2 | You both respect each other's interior life |
 | ZZ | 3 | Feelings can be heavy even if they are not spoken |
 | WX | 1 | You both strive for resolution |
-| WX | 2 | Complementary processors, thoughtful and eager |
+| WX | 2 | You are complementary processors, thoughtful and eager |
 | WX | 3 | Your relationship has warmth and steadiness |
 | WY | 1 | Friction can be easily removed for this pairing |
 | WY | 2 | Complementary instincts, attentive and stabilizing |
@@ -49,7 +49,7 @@ of them to a name before anyone reads them.
 | WZ | 2 | Genuine feelings are received well between you |
 | WZ | 3 | You have learned to stretch toward each other |
 | XY | 1 | Named and managed, your instincts produce repair that works |
-| XY | 2 | Emotionally complementary, logical and feeling |
+| XY | 2 | You are emotionally complementary, logical and feeling |
 | XY | 3 | The dynamic is highly solvable once it is understood |
 | XZ | 1 | Silence between you is comfortable rather than tense |
 | XZ | 2 | You both think through feelings before sharing |
