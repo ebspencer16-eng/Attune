@@ -8,9 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| W11a | **I need the FIRST table, not the second.** The query you ran printed two. You sent the denominator, which tells me there are three non-binary rows and one of them is already a demo. The table above it names the three by name and email, and that is the one I need to know which to mark. Scroll up in the Supabase results and paste it. |
-| B147 | **Answered under this table.** Your default is already what ships. Read it and tell me if you want it different. |
-| W14 | **Is the citation format right?** Answered under this table, with what the usual practice actually is. One decision for you. |
+| W11a | **One statement this time, so one table comes back.** That editor only shows the result of the last query in the box, so the names were computed and thrown away. The SQL under this table is just that half. Run it and send me what it prints. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -20,84 +18,32 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### B147, what "a preference we cannot confirm" meant
-
-Short version: **it already defaults to yes, keep.** Nothing to change.
-
-The longer version, because you asked what it meant. When somebody deletes
-their account we keep a de-identified copy of their answers for research
-unless they turned that off. The copy puts the couple's answers side by side,
-so it contains the partner's answers too, and the partner has not deleted
-anything and may feel differently. So before writing it, the server reads the
-partner's own setting.
-
-"Cannot confirm" is the case where that read does not give a clear answer.
-Two ways it happens: there is no row at all, which means they never visited
-the privacy page, or the database read itself fails. Neither is the same as
-them saying no.
-
-Both now count as **keep**, which is your instruction: "I want the default to
-be to keep responses." An explicit no is still honoured, on both sides, and
-that is the one thing that does not bend because it is the promise on the
-page.
-
-### W14, whether the citations credit people properly
-
-What it does now: an article reads `Author, "Headline," The Gottman
-Institute, 2024`. A book reads `Author, Title (Publisher 2015)`.
-
-**Is there a customary way?** Yes, and that is roughly it. Author first,
-title, where it was published, when. It is what every house style does,
-APA and Chicago included, and the differences between them are punctuation
-rather than substance. Nothing in ours is unusual.
-
-**Where it falls short, and it is one thing.** An article with no byline on
-the page is cited without an author, because inventing one would be worse.
-Fourteen of the sixty-nine are like that: an institute publishes under its own
-name rather than a person's. The institute is still named, so the credit goes
-somewhere, but a reader cannot tell whether we dropped the author or there
-never was one.
-
-**The decision for you.** Leave it, or add "The Gottman Institute" as the
-author in those cases so every citation starts with a name. I lean towards
-leaving it, because naming the institute twice reads oddly and a missing
-byline is the publisher's choice rather than ours. Your call.
-
-Everything cited is also checked against the page it came from, which is the
-part that matters most for crediting people correctly: 150 quotations, all
-verified, 73 against the page and 77 against Google's scan of the book.
-
 ### W11a, the three rows
 
-You have already run this. The first table it printed is the one I need.
+Paste this into the **Supabase SQL editor** (not Terminal) and press Run. It
+reads and changes nothing, and it prints one table.
 
-Paste this into the **Supabase SQL editor** (not Terminal) if you want to run
-it again. It reads and changes nothing.
-
-<!-- SQL 085_who_is_non_binary.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 086_non_binary_names.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 085: which accounts the Gender tile is counting as non-binary.
+-- 086: WHO the three non-binary rows are. One table, nothing else.
 --
--- ── WHY ─────────────────────────────────────────────────────────────────────
--- Ellie: "Didn't I ask for demos to be removed from admin? I'm still seeing 3
--- non-binary testers."
+-- ── WHY A SECOND ONE ────────────────────────────────────────────────────────
+-- 085 printed two tables: the three accounts, and a count per pronoun for a
+-- denominator. Ellie ran it and got one back: "Only printed one table."
 --
--- The demo filter works and the tile reads the filtered list: every admin read
--- of profiles goes through api/_lib/demo-accounts.js, and check-demo-excluded
--- proves it over sixteen of them. So the three rows are accounts that are not
--- marked as demos. Migration 082 marks a narrow set on purpose: the two she
--- named, and anything that calls itself a test. A test account called Mya,
--- or one on a Gmail alias, is not caught by that and should not have been:
--- a rule that guesses drops real customers out of the figures silently.
+-- The Supabase SQL editor shows the result of the LAST statement in the box.
+-- Two SELECTs means the first is computed and thrown away, which is a thing
+-- about that editor rather than about the query, and asking somebody to scroll
+-- up for a table that was never rendered is asking for something that does not
+-- exist.
 --
--- So this asks the database who they are rather than guessing from here.
+-- So this is one statement. It is the first half of 085, on its own.
 --
 -- ── WHAT TO DO WITH IT ──────────────────────────────────────────────────────
--- Run it, read the list, and send it back. The second statement is the one
--- that marks a row, by id, commented out: nothing is marked until you say
--- which. A row marked as a demo disappears from every figure in the admin and
--- from nothing else.
+-- Run it and send the table back. It names the accounts whose pronouns are
+-- they/them and says which are already marked as demos. If one of them is a
+-- tester I will mark them; if one is a customer they stay exactly as they are.
 --
 -- Run in the Supabase SQL Editor and click Run. It changes nothing.
 -- ============================================================================
@@ -106,29 +52,13 @@ select p.id,
        p.name,
        p.email,
        p.is_demo,
-       p.created_at,
-       p.pronouns,
+       p.created_at::date as joined,
        (p.ex1_answers is not null) as answered_communication,
        (p.ex2_answers is not null) as answered_expectations,
        exists (select 1 from public.orders o where o.user_id = p.id) as has_order
   from public.profiles p
  where lower(trim(p.pronouns)) = 'they/them'
  order by p.created_at;
-
--- And the same question for everybody, so the three have a denominator.
-select coalesce(nullif(lower(trim(pronouns)), ''), '(not set)') as pronouns,
-       count(*) filter (where not is_demo) as counted_in_admin,
-       count(*) filter (where is_demo)     as marked_demo
-  from public.profiles
- group by 1
- order by 2 desc;
-
--- ── To mark one, once you have read the list ────────────────────────────────
--- Put the ids in and uncomment. This is the only thing that changes a row.
---
--- update public.profiles
---    set is_demo = true
---  where id in ('00000000-0000-0000-0000-000000000000');
 ```
 <!-- /SQL -->
 
@@ -136,9 +66,35 @@ select coalesce(nullif(lower(trim(pronouns)), ''), '(not set)') as pronouns,
 
 ## 2. Open
 
-**Nothing open.** Everything from your last message is built and is in
-section 3. Two things need you, both at the top: the first table from the
-Supabase query, and which column you want on the new AI-tone table.
+| # | What I am doing |
+|--|--|
+| W52 | **The cloud again.** The outline of the person is right; the new cloud is worse than the one before it. Go back towards that shape and keep the bottom bumpy. |
+| W53 | **A sofa on its own, no people.** And no lines showing through: the arms must hide what is behind them. One outline rather than shapes stacked on shapes. |
+| W54 | **Your seventeen rewrites, word for word.** |
+| W56 | **Leaving Insights should bring you back to the menu.** You came back and were still on What Comes Next. |
+| W57 | **The couple map is too small on a phone.** Make it bigger. You can see the next heading under it, which means it is not filling the space it has. |
+| W58 | **Two bullets under each heading, not a tile each**, under What comes naturally and What's worth being aware of. |
+| W59 | **Those bullets start with "You are".** "Complementary processors, thoughtful and eager" reads as a label on the page even though it read fine in the table. Every option with that shape gets the same treatment. |
+| W60 | **Remove the "Overview" eyebrow** above the ten dimension bars on the Communication overview. |
+| W61 | **A dropdown closes when you leave the page.** Side by Side in Internal Processing was still open a day later. Everywhere, not just there. |
+| W62 | **Expectations, the experienced view.** Expects shows "genuinely" and "usually"; experienced shows only "both". Find out whether we ask for the detail and do not show it, or never ask. |
+| W63 | **Degree of alignment, expectations.** The bars are all or nothing. On Emotional Labour you put "Usually Ellie, sometimes Preston" and Preston put "Ellie", which is nearly the same answer and counts as a miss. Two answers that are close should count as closer than two that are opposite. |
+| W64 | **A methodology document, kept current.** Every backend analysis process: weighting, scoring, thresholds, how each number is produced. For you and Carolina, and shareable. |
+| W65 | **Tap a bar or a pole label and go to its page**, on the Communication and Expectations overviews. |
+| W66 | **The Expectations convos dropdown opens the three conversations** instead of jumping to the page. An arrow on the right of each row opens the page. |
+| W67 | **Remove the description line** under the visual for What matters most this year, in Relationship Reflection. |
+| W68 | **Remove the description sentence** under the Side by Side hero, in Relationship Reflection. |
+| W69 | **Soften the backgrounds** on the Relationship Reflection pages and the Physical Intimacy detail pages. They are too dark. |
+| W70 | **Degree of alignment for intimacy too.** |
+| W71 | **One source of truth for every alignment score**, wherever it appears. |
+| W72 | **The Intimacy overview eyebrow becomes "Alignment by category"**, like Expectations. |
+| W73 | **The Physical Intimacy action plan goes in page order.** Yours is reversed. |
+| W74 | **The sliding bars: a dot at the end of the bar sits flush with the end.** Right now its centre is on the end, so half of it hangs off and the bars look like different lengths. Extend the bars rather than narrowing where a dot can sit. |
+| W75 | **The number labels in the repair section of Conflict Patterns are invisible.** |
+| W76 | **"To help reset mid-conflict"**, and the answers read as "Asks a clarifying question" and "Uses humor". |
+| W77 | **The conflict snapshot becomes a table**: a column each for you and Preston, a row for each of the three scenarios. No pills. |
+| W78 | **A tile for each of the four horsemen.** First line "Criticism: going after the person rather than the problem", second "Self-assigned score: sometimes" with the score in orange, no analysis paragraph, then straight to One thing to try. |
+| W79 | **A third prose list**, from what your edits have in common. |
 
 ---
 
@@ -152,7 +108,6 @@ Supabase query, and which column you want on the new AI-tone table.
 | W46 | **Two people on a sofa**, like the picture you sent. |
 | W47 | **"Your unique relationship dynamic"** is back. |
 | W48 | **Your fifteen rewrites are live, word for word.** |
-| W49 | **The second AI-tone pass is under this table.** Seventeen more, with a suggestion for each. Nothing is live. |
 | W51 | **Every endpoint now checks your sign-in token itself and runs next to the database.** Sixteen of twenty-five check locally; all fifty-two run beside the database, including the website, the admin and the crons. |
 | B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. Nothing draws it, so it was landing on every phone and in the offline cache for nothing. It stays in your records and no longer reaches the device. |
 | C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none. You wrote the words and they are in; this row is here in case you want to hear them. |
