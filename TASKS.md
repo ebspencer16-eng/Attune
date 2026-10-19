@@ -136,17 +136,9 @@ select coalesce(nullif(lower(trim(pronouns)), ''), '(not set)') as pronouns,
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W42 | **The bin should delete a tag.** When you tap a margin tag and the words light up, the bin in the toolbar is greyed out. It should be live, and it should take that tag off. |
-| W44 | **The insight of the day gets the same two icons as the word of the day.** A bookmark and a share icon, no words. |
-| W45 | **The cloud and the person, again.** Your shape: a head and shoulders like the one you sent, and a cloud that is not flat along the bottom. |
-| W46 | **The couch, again.** Two people sitting together, like the picture you sent. |
-| W47 | **The couple type hero goes back to "Your unique relationship dynamic."** |
-| W48 | **Your fifteen rewrites, word for word.** Table 1 is final and these are your words, not my suggestions. |
-| W49 | **A second pass on AI tone.** Read what people actually point at as the tells, build a scrutinised list, sweep every piece of prose against it, and bring you a table of current against suggested. |
-| W50 | **Keep going on speed.** The remaining variance, and the rest of the chain. |
-| W51 | **The eighteen endpoints still asking Supabase who you are**, and the thirty-four still running away from the database. Same two fixes, applied to the rest. |
+**Nothing open.** Everything from your last message is built and is in
+section 3. Two things need you, both at the top: the first table from the
+Supabase query, and which column you want on the new AI-tone table.
 
 ---
 
@@ -154,9 +146,18 @@ select coalesce(nullif(lower(trim(pronouns)), ''), '(not set)') as pronouns,
 
 | # | Built, needs your eye |
 |--|--|
+| W42 | **The bin deletes a tag now.** Tap a margin tag, the words light up, and the bin is live. It was scoped to highlights and underlines, which was your first instruction about it; a sentence that was only tagged is filed as a note internally, so it fell outside. A note with words in it still stays out of the bin. |
+| W44 | **The insight of the day has the same two icons as the word of the day.** A bookmark and a share, no words, in the same round shape. |
+| W45 | **The person and the cloud, your shapes.** Head and shoulders like the picture you sent, and a cloud with bumps all the way round. |
+| W46 | **Two people on a sofa**, like the picture you sent. |
+| W47 | **"Your unique relationship dynamic"** is back. |
+| W48 | **Your fifteen rewrites are live, word for word.** |
+| W49 | **The second AI-tone pass is under this table.** Seventeen more, with a suggestion for each. Nothing is live. |
+| W51 | **Every endpoint now checks your sign-in token itself and runs next to the database.** Sixteen of twenty-five check locally; all fifty-two run beside the database, including the website, the admin and the crons. |
 | B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. Nothing draws it, so it was landing on every phone and in the offline cache for nothing. It stays in your records and no longer reaches the device. |
 | C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none. You wrote the words and they are in; this row is here in case you want to hear them. |
 | W22 | **A row's list opens directly under that row.** The rows below move down; the one you tapped stays under your finger. |
+| W50 | **Speed, where it got to.** The home screen's request is 283ms, down from between 1.3 and 5.9 seconds. The whole account is under this table as W39 to W41. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
