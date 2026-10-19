@@ -68,30 +68,22 @@ select p.id,
 
 | # | What I am doing |
 |--|--|
-| W52 | **The cloud again.** The outline of the person is right; the new cloud is worse than the one before it. Go back towards that shape and keep the bottom bumpy. |
-| W53 | **A sofa on its own, no people.** And no lines showing through: the arms must hide what is behind them. One outline rather than shapes stacked on shapes. |
-| W54 | **Your seventeen rewrites, word for word.** |
 | W56 | **Leaving Insights should bring you back to the menu.** You came back and were still on What Comes Next. |
 | W57 | **The couple map is too small on a phone.** Make it bigger. You can see the next heading under it, which means it is not filling the space it has. |
 | W58 | **Two bullets under each heading, not a tile each**, under What comes naturally and What's worth being aware of. |
 | W59 | **Those bullets start with "You are".** "Complementary processors, thoughtful and eager" reads as a label on the page even though it read fine in the table. Every option with that shape gets the same treatment. |
-| W60 | **Remove the "Overview" eyebrow** above the ten dimension bars on the Communication overview. |
 | W61 | **A dropdown closes when you leave the page.** Side by Side in Internal Processing was still open a day later. Everywhere, not just there. |
 | W62 | **Expectations, the experienced view.** Expects shows "genuinely" and "usually"; experienced shows only "both". Find out whether we ask for the detail and do not show it, or never ask. |
 | W63 | **Degree of alignment, expectations.** The bars are all or nothing. On Emotional Labour you put "Usually Ellie, sometimes Preston" and Preston put "Ellie", which is nearly the same answer and counts as a miss. Two answers that are close should count as closer than two that are opposite. |
 | W64 | **A methodology document, kept current.** Every backend analysis process: weighting, scoring, thresholds, how each number is produced. For you and Carolina, and shareable. |
 | W65 | **Tap a bar or a pole label and go to its page**, on the Communication and Expectations overviews. |
 | W66 | **The Expectations convos dropdown opens the three conversations** instead of jumping to the page. An arrow on the right of each row opens the page. |
-| W67 | **Remove the description line** under the visual for What matters most this year, in Relationship Reflection. |
-| W68 | **Remove the description sentence** under the Side by Side hero, in Relationship Reflection. |
 | W69 | **Soften the backgrounds** on the Relationship Reflection pages and the Physical Intimacy detail pages. They are too dark. |
 | W70 | **Degree of alignment for intimacy too.** |
 | W71 | **One source of truth for every alignment score**, wherever it appears. |
-| W72 | **The Intimacy overview eyebrow becomes "Alignment by category"**, like Expectations. |
 | W73 | **The Physical Intimacy action plan goes in page order.** Yours is reversed. |
 | W74 | **The sliding bars: a dot at the end of the bar sits flush with the end.** Right now its centre is on the end, so half of it hangs off and the bars look like different lengths. Extend the bars rather than narrowing where a dot can sit. |
 | W75 | **The number labels in the repair section of Conflict Patterns are invisible.** |
-| W76 | **"To help reset mid-conflict"**, and the answers read as "Asks a clarifying question" and "Uses humor". |
 | W77 | **The conflict snapshot becomes a table**: a column each for you and Preston, a row for each of the three scenarios. No pills. |
 | W78 | **A tile for each of the four horsemen.** First line "Criticism: going after the person rather than the problem", second "Self-assigned score: sometimes" with the score in orange, no analysis paragraph, then straight to One thing to try. |
 | W79 | **A third prose list**, from what your edits have in common. |
@@ -102,6 +94,14 @@ select p.id,
 
 | # | Built, needs your eye |
 |--|--|
+| W52 | **The cloud again.** The outline of the person is right; the new cloud is worse than the one before it. Go back towards that shape and keep the bottom bumpy. |
+| W53 | **A sofa on its own, no people.** And no lines showing through: the arms must hide what is behind them. One outline rather than shapes stacked on shapes. |
+| W54 | **Your seventeen rewrites, word for word.** |
+| W60 | **Remove the "Overview" eyebrow** above the ten dimension bars on the Communication overview. |
+| W67 | **Remove the description line** under the visual for What matters most this year, in Relationship Reflection. |
+| W68 | **Remove the description sentence** under the Side by Side hero, in Relationship Reflection. |
+| W72 | **The Intimacy overview eyebrow becomes "Alignment by category"**, like Expectations. |
+| W76 | **"To help reset mid-conflict"**, and the answers read as "Asks a clarifying question" and "Uses humor". |
 | W42 | **The bin deletes a tag now.** Tap a margin tag, the words light up, and the bin is live. It was scoped to highlights and underlines, which was your first instruction about it; a sentence that was only tagged is filed as a note internally, so it fell outside. A note with words in it still stays out of the bin. |
 | W44 | **The insight of the day has the same two icons as the word of the day.** A bookmark and a share, no words, in the same round shape. |
 | W45 | **The person and the cloud, your shapes.** Head and shoulders like the picture you sent, and a cloud with bumps all the way round. |
