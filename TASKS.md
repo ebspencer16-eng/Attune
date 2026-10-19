@@ -95,8 +95,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 | # | What I am doing |
 |--|--|
-| W36 | **The four reads /api/home does one after another.** Each waits on the one before. Find which of them genuinely need the answer to the last and start the rest together. The home screen is the first thing you see, so this is the wait you notice most. |
-| W37 | **Read the server's own timing first**, now that it reports it, so this is a measurement rather than a guess about which read is slow. |
+| W38 | **Which read is the slow one.** Ten measurements of the home screen's request against the live site: the fastest was 772ms and the slowest 3910ms, for the same work. A five-fold spread is a bigger prize than any one read, and I cannot name the cause from outside. The server reports its own timing now; it needs to report it per read. |
 
 ---
 

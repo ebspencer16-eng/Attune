@@ -69,6 +69,34 @@ function timed(startedAt) {
   return (phase) => `${phase};dur=${ms}`;
 }
 
+/**
+ * ── AND WHICH READ IS THE SLOW ONE ────────────────────────────────────────
+ * Ten measurements of this endpoint against the live site: 772ms at best and
+ * 3910ms at worst, for the same work on the same couple. A five-fold spread
+ * is a bigger prize than any single read, and nothing visible from outside
+ * says which read it is.
+ *
+ * So each phase reports its own duration. `marks` is a list rather than an
+ * object so the order is the order they happened in, which is half of what
+ * a waterfall tells you.
+ *
+ * Nothing about a customer is in it: a phase name and a number of
+ * milliseconds. It is visible in any network inspector, which is the point.
+ */
+function phases() {
+  const marks = [];
+  return {
+    async mark(name, work) {
+      const at = Date.now();
+      try { return await work(); }
+      finally { marks.push(`${name};dur=${Date.now() - at}`); }
+    },
+    header(startedAt) {
+      return [...marks, timed(startedAt)('total')].join(', ');
+    },
+  };
+}
+
 const json = (body, status = 200, timing = null) => new Response(JSON.stringify(body), {
   status,
   headers: timing ? { ...HEADERS, 'Server-Timing': timing } : HEADERS,
@@ -76,9 +104,9 @@ const json = (body, status = 200, timing = null) => new Response(JSON.stringify(
 const has = (o) => !!(o && Object.keys(o).length);
 
 export default async function handler(req) {
-  /* For the Server-Timing header. See `timed` above. */
+  /* For the Server-Timing header. See `timed` and `phases` above. */
   const startedAt = Date.now();
-  let authMs = 0;
+  const t = phases();
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
 
   /**
@@ -120,9 +148,7 @@ export default async function handler(req) {
      * The round trip is still the fall-back for anything the local
      * check cannot decide. See api/_lib/verify-token.js.
      */
-    const authAt = Date.now();
-    const user = await userForRequest({ token, supabaseUrl, anonKey });
-    authMs = Date.now() - authAt;
+    const user = await t.mark('auth', () => userForRequest({ token, supabaseUrl, anonKey }));
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
@@ -215,19 +241,23 @@ export default async function handler(req) {
 
     const DAILY_COLUMNS = ['daily_insight_at', 'daily_word_at'];
     const profileUrl = (list) => `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${list}`;
-    let meRes = await fetch(profileUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc });
     let dailyKnown = true;
-    if (!meRes.ok) {
-      dailyKnown = false;
-      meRes = await fetch(profileUrl(cols), { headers: svc });
-    }
-    const me = (await meRes.json().catch(() => []))?.[0];
+    const me = await t.mark('profile', async () => {
+      let meRes = await fetch(profileUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc });
+      if (!meRes.ok) {
+        dailyKnown = false;
+        meRes = await fetch(profileUrl(cols), { headers: svc });
+      }
+      return (await meRes.json().catch(() => []))?.[0];
+    });
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
     let partner = null;
     if (me.partner_profile_id) {
-      const pRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
-      partner = (await pRes.json().catch(() => []))?.[0] || null;
+      partner = await t.mark('partner', async () => {
+        const pRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
+        return (await pRes.json().catch(() => []))?.[0] || null;
+      });
     }
 
     // What the couple owns. Premium bundles reflection and intimacy; add-ons
@@ -368,7 +398,7 @@ export default async function handler(req) {
     let topGapDimensionLabel = null, coupleType = null;
     let betaTester = false;
     {
-      const [rRes, oRes] = await Promise.all([resultsP, ordersP]);
+      const [rRes, oRes] = await t.mark('results+beta', () => Promise.all([resultsP, ordersP]));
       const row = rRes ? (await rRes.json().catch(() => []))?.[0] : null;
       coupleType = row?.couple_type || null;
       const top = row?.results?.rankedGaps?.[0]?.dim;
@@ -383,7 +413,7 @@ export default async function handler(req) {
     let inPractice = {};
     try {
       /* Asked for before the profile read, because neither depends on it. */
-      const [pRes, rRes] = await Promise.all([early.posts, early.postReads]);
+      const [pRes, rRes] = await t.mark('practice', () => Promise.all([early.posts, early.postReads]));
       const latest = (await pRes?.json().catch(() => []))?.[0];
       const lastRead = (await rRes?.json().catch(() => []))?.[0];
       if (latest) {
@@ -400,7 +430,7 @@ export default async function handler(req) {
     let lastNote = null;
     try {
       /* Asked for before the profile read; the journal is excluded there. */
-      const nRes = await early.notes;
+      const nRes = await t.mark('notes', () => early.notes);
       lastNote = (await nRes?.json().catch(() => []))?.[0] || null;
     } catch { /* no notes table yet, or a read failure: the row falls back to a post */ }
 
@@ -424,7 +454,7 @@ export default async function handler(req) {
     try {
       /* Asked for before the profile read, because an unread alert is the
          reader's and needs nothing from their partner. */
-      const aRes = await early.alerts;
+      const aRes = await t.mark('alerts', () => early.alerts);
       alerts = ((await aRes?.json().catch(() => [])) || []).map(n => ({
         id: n.id,
         kind: n.kind,
@@ -614,7 +644,7 @@ export default async function handler(req) {
         notes: 0,
       },
       state: { resultsReady, coupleType, partnerLinked: !!me.partner_profile_id },
-    }, 200, `auth;dur=${authMs}, ${timed(startedAt)('total')}`);
+    }, 200, t.header(startedAt));
   } catch (e) {
     console.error('[home] failed:', e);
     return json({ ok: false, error: 'home unavailable' }, 500);
