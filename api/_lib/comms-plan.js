@@ -19,7 +19,7 @@
  * version their results were stamped with, never whatever is current.
  */
 
-import { alignedAdvice, getDimShift } from './dimension-copy.js';
+import { alignedAdvice, getDimShift, shiftAudience } from './dimension-copy.js';
 import { COMM_DOMAINS } from './tags.js';
 
 /**
@@ -196,6 +196,24 @@ export function commsActionPlan({ feedback, copy }) {
       label: domain.label,
       color: domain.color,
       dim: lead.dim,
+      /**
+       * ── WHOSE ACTION THIS TILE IS ───────────────────────────────────
+       * Ellie: "the how you connect action item is for me, and the when
+       * things get hard action item is for Preston. The action item for
+       * Preston should not be included in my list of things to consider."
+       *
+       * 'you', 'them' or 'both', from the reader's side. The tile itself
+       * still shows it on the Communication overview, where the advice is
+       * met in context with both names in it; What Comes Next is the list
+       * of things to DO, and that is where a row addressed to the other
+       * person is dropped.
+       *
+       * Only a real shift has an audience. An aligned domain's copy is
+       * about the pair by construction.
+       */
+      audience: advice && lead.adviceText
+        ? shiftAudience(lead.dim, lead.myScore, lead.partScore)
+        : 'both',
       ...base,
     };
   }).filter(Boolean);

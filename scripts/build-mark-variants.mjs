@@ -109,6 +109,45 @@ function darkVariant(src) {
   );
 }
 
+/**
+ * ── THE RIGHT BUBBLE, ON ITS OWN ──────────────────────────────────────────
+ * Ellie, of the What Comes Next icon: "Make the convo bubble with a heart the
+ * same shape as one of the ones from the logo, not sure why you're having
+ * trouble with this one since those already exist."
+ *
+ * She is right and the trouble was mine: I drew a bubble out of two rounded
+ * rectangles instead of using the one the product already has. The logo's
+ * right bubble IS a conversation bubble with a heart in it.
+ *
+ * Two edits to the source, and no new artwork:
+ *
+ *   - the bubble's `fill="white"` becomes `fill="none"`, so the tile's own
+ *     tint shows through the way it does through every other glyph in that
+ *     row. White would be a white box on a tinted ground.
+ *   - the viewBox is cropped to the bubble's own extent, 48 by 58, so the
+ *     file is the picture rather than the picture in the corner of a wider
+ *     canvas. `contain` fits the canvas, which is how the lockup's mark ended
+ *     up two thirds of its size once before.
+ *
+ * The gradient is in userSpaceOnUse against the full 103 by 76, so cropping
+ * the viewBox keeps the bubble painted in the part of the brand gradient it
+ * has in the logo, rather than restarting it.
+ */
+function bubbleHeart(src) {
+  const out = src
+    .replace(/viewBox="0 0 103 76"/, 'viewBox="48 12 52 61"')
+    .replace(/<!-- Left bubble[\s\S]*?<!-- Right bubble: outline only -->/, '<!-- Right bubble: outline only -->')
+    .replace('L5,13 A9,9 0 0,1 14,4 Z" fill="url(#fg)"/>', 'L5,13 A9,9 0 0,1 14,4 Z" fill="none"/>')
+    .replace('A9,9 0 0,0 89,14 Z" fill="white"', 'A9,9 0 0,0 89,14 Z" fill="none"');
+  if (out.includes('fill="white" stroke="url(#fg)"')) {
+    throw new Error('bubbleHeart did not clear the bubble fill; the glyph would be a white box.');
+  }
+  if (!out.includes('translate(58.16,21.3)')) {
+    throw new Error('bubbleHeart lost the right heart.');
+  }
+  return out;
+}
+
 const page = (body, w, h) => `<!doctype html><html><head><meta charset="utf-8"><style>
   html, body { margin: 0; padding: 0; width: ${w}px; height: ${h}px; background: transparent; }
   svg { width: ${w}px; height: ${h}px; display: block; }
@@ -135,6 +174,9 @@ try {
     ['attune-mark', svg, 88, 64],
     ['attune-mark@2x', svg, 176, 128],
     ['attune-mark@3x', svg, 264, 192],
+    /* The What Comes Next glyph, at three times the 60 points it is drawn at,
+       in the bubble's own 52 by 61 proportion. */
+    ['attune-bubble-heart', bubbleHeart(svg), 153, 180],
   ];
   for (const [name, src, w, h] of SIZES) {
     await browser.goto(`data:text/html;base64,${Buffer.from(page(src, w, h)).toString('base64')}`);

@@ -1,14 +1,27 @@
 /**
  * Customer-facing results copy, version 1.
  *
- * Snapshot of the copy as it stood on 2026-08-29. Couples whose results were
- * computed under CONTENT_VERSION 1 render from this file, and it does not
- * change again: editing it would move the words a highlight was written
- * against, which is the thing content pinning exists to prevent.
+ * Snapshot of the copy as it stood on 2026-08-29, and the copy everybody is
+ * served today.
  *
- * TO CHANGE THE COPY: copy this file to v2.js, edit that, bump CONTENT_VERSION
- * in api/_lib/content-version.js, and register v2 in ./index.js. New couples
- * get v2; everyone already stamped keeps v1 until deliberately republished.
+ * ── THIS HEADER USED TO SAY THE OPPOSITE ──────────────────────────────────
+ * It said the file never changes, and that a copy edit meant a v2 which only
+ * new couples would read. That stopped being true when Ellie asked for the
+ * split the product actually has: "I want formatting changes and prose
+ * adjustments to be applied even for couples who have already taken their
+ * assessments, but responses and scoring/backend calculations should persist."
+ *
+ * api/_lib/results-store.js hands back the CURRENT content version rather than
+ * the one stamped on the row, so results.js renders everyone from whatever is
+ * newest. Editing this file is how a correction reaches people, and a header
+ * telling you not to was describing a path nothing has taken for months. See
+ * api/_lib/content-version.js, which has been right about this the whole time.
+ *
+ * ── WHAT IT COSTS, WHICH IS REAL ──────────────────────────────────────────
+ * A mark is anchored by the text it was made on. Editing a sentence here
+ * orphans every highlight and note anybody made on that sentence, silently:
+ * the row stays in the table and nothing draws it. Run check-mark-reach after
+ * a copy edit, and expect to tell somebody their highlight is gone.
  *
  * Moved verbatim out of src/App.jsx. SHIFTS keeps its original indentation
  * because it was nested inside getDimShift; nothing else changed.
@@ -27,7 +40,7 @@ export const ALIGNED_ADVICE = {
   // Direction-dependent: which pole the couple is aligned toward changes the copy.
   expression: {
     low:  "You both process emotion inwardly. That gives feelings room to settle before they're spoken. It also means nothing forces the deeper thing to the surface, so neither of you pushes the other toward the part that's harder to say. Ask for it sometimes, even when neither of you offers first.",
-    high: "You both process emotion out loud. Feelings reach the table fast, which is easy. The watch-out is volume. When you're both expressing at once, leave room for one of you to just listen.",
+    high: "You both process emotion out loud. Feelings are shared readily, which is good. If you're both expressing at once, be sure to pause and actively listen to your partner.",
   },
   needs: {
     low:  "You both ask directly. Nothing gets buried, which is its own kind of ease. The watch-out is tone, not clarity. When you're tired, directness can read sharper than you mean it. Same ask, softer.",

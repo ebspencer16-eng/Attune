@@ -39,6 +39,7 @@ import MarkSheet from '@/components/mark-sheet';
 import { marksIn, unplacedMarks } from '@/constants/mark-reach';
 import { deleteNote, type Note, type Tag } from '@/api/client';
 import { DELETE_NOTE, REMOVE_MARK } from '@/constants/delete-copy';
+import { copyText } from '@/lib/copy-text';
 
 type Ctx = {
   /** Marks on the section currently on screen, by the text they sit on. */
@@ -772,7 +773,20 @@ export function AnnotationProvider({
     pageGesture,
     claim,
     unplaced,
-    select: (text: string, action: MarkAction) => setSelected({ text, action }),
+    /**
+     * ── COPY OPENS NOTHING ────────────────────────────────────────────
+     * Ellie: "Can we add the option to copy text when it's selected?"
+     *
+     * Every other action on the toolbar becomes a mark, so it opens the sheet
+     * that asks for a colour or a tag or some words. A copy is finished the
+     * moment it happens; opening a sheet to tell somebody so would be a
+     * second screen saying nothing. The tick on the toolbar's own icon is the
+     * confirmation, which is in annotatable.tsx where the toolbar is.
+     */
+    select: (text: string, action: MarkAction) => {
+      if (action === 'copy') { copyText(text); return; }
+      setSelected({ text, action });
+    },
     /**
      * Off the screen first, then off the server.
      *

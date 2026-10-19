@@ -80,8 +80,16 @@ const keys = new Set(tiles.flatMap((t) => Object.keys(t)));
  * the rule down its left edge; `dim` is which dimension led the domain, which
  * neither surface prints. They are named here rather than skipped silently, so
  * the list of things not shown is a decision someone wrote down.
+ *
+ * `audience` is the newest and the one worth explaining. It says whether the
+ * tile's advice is addressed to the reader, to their partner, or to the pair,
+ * and What Comes Next drops a row that is the partner's alone. Ellie: "The
+ * action item for Preston should not be included in my list of things to
+ * consider, and vice versa." It is read on the server and printed nowhere: the
+ * tile itself still shows the advice in context with both names in it, and a
+ * label saying whose it is would be the product arguing with its own sentence.
  */
-const NOT_DRAWN = new Set(['domain', 'color', 'dim']);
+const NOT_DRAWN = new Set(['domain', 'color', 'dim', 'audience']);
 
 /** The two blocks, found by the section-block markers rather than by line. */
 const SURFACES = [

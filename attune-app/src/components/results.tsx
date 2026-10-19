@@ -3737,8 +3737,17 @@ function NextRow({ n, title, quote, say, color, onOpen, onKeep }: {
           vertically stacked so the content margin can be brought further to
           the right?" Side by side they took two columns of a phone's width
           from the words; one above the other they take one. */}
+      {/* ── AND CENTRED IN THE ROW ──────────────────────────────────────
+          Ellie: "The notes icon and arrow icon on the right hand side of each
+          what comes next row should be grouped then middle-aligned in that
+          tile rather than top-aligned."
+
+          The row is flex-start so the number lines up with the first line of
+          the words, which is where a number belongs. The pair is the one child
+          that should not follow it, so it says so itself rather than the row
+          changing for everything. */}
       {onKeep || onOpen ? (
-        <View style={{ width: 28, alignItems: 'center', gap: 2 }}>
+        <View style={{ width: 28, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', gap: 2 }}>
           {onKeep ? (
             <Pressable
               accessibilityRole="button"

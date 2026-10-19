@@ -71,7 +71,7 @@ export type Mark = {
 };
 
 /** What the toolbar offers, in the order Ellie listed them. */
-export type MarkAction = 'highlight' | 'underline' | 'tag' | 'note' | 'share';
+export type MarkAction = 'highlight' | 'underline' | 'tag' | 'note' | 'share' | 'copy';
 
 const TOOLBAR: { action: MarkAction; icon: string; label: string }[] = [
   { action: 'highlight', icon: 'highlighter', label: 'Highlight' },
@@ -79,6 +79,12 @@ const TOOLBAR: { action: MarkAction; icon: string; label: string }[] = [
   { action: 'tag', icon: 'tag', label: 'Tag' },
   { action: 'note', icon: 'square.and.pencil', label: 'Note' },
   { action: 'share', icon: 'paperplane', label: 'Share' },
+  /* Ellie: "Can we add the option to copy text when it's selected?" Last,
+     because it is the one action that makes no mark and leaves nothing
+     behind. Its confirmation is the tick below rather than a word, which is
+     the only thing on this toolbar that needs one: every other action opens
+     something that says what it did. */
+  { action: 'copy', icon: 'doc.on.doc', label: 'Copy' },
 ];
 
 /**
@@ -457,6 +463,9 @@ export default function Annotatable({
    * renders; a new gesture on every render detaches and reattaches the native
    * recogniser, which loses taps that arrive mid-render.
    */
+  /* The tick on the Copy icon, for the moment between the tap and the
+     toolbar going. See the toolbar below. */
+  const [copied, setCopied] = useState(false);
   const fragmentRef = useRef('');
   const tapFor = useMemo(() => {
     const cache = new Map<MarkAction, ReturnType<typeof Gesture.Tap>>();
@@ -621,12 +630,26 @@ export default function Annotatable({
             <Pressable
               key={t.action}
               accessibilityRole="button"
-              accessibilityLabel={t.label}
-              onPress={() => { onSelect(fragment, t.action); clear(); }}
+              accessibilityLabel={t.action === 'copy' && copied ? 'Copied' : t.label}
+              onPress={() => {
+                onSelect(fragment, t.action);
+                /* ── COPY KEEPS THE TOOLBAR FOR A MOMENT ──────────────
+                   Every other action opens a sheet, so dismissing the
+                   toolbar is right: something else appears and says what
+                   happened. A copy opens nothing, so dismissing on the tap
+                   leaves no evidence it worked at all. The icon becomes a
+                   tick and the toolbar goes a beat later. */
+                if (t.action === 'copy') {
+                  setCopied(true);
+                  setTimeout(() => { setCopied(false); clear(); }, 700);
+                  return;
+                }
+                clear();
+              }}
               hitSlop={6}
               style={{ paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm }}>
               <SymbolView
-                name={t.icon as never}
+                name={(t.action === 'copy' && copied ? 'checkmark' : t.icon) as never}
                 size={18}
                 tintColor={c.textStrong}
                 fallback={<Text style={{ ...Type.small, color: c.textStrong }}>{t.label[0]}</Text>}

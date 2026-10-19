@@ -40,18 +40,24 @@ import {
 import {
   Colors, Fonts, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
+import { copyText } from '@/lib/copy-text';
 
 const c = Colors.light;
 
-type Step = 'menu' | 'highlight' | 'underline' | 'tag' | 'note' | 'share' | 'saving';
+type Step = 'menu' | 'highlight' | 'underline' | 'tag' | 'note' | 'share' | 'copy' | 'saving';
 
-/** The five things the menu offers, in the order Ellie listed them. */
+/** The six things the menu offers, in the order Ellie listed them. */
 const ACTIONS: { step: Step; icon: string; label: string }[] = [
   { step: 'highlight', icon: 'highlighter', label: 'Highlight' },
   { step: 'underline', icon: 'underline', label: 'Underline' },
   { step: 'tag', icon: 'tag', label: 'Tag' },
   { step: 'note', icon: 'square.and.pencil', label: 'Note' },
   { step: 'share', icon: 'paperplane', label: 'Share' },
+  /* Ellie: "Can we add the option to copy text when it's selected?" It is on
+     the floating toolbar, which is where a selection is usually acted on, and
+     here too because this menu is the same list and check-mark-toolbar holds
+     the two surfaces to one. */
+  { step: 'copy', icon: 'doc.on.doc', label: 'Copy' },
 ];
 
 export default function AnnotationSheet({
@@ -192,7 +198,12 @@ export default function AnnotationSheet({
               {ACTIONS.map((a) => (
                 <Pressable
                   key={a.step}
-                  onPress={() => setStep(a.step)}
+                  /* Copy is done the moment it is picked, so it closes rather
+                     than becoming a step with nothing on it. */
+                  onPress={() => {
+                    if (a.step === 'copy') { copyText(sentence); onClose(); return; }
+                    setStep(a.step);
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel={a.label}
                   style={{

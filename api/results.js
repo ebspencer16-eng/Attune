@@ -717,14 +717,17 @@ export default async function handler(req) {
      */
     const commsPlan = (() => {
       /**
-       * The copy this couple's results were stamped with, not whatever is
-       * current. Passing null makes contentFor return the newest version, which
-       * is what the stamp exists to prevent: a couple who finished under v1 has
-       * to keep reading v1 until someone republishes them deliberately, or a
-       * note written against a sentence starts pointing at a different one.
+       * The copy to render this couple from.
        *
-       * Invisible while only v1 exists, and a silent disagreement between the
-       * app and the website the day v2 ships.
+       * `contentVersion` is what results-store hands back, which is the
+       * CURRENT version rather than the one stamped on the row: Ellie asked
+       * for prose fixes to reach couples who have already finished, and that
+       * is where it is implemented. So this resolves to the newest copy for
+       * everybody, and the stamp on the row stays a record of what they first
+       * read.
+       *
+       * This comment used to say the opposite, in detail, about a path the
+       * store stopped taking.
        */
       const copy = contentFor(contentVersion ?? null);
       const feedback = personalityFeedback({

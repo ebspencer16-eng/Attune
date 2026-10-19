@@ -14,6 +14,7 @@
  */
 
 import { contentFor } from '../_content/index.js';
+import { SHIFT_AUDIENCE } from '../_content/shift-audience.js';
 
 /**
  * The copy snapshot, which the caller must supply.
@@ -38,6 +39,38 @@ export function alignedAdvice(dim, a, b, content) {
   const na = Number(a), nb = Number(b);
   const avg = ((isNaN(na) ? 3 : na) + (isNaN(nb) ? 3 : nb)) / 2;
   return avg < 3 ? adv.low : adv.high;
+}
+
+/**
+ * Who a shift sentence is telling to do something, from the reader's side.
+ *
+ * ── WHY ───────────────────────────────────────────────────────────────────
+ * Ellie: "The action item for Preston should not be included in my list of
+ * things to consider, and vice versa."
+ *
+ * A shift sentence names people by POSITION: whoever scored lower is loName,
+ * whichever of them is reading. So both partners are served the same words,
+ * and whether those words ask the reader or their partner to act depends on
+ * which position the reader holds.
+ *
+ * SHIFT_AUDIENCE records the sentence's own answer in lo/hi terms. This turns
+ * it into the reader's: 'you', 'them' or 'both'. The same arithmetic as
+ * getDimShift, deliberately: the two have to agree about which position the
+ * reader is in or the filter hides the wrong row.
+ *
+ * Returns 'both' for anything it does not have an answer for, which is the
+ * safe direction: nothing is hidden by not knowing.
+ */
+export function shiftAudience(dim, myScore, partScore) {
+  const pos = s => s <= 1.8 ? 1 : s <= 2.6 ? 2 : s <= 3.4 ? 3 : s <= 4.2 ? 4 : 5;
+  const mp = pos(myScore), pp = pos(partScore);
+  const key = `${Math.min(mp, pp)}_${Math.max(mp, pp)}`;
+  const who = SHIFT_AUDIENCE[dim]?.[key];
+  if (who !== 'lo' && who !== 'hi') return 'both';
+  /* The reader is `lo` when their own score is the lower of the two, which is
+     exactly how getDimShift picks loName. */
+  const iAmLo = mp <= pp;
+  return (who === 'lo') === iAmLo ? 'you' : 'them';
 }
 
 export function getDimShift(dim, myScore, partScore, U, P, content) {

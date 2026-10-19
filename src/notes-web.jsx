@@ -271,6 +271,9 @@ const ACTIONS = [
   { id: 'tag', label: 'Tag', icon: 'M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9-9-9zM8 8h.01' },
   { id: 'note', label: 'Note', icon: 'M4 20h4l10-10-4-4L4 16v4zM13 5l4 4' },
   { id: 'share', label: 'Share', icon: 'M21 3L3 10l7 3 3 7 8-17z' },
+  /* Ellie: "Can we add the option to copy text when it's selected?" Two
+     overlapping sheets of paper, which is what every clipboard icon is. */
+  { id: 'copy', label: 'Copy', icon: 'M9 9h10v12H9zM5 15H3V3h12v2' },
 ];
 
 /**
@@ -434,7 +437,26 @@ export function MarkToolbar({ marking, partnerName }) {
             <button
               key={a.id}
               type="button"
-              onClick={() => setStep(a.id)}
+              /* Copy is finished the moment it is picked, so it closes rather
+                 than opening a panel with nothing in it. The clipboard API is
+                 only there on a secure origin, so the old selection-based
+                 fallback is the other branch: both are the browser's own copy,
+                 and neither asks the reader to do anything. */
+              onClick={() => {
+                if (a.id !== 'copy') { setStep(a.id); return; }
+                const text = sel?.text || '';
+                if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text);
+                else {
+                  const t = document.createElement('textarea');
+                  t.value = text;
+                  t.style.position = 'fixed';
+                  t.style.opacity = '0';
+                  document.body.appendChild(t);
+                  t.select();
+                  try { document.execCommand('copy'); } finally { t.remove(); }
+                }
+                close();
+              }}
               aria-label={a.label}
               title={a.label}
               style={{

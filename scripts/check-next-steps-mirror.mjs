@@ -60,6 +60,7 @@
 import { readFileSync } from 'node:fs';
 
 import { whatComesNext } from '../api/_lib/what-comes-next.js';
+import { RESULTS_SECTIONS, RETIRED_SECTIONS } from '../api/_lib/results-sections.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const WEB = 'src/App.jsx';
@@ -95,7 +96,17 @@ const built = whatComesNext({
     protocols: [{ dim: 'cf', title: 'P', thisWeek: 'Try this' }],
   },
   expectations: { categories: [{ label: 'Household', differences: 2, section: 'exp-convo-0' }] },
-  intimacy: { actionPlan: [{ label: 'How it happens', prompt: 'Say this', section: 'intimacy-how' }] },
+  /**
+   * A RETIRED section id on purpose.
+   *
+   * api/_lib/intimacy-results.js puts `intimacy-<dimension>` on every row, and
+   * those six pages were merged into two at Ellie's ask. The fixture used to
+   * say `intimacy-how`, which is a page that exists, so it tested a shape the
+   * product does not produce and the broken arrow walked straight past it:
+   * "I tried to tap into the physical intimacy discussion we need to have, and
+   * it did not bring me to that Page."
+   */
+  intimacy: { actionPlan: [{ label: 'What it means', prompt: 'Say this', section: 'intimacy-meaning' }] },
   reflection: { written: [{ key: 'a6', you: 'Be kinder', them: 'Listen more' }] },
   conflictReady: true,
   conflictAnswers: null,
@@ -138,6 +149,28 @@ for (const g of built.groups) {
     fails.push(`${blind.length} of ${g.items.length} rows in "${g.label}" carry no section, so`
       + ' they draw no arrow:\n'
       + `      ${blind.slice(0, 2).map((i) => `"${i.title}"`).join(', ')}`);
+  }
+}
+
+/*
+ * ── AND THE PAGE IT NAMES CAN ACTUALLY BE DRAWN ───────────────────────────
+ * Having a section is not the same as having a page. `isResultsSection` says
+ * yes to a RETIRED id, deliberately, because a mark written against one of the
+ * six old Physical Intimacy pages still has to validate. An arrow pointed at
+ * one goes nowhere: no error, no page, nothing happens on the tap.
+ *
+ * RESULTS_SECTIONS is the list of pages that can be rendered, so that is what
+ * a navigation target is held to here.
+ */
+for (const g of built.groups) {
+  for (const i of g.items || []) {
+    if (i.section && !RESULTS_SECTIONS.includes(i.section)) {
+      fails.push(`"${i.title}" in "${g.label}" opens "${i.section}", which is not a page.\n`
+        + `      ${i.section in RETIRED_SECTIONS
+          ? `It was retired into "${RETIRED_SECTIONS[i.section]}". Resolve it with currentSection().`
+          : 'It is in no nav and nothing renders it.'}\n`
+        + '      A tap on that row does nothing at all, which is what Ellie reported.');
+    }
   }
 }
 

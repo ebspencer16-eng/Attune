@@ -93,8 +93,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** Your three changes to What Comes Next are built and are in
-section 3.
+| # | What I am doing |
+|--|--|
+| W33 | **Pages are still slow, and I have measured it.** It is the server, not your phone and not the network. The numbers and what I want to do about it are under section 3. I have not made the change yet, because it is the code that checks who you are and I am not shipping that at the end of a long session without a second look. |
 
 ---
 
@@ -116,8 +117,140 @@ section 3.
 | W21 | **Every icon is on the right now**, and every row starts in the same place. |
 | W22 | **A row's list opens directly under that row.** The rows below it move down; the one you tapped stays under your finger. |
 | W23 | **The three icons are redrawn.** The person's head overlaps the shoulders rather than sitting on them, the couple have flatter shoulders so they stop reading as four circles in a tub, and the heart is built from the construction rather than by eye. The journal is untouched. |
+| W24 | **The thought bubble is a cloud now.** |
+| W25 | **The heart bubble is the logo's own bubble**, generated from the favicon rather than drawn again. |
+| W26 | **Copy is on the selection toolbar**, on the phone and on the site. The icon turns to a tick for a moment, which is how you know it worked. |
+| W27 | **Your Internal Processing rewrite is live, word for word.** It replaced the sentence you had a highlight on, so that highlight is gone. See the note under this table. |
+| W28 | **Fifteen sentences that read as AI, with a suggestion for each.** The table is under this one. Nothing is live; pick a column. |
+| W29 | **The note and arrow icons sit in the middle of their row** now. |
+| W30 | **An action item addressed to your partner is out of your list.** See the note under this table: I need you to sanity-check how it decides. |
+| W31 | **Two whole people on the couch**, not two torsos. |
+| W32 | **The physical intimacy rows open their page now.** They pointed at six pages that were merged into two months ago, so the tap did nothing at all. |
 | W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
+
+### W33, why the pages are slow
+
+**It is not your phone and it is not your connection.** I instrumented the app
+to time every request it makes, launched it cold on the simulator, and walked
+every tab.
+
+On a cold launch the app fires three requests 0.5 seconds in, all at once:
+
+| Request | Cold | Warm, later in the session |
+|--|--|--|
+| /api/home | 4.1s | 1.3s to 3.1s |
+| /api/survey | 3.5s | 0.45s |
+| /api/conflict-results | 3.6s | — |
+| /api/results | 6.3s | — |
+| /api/notes (tags) | 6.1s | 1.0s to 2.9s |
+
+The control, in the same run and over the same connection: **a static file from
+the same domain came back in 238ms.** So the phone is fine, the network is
+fine, and the app is firing its requests promptly. The time is being spent
+inside the server answering an authenticated request.
+
+**Where it goes.** Every one of those endpoints does the same thing before it
+does anything else: it hands your sign-in token to Supabase and asks "who is
+this?", over the network. Then it runs its own queries, and /api/home runs
+four of them one after another because each needs the answer to the last. So a
+home screen is five network hops deep, in a row, before a single word is sent
+back.
+
+**What I want to do about it.** Take out the first hop. Your Supabase project
+publishes the public key it signs tokens with, so the server can check a token
+itself, in memory, in under a millisecond, instead of asking over the network.
+I checked: the key is there and public, so **there is nothing for you to set
+up and no new secret** — which was the only thing that might have needed you.
+
+That is one hop off every request the app makes, on every screen. It is not
+the whole three seconds, and I am not going to pretend it is until I have
+measured it again afterwards. The rest is the four-deep query chain in
+/api/home, which is a bigger piece of work and is worth doing next.
+
+**Why I have not already done it.** It is the code that decides whether
+somebody is who they say they are. Getting it wrong is worse than a slow app.
+It wants to be written carefully, with a gate that forges a token, signs one
+with the wrong key, backdates one and strips the signature off one, and proves
+all four are refused. That is a first job rather than a last one.
+
+### W28, the phrases that read as AI
+
+Fifteen sentences, from running every copy module and reading what it
+produces. Quotations are left out: those are somebody else's words.
+
+Nothing here is live. Tell me which column you want, row by row or in bulk,
+and I will put it in.
+
+| Where | What it says now | Suggested |
+|--|--|--|
+| Couple type: fast repair | "Fast repair is a real strength. **The watch-out is** closing the loop before the thing is actually through." | "Fast repair is a real strength. **The risk is** closing the loop before the thing is actually through." |
+| Couple type: both inward | "stable, **low-drama**, and genuinely deep" | "stable, **calm**, and genuinely deep" |
+| Couple type: both inward | "more stable-looking than many, but **the thing to watch is** what's accumulating beneath the stability." | "more stable-looking than many. **What accumulates beneath that stability is the part to watch.**" |
+| Couple type: tip | "**Low-drama** is a real quality." | "**Calm** is a real quality." |
+| Reassurance, both voiced | "**The thing to watch is** it becoming a routine that stops carrying weight." | "**The risk is** that it becomes a routine and stops carrying weight." |
+| Reassurance, both assumed | "**The thing to watch is** that silence carries no information" | "**The risk is** that silence carries no information" |
+| Needs, both direct | "Nothing gets buried, which is **its own kind of ease**. **The watch-out is** tone, not clarity." | "Nothing gets buried, which is easy. **The risk is** tone, not clarity." |
+| Energy, both outward | "**The watch-out:** when you're both depleted at the same time" | "**The risk:** when you're both depleted at the same time" |
+| Expression, both internal | "That creates **low-drama**, but it means significant things can sit unspoken too long." | "That keeps things **calm**, but it means significant things can sit unspoken too long." |
+| Conflict, one fast one slow | "**A real tension point.** Agree in advance that..." | "**This difference is worth planning for.** Agree in advance that..." |
+| Conflict, both slow | "**The watch-out:** 'some space' can quietly stretch into avoidance" | "**The risk:** 'some space' can quietly stretch into avoidance" |
+| Repair, moderate difference | "Try a check-in 24 hours after conflict, 'are we good?', **low pressure, high information**." | "Try a check-in 24 hours after conflict, 'are we good?' **It asks little and tells you a lot.**" |
+| Listening, both active | "**The watch-out:** sometimes a person needs silence and room, not questions." | "**The risk:** sometimes a person needs silence and room, not questions." |
+| Workbook scene | "starts **unpacking** it the moment they walk in" | "starts **going through** it the moment they walk in" |
+| Anniversary question a6 | "in how I **show up for** you" | "in how I **am with** you" (this one may be fine as it is) |
+
+Two more things the sweep turned up that are not phrases, in case you want
+them: "The thing to watch" and "The watch-out" are the same move written two
+ways, so whichever you pick is worth using for both. And "The risk is" already
+appears in your copy elsewhere, which is why I reached for it.
+
+### W27, the highlight that went with it
+
+Your rewrite replaced this sentence: "Feelings reach the table fast, which is
+easy. The watch-out is volume. When you're both expressing at once, leave room
+for one of you to just listen."
+
+A highlight is anchored to the words it was made on, so one of the two
+highlights on your Notes tab, the one reading "volume. When you're both
+expressing at on...", no longer has anything to attach to and will not draw.
+The other one, "process emotion out loud", is on words that survived and is
+fine. Nothing is lost in the database; it is just not shown. Say the word and
+I will remove the orphan.
+
+This is the cost of a copy fix reaching people who have already finished,
+which is the trade you asked for, and it is worth knowing each time rather
+than once.
+
+### W30, how it decides whose action item it is
+
+The three Communication rows are each a sentence about the two of you, and the
+same sentence goes to both of you: it names whoever scored lower first, not
+whoever is reading. So whether a row is "yours" is a property of the sentence.
+
+I had a script read all 150 of those sentences and mark each one. **39 came out
+as addressed to one partner; the other 111 are for the pair.** The rule it used,
+and it refuses to guess:
+
+- one-sided only when exactly one of the two names is followed by "can",
+  "could", "should", "commits to", "gets to" or "must",
+- and never when the sentence also says "you both", "each of you", "agree
+  that", or starts a clause with a joint instruction like "Agree", "Try" or
+  "Set".
+
+Anything it is unsure about stays "for both of you". That is deliberate and it
+is the direction I would rather be wrong in: showing you something you did not
+strictly need is the way it has always worked, and hiding something from you is
+a thing you could never find out about.
+
+**What I need from you:** cast an eye over the three rows on your own What
+Comes Next page and tell me if any of them is now missing something that was
+yours, or still showing something that is clearly Preston's. The rule is in one
+file and easy to change.
+
+The rows still appear in full on the Communication Styles pages, where the
+advice is read in context with both your names in it. Only the "things to
+consider" list filters.
 
 ### C12, the long and the short of it
 

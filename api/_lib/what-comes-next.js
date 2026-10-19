@@ -21,6 +21,7 @@ import { summarizeConflict } from './conflict-results.js';
 import { PATTERN_ACTIONS } from '../_conflict-results-prose.js';
 import { COMM_DOMAINS } from './comm-domains.js';
 import { resolveRoleTokens } from './role-tokens.js';
+import { currentSection } from './results-sections.js';
 
 export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, reflectionPlan, conflictReady, conflictAnswers, names, sides }) {
   /**
@@ -120,7 +121,25 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
    *
    * The count is the rows, so filtering the rows fixes both.
    */
-  const commTiles = (commsPlan?.tiles || []).filter((t) => (t.title || t.label) && t.body);
+  /**
+   * ── AND NOT THE ONES ADDRESSED TO THE OTHER PERSON ──────────────────────
+   * Ellie: "For Preston and Me, our internal processing action item is for
+   * both of us, the how you connect action item is for me, and the when
+   * things get hard action item is for Preston. The action item for Preston
+   * should not be included in my list of things to consider, and vice versa."
+   *
+   * `audience` is 'you', 'them' or 'both', worked out from the shift sentence
+   * itself in api/_content/shift-audience.js. A row for the partner alone is
+   * dropped here and nowhere else: the same advice still appears on the
+   * Communication overview, where it is read in context with both names in
+   * it and is about the pair. This page is the list of things to DO.
+   *
+   * Anything the rule is not sure about is 'both', so a sentence this never
+   * gets an answer for keeps showing. Nothing is hidden by not knowing.
+   */
+  const commTiles = (commsPlan?.tiles || [])
+    .filter((t) => (t.title || t.label) && t.body)
+    .filter((t) => t.audience !== 'them');
   if (commTiles.length) {
     groups.push({
       id: 'comm',
@@ -470,6 +489,28 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       .filter(Boolean)
       .flatMap((g) => g.items || []),
   })).filter((b) => b.items.length);
+
+  /**
+   * ── EVERY ARROW HAS TO LAND ON A PAGE THAT EXISTS ───────────────────────
+   * Ellie: "I tried to tap into the physical intimacy discussion we need to
+   * have, and it did not bring me to that Page."
+   *
+   * The intimacy dimension rows carry `section: 'intimacy-<dimension>'`, and
+   * those six pages were retired into two at her own ask. The id is still a
+   * valid ANCHOR, so `isResultsSection` says yes and nothing complained; it is
+   * not a page, so the tap went nowhere. One field doing two jobs: where a
+   * mark lives and where an arrow goes.
+   *
+   * `currentSection` already knows what each retired id became and was called
+   * by nothing but its own gate. Resolving here covers every group rather than
+   * the one that was reported, which is the half that matters: the next page
+   * Ellie asks to merge would have broken the same way.
+   */
+  for (const g of groups) {
+    for (const item of g.items || []) {
+      if (item.section) item.section = currentSection(item.section);
+    }
+  }
 
   return { groups, buckets };
 }
