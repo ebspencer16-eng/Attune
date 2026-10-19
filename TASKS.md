@@ -93,9 +93,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W38 | **Which read is the slow one.** Ten measurements of the home screen's request against the live site: the fastest was 772ms and the slowest 3910ms, for the same work. A five-fold spread is a bigger prize than any one read, and I cannot name the cause from outside. The server reports its own timing now; it needs to report it per read. |
+**Nothing open.** W36, W37 and W38 are in section 3. The home screen's request
+is now measured phase by phase and the slow part has a name, which is under
+that table.
 
 ---
 
@@ -121,6 +121,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W25 | **The heart bubble is the logo's own bubble**, generated from the favicon rather than drawn again. |
 | W26 | **Copy is on the selection toolbar**, on the phone and on the site. The icon turns to a tick for a moment, which is how you know it worked. |
 | W27 | **Your Internal Processing rewrite is live, word for word.** It replaced the sentence you had a highlight on, so that highlight is gone. See the note under this table. |
+| W36 | **Two of the home screen's four reads were waiting on each other for no reason.** They start together now: five round trips deep before, four after, three in production. |
+| W37 | **The token check is confirmed free**, not just assumed. Measured on the live site across ten launches: 0 or 1 millisecond every time on a warm server, against a full network round trip a week ago. |
+| W38 | **The slow part has a name now.** It is one read, not all of them, and it is not the query. See the note under this table: there is one more thing to try and it is not a small one. |
 | W34 | **The server no longer asks Supabase who you are on every request.** It checks your sign-in token itself, in memory, against the public key your project publishes. Nothing for you to set up. See the note under this table for what it did and did not fix. |
 | W35 | **Fifteen forged tokens tried against it**, including the one that defeats most hand-written versions of this. None accepted. |
 | W33 | **The slow loading is measured.** It is the server, not your phone. The numbers and the fix are under this table. Nothing is changed yet, on purpose. |
@@ -131,6 +134,50 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W32 | **The physical intimacy rows open their page now.** They pointed at six pages that were merged into two months ago, so the tap did nothing at all. |
 | W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
+
+### W38, what is actually slow
+
+The home screen's request now reports how long each of its parts took. Five
+launches against the live site, same account, same data:
+
+| | auth | profile | partner | results + beta | the rest | total |
+|--|--|--|--|--|--|--|
+| 1 | 191ms | **2149ms** | 407ms | 258ms | 0ms | 3032ms |
+| 2 | 0ms | **2103ms** | 500ms | 288ms | 0ms | 2895ms |
+| 3 | 0ms | 298ms | 144ms | 240ms | 0ms | 687ms |
+| 4 | 1ms | **2308ms** | 227ms | 274ms | 0ms | 2841ms |
+| 5 | 0ms | 158ms | 134ms | 118ms | 0ms | 413ms |
+
+**Three things that settles.**
+
+The token check is free. Zero or one millisecond, every warm run. That was a
+network round trip a week ago and it is gone.
+
+It is one read, not all of them. Everything except the first profile read is
+between 118 and 500 milliseconds, every time. The spread is entirely in that
+one line, and it is not gradual: it is either about 200ms or about 2100ms,
+never in between. Two code paths, not one slow query.
+
+**And it is not the query.** The partner's row is read from the same table with
+the same columns a few milliseconds later, and it takes 134ms in the same
+request where the first one took 2149ms. Same question, same data, fifteen
+times faster. So the two seconds is the cost of being the FIRST thing to speak
+to the database in that request, and it has nothing to do with what is being
+asked.
+
+**What I ruled out.** The obvious candidate was in the file: the
+daily-notification columns are asked for separately and allowed to be missing,
+so if migration 083 had not been run, every request would quietly do the whole
+read twice. I gave that retry its own mark and deployed it. It does not appear
+in any of the five, so the migration is in place and that is not it.
+
+**What is left, and it is not small.** The two seconds looks like the cost of
+opening a connection to the database from a server that has not spoken to it
+recently. The app asks three different endpoints at the moment it opens, and
+each one is a separate server that may be paying that separately. Making the
+home screen one request instead of three is the experiment, and it is a real
+piece of work rather than a tweak, so it is the next thing rather than
+something I will slip in.
 
 ### W34, what came off and what is left
 
