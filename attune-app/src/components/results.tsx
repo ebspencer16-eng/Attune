@@ -1637,11 +1637,29 @@ function ExpectationsOverview({
                  * api/_lib/alignment.js, which is the only thing in the
                  * product that turns a distance into a figure.
                  */
-                const pct = cat.closeness ?? 0;
+                /**
+                 * ── AND A MISSING FIGURE IS NOT NOUGHT ──────────────────
+                 * This was `cat.closeness ?? 0`, which drew six bars at 0 per
+                 * cent the moment the app was published ahead of the server.
+                 * I saw exactly that on a simulator: the app had the new code
+                 * and the deployed server had not caught up, so every category
+                 * read as total disagreement.
+                 *
+                 * A confident wrong number is worse than an absent one, and
+                 * this file already says so about an unanswered aspect: it "is
+                 * not 0 per cent aligned, it is unanswered, and the row says so
+                 * in words". The bar draws empty and the figure is a dash.
+                 *
+                 * Not a fall-back to `aligned / answered` either, which is the
+                 * arithmetic that was just taken out of here. A second copy of
+                 * the rule kept alive for a payload that is a few minutes old
+                 * is how the second copy becomes permanent.
+                 */
+                const pct = cat.closeness;
                 /* alignedTone, not the ramp written out again. The note on that
                    function says a percentage means the same thing wherever it
                    appears, and this line was the counter-example. */
-                const bar = alignedTone(pct);
+                const bar = alignedTone(pct ?? 0);
                 return (
                   /* The row opens its category's page. Ellie: "Add ability to
                      tap the bars or the pole labels on the comms and
@@ -1653,7 +1671,9 @@ function ExpectationsOverview({
                     key={cat.section}
                     onPress={() => showSection(cat.section)}
                     accessibilityRole="link"
-                    accessibilityLabel={`${cat.label}, ${pct} per cent aligned. Open this page.`}
+                    accessibilityLabel={pct == null
+                      ? `${cat.label}, no figure yet. Open this page.`
+                      : `${cat.label}, ${pct} per cent aligned. Open this page.`}
                     style={({ pressed }) => ({
                       flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
                       opacity: pressed ? 0.6 : 1,
@@ -1662,10 +1682,12 @@ function ExpectationsOverview({
                       {cat.label}
                     </Prose>
                     <View style={{ flex: 1, height: 6, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                      <View style={{ width: `${pct}%`, height: 6, backgroundColor: bar, borderRadius: 999 }} />
+                      {pct == null ? null : (
+                        <View style={{ width: `${pct}%`, height: 6, backgroundColor: bar, borderRadius: 999 }} />
+                      )}
                     </View>
-                    <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: bar, width: 34, textAlign: 'right' }}>
-                      {pct}%
+                    <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: pct == null ? 'rgba(255,255,255,0.45)' : bar, width: 34, textAlign: 'right' }}>
+                      {pct == null ? '\u2014' : `${pct}%`}
                     </Text>
                   </Pressable>
                 );

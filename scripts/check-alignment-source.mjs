@@ -131,6 +131,30 @@ const SHAPES = [
     say: 'closenessPct(gap) or meanPct(rows.map((r) => r.closeness))',
   },
   {
+    what: 'a missing closeness read as nought',
+    /**
+     * ── WHY THIS IS ITS OWN SHAPE ─────────────────────────────────────────
+     * The app drew `cat.closeness ?? 0`, and the moment it was published ahead
+     * of the server every category bar read 0 per cent: six confident claims
+     * of total disagreement, from a field that simply had not arrived yet. Seen
+     * on a simulator, not reasoned about.
+     *
+     * Null here means "no figure", and nought means "as far apart as two
+     * people can be". Collapsing the first into the second is the same mistake
+     * as reading an unanswered question as a disagreement, which `meanPct` here
+     * and `commAlignmentPct` next door were both written to avoid.
+     *
+     * Scoped to a figure read straight off a payload, which is where the lag
+     * lives. The website computes its rows' closeness in the same render, so
+     * `meanPct(rows.map(r => r.closeness)) ?? 0` there can only be reached by a
+     * category with no comparable rows, and those are filtered out before any
+     * bar is drawn. Saying so rather than widening the pattern until it catches
+     * both: a gate that matches too much gets loosened until it matches nothing.
+     */
+    test: (chunk) => /\bcloseness\s*(\?\?|\|\|)\s*0\b/.test(chunk),
+    say: 'null, and a row that says it has no figure rather than drawing one',
+  },
+  {
     what: 'a gap subtracted from one',
     /* The inversion on its own, which is how it survives being hoisted out of
        the expression that rounds it. */
