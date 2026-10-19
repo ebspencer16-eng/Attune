@@ -93,9 +93,10 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W33 | **Pages are still slow, and I have measured it.** It is the server, not your phone and not the network. The numbers and what I want to do about it are under section 3. I have not made the change yet, because it is the code that checks who you are and I am not shipping that at the end of a long session without a second look. |
+**Nothing open.** Nine of your ten are built and in section 3. The tenth, the
+slow loading, is measured and diagnosed in section 3 as W33: I know where the
+time goes and what to do about it, and I have deliberately not done it yet
+because it is the code that decides who you are.
 
 ---
 
@@ -121,6 +122,7 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W25 | **The heart bubble is the logo's own bubble**, generated from the favicon rather than drawn again. |
 | W26 | **Copy is on the selection toolbar**, on the phone and on the site. The icon turns to a tick for a moment, which is how you know it worked. |
 | W27 | **Your Internal Processing rewrite is live, word for word.** It replaced the sentence you had a highlight on, so that highlight is gone. See the note under this table. |
+| W33 | **The slow loading is measured.** It is the server, not your phone. The numbers and the fix are under this table. Nothing is changed yet, on purpose. |
 | W28 | **Fifteen sentences that read as AI, with a suggestion for each.** The table is under this one. Nothing is live; pick a column. |
 | W29 | **The note and arrow icons sit in the middle of their row** now. |
 | W30 | **An action item addressed to your partner is out of your list.** See the note under this table: I need you to sanity-check how it decides. |
