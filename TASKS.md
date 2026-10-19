@@ -8,8 +8,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| W11b | **You were right, and three accounts need marking.** All four they/them rows are ours: Alex is already a demo, Tester, Testpartner and Solo are not. The SQL under this table marks those three and then prints everybody the admin still counts. Run it and send me that table: I need you to tell me whether anybody on it is another tester. |
-| W57 | **The couple map can be bigger, and only by giving something up.** 227 points today where the width allows 310. The cap is there so the whole couple type tile fits on screen, which is what you asked for last time. Three options under this table; pick one. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -19,135 +17,12 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### W57, the couple map, and the thing it is trading against
-
-**The measurement.** On your phone the screen is 402 by 874 points. The map is
-a square, and it is sized by whichever of three limits is smallest:
-
-| Limit | Allows |
-|--|--|
-| A cap so it does not become a huge square on a tablet | 320 |
-| The page width, less the margins the rotated axis words sit in | 310 |
-| A share of the screen height | **227** |
-
-The height one wins, so the map is 227 where the width would allow 310. That
-is the "not filling the space it has" you are seeing.
-
-**Why that height limit exists.** You asked for it: "I would love for the
-'money slide' when you open the couple type page to fit the full couple type
-tile on the screen." It was set by measuring on an iPhone 17. At a third of the
-screen the tile's tagline sat behind the tab bar; at the current figure the
-whole tile is on screen. So 227 is the largest the map can be with your earlier
-instruction still true.
-
-**Three ways out. Pick one.**
-
-| | What happens | Map goes to |
-|--|--|--|
-| **A** | Leave it. The whole tile stays on screen. | 227 |
-| **B** | The map fills the width. The bottom line or two of the type tile sits below the fold and you scroll to it. | 310 |
-| **C** | Move "Placement calculated based on 10 dimension scores." behind the question mark, the way the axis descriptions already went. The tile stays fully on screen. | about 269 |
-
-**C is the one I would pick**, because it is the only one that does not undo
-something you asked for. It is a smaller jump than B, and it moves a line of
-your copy, which is why I have not done it.
-
-### W11b, marking the three testers
-
-Your table answered it. Nobody non-binary has ever used Attune, so the figure
-you did not recognise was four of our own accounts. Three of them are not
-marked as demos, which means they have been inside the couple types, the
-demographics, the engagement figures and the completion funnel since the day
-each was made, and one of the three carries an order, so they have been inside
-the revenue figures too. That is wider than the one tile you spotted it on.
-
-082 did try to catch testers. Its rule looks for `test` as a whole word and for
-an email starting `test@`, and "Tester" is `test` followed by a letter while
-`tester@` is not `test@`, so all three walked past it. The narrow rule is the
-right one, because a rule that guesses drops a real customer out of every
-figure with nobody the wiser. It just has to be topped up by hand.
-
-Paste this into the **Supabase SQL editor** (not Terminal) and press Run. It
-marks three rows by id, nothing by pattern, and prints one table.
-
-<!-- SQL 087_mark_test_accounts.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
-```sql
--- ============================================================================
--- 087: the three test accounts stop being counted as people.
---
--- ── WHAT 086 ANSWERED ───────────────────────────────────────────────────────
--- Ellie ran 086 and sent back four rows with pronouns of they/them:
---
---   Alex          (no email)                               is_demo true
---   Tester        tester@attune-relationships.com          is_demo FALSE
---   Testpartner   tester-partner@attune-relationships.com  is_demo FALSE
---   Solo          tester-alone@attune-relationships.com    is_demo FALSE
---
--- So her original reading was right: "none of our beta testers are non binary."
--- Nobody non-binary has ever used Attune. Every they/them row is one of ours,
--- and three of the four are inside every figure the admin draws.
---
--- ── WHY 082 MISSED THEM ─────────────────────────────────────────────────────
--- 082 marked demos deliberately narrowly, because a rule that guesses drops a
--- real customer out of every figure with nobody the wiser. Its name match is
--- `test` as a WHOLE WORD, so "Tester" and "Testpartner" are both `test`
--- followed by a letter and neither matches. Its email match wants `test@`,
--- `%+test@%`, `@example.com` or `@test.%`, and `tester@` is none of them.
---
--- The narrow rule was the right call and this is the cost of it: it has to be
--- topped up by hand when a tester is made. Which is why the last statement
--- here prints everybody who is NOT marked, rather than just the three.
---
--- ── WHAT THIS DOES ──────────────────────────────────────────────────────────
--- Marks exactly three rows, by id, named one per line. No pattern, nothing
--- guessed, nothing that could catch a customer. Reversing one is one line:
---
---   update public.profiles set is_demo = false where id = '<the id>';
---
--- This is wider than the pronoun tile. These three have been inside the couple
--- types, the demographics, the engagement figures and the completion funnel
--- since the day each was made, and one of them carries an order, so they have
--- been inside the revenue figures too.
---
--- ── THE TABLE IT PRINTS ─────────────────────────────────────────────────────
--- Everybody the admin still counts, which is what the figures are about. The
--- update above it returns no table of its own, so the editor shows this one.
--- Read it and tell me whether anybody on it is another tester: that is the
--- half no query can answer, because a tester and a customer look the same.
---
--- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
--- ============================================================================
-
-update public.profiles
-   set is_demo = true
- where is_demo = false
-   and id in (
-     '11111111-1111-4111-8111-111111111111',  -- Tester
-     '22222222-2222-4222-8222-222222222222',  -- Testpartner
-     '33333333-3333-4333-8333-333333333333'   -- Solo
-   );
-
--- Everybody the admin counts, after the update above. If a name here is one of
--- yours rather than a customer's, send it back and I will add it to the list.
-select p.name,
-       p.email,
-       p.pronouns,
-       p.created_at::date as joined,
-       (p.ex1_answers is not null) as answered_communication,
-       exists (select 1 from public.orders o where o.user_id = p.id) as has_order
-  from public.profiles p
- where p.is_demo = false
- order by p.created_at;
-```
-<!-- /SQL -->
-
 ---
 
 ## 2. Open
 
-One left, and it needs three sentences from you. W57 moved up to section 1,
-because making the map bigger means breaking an instruction you already gave
-and which of them goes is yours to pick.
+Sweeps, which is what you asked for next. W59 is still waiting on three
+sentences from you.
 
 | # | What I am doing |
 |--|--|
@@ -159,42 +34,13 @@ and which of them goes is yours to pick.
 
 | # | Built, needs your eye |
 |--|--|
+| W57 | **The map is a subtraction now, not a share of the screen.** An iPhone 17 still draws 227, which you approved; a Pro Max goes from 249 to 309. The thing below the map is a fixed number of points on every phone, so a fraction was handing a bigger screen a smaller share of its own spare room. |
+| W77 | **The snapshot answers are italic.** |
+| W78 | **Bigger horseman title, smaller One thing to try.** |
+| W52 | **The thought dots rise from the crown.** They were level with the shoulder, so the thought looked like it was leaving somewhere around the ear. |
 | W64 | **METHODOLOGY.md**, in the repo root. Every weight, threshold and list is read out of the code that serves customers, so it cannot describe a version of the scoring that is not live. Notes under this table, including what it deliberately leaves out. |
-| W77 | **The conflict snapshot is a table.** Your name and Preston's across the top once, a row per scenario, no pills. The Repair tile's reset row matches it, because it was the only pair of pills left on the page. |
-| W78 | **A tile each for the four horsemen**, and the content you described. The analysis paragraph it loses was app-only: the website has never drawn it. |
 | W79 | **The third prose list**, under this table. Built from your edits rather than from my taste, and the first five findings are your own Criticism rewrite applied to the three horsemen nobody showed you. |
-| W58 | **Bullets, not a tile each.** The app drew a white card per sentence; the website has always drawn a badge and a sentence, so the app draws that now rather than a third thing. |
-| W63 | **The bars show degrees now.** Your Emotional Labour answer against Preston's reads 75 per cent close where it read a flat miss. The follow-up after "Both of us" was asked of every customer and read by nothing that scored. |
-| W70 | **Physical Intimacy too**, and it already had the distance: the three donuts on the storycards were throwing it away to count states. |
-| W71 | **One module decides how close two answers are.** There were four, and they disagreed. Under this table: what each of them said. |
-| W62 | **The Experienced column shows what "Both" meant.** We asked. Nothing has ever read the answer. |
-| W65 | **Tap a bar on either overview to open its page.** The whole row, so there is no dead strip between the name and the bar. |
-| W66 | **A little arrow on the right of each conversations row**, and the "Open Household" line at the foot of the list is gone. Your instruction from last time, which the site had half of and the app had none of. |
-| W69 | **Both backgrounds softened, by two numbers rather than by eye.** Under this table, including the thing that was too dark being the one thing nothing measured. |
-| W74 | **A dot at the end of a bar sits inside it now.** The bar keeps its full width and the dot's travel is inset by half a dot, so it sweeps the bar edge to edge. Checked against the page you sent. |
-| W56 | **Leaving Insights brings you back to the menu now.** Every tab stays mounted so it switches instantly, which is also why the results screen was still where you left it. |
-| W61 | **Dropdowns close when you leave the page, and there is one rule for it now** rather than three. See the note under this table about Side by Side: it also opens itself when a note of yours is inside it. |
-| W73 | **The Physical Intimacy plan is in page order.** Which conversations are worth having is still decided by how far apart you are; only the order changed. |
-| W75 | **The rank numbers in Repair are visible.** They were drawn in the blue the section is named after, on a panel of almost exactly that blue. |
-| W52 | **The cloud again.** The outline of the person is right; the new cloud is worse than the one before it. Go back towards that shape and keep the bottom bumpy. |
-| W53 | **A sofa on its own, no people.** And no lines showing through: the arms must hide what is behind them. One outline rather than shapes stacked on shapes. |
-| W54 | **Your seventeen rewrites, word for word.** |
-| W60 | **Remove the "Overview" eyebrow** above the ten dimension bars on the Communication overview. |
-| W67 | **Remove the description line** under the visual for What matters most this year, in Relationship Reflection. |
 | W68 | **Remove the description sentence** under the Side by Side hero, in Relationship Reflection. |
-| W72 | **The Intimacy overview eyebrow becomes "Alignment by category"**, like Expectations. |
-| W76 | **"To help reset mid-conflict"**, and the answers read as "Asks a clarifying question" and "Uses humor". |
-| W42 | **The bin deletes a tag now.** Tap a margin tag, the words light up, and the bin is live. It was scoped to highlights and underlines, which was your first instruction about it; a sentence that was only tagged is filed as a note internally, so it fell outside. A note with words in it still stays out of the bin. |
-| W44 | **The insight of the day has the same two icons as the word of the day.** A bookmark and a share, no words, in the same round shape. |
-| W45 | **The person and the cloud, your shapes.** Head and shoulders like the picture you sent, and a cloud with bumps all the way round. |
-| W46 | **Two people on a sofa**, like the picture you sent. |
-| W47 | **"Your unique relationship dynamic"** is back. |
-| W48 | **Your fifteen rewrites are live, word for word.** |
-| W51 | **Every endpoint now checks your sign-in token itself and runs next to the database.** Sixteen of twenty-five check locally; all fifty-two run beside the database, including the website, the admin and the crons. |
-| B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. Nothing draws it, so it was landing on every phone and in the offline cache for nothing. It stays in your records and no longer reaches the device. |
-| C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none. You wrote the words and they are in; this row is here in case you want to hear them. |
-| W22 | **A row's list opens directly under that row.** The rows below move down; the one you tapped stays under your finger. |
-| W50 | **Speed, where it got to.** The home screen's request is 283ms, down from between 1.3 and 5.9 seconds. The whole account is under this table as W39 to W41. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -253,6 +99,32 @@ the word if you want it gone and I will bring you options.
 **And one of yours that the sweep still flags.** Your own rewrite of the Needs
 line uses "The thing to watch for is tone rather than clarity." The sweep
 reports it because "the thing to" is on the list. You wrote it, so it stays.
+
+### W57, how big the map is on each phone
+
+You were right about the shape of it. It was a quarter of the screen height,
+and everything below the map is a fixed number of points: an eyebrow, the type
+tile, the tab bar. Those do not get taller on a bigger phone, so a taller phone
+has more spare room and a fraction was handing the map a smaller share of it.
+
+It is a subtraction now, screen height minus what the rest of the page needs.
+
+| | Screen | Map was | Map is |
+|--|--|--|--|
+| iPhone SE | 375 x 667 | 173 | 200, the floor |
+| iPhone 17 | 402 x 874 | 227 | **227**, unchanged |
+| iPhone 17 Pro Max | 440 x 956 | 249 | **309** |
+| iPad mini | 744 x 1133 | 295 | 320, the cap |
+
+The 227 you approved is untouched, because the reserve is derived from it. The
+check runs this arithmetic over all four and fails if a taller phone ever gets
+a smaller map again.
+
+**What I could not see.** The Simulator lost its window part way through, which
+stops synthetic taps while screenshots keep working, so I verified the map
+arithmetic and not the map on screen. The other three I did see: the snapshot
+table, the horseman tiles and the new icon. The italic and the two type sizes
+are built and typechecked but unlooked at.
 
 ### W64, the methodology document
 
@@ -355,118 +227,6 @@ space" the only two of those, "low-drama" the only two, and "the thing that"
 the only two. You got all of them. That is four tests that found nothing, which
 is worth one sentence because it turns "probably fine" into a number.
 
-### W71, the four rules that disagreed
-
-How close two expectations answers are was decided in four places, and three
-of them are rules you never asked for twice:
-
-| Where | What it did |
-|--|--|
-| The server's results rows | Aligned or not, over three positions |
-| The headline percentage | A similarity over the same three positions |
-| The website's bars | That similarity, averaged |
-| The website's storycards | The two answers compared as the words you read, which is the exact comparison a check was written two months ago to abolish |
-| The app's bars | How many rows matched exactly, divided by how many there were |
-
-So the same category's bar was one number on the site and a different number
-on your phone, and none of the five read the follow-up the exercise asks every
-time somebody answers "Both of us".
-
-**What there is now.** One module, `api/_lib/alignment.js`. It owns one
-question: given how far apart two answers are, how close is that and which of
-the three things do we say about it. Each exercise still measures its own
-distance, because the instruments genuinely differ: Communication is a
-one-to-five scale each way, a responsibility is a position between the two of
-you, a life question is a place in an ordered list, and one intimacy question
-compares two sets by overlap. Pretending those are one function would be a
-second copy of a rule wearing a shared name.
-
-**One thing is deliberately left out, and it is yours to decide.**
-Communication draws its line at one point on a five-point scale, which works
-out to 0.25 where the shared bands sit at 0.2. Moving it would change the
-alignment percentage on every storycard every existing customer has already
-read. Say the word and it moves; until then it stays and the check says in
-writing that it is not covered.
-
-**Two things the sweep turned up on the way.** A pair of answers where one of
-you said a name and the other said "Primarily my partner's" was scored as a
-total mismatch, and both of those name the same person. That spelling is no
-longer offered, so it can only affect rows stored before it changed; I cannot
-say from here whether any exist. And two people who both answered "Both of us"
-counted as aligned however differently they refined it, which is now a small
-real difference rather than none.
-
-### W63, what changed on your own results
-
-Driven on a simulator against your real answers, after the site deployed:
-
-| Category | Reads now |
-|--|--|
-| Life & Values | 88% |
-| Household | 57% |
-| Financial | 81% |
-| Career & Work | 100% |
-| Emotional Labor | **88%** |
-| Extended Family | 75% |
-
-Emotional Labour is the one you gave as the example. It was a flat miss.
-
-**Your topic counts moved too, and you should know why.** Household went from
-4 topics to 6 and Extended Family from 2 to 4. Two people who both answered
-"Both of us" used to count as agreeing however differently they refined it, so
-"usually me" against "genuinely half" was filed as agreement. It is a small
-real difference now. Nothing was added that you did not answer; a few rows
-moved from one side of the line to the other.
-
-**One thing I got wrong and caught on the phone.** I published the app update
-before the site had deployed, and for about half an hour every bar read 0%
-rather than the figures above, because the app was asking for a number the
-server had not started sending. Nought is not "we do not know yet". It draws a
-dash now while it waits, which is what you would have seen instead. Both the
-fix and a check against it are in.
-
-### W69, softer, and the number for each
-
-Two changes per section, and neither costs any readability.
-
-| | Before | After |
-|--|--|--|
-| Relationship Reflection, top of the page | 13.6 to 1 against white | 7.6 |
-| Physical Intimacy, top of the page | 11.7 | 7.6 |
-| Where the middle colour sits | 55 per cent down the page | 38 per cent |
-| The intimacy detail pages' deep end | 15.3 | 10.1 |
-
-Body text needs 4.6 to 1, so all of that was spare room. The light end of both
-gradients sits at 4.6 already and cannot move at all: lightening it is how a
-fix makes something unreadable.
-
-The second row of that table is the lever with no trade-off in it. The same
-three colours, with the lighter two holding most of the height instead of the
-darkest one. A gradient reads as dark mostly because its dark end owns more
-than half the page.
-
-**And the pages you reported were the pages nothing measured.** The check that
-measures white type on every background printed "41 stops across 6 grounds, 6
-categories and the app's own three" and the six Physical Intimacy detail
-grounds were in none of those three sets. They also could not have been
-measured as they were: they were a colour at two transparencies over whatever
-happened to be behind, and a transparency has no contrast of its own. They are
-solid colours now and the check counts them, 59 stops.
-
-Both numbers are numbers, so "a bit more" or "too far" is one line each.
-
-### W61, the one dropdown that will still greet you open
-
-Side by Side in Internal Processing closes when you leave the page now, like
-every other dropdown. It will still sometimes be open when you arrive, and
-that is a different thing doing it: a dropdown opens itself when the page is
-holding a mark that nothing on screen has claimed, which is what a note inside
-a shut dropdown is. You have a note in that one.
-
-It is the only thing stopping a note being invisible, so I have left it. If
-you would rather it stayed shut and the margin icon did the work on its own,
-say so and I will take it out.
-
 ### W59, the three bullets that need your words
 
 Two took the change as it stands: "You are complementary processors,
@@ -528,6 +288,37 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| W11b | Who the admin still counts. You ran 087 and sent back seventeen real people with no they/them among them, which closes the figure you did not recognise. |
+| W63 | The Expectations bars were all or nothing. They show degrees now, and your Emotional Labour answer reads 88 per cent where it read a flat miss. |
+| W70 | The same for Physical Intimacy, which already had the distance and was throwing it away to count states. |
+| W71 | Five places decided how close two answers are and they disagreed. One module does, and two checks hold it. |
+| W62 | We asked what "Both" meant in the Experienced column and showed the answer nowhere. |
+| W65 | A bar on either overview opens its page, the whole row rather than three targets. |
+| W66 | A little arrow on the right of each conversations row, and the "Open Household" line at the foot of the list is gone. |
+| W69 | Relationship Reflection and Physical Intimacy softened, by two measured numbers rather than by eye. |
+| W58 | The couple type bullets stopped being a white card each and draw the badge the site already drew. |
+| W74 | A dot at the end of a bar sits inside it, so the bar keeps its full width. |
+| W56 | Leaving Insights brings you back to the menu. |
+| W61 | Dropdowns close when you leave a page, under one rule instead of three. |
+| W73 | The Physical Intimacy plan is in page order. |
+| W75 | The rank numbers in Repair were drawn in the blue the section is named after, on a panel of almost that blue. |
+| W53 | A sofa on its own, one outline, no lines showing through the arms. |
+| W54 | Your seventeen rewrites, word for word. |
+| W60 | The "Overview" eyebrow is gone from the Communication overview. |
+| W67 | The description line under the What matters most visual is gone. |
+| W72 | The Intimacy overview eyebrow reads "Alignment by category". |
+| W76 | "To help reset mid-conflict", with the answers in the third person. |
+| W42 | The bin deletes a tag. It was scoped to highlights and underlines, so a sentence that was only tagged fell outside. |
+| W44 | The insight of the day has the same two icons as the word of the day. |
+| W45 | The person and the cloud, your shapes. |
+| W46 | Two people on a sofa, which became a sofa on its own. |
+| W47 | "Your unique relationship dynamic" is back. |
+| W48 | Your fifteen rewrites, word for word. |
+| W51 | Every endpoint checks your sign-in token itself and runs next to the database. |
+| B141 | Every results request carried a judgement about who reads whom better that neither surface draws. It no longer reaches the device. |
+| C17 | Three spoken labels for VoiceOver, in your words. |
+| W22 | A row's list opens directly under that row. |
+| W50 | The home screen's request is 283ms, down from between 1.3 and 5.9 seconds. |
 | W11a | Who the four they/them rows actually were. You ran it: all four are ours, and three were never marked as demos, so the figure you did not recognise was us. |
 | W12 | Notes opened on three requests and drew nothing until they landed; it opens from what the phone already has and fills in behind. |
 | W13 | A tap on a margin tag turns the page instead of showing the words it sits on, because the margin is inside the forward-paging zone. |

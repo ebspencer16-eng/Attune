@@ -30,8 +30,8 @@ import PageTile from '@/components/page-tile';
 import StepCount from '@/components/step-count';
 import { Prose } from '@/components/annotation-context';
 import { ResultsScroll } from '@/components/results-scroll';
-import { Fonts,
-  BottomTabInset, Colors, MaxContentWidth, Palette, Radius, Spacing, Type,
+import {
+  BottomTabInset, Colors, Fonts, MaxContentWidth, Palette, Radius, Spacing, Type,
 } from '@/constants/attune-theme';
 
 const c = Colors.light;
@@ -634,7 +634,12 @@ function Patterns({
                   One Prose rather than a heading and a line under it, because
                   that is how she wrote it and because a reader marking this
                   marks the whole thought rather than half of it. */}
-              <Prose style={{ ...Type.body, color: Palette.white, lineHeight: 21 }}>
+              {/* Ellie: "make the horseman title larger". Type.title rather
+                  than body, which is the same step the page's own heading
+                  takes, so a tile reads as a thing rather than as a paragraph.
+                  One Prose still, because the name and what it means are one
+                  sentence and a reader marking it marks the whole thought. */}
+              <Prose style={{ ...Type.title, fontSize: 19, lineHeight: 26, color: Palette.white }}>
                 {definition ? `${titleFor(p.key)}: ${definition}` : titleFor(p.key)}
               </Prose>
 
@@ -675,9 +680,16 @@ function Patterns({
                     </Text>
                   ) : null}
                   {v >= 2 && advice.title ? (
-                    <Prose style={{ ...Type.cardTitle, color: Palette.white, marginBottom: 2 }}>{advice.title}</Prose>
+                    /* A step down with the body under it, or the title would
+                       be the same size as the horseman's name above it and the
+                       tile would read as two headings. */
+                    <Prose style={{ ...Type.cardTitle, fontSize: 14, lineHeight: 19, color: Palette.white, marginBottom: 2 }}>{advice.title}</Prose>
                   ) : null}
-                  <Prose style={{ ...Type.body, color: INK }}>{advice.body || ''}</Prose>
+                  {/* Ellie: "make the text in one thing to try smaller." The
+                      instruction is the longest thing on the tile and was set
+                      at the same size as everything else, so it carried the
+                      weight of the page. */}
+                  <Prose style={{ ...Type.small, color: INK, lineHeight: 19 }}>{advice.body || ''}</Prose>
                 </View>
               ) : null}
             </View>
@@ -818,7 +830,17 @@ function TableHead({ you, partner }: { you: string; partner: string | null }) {
 function TableRow({ label, mine, theirs, first = false }: {
   label: string; mine: string; theirs: string | null; first?: boolean;
 }) {
-  const cell = { ...Type.small, fontWeight: '600' as const, flex: SNAPSHOT_COLS.cell, lineHeight: 17 };
+  /**
+   * Ellie: "Italicize the responses in the table."
+   *
+   * `Fonts.bodyItalic`, not `fontStyle: 'italic'`. iOS does not slant a
+   * registered typeface and reports no error, so the flag draws the upright
+   * face and looks like it worked: eighteen places in this app asked for
+   * italic that way and every one of them was upright. Italic is a family
+   * here. The weight goes with it, because DM Sans Italic carries its own and
+   * asking for 600 on top is the same synthetic-face trap one step along.
+   */
+  const cell = { ...Type.small, fontFamily: Fonts.bodyItalic, flex: SNAPSHOT_COLS.cell, lineHeight: 17 };
   return (
     <View
       style={{

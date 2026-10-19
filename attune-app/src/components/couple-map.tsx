@@ -51,6 +51,46 @@ type Quadrant = { code: string; name: string; color: string; fill: string };
  */
 const SIDE = 22;
 
+/**
+ * How big the map is allowed to be, and why it is not a share of the screen.
+ *
+ * ── WHAT WAS WRONG WITH A FRACTION ────────────────────────────────────────
+ * Ellie: "Can the height adjust based on the device it's being viewed on? So
+ * that the max height is used? 227 looks right on the simulator of a 17 but on
+ * my pro max it looks small."
+ *
+ * It was `height * 0.26`, tuned on an iPhone 17 so that the whole couple type
+ * tile fits on screen, which is what she asked for before. A fraction is the
+ * wrong shape for this. Everything BELOW the map is a fixed number of points:
+ * an eyebrow, a tile with two lines of type in it, the tab bar. Those do not
+ * get taller on a bigger phone. So a bigger phone has MORE spare height, and a
+ * fraction gives the map a smaller share of it rather than the whole of it.
+ *
+ *   iPhone 17       874 tall     a quarter is 227, and 227 is right
+ *   iPhone Pro Max  956 tall     a quarter is 249, and about 309 would fit
+ *
+ * ── SO IT IS A SUBTRACTION ────────────────────────────────────────────────
+ * `height - ROOM_BELOW`. The reserve is derived from the one measurement that
+ * has her approval: 227 was right at 874, so the room everything else needs is
+ * 874 - 227. If the page above or below the map changes, re-measure on one
+ * device and this follows on every other.
+ *
+ * The assumption is written down because it is the thing that can go wrong:
+ * that the chrome and the type tile are the same height on every phone. They
+ * are, because their type is set in points and none of it wraps differently at
+ * these widths. A phone narrow enough to wrap the tile's tagline onto a third
+ * line would need the floor below.
+ */
+const ROOM_BELOW = 647;
+
+/** Never smaller than this, even if the arithmetic says so. On a phone short
+ *  enough to want it, the type tile going below the fold is the lesser of the
+ *  two evils: a map too small to read is no money slide at all. */
+const MAP_MIN = 200;
+
+/** And never a huge square on a tablet. */
+const MAP_MAX = 320;
+
 /** Fallback used only when an older cached payload carries no quadrants. */
 const AXIS = { left: 'Open', right: 'Guarded', top: 'Engage', bottom: 'Withdraw' };
 
@@ -113,14 +153,9 @@ export default function CoupleMap({
    * map rather than a map that fits and a tile that does not.
    */
   const size = fixedSize ?? Math.min(
-    320,
+    MAP_MAX,
     width - Spacing.xl * 2 - SIDE * 2,
-    /* A quarter of the window, not a third. "Your relationship dynamic" is
-       two lines on a phone where "Your unique dynamic" was one, and the type
-       reveal went back under the fold; the map is where the room is. Measured
-       on an iPhone 17 rather than guessed: at 0.32 the tile's tagline sat
-       behind the tab bar, at 0.26 the whole tile is on screen. */
-    Math.round(height * 0.26),
+    Math.max(MAP_MIN, height - ROOM_BELOW),
   );
   const qs = quadrants?.length === 4 ? quadrants : null;
   const pa = a?.coords;

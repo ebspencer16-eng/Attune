@@ -117,12 +117,22 @@ const THINKING = `
   <path d="M3.5 54
            C3.5 43.5 10.5 37.5 19 37.5
            C27.5 37.5 34.5 43.5 34.5 54"/>
-  <!-- two beads rising to the cloud -->
-  <!-- Clear of the cloud on purpose. A bead that lands inside it draws a
-       circle in the middle of the drawing, which is the same complaint she
-       made about the sofa: a line showing through something in front of it. -->
-  <circle cx="30" cy="31" r="1.7"/>
-  <circle cx="35" cy="26" r="2.3"/>
+  <!-- ── TWO BEADS, FROM THE CROWN ───────────────────────────────────────
+       Ellie: "trailing dots need to come from the top of the head not the
+       bottom."
+
+       They were at (30,31) and (35,26), which is level with the shoulder: the
+       head's centre is at y=22, so both sat BELOW it and the thought appeared
+       to leave somewhere around the ear. They start above the crown now, at
+       y=11.5, and rise to the right.
+
+       Still clear of the cloud and of the head, checked by arithmetic rather
+       than by eye: every bead is further from each cloud lobe's centre than
+       the two radii together, and outside the head ellipse. A bead that lands
+       inside either draws a circle in the middle of the drawing, which is the
+       same complaint she made about the sofa. -->
+  <circle cx="25" cy="9" r="1.6"/>
+  <circle cx="32" cy="7" r="2.2"/>
   <!--
     ── THE CLOUD, THIRD TIME ──────────────────────────────────────────────
     Ellie: "cloud was better before. Can we try the cloud again?"

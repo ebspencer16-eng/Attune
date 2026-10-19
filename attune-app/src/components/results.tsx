@@ -1686,6 +1686,7 @@ function ExpectationsOverview({
                         <View style={{ width: `${pct}%`, height: 6, backgroundColor: bar, borderRadius: 999 }} />
                       )}
                     </View>
+                    {/* not markable: a figure, and a dash when there is no figure yet. */}
                     <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: pct == null ? 'rgba(255,255,255,0.45)' : bar, width: 34, textAlign: 'right' }}>
                       {pct == null ? '\u2014' : `${pct}%`}
                     </Text>
