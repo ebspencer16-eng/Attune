@@ -81,15 +81,32 @@ const DIM_TINT = {
  */
 export function intimacyActionPlan(rows) {
   const distance = (d) => d.distancePct ?? d.avgGap ?? null;
-  const ranked = (rows || [])
-    .filter((d) => d.state !== 'unspoken' && d.state !== 'aligned' && distance(d) != null)
-    .sort((a, b) => distance(b) - distance(a));
+  const all = (rows || [])
+    .filter((d) => d.state !== 'unspoken' && d.state !== 'aligned' && distance(d) != null);
+  const ranked = [...all].sort((a, b) => distance(b) - distance(a));
 
-  if (ranked.length <= 2) return ranked;
-  // The distance the second one sits at. Everything at that distance is in,
-  // however many that turns out to be.
-  const cutoff = distance(ranked[1]);
-  return ranked.filter((d) => distance(d) >= cutoff);
+  const chosen = ranked.length <= 2
+    ? ranked
+    // The distance the second one sits at. Everything at that distance is in,
+    // however many that turns out to be.
+    : ranked.filter((d) => distance(d) >= distance(ranked[1]));
+
+  /**
+   * ── CHOSEN BY DISTANCE, ORDERED BY THE PAGE ─────────────────────────────
+   * Ellie: "Reorder action plan for physical intimacy so that it goes in
+   * order of the page it came from, mine are flipped."
+   *
+   * Which conversations are worth having is a question about distance, and
+   * that is what the sort above answers. The ORDER they are listed in is a
+   * different question, and the answer she wants is the order she met them
+   * in: a reader who scrolled past What it is for before Initiating should
+   * not find them the other way round on the page that collects them.
+   *
+   * `rows` arrives in the page's own order, from INTIMACY_DIMENSIONS, so
+   * this is the order it came in rather than a second list of the order.
+   */
+  const page = (rows || []).map((d) => d.id);
+  return chosen.sort((a, b) => page.indexOf(a.id) - page.indexOf(b.id));
 }
 
 export function groundForDimension(id) {

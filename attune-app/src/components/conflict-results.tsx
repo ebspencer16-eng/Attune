@@ -490,13 +490,11 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
           <RepairColumn
             title={`What ${names.you} wants from ${names.partner}, in order`}
             items={you.repairRanking}
-            accent={accent}
           />
           {partner ? (
             <RepairColumn
               title={`What ${names.partner} wants from ${names.you}, in order`}
               items={partner.repairRanking}
-              accent={accent}
             />
           ) : null}
         </View>
@@ -795,11 +793,26 @@ function SnapshotCell({ name, text, own = false }: { name: string; text: string;
 // Chip, a dot and a name against a value, drew the snapshot before it became
 // a table. Nothing uses that shape now.
 
-/* Light: this column lives in the Snapshot page's repair tile, which is a
-   ghost panel on the section's dark gradient. Ellie: "Adjust text coloring
-   when you change tile color so that text is visible." */
-function RepairColumn({ title, items, accent }: {
-  title: string; items: string[]; accent?: string;
+/**
+ * Light: this column lives in the Snapshot page's repair tile, which is a
+ * ghost panel on the section's dark gradient. Ellie: "Adjust text coloring
+ * when you change tile color so that text is visible."
+ *
+ * ── AND THE RANK NUMBER WAS THE ONE THAT DID NOT MOVE ─────────────────────
+ * Ellie: "Number labels in repair section of conflict results are invisible."
+ *
+ * The number was drawn in the section's accent, #1B5FE8, which is the blue
+ * this section is NAMED after and is almost exactly the blue the panel sits
+ * on. The rest of the tile had already been given light ink for this reason
+ * and the number was missed, because it is one character and nobody reading
+ * the file would see it.
+ *
+ * GLANCE_LABEL is the light version of that blue, already used twice on this
+ * page for the same reason: it reads as the section's colour and it is
+ * visible on the section's ground.
+ */
+function RepairColumn({ title, items }: {
+  title: string; items: string[];
 }) {
   return (
     <View style={{ flex: 1 }}>
@@ -812,7 +825,7 @@ function RepairColumn({ title, items, accent }: {
       {(items || []).slice(0, 3).map((item, i) => (
         <View key={item} style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm }}>
           {/* not markable: a step number the app generates. */}
-          <Text style={{ ...Type.small, fontWeight: '700', color: accent || Palette.white }}>{i + 1}</Text>
+          <Text style={{ ...Type.small, fontWeight: '700', color: GLANCE_LABEL }}>{i + 1}</Text>
           <Prose style={{ ...Type.small, color: INK, flex: 1 }}>{item}</Prose>
         </View>
       ))}

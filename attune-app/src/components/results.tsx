@@ -238,6 +238,30 @@ let lastSection: string | null = null;
  * It is not in the server's list, so nothing can link to it by accident, and
  * the guard below has to name it explicitly.
  */
+/**
+ * A dropdown shuts when you leave the page it is on.
+ *
+ * ── WHY THIS IS A HOOK AND NOT A LINE IN EACH ONE ─────────────────────────
+ * Ellie, of Side by Side in Internal Processing: "I opened side by side
+ * responses in internal processing yesterday, but I've been out of the app
+ * since then. I just opened that page and the side by side dropdown is still
+ * open. On every page, dropdowns should close immediately if you navigate out
+ * of the page."
+ *
+ * She has asked for this rule three times now, each time about a different
+ * control: "Dropdowns should always close when you leave the page", then the
+ * What Comes Next buckets, and now this one. Three instructions about one rule
+ * is the rule asking to live in one place.
+ *
+ * The cleanup of a focus effect is the moment of leaving. Every tab in this
+ * app mounts at launch and stays mounted, which is what makes switching
+ * instant, so leaving a screen is not unmounting it and nothing resets by
+ * itself.
+ */
+export function useClosesOnLeave(close: () => void) {
+  useFocusEffect(useCallback(() => () => close(), [close]));
+}
+
 export const MENU_SECTION = '__menu';
 
 /**
@@ -308,6 +332,7 @@ export function showFirstSection() {
   // Cleared as well as called, so a tap that arrives while nothing is mounted
   // still decides where the next mount opens.
   lastSection = null;
+  goToSection?.(MENU_SECTION);
   jumpToTop?.();
 }
 
@@ -1678,6 +1703,7 @@ function ExpectationsOverview({
  */
 function CategoryDrawer({ label, items, color }: { label: string; items: string[]; color: string }) {
   const [open, setOpen] = useState(false);
+  useClosesOnLeave(useCallback(() => setOpen(false), []));
   return (
     <View
       style={{
@@ -3324,9 +3350,8 @@ function WhatComesNext({
    * This is the same rule she gave once before, of a different control:
    * "Dropdowns should always close when you leave the page."
    */
-  useFocusEffect(
-    useCallback(() => () => setOpenGroup(null), []),
-  );
+  /* The same rule every other dropdown here follows. See useClosesOnLeave. */
+  useClosesOnLeave(useCallback(() => setOpenGroup(null), []));
   if (!data?.groups.length) {
     return (
       <Waiting
@@ -4583,6 +4608,7 @@ function SideBySide({
  */
 function Disclosure({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  useClosesOnLeave(useCallback(() => setOpen(false), []));
   /**
    * ── AND IT OPENS ITSELF FOR A MARK IT MIGHT BE HIDING ─────────────────
    * Ellie: "Not seeing the icon on the internal processing page that marks

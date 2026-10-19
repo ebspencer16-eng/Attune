@@ -279,6 +279,22 @@ export default function InsightsScreen() {
     showFirstSection();
   }, []));
 
+  /**
+   * ── AND LEAVING THE TAB GOES BACK TO THE MENU ──────────────────────────
+   * Ellie: "I clicked out of insights then back in and I was still in what
+   * comes next. I should be back at the menu."
+   *
+   * Every tab in this app mounts at launch and stays mounted, which is what
+   * makes switching instant and is also why the results screen was still on
+   * the page she left it on. Leaving is not unmounting, so nothing reset it.
+   *
+   * The cleanup of a focus effect is the moment of leaving. Same shape as the
+   * dropdowns that close when you navigate away, and for the same reason:
+   * anything a screen is holding that reads as "where you are" has to let go
+   * when you go somewhere else.
+   */
+  useFocusEffect(useCallback(() => () => showFirstSection(), []));
+
   /* onDark: this Shell is the brand orange, not cream. See the note on
      ScreenLoading. */
   if (loading) return <Shell><ScreenLoading label={LOADING.insights} /></Shell>;
