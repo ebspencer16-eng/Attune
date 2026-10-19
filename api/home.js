@@ -242,14 +242,24 @@ export default async function handler(req) {
     const DAILY_COLUMNS = ['daily_insight_at', 'daily_word_at'];
     const profileUrl = (list) => `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${list}`;
     let dailyKnown = true;
-    const me = await t.mark('profile', async () => {
-      let meRes = await fetch(profileUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc });
+    const me = await (async () => {
+      let meRes = await t.mark('profile', () => fetch(profileUrl([cols, ...DAILY_COLUMNS].join(',')), { headers: svc }));
       if (!meRes.ok) {
+        /**
+         * Marked separately on purpose.
+         *
+         * If migration 083 has not run, this second read happens on EVERY
+         * request and the first one is a wasted round trip. The profile read
+         * measured between 278ms and 2029ms on the live site for the same
+         * couple, and a phase that only appears when the fallback runs is
+         * what tells the two explanations apart. A `profile-retry` in the
+         * header means the migration is outstanding.
+         */
         dailyKnown = false;
-        meRes = await fetch(profileUrl(cols), { headers: svc });
+        meRes = await t.mark('profile-retry', () => fetch(profileUrl(cols), { headers: svc }));
       }
-      return (await meRes.json().catch(() => []))?.[0];
-    });
+      return await t.mark('profile-read', async () => (await meRes.json().catch(() => []))?.[0]);
+    })();
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
     let partner = null;
