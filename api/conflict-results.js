@@ -35,6 +35,7 @@ import {
 } from './_conflict-results-prose.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
 import { userForRequest } from './_lib/verify-token.js';
+import { phases, withTiming } from './_lib/server-timing.js';
 
 /**
  * Put the real names into every string in the content tree.
@@ -58,10 +59,23 @@ function interpDeep(value, names) {
 }
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
-const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: HEADERS });
+/**
+ * ── IT SAYS HOW LONG IT TOOK TOO ──────────────────────────────────────────
+ * This is one of the three endpoints the app calls the moment it opens, and
+ * the open question is whether each of them separately pays the two seconds
+ * that /api/home's first database read sometimes costs, or whether they share
+ * it. One costs seconds to fix and the other costs nothing, so it is worth
+ * knowing before building either. See api/_lib/server-timing.js.
+ */
+const json = (b, s = 200, timing = null) => new Response(JSON.stringify(b), {
+  status: s,
+  headers: withTiming(HEADERS, timing),
+});
 
 
 export default async function handler(req) {
+  /* See api/_lib/server-timing.js, and the note above `json`. */
+  const t = phases();
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -91,7 +105,7 @@ export default async function handler(req) {
      * The round trip is still the fall-back for anything the local
      * check cannot decide. See api/_lib/verify-token.js.
      */
-    const user = await userForRequest({ token: token, supabaseUrl, anonKey });
+    const user = await t.mark('auth', () => userForRequest({ token, supabaseUrl, anonKey }));
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
@@ -101,8 +115,8 @@ export default async function handler(req) {
     // Conflict Patterns at checkout were told they do not own it.
     const cols = ['id', 'name', 'partner_name', 'partner_profile_id', 'conflict_data', ...OWNERSHIP_COLUMNS].join(',');
 
-    const meRes = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc });
+    const meRes = await t.mark('profile', () => fetch(
+      `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc }));
     const me = (await meRes.json().catch(() => []))?.[0];
     if (!me) return json({ ok: false, error: 'profile not found' }, 404);
 
@@ -112,8 +126,8 @@ export default async function handler(req) {
 
     let partner = null;
     if (me.partner_profile_id) {
-      const pRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc });
+      const pRes = await t.mark('partner', () => fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${me.partner_profile_id}&select=${cols}`, { headers: svc }));
       partner = (await pRes.json().catch(() => []))?.[0] || null;
     }
 
@@ -181,7 +195,7 @@ export default async function handler(req) {
         noActionNeeded: NO_ACTION_NEEDED,
         copy: CONFLICT_RESULTS_COPY,
       }, { partner: me.partner_name || partner?.name, a: me.name, b: me.partner_name || partner?.name }),
-    });
+    }, 200, t.header());
   } catch (e) {
     console.error('[conflict-results] failed:', e);
     return json({ ok: false, error: 'conflict results unavailable' }, 500);

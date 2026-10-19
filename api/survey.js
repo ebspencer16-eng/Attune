@@ -37,11 +37,25 @@ import {
   SURVEY_COPY, SURVEY_QUESTIONS, SURVEY_VERSION, TESTIMONIAL_NOTICE,
   hasAnswer, rankOptionsFor, visibleQuestions,
 } from './_lib/survey.js';
+import { userForRequest } from './_lib/verify-token.js';
+import { phases, withTiming } from './_lib/server-timing.js';
 
 export const config = { runtime: 'edge' };
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
-const json = (status, body) => new Response(JSON.stringify(body), { status, headers: HEADERS });
+/**
+ * ── AND IT SAYS HOW LONG IT TOOK ──────────────────────────────────────────
+ * One of the three endpoints the app calls the moment it opens. See
+ * api/_lib/server-timing.js for why they all report now.
+ *
+ * Note the argument order: status first here, body second, which is this
+ * file's own convention and not worth changing for the sake of matching the
+ * others.
+ */
+const json = (status, body, timing = null) => new Response(JSON.stringify(body), {
+  status,
+  headers: withTiming(HEADERS, timing),
+});
 
 /** Everything a surface needs to draw the survey, for this person. */
 function form(rankOptions, answers = {}, finished = false) {
@@ -65,10 +79,14 @@ function form(rankOptions, answers = {}, finished = false) {
 }
 
 export default async function handler(req) {
+  /* See api/_lib/server-timing.js, and the note above `json`. */
+  const t = phases();
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY
                   || process.env.SUPABASE_SERVICE_ROLE_KEY
                   || process.env.SUPABASE_SERVICE_ROLE;
+  /* The public key, for the token check's fall-back path. */
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
   if (!supabaseUrl || !serviceKey) return json(500, { ok: false, error: 'Server not configured' });
 
   const auth = req.headers.get('authorization') || req.headers.get('Authorization') || '';
@@ -80,8 +98,16 @@ export default async function handler(req) {
      and still gets the questions. */
   let me = null;
   if (token) {
-    const { data: who } = await admin.auth.getUser(token);
-    me = who?.user?.id || null;
+    /**
+     * ── CHECKED HERE, NOT OVER THE NETWORK ────────────────────────────
+     * This was `admin.auth.getUser(token)`, which is a round trip to
+     * Supabase before anything else happens, on one of the three requests
+     * the app makes the instant it opens. The token is signed and the
+     * project publishes the key; see api/_lib/verify-token.js, which falls
+     * back to asking the server for anything it cannot decide.
+     */
+    const who = await t.mark('auth', () => userForRequest({ token, supabaseUrl, anonKey }));
+    me = who?.id || null;
   }
 
   /* What this person can be asked to rank, from their own row. Without a
@@ -91,7 +117,7 @@ export default async function handler(req) {
   let profile = null;
   if (me) {
     const cols = ['id', 'partner_profile_id', ...OWNERSHIP_COLUMNS, ...EXERCISE_COLUMNS].join(',');
-    const { data } = await admin.from('profiles').select(cols).eq('id', me).maybeSingle();
+    const { data } = await t.mark('profile', () => admin.from('profiles').select(cols).eq('id', me).maybeSingle());
     profile = data || null;
     if (profile) {
       const { caps, ...owns } = capabilitiesFor(profile);
@@ -108,12 +134,12 @@ export default async function handler(req) {
     let answers = {};
     let finished = false;
     if (me) {
-      const { data } = await admin.from('survey_responses')
-        .select('answers, completed_at').eq('respondent_id', me).maybeSingle();
+      const { data } = await t.mark('answers', () => admin.from('survey_responses')
+        .select('answers, completed_at').eq('respondent_id', me).maybeSingle());
       answers = data?.answers || {};
       finished = !!data?.completed_at;
     }
-    return json(200, form(rankOptions, answers, finished));
+    return json(200, form(rankOptions, answers, finished), t.header());
   }
 
   if (req.method !== 'POST') return json(405, { ok: false, error: 'GET or POST only' });

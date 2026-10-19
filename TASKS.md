@@ -93,9 +93,10 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** W36, W37 and W38 are in section 3. The home screen's request
-is now measured phase by phase and the slow part has a name, which is under
-that table.
+| # | What I am doing |
+|--|--|
+| W39 | **Is the two seconds paid once or three times?** The app asks three endpoints the moment it opens. Each is a separate server. If each pays its own first-connection cost, merging them is worth seconds; if they share it, merging them is worth nothing. Measure before building. |
+| W40 | **Then act on what it says.** Either fold the launch into one request, or go after the connection itself. |
 
 ---
 

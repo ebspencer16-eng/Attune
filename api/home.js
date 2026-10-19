@@ -43,6 +43,7 @@ import { JOURNAL_ANCHOR } from './_lib/tags.js';
 import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import { shareFooter } from './_lib/share-footer.js';
 import { userForRequest } from './_lib/verify-token.js';
+import { phases, withTiming } from './_lib/server-timing.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
@@ -50,62 +51,19 @@ const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 
  * ── HOW LONG THIS TOOK, SAID OUT LOUD ─────────────────────────────────────
  * Ellie: "My pages are still taking a long time to load."
  *
- * Finding out where that time went took instrumenting the app, launching it
- * cold on a simulator and reading Metro's log, which is a lot of machinery to
- * answer "is it us or is it the phone". The answer was us, and the next
- * question, which is which PART of us, needed the same machinery again.
- *
- * So the server says. `Server-Timing` is a standard response header, it is
- * visible in any network inspector, and it reports only how long our own code
- * took. Nothing about a customer is in it.
- *
- * `auth` is the token check, which used to be a network round trip to Supabase
- * and is now done in memory; see api/_lib/verify-token.js. `total` is the
- * whole handler. The gap between them is the query chain, which is four reads
- * deep and is the next thing worth fixing.
+ * Every phase of this handler reports its own duration in the response, and
+ * it is what found the one slow read. The helper is shared, because the other
+ * two endpoints the app calls on launch need the same thing and the question
+ * being asked of all three is the same question. See api/_lib/server-timing.js.
  */
-function timed(startedAt) {
-  const ms = Date.now() - startedAt;
-  return (phase) => `${phase};dur=${ms}`;
-}
-
-/**
- * ── AND WHICH READ IS THE SLOW ONE ────────────────────────────────────────
- * Ten measurements of this endpoint against the live site: 772ms at best and
- * 3910ms at worst, for the same work on the same couple. A five-fold spread
- * is a bigger prize than any single read, and nothing visible from outside
- * says which read it is.
- *
- * So each phase reports its own duration. `marks` is a list rather than an
- * object so the order is the order they happened in, which is half of what
- * a waterfall tells you.
- *
- * Nothing about a customer is in it: a phase name and a number of
- * milliseconds. It is visible in any network inspector, which is the point.
- */
-function phases() {
-  const marks = [];
-  return {
-    async mark(name, work) {
-      const at = Date.now();
-      try { return await work(); }
-      finally { marks.push(`${name};dur=${Date.now() - at}`); }
-    },
-    header(startedAt) {
-      return [...marks, timed(startedAt)('total')].join(', ');
-    },
-  };
-}
-
 const json = (body, status = 200, timing = null) => new Response(JSON.stringify(body), {
   status,
-  headers: timing ? { ...HEADERS, 'Server-Timing': timing } : HEADERS,
+  headers: withTiming(HEADERS, timing),
 });
 const has = (o) => !!(o && Object.keys(o).length);
 
 export default async function handler(req) {
-  /* For the Server-Timing header. See `timed` and `phases` above. */
-  const startedAt = Date.now();
+  /* For the Server-Timing header. See api/_lib/server-timing.js. */
   const t = phases();
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
 
@@ -654,7 +612,7 @@ export default async function handler(req) {
         notes: 0,
       },
       state: { resultsReady, coupleType, partnerLinked: !!me.partner_profile_id },
-    }, 200, t.header(startedAt));
+    }, 200, t.header());
   } catch (e) {
     console.error('[home] failed:', e);
     return json({ ok: false, error: 'home unavailable' }, 500);
