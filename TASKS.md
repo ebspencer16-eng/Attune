@@ -66,11 +66,16 @@ select p.id,
 
 ## 2. Open
 
+Fourteen left, and they are the big ones. In rough order of what I will get
+to first: the degrees of alignment, which is a scoring change and touches
+three places; the two Conflict Patterns pages; the methodology document; and
+the rest of the smaller layout work.
+
 | # | What I am doing |
 |--|--|
 | W57 | **The couple map is too small on a phone.** Make it bigger. You can see the next heading under it, which means it is not filling the space it has. |
 | W58 | **Two bullets under each heading, not a tile each**, under What comes naturally and What's worth being aware of. |
-| W59 | **Those bullets start with "You are".** "Complementary processors, thoughtful and eager" reads as a label on the page even though it read fine in the table. Every option with that shape gets the same treatment. |
+| W59 | **Two of them start with "You are" now. Three need your words**, under this table: they cannot take the phrase without being rewritten, and rewriting them is writing copy. |
 | W62 | **Expectations, the experienced view.** Expects shows "genuinely" and "usually"; experienced shows only "both". Find out whether we ask for the detail and do not show it, or never ask. |
 | W63 | **Degree of alignment, expectations.** The bars are all or nothing. On Emotional Labour you put "Usually Ellie, sometimes Preston" and Preston put "Ellie", which is nearly the same answer and counts as a miss. Two answers that are close should count as closer than two that are opposite. |
 | W64 | **A methodology document, kept current.** Every backend analysis process: weighting, scoring, thresholds, how each number is produced. For you and Carolina, and shareable. |
@@ -79,7 +84,6 @@ select p.id,
 | W69 | **Soften the backgrounds** on the Relationship Reflection pages and the Physical Intimacy detail pages. They are too dark. |
 | W70 | **Degree of alignment for intimacy too.** |
 | W71 | **One source of truth for every alignment score**, wherever it appears. |
-| W74 | **The sliding bars: a dot at the end of the bar sits flush with the end.** Right now its centre is on the end, so half of it hangs off and the bars look like different lengths. Extend the bars rather than narrowing where a dot can sit. |
 | W77 | **The conflict snapshot becomes a table**: a column each for you and Preston, a row for each of the three scenarios. No pills. |
 | W78 | **A tile for each of the four horsemen.** First line "Criticism: going after the person rather than the problem", second "Self-assigned score: sometimes" with the score in orange, no analysis paragraph, then straight to One thing to try. |
 | W79 | **A third prose list**, from what your edits have in common. |
@@ -90,6 +94,7 @@ select p.id,
 
 | # | Built, needs your eye |
 |--|--|
+| W74 | **A dot at the end of a bar sits inside it now.** The bar keeps its full width and the dot's travel is inset by half a dot, so it sweeps the bar edge to edge. Checked against the page you sent. |
 | W56 | **Leaving Insights brings you back to the menu now.** Every tab stays mounted so it switches instantly, which is also why the results screen was still where you left it. |
 | W61 | **Dropdowns close when you leave the page, and there is one rule for it now** rather than three. See the note under this table about Side by Side: it also opens itself when a note of yours is inside it. |
 | W73 | **The Physical Intimacy plan is in page order.** Which conversations are worth having is still decided by how far apart you are; only the order changed. |
@@ -183,6 +188,22 @@ a shut dropdown is. You have a note in that one.
 It is the only thing stopping a note being invisible, so I have left it. If
 you would rather it stayed shut and the margin icon did the work on its own,
 say so and I will take it out.
+
+### W59, the three bullets that need your words
+
+Two took the change as it stands: "You are complementary processors,
+thoughtful and eager" and "You are emotionally complementary, logical and
+feeling".
+
+Three more have the same shape and cannot take the words mechanically. "You
+are complementary instincts" and "You are efficient decision making" are not
+sentences. A suggestion for each, and the suggestion is mine, so change it:
+
+| Couple type | What it says now | Suggested |
+|--|--|--|
+| One fast, one steady | "Complementary instincts, attentive and stabilizing" | "You are complementary, attentive and stabilizing" |
+| Both inward | "Efficient decision making as a unit" | "You are efficient at making decisions together" |
+| Both step back | "Shared instinct to step back before getting too heated" | "You are both inclined to step back before things get heated" |
 
 ### C12, the long and the short of it
 
