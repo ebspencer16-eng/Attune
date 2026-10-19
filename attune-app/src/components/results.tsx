@@ -3342,7 +3342,6 @@ function WhatComesNext({
   const buckets: NextStepBucket[] = data.buckets?.length
     ? data.buckets
     : data.groups.map((g) => ({ id: g.id, label: g.label, color: g.color, items: g.items }));
-  const open = buckets.find((b) => b.id === openGroup) || null;
 
   return (
     /* Cream, which is what the website uses here. Four rows that stay put,
@@ -3354,27 +3353,11 @@ function WhatComesNext({
         {/* B98. Ellie: "Remove explanation paragraph above dropdowns on what
             comes next page." Gone from both surfaces. */}
 
-        {/* ── B105: FOUR TILES, AND ONE OF THEM IS OPEN ──────────────
-            Ellie: "Four quick-access tiles formatted like the ones on the home
-            page. One for each bucket listed above and one for the relationship
-            journal. When a user taps one of the tiles, that content appears in
-            the space below, but the 4 tiles stay in place."
-
-            So the tiles are a row that does not move, and the space under them
-            is whichever bucket is open. The journal tile is the odd one out: it
-            opens the journal rather than filling that space, which is why it
-            carries an icon the others do not.
-
-            Which bucket an item is in is the server's decision, in
-            api/_lib/what-comes-next.js. Nothing here names an exercise, which
-            is the other half of what she asked for. */}
-        {/* ── FOUR WIDE ROWS, THE ICON SWAPPING SIDES ──────────────────
+        {/* ── FOUR WIDE ROWS, AND ONE OF THEM IS OPEN ─────────────────
             Ellie: "I want 4, vertically stacked wider rectangular tiles... I
-            want tiles to be the same size, but for the rows to be visually
-            interesting because they're alternating the left or right
-            placement of the icon. I want the icons to be large and to be
-            stylized outline drawings with attune-branded gradient lines. I
-            want the number in each row to be larger than the text."
+            want the icons to be large and to be stylized outline drawings
+            with attune-branded gradient lines. I want the number in each row
+            to be larger than the text."
 
             Four across a phone gave each tile about eighty points, which is
             where the clipped numbers came from and why the labels had to be
@@ -3383,20 +3366,58 @@ function WhatComesNext({
 
             The icon for each is named by her: a person with a thought bubble,
             two people on a couch, a conversation bubble with a heart, and a
-            journal. They are drawn in components/brand-glyph.tsx. */}
+            journal. They are drawn in components/brand-glyph.tsx.
+
+            ── WHERE THE LIST OPENS, WHICH SHE HAS NOW SAID TWICE ─────────
+            B105, of the four small tiles: "When a user taps one of the tiles,
+            that content appears in the space below, but the 4 tiles stay in
+            place." That was right for a 2x2 of squares, where a list pushed
+            in among them would have broken the grid.
+
+            Of these four rows: "I want the drop downs to open right below
+            their row not below the others."
+
+            Both are kept because the second only makes sense beside the
+            first. A row and its list are one block now, so the rows below it
+            move down and the one you tapped stays under your finger.
+
+            Which bucket an item is in is the server's decision, in
+            api/_lib/what-comes-next.js. Nothing here names an exercise, which
+            is the other half of what she asked for. */}
         <View style={{ marginTop: Spacing.lg, gap: Spacing.sm }}>
-          {buckets.map((b, i) => (
-            <NextBand
-              key={b.id}
-              label={b.label}
-              count={b.items.length}
-              glyph={BUCKET_GLYPH[b.id] || 'think'}
-              stripe={stripe}
-              color={b.color || c.accent}
-              active={openGroup === b.id}
-              reverse={i % 2 === 1}
-              onPress={() => setOpenGroup((cur) => (cur === b.id ? null : b.id))}
-            />
+          {buckets.map((b) => (
+            <View key={b.id}>
+              <NextBand
+                label={b.label}
+                count={b.items.length}
+                glyph={BUCKET_GLYPH[b.id] || 'think'}
+                stripe={stripe}
+                color={b.color || c.accent}
+                active={openGroup === b.id}
+                onPress={() => setOpenGroup((cur) => (cur === b.id ? null : b.id))}
+              />
+              {/* Its own rows, directly under it. Each one opens the page in
+                  Insights it came from, which is the only thing on this page
+                  that says where it came from. */}
+              {openGroup === b.id ? (
+                <View style={{ marginTop: Spacing.sm, gap: Spacing.xs }}>
+                  {/* block: what-comes-next/groups */}
+                  {b.items.map((item, i) => (
+                    <NextRow
+                      key={`${b.id}-${i}`}
+                      n={i + 1}
+                      title={item.title}
+                      quote={item.quote || null}
+                      say={item.say || null}
+                      color={b.color || c.accent}
+                      onOpen={item.section ? () => onGoToSection(item.section as string) : null}
+                      onKeep={() => setKeeping([item.title, item.quote, item.say]
+                        .filter(Boolean).join(' '))}
+                    />
+                  ))}
+                </View>
+              ) : null}
+            </View>
           ))}
           <NextBand
             /* The app's one copy of that name, which notes.tsx holds and
@@ -3410,33 +3431,10 @@ function WhatComesNext({
                colour for it would say it belongs to that section. */
             color={Palette.clayInk}
             active={false}
-            reverse={buckets.length % 2 === 1}
             leaves
             onPress={onOpenJournal}
           />
         </View>
-
-        {/* The open bucket's rows, under the tiles. Each one opens the page in
-            Insights it came from, which is the only thing on this page that
-            says where it came from. */}
-        {open ? (
-          <View style={{ marginTop: Spacing.lg, gap: Spacing.xs }}>
-            {/* block: what-comes-next/groups */}
-            {open.items.map((item, i) => (
-              <NextRow
-                key={`${open.id}-${i}`}
-                n={i + 1}
-                title={item.title}
-                quote={item.quote || null}
-                say={item.say || null}
-                color={open.color}
-                onOpen={item.section ? () => onGoToSection(item.section as string) : null}
-                onKeep={() => setKeeping([item.title, item.quote, item.say]
-                  .filter(Boolean).join(' '))}
-              />
-            ))}
-          </View>
-        ) : null}
 
         {/* ── THE BUTTON, AND WHEN IT IS THERE ─────────────────────────
             Ellie: "The tell us about your experience Button is now missing
@@ -3558,7 +3556,7 @@ const BUCKET_GLYPH: Record<string, 'think' | 'couch' | 'heart' | 'journal'> = {
  * icon takes the other end, and swaps ends row by row.
  */
 function NextBand({
-  label, count, glyph, color, stripe, active, reverse, leaves = false, onPress,
+  label, count, glyph, color, stripe, active, leaves = false, onPress,
 }: {
   label: string;
   count?: number;
@@ -3566,8 +3564,6 @@ function NextBand({
   color: string;
   stripe?: readonly string[] | null;
   active: boolean;
-  /** The icon on the right rather than the left, so the four alternate. */
-  reverse: boolean;
   /** This row leaves the page rather than opening underneath it. */
   leaves?: boolean;
   onPress: () => void;
@@ -3611,11 +3607,15 @@ function NextBand({
       accessibilityLabel={count != null ? `${words}, ${count} item${count === 1 ? '' : 's'}` : words}
       onPress={onPress}
       style={{
-        /* The icon swaps ends, the chevron does not: row-reverse moved all
-           three, so every other row had its disclosure arrow on the left and
-           its words starting in a different place. The two halves are ordered
-           below instead and the arrow stays on the trailing edge, which is
-           where a disclosure lives. */
+        /* ── EVERY ICON ON THE RIGHT ────────────────────────────────────
+           Ellie first: "I want tiles to be the same size, but for the rows to
+           be visually interesting because they're alternating the left or
+           right placement of the icon." Then, having seen it: "put all icons
+           on the right, I decided against the alternating layout."
+
+           Both are kept because the second only makes sense beside the first.
+           The words lead, the icon sits before the chevron, and every row
+           starts in the same place. */
         flexDirection: 'row',
         alignItems: 'center',
         gap: Spacing.lg,
@@ -3631,8 +3631,8 @@ function NextBand({
         borderWidth: 1,
         borderColor: active ? withAlpha(color, 0.5) : 'transparent',
       }}>
-      {reverse ? words_ : art}
-      {reverse ? art : words_}
+      {words_}
+      {art}
       <SymbolView
         name={(leaves ? 'chevron.right' : active ? 'chevron.up' : 'chevron.down') as never}
         size={12}

@@ -93,9 +93,8 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** The nine things in your last message are built. They are in
-section 3 for your eye, and the one that needs you is W11a at the top of this
-file.
+**Nothing open.** Your three changes to What Comes Next are built and are in
+section 3.
 
 ---
 
@@ -114,6 +113,9 @@ file.
 | W15 | **What Comes Next, rebuilt.** Four wide stacked rows, the icon swapping sides down the page, outline drawings in the brand gradient, the number set large beside the words, an orange sunrise behind the tile that grows when a row opens, and the experience button in the brand gradient. |
 | W16 | **Word of the day has a Save button** beside Share, opening the same journal sheet the insight of the day opens. |
 | W17 | **Anything shared now carries a line home, and the line is yours.** It says `Attune Relationships: attune-relationships.com` today and `Download Attune Relationships in the App Store: [link]` once the app is live. Both are mine as placeholders. Send me the words you want. |
+| W21 | **Every icon is on the right now**, and every row starts in the same place. |
+| W22 | **A row's list opens directly under that row.** The rows below it move down; the one you tapped stays under your finger. |
+| W23 | **The three icons are redrawn.** The person's head overlaps the shoulders rather than sitting on them, the couple have flatter shoulders so they stop reading as four circles in a tub, and the heart is built from the construction rather than by eye. The journal is untouched. |
 | W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
 
