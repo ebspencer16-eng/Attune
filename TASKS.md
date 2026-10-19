@@ -93,10 +93,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W34 | **Taking the first network hop out of every request.** The server asks Supabase over the network who your token belongs to before it does anything else, on every single call the app makes. Your project publishes the public key, so it can check the token itself in under a millisecond. Nothing for you to set up. |
-| W35 | **A gate that tries to get past it.** A token signed with the wrong key, one with the signature stripped off, a backdated one, one from another project, one with the payload edited. All five have to be refused before W34 ships. |
+**Nothing open.** W34 and W35 are done and are in section 3. What is left of
+the slow loading is named there: the four database reads that /api/home does
+one after another.
 
 ---
 
@@ -122,6 +121,8 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W25 | **The heart bubble is the logo's own bubble**, generated from the favicon rather than drawn again. |
 | W26 | **Copy is on the selection toolbar**, on the phone and on the site. The icon turns to a tick for a moment, which is how you know it worked. |
 | W27 | **Your Internal Processing rewrite is live, word for word.** It replaced the sentence you had a highlight on, so that highlight is gone. See the note under this table. |
+| W34 | **The server no longer asks Supabase who you are on every request.** It checks your sign-in token itself, in memory, against the public key your project publishes. Nothing for you to set up. See the note under this table for what it did and did not fix. |
+| W35 | **Fifteen forged tokens tried against it**, including the one that defeats most hand-written versions of this. None accepted. |
 | W33 | **The slow loading is measured.** It is the server, not your phone. The numbers and the fix are under this table. Nothing is changed yet, on purpose. |
 | W28 | **Fifteen sentences that read as AI, with a suggestion for each.** The table is under this one. Nothing is live; pick a column. |
 | W29 | **The note and arrow icons sit in the middle of their row** now. |
@@ -130,6 +131,65 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W32 | **The physical intimacy rows open their page now.** They pointed at six pages that were merged into two months ago, so the tap did nothing at all. |
 | W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
+
+### W34, what came off and what is left
+
+Done, deployed, and measured again afterwards.
+
+**What it was.** Seven endpoints each began by handing your sign-in token to
+Supabase and asking, over the network, who it belongs to. One round trip
+before any work started, on every request, on every screen.
+
+**What it is now.** Your sign-in token is a signed document, and your Supabase
+project publishes the key to check the signature with. The server checks it
+itself. There was nothing for you to set up, which is the part I was not sure
+about until I looked.
+
+**What I will not claim.** I cannot put a figure on how much of the wait that
+removed, and I would rather say so than invent one. Measuring it properly needs
+the server to report its own timing, which it now does: /api/home returns a
+`Server-Timing` header saying how long the token check took and how long the
+whole request took. The next round gets real numbers instead of inference.
+
+**What the measurement DID settle, again.** On the latest run a static file
+from the same host, fired at the same instant as the three requests the app
+makes on launch, came back in **301ms** while those three took 1.6 to 2.1
+seconds. So it is still the server, it is not your phone, and it is not the
+connection.
+
+**What is left.** /api/home does four database reads one after another, each
+waiting on the one before, because each needs the answer to the last. That
+chain is now the biggest single thing in the wait and it is the next piece of
+work.
+
+**And the same seven endpoints had seven copies of that code**, pasted one into
+the next. There is one now, which is worth as much as the speed.
+
+### W35, trying to get past it
+
+This is the code that decides whether somebody is who they say they are, so it
+has a gate that attacks it rather than describes it. The gate makes its own
+signing key, publishes it the way your project publishes yours, and then signs
+fifteen tokens.
+
+One genuine one is accepted. Ten are refused: signed with the wrong key, the
+signature stripped off, the signature replaced with junk, expired, not valid
+yet, nobody named in it, no expiry at all, the contents edited after signing,
+and two that are not tokens at all. Four are handed to Supabase to judge rather
+than refused here, which is deliberate: refusing them would be a guess, and a
+wrong guess in that direction signs people out.
+
+The one worth naming is a forgery that defeats most hand-written versions of
+this: a token that asks to be checked with a shared secret, signed using the
+public key as that secret. Anybody can make one, because the public key is
+public. It is refused.
+
+I also attacked the gate, six ways, to find out whether it could fail. Five
+failed it at once. The sixth passed and it was the gate's fault, not the code's:
+the only token it had that asked "do not check me" also had an empty signature,
+and a different line was catching that, so the rule under test was never
+actually tested. There is a second one now with bytes in the signature slot,
+and that plant fails properly.
 
 ### W33, why the pages are slow
 

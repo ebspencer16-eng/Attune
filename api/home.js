@@ -45,10 +45,40 @@ import { shareFooter } from './_lib/share-footer.js';
 import { userForRequest } from './_lib/verify-token.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
-const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
+
+/**
+ * ── HOW LONG THIS TOOK, SAID OUT LOUD ─────────────────────────────────────
+ * Ellie: "My pages are still taking a long time to load."
+ *
+ * Finding out where that time went took instrumenting the app, launching it
+ * cold on a simulator and reading Metro's log, which is a lot of machinery to
+ * answer "is it us or is it the phone". The answer was us, and the next
+ * question, which is which PART of us, needed the same machinery again.
+ *
+ * So the server says. `Server-Timing` is a standard response header, it is
+ * visible in any network inspector, and it reports only how long our own code
+ * took. Nothing about a customer is in it.
+ *
+ * `auth` is the token check, which used to be a network round trip to Supabase
+ * and is now done in memory; see api/_lib/verify-token.js. `total` is the
+ * whole handler. The gap between them is the query chain, which is four reads
+ * deep and is the next thing worth fixing.
+ */
+function timed(startedAt) {
+  const ms = Date.now() - startedAt;
+  return (phase) => `${phase};dur=${ms}`;
+}
+
+const json = (body, status = 200, timing = null) => new Response(JSON.stringify(body), {
+  status,
+  headers: timing ? { ...HEADERS, 'Server-Timing': timing } : HEADERS,
+});
 const has = (o) => !!(o && Object.keys(o).length);
 
 export default async function handler(req) {
+  /* For the Server-Timing header. See `timed` above. */
+  const startedAt = Date.now();
+  let authMs = 0;
   if (req.method !== 'GET') return json({ ok: false, error: 'GET only' }, 405);
 
   /**
@@ -90,7 +120,9 @@ export default async function handler(req) {
      * The round trip is still the fall-back for anything the local
      * check cannot decide. See api/_lib/verify-token.js.
      */
-    const user = await userForRequest({ token: token, supabaseUrl, anonKey });
+    const authAt = Date.now();
+    const user = await userForRequest({ token, supabaseUrl, anonKey });
+    authMs = Date.now() - authAt;
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
@@ -552,7 +584,7 @@ export default async function handler(req) {
         notes: 0,
       },
       state: { resultsReady, coupleType, partnerLinked: !!me.partner_profile_id },
-    });
+    }, 200, `auth;dur=${authMs}, ${timed(startedAt)('total')}`);
   } catch (e) {
     console.error('[home] failed:', e);
     return json({ ok: false, error: 'home unavailable' }, 500);
