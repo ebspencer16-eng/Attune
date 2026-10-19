@@ -68,11 +68,9 @@ select p.id,
 
 | # | What I am doing |
 |--|--|
-| W56 | **Leaving Insights should bring you back to the menu.** You came back and were still on What Comes Next. |
 | W57 | **The couple map is too small on a phone.** Make it bigger. You can see the next heading under it, which means it is not filling the space it has. |
 | W58 | **Two bullets under each heading, not a tile each**, under What comes naturally and What's worth being aware of. |
 | W59 | **Those bullets start with "You are".** "Complementary processors, thoughtful and eager" reads as a label on the page even though it read fine in the table. Every option with that shape gets the same treatment. |
-| W61 | **A dropdown closes when you leave the page.** Side by Side in Internal Processing was still open a day later. Everywhere, not just there. |
 | W62 | **Expectations, the experienced view.** Expects shows "genuinely" and "usually"; experienced shows only "both". Find out whether we ask for the detail and do not show it, or never ask. |
 | W63 | **Degree of alignment, expectations.** The bars are all or nothing. On Emotional Labour you put "Usually Ellie, sometimes Preston" and Preston put "Ellie", which is nearly the same answer and counts as a miss. Two answers that are close should count as closer than two that are opposite. |
 | W64 | **A methodology document, kept current.** Every backend analysis process: weighting, scoring, thresholds, how each number is produced. For you and Carolina, and shareable. |
@@ -81,9 +79,7 @@ select p.id,
 | W69 | **Soften the backgrounds** on the Relationship Reflection pages and the Physical Intimacy detail pages. They are too dark. |
 | W70 | **Degree of alignment for intimacy too.** |
 | W71 | **One source of truth for every alignment score**, wherever it appears. |
-| W73 | **The Physical Intimacy action plan goes in page order.** Yours is reversed. |
 | W74 | **The sliding bars: a dot at the end of the bar sits flush with the end.** Right now its centre is on the end, so half of it hangs off and the bars look like different lengths. Extend the bars rather than narrowing where a dot can sit. |
-| W75 | **The number labels in the repair section of Conflict Patterns are invisible.** |
 | W77 | **The conflict snapshot becomes a table**: a column each for you and Preston, a row for each of the three scenarios. No pills. |
 | W78 | **A tile for each of the four horsemen.** First line "Criticism: going after the person rather than the problem", second "Self-assigned score: sometimes" with the score in orange, no analysis paragraph, then straight to One thing to try. |
 | W79 | **A third prose list**, from what your edits have in common. |
@@ -94,6 +90,10 @@ select p.id,
 
 | # | Built, needs your eye |
 |--|--|
+| W56 | **Leaving Insights brings you back to the menu now.** Every tab stays mounted so it switches instantly, which is also why the results screen was still where you left it. |
+| W61 | **Dropdowns close when you leave the page, and there is one rule for it now** rather than three. See the note under this table about Side by Side: it also opens itself when a note of yours is inside it. |
+| W73 | **The Physical Intimacy plan is in page order.** Which conversations are worth having is still decided by how far apart you are; only the order changed. |
+| W75 | **The rank numbers in Repair are visible.** They were drawn in the blue the section is named after, on a panel of almost exactly that blue. |
 | W52 | **The cloud again.** The outline of the person is right; the new cloud is worse than the one before it. Go back towards that shape and keep the bottom bumpy. |
 | W53 | **A sofa on its own, no people.** And no lines showing through: the arms must hide what is behind them. One outline rather than shapes stacked on shapes. |
 | W54 | **Your seventeen rewrites, word for word.** |
@@ -171,6 +171,18 @@ the word if you want it gone and I will bring you options.
 **And one of yours that the sweep still flags.** Your own rewrite of the Needs
 line uses "The thing to watch for is tone rather than clarity." The sweep
 reports it because "the thing to" is on the list. You wrote it, so it stays.
+
+### W61, the one dropdown that will still greet you open
+
+Side by Side in Internal Processing closes when you leave the page now, like
+every other dropdown. It will still sometimes be open when you arrive, and
+that is a different thing doing it: a dropdown opens itself when the page is
+holding a mark that nothing on screen has claimed, which is what a note inside
+a shut dropdown is. You have a note in that one.
+
+It is the only thing stopping a note being invisible, so I have left it. If
+you would rather it stayed shut and the margin icon did the work on its own,
+say so and I will take it out.
 
 ### C12, the long and the short of it
 
