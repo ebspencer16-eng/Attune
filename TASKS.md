@@ -396,6 +396,35 @@ say from here whether any exist. And two people who both answered "Both of us"
 counted as aligned however differently they refined it, which is now a small
 real difference rather than none.
 
+### W63, what changed on your own results
+
+Driven on a simulator against your real answers, after the site deployed:
+
+| Category | Reads now |
+|--|--|
+| Life & Values | 88% |
+| Household | 57% |
+| Financial | 81% |
+| Career & Work | 100% |
+| Emotional Labor | **88%** |
+| Extended Family | 75% |
+
+Emotional Labour is the one you gave as the example. It was a flat miss.
+
+**Your topic counts moved too, and you should know why.** Household went from
+4 topics to 6 and Extended Family from 2 to 4. Two people who both answered
+"Both of us" used to count as agreeing however differently they refined it, so
+"usually me" against "genuinely half" was filed as agreement. It is a small
+real difference now. Nothing was added that you did not answer; a few rows
+moved from one side of the line to the other.
+
+**One thing I got wrong and caught on the phone.** I published the app update
+before the site had deployed, and for about half an hour every bar read 0%
+rather than the figures above, because the app was asking for a number the
+server had not started sending. Nought is not "we do not know yet". It draws a
+dash now while it waits, which is what you would have seen instead. Both the
+fix and a check against it are in.
+
 ### W69, softer, and the number for each
 
 Two changes per section, and neither costs any readability.
