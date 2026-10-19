@@ -8,7 +8,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| W11a | **One statement this time, so one table comes back.** That editor only shows the result of the last query in the box, so the names were computed and thrown away. The SQL under this table is just that half. Run it and send me what it prints. |
+| W11b | **You were right, and three accounts need marking.** All four they/them rows are ours: Alex is already a demo, Tester, Testpartner and Solo are not. The SQL under this table marks those three and then prints everybody the admin still counts. Run it and send me that table: I need you to tell me whether anybody on it is another tester. |
+| W57 | **The couple map can be bigger, and only by giving something up.** 227 points today where the width allows 310. The cap is there so the whole couple type tile fits on screen, which is what you asked for last time. Three options under this table; pick one. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -18,46 +19,124 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
 | D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
 
-### W11a, the three rows
+### W57, the couple map, and the thing it is trading against
+
+**The measurement.** On your phone the screen is 402 by 874 points. The map is
+a square, and it is sized by whichever of three limits is smallest:
+
+| Limit | Allows |
+|--|--|
+| A cap so it does not become a huge square on a tablet | 320 |
+| The page width, less the margins the rotated axis words sit in | 310 |
+| A share of the screen height | **227** |
+
+The height one wins, so the map is 227 where the width would allow 310. That
+is the "not filling the space it has" you are seeing.
+
+**Why that height limit exists.** You asked for it: "I would love for the
+'money slide' when you open the couple type page to fit the full couple type
+tile on the screen." It was set by measuring on an iPhone 17. At a third of the
+screen the tile's tagline sat behind the tab bar; at the current figure the
+whole tile is on screen. So 227 is the largest the map can be with your earlier
+instruction still true.
+
+**Three ways out. Pick one.**
+
+| | What happens | Map goes to |
+|--|--|--|
+| **A** | Leave it. The whole tile stays on screen. | 227 |
+| **B** | The map fills the width. The bottom line or two of the type tile sits below the fold and you scroll to it. | 310 |
+| **C** | Move "Placement calculated based on 10 dimension scores." behind the question mark, the way the axis descriptions already went. The tile stays fully on screen. | about 269 |
+
+**C is the one I would pick**, because it is the only one that does not undo
+something you asked for. It is a smaller jump than B, and it moves a line of
+your copy, which is why I have not done it.
+
+### W11b, marking the three testers
+
+Your table answered it. Nobody non-binary has ever used Attune, so the figure
+you did not recognise was four of our own accounts. Three of them are not
+marked as demos, which means they have been inside the couple types, the
+demographics, the engagement figures and the completion funnel since the day
+each was made, and one of the three carries an order, so they have been inside
+the revenue figures too. That is wider than the one tile you spotted it on.
+
+082 did try to catch testers. Its rule looks for `test` as a whole word and for
+an email starting `test@`, and "Tester" is `test` followed by a letter while
+`tester@` is not `test@`, so all three walked past it. The narrow rule is the
+right one, because a rule that guesses drops a real customer out of every
+figure with nobody the wiser. It just has to be topped up by hand.
 
 Paste this into the **Supabase SQL editor** (not Terminal) and press Run. It
-reads and changes nothing, and it prints one table.
+marks three rows by id, nothing by pattern, and prints one table.
 
-<!-- SQL 086_non_binary_names.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
+<!-- SQL 087_mark_test_accounts.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
 -- ============================================================================
--- 086: WHO the three non-binary rows are. One table, nothing else.
+-- 087: the three test accounts stop being counted as people.
 --
--- ── WHY A SECOND ONE ────────────────────────────────────────────────────────
--- 085 printed two tables: the three accounts, and a count per pronoun for a
--- denominator. Ellie ran it and got one back: "Only printed one table."
+-- ── WHAT 086 ANSWERED ───────────────────────────────────────────────────────
+-- Ellie ran 086 and sent back four rows with pronouns of they/them:
 --
--- The Supabase SQL editor shows the result of the LAST statement in the box.
--- Two SELECTs means the first is computed and thrown away, which is a thing
--- about that editor rather than about the query, and asking somebody to scroll
--- up for a table that was never rendered is asking for something that does not
--- exist.
+--   Alex          (no email)                               is_demo true
+--   Tester        tester@attune-relationships.com          is_demo FALSE
+--   Testpartner   tester-partner@attune-relationships.com  is_demo FALSE
+--   Solo          tester-alone@attune-relationships.com    is_demo FALSE
 --
--- So this is one statement. It is the first half of 085, on its own.
+-- So her original reading was right: "none of our beta testers are non binary."
+-- Nobody non-binary has ever used Attune. Every they/them row is one of ours,
+-- and three of the four are inside every figure the admin draws.
 --
--- ── WHAT TO DO WITH IT ──────────────────────────────────────────────────────
--- Run it and send the table back. It names the accounts whose pronouns are
--- they/them and says which are already marked as demos. If one of them is a
--- tester I will mark them; if one is a customer they stay exactly as they are.
+-- ── WHY 082 MISSED THEM ─────────────────────────────────────────────────────
+-- 082 marked demos deliberately narrowly, because a rule that guesses drops a
+-- real customer out of every figure with nobody the wiser. Its name match is
+-- `test` as a WHOLE WORD, so "Tester" and "Testpartner" are both `test`
+-- followed by a letter and neither matches. Its email match wants `test@`,
+-- `%+test@%`, `@example.com` or `@test.%`, and `tester@` is none of them.
 --
--- Run in the Supabase SQL Editor and click Run. It changes nothing.
+-- The narrow rule was the right call and this is the cost of it: it has to be
+-- topped up by hand when a tester is made. Which is why the last statement
+-- here prints everybody who is NOT marked, rather than just the three.
+--
+-- ── WHAT THIS DOES ──────────────────────────────────────────────────────────
+-- Marks exactly three rows, by id, named one per line. No pattern, nothing
+-- guessed, nothing that could catch a customer. Reversing one is one line:
+--
+--   update public.profiles set is_demo = false where id = '<the id>';
+--
+-- This is wider than the pronoun tile. These three have been inside the couple
+-- types, the demographics, the engagement figures and the completion funnel
+-- since the day each was made, and one of them carries an order, so they have
+-- been inside the revenue figures too.
+--
+-- ── THE TABLE IT PRINTS ─────────────────────────────────────────────────────
+-- Everybody the admin still counts, which is what the figures are about. The
+-- update above it returns no table of its own, so the editor shows this one.
+-- Read it and tell me whether anybody on it is another tester: that is the
+-- half no query can answer, because a tester and a customer look the same.
+--
+-- Run in the Supabase SQL Editor and click Run. Safe to run more than once.
 -- ============================================================================
 
-select p.id,
-       p.name,
+update public.profiles
+   set is_demo = true
+ where is_demo = false
+   and id in (
+     '11111111-1111-4111-8111-111111111111',  -- Tester
+     '22222222-2222-4222-8222-222222222222',  -- Testpartner
+     '33333333-3333-4333-8333-333333333333'   -- Solo
+   );
+
+-- Everybody the admin counts, after the update above. If a name here is one of
+-- yours rather than a customer's, send it back and I will add it to the list.
+select p.name,
        p.email,
-       p.is_demo,
+       p.pronouns,
        p.created_at::date as joined,
        (p.ex1_answers is not null) as answered_communication,
-       (p.ex2_answers is not null) as answered_expectations,
        exists (select 1 from public.orders o where o.user_id = p.id) as has_order
   from public.profiles p
- where lower(trim(p.pronouns)) = 'they/them'
+ where p.is_demo = false
  order by p.created_at;
 ```
 <!-- /SQL -->
@@ -66,27 +145,13 @@ select p.id,
 
 ## 2. Open
 
-Fourteen left, and they are the big ones. In rough order of what I will get
-to first: the degrees of alignment, which is a scoring change and touches
-three places; the two Conflict Patterns pages; the methodology document; and
-the rest of the smaller layout work.
+One left, and it needs three sentences from you. W57 moved up to section 1,
+because making the map bigger means breaking an instruction you already gave
+and which of them goes is yours to pick.
 
 | # | What I am doing |
 |--|--|
-| W57 | **The couple map is too small on a phone.** Make it bigger. You can see the next heading under it, which means it is not filling the space it has. |
-| W58 | **Two bullets under each heading, not a tile each**, under What comes naturally and What's worth being aware of. |
 | W59 | **Two of them start with "You are" now. Three need your words**, under this table: they cannot take the phrase without being rewritten, and rewriting them is writing copy. |
-| W62 | **Expectations, the experienced view.** Expects shows "genuinely" and "usually"; experienced shows only "both". Find out whether we ask for the detail and do not show it, or never ask. |
-| W63 | **Degree of alignment, expectations.** The bars are all or nothing. On Emotional Labour you put "Usually Ellie, sometimes Preston" and Preston put "Ellie", which is nearly the same answer and counts as a miss. Two answers that are close should count as closer than two that are opposite. |
-| W64 | **A methodology document, kept current.** Every backend analysis process: weighting, scoring, thresholds, how each number is produced. For you and Carolina, and shareable. |
-| W65 | **Tap a bar or a pole label and go to its page**, on the Communication and Expectations overviews. |
-| W66 | **The Expectations convos dropdown opens the three conversations** instead of jumping to the page. An arrow on the right of each row opens the page. |
-| W69 | **Soften the backgrounds** on the Relationship Reflection pages and the Physical Intimacy detail pages. They are too dark. |
-| W70 | **Degree of alignment for intimacy too.** |
-| W71 | **One source of truth for every alignment score**, wherever it appears. |
-| W77 | **The conflict snapshot becomes a table**: a column each for you and Preston, a row for each of the three scenarios. No pills. |
-| W78 | **A tile for each of the four horsemen.** First line "Criticism: going after the person rather than the problem", second "Self-assigned score: sometimes" with the score in orange, no analysis paragraph, then straight to One thing to try. |
-| W79 | **A third prose list**, from what your edits have in common. |
 
 ---
 
@@ -94,6 +159,18 @@ the rest of the smaller layout work.
 
 | # | Built, needs your eye |
 |--|--|
+| W64 | **METHODOLOGY.md**, in the repo root. Every weight, threshold and list is read out of the code that serves customers, so it cannot describe a version of the scoring that is not live. Notes under this table, including what it deliberately leaves out. |
+| W77 | **The conflict snapshot is a table.** Your name and Preston's across the top once, a row per scenario, no pills. The Repair tile's reset row matches it, because it was the only pair of pills left on the page. |
+| W78 | **A tile each for the four horsemen**, and the content you described. The analysis paragraph it loses was app-only: the website has never drawn it. |
+| W79 | **The third prose list**, under this table. Built from your edits rather than from my taste, and the first five findings are your own Criticism rewrite applied to the three horsemen nobody showed you. |
+| W58 | **Bullets, not a tile each.** The app drew a white card per sentence; the website has always drawn a badge and a sentence, so the app draws that now rather than a third thing. |
+| W63 | **The bars show degrees now.** Your Emotional Labour answer against Preston's reads 75 per cent close where it read a flat miss. The follow-up after "Both of us" was asked of every customer and read by nothing that scored. |
+| W70 | **Physical Intimacy too**, and it already had the distance: the three donuts on the storycards were throwing it away to count states. |
+| W71 | **One module decides how close two answers are.** There were four, and they disagreed. Under this table: what each of them said. |
+| W62 | **The Experienced column shows what "Both" meant.** We asked. Nothing has ever read the answer. |
+| W65 | **Tap a bar on either overview to open its page.** The whole row, so there is no dead strip between the name and the bar. |
+| W66 | **A little arrow on the right of each conversations row**, and the "Open Household" line at the foot of the list is gone. Your instruction from last time, which the site had half of and the app had none of. |
+| W69 | **Both backgrounds softened, by two numbers rather than by eye.** Under this table, including the thing that was too dark being the one thing nothing measured. |
 | W74 | **A dot at the end of a bar sits inside it now.** The bar keeps its full width and the dot's travel is inset by half a dot, so it sweeps the bar edge to edge. Checked against the page you sent. |
 | W56 | **Leaving Insights brings you back to the menu now.** Every tab stays mounted so it switches instantly, which is also why the results screen was still where you left it. |
 | W61 | **Dropdowns close when you leave the page, and there is one rule for it now** rather than three. See the note under this table about Side by Side: it also opens itself when a note of yours is inside it. |
@@ -177,6 +254,178 @@ the word if you want it gone and I will bring you options.
 line uses "The thing to watch for is tone rather than clarity." The sweep
 reports it because "the thing to" is on the list. You wrote it, so it stays.
 
+### W64, the methodology document
+
+**Where it is.** `METHODOLOGY.md`, at the top level of the repo. Six sections:
+Communication, how aligned is decided, Expectations, Physical Intimacy,
+Conflict Patterns, and what happens to a couple whose results were written
+before a scoring change.
+
+**Why it is generated rather than written.** "Kept current" was the whole
+requirement, and a hand-written methodology document is the most reliable way
+to be wrong about a product. We have had two of exactly this shape already: the
+copy review that listed ten action items nothing renders, and the email preview
+page that showed six mock-ups while the product sent nineteen. Both were built
+to describe the product and quietly became a second draft of it.
+
+So every weight, every threshold and every list is read out of the module the
+running product reads. Change a weight and the document changes with it, or the
+build fails and tells you it has fallen behind.
+
+**What is in it that you cannot get anywhere else.** The per-question weights,
+which have never been written down outside the code. The two axis tables, with
+which dimensions are inverted and why that matters. Which figure is the
+self-report and which is blended with your partner's view of you, dimension by
+dimension, and which of the two every screen shows. And the three different
+thresholds that answer three different questions about alignment.
+
+**What it deliberately leaves out.** The copy. What a result SAYS is yours and
+is reviewed in WORDS-REVIEW.md and COUPLE-TYPE-COPY-REVIEW.md. This is the
+arithmetic, which is the half Carolina can check and I cannot write.
+
+**One thing in it is an honest caveat rather than a boast.** Three or four of
+the life questions have options that are categorical rather than ordered, so
+the distance between two of them is an approximation. It has always been one.
+It is now written down where somebody can disagree with it.
+
+**It is shareable as it stands.** Markdown, no secrets, no customer data, and
+nothing in it names a person. If you would rather have it as a page with a link
+you can send, say so and I will build that from the same generator.
+
+### W79, the third list, built from your own edits
+
+**What is different about this one.** The first two lists were my reading of
+what AI prose sounds like. This one is not: every test is lifted from a change
+you actually made, in your fifteen or your seventeen, and the change it came
+from is named beside it. If it is not a shape you have already rewritten once,
+it is not in here.
+
+Same method as the second list: import each module and read the finished
+sentences, so a sentence built from three template pieces is tested the way a
+reader sees it. 179 modules, 2,915 sentences, 31 flagged, 11 worth your eye.
+
+**The first group is the one that matters.** You rewrote two sentences about
+Criticism. The other three horsemen have the same two sentences, untouched,
+because they are written per pattern and you were only shown one.
+
+| Where | What it says now | Suggested |
+|--|--|--|
+| Contempt, never | "**Not showing up at all.** This is the pattern that matters most..." | "You do not show contempt. This is the pattern that matters most..." |
+| Defensiveness, never | "**Not showing up.** Taking a complaint without returning one is harder than it sounds." | "You do not get defensive. Taking a complaint without returning one is harder than it sounds." |
+| Stonewalling, never | "**Not showing up.** Staying present when things get tense is genuinely difficult." | "You do not shut down. Staying present when things get tense is genuinely difficult." |
+| Defensiveness, sometimes | "**Showing up regularly.** Before responding, try reflecting back..." | "Defensiveness appears enough to matter. Before responding, try reflecting back..." |
+| Stonewalling, sometimes | "**Showing up regularly.** A stated pause protects the relationship..." | "Shutting down appears enough to matter. A stated pause protects the relationship..." |
+
+The Stonewalling one is the worst of the five. "Not showing up" sits directly
+beside "Staying present when things get tense", so the line reads as its own
+contradiction.
+
+**The same ambiguity, twice more.** Your Criticism edit was about "showing up
+**for you**" reading as "being there for you". These two say exactly that:
+
+| Where | What it says now | Suggested |
+|--|--|--|
+| Conflict, all clear | "None of the four patterns are **showing up often for you**." | "None of the four patterns come up often for you." |
+| Conflict, no action needed | "None of the four patterns are **showing up often for you**." | "None of the four patterns come up often for you." |
+
+**And four singles.**
+
+| Where | What it says now | Suggested |
+|--|--|--|
+| In Practice, reviewing results | "It's easier to engage with a difference when you both already trust the **framework**." | "It is easier to talk about a difference when you both already trust where the numbers came from." |
+| In Practice, heated conversation | "...creates a **container** that the pause doesn't feel like avoidance." | "...so the pause does not feel like avoidance." |
+| Workbook, hard workday | "The **container** makes the listening easier." | "Knowing the turn is coming makes the listening easier." |
+| Couple type, one fast one steady | "Efficient repair can mean **closing the loop** before it's actually through." | "Efficient repair can mean ending the conversation before it is actually settled." |
+
+**Two things it flagged that I left alone, and why.**
+
+"The thing to watch for is tone rather than clarity" is yours. You wrote it in
+the fifteen. The test fires on it because the test came from your other edits,
+which is the test working rather than failing.
+
+Twenty-three sentences use "show up" and sixteen of them are the sense you
+kept: "the gap shows up after a rough patch", and the love-language answer
+"Doing things. Showing up and making life easier." That one means being there
+for somebody, which is the whole point of the option. The seven above are the
+other sense, where it means "appears" and reads as "is there for you".
+
+**And one shape with nothing to report.** "Low effort, high return" was the
+only two-word fragment pair in the product, "make space for" and "holding
+space" the only two of those, "low-drama" the only two, and "the thing that"
+the only two. You got all of them. That is four tests that found nothing, which
+is worth one sentence because it turns "probably fine" into a number.
+
+### W71, the four rules that disagreed
+
+How close two expectations answers are was decided in four places, and three
+of them are rules you never asked for twice:
+
+| Where | What it did |
+|--|--|
+| The server's results rows | Aligned or not, over three positions |
+| The headline percentage | A similarity over the same three positions |
+| The website's bars | That similarity, averaged |
+| The website's storycards | The two answers compared as the words you read, which is the exact comparison a check was written two months ago to abolish |
+| The app's bars | How many rows matched exactly, divided by how many there were |
+
+So the same category's bar was one number on the site and a different number
+on your phone, and none of the five read the follow-up the exercise asks every
+time somebody answers "Both of us".
+
+**What there is now.** One module, `api/_lib/alignment.js`. It owns one
+question: given how far apart two answers are, how close is that and which of
+the three things do we say about it. Each exercise still measures its own
+distance, because the instruments genuinely differ: Communication is a
+one-to-five scale each way, a responsibility is a position between the two of
+you, a life question is a place in an ordered list, and one intimacy question
+compares two sets by overlap. Pretending those are one function would be a
+second copy of a rule wearing a shared name.
+
+**One thing is deliberately left out, and it is yours to decide.**
+Communication draws its line at one point on a five-point scale, which works
+out to 0.25 where the shared bands sit at 0.2. Moving it would change the
+alignment percentage on every storycard every existing customer has already
+read. Say the word and it moves; until then it stays and the check says in
+writing that it is not covered.
+
+**Two things the sweep turned up on the way.** A pair of answers where one of
+you said a name and the other said "Primarily my partner's" was scored as a
+total mismatch, and both of those name the same person. That spelling is no
+longer offered, so it can only affect rows stored before it changed; I cannot
+say from here whether any exist. And two people who both answered "Both of us"
+counted as aligned however differently they refined it, which is now a small
+real difference rather than none.
+
+### W69, softer, and the number for each
+
+Two changes per section, and neither costs any readability.
+
+| | Before | After |
+|--|--|--|
+| Relationship Reflection, top of the page | 13.6 to 1 against white | 7.6 |
+| Physical Intimacy, top of the page | 11.7 | 7.6 |
+| Where the middle colour sits | 55 per cent down the page | 38 per cent |
+| The intimacy detail pages' deep end | 15.3 | 10.1 |
+
+Body text needs 4.6 to 1, so all of that was spare room. The light end of both
+gradients sits at 4.6 already and cannot move at all: lightening it is how a
+fix makes something unreadable.
+
+The second row of that table is the lever with no trade-off in it. The same
+three colours, with the lighter two holding most of the height instead of the
+darkest one. A gradient reads as dark mostly because its dark end owns more
+than half the page.
+
+**And the pages you reported were the pages nothing measured.** The check that
+measures white type on every background printed "41 stops across 6 grounds, 6
+categories and the app's own three" and the six Physical Intimacy detail
+grounds were in none of those three sets. They also could not have been
+measured as they were: they were a colour at two transparencies over whatever
+happened to be behind, and a transparency has no contrast of its own. They are
+solid colours now and the check counts them, 59 stops.
+
+Both numbers are numbers, so "a bit more" or "too far" is one line each.
+
 ### W61, the one dropdown that will still greet you open
 
 Side by Side in Internal Processing closes when you leave the page now, like
@@ -250,6 +499,7 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| W11a | Who the four they/them rows actually were. You ran it: all four are ours, and three were never marked as demos, so the figure you did not recognise was us. |
 | W12 | Notes opened on three requests and drew nothing until they landed; it opens from what the phone already has and fills in behind. |
 | W13 | A tap on a margin tag turns the page instead of showing the words it sits on, because the margin is inside the forward-paging zone. |
 | W15 | What Comes Next rebuilt: four wide stacked rows, big outline icons in the brand gradient, the number larger than the words, a sunrise behind the tile, the experience button in the brand gradient. |

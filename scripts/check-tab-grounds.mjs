@@ -342,6 +342,89 @@ for (const { tab, file, inline, from, declaredIn, name } of TABS) {
 }
 
 /**
+ * ── AND THE COUPLE TYPE PAGE'S TWO BULLET MARKERS ─────────────────────────
+ * Ellie: "Two bullets under each heading, not a tile each." The website has
+ * always drawn a green tick and an orange exclamation beside these sentences;
+ * the app drew a white card each, so four sentences read as four findings. The
+ * fix was to make the app draw the website's badge, which means both surfaces
+ * now hold the same four values per marker.
+ *
+ * Held equal here rather than in a gate of its own, because it is the same
+ * question as the grounds and the prompt tints above and below it: one design,
+ * two surfaces, and an Expo project that cannot import from api/. A second
+ * fixture for the same question is the failure CLAUDE.md warns about.
+ */
+{
+  const { BULLET_TONES } = await import(`${ROOT}api/_lib/section-grounds.js`);
+  const theme = read('attune-app/src/constants/attune-theme.ts');
+
+  const m = /export const BulletTone = \{([\s\S]*?)\} as const;/.exec(theme);
+  if (!m) {
+    fails.push('attune-app/src/constants/attune-theme.ts no longer declares BulletTone, which is'
+      + ' what the app draws these two badges with. Refusing to pass: a gate that has lost its'
+      + ' subject must never report success.');
+  } else {
+    for (const kind of Object.keys(BULLET_TONES)) {
+      /* Every field, not just the ink. The fill and the edge are what make the
+         badge a badge, and the mark is the character inside it: three of the
+         four could drift while the one a name-matching check looks at agreed. */
+      for (const [field, want] of Object.entries(BULLET_TONES[kind])) {
+        const re = new RegExp(`${kind}:\\s*\\{[^}]*${field}:\\s*'([^']+)'`);
+        const got = re.exec(m[1]);
+        if (!got) {
+          fails.push(`BulletTone.${kind} in the app has no ${field}, and the server's`
+            + ` BULLET_TONES.${kind} sets it to ${want}.`);
+        } else if (got[1] !== want) {
+          fails.push(`the ${kind} bullet's ${field} is ${got[1]} in the app and ${want} on the`
+            + ' server. One pair of markers drawn two ways depending on which surface you are on.');
+        }
+      }
+    }
+  }
+
+  /* And both surfaces USE them rather than declaring them. A constant nothing
+     draws with is the half-mark bug: the value exists and the picture does not. */
+  const resultsTsx = read('attune-app/src/components/results.tsx');
+  if (!/BulletTone\[kind\]/.test(resultsTsx)) {
+    fails.push('attune-app/src/components/results.tsx does not read BulletTone, so the app is'
+      + ' drawing these markers some other way.');
+  }
+  /**
+   * The website, site by site rather than once for the whole file.
+   *
+   * Asking whether `BULLET_TONES.good.ink` appears anywhere was passed by a
+   * plant that put a literal hex back on the heading, because the badge below
+   * it still named the constant. That is this file's recurring mistake:
+   * matching a name instead of what follows it. There are four places these
+   * colours are drawn, and each one is checked where it is.
+   */
+  const siteJsx = read('src/App.jsx');
+  const siteSites = [
+    ['What comes naturally', 'BULLET_TONES.good.ink', 'the green heading'],
+    ["What's worth being aware of", 'BULLET_TONES.watch.ink', 'the orange heading'],
+  ];
+  for (const [needle, wants, what] of siteSites) {
+    const line = siteJsx.split('\n').find((l) => l.includes(`>${needle}`));
+    if (!line) {
+      fails.push(`src/App.jsx no longer draws "${needle}". Refusing to pass: a gate that has`
+        + ' lost its subject must never report success.');
+    } else if (!line.includes(wants)) {
+      fails.push(`src/App.jsx draws ${what} with something other than ${wants}.`
+        + ' A hex typed back in here is the app drawing one design and the website another.'
+        + `\n      ${line.trim().slice(0, 140)}`);
+    }
+  }
+  /* And the two badges, which are the markers themselves. */
+  for (const kind of ['good', 'watch']) {
+    for (const field of ['fill', 'edge', 'mark']) {
+      if (!siteJsx.includes(`BULLET_TONES.${kind}.${field}`)) {
+        fails.push(`src/App.jsx does not draw the ${kind} badge's ${field} from BULLET_TONES.`);
+      }
+    }
+  }
+}
+
+/**
  * ── AND THE TWO PROMPT-CARD TINTS ─────────────────────────────────────────
  * The home screen's pair of action cards. The website read `card.tint` off the
  * payload and nothing has ever put one there, so both cards fell to one

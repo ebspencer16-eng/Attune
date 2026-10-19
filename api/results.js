@@ -258,6 +258,23 @@ export function withContent(results, viewer, contentVersion, pronouns = {}) {
       // Which Communication screen this dimension belongs on.
       domain: DOMAIN_OF[dim] || null,
       domainLabel: DOMAIN_LABEL[DOMAIN_OF[dim]] || null,
+      /**
+       * ── AND ITS ADDRESS, SO A TAP CAN GO THERE ────────────────────────
+       * Ellie: "Add ability to tap the bars or the pole labels on the comms
+       * and expectations overview pages to go to those pages."
+       *
+       * The id is `comm-<domain>`, and both surfaces could work that out from
+       * `domain` above. Neither should: an address assembled by whoever is
+       * drawing it is a guess about the section registry, and the app's own
+       * share sheet built `/in-practice/<id>` for pages that live at
+       * `/practice/<slug>`, so every article anybody shared went to a 404.
+       *
+       * It is in withContent rather than beside the scoring, so a couple whose
+       * results row was written last year gets it too. The couple map's two
+       * coordinates were added next to the axes they come from and the map
+       * then worked for nobody who had already finished.
+       */
+      section: DOMAIN_OF[dim] ? `comm-${DOMAIN_OF[dim]}` : null,
       // Self-report, not the blended score.
       //
       // blendedDimScores mixes a person's answers with their partner's view of

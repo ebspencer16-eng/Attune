@@ -16,16 +16,32 @@
  *
  * ── HOW IT IS CHECKED ─────────────────────────────────────────────────────
  * Two people's answers are built so the two halves cannot come out the same:
- * every life question agreed, every responsibility disagreed. A card that
- * reads the wrong rows cannot produce 100 and 0 from that. Then the mirror
- * case, so a gate that only ever sees one arrangement cannot pass by accident.
+ * every life question agreed, every responsibility at opposite ends. A card
+ * that reads the wrong rows cannot produce 100 and 0 from that. Then the
+ * mirror case, so a gate that only ever sees one arrangement cannot pass by
+ * accident.
  *
  * The expected figures are computed from the question lists here, not copied
  * from the card, so this is two independent readings of the same answers.
  *
+ * ── AND A THIRD CASE, BECAUSE THE RINGS MEASURE NOW ───────────────────────
+ * Ellie: "I don't think it should be all-or-nothing aligned, I want to include
+ * degrees." The rings were the share of rows that matched exactly and are the
+ * mean closeness of the rows now.
+ *
+ * Two things about that. The "disagree" fixture used each question's first TWO
+ * options, which are NEIGHBOURS: under the old rule that was a flat miss and
+ * under the new one it is 72 per cent, so this gate failed the moment the rule
+ * changed and was right to. Disagreement here means the two ENDS of the option
+ * list, which is what the fixture was always trying to say.
+ *
+ * And a gate that only ever sees 0 and 100 cannot tell a mean from a count, so
+ * there is a third case one step apart, where the two readings differ and the
+ * expected figure is worked out from the option count rather than asserted.
+ *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The overall figure above the rings, which is a similarity score across six
- * domains rather than a count of rows, and has its own test in
+ * The overall figure above the rings, which averages six domains that cut
+ * across the categories rather than the rows of one, and has its own test in
  * expectations-test.mjs.
  */
 
@@ -40,7 +56,7 @@ import { highlightCards } from '../api/_lib/highlight-cards.js';
  * themselves, so "Mostly me" from one and "Mostly them" from the other is
  * agreement. Life answers are not, and compare directly.
  */
-function answers({ lifeAgree, respAgree }) {
+function answers({ lifeAgree, respAgree, lifeStep = null }) {
   const mine = { responsibilities: {}, life: {} };
   const theirs = { responsibilities: {}, life: {} };
 
@@ -56,12 +72,22 @@ function answers({ lifeAgree, respAgree }) {
     }
   }
   for (const q of LIFE_QUESTIONS) {
-    // Life answers compare directly, so the question's own first two options
-    // are enough, and using them means a question whose options change is
-    // still being answered with something it offers.
-    const [first, second] = q.options || ['Yes', 'No'];
-    mine.life[q.id] = first;
-    theirs.life[mirrorLifeId(q.id)] = lifeAgree ? first : (second ?? 'No');
+    /**
+     * Life answers compare directly, by how far apart the two options are in
+     * the question's own ordered list. So disagreement is the two ENDS, not
+     * the first two: the first two are neighbours, which is a near miss and
+     * reads about 72 per cent rather than nought.
+     *
+     * Taken from the question's own options, so a question whose options
+     * change is still being answered with something it offers.
+     */
+    const opts = q.options || ['Yes', 'No'];
+    mine.life[q.id] = opts[0];
+    if (lifeStep != null) {
+      theirs.life[mirrorLifeId(q.id)] = opts[Math.min(lifeStep, opts.length - 1)];
+    } else {
+      theirs.life[mirrorLifeId(q.id)] = lifeAgree ? opts[0] : opts[opts.length - 1];
+    }
   }
   return { mine, theirs };
 }
@@ -103,6 +129,33 @@ for (const [name, opts] of [
   }
 }
 
+/**
+ * ── THE DEGREES REACH THE RING ────────────────────────────────────────────
+ * Every life question answered one step apart. Under a count that is nought;
+ * under a mean it is the average of (1 - 1/(options - 1)) over the questions,
+ * which is computed here from the question list rather than asserted, because
+ * the number depends on how many options each question has.
+ */
+{
+  const pair = answers({ lifeAgree: false, respAgree: true, lifeStep: 1 });
+  const got = rings(pair);
+  const each = LIFE_QUESTIONS.map((q) => {
+    const n = (q.options || ['Yes', 'No']).length;
+    return Math.round((1 - 1 / (n - 1)) * 100);
+  });
+  const want = Math.round(each.reduce((a, b) => a + b, 0) / each.length);
+  if (!got) fails.push('one step apart: the card was not built at all');
+  else if (got['Life & values'] !== want) {
+    fails.push(`one step apart on every life question: Life & values reads`
+      + ` ${got['Life & values']}% and should read ${want}%.`
+      + ' A near miss is not a flat miss, which is the whole of the degrees change;'
+      + ' a ring reading 0 here is counting matches again.');
+  } else if (got['Life & values'] === 0 || got['Life & values'] === 100) {
+    fails.push('one step apart produced a figure at one end of the scale, so this case'
+      + ' cannot tell a mean from a count. Pick options that are genuinely one apart.');
+  }
+}
+
 if (fails.length) {
   console.error('[check-expectations-rings] the storycard is counting the wrong rows:');
   for (const f of fails) console.error(`  ${f}`);
@@ -112,4 +165,4 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log(`[check-expectations-rings] ${LIFE_QUESTIONS.length} life questions and ${RESPONSIBILITY_CATEGORIES.reduce((n, c) => n + c.items.length, 0)} responsibilities, counted into the right ring both ways round.`);
+console.log(`[check-expectations-rings] ${LIFE_QUESTIONS.length} life questions and ${RESPONSIBILITY_CATEGORIES.reduce((n, c) => n + c.items.length, 0)} responsibilities, into the right ring both ways round, and a third case one step apart where a ring that counted matches would read nought.`);

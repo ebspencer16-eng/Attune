@@ -116,6 +116,10 @@ function overallTone(bands: string[], value: number): string {
  * is read now.
  */
 const ADVICE_TRY = 'One thing to try';
+/* The second line of a horseman's tile is `content.copy.selfScoreLabel`, from
+ * api/_conflict-results-prose.js. It was a constant here for about ten minutes
+ * and the website had the same sentence typed into it, which is two copies of a
+ * string Ellie wrote. */
 
 /** The section's blue, which the website uses for this label. */
 const accentBlue = '#1B5FE8';
@@ -426,45 +430,43 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
       {/* block: conflict-snapshot/head */}
       <StepCount step={step} />
       <PageHead copy={content.copy} title={content.copy.snapshotTitle} shared />
-      {/* ── THE SNAPSHOT IS A TABLE ──────────────────────────────────────
-          Ellie: "Your patterns does match the web view, but the conflict
-          snapshot does not."
+      {/* ── AN ACTUAL TABLE, AND NO PILLS ────────────────────────────────
+          Ellie: "Make the conflict snapshot an actual table, a column for me
+          and a column for Preston, and a row for each of the three scenarios.
+          No pills."
 
-          The website draws three columns, the question and a column per
-          person, under a header naming the two of them, with each answer in a
-          blue pill. This drew a row per person per question with a dot and a
-          name against it, so the same three questions read as six findings and
-          there was nothing to scan down.
+          This was two columns of pills with the scenario written above them,
+          and a comment here arguing that the questions are sentences and a
+          phone has no room for a label column. She has asked for that column
+          by name, so it has one. The note is kept rather than deleted so the
+          next person knows the narrow column was a choice and not an oversight.
 
-          Two columns of pills under two names, which is the website's table
-          with the question above each row rather than beside it, because the
-          questions are sentences and a phone has no room for a 1.6fr column. */}
+          What makes it fit is losing the pills. A pill is a background, a
+          border and sixteen points of horizontal padding around three words,
+          which is most of a phone column spent on decoration. The answers are
+          plain text now and the names sit across the top once instead of above
+          each of the six cells. */}
       {/* block: conflict-snapshot/openings */}
       <View style={{ ...card }}>
         <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.88)', marginBottom: Spacing.md }}>Conflict</Text>
+
+        <TableHead you={names.you} partner={partner ? names.partner : null} />
 
         {content.snapshotRows.map((row, i) => {
           const chips = content.openingChips[row.id];
           const mine = pickChip(you.openings, row.field);
           const theirs = partner ? pickChip(partner.openings, row.field) : null;
           return (
-            <View
+            <TableRow
               key={row.id}
-              style={{
-                /* Ellie: "Too much vertical space between rows on conflict
-                   snapshot conflict tile." Sixteen above the rule and sixteen
-                   below it is thirty-two points between two short rows. */
-                paddingTop: i === 0 ? 0 : Spacing.md,
-                marginTop: i === 0 ? 0 : Spacing.md,
-                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
-              }}>
-              {/* not markable: a row label above the two answers it introduces. */}
-              <Text style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>{row.label}</Text>
-              <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-                <SnapshotCell name={names.you} text={chipText(chips, mine)} own />
-                {partner ? <SnapshotCell name={names.partner} text={chipText(chips, theirs)} /> : null}
-              </View>
-            </View>
+              label={row.label}
+              mine={chipText(chips, mine)}
+              theirs={partner ? chipText(chips, theirs) : null}
+              /* Ellie: "Too much vertical space between rows on conflict
+                 snapshot conflict tile." Sixteen above the rule and sixteen
+                 below it is thirty-two points between two short rows. */
+              first={i === 0}
+            />
           );
         })}
         {!partner ? (
@@ -515,13 +517,17 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
             <Prose style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>
               {content.resetQuestion}
             </Prose>
-            {/* The website puts these two in the same pills as the rows
-                above, side by side. They were the old dot-and-name rows, which
-                is the shape the snapshot table has just left behind. */}
-            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-              {you.strength ? <SnapshotCell name={names.you} text={you.strength} own /> : null}
-              {partner?.strength ? <SnapshotCell name={names.partner} text={partner.strength} /> : null}
-            </View>
+            {/* The same two columns as the snapshot table above, because it
+                is the same question asked of the two of them. It used to be
+                the pills the table has just lost, and leaving them here would
+                have made this the only pair of pills on the page. */}
+            <TableHead you={names.you} partner={partner?.strength ? names.partner : null} />
+            <TableRow
+              label=""
+              mine={you.strength || '\u2014'}
+              theirs={partner?.strength || null}
+              first
+            />
           </View>
         ) : null}
       </View>
@@ -571,27 +577,37 @@ function Patterns({
       ) : null}
 
       {/* block: conflict-patterns/rows */}
-      {/* ── ONE CARD, A ROW PER PATTERN ──────────────────────────────────
-          The website draws the four patterns as rows inside one card, divided
-          by a hairline. The app drew a card each, so four readings of one
-          measure read as four separate findings, which is the same mistake the
-          comms glance used to make with its dimensions.
+      {/* ── A TILE EACH, AND THREE THINGS IN IT ──────────────────────────
+          Ellie: "I want a tile for each of the four horsemen. First line
+          should be 'Criticism: going after the person rather than the problem',
+          second line 'Self-assigned score: sometimes' with the score in orange.
+          No analysis paragraph, then go straight to One thing to try."
 
-          Three other things were the website's and are here now: the
-          definition line under each name, the bar filled the way the website
-          fills it, and the label over the advice, which reads differently when
-          a pattern is rare. Ellie: "Conflict styles detailed pages don't match
-          the site's formatting." */}
-      <View style={card}>
-        {you.ranked.map((p, i) => {
+          This was one card with four rows divided by hairlines, and a comment
+          here arguing that four cards read as four separate findings. She has
+          asked for four tiles, and the content she asked for is why it now
+          works: a tile that is three short lines is a tile, and a tile that was
+          a name, a definition, a bar, a band label and a paragraph was a page.
+
+          Gone with the paragraph: the frequency bar. She listed what is on the
+          tile and a bar is not in the list, and the line above the advice says
+          the same thing in words. A bar and a word saying "Sometimes" are one
+          measure drawn twice.
+
+          Both surfaces, because this changes what the tile SAYS and not only
+          how it is boxed. One of them keeping the paragraph would be the two
+          products telling one couple different things. */}
+      <View style={{ gap: Spacing.md }}>
+        {you.ranked.map((p) => {
           const v = p.value ?? 0;
           const color = content.bandColors[Math.min(v, content.bandColors.length - 1)] || PANEL_EDGE;
           const label = content.frequencyLabels[v] || '';
           const copy = content.patternCopy[p.key] || {};
-          // The band entries are objects and the label and definition are
-          // strings, in one map, which is how the website writes it.
-          const band = copy[String(v)];
-          const note = typeof band === 'object' ? band?.note : null;
+          /* `band` and `note` were read here. The band entry's note is the
+             analysis paragraph Ellie asked to have off this tile, and nothing
+             else on this screen uses it; the website's patterns page still
+             the website has never drawn it either. Removed rather than left assigned:
+             a local nothing reads is a line that looks like a feature. */
           const definition = typeof copy.definition === 'string' ? copy.definition : null;
           // Sometimes and Often get the action; Rarely gets the awareness note;
           // Never gets neither. Attaching an instruction to a pattern that is
@@ -613,36 +629,35 @@ function Patterns({
           const adviceLabel = v >= 2 ? ADVICE_TRY : (advice?.title || '');
 
           return (
-            <View
-              key={p.key}
-              style={{
-                paddingTop: i === 0 ? 0 : Spacing.lg,
-                marginTop: i === 0 ? 0 : Spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1, borderTopColor: PANEL_EDGE,
-              }}>
-              {/* not markable: the name of a pattern, which labels the block under it. */}
-              <Text style={{ ...Type.cardTitle, color: Palette.white }}>{titleFor(p.key)}</Text>
-              {definition ? (
-                <Prose style={{ ...Type.small, color: INK_QUIET, marginTop: 2 }}>{definition}</Prose>
-              ) : null}
+            <View key={p.key} style={card}>
+              {/* Her first line: the name and what it means, as one sentence.
+                  One Prose rather than a heading and a line under it, because
+                  that is how she wrote it and because a reader marking this
+                  marks the whole thought rather than half of it. */}
+              <Prose style={{ ...Type.body, color: Palette.white, lineHeight: 21 }}>
+                {definition ? `${titleFor(p.key)}: ${definition}` : titleFor(p.key)}
+              </Prose>
 
-              {/* Frequency named above the bar, in the bar's own colour, so the
-                  colour is never the only thing carrying the meaning. */}
-              {/* not markable: a band label the app picks from the score. */}
-              <Text style={{ ...Type.small, color, fontWeight: '700', textAlign: 'right', marginTop: Spacing.md }}>
-                {label}
+              {/* Her second line. The score keeps the band's own colour rather
+                  than being painted orange whatever it says: orange is what
+                  Sometimes already is, and painting Never orange would make the
+                  colour mean nothing. */}
+              {/* not markable: a measure, in the words the server names it with. */}
+              <Text style={{ ...Type.small, color: INK_QUIET, marginTop: Spacing.sm }}>
+                {content.copy.selfScoreLabel}
+                <Text style={{ color, fontWeight: '700' }}>{label}</Text>
               </Text>
-              <View style={{ height: 5, borderRadius: Radius.pill, backgroundColor: PANEL_EDGE, marginTop: Spacing.xs, overflow: 'hidden' }}>
-                {/* The website's fill: the band as a share of the top band,
-                    with a sliver left visible at zero so the track reads as a
-                    measure rather than as an empty box. The app filled a
-                    quarter of the bar for a pattern that never happens. */}
-                <View style={{ width: `${Math.max((v / 3) * 100, 3)}%`, height: 5, backgroundColor: color }} />
-              </View>
 
-              {note ? (
-                <Prose style={{ ...Type.body, color: INK, marginTop: Spacing.md }}>{note}</Prose>
-              ) : null}
+              {/* ── NO ANALYSIS PARAGRAPH, AND IT WAS APP-ONLY ──────────
+                  Ellie: "No analysis paragraph." It was the band entry's
+                  `note`, and the website's patterns page has never drawn it:
+                  that page is the name, the definition, the frequency and the
+                  advice. So this was a paragraph the app showed and the website
+                  did not, which is the thing she has asked twice not to happen.
+
+                  The copy is still in api/_conflict-results-prose.js and is now
+                  drawn by nothing. Flagged in TASKS.md rather than deleted: it
+                  is her copy and whether it is retired is her call. */}
 
               {advice ? (
                 /* ── WHITE ON NEAR-WHITE ────────────────────────────────
@@ -759,33 +774,63 @@ function Wrote({ data, ground = null, groundStops = null, step = null }: {
  * grey, which is the distinction the website draws between the two columns of
  * its table and the only thing on the row saying which is which at a glance.
  */
-function SnapshotCell({ name, text, own = false }: { name: string; text: string; own?: boolean }) {
+/**
+ * The snapshot table's three columns.
+ *
+ * The scenario is a sentence and the two answers are three or four words, so
+ * the label column is wider than either of them and still narrower than both
+ * together. Flex weights rather than points, so the table is the same shape on
+ * any phone.
+ */
+const SNAPSHOT_COLS = { label: 1.25, cell: 1 };
+
+/** The two names, once, across the top of a table. */
+function TableHead({ you, partner }: { you: string; partner: string | null }) {
   return (
-    <View style={{ flex: 1 }}>
-      {/* ── THE NAME IS ON THE GHOST, NOT ON THE PILL ──────────────────
-          Ellie: "Adjust text coloring when you change tile color so that text
-          is visible." The pills keep their light grounds and their dark type.
-          The two names sit above them, directly on a ghost panel over the
-          section's blue, and they were still the blue and the grey the pills
-          use, which on that ground is barely a colour at all. */}
-      <Text
-        style={{
-          ...Type.eyebrow, fontSize: 9, marginBottom: Spacing.xs,
-          color: own ? '#BFD4FF' : 'rgba(255,255,255,0.72)',
-        }}>
-        {name}
-      </Text>
-      <View
-        style={{
-          alignSelf: 'flex-start',
-          backgroundColor: own ? '#EEF3FF' : Palette.warm,
-          borderColor: own ? `${accentBlue}33` : c.border, borderWidth: 1,
-          borderRadius: Radius.pill, paddingVertical: 5, paddingHorizontal: Spacing.md,
-        }}>
-        <Prose style={{ ...Type.small, fontWeight: '600', color: own ? accentBlue : c.textMuted }}>
-          {text}
-        </Prose>
-      </View>
+    <View
+      style={{
+        flexDirection: 'row', gap: Spacing.sm,
+        paddingBottom: Spacing.sm,
+        borderBottomWidth: 1, borderBottomColor: PANEL_EDGE,
+      }}>
+      <View style={{ flex: SNAPSHOT_COLS.label }} />
+      {/* not markable: a column heading. */}
+      <Text style={{ ...Type.eyebrow, fontSize: 9, color: '#BFD4FF', flex: SNAPSHOT_COLS.cell }}>{you}</Text>
+      {partner ? (
+        <Text style={{ ...Type.eyebrow, fontSize: 9, color: 'rgba(255,255,255,0.72)', flex: SNAPSHOT_COLS.cell }}>
+          {partner}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * One row: what the question was, and what each of them answered.
+ *
+ * Ellie: "No pills." These were a background, a border and sixteen points of
+ * padding around three words each. Plain text, in the two people's own two
+ * colours, which is what tells the columns apart now that the pill does not.
+ *
+ * The reader's own answer is the lighter blue the rest of this section uses
+ * for them; `Prose` on both, because these are words a reader can mark.
+ */
+function TableRow({ label, mine, theirs, first = false }: {
+  label: string; mine: string; theirs: string | null; first?: boolean;
+}) {
+  const cell = { ...Type.small, fontWeight: '600' as const, flex: SNAPSHOT_COLS.cell, lineHeight: 17 };
+  return (
+    <View
+      style={{
+        flexDirection: 'row', gap: Spacing.sm, alignItems: 'flex-start',
+        paddingTop: Spacing.md,
+        marginTop: first ? 0 : Spacing.md,
+        borderTopWidth: first ? 0 : 1, borderTopColor: PANEL_EDGE,
+      }}>
+      {/* not markable: a row label, which is the scenario the answers are about. */}
+      <Text style={{ ...Type.small, color: INK_QUIET, flex: SNAPSHOT_COLS.label, lineHeight: 17 }}>{label}</Text>
+      <Prose style={{ ...cell, color: '#DCE7FF' }}>{mine}</Prose>
+      {theirs !== null ? <Prose style={{ ...cell, color: 'rgba(255,255,255,0.92)' }}>{theirs}</Prose> : null}
     </View>
   );
 }

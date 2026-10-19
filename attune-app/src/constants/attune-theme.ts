@@ -166,6 +166,24 @@ export const OrangeGround = ['#CB5A33', '#F09763'] as const;
  * app means "this belongs to that section", so borrowing one for emphasis
  * breaks the only signal it carries.
  */
+/**
+ * The two markers on the couple type page's bullet lists.
+ *
+ * NOT section colours, which is why they are here rather than borrowed from
+ * SectionColor below. The green means "you already agree about this" and the
+ * orange means "worth a look"; they happen to be the same two hexes as
+ * Reflection and Communication and they are not saying what those say.
+ *
+ * The website draws the same badges from BULLET_TONES in
+ * api/_lib/section-grounds.js. This project cannot import that, so
+ * check-tab-grounds.mjs holds the two equal, the same arrangement as the tab
+ * grounds and the prompt-card tints.
+ */
+export const BulletTone = {
+  good: { ink: '#10B981', fill: 'rgba(16,185,129,0.12)', edge: 'rgba(16,185,129,0.3)', mark: '✓' },
+  watch: { ink: '#E8673A', fill: 'rgba(232,103,58,0.1)', edge: 'rgba(232,103,58,0.28)', mark: '!' },
+} as const;
+
 export const SectionColor = {
   communication: '#E8673A',
   expectations: '#1B5FE8',

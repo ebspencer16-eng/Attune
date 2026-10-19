@@ -31,6 +31,11 @@
  * stays invisible rather than becoming its own signal.
  */
 
+import { closenessPct, distancePct } from './alignment.js';
+/* Softening and the shared deep end both live with the other grounds. A
+   gradient for one of these pages was being built here with hex alpha while
+   every other page's came from one module. */
+import { soften, SECTION_GROUNDS } from './section-grounds.js';
 import {
   INTIMACY_DIMENSIONS, INTIMACY_DOMAINS,
   INTIMACY_QUESTIONS,
@@ -47,6 +52,16 @@ import {
  * app drew all six on cream, so the section that is most obviously designed on
  * one product looked undesigned on the other. One table, both surfaces.
  */
+/**
+ * The deep end every results ground finishes on.
+ *
+ * Read from the reflection ground's own first stop rather than typed, because
+ * section-grounds.js does not export NAVY and a second copy of a hex is this
+ * codebase's whole failure mode. That ground's first stop IS the shared navy,
+ * softened, which is what these pages want to end on too.
+ */
+const DEEP_END = '#1B2A5E';
+
 const DIM_TINT = {
   frequency: '#7A2540',
   initiating: '#8A3350',
@@ -109,9 +124,49 @@ export function intimacyActionPlan(rows) {
   return chosen.sort((a, b) => page.indexOf(a.id) - page.indexOf(b.id));
 }
 
+/**
+ * The ground one Physical Intimacy page is painted with.
+ *
+ * ── SOFTENED, AND MADE MEASURABLE AT THE SAME TIME ────────────────────────
+ * Ellie: "Relationship reflection pages and physical intimacy detailed pages
+ * are too dark, can we soften those backgrounds?"
+ *
+ * These are the pages she means. The app's two Physical Intimacy detail pages
+ * prefer `domain.ground`, which is this, over the ground the results nav sends,
+ * so this function and not `intimacy-overview` is what she is looking at.
+ *
+ * It used to return `[tint + 'dd', tint + '99', '#22204a']`: the tint at two
+ * alphas over whatever happens to be behind, finishing on a near-black purple
+ * that is no other page's deep end. Two problems in one line. An alpha has no
+ * colour of its own, so nothing can say what white type reads against here,
+ * and check-ground-contrast measured 41 stops across six grounds and six
+ * categories without ever looking at these six. The pages reported as too dark
+ * were the pages nothing measured.
+ *
+ * Opaque now, lifted through `soften`, and finishing on the softened navy every
+ * other results ground finishes on. Every stop is a colour a ratio can be
+ * taken of, and check-ground-contrast takes it.
+ */
 export function groundForDimension(id) {
   const t = DIM_TINT[id] || DIM_TINT.frequency;
-  return [`${t}dd`, `${t}99`, '#22204a'];
+  /**
+   * The tint twice, lifted by different amounts, then the deep end.
+   *
+   * Each tint sits between 7.6 and 11.8 to 1 before softening, against a
+   * requirement of 4.6, so all of that room was going spare.
+   *
+   * ── WHY THE DEEP END HAS ITS OWN FLOOR ────────────────────────────────
+   * The page runs deep tint, lighter tint at 38 per cent, deep end at the
+   * foot. Softened to the same 7.5 as everything else the end came out at
+   * 7.60 against a first stop of 8.55, so the gradient stopped going anywhere:
+   * it ended LIGHTER than it started and the navy read as a band across the
+   * bottom of a rose page rather than as its depth.
+   *
+   * 10 keeps it the darkest colour on the page while still lifting it from the
+   * 15.3 that `#22204a` read at. Measured, not guessed, and the whole reason
+   * the floor is an argument rather than a constant.
+   */
+  return [soften(t, 8.5), soften(t, 5.4), soften(DEEP_END, 10)];
 }
 
 /**
@@ -314,7 +369,7 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
       state,
       // Rounded to a percentage of the scale. The raw average is a distance
       // between 0 and 1 and means nothing to a reader.
-      distancePct: found?.avgGap == null ? null : Math.round(found.avgGap * 100),
+      distancePct: distancePct(found?.avgGap),
       /**
        * How aligned the two of them are here, as a percentage.
        *
@@ -327,8 +382,14 @@ export function intimacyResults({ mine, theirs, variant = 'premarital' }) {
        * reads 100 and the widest possible gap reads 0. Null when one of them
        * skipped the aspect: an unanswered aspect is not 0 per cent aligned,
        * it is unanswered, and the row says so in words.
+       *
+       * The inversion was written out here and again on the Expectations bar,
+       * in two different shapes. Ellie: "One source of truth for every
+       * alignment score, wherever it appears." It is closenessPct now, in
+       * api/_lib/alignment.js, which is also what decides the band on the
+       * line above.
        */
-      alignedPct: found?.avgGap == null ? null : Math.round((1 - found.avgGap) * 100),
+      alignedPct: closenessPct(found?.avgGap),
       body: prose.body,
       reason: prose.reason,
       // The question to take away. This is the actual product of the section:

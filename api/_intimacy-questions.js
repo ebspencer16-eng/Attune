@@ -20,6 +20,10 @@
 // This is a SCAFFOLD question set. Final copy is under review; ids are stable
 // so answers persist across copy edits.
 
+// What a gap MEANS is decided in one place for the whole product. See
+// api/_lib/alignment.js and the note on gapState below.
+import { bandFor } from './_lib/alignment.js';
+
 /**
  * The two pages Physical Intimacy is read on, and which aspects sit on each.
  *
@@ -41,6 +45,7 @@
  * So `dims` is ordered, and the tie-break reads it left to right. Written
  * once, here, rather than in the two renderers that need it.
  */
+
 export const INTIMACY_DOMAINS = [
   {
     id: 'how',
@@ -612,11 +617,28 @@ export function scoreIntimacyPair(q, mineRaw, theirsRaw) {
   return { gap, state: gapState(gap) };
 }
 
+/**
+ * What a gap means, from the one place that decides that.
+ *
+ * ── WHY IT IS NOT THE TWO NUMBERS ANY MORE ────────────────────────────────
+ * Ellie: "One source of truth for every alignment score, wherever it appears."
+ *
+ * The 0.2 and the 0.5 were written out here, and the same judgement was being
+ * made three other ways: `agrees` in api/_lib/expectations.js decided it as a
+ * boolean, intimacy-results.js inverted the gap into a percentage by hand, and
+ * the phone divided two counts. They are all api/_lib/alignment.js now.
+ *
+ * Physical Intimacy keeps every band and every word it has ever shown: the
+ * thresholds there were taken from this function, so nothing a customer has
+ * read changes. What changes is that there is one place to change them.
+ *
+ * 'incomplete' rather than null for a missing gap, because that is the word
+ * this exercise's prose is written against and `bandFor` answers in bands
+ * rather than in reasons.
+ */
 function gapState(gap) {
   if (gap == null) return 'incomplete';
-  if (gap <= 0.2) return 'aligned';
-  if (gap <= 0.5) return 'discuss';
-  return 'different';
+  return bandFor(gap);
 }
 
 // Roll up per-dimension and overall alignment for a completed pair.

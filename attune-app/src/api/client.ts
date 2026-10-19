@@ -98,6 +98,15 @@ export type ResultDimension = {
   /** Which Communication screen it belongs on. */
   domain: 'inner' | 'connection' | 'hard' | null;
   domainLabel: string | null;
+  /**
+   * That screen's section id, from the server.
+   *
+   * Ellie asked for the overview's bars to open the page they belong to. The
+   * app could build `comm-${domain}` itself and must not: an address assembled
+   * by the surface that draws it is a guess about the section registry, which
+   * is how every article shared from this app went to a 404 for months.
+   */
+  section?: string | null;
   /** Self-report, 1 to 5. What the scales draw. */
   a: number | null;
   b: number | null;
@@ -378,6 +387,17 @@ export type ExpectationRow = {
   prompt?: string | null;
   you: string;
   them: string;
+  /**
+   * How close the two answers are, 0 to 100, and which of the three things we
+   * say about that.
+   *
+   * Ellie: "I don't think it should be all-or-nothing aligned, I want to
+   * include degrees (preston and I were basically aligned on this one so it's
+   * a good example)." `aligned` is the top of this scale rather than a
+   * separate opinion about it: api/_lib/alignment.js owns both.
+   */
+  closeness: number | null;
+  band: 'aligned' | 'discuss' | 'different' | null;
   aligned: boolean;
 };
 
@@ -609,6 +629,8 @@ export type ExpectationsSummary = {
   /** What the life questions are called. One string, shared with the site. */
   answered: number;
   aligned: number;
+  /** Every row's closeness averaged, for one figure about the whole exercise. */
+  closeness: number | null;
   /* The top-level `differences` was here. The only thing that drew it was the
      "Already aligned / Worth discussing" line Ellie had removed from the
      expectations overview, so the server stopped sending it. The per-category
@@ -627,6 +649,15 @@ export type ExpectationsSummary = {
     answered: number;
     aligned: number;
     differences: number;
+    /**
+     * The number on the bar: the mean closeness of this category's rows.
+     *
+     * It used to be `aligned / answered` worked out here, so a category of
+     * near misses drew the same empty bar as a category of opposites. The
+     * server sends the figure now and api/_lib/alignment.js is the only thing
+     * that computes one.
+     */
+    closeness: number | null;
   }[];
 };
 

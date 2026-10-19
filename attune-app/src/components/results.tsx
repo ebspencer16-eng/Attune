@@ -59,7 +59,7 @@ import { Eyebrow } from '@/components/screen-states';
 import { WAITING } from '@/constants/waiting';
 import { ResultsScroll } from '@/components/results-scroll';
 import {
-  BottomTabInset, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
+  BottomTabInset, BulletTone, Colors, Fonts, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
 
 /**
@@ -1624,13 +1624,40 @@ function ExpectationsOverview({
             </View>
             <View style={{ gap: Spacing.sm }}>
               {categories.map((cat) => {
-                const pct = cat.answered ? Math.round((cat.aligned / cat.answered) * 100) : 0;
+                /**
+                 * ── THE DEGREE, NOT THE TALLY ──────────────────────────
+                 * Ellie: "I don't think it should be all-or-nothing aligned,
+                 * I want to include degrees."
+                 *
+                 * This was `cat.aligned / cat.answered`, the share of rows
+                 * that matched exactly, worked out here and again on the
+                 * website. A category where every answer was one step apart
+                 * drew the same empty bar as one where every answer was
+                 * opposite. The server sends the mean closeness now, from
+                 * api/_lib/alignment.js, which is the only thing in the
+                 * product that turns a distance into a figure.
+                 */
+                const pct = cat.closeness ?? 0;
                 /* alignedTone, not the ramp written out again. The note on that
                    function says a percentage means the same thing wherever it
                    appears, and this line was the counter-example. */
                 const bar = alignedTone(pct);
                 return (
-                  <View key={cat.section} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  /* The row opens its category's page. Ellie: "Add ability to
+                     tap the bars or the pole labels on the comms and
+                     expectations overview pages to go to those pages." The
+                     website's version of this row has been clickable all
+                     along; the app's was not. The section id is the server's,
+                     and it is the same one this row is keyed by. */
+                  <Pressable
+                    key={cat.section}
+                    onPress={() => showSection(cat.section)}
+                    accessibilityRole="link"
+                    accessibilityLabel={`${cat.label}, ${pct} per cent aligned. Open this page.`}
+                    style={({ pressed }) => ({
+                      flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                      opacity: pressed ? 0.6 : 1,
+                    })}>
                     <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 104 }}>
                       {cat.label}
                     </Prose>
@@ -1640,7 +1667,7 @@ function ExpectationsOverview({
                     <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: bar, width: 34, textAlign: 'right' }}>
                       {pct}%
                     </Text>
-                  </View>
+                  </Pressable>
                 );
               })}
             </View>
@@ -1665,6 +1692,10 @@ function ExpectationsOverview({
                     key={cat.section}
                     label={cat.label}
                     items={cat.rows.filter((r) => !r.aligned).map((r) => r.item)}
+                    /* The page this category's conversations live on. Its own
+                       section id from the server, the same one the row above
+                       is keyed by. */
+                    section={cat.section}
                     /* The category's own colour, from the server. All six were
                        painted in one section colour here, so the app said the
                        six tiles were the same kind of thing and the website
@@ -1701,7 +1732,32 @@ function ExpectationsOverview({
  * word "Show" and a chevron so it reads as openable, then a checkbox line per
  * topic. Collapsed by default so the page stays scannable.
  */
-function CategoryDrawer({ label, items, color }: { label: string; items: string[]; color: string }) {
+/**
+ * One category's conversations, with a way to its page.
+ *
+ * ── THE ARROW ─────────────────────────────────────────────────────────────
+ * Ellie, of these rows: "each row should have a little arrow on the right side
+ * of the row to open that page directly, then remove the open expectations
+ * arrow at the bottom of the expectations list."
+ *
+ * So the header does two things and they are two targets. Tapping the words or
+ * the count opens the list underneath; tapping the arrow on the right opens
+ * the category's own page. The website carried this as an "Open Household →"
+ * line at the foot of the expanded list, which is the arrow she asked to have
+ * moved, and the app had no way to the page at all.
+ *
+ * The arrow is its own Pressable inside the header's. React Native hands a
+ * touch to the innermost responder and does not bubble it, so the arrow does
+ * not also toggle the drawer. That is the opposite of the website, where a
+ * click anywhere inside a <summary> toggles the <details> and the arrow has to
+ * say preventDefault.
+ */
+function CategoryDrawer({ label, items, color, section }: {
+  label: string; items: string[]; color: string;
+  /** The category's page, from the server. Null leaves the arrow undrawn
+   *  rather than drawing one that does nothing. */
+  section?: string | null;
+}) {
   const [open, setOpen] = useState(false);
   useClosesOnLeave(useCallback(() => setOpen(false), []));
   return (
@@ -1727,6 +1783,23 @@ function CategoryDrawer({ label, items, color }: { label: string; items: string[
         </Text>
         <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Show</Text>
         <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13 }}>{open ? '\u25B4' : '\u25BE'}</Text>
+        {section ? (
+          /* Her little arrow. A box round it rather than the glyph alone: a
+             13 point character is not a tap target, and hitSlop on a nested
+             Pressable would overlap the header it sits inside. */
+          <Pressable
+            onPress={() => showSection(section)}
+            accessibilityRole="link"
+            accessibilityLabel={`Open ${label}`}
+            style={({ pressed }) => ({
+              paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm,
+              marginLeft: Spacing.xs, marginVertical: -Spacing.xs,
+              borderRadius: Radius.sm,
+              backgroundColor: pressed ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.10)',
+            })}>
+            <Text style={{ color: Palette.white, fontSize: 13, lineHeight: 15 }}>{'\u2192'}</Text>
+          </Pressable>
+        ) : null}
       </Pressable>
       {open ? (
         <View style={{ borderTopColor: 'rgba(255,255,255,0.16)', borderTopWidth: 1 }}>
@@ -3925,7 +3998,30 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
      * wraps, which keeps the layout and loses the end of a word: the wrong
      * trade to leave silent, so check-dimension-order.mjs measures it.
      */
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26 }}>
+    /**
+     * ── THE WHOLE ROW OPENS ITS PAGE ────────────────────────────────────
+     * Ellie: "Add ability to tap the bars or the pole labels on the comms and
+     * expectations overview pages to go to those pages."
+     *
+     * The name, the track and the dots are one target rather than three, so
+     * there is no dead strip between them to land in. The address comes from
+     * the server on the dimension; a row the server has not given one to is
+     * not pressable instead of being pressable and doing nothing.
+     *
+     * Pressable rather than a gesture: this page has no edge-tap of its own to
+     * compete with. The storycards and the results pages do, which is why the
+     * margin rail needed Gesture.Tap and blocksExternalGesture, and it is
+     * worth knowing the difference rather than reaching for the heavier tool.
+     */
+    <Pressable
+      onPress={dim.section ? () => showSection(dim.section as string) : undefined}
+      disabled={!dim.section}
+      accessibilityRole={dim.section ? 'link' : undefined}
+      accessibilityLabel={dim.section ? `${dim.label}. Open ${dim.domainLabel || 'this page'}.` : undefined}
+      style={({ pressed }) => ({
+        flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26,
+        opacity: pressed ? 0.6 : 1,
+      })}>
       {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
       <Text
         numberOfLines={1}
@@ -3950,7 +4046,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
           />
         ))}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -4232,6 +4328,21 @@ function CoupleType({ results, you, them, title }: {
         {/* The website's three blocks, in the website's order and with the
             website's headings. All three were absent because /api/results did
             not forward strengths, stickingPoints or tips. */}
+        {/* ── BULLETS, NOT A TILE EACH ─────────────────────────────────
+            Ellie: "Two bullets under each heading, not a tile each."
+
+            Each of these four sentences was a white card with its own padding
+            and shadow, so four sentences took the height of four findings. A
+            tile says "this is a thing in its own right"; a bullet says "this
+            is one of two". Two of two, under a heading that already names what
+            they are.
+
+            It does NOT give the couple map the room she asked for in the same
+            message, which is what I first wrote here. These sit BELOW the type
+            reveal, so what they save is scroll length rather than anything
+            above the fold. W57 is a separate question and the trade-off in it
+            is hers: the map can only grow by pushing the type tile down, and
+            she asked for that tile to be fully on screen. */}
         {type.strengths?.length ? (
           <View style={{ marginTop: Spacing.xl }}>
             <Text style={{ ...Type.eyebrow, color: accent, marginBottom: Spacing.sm }}>
@@ -4239,9 +4350,7 @@ function CoupleType({ results, you, them, title }: {
               What comes naturally
             </Text>
             {type.strengths.slice(0, 2).map((t) => (
-              <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Prose style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Prose>
-              </View>
+              <Bullet key={t} kind="good">{interp(t, you, them)}</Bullet>
             ))}
           </View>
         ) : null}
@@ -4253,9 +4362,7 @@ function CoupleType({ results, you, them, title }: {
               What&apos;s worth being aware of
             </Text>
             {type.stickingPoints.slice(0, 2).map((t) => (
-              <View key={t} style={{ ...card(), marginBottom: Spacing.sm }}>
-                <Prose style={{ ...Type.body, color: c.text }}>{interp(t, you, them)}</Prose>
-              </View>
+              <Bullet key={t} kind="watch">{interp(t, you, them)}</Bullet>
             ))}
           </View>
         ) : null}
@@ -4932,6 +5039,42 @@ function Dot({ pct, dy, color, label }: { pct: number; dy: number; color: string
       {label ? (
         <Text style={{ fontSize: 9, lineHeight: 11, fontWeight: '700', color: Palette.white }}>{label}</Text>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * One sentence in a list of two, with the marker the website already uses.
+ *
+ * ── WHY NOT A PLAIN DOT ───────────────────────────────────────────────────
+ * Ellie: "Two bullets under each heading, not a tile each." The complaint is
+ * the tile: four sentences each in a white card with its own padding read as
+ * four findings rather than as two and two.
+ *
+ * The website has never drawn tiles here. It draws exactly this: a small round
+ * badge, a tick in green for what comes naturally and an exclamation in orange
+ * for what is worth being aware of, and the sentence beside it. So the app
+ * draws that rather than a third marker of its own, which is the rule the rest
+ * of this file follows. If she wants a plain dot it is one line.
+ *
+ * `Prose` rather than `Text` for the sentence, because these are words a reader
+ * can highlight and tag. A Text here would make these four the only prose on
+ * the page that cannot be marked.
+ */
+function Bullet({ children, kind }: { children: string; kind: keyof typeof BulletTone }) {
+  const t = BulletTone[kind];
+  return (
+    <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm, alignItems: 'flex-start' }}>
+      {/* not markable: a list marker, not words. */}
+      <View
+        style={{
+          width: 20, height: 20, borderRadius: 10, marginTop: 2,
+          backgroundColor: t.fill, borderColor: t.edge, borderWidth: 1.5,
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+        <Text style={{ fontSize: 11, lineHeight: 13, fontWeight: '700', color: t.ink }}>{t.mark}</Text>
+      </View>
+      <Prose style={{ ...Type.body, color: c.text, flex: 1, lineHeight: 22 }}>{children}</Prose>
     </View>
   );
 }

@@ -20,6 +20,7 @@
  */
 
 import { COUPLE_TYPES } from '../_couple-types.js';
+import { meanPct } from './alignment.js';
 import { overallExpectationsPct } from './expectations-alignment.js';
 import { CALLOUT_TONES, RING_COLORS, statColor } from './storycard-style.js';
 import { commAlignmentPct, selfGap } from './comm-alignment.js';
@@ -238,8 +239,20 @@ export function highlightCards({
     const allRows = expectations.categories.flatMap((cat) => cat.rows);
     const lifeRows = allRows.filter((r) => r.kind === 'life');
     const respRows = allRows.filter((r) => r.kind !== 'life');
-    const pct = (rows) => (rows.length
-      ? Math.round((rows.filter((r) => r.aligned).length / rows.length) * 100) : 0);
+    /**
+     * ── AND THE RINGS WERE COUNTING, NOT MEASURING ────────────────────────
+     * Ellie: "I don't think it should be all-or-nothing aligned, I want to
+     * include degrees." This was the share of rows that matched exactly, so a
+     * couple one step apart on every question read the same nought as a
+     * couple at opposite ends of every one, on the card that leads with a
+     * percentage.
+     *
+     * meanPct over the rows' own closeness, from api/_lib/alignment.js. The
+     * big figure above it is still the domain-weighted overall, which is a
+     * roll-up decision rather than a second rule: both are averages of the
+     * same per-item distance.
+     */
+    const pct = (rows) => (meanPct(rows.map((r) => r.closeness)) ?? 0);
 
     cards.push({
       id: 'expectations', kind: 'stat-rings', tone: 'blue',

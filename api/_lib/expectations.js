@@ -24,6 +24,7 @@ import {
   RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, substName,
   LIFE_CATEGORY_LABEL,
 } from '../_questions.js';
+import { bandFor, closenessPct, isAligned, meanPct } from './alignment.js';
 import { introFor } from './category-intros.js';
 import { starterFor } from './expectation-starters.js';
 
@@ -78,6 +79,39 @@ export function childhoodValue(value) {
 }
 
 /**
+ * What each of them grew up with, including what "Both" turned out to mean.
+ *
+ * ── THE PROMISE ───────────────────────────────────────────────────────────
+ * Ellie: "Expectations experienced column only shows 'both' where expects
+ * shows 'genuinely' and 'usually'."
+ *
+ * Both columns ask the same follow-up. Answering Both to who did the cooking
+ * now opens "A bit more specifically" and stores it in `bothDetail`; answering
+ * Both to who did it in the house you grew up in opens the same question and
+ * stores it in `childhoodBothDetail`. The Expects column has read its
+ * refinement since Ellie asked for it. Nothing has ever read this one.
+ *
+ * So the question was asked of every customer, was required before the item
+ * counted as answered, and the answer went nowhere. Written by both exercise
+ * surfaces, read by `api/_lib/exercise-progress.js` only to count it as
+ * answered, and drawn by neither results page.
+ *
+ * ── WHY IT IS NOT respDisplay ─────────────────────────────────────────────
+ * The value is 'Both' here and 'Both of us' there, and the refinement names
+ * the two adults in the house that person grew up in rather than the two
+ * people in the couple. Same shape, different vocabulary, so the fall-back
+ * word is different and sharing the function would mean teaching it which
+ * column it is in.
+ */
+export function childhoodDisplay(value, detail) {
+  const v = childhoodValue(value);
+  if (v == null) return null;
+  const refined = String(detail ?? '').trim();
+  if (refined) return refined;
+  return v;
+}
+
+/**
  * What a results page shows for one answer.
  *
  * ── WHY "BOTH OF US" IS NOT IT ────────────────────────────────────────────
@@ -106,49 +140,161 @@ export function normRespValue(value, isSelf, youName, themName) {
 }
 
 /**
- * Do two answers name the same person?
+ * Where an answer sits on the five-point scale between the two of them.
  *
- * Compared as absolute sides, never as strings. "Primarily mine" from both
- * partners is a disagreement, because each has claimed it. Comparing the
- * strings says they match, and that is the bug this exists to avoid.
+ * ── WHY A SCALE AND NOT A SIDE ────────────────────────────────────────────
+ * Ellie: "I don't think it should be all-or-nothing aligned, I want to include
+ * degrees (preston and I were basically aligned on this one so it's a good
+ * example)." The example was Emotional Labour, where she answered "Both of us"
+ * and refined it to "Usually Ellie, sometimes Preston" while Preston answered
+ * "Ellie". Neighbours, scored as a flat miss.
+ *
+ * `sideOf` above answers a three-way question: you, both, or them. The scale
+ * is five points, because the exercise asks a follow-up every time someone
+ * answers Both and the follow-up is exactly which way it leans:
+ *
+ *   0    you                      the name, or "Primarily mine" from you
+ *   0.5  both, leaning to you     "Usually <you>, sometimes <them>"
+ *   1    both, evenly             "Genuinely 50/50", or Both with no detail
+ *   1.5  both, leaning to them    "Usually <them>, sometimes <you>"
+ *   2    them                     the name, or "Primarily my partner's"
+ *
+ * That follow-up has been asked since the exercise shipped, is required
+ * before an item counts as answered, and was read by nothing that scored.
+ * It is on the page: respDisplay prints it in place of "Both of us". So the
+ * product has been showing her the refinement and comparing as though she had
+ * not given it.
+ *
+ * ── THE TWO KINDS OF VALUE, AGAIN ─────────────────────────────────────────
+ * A name is absolute: "Ellie" means Ellie whoever stored it, so it needs no
+ * mirroring. "Primarily mine" is relative and means a different person on each
+ * side, which is why `isYours` exists and why getting it backwards inverts
+ * every row while looking entirely plausible. Same trap as everything else in
+ * this file.
+ *
+ * The detail strings are absolute for the same reason: they are built with
+ * live names, so "Usually Ellie, sometimes Preston" says Ellie whichever of
+ * them picked it. Parsed by the name it puts first rather than by matching the
+ * whole sentence, because the sentence is assembled in api/questions.js and a
+ * punctuation change there must not quietly stop this reading it.
  */
-export function agrees(yourValue, theirValue) {
-  // Unanswered is not a comparison. Everything else is.
-  if (yourValue == null || yourValue === '') return null;
-  if (theirValue == null || theirValue === '') return null;
+export const DETAIL_EVEN = 'Genuinely 50/50';
 
-  const you = sideOf(yourValue);
-  const them = sideOf(theirValue);
-
-  // ── "DOESN'T APPLY" IS AN ANSWER ────────────────────────────────────────
-  // This used to return null whenever either side said it, which dropped the
-  // row from the results entirely: out of the count, out of the percentage,
-  // out of the list of things to talk about.
-  //
-  // The website has never done that. It compares the two answers as a reader
-  // sees them, so "Doesn't apply" against "Primarily mine" is a difference and
-  // "Doesn't apply" from both is agreement. The two products therefore told
-  // the same couple different things, and the app was the optimistic one: the
-  // disagreements it dropped pushed categories to 100 per cent aligned that
-  // the website showed as gaps.
-  //
-  // Thirty-three of the possible answer pairs diverged, every one of them
-  // involving this value. The website's reading is kept because it is the one
-  // customers have been given and because it is right: one person saying a
-  // responsibility does not apply while the other says it is theirs is a
-  // mismatched expectation, which is the entire subject of this exercise.
-  if (you === 'na' || them === 'na') return you === them;
-
-  // A value neither side recognises falls back to comparing what was stored,
-  // which is what the website's display comparison did. Better than dropping
-  // an answer nobody has taught this function about.
-  if (you == null || them == null) return yourValue === theirValue;
-
-  if (you === 'both' || them === 'both') return you === them;
-  const youMean = you === 'self' ? 'you' : 'them';
-  const theyMean = them === 'self' ? 'them' : 'you';
-  return youMean === theyMean;
+/** Which of the two a "Usually X, sometimes Y" refinement leans toward. */
+function detailLean(detail, youName, themName) {
+  const text = String(detail ?? '').trim();
+  if (!text) return null;
+  if (text === DETAIL_EVEN) return 'even';
+  const m = /^Usually\s+(.+?),\s*sometimes\b/i.exec(text);
+  if (!m) return null;
+  const named = m[1].trim();
+  if (youName && named === youName) return 'you';
+  if (themName && named === themName) return 'them';
+  return null;
 }
+
+/**
+ * The position, or 'na' for an answer that says the question does not apply,
+ * or null for one nothing here recognises.
+ *
+ * "Doesn't apply" stays off the scale rather than being parked at the middle.
+ * It is a real answer and the website has always compared it as one: against
+ * a position it is a difference, against the same answer it is agreement. A
+ * middle rank would make it half-agree with everything.
+ */
+function positionOf(value, detail, isYours, youName, themName) {
+  if (value == null || value === '') return null;
+  const at = (pos) => ({ pos, specific: true });
+  if (value === "Doesn't apply" || value === "Doesn't apply to us") return { pos: 'na', specific: true };
+  if (value === 'Primarily mine') return at(isYours ? 0 : 2);
+  if (value === "Primarily my partner's") return at(isYours ? 2 : 0);
+  if (value === 'Both of us' || value === 'Balanced') {
+    const lean = detailLean(detail, youName, themName);
+    if (lean === 'you') return at(0.5);
+    if (lean === 'them') return at(1.5);
+    if (lean === 'even') return at(1);
+    /**
+     * Both, with nothing more said about it.
+     *
+     * The middle is where it sits, and `specific: false` is the part that
+     * matters. The follow-up is required before an item counts as answered
+     * today, so a row with no detail was stored before the follow-up existed.
+     * Reading that as "they said exactly half" would invent a quarter-point
+     * gap against a partner who did say which way it leans, and would do it
+     * for every Both row the couple ever answered.
+     *
+     * What a reader sees in those two columns is "Usually Ellie, sometimes
+     * Preston" beside "Both". That is one of them being more precise, not the
+     * two of them disagreeing, and respDistance reads it that way.
+     */
+    return { pos: 1, specific: false };
+  }
+  if (youName && value === youName) return at(0);
+  if (themName && value === themName) return at(2);
+  return null;
+}
+
+/** Anywhere in the middle of the scale: both of them, however it leans. */
+const isShared = (pos) => typeof pos === 'number' && pos >= 0.5 && pos <= 1.5;
+
+/**
+ * How far apart two responsibility answers are, normalised to 0..1.
+ *
+ * Null when either side has not answered, which is not a distance of zero.
+ * api/_lib/alignment.js turns this into the percentage on the bar and into the
+ * band; nothing else is allowed to decide what a distance means.
+ */
+export function respDistance({ yourValue, theirValue, yourDetail, theirDetail, youName, themName }) {
+  const a = positionOf(yourValue, yourDetail, true, youName, themName);
+  const b = positionOf(theirValue, theirDetail, false, youName, themName);
+  if (a === null || b === null) {
+    /* One value nothing recognises, which happens for an answer stored before
+       an option was renamed. Fall back to comparing what is stored, the way
+       `agrees` does, so the row is still a comparison rather than vanishing. */
+    if (yourValue == null || yourValue === '' || theirValue == null || theirValue === '') return null;
+    if (a === null && b === null) return yourValue === theirValue ? 0 : 1;
+    return 1;
+  }
+  if (a.pos === 'na' || b.pos === 'na') return a.pos === b.pos ? 0 : 1;
+  /* One of them said Both and said no more. See positionOf: that is a row from
+     before the follow-up existed, and it agrees with any Both. */
+  if ((!a.specific || !b.specific) && isShared(a.pos) && isShared(b.pos)) return 0;
+  return Math.abs(a.pos - b.pos) / 2;
+}
+
+/**
+ * How far apart two life-question answers are, normalised to 0..1.
+ *
+ * The options are an ordered list, so the distance is the index gap over the
+ * widest possible one. Three or four of these questions are categorical rather
+ * than linear, which api/_workbook-content.js says out loud beside
+ * LIFE_QUESTION_OPTIONS: for those the number is an approximation. It is the
+ * same approximation the percentage on the highlight card has always used, so
+ * this changes where it is computed and not what it says.
+ */
+export function lifeDistance(yourValue, theirValue, options) {
+  if (yourValue == null || yourValue === '' || theirValue == null || theirValue === '') return null;
+  const opts = Array.isArray(options) ? options : null;
+  if (!opts || opts.length < 2) return yourValue === theirValue ? 0 : 1;
+  const a = opts.indexOf(yourValue);
+  const b = opts.indexOf(theirValue);
+  if (a === -1 || b === -1) return yourValue === theirValue ? 0 : 1;
+  return Math.abs(a - b) / (opts.length - 1);
+}
+
+/**
+ * `agrees` was here.
+ *
+ * It answered the same question as a boolean, over three positions, from the
+ * side an answer named. Every caller measures a distance now and reads the top
+ * of that scale as agreement, because the exercise offers five positions and a
+ * three-position rule could not see the follow-up it asks after "Both of us".
+ * See respDistance above and api/_lib/alignment.js.
+ *
+ * Deleted rather than left exported: a definition nothing calls reads like a
+ * feature, and the one it would read like here is a second opinion about
+ * whether two people agree.
+ */
 
 /**
  * Every answered pair, in the order the results screens present them.
@@ -179,8 +325,19 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
       const key = cat.id + '__' + item;
       const rawYours = mine?.responsibilities?.[key];
       const rawTheirs = theirs?.responsibilities?.[mirrorRespKey(key)];
-      const aligned = agrees(rawYours, rawTheirs);
-      if (aligned === null) return null;
+      const yourDetail = bothDetailFor(mine, key);
+      const theirDetail = bothDetailFor(theirs, mirrorRespKey(key));
+      /**
+       * How far apart, before whether. `aligned` is the top of that scale
+       * rather than a second opinion about it, which is the whole of W63: the
+       * boolean and the degree used to be worked out by two different rules
+       * and only the boolean reached a bar.
+       */
+      const distance = respDistance({
+        yourValue: rawYours, theirValue: rawTheirs,
+        yourDetail, theirDetail, youName: you, themName: them,
+      });
+      if (distance === null) return null;
       return {
         key,
         kind: 'responsibility',
@@ -211,8 +368,8 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
          * underneath, which put the least informative word in the column and
          * the informative one in small print below it.
          */
-        you: respDisplay(normRespValue(rawYours, true, you, them), bothDetailFor(mine, key)),
-        them: respDisplay(normRespValue(rawTheirs, false, you, them), bothDetailFor(theirs, mirrorRespKey(key))),
+        you: respDisplay(normRespValue(rawYours, true, you, them), yourDetail),
+        them: respDisplay(normRespValue(rawTheirs, false, you, them), theirDetail),
         /**
          * What each of them grew up with.
          *
@@ -226,9 +383,16 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
          * has to be flipped to compare; this is a claim about the house each
          * of them grew up in, which is theirs either way.
          */
-        youExperienced: childhoodValue(mine?.childhood?.[key]),
-        themExperienced: childhoodValue(theirs?.childhood?.[key]),
-        aligned,
+        youExperienced: childhoodDisplay(
+          mine?.childhood?.[key], mine?.childhoodBothDetail?.[key]),
+        themExperienced: childhoodDisplay(
+          theirs?.childhood?.[key], theirs?.childhoodBothDetail?.[key]),
+        /** How close, 0 to 100, and which of the three things we say. Both
+         *  from api/_lib/alignment.js, which is the only thing allowed to
+         *  turn a distance into a judgement. */
+        closeness: closenessPct(distance),
+        band: bandFor(distance),
+        aligned: isAligned(distance),
       };
     }).filter(Boolean));
 
@@ -236,6 +400,7 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
     const rawYours = mine?.life?.[q.id];
     const rawTheirs = theirs?.life?.[mirrorLifeId(q.id)];
     if (!rawYours || !rawTheirs) return null;
+    const lifeDist = lifeDistance(rawYours, rawTheirs, q.options);
     return {
       key: q.id,
       kind: 'life',
@@ -246,9 +411,15 @@ export function expectationsRows({ mine, theirs, youName = 'You', themName = 'Yo
       prompt: q.core || null,
       you: rawYours,
       them: rawTheirs,
-      // Life questions are not directional: both answer about the same thing,
-      // so the strings compare directly.
-      aligned: rawYours === rawTheirs,
+      /**
+       * Life questions are not directional: both answer about the same thing.
+       * The options are an ordered list, so two neighbouring answers are a
+       * near miss rather than a flat one, which is the same change the
+       * responsibilities got and for the same reason.
+       */
+      closeness: closenessPct(lifeDist),
+      band: bandFor(lifeDist),
+      aligned: isAligned(lifeDist),
     };
   }).filter(Boolean);
 
@@ -319,12 +490,31 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
       answered: inCat.length,
       aligned: inCat.filter((r) => r.aligned).length,
       differences: inCat.filter((r) => !r.aligned).length,
+      /**
+       * ── THE NUMBER ON THE BAR ───────────────────────────────────────
+       * Ellie: "I don't think it should be all-or-nothing aligned, I want to
+       * include degrees."
+       *
+       * It was `cat.aligned / cat.answered`, worked out on the phone and
+       * again on the website, so a category where every row was a near miss
+       * drew an empty bar and one where every row was opposite drew the same
+       * empty bar. This is the mean closeness of the rows instead, which is
+       * the figure the degrees were asked for, and it is computed once here
+       * rather than twice from two counts.
+       *
+       * Null when nothing in the category can be compared, so a surface has
+       * to decide what to draw rather than being handed a confident zero.
+       */
+      closeness: meanPct(inCat.map((r) => r.closeness)),
     };
   });
 
   return {
     answered,
     aligned,
+    /** Every row's closeness averaged, for anything that wants one figure for
+     *  the whole exercise. The same function the categories use. */
+    closeness: meanPct(rows.map((r) => r.closeness)),
     /**
      * ── THE TOP-LEVEL `differences` IS GONE ──────────────────────────────
      * Ellie: "Remove 'already aligned:20 worth discussing:12' line from top of

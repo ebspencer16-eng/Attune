@@ -20,14 +20,13 @@ import { PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, NO_ACTION_NE
 // reason api/_couple-types.js moved out of this file.
 import { contentFor, CURRENT_CONTENT_VERSION } from "../api/_content/index.js";
 import { alignedAdvice, getDimShift } from "../api/_lib/dimension-copy.js";
-// scoreRespClient and scoreLqClient used to live in this file. Extracting the
-// alignment maths deleted them and left three call sites referencing nothing,
-// which built clean and threw on every results page. They are the same two
-// functions, under their shared names.
+// The two item scorers this file used to alias out of here are gone. They
+// were a second rule for how close two answers are, beside the one the results
+// rows use, and they knew three positions where the exercise offers five: a
+// person who answers "Both of us" is asked which way it leans, and neither
+// rule read that. Every call site measures through respDistance now.
 import {
   domainAlignmentPct as computeDomainPctClient, overallExpectationsPct,
-  scoreResponsibilityPairSided as scoreRespClient,
-  scoreLifeQuestionPair as scoreLqClient,
 } from "../api/_lib/expectations-alignment.js";
 
 // The shared module takes a named object; these four call sites are positional
@@ -35,7 +34,11 @@ import {
 // cannot alter which values reach the maths.
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
-import { agrees, normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL } from "../api/_lib/expectations.js";
+import { normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL, respDistance, lifeDistance } from "../api/_lib/expectations.js";
+// How close two answers are, and what that means. One module for the whole
+// product; see api/_lib/alignment.js. Ellie: "One source of truth for every
+// alignment score, wherever it appears."
+import { closenessPct, isAligned, meanPct } from "../api/_lib/alignment.js";
 import { exerciseIntro } from "../api/_lib/exercise-intro.js";
 import { shouldShow, SURVEY_COPY } from "../api/_lib/survey.js";
 /* One insight a day, the same one the app shows, from one module. */
@@ -174,6 +177,8 @@ import { NEAR_AXIS_PROSE as NEAR_AXIS_PROSE_SHARED } from "../api/_lib/near-axis
 import { EXP_CAT_STARTERS as EXP_CAT_STARTERS_SHARED } from "../api/_lib/expectation-starters.js";
 import { REFLECTION_PROMPTS } from "../api/_lib/reflection-prompts.js";
 import { groundForDimension, intimacyActionPlan, intimacyAllAlignedNote } from "../api/_lib/intimacy-results.js";
+// The couple type page's two bullet markers, which the app also draws.
+import { BULLET_TONES } from "../api/_lib/section-grounds.js";
 // The fixed page gradients, one copy for both surfaces: the app receives the
 // same stops on the results nav. See api/_lib/section-grounds.js.
 import { gradientCss, groundForCategory, ALIGNED_PANEL } from "../api/_lib/section-grounds.js";
@@ -5837,17 +5842,29 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       const rawMine = myAnswers.responsibilities?.[key];
       const rawTheirs = partnerAnswers.responsibilities?.[mirrorRespKey(key)];
       if (!rawMine || !rawTheirs) return;
-      const score = scoreRespClient(rawMine, rawTheirs, userName, partnerName);
+      // respDistance() from api/_lib/expectations.js, not two display names
+      // compared and not a scorer of this file's own.
+      //
+      // Comparing the display names happened to give the right answer for most
+      // pairs and the wrong one wherever "Doesn't apply" appeared, and the
+      // server had its own rule that dropped those rows instead. One couple,
+      // two products, two different sets of results.
+      //
+      // This file then kept a second number beside the boolean: a similarity
+      // from a three-position scorer, which is what drew the bars, while the
+      // boolean decided what counted as a gap. Five positions are on offer,
+      // because answering "Both of us" opens a follow-up asking which way it
+      // leans, and neither rule read it. One distance now; everything else is
+      // a reading of it.
+      const distance = respDistance({
+        yourValue: rawMine, theirValue: rawTheirs,
+        yourDetail: myAnswers.bothDetail?.[key],
+        theirDetail: partnerAnswers.bothDetail?.[mirrorRespKey(key)],
+        youName: userName, themName: partnerName,
+      });
       const mine = normRespVal(rawMine, true);
       const theirs = normRespVal(rawTheirs, false);
-      // agrees() from api/_lib/expectations.js, not `mine === theirs`.
-      //
-      // Comparing the two display names happened to give the right answer for
-      // most pairs and the wrong one wherever "Doesn't apply" appeared, and the
-      // server had its own rule that dropped those rows instead. One couple,
-      // two products, two different sets of results. There is one rule now and
-      // this is a call to it.
-      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: agrees(rawMine, rawTheirs) === true, score });
+      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: isAligned(distance), closeness: closenessPct(distance) });
     });
   });
 
@@ -5855,11 +5872,14 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
   const lifeRows = LIFE_QUESTIONS.map(q => {
     const mine = myAnswers.life?.[q.id];
     const theirs = partnerAnswers.life?.[mirrorLifeId(q.id)];
+    /* The options are an ordered list, so two neighbouring answers are a near
+       miss rather than a flat one. Same change as the responsibilities. */
+    const lifeDist = lifeDistance(mine, theirs, q.options);
     return {
       category: "Life & Values", catId: "life", item: substName(q.text, userName, partnerName),
       mine, theirs,
-      aligned: mine === theirs,
-      score: scoreLqClient(mine, theirs, q.options),
+      aligned: isAligned(lifeDist),
+      closeness: closenessPct(lifeDist),
     };
   }).filter(r => r.mine && r.theirs);
 
@@ -5953,16 +5973,15 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                 {catData.filter(fc => fc.rows.length > 0).map(fc => {
-                  // Similarity-based pct: mean of item scores in [0,1], rounded
-                  // to %. The same methodology as the headline alignPct, and now
-                  // as the workbook: this comment claimed all three agreed and
-                  // the workbook was counting exact matches, which came out up
-                  // to 71 points lower on the same answers. Rows the scorer
-                  // cannot read drop out of the mean rather than skewing it.
-                  const scored = fc.rows.filter(r => r.score != null);
-                  const pct = scored.length
-                    ? Math.round((scored.reduce((a, r) => a + r.score, 0) / scored.length) * 100)
-                    : 0;
+                  // The mean closeness of this category's rows, from
+                  // api/_lib/alignment.js. Rows nothing can compare drop out of
+                  // the mean rather than counting as nought.
+                  //
+                  // This was the same average written out here over a field
+                  // this file computed itself, while the app drew the same bar
+                  // from `aligned / answered`. One bar, two numbers, and the
+                  // app's could not tell a near miss from an opposite.
+                  const pct = meanPct(fc.rows.map(r => r.closeness)) ?? 0;
                   const isStrong = pct >= 75;
                   /* ── THE SAME RAMP THE APP DRAWS THESE BARS WITH ─────────
                      This was green above 75, orange above 40 and #F87171 below,
@@ -6011,6 +6030,27 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                           <span style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.75)", fontFamily: BFONT }}>{fc.gapItems.length} topic{fc.gapItems.length !== 1 ? "s" : ""}</span>
                           <span style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.6)", fontFamily: BFONT, letterSpacing: "0.06em" }}>Show</span>
                           <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.75)", lineHeight: 1 }}>▾</span>
+                          {/* ── THE ARROW SHE ASKED TO HAVE MOVED ──────────────
+                              Ellie: "each row should have a little arrow on the
+                              right side of the row to open that page directly,
+                              then remove the open expectations arrow at the
+                              bottom of the expectations list."
+
+                              A click anywhere inside a <summary> toggles the
+                              <details> it belongs to, so this has to say
+                              preventDefault or the page would open AND the
+                              drawer would flip. The app's version needs no
+                              such line: React Native gives the touch to the
+                              innermost responder and does not bubble it. */}
+                          <span
+                            role="link"
+                            tabIndex={0}
+                            aria-label={`Open ${fc.label}`}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); go(`convo-${FIXED_CATS.findIndex(x => x.id === fc.id)}`); }}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go(`convo-${FIXED_CATS.findIndex(x => x.id === fc.id)}`); } }}
+                            style={{ fontSize: "0.8rem", lineHeight: 1, color: "white", cursor: "pointer", padding: "0.2rem 0.4rem", margin: "-0.2rem 0", borderRadius: 6, background: "rgba(255,255,255,0.10)" }}>
+                            →
+                          </span>
                         </span>
                       </summary>
                       <div style={{ borderTop: "1px solid rgba(255,255,255,0.16)" }}>
@@ -6020,10 +6060,6 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                             <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
                           </div>
                         ))}
-                        <div onClick={() => go(`convo-${FIXED_CATS.findIndex(x => x.id === fc.id)}`)}
-                          style={{ padding: "0.6rem 1rem", cursor: "pointer", fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.8)", fontFamily: BFONT }}>
-                          Open {fc.label} →
-                        </div>
                       </div>
                     </details>
                   ))}
@@ -7857,16 +7893,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
       const mine = rawMine ? normRespValue(rawMine, true, userName, partnerName) : rawMine;
       const theirs = rawTheirs ? normRespValue(rawTheirs, false, userName, partnerName) : rawTheirs;
       const bothAnswered = mine && theirs;
-      const aligned = mine === theirs;
-      const score = bothAnswered ? scoreRespClient(rawMine, rawTheirs, userName, partnerName) : null;
-      return { item: substName(item, userName, partnerName), category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered, score };
+      /* `mine === theirs` over two display strings was the exact comparison
+         check-alignment-rule.mjs was written about, and it was still here in
+         the second of this file's row builders. One rule now, through
+         api/_lib/alignment.js, like everything else. */
+      const distance = bothAnswered ? respDistance({
+        yourValue: rawMine, theirValue: rawTheirs,
+        yourDetail: ex2Answers?.bothDetail?.[key],
+        theirDetail: partnerEx2?.bothDetail?.[mirrorRespKey(key)],
+        youName: userName, themName: partnerName,
+      }) : null;
+      const aligned = isAligned(distance);
+      const closeness = closenessPct(distance);
+      return { item: substName(item, userName, partnerName), category: cat.label, catId: cat.id, mine, theirs, aligned, bothAnswered, closeness };
     })
   );
   const expCatSummary = RESPONSIBILITY_CATEGORIES.map(cat => {
-    const rows = allRows.filter(r => r.catId === cat.id && r.bothAnswered && r.score != null);
-    const pct = rows.length
-      ? Math.round((rows.reduce((a, r) => a + r.score, 0) / rows.length) * 100)
-      : null;
+    const rows = allRows.filter(r => r.catId === cat.id && r.bothAnswered && r.closeness != null);
+    const pct = meanPct(rows.map(r => r.closeness));
     return { ...cat, pct };
   });
 
@@ -9095,12 +9139,16 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {ct.strengths?.length > 0 && (
               <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
                 {/* block: couple-type/strengths */}
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#10b981", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What comes naturally</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: BULLET_TONES.good.ink, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What comes naturally</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {ct.strengths.slice(0,2).map((sx, i) => (
                     <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start" }}>
-                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "1.5px solid rgba(16,185,129,0.3)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-                        <span style={{ fontSize: "0.6rem", color: "#10b981", fontWeight: 700 }}>✓</span>
+                      {/* BULLET_TONES, not four hexes typed here. The app draws
+                          the same two badges and could only do it by holding a
+                          second copy of these values; check-tab-grounds.mjs
+                          holds the two equal. */}
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: BULLET_TONES.good.fill, border: `1.5px solid ${BULLET_TONES.good.edge}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+                        <span style={{ fontSize: "0.6rem", color: BULLET_TONES.good.ink, fontWeight: 700 }}>{BULLET_TONES.good.mark}</span>
                       </div>
                       <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(sx)}</p>
                     </div>
@@ -9111,12 +9159,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             {ct.stickingPoints?.length > 0 && (
               <div style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 18, padding: "1.5rem" }}>
                 {/* block: couple-type/sticking-points */}
-                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#E8673A", fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What's worth being aware of</div>
+                <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: BULLET_TONES.watch.ink, fontFamily: BFONT, fontWeight: 700, marginBottom: "1rem" }}>What's worth being aware of</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {_proseSet(ct.stickingPoints, _nearProse.stickingPointsNearEngage, _nearProse.stickingPointsNearOpen).slice(0,2).map((sx, i) => (
                     <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start" }}>
-                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(232,103,58,0.1)", border: "1.5px solid rgba(232,103,58,0.28)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-                        <span style={{ fontSize: "0.65rem", color: "#E8673A", fontWeight: 700 }}>!</span>
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: BULLET_TONES.watch.fill, border: `1.5px solid ${BULLET_TONES.watch.edge}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+                        <span style={{ fontSize: "0.65rem", color: BULLET_TONES.watch.ink, fontWeight: 700 }}>{BULLET_TONES.watch.mark}</span>
                       </div>
                       <p style={{ fontSize: "0.84rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.65, margin: 0 }}>{interp(sx)}</p>
                     </div>
@@ -9711,7 +9759,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
                   {INTIMACY_DIMENSIONS.map(d => {
                     const found = (intimacySummary?.dimSummary || []).find(x => x.id === d.id);
-                    const pct = found?.avgGap == null ? null : Math.round((1 - found.avgGap) * 100);
+                    /* closenessPct, not the inversion written out again. The
+                       server sends this same figure as `alignedPct` and it was
+                       recomputed here by hand; one of the two was always going
+                       to move without the other. api/_lib/alignment.js. */
+                    const pct = closenessPct(found?.avgGap);
                     /* The third copy of this ramp was here. It lives in
                        the app's lib now, which the app reads as well, so a
                        percentage cannot mean one thing on a phone and another
@@ -9992,24 +10044,35 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
     const PatternRow = ({ p }) => {
       const copy = PATTERN_COPY[p.key];
       const v = p.value ?? 0;
-      const pct = (v / 3) * 100;
+      /* `pct` filled the bar. The bar is gone; see the note on the tile. */
       const tone = BAND_COLORS[v] || BAND_COLORS[0];
       // Never gets no advice at all. Rarely gets an awareness note. Sometimes
       // and Often get the action. Attaching an instruction to an absent
       // pattern would read as a warning about something that is not happening.
       const advice = v >= 2 ? PATTERN_ACTIONS[p.key] : v === 1 ? PATTERN_NOTES[p.key] : null;
       const adviceLabel = v >= 2 ? 'One thing to try' : 'One thing to keep in mind';
+      /* ── A TILE EACH, AND THREE THINGS IN IT ────────────────────────────
+         Ellie: "I want a tile for each of the four horsemen. First line should
+         be 'Criticism: going after the person rather than the problem', second
+         line 'Self-assigned score: sometimes' with the score in orange. No
+         analysis paragraph, then go straight to One thing to try."
+
+         These were four rows divided by hairlines inside one card. The name and
+         the definition are one sentence now, the frequency is a line of words
+         rather than a label over a bar, and the bar is gone: she listed what is
+         on the tile and a bar is not in the list, and a bar beside the word
+         "Sometimes" is one measure drawn twice.
+
+         The score keeps the band's own colour rather than being painted orange
+         whatever it says. Orange is what Sometimes already is; painting Never
+         orange would leave the colour meaning nothing. */
       return (
-        <div key={p.key} style={{ padding: "1rem 0", borderTop: `1px solid ${C.stone}` }}>
-          <div style={{ fontSize: "0.92rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.15rem" }}>{copy.label}</div>
-          <div style={{ fontSize: "0.74rem", color: C.muted, fontFamily: BFONT, marginBottom: "0.5rem" }}>{copy.definition}</div>
-          {/* Frequency sits directly above the right edge of the bar, in the
-              bar's own colour, so the reading and the measure are one unit. */}
-          <div style={{ textAlign: "right", fontSize: "0.68rem", fontWeight: 700, color: tone, fontFamily: BFONT, marginBottom: "0.25rem" }}>
-            {FREQUENCY_LABELS[v]}
-          </div>
-          <div style={{ height: 5, background: C.stone, borderRadius: 99 }}>
-            <div style={{ height: "100%", width: `${Math.max(pct, 3)}%`, background: tone, borderRadius: 99 }} />
+        <div key={p.key} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "0.75rem" }}>
+          <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
+            <strong style={{ fontWeight: 700 }}>{copy.label}</strong>{copy.definition ? `: ${copy.definition}` : ""}
+          </p>
+          <div style={{ fontSize: "0.74rem", color: C.muted, fontFamily: BFONT, marginTop: "0.45rem" }}>
+            {CONFLICT_RESULTS_COPY.selfScoreLabel}<span style={{ color: tone, fontWeight: 700 }}>{FREQUENCY_LABELS[v]}</span>
           </div>
           {advice && (
             <div style={{ marginTop: "0.8rem", background: "#F4F7FF", borderRadius: 8, padding: "0.75rem 0.95rem" }}>
@@ -11059,10 +11122,19 @@ function ResultsHighlights({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3
   // mattered: `f.gap ?? 0` counted a dimension with no gap as perfectly
   // aligned, so an unanswered dimension quietly raised the figure.
   const commAlignPct = commAlignmentPct(feedback.map(f => f.gap));
-  const lifeAlignPct = lifeRows.length ? Math.round(lifeRows.filter(r => r.aligned).length / lifeRows.length * 100) : 0;
-  const respAlignPct = allRows.length ? Math.round(allRows.filter(r => r.aligned).length / allRows.length * 100) : 0;
+  /* ── THE THREE DONUTS WERE COUNTING, NOT MEASURING ──────────────────────
+     Each was the share of rows that matched exactly, so a couple one step apart
+     on every question scored the same nought as a couple at opposite ends of
+     every one. Ellie: "I don't think it should be all-or-nothing aligned, I
+     want to include degrees."
+
+     The mean closeness instead, through api/_lib/alignment.js, which is what
+     the bars and the app read too. Intimacy already had a distance per aspect
+     and this was discarding it to count states. */
+  const lifeAlignPct = meanPct(lifeRows.map(r => r.closeness)) ?? 0;
+  const respAlignPct = meanPct(allRows.map(r => r.closeness)) ?? 0;
   const intimacyAlignPct = (intimacySum && intimacySum.dimSummary && intimacySum.dimSummary.length)
-    ? Math.round(intimacySum.dimSummary.filter(d => d.state === "aligned").length / intimacySum.dimSummary.length * 100) : null;
+    ? meanPct(intimacySum.dimSummary.map(d => closenessPct(d.avgGap))) : null;
   // A five-dimension spread for the comms peek (most aligned -> most divergent).
   const commPeekDims = (() => { const n = sortedFeedback.length; if (n <= 5) return sortedFeedback; return [0, Math.round(n*0.25), Math.round(n*0.5), Math.round(n*0.72), n-1].map(i => sortedFeedback[i]); })();
   const Donut = ({ pct, color, label }) => {

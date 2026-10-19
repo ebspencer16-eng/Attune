@@ -13,8 +13,16 @@
  *
  * Blending exists to type a couple: it is the right input for the couple map,
  * because how you are seen is part of the dynamic. It is the wrong input for
- * "how far apart are your answers", and it systematically shrinks gaps,
- * because mixing two numbers moves each toward the other.
+ * "how far apart are your answers", and it shrinks gaps more often than not,
+ * because mixing two numbers usually moves each toward the other.
+ *
+ * "Systematically" is what this said, and it is an overclaim. Swept over every
+ * combination of two people's answers and two people's views of each other,
+ * the blended gap is narrower 58 per cent of the time and WIDER 28 per cent:
+ * a partner's view can push somebody further from their partner rather than
+ * toward them. In the ordinary case, where each reads the other within a
+ * point, it is narrower 74 per cent and wider 14. A tendency, and more than
+ * enough to produce the bug below.
  *
  * The website has always known this. Its storycard block says so in a comment:
  * "Share-card couple type uses the blend; the gap feedback below stays self."
@@ -22,9 +30,13 @@
  *
  * api/_lib/highlight-cards.js used `results.gaps`, which is blended. So the
  * app's cards were computed from different numbers than the website's, and
- * because blending pulls the two together, the app's alignment percentage was
- * always the higher of the two. For a couple who see each other accurately it
- * reaches 100 while the sliders on the previous card visibly do not touch.
+ * because blending pulls the two together more often than not, the app's
+ * alignment percentage was usually the higher of the two. "Always" is what
+ * this said, and it is the same overclaim as the paragraph above: a narrower
+ * gap puts more dimensions under the threshold, and the gap is not always
+ * narrower. For a couple who see each other accurately, where blending
+ * narrows four times in five, it reaches 100 while the sliders on the
+ * previous card visibly do not touch.
  *
  * It was not only the percentage. The same sort decides which five dimensions
  * the slider card shows, which dimension is named "where you're most in tune",

@@ -94,6 +94,50 @@ if (!/delete\s+\w+\.conflict_data;/.test(sync)) {
     + '      That promise is this line.');
 }
 
+/**
+ * ── AND EVERY COPY KEY EITHER SURFACE READS HAS TO EXIST ──────────────────
+ * `content.copy` reaches the app typed as `Record<string, string>`, so
+ * `content.copy.selfScoreLabl` is `undefined` rather than a type error, and an
+ * undefined string in React Native draws nothing at all. A line of a results
+ * page silently absent.
+ *
+ * This is CLAUDE.md's own lesson about EXP_LIFE_KEYS, where six category keys
+ * were looked up as life-question ids and five of them did not exist: every
+ * value it produced was a valid value, so a null answer was indistinguishable
+ * from a couple who had not finished. The rule it gave is the rule here: when
+ * one list indexes into another, check that every key resolves.
+ *
+ * Both surfaces, because the website imports the same object by name and a
+ * typo there is an empty string in the markup.
+ */
+{
+  const copy = (await import(`${ROOT}api/_conflict-results-prose.js`)).CONFLICT_RESULTS_COPY;
+  const surfaces = [
+    ['attune-app/src/components/conflict-results.tsx', /content\.copy\.([A-Za-z_$][\w$]*)/g],
+    ['src/App.jsx', /CONFLICT_RESULTS_COPY\.([A-Za-z_$][\w$]*)/g],
+  ];
+  let keysChecked = 0;
+  for (const [rel, re] of surfaces) {
+    const src = stripComments(readFileSync(ROOT + rel, 'utf8'));
+    const seen = new Set([...src.matchAll(re)].map((m) => m[1]));
+    for (const key of seen) {
+      keysChecked += 1;
+      if (!(key in copy)) {
+        problems.push(`${rel} reads content copy "${key}" and CONFLICT_RESULTS_COPY has no such\n`
+          + '      key. It is typed as Record<string, string> on the app, so this is undefined\n'
+          + '      rather than an error, and an undefined string draws nothing: the line is\n'
+          + '      simply missing from the page with nothing to notice it.');
+      }
+    }
+  }
+  if (keysChecked < 6) {
+    console.error(`[check-conflict-source] only ${keysChecked} copy keys found across both`
+      + ' surfaces, which cannot be right. Refusing to pass: a gate that has lost its subject'
+      + ' must never report success.');
+    process.exit(1);
+  }
+}
+
 if (problems.length) {
   console.error('[check-conflict-source] a surface is computing conflict results itself:');
   for (const p of problems) console.error(`  ${p}`);
@@ -102,4 +146,5 @@ if (problems.length) {
 
 console.log(
   '[check-conflict-source] neither surface pairs conflict itself; both read '
-  + '/api/conflict-results, and partner-sync still strips the raw record.');
+  + '/api/conflict-results, partner-sync still strips the raw record, and every '
+  + 'conflict copy key either surface reads exists in CONFLICT_RESULTS_COPY.');

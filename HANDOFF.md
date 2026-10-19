@@ -3582,3 +3582,57 @@ sheet, which now have one home.
 New gates: check-log-privacy, check-destructive-confirm. Widened:
 check-selected-columns (writes), check-cache-privacy (memory),
 check-email-preview (one exemption).
+
+---
+
+## 2026-10-19 — her twenty-seven, the degrees of alignment, and a methodology doc
+
+**Where it stopped.** Nothing is half-done. The tree is clean, the chain is
+green, and TASKS.md section 2 holds one row.
+
+**The big one was W63/W70/W71, the degrees of alignment.** How close two
+expectations answers are had been decided in five places and they disagreed:
+a boolean over three positions on the server, a similarity over three ranks
+for the headline, that similarity averaged for the website's bars, two display
+strings compared in the website's second row builder, and a count of exact
+matches divided by a total on the phone. The same category's bar was one
+number on the site and a different number on the phone.
+
+`api/_lib/alignment.js` owns the judgement now: given a distance normalised to
+0 and 1, what percentage is that and which of three bands. Each exercise still
+measures its own distance, because the instruments genuinely differ. Two gates:
+check-alignment-rule runs the rule, check-alignment-source proves nothing goes
+round it. Sixteen plants between them.
+
+**The measurement changed, not only where it lives.** The exercise asks a
+follow-up every time somebody answers "Both of us", it is required before the
+item counts as answered, and nothing that scored had ever read it. Her example,
+"Both of us, usually Ellie" against "Ellie", read as a flat miss and now reads
+75 per cent close. `agrees()` is deleted.
+
+**Two things fell out of the sweep.** A name against "Primarily my partner's"
+was scored as a total mismatch when both name the same person; that spelling is
+no longer served, so it can only affect rows stored before it changed. And the
+childhood follow-up, `childhoodBothDetail`, was written by both exercise
+surfaces and read by nothing, which is why the Experienced column said "Both"
+where Expects said "usually". That was W62.
+
+**Communication is deliberately out of all of it.** Its line is
+CARD_ALIGNED_GAP, one point on a five-point scale, which normalises to 0.25
+rather than the 0.2 the bands use. Moving it changes a figure every existing
+customer has read, so it is in TASKS.md as her decision and the gate says in
+writing that it is not covered.
+
+**METHODOLOGY.md is new** and is generated from the modules the product reads,
+by scripts/build-methodology.mjs. check-methodology compares the committed file
+against a fresh build and rewrites it in place when it has fallen behind. The
+generator is deliberately NOT in the check chain: this file already records
+twice what happens when a document is regenerated before it is checked.
+
+**What is waiting on Ellie**, all in TASKS.md section 1: migration 087 marking
+three test accounts as demos; the couple map trade-off in W57, which has three
+options and a measurement; and three couple-type bullets in W59 that cannot
+take "You are" without being rewritten.
+
+**Not done and not started:** nothing from her list. W57 and W59 are decisions
+rather than work.

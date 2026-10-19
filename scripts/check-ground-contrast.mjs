@@ -13,8 +13,27 @@
  * room: it is a number, so it is measured.
  *
  * ── WHAT IS CHECKED ───────────────────────────────────────────────────────
- * Every stop of every fixed ground, and every stop of the ground each of the
- * six expectations categories generates.
+ * Every stop of every fixed ground, every stop of the ground each of the six
+ * expectations categories generates, and every stop of the six Physical
+ * Intimacy dimension grounds.
+ *
+ * ── THE SIX THIS USED TO MISS ─────────────────────────────────────────────
+ * It printed "41 stops across 6 results grounds, 6 categories and the app's
+ * own three" and the six intimacy dimension grounds were in none of those
+ * three sets. They come from `groundForDimension` in intimacy-results.js, not
+ * from SECTION_GROUNDS, and the app's two Physical Intimacy detail pages
+ * prefer that ground over the one the results nav sends them.
+ *
+ * So the pages Ellie reported as too dark were the pages nothing measured:
+ * "Relationship reflection pages and physical intimacy detailed pages are too
+ * dark, can we soften those backgrounds?" They also could not have been
+ * measured as they were, because they were a tint at two hex alphas over
+ * whatever happened to be behind, and an alpha has no ratio of its own. They
+ * are opaque now and this counts them.
+ *
+ * The lesson is the gate's own summary line. It named three sets and stated a
+ * total, which reads as "every ground", and the honest reading of a count is
+ * always "what did it count".
  *
  * The category half is worth being honest about: those stops are built by
  * groundForCategory, which passes them through readable(), so a category
@@ -22,6 +41,22 @@
  * nothing. What that half actually checks is that the generator is still the
  * thing generating them. Build a category ground any other way and this is
  * what says so.
+ *
+ * ── AND THE SAME IS TRUE OF THE FIXED GROUNDS, WHICH IS WORTH SAYING ─────
+ * SECTION_GROUNDS maps every RAW stop through `readable()` as its last step,
+ * so a stop cannot arrive unreadable however it was written. Softening the
+ * navy to a floor of 2.5 was planted against this and it passed, correctly:
+ * `readable()` took #9da3ba straight back to #6f7484 at 4.66.
+ *
+ * So for those grounds this gate checks that the pipeline is still the
+ * pipeline, not that somebody chose a legible colour. The intimacy dimension
+ * grounds are the half where it checks the data, because `groundForDimension`
+ * builds its stops itself and nothing clamps them: planting a 3.0 there fails
+ * in one line.
+ *
+ * Said out loud because a gate that passes for a reason nobody has written
+ * down is a gate somebody will later read as proof of something it never
+ * tested.
  *
  * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
  * Type set at less than full white, of which there is plenty: a caption at 60
@@ -36,6 +71,8 @@ import {
 import { readFileSync } from 'node:fs';
 
 import { EXPECTATIONS_CATEGORIES } from '../api/_questions.js';
+import { INTIMACY_DIMENSIONS } from '../api/_intimacy-questions.js';
+import { groundForDimension } from '../api/_lib/intimacy-results.js';
 
 const fails = [];
 let stops = 0;
@@ -46,6 +83,30 @@ for (const [id, g] of Object.entries(SECTION_GROUNDS)) {
     const r = contrastOnWhiteText(stop);
     if (r < READABLE) {
       fails.push(`${id}: white type on ${stop} is ${r.toFixed(1)} to 1, and body text needs ${READABLE}`);
+    }
+  }
+}
+
+/**
+ * The six Physical Intimacy dimension grounds.
+ *
+ * Opaque, so each stop is a colour a ratio can be taken of. An 8-digit hex
+ * here would be an alpha with no backdrop, which is unmeasurable rather than
+ * failing, so it is called out as its own failure instead of being silently
+ * skipped. A sweep that cannot see something has to say it cannot see it.
+ */
+for (const d of INTIMACY_DIMENSIONS) {
+  for (const stop of groundForDimension(d.id)) {
+    stops += 1;
+    if (!/^#[0-9a-f]{6}$/i.test(stop)) {
+      fails.push(`${d.label}'s page: the stop ${stop} is not an opaque colour, so no ratio`
+        + ' can be taken of it. These were a tint at two alphas over an unknown backdrop and'
+        + ' this check skipped all six without saying so.');
+      continue;
+    }
+    const r = contrastOnWhiteText(stop);
+    if (r < READABLE) {
+      fails.push(`${d.label}'s page: white type on ${stop} is ${r.toFixed(1)} to 1, and body text needs ${READABLE}`);
     }
   }
 }
@@ -164,5 +225,5 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log(`[check-ground-contrast] ${stops} stops across ${Object.keys(SECTION_GROUNDS).length} results grounds, ${EXPECTATIONS_CATEGORIES.length} categories and the app's own three; white type clears ${READABLE} to 1 on every one.`);
+console.log(`[check-ground-contrast] ${stops} stops: ${Object.keys(SECTION_GROUNDS).length} results grounds, ${EXPECTATIONS_CATEGORIES.length} expectations categories, ${INTIMACY_DIMENSIONS.length} Physical Intimacy dimension grounds and the app's own three. White type clears ${READABLE} to 1 on every one, and every stop is an opaque colour a ratio can be taken of.`);
 console.log("  one declared exemption: LearnGround's light stop, whose white type sits at the dark end.");

@@ -8,7 +8,8 @@
 // This is the test the three previous copies of the comparison never had.
 
 import { isResultsSection } from '../api/_lib/results-sections.js';
-import { mirrorRespKey, mirrorLifeId, agrees, normRespValue, expectationsSummary } from '../api/_lib/expectations.js';
+import { mirrorRespKey, mirrorLifeId, respDistance, normRespValue, expectationsSummary } from '../api/_lib/expectations.js';
+import { isAligned, closenessPct } from '../api/_lib/alignment.js';
 import { RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS } from '../api/_questions.js';
 
 let pass = 0, fail = 0;
@@ -25,13 +26,38 @@ ok('life ids swap only the directional pair',
   mirrorLifeId('lq_involve_user') === 'lq_involve_partner'
   && mirrorLifeId('lq_children') === 'lq_children');
 
+// ── `agrees` IS GONE, AND THIS IS THE SAME SET OF CLAIMS ──────────────────
+// It answered as a boolean over three positions. Ellie: "I don't think it
+// should be all-or-nothing aligned, I want to include degrees." A boolean
+// cannot carry a degree, so the rule is a distance and agreement is the top of
+// it. Every assertion below is the one that was here, asked of the new rule.
+const agree = (a, b, da = null, db = null) => {
+  const d = respDistance({
+    yourValue: a, theirValue: b, yourDetail: da, theirDetail: db,
+    youName: 'Ellie', themName: 'Preston',
+  });
+  return d === null ? null : isAligned(d);
+};
+
 console.log('\n— Agreement is about people, not strings —');
-ok('both say "mine" is a DISAGREEMENT', agrees('Primarily mine', 'Primarily mine') === false);
-ok('opposite answers AGREE', agrees('Primarily mine', "Primarily my partner's") === true);
-ok('the other direction agrees too', agrees("Primarily my partner's", 'Primarily mine') === true);
-ok('balanced with balanced agrees', agrees('Balanced', 'Balanced') === true);
-ok('balanced against a claim disagrees', agrees('Balanced', 'Primarily mine') === false);
-ok('unanswered is not a comparison', agrees(null, 'Primarily mine') === null);
+ok('both say "mine" is a DISAGREEMENT', agree('Primarily mine', 'Primarily mine') === false);
+ok('opposite answers AGREE', agree('Primarily mine', "Primarily my partner's") === true);
+ok('the other direction agrees too', agree("Primarily my partner's", 'Primarily mine') === true);
+ok('balanced with balanced agrees', agree('Balanced', 'Balanced') === true);
+ok('balanced against a claim disagrees', agree('Balanced', 'Primarily mine') === false);
+ok('unanswered is not a comparison', agree(null, 'Primarily mine') === null);
+
+console.log('\n— And the degrees, which a boolean could not say —');
+ok('both claiming it is as far apart as the scale goes',
+  closenessPct(respDistance({ yourValue: 'Primarily mine', theirValue: 'Primarily mine', youName: 'Ellie', themName: 'Preston' })) === 0);
+ok('her Emotional Labour example is 75 per cent close, not a flat miss',
+  closenessPct(respDistance({
+    yourValue: 'Both of us', yourDetail: 'Usually Ellie, sometimes Preston',
+    theirValue: 'Ellie', youName: 'Ellie', themName: 'Preston',
+  })) === 75);
+ok('one step apart beats two steps apart',
+  respDistance({ yourValue: 'Both of us', theirValue: 'Ellie', youName: 'Ellie', themName: 'Preston' })
+  < respDistance({ yourValue: 'Preston', theirValue: 'Ellie', youName: 'Ellie', themName: 'Preston' }));
 
 // ── "DOESN'T APPLY" USED TO BE DROPPED, AND THAT WAS THE BUG ───────────────
 // This line asserted that it returns null, meaning the row leaves results
@@ -45,11 +71,11 @@ ok('unanswered is not a comparison', agrees(null, 'Primarily mine') === null);
 // check-alignment-rule.mjs holds the two readings together across every
 // possible pair.
 ok('one partner saying it does not apply is a DIFFERENCE',
-  agrees("Doesn't apply", 'Primarily mine') === false);
+  agree("Doesn't apply", 'Primarily mine') === false);
 ok('both saying it does not apply is AGREEMENT',
-  agrees("Doesn't apply", "Doesn't apply") === true);
+  agree("Doesn't apply", "Doesn't apply") === true);
 ok('a row is only dropped when nobody answered',
-  agrees("Doesn't apply", '') === null);
+  agree("Doesn't apply", '') === null);
 
 console.log('\n— A naive string comparison would get these wrong —');
 const naive = (a, b) => a === b;
@@ -58,7 +84,7 @@ const inverted = [
   ['Primarily mine', "Primarily my partner's"],
 ];
 ok('and it disagrees with us on both, which is the point',
-  inverted.every(([a, b]) => naive(a, b) !== agrees(a, b)));
+  inverted.every(([a, b]) => naive(a, b) !== agree(a, b)));
 
 console.log('\n— Values read as names —');
 ok('your "mine" is you', normRespValue('Primarily mine', true, 'Ellie', 'Preston') === 'Ellie');

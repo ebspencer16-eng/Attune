@@ -24,7 +24,7 @@
 
 import { RESPONSIBILITY_CATEGORIES } from '../_questions.js';
 import { scoreLifeQuestionPair, LIFE_QUESTION_OPTIONS, EXP_DOMAINS } from '../_workbook-content.js';
-import { mirrorRespKey, mirrorLifeId } from './expectations.js';
+import { mirrorRespKey, mirrorLifeId, respDistance, lifeDistance } from './expectations.js';
 
 /**
  * Score one responsibility pair, from each partner's own point of view.
@@ -102,24 +102,53 @@ function domainScores(domainKey, mine, theirs, youName, themName) {
   if (!spec) return [];
   const out = [];
 
+  /**
+   * ── ONE ITEM RULE, TWO ROLL-UPS ─────────────────────────────────────────
+   * Ellie: "One source of truth for every alignment score, wherever it
+   * appears."
+   *
+   * These used to be `scoreResponsibilityPairSided` and
+   * `scoreLifeQuestionPair`, a second item-level rule sitting beside the one
+   * the results rows use. Three things were wrong with having two. The pair
+   * scorer knew three positions where the exercise offers five, so the
+   * refinement someone gives after answering "Both of us" counted for
+   * nothing. It read a mixed pair of a name against "Primarily my partner's"
+   * as a total mismatch when both name the same person. And the two rules
+   * could drift, which is this codebase's whole failure mode.
+   *
+   * So the distance comes from api/_lib/expectations.js, the same call the
+   * rows make, and a similarity is one minus it.
+   *
+   * What is deliberately NOT shared is the roll-up. This file averages five
+   * DOMAINS, which cut across the categories: Money pulls two financial
+   * items, one career item and three life questions, and each domain counts
+   * equally so Household's seven items do not outweigh Emotional Labor's two.
+   * The results bars average the six CATEGORIES instead, because a bar is
+   * labelled with a category. Two summaries of one score, each right for the
+   * thing it is drawn next to.
+   */
   for (const [catId, index] of spec.resp) {
     const cat = RESPONSIBILITY_CATEGORIES.find((c) => c.id === catId);
     const item = cat?.items?.[index];
     if (item === undefined) continue;
     const key = `${catId}__${item}`;
-    const s = scoreResponsibilityPairSided(
-      mine?.responsibilities?.[key],
-      theirs?.responsibilities?.[mirrorRespKey(key)],
-      youName, themName);
-    if (s != null) out.push(s);
+    const mirrored = mirrorRespKey(key);
+    const d = respDistance({
+      yourValue: mine?.responsibilities?.[key],
+      theirValue: theirs?.responsibilities?.[mirrored],
+      yourDetail: mine?.bothDetail?.[key],
+      theirDetail: theirs?.bothDetail?.[mirrored],
+      youName, themName,
+    });
+    if (d != null) out.push(1 - d);
   }
 
   for (const id of spec.life) {
-    const s = scoreLifeQuestionPair(
+    const d = lifeDistance(
       mine?.life?.[id],
       theirs?.life?.[mirrorLifeId(id)],
       LIFE_QUESTION_OPTIONS[id]);
-    if (s != null) out.push(s);
+    if (d != null) out.push(1 - d);
   }
 
   return out;

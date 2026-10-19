@@ -253,6 +253,20 @@ export const CONFLICT_RESULTS_COPY = {
    */
   glancePrivate: '*private to you',
 
+  /**
+   * The second line of each horseman's tile, up to the colon.
+   *
+   * Ellie: "second line 'Self-assigned score: sometimes' with the score in
+   * orange." The word after the colon is the band's own label from
+   * FREQUENCY_LABELS, so this owns the question and not the measure.
+   *
+   * Here rather than in the two renderers because it was typed into both for
+   * about ten minutes, which is the shape of every serious bug in this
+   * codebase. The website imports it; the app receives it on `content.copy`
+   * like every other string on these pages.
+   */
+  selfScoreLabel: 'Self-assigned score: ',
+
   allClear: 'None of the four patterns are showing up often for you. That is worth knowing, and worth saying to {partner}.',
 };
 

@@ -83,6 +83,42 @@ export function readable(hex, want = READABLE) {
 export const READABLE = 4.6;
 
 /**
+ * The same colour, lifted toward white until white type stops clearing `floor`.
+ *
+ * ── WHY SOFTENING IS NOT JUST LIGHTENING ──────────────────────────────────
+ * Ellie: "Relationship reflection pages and physical intimacy detailed pages
+ * are too dark, can we soften those backgrounds?"
+ *
+ * Every one of these pages sets white type on the gradient, and `readable`
+ * above already takes each stop as light as 4.6 to 1 allows. So on the stops
+ * that were at the floor there is no room at all: lightening them is the
+ * contrast sweep's own lesson, where three pills on cream were darkened to
+ * clear the threshold and the fourth, on a dark gradient, went from 2.92 to
+ * 1.97 by the same edit.
+ *
+ * Where there IS room is the deep end. Reflection's first stop read 13.6 to 1
+ * and intimacy's 11.7, against a requirement of 4.6, and the deep end is the
+ * top of the page: it is most of what a reader sees before scrolling. This
+ * lifts those and refuses to touch a stop that has no headroom.
+ *
+ * `floor` is deliberately well above READABLE. Softening a ground to exactly
+ * the minimum would leave nothing for a future change to spend, and the point
+ * is a page that reads lighter rather than one that only just passes.
+ */
+export function soften(hex, floor = 7.5) {
+  const h = hex.replace('#', '').slice(0, 6);
+  const rgb = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  let best = `#${h}`;
+  for (let k = 0; k <= 100; k += 1) {
+    const t = k / 100;
+    const c = `#${rgb.map((v) => Math.round(v + (255 - v) * t).toString(16).padStart(2, '0')).join('')}`;
+    if (contrastOnWhiteText(c) < floor) break;
+    best = c;
+  }
+  return best;
+}
+
+/**
  * ── WHY THESE FIVE ARE DIFFERENT COLOURS ──────────────────────────────────
  * Ellie: "expectations, rel relf, and conflict all look similar, can we get a
  * little more distinction for each of those pages?" All three ran navy into a
@@ -101,8 +137,27 @@ const RAW = {
   'exp-overview': { angle: 150, mid: 55, stops: [NAVY, '#4C56C0', '#1B8FA8'] },
   /** Every expectations conversation page, for a category with no colour. */
   'exp-detail': { angle: 145, mid: 55, stops: [NAVY, '#6F63D6', '#514AAE'] },
-  'reflection-overview': { angle: 150, mid: 55, stops: [NAVY, '#2F7D62', '#10B981'] },
-  'intimacy-overview': { angle: 150, mid: 55, stops: ['#5E2340', '#A34468', '#C8703E'] },
+  /**
+   * ── THE TWO SHE ASKED TO HAVE SOFTENED ──────────────────────────────────
+   * Ellie: "Relationship reflection pages and physical intimacy detailed
+   * pages are too dark, can we soften those backgrounds?"
+   *
+   * Two changes each, and neither one costs any readability.
+   *
+   * The deep stop is lifted through `soften`, which is the only stop on either
+   * ground with headroom: these read 13.6 and 11.7 to 1 against a requirement
+   * of 4.6, while their light ends sit at 4.6 and 4.6 and cannot move at all.
+   *
+   * And the middle stop moves from 55 per cent of the page to 38. That is the
+   * lever with no trade-off in it: the same three colours, with the lighter two
+   * holding most of the height instead of the darkest one. A gradient reads as
+   * dark mainly because its dark end owns more than half the page.
+   *
+   * Both are numbers rather than a judgement, so "a bit more" or "too much" is
+   * one line each. The other four grounds are untouched: she named these two.
+   */
+  'reflection-overview': { angle: 150, mid: 38, stops: [soften(NAVY), '#2F7D62', '#10B981'] },
+  'intimacy-overview': { angle: 150, mid: 38, stops: [soften('#5E2340'), '#A34468', '#C8703E'] },
   /**
    * Ellie: "Conflict styles at a glance page needs some color." It ran navy
    * into a muted blue into a muted teal, which is reflection's old gradient
@@ -336,6 +391,36 @@ export const TAB_GROUNDS = {
  * the tab grounds already use.
  */
 export const CARD_TINTS = ['#F7E8E0', '#E4E9F7'];
+
+/**
+ * The two markers on the couple type page.
+ *
+ * ── WHY THEY ARE NOT SECTION COLOURS ──────────────────────────────────────
+ * "What comes naturally" carries a green tick and "What's worth being aware
+ * of" an orange exclamation. Those are the same two hexes as the Relationship
+ * Reflection green and the Communication orange, and they mean something
+ * entirely different here: agreed, and worth a look. The app's own theme says
+ * why that distinction matters, beside SectionColor: "a colour on this app
+ * means 'this belongs to that section', so borrowing one for emphasis breaks
+ * the only signal it carries."
+ *
+ * ── WHY THEY ARE HERE ─────────────────────────────────────────────────────
+ * Ellie: "Two bullets under each heading, not a tile each." The website has
+ * always drawn these as a badge and a sentence; the app drew a white card per
+ * sentence, so four sentences read as four findings. Making the app draw the
+ * website's treatment means the two surfaces hold the same four values, which
+ * is the shape of every serious bug in this codebase.
+ *
+ * An Expo project cannot import from api/, so the app keeps its copy in
+ * attune-theme.ts and check-tab-grounds.mjs holds the two equal. Same
+ * arrangement as the tab grounds and the prompt-card tints above it.
+ */
+export const BULLET_TONES = {
+  /** What comes naturally. A tick. */
+  good: { ink: '#10B981', fill: 'rgba(16,185,129,0.12)', edge: 'rgba(16,185,129,0.3)', mark: '✓' },
+  /** What's worth being aware of. An exclamation. */
+  watch: { ink: '#E8673A', fill: 'rgba(232,103,58,0.1)', edge: 'rgba(232,103,58,0.28)', mark: '!' },
+};
 
 /**
  * The tint for a card in this position.
