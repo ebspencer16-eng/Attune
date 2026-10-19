@@ -51,7 +51,7 @@ export const COUPLE_TYPES = [
     tips: [
       { title: "Notice when you're amplifying each other", body: "When both of you are feeling something strongly, the loop can escalate. One person naming it can break the cycle before it needs to get bigger.", phraseTry: "I think we're both escalating things right now, can we both take a breath before we keep going?" },
       { title: "Not every feeling needs an audience", body: "{U} and {P} are both expressive, but some feelings are better processed privately before being shared. Practice sitting with something for a beat before putting it into the shared space.", phraseTry: "I need a minute with this before I put it out there. Give me twenty minutes." },
-      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it's the thing that makes real closeness possible.", phraseTry: "I know this is a lot right now, but I'm glad we can actually see each other in it." },
+      { title: "The visibility is a gift", body: "Most couples are guessing at each other's interior. {U} and {P} don't have to. Appreciate that even when it's uncomfortable, it is what makes real closeness possible.", phraseTry: "I know this is a lot right now, but I'm glad we can actually see each other in it." },
     ],
   },
   {
@@ -132,7 +132,7 @@ export const COUPLE_TYPES = [
     strengths: [
       "When either of you shares something, it is respected",
       "You both respect each other's interior life",
-      "Feelings are meaningful even if not expressive",
+      "Feelings can be heavy even if they are not spoken",
     ],
     stickingPoints: [
       "Comfort with silence can become avoidance",
@@ -192,7 +192,7 @@ export const COUPLE_TYPES = [
     nuance: "This is one of the most common and most solvable friction patterns in relationships. The solution isn't changing your instinct, it's naming it out loud before the hard moment arrives. A simple agreement, 'I need a few hours, let's talk at 9', short-circuits the loop that otherwise runs on its own.",
     color: "#E8673A", shade: "#FCE4EC",
     famousDuos: [
-      { names: "Ross & Rachel", show: "Friends", note: "One wanted to resolve everything immediately; the other needed time and space first. Without a framework for it, they kept colliding at exactly the wrong moment." },
+      { names: "Ross & Rachel", show: "Friends", note: "One wanted to resolve everything immediately; the other needed time and space first. Without the right mindset to approach it, they kept colliding at the wrong moments." },
       { names: "Carrie & Big", show: "Sex and the City", note: "She reached. He retreated. Without a language for it, the pattern was destabilizing for years. When they finally named it, things changed." },
     ],
     strengths: [
@@ -228,8 +228,8 @@ export const COUPLE_TYPES = [
       { names: "Hannah & Adam", show: "Girls", note: "One always needed more contact; the other needed to disappear first. The difficulty wasn't incompatibility, it was the gap between their stress responses." },
     ],
     strengths: [
-      "Together, you facilitate emotional safety and depth",
-      "Meaningful feelings are received well between you",
+      "Together, you encourage emotional safety and depth",
+      "Genuine feelings are received well between you",
       "You have learned to stretch toward each other",
     ],
     stickingPoints: [

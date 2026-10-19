@@ -1321,7 +1321,6 @@ function SectionBody({
         step={step}
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         title={pageTitle('comm-overview', 'Communication Styles')}
-        placementsLabel={pageCopy('commPlacements', 'Overview')}
       />
     );
   }
@@ -1380,7 +1379,6 @@ function SectionBody({
         results={results} you={you} them={them} viewer={viewer} wideGap={wideGap}
         plan={commsPlan} ground={ground} groundStops={groundStops}
         title={pageTitle('comm-overview', 'Communication Styles')}
-        placementsLabel={pageCopy('commPlacements', 'Overview')}
       />
     );
   }
@@ -1477,7 +1475,7 @@ function SectionBody({
   // asked for it to go: the plan is on the at-a-glance page, where a reader
   // meets it without a detour.
 
-  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} placementsLabel={pageCopy('commPlacements', 'Overview')} ground={ground} groundStops={groundStops} step={step} />;
+  if (section === 'intimacy-overview') return <IntimacyOverview data={intimacy} you={you} them={them} title={pageTitle('intimacy-overview', 'Physical Intimacy Expectations')} placementsLabel={pageCopy('alignmentByCategory', 'Alignment by category')} ground={ground} groundStops={groundStops} step={step} />;
   if (section.startsWith('intimacy-')) {
     const domain = intimacy?.domains?.find((d) => d.section === section) ?? null;
     return (
@@ -2066,10 +2064,11 @@ function IntimacyOverview({ data, you, them, title, placementsLabel, ground, gro
             }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }}>
               {/* block: intimacy-overview/where-you-each-land */}
-              {/* Ellie: this "should be called overview not where you each
-                  land", the same rename the communication page got. One
-                  string, from the server, so the two pages cannot drift
-                  apart again. */}
+              {/* Ellie: "Remove overview eyebrow on intimacy overview page to
+                  'alignment by category' like expectations overview page."
+                  These bars are a percentage per aspect, which is the same
+                  thing Expectations shows, so they say the same words and the
+                  words come from one place. */}
               <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.3)' }}>{placementsLabel}</Text>
             </View>
             {/* ── ONE BAR PER ASPECT, AS A PERCENTAGE ────────────────────
@@ -2688,7 +2687,6 @@ function ReflectionRatings({ data, step = null, ground = null, groundStops = nul
               them={data.names.them}
               yours={data.priorities.you}
               theirs={data.priorities.them}
-              note={data.pages?.priorities?.note || ''}
             />
           </View>
         ) : null}
@@ -3053,8 +3051,16 @@ function ReflectionStory({ data, step = null, ground = null, groundStops = null 
  * that curve: the same control points, sampled. At this width it is a dozen
  * pieces and reads as one stroke.
  */
-function PriorityPair({ you, them, yours, theirs, note }: {
-  you: string; them: string; yours: string[]; theirs: string[]; note: string;
+/**
+ * ── THE LINE UNDER IT IS GONE ─────────────────────────────────────────────
+ * Ellie: "Remove the description line under the visual for what matters most
+ * this year in rel relf results." It explained how to read the connectors.
+ * The `note` prop and its strip go with it rather than being passed an empty
+ * string, because a block that draws nothing when given nothing is a block
+ * somebody will wire up again by accident.
+ */
+function PriorityPair({ you, them, yours, theirs }: {
+  you: string; them: string; yours: string[]; theirs: string[];
 }) {
   /** One row per item, and the connector column between the two lists. */
   const ROW = 30;
@@ -3127,11 +3133,6 @@ function PriorityPair({ you, them, yours, theirs, note }: {
         </View>
       </View>
 
-      {note ? (
-        <View style={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, borderTopColor: c.border, borderTopWidth: 1, backgroundColor: Palette.warm }}>
-          <Prose style={{ ...Type.small, color: c.textMuted, lineHeight: 18 }}>{note}</Prose>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -3928,7 +3929,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
 
 function Glance({
   results, you, them, viewer, wideGap, plan = null, ground, groundStops,
-  title = 'Communication Styles', placementsLabel = 'Overview', step = null }: {
+  title = 'Communication Styles', step = null }: {
   results: CoupleResults; you: string; them: string; viewer: 'a' | 'b';
   wideGap: number | null; plan?: CommsPlan | null;
   /** The page's gradient and its stops, from the results nav. */
@@ -3936,7 +3937,7 @@ function Glance({
   groundStops?: number[] | null;
 
   /** From the server, so the two surfaces cannot title the page differently. */
-  title?: string; placementsLabel?: string;
+  title?: string;
   /* Ellie: "please ensure every page that's not a cover page has this".
      The overviews are pages of the set now, so they are numbered too. */
   step?: { index: number; total: number } | null;
@@ -3974,11 +3975,14 @@ function Glance({
 
           {dims.length ? (
             <View style={{ marginTop: Spacing.xl }}>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+              {/* ── NO EYEBROW, JUST THE TWO NAMES ───────────────────
+                  Ellie: "Remove 'overview' eyebrow over 10 dimension bars on
+                  comms overview page." The hero two inches above already says
+                  Overview. The legend stays, because a bar with two dots on
+                  it needs to say whose they are, and it moves to the right
+                  where the eyebrow used to end. */}
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'flex-end', marginBottom: Spacing.md }}>
                 {/* block: comm-overview/where-you-each-land */}
-                <Text style={{ ...Type.eyebrow, color: 'rgba(255,255,255,0.85)' }}>
-                  {placementsLabel}
-                </Text>
                 <View style={{ flexDirection: 'row', gap: Spacing.md }}>
                   {[{ n: you, col: GLANCE_YOU }, { n: them, col: GLANCE_THEM }].map((x) => (
                     <View key={x.n} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>

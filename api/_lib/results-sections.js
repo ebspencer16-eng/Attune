@@ -180,14 +180,21 @@ export const PAGE_COPY = {
    */
   exerciseResults: 'Exercise results',
   /**
-   * Over the placement bars on the communication overview.
+   * ── THE EYEBROW OVER A ROW OF BARS ──────────────────────────────────────
+   * `commPlacements` was here, and it is gone. It read "Where you each land",
+   * then "Communication style overview", then just "Overview", and then Ellie:
+   * "Remove 'overview' eyebrow over 10 dimension bars on comms overview page."
+   * The page's hero already says what the page is, and a word above the bars
+   * saying "Overview" on a page titled Overview is the product talking to
+   * itself. There is no eyebrow on that block now.
    *
-   * Ellie: "can just be titled 'overview' now that the main hero says
-   * communication styles". It read "Where you each land" before she renamed
-   * it, then "Communication style overview", which said the page's own title
-   * back to the reader two inches under it.
+   * The Physical Intimacy page used the same string, and its bars are not
+   * placements: they are one percentage per aspect. Ellie: "Remove overview
+   * eyebrow on intimacy overview page to 'alignment by category' like
+   * expectations overview page." So it says what Expectations says, from one
+   * place, rather than each page carrying its own.
    */
-  commPlacements: 'Overview',
+  alignmentByCategory: 'Alignment by category',
   /*
    * `coverStart` was here: the word on a chapter cover's one button, See
    * insights, shared so both surfaces said it.

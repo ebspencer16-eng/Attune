@@ -38,15 +38,15 @@ of them to a name before anyone reads them.
 | YY | 3 | Neither of you takes the other's need for space personally |
 | ZZ | 1 | When either of you shares something, it is respected |
 | ZZ | 2 | You both respect each other's interior life |
-| ZZ | 3 | Feelings are meaningful even if not expressive |
+| ZZ | 3 | Feelings can be heavy even if they are not spoken |
 | WX | 1 | You both strive for resolution |
 | WX | 2 | Complementary processors, thoughtful and eager |
 | WX | 3 | Your relationship has warmth and steadiness |
 | WY | 1 | Friction can be easily removed for this pairing |
 | WY | 2 | Complementary instincts, attentive and stabilizing |
 | WY | 3 | Genuinely beneficial repair systems are attainable here |
-| WZ | 1 | Together, you facilitate emotional safety and depth |
-| WZ | 2 | Meaningful feelings are received well between you |
+| WZ | 1 | Together, you encourage emotional safety and depth |
+| WZ | 2 | Genuine feelings are received well between you |
 | WZ | 3 | You have learned to stretch toward each other |
 | XY | 1 | Named and managed, your instincts produce repair that works |
 | XY | 2 | Emotionally complementary, logical and feeling |

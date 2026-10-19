@@ -60,9 +60,9 @@ export const PATTERN_COPY = {
     label: 'Criticism',
     // What the pattern is, in plain words, said once above the four bands.
     definition: 'Going after the person rather than the problem.',
-    0: { note: 'This is not showing up for you. Worth naming to {partner} as something you already do well.' },
+    0: { note: 'You do not express criticism. Worth naming to {partner} as something you already do well.' },
     1: { note: 'Rare, and you notice it. Keep naming the specific behavior instead of the trait: "when plans change last minute" instead of "you are careless."' },
-    2: { note: 'Showing up enough to matter. The swap is small: describe the thing that happened, not the kind of person they are. One sentence is usually the difference.' },
+    2: { note: 'Criticism appears enough to matter. The swap is small: describe the thing that happened, not the kind of person they are. One sentence is usually the difference.' },
     3: { note: 'This one is worth real attention. Before raising something, try writing the specific behavior down first. Character language tends to arrive when the actual complaint has not been named yet.' },
   },
   contempt: {
@@ -169,6 +169,44 @@ export const NO_ACTION_NEEDED = {
  * Speaking up early and needing a pause mid-argument are perfectly coherent
  * together, but only if you can see which is which.
  */
+/**
+ * ── WHAT EACH OF THEM DOES TO RESET, IN THE RESULTS' OWN VOICE ────────────
+ * Ellie: "Reframe 'the thing you do that most often helps you reset
+ * mid-conflict' results section to say 'To help reset mid-conflict' then
+ * adjust tense of the answers to say ellie 'Asks a clarifying question' and
+ * Preston 'Uses humor'."
+ *
+ * The question asks a person about themselves, so its options are gerunds:
+ * "Asking a clarifying question". The results talk about two people in the
+ * third person, so they want the present tense: "Asks a clarifying question".
+ * Same answer, different sentence it is sitting in.
+ *
+ * The exercise's own wording is untouched. This is a second form of each
+ * option for the page that reports it, keyed by the option itself, and
+ * check-reset-forms.mjs fails the build if an option has no form or a form
+ * has no option.
+ */
+export const RESET_TITLE = 'To help reset mid-conflict';
+
+export const RESET_FORMS = {
+  'Taking a break': 'Takes a break',
+  'Using humor': 'Uses humor',
+  'Physical touch': 'Reaches for physical touch',
+  'Naming the pattern out loud': 'Names the pattern out loud',
+  'Apologizing first': 'Apologizes first',
+  'Listening without responding': 'Listens without responding',
+  'Asking a clarifying question': 'Asks a clarifying question',
+  'Suggesting a walk or change of scenery': 'Suggests a walk or a change of scenery',
+  'Writing it down': 'Writes it down',
+  'Sleeping on it': 'Sleeps on it',
+};
+
+/** The reported form of a stored answer, or the answer itself if it is new. */
+export function resetForm(answer) {
+  const a = String(answer || '').trim();
+  return RESET_FORMS[a] || a;
+}
+
 export const SNAPSHOT_ROWS = [
   { id: 'c1', field: 'start', label: 'When you notice something frustrating' },
   { id: 'c2', field: 'middle', label: "When you're in an argument" },

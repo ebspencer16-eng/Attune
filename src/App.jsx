@@ -5564,9 +5564,12 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 
         {/* ── COMPARISON BARS GRAPHIC ── */}
         <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
+          {/* Ellie: "Remove 'overview' eyebrow over 10 dimension bars on comms
+              overview page." The hero above already says it. The legend stays
+              and moves right, because a bar with two dots on it has to say
+              whose they are. */}
+          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "0.7rem" }}>
             {/* block: comm-overview/where-you-each-land */}
-            <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.commPlacements}</div>
             <div style={{ display: "flex", gap: "0.85rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#E8673A" }} />
@@ -5945,7 +5948,7 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
             <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
                 {/* block: exp-overview/by-category */}
-                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>Alignment by category</div>
+                <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.alignmentByCategory}</div>
                 <div style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.3)", fontFamily: BFONT }}>% aligned</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
@@ -9574,11 +9577,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       ))}
                     </div>
                   </div>
-                  <div style={{ padding: "0.6rem 1.15rem", borderTop: `1px solid ${C.stone}40`, background: "#FAFAF8" }}>
-                    <span style={{ fontSize: "0.7rem", color: C.muted, fontFamily: BFONT, fontWeight: 300 }}>
-                      {REFLECTION_PAGES.priorities.note}
-                    </span>
-                  </div>
                 </div>
               </div>
               );
@@ -9601,7 +9599,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           <div style={{ maxWidth: 660 }}>
             {/* No page dot and no eyebrow. Ellie: "make sure these are gone from every results page across web and app." The two reflection detail pages were the last two carrying them. */}
             <h2 style={{ fontFamily: HFONT, fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "0.5rem" }}>{REFLECTION_PAGES.story.title}</h2>
-            <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, marginBottom: "1.5rem", lineHeight: 1.65 }}>{REFLECTION_PAGES.story.sub}</p>
             {/* block: reflection-story/groups */}
           {STORY_CATEGORIES.map(cat => {
               const catQs = textQs.filter(q => q.category === cat);
@@ -9695,7 +9692,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
               <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "1rem", boxShadow: "0 8px 26px rgba(0,0,0,0.16)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.7rem", gap: "1rem", flexWrap: "wrap" }}>
                   {/* block: intimacy-overview/where-you-each-land */}
-                  <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.commPlacements}</div>
+                  {/* Ellie: "'alignment by category' like expectations overview
+                      page". These bars are a percentage per aspect, the same
+                      thing Expectations shows, so the words come from one
+                      place rather than each page carrying its own. */}
+                  <div style={{ fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", fontFamily: BFONT, fontWeight: 700 }}>{SC_COPY.alignmentByCategory}</div>
                 </div>
                 {/* ── ONE BAR PER ASPECT, AS A PERCENTAGE ──────────────────
                     Ellie: "can we make the bars % aligned rather than the

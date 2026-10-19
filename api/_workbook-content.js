@@ -420,7 +420,7 @@ export const WHEN_THIS_SHOWS_UP = {
     WZ: "You\'ll feel it after social events. [W partner name] wants to talk, [Z partner name] wants silence. [W partner name] shares one highlight and stops. [Z partner name] could contribute later, after real quiet.",
     XY: "[X partner name] can be ready to move on when [Y partner name] is still processing. Having different recovery timelines does not mean avoidance. Name what you both need.",
     XZ: "Both of you recover internally. Efficient, but it can tip into isolation. Once a week, ask the specific question: \'how are you, actually?\'",
-    YZ: "Both go quiet after a busy stretch and neither moves first. Since both need space, consider agreeing in advance a time to reconnect. Recharge how you need, but make space for connection, too.",
+    YZ: "Both go quiet after a busy stretch and neither moves first. Since both need space, consider agreeing in advance a time to reconnect. Recharge how you need, and keep some time for each other.",
   },
   expression: {
     WW: "You\'re both expressive, so silence between you is information. When one of you has been quieter than usual, name it out loud instead of waiting to see if it clears.",
@@ -468,7 +468,7 @@ export const WHEN_THIS_SHOWS_UP = {
     WZ: "[W partner name] bids bigger and more often; [Z partner name] bids rarely but meaningfully. Don\'t measure by frequency; measure by weight. [Z partner name]\'s one bid can carry as much intention as five of [W partner name]\'s.",
     XY: "[X partner name] bids practically; [Y partner name] bids emotionally. Identify how each of you bids and how each of you responds. [Y partner name]\'s emotional check-in could be the bid. [X partner name]\'s offer to help could be the bid.",
     XZ: "Both of you take quiet bids at face value without naming them. That works most of the time. Every so often, mark appreciation out loud to reinforce the pattern.",
-    YZ: "[Y partner name] extends a soft bid; [Z partner name] may take time processing. Neither of you is pushy, so bids can disappear silently. Build a small daily ritual to foster meaningful connection.",
+    YZ: "[Y partner name] extends a soft bid; [Z partner name] may take time processing. Neither of you is pushy, so bids can disappear silently. Build a small daily ritual that you both look forward to.",
   },
   conflict: {
     WW: "Both of you want to address tension relatively quickly. This is mostly a strength, except when \'now\' means neither of you is regulated. It may prove productive for you to each recognize your temperature: \'I\'m heated, give me ten minutes.\'",

@@ -3,7 +3,7 @@
   "energy": {
    "measures": "How each of you recovers, socially, emotionally, physically. Inward: solitude recharges. Outward: connection recharges. This shapes your weekend default, how you decompress, and what a good evening looks like.",
    "closeText": "{U} and {P} recover in similar ways. This quietly removes friction, you're rarely on opposite ends after a hard week.",
-   "gapText": "One of you recharges through solitude; the other through connection. After a long week, you're in very different places. Without a framework, the inward partner's need for quiet can read as withdrawal, and the outward partner's reach for people can feel exhausting.",
+   "gapText": "One of you recharges through solitude; the other through connection. After a long week, you're in very different places. Without understanding, the inward partner's need for quiet can read as withdrawal, and the outward partner's reach for people can feel exhausting.",
    "prompts": [
     "After a big social event, what does each of you need in the next 24 hours?",
     "When does one of you feel most energized, and when does the other feel most depleted?",
@@ -63,7 +63,7 @@
   "conflict": {
    "measures": "How each partner responds when something feels wrong, whether the instinct is to engage immediately or need space first. This is about timing, not care.",
    "closeText": "{U} and {P} move toward resolution with similar timing. This symmetry removes the most common friction point in conflict, the pursuer-withdrawer dynamic.",
-   "gapText": "One of you needs to address things immediately; the other needs space first. Without a framework, the person who needs resolution reads the other's silence as avoidance. The person who needs space reads the other's urgency as pressure.",
+   "gapText": "One of you needs to address things immediately; the other needs space first. If feelings are not voiced, the person who needs resolution reads the other's silence as avoidance. The person who needs space reads the other's urgency as pressure.",
    "prompts": [
     "When something is bothering you, what does your ideal next few hours look like?",
     "When one of you is clearly upset and pulls back, what does that feel like for the other? What does the other do?",
@@ -278,7 +278,7 @@
   "after_conflict": {
    "moment": "A day has passed. Things are normal again. Neither of you has mentioned it.",
    "happening": "Zs repair by letting time do it. Two Zs get very good at moving on and never confirming, so the same argument can recur for years without either of you knowing it was never closed.",
-   "not": "Letting normal stand in for repaired. For two Zs it always will, and it is the thing that accumulates.",
+   "not": "Letting normal stand in for repaired. For two Zs it always will, and it is what accumulates.",
    "works": "One sentence, once, even days later. It does not have to reopen anything. It has to acknowledge that something happened.",
    "phrase": "About Tuesday. I'm not bringing it back. I just didn't want it to go unsaid."
   },

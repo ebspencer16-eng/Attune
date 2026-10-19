@@ -19,6 +19,7 @@
 import {
   CONFLICT_QUESTIONS, RISK_QUESTIONS, CONFLICT_REQUIRED, conflictQuestionsInOrder,
 } from '../_conflict-questions.js';
+import { resetForm } from '../_conflict-results-prose.js';
 
 /**
  * Bands for a 0-3 frequency answer.
@@ -86,7 +87,11 @@ export function summarizeConflict(answers) {
     // number invites exactly that reading.
     flaggedCount: flagged.length,
     // What they said already works, which the results lead with.
-    strength: answers.c8 || null,
+    /* The reported form: the question asks "Asking a clarifying question" of
+       a person about themselves, and the results say "Asks a clarifying
+       question" about two people. Same answer, different sentence. See
+       resetForm in api/_conflict-results-prose.js. */
+    strength: answers.c8 ? resetForm(answers.c8) : null,
     repairRanking: Array.isArray(answers.c_repair) ? answers.c_repair : [],
     openings: { start: answers.c1 ?? null, middle: answers.c2 ?? null, oldTopics: answers.c_topic ?? null },
     reflection: (answers.c9 || '').trim() || null,

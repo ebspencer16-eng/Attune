@@ -5,6 +5,7 @@
 
 import { summarizeConflict, conflictPair, isConflictComplete, riskBand } from '../api/_lib/conflict-results.js';
 import { CONFLICT_QUESTIONS, CONFLICT_SECTIONS, CONFLICT_REQUIRED, conflictQuestionsInOrder } from '../api/_conflict-questions.js';
+import { resetForm } from '../api/_conflict-results-prose.js';
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -54,7 +55,18 @@ ok('flags only what crosses the line', mixed.flagged.join(',') === 'contempt,def
 const s = summarizeConflict(base({ c_cont: 3 }));
 ok('no type or letter assigned', !('type' in s) && !('typeCode' in s));
 ok('no single composite score', !('score' in s) && !('total' in s) && !('index' in s));
-ok('strengths preserved alongside risks', s.strength === 'Using humor');
+/*
+ * The strength survives, and it arrives in the voice the results speak in.
+ *
+ * This asserted `=== 'Using humor'`, the option exactly as the question asks
+ * it. Ellie: "adjust tense of the answers to say ellie 'Asks a clarifying
+ * question' and Preston 'Uses humor'." The question asks a person about
+ * themselves and the results talk about two people, so the stored answer is
+ * reported through resetForm. Checked against the table rather than against a
+ * literal, so this says "it is reported" rather than "it is that string".
+ */
+ok('strengths preserved alongside risks', s.strength === resetForm('Using humor'));
+ok('and in the results voice, not the question voice', s.strength === 'Uses humor');
 
 // ── Couple view ─────────────────────────────────────────────────────────────
 const pair = conflictPair(base({ c_def: 3 }), base({ c_def: 3, c_crit: 2 }));

@@ -51,7 +51,7 @@ import { capabilitiesFor, OWNERSHIP_COLUMNS } from './_lib/ownership.js';
 import {
   PATTERN_COPY, PATTERN_ACTIONS, PATTERN_NOTES, BAND_COLORS, FREQUENCY_LABELS,
   SNAPSHOT_ROWS, OPENING_CHIPS, CONFLICT_RESULTS_COPY, NO_ACTION_NEEDED,
-  WROTE_ROWS,
+  WROTE_ROWS, RESET_TITLE,
   interpConflict,
 } from './_conflict-results-prose.js';
 import { CONFLICT_QUESTIONS } from './_conflict-questions.js';
@@ -220,20 +220,18 @@ export default async function handler(req) {
         /** The two rows on What You Each Wrote, with the website's headings. */
         wroteRows: WROTE_ROWS,
         /**
-         * The c8 question, verbatim, to label each person's `strength`.
+         * The heading over each person's `strength`, and its words.
          *
          * c8 is a picked option: "The thing you do that most often helps you
-         * reset mid-conflict". Both partners agreed to share it, it is in the
-         * partner allowlist, and neither surface has ever shown it. Ellie
-         * asked for it to be displayed, and Your Conflict Snapshot's Repair
-         * block is the place it belongs: that block is what helps each of you
-         * reset, and this is the half about what you each DO, next to the
-         * ranking of what you each want done for you.
+         * reset mid-conflict". It used to be labelled with the question's own
+         * text, because writing a heading would have been writing customer
+         * copy. Ellie has now written one: "Reframe ... to say 'To help reset
+         * mid-conflict' then adjust tense of the answers."
          *
-         * The question's own text is the label. Writing a heading here would
-         * be writing customer copy, which is Ellie's.
+         * Both are hers, and both live in the results prose module beside the
+         * rest of this page's words.
          */
-        resetQuestion: CONFLICT_QUESTIONS.find((q) => q.id === 'c8')?.text || '',
+        resetQuestion: RESET_TITLE,
         snapshotRows: SNAPSHOT_ROWS,
         openingChips: OPENING_CHIPS,
         noActionNeeded: NO_ACTION_NEEDED,

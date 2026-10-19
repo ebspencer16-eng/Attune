@@ -72,13 +72,24 @@ export const REFLECTION_PAGES = {
    * Both were written inside src/App.jsx, so the app had no heading for this
    * section and nothing explaining what the lines mean.
    */
+  /**
+   * ── TWO EXPLANATORY LINES, REMOVED ──────────────────────────────────────
+   * Ellie: "Remove the description line under the visual for what matters
+   * most this year in rel relf results", and "Remove description sentence
+   * under side by side hero in rel relf results."
+   *
+   * `note` said how to read the connecting lines and `sub` said what the page
+   * contained. Both are gone rather than emptied: a key nothing draws is a
+   * piece of copy on the review surface that no customer can reach, which is
+   * what happened to the retired action plan's three strings below.
+   *
+   * The headings stay. They are the only thing either block needs.
+   */
   priorities: {
     title: 'What matters most this year',
-    note: 'Each line links the same priority on both lists. The flatter the line, the closer you ranked it.',
   },
   story: {
     title: 'Side by Side',
-    sub: 'Everything you each wrote, unedited, next to each other. Read them together.',
   },
   // `plan` was the retired action plan page's heading, its eyebrow and its
   // all-aligned line. The page is gone from both surfaces and nothing read
