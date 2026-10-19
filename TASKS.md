@@ -93,9 +93,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W41 | **Where the server runs.** Every database read costs 200 to 600 milliseconds, which is a long way for a lookup by id. The server runs wherever you are: your request lands in San Francisco and the database is somewhere else, so every read crosses the country. Pinning it next to the database is one line. It is an experiment, so I will measure it and put it back if it is worse. |
+**Nothing open.** The speed work is in section 3 as W39 to W41, with the
+numbers. The home screen's request went from between 1.3 and 5.9 seconds to
+283 milliseconds.
 
 ---
 
@@ -121,6 +121,9 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W25 | **The heart bubble is the logo's own bubble**, generated from the favicon rather than drawn again. |
 | W26 | **Copy is on the selection toolbar**, on the phone and on the site. The icon turns to a tick for a moment, which is how you know it worked. |
 | W27 | **Your Internal Processing rewrite is live, word for word.** It replaced the sentence you had a highlight on, so that highlight is gone. See the note under this table. |
+| W39 | **Both of you come back in one read instead of two.** Your row and Preston's were read one after the other because his id is on your row. They are linked both ways, so they can be asked for together. |
+| W40 | **The slow part was never the question, it was the distance.** Every read was crossing the country and back. |
+| W41 | **Every endpoint the app uses now runs next to the database.** The home screen's request is 283 milliseconds, measured. It was between 1.3 and 5.9 seconds when you said the pages were slow. |
 | W36 | **Two of the home screen's four reads were waiting on each other for no reason.** They start together now: five round trips deep before, four after, three in production. |
 | W37 | **The token check is confirmed free**, not just assumed. Measured on the live site across ten launches: 0 or 1 millisecond every time on a warm server, against a full network round trip a week ago. |
 | W38 | **The slow part has a name now.** It is one read, not all of them, and it is not the query. See the note under this table: there is one more thing to try and it is not a small one. |
@@ -134,6 +137,47 @@ These two are still waiting on somebody, and neither is waiting on me.
 | W32 | **The physical intimacy rows open their page now.** They pointed at six pages that were merged into two months ago, so the tap did nothing at all. |
 | W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
+
+### W39 to W41, the speed, and what it took
+
+**Where it ended up.** Server time for the home screen's request, measured by
+the server itself, with the app warm:
+
+| | |
+|--|--|
+| when you said the pages were slow | 1336ms to 5885ms |
+| the token check stopped being a network call | auth went to 0ms |
+| two reads stopped waiting on each other | about 1430ms |
+| both of your rows in one read instead of two | about 800ms |
+| running next to the database | **283ms**, and 176ms at best |
+
+The rest of the app came with it: the survey request is 227ms, conflict
+patterns about 400ms, results 446ms. Those were seconds each.
+
+**The thing I got wrong, and how I found out.** I told you last round that the
+cost was "being first to speak to the database". It was not. When I measured
+every read separately, the second read was sometimes slower than the first,
+which killed that theory. What was actually true is duller and much more
+fixable: every single read was costing 200 to 600 milliseconds, which is far
+too long for looking up a row by its id.
+
+**The distance.** The server runs on Vercel's edge, which puts it near whoever
+is asking. That is right when the answer is already nearby and wrong when every
+answer comes from one database somewhere else: your request landed in San
+Francisco, and each read crossed the country and came back. Pinning the
+endpoints next to the database took a lookup from 200-600ms to 98ms.
+
+Supabase does not publish which region a project is in and it is not visible
+from outside, so the first pin was a guess, deployed as an experiment with a
+measurement either side of it. The measurement is what turned it into a fact.
+
+**Eighteen, not three.** I pinned the three the app calls on launch, then wrote
+a gate that reads the endpoint list out of the app's own code rather than
+keeping its own. It found ten more I would not have thought of, including the
+one that saves every answer anybody types.
+
+**Nothing needed from you**, and nothing about any of this is visible in the
+product except that it is faster.
 
 ### W38, what is actually slow
 
