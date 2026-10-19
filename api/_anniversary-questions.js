@@ -29,7 +29,7 @@ export const ANNIVERSARY_QUESTIONS = [
   { id: "a_sat_fun", category: "How We're Doing", type: "scale", text: "How much do we prioritize fun and lightness together?", scaleLabels: ["Not enough", "Less than I'd like", "About right", "Quite a bit", "A lot"], scaleColors: ["#ef4444","#f97316","#eab308","#22c55e","#10b981"] },
   // Looking forward — priorities first, then 6mo, then honest reflection, then 5yr
   { id: "a_priority", category: "Looking Forward", type: "rank", text: "Rank these from most to least important to invest in together this year:", options: ["Quality time","Communication","Financial alignment","Physical intimacy","Shared adventures","Long-term planning"] },
-  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I show up for you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
+  { id: "a6", category: "Looking Forward", type: "text", text: "One thing I want to work on, in the next 6 months, in how I am with you:", placeholder: "e.g. Being more present, saying what I need directly, making more time for us..." },
   { id: "a7", category: "Looking Forward", type: "text", text: "Something I wish we'd approached differently:", placeholder: "e.g. A disagreement we got stuck on, a decision we made without fully talking it through..." },
   { id: "a5", category: "Looking Forward", type: "text", text: "Where I see us in 5 years, what matters most to me about that picture:", placeholder: "e.g. Financially stable and adventurous, close to family, in a home we love..." },
   // What matters — gratitude and intention, ends the exercise on a high note

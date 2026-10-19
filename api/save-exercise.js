@@ -52,6 +52,7 @@ import { ANNIVERSARY_VERSION } from './_anniversary-questions.js';
 /* What happens at the moment results open lives in one module, because the
    website completes an exercise without coming through here at all. */
 import { announceCompletion } from './_lib/completion.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -86,6 +87,9 @@ export default async function handler(req) {
   const serviceKey  = process.env.SUPABASE_SERVICE_KEY
                    || process.env.SUPABASE_SERVICE_ROLE
                    || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  /* The public key, for the token check's fall-back path. See
+     api/_lib/verify-token.js. */
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
   if (!supabaseUrl || !serviceKey) return err(500, 'Server not configured');
 
   const _parsed = await jsonBody(req);
@@ -112,8 +116,12 @@ export default async function handler(req) {
   let mode = null;
 
   if (accessToken) {
-    const { data: userData, error: userErr } = await admin.auth.getUser(accessToken);
-    if (userErr || !userData?.user) return err(401, 'Invalid or expired token');
+    /* Checked here rather than over the network, which is a round trip in
+       front of every answer anybody types. api/_lib/verify-token.js falls
+       back to asking Supabase for anything it cannot decide. */
+    const who = await userForRequest({ token: accessToken, supabaseUrl, anonKey });
+    if (!who?.id) return err(401, 'Invalid or expired token');
+    const userData = { user: { id: who.id, email: who.email } };
     resolvedUserId = userData.user.id;
     mode = 'bearer';
     // If the body's userId mismatches the token's user, that's a client

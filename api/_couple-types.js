@@ -81,7 +81,7 @@ export const COUPLE_TYPES = [
       "The emotional texture of hard moments can sometimes get skipped in the move toward resolution.",
     ],
     tips: [
-      { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The watch-out is closing the loop before the thing is actually through.", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
+      { title: "Check if it's resolved or just closed", body: "Fast repair is a real strength. The risk is ending a conversation or apologizing before things are fully settled.", phraseTry: "Are we actually okay, or are we both just ready to be done?" },
       { title: "Ask what's going on underneath the plan", body: "{U} and {P} are both comfortable with the practical mode. Add a deliberate question to get at the emotional weight underneath the practical action. This changes the quality of the conclusion.", phraseTry: "How does this actually feel for you, beyond what it means?" },
       { title: "Give the slower moments their time", body: "Occasionally, slow the repair down enough to make sure you've actually heard each other. The extra few minutes tends to be what prevents the same conversation coming back.", phraseTry: "I want to make sure we've actually heard each other on this before we move on. I'm curious about your perspective." },
     ],
@@ -122,7 +122,7 @@ export const COUPLE_TYPES = [
     id: "ZZ", typeA: "Z", typeB: "Z",
     name: "The depth",
     tagline: "Both withdraw. Both hold it close. A lot lives under the surface.",
-    description: "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, low-drama, and genuinely deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
+    description: "{U} and {P} both go inward when things get hard and both hold their interior life privately. The relationship tends to be stable, calm, and emotionally deep, but the depth doesn't surface readily. There is often more going on beneath the calm than either of you shows.",
     nuance: "Important things can go unsaid for a very long time. The comfort with quiet can become avoidance without either person intending it. The relationship looks more okay from the outside than it sometimes is from the inside. Creating a deliberate structure for openness is worth more here than in most pairings.",
     color: "#6B7280", shade: "#F4F5F6",
     famousDuos: [
@@ -142,7 +142,7 @@ export const COUPLE_TYPES = [
     patterns: [
       "{U} and {P} probably don't have a lot of dramatic conversations. The emotional content of the relationship tends to go inward rather than outward.",
       "When something is hard, it may be days before either of you brings it up, if it gets brought up at all.",
-      "The relationship is probably more stable-looking than many, but the thing to watch is what's accumulating beneath the stability.",
+      "The relationship is probably more stable-looking than many. Worth noting that feelings can still accumulate beneath that stability.",
     ],
     tips: [
       { title: "Build in the opening, don't wait for it to happen", body: "A weekly check-in, even 15 minutes, creates a structure for the things that wouldn't come up otherwise. Schedule the opening you both won't naturally make.", phraseTry: "Can we do a quick check-in this week? Nothing heavy. I just want to know how you're actually doing." },
@@ -309,7 +309,7 @@ export const COUPLE_TYPES = [
     tips: [
       { title: "Build a practice of asking", body: "Not 'are you okay?' but 'what's actually going on for you right now?' Two people who both hold things privately need to be asked before they'll share their feelings.", phraseTry: "What's actually going on for you right now? How are you feeling?" },
       { title: "Schedule the emotional check-in", body: "{U} and {P} are both capable of going long stretches without naming what's going on inside. A regular, brief check-in creates the structure that neither of you will naturally generate on your own.", phraseTry: "Can we do fifteen minutes on Sunday? Just to check in properly." },
-      { title: "The quiet isn't a problem, until it is", body: "Low-drama is a real quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
+      { title: "The quiet isn't a problem, until it is", body: "Calm is a wonderful quality. The work is making sure the ease isn't covering for avoided conversations. Check in on whether the calm is genuine or whether something is sitting unspoken.", phraseTry: "Is there anything sitting unspoken between us right now? I want to make sure we're actually okay." },
     ],
   },
   {

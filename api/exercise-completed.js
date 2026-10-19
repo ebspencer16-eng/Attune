@@ -29,6 +29,7 @@ import { createClient } from '@supabase/supabase-js';
 import { jsonBody } from './_lib/http.js';
 import { EXERCISES } from './_exercises.js';
 import { announceCompletion } from './_lib/completion.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 export const config = { runtime: 'edge' };
 
@@ -42,6 +43,9 @@ export default async function handler(req) {
   const serviceKey  = process.env.SUPABASE_SERVICE_KEY
                    || process.env.SUPABASE_SERVICE_ROLE
                    || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  /* The public key, for the token check's fall-back path. See
+     api/_lib/verify-token.js. */
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
   if (!supabaseUrl || !serviceKey) return json(500, { ok: false, error: 'Server not configured' });
 
   const auth = req.headers.get('authorization') || req.headers.get('Authorization') || '';
@@ -59,9 +63,10 @@ export default async function handler(req) {
 
   /* Whose completion this is. From the token, never from the body: the body
      is the one thing a caller controls. */
-  const { data: who, error: whoErr } = await admin.auth.getUser(token);
-  const userId = who?.user?.id;
-  if (whoErr || !userId) return json(401, { ok: false, error: 'Invalid auth token' });
+  /* Checked here rather than over the network. See api/_lib/verify-token.js. */
+  const who = await userForRequest({ token, supabaseUrl, anonKey });
+  const userId = who?.id;
+  if (!userId) return json(401, { ok: false, error: 'Invalid auth token' });
 
   /* Nothing here fails the caller. The answers are already saved; this is the
      courtesy on the side of that, exactly as it is in /api/save-exercise. */

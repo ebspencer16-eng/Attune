@@ -1,4 +1,5 @@
 import { jsonBody } from './_lib/http.js';
+import { userForRequest } from './_lib/verify-token.js';
 /**
  * /api/privacy-choices
  *
@@ -62,11 +63,10 @@ export default async function handler(req) {
   }
 
   try {
-    const uRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-    });
-    if (!uRes.ok) return json({ ok: false, error: 'invalid auth token' }, 401);
-    const user = await uRes.json().catch(() => null);
+    /* Checked here rather than over the network. See api/_lib/verify-token.js;
+       the round trip is still the fall-back for anything the local check
+       cannot decide. */
+    const user = await userForRequest({ token, supabaseUrl, anonKey });
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
     const me = user.id;
 

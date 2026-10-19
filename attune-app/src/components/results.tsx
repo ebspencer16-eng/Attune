@@ -1364,8 +1364,11 @@ function SectionBody({
       <CoupleType
         results={results} you={you} them={them}
         /* The fallback is the same words the server sends, for a cached
-           payload written before this line changed. B117. */
-        title={pageCopy('coupleTypeTitle', 'Your relationship dynamic')}
+           payload written before this line changed. B117, and now also
+           Ellie's "Change back to 'Your unique relationship dynamic'": a
+           phone holding a payload from before that reads the old line until
+           the request lands, which is a second, not a day. */
+        title={pageCopy('coupleTypeTitle', 'Your unique relationship dynamic')}
       />
     );
   }

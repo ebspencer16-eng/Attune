@@ -32,6 +32,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 import { jsonBody } from './_lib/http.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -56,6 +57,9 @@ export default async function handler(req) {
   const serviceKey  = process.env.SUPABASE_SERVICE_KEY
                    || process.env.SUPABASE_SERVICE_ROLE
                    || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  /* The public key, for the token check's fall-back path. See
+     api/_lib/verify-token.js. */
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
   if (!supabaseUrl || !serviceKey) return json(500, { ok: false, error: 'Server not configured' });
 
   const auth = req.headers.get('authorization') || req.headers.get('Authorization') || '';
@@ -74,9 +78,10 @@ export default async function handler(req) {
   const optIn = typeof body.optIn === 'boolean' ? body.optIn : null;
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-  const { data: who, error: whoErr } = await admin.auth.getUser(token);
-  const profileId = who?.user?.id;
-  if (whoErr || !profileId) return json(401, { ok: false, error: 'Invalid auth token' });
+  /* Checked here rather than over the network. See api/_lib/verify-token.js. */
+  const who = await userForRequest({ token, supabaseUrl, anonKey });
+  const profileId = who?.id;
+  if (!profileId) return json(401, { ok: false, error: 'Invalid auth token' });
 
   const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
   const rest = (path, init = {}) => fetch(`${supabaseUrl}/rest/v1/${path}`, {

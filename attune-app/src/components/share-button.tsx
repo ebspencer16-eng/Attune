@@ -17,7 +17,7 @@ import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
 import { recallShareFooter } from '@/api/client';
-import { Colors, Radius, Spacing, Type } from '@/constants/attune-theme';
+import { Colors, Palette, Radius, Spacing, Type } from '@/constants/attune-theme';
 
 const c = Colors.light;
 
@@ -78,7 +78,8 @@ async function named(uri: string, name: string): Promise<string> {
  * round: a link is readable as text and an image is not.
  */
 export default function ShareButton({
-  message, url, title = SUBJECT, label, tone = 'ink', accessibilityLabel, capture, pictureName,
+  message, url, title = SUBJECT, label, round = false, tone = 'ink', accessibilityLabel,
+  capture, pictureName,
 }: {
   /** What lands in the message. */
   message: string;
@@ -96,6 +97,15 @@ export default function ShareButton({
   title?: string;
   /** Shown beside the icon. Omitted for a bare icon. */
   label?: string;
+  /**
+   * Draw it as a round button rather than a bare glyph.
+   *
+   * Ellie, of the insight of the day: "I want them to be a bookmark icon and
+   * a share icon, not to have the words like they currently do." The word of
+   * the day's two controls are round, so this is what makes the insight's
+   * match rather than a second drawing of the same button.
+   */
+  round?: boolean;
   tone?: 'ink' | 'light';
   accessibilityLabel?: string;
   /**
@@ -190,6 +200,13 @@ export default function ShareButton({
         ...(label ? {
           borderRadius: Radius.pill, borderWidth: 1, borderColor: tone === 'light' ? 'rgba(255,255,255,0.35)' : c.border,
           paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
+        } : null),
+        /* The word of the day's own measurements: a 34 point circle with the
+           glyph centred in it. See components/word-entry.tsx. */
+        ...(round ? {
+          width: 34, height: 34, borderRadius: 17,
+          justifyContent: 'center', alignItems: 'center',
+          backgroundColor: tone === 'light' ? 'rgba(255,255,255,0.18)' : Palette.warm,
         } : null),
       }}>
       {busy ? (

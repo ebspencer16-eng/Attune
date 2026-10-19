@@ -157,7 +157,7 @@ export const DIM_CONTENT = {
 /** Six recognisable moments for a W pairing, and what each person can do in them. */
 export const MOMENTS_W = {
   "hard_workday": {
-    "moment": "{U} gets home from a hard day and starts unpacking it the moment they walk in: the project, the people, the frustration.",
+    "moment": "{U} gets home from a hard day and starts going through things the moment they walk in: the project, the people, the frustration.",
     "happening": "{U} processes by talking. They're not asking {P} to fix it; they're making sense of the day by hearing themselves say it. Once it's said, most of it's out of their system and they can move on.",
     "not": "Don't problem-solve, don't try to redirect, don't go quiet halfway through.",
     "works": "Listen actively. Reflect back what you heard. Match their energy and ask one or two follow-up questions. The relief comes from being heard, not from being fixed.",

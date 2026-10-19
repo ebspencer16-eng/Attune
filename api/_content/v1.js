@@ -33,8 +33,8 @@
 // but which pole is data-dependent, so each line works for either.
 export const ALIGNED_ADVICE = {
   reassurance: {
-    low:  "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The thing to watch is it becoming a routine that stops carrying weight. Name the specific thing, not the category.",
-    high: "You both take security as a given, so it rarely gets said. That is a settled place to be. The thing to watch is that silence carries no information, so a hard stretch looks exactly like an easy one. Say it out loud after the next rough week.",
+    low:  "You both want where you stand said out loud, and you both say it. Nothing goes unnamed. The risk is that it becomes common and stops carrying weight. Name the specific thing, not the category.",
+    high: "You both take security as a given, so it rarely gets said. That is a settled place to be. The issue is that silence carries no information, so a hard stretch looks exactly like an easy one. Say it out loud after the next rough week.",
   },
   energy:     "You recharge in similar ways. That makes it easy to assume the other always wants what you want. Check before you plan the weekend around it.",
   // Direction-dependent: which pole the couple is aligned toward changes the copy.
@@ -43,7 +43,7 @@ export const ALIGNED_ADVICE = {
     high: "You both process emotion out loud. Feelings are shared readily, which is good. If you're both expressing at once, be sure to pause and actively listen to your partner.",
   },
   needs: {
-    low:  "You both ask directly. Nothing gets buried, which is its own kind of ease. The watch-out is tone, not clarity. When you're tired, directness can read sharper than you mean it. Same ask, softer.",
+    low:  "You both ask directly. Needs are rarely buried, which is great. The thing to watch for is tone rather than clarity. When you're tired, directness can read sharper than you mean it. Same ask, softer.",
     high: "You both tend to hint. That keeps things gentle, but when neither of you says it straight, the ask gets missed by both of you. Say the direct version sometimes anyway.",
   },
   bids: {
@@ -102,7 +102,7 @@ export const SHIFTS = (loName, hiName) => ({
     '3_5': `${loName} is neutral; ${hiName} genuinely energizes from people and connection. ${hiName}'s need is a real preference worth designing around. Build in deliberate closeness even when ${loName} would otherwise be fine either way.`,
     '4_4': `You both restore through connection and togetherness. Warm match. Give each other explicit permission to want a quiet night sometimes. It shouldn't feel like a confession when one of you needs to be alone for a bit.`,
     '4_5': `Both of you lean toward connection, ${hiName} more strongly. When one of you is genuinely depleted and doesn't have energy for togetherness, build in an easy way to signal it: "I'm low tonight but I'm not going anywhere."`,
-    '5_5': `You both restore through people and being together. Strong match in daily energy needs. The watch-out: when you're both depleted at the same time, neither of you may feel like being "on" for the other. Name it when it happens rather than both performing okay-ness.`,
+    '5_5': `You both restore through people and being together. Strong match in daily energy needs. The risk: when you're both depleted at the same time, neither of you may feel like being "on" for the other. Name it when it happens rather than both performing okay-ness.`,
   },
 
   // ── EMOTIONAL EXPRESSION (A=Internal, B=External) ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ export const SHIFTS = (loName, hiName) => ({
     '1_3': `${loName} processes privately; ${hiName} is flexible. The shift for ${loName}: trust that sharing before you're fully sorted won't make you look uncertain. It gives ${hiName} a chance to feel included in what's actually going on.`,
     '1_4': `${loName} goes internal; ${hiName} tends toward sharing. A real difference. ${loName} can offer an interim signal, "I'm processing something, I'll bring it up when I have words", so ${hiName} doesn't fill the silence with their own interpretation.`,
     '1_5': `${loName} is very private in processing; ${hiName} processes by talking it through. One of the most common expression mismatches. The shift: agree that ${hiName} gets to think out loud without it being a finished position, and ${loName} gets time before being expected to respond.`,
-    '2_2': `You both tend to work through things privately. That creates low-drama, but it means significant things can sit unspoken too long. Make it easy to say "I've been sitting with something" without needing to be fully ready to explain.`,
+    '2_2': `You both tend to work through things privately. That keeps things calm, but means significant things can sit unspoken too long. Make it easy to say "I've been sitting with something" without needing to be fully ready to explain.`,
     '2_3': `${loName} leans private; ${hiName} is flexible. Don't let ${hiName}'s flexibility become the default that always gives way. Check in on what ${hiName} actually wants to share, rather than only what they're willing to hold.`,
     '2_4': `${loName} leans internal; ${hiName} leans toward sharing. ${loName} may often appear fine when they're not. Agree that "I need to think about this" means "I'll come back to you", not "nothing's wrong."`,
     '2_5': `${loName} tends inward; ${hiName} processes externally. The shift: ${hiName} may share unfinished thoughts, which can feel like oversharing to ${loName}. Agree that thinking out loud is allowed and doesn't require an immediate response.`,
@@ -167,7 +167,7 @@ export const SHIFTS = (loName, hiName) => ({
     '1_1': `You both move toward resolution quickly. That keeps things from festering, but when both of you are ready to engage before one has fully settled, words can come out sharper than intended. A short pause, even 10 minutes, can change the tone without losing momentum.`,
     '1_2': `${loName} addresses things quickly; ${hiName} leans similar. Close match. Watch for: moving so fast toward resolution that one of you doesn't fully share what happened before you're onto "what do we do." Make space for "here's what I felt" before jumping to fix it.`,
     '1_3': `${loName} moves toward resolution quickly; ${hiName} is flexible. ${hiName} can signal when they're ready. It helps ${loName} not feel like they're carrying the weight of bringing things up.`,
-    '1_4': `${loName} addresses things quickly; ${hiName} tends to need more time. A real tension point. Agree in advance that when ${hiName} asks for time, ${loName} can ask for a return window: "when should we come back to this?", turns space into a plan.`,
+    '1_4': `${loName} addresses things quickly; ${hiName} tends to need more time. This can cause tension. Agree in advance that when ${hiName} asks for time, ${loName} can ask for a return window: "when should we come back to this?", turns space into a plan.`,
     '1_5': `${loName} wants to resolve things quickly; ${hiName} needs significant space first. One of the most common conflict mismatches. Name the pattern in a calm moment. Agree: ${hiName} commits to a specific return time, and ${loName} trusts that as a promise, not avoidance.`,
     '2_2': `You both lean toward addressing things sooner rather than later. That keeps the relationship clear. Watch for: moving quickly into the conversation before one of you is actually ready. "Ready to talk" doesn't mean "ready to resolve", it's okay to share and still feel unsettled.`,
     '2_3': `${loName} leans toward quicker resolution; ${hiName} is flexible. ${hiName} can signal readiness. It helps ${loName} not always be the one initiating.`,
@@ -176,7 +176,7 @@ export const SHIFTS = (loName, hiName) => ({
     '3_3': `You're both flexible on timing. That's adaptive. Watch for: neither of you pushing to address something that should be addressed. Make it easy for either person to say "I'm ready to talk about that thing from earlier", the opening shouldn't always come from the same person.`,
     '3_4': `${hiName} needs a bit more time than ${loName} does. ${loName} can signal readiness without pushing, "whenever you're ready, I'm here", rather than waiting in silence or asking repeatedly.`,
     '3_5': `${loName} is neutral; ${hiName} strongly needs space before engaging. The shift: ${hiName} can share why time matters, often it's about saying things more accurately, not avoiding the conversation. That reframe helps ${loName} understand the delay isn't rejection.`,
-    '4_4': `You both tend to need some time before resolving. A compatible match. The watch-out: "some space" can quietly stretch into avoidance when both people are comfortable waiting. Set a norm, things get addressed within 24 hours unless explicitly deferred to a specific time.`,
+    '4_4': `You both tend to need some time before resolving. A compatible match. The risk is that "some space" can quietly stretch into avoidance when both people are comfortable waiting. Set a norm, things get addressed within 24 hours unless explicitly deferred to a specific time.`,
     '4_5': `Both of you lean toward needing space, ${hiName} more significantly. Close match in pacing. The thing to name: when both of you are holding space, who comes back first? Agree on a signal or a window so it doesn't drift into distance.`,
     '5_5': `You both need significant space before conflict is possible. That prevents saying things you don't mean, but also means things can sit for too long. Agree to a timeout protocol with a return time. "I need a couple hours, let's come back at 8pm" is not avoidance. Open-ended silence is.`,
   },
@@ -190,7 +190,7 @@ export const SHIFTS = (loName, hiName) => ({
     '1_5': `${loName} takes significantly longer to recover; ${hiName} moves on quickly, a meaningful gap. Agree: ${hiName} moving on first doesn't mean it's resolved. ${loName} can name a window, "I'll be ready to put this behind me by tomorrow morning", gives both something to work with.`,
     '2_2': `You both tend to take a bit of time recovering. Neither of you will push the other to perform "fine" before they are. Watch for: slow repair slipping into distance. Make sure "I need time" doesn't become indefinite.`,
     '2_3': `${loName} leans toward slower recovery; ${hiName} is flexible. ${hiName} can signal when they're ready, "I'm feeling good about where we are", without demanding ${loName} match it. Gives ${loName} information without pressure.`,
-    '2_4': `${loName} tends slower; ${hiName} tends to recover more quickly. Moderate difference. Try a check-in 24 hours after conflict, "are we good?", low pressure, high information.`,
+    '2_4': `${loName} tends slower; ${hiName} tends to recover more quickly. Moderate difference. Try a check-in 24 hours after conflict, "are we good?", It asks little but can reveal a lot.`,
     '2_5': `${loName} tends toward slower repair; ${hiName} moves on quickly. ${hiName} can say "I'm okay, take whatever time you need" without expecting ${loName} to match the pace. That removes the silent pressure to perform recovery.`,
     '3_3': `You're both somewhere in the middle. Watch for: neither of you having a strong pull to check in, which can leave repair feeling incomplete. A "are we actually good?" the day after a hard moment helps.`,
     '3_4': `${hiName} tends to move through repair faster than ${loName}. ${loName} can communicate where they are without oversharing, "I'm still sitting with it a little, but we're okay", so ${hiName} doesn't have to guess.`,
@@ -216,7 +216,7 @@ export const SHIFTS = (loName, hiName) => ({
     '3_5': `${loName} is flexible; ${hiName} listens by engaging, reflecting, asking. ${hiName}'s questions are how they connect, not a demand for more than you have. ${loName} can meet it with a short answer rather than retreating into quiet.`,
     '4_4': `You both listen by engaging, asking, reflecting back. Conversations move. Watch for: two people responding at once crowds out the actual listening. Let one person finish and sit with it before the other steps in.`,
     '4_5': `Both of you listen actively, ${hiName} more so. You draw each other out, which keeps you current. When one of you wants to be heard and not questioned, say so. Active listening tips into problem-solving when the other just wanted presence.`,
-    '5_5': `You both listen by engaging fully, asking, responding. Nothing sits unaddressed for long. The watch-out: sometimes a person needs silence and room, not questions. Build a way to say "I just want you to listen for a minute" without it landing as criticism.`,
+    '5_5': `You both listen by engaging fully, asking, responding. Nothing sits unaddressed for long. The risk: sometimes a person needs silence and room, not questions. Build a way to say "I just want you to listen for a minute" without it landing as criticism.`,
   },
 
   // ── HOW LOVE LANDS (A=Words, B=Actions) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────

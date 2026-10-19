@@ -675,6 +675,10 @@ export function AnnotationProvider({
       color: n.color ?? null,
       text: n.anchor_context as string,
       tagged: (n.tagIds?.length || 0) > 0,
+      /* Whether the reader wrote anything, which is what separates a note
+         from a sentence that was only filed under a tag. Both are kind
+         'note'. See the Mark type. */
+      hasWords: !!(String(n.body || '').trim() || String(n.title || '').trim()),
     })), [notes, section, anchorType]);
 
   /**
@@ -806,13 +810,24 @@ export function AnnotationProvider({
      * about in the two other places it is offered, the note sheet and the
      * journal. Here it was not, so the words went with one tap and nothing
      * said so. The wording is theirs, from the sheet that already asked.
+     *
+     * The question is asked when there is WRITING to lose, which is not the
+     * same as kind 'note'. A sentence that was only tagged is kind 'note'
+     * too, because that is what everything which is not a colour is called,
+     * and taking a tag off is not losing anything a reader wrote. Ellie: "I
+     * should be able to click delete and have it delete the tag."
+     *
+     * The guard is kept on one line and directly above the alert on purpose:
+     * check-destructive-confirm looks for the question within a few lines of
+     * the call, and a comment in between pushed it out of range and reported
+     * this as a one-tap deletion.
      */
     remove: (mark: Mark) => {
       const go = () => {
         onRemoved?.(mark.id);
         deleteNote(mark.id);
       };
-      if (mark.kind !== 'note') { go(); return; }
+      if (!mark.hasWords) { go(); return; }
       Alert.alert(DELETE_NOTE.title, DELETE_NOTE.body, [
         { text: DELETE_NOTE.keep, style: 'cancel' },
         { text: DELETE_NOTE.confirm, style: 'destructive', onPress: go },

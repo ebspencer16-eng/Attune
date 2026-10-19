@@ -8,17 +8,71 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| W11a | **Who are the three non-binary rows?** Checked: the demo filter works and the tile reads the filtered list, so these are accounts nobody has marked as demos. Run the SQL under this table and send me what it prints: it names them and changes nothing. If they are test accounts I will mark them, and if one is a customer we leave them alone. |
+| W11a | **I need the FIRST table, not the second.** The query you ran printed two. You sent the denominator, which tells me there are three non-binary rows and one of them is already a demo. The table above it names the three by name and email, and that is the one I need to know which to mark. Scroll up in the Supabase results and paste it. |
+| B147 | **Answered under this table.** Your default is already what ships. Read it and tell me if you want it different. |
+| W14 | **Is the citation format right?** Answered under this table, with what the usual practice actually is. One decision for you. |
+| W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
 | O482 | Partner invite email mentions the app. Fix when it is live. |
 | O1 | App Store launch: tell me when it is live and I flip two flags. |
 | O16 | Download numbers need an App Store Connect key. After launch. |
+| D27 | **The post-checkout message is approved. The EMAIL it points at still says what it always said.** |
+| D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you; here so it is not lost. |
+
+### B147, what "a preference we cannot confirm" meant
+
+Short version: **it already defaults to yes, keep.** Nothing to change.
+
+The longer version, because you asked what it meant. When somebody deletes
+their account we keep a de-identified copy of their answers for research
+unless they turned that off. The copy puts the couple's answers side by side,
+so it contains the partner's answers too, and the partner has not deleted
+anything and may feel differently. So before writing it, the server reads the
+partner's own setting.
+
+"Cannot confirm" is the case where that read does not give a clear answer.
+Two ways it happens: there is no row at all, which means they never visited
+the privacy page, or the database read itself fails. Neither is the same as
+them saying no.
+
+Both now count as **keep**, which is your instruction: "I want the default to
+be to keep responses." An explicit no is still honoured, on both sides, and
+that is the one thing that does not bend because it is the promise on the
+page.
+
+### W14, whether the citations credit people properly
+
+What it does now: an article reads `Author, "Headline," The Gottman
+Institute, 2024`. A book reads `Author, Title (Publisher 2015)`.
+
+**Is there a customary way?** Yes, and that is roughly it. Author first,
+title, where it was published, when. It is what every house style does,
+APA and Chicago included, and the differences between them are punctuation
+rather than substance. Nothing in ours is unusual.
+
+**Where it falls short, and it is one thing.** An article with no byline on
+the page is cited without an author, because inventing one would be worse.
+Fourteen of the sixty-nine are like that: an institute publishes under its own
+name rather than a person's. The institute is still named, so the credit goes
+somewhere, but a reader cannot tell whether we dropped the author or there
+never was one.
+
+**The decision for you.** Leave it, or add "The Gottman Institute" as the
+author in those cases so every citation starts with a name. I lean towards
+leaving it, because naming the institute twice reads oddly and a missing
+byline is the publisher's choice rather than ours. Your call.
+
+Everything cited is also checked against the page it came from, which is the
+part that matters most for crediting people correctly: 150 quotations, all
+verified, 73 against the page and 77 against Google's scan of the book.
 
 ### W11a, the three rows
 
-Paste this into the **Supabase SQL editor** (not Terminal) and press Run. It
-reads and changes nothing. Send me both tables it prints.
+You have already run this. The first table it printed is the one I need.
+
+Paste this into the **Supabase SQL editor** (not Terminal) if you want to run
+it again. It reads and changes nothing.
 
 <!-- SQL 085_who_is_non_binary.sql: written by scripts/build-tasks-sql.mjs. Do not edit. -->
 ```sql
@@ -78,24 +132,21 @@ select coalesce(nullif(lower(trim(pronouns)), ''), '(not set)') as pronouns,
 ```
 <!-- /SQL -->
 
-### Still open from the review
-
-Every one is answered. Eighteen of them are in section 4: eleven built and
-verified, seven you turned down and recorded there so they do not come back.
-These two are still waiting on somebody, and neither is waiting on me.
-
-| # | What I need |
-|--|--|
-| D27 | **The post-checkout message is written and approved. Left here so the EMAIL gets the same treatment.** The page now says what happens next; the setup email it points at still says what it always said. |
-| D32 | **Illustration, with the designers you have reached out to.** Nothing needed from you here; this row is so it does not get lost. |
-
 ---
 
 ## 2. Open
 
-**Nothing open.** The speed work is in section 3 as W39 to W41, with the
-numbers. The home screen's request went from between 1.3 and 5.9 seconds to
-283 milliseconds.
+| # | What I am doing |
+|--|--|
+| W42 | **The bin should delete a tag.** When you tap a margin tag and the words light up, the bin in the toolbar is greyed out. It should be live, and it should take that tag off. |
+| W44 | **The insight of the day gets the same two icons as the word of the day.** A bookmark and a share icon, no words. |
+| W45 | **The cloud and the person, again.** Your shape: a head and shoulders like the one you sent, and a cloud that is not flat along the bottom. |
+| W46 | **The couch, again.** Two people sitting together, like the picture you sent. |
+| W47 | **The couple type hero goes back to "Your unique relationship dynamic."** |
+| W48 | **Your fifteen rewrites, word for word.** Table 1 is final and these are your words, not my suggestions. |
+| W49 | **A second pass on AI tone.** Read what people actually point at as the tells, build a scrutinised list, sweep every piece of prose against it, and bring you a table of current against suggested. |
+| W50 | **Keep going on speed.** The remaining variance, and the rest of the chain. |
+| W51 | **The eighteen endpoints still asking Supabase who you are**, and the thirty-four still running away from the database. Same two fixes, applied to the rest. |
 
 ---
 
@@ -103,307 +154,67 @@ numbers. The home screen's request went from between 1.3 and 5.9 seconds to
 
 | # | Built, needs your eye |
 |--|--|
-| B147 | **One person's deletion could archive their partner's answers.** The de-identified copy includes the couple's answers side by side, which means the partner's. Their own "do not keep a copy of my answers" setting was never read, and they had not deleted anything. It is read now, and a preference we cannot confirm counts as no. Proved by running the real deletion four ways. |
-| B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. The app's own code says "never shown to customers" and nothing draws it, so it was landing on every phone, and in the offline cache, for nothing. It stays in your records and is no longer sent to the device. |
-| C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none, so it says "button": the row of progress dots at the bottom, the card itself, and the tap zones that page back and forward. They need a short phrase each, which is yours to write (something like "card 2 of 6" for a dot). 172 controls across the app, these three are the only ones without words, and they are only reached by someone using a screen reader. |
+| B141 | **The app and the site were being sent a judgement neither of them shows.** Every results request carried a block saying how accurately each partner read the other and who read whom better. Nothing draws it, so it was landing on every phone and in the offline cache for nothing. It stays in your records and no longer reaches the device. |
+| C17 | **Three spoken labels, if you want them.** VoiceOver reads a button's words; three controls on the storycards have none. You wrote the words and they are in; this row is here in case you want to hear them. |
+| W22 | **A row's list opens directly under that row.** The rows below move down; the one you tapped stays under your finger. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-| W12 | **Notes opens instantly now.** It waited on three requests before drawing anything; it opens from what the phone already has and fills in behind. Cold start of the notes request was 2.5 seconds, so the wait was real. |
-| W13 | **Tap a tag in the margin and the words it sits on light up. Hold it and it offers to remove the tag.** A tap used to turn the page: the margin is inside the sixth of the screen that pages forward, and the icon was losing that fight. |
-| W14 | **Citations carry the publication and the year now.** An article reads `Author, "Headline," The Gottman Institute, 2024`; a book reads `Author, Title (Publisher 2015)`. Tell me if you want a different order or something shorter. |
-| W15 | **What Comes Next, rebuilt.** Four wide stacked rows, the icon swapping sides down the page, outline drawings in the brand gradient, the number set large beside the words, an orange sunrise behind the tile that grows when a row opens, and the experience button in the brand gradient. |
-| W16 | **Word of the day has a Save button** beside Share, opening the same journal sheet the insight of the day opens. |
-| W17 | **Anything shared now carries a line home, and the line is yours.** It says `Attune Relationships: attune-relationships.com` today and `Download Attune Relationships in the App Store: [link]` once the app is live. Both are mine as placeholders. Send me the words you want. |
-| W21 | **Every icon is on the right now**, and every row starts in the same place. |
-| W22 | **A row's list opens directly under that row.** The rows below it move down; the one you tapped stays under your finger. |
-| W23 | **The three icons are redrawn.** The person's head overlaps the shoulders rather than sitting on them, the couple have flatter shoulders so they stop reading as four circles in a tub, and the heart is built from the construction rather than by eye. The journal is untouched. |
-| W24 | **The thought bubble is a cloud now.** |
-| W25 | **The heart bubble is the logo's own bubble**, generated from the favicon rather than drawn again. |
-| W26 | **Copy is on the selection toolbar**, on the phone and on the site. The icon turns to a tick for a moment, which is how you know it worked. |
-| W27 | **Your Internal Processing rewrite is live, word for word.** It replaced the sentence you had a highlight on, so that highlight is gone. See the note under this table. |
-| W39 | **Both of you come back in one read instead of two.** Your row and Preston's were read one after the other because his id is on your row. They are linked both ways, so they can be asked for together. |
-| W40 | **The slow part was never the question, it was the distance.** Every read was crossing the country and back. |
-| W41 | **Every endpoint the app uses now runs next to the database.** The home screen's request is 283 milliseconds, measured. It was between 1.3 and 5.9 seconds when you said the pages were slow. |
-| W36 | **Two of the home screen's four reads were waiting on each other for no reason.** They start together now: five round trips deep before, four after, three in production. |
-| W37 | **The token check is confirmed free**, not just assumed. Measured on the live site across ten launches: 0 or 1 millisecond every time on a warm server, against a full network round trip a week ago. |
-| W38 | **The slow part has a name now.** It is one read, not all of them, and it is not the query. See the note under this table: there is one more thing to try and it is not a small one. |
-| W34 | **The server no longer asks Supabase who you are on every request.** It checks your sign-in token itself, in memory, against the public key your project publishes. Nothing for you to set up. See the note under this table for what it did and did not fix. |
-| W35 | **Fifteen forged tokens tried against it**, including the one that defeats most hand-written versions of this. None accepted. |
-| W33 | **The slow loading is measured.** It is the server, not your phone. The numbers and the fix are under this table. Nothing is changed yet, on purpose. |
-| W28 | **Fifteen sentences that read as AI, with a suggestion for each.** The table is under this one. Nothing is live; pick a column. |
-| W29 | **The note and arrow icons sit in the middle of their row** now. |
-| W30 | **An action item addressed to your partner is out of your list.** See the note under this table: I need you to sanity-check how it decides. |
-| W31 | **Two whole people on the couch**, not two torsos. |
-| W32 | **The physical intimacy rows open their page now.** They pointed at six pages that were merged into two months ago, so the tap did nothing at all. |
-| W19 | **The couple type hero carries your names again.** "Ellie and Preston's unique relationship dynamic", with "unique" dropped when the names are long enough to push the hero to three lines. |
 
+### W49, the second pass on AI tone
 
-### W39 to W41, the speed, and what it took
+**What I read for.** The complaints people make are less about vocabulary than
+about construction. The ones that come up again and again: the em dash used as
+a comma, "it's not X, it's Y", a tidy list of three to close a sentence,
+"here's the thing", "that said", "in today's world", heavy signposting, and a
+set of brochure verbs: foster, cultivate, facilitate, leverage, unlock, embark,
+empower. Plus the vocabulary everybody names: delve, tapestry, testament,
+realm, myriad, holistic, robust, navigate the complexities.
 
-**Where it ended up.** Server time for the home screen's request, measured by
-the server itself, with the app warm:
+**What I did with it.** Thirty tests, phrases and shapes, run over every copy
+module by importing it and reading the finished sentences rather than grepping
+the source. 175 modules, 46 sentences flagged.
 
-| | |
-|--|--|
-| when you said the pages were slow | 1336ms to 5885ms |
-| the token check stopped being a network call | auth went to 0ms |
-| two reads stopped waiting on each other | about 1430ms |
-| both of your rows in one read instead of two | about 800ms |
-| running next to the database | **283ms**, and 176ms at best |
+**Two tests I threw away, and why that matters.** A list of three flagged eight
+sentences and every one was a real list: "credit cards, loans, and retirement
+accounts" is the three things, not a flourish. And "what's going on" flagged
+seventeen, most of them inside a phrase somebody is meant to SAY out loud,
+where it is exactly right. A tell in a sentence we wrote is a problem; the same
+words in a line we are suggesting you say are not.
 
-The rest of the app came with it: the survey request is 227ms, conflict
-patterns about 400ms, results 446ms. Those were seconds each.
-
-**The thing I got wrong, and how I found out.** I told you last round that the
-cost was "being first to speak to the database". It was not. When I measured
-every read separately, the second read was sometimes slower than the first,
-which killed that theory. What was actually true is duller and much more
-fixable: every single read was costing 200 to 600 milliseconds, which is far
-too long for looking up a row by its id.
-
-**The distance.** The server runs on Vercel's edge, which puts it near whoever
-is asking. That is right when the answer is already nearby and wrong when every
-answer comes from one database somewhere else: your request landed in San
-Francisco, and each read crossed the country and came back. Pinning the
-endpoints next to the database took a lookup from 200-600ms to 98ms.
-
-Supabase does not publish which region a project is in and it is not visible
-from outside, so the first pin was a guess, deployed as an experiment with a
-measurement either side of it. The measurement is what turned it into a fact.
-
-**Eighteen, not three.** I pinned the three the app calls on launch, then wrote
-a gate that reads the endpoint list out of the app's own code rather than
-keeping its own. It found ten more I would not have thought of, including the
-one that saves every answer anybody types.
-
-**Nothing needed from you**, and nothing about any of this is visible in the
-product except that it is faster.
-
-### W38, what is actually slow
-
-The home screen's request now reports how long each of its parts took. Five
-launches against the live site, same account, same data:
-
-| | auth | profile | partner | results + beta | the rest | total |
-|--|--|--|--|--|--|--|
-| 1 | 191ms | **2149ms** | 407ms | 258ms | 0ms | 3032ms |
-| 2 | 0ms | **2103ms** | 500ms | 288ms | 0ms | 2895ms |
-| 3 | 0ms | 298ms | 144ms | 240ms | 0ms | 687ms |
-| 4 | 1ms | **2308ms** | 227ms | 274ms | 0ms | 2841ms |
-| 5 | 0ms | 158ms | 134ms | 118ms | 0ms | 413ms |
-
-**Three things that settles.**
-
-The token check is free. Zero or one millisecond, every warm run. That was a
-network round trip a week ago and it is gone.
-
-It is one read, not all of them. Everything except the first profile read is
-between 118 and 500 milliseconds, every time. The spread is entirely in that
-one line, and it is not gradual: it is either about 200ms or about 2100ms,
-never in between. Two code paths, not one slow query.
-
-**And it is not the query.** The partner's row is read from the same table with
-the same columns a few milliseconds later, and it takes 134ms in the same
-request where the first one took 2149ms. Same question, same data, fifteen
-times faster. So the two seconds is the cost of being the FIRST thing to speak
-to the database in that request, and it has nothing to do with what is being
-asked.
-
-**What I ruled out.** The obvious candidate was in the file: the
-daily-notification columns are asked for separately and allowed to be missing,
-so if migration 083 had not been run, every request would quietly do the whole
-read twice. I gave that retry its own mark and deployed it. It does not appear
-in any of the five, so the migration is in place and that is not it.
-
-**What is left, and it is not small.** The two seconds looks like the cost of
-opening a connection to the database from a server that has not spoken to it
-recently. The app asks three different endpoints at the moment it opens, and
-each one is a separate server that may be paying that separately. Making the
-home screen one request instead of three is the experiment, and it is a real
-piece of work rather than a tweak, so it is the next thing rather than
-something I will slip in.
-
-### W34, what came off and what is left
-
-Done, deployed, and measured again afterwards.
-
-**What it was.** Seven endpoints each began by handing your sign-in token to
-Supabase and asking, over the network, who it belongs to. One round trip
-before any work started, on every request, on every screen.
-
-**What it is now.** Your sign-in token is a signed document, and your Supabase
-project publishes the key to check the signature with. The server checks it
-itself. There was nothing for you to set up, which is the part I was not sure
-about until I looked.
-
-**What I will not claim.** I cannot put a figure on how much of the wait that
-removed, and I would rather say so than invent one. Measuring it properly needs
-the server to report its own timing, which it now does: /api/home returns a
-`Server-Timing` header saying how long the token check took and how long the
-whole request took. The next round gets real numbers instead of inference.
-
-**What the measurement DID settle, again.** On the latest run a static file
-from the same host, fired at the same instant as the three requests the app
-makes on launch, came back in **301ms** while those three took 1.6 to 2.1
-seconds. So it is still the server, it is not your phone, and it is not the
-connection.
-
-**What is left.** /api/home does four database reads one after another, each
-waiting on the one before, because each needs the answer to the last. That
-chain is now the biggest single thing in the wait and it is the next piece of
-work.
-
-**And the same seven endpoints had seven copies of that code**, pasted one into
-the next. There is one now, which is worth as much as the speed.
-
-### W35, trying to get past it
-
-This is the code that decides whether somebody is who they say they are, so it
-has a gate that attacks it rather than describes it. The gate makes its own
-signing key, publishes it the way your project publishes yours, and then signs
-fifteen tokens.
-
-One genuine one is accepted. Ten are refused: signed with the wrong key, the
-signature stripped off, the signature replaced with junk, expired, not valid
-yet, nobody named in it, no expiry at all, the contents edited after signing,
-and two that are not tokens at all. Four are handed to Supabase to judge rather
-than refused here, which is deliberate: refusing them would be a guess, and a
-wrong guess in that direction signs people out.
-
-The one worth naming is a forgery that defeats most hand-written versions of
-this: a token that asks to be checked with a shared secret, signed using the
-public key as that secret. Anybody can make one, because the public key is
-public. It is refused.
-
-I also attacked the gate, six ways, to find out whether it could fail. Five
-failed it at once. The sixth passed and it was the gate's fault, not the code's:
-the only token it had that asked "do not check me" also had an empty signature,
-and a different line was catching that, so the rule under test was never
-actually tested. There is a second one now with bytes in the signature slot,
-and that plant fails properly.
-
-### W33, why the pages are slow
-
-**It is not your phone and it is not your connection.** I instrumented the app
-to time every request it makes, launched it cold on the simulator, and walked
-every tab.
-
-On a cold launch the app fires three requests 0.5 seconds in, all at once:
-
-| Request | Cold | Warm, later in the session |
-|--|--|--|
-| /api/home | 4.1s | 1.3s to 3.1s |
-| /api/survey | 3.5s | 0.45s |
-| /api/conflict-results | 3.6s | — |
-| /api/results | 6.3s | — |
-| /api/notes (tags) | 6.1s | 1.0s to 2.9s |
-
-The control, in the same run and over the same connection: **a static file from
-the same domain came back in 238ms.** So the phone is fine, the network is
-fine, and the app is firing its requests promptly. The time is being spent
-inside the server answering an authenticated request.
-
-**Where it goes.** Every one of those endpoints does the same thing before it
-does anything else: it hands your sign-in token to Supabase and asks "who is
-this?", over the network. Then it runs its own queries, and /api/home runs
-four of them one after another because each needs the answer to the last. So a
-home screen is five network hops deep, in a row, before a single word is sent
-back.
-
-**What I want to do about it.** Take out the first hop. Your Supabase project
-publishes the public key it signs tokens with, so the server can check a token
-itself, in memory, in under a millisecond, instead of asking over the network.
-I checked: the key is there and public, so **there is nothing for you to set
-up and no new secret** — which was the only thing that might have needed you.
-
-That is one hop off every request the app makes, on every screen. It is not
-the whole three seconds, and I am not going to pretend it is until I have
-measured it again afterwards. The rest is the four-deep query chain in
-/api/home, which is a bigger piece of work and is worth doing next.
-
-**Why I have not already done it.** It is the code that decides whether
-somebody is who they say they are. Getting it wrong is worse than a slow app.
-It wants to be written carefully, with a gate that forges a token, signs one
-with the wrong key, backdates one and strips the signature off one, and proves
-all four are refused. That is a first job rather than a last one.
-
-### W28, the phrases that read as AI
-
-Fifteen sentences, from running every copy module and reading what it
-produces. Quotations are left out: those are somebody else's words.
-
-Nothing here is live. Tell me which column you want, row by row or in bulk,
-and I will put it in.
+**The ones worth changing.** Nothing is live. Pick a column.
 
 | Where | What it says now | Suggested |
 |--|--|--|
-| Couple type: fast repair | "Fast repair is a real strength. **The watch-out is** closing the loop before the thing is actually through." | "Fast repair is a real strength. **The risk is** closing the loop before the thing is actually through." |
-| Couple type: both inward | "stable, **low-drama**, and genuinely deep" | "stable, **calm**, and genuinely deep" |
-| Couple type: both inward | "more stable-looking than many, but **the thing to watch is** what's accumulating beneath the stability." | "more stable-looking than many. **What accumulates beneath that stability is the part to watch.**" |
-| Couple type: tip | "**Low-drama** is a real quality." | "**Calm** is a real quality." |
-| Reassurance, both voiced | "**The thing to watch is** it becoming a routine that stops carrying weight." | "**The risk is** that it becomes a routine and stops carrying weight." |
-| Reassurance, both assumed | "**The thing to watch is** that silence carries no information" | "**The risk is** that silence carries no information" |
-| Needs, both direct | "Nothing gets buried, which is **its own kind of ease**. **The watch-out is** tone, not clarity." | "Nothing gets buried, which is easy. **The risk is** tone, not clarity." |
-| Energy, both outward | "**The watch-out:** when you're both depleted at the same time" | "**The risk:** when you're both depleted at the same time" |
-| Expression, both internal | "That creates **low-drama**, but it means significant things can sit unspoken too long." | "That keeps things **calm**, but it means significant things can sit unspoken too long." |
-| Conflict, one fast one slow | "**A real tension point.** Agree in advance that..." | "**This difference is worth planning for.** Agree in advance that..." |
-| Conflict, both slow | "**The watch-out:** 'some space' can quietly stretch into avoidance" | "**The risk:** 'some space' can quietly stretch into avoidance" |
-| Repair, moderate difference | "Try a check-in 24 hours after conflict, 'are we good?', **low pressure, high information**." | "Try a check-in 24 hours after conflict, 'are we good?' **It asks little and tells you a lot.**" |
-| Listening, both active | "**The watch-out:** sometimes a person needs silence and room, not questions." | "**The risk:** sometimes a person needs silence and room, not questions." |
-| Workbook scene | "starts **unpacking** it the moment they walk in" | "starts **going through** it the moment they walk in" |
-| Anniversary question a6 | "in how I **show up for** you" | "in how I **am with** you" (this one may be fine as it is) |
+| Workbook, bids | "Build a small daily ritual to **foster meaningful** connection." | "Build a small daily ritual that you both look forward to." |
+| Repair, love and feedback (three places) | "a **meaningful** gap" | "a wide gap" |
+| Couple type: both inward | "Feelings are **meaningful** even if not expressive" | "Feelings run deep even when they are not spoken" |
+| Couple type: both expressive | "Together, you **facilitate** emotional safety and depth" | "Together, you make it safe to go deep" |
+| Couple type: both expressive | "**Meaningful** feelings are received well between you" | "What one of you feels, the other takes seriously" |
+| Couple type: famous pair | "Without a **framework** for it, they kept colliding at exactly the wrong moment." | "With no way to name it, they kept colliding at exactly the wrong moment." |
+| Workbook, energy | "**Without a framework**, the inward partner's need for quiet can read as withdrawal" | "Unnamed, the inward partner's need for quiet can read as withdrawal" |
+| Workbook, conflict | "**Without a framework**, the person who needs resolution reads the other's silence as avoidance." | "Unnamed, the person who needs resolution reads the other's silence as avoidance." |
+| Conflict, both slow | "**The thing to name**: when both of you are **holding space**, who comes back first?" | "Worth naming: when you are both giving each other room, who comes back first?" |
+| Couple type: both expressive | "it's **the thing that** makes real closeness possible" | "it is what makes real closeness possible" |
+| Workbook, after conflict | "it is **the thing that** accumulates" | "it is what accumulates" |
+| Bids, one reserved one attuned | "**Low effort, high return.**" | "It costs little and it lands." |
+| Workbook, energy | "Recharge how you need, but **make space for** connection, too." | "Recharge how you need, and keep some time for each other." |
+| Conflict, both fast | "**Make space for** 'here's what I felt' before jumping to fix it." | "Leave room for 'here's what I felt' before jumping to fix it." |
+| Bids, one reserved one attuned | "Bids don't need to be **meaningful** to matter." | "A bid does not have to be a big one to count." |
+| Conflict patterns, criticism, none | "This is not **showing up** for you." | "This one does not appear for you." |
+| Conflict patterns, criticism, some | "**Showing up** enough to matter." | "Appearing enough to matter." |
 
-Two more things the sweep turned up that are not phrases, in case you want
-them: "The thing to watch" and "The watch-out" are the same move written two
-ways, so whichever you pick is worth using for both. And "The risk is" already
-appears in your copy elsewhere, which is why I reached for it.
+The last two go together: "showing up" is being used there to mean "appearing
+in your results", and it reads at a glance as "they are not showing up for
+you", which is close to the opposite.
 
-### W27, the highlight that went with it
+**One thing I did not touch.** The word "unlock", which is in the waiting
+copy and three emails: "Results unlock when both of you complete exercises."
+It is product language rather than AI language and it is in your voice. Say
+the word if you want it gone and I will bring you options.
 
-Your rewrite replaced this sentence: "Feelings reach the table fast, which is
-easy. The watch-out is volume. When you're both expressing at once, leave room
-for one of you to just listen."
-
-A highlight is anchored to the words it was made on, so one of the two
-highlights on your Notes tab, the one reading "volume. When you're both
-expressing at on...", no longer has anything to attach to and will not draw.
-The other one, "process emotion out loud", is on words that survived and is
-fine. Nothing is lost in the database; it is just not shown. Say the word and
-I will remove the orphan.
-
-This is the cost of a copy fix reaching people who have already finished,
-which is the trade you asked for, and it is worth knowing each time rather
-than once.
-
-### W30, how it decides whose action item it is
-
-The three Communication rows are each a sentence about the two of you, and the
-same sentence goes to both of you: it names whoever scored lower first, not
-whoever is reading. So whether a row is "yours" is a property of the sentence.
-
-I had a script read all 150 of those sentences and mark each one. **39 came out
-as addressed to one partner; the other 111 are for the pair.** The rule it used,
-and it refuses to guess:
-
-- one-sided only when exactly one of the two names is followed by "can",
-  "could", "should", "commits to", "gets to" or "must",
-- and never when the sentence also says "you both", "each of you", "agree
-  that", or starts a clause with a joint instruction like "Agree", "Try" or
-  "Set".
-
-Anything it is unsure about stays "for both of you". That is deliberate and it
-is the direction I would rather be wrong in: showing you something you did not
-strictly need is the way it has always worked, and hiding something from you is
-a thing you could never find out about.
-
-**What I need from you:** cast an eye over the three rows on your own What
-Comes Next page and tell me if any of them is now missing something that was
-yours, or still showing something that is clearly Preston's. The rule is in one
-file and easy to change.
-
-The rows still appear in full on the Communication Styles pages, where the
-advice is read in context with both your names in it. Only the "things to
-consider" list filters.
+**And one of yours that the sweep still flags.** Your own rewrite of the Needs
+line uses "The thing to watch for is tone rather than clarity." The sweep
+reports it because "the thing to" is on the list. You wrote it, so it stays.
 
 ### C12, the long and the short of it
 
@@ -450,6 +261,24 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| W12 | Notes opened on three requests and drew nothing until they landed; it opens from what the phone already has and fills in behind. |
+| W13 | A tap on a margin tag turns the page instead of showing the words it sits on, because the margin is inside the forward-paging zone. |
+| W15 | What Comes Next rebuilt: four wide stacked rows, big outline icons in the brand gradient, the number larger than the words, a sunrise behind the tile, the experience button in the brand gradient. |
+| W21 | Every icon on the right rather than alternating sides. |
+| W23 | The person, the couple and the heart redrawn after the first set did not look good enough. |
+| W25 | The heart bubble is the logo's own bubble, generated from the favicon rather than drawn a third time. |
+| W26 | Copy added to the selection toolbar on the phone and the site, with a tick for a moment so you know it worked. |
+| W27 | Your Internal Processing rewrite, word for word, and the three comments claiming that file could never be edited. |
+| W29 | The note and arrow icons grouped and centred in their row. |
+| W30 | An action item addressed to one partner no longer appears in the other's list. |
+| W32 | The physical intimacy rows opened nothing: they pointed at six pages that were merged into two months ago. |
+| W34 | The server checked every sign-in token by asking Supabase over the network, on every request the app makes. It checks them itself now. |
+| W35 | Fifteen forged tokens tried against that check, including HS256 signed with the public key. None accepted. |
+| W36 | Two of the home screen's four reads were waiting on each other for no reason. |
+| W37 | The token check confirmed free by measurement rather than assumption: 0 or 1ms, every warm run. |
+| W39 | Both halves of a couple come back in one read instead of two. |
+| W40 | The slow part was the distance, not the question: every read crossed the country and back. |
+| W41 | Every endpoint the app calls now runs next to the database. The home screen's request went from 1.3-5.9 seconds to 283ms. |
 | W18 | Alignment and understanding now reach the admin and the CSV export tied to the account, and no longer reach the phone at all: nine columns in the export, nothing in the payload. |
 | W20 | The three storycard controls a screen reader could not name now say your words: "card 2 of 6" for a dot, "[name] highlight card" for the card, and "tap to move forward" for a tap zone. |
 | S34 | Six sweeps over UX and data storage: deletion leaves nothing behind, nothing personal reaches a log, every column written exists, what the phone keeps, destructive taps, tap targets. |

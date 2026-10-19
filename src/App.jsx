@@ -9015,9 +9015,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
           {/* block: couple-type/lead */}
           <div style={{ marginBottom: "1.25rem" }}>
             <div style={{ fontFamily: HFONT, fontSize: "clamp(1.7rem,4vw,2.3rem)", fontWeight: 700, color: C.ink, lineHeight: 1.08, letterSpacing: "-0.02em" }}>
-              {/* The names, which this called without. See the note on
-                  coupleTypeTitle: the word "unique" comes out when they are
-                  long enough to push the hero onto a third line. */}
+              {/* One sentence for everybody. Ellie, after seeing the version
+                  with the names in it: "Change back to 'Your unique
+                  relationship dynamic'." The names are still passed because
+                  the function still takes them; see the note beside it, which
+                  keeps all three of her instructions about this line. */}
               {SC_COPY.coupleTypeTitle(userName, partnerName)}
             </div>
           </div>

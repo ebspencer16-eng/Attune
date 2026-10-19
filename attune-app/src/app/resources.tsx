@@ -1155,23 +1155,38 @@ export default function ResourcesScreen() {
                     the share control opens the phone's own sheet, which this
                     app does not get to add a row to, and a menu in front of a
                     menu is two taps to do what one did. */}
+                {/* ── TWO ICONS, NO WORDS ──────────────────────────────
+                    Ellie, having seen the word of the day's pair: "I want the
+                    buttons on the insight of the day to match these, I want
+                    them to be a bookmark icon and a share icon, not to have
+                    the words like they currently do."
+
+                    So this is the word card's own shape, a 34 point circle
+                    with the glyph in it, on a translucent white rather than
+                    the warm fill because this banner is a dark gradient. The
+                    words move to the accessible name, which is where a screen
+                    reader reads them and where they were anyway. */}
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Save the insight of the day to your relationship journal"
                   onPress={() => setKeepingInsight(true)}
                   hitSlop={8}
                   style={{
-                    borderRadius: Radius.pill, borderWidth: 1,
-                    borderColor: 'rgba(255,255,255,0.35)',
-                    paddingVertical: Spacing.xs + 2, paddingHorizontal: Spacing.md,
+                    width: 34, height: 34, borderRadius: 17,
+                    backgroundColor: 'rgba(255,255,255,0.18)',
+                    alignItems: 'center', justifyContent: 'center',
                   }}>
-                  <Text style={{ ...Type.small, fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.9)' }}>
-                    {KEEP_INSIGHT}
-                  </Text>
+                  <SymbolView
+                    name={'bookmark' as never}
+                    size={15}
+                    tintColor={'rgba(255,255,255,0.92)'}
+                    fallback={<Text style={{ ...Type.small, color: 'rgba(255,255,255,0.92)' }}>{'\u2605'}</Text>}
+                    style={{ width: 17, height: 17 }}
+                  />
                 </Pressable>
                 <ShareButton
                   tone="light"
-                  label="Share"
+                  round
                   accessibilityLabel="Share the insight of the day"
                   /* The card is rendered off the edge of the screen for exactly
                      this: there is none on this banner to photograph. The
@@ -1735,8 +1750,6 @@ const INSIGHT_OF_THE_DAY = 'Insight of the day';
 /** Her two lines on the sheet a locked tool opens. */
 const NOT_YOURS = "You don't own this";
 const SEE_MORE = 'See more details';
-/** The control beside Share on the insight banner. A placeholder, like the rest. */
-const KEEP_INSIGHT = 'Save';
 
 /**
  * Ellie: "Make sure the learn page bg is an attune-branded blue", then "I

@@ -51,6 +51,7 @@ import {
 import { ANNIVERSARY_QUESTIONS, ANNIVERSARY_VERSION } from './_anniversary-questions.js';
 import { progressAnswers } from './_lib/exercise-progress.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 /**
  * What a surface needs to know about an exercise, as one object.
@@ -141,11 +142,10 @@ export default async function handler(req) {
   if (!token) return json({ ok: false, error: 'missing auth token' }, 401);
 
   try {
-    const uRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-    });
-    if (!uRes.ok) return json({ ok: false, error: 'invalid auth token' }, 401);
-    const user = await uRes.json().catch(() => null);
+    /* Checked here rather than over the network. See api/_lib/verify-token.js;
+       the round trip is still the fall-back for anything the local check
+       cannot decide. */
+    const user = await userForRequest({ token, supabaseUrl, anonKey });
     if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
     const url = new URL(req.url);

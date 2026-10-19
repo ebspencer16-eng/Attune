@@ -65,161 +65,58 @@ function Outline({
   );
 }
 
-/**
- * Several shapes drawn as ONE outline.
- *
- * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
- * `Outline` draws a gradient box with the ground punched out of it, which is
- * one closed shape. Put two of them side by side and you get two closed
- * shapes: a head and a body edge to edge read as a snowman, and four circles
- * on a couch read as four circles.
- *
- * A union is drawn in two passes instead. Every gradient shape goes down
- * first, then every ground-coloured inset on top of all of them. The insets
- * cover each other's internal strokes, so what survives is the boundary of the
- * whole group: a cloud rather than four bubbles, a seated person rather than a
- * head and a torso.
- *
- * Ellie asked for both: "Can the thought bubble be a cloud not just an oval",
- * and "Any way to make the icon for discussions to have look like two full
- * bodies rather than just a torso on the couch?"
- *
- * Groups are drawn in order and a later group covers an earlier one, which is
- * what puts the two people in front of the couch.
- */
-type Part = {
-  w: number; h: number; left: number; top: number;
-  /** Defaults to a pill: half the shorter side. */
-  radius?: number;
-  /** Degrees, about the part's own centre. */
-  rot?: number;
-};
-
-function Union({ parts, u, stroke = 2, stripe, ground }: {
-  parts: readonly Part[];
-  /** The glyph's unit, so a part is written in the same 64 grid as the rest. */
-  u: number;
-  stroke?: number;
-  stripe?: Stripe | null;
-  ground: string;
-}) {
-  const box = (p: Part, inset: number) => {
-    const r = p.radius ?? Math.min(p.w, p.h) / 2;
-    return {
-      position: 'absolute' as const,
-      left: (p.left + inset) * u,
-      top: (p.top + inset) * u,
-      width: (p.w - inset * 2) * u,
-      height: (p.h - inset * 2) * u,
-      borderRadius: Math.max(0, r - inset) * u,
-      ...(p.rot ? { transform: [{ rotate: `${p.rot}deg` }] } : null),
-    };
-  };
-  return (
-    <>
-      {parts.map((p, i) => (
-        <LinearGradient
-          key={`g${i}`}
-          colors={stops(stripe)}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={box(p, 0)}
-        />
-      ))}
-      {parts.map((p, i) => (
-        <View key={`i${i}`} style={[box(p, stroke), { backgroundColor: ground }]} />
-      ))}
-    </>
-  );
-}
-
 type GlyphProps = { size?: number; stripe?: Stripe | null; ground: string };
 
 /**
- * A person with a thought bubble: the things to consider.
+ * A person with a thought bubble, and two people on a couch.
  *
- * ── THE THIRD DRAWING ─────────────────────────────────────────────────────
- * First the shoulders ran off the bottom of the box, so the bust was clipped
- * flat. Then the head and shoulders met edge to edge, each outline closing, so
- * it read as a snowman. Both are fixed by drawing the person as one union
- * rather than as two shapes that touch.
+ * ── WHY THESE ARE PICTURES ────────────────────────────────────────────────
+ * They were built out of rounded rectangles and circles, because this project
+ * has no SVG without a native dependency and a native dependency means a
+ * TestFlight build rather than an update Ellie can publish. That works for a
+ * book and for the logo's own bubble. It does not work for a person or for two
+ * people on a couch: those are curves, and three attempts at the couple
+ * produced four circles in a tub, then two torsos, then something passable and
+ * still wrong.
  *
- * And the thought is a cloud. Ellie: "Can the thought bubble be a cloud not
- * just an oval." Four overlapping circles and a flat base, unioned, so the
- * internal edges disappear and what is left is a cloud's own outline.
+ * Ellie, with a picture of each: "I want this shape head and shoulders and I
+ * want the cloud to not be flat on the bottom", and "Can we do something like
+ * this?"
+ *
+ * So they are drawn as SVG and rendered to PNG by scripts/build-glyphs.mjs,
+ * which is exactly how every other place the app draws the logo works. The
+ * gradient is the brand's, baked in. check-glyph-assets.mjs fails the build if
+ * a picture is missing or was drawn from a different version of the paths.
+ *
+ * They take `stripe` and `ground` so the four glyphs stay interchangeable at
+ * the call site, and ignore both: the gradient is in the artwork and the
+ * middle is transparent, so the tile tints through it.
  */
-export function ThinkingPerson({ size = 64, stripe, ground }: GlyphProps) {
-  const u = size / 64;
+function Picture({ size, source, ratio }: {
+  size: number;
+  source: number;
+  /** width over height, so a drawing that is not square is not letterboxed. */
+  ratio: number;
+}) {
   return (
-    <View style={{ width: size, height: size }}>
-      {/* The thought, drawn first so the person covers it where they meet. */}
-      <Union
-        u={u} stroke={2} stripe={stripe} ground={ground}
-        parts={[
-          { w: 15, h: 15, left: 35, top: 6 },
-          { w: 20, h: 20, left: 42, top: 1 },
-          { w: 15, h: 15, left: 50, top: 7 },
-          { w: 24, h: 11, left: 38, top: 12, radius: 5.5 },
-        ]}
-      />
-      {/* The two beads that lead up to it. Separate on purpose: a thought
-          bubble's beads are not joined to the cloud. */}
-      <Union u={u} stroke={1.5} stripe={stripe} ground={ground}
-        parts={[{ w: 5, h: 5, left: 29, top: 29 }]} />
-      <Union u={u} stroke={1.5} stripe={stripe} ground={ground}
-        parts={[{ w: 8, h: 8, left: 33, top: 21 }]} />
-      {/* The person: head and shoulders as one outline. */}
-      <Union
-        u={u} stroke={2} stripe={stripe} ground={ground}
-        parts={[
-          { w: 20, h: 20, left: 7, top: 24 },
-          { w: 32, h: 24, left: 1, top: 40, radius: 12 },
-        ]}
-      />
-    </View>
+    <Image
+      source={source}
+      style={{ width: size * ratio, height: size }}
+      contentFit="contain"
+      /* not markable: an icon. */
+      accessible={false}
+    />
   );
 }
 
-/**
- * Two people sitting together: the discussions to have.
- *
- * ── TWO WHOLE PEOPLE ──────────────────────────────────────────────────────
- * Ellie: "Any way to make the icon for discussions to have look like two full
- * bodies rather than just a torso on the couch?"
- *
- * Each person is a union of head, torso, thigh and shin, so they come out as
- * one seated silhouette rather than a stack of parts. The couch is its own
- * union and is drawn first, so the two of them sit in front of it: a later
- * group's ground fill covers the earlier group's lines where they overlap,
- * which is what in-front looks like.
- */
-export function CouchPair({ size = 64, stripe, ground }: GlyphProps) {
-  const u = size / 64;
-  /** One seated figure, at an x offset. */
-  const person = (x: number): Part[] => ([
-    { w: 11, h: 11, left: x + 3, top: 10 },           // head
-    { w: 15, h: 17, left: x + 1, top: 19, radius: 6 }, // torso
-    { w: 17, h: 8, left: x, top: 33, radius: 4 },      // thigh, forward
-    { w: 8, h: 14, left: x + 9, top: 37, radius: 4 },  // shin, down
-  ]);
-  return (
-    <View style={{ width: size, height: size }}>
-      {/* The couch: back, seat, two arms, two feet, as one outline. */}
-      <Union
-        u={u} stroke={2} stripe={stripe} ground={ground}
-        parts={[
-          { w: 48, h: 18, left: 8, top: 20, radius: 7 },
-          { w: 58, h: 12, left: 3, top: 36, radius: 5 },
-          { w: 9, h: 18, left: 1, top: 31, radius: 4.5 },
-          { w: 9, h: 18, left: 54, top: 31, radius: 4.5 },
-          { w: 4, h: 7, left: 8, top: 47, radius: 2 },
-          { w: 4, h: 7, left: 52, top: 47, radius: 2 },
-        ]}
-      />
-      <Union u={u} stroke={2} stripe={stripe} ground={ground} parts={person(11)} />
-      <Union u={u} stroke={2} stripe={stripe} ground={ground} parts={person(34)} />
-    </View>
-  );
+/** A person with a thought bubble: the things to consider. */
+export function ThinkingPerson({ size = 64 }: GlyphProps) {
+  return <Picture size={size} ratio={1} source={require('@/assets/images/attune-glyph-thinking.png')} />;
+}
+
+/** Two people sitting together: the discussions to have. */
+export function CouchPair({ size = 64 }: GlyphProps) {
+  return <Picture size={size} ratio={1} source={require('@/assets/images/attune-glyph-couch.png')} />;
 }
 
 /**

@@ -68,6 +68,16 @@ export type Mark = {
   text: string;
   /** Whether it is filed under a tag, which is what the margin marker shows. */
   tagged?: boolean;
+  /**
+   * Whether the reader wrote anything in it.
+   *
+   * `kind` says 'note' for everything that is not a highlight or an underline,
+   * which includes a sentence that was only ever TAGGED: no colour, no words,
+   * just filed. The two want different treatment and the kind cannot tell
+   * them apart, so this does. See the bin below and `remove` in
+   * annotation-context.tsx.
+   */
+  hasWords?: boolean;
 };
 
 /** What the toolbar offers, in the order Ellie listed them. */
@@ -504,7 +514,24 @@ export default function Annotatable({
     if (lo == null) return null;
     for (let i = lo; i <= (hi as number); i += 1) {
       const m = marked.get(i);
-      if (m && m.kind !== 'note') return m;
+      /**
+       * ── AND A TAG COUNTS ──────────────────────────────────────────────
+       * Ellie: "the trash button is greyed out of the toolbar when this
+       * happens. I should be able to click delete and have it delete the
+       * tag."
+       *
+       * This was `m.kind !== 'note'`, which was her first instruction about
+       * the bin: "so that people can delete the highlight/underline over
+       * that text." A sentence that was only tagged has kind 'note' too,
+       * because that is what everything which is not a colour is called, so
+       * tapping a margin tag lit up the words and left the bin grey.
+       *
+       * What stays out of the bin is a note with WORDS in it. That is the
+       * reader's own writing, it is deleted from the sheet and the journal
+       * where the question is asked properly, and a one-tap bin over it is
+       * the thing B146 was about.
+       */
+      if (m && (m.kind !== 'note' || !m.hasWords)) return m;
     }
     return null;
   })();

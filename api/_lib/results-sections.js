@@ -228,37 +228,26 @@ export const PAGE_COPY = {
    * to know this line stopped using them.
    */
   /**
-   * ── AND THE NAMES CAME BACK ─────────────────────────────────────────────
-   * Ellie, once the map had been shrunk: "Now that we shrunk the map, can we
-   * fit the title we used to have? [name] and [name]'s unique relationship
-   * dynamic? Take out the word unique whenever the names are long enough that
-   * the hero won't fit on two lines."
+   * ── THE NAMES CAME BACK, AND THEN THEY WENT AGAIN ───────────────────────
+   * Three instructions, and all three are kept because the round trip is the
+   * argument.
    *
-   * So the word is conditional, and the condition is measured rather than
-   * guessed. Rendered in the real hero style at 390 points, the narrowest
-   * phone this product draws on:
+   * It was "Your unique relationship dynamic". Ellie had it changed to drop
+   * the names, because they are on the tile below it. Then, once the map had
+   * been shrunk: "Now that we shrunk the map, can we fit the title we used to
+   * have? [name] and [name]'s unique relationship dynamic? Take out the word
+   * unique whenever the names are long enough that the hero won't fit on two
+   * lines." That was built, measured at 390 points, and conditional on a
+   * character count.
    *
-   *   Ellie and Preston's unique relationship dynamic     47 characters, 2 lines
-   *   Maddie and Preston's unique relationship dynamic    48 characters, 3 lines
-   *   Madeline and Christopher's relationship dynamic     47 characters, 2 lines
-   *   Alexandra and Christopher's relationship dynamic    48 characters, 3 lines
+   * Having seen it: "Change back to 'Your unique relationship dynamic'."
    *
-   * The line breaks at the same place either way, so the rule is one number:
-   * 47 characters. Longer than that with the word in, and the word comes out,
-   * which buys seven characters and takes most pairs back to two lines. A
-   * pair long enough to overflow without it has nothing left to give, and the
-   * hero wraps, which is the right failure.
-   *
-   * Without both names it is the line it has been since she renamed it, which
-   * is also what the demo and a half-finished couple get.
+   * So it is one sentence for everybody, it fits on any phone, and it needs
+   * no measurement and no condition. The names are still taken, because a
+   * caller that has them should not have to know this line stopped using
+   * them, and because this is now the third time that has changed.
    */
-  coupleTypeTitle: (you, them) => {
-    const a = String(you || '').trim();
-    const b = String(them || '').trim();
-    if (!a || !b || a === 'You' || b === 'your partner') return 'Your relationship dynamic';
-    const withUnique = `${a} and ${b}'s unique relationship dynamic`;
-    return withUnique.length <= 47 ? withUnique : `${a} and ${b}'s relationship dynamic`;
-  },
+  coupleTypeTitle: () => 'Your unique relationship dynamic',
 };
 
 export const RESULTS_SECTION_LABELS = {

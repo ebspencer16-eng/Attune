@@ -27,6 +27,7 @@
 
 import { jsonBody } from './_lib/http.js';
 import { ABOUT_YOU, PROFILE_SETUP_COPY } from './_lib/profile-setup-copy.js';
+import { userForRequest } from './_lib/verify-token.js';
 
 /**
  * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
@@ -74,12 +75,9 @@ export default async function handler(req) {
     .replace(/^Bearer\s+/i, '').trim();
   if (!token) return json({ ok: false, error: 'missing auth token' }, 401);
 
-  // Whose profile, from the token and only from the token.
-  const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-    headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-  });
-  if (!userRes.ok) return json({ ok: false, error: 'invalid auth token' }, 401);
-  const user = await userRes.json().catch(() => null);
+  // Whose profile, from the token and only from the token. Checked here
+  // rather than over the network; see api/_lib/verify-token.js.
+  const user = await userForRequest({ token, supabaseUrl, anonKey });
   if (!user?.id) return json({ ok: false, error: 'invalid auth token' }, 401);
 
   // ── GET: what the editable fields say now ───────────────────────────────
