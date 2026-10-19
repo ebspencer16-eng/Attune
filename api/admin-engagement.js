@@ -37,7 +37,16 @@ import { resultsNav } from './_lib/results-sections.js';
 import { axisScores, calcDimScores, typeCodeFromAxes } from './_type-engine.js';
 import { fetchProfiles, ownedBy } from './_lib/demo-accounts.js';
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the wrong default when every answer comes from one database
+ * somewhere else: a request that landed in San Francisco spent two crossings
+ * of the country on a lookup by id. See api/_lib/db-region.js for the
+ * measurement, and check-edge-region.mjs, which holds every one of these to
+ * the one constant that says where.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 const json = (b, s = 200) => new Response(JSON.stringify(b), {
   status: s, headers: { 'Content-Type': 'application/json' },

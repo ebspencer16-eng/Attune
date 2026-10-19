@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Every endpoint the app calls runs in the database's region.
+ * Every endpoint that reads the database runs in the database's region.
  *
  * ── THE PROMISE ───────────────────────────────────────────────────────────
  * Ellie: "Keep trying to speed things up."
@@ -15,20 +15,24 @@
  * ── WHY A GATE ────────────────────────────────────────────────────────────
  * Vercel reads `export const config` by parsing the file, so the region has to
  * be a literal in each endpoint. It cannot be imported. That makes it a value
- * written out in eight places, which is the shape of every serious bug in this
- * codebase, so this holds all eight to the one constant that means it.
+ * written out in fifty-two places, which is the shape of every serious bug in
+ * this codebase, so this holds all fifty-two to the one constant that means
+ * it.
  *
- * It also catches the quieter failure: a new endpoint the app calls, or an
- * existing one that loses its region in a refactor. One endpoint in the wrong
- * place is a screen that is slower than the others for no visible reason,
- * which is not something anybody would think to look for.
+ * It also catches the quieter failure: a new endpoint, or an existing one that
+ * loses its region in a refactor. One endpoint in the wrong place is a screen
+ * that is slower than the others for no visible reason, which is not something
+ * anybody would think to look for.
  *
- * ── WHAT IT DELIBERATELY DOES NOT COVER ───────────────────────────────────
- * The rest of api/. The website's own endpoints, the admin and the crons talk
- * to the same database and would benefit from the same pin, but they are not
- * what Ellie is waiting on and a gate that demands a change nobody has made
- * yet is a gate that gets switched off. They are listed in the summary so the
- * number is visible rather than forgotten.
+ * ── IT COVERS EVERYTHING NOW, AND DID NOT AT FIRST ────────────────────────
+ * It started scoped to the endpoints the app calls, because those are what
+ * Ellie was waiting on and a gate that demands a change nobody has made yet is
+ * a gate that gets switched off. It counted the others in its summary so the
+ * number stayed visible rather than being forgotten, which is the only reason
+ * the rest got done: the sentence said thirty-four every time anybody ran it.
+ *
+ * They are all pinned, so the rule is now simply: any edge endpoint that
+ * talks to the database runs beside it.
  */
 
 import { readFileSync, readdirSync } from 'node:fs';
@@ -56,9 +60,26 @@ if (called.length < 5) {
   process.exit(1);
 }
 
+/**
+ * And every other edge endpoint that reads the database.
+ *
+ * The app's list is read from the app; this is the rest of api/, found by
+ * asking which files run on the edge and name SUPABASE_URL. Both sets get the
+ * same rule, and they are counted separately only so the summary can say which
+ * is which.
+ */
+const others = readdirSync(`${ROOT}api`)
+  .filter((f) => f.endsWith('.js') && !f.startsWith('_'))
+  .map((f) => f.replace(/\.js$/, ''))
+  .filter((n) => !called.includes(n))
+  .filter((n) => {
+    const src = readFileSync(`${ROOT}api/${n}.js`, 'utf8');
+    return /runtime:\s*'edge'/.test(src) && /SUPABASE_URL/.test(src);
+  });
+
 const pinned = [];
 const missing = [];
-for (const name of called) {
+for (const name of [...called, ...others]) {
   let src;
   try { src = readFileSync(`${ROOT}api/${name}.js`, 'utf8'); }
   catch { continue; } // not an endpoint file: a route handled elsewhere
@@ -80,27 +101,20 @@ for (const name of called) {
 }
 
 if (missing.length) {
-  fails.push(`${missing.length} endpoint(s) the app calls run wherever the request lands`
+  fails.push(`${missing.length} endpoint(s) run wherever the request lands`
     + ` rather than beside the database: ${missing.join(', ')}.\n`
     + `      Add regions: ['${DB_REGION}'] to the config export. See api/_lib/db-region.js`
     + ' for why, and for the measurement.');
 }
 
 if (fails.length) {
-  console.error('\n check-edge-region: an endpoint the app calls is not next to the database.\n');
+  console.error('\n check-edge-region: an endpoint is not next to the database.\n');
   for (const f of fails) console.error(`  ✗ ${f}\n`);
   process.exit(1);
 }
 
-/* The ones outside this gate's scope, counted rather than forgotten. */
-const all = readdirSync(`${ROOT}api`).filter((f) => f.endsWith('.js') && !f.startsWith('_'));
-const elsewhere = all.filter((f) => {
-  const src = readFileSync(`${ROOT}api/${f}`, 'utf8');
-  return /runtime:\s*'edge'/.test(src) && !/regions:/.test(src) && /SUPABASE_URL/.test(src);
-}).length;
-
-console.log(`[check-edge-region] ${pinned.length} of the endpoints the app calls run in`
-  + ` ${DB_REGION}, which is where the database is, read from the app's own client rather`
-  + ` than a list kept here. ${elsewhere} other endpoint(s) talk to the same database from`
-  + ' wherever the request lands; they are the website, the admin and the crons, and they'
-  + ' are the next ones worth moving.');
+const fromApp = pinned.filter((n) => called.includes(n)).length;
+console.log(`[check-edge-region] ${pinned.length} edge endpoints read the database and all of`
+  + ` them run in ${DB_REGION}, which is where it is. ${fromApp} are the ones the app calls,`
+  + " read from the app's own client rather than a list kept here; the rest are the website,"
+  + ' the admin and the crons.');

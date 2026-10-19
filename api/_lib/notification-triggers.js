@@ -54,13 +54,13 @@ export const PUSH_TRIGGERS = {
   ],
   "workbook_ready": [],
   "journal_streak": [
-    "api/cron-push.js:183"
+    "api/cron-push.js:192"
   ],
   "exercise_unfinished": [
-    "api/cron-push.js:140"
+    "api/cron-push.js:149"
   ],
   "new_post": [
-    "api/cron-push.js:218"
+    "api/cron-push.js:227"
   ]
 };
 

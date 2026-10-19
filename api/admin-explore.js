@@ -37,7 +37,16 @@ import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.j
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
 // and every request fails with FUNCTION_INVOCATION_FAILED.
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the wrong default when every answer comes from one database
+ * somewhere else: a request that landed in San Francisco spent two crossings
+ * of the country on a lookup by id. See api/_lib/db-region.js for the
+ * measurement, and check-edge-region.mjs, which holds every one of these to
+ * the one constant that says where.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { corsHeaders, safeError } from './_lib/http.js';
 import { SURVEY_QUESTIONS } from './_lib/survey.js';

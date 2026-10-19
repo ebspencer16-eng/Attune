@@ -32,7 +32,16 @@
 import { jsonBody } from './_lib/http.js';
 import { consentRequired } from './_lib/consent-region.js';
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the wrong default when every answer comes from one database
+ * somewhere else: a request that landed in San Francisco spent two crossings
+ * of the country on a lookup by id. See api/_lib/db-region.js for the
+ * measurement, and check-edge-region.mjs, which holds every one of these to
+ * the one constant that says where.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 const KINDS = new Set(['visit', 'page_time']);
 const MAX_MS = 2 * 60 * 60 * 1000;   // two hours; longer is a tab left open

@@ -12,7 +12,16 @@
  *   RESEND_API_KEY + FROM_EMAIL  — to trigger confirmation emails on success
  */
 
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the wrong default when every answer comes from one database
+ * somewhere else: a request that landed in San Francisco spent two crossings
+ * of the country on a lookup by id. See api/_lib/db-region.js for the
+ * measurement, and check-edge-region.mjs, which holds every one of these to
+ * the one constant that says where.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { reportToSentry } from './_lib/sentry-edge.js';
 import { writeEntitlements } from './_lib/entitlements.js';

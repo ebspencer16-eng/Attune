@@ -23,7 +23,7 @@ export const EMAIL_TRIGGERS = {
     "public/admin.html:5547"
   ],
   "workbook_promo": [
-    "api/generate-workbook-promo.js:176"
+    "api/generate-workbook-promo.js:185"
   ]
 };
 

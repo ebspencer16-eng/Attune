@@ -9,7 +9,16 @@ import { safeError, jsonBody } from './_lib/http.js';
 // answered FUNCTION_INVOCATION_FAILED to every request. Its own commit
 // message promised it would "degrade gracefully" until migration 036 ran;
 // it degraded to a 500.
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the wrong default when every answer comes from one database
+ * somewhere else: a request that landed in San Francisco spent two crossings
+ * of the country on a lookup by id. See api/_lib/db-region.js for the
+ * measurement, and check-edge-region.mjs, which holds every one of these to
+ * the one constant that says where.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 const HEADERS = { 'Content-Type': 'application/json' };
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: HEADERS });

@@ -4,7 +4,16 @@
  * The Supabase anon key is safe to expose — it's protected by RLS.
  * The admin page itself is protected by a separate password gate.
  */
-export const config = { runtime: 'edge' };
+/**
+ * ── AND WHERE IT RUNS ─────────────────────────────────────────────────────
+ * Pinned next to the database. An edge function runs near whoever is asking,
+ * which is the wrong default when every answer comes from one database
+ * somewhere else: a request that landed in San Francisco spent two crossings
+ * of the country on a lookup by id. See api/_lib/db-region.js for the
+ * measurement, and check-edge-region.mjs, which holds every one of these to
+ * the one constant that says where.
+ */
+export const config = { runtime: 'edge', regions: ['iad1'] };
 
 export default function handler(req) {
   const url  = process.env.VITE_SUPABASE_URL  || process.env.SUPABASE_URL  || '';
