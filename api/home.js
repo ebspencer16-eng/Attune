@@ -300,19 +300,34 @@ export default async function handler(req) {
     });
     const resultsReady = gate.ready;
 
-    // The revisit anchor: the couple's widest gap, read from the stored results
-    // rather than recomputed, since this endpoint should stay cheap.
-    let topGapDimensionLabel = null, coupleType = null;
-    if (resultsReady && me.partner_profile_id) {
-      const [a, b] = [me.id, me.partner_profile_id].sort();
-      const rRes = await fetch(
-        `${supabaseUrl}/rest/v1/couple_results?partner_a=eq.${a}&partner_b=eq.${b}&select=couple_type,results`,
-        { headers: svc });
-      const row = (await rRes.json().catch(() => []))?.[0];
-      coupleType = row?.couple_type || null;
-      const top = row?.results?.rankedGaps?.[0]?.dim;
-      if (top) topGapDimensionLabel = top;
-    }
+    /**
+     * ── THE LAST TWO READS GO TOGETHER ──────────────────────────────────
+     * Ellie: "My pages are still taking a long time to load."
+     *
+     * The chain here was four reads deep: this person's profile, then their
+     * partner's, then the stored results, then the orders table. Four round
+     * trips one after another, and the server's own timing says the whole
+     * request is between 1.3 and 5.9 seconds, essentially all of it here.
+     *
+     * The first two genuinely wait: the partner's id is on this person's row,
+     * and whether results exist depends on what the partner has finished. The
+     * last two do not wait on each other at all. They are started together and
+     * awaited where their answers are used, which takes the chain to three.
+     *
+     * The beta read still waits for the partner, because it looks them up by
+     * email and the email is a column on the partner's row. Dropping that
+     * predicate would make it concurrent with the partner read and would also
+     * stop finding a tester who bought before the two accounts were linked, so
+     * it stays.
+     */
+    const resultsP = (resultsReady && me.partner_profile_id)
+      ? (() => {
+        const [a, b] = [me.id, me.partner_profile_id].sort();
+        return fetch(
+          `${supabaseUrl}/rest/v1/couple_results?partner_a=eq.${a}&partner_b=eq.${b}&select=couple_type,results`,
+          { headers: svc }).catch(() => null);
+      })()
+      : null;
 
     /**
      * ── IS EITHER PARTNER A BETA TESTER ─────────────────────────────────
@@ -332,21 +347,36 @@ export default async function handler(req) {
      * costs a prompt; refusing to draw the home screen over it costs the
      * screen.
      */
+    const ordersP = (() => {
+      try {
+        const ids = [me.id, me.partner_profile_id].filter(Boolean);
+        const emails = [user.email, partner?.email]
+          .filter(Boolean).map((e) => String(e).toLowerCase());
+        const or = [
+          `user_id.in.(${ids.join(',')})`,
+          ...(emails.length ? [`buyer_email.in.(${emails.map((e) => `"${e}"`).join(',')})`] : []),
+        ].join(',');
+        return fetch(
+          `${supabaseUrl}/rest/v1/orders?select=promo_code&or=(${encodeURIComponent(or)})`,
+          { headers: svc },
+        ).catch(() => null);
+      } catch { return null; }
+    })();
+
+    // The revisit anchor: the couple's widest gap, read from the stored results
+    // rather than recomputed, since this endpoint should stay cheap.
+    let topGapDimensionLabel = null, coupleType = null;
     let betaTester = false;
-    try {
-      const ids = [me.id, me.partner_profile_id].filter(Boolean);
-      const emails = [user.email, partner?.email]
-        .filter(Boolean).map((e) => String(e).toLowerCase());
-      const or = [
-        `user_id.in.(${ids.join(',')})`,
-        ...(emails.length ? [`buyer_email.in.(${emails.map((e) => `"${e}"`).join(',')})`] : []),
-      ].join(',');
-      const oRes = await fetch(
-        `${supabaseUrl}/rest/v1/orders?select=promo_code&or=(${encodeURIComponent(or)})`,
-        { headers: svc },
-      );
-      betaTester = isBetaOrderSet(await oRes.json().catch(() => []));
-    } catch { /* a missing beta flag costs a prompt, not the screen */ }
+    {
+      const [rRes, oRes] = await Promise.all([resultsP, ordersP]);
+      const row = rRes ? (await rRes.json().catch(() => []))?.[0] : null;
+      coupleType = row?.couple_type || null;
+      const top = row?.results?.rankedGaps?.[0]?.dim;
+      if (top) topGapDimensionLabel = top;
+      try {
+        betaTester = oRes ? isBetaOrderSet(await oRes.json().catch(() => [])) : false;
+      } catch { /* a missing beta flag costs a prompt, not the screen */ }
+    }
 
     // Newest published post, and whether they have read it. Drives the
     // "new in In Practice" card, and the badge below.

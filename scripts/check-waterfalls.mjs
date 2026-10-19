@@ -78,6 +78,29 @@ const BUDGETS = [
     chain: 'auth, profile, partner, beta lookup',
   },
   {
+    /**
+     * The same endpoint for a couple who have finished, which is the deeper
+     * case and the one most people are in. It reads the stored results as
+     * well, and that read does not wait on the beta lookup or the other way
+     * round: both need the partner's row and neither needs the other, so they
+     * are started together.
+     *
+     * Four here rather than three because the auth call is still in the chain
+     * in this harness: there is no key set to be had, so verify-token falls
+     * back to asking the server. In production it is checked in memory and
+     * this chain is three.
+     */
+    name: '/api/home (finished couple)',
+    file: '../api/home.js',
+    path: '/api/home?tzOffset=420',
+    /* Named rather than referenced: the fixtures are declared below this
+       table and a const cannot be read before it exists. */
+    profile: 'finished',
+    deep: 4,
+    calls: 9,
+    chain: 'auth, profile, partner, then the results and the beta lookup together',
+  },
+  {
     name: '/api/tool-data',
     file: '../api/tool-data.js',
     path: '/api/tool-data',
@@ -187,6 +210,21 @@ const PROFILE = {
   ex1_answers: { en4: 4 }, ex2_answers: { a: 1 }, ex3_answers: {},
 };
 
+/**
+ * ── AND THE SAME COUPLE, FINISHED ─────────────────────────────────────────
+ * The fixture above is a premium couple part-way through, so `resultsReady` is
+ * false and /api/home never reads the stored results at all. Its deepest chain
+ * was therefore never the one it measured: an established couple adds that
+ * read, and an established couple is everybody who has been here a while.
+ *
+ * Core owns the two exercises both of them have answers for, so this one is
+ * finished without inventing three more sets of answers.
+ */
+const FINISHED = { ...PROFILE, pkg: 'core' };
+
+/** Which profile the stub answers with, set per case before driving. */
+let profileFixture = PROFILE;
+
 let calls = [];
 let t0 = 0;
 globalThis.fetch = async (u, init) => {
@@ -212,9 +250,12 @@ globalThis.fetch = async (u, init) => {
   await new Promise((r) => setTimeout(r, TICK));
   rec.end = Date.now() - t0;
   const body = /\/auth\/v1\/user/.test(url) ? { id: 'u1', email: 'a@example.com' }
-    : /profiles\?id=eq\.u1/.test(url) ? [PROFILE]
-    : /profiles\?id=eq\.u2/.test(url) ? [{ ...PROFILE, id: 'u2', name: 'Spencer', invite_code: null, email: 'b@example.com' }]
-    : /\/profiles/.test(url) ? [PROFILE]
+    : /profiles\?id=eq\.u1/.test(url) ? [profileFixture]
+    : /profiles\?id=eq\.u2/.test(url) ? [{ ...profileFixture, id: 'u2', name: 'Spencer', invite_code: null, email: 'b@example.com' }]
+    /* A finished couple has a stored results row, which is the read the
+       part-way fixture never reaches. */
+    : /\/couple_results/.test(url) ? [{ couple_type: 'WX', results: { rankedGaps: [{ dim: 'conflict' }] } }]
+    : /\/profiles/.test(url) ? [profileFixture]
     /* A couple who have opened the tools before, which is everybody after the
        first visit. With no row the endpoint seeds one, and that is two more
        round trips that happen exactly once in a couple's life. */
@@ -248,7 +289,8 @@ function depthOf(records) {
 const fails = [];
 const notes = [];
 
-async function drive({ file, path, method, body }) {
+async function drive({ file, path, method, body, profile }) {
+  profileFixture = profile === 'finished' ? FINISHED : PROFILE;
   let mod;
   try { mod = await import(file); }
   catch (e) { return { error: `could not be imported (${e.message})` }; }
@@ -291,6 +333,21 @@ for (const spec of BUDGETS) {
   if (depth <= spec.deep && out.records.length <= spec.calls) {
     const overlapped = out.records.filter((c, i) => out.records.slice(0, i).some((p) => c.start < p.end - 2)).length;
     notes.push(`${spec.name}: ${out.records.length} calls, ${depth} deep, ${overlapped} overlapping`);
+    /**
+     * The waterfall for one passing case, on request.
+     *
+     * It already prints for a FAILING one, which is the common need. This is
+     * for the other half: /api/home was reported at four deep both before and
+     * after a change that was supposed to flatten it, and the dump is what
+     * showed why. The fixture was a couple part-way through, so the read being
+     * flattened never happened at all. A number that does not move is a
+     * question about what was measured.
+     *
+     *   WATERFALL_DUMP='/api/home (finished couple)' node scripts/check-waterfalls.mjs
+     */
+    if (process.env.WATERFALL_DUMP && spec.name === process.env.WATERFALL_DUMP) {
+      for (const c of out.records) console.log(`      ${String(c.start).padStart(4)} -> ${String(c.end).padStart(4)}  ${c.url}`);
+    }
   }
 }
 

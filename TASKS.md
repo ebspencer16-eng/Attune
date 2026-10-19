@@ -93,9 +93,10 @@ These two are still waiting on somebody, and neither is waiting on me.
 
 ## 2. Open
 
-**Nothing open.** W34 and W35 are done and are in section 3. What is left of
-the slow loading is named there: the four database reads that /api/home does
-one after another.
+| # | What I am doing |
+|--|--|
+| W36 | **The four reads /api/home does one after another.** Each waits on the one before. Find which of them genuinely need the answer to the last and start the rest together. The home screen is the first thing you see, so this is the wait you notice most. |
+| W37 | **Read the server's own timing first**, now that it reports it, so this is a measurement rather than a guess about which read is slow. |
 
 ---
 
