@@ -21,7 +21,16 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.**
+Five from your last message. 1 to 3 are small and certain. 4 is new work. 5 has
+a question in it I want to get right before building, and it is under the table.
+
+| # | What I am doing |
+|--|--|
+| W84 | **What Comes Next on the site should match the app.** Reading both, listing every difference, then making the website render the server's version rather than reconciling them one by one. |
+| W85 | **Physical Intimacy Expectations is indented in the results left nav.** Finding what puts it a level down and whether the nav or the section list is wrong. |
+| W86 | **Removing the Download action plan button from the site.** |
+| W87 | **Additional exercises section at the foot of the Insights page.** One rounded square tile per exercise they do not own, so three, two or one, and none when they own all three. Each tile opens the packages page at the add-on section. |
+| W88 | **A standalone exercise or resource cannot be bought without the core exercises.** Checkout asks for an email and the server checks that it owns the foundation before the order is allowed. See below. |
 
 ---
 
@@ -29,9 +38,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
-| W82 | **The Action plans tile opens the action plan now.** It was the same bug as the Insights menu rows, in the one place that fix never reached. |
-| W83 | **The insight of the day no longer cuts to one line.** When the page cannot work out its room it sets the whole quotation small instead of showing six words and dots. Worth your eye on how small. |
-| S35 | **Six sweeps, nothing broken found.** Eight faults in my own measuring, which is the usual ratio. Detail under the table. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -43,6 +49,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | Verified by you | What it was |
 |--|--|
+| W82 | The Action plans quick tile opened the storycards. Same bug as the Insights menu rows, in the one call site that fix never reached; the gate now covers both. |
+| W83 | The insight of the day cut to one line when the page could not work out its room. It sets the whole quotation small instead. |
+| S35 | Six sweeps over timers, throwing reads, timezone days, assets, unnamed controls and money units. All clean; eight faults found in the measuring, none in the product. |
 | S36 | I was wrong that the whole research module was dead. The array is what a gate holds the Our Purpose page to, so it stays; the dead function went, and with it the last copy of the old day rule. |
 | W52 | The thinking glyph: the trailing dot comes off the top of the head and clears its ink, and the cloud is a nine-lobe shape with no gap showing through. |
 | B148 | The workbook scored the responsibility mirror backwards with its own fourth copy of the rule. It reads the shared one now. |
@@ -866,3 +875,27 @@ function next to it, which nothing has called since September and which still
 carried the old day arithmetic, the one that turned over at 5pm and gave your
 phone and the simulator different words on the same day. That is gone, along
 with three comments that pointed at it or described it as live.
+
+### W88 — the bit I want to get right
+
+You said "maybe if they only add one exercise to their cart they should have to
+provide their email to confirm that they already have the foundational
+exercises". I want to make sure I build the strong version of that.
+
+Typing an email is not on its own a confirmation of anything, because anyone
+can type any email. What makes it real is the server looking that email up and
+checking whether it actually owns the core exercises. So that is what I am
+building: the box appears only when the cart has no package in it, and the
+order cannot complete unless the lookup finds core exercises on that account.
+
+Three cases I have to decide on, and my answers unless you say otherwise:
+
+A partner who did not pay. A couple share one package, so the invited partner
+owns the core through the person who bought it. I will count that as owning it.
+
+A different email from the one they bought under. The lookup fails and they are
+told the account has no core exercises, with the option to buy a package
+instead. There is no way around that without letting anybody through.
+
+Someone who genuinely has it but is not signed in. Same as above, and the
+message will say to sign in, because signing in answers the question properly.
