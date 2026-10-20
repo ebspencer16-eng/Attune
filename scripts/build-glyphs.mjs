@@ -67,10 +67,19 @@ const LOBES = [
    * ── THE CLOUD, FOURTH TIME ────────────────────────────────────────────
    * Ellie: "try to draw the cloud one more time, we are almost there."
    *
-   * One big lobe with five smaller ones round it: two lifting the top corners
-   * and three along the underside, so the bottom is bumpy rather than flat,
-   * which is the half she asked for first and which has to survive every
-   * redraw.
+   * One central lobe with eight evenly spaced round it, on an ellipse.
+   *
+   * ── WHY EVENLY SPACED, AFTER FOUR THAT WERE NOT ────────────────────────
+   * Every arrangement before this placed the lobes by hand, and every one had
+   * clefts: adjacent lobes that barely met, so the outline cut deep between
+   * them and the thing read as a splat rather than a cloud. The depth of a
+   * cleft is set by how far apart two neighbours are against their radius, so
+   * the fix is to stop placing them and generate them: eight at 7 and 5.5 on
+   * the two axes, each of radius 5.4, puts adjacent centres about 4.2 apart
+   * against a radius of 5.4, which is a shallow scallop.
+   *
+   * The underside is bumpy for free, which is the half she asked for first and
+   * which has to survive every redraw.
    *
    * ── THE CONSTRAINT THAT KEEPS BEING MISSED ─────────────────────────────
    * It is not that the lobes overlap. The mask subtracts STROKE from every
@@ -93,12 +102,15 @@ const LOBES = [
    * EDGE, which every interior gap also satisfies, and reported a clean sheet
    * on a cloud with a hole in it.
    */
-  [50, 14, 10],
-  [43.5, 12.5, 6],
-  [56.5, 12.5, 6],
-  [45.5, 20, 5.5],
-  [54.5, 20, 5.5],
-  [50, 20.5, 5.5],
+  [51, 13, 7],
+  [51, 7.5, 5.4],
+  [55.2, 9.1, 5.4],
+  [57, 13, 5.4],
+  [55.2, 16.9, 5.4],
+  [51, 18.5, 5.4],
+  [46.8, 16.9, 5.4],
+  [45, 13, 5.4],
+  [46.8, 9.1, 5.4],
 ];
 const STROKE = 2.6;
 /*
@@ -153,18 +165,21 @@ const THINKING = `
        Ellie: "Maybe only one dot before the cloud, leaving from 75% of the way
        up the head."
 
-       The head spans y 11.5 to 32.5, so three quarters up is y 16.75, and the
-       ellipse's right edge at that height is x 27.2. The bead sits just clear
-       of it and on the line from there to the cloud, so the thought reads as
-       leaving the head rather than floating beside it.
+       The head spans y 11.5 to 32.5, so three quarters up is y 16.75.
 
-       Two before this, then one: a trail of two read as a cartoon, and the
-       cloud is doing the work. Checked by arithmetic rather than by eye: the
-       bead is outside the head ellipse and further from every cloud lobe's
-       centre than the two radii together. A bead inside either draws a circle
-       in the middle of the drawing, which is the complaint she made about the
-       sofa. -->
-  <circle cx="30.5" cy="15" r="2"/>
+       ── AND "CLEAR" MEANS THE INK, NOT THE PATH ─────────────────────────
+       Ellie: "Dot shouldn't be touching the head." The first attempt put the
+       bead outside the head ellipse and checked exactly that, which is the
+       wrong test: both shapes are STROKED, so 1.3 of each line sits outside
+       its own path. Centre to head edge was 3.71 against a bead radius of 2,
+       so the paths cleared by 1.71 and the drawn lines overlapped by 0.89.
+
+       What is checked now is the visible gap: centre-to-edge minus the bead's
+       radius minus a full stroke width. It is 2.17 to the head and 1.94 to the
+       cloud, and there is no position at this height where both clear unless
+       the cloud gives up some size, which is why the cloud is 22.8 across
+       rather than 26. Solved by search rather than nudged. -->
+  <circle cx="34" cy="16.5" r="1.6"/>
   <!--
     ── THE CLOUD, THIRD TIME ──────────────────────────────────────────────
     Ellie: "cloud was better before. Can we try the cloud again?"

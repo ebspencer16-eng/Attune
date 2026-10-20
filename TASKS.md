@@ -21,8 +21,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** Everything from your last message is built and sitting in
-section 3 for your eye.
+**Nothing open.**
 
 ---
 
@@ -30,214 +29,10 @@ section 3 for your eye.
 
 | # | Built, needs your eye |
 |--|--|
-| W79 | **Your eleven rewrites, word for word.** The In Practice two went into the pages themselves, which is where that copy lives; the generated copy follows. |
-| W59 | **Your three bullets, word for word.** |
-| W78 | **"Criticism:" large, the sentence after it small.** It costs those four lines their highlighting; one line under this table says why and how to get it back. |
-| W80 | **The reset answers are two tiles, full width.** The empty label column is gone. |
-| W81 | **One round dropdown arrow per row, and nothing else**, with "See how these expectations differ" at the foot of each open list. |
-| W52 | **One dot from three quarters up the head, and the cloud again.** The note under this table is about why the last three clouds had something wrong inside them. |
+| W52 | **The dot comes off the top of the head and clears it, and the cloud is redrawn.** Both are in the app now. |
 | B148 | **The workbook scorer is fixed**, and it reads the same rule as everything else rather than a corrected fourth copy. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-
-### The bug sweeps
-
-Eight sweeps. Four found something real, one found a latent hazard worth a
-check, and three found nothing, which is worth saying because the method can
-now see the thing it is looking for.
-
-**1. Every endpoint, asked from outside with no sign-in.** 60 of them. Every
-one answers with a proper refusal or a legitimate public reply. No 500s, which
-is what this sweep found last time: two admin endpoints that had never once
-worked. Three answer 200 to a stranger and all three are meant to: the profile
-form's wording, the publishable Supabase key that is in the browser bundle
-anyway, and the email catalogue.
-
-**2. One rule written twice.** 28 function names are defined more than once
-across the three surfaces. I ran the highest-stakes one rather than reading it:
-the three `calcDimScores` agree on 4,000 dimension scores over 400 answer sets,
-because the admin's now delegates to the engine and the website's is a mirror
-that holds.
-
-**3. Role tokens, where your couple-type copy gets a name put into it.** Two
-implementations, one per surface, and only the server's was checked. They agree
-on every input a real couple can produce. They disagree about what to do when a
-token CANNOT resolve: the server prints "the more expressive partner" and the
-website would print a raw `{EXP}` on the page.
-
-Nothing reaches that today, and the reason was a property nobody was checking:
-each couple type only uses the tokens for an axis its two people actually
-differ on. One copy edit putting `{EXP}` into the Orbit's prose would have done
-it. That is now one line in check-role-tokens, planted against.
-
-**4. A field the app reads that the server never sends.** This is the direction
-that caused the invisible highlights on results pages. Nothing. Worth noting
-that the first version of this sweep reported seven and all seven were my
-mistake: it could not see shorthand, which is how most of this codebase builds
-a payload. It can now, and the nothing means something.
-
-**5. Exported names nothing imports.** 87 of 919. Almost all are used inside
-their own file and merely exported for no reason. Three were genuinely called
-by nothing, and two of those read like live features:
-
-- `exerciseStatus` in `api/_exercises.js`, the module that defines what
-  exercises exist. Written when that module was created and never wired up.
-- `perDimensionCoupleType` in the workbook content. Its caller went on 2
-  October when you had the Word file removed; it was left behind.
-- `scoreResponsibilityPairSided`, which I orphaned myself earlier today.
-
-All three are gone. A function nobody calls, sitting in a file that defines a
-rule, is the next person's wrong answer.
-
-**6. A React component declared inside another component.** Fourteen on the
-website, and one of them was a real bug: the pronoun buttons on your profile
-panel. They were declared inside the page's own markup, so every time anything
-on that page re-rendered, React threw the buttons away and rebuilt them, and
-the pronoun you had just picked went back to whatever your account already
-said. In the buttons and in the value the form submits.
-
-This is the same shape that made Side by Side impossible to open: a panel that
-reopened shut fifty times a second. Nothing errors and the console stays clean,
-which is why it is worth a check rather than an eye.
-
-The other thirteen are decoration and lose nothing when they are rebuilt, so
-they are deliberately left alone and the check says so in writing. If one of
-them ever starts holding something, it fails.
-
-**7. An error caught and thrown away without a word.** 410 of these across the
-product, and most are right: a browser in private mode refuses to remember
-anything, and a page should not break over that.
-
-22 sit round a database or a network call, which is the shape that has cost
-this product before. One of those is a real bug. The job that sends the survey
-nudge reads a list of who is due, and if that read failed it treated the answer
-as "nobody is due": it sent nothing and reported success. Nobody would know,
-and because the window moves on, the people who should have been nudged that
-day would never be nudged at all.
-
-Ten lines above it, the same job already gets this right for a different read:
-it stops and says "could not read who to leave alone, so nothing was sent". It
-says the same thing for this one now. Driven both ways to check: a failed read
-answers 503 and names it, and nobody being due is still a quiet success.
-
-**8. One colour typed on two surfaces.** 557 named constants, 24 declared on
-more than one surface, 14 agreeing exactly. Most are a name used for two
-different things. Two were one value drawn twice with nothing holding them:
-the ink your home screen's quick-link icons are drawn in, and the grey behind a
-featured In Practice tile. They agreed, which is why nobody had looked. They
-have one home now.
-
-### One thing for you, in the workbook
-
-Not new, and not mine to change: it is written up in SECURITY.md awaiting your
-call, and the sweep confirmed it still reproduces.
-
-The workbook's own scorer reads one kind of answer backwards. Two people who
-both say a job is primarily theirs score as perfect agreement, and two who
-answer oppositely score as a total mismatch.
-
-**How far it reaches, which I measured today.** It only fires on the older
-"Primarily mine" phrasing. The exercise serves name-based answers now, and on
-every one of those the workbook agrees with the live rule. So it reaches
-couples whose answers predate that change and nobody else.
-
-It is scoring, and changing it changes documents people already have, so it
-stays your decision. SECURITY.md now points at the right function to move it to
-and carries the measurement.
-
-### W79, the third list, built from your own edits
-
-**What is different about this one.** The first two lists were my reading of
-what AI prose sounds like. This one is not: every test is lifted from a change
-you actually made, in your fifteen or your seventeen, and the change it came
-from is named beside it. If it is not a shape you have already rewritten once,
-it is not in here.
-
-Same method as the second list: import each module and read the finished
-sentences, so a sentence built from three template pieces is tested the way a
-reader sees it. 179 modules, 2,915 sentences, 31 flagged, 11 worth your eye.
-
-**The first group is the one that matters.** You rewrote two sentences about
-Criticism. The other three horsemen have the same two sentences, untouched,
-because they are written per pattern and you were only shown one.
-
-| Where | What it says now | Suggested |
-|--|--|--|
-| Contempt, never | "**Not showing up at all.** This is the pattern that matters most..." | "You do not show contempt. This is the pattern that matters most..." |
-| Defensiveness, never | "**Not showing up.** Taking a complaint without returning one is harder than it sounds." | "You do not get defensive. Taking a complaint without returning one is harder than it sounds." |
-| Stonewalling, never | "**Not showing up.** Staying present when things get tense is genuinely difficult." | "You do not shut down. Staying present when things get tense is genuinely difficult." |
-| Defensiveness, sometimes | "**Showing up regularly.** Before responding, try reflecting back..." | "Defensiveness appears enough to matter. Before responding, try reflecting back..." |
-| Stonewalling, sometimes | "**Showing up regularly.** A stated pause protects the relationship..." | "Shutting down appears enough to matter. A stated pause protects the relationship..." |
-
-The Stonewalling one is the worst of the five. "Not showing up" sits directly
-beside "Staying present when things get tense", so the line reads as its own
-contradiction.
-
-**The same ambiguity, twice more.** Your Criticism edit was about "showing up
-**for you**" reading as "being there for you". These two say exactly that:
-
-| Where | What it says now | Suggested |
-|--|--|--|
-| Conflict, all clear | "None of the four patterns are **showing up often for you**." | "None of the four patterns come up often for you." |
-| Conflict, no action needed | "None of the four patterns are **showing up often for you**." | "None of the four patterns come up often for you." |
-
-**And four singles.**
-
-| Where | What it says now | Suggested |
-|--|--|--|
-| In Practice, reviewing results | "It's easier to engage with a difference when you both already trust the **framework**." | "It is easier to talk about a difference when you both already trust where the numbers came from." |
-| In Practice, heated conversation | "...creates a **container** that the pause doesn't feel like avoidance." | "...so the pause does not feel like avoidance." |
-| Workbook, hard workday | "The **container** makes the listening easier." | "Knowing the turn is coming makes the listening easier." |
-| Couple type, one fast one steady | "Efficient repair can mean **closing the loop** before it's actually through." | "Efficient repair can mean ending the conversation before it is actually settled." |
-
-**Two things it flagged that I left alone, and why.**
-
-"The thing to watch for is tone rather than clarity" is yours. You wrote it in
-the fifteen. The test fires on it because the test came from your other edits,
-which is the test working rather than failing.
-
-Twenty-three sentences use "show up" and sixteen of them are the sense you
-kept: "the gap shows up after a rough patch", and the love-language answer
-"Doing things. Showing up and making life easier." That one means being there
-for somebody, which is the whole point of the option. The seven above are the
-other sense, where it means "appears" and reads as "is there for you".
-
-**And one shape with nothing to report.** "Low effort, high return" was the
-only two-word fragment pair in the product, "make space for" and "holding
-space" the only two of those, "low-drama" the only two, and "the thing that"
-the only two. You got all of them. That is four tests that found nothing, which
-is worth one sentence because it turns "probably fine" into a number.
-
-### W52, why the last three clouds were wrong
-
-The cloud is drawn as a union of overlapping circles with the inside cut out,
-so what you see is the rim. Three attempts had something wrong inside them and
-I kept checking the wrong thing.
-
-The rule is not that the circles overlap. The cut-out circles are each smaller
-by the width of the line, and what has to hold is that **those** cover the
-whole inside. Five circles in an even ring pass every overlap test and leave
-the middle uncovered, so the middle gets painted: a coloured blob inside the
-cloud.
-
-It now has one big circle in the centre with five smaller ones around it, three
-of them along the underside so the bottom is bumpy rather than flat.
-
-**And the check I wrote for it was wrong first.** It measured how far a painted
-point was from the nearest circle edge, which every inside gap also passes,
-because a gap is bounded by edges. The question is whether you can walk OUT of
-the shape from there. The old arrangement scores eleven per cent of its ink as
-inside-blob; this one scores none.
-
-### W78, what the two sizes cost
-
-"Criticism:" large and the sentence after it small, on one line, needs the two
-to be one piece of text. The highlighting layer needs each word to be its own
-box so it can report where it is. You cannot have both.
-
-So those four lines are the one place on that page you cannot highlight. The
-advice under them still is. If you would rather keep the highlighting, the name
-on its own line above the sentence gets both, and it is one line to change.
 
 ## 4. Done and verified
 
@@ -247,6 +42,11 @@ on its own line above the sentence gets both, and it is one line to change.
 
 | Verified by you | What it was |
 |--|--|
+| W81 | The right end of a row turned the page instead of opening its list. Four rows had it, not one; a row now takes the touch as the finger lands. |
+| W79 | The third prose list, from your own edits. Eleven rewrites, in your words. |
+| W59 | The three couple-type bullets, in your words. |
+| W78 | "Criticism:" large and the sentence after it small, on one line. |
+| W80 | The reset answers are two full-width tiles rather than a table with an empty column. |
 | W57 | The couple map was a share of the screen height. It is a subtraction now, so a bigger phone gets a bigger map: 227 on a 17, 309 on a Pro Max. |
 | W77 | The conflict snapshot is a real table, names across the top once, no pills. |
 | W68 | The description sentence under the Side by Side hero is gone. |

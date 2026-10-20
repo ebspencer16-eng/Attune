@@ -20,7 +20,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
-import { Modal, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import {
+  Modal, ScrollView, type StyleProp, Text, useWindowDimensions, View, type ViewStyle,
+} from 'react-native';
 import { CouchPair, HeartBubble, JournalBook, ThinkingPerson } from '@/components/brand-glyph';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
@@ -803,15 +805,39 @@ export default function Results({
    * stealing them.
    */
   const pageGestureRef = useRef<GestureType | undefined>(undefined);
+  /**
+   * Turn the page, unless a row claimed this touch when it began.
+   *
+   * On the JS thread, because the claim is an ordinary module variable. See
+   * the note on RowTap for why the page is told not to fire rather than the
+   * rows being told to block it.
+   */
+  const maybePage = useCallback((x: number) => {
+    if (aRowTookThePress()) return;
+    const edge = screenW / 6;
+    if (x < edge && prev) rememberSection(prev);
+    else if (x > screenW - edge && next) rememberSection(next);
+  }, [prev, next, rememberSection, screenW]);
+
   const edgeTap = useMemo(() => Gesture.Tap()
     .withRef(pageGestureRef)
     .maxDuration(300)
     .onEnd((e, ok) => {
       if (!ok) return;
-      const edge = screenW / 6;
-      if (e.x < edge && prev) runOnJS(rememberSection)(prev);
-      else if (e.x > screenW - edge && next) runOnJS(rememberSection)(next);
-    }), [prev, next, rememberSection, screenW]);
+      /**
+       * ── THE WHOLE DECISION IS ON THE JS THREAD ────────────────────────
+       * A gesture callback is a worklet and runs on the UI thread, which has
+       * its own runtime: it cannot see an ordinary module variable. Reading
+       * one from in here threw inside the worklet and took the app down to the
+       * home screen, with a crash report whose only app frames are
+       * reanimated's. CLAUDE.md already says the handler has to be runOnJS;
+       * this is what happens when the decision is not.
+       *
+       * So nothing is decided here. The x goes across and `maybePage` works
+       * out whether the touch belonged to a row or to the page.
+       */
+      runOnJS(maybePage)(e.x);
+    }), [maybePage]);
 
   /* The swipe wins a race: a drag that happens to end near an edge is a swipe,
      not two taps. */
@@ -1667,17 +1693,14 @@ function ExpectationsOverview({
                      website's version of this row has been clickable all
                      along; the app's was not. The section id is the server's,
                      and it is the same one this row is keyed by. */
-                  <Pressable
+                  <RowTap
                     key={cat.section}
                     onPress={() => showSection(cat.section)}
                     accessibilityRole="link"
                     accessibilityLabel={pct == null
                       ? `${cat.label}, no figure yet. Open this page.`
                       : `${cat.label}, ${pct} per cent aligned. Open this page.`}
-                    style={({ pressed }) => ({
-                      flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-                      opacity: pressed ? 0.6 : 1,
-                    })}>
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
                     <Prose style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.65)', width: 104 }}>
                       {cat.label}
                     </Prose>
@@ -1690,7 +1713,7 @@ function ExpectationsOverview({
                     <Text style={{ ...Type.small, fontSize: 11, fontWeight: '700', color: pct == null ? 'rgba(255,255,255,0.45)' : bar, width: 34, textAlign: 'right' }}>
                       {pct == null ? '\u2014' : `${pct}%`}
                     </Text>
-                  </Pressable>
+                  </RowTap>
                 );
               })}
             </View>
@@ -1756,6 +1779,89 @@ function ExpectationsOverview({
  * topic. Collapsed by default so the page stays scannable.
  */
 /**
+ * Rows that must not be mistaken for a page turn.
+ *
+ * ── THE BUG ───────────────────────────────────────────────────────────────
+ * Ellie: "I tapped the right side of the top-level category row and it brought
+ * me to the detailed page rather than showing the dropdown list."
+ *
+ * The results pages turn forward on a tap in the right sixth of the screen,
+ * which is her own rule from the storycards. A full-width row inside a card
+ * ends at x=378 on a 402 point phone and the strip starts at 335, so the
+ * right-hand end of every row here is inside it.
+ *
+ * ── WHY NOT blocksExternalGesture, WHICH IS WHAT THE MARGIN RAIL USES ─────
+ * It was tried first and it works in some places and not others, which is the
+ * worst kind of fix. Measured on a simulator: a tap on the right end of a
+ * category bar turned the page, a tap on the same row's label opened the right
+ * page, and the same code on a drawer header blocked correctly. Whatever
+ * decides that, it is not something this screen can see or test, and a
+ * relation that holds for three rows out of four is not a rule.
+ *
+ * So the page tap is told not to fire, by the row, at the moment the finger
+ * lands. A press always begins before the tap it is part of ends, so the row
+ * has said "this one is mine" by the time the page comes to decide.
+ *
+ * ── WHY NOT A RECTANGLE, WHICH IS WHAT THIS DID FIRST ────────────────────
+ * Each row registered its window rectangle at onLayout and the page tested
+ * the point against them. It worked, on an unscrolled page, and that is the
+ * whole of it: onLayout does not fire again when a scroll moves the row, so
+ * the rectangles went on describing where the rows used to be. Driven on a
+ * simulator, a tap on the right of the Financial drawer header turned the page
+ * the moment the page had been scrolled, which is her bug back again two
+ * finger movements later.
+ *
+ * A claim needs no coordinates, so there is nothing for a scroll to
+ * invalidate. It is consumed on read, so a claim can never suppress more than
+ * the one tap it belongs to, and it expires, so a press whose tap never
+ * arrived cannot suppress anything.
+ *
+ * The rail icons keep blocksExternalGesture: they are inside the annotation
+ * provider, they already work, and they are a gesture rather than a press.
+ */
+
+/** When a row last took a press, as a timestamp. Zero means nothing pending. */
+let rowPressAt = 0;
+
+/** A row has taken this touch. Called from onPressIn, so: before the tap ends. */
+function claimTouchForARow() { rowPressAt = Date.now(); }
+
+/**
+ * Did a row claim the touch that is ending now?
+ *
+ * Consumes the claim either way. The window is longer than a tap, which this
+ * page caps at 300ms, and shorter than any deliberate second tap.
+ */
+export function aRowTookThePress(): boolean {
+  const recent = rowPressAt !== 0 && Date.now() - rowPressAt < 400;
+  rowPressAt = 0;
+  return recent;
+}
+
+function RowTap({
+  onPress, children, style, accessibilityLabel, accessibilityRole = 'button', disabled = false,
+}: {
+  onPress: () => void;
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
+  accessibilityRole?: 'button' | 'link';
+  disabled?: boolean;
+}) {
+  if (disabled) return <View style={style}>{children}</View>;
+  return (
+    <Pressable
+      onPressIn={claimTouchForARow}
+      onPress={onPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      style={({ pressed }) => [style, pressed ? { opacity: 0.6 } : null]}>
+      {children}
+    </Pressable>
+  );
+}
+
+/**
  * Her words for the row at the foot of an open conversations list.
  *
  * Ellie: "there should be one row at the bottom without a checkbox, with
@@ -1800,9 +1906,9 @@ function CategoryDrawer({ label, items, color, section }: {
         borderColor: 'rgba(255,255,255,0.22)', borderWidth: 1,
         borderLeftColor: color, borderLeftWidth: 4,
       }}>
-      <Pressable
+      <RowTap
         onPress={() => setOpen((v) => !v)}
-        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${open ? 'hide' : 'show'} the list`}
         style={{
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           gap: Spacing.sm, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
@@ -1838,7 +1944,7 @@ function CategoryDrawer({ label, items, color, section }: {
             {open ? '\u25B4' : '\u25BE'}
           </Text>
         </View>
-      </Pressable>
+      </RowTap>
       {open ? (
         <View style={{ borderTopColor: 'rgba(255,255,255,0.16)', borderTopWidth: 1 }}>
           {items.map((it) => (
@@ -1871,15 +1977,14 @@ function CategoryDrawer({ label, items, color, section }: {
               A category the server has given no section is not drawn at all
               rather than drawn and inert. */}
           {section ? (
-            <Pressable
+            <RowTap
               onPress={() => showSection(section)}
               accessibilityRole="link"
               accessibilityLabel={SEE_HOW_THEY_DIFFER}
-              style={({ pressed }) => ({
+              style={{
                 flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
                 paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
-                backgroundColor: pressed ? 'rgba(255,255,255,0.10)' : 'transparent',
-              })}>
+              }}>
               {/* not markable: a link to another page, not words about the couple. */}
               <Text
                 style={{
@@ -1889,7 +1994,7 @@ function CategoryDrawer({ label, items, color, section }: {
                 {SEE_HOW_THEY_DIFFER}
               </Text>
               <Text style={{ color: Palette.white, fontSize: 14, lineHeight: 16 }}>{'\u2192'}</Text>
-            </Pressable>
+            </RowTap>
           ) : null}
         </View>
       ) : null}
@@ -4078,20 +4183,17 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
      * the server on the dimension; a row the server has not given one to is
      * not pressable instead of being pressable and doing nothing.
      *
-     * Pressable rather than a gesture: this page has no edge-tap of its own to
-     * compete with. The storycards and the results pages do, which is why the
-     * margin rail needed Gesture.Tap and blocksExternalGesture, and it is
-     * worth knowing the difference rather than reaching for the heavier tool.
+     * RowTap rather than a bare Pressable: this page HAS an edge tap of its
+     * own, and a glance row runs to within forty points of the card's right
+     * edge, which is inside it. The sentence here used to say the opposite,
+     * and it was wrong when it was written. See the note on RowTap.
      */
-    <Pressable
-      onPress={dim.section ? () => showSection(dim.section as string) : undefined}
+    <RowTap
+      onPress={() => showSection(dim.section as string)}
       disabled={!dim.section}
-      accessibilityRole={dim.section ? 'link' : undefined}
+      accessibilityRole="link"
       accessibilityLabel={dim.section ? `${dim.label}. Open ${dim.domainLabel || 'this page'}.` : undefined}
-      style={({ pressed }) => ({
-        flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26,
-        opacity: pressed ? 0.6 : 1,
-      })}>
+      style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, height: 26 }}>
       {/* not markable: numberOfLines truncates, and Prose lays the words out itself. */}
       <Text
         numberOfLines={1}
@@ -4116,7 +4218,7 @@ function GlanceRow({ dim, viewer }: { dim: ResultDimension; viewer: 'a' | 'b' })
           />
         ))}
       </View>
-    </Pressable>
+    </RowTap>
   );
 }
 
