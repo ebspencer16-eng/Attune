@@ -21,7 +21,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| S36 | **Deleting api/_research.js, approved.** Checking what imports it before anything goes. |
 
 ---
 
@@ -850,3 +852,18 @@ hard cut with an ellipsis.
 It now sets the whole quotation at the smallest readable size instead. That is
 the honest answer to "I do not know how much room there is"; showing one line
 of it is not. Tell me if it reads too small.
+
+### S36 — what I got wrong, and what was actually deleted
+
+I told you the module was dead and nothing shipped it. That was from a search
+that looked in the app, the website and the server, and missed the scripts
+folder. Two things there import it, and one is the check that holds
+public/purpose.html to those three citations. Deleting it would have taken away
+the thing that stops a citation being edited on the page and quietly
+misattributing a claim to a researcher.
+
+So the array stays and the page keeps its guard. What was actually dead was one
+function next to it, which nothing has called since September and which still
+carried the old day arithmetic, the one that turned over at 5pm and gave your
+phone and the simulator different words on the same day. That is gone, along
+with three comments that pointed at it or described it as live.

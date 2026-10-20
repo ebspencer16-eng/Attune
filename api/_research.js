@@ -42,16 +42,3 @@ export const RESEARCH = [
     source: 'Johnson, Hold Me Tight',
   },
 ];
-
-/**
- * One finding, chosen by the day rather than at random.
- *
- * Random would mean a reader who opens the app twice in a minute sees two
- * different claims about relationship science, which reads as decoration. By
- * the day it is the same thought for as long as you are thinking about it, and
- * a different one tomorrow.
- */
-export function researchOfTheDay(now = new Date()) {
-  const day = Math.floor(now.getTime() / 86400000);
-  return RESEARCH[day % RESEARCH.length];
-}

@@ -665,9 +665,12 @@ export const WORDS = [
 /**
  * One word, chosen by the day rather than at random.
  *
- * The same argument researchOfTheDay makes: random means a reader who opens
+ * The same argument insightOfTheDay makes: random means a reader who opens
  * the app twice in a minute is shown two different words, which reads as
  * decoration. By the day it is one word for as long as the day lasts.
+ *
+ * It named researchOfTheDay until that function was deleted. A comment citing
+ * a function nobody can go and read is a dead end for whoever follows it.
  *
  * Offset by one against the research finding, so the two tiles do not both
  * turn over on the same days and then both sit still for the same days.

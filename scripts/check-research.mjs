@@ -3,9 +3,19 @@
 //
 // ── WHY ────────────────────────────────────────────────────────────────────
 // The three findings were written for public/purpose.html and live in its
-// markup. The app's home screen now shows one a day, served from
-// api/_research.js. That is two copies of the same claims and the same
-// citations.
+// markup. api/_research.js holds the same three as text.
+//
+// This said the app's home screen shows one a day from that module, and it
+// has not since e80b8d9a, which pointed /api/home at insightOfTheDay and left
+// researchOfTheDay behind with no caller. That function is now deleted, and
+// with it the last copy of the pre-dayNumber day arithmetic that turned over
+// at 00:00Z and gave two devices different words in the same afternoon.
+//
+// So this is no longer two live surfaces disagreeing. It is a page with no
+// build step and a reference copy of what it is supposed to say, which is
+// still worth holding: a citation edited on the page alone is a claim
+// attributed to research that did not quite make it, and that is the kind of
+// drift nobody notices by reading.
 //
 // Citation drift is worse than most drift. A body that reads slightly
 // differently on two surfaces is untidy; a source that reads differently
