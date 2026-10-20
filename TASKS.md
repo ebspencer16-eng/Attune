@@ -21,7 +21,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| W94 | **Discussions to have should hold the five expectations categories, each a dropdown.** Same content as the Expectations overview, same look as What Comes Next. |
+| W95 | **Working checkboxes on the Expectations conversations.** The tick stays, the row greys and drops to the bottom above the See how line, and What Comes Next counts it too. |
 
 ---
 
@@ -924,3 +927,24 @@ missing one exercise or all three.
 Physical Intimacy $20. Relationship Reflection $40. Conflict Patterns $40.
 Those are the three exercises. The two resources, the budget tool and the
 checklist, are $20 each, and the workbook is $19 digital or $39 printed.
+
+### W94 and W95 — what I am working out first
+
+These two are one thing underneath. A tick has to mean the same on the
+Expectations page and on What Comes Next, which means it has to be stored
+somewhere both can read, and a conversation needs a name that does not change
+when its wording does.
+
+Three things I am settling from the code before building, so I do not invent a
+second way to do something that already exists:
+
+Where a tick lives. There may already be a store for this; the checklist tool
+has one. If there is not, it is a new table and a migration you run. I will say
+which before I write it.
+
+Whose tick it is. A conversation is something the two of you do together, so my
+assumption is that it belongs to the couple and either of you ticking it shows
+for both. Say if you would rather each of you had your own.
+
+The app has both of these pages too, and would drift the moment one surface
+learns to tick.
