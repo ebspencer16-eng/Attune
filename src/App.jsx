@@ -3,7 +3,7 @@ import { isWorkbookUrl } from "../api/_lib/workbook-format.js";
 import { getWorkbookUrl, saveWorkbook } from "./workbook-download.js";
 import { AttuneMark } from "./attune-mark.jsx";
 import { buildWorkbookPayload } from "../api/_lib/workbook-payload.js";
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { axisScores, blendedDimScores, AXIS_CONFIG, QUESTION_WEIGHTS } from "../api/_type-engine.js";
 import { PERSONALITY_QUESTIONS, RESPONSIBILITY_CATEGORIES, EXPECTATIONS_CATEGORIES, LIFE_QUESTIONS, PARTNER_VIEW_TEXT, twoPartEx1, EX1_SCALE, CHILDHOOD_STRUCTURES, substName } from "../api/_questions.js";
 import { CONFLICT_SECTIONS, FREQUENCY_OPTIONS, conflictQuestionsInOrder } from "../api/_conflict-questions.js";
@@ -892,6 +892,70 @@ async function saveProfileData(sb, accountId, patch, label) {
  * Returns whether it saved, so a caller can say so. The old path reported a
  * failure through saveProfileData's toast; this returns the same answer.
  */
+/**
+ * Which expectations conversations this couple have already had.
+ *
+ * ── WHY THE SERVER HOLDS IT ───────────────────────────────────────────────
+ * Ellie: "I want the check boxes to be functional on the expectations convos
+ * to have... The progress/checks should update the what comes next dropdown
+ * rows as well."
+ *
+ * A conversation belongs to the couple, not to whoever ticked it, so this goes
+ * through an endpoint that works out the pairing rather than into this
+ * browser's own storage. The same argument migration 076 makes about the
+ * checklist. See api/convos.js.
+ *
+ * Keyed by the question id, which is what a row is keyed by on both surfaces,
+ * so a tick made on the phone is the same tick here.
+ */
+/**
+ * The couple's conversation ticks, for every page that draws one.
+ *
+ * Two pages show the same conversations: the Expectations overview, where the
+ * boxes are, and What Comes Next, where Ellie asked for the same progress to
+ * show. They are built by different components in this file, so a context is
+ * what lets both read one set without threading a prop through everything in
+ * between. The app does the same thing for the same reason.
+ */
+const ConvoTicksCtx = createContext({ ticks: {}, toggle: () => {} });
+
+async function fetchConvoTicks() {
+  try {
+    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+    if (!hasSupabase()) return {};
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) return {};
+    const res = await fetch('/api/convos', { headers: { Authorization: `Bearer ${session.access_token}` } });
+    if (!res.ok) return {};
+    const body = await res.json().catch(() => null);
+    return (body && body.ok && body.convos) || {};
+  } catch { return {}; }
+}
+
+/**
+ * Tick a conversation, or untick it. Answers with the whole set.
+ *
+ * Null when it could not be saved, which is what the caller puts the box back
+ * on. Until migration 088 is run every write is a refusal, so the boxes behave
+ * exactly as they did before: drawn, and inert.
+ */
+async function saveConvoTick(key, done) {
+  try {
+    const { supabase: sb, hasSupabase } = await import('./supabase.js');
+    if (!hasSupabase()) return null;
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) return null;
+    const res = await fetch('/api/convos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ key, done }),
+    });
+    if (!res.ok) return null;
+    const body = await res.json().catch(() => null);
+    return (body && body.ok && body.convos) || null;
+  } catch { return null; }
+}
+
 async function saveSharedTool(tool, data) {
   try {
     const { supabase: sb, hasSupabase } = await import('./supabase.js');
@@ -5892,6 +5956,10 @@ function PersonalityResults({ myAnswers, partnerAnswers, userName, partnerName, 
 // fallback in groundForCategory, for a category with no colour of its own.
 
 function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName, forcedSection, noSideNav = false, onGoWhatComesNext, onGoBack, onExternalGo, coupleTypeCode = null, coupleTypeName = null, coupleTypeColor = "#1B5FE8" }) {
+  /* The couple's ticks, from the provider around every results page. A surface
+     that mounts this component outside that provider gets the empty default
+     and draws unticked boxes, which is what it drew before. */
+  const { ticks: convoTicks, toggle: toggleConvo } = useContext(ConvoTicksCtx);
   // ── Fixed 5 display categories ──────────────────────────────────────────────
   // ── Step system: 0=overview, "convo-0".."convo-4"=individual cats,
   //                "action-plan"=plan, "summary"=summary.
@@ -5955,7 +6023,14 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
       });
       const mine = normRespVal(rawMine, true);
       const theirs = normRespVal(rawTheirs, false);
-      rows.push({ category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: isAligned(distance), closeness: closenessPct(distance) });
+      /* `key` is the question's id, which this scope already has: it is what
+         the answers were looked up by two lines above. On the row it is what a
+         tick is stored against, and it is the same string the server puts on
+         its own rows, so a conversation ticked on the phone is the same
+         conversation here. Never the sentence: Ellie edits that copy, and a
+         tick tied to the wording would come loose the first time a word
+         changed. */
+      rows.push({ key, category: cat.label, catId: cat.id, item: substName(item, userName, partnerName), mine, theirs, aligned: isAligned(distance), closeness: closenessPct(distance) });
     });
   });
 
@@ -5967,6 +6042,8 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
        miss rather than a flat one. Same change as the responsibilities. */
     const lifeDist = lifeDistance(mine, theirs, q.options);
     return {
+      /* The life question's own id, which is what the server keys these by. */
+      key: q.id,
       category: "Life & Values", catId: "life", item: substName(q.text, userName, partnerName),
       mine, theirs,
       aligned: isAligned(lifeDist),
@@ -6145,11 +6222,38 @@ function ExpectationsResults({ myAnswers, partnerAnswers, userName, partnerName,
                         </span>
                       </summary>
                       <div style={{ borderTop: "1px solid rgba(255,255,255,0.16)" }}>
-                        {fc.gapItems.map((g, gi) => (
-                          <div key={gi} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.6rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                            <div style={{ width: 17, height: 17, borderRadius: 4, border: "1.5px solid rgba(255,255,255,0.55)", background: "rgba(255,255,255,0.12)", flexShrink: 0, marginTop: 1 }} />
-                            <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.88)", fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
-                          </div>
+                        {/* ── THE BOXES WORK, AND A TICK STAYS PUT ──────────
+                            Ellie: "I don't want the row to disappear once you
+                            check it, but I want the check mark to appear in
+                            the box and I want the row to be moved to the
+                            bottom (but still above the see how these differ
+                            line) and greyed out slightly."
+
+                            All three. A stable sort by done, so two ticked in
+                            the same minute keep the order the results gave
+                            them rather than swapping about on each render. */}
+                        {fc.gapItems
+                          .map((g) => ({ ...g, done: !!convoTicks[g.key] }))
+                          .sort((a, b) => Number(a.done) - Number(b.done))
+                          .map((g) => (
+                          <button
+                            key={g.key}
+                            onClick={() => toggleConvo(g.key)}
+                            aria-pressed={g.done}
+                            aria-label={`${g.item}. ${g.done ? "Talked about. Click to undo." : "Click when you have talked about it."}`}
+                            style={{ width: "100%", textAlign: "left", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.1)", cursor: "pointer", display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.6rem 1rem", fontFamily: BFONT }}>
+                            <span style={{
+                              width: 17, height: 17, borderRadius: 4, flexShrink: 0, marginTop: 1,
+                              border: `1.5px solid rgba(255,255,255,${g.done ? "0.75" : "0.55"})`,
+                              background: g.done ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.12)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: "#1B2A5E", fontSize: "0.7rem", fontWeight: 800, lineHeight: 1,
+                            }}>{g.done ? "\u2713" : ""}</span>
+                            {/* "greyed out slightly", on a painted ground: the
+                                same white, further down. A grey would read as a
+                                different colour rather than the same row done. */}
+                            <span style={{ fontSize: "0.8rem", color: `rgba(255,255,255,${g.done ? "0.45" : "0.88"})`, fontFamily: BFONT, lineHeight: 1.45 }}>{g.item}</span>
+                          </button>
                         ))}
                       </div>
                     </details>
@@ -7832,9 +7936,44 @@ function ResultsSurvey({ onClose, onDone }) {
 // demo mode and for couples stamped before pinning existed, which resolves to
 // current.
 function UnifiedResultsRoot(props) {
+  /**
+   * ── THE COUPLE'S CONVERSATION TICKS ──────────────────────────────────────
+   * Two pages inside this tree draw the same conversations: the Expectations
+   * overview, where the boxes are, and What Comes Next, where Ellie asked for
+   * the same progress to show. One set, loaded once, so a tick on one is
+   * already true on the other.
+   *
+   * Here rather than in UnifiedResults, which returns a different
+   * ResultsLayout for each of a dozen sections and has no single root to wrap.
+   * It was briefly a prop on that layout, and check-results-arrows refused it:
+   * that component's parameter list is pinned because a page once passed an
+   * extra prop to leave the arrows out and twelve pages lost them. The gate
+   * was right, and this is a better place anyway, beside the provider that is
+   * already here for the same reason.
+   */
+  const [convoTicks, setConvoTicks] = useState({});
+  useEffect(() => {
+    let alive = true;
+    fetchConvoTicks().then((t) => { if (alive) setConvoTicks(t); });
+    return () => { alive = false; };
+  }, []);
+  const toggleConvo = useCallback((key) => {
+    setConvoTicks((cur) => {
+      const next = { ...cur };
+      const done = !next[key];
+      if (done) next[key] = new Date().toISOString(); else delete next[key];
+      /* Optimistic: a checkbox that waits for a round trip reads as broken.
+         The server's answer wins, and a refusal puts it back where it was. */
+      saveConvoTick(key, done).then((saved) => setConvoTicks(saved || cur));
+      return next;
+    });
+  }, []);
+  const convoCtx = useMemo(() => ({ ticks: convoTicks, toggle: toggleConvo }), [convoTicks, toggleConvo]);
   return (
     <ContentContext.Provider value={props.contentVersion ?? null}>
-      <UnifiedResults {...props} />
+      <ConvoTicksCtx.Provider value={convoCtx}>
+        <UnifiedResults {...props} />
+      </ConvoTicksCtx.Provider>
     </ContentContext.Provider>
   );
 }
@@ -8111,6 +8250,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
      disclosure, so it is state. Null is all four closed, which is how the
      page opens. */
   const [openBucket, setOpenBucket] = useState(null);
+  /* The couple's ticks, for What Comes Next's topic rows. Written by the
+     Expectations page's boxes; see the provider in UnifiedResultsRoot. */
+  const { ticks: convoTicks } = useContext(ConvoTicksCtx);
+
+  /* Which expectations row inside a bucket has its topics open. One at a time,
+     like the buckets above them. Ellie asked for each of those rows to be "a
+     dropdown with the same rows as the expectations overview page". */
+  const [openTopics, setOpenTopics] = useState(null);
   /* ── B115: AND IT CLOSES WHEN YOU LEAVE THE PAGE ──────────────────────
      Ellie: "It should auto close whatever dropdown is open if you leave the
      what comes next page."
@@ -10562,6 +10709,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 quote: it.quote || null,
                 phrase: it.say || it.body || "",
                 section: it.section || null,
+                /* The rows inside an expectations row. Ellie asked for these
+                   to be "a dropdown with the same rows as the expectations
+                   overview page", and they are that page's own list: see
+                   `conversations` in api/_lib/expectations.js. */
+                topics: it.topics || null,
               })),
             }));
 
@@ -10594,6 +10746,53 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                                 <span style={{ fontStyle: "italic", color: C.muted }}>{`${it.tip ? " " : ""}\u201C${it.quote}\u201D`}</span>
                               ) : null}
                             </div>
+                            {/* ── THE SAME ROWS AS THE EXPECTATIONS PAGE ────
+                                Ellie: "each of those rows should be a dropdown
+                                with the same rows as the expectations overview
+                                page. The formatting should match the what
+                                comes next page, but I want that content to be
+                                the same."
+
+                                So the content is that page's own list, off the
+                                payload, and the dressing is this page's. */}
+                            {it.topics && it.topics.length ? (
+                              <>
+                                <button
+                                  onClick={() => setOpenTopics((cur) => (cur === `${g.id}:${i}` ? null : `${g.id}:${i}`))}
+                                  aria-expanded={openTopics === `${g.id}:${i}`}
+                                  style={{ background: "transparent", border: "none", padding: "0.3rem 0 0", cursor: "pointer", fontFamily: BFONT, fontSize: "0.72rem", color: C.muted, display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                                  {`${it.topics.length} ${it.topics.length === 1 ? "topic" : "topics"}`}
+                                  <span aria-hidden="true" style={{ fontSize: "0.6rem", lineHeight: 1 }}>
+                                    {openTopics === `${g.id}:${i}` ? "\u02C4" : "\u02C5"}
+                                  </span>
+                                </button>
+                                {openTopics === `${g.id}:${i}` ? (
+                                  <div style={{ marginTop: "0.45rem", display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                                    {/* ── THE SAME PROGRESS, SHOWN HERE ──────
+                                        Ellie: "The progress/checks should
+                                        update the what comes next dropdown
+                                        rows as well."
+
+                                        Read from the set the Expectations page
+                                        writes, so there is no second idea of
+                                        what has been talked about. Not
+                                        clickable: this page reports, the other
+                                        page is where the boxes are. */}
+                                    {it.topics.map((t) => {
+                                      const done = !!convoTicks[t.key];
+                                      return (
+                                        <div key={t.key} style={{ display: "flex", alignItems: "flex-start", gap: "0.4rem", fontSize: "0.78rem", fontFamily: BFONT, lineHeight: 1.45 }}>
+                                          <span aria-hidden="true" style={{ width: "0.8rem", flexShrink: 0, color: done ? g.color : C.muted, fontWeight: done ? 800 : 400 }}>
+                                            {done ? "\u2713" : "\u00B7"}
+                                          </span>
+                                          <span style={{ color: done ? C.muted : C.text }}>{t.item}</span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : null}
+                              </>
+                            ) : null}
                           </div>
                           {/* ── B106: KEEP THIS ONE ───────────────────────
                               Ellie: "If the user taps the note icon, the

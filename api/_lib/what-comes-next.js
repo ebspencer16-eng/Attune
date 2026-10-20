@@ -204,10 +204,26 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
 
   // 2. Expectations, named rather than generic. The categories with the most
   //    differences, because those are the conversations with the most in them.
+  /**
+   * ── EVERY CATEGORY WITH A CONVERSATION IN IT, NOT THE TOP THREE ─────────
+   * Ellie: "in what comes next discussions to have, the expectations
+   * discussions should be listed in the same format as the expectations
+   * overview action plan - meaning that there should be 5 rows... and each of
+   * those rows should be a dropdown with the same rows as the expectations
+   * overview page."
+   *
+   * So the same categories the Expectations overview draws a drawer for, in
+   * the same order, each carrying that drawer's own topics. It was the three
+   * with the most differences, flattened into a sentence apiece, so a couple
+   * with conversations in five areas saw three of them here and five there and
+   * the two pages disagreed about how much was left to talk about.
+   *
+   * The topics are `cat.conversations`, which is the list the overview's
+   * drawer draws. Filtering the rows again here would be the seventh copy of
+   * that filter; see the note on `conversations` in _lib/expectations.js.
+   */
   const expCats = (expectations?.categories || [])
-    .filter((cat) => cat.differences > 0)
-    .sort((a, b) => b.differences - a.differences)
-    .slice(0, 3);
+    .filter((cat) => (cat.conversations?.length || cat.differences) > 0);
   /**
    * The group appears whenever this couple has expectations results, which is
    * what the website does. It was conditional on there being a difference, so
@@ -239,12 +255,24 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
          * A group whose items each carry a section does not draw its own open
          * arrow: the same link seven times is six too many.
          */
-        ? expCats.map((cat) => ({
-          title: `Discuss ${cat.label.toLowerCase()} expectations together`,
-          body: `${cat.differences} ${cat.differences === 1 ? 'thing' : 'things'} here you each pictured differently. Start with the first one.`,
-          say: null,
-          section: cat.section,
-        }))
+        ? expCats.map((cat) => {
+          const topics = cat.conversations || [];
+          return {
+            /* Her words for the row: "they should be titled Life and values
+               discussions, household discussions, etc." */
+            title: `${cat.label} discussions`,
+            body: `${topics.length} ${topics.length === 1 ? 'thing' : 'things'} here you each pictured differently.`,
+            say: null,
+            section: cat.section,
+            /**
+             * The rows inside this one, which is what makes it a dropdown
+             * rather than a line. Keyed, because a tick has to survive a copy
+             * edit: `key` comes from the question id and `item` is the
+             * sentence, and only one of those is safe to store.
+             */
+            topics: topics.map((r) => ({ key: r.key, item: r.item })),
+          };
+        })
         : [{
           title: 'Keep your expectations current',
           body: 'You matched across every area. Revisit this when something changes.',

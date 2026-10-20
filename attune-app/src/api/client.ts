@@ -597,6 +597,16 @@ export type NextStepBucket = {
   items: {
     title: string; quote?: string | null; body: string | null; say: string | null;
     section?: string | null;
+    /**
+     * The rows inside this one, when it is a category of conversations.
+     *
+     * Ellie, of the expectations rows on What Comes Next: "each of those rows
+     * should be a dropdown with the same rows as the expectations overview
+     * page." Those are the same objects that page's drawer draws, keyed by the
+     * question id rather than by their wording, because a key has to survive a
+     * copy edit. Built in api/_lib/what-comes-next.js from `conversations`.
+     */
+    topics?: { key: string; item: string }[] | null;
   }[];
 };
 
@@ -622,6 +632,16 @@ export type NextStepGroup = {
      * not draw its own Open link.
      */
     section?: string | null;
+    /**
+     * The rows inside this one, when it is a category of conversations.
+     *
+     * Ellie, of the expectations rows on What Comes Next: "each of those rows
+     * should be a dropdown with the same rows as the expectations overview
+     * page." Those are the same objects that page's drawer draws, keyed by the
+     * question id rather than by their wording, because a key has to survive a
+     * copy edit. Built in api/_lib/what-comes-next.js from `conversations`.
+     */
+    topics?: { key: string; item: string }[] | null;
   }[];
 };
 
@@ -648,6 +668,16 @@ export type ExpectationsSummary = {
     rows: ExpectationRow[];
     answered: number;
     aligned: number;
+    /**
+     * The rows the two of them answered differently: this category's
+     * conversations, which is what the drawer draws and what `differences`
+     * counts.
+     *
+     * Sent rather than filtered on the phone, because What Comes Next shows
+     * the same list and a second `rows.filter((r) => !r.aligned)` is how the
+     * two pages would come to disagree. See api/_lib/expectations.js.
+     */
+    conversations: ExpectationRow[];
     differences: number;
     /**
      * The number on the bar: the mean closeness of this category's rows.
@@ -1277,6 +1307,37 @@ export type PostBlock = {
 };
 
 export type Post = PostSummary & { blocks: PostBlock[] };
+
+/**
+ * Which expectations conversations this couple have already had.
+ *
+ * Keyed by the question id, which is what a results row is keyed by, so a tick
+ * survives a copy edit to the sentence a reader sees. The value is when it was
+ * ticked; nothing reads it yet and a date is worth more than a `true`.
+ *
+ * Belongs to the couple rather than to the reader: either of them ticking
+ * "we have talked about who cooks" makes it true for both. See api/convos.js.
+ */
+export type ConvoTicks = Record<string, string>;
+
+/** Every conversation this couple have ticked. */
+export async function fetchConvos() {
+  return request<{ ok: true; convos: ConvoTicks; pending?: boolean }>('/api/convos');
+}
+
+/**
+ * Tick a conversation, or untick it.
+ *
+ * Answers with the whole set the reader should now see, so a screen never has
+ * to work out what its own tap meant, which is the same shape savePost uses.
+ */
+export async function setConvoDone(key: string, done: boolean) {
+  return request<{ ok: true; convos: ConvoTicks; pending?: boolean }>('/api/convos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, done }),
+  });
+}
 
 /**
  * Put a post on this reader's list, or take it off.

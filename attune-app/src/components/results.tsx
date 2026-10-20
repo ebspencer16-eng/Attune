@@ -17,7 +17,7 @@
  * product, and a section invented in the app is a second copy of a rule.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScreenTime } from '@/hooks/use-screen-time';
 import {
@@ -33,7 +33,7 @@ import PageTile, { NeutralGround, ResultsBottomInset } from '@/components/page-t
 import StepCount from '@/components/step-count';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { fetchConflictResults, fetchNotes, fetchSurvey, fetchTags, recallSurvey, type SurveyForm } from '@/api/client';
+import { fetchConflictResults, fetchConvos, fetchNotes, fetchSurvey, fetchTags, recallSurvey, setConvoDone, type ConvoTicks, type SurveyForm } from '@/api/client';
 import Survey from '@/components/survey';
 import { SaveToJournal } from '@/components/journal';
 import { Gesture, GestureDetector, type GestureType } from 'react-native-gesture-handler';
@@ -944,6 +944,12 @@ export default function Results({
   }
 
   return (
+    /* ── THE COUPLE'S TICKS, ABOVE THE PAGE ────────────────────────────
+       Above SectionBody rather than inside it. That is keyed on the section,
+       deliberately, so every page change remounts it; a provider in there
+       would fetch the whole set again on every turn of the page and lose a
+       tick made a moment earlier while the request was in flight. */
+    <ConvoTicksProvider>
     <View style={{ flex: 1 }}>
       {/* ── THE WAY OUT, AND NOTHING ELSE ────────────────────────────────
           Ellie asked for the header to read "[Section]: [detailed page]", saw
@@ -1284,6 +1290,7 @@ export default function Results({
         </Modal>
       ) : null}
     </View>
+    </ConvoTicksProvider>
   );
 }
 
@@ -1737,7 +1744,11 @@ function ExpectationsOverview({
                   <CategoryDrawer
                     key={cat.section}
                     label={cat.label}
-                    items={cat.rows.filter((r) => !r.aligned).map((r) => r.item)}
+                    /* The list the payload carries, rather than this screen
+                       filtering the rows again. See `conversations` in
+                       api/_lib/expectations.js, which What Comes Next reads
+                       too so the two pages cannot disagree. */
+                    items={cat.conversations || []}
                     /* The page this category's conversations live on. Its own
                        section id from the server, the same one the row above
                        is keyed by. */
@@ -1890,14 +1901,88 @@ const SEE_HOW_THEY_DIFFER = 'See how these expectations differ';
  * click anywhere inside a <summary> toggles the <details> and the arrow has to
  * say preventDefault.
  */
+/**
+ * Which conversations this couple have ticked, for every page that shows one.
+ *
+ * ── WHY A CONTEXT ─────────────────────────────────────────────────────────
+ * Ellie: "The progress/checks should update the what comes next dropdown rows
+ * as well." Two pages, the Expectations overview and What Comes Next, draw the
+ * same conversations, and a tick on one has to show on the other without a
+ * reload. Passing the set down two unrelated trees would have meant the
+ * results screen holding a prop for something neither page's parent cares
+ * about, and two copies of the toggle.
+ *
+ * Loaded once by the results screen. A surface that mounts a page on its own,
+ * which the gates do, gets the empty default and draws unticked boxes.
+ */
+const ConvoTicksContext = createContext<{
+  ticks: ConvoTicks;
+  toggle: (key: string) => void;
+}>({ ticks: {}, toggle: () => {} });
+
+/**
+ * Holds the couple's ticks and answers taps optimistically.
+ *
+ * The box fills the moment it is tapped rather than after a round trip,
+ * because a checkbox that waits reads as broken. The server answers with the
+ * whole set and that answer wins; if the write failed, the tick goes back to
+ * where it was, which is the honest thing to draw.
+ */
+export function ConvoTicksProvider({ children }: { children: React.ReactNode }) {
+  const [ticks, setTicks] = useState<ConvoTicks>({});
+  useEffect(() => {
+    let alive = true;
+    fetchConvos().then((r) => {
+      if (alive && r.ok && r.data?.convos) setTicks(r.data.convos);
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const toggle = useCallback((key: string) => {
+    setTicks((cur) => {
+      const next = { ...cur };
+      const done = !next[key];
+      if (done) next[key] = new Date().toISOString(); else delete next[key];
+      setConvoDone(key, done).then((r) => {
+        if (r.ok && r.data?.convos) setTicks(r.data.convos);
+        /* A refusal puts it back. Until migration 088 is run every write is a
+           refusal, so the boxes behave exactly as they did before. */
+        else setTicks(cur);
+      }).catch(() => setTicks(cur));
+      return next;
+    });
+  }, []);
+
+  const value = useMemo(() => ({ ticks, toggle }), [ticks, toggle]);
+  return <ConvoTicksContext.Provider value={value}>{children}</ConvoTicksContext.Provider>;
+}
+
 function CategoryDrawer({ label, items, color, section }: {
-  label: string; items: string[]; color: string;
+  label: string;
+  /** The category's conversations, keyed. See `conversations` in
+   *  api/_lib/expectations.js: the key is the question id, the item is the
+   *  sentence, and only the first is safe to store a tick against. */
+  items: { key: string; item: string }[];
+  color: string;
   /** The category's page, from the server. Null leaves the arrow undrawn
    *  rather than drawing one that does nothing. */
   section?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   useClosesOnLeave(useCallback(() => setOpen(false), []));
+  const { ticks, toggle } = useContext(ConvoTicksContext);
+  /**
+   * The rows, with the ticked ones at the bottom.
+   *
+   * A stable sort, so two conversations ticked in the same minute keep the
+   * order the results gave them rather than swapping about on every render.
+   */
+  const ordered = useMemo(
+    () => items
+      .map((r) => ({ ...r, done: !!ticks[r.key] }))
+      .sort((a, b) => Number(a.done) - Number(b.done)),
+    [items, ticks],
+  );
   return (
     <View
       style={{
@@ -1947,23 +2032,48 @@ function CategoryDrawer({ label, items, color, section }: {
       </RowTap>
       {open ? (
         <View style={{ borderTopColor: 'rgba(255,255,255,0.16)', borderTopWidth: 1 }}>
-          {items.map((it) => (
-            <View
-              key={it}
+          {ordered.map(({ key, item, done }) => (
+            <RowTap
+              key={key}
+              onPress={() => toggle(key)}
+              accessibilityLabel={`${item}. ${done ? 'Talked about. Tap to undo.' : 'Tap when you have talked about it.'}`}
               style={{
                 flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
                 paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg,
                 borderBottomColor: 'rgba(255,255,255,0.1)', borderBottomWidth: 1,
               }}>
+              {/* ── THE BOX, AND WHAT A TICK DOES ────────────────────────
+                  Ellie: "I don't want the row to disappear once you check it,
+                  but I want the check mark to appear in the box and I want the
+                  row to be moved to the bottom (but still above the see how
+                  these differ line) and greyed out slightly."
+
+                  All three: the row stays, the box fills, and `ordered` above
+                  puts the ticked ones last without touching the See how row,
+                  which is drawn after this list and so cannot move. */}
               <View
                 style={{
                   width: 17, height: 17, borderRadius: 4, marginTop: 1,
-                  borderColor: 'rgba(255,255,255,0.55)', borderWidth: 1.5,
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                }}
-              />
-              <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.88)', flex: 1, lineHeight: 19 }}>{it}</Prose>
-            </View>
+                  borderColor: done ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.55)',
+                  borderWidth: 1.5,
+                  backgroundColor: done ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.12)',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                {/* not markable: the state of a checkbox. */}
+                {done ? (
+                  <Text style={{ color: '#1B2A5E', fontSize: 11, lineHeight: 13, fontWeight: '700' }}>
+                    {'\u2713'}
+                  </Text>
+                ) : null}
+              </View>
+              <Prose style={{
+                ...Type.small, flex: 1, lineHeight: 19,
+                /* "greyed out slightly", on a painted ground: the same white,
+                   further down. Not a grey, which would read as a different
+                   colour rather than the same row having been done. */
+                color: done ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.88)',
+              }}>{item}</Prose>
+            </RowTap>
           ))}
           {/* ── THE WAY TO THE PAGE, AT THE FOOT OF THE LIST ────────────
               Ellie: "once the dropdown rows appear, there should be one row at
@@ -3689,6 +3799,7 @@ function WhatComesNext({
                       quote={item.quote || null}
                       say={item.say || null}
                       color={b.color || c.accent}
+                      topics={item.topics || null}
                       onOpen={item.section ? () => onGoToSection(item.section as string) : null}
                       onKeep={() => setKeeping([item.title, item.quote, item.say]
                         .filter(Boolean).join(' '))}
@@ -3954,10 +4065,25 @@ function NextBand({
  * a nested control inside one big Pressable is how a tap ends up doing the
  * other thing.
  */
-function NextRow({ n, title, quote, say, color, onOpen, onKeep }: {
+function NextRow({ n, title, quote, say, color, topics, onOpen, onKeep }: {
   n: number; title?: string | null; quote?: string | null; say?: string | null; color?: string;
+  /** The conversations inside a category row. See NextStepGroup in client.ts. */
+  topics?: { key: string; item: string }[] | null;
   onOpen: (() => void) | null; onKeep: (() => void) | null;
 }) {
+  /**
+   * ── THE SAME ROWS AS THE EXPECTATIONS PAGE ──────────────────────────────
+   * Ellie: "each of those rows should be a dropdown with the same rows as the
+   * expectations overview page. The formatting should match the what comes
+   * next page, but I want that content to be the same."
+   *
+   * The content is that page's list, off the payload; the dressing is this
+   * page's. Closed by default, and it closes when the page is left, which is
+   * the rule every other dropdown here follows.
+   */
+  const [open, setOpen] = useState(false);
+  useClosesOnLeave(useCallback(() => setOpen(false), []));
+  const { ticks } = useContext(ConvoTicksContext);
   const body = (
     <View style={{ flex: 1 }}>
       {title ? <Prose style={{ ...Type.body, color: c.textStrong }}>{title}</Prose> : null}
@@ -3976,6 +4102,50 @@ function NextRow({ n, title, quote, say, color, onOpen, onKeep }: {
       ) : null}
       {say ? (
         <Prose style={{ ...Type.small, color: c.textMuted, marginTop: Spacing.xs }}>{say}</Prose>
+      ) : null}
+      {topics && topics.length ? (
+        <>
+          <Pressable
+            onPress={() => setOpen((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel={`${topics.length} topic${topics.length === 1 ? '' : 's'}, ${open ? 'hide' : 'show'} them`}
+            hitSlop={8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingTop: Spacing.xs }}>
+            {/* not markable: a count of the rows below it. */}
+            <Text style={{ ...Type.small, color: c.textMuted }}>
+              {`${topics.length} topic${topics.length === 1 ? '' : 's'}`}
+            </Text>
+            {/* not markable: a disclosure arrow. */}
+            <Text style={{ ...Type.small, color: c.textMuted, fontSize: 11, lineHeight: 13 }}>
+              {open ? '\u25B4' : '\u25BE'}
+            </Text>
+          </Pressable>
+          {open ? (
+            <View style={{ marginTop: Spacing.xs, gap: 2 }}>
+              {/* ── A TICK SHOWS HERE TOO ──────────────────────────────
+                  Ellie: "The progress/checks should update the what comes next
+                  dropdown rows as well." Read from the same context the
+                  Expectations drawer writes, so there is no second idea of
+                  what has been talked about. Not tappable here: this page
+                  reports, the other page is where the boxes are. */}
+              {topics.map((t) => {
+                const done = !!ticks[t.key];
+                return (
+                  <View key={t.key} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
+                    {/* not markable: the state of a conversation. */}
+                    <Text style={{ ...Type.small, color: done ? c.accent : c.textMuted, width: 14 }}>
+                      {done ? '\u2713' : '\u00B7'}
+                    </Text>
+                    <Prose style={{
+                      ...Type.small, flex: 1,
+                      color: done ? c.textMuted : c.text,
+                    }}>{t.item}</Prose>
+                  </View>
+                );
+              })}
+            </View>
+          ) : null}
+        </>
       ) : null}
     </View>
   );

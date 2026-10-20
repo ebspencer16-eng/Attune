@@ -357,6 +357,25 @@ export function expectationsSummary({ mine, theirs, youName, themName, coupleTyp
       rows: inCat,
       answered: inCat.length,
       aligned: inCat.filter((r) => r.aligned).length,
+      /**
+       * ── THE CONVERSATIONS, AS A LIST RATHER THAN A FILTER ─────────────
+       * The rows in this category the two of them answered differently, which
+       * is what "Conversations to have" draws and what `differences` counts.
+       *
+       * It was `rows.filter((r) => !r.aligned)` written out in six places: the
+       * app's drawer, the app's bucket page, the website's category block, the
+       * website's overall gap list, and this count twice. Six copies of one
+       * rule, which is the failure this codebase is organised against, and it
+       * started to matter the moment What Comes Next needed the same list:
+       * Ellie asked for its Discussions to have rows to hold "the same rows as
+       * the expectations overview page", and a seventh filter would have been
+       * the one that drifted.
+       *
+       * The full rows, not a thinned copy, so every reader can take what it
+       * needs and nothing has to go back to `rows` to find the rest of a
+       * conversation.
+       */
+      conversations: inCat.filter((r) => !r.aligned),
       differences: inCat.filter((r) => !r.aligned).length,
       /**
        * ── THE NUMBER ON THE BAR ───────────────────────────────────────

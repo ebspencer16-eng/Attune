@@ -23,8 +23,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I am doing |
 |--|--|
-| W94 | **Discussions to have should hold the five expectations categories, each a dropdown.** Same content as the Expectations overview, same look as What Comes Next. |
-| W95 | **Working checkboxes on the Expectations conversations.** The tick stays, the row greys and drops to the bottom above the See how line, and What Comes Next counts it too. |
+| M088 | **One line of SQL to run**, which is what turns the checkboxes on. It is in the block under this table. Until you run it they stay drawn and inert, exactly as before. |
 
 ---
 
@@ -33,6 +32,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | # | Built, needs your eye |
 |--|--|
 | W93 | **The Additional exercises tiles, rendered for you** at all three ownership levels. The picture is on your Desktop. Tell me if the tiles want to be smaller. |
+| W94 | **Discussions to have now holds one row per expectations category**, each a dropdown with that category's own conversations. |
+| W95 | **The checkboxes work.** Tick stays, row greys and drops below the unticked ones, and What Comes Next shows the same progress. Needs M088 first. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -928,23 +929,39 @@ Physical Intimacy $20. Relationship Reflection $40. Conflict Patterns $40.
 Those are the three exercises. The two resources, the budget tool and the
 checklist, are $20 each, and the workbook is $19 digital or $39 printed.
 
-### W94 and W95 — what I am working out first
+### M088 — the one thing you need to run
 
-These two are one thing underneath. A tick has to mean the same on the
-Expectations page and on What Comes Next, which means it has to be stored
-somewhere both can read, and a conversation needs a name that does not change
-when its wording does.
+Open the Supabase SQL Editor and paste this, then tell me it is done.
 
-Three things I am settling from the code before building, so I do not invent a
-second way to do something that already exists:
+```sql
+alter table public.couple_tools
+  add column if not exists convos_data jsonb;
 
-Where a tick lives. There may already be a store for this; the checklist tool
-has one. If there is not, it is a new table and a migration you run. I will say
-which before I write it.
+comment on column public.couple_tools.convos_data is
+  'Which expectations conversations this couple have had, keyed by question id.';
+```
 
-Whose tick it is. A conversation is something the two of you do together, so my
-assumption is that it belongs to the couple and either of you ticking it shows
-for both. Say if you would rather each of you had your own.
+Until it runs, every tick is refused and the box goes back to unticked. That is
+the same behaviour the boxes have had since they were drawn, so nothing breaks
+in the meantime and no error reaches a results page.
 
-The app has both of these pages too, and would drift the moment one surface
-learns to tick.
+### W94 and W95 — the three things I settled first
+
+**Where a tick lives.** There was already a home for it. Migration 076 made a
+`couple_tools` row per couple for the Shared Budget and the checklist, for
+exactly the reason you gave about those: one partner checking something off
+should show for both. The ticks are a column on that row rather than a third
+place that knows how to name a couple.
+
+**Whose tick it is.** The couple's. Either of you ticking "we have talked about
+who cooks" makes it true for both, which is what a conversation is. Say if you
+would rather each of you had your own and I will change it.
+
+**What it is keyed by.** The question's id, never the sentence. You edit that
+copy, and a tick tied to the wording would come loose the first time a word
+changed.
+
+One thing I found on the way. "The rows the two of you answered differently"
+was written out in six places across the app, the website and the server. What
+Comes Next needed the same list, and a seventh copy is the one that would have
+drifted, so it is computed once now and everything reads it.
