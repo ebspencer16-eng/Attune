@@ -159,29 +159,23 @@ export function HeartBubble({ size = 64 }: GlyphProps) {
   );
 }
 
-/** A book with a ribbon: the relationship journal. */
-export function JournalBook({ size = 64, stripe, ground }: GlyphProps) {
-  const u = size / 64;
-  return (
-    <View style={{ width: size, height: size }}>
-      <Outline w={42 * u} h={52 * u} radius={6 * u} stroke={2 * u} stripe={stripe} ground={ground}
-        style={{ position: 'absolute', left: 11 * u, top: 6 * u }} />
-      {/* the spine */}
-      <Outline w={7 * u} h={52 * u} radius={3 * u} stroke={2 * u} stripe={stripe} ground={ground}
-        style={{ position: 'absolute', left: 11 * u, top: 6 * u }} />
-      {/* three written lines */}
-      {[20, 29, 38].map((top, i) => (
-        <LinearGradient
-          key={top}
-          colors={stops(stripe)}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{
-            position: 'absolute', left: 24 * u, top: top * u,
-            width: (i === 2 ? 14 : 22) * u, height: 2 * u, borderRadius: u,
-          }}
-        />
-      ))}
-    </View>
-  );
+/**
+ * A book with three written lines: the relationship journal.
+ *
+ * ── IT IS A PICTURE NOW, LIKE THE OTHER THREE ─────────────────────────────
+ * Ellie: "What comes next page on site should match app." The website draws
+ * that page too now, and it could not draw this icon: it was built here out of
+ * Views and a LinearGradient, which renders in React Native and nowhere else.
+ *
+ * Drawing it a second time in CSS for the website would be a second drawing of
+ * one icon, which is what scripts/build-glyphs.mjs exists to stop. So the same
+ * geometry moved into that builder, which renders it to a PNG, and both
+ * surfaces show the same bytes. ThinkingPerson and CouchPair have worked this
+ * way since they were drawn.
+ *
+ * `stripe` and `ground` are no longer read, because the gradient is baked into
+ * the picture. That is already true of the other three.
+ */
+export function JournalBook({ size = 64 }: GlyphProps) {
+  return <Picture size={size} ratio={1} source={require('@/assets/images/attune-glyph-journal.png')} />;
 }

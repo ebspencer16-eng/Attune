@@ -8518,8 +8518,35 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 else if (sec.id === "conflict") { setConflictExpanded(e => !e); if (!conflictExpanded) go(first); }
               } else { go(sec.id); }
             }} data-nav-active={section === sec.id ? "true" : undefined} style={{ width: "100%", background: (section === sec.id) ? color + "15" : "transparent", border: "none", borderRadius: 8, padding: "0.5rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: BFONT, transition: "background .15s" }}>
-              <span style={{ fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#7A6753" }}>{sec.icon && <span style={{ marginRight: "0.4rem", fontSize: "0.65rem", opacity: 0.7 }}>{sec.icon}</span>}{sec.label}</span>
-              {sec.children && <span style={{ fontSize: "0.95rem", lineHeight: 1, color: "#7A6753", opacity: 0.85 }}>{isExpanded ? "▾" : "▸"}</span>}
+              {/* ── THE LABEL HAS TO BE ALLOWED TO SHRINK ──────────────────
+                  Ellie: "Left nav in site results has physical intimacy
+                  expectations indented for some reason."
+
+                  It was, by 28 points, and only that one row. The reason is
+                  flexbox rather than anything to do with intimacy: this button
+                  is a flex row with space-between, and a flex item defaults to
+                  `min-width: auto`, which means it will not shrink below its
+                  own content. "Physical Intimacy Expectations" is the only
+                  label in this nav too wide for a 200 point column, so it was
+                  the only item that overflowed, and space-between with
+                  negative free space pushes the first item across.
+
+                  Measured, before and after: every other row's icon sits at
+                  207 and this one sat at 235.
+
+                  `minWidth: 0` lets it shrink and wrap instead. The icon is
+                  its own flex item now rather than an inline span, so a label
+                  that takes two lines keeps both of them aligned under each
+                  other instead of the second starting back under the icon. */}
+              <span style={{
+                display: "flex", alignItems: "flex-start", gap: "0.4rem",
+                flex: 1, minWidth: 0, textAlign: "left",
+                fontSize: "0.75rem", fontWeight: isActive ? 700 : 500, color: isActive ? color : "#7A6753",
+              }}>
+                {sec.icon && <span style={{ fontSize: "0.65rem", opacity: 0.7, flexShrink: 0, lineHeight: 1.5 }}>{sec.icon}</span>}
+                <span style={{ minWidth: 0 }}>{sec.label}</span>
+              </span>
+              {sec.children && <span style={{ fontSize: "0.95rem", lineHeight: 1, color: "#7A6753", opacity: 0.85, flexShrink: 0 }}>{isExpanded ? "▾" : "▸"}</span>}
             </button>
             {sec.children && isExpanded && (
               <div style={{ paddingLeft: "0.75rem", display: "flex", flexDirection: "column", gap: "0.08rem", marginBottom: "0.25rem" }}>
@@ -10459,112 +10486,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             }));
 
             if (!groups.length) return null;
-            return (
-              <div style={{ marginBottom: "1.75rem" }}>
-                {/* B98. Ellie: "Remove explanation paragraph above dropdowns on what
-                    comes next page." The page is a list of things to do; a paragraph
-                    explaining that it is a list of things to do is one more thing to
-                    read before reading it. */}
-                {/* ── B105: FOUR TILES, AND ONE OF THEM IS OPEN ────────
-                    Ellie: "Four quick-access tiles formatted like the ones on
-                    the home page. One for each bucket listed above and one for
-                    the relationship journal. When a user taps one of the
-                    tiles, that content appears in the space below, but the 4
-                    tiles stay in place."
 
-                    The same square the home page's quick links are: three per
-                    cent ink, the same radius and aspect, the label on two
-                    lines. The accordion this replaced is gone, and with it the
-                    <details name> trick that gave it one-open-at-a-time; that
-                    is state here, because a tile is not a disclosure. */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
-                  {groups.map(g => {
-                    const open = openBucket === g.id;
-                    return (
-                      <button key={g.id} onClick={() => setOpenBucket(cur => cur === g.id ? null : g.id)}
-                        aria-pressed={open}
-                        aria-label={`${g.label}, ${g.items.length} item${g.items.length !== 1 ? "s" : ""}`}
-                        style={{
-                          /* B107. The tile is its bucket's colour, closed as
-                             well as open. It was three greys on white, and
-                             Ellie: "I want color on the what's next page.
-                             Feels bland currently." */
-                          background: open ? `${g.color}24` : `${g.color}0F`,
-                          border: open ? `1px solid ${g.color}80` : "1px solid transparent",
-                          borderRadius: 14, aspectRatio: "0.92", maxHeight: 132,
-                          padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
-                          fontFamily: BFONT, display: "flex", flexDirection: "column",
-                          alignItems: "center", justifyContent: "flex-end",
-                        }}>
-                        {/* The count, which is what this tile has to offer. The
-                            home page's squares carry an icon here; a number is
-                            the honest equivalent for a tile whose content is a
-                            list. */}
-                        <span style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-                          fontFamily: HFONT, fontSize: "1.4rem", fontWeight: 700,
-                          color: g.color }}>
-                          {g.items.length}
-                        </span>
-                        <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
-                          color: open ? C.ink : C.text, whiteSpace: "pre-line", width: "86%" }}>
-                          {g.label}
-                        </span>
-                        {/* B126. Ellie: "Can we put a little arrow icon or
-                            something on each of the four tiles on the what
-                            comes next page so that it is clear that that
-                            content will show if you click on the button?"
-                            Down for a tile that opens below, up when it is the
-                            one that is open. */}
-                        <span aria-hidden="true" style={{ fontSize: "0.6rem", lineHeight: 1, marginTop: "0.2rem", color: open ? g.color : C.muted }}>
-                          {open ? "\u02C4" : "\u02C5"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                  {/* The journal, which opens rather than filling the space
-                      below. The dashboard already has a Notes tab and the home
-                      page's fourth square goes to the same place. */}
-                  <button onClick={() => {
-                      /* The dashboard owns the Notes tab, so the move is the
-                         parent's to make. Without a handler (a demo, or a
-                         future surface that mounts the results alone) the URL
-                         gets there too, because dashTab reads ?tab=. */
-                      if (onOpenJournal) onOpenJournal();
-                      else window.location.assign('/app?tab=notes');
-                    }}
-                    aria-label="Relationship journal"
-                    style={{
-                      /* Not one of the three section colours: the journal is a
-                         place to write rather than a bucket of findings, and
-                         borrowing a section's colour would say it belongs to
-                         that section. */
-                      background: `${C.clay}0F`, border: "1px solid transparent",
-                      borderRadius: 14, aspectRatio: "0.92", maxHeight: 132,
-                      padding: "0.5rem 0.25rem 0.75rem", cursor: "pointer",
-                      fontFamily: BFONT, display: "flex", flexDirection: "column",
-                      alignItems: "center", justifyContent: "flex-end",
-                    }}>
-                    <span style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {QuickIcons.book(C.clay)}
-                    </span>
-                    <span style={{ fontSize: "0.68rem", lineHeight: 1.25, textAlign: "center",
-                      color: C.text, whiteSpace: "pre-line", width: "86%" }}>
-                      {"Relationship\njournal"}
-                    </span>
-                    {/* Pointing right, because this one leaves the page. */}
-                    <span aria-hidden="true" style={{ fontSize: "0.6rem", lineHeight: 1, marginTop: "0.2rem", color: C.muted }}>
-                      {"\u203A"}
-                    </span>
-                  </button>
-                </div>
-
-                {/* The open bucket's rows, under the tiles. Each one opens the
-                    page in Insights it came from, which is the only thing on
-                    this page that says where it came from. */}
-                {(() => {
-                  const g = groups.find(x => x.id === openBucket);
-                  if (!g) return null;
-                  return (
+            /* The items for one bucket, directly under its own row. This was
+               a block below all four tiles; it is a function now so each row
+               can draw its own without a second copy of it existing. */
+            const ITEMS = (g) => (
                     <div style={{ marginTop: "0.9rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
                       {/* block: what-comes-next/groups */}
                       {g.items.map((it, i) => (
@@ -10637,7 +10563,125 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                       ))}
                     </div>
                   );
-                })()}
+
+            /* The four rows, in the app's order, with the app's icons. The
+               journal is last and leaves the page rather than opening a list,
+               which is what the app's fourth row does. */
+            const BUCKET_GLYPH = {
+              "keep-in-mind": "/attune-glyph-thinking.png",
+              discuss: "/attune-glyph-couch.png",
+              phrases: "/attune-bubble-heart.png",
+            };
+            const rows = [
+              ...groups.map(g => ({
+                id: g.id, label: g.label, color: g.color, count: g.items.length,
+                glyph: BUCKET_GLYPH[g.id] || "/attune-glyph-thinking.png",
+                group: g, leaves: false,
+                onPress: () => setOpenBucket(cur => cur === g.id ? null : g.id),
+              })),
+              {
+                id: "journal", label: "Relationship journal",
+                /* Not one of the three section colours: the journal is a place
+                   to write, not a bucket of findings, and borrowing a
+                   section's colour would say it belongs to that section. */
+                color: C.clay, count: 0, glyph: "/attune-glyph-journal.png",
+                group: null, leaves: true,
+                onPress: () => {
+                  /* The dashboard owns the Notes tab, so the move is the
+                     parent's to make. Without a handler (a demo, or a future
+                     surface that mounts the results alone) the URL gets there
+                     too, because dashTab reads ?tab=. */
+                  if (onOpenJournal) onOpenJournal();
+                  else window.location.assign('/app?tab=notes');
+                },
+              },
+            ];
+            return (
+              <div style={{ marginBottom: "1.75rem" }}>
+                {/* B98. Ellie: "Remove explanation paragraph above dropdowns on what
+                    comes next page." The page is a list of things to do; a paragraph
+                    explaining that it is a list of things to do is one more thing to
+                    read before reading it. */}
+                {/* ── B105: FOUR TILES, AND ONE OF THEM IS OPEN ────────
+                    Ellie: "Four quick-access tiles formatted like the ones on
+                    the home page. One for each bucket listed above and one for
+                    the relationship journal. When a user taps one of the
+                    tiles, that content appears in the space below, but the 4
+                    tiles stay in place."
+
+                    The same square the home page's quick links are: three per
+                    cent ink, the same radius and aspect, the label on two
+                    lines. The accordion this replaced is gone, and with it the
+                    <details name> trick that gave it one-open-at-a-time; that
+                    is state here, because a tile is not a disclosure. */}
+                {/* ── FOUR WIDE ROWS, AND THE LIST OPENS UNDER ITS OWN ──
+                    Ellie: "What comes next page on site should match app."
+
+                    It did not. This was four small squares in a row with the
+                    open bucket's list below all of them, which is the B105
+                    design; the app has since been given four wide stacked rows
+                    with a large icon, a number larger than the words, and the
+                    list directly under the row you pressed. Both of those were
+                    her instructions to the app:
+
+                      "I want 4, vertically stacked wider rectangular tiles...
+                       I want the icons to be large and to be stylized outline
+                       drawings with attune-branded gradient lines. I want the
+                       number in each row to be larger than the text."
+
+                      "I want the drop downs to open right below their row not
+                       below the others."
+
+                    So this is the app's layout, drawn with the app's icons.
+                    They are the same PNGs: scripts/build-glyphs.mjs writes
+                    them into the app's assets and into public/ in one pass,
+                    and the journal book moved in there from brand-glyph.tsx so
+                    that the fourth row is not a second drawing of it. */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {rows.map(r => {
+                    const open = !r.leaves && openBucket === r.id;
+                    return (
+                      <div key={r.id}>
+                        <button
+                          onClick={r.onPress}
+                          aria-pressed={r.leaves ? undefined : open}
+                          aria-label={r.leaves ? r.label : `${r.label}, ${r.count} item${r.count !== 1 ? "s" : ""}`}
+                          style={{
+                            width: "100%", display: "flex", alignItems: "center", gap: "0.9rem",
+                            /* The bucket's colour, closed as well as open.
+                               Ellie: "I want color on the what's next page.
+                               Feels bland currently." */
+                            background: open ? `${r.color}24` : `${r.color}0F`,
+                            border: open ? `1px solid ${r.color}80` : "1px solid transparent",
+                            borderRadius: 16, padding: "0.75rem 1rem", cursor: "pointer",
+                            fontFamily: BFONT, textAlign: "left",
+                          }}>
+                          <img src={r.glyph} alt="" aria-hidden="true" width={46} height={46}
+                            style={{ flexShrink: 0, display: "block" }} />
+                          <span style={{ flex: 1, minWidth: 0, fontSize: "0.9rem", lineHeight: 1.25, color: C.ink, fontWeight: 600 }}>
+                            {r.label}
+                          </span>
+                          {/* The number, larger than the words, which is what
+                              she asked for on the app's rows. A row that leaves
+                              the page has no count: it has somewhere to go. */}
+                          {r.leaves ? (
+                            <span aria-hidden="true" style={{ fontSize: "1rem", color: C.muted, flexShrink: 0 }}>{"\u203A"}</span>
+                          ) : (
+                            <span style={{ fontFamily: HFONT, fontSize: "1.6rem", fontWeight: 700, lineHeight: 1, color: r.color, flexShrink: 0 }}>
+                              {r.count}
+                            </span>
+                          )}
+                          {!r.leaves && (
+                            <span aria-hidden="true" style={{ fontSize: "0.7rem", lineHeight: 1, color: open ? r.color : C.muted, flexShrink: 0 }}>
+                              {open ? "\u02C4" : "\u02C5"}
+                            </span>
+                          )}
+                        </button>
+                        {open ? ITEMS(r.group) : null}
+                      </div>
+                    );
+                  })}
+                </div>
 
                 {/* B106's sheet, which is the insight of the day's sheet. */}
                 {keepingAction ? (
@@ -10647,29 +10691,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                   />
                 ) : null}
 
-                {/* Download — one plain-text file with every item above. */}
-                <button onClick={() => {
-                  const out = ["ATTUNE ACTION PLAN", "=".repeat(40), `${userName} & ${partnerName}`, ""];
-                  groups.forEach(g => {
-                    out.push(g.label.toUpperCase());
-                    /* A phrase to try has no heading, so a row's words are
-                       whichever halves it has. This pushed `it.tip` alone and
-                       would have written "- " for every phrase. */
-                    g.items.forEach(it => {
-                      const words = [it.tip, it.quote ? `\u201C${it.quote}\u201D` : null].filter(Boolean).join(" ");
-                      out.push("- " + words);
-                      if (it.phrase && it.phrase !== it.quote) out.push('  Try: "' + it.phrase + '"');
-                    });
-                    out.push("");
-                  });
-                  const blob = new Blob([out.join("\n")], { type: "text/plain" });
-                  const el = document.createElement("a");
-                  el.href = URL.createObjectURL(blob);
-                  el.download = "Attune_Action_Plan.txt";
-                  el.click();
-                }} style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.1rem", fontSize: "0.75rem", fontWeight: 600, fontFamily: BFONT, cursor: "pointer", marginTop: "0.85rem" }}>
-                  ↓ Download action plan
-                </button>
+                {/* The "Download action plan" button was here. Ellie asked
+                    for it to go: "Remove download action plan button on site."
+                    It wrote the groups above into a plain text file. Nothing
+                    else used that code, and What Comes Next is the page the
+                    plan lives on now. */}
               </div>
             );
           })()}
@@ -17089,7 +17115,7 @@ export default function App() {
                         also what the website's own results sidebar is built
                         from. One source, so a section added to results appears
                         here without anyone remembering to add it. */}
-                    {bothDone ? (
+                    {bothDone ? (<>
                       <AppInsightsMenu
                         groups={resultsNav({
                           /* `pkg.hasReflection` does not exist. The flag is
@@ -17127,6 +17153,65 @@ export default function App() {
                          */
                         onOpen={(sectionId) => { setActiveResult(sectionId); setHighlightsSeen(true); setView("results"); }}
                       />
+
+                      {/* ── ADDITIONAL EXERCISES ──────────────────────────
+                          Ellie: "A user who does not own all exercises should
+                          see a section below the menu, at the bottom of the
+                          insights page called 'Additional exercises' that has
+                          3 rounded square tiles, one for each additional
+                          exercise. If they own one additional but not two,
+                          they should only see 2 in that section. Clicking one
+                          of those tiles should take you to the packages page
+                          on the site, scrolled directly to the add-on
+                          section."
+
+                          Which exercises are additional is not a list typed
+                          here: it is every exercise in api/_exercises.js that
+                          is gated by a capability, which is what makes it
+                          additional. So an exercise added to the registry
+                          appears here without anyone remembering to, and one
+                          renamed cannot be renamed in only one place. */}
+                      {(() => {
+                        const extras = EXERCISES
+                          .filter((e) => e.capability && !pkg[e.capability]);
+                        if (!extras.length) return null;
+                        return (
+                          <div style={{ marginTop: "2rem" }}>
+                            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>
+                              Additional exercises
+                            </div>
+                            {/* Three across, or two, or one: the grid takes its
+                                column count from how many there are, so a
+                                single tile is a tile and not a banner. */}
+                            <div style={{ display: "grid", gridTemplateColumns: `repeat(${extras.length}, minmax(0, 1fr))`, gap: "0.6rem", maxWidth: extras.length < 3 ? "66%" : "100%" }}>
+                              {extras.map((e) => (
+                                <a
+                                  key={e.key}
+                                  href="/offerings#add-ons"
+                                  aria-label={`${e.label}. Add it from the packages page.`}
+                                  style={{
+                                    display: "flex", flexDirection: "column", alignItems: "center",
+                                    justifyContent: "center", gap: "0.5rem",
+                                    aspectRatio: "1", borderRadius: 16, textDecoration: "none",
+                                    background: `${e.color}0F`, border: `1px solid ${e.color}33`,
+                                    padding: "0.75rem", textAlign: "center", fontFamily: BFONT,
+                                  }}>
+                                  <span aria-hidden="true" style={{
+                                    width: 30, height: 30, borderRadius: "50%", display: "flex",
+                                    alignItems: "center", justifyContent: "center",
+                                    background: `${e.color}1F`, color: e.color,
+                                    fontSize: "1.05rem", lineHeight: 1, fontWeight: 600,
+                                  }}>+</span>
+                                  <span style={{ fontSize: "0.72rem", lineHeight: 1.3, color: C.ink, fontWeight: 600 }}>
+                                    {e.label}
+                                  </span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      </>
                     ) : (() => {
                       // Exercises are numbered in sequence, so the intimacy
                       // exercise reads as 04 (or 03 when there's no reflection),

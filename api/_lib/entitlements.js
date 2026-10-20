@@ -135,55 +135,74 @@ async function restGet(url, serviceKey, path) {
  *
  * Returns { ok, entitlements } or { ok: false, error }.
  */
-export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email }) {
+/**
+ * Everything an account is entitled to, read and computed, without writing.
+ *
+ * ── WHY IT IS ITS OWN FUNCTION ────────────────────────────────────────────
+ * This was the first two thirds of writeEntitlements. /api/verify-core needs
+ * exactly the same gathering, for a buyer at checkout who is claiming to
+ * already own the core exercises, and must not write anything while it asks.
+ *
+ * Copying the gathering would have been a second answer to "what does this
+ * account own", which is the question the whole file exists to have one answer
+ * to. So writeEntitlements calls this and then patches the row.
+ */
+export async function entitlementsFor({ supabaseUrl, serviceKey, userId, email }) {
   if (!supabaseUrl || !serviceKey || !userId) {
     return { ok: false, error: 'missing supabaseUrl/serviceKey/userId' };
   }
-  try {
-    // Select * : profiles has drifted from the migrations (no `pkg`, no
-    // `addon_checklist`), and naming a nonexistent column makes PostgREST
-    // return 400 for the whole row. `*` is resilient to that drift.
-    const { data: profiles, error: profErr } = await restGet(supabaseUrl, serviceKey, `profiles?id=eq.${encodeURIComponent(userId)}&select=*`);
-    if (profErr) return { ok: false, error: `profile read failed: ${profErr}` };
-    const profile = Array.isArray(profiles) ? profiles[0] : null;
-    if (!profile) return { ok: false, error: 'profile not found' };
+  // Select * : profiles has drifted from the migrations (no `pkg`, no
+  // `addon_checklist`), and naming a nonexistent column makes PostgREST
+  // return 400 for the whole row. `*` is resilient to that drift.
+  const { data: profiles, error: profErr } = await restGet(supabaseUrl, serviceKey, `profiles?id=eq.${encodeURIComponent(userId)}&select=*`);
+  if (profErr) return { ok: false, error: `profile read failed: ${profErr}` };
+  const profile = Array.isArray(profiles) ? profiles[0] : null;
+  if (!profile) return { ok: false, error: 'profile not found' };
 
-    const rows = [];
-    const seen = new Set();
-    const add = (data) => {
-      for (const r of (data || [])) {
-        const k = r.order_num || `${r.pkg_key}:${r.created_at}`;
-        if (!seen.has(k)) { seen.add(k); rows.push(r); }
-      }
-    };
-    // Profile's own columns as a grant source. Missing columns read as
-    // undefined, which computeEntitlements treats as "no grant".
-    rows.push({
-      order_num: null, pkg_key: profile.pkg || null, is_physical: false,
-      addon_reflection: profile.addon_reflection,
-      addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
-      addon_intimacy: profile.addon_intimacy, addon_conflict: profile.addon_conflict, addon_workbook: profile.addon_workbook,
-      created_at: null,
-    });
-
-    if (!profile.is_comp) {
-      const reads = [
-        restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(userId)}&select=${ORDER_SELECT}`),
-      ];
-      const em = (email || profile.email || '').toLowerCase();
-      if (em) reads.push(restGet(supabaseUrl, serviceKey, `orders?buyer_email=eq.${encodeURIComponent(em)}&select=${ORDER_SELECT}`));
-      if (profile.joined_via_invite && profile.partner_profile_id) {
-        reads.push(restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(profile.partner_profile_id)}&select=${ORDER_SELECT}`));
-      }
-      const results = await Promise.all(reads);
-      // If ANY orders read failed we cannot know what the account owns.
-      // Writing a blob now would persist a downgrade. Abort instead.
-      const failed = results.find(r => r.error);
-      if (failed) return { ok: false, error: `orders read failed: ${failed.error}` };
-      for (const r of results) add(r.data);
+  const rows = [];
+  const seen = new Set();
+  const add = (data) => {
+    for (const r of (data || [])) {
+      const k = r.order_num || `${r.pkg_key}:${r.created_at}`;
+      if (!seen.has(k)) { seen.add(k); rows.push(r); }
     }
+  };
+  // Profile's own columns as a grant source. Missing columns read as
+  // undefined, which computeEntitlements treats as "no grant".
+  rows.push({
+    order_num: null, pkg_key: profile.pkg || null, is_physical: false,
+    addon_reflection: profile.addon_reflection,
+    addon_budget: profile.addon_budget, addon_checklist: profile.addon_checklist,
+    addon_intimacy: profile.addon_intimacy, addon_conflict: profile.addon_conflict, addon_workbook: profile.addon_workbook,
+    created_at: null,
+  });
 
-    const ent = computeEntitlements(rows, profile);
+  if (!profile.is_comp) {
+    const reads = [
+      restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(userId)}&select=${ORDER_SELECT}`),
+    ];
+    const em = (email || profile.email || '').toLowerCase();
+    if (em) reads.push(restGet(supabaseUrl, serviceKey, `orders?buyer_email=eq.${encodeURIComponent(em)}&select=${ORDER_SELECT}`));
+    if (profile.joined_via_invite && profile.partner_profile_id) {
+      reads.push(restGet(supabaseUrl, serviceKey, `orders?user_id=eq.${encodeURIComponent(profile.partner_profile_id)}&select=${ORDER_SELECT}`));
+    }
+    const results = await Promise.all(reads);
+    // If ANY orders read failed we cannot know what the account owns.
+    // Answering now would be a guess, and for the caller that writes it would
+    // persist a downgrade. Abort instead.
+    const failed = results.find((r) => r.error);
+    if (failed) return { ok: false, error: `orders read failed: ${failed.error}` };
+    for (const r of results) add(r.data);
+  }
+
+  return { ok: true, profile, entitlements: computeEntitlements(rows, profile) };
+}
+
+export async function writeEntitlements({ supabaseUrl, serviceKey, userId, email }) {
+  try {
+    const read = await entitlementsFor({ supabaseUrl, serviceKey, userId, email });
+    if (!read.ok) return read;
+    const { profile, entitlements: ent } = read;
     const blob = { ...ent, computedAt: new Date().toISOString() };
 
     const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {

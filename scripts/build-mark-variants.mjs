@@ -199,6 +199,13 @@ try {
     );
     if (png.length < 500) throw new Error(`${name} came back ${png.length} bytes, which is not an image`);
     writeFileSync(`${ROOT}attune-app/assets/images/${name}.png`, png);
+    /* The heart bubble is one of the four What Comes Next icons, and that page
+       is drawn on both surfaces now. The website serves it as a static file,
+       written in the same pass from the same drawing for the reason
+       build-glyphs.mjs gives about its three: a second copy of an icon is a
+       second drawing of it waiting to happen. Only this one, because it is the
+       only mark variant the website needs that it does not already have. */
+    if (name === 'attune-bubble-heart') writeFileSync(`${ROOT}public/${name}.png`, png);
     console.log(`[build-mark-variants] ${name}.png written, ${png.length} bytes.`);
   }
   /**

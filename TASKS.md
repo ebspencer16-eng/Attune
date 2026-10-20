@@ -26,11 +26,7 @@ a question in it I want to get right before building, and it is under the table.
 
 | # | What I am doing |
 |--|--|
-| W84 | **What Comes Next on the site should match the app.** Reading both, listing every difference, then making the website render the server's version rather than reconciling them one by one. |
-| W85 | **Physical Intimacy Expectations is indented in the results left nav.** Finding what puts it a level down and whether the nav or the section list is wrong. |
-| W86 | **Removing the Download action plan button from the site.** |
-| W87 | **Additional exercises section at the foot of the Insights page.** One rounded square tile per exercise they do not own, so three, two or one, and none when they own all three. Each tile opens the packages page at the add-on section. |
-| W88 | **A standalone exercise or resource cannot be bought without the core exercises.** Checkout asks for an email and the server checks that it owns the foundation before the order is allowed. See below. |
+| W88 | **Buying a standalone exercise.** The server half is built and the rest is a change to what the cart will sell, which I have not made yet. Read the note below before I go further. |
 
 ---
 
@@ -49,6 +45,10 @@ a question in it I want to get right before building, and it is under the table.
 
 | Verified by you | What it was |
 |--|--|
+| W84 | What Comes Next on the site is the app's layout now: four wide stacked rows, the same four icons, and the list opening under its own row. |
+| W85 | Physical Intimacy Expectations sat 28 points right of every other row in the results nav. Its label was too wide to shrink, so the row pushed itself across. |
+| W86 | The Download action plan button is gone from the site. |
+| W87 | Additional exercises at the foot of Insights: one tile per exercise you do not own, opening the packages page at the add-on section. |
 | W82 | The Action plans quick tile opened the storycards. Same bug as the Insights menu rows, in the one call site that fix never reached; the gate now covers both. |
 | W83 | The insight of the day cut to one line when the page could not work out its room. It sets the whole quotation small instead. |
 | S35 | Six sweeps over timers, throwing reads, timezone days, assets, unnamed controls and money units. All clean; eight faults found in the measuring, none in the product. |
@@ -876,26 +876,31 @@ carried the old day arithmetic, the one that turned over at 5pm and gave your
 phone and the simulator different words on the same day. That is gone, along
 with three comments that pointed at it or described it as live.
 
-### W88 — the bit I want to get right
+### W88 — what I found, and the decision that is yours
 
-You said "maybe if they only add one exercise to their cart they should have to
-provide their email to confirm that they already have the foundational
-exercises". I want to make sure I build the strong version of that.
+The server half is built and working: `/api/verify-core` takes an email and
+answers whether that account already owns the core exercises. It reads the
+orders, counts an invited partner who never paid, counts somebody who bought
+and has not made an account yet, and answers the same for "no account" as for
+"account with no package" so it cannot be used to find out who is registered.
 
-Typing an email is not on its own a confirmation of anything, because anyone
-can type any email. What makes it real is the server looking that email up and
-checking whether it actually owns the core exercises. So that is what I am
-building: the box appears only when the cart has no package in it, and the
-order cannot complete unless the lookup finds core exercises on that account.
+Then I found something that changes the job. **Today you cannot buy a
+standalone exercise at all.** The add-on tiles on the packages page refuse it:
+with an empty cart they flash "Pick a package first" and scroll you up to the
+packages. Add-ons are not line items, they are flags attached to a package
+already in the cart.
 
-Three cases I have to decide on, and my answers unless you say otherwise:
+So this is not a guard to add. It is opening a door that is currently shut, and
+the door is the money path: the cart has to allow an add-on-only line, checkout
+has to price a cart with no package in it, and create-payment-intent has to
+build the Stripe lines for one. That file is where the $198 against $295 bug
+lived, and where a missing line once left an order forty dollars short of its
+own quote.
 
-A partner who did not pay. A couple share one package, so the invited partner
-owns the core through the person who bought it. I will count that as owning it.
+I did not want to make that change at the end of a long round and hand you
+something I could not test against a real card. It is the next thing I pick up.
 
-A different email from the one they bought under. The lookup fails and they are
-told the account has no core exercises, with the option to buy a package
-instead. There is no way around that without letting anybody through.
-
-Someone who genuinely has it but is not signed in. Same as above, and the
-message will say to sign in, because signing in answers the question properly.
+One question, because it changes the build. When somebody who already owns the
+core buys Conflict Patterns on its own, is that **$40, the add-on price**, or a
+different standalone price? The catalogue has one number for it today and I do
+not want to invent a second.

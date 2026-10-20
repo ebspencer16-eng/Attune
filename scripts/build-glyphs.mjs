@@ -232,10 +232,50 @@ const COUCH = `
   <path d="M54 50 v5"/>
 `;
 
+/**
+ * The journal, which was the one of the four drawn live rather than baked.
+ *
+ * ── WHY IT MOVED HERE ─────────────────────────────────────────────────────
+ * Ellie: "What comes next page on site should match app." The app's version of
+ * that page is four wide rows with these icons on them, and the website could
+ * not show the fourth: JournalBook in brand-glyph.tsx builds it out of Views
+ * and a LinearGradient, which is React Native and renders nowhere else.
+ *
+ * Drawing it a second time in CSS for the website is the failure this file's
+ * own header is about, one icon later. So it is drawn once, here, like the
+ * other three, and both surfaces show the same bytes.
+ *
+ * The geometry is lifted from that component rather than redesigned: a 42 by
+ * 52 cover at x=11 y=6 with a 7 wide spine down its left edge, and three
+ * written lines at y=20, 29 and 38, the last of them short. check-glyph-assets
+ * holds the two together.
+ */
+const JOURNAL = `
+  <rect x="11" y="6" width="42" height="52" rx="6"/>
+  <!-- the spine, a narrow panel down the left edge of the cover -->
+  <rect x="11" y="6" width="7" height="52" rx="3"/>
+  <!-- three written lines, the last one short the way a paragraph ends -->
+  <path d="M24 21 H46"/>
+  <path d="M24 30 H46"/>
+  <path d="M24 39 H38"/>
+`;
+
 const GLYPHS = [
   ['attune-glyph-thinking', THINKING],
   ['attune-glyph-couch', COUCH],
+  ['attune-glyph-journal', JOURNAL],
 ];
+
+/**
+ * And where they go.
+ *
+ * Two places, because two surfaces draw this page now. The app reads them out
+ * of its own assets folder; the website serves them as static files, the same
+ * arrangement public/_pkg-rules.js and public/_flags.js already use for a
+ * generated thing both sides need. Written from one drawing in the same pass,
+ * so there is nothing for them to drift from.
+ */
+const OUTS = [OUT, `${ROOT}public`];
 
 /** Three times the 60 points the app draws them at. */
 const PX = 180;
@@ -257,8 +297,8 @@ try {
     /* An empty transparent PNG is about 500 bytes and looks like nothing in a
        viewer, which is how an icon ships blank. */
     if (png.length < 1500) throw new Error(`${name} came back ${png.length} bytes, which is not a drawing`);
-    writeFileSync(`${OUT}/${name}.png`, png);
-    console.log(`[build-glyphs] ${name}.png written, ${png.length} bytes.`);
+    for (const dir of OUTS) writeFileSync(`${dir}/${name}.png`, png);
+    console.log(`[build-glyphs] ${name}.png written to ${OUTS.length} places, ${png.length} bytes.`);
   }
   /**
    * A hash of this file beside the pictures it made.
