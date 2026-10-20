@@ -23,7 +23,14 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** Everything from your last message is in section 3.
+| # | What I am doing |
+|--|--|
+| S38 | **A valid request to every endpoint.** Today's bug was an endpoint refusing a good body; every gate here only ever sends bad ones, so a refusal is what they look for. |
+| S39 | **Every function that unpacks its argument, against every caller.** Both of today's bugs were a value with the right name and the wrong keys. That is a shape I can count. |
+| S40 | **Every side effect started inside a React state update.** The convos provider fires its save from inside the updater, which React is allowed to run twice. |
+| S41 | **Every column the code reads that nothing ever writes.** `feedback_given_at` was one of these for months: a prompt that could never stop. |
+| S42 | **Every field the app reads that the server never sends**, and the other way round. The last run of this was blind to the common spelling. |
+| S43 | **Every screenshot gate, re-measured after the camera fix.** A harness change that quietly moved what every other gate sees is the thing to check next. |
 
 ---
 
