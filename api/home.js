@@ -595,10 +595,17 @@ export default async function handler(req) {
       // What exists to buy, so the app renders the server's catalogue rather
       // than a copy that goes stale the moment an add-on is added or repriced.
       catalogue: CATALOGUE,
-      // One research finding, the same for everyone on a given day. The app's
-      // home screen carries it; the copy and the citation live in
-      // api/_research.js so they cannot drift from the website's Our Purpose
-      // page, which says the same three things.
+      // One insight, the same for everyone on a given day, from
+      // api/_insights.js. The field is still called `research` because the app
+      // reads that name.
+      //
+      // This said the copy lives in api/_research.js "so they cannot drift
+      // from the website's Our Purpose page". Neither half is true any more:
+      // e80b8d9a replaced researchOfTheDay with insightOfTheDay here and left
+      // the old module behind, nothing imports it now, and public/purpose.html
+      // carries its own words. A comment claiming a single source of truth
+      // that does not exist is worse than no comment, because the next person
+      // to change one of them will believe the other follows.
       /* The reader's day, from the offset their device already sends. Both of
          these counted days from the epoch in UTC, so they turned over at 00:00Z,
          which is 5pm in California: two devices opened either side of that hour

@@ -99,7 +99,7 @@ const MARGIN = fromPage(
   /data-block="app-learn\/insight" style=\{\{ marginTop: isMobile \? "([\d.]+)rem" : "([\d.]+)rem" \}\}/,
   (m) => ({ mobile: Number(m[1]) * 16, desktop: Number(m[2]) * 16 }),
 );
-fromPage('the quote clamp', /WebkitLineClamp: fit \? fit\.lines : undefined/, (m) => m[0]);
+fromPage('the quote clamp', /WebkitLineClamp: shown \? shown\.lines : undefined/, (m) => m[0]);
 
 /**
  * ── THE THREE THINGS THE FIX IS MADE OF ───────────────────────────────────
@@ -235,7 +235,7 @@ const harness = `
 import { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AppLearnReading } from ${JSON.stringify(`${ROOT}src/App.jsx`)};
-import { quoteFit } from ${JSON.stringify(`${ROOT}attune-app/src/lib/insight-fit.js`)};
+import { quoteFit, floorFit } from ${JSON.stringify(`${ROOT}attune-app/src/lib/insight-fit.js`)};
 
 const LEARN_GAP = ${LEARN_GAP};
 const blockStyle = (LEARN_GAP, learnPeek, learnTop, learnRoom) => (${BLOCK_STYLE});
@@ -288,9 +288,16 @@ function Page({ insight, isMobile, banner, furniture }) {
   const mh = parseFloat(blockStyle(LEARN_GAP, peek, top, room).minHeight) || 0;
   const budgetBox = mh ? mh - LEARN_GAP : 0;
   const r = (budgetBox && toolsH) ? budgetBox - toolsH - furniture : 0;
-  const fit = above.w > 0 ? quoteFit({ text: insight.body, room: Math.max(1, r) / scale, width: above.w / scale }) : null;
-  const q = fit ? Math.round(fit.size * scale) : base;
-  const cite = fit ? Math.round(fit.cite * scale) : (isMobile ? 13.1 : 14.1);
+  /* The page's two cases, through the page's two functions. A room that is
+     not positive means a measurement has not landed or the block is over
+     budget, and the answer to both is the floor setting of the whole
+     quotation rather than one line of it. See floorFit. */
+  const fit = (above.w > 0 && r > 0)
+    ? quoteFit({ text: insight.body, room: r / scale, width: above.w / scale })
+    : null;
+  const shown = fit || floorFit({ text: insight.body, width: (above.w || 300) / scale });
+  const q = shown ? Math.round(shown.size * scale) : base;
+  const cite = shown ? Math.round(shown.cite * scale) : (isMobile ? 13.1 : 14.1);
 
   return (
     <div style={{ display: 'flex', height: '100dvh', background: '#FBF8F3' }}>
@@ -306,7 +313,7 @@ function Page({ insight, isMobile, banner, furniture }) {
               <p id="quote" style={{
                 fontFamily: 'Georgia, serif', fontSize: q, lineHeight: Math.round(q * FIT_LEADING) + 'px',
                 margin: 0, letterSpacing: '-0.01em', display: '-webkit-box', WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: fit ? fit.lines : undefined, overflow: 'hidden',
+                WebkitLineClamp: shown ? shown.lines : undefined, overflow: 'hidden',
               }}>{insight.body}</p>
               <p id="cite" style={{ fontSize: cite, lineHeight: Math.round(cite * FIT_CITE_LEADING) + 'px', fontStyle: 'italic', margin: '1.1rem 0 0' }}>{insight.source}</p>
               <div id="controls" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1.1rem' }}>

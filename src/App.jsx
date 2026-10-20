@@ -59,7 +59,7 @@ import { insightOfTheDay, INSIGHT_EYEBROW, insightShareText } from "../api/_insi
  * it: a .ts file here sends vite looking for the app's tsconfig, which extends
  * a package the website never installs, and the deploy fails.
  */
-import { quoteFit as fitQuote, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEADING, CITE_LEADING as FIT_CITE_LEADING } from "../attune-app/src/lib/insight-fit.js";
+import { quoteFit as fitQuote, floorFit, QUOTE_BASE as FIT_BASE, QUOTE_LEADING as FIT_LEADING, CITE_LEADING as FIT_CITE_LEADING } from "../attune-app/src/lib/insight-fit.js";
 /* Every In Practice article, which the app is served through /api/posts. */
 import { IN_PRACTICE, shelfFor } from "../api/_in-practice.js";
 import { POST_CATEGORIES } from "../api/_lib/post-categories.js";
@@ -16969,7 +16969,32 @@ export default function App() {
                     onQuick={(id) => {
                       if (id === "journal") { setDashTab("notes"); return; }
                       if (id === "insight") { setDashTab("learn"); return; }
-                      setActiveResult(id === "plan" ? "what-comes-next" : "highlights");
+                      /**
+                       * ── AND PAST THE STORYCARDS, AGAIN ────────────────
+                       * Ellie: "ON site, action plan quick access tile opens
+                       * highlights storycards."
+                       *
+                       * The same bug as the Insights menu rows, in the one
+                       * place that fix did not reach. The results view draws
+                       * the storycards whenever `highlightsSeen` is false, so
+                       * "what-comes-next" was set and then ignored. The note
+                       * on `onOpen` below says the id was never the problem;
+                       * it was not the problem here either.
+                       *
+                       * Both tiles say what they want now rather than one of
+                       * them relying on the gate's default. Asking for the
+                       * highlights is the one case where the cards ARE the
+                       * destination, so that tile turns the flag off and the
+                       * other turns it on.
+                       */
+                      if (id === "highlights") {
+                        setActiveResult("highlights");
+                        setHighlightsSeen(false);
+                        setView("results");
+                        return;
+                      }
+                      setActiveResult("what-comes-next");
+                      setHighlightsSeen(true);
                       setView("results");
                     }}
                     /* ── WHERE A CARD GOES ─────────────────────────────
@@ -17517,16 +17542,52 @@ export default function App() {
                        room of 1 gets the smallest readable setting and a clamp,
                        which is the right answer to "there is no room" in a way
                        that unbounded type is not. */
-                    const fit = width > 0
+                    /* ── ONE LINE IS NOT A FIT, IT IS A FAILURE ──────────
+                       Ellie: "on website, insight of the day trails after one
+                       line."
+
+                       `room` is zero in two different situations and both end
+                       here. Either the block is genuinely over its budget, or
+                       one of the four measurements it is built from has not
+                       landed yet, and `learnBudget` guards on
+                       `learnRoom && learnTop && learnPeek` so any one of them
+                       being zero makes it zero. Passing `Math.max(1, room)`
+                       then asks quoteFit to fit a quotation into one point,
+                       and its fallback answers the floor size and
+                       `Math.max(1, ...)` lines. One line, with an ellipsis.
+
+                       On the phone that is survivable because
+                       adjustsFontSizeToFit takes the text the rest of the way,
+                       which is what the comment in quoteFit is relying on.
+                       react-native-web and the browser have no such backstop,
+                       so here it is a hard clamp and the reader sees six words
+                       and a row of dots.
+
+                       So when there is no usable room, the quotation is set at
+                       the floor and given the lines it actually needs. That is
+                       the smallest readable setting of the whole sentence,
+                       which is the honest answer to "I do not know how much
+                       room there is" in a way that showing one line of it is
+                       not. The block carries a minHeight, so it can hold it.
+
+                       Deliberately not changed inside quoteFit: the app calls
+                       that too, its backstop is real, and widening the line
+                       count there could push its own peek down. The missing
+                       backstop is this surface's, so the answer is too. */
+                    const fit = width > 0 && room > 0
                       ? fitQuote({
                         text: insight.body,
-                        room: Math.max(1, room) / scale,
+                        room: room / scale,
                         width: width / scale,
                       })
                       : null;
-                    const quoteSize = fit ? Math.round(fit.size * scale) : base;
-                    const citeSize = fit
-                      ? Math.round(fit.cite * scale)
+                    /* The floor setting, in this surface's scale, for the case
+                       above. Same arithmetic quoteFit uses for how many
+                       characters reach across a line. */
+                    const shown = fit || floorFit({ text: insight.body, width: (width || 300) / scale });
+                    const quoteSize = shown ? Math.round(shown.size * scale) : base;
+                    const citeSize = shown
+                      ? Math.round(shown.cite * scale)
                       : (isMobile ? 13.1 : 14.1);
 
                     return (
@@ -17548,7 +17609,7 @@ export default function App() {
                           lineHeight: `${Math.round(quoteSize * FIT_LEADING)}px`,
                           color: "white", fontWeight: 400, margin: 0, letterSpacing: "-0.01em",
                           display: "-webkit-box", WebkitBoxOrient: "vertical",
-                          WebkitLineClamp: fit ? fit.lines : undefined, overflow: "hidden",
+                          WebkitLineClamp: shown ? shown.lines : undefined, overflow: "hidden",
                         }}>
                           {insight.body}
                         </p>

@@ -29,8 +29,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
-| W52 | **The dot comes off the top of the head and clears it, and the cloud is redrawn.** Both are in the app now. |
-| B148 | **The workbook scorer is fixed**, and it reads the same rule as everything else rather than a corrected fourth copy. |
+| W82 | **The Action plans tile opens the action plan now.** It was the same bug as the Insights menu rows, in the one place that fix never reached. |
+| W83 | **The insight of the day no longer cuts to one line.** When the page cannot work out its room it sets the whole quotation small instead of showing six words and dots. Worth your eye on how small. |
+| S35 | **Six sweeps, nothing broken found.** Eight faults in my own measuring, which is the usual ratio. Detail under the table. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -42,6 +43,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | Verified by you | What it was |
 |--|--|
+| W52 | The thinking glyph: the trailing dot comes off the top of the head and clears its ink, and the cloud is a nine-lobe shape with no gap showing through. |
+| B148 | The workbook scored the responsibility mirror backwards with its own fourth copy of the rule. It reads the shared one now. |
 | W81 | The right end of a row turned the page instead of opening its list. Four rows had it, not one; a row now takes the touch as the finger lands. |
 | W79 | The third prose list, from your own edits. Eleven rewrites, in your words. |
 | W59 | The three couple-type bullets, in your words. |
@@ -821,3 +824,29 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | R18 | The waiting copy , six lines, in place on both surfaces. Yours already; worth seeing in situ. |
 | R19 | The founders note rewrite you sent, as it reads on the page. |
 | R21 | Scrolling on the insights and results pages, top to bottom, on a phone rather than a simulator window. |
+
+### S35 — what the six sweeps measured
+
+Timers and listeners started in an effect; a method that throws on a missing
+field, on data that crossed a boundary; every stored timestamp turned into a
+calendar day; every referenced image, icon and font; every control with no name
+a screen reader can read; and a cents value printed as dollars or a dollars
+value sent to Stripe.
+
+All six came back clean. Every one of them was wrong first: eight separate bugs
+in the measuring, not in the product. The sharpest was the throwing-reads sweep,
+which flagged 68 of 99 cases on its first run, which is not a finding, it is a
+description of how the code is written. They are in `scripts/_sweeps/` with what
+each one got wrong written beside it.
+
+### W83 — why the insight was cutting off
+
+The quotation is sized from four separate measurements of the page. If any one
+of them has not landed, or the block is over its budget, the room comes out at
+zero and the fitting function answers "one line". On a phone that is survivable
+because iOS shrinks text to fit. A browser has no such backstop, so it was a
+hard cut with an ellipsis.
+
+It now sets the whole quotation at the smallest readable size instead. That is
+the honest answer to "I do not know how much room there is"; showing one line
+of it is not. Tell me if it reads too small.

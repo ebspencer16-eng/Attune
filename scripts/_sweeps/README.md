@@ -22,6 +22,12 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-swallowed-errors.mjs` | a catch that discards the error and says nothing | one cron reporting success after a failed read |
 | `sweep-alignment-change.mjs` | both alignment rules over every real couple's stored answers | 19 rows the old rule called aligned that are not; every score that fell had been a 100 |
 | `sweep-alignment-floor.mjs` | whether the new measure can still score low, over every pair of answers two people can give | floor reachable: opposite couples read 0 everywhere; the one generous branch fires on no real row |
+| `sweep-uncleared-timers.mjs` | every timer and listener started in an effect | nothing, after it learned that an effect's implicit return IS the cleanup |
+| `sweep-throwing-reads.mjs` | a method that throws on undefined, on a chain that crossed a boundary | nothing, after three narrowings: 68 of 99 was the normal case, not a fault |
+| `sweep-timezone-days.mjs` | every place a stored timestamp becomes a calendar day | nothing live; the two display calls are correctly local and the crons are UTC-consistent |
+| `sweep-missing-assets.mjs` | every referenced image, icon and font | nothing, after it learned the `@/` path alias |
+| `sweep-unlabelled-controls.mjs` | every control with an onPress and no name a screen reader can read | nothing, after it learned `accessible={false}` is a deliberate exemption |
+| `sweep-cents-and-dollars.mjs` | a cents value printed as dollars, or a dollars value sent to a processor | nothing, after it learned the conversion sits on the definition, not the use |
 
 Two of them were wrong before they were right, which is the usual ratio:
 

@@ -73,6 +73,50 @@ if (!/setHighlightsSeen\(\s*true\s*\)/.test(body)) {
     + '      That is what Ellie reported, and the id was never the problem.');
 }
 
+/* ── AND THE QUICK TILE, WHICH IS THE SAME RULE ON A SECOND SURFACE ───────
+   Ellie, months after the menu was fixed: "ON site, action plan quick access
+   tile opens highlights storycards."
+
+   The same bug in the one place the first fix did not reach. This gate held
+   the menu's handler and nothing else, which is this codebase's recorded
+   lesson about a gate that names one file holding one surface: the rule has
+   more than one call site and the check only knew about one of them.
+
+   So the home tiles are a subject here too. Two branches, each of which has
+   to say what it wants rather than leaning on the gate's default:
+
+     plan        a results section, so the storycards have to be settled
+     highlights  the storycards ARE the destination, so they must not be
+
+   Matched on the call with its argument for the reason given above: the name
+   alone appears all over this file, and `setHighlightsSeen(false)` on the
+   plan branch would be the bug wearing the fix's own words. */
+const quick = /onQuick=\{\(id\)\s*=>\s*\{([\s\S]*?)\n\s*\}\}/.exec(src);
+if (!quick) {
+  console.error('[check-menu-opens-section] src/App.jsx no longer hands AppHome an onQuick'
+    + ' taking an id. Refusing to pass: a gate that has lost its subject must never report'
+    + ' success.');
+  process.exit(1);
+}
+const qbody = quick[1];
+
+if (!/setActiveResult\(\s*["']what-comes-next["']\s*\)/.test(qbody)) {
+  fails.push('the Action plans tile does not set the what-comes-next section.');
+}
+/* The plan branch is everything after the highlights branch returns, which is
+   where the section it asked for has to be settled. */
+const planPart = qbody.includes('"highlights"') ? qbody.slice(qbody.lastIndexOf('return;')) : qbody;
+if (!/setHighlightsSeen\(\s*true\s*\)/.test(planPart)) {
+  fails.push('the Action plans tile does not settle the storycards, so the section it set is'
+    + ' overruled by the `!highlightsSeen` branch and the tile lands on Highlights.\n'
+    + '      That is what Ellie reported, twice, in two different places.');
+}
+if (!/setHighlightsSeen\(\s*false\s*\)/.test(qbody)) {
+  fails.push('the Results highlights tile does not ask for the storycards. It would still'
+    + ' draw them while `highlightsSeen` happens to be false, which is a tile that works'
+    + ' by accident and stops working the moment anything else settles them.');
+}
+
 // ── The caret is its own control ────────────────────────────────────────────
 const menu = (() => {
   const at = src.indexOf('function AppInsightsMenu(');
@@ -124,5 +168,6 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log('[check-menu-opens-section] a menu row sets its section and settles the storycards,'
-  + ' and the caret is a control of its own that opens the pages under a group.');
+console.log('[check-menu-opens-section] a menu row and both home tiles set their section and say'
+  + ' what they want of the storycards, and the caret is a control of its own that opens the pages'
+  + ' under a group.');

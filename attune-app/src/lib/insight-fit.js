@@ -121,6 +121,41 @@ export function citeHeight(quote) {
  * @param {{ text: string, room: number, width: number }} input
  * @returns {Fit}
  */
+/**
+ * The setting to use when there is no usable room to fit against.
+ *
+ * ── WHY THIS IS NOT INSIDE quoteFit ───────────────────────────────────────
+ * Ellie: "on website, insight of the day trails after one line."
+ *
+ * quoteFit's own fallback answers `Math.max(1, ...)` lines, which is one line
+ * whenever the room it was handed is smaller than a single line of floor type.
+ * On a phone that is survivable, because adjustsFontSizeToFit takes the text
+ * the rest of the way. In a browser there is no such backstop, so it is a hard
+ * clamp and the reader sees six words and a row of dots.
+ *
+ * Changing quoteFit itself would change what the app does, where the backstop
+ * is real and a wider line count could push its own peek down. So this is a
+ * separate answer to a separate question: not "how big does this fit" but
+ * "there is no room yet, what is the least bad thing to draw". The whole
+ * quotation at the smallest readable size.
+ *
+ * It is here rather than inline in src/App.jsx so the page and
+ * check-learn-gap call the same function. The gate keeps a harness that
+ * mirrors the page, and a fallback written twice is the failure this file's
+ * own header is about.
+ *
+ * @param {{text: string, width: number}} a width in the app's points.
+ * @returns {Fit}
+ */
+export function floorFit({ text, width }) {
+  const perLine = Math.max(12, Math.floor(width / (QUOTE_FLOOR * CHAR_RATIO)));
+  return {
+    size: QUOTE_FLOOR,
+    lines: Math.max(1, Math.ceil(String(text || '').length / perLine)),
+    cite: citeSize(QUOTE_FLOOR),
+  };
+}
+
 export function quoteFit({ text, room, width }) {
   for (let size = QUOTE_BASE; size >= QUOTE_FLOOR; size -= 1) {
     const left = room - citeHeight(size);
