@@ -50,17 +50,41 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const fails = [];
 
 // ── 1. The price, run ───────────────────────────────────────────────────────
-/* Each add-on, alone, with no package. The expected number is the catalogue's,
-   named here as the promise rather than read from the thing under test: a gate
-   that takes its expectation from the module it checks compares a function
-   with itself. */
+/**
+ * Each add-on, alone, with no package, against a number typed here.
+ *
+ * ── THE FIRST VERSION OF THIS WAS VACUOUS ─────────────────────────────────
+ * It read the expected price out of ADDON_PRICES, which is the same constant
+ * itemAddonTotal reads, and then asserted the two agreed. They always will.
+ * Changing a price moves both sides together and the gate goes on passing,
+ * which is this codebase's own recorded lesson about check-feedback-mirror and
+ * about check-alignment-rule, written into a gate by the person who wrote the
+ * lesson down. The comment here even claimed the opposite.
+ *
+ * So the numbers are the product's promise, confirmed by Ellie: "physical
+ * intimacy should only be $20 but the others should be 40". Moving a price now
+ * has to be done in both places, which makes it a decision rather than an
+ * edit, and the catalogue is still checked against itself below so a typo here
+ * cannot quietly redefine what is charged.
+ */
 const ALONE = [
-  ['addonConflict', ADDON_PRICES.conflict],
-  ['addonIntimacy', ADDON_PRICES.intimacy],
-  ['addonReflection', ADDON_PRICES.reflection],
-  ['addonBudget', ADDON_PRICES.budget],
-  ['addonChecklist', ADDON_PRICES.checklist],
+  ['addonConflict', 40],
+  ['addonIntimacy', 20],
+  ['addonReflection', 40],
+  ['addonBudget', 20],
+  ['addonChecklist', 20],
 ];
+
+/* And the catalogue has to agree with those, so this file cannot drift into
+   being a second price list. If these two disagree, one of them moved and the
+   message says which. */
+const CATALOGUE_KEY = { addonConflict: 'conflict', addonIntimacy: 'intimacy', addonReflection: 'reflection', addonBudget: 'budget', addonChecklist: 'checklist' };
+for (const [flag, promised] of ALONE) {
+  const inCatalogue = ADDON_PRICES[CATALOGUE_KEY[flag]];
+  if (inCatalogue !== promised) {
+    fails.push(`${CATALOGUE_KEY[flag]} costs ${inCatalogue} in api/_catalogue.js and this gate was told ${promised}. If the price moved on purpose, move it here too; if it did not, the catalogue is wrong.`);
+  }
+}
 for (const [flag, price] of ALONE) {
   const it = normalizeItem({ [flag]: true });
   if (itemBasePrice(it) !== 0) {
@@ -72,8 +96,8 @@ for (const [flag, price] of ALONE) {
 }
 /* Two together, so the total is the sum and not the first one found. */
 const pair = normalizeItem({ addonConflict: true, addonIntimacy: true });
-if (itemSubtotal(pair) !== ADDON_PRICES.conflict + ADDON_PRICES.intimacy) {
-  fails.push(`conflict and intimacy together cost ${itemSubtotal(pair)}, not ${ADDON_PRICES.conflict + ADDON_PRICES.intimacy}.`);
+if (itemSubtotal(pair) !== 60) {
+  fails.push(`conflict and intimacy together cost ${itemSubtotal(pair)}, not 60.`);
 }
 if (itemAddonTotal(normalizeItem({})) !== 0) {
   fails.push('an item with no package and no add-ons costs something, which is nothing to sell.');

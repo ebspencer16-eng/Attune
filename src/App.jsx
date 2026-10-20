@@ -3801,6 +3801,81 @@ const NAV_ICONS = {
   ),
 };
 
+/**
+ * The exercises this couple do not own, at the foot of the Insights page.
+ *
+ * ── WHY IT IS A COMPONENT AND NOT JSX IN THE PAGE ─────────────────────────
+ * Ellie: "additional exercise add-on section exists on insights page below
+ * exercise status table and below insights menu (the two stages of that
+ * page)."
+ *
+ * It was written into one of them. The Insights tab draws an exercise status
+ * table until both people have finished and the results menu afterwards, and
+ * the section only existed in the second, so the couple most likely to want
+ * another exercise, the ones still working through the ones they have, never
+ * saw it. Copying the markup into the other branch would have been the same
+ * block twice; this is it once, rendered in both.
+ *
+ * At module scope rather than inside the dashboard, because a component
+ * declared inside another is a new type on every render and remounts
+ * everything under it. check-nested-components forbids the ones that hold
+ * state, and there is no reason for this to be one of them.
+ */
+export function AdditionalExercises({ pkg }) {
+  /* Which exercises are additional is not a list typed here: it is every
+     exercise in api/_exercises.js that is gated by a capability, which is what
+     makes it additional. So an exercise added to the registry appears here
+     without anyone remembering to, and one renamed cannot be renamed in only
+     one place. */
+  const extras = EXERCISES.filter((e) => e.capability && !pkg[e.capability]);
+  if (!extras.length) return null;
+  return (
+    <div style={{ marginTop: "2rem" }}>
+      <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>
+        Additional exercises
+      </div>
+      {/* ── ALWAYS THREE COLUMNS, HOWEVER MANY TILES ────────────────────
+          Ellie: "3 rounded square tiles, one for each additional exercise. If
+          they own one additional but not two, they should only see 2 in that
+          section."
+
+          The count is hers; the SIZE should not follow it. This took its
+          column count from how many tiles there were, and because a tile is
+          square, two tiles were each half again as tall as three and a single
+          tile was a 500 point square taking most of the page. Rendered at all
+          three counts to see it.
+
+          Three columns always, with the spare cells empty, so a tile is the
+          same tile whether you are missing one exercise or all of them. */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "0.6rem" }}>
+        {extras.map((e) => (
+          <a
+            key={e.key}
+            href="/offerings#add-ons"
+            aria-label={`${e.label}. Add it from the packages page.`}
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center",
+              justifyContent: "center", gap: "0.5rem",
+              aspectRatio: "1", borderRadius: 16, textDecoration: "none",
+              background: `${e.color}0F`, border: `1px solid ${e.color}33`,
+              padding: "0.75rem", textAlign: "center", fontFamily: BFONT,
+            }}>
+            <span aria-hidden="true" style={{
+              width: 30, height: 30, borderRadius: "50%", display: "flex",
+              alignItems: "center", justifyContent: "center",
+              background: `${e.color}1F`, color: e.color,
+              fontSize: "1.05rem", lineHeight: 1, fontWeight: 600,
+            }}>+</span>
+            <span style={{ fontSize: "0.72rem", lineHeight: 1.3, color: C.ink, fontWeight: 600 }}>
+              {e.label}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
   /**
    * Which group is open, if any.
@@ -10536,20 +10611,13 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                               that and the arrow vertically stacked so the
                               content margin can be brought further to the
                               right?" Side by side they took two columns from
-                              the words; one above the other they take one. */}
+                              the words; one above the other they take one.
+
+                              And the arrow is the top one. Ellie: "Swap
+                              placement of notes icon and arrow on the what
+                              comes next dropdown rows, I want the arrow on
+                              top." */}
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.1rem", flexShrink: 0 }}>
-                            <button
-                              onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
-                              aria-label={`Keep "${it.tip || it.quote}" in your relationship journal`}
-                              title={JOURNAL_COPY.saveTitle}
-                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.15rem 0.25rem", display: "inline-flex", alignItems: "center" }}>
-                              {/* A page with a pencil: the same picture the app
-                                  draws with square.and.pencil. */}
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                                <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
-                              </svg>
-                            </button>
                             {/* Ellie: "each with a grey arrow on the right hand
                                 side that takes you to the page in insights
                                 where that row's content is coming from." Grey,
@@ -10563,6 +10631,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                                 {"\u203A"}
                               </button>
                             ) : null}
+                            <button
+                              onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
+                              aria-label={`Keep "${it.tip || it.quote}" in your relationship journal`}
+                              title={JOURNAL_COPY.saveTitle}
+                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.15rem 0.25rem", display: "inline-flex", alignItems: "center" }}>
+                              {/* A page with a pencil: the same picture the app
+                                  draws with square.and.pencil. */}
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                                <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
+                              </svg>
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -16967,63 +17047,7 @@ export default function App() {
                         onOpen={(sectionId) => { setActiveResult(sectionId); setHighlightsSeen(true); setView("results"); }}
                       />
 
-                      {/* ── ADDITIONAL EXERCISES ──────────────────────────
-                          Ellie: "A user who does not own all exercises should
-                          see a section below the menu, at the bottom of the
-                          insights page called 'Additional exercises' that has
-                          3 rounded square tiles, one for each additional
-                          exercise. If they own one additional but not two,
-                          they should only see 2 in that section. Clicking one
-                          of those tiles should take you to the packages page
-                          on the site, scrolled directly to the add-on
-                          section."
-
-                          Which exercises are additional is not a list typed
-                          here: it is every exercise in api/_exercises.js that
-                          is gated by a capability, which is what makes it
-                          additional. So an exercise added to the registry
-                          appears here without anyone remembering to, and one
-                          renamed cannot be renamed in only one place. */}
-                      {(() => {
-                        const extras = EXERCISES
-                          .filter((e) => e.capability && !pkg[e.capability]);
-                        if (!extras.length) return null;
-                        return (
-                          <div style={{ marginTop: "2rem" }}>
-                            <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>
-                              Additional exercises
-                            </div>
-                            {/* Three across, or two, or one: the grid takes its
-                                column count from how many there are, so a
-                                single tile is a tile and not a banner. */}
-                            <div style={{ display: "grid", gridTemplateColumns: `repeat(${extras.length}, minmax(0, 1fr))`, gap: "0.6rem", maxWidth: extras.length < 3 ? "66%" : "100%" }}>
-                              {extras.map((e) => (
-                                <a
-                                  key={e.key}
-                                  href="/offerings#add-ons"
-                                  aria-label={`${e.label}. Add it from the packages page.`}
-                                  style={{
-                                    display: "flex", flexDirection: "column", alignItems: "center",
-                                    justifyContent: "center", gap: "0.5rem",
-                                    aspectRatio: "1", borderRadius: 16, textDecoration: "none",
-                                    background: `${e.color}0F`, border: `1px solid ${e.color}33`,
-                                    padding: "0.75rem", textAlign: "center", fontFamily: BFONT,
-                                  }}>
-                                  <span aria-hidden="true" style={{
-                                    width: 30, height: 30, borderRadius: "50%", display: "flex",
-                                    alignItems: "center", justifyContent: "center",
-                                    background: `${e.color}1F`, color: e.color,
-                                    fontSize: "1.05rem", lineHeight: 1, fontWeight: 600,
-                                  }}>+</span>
-                                  <span style={{ fontSize: "0.72rem", lineHeight: 1.3, color: C.ink, fontWeight: 600 }}>
-                                    {e.label}
-                                  </span>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })()}
+                      <AdditionalExercises pkg={pkg} />
                       </>
                     ) : (() => {
                       // Exercises are numbered in sequence, so the intimacy
@@ -17120,6 +17144,14 @@ export default function App() {
                         </>
                       );
                     })()}
+                    {/* The same section on this stage of the page. Ellie:
+                        "additional exercise add-on section exists on insights
+                        page below exercise status table and below insights
+                        menu (the two stages of that page)". It was under the
+                        menu only, which is the page after both of them have
+                        finished, so a couple still working through the
+                        exercises never saw it. */}
+                    <AdditionalExercises pkg={pkg} />
                   </div>
                 </div>
                 )}

@@ -21,10 +21,12 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-Five from your last message. 1 to 3 are small and certain. 4 is new work. 5 has
-a question in it I want to get right before building, and it is under the table.
-
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| W91 | **The Additional exercises section is only on half the Insights page.** Putting it on both stages. |
+| W92 | **Swapping the arrow above the notes icon** on the What Comes Next dropdown rows. |
+| W93 | **A picture of the Insights tiles**, since you own everything and cannot see them. |
+| S37 | **My own price gate was comparing a number with itself.** Typing the four prices in. |
 
 ---
 
@@ -32,7 +34,6 @@ a question in it I want to get right before building, and it is under the table.
 
 | # | Built, needs your eye |
 |--|--|
-| W88 | **A single exercise can now be bought on its own, if that email already owns the assessment.** Worth testing with a real card before you trust it. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -44,6 +45,7 @@ a question in it I want to get right before building, and it is under the table.
 
 | Verified by you | What it was |
 |--|--|
+| W88 | A single exercise sells on its own, $40 (or $20 for Physical Intimacy), only to an email that already owns the assessment. Asked on the page and again on the server. |
 | W89 | Keep growing and Continue living attuned are off What Comes Next. The page is the four rows and the survey button. |
 | W90 | The dashboard's address kept the results section parameter after you left results, so it still said what-comes-next. |
 | W84 | What Comes Next on the site is the app's layout now: four wide stacked rows, the same four icons, and the list opening under its own row. |
@@ -899,3 +901,27 @@ one place I will not call something verified from a test harness. When you are
 ready, the thing to try is: buy Conflict Patterns on its own with the email you
 bought your assessment with, and check the charge is $40 and the confirmation
 lists one line.
+
+### W91, and the thing I got wrong
+
+You asked for the section "below the menu, at the bottom of the insights
+page". I read that as one state and built it only in the branch that draws the
+menu, which is the page after both of you have finished. Before that the page
+draws the exercise status table instead, and the section was not there at all.
+Your "the two stages of that page" is the correction. It is on both now, from
+one component rather than the same markup written twice.
+
+### W93 — what the picture shows, and one thing I changed
+
+Rendering it turned up a fault you could not have seen from my description.
+The tiles took their column count from how many there were, and because a tile
+is square, two tiles were each half again as tall as three and a single tile
+was a 500 point square filling most of the page. It is three columns always
+now, with the spare cells empty, so a tile is the same tile whether you are
+missing one exercise or all three.
+
+### Add-on prices, confirmed
+
+Physical Intimacy $20. Relationship Reflection $40. Conflict Patterns $40.
+Those are the three exercises. The two resources, the budget tool and the
+checklist, are $20 each, and the workbook is $19 digital or $39 printed.
