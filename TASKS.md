@@ -23,7 +23,19 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I am doing |
 |--|--|
-| W109 | **Additional exercises on the app's Insights tab.** A question for you first, under the table: it may be the thing Apple rejects for. |
+| W110 | **The couple type pie says Loading and never stops.** A break I introduced. First. |
+| W111 | **An admin render harness**, so I stop telling you a chart works without having looked at one. |
+| W103b | **Column labels are not appearing.** Written, never rendered. |
+| W104b | **Keep the spider web and the line labels**, drop the gridlines and x labels outside the visual. |
+| W106b | **Life & Values the same size as the other, with both axis labels.** |
+| W107b | **Make the conflict tab readable**: fix the data views. |
+| W94b | **What Comes Next category dropdowns, verified on both surfaces.** |
+| W95b | **Checkboxes in the What Comes Next discussion rows.** |
+| W96b | **Numbering continues across sections** instead of restarting. |
+| W97b | **The For Ellie section is missing** from Things to consider when it should not be. |
+| W100b | **The four tiles on the APP's insights nav**, text inset from the left edge, sized to one screen with no scroll. |
+| W109 | **More Attune Exercises**, greyed with a lock, the way Learn does it. Checking that is what Learn does. |
+| W112 | **Move the data quality section above the formula diagnostics tile.** |
 
 ---
 
@@ -942,37 +954,18 @@ Physical Intimacy $20. Relationship Reflection $40. Conflict Patterns $40.
 Those are the three exercises. The two resources, the budget tool and the
 checklist, are $20 each, and the workbook is $19 digital or $39 printed.
 
-### W109 — a question before I build it
+### What went wrong, and what I am changing
 
-The audit turned up that Additional exercises went onto the website only. The
-obvious fix is to put it on the app's Insights tab too, and I have not, because
-I do not think I should decide this one.
+Four of the things I handed you were not working, and one of those was a
+regression I caused. The common cause is that I checked builders, payloads and
+gates and did not render the surface a person looks at. A gate passing is not a
+page working.
 
-CLAUDE.md's rule is "the app does not sell", and the gate that enforces it says
-in writing that sending somebody from a tile they tapped to a page that sells
-is "the line that fails review". Tiles on the app saying "add Conflict
-Patterns" are closer to that line than anything in the app today. Opening
-/offerings in the browser is explicitly allowed, so it is buildable; whether it
-is worth the review risk is yours.
+So before the fixes: a harness that serves the admin with stubbed data and
+screenshots it, the way there is already one for the app's results and the
+website's menu. Every admin claim after this is a picture I looked at.
 
-Three ways to go, and I will do whichever you say: leave the app without it;
-add the tiles opening /offerings in the browser; or add them only as a line of
-text with no price and no call to action.
-
-### What I checked after the arrow
-
-You were right to be suspicious, and about the wrong thing: the swap did ship,
-on the website, where I made it. The app's rows have always had the notes icon
-on top. Those rows exist on both surfaces and I changed one, which is why it
-looked to you as though nothing happened.
-
-I then went back over every item from the last few rounds and checked each one
-against both surfaces rather than the one I edited. One other had landed on a
-single surface: Additional exercises, above. Everything else was either on both
-or site-only because you asked for the site.
-
-### A near miss worth knowing about
-
-Deleting the old couple-type bar renderer, I checked for callers and found a
-second one: the same tile on the Responses page. Had I not looked, that chart
-would have gone blank and nothing would have said so.
+And the surfaces rule, which I have now broken twice: these rows, this nav and
+the exercise tiles all exist on BOTH the app and the website. Every item below
+gets checked on both before I call it done, and TASKS.md says which surfaces an
+item touched.
