@@ -47,6 +47,7 @@ import { recall } from '@/lib/payload-cache';
 import {
   AccentFallback, AccentFor, BottomTabInset, Colors, Fonts, inputType, Lift, LearnGround, MaxContentWidth, Palette, Radius, SectionColor, Spacing, TabTopInset, Type,
 } from '@/constants/attune-theme';
+import { TILE_GREY } from '@/lib/shared-inks.js';
 
 const c = Colors.light;
 const SITE = SITE_URL;
@@ -1738,7 +1739,8 @@ const SHEET_TOP_MAX = 420;
 
 /** The label on the insight, here and on the card it opens. */
 /** The four featured previews' ground. One tone, not four. */
-const TILE_GREY = '#EFECE7';
+/* TILE_GREY was a hex here and the same hex in src/App.jsx. One home now;
+   see attune-app/src/lib/shared-inks.js. */
 
 /**
  * The fallback only. The label comes from the server with the insight now, so

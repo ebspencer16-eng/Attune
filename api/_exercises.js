@@ -158,10 +158,5 @@ export function isExerciseDone(exercise, value) {
   return typeof value === 'object' && Object.keys(value).length > 0;
 }
 
-/** Completion for every owned exercise, for one side of the couple. */
-export function exerciseStatus(pkg, valuesByKey) {
-  return ownedExercises(pkg).map(e => ({
-    ...e,
-    done: isExerciseDone(e, valuesByKey?.[e.key]),
-  }));
-}
+/* `exerciseStatus` was here, exported and called by nothing. See the sweep note in
+   TASKS.md. */

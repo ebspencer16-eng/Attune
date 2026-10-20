@@ -55,6 +55,7 @@ import { recall } from '@/lib/payload-cache';
 import {
   BlueGround, BottomTabInset, Colors, Fonts, HomeGroundFoot, Lift, MaxContentWidth, Palette, Radius, SectionColor, Spacing, Type,
 } from '@/constants/attune-theme';
+import { QUICK_INK } from '@/lib/shared-inks.js';
 
 const c = Colors.light;
 const SITE = SITE_URL;
@@ -1103,7 +1104,8 @@ const SQUARE_FILL = 'rgba(14,11,7,0.045)';
  * this has the same lightness and three times the distance between its red and
  * its blue, so it sits with the cream ground rather than on top of it.
  */
-const QUICK_INK = '#8F8071';
+/* QUICK_INK was a hex here and the same hex in src/App.jsx. One home now;
+   see attune-app/src/lib/shared-inks.js. */
 /**
  * The two card grounds. The same two tints In Practice puts behind an article
  * with no artwork, at the same strength, so a placeholder on this screen and a

@@ -1241,6 +1241,31 @@ entirely. Every file read correctly and nothing threw. Loading the page and
 asking for the function is what showed it, which is the argument for a gate
 that drives rather than one that reads.
 
+**A sweep that cannot see the common spelling is a sweep that found nothing
+because it looked at nothing.** A sweep for a payload field the app reads and
+the server never sets matched `name:` and reported seven findings. All seven
+were shorthand: `return { groups, buckets }`, which is how most of this
+codebase builds an object. The sweep was blind to the normal case and its
+"findings" were the abnormal one. It knows four spellings now and reports
+nothing, and only the second of those nothings means anything.
+
+The general form, which this file already states about gates and now states
+about sweeps: before believing a count, write down how the thing being counted
+is usually spelled, and check the matcher against that rather than against the
+example you had in mind.
+
+**An exported name nothing imports is usually clutter; the dangerous ones sit
+in a file that defines a rule.** 87 of 919 exports are imported by no other
+file and almost all are harmless. Three were called by nothing at all, and two
+of those were in modules whose whole job is to be the single source of truth:
+`exerciseStatus` in `api/_exercises.js`, born with no caller, and
+`perDimensionCoupleType` in the workbook content, whose caller went when the
+Word builder was deleted and which was left behind.
+
+That is the same shape as `fetchWorkbookView`: a deliberate removal that left
+its callee standing. Sort dead exports by what file they are in rather than by
+how many there are.
+
 **A gate that reads its threshold from the module it is checking is a gate
 comparing a function with itself.** This file already says it about
 check-feedback-mirror, where the website's labels were handed to the server's
@@ -1862,13 +1887,21 @@ The shape that satisfies both: the table rows stay one or two sentences, and
 anything longer goes in a section UNDER that table, keyed to the row's id. Not
 a new file, and not a link to one.
 
-On 2026-10-10 the repo had 32 markdown files and now has 18. Fourteen were
-deleted and three merged into their nearest sibling. What is left is this file,
-TASKS.md, HANDOFF.md, the three maps under `app/` that
-check-maps-are-current holds, `app/TESTFLIGHT.md`, the three generated review
-documents, `LEGAL-VS-CODE.md`, `SECURITY.md`, `scripts/SERVICE_INTEGRATION.md`
-and four small ones inside the Expo project. Before adding a seventeenth, ask
-whether it is a row in TASKS.md instead.
+On 2026-10-10 the repo had 32 markdown files. It has 21: nineteen of them are
+the eighteen that survived the cull plus METHODOLOGY.md, which is generated
+from the modules it describes and which Ellie asked for by name, and
+scripts/_sweeps/README.md, which is the index of the throwaway sweeps. Fourteen
+of the original 32 were deleted and three merged into their nearest sibling.
+What is left is this file, TASKS.md, HANDOFF.md, METHODOLOGY.md, the three maps
+under `app/` that check-maps-are-current holds, `app/TESTFLIGHT.md`, the three
+generated review documents, `LEGAL-VS-CODE.md`, `SECURITY.md`,
+`scripts/SERVICE_INTEGRATION.md`, the sweeps index, and four small ones inside
+the Expo project. Before adding a twenty-second, ask whether it is a row in
+TASKS.md instead.
+
+The count in that sentence has now been wrong twice, which is this file doing
+the thing it warns about. `find . -name '*.md' -not -path './node_modules/*'`
+settles it in one command, so count rather than remember.
 
 ---
 

@@ -126,6 +126,80 @@ arithmetic and not the map on screen. The other three I did see: the snapshot
 table, the horseman tiles and the new icon. The italic and the two type sizes
 are built and typechecked but unlooked at.
 
+### The bug sweeps
+
+Six sweeps. Two found something real, one found a latent hazard worth a check,
+and three found nothing, which is worth saying because the method can now see
+the thing it is looking for.
+
+**1. Every endpoint, asked from outside with no sign-in.** 60 of them. Every
+one answers with a proper refusal or a legitimate public reply. No 500s, which
+is what this sweep found last time: two admin endpoints that had never once
+worked. Three answer 200 to a stranger and all three are meant to: the profile
+form's wording, the publishable Supabase key that is in the browser bundle
+anyway, and the email catalogue.
+
+**2. One rule written twice.** 28 function names are defined more than once
+across the three surfaces. I ran the highest-stakes one rather than reading it:
+the three `calcDimScores` agree on 4,000 dimension scores over 400 answer sets,
+because the admin's now delegates to the engine and the website's is a mirror
+that holds.
+
+**3. Role tokens, where your couple-type copy gets a name put into it.** Two
+implementations, one per surface, and only the server's was checked. They agree
+on every input a real couple can produce. They disagree about what to do when a
+token CANNOT resolve: the server prints "the more expressive partner" and the
+website would print a raw `{EXP}` on the page.
+
+Nothing reaches that today, and the reason was a property nobody was checking:
+each couple type only uses the tokens for an axis its two people actually
+differ on. One copy edit putting `{EXP}` into the Orbit's prose would have done
+it. That is now one line in check-role-tokens, planted against.
+
+**4. A field the app reads that the server never sends.** This is the direction
+that caused the invisible highlights on results pages. Nothing. Worth noting
+that the first version of this sweep reported seven and all seven were my
+mistake: it could not see shorthand, which is how most of this codebase builds
+a payload. It can now, and the nothing means something.
+
+**5. Exported names nothing imports.** 87 of 919. Almost all are used inside
+their own file and merely exported for no reason. Three were genuinely called
+by nothing, and two of those read like live features:
+
+- `exerciseStatus` in `api/_exercises.js`, the module that defines what
+  exercises exist. Written when that module was created and never wired up.
+- `perDimensionCoupleType` in the workbook content. Its caller went on 2
+  October when you had the Word file removed; it was left behind.
+- `scoreResponsibilityPairSided`, which I orphaned myself earlier today.
+
+All three are gone. A function nobody calls, sitting in a file that defines a
+rule, is the next person's wrong answer.
+
+**6. One colour typed on two surfaces.** 557 named constants, 24 declared on
+more than one surface, 14 agreeing exactly. Most are a name used for two
+different things. Two were one value drawn twice with nothing holding them:
+the ink your home screen's quick-link icons are drawn in, and the grey behind a
+featured In Practice tile. They agreed, which is why nobody had looked. They
+have one home now.
+
+### One thing for you, in the workbook
+
+Not new, and not mine to change: it is written up in SECURITY.md awaiting your
+call, and the sweep confirmed it still reproduces.
+
+The workbook's own scorer reads one kind of answer backwards. Two people who
+both say a job is primarily theirs score as perfect agreement, and two who
+answer oppositely score as a total mismatch.
+
+**How far it reaches, which I measured today.** It only fires on the older
+"Primarily mine" phrasing. The exercise serves name-based answers now, and on
+every one of those the workbook agrees with the live rule. So it reaches
+couples whose answers predate that change and nobody else.
+
+It is scoring, and changing it changes documents people already have, so it
+stays your decision. SECURITY.md now points at the right function to move it to
+and carries the measurement.
+
 ### W64, the methodology document
 
 **Where it is.** `METHODOLOGY.md`, at the top level of the repo. Six sections:

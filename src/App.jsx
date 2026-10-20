@@ -70,6 +70,7 @@ import { IN_PRACTICE_BODIES } from "../api/_in-practice-bodies.js";
    app reads. Ellie: "I want the site's in practice to look exactly like the
    app's. That means the same visuals, coloring, etc." */
 import { cardGround } from "../attune-app/src/lib/card-tints.js";
+import { QUICK_INK, TILE_GREY } from "../attune-app/src/lib/shared-inks.js";
 import { alignedTone } from "../attune-app/src/lib/aligned-tone.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
@@ -2554,7 +2555,8 @@ function GrowSquare({ color = "#9B5DE5", icon, title, sub, cta, onClick, href, d
  * thing, but version 2.0." Solid plates with a pointed end, because at this
  * size an outline cannot carry a point and reads as two bars.
  */
-const QUICK_INK = "#8F8071";
+/* QUICK_INK and TILE_GREY come from attune-app/src/lib/shared-inks.js, which
+   the app reads too. Both were this hex here and the same hex there. */
 
 const QuickIcons = {
   /* Two lobes with a seam down the middle and a fold in each, which is what
@@ -3961,7 +3963,7 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
  * out of attune-app: that is what broke the Vercel deploy for two commits.
  * check-card-tints holds all three to the app's own values.
  */
-const TILE_GREY = "#EFECE7";
+
 const MUTED_INK = "#7A6753";
 const ACCENT = "#E8673A";
 

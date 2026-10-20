@@ -27,7 +27,11 @@
  *   1. The shared tint list is SectionColor's four, in the order the app's
  *      shelves use: communication, expectations, reflection, intimacy.
  *   2. The website's three card colours are the app's TILE_GREY, mutedInk and
- *      orange.
+ *      orange. TILE_GREY moved out of resources.tsx into lib/shared-inks.js,
+ *      which the website imports directly, so the two cannot differ any more.
+ *      It is still read here rather than imported: this gate is about where
+ *      the value comes from, and importing it would make the comparison a
+ *      function equalling itself.
  *   3. Both surfaces reach their ground through cardGround, so the shared
  *      module is the one that ships rather than one that merely exists. A
  *      helper imported and never called is a constant that happens to be
@@ -49,6 +53,10 @@ const WEB = 'src/App.jsx';
 
 const theme = readFileSync(ROOT + THEME, 'utf8');
 const app = readFileSync(ROOT + APP, 'utf8');
+/* TILE_GREY lives here now, and the website imports it rather than keeping a
+   second hex. See the note on PAIRS below. */
+const INKS = 'attune-app/src/lib/shared-inks.js';
+const inks = readFileSync(ROOT + INKS, 'utf8');
 const web = readFileSync(ROOT + WEB, 'utf8');
 const fails = [];
 
@@ -85,8 +93,6 @@ ORDER.forEach((k, i) => {
 
 /* 2. The website's three flat colours against the app's. */
 const PAIRS = [
-  ['TILE_GREY', /const TILE_GREY = '(#[0-9A-Fa-f]{6})'/, app, APP,
-    /const TILE_GREY = "(#[0-9A-Fa-f]{6})"/, 'the featured tile\'s ground'],
   ['mutedInk', /mutedInk:\s*'(#[0-9A-Fa-f]{6})'/, theme, THEME,
     /const MUTED_INK = "(#[0-9A-Fa-f]{6})"/, 'the meta line under a card title'],
   ['orange', /orange:\s*'(#[0-9A-Fa-f]{6})'/, theme, THEME,
@@ -97,6 +103,37 @@ for (const [name, appRe, appSrc, appWhere, webRe, what] of PAIRS) {
   const ours = hex(web, WEB, `the website's copy of ${name}`, webRe);
   if (theirs !== ours) {
     fails.push(`${what}: the app uses ${theirs} and the website uses ${ours}.`);
+  }
+}
+
+/**
+ * ── TILE_GREY IS NO LONGER TWO HEXES ──────────────────────────────────────
+ * It was `const TILE_GREY = '#EFECE7'` in resources.tsx and the same hex in
+ * src/App.jsx, and this gate compared the two. They agreed, which is why
+ * nobody had looked: a sweep of every constant declared on more than one
+ * surface is what turned it up.
+ *
+ * It lives in attune-app/src/lib/shared-inks.js now and both surfaces import
+ * it, so there is no second value to compare. What is worth checking instead
+ * is that neither has quietly gone back to its own: a comparison of two hexes
+ * is satisfied the moment somebody adds a third.
+ */
+{
+  if (!/export const TILE_GREY = '#[0-9A-Fa-f]{6}'/.test(inks)) {
+    fails.push(`${INKS} no longer declares TILE_GREY, which is the featured tile's ground`
+      + ' on both surfaces.');
+  }
+  for (const [where, src] of [[APP, app], [WEB, web]]) {
+    const declaresOwn = new RegExp(`const TILE_GREY\\s*=\\s*["']#`).test(src);
+    const imports = /TILE_GREY[^;]*from ["'][^"']*shared-inks(\.js)?["']/.test(src)
+      || /from ["'][^"']*shared-inks(\.js)?["'][^;]*TILE_GREY/.test(src);
+    if (declaresOwn) {
+      fails.push(`${where} declares its own TILE_GREY again. It is in ${INKS}, which both`
+        + ' surfaces import; a second hex here is one colour becoming two.');
+    } else if (!imports) {
+      fails.push(`${where} neither imports TILE_GREY from ${INKS} nor declares one, so the`
+        + ' featured tile is grounded in something this gate cannot see.');
+    }
   }
 }
 

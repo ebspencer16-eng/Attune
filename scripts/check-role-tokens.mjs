@@ -87,6 +87,61 @@ if (!keep.includes('{U}') || !keep.includes('{P}')) {
   problems.push(`{U}/{P} must survive for the renderer, got: ${keep}`);
 }
 
+/**
+ * ── AND EACH TYPE ONLY USES THE TOKENS ITS PAIR CAN RESOLVE ───────────────
+ * Found by running the website's resolver and this one over the same strings.
+ * They agree on every input a real couple can produce, and they disagree about
+ * what to do when a token CANNOT resolve: this one falls back to a generic
+ * phrase ("the more expressive partner") and the website leaves the raw token
+ * on the page.
+ *
+ * Nothing reaches that today, and the reason is a property nobody was checking:
+ * each mixed couple type uses only the tokens for an axis its two people
+ * actually differ on. The Jumpstart differs on open and uses {EXP}/{GRD}; the
+ * Orbit differs on engage and uses {RCH}/{WDR}. Both surfaces resolve from the
+ * blended scores the type itself is derived from, so the pair always differs
+ * where the copy assumes it does.
+ *
+ * Put {EXP} into the Orbit's prose and the app would read "the more expressive
+ * partner" while the website printed "{EXP}". That is one copy edit away, and
+ * it is now one line to catch.
+ */
+{
+  /** Which side of each axis an individual type code sits on. From
+   *  typeCodeFromAxes in api/_type-engine.js, written out because this is the
+   *  claim being checked rather than a value to reuse. */
+  const SIDE = {
+    W: { engage: true, open: true },
+    X: { engage: true, open: false },
+    Y: { engage: false, open: true },
+    Z: { engage: false, open: false },
+  };
+  const AXIS_OF = { EXP: 'open', GRD: 'open', RCH: 'engage', WDR: 'engage' };
+
+  let typesSeen = 0;
+  for (const t of COUPLE_TYPES) {
+    const code = t.code || t.id || '';
+    const [a, b] = String(code).split('');
+    if (!SIDE[a] || !SIDE[b]) continue;
+    typesSeen += 1;
+    const tokens = [...new Set((JSON.stringify(t).match(/\{(EXP|GRD|RCH|WDR)\}/g) || [])
+      .map((m) => m.slice(1, -1)))];
+    for (const tok of tokens) {
+      const axis = AXIS_OF[tok];
+      if (SIDE[a][axis] === SIDE[b][axis]) {
+        problems.push(`${code} (${t.name}) uses {${tok}}, which names a side of the ${axis} axis,`
+          + ` and its two people are on the SAME side of it. The token cannot resolve to a name:`
+          + ' this file would print a generic phrase and src/App.jsx would print the raw token.');
+      }
+    }
+  }
+  if (typesSeen < 6) {
+    console.error(`[check-role-tokens] only ${typesSeen} couple types had a readable two-letter`
+      + ' code, which cannot be right. Refusing to pass.');
+    process.exit(1);
+  }
+}
+
 if (problems.length) {
   console.error('[check-role-tokens] template tokens could reach a reader:');
   for (const p of problems) console.error(`  ${p}`);
@@ -97,4 +152,5 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`[check-role-tokens] ${checked} strings resolve clean for both alike and opposite couples.`);
+console.log(`[check-role-tokens] ${checked} strings resolve clean for both alike and opposite couples,`
+  + ' and every mixed couple type uses only the tokens for an axis its two people differ on.');

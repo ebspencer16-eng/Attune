@@ -3636,3 +3636,47 @@ take "You are" without being rewritten.
 
 **Not done and not started:** nothing from her list. W57 and W59 are decisions
 rather than work.
+
+---
+
+## 2026-10-19, later — her four tweaks, and six bug sweeps
+
+**Where it stopped.** Tree clean, chain green, app update published. TASKS.md
+section 2 holds one row and it is waiting on her.
+
+**W57 is the one worth knowing.** The couple map was `height * 0.26`, tuned on
+an iPhone 17. Ellie, on a Pro Max: "227 looks right on the simulator of a 17
+but on my pro max it looks small." A share is the wrong shape and her report is
+the argument: everything below the map is a fixed number of points, so a taller
+phone has MORE spare height and a fraction hands the map a smaller share of it.
+It is `height - ROOM_BELOW` now, with the reserve derived from the one
+measurement she approved, so an iPhone 17 still draws exactly 227.
+
+check-card-map-size was widened rather than a second gate written: one
+property, is the map the right size for the room it is in, over both instances.
+Two of its five plants passed blind and both were the gate reading its floor
+and its cap out of the file it was checking. That is the third time in one day
+and it is now the first thing to check when writing a threshold into a gate.
+
+**Six sweeps, written up in TASKS.md.** Two real findings, one latent hazard
+now gated, three clean. They live in `scripts/_sweeps/` with a README that
+records how two of them were wrong before they were right, which is the usual
+ratio.
+
+The two real ones: three exported functions called by nothing, two of them
+sitting in modules whose whole job is to be the single source of truth; and two
+colours typed on both surfaces with nothing holding them, which is this
+codebase's signature bug found by sweeping every constant declared twice.
+
+**One thing waiting on Ellie that is not new.** The workbook's own scorer reads
+the relative answers backwards, which SECURITY.md has carried for a while. The
+sweep confirmed it reproduces and bounded it: it only fires on the "Primarily
+mine" phrasing, which the exercise no longer serves, so it reaches couples
+whose answers predate that change and nobody else. SECURITY.md now points at
+`respDistance` rather than at a function that no longer exists.
+
+**What was NOT verified on screen.** The italic in the snapshot table and the
+two type sizes on the horseman tiles. The Simulator lost its window part way
+through the round, which stops synthetic taps while screenshots keep working,
+and it does not come back from a script. The snapshot table, the horseman tile
+structure, the new icon and the Expectations bars on real data were all seen.

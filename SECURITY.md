@@ -376,10 +376,23 @@ wrong one and now carries the correct implementation.
 `_workbook-content.js` is untouched because it is the workbook's scorer and
 changing it changes generated documents.
 
-**Recommended fix.** Point the workbook at
-`scoreResponsibilityPairSided` and regenerate a sample workbook to confirm the
-Money domain percentage moves in the direction you expect. This is scoring, so
-it is your call.
+**How far it reaches, measured.** The inversion only fires on the relative
+strings, "Primarily mine" and "Primarily my partner's". `api/questions.js`
+serves name-based options for every category and has not offered the relative
+set for some time, so a couple who answered recently has no answer that can
+trigger it. Run over every name-based pair, the workbook's scorer agrees with
+the live rule on all six. So this reaches couples whose stored answers predate
+that change, and nobody else.
+
+**Recommended fix.** Point the workbook at `respDistance` in
+`api/_lib/expectations.js`, which is the one rule the rest of the product now
+uses, and regenerate a sample workbook to confirm the Money domain percentage
+moves in the direction you expect. This is scoring, so it is your call.
+
+(It used to recommend `scoreResponsibilityPairSided`. That function was the
+expectations module's own three-position scorer, and it was replaced by
+`respDistance` when the five-point scale went in, so the recommendation pointed
+at something no longer in the tree.)
 
 ---
 

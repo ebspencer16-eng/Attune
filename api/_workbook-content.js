@@ -334,16 +334,9 @@ function _perDimensionTypeCode(overallCode, dim, score) {
 //   nameMapId  — user-first 2-letter id for personalizeTypeRefs (so name
 //                references resolve to the correct partner regardless of sort)
 //   userLetter / partnerLetter — per-dimension codes
-export function perDimensionCoupleType(userType, partnerType, dim, userScore, partnerScore) {
-  const userLetter    = _perDimensionTypeCode(userType,    dim, userScore);
-  const partnerLetter = _perDimensionTypeCode(partnerType, dim, partnerScore);
-  return {
-    lookupKey: [userLetter, partnerLetter].sort().join(''),
-    nameMapId: userLetter + partnerLetter,
-    userLetter,
-    partnerLetter,
-  };
-}
+
+/* `perDimensionCoupleType` was here, exported and called by nothing. See the sweep note in
+   TASKS.md. */
 
 export const GAP_BLURBS = {
   energy: {
