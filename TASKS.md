@@ -21,12 +21,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W91 | **The Additional exercises section is only on half the Insights page.** Putting it on both stages. |
-| W92 | **Swapping the arrow above the notes icon** on the What Comes Next dropdown rows. |
-| W93 | **A picture of the Insights tiles**, since you own everything and cannot see them. |
-| S37 | **My own price gate was comparing a number with itself.** Typing the four prices in. |
+**Nothing open.**
 
 ---
 
@@ -34,6 +29,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| W93 | **The Additional exercises tiles, rendered for you** at all three ownership levels. The picture is on your Desktop. Tell me if the tiles want to be smaller. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -45,6 +41,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | Verified by you | What it was |
 |--|--|
+| W91 | The Additional exercises section was only under the results menu. It is on both stages of the Insights page now, from one component rather than the markup twice. |
+| W92 | The arrow sits above the notes icon on the What Comes Next rows. |
+| S37 | My own price gate read the add-on price from the module it was checking, so a changed price moved both sides and it passed. The four numbers are typed in now and a price change fails it. |
 | W88 | A single exercise sells on its own, $40 (or $20 for Physical Intimacy), only to an email that already owns the assessment. Asked on the page and again on the server. |
 | W89 | Keep growing and Continue living attuned are off What Comes Next. The page is the four rows and the survey button. |
 | W90 | The dashboard's address kept the results section parameter after you left results, so it still said what-comes-next. |
