@@ -51,7 +51,7 @@
  * the correct answer to being asked to verify a signature it cannot.
  */
 
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { SITE_URL } from '../api/_lib/site.js';
 
 Object.assign(process.env, {
@@ -219,6 +219,75 @@ for (const f of files) {
 }
 [console.log, console.warn, console.error] = quiet;
 
+/**
+ * ── AND THE OTHER HALF: A GOOD BODY HAS TO BE ACCEPTED ────────────────────
+ * Everything above asks whether a malformed body is refused politely. It
+ * cannot see the opposite mistake, because a refusal is what it is looking
+ * for: api/convos.js read
+ *
+ *     const body = await jsonBody(req);
+ *     const key = convoKey(body?.key);
+ *
+ * and jsonBody answers `{ body }` or `{ error }`, never the body itself. So
+ * `body.key` was undefined on every request and the endpoint answered 400
+ * "bad conversation" to a perfectly good one. Every checkbox on both surfaces
+ * filled and emptied again, which reads as a design decision rather than a
+ * failure, and a 400 is also the right answer to a genuinely bad key.
+ *
+ * This is the same family as the auth one found the same afternoon, and as
+ * `resultsGate` being handed the whole capabilities object rather than its
+ * `caps` half: a function's return given the right name and the wrong keys.
+ *
+ * The rule: a caller of jsonBody must read `.body` off what it got back, or
+ * destructure it. Treating the return as the body is the bug. Static, because
+ * driving it only proves a refusal, which is what the bug looks like.
+ */
+{
+  const shape = [];
+  for (const f of readdirSync(new URL('../api', import.meta.url))) {
+    if (!f.endsWith('.js')) continue;
+    const src = readFileSync(new URL(`../api/${f}`, import.meta.url), 'utf8')
+      .replace(/\/\*[^]*?\*\//g, ' ').replace(/^\s*\/\/[^\n]*/gm, ' ');
+    for (const m of src.matchAll(/(?:const|let|var)\s+(\{[^}]*\}|[A-Za-z_$][\w$]*)\s*=\s*await\s+jsonBody\(/g)) {
+      const target = m[1];
+      // Destructuring the pair is correct by construction.
+      if (target.startsWith('{')) {
+        if (!/\bbody\b/.test(target)) {
+          shape.push(`api/${f} destructures jsonBody's answer without taking \`body\`: ${target}`);
+        }
+        continue;
+      }
+      /* A plain name. The two keys on that answer are `body` and `error`, so
+         any OTHER field read off it is a field that does not exist.
+
+         Not "it must read .body": api/partner-nudge.js parses the body and
+         deliberately ignores it, with a comment saying why, because the nudge
+         is decided by who the caller is partnered with rather than by what
+         they asked for. That is correct and must keep passing. What is never
+         correct is reaching through the wrapper for a field of the body. */
+      const after = src.slice(m.index + m[0].length);
+      const reads = [...after.matchAll(new RegExp(`\\b${target}\\s*\\??\\.\\s*([A-Za-z_$][\\w$]*)`, 'g'))]
+        .map((r) => r[1]);
+      const wrong = [...new Set(reads.filter((k) => k !== 'body' && k !== 'error'))];
+      if (wrong.length) {
+        shape.push(`api/${f} reads \`${target}.${wrong[0]}\` off jsonBody's answer.`
+          + ' That answer is { body } or { error }, so that field is undefined on every'
+          + ` request and the endpoint refuses a body that was fine. Read \`${target}.body\` first.`);
+      }
+    }
+  }
+  if (shape.length) {
+    console.error('[check-body-parsing] an endpoint reads the wrapper instead of the body:\n');
+    for (const p of shape) console.error('  ' + p);
+    console.error('\napi/_lib/http.js: jsonBody(req) answers { body } on success and { error }');
+    console.error('on a bad body. The three-line form every other endpoint uses is:');
+    console.error('\n  const _parsed = await jsonBody(req);');
+    console.error('  if (_parsed.error) return _parsed.error;');
+    console.error('  const body = _parsed.body;\n');
+    process.exit(1);
+  }
+}
+
 if (problems.length) {
   console.error('[check-body-parsing] an endpoint falls over on a body it should refuse:\n');
   for (const p of problems) console.error('  ' + p);
@@ -227,4 +296,5 @@ if (problems.length) {
 }
 
 console.log(`[check-body-parsing] ${called} calls across ${files.length - UNCONFIGURED.size} endpoints,`
-  + ' seven malformed bodies and a bare GET each; none threw and none answered 5xx.');
+  + ' seven malformed bodies and a bare GET each; none threw and none answered 5xx,'
+  + " and every caller of jsonBody reads the body off its answer rather than the answer itself.");

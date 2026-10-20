@@ -131,7 +131,19 @@ export default async function handler(req) {
 
     if (req.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
 
-    const body = await jsonBody(req);
+    /**
+     * ── THE PARSE ANSWERS { body } OR { error }, NOT THE BODY ────────────
+     * This read `body.key` off the wrapper, so the key was undefined on every
+     * request and the endpoint answered "bad conversation" to a perfectly good
+     * one. The second bug of exactly this shape in this file: a function's
+     * return given the right NAME and the wrong keys.
+     *
+     * Every other caller of jsonBody in api/ uses the three-line form below,
+     * and check-body-parsing.mjs now fails the build on one that does not.
+     */
+    const _parsed = await jsonBody(req);
+    if (_parsed.error) return _parsed.error;
+    const body = _parsed.body;
     const key = convoKey(body?.key);
     if (!key) return json({ ok: false, error: 'bad conversation' }, 400);
     const done = body?.done !== false;
