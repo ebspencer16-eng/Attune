@@ -24,11 +24,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 Five from your last message. 1 to 3 are small and certain. 4 is new work. 5 has
 a question in it I want to get right before building, and it is under the table.
 
-| # | What I am doing |
-|--|--|
-| W89 | **What Comes Next on the site carries two sections the app does not.** Removing Keep growing and Continue living attuned so the page is the four rows. |
-| W90 | **The dashboard's address says what-comes-next.** Finding what writes it and why it survives leaving the page. |
-| W88 | **Standalone exercise purchase, approved, at the price already on the page.** Opening the cart to an add-on with no package, pricing it, and gating it on the email check that is already built. |
+**Nothing open.**
 
 ---
 
@@ -36,6 +32,7 @@ a question in it I want to get right before building, and it is under the table.
 
 | # | Built, needs your eye |
 |--|--|
+| W88 | **A single exercise can now be bought on its own, if that email already owns the assessment.** Worth testing with a real card before you trust it. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -47,6 +44,8 @@ a question in it I want to get right before building, and it is under the table.
 
 | Verified by you | What it was |
 |--|--|
+| W89 | Keep growing and Continue living attuned are off What Comes Next. The page is the four rows and the survey button. |
+| W90 | The dashboard's address kept the results section parameter after you left results, so it still said what-comes-next. |
 | W84 | What Comes Next on the site is the app's layout now: four wide stacked rows, the same four icons, and the list opening under its own row. |
 | W85 | Physical Intimacy Expectations sat 28 points right of every other row in the results nav. Its label was too wide to shrink, so the row pushed itself across. |
 | W86 | The Download action plan button is gone from the site. |
@@ -878,26 +877,25 @@ carried the old day arithmetic, the one that turned over at 5pm and gave your
 phone and the simulator different words on the same day. That is gone, along
 with three comments that pointed at it or described it as live.
 
-### W88 — approved, and the price is settled
+### W88 — built, and what I would test first
 
-You: "I want users to be able to buy a standalone exercise but only if they
-already own the base exercises. Confirmed that the exercise exercises are the
-same price as listed on the website for those users."
+A lone exercise is $40, the price the packages page already lists. I checked
+that by running the pricing rather than reading it: an item with no package
+bases at nought and the add-on is the whole of it.
 
-So no new price list. A standalone exercise costs what the packages page
-already says it costs, which is the add-on price in `api/_catalogue.js`, and
-there is one number for each rather than a second standalone one.
+The rule is asked twice, on purpose. The checkout page asks before it takes a
+card, so somebody finds out early. The server asks again inside
+create-payment-intent and refuses the order, because the page's question can be
+skipped by anyone posting straight to the endpoint. A check that only exists in
+a browser is not a check.
 
-What that takes, in order:
+Three answers, not two. Owns it, does not own it, and could not be checked. The
+last one refuses the sale and says so, because treating "we could not check" as
+"they have not paid" accuses a customer, and treating it as "they have" is the
+guard not being there.
 
-1. The cart will sell an add-on with no package in it. Today it refuses:
-   `addAddonToCart` flashes "Pick a package first" on an empty cart.
-2. Checkout prices a cart with no package. The subtotal, the tax lines and the
-   Stripe lines all start from a package today.
-3. The email box, which only appears for such a cart, and `/api/verify-core`,
-   which is built and answers whether that address already owns the core.
-4. The order that results has to grant the add-on and nothing else.
-
-The invariant I am holding it to is the one this codebase already paid for:
-the lines sent to Stripe add up to what the cart says is owed. That is what
-catches a missing line, a double-counted one and a mispriced one at once.
+**What I have not done is put a real card through it.** The money path is the
+one place I will not call something verified from a test harness. When you are
+ready, the thing to try is: buy Conflict Patterns on its own with the email you
+bought your assessment with, and check the charge is $40 and the confirmation
+lists one line.

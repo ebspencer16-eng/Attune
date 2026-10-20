@@ -526,6 +526,30 @@ const PACKAGES = {
 // physicalTags) stays on each package so phase 2 is a flag flip.
 if (!PHYSICAL_ENABLED) {
   Object.values(PACKAGES).forEach(p => { p.format = 'digital'; p.price = p.digitalPrice; p.priceLabel = '$' + p.digitalPrice; });
+
+/* ── A CART LINE WITH NO PACKAGE IN IT ───────────────────────────────────
+   Ellie: "I want users to be able to buy a standalone exercise but only if
+   they already own the base exercises."
+
+   Such a line has no package key, and every lookup on this page read
+   `PACKAGES[it.pkg] || PACKAGES.core`. That fallback is there for an unknown
+   package id, and it would have priced a lone $40 exercise at the $89 base:
+   quoted one number and charged another, which is the bug this file is
+   already known for.
+
+   So the two cases are told apart. No package key is this, priced at nought,
+   which leaves the add-ons as the whole of the line. An unrecognised key is
+   still somebody's broken link and still falls back to core. */
+const STANDALONE_PKG = {
+  id: null, name: 'Single exercise', badge: '',
+  digitalPrice: 0, physicalPrice: 0,
+  price: 0, priceLabel: '', format: 'digital',
+  tags: [], physicalTags: [],
+};
+function pkgFor(key) {
+  if (!key) return STANDALONE_PKG;
+  return PACKAGES[key] || PACKAGES.core;
+}
 }
 // forceFmt: honours the physical flag. Every format read routes through this.
 function forceFmt(f) { return PHYSICAL_ENABLED ? (f || 'digital') : 'digital'; }
@@ -840,7 +864,7 @@ function persistOrderComplete(orderNum) {
 
   // Mirror first item into legacy vars (for summary code that still uses them)
   const first = _items[0];
-  pkg = PACKAGES[first.pkg] || PACKAGES.core;
+  pkg = pkgFor(first.pkg);
   pkg.format = first.format;
   addonWorkbook   = first.addons.workbook ? (first.addons.workbookVariant || 'digital') : null;
   addonReflection = !!first.addons.reflection;
@@ -945,7 +969,7 @@ function renderItemsStep() {
   }
 
   container.innerHTML = _items.map((it, idx) => {
-    const p = PACKAGES[it.pkg] || PACKAGES.core;
+    const p = pkgFor(it.pkg);
     const pkgLabel = p.name;
     const isPhysical = it.format === 'physical';
     const header = _items.length > 1
@@ -1097,7 +1121,7 @@ function renderSummary() {
   }
 
   for (const g of groups) {
-    const p = PACKAGES[g.item.pkg] || PACKAGES.core;
+    const p = pkgFor(g.item.pkg);
     const isPhys = g.item.format === 'physical';
     total += g.subtotal;
     const qtyLabel = g.qty > 1 ? ` <span style="color:#7A6753;font-size:.7rem">× ${g.qty}</span>` : '';
@@ -1152,7 +1176,7 @@ function renderSummary() {
        api/_catalogue.js, so reading it here means there is one price per
        package on this page. */
     const baseTotal = _items.reduce((s, it) => {
-      const p = PACKAGES[it.pkg];
+      const p = pkgFor(it.pkg);
       return s + (p ? (it.format === 'physical' ? p.physicalPrice : p.digitalPrice) : 0);
     }, 0);
     // For fixed-price codes, the user still owes appliedPromoAmount per package.
@@ -1321,7 +1345,7 @@ function validateForm() {
     // be registered in the Stripe dashboard for Apple Pay.
     try {
       const total = _items.reduce((sum, it) => {
-        const p = PACKAGES[it.pkg] || PACKAGES.core;
+        const p = pkgFor(it.pkg);
         const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
         let add = 0;
         add += wbCharge(it);
@@ -1553,7 +1577,7 @@ function validateForm() {
 function updatePaymentRequestTotal() {
   if (!paymentRequest) return;
   const total = _items.reduce((sum, it) => {
-    const p = PACKAGES[it.pkg] || PACKAGES.core;
+    const p = pkgFor(it.pkg);
     const base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
     let add = 0;
     add += wbCharge(it);
@@ -1592,10 +1616,49 @@ async function handleSubmit(e) {
 
   const email = document.getElementById('email').value.trim();
 
+  /* ── A SINGLE EXERCISE NEEDS AN ACCOUNT THAT OWNS THE REST ────────────
+     Ellie: "maybe if they only add one exercise to their cart they should
+     have to provide their email to confirm that they already have the
+     foundational exercises before checking out?"
+
+     That is this, and the email is the one already in the form rather than a
+     second box: typing it is not what confirms anything, the lookup is. The
+     server answers from the orders behind that address.
+
+     Asked here so somebody finds out before a card is involved, and asked
+     AGAIN inside create-payment-intent, which is where the rule actually
+     lives. This half can be skipped by anybody posting straight to the API;
+     that half cannot. */
+  if (_items.every(it => !it.pkg)) {
+    let owns = null;
+    try {
+      const vr = await fetch('/api/verify-core', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const vj = await vr.json().catch(() => ({}));
+      owns = vr.ok ? !!vj.ownsCore : null;
+    } catch { owns = null; }
+
+    if (owns !== true) {
+      /* Three outcomes and only two messages, deliberately. "We could not
+         check" and "you do not own it" are different facts, and saying the
+         second when the first is true would accuse a paying customer of not
+         having paid. */
+      showPaymentError(new Error(owns === false
+        ? 'A single exercise is an addition to the Attune Assessment, and that email does not have one yet. Add a package to your cart, or use the email you bought with.'
+        : 'We could not check your account just now. Please try again in a moment.'));
+      btn.disabled = false;
+      btn.innerHTML = '<span id="btnLabel">Complete order · $' + getPkgTotal() + '</span>';
+      return;
+    }
+  }
+
   // Build the items payload. If the API doesn't know about items (legacy),
   // we also pass top-level fields reflecting the first item.
   const first = _items[0];
-  const firstPkg = PACKAGES[first.pkg] || PACKAGES.core;
+  const firstPkg = pkgFor(first.pkg);
 
   try {
     // 1. Create payment intent on server (timeout so a hung or unreachable
@@ -1715,7 +1778,7 @@ async function handleSubmit(e) {
     // Build an itemized list (package + each add-on at its real price) so the
     // confirmation email shows a correct breakdown and total.
     for (const it of _items) {
-      const itPkg = PACKAGES[it.pkg] || PACKAGES.core;
+      const itPkg = pkgFor(it.pkg);
       const isPhys = it.format === 'physical';
       const lineItems = [{ label: itPkg.name, price: isPhys ? itPkg.physicalPrice : itPkg.digitalPrice }];
       if (it.addons.workbook) {
@@ -1912,7 +1975,7 @@ function clearPaymentError() {
 // Canonical per-item price (base + add-ons). Mirror of the cart/summary
 // itemPrice() so the order total, button label, and idempotency amount agree.
 function cartItemPrice(it) {
-  const p = PACKAGES[it.pkg] || PACKAGES.core;
+  const p = pkgFor(it.pkg);
   let base = it.format === 'physical' ? p.physicalPrice : p.digitalPrice;
   let add = 0;
   if (it.addons.workbook)   add += wbCharge(it);

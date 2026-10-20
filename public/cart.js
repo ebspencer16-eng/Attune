@@ -384,10 +384,27 @@ function addAddonToCart(key, ev) {
   var btn = ev && ev.currentTarget ? ev.currentTarget : null;
   if (ev) ev.stopPropagation();
 
+  /* ── AN ADD-ON ON ITS OWN, FOR SOMEBODY WHO ALREADY OWNS THE REST ─────
+     Ellie: "I want users to be able to buy a standalone exercise but only if
+     they already own the base exercises."
+
+     This used to flash "Pick a package first" and scroll back up, which made a
+     standalone exercise unbuyable rather than conditional. It is a line item
+     with no package now: the pricing already handles that, because an item
+     with no package key bases at nought and keeps every add-on billable, so a
+     lone Conflict Patterns costs the $40 the page lists and not a new number.
+
+     The condition she asked for is NOT enforced here. A browser is the wrong
+     place for a rule about who may buy: checkout asks for an email and
+     /api/verify-core answers, and create-payment-intent asks the same question
+     again server side and refuses the order. This file only has to stop
+     getting in the way. */
   if (!_cartItems.length) {
-    _addonBtnFlash(btn, 'Pick a package first', false);
-    var target = document.querySelector('.pkg-overview') || document.getElementById('pkg-core');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    _cartItems.push({ id: _newItemId(), pkg: null, format: 'digital', qty: 1, addons: { [key]: true } });
+    renderCart();
+    updateCartBadge();
+    _persistCart();
+    _addonBtnFlash(btn, 'Added ✓', true);
     return;
   }
 

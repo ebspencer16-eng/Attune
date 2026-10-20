@@ -59,19 +59,10 @@
 export const config = { runtime: 'edge', regions: ['iad1'] };
 
 import { safeError } from './_lib/http.js';
-import { ORDER_SELECT, computeEntitlements, entitlementsFor } from './_lib/entitlements.js';
+import { emailOrNull, ownsCoreFor } from './_lib/owns-core.js';
 
 const HEADERS = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
-
-/** The same shape of read the rest of api/ uses against PostgREST. */
-async function restGet(url, key, path) {
-  const res = await fetch(`${url}/rest/v1/${path}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
-  });
-  if (!res.ok) return { error: `${res.status}` };
-  return { data: await res.json().catch(() => null) };
-}
 
 export default async function handler(req) {
   if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405);
@@ -83,51 +74,23 @@ export default async function handler(req) {
   let body;
   try { body = await req.json(); } catch { return json({ error: 'bad request' }, 400); }
 
-  const email = String(body?.email || '').trim().toLowerCase();
-  /* Shape only. A real check is the lookup below, and rejecting an address
-     here for looking unusual would turn a typo into "you do not own this". */
-  if (!email || email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    return json({ error: 'enter an email address' }, 400);
-  }
+  /* Shape only. A real check is the lookup, and rejecting an address here for
+     looking unusual would turn a typo into "you do not own this". */
+  const email = emailOrNull(body?.email);
+  if (!email) return json({ error: 'enter an email address' }, 400);
 
   try {
-    /* ── FIRST, THE ORDERS ────────────────────────────────────────────────
-       Before the profile, because a buyer who has not made an account yet has
-       orders and no profile, and that person has certainly bought the core. */
-    const direct = await restGet(
-      supabaseUrl, serviceKey,
-      `orders?buyer_email=eq.${encodeURIComponent(email)}&select=${ORDER_SELECT}`,
-    );
-    if (direct.error) {
+    const read = await ownsCoreFor({ supabaseUrl, serviceKey, email });
+    if (!read.ok) {
       /* A failed read is not "no". Saying no here would refuse a sale to
          somebody who has paid, which is the expensive direction to be wrong
          in. The page asks them to try again. */
-      console.error('[verify-core] orders read failed:', direct.error);
+      console.error('[verify-core]', read.error);
       return json({ error: 'could not check that right now' }, 503);
     }
-    if (computeEntitlements(direct.data || [], null).hasGrant) return json({ ownsCore: true });
-
-    /* ── THEN THE ACCOUNT ─────────────────────────────────────────────────
-       Which catches a comp account, and an invited partner whose own email
-       never appears on an order. entitlementsFor does that gathering. */
-    const prof = await restGet(
-      supabaseUrl, serviceKey,
-      `profiles?email=eq.${encodeURIComponent(email)}&select=id&limit=1`,
-    );
-    if (prof.error) {
-      console.error('[verify-core] profile read failed:', prof.error);
-      return json({ error: 'could not check that right now' }, 503);
-    }
-    const id = Array.isArray(prof.data) && prof.data[0]?.id;
-    if (!id) return json({ ownsCore: false });
-
-    const read = await entitlementsFor({ supabaseUrl, serviceKey, userId: id, email });
-    if (!read.ok) {
-      console.error('[verify-core] entitlements read failed:', read.error);
-      return json({ error: 'could not check that right now' }, 503);
-    }
-    return json({ ownsCore: !!read.entitlements.hasGrant });
+    return json({ ownsCore: read.ownsCore });
   } catch (e) {
     return json({ error: safeError('verify-core', e, 'could not check that right now') }, 500);
   }
+
 }

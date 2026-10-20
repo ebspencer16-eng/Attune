@@ -210,6 +210,16 @@ import { ABOUT_YOU } from "../api/_lib/profile-setup-copy.js";
  * build when they disagree, which is the same arrangement scripts/check-render
  * already relies on to know what to render.
  */
+/**
+ * The query parameter that names which results page is open.
+ *
+ * At module scope because two places need it: the results view writes it, and
+ * the dashboard's address effect has to delete it on the way out. Ellie: "When
+ * I'm on the dashboard online, that URL says what comes next." It did, because
+ * only one of those two places existed.
+ */
+export const RESULTS_SECTION_PARAM = "s";
+
 const RENDERABLE_VIEWS = new Set([
   "account", "budget", "checklist", "conflict", "exercise1", "exercise2",
   "exercise3", "exercises", "home", "intimacy", "notes", "resources",
@@ -7930,29 +7940,24 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   const [typeShared, setTypeShared] = useState(false);
   const shareCardRef = useRef(null);
   const [shareBusy, setShareBusy] = useState(false);
-  const [stayEmail, setStayEmail] = useState('');
-  const [stayDone, setStayDone] = useState(() => { try { return !!localStorage.getItem('attune_stay_subscribed'); } catch { return false; } });
-  const [stayLoading, setStayLoading] = useState(false);
-  const handleStaySubmit = async () => {
-    if (!stayEmail.trim() || !stayEmail.includes('@')) return;
-    setStayLoading(true);
-    try {
-      // account isn't a prop of UnifiedResults — read from localStorage
-      // (matches the same lookup pattern used elsewhere in this component).
-      const _acct = (() => { try { return JSON.parse(localStorage.getItem('attune_account') || 'null'); } catch { return null; } })();
-      // beta_survey email retired (email #10 removed).
-      localStorage.setItem('attune_stay_subscribed', '1');
-    } catch {}
-    setStayDone(true);
-    setStayLoading(false);
-  };
+  /* The four `stay*` values and their submit handler were here. They belonged
+     to the Continue living attuned card, which Ellie asked to have taken off
+     this page; with the card gone the handler was a function nothing called
+     that still read like a sign-up, which is the shape this codebase keeps
+     finding and mistaking for a feature. The key it wrote,
+     attune_stay_subscribed, stays in the registry at the top of this file: it
+     is in readers' browsers already, and dropping it would mean a sign-out no
+     longer clears it. */
 
   // Section/page system: "summary" | "comm-overview" | "comm-{dim}" | "exp-overview" | "exp-{catId}" | "exp-life" | "reflection"
   // The results section is part of the URL, so a page can be linked to,
   // shared, bookmarked, and opened directly by a notification. A query param
   // rather than a path segment: no server rewrite rules needed, and the static
   // routes (/checkout, /start) are unaffected.
-  const SECTION_PARAM = "s";
+  /* Declared at module scope: the dashboard has to clear this parameter when
+     it leaves results, and a second `"s"` typed over there is the shape this
+     codebase keeps paying for. See RESULTS_SECTION_PARAM. */
+  const SECTION_PARAM = RESULTS_SECTION_PARAM;
   const sectionFromUrl = () => {
     try { return new URLSearchParams(window.location.search).get(SECTION_PARAM) || null; } catch { return null; }
   };
@@ -10700,219 +10705,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             );
           })()}
 
-          {/* ── KEEP GROWING (workbook tile + in-practice list) ── */}
-          <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>Keep growing</div>
+          {/* ── KEEP GROWING AND CONTINUE LIVING ATTUNED WERE HERE ──────
+              Ellie: "What comes next on the website should not include keep
+              growing or continue living attuned sections."
 
-          {/* ── WORKBOOK CTA ── */}
-          {/* Gated on hasWorkbook (i.e. user purchased the workbook addon).
-              The workbook is a paid product. Without this gate, every user
-              with results sees the download button and can fetch the
-              workbook from /api/generate-workbook for free, which bypasses
-              the paywall entirely. */}
-          {hasWorkbook && (() => {
-            // Build the payload from this couple's actual data
-            /**
-             * The workbook, which is a PDF.
-             *
-             * Ellie: "I want customers to be able to download the pdf. Remove the word
-             * file." This was 115 lines that tried a stored link, then a .docx from
-             * /api/generate-workbook, then html2pdf in a hidden iframe, then the .docx
-             * again, under a button reading "Download (.docx)". None of those is the
-             * workbook: the workbook is what the PDF service renders, and the dashboard
-             * has always asked for that one. Two download paths producing two different
-             * documents is the failure this codebase is organised against.
-             *
-             * src/workbook-download.js is the one path now, and both callers use it.
-             */
-            const buildAndDownload = async () => {
-              const payload = buildWorkbookPayload(
-                userName, partnerName,
-                ex1Answers, partnerEx1,
-                ex2Answers, partnerEx2,
-                coupleType
-              );
-              const stored = (() => {
-                try { return JSON.parse(localStorage.getItem('attune_order') || 'null')?.workbookUrl || null; }
-                catch { return null; }
-              })();
-              const got = await getWorkbookUrl({
-                storedUrl: stored,
-                body: payload,
-                /* Only when there is actually something to wait for. Her words, from the
-                   module that already says this on both surfaces. */
-                onBuilding: () => toast(WORKBOOK_COPY.generating),
-              });
-              if (got.error) { toast(got.error); return; }
-              saveWorkbook(got.url, userName, partnerName);
-            };
+              They were this page's own, with nothing matching them in the
+              app's version, which is the page she asked this one to match.
+              Keep growing listed the workbook, the budget and the checklist;
+              all three are tiles on the Learn tab, read from CATALOGUE, so
+              nothing lost a way in. Continue living attuned held the six-month
+              check-in sign-up.
 
-            return (
-              // 10.1 — owned workbook reads as one of the "keep growing" tools,
-              // not as a navy add-on pitch.
-              <div style={{ background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.25rem 1.4rem", marginBottom: "1.25rem", transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.85rem" }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(155,93,229,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B5DE5" strokeWidth="1.8" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Your personalized workbook</div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Exercises, prompts, and a discussion guide built from your answers</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap", alignItems: "center" }}>
-                  <button onClick={buildAndDownload}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "#9B5DE5", color: "white", borderRadius: 10, padding: "0.6rem 1.25rem", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 700, fontFamily: BFONT }}>
-                    ↓ Download workbook
-                  </button>
-                  <a href="/offerings#pkg-workbook" onClick={(e) => { if (onNavigateTool) { e.preventDefault(); onNavigateTool("workbook-upsell"); } }} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, color: C.ink, borderRadius: 10, padding: "0.6rem 1.15rem", textDecoration: "none", fontSize: "0.78rem", fontWeight: 600, fontFamily: BFONT }}>
-                    Order a bound copy →
-                  </a>
-                  {/* Ellie: "Remove the word file." It said "Opens in Word, Google
-                      Docs, or Pages", which was true of the document this button
-                      used to fetch and is not true of a workbook. */}
-                  <span style={{ fontSize: "0.66rem", color: C.muted, fontFamily: BFONT }}>A PDF, built from your answers</span>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* ── KEEP GROWING: in-practice list (workbook covered by CTA above) ── */}
-          <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-
-
-              {/* Relationship Reflection */}
-              {/* Relationship Reflection — only shown as an add-on prompt when not owned (10.2) */}
-              {!hasAnniversary && (
-                <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
-                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('reflection-upsell'); }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#10b981"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(16,185,129,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Relationship Reflection <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#10b981", background: "rgba(16,185,129,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>A third exercise about the moments that shaped you</div>
-                  </div>
-                  <div style={{ color: "#10b981", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1 }}>+</div>
-                </a>
-              )}
-              {/* Physical Intimacy Expectations — add-on prompt when not owned (10.2) */}
-              {!hasIntimacy && (
-                <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
-                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('intimacy-upsell'); }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#B5546E"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(181,84,110,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="16" viewBox="0 0 24 26" fill="none" stroke="#B5546E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 11 V8 a5 5 0 0 1 10 0 V11"/><rect x="4" y="11" width="16" height="12" rx="3"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Physical Intimacy Expectations <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#B5546E", background: "rgba(181,84,110,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Answered independently, compared side by side</div>
-                  </div>
-                  <div style={{ color: "#B5546E", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1 }}>+</div>
-                </a>
-              )}
-
-              {/* Merging Lives Checklist */}
-              {/* Keep growing lists what they do NOT have. The owned branch
-                  used to render here too, so a reader who already had the tool
-                  saw it under a heading that frames everything below it as
-                  something to grow into. Owned tools live on the dashboard. */}
-              {!hasChecklist && (
-                <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
-                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('checklist-upsell'); }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(193,127,71,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.clay} strokeWidth="1.8" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Newlywed Checklist <span style={{ fontSize: "0.62rem", fontWeight: 600, color: C.clay, background: "rgba(193,127,71,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>A practical guide to starting your life together</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </a>
-              )}
-
-              {/* Shared Budgeting */}
-              {/* Keep growing lists what they do NOT have. The owned branch
-                  used to render here too, so a reader who already had the tool
-                  saw it under a heading that frames everything below it as
-                  something to grow into. Owned tools live on the dashboard. */}
-              {!hasBudget && (
-                <a href="/offerings" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
-                  onClick={(e) => { e.preventDefault(); onNavigateTool && onNavigateTool('budget-upsell'); }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B5FE8"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(27,95,232,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B5FE8" strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Shared Budgeting Activity <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "#1B5FE8", background: "rgba(27,95,232,0.1)", borderRadius: 999, padding: "0.1rem 0.5rem", marginLeft: "0.35rem" }}>Add-on</span></div>
-                    <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Build a shared financial picture from your expectations</div>
-                  </div>
-                  <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-                </a>
-              )}
-
-              {/* In Practice resource library */}
-              <a href="/practice?from=app" style={{ display: "flex", alignItems: "center", gap: "1rem", background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "0.85rem 1.1rem", textDecoration: "none", transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = C.clay; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = C.stone; }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(193,127,71,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.clay} strokeWidth="1.8" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: C.ink, fontFamily: BFONT, marginBottom: "0.1rem" }}>Resource Library</div>
-                  <div style={{ fontSize: "0.68rem", color: C.muted, fontFamily: BFONT }}>Guides on communication, conflict, and growing together</div>
-                </div>
-                <div style={{ color: C.muted, fontSize: "0.9rem" }}>→</div>
-              </a>
-
-            </div>
-          </div>
-
-
-
-
-          {/* ── CONTINUE LIVING ATTUNED ── */}
-          <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginTop: "2rem", marginBottom: "0.85rem" }}>Continue living attuned</div>
-          <div style={{ background: C.warm, border: `1.5px solid ${C.stone}`, borderRadius: 16, padding: "1.4rem 1.6rem", marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.6rem" }}>Stay connected to your results</div>
-            {stayDone ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#ECFDF5", border: "1.5px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "0.75rem" }}>✓</div>
-                <p style={{ fontSize: "0.82rem", color: C.muted, fontFamily: BFONT, margin: 0, lineHeight: 1.55 }}>Done. We'll check in at 6 months with an option to retake and compare.</p>
-              </div>
-            ) : (
-              <>
-                <p style={{ fontSize: "0.85rem", color: C.muted, fontFamily: BFONT, fontWeight: 300, lineHeight: 1.72, marginBottom: "1rem" }}>
-                  We'll check in at 6 months with an option to retake and compare. Results shift more than most couples expect.
-                </p>
-                <div style={{ display: "flex", gap: "0.65rem", alignItems: "center", flexWrap: "wrap" }}>
-                  <input type="email" placeholder="your@email.com" value={stayEmail} onChange={e => setStayEmail(e.target.value)}
-                    style={{ flex: 1, minWidth: 180, border: `1.5px solid ${C.stone}`, borderRadius: 10, padding: "0.6rem 0.9rem", fontSize: "0.82rem", fontFamily: BFONT, outline: "none", background: "white", color: C.ink }} />
-                  <button disabled={stayLoading} onClick={handleStaySubmit}
-                    style={{ background: C.ink, color: "white", border: "none", borderRadius: 10, padding: "0.6rem 1.2rem", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", fontFamily: BFONT, whiteSpace: "nowrap", opacity: stayLoading ? 0.6 : 1 }}>
-                    {stayLoading ? "…" : "Stay in touch"}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: `1px solid ${C.stone}` }}>
-            <button onClick={() => onNavigateTool && onNavigateTool("home")} style={{ background: "#2d2250", border: "none", borderRadius: 10, padding: "0.7rem 1.5rem", fontSize: "0.78rem", color: "white", cursor: "pointer", fontFamily: BFONT, fontWeight: 700, letterSpacing: ".02em" }}>
-              Back to dashboard →
-            </button>
-          </div>
-
-          {/* The end of the whole experience is where to ask how it went. */}
+              The page is the four rows and the survey button now. */}
           {/* The seven-question card that used to sit here is gone. It asked
               a third set of questions at the same moment the survey asks its
               own, which is the product asking twice. One survey, and it opens
@@ -14696,6 +14500,15 @@ export default function App() {
       const url = new URL(window.location.href);
       if (view === 'results') url.searchParams.set('view', 'results');
       else url.searchParams.delete('view');
+      /* And the results page's own parameter, which only means something
+         inside results. It was written when a section opened and never taken
+         off, so backing out to the dashboard left an address that still named
+         the last page read. Ellie: "When I'm on the dashboard online, that URL
+         says what comes next."
+
+         Only cleared on the way out: while the view IS results, that component
+         owns this parameter and writing it from here would fight it. */
+      if (view !== 'results') url.searchParams.delete(RESULTS_SECTION_PARAM);
       if (view === 'home' && dashTab && dashTab !== 'home') url.searchParams.set('tab', dashTab);
       else url.searchParams.delete('tab');
       window.history.replaceState(window.history.state, '', url.pathname + (url.search || '') + url.hash);

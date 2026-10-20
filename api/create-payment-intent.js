@@ -19,6 +19,7 @@ import { PHYSICAL_ENABLED as FLAG_PHYSICAL_ENABLED } from './_lib/flags.js';
 // Prices live in one place. This file used to declare its own copy.
 import { ADDON_PRICES, DIGITAL_PRICES, PHYSICAL_PRICES } from './_catalogue.js';
 import { itemBasePrice, itemAddonTotal, itemSubtotal, normalizeItem, workbookAmount as wbAmount } from './_lib/cart-pricing.js';
+import { isStandaloneCart, ownsCoreFor } from './_lib/owns-core.js';
 /* What each package already includes, so this file does not say it again. */
 
 /**
@@ -361,13 +362,36 @@ export default async function handler(req) {
 
   const items = rawItems.map(normalizeItem);
 
-  // Validate every item has a valid package
+  /* ── EVERY ITEM IS A PACKAGE, OR THE WHOLE CART IS STANDALONE ──────────
+     Ellie: "I want users to be able to buy a standalone exercise but only if
+     they already own the base exercises."
+
+     So there are two legal shapes and nothing in between. Either every item
+     names a package, which is the ordinary order, or no item does and the cart
+     is one or more add-ons bought on their own. A cart mixing the two would be
+     a package order with a loose add-on floating beside it, which is not
+     something any surface can produce and not something this should invent a
+     price for.
+
+     The pricing needs no special case: an item with no package key bases at
+     nought, because DIGITAL_PRICES has no entry, and normalizeItem falls back
+     to core capabilities so every add-on on it stays billable. Measured: an
+     item carrying only addonConflict subtotals 40, which is what the packages
+     page lists. Ellie: "Confirmed that the exercise exercises are the same
+     price as listed on the website for those users." */
+  const standalone = isStandaloneCart(items);
   for (const it of items) {
+    if (standalone) continue;
     if (!DIGITAL_PRICES[it.pkgKey]) {
       return new Response(JSON.stringify({ error: `Invalid package: ${it.pkgKey}` }), {
         status: 400, headers: { 'Content-Type': 'application/json' }
       });
     }
+  }
+  if (standalone && items.every((it) => itemAddonTotal(it) <= 0)) {
+    return new Response(JSON.stringify({ error: 'Nothing in the cart to buy.' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   const buyerEmail = body.buyerEmail || body.email || null;
@@ -377,6 +401,36 @@ export default async function handler(req) {
 
   const supabaseUrl        = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+
+  /* ── AND THE RULE, WHICH LIVES HERE RATHER THAN IN THE PAGE ────────────
+     The checkout page asks /api/verify-core before it shows a card field, so
+     somebody finds out early. That is a courtesy and it runs in a browser,
+     which means it can be skipped by posting straight here.
+
+     This is the same question, asked again, by the same function. An add-on
+     has no meaning without the two core exercises, so selling one to an
+     account that does not own them takes money for something the buyer cannot
+     open.
+
+     A read that fails answers 503 and sells nothing. Treating "we could not
+     check" as "they do not own it" would refuse a paying customer, and
+     treating it as "they do" would be the guard not being there. */
+  if (standalone) {
+    const read = await ownsCoreFor({
+      supabaseUrl, serviceKey: supabaseServiceKey, email: buyerEmail,
+    });
+    if (!read.ok) {
+      console.error('[create-payment-intent] core check failed:', read.error);
+      return new Response(JSON.stringify({ error: 'We could not check your account just now. Please try again.' }), {
+        status: 503, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (!read.ownsCore) {
+      return new Response(JSON.stringify({
+        error: 'A single exercise can only be added to an existing Attune assessment. That email does not have one yet.',
+      }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
 
   // ── Promo code path ────────────────────────────────────────────────────
   // Code value shapes:
