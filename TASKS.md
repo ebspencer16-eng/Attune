@@ -31,7 +31,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
-| W95 | **The checkboxes save now. They never did.** `/api/convos` refused every request, signed in or not, so every tick went back a moment later on both surfaces. Site and app. |
+| W95 | **The checkboxes save now. They never did.** Two bugs in `/api/convos`, one on top of the other. Ticked, reloaded and unticked on my simulator against your live account. Site and app. |
 | W94 | **Discussions to have is six category rows, not five.** Life & Values was missing on the website and it is the biggest one: seven topics. Site and app. |
 | W96 | **The numbering runs 1 to 8 straight through** the Discussions list instead of restarting in each half. Site and app. |
 | W97 | **Things to consider is split into For both of you and For [name]**, and every row knows who it is for, not only the couple-type ones. Site and app. |
@@ -53,20 +53,30 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
-### W95 — why a drawn checkbox saved nothing
+### W95 — why a drawn checkbox saved nothing, twice
 
-`api/convos.js` asked `userForRequest(req)`. That function takes
-`{ token, supabaseUrl, anonKey }`, and a request object has none of those
-names, so the token was always undefined and the endpoint answered
-"unauthorized" to everybody from the day it shipped. 401 is also the right
-answer to a request with no token, so sweeping the live site from outside read
-as working, and both surfaces put a tick back when a save is refused, which is
-what they are supposed to do. The symptom was a box that filled and emptied
-again, which looks like a design decision.
+Two bugs, the same shape, one behind the other.
 
-Found by putting the server's reply on the screen in the simulator and tapping
-a box. `check-auth-shape.mjs` fails the build on any endpoint that hands that
-function the wrong shape.
+The endpoint asked `userForRequest(req)`. That function takes
+`{ token, supabaseUrl, anonKey }` and a request object has none of those names,
+so the token was undefined on every call and it answered "unauthorized" to
+everybody from the day it shipped. Fixing that turned up the second: the body
+parser answers `{ body }` or `{ error }`, and the handler read the key off the
+wrapper, so it answered "bad conversation" to a perfectly good one.
+
+Neither was visible from outside. A 401 is also the right answer to a request
+with no token, and a 400 is the right answer to a genuinely bad key, so a sweep
+of the live site reads as working. Both surfaces put a tick back when a save is
+refused, which is what they are supposed to do, so the symptom was a box that
+filled and emptied again: that reads as a design decision, not a failure.
+
+Found by putting the server's own reply on the screen in the simulator and
+tapping a box, twice. Two new gates: `check-auth-shape.mjs` on the first,
+and `check-body-parsing.mjs` widened for the second. Seven plants between them,
+seven caught.
+
+Then ticked, reloaded and unticked on your real account, so the row below the
+box greys and the tick survives a restart. I left nothing ticked.
 
 ### W94 — what was missing, and why
 

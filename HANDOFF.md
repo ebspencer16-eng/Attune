@@ -3713,3 +3713,48 @@ surface has gone back to its own).
 **The ratio held.** Three of eight sweeps were measuring something other than
 what they claimed, and finding that out was most of the work. When one reports
 something surprising, print one case end to end before believing the column.
+
+---
+
+## 2026-10-20 — her list of thirteen, finished
+
+Tree clean, pushed, EAS update published to production from b25c4168.
+Nothing half-done.
+
+**The thing worth knowing.** A tapped checkbox had never once saved, on either
+surface, and two separate bugs were in the way. `api/convos.js` handed
+`userForRequest` a Request when that function destructures
+`{ token, supabaseUrl, anonKey }`, so the token was undefined and the answer was
+401 to everybody. Behind it, the same file read the body off `jsonBody`'s
+wrapper, which answers `{ body }` or `{ error }`, so the key was undefined and
+the answer was 400. Both are the same family as `resultsGate` being handed the
+whole capabilities object rather than its `caps` half, recorded in CLAUDE.md:
+a return value with the right name and the wrong keys.
+
+Neither was findable from outside. 401 is the right answer to a request with no
+token and 400 is the right answer to a bad key, so a sweep of the deployed
+surface reads as working. Both surfaces put a tick back when a save is refused,
+which is correct, so the symptom read as a design decision. What found it was
+putting the server's own reply on the screen in the simulator and tapping.
+
+New gates: `check-auth-shape.mjs`, and `check-body-parsing.mjs` widened to read
+its callers rather than only drive them. `check-more-exercises.mjs` for the new
+section, ten plants. `check-tag-closure` widened to walk every `id="page-*"`.
+
+**And the camera lied, twice, which cost more than the bugs did.** Every
+screenshot this repo takes was captured with Chrome's beyond-the-viewport flag
+on, which resizes the page mid-capture so a responsive chart gets painted at
+two sizes at once. I read one of those pictures as gridlines still on the type
+pies after they had been fixed, and another as the conflict chart's columns
+huddled against its axis. Both charts were correct and their own models said so.
+`scripts/_lib/browser.mjs` takes an honest viewport shot now, and
+`scripts/probe-admin.mjs` reports each chart's type, scales, gridlines, legend
+and bar positions, so a claim about a chart is a number rather than a picture.
+
+Also worth knowing: a stale `admin-types.png` sitting in the scratchpad from an
+earlier session was read as this session's output for twenty minutes. The probe
+writes to `OUT`, which defaults to the working directory, not to `SHOT_DIR`.
+
+**Open for Ellie:** W113, whether the locked tiles on Learn should get the lock
+icon the exercises tiles now have (Learn only dims). W114, tick one discussion
+on her phone and confirm it stays.
