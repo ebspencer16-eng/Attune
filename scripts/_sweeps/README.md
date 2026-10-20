@@ -21,6 +21,7 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-nested-components.mjs` | a React component declared inside another | one holding state, fixed and now gated |
 | `sweep-swallowed-errors.mjs` | a catch that discards the error and says nothing | one cron reporting success after a failed read |
 | `sweep-alignment-change.mjs` | both alignment rules over every real couple's stored answers | 19 rows the old rule called aligned that are not; every score that fell had been a 100 |
+| `sweep-alignment-floor.mjs` | whether the new measure can still score low, over every pair of answers two people can give | floor reachable: opposite couples read 0 everywhere; the one generous branch fires on no real row |
 
 Two of them were wrong before they were right, which is the usual ratio:
 
