@@ -21,9 +21,24 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
+Thirteen from your list, plus two I found checking that nothing else dropped.
+
 | # | What I am doing |
 |--|--|
-| M088 | **One line of SQL to run**, which is what turns the checkboxes on. It is in the block under this table. Until you run it they stay drawn and inert, exactly as before. |
+| W102 | **Expectations overview says zero topics in every conversation row.** A live bug, so first. |
+| W96 | **Phrases to try, shown only to the partner who should say them.** Working back from which phrase belongs to which type, and which of you is which. |
+| W97 | **Things to consider split by eyebrow:** For both of you, and For [name]. |
+| W98 | **Discussions to have gets one eyebrow:** For the two of you to discuss together. |
+| W99 | **Phrases to try split the same way as Things to consider**, each section only when it has something in it. |
+| W100 | **The insights nav becomes four stacked tiles:** Highlights, Couple Type, exercise results, What Comes Next. Same width and shape, so it reads as four things to click. |
+| W101 | **Physical Intimacy page titles are the only lowercase ones in the insights nav.** |
+| W103 | **Every column labelled on the self versus partner gap**, and on every column chart in the admin. |
+| W104 | **No gridlines and no x axis labels** on average alignment by dimension, responsibilities and views. |
+| W105 | **Physical intimacy average alignment by dimension** laid out like the comms one. |
+| W106 | **Life and values gap** drawn like the self versus partner gap on the comms page. |
+| W107 | **A responses page in the admin for the conflict exercise.** |
+| W108 | **Couple type distribution as a pie**, like individual types, and neither with gridlines, axis labels or a legend. |
+| W109 | **Additional exercises is only on the website.** Found checking what else dropped; the app's Insights tab never got it. |
 
 ---
 
@@ -46,7 +61,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | Verified by you | What it was |
 |--|--|
 | W91 | The Additional exercises section was only under the results menu. It is on both stages of the Insights page now, from one component rather than the markup twice. |
-| W92 | The arrow sits above the notes icon on the What Comes Next rows. |
+| W92 | Asked for the arrow on top, then reversed: the notes icon is back on top. It had only ever moved on the website, which is why the app looked unchanged. |
 | S37 | My own price gate read the add-on price from the module it was checking, so a changed price moved both sides and it passed. The four numbers are typed in now and a price change fails it. |
 | W88 | A single exercise sells on its own, $40 (or $20 for Physical Intimacy), only to an email that already owns the assessment. Asked on the page and again on the server. |
 | W89 | Keep growing and Continue living attuned are off What Comes Next. The page is the four rows and the survey button. |

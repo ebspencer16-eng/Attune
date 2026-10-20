@@ -10812,11 +10812,30 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                               right?" Side by side they took two columns from
                               the words; one above the other they take one.
 
-                              And the arrow is the top one. Ellie: "Swap
-                              placement of notes icon and arrow on the what
-                              comes next dropdown rows, I want the arrow on
-                              top." */}
+                              Notes on top, and that is the second answer to
+                              the same question. Ellie asked for them swapped,
+                              "I want the arrow on top", and then: "I've
+                              changed my mind, I like notes being on top."
+
+                              Both are kept because the round trip is the
+                              reason this order is deliberate rather than
+                              accidental. The app has had notes on top all
+                              along: the swap was made here and not there,
+                              which is why it looked to her as though nothing
+                              had happened. Two surfaces draw this row. */}
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.1rem", flexShrink: 0 }}>
+                            <button
+                              onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
+                              aria-label={`Keep "${it.tip || it.quote}" in your relationship journal`}
+                              title={JOURNAL_COPY.saveTitle}
+                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.15rem 0.25rem", display: "inline-flex", alignItems: "center" }}>
+                              {/* A page with a pencil: the same picture the app
+                                  draws with square.and.pencil. */}
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                                <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
+                              </svg>
+                            </button>
                             {/* Ellie: "each with a grey arrow on the right hand
                                 side that takes you to the page in insights
                                 where that row's content is coming from." Grey,
@@ -10830,18 +10849,6 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                                 {"\u203A"}
                               </button>
                             ) : null}
-                            <button
-                              onClick={() => setKeepingAction([it.tip, it.quote, it.phrase].filter(Boolean).join(" "))}
-                              aria-label={`Keep "${it.tip || it.quote}" in your relationship journal`}
-                              title={JOURNAL_COPY.saveTitle}
-                              style={{ background: "transparent", border: "none", cursor: "pointer", color: C.muted, padding: "0.15rem 0.25rem", display: "inline-flex", alignItems: "center" }}>
-                              {/* A page with a pencil: the same picture the app
-                                  draws with square.and.pencil. */}
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                                <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4Z" />
-                              </svg>
-                            </button>
                           </div>
                         </div>
                       ))}
