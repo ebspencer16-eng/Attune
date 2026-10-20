@@ -71,6 +71,10 @@ import { IN_PRACTICE_BODIES } from "../api/_in-practice-bodies.js";
    app's. That means the same visuals, coloring, etc." */
 import { cardGround } from "../attune-app/src/lib/card-tints.js";
 import { QUICK_INK, TILE_GREY } from "../attune-app/src/lib/shared-inks.js";
+/* The three pronouns, from the module that owns them rather than typed here.
+   The sweep for constants declared on more than one surface found this list
+   in three places. */
+import { PRONOUNS } from "../api/_lib/pronouns.js";
 import { alignedTone } from "../attune-app/src/lib/aligned-tone.js";
 /* The colour each of the app's tabs is painted in. */
 import { tabGradientCss, tabGroundTail, cardTint } from "../api/_lib/section-grounds.js";
@@ -13846,6 +13850,47 @@ function DiagPanel({ renders }) {
   );
 }
 
+/**
+ * The three pronoun buttons on the profile panel.
+ *
+ * ── WHY IT IS OUT HERE ────────────────────────────────────────────────────
+ * It was declared inside an IIFE inside App's own JSX, so every render of App
+ * made a NEW component type and React threw this away and built it again
+ * rather than updating it. `useState` reinitialises on a remount, so the
+ * pronoun somebody had just chosen went back to whatever the account already
+ * held, in the buttons AND in the hidden input the form submits.
+ *
+ * That is the shape that cost the Side by Side panel: `const Layout` inside
+ * UnifiedResults, remounting about forty-eight times a second, replacing an
+ * opened <details> with a fresh shut one. Nothing errors and the console is
+ * clean. Found by sweeping for a component declared inside another: fourteen
+ * of them on the website, and this is the one that holds state.
+ *
+ * `initial` is passed rather than read from a closure, which is what kept it
+ * in there.
+ */
+function PronounPicker({ label, fieldKey, accentColor, bgColor, initial }) {
+  const [sel, setSel] = useState(initial || "");
+  useEffect(() => {
+    const el = document.getElementById(`profile_${fieldKey}_val`);
+    if (el) el.value = sel;
+  }, [sel, fieldKey]);
+  return (
+    <div style={{ marginBottom: "0.65rem" }}>
+      <div style={{ fontSize: "0.65rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{label}</div>
+      <div style={{ display: "flex", gap: "0.4rem" }}>
+        {PRONOUNS.map(p => (
+          <button key={p} onClick={() => setSel(sel === p ? "" : p)} type="button"
+            style={{ flex: 1, padding: "0.4rem 0.2rem", borderRadius: 8, border: `1.5px solid ${sel===p ? accentColor : "#E8DDD0"}`, background: sel===p ? bgColor : "white", color: sel===p ? accentColor : "#7A6753", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s" }}>
+            {p}
+          </button>
+        ))}
+      </div>
+      <input type="hidden" id={`profile_${fieldKey}_val`} defaultValue={sel} />
+    </div>
+  );
+}
+
 export default function App() {
   const _diagOn = (() => {
     try { return new URLSearchParams(window.location.search).get('diag') === '1'; } catch { return false; }
@@ -18973,24 +19018,8 @@ export default function App() {
 
     {/* ── PROFILE SETUP MODAL (inline edit panel) ── */}
     {showProfileSetup && (() => {
-      const PronounPicker = ({ label, fieldKey, accentColor, bgColor }) => {
-        const [sel, setSel] = React.useState(account?.[fieldKey] || "");
-        React.useEffect(() => { document.getElementById(`profile_${fieldKey}_val`).value = sel; }, [sel]);
-        return (
-          <div style={{ marginBottom: "0.65rem" }}>
-            <div style={{ fontSize: "0.65rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{label}</div>
-            <div style={{ display: "flex", gap: "0.4rem" }}>
-              {["she/her","he/him","they/them"].map(p => (
-                <button key={p} onClick={() => setSel(sel === p ? "" : p)} type="button"
-                  style={{ flex: 1, padding: "0.4rem 0.2rem", borderRadius: 8, border: `1.5px solid ${sel===p ? accentColor : "#E8DDD0"}`, background: sel===p ? bgColor : "white", color: sel===p ? accentColor : "#7A6753", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all 0.12s" }}>
-                  {p}
-                </button>
-              ))}
-            </div>
-            <input type="hidden" id={`profile_${fieldKey}_val`} defaultValue={sel} />
-          </div>
-        );
-      };
+      /* PronounPicker was declared here, inside this IIFE, inside App's JSX.
+         It is at module scope now; see the note on it. */
       return (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
           onClick={e => e.target === e.currentTarget && setShowProfileSetup(false)}>
@@ -19000,12 +19029,12 @@ export default function App() {
             <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.yourName}</div>
             <input type="text" placeholder={PROFILE_SETUP_COPY.yourNamePlaceholder} defaultValue={account?.name || ""} id="profile_name"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
-            <PronounPicker label="Your pronouns" fieldKey="pronouns" accentColor="#E8673A" bgColor="#FFF0EB" />
+            <PronounPicker label="Your pronouns" fieldKey="pronouns" accentColor="#E8673A" bgColor="#FFF0EB" initial={account?.pronouns || ""} />
             <div style={{ borderTop: "1px solid #E8DDD0", margin: "0.75rem 0 0.85rem" }} />
             <div style={{ fontSize: "0.7rem", color: "#7A6753", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: "0.35rem", letterSpacing: "0.04em" }}>{PROFILE_SETUP_COPY.partnerName}</div>
             <input type="text" placeholder={PROFILE_SETUP_COPY.partnerNamePlaceholder} defaultValue={account?.partnerName || ""} id="profile_partnerName"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "0.65rem", boxSizing: "border-box" }} />
-            <PronounPicker label="Partner's pronouns" fieldKey="partnerPronouns" accentColor="#1B5FE8" bgColor="#EEF0FF" />
+            <PronounPicker label="Partner's pronouns" fieldKey="partnerPronouns" accentColor="#1B5FE8" bgColor="#EEF0FF" initial={account?.partnerPronouns || ""} />
             <input type="email" placeholder={PROFILE_SETUP_COPY.partnerEmailPlaceholder} defaultValue={account?.partnerEmail || ""} id="profile_partnerEmail"
               style={{ width: "100%", padding: "0.78rem 1rem", border: "1.5px solid #E8DDD0", borderRadius: 11, fontSize: "0.88rem", fontFamily: "'DM Sans',sans-serif", color: "#0E0B07", background: "#FFFDF9", outline: "none", marginBottom: "1.25rem", boxSizing: "border-box" }} />
             <div style={{ background: "#F3EDE6", borderRadius: 10, padding: "0.65rem 0.9rem", marginBottom: "1rem", display: "flex", gap: "0.55rem", alignItems: "flex-start" }}>

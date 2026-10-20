@@ -18,6 +18,8 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-dead-exports.mjs` | exported names nothing imports | three genuinely dead, two in rule-defining files |
 | `sweep-twin-constants.mjs` | a constant declared on more than one surface | two colours typed twice, now in one place |
 | `sweep-her-edits.mjs` | prose shapes Ellie has already rewritten once | eleven, in TASKS.md under W79 |
+| `sweep-nested-components.mjs` | a React component declared inside another | one holding state, fixed and now gated |
+| `sweep-swallowed-errors.mjs` | a catch that discards the error and says nothing | one cron reporting success after a failed read |
 
 Two of them were wrong before they were right, which is the usual ratio:
 
@@ -27,6 +29,15 @@ Two of them were wrong before they were right, which is the usual ratio:
 - `sweep-role-tokens` reported 38 disagreements and all 38 were impossible
   pairings: it ran every couple type's strings against every kind of couple,
   including couples who could never be that type.
+- `sweep-nested-components` first measured each component's size by counting
+  braces from its first line and reported Sidebar as two lines and Entry as
+  two lines. Both are forty to fifty. It reads the extent off the parsed node
+  now, which is the only thing that knows where a function ends.
+- `sweep-swallowed-errors` looked for an explanatory comment only ABOVE the
+  catch, and most of the explanations in this codebase are written inside the
+  block. It was calling the documented ones undocumented. It reads both now,
+  and it reports separately the 22 that sit round a database or network call,
+  because a catch round localStorage is not the same question.
 
 So: when one of these reports something surprising, the first hypothesis is
 the harness. Print one case end to end before believing the column.

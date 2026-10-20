@@ -147,10 +147,35 @@ export default async function handler(req) {
   const sendEmail = (to, subject, html) => fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: `Attune <${fromEmail}>`, to: [to], subject, html }) }).then(r => r.ok);
   const isBeta = (u) => u.email && betaEmails.has(String(u.email).toLowerCase());
 
+  /**
+   * ── A FAILED READ IS NOT AN EMPTY ONE ───────────────────────────────────
+   * This was `catch {}` with `users = []` after it, so a Supabase hiccup
+   * became "nobody is eligible": the pass sent nothing and the run answered
+   * ok: true, sent: 0. Nobody would ever know, and the window moves on, so the
+   * people who should have been nudged that day are never nudged at all.
+   *
+   * The block ten lines above this already gets it right. It answers 503 with
+   * "could not read who to leave alone, so nothing was sent" when ITS read
+   * fails. The same function treated one failed read as a hard stop and
+   * another as a result.
+   *
+   * It returns the failure now and the handler reports it, which is the same
+   * answer the other read gives. Found by sweeping for a catch that discards
+   * the error around a database call: 410 catch blocks, 22 of that shape, and
+   * this is the one where silence costs somebody an email.
+   */
   async function runPass(field, startD, endD, build) {
-    let users = [];
-    try { const res = await fetch(`${url}/rest/v1/profiles?select=id,email,name&email_opt_in=eq.true&${field}=is.null&ex2_completed_at=gte.${daysAgo(endD)}&ex2_completed_at=lte.${daysAgo(startD)}`, { headers: H }); users = await res.json(); } catch {}
-    if (!Array.isArray(users)) users = [];
+    let users;
+    try {
+      const res = await fetch(`${url}/rest/v1/profiles?select=id,email,name&email_opt_in=eq.true&${field}=is.null&ex2_completed_at=gte.${daysAgo(endD)}&ex2_completed_at=lte.${daysAgo(startD)}`, { headers: H });
+      if (!res.ok) return { error: `could not read who is due (${res.status})`, eligible: 0, sent: 0, skipped: 0, failed: 0 };
+      users = await res.json();
+    } catch (e) {
+      return { error: `could not read who is due (${e?.message || 'request failed'})`, eligible: 0, sent: 0, skipped: 0, failed: 0 };
+    }
+    if (!Array.isArray(users)) {
+      return { error: 'the list of who is due came back in a shape this cannot read', eligible: 0, sent: 0, skipped: 0, failed: 0 };
+    }
     let sent = 0, skipped = 0, failed = 0;
     for (const u of users) {
       if (!u.email) continue;
@@ -164,5 +189,12 @@ export default async function handler(req) {
 
   const nudge1 = await runPass('survey_nudge_sent_at', 1, 3, NUDGE_EMAILS.survey_nudge_1);
   const nudge2 = await runPass('survey_nudge2_sent_at', 5, 8, NUDGE_EMAILS.survey_nudge_2);
+  /* A pass that could not read its list did not send nothing because nobody
+     was due; it sent nothing because it could not tell. The run says so, with
+     the status the other failed read uses. */
+  const broken = [nudge1, nudge2].filter((p) => p.error);
+  if (broken.length) {
+    return json({ ok: false, nudge1, nudge2, error: broken.map((p) => p.error).join('; ') }, 503);
+  }
   return json({ ok: true, nudge1, nudge2 });
 }

@@ -128,9 +128,9 @@ are built and typechecked but unlooked at.
 
 ### The bug sweeps
 
-Six sweeps. Two found something real, one found a latent hazard worth a check,
-and three found nothing, which is worth saying because the method can now see
-the thing it is looking for.
+Eight sweeps. Four found something real, one found a latent hazard worth a
+check, and three found nothing, which is worth saying because the method can
+now see the thing it is looking for.
 
 **1. Every endpoint, asked from outside with no sign-in.** 60 of them. Every
 one answers with a proper refusal or a legitimate public reply. No 500s, which
@@ -175,7 +175,38 @@ by nothing, and two of those read like live features:
 All three are gone. A function nobody calls, sitting in a file that defines a
 rule, is the next person's wrong answer.
 
-**6. One colour typed on two surfaces.** 557 named constants, 24 declared on
+**6. A React component declared inside another component.** Fourteen on the
+website, and one of them was a real bug: the pronoun buttons on your profile
+panel. They were declared inside the page's own markup, so every time anything
+on that page re-rendered, React threw the buttons away and rebuilt them, and
+the pronoun you had just picked went back to whatever your account already
+said. In the buttons and in the value the form submits.
+
+This is the same shape that made Side by Side impossible to open: a panel that
+reopened shut fifty times a second. Nothing errors and the console stays clean,
+which is why it is worth a check rather than an eye.
+
+The other thirteen are decoration and lose nothing when they are rebuilt, so
+they are deliberately left alone and the check says so in writing. If one of
+them ever starts holding something, it fails.
+
+**7. An error caught and thrown away without a word.** 410 of these across the
+product, and most are right: a browser in private mode refuses to remember
+anything, and a page should not break over that.
+
+22 sit round a database or a network call, which is the shape that has cost
+this product before. One of those is a real bug. The job that sends the survey
+nudge reads a list of who is due, and if that read failed it treated the answer
+as "nobody is due": it sent nothing and reported success. Nobody would know,
+and because the window moves on, the people who should have been nudged that
+day would never be nudged at all.
+
+Ten lines above it, the same job already gets this right for a different read:
+it stops and says "could not read who to leave alone, so nothing was sent". It
+says the same thing for this one now. Driven both ways to check: a failed read
+answers 503 and names it, and nobody being due is still a quiet success.
+
+**8. One colour typed on two surfaces.** 557 named constants, 24 declared on
 more than one surface, 14 agreeing exactly. Most are a name used for two
 different things. Two were one value drawn twice with nothing holding them:
 the ink your home screen's quick-link icons are drawn in, and the grey behind a

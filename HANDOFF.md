@@ -3680,3 +3680,36 @@ two type sizes on the horseman tiles. The Simulator lost its window part way
 through the round, which stops synthetic taps while screenshots keep working,
 and it does not come back from a script. The snapshot table, the horseman tile
 structure, the new icon and the Expectations bars on real data were all seen.
+
+---
+
+## 2026-10-19, the sweeps
+
+Eight, in `scripts/_sweeps/` with a README that records how three of them were
+wrong before they were right. They are not gates; nothing runs them.
+
+**Four real findings.** Three exported functions called by nothing, two of them
+in modules whose whole job is to be the single source of truth. Two colours
+typed on both surfaces with nothing holding them. A React component holding
+state declared inside another component, which reset a customer's pronoun
+choice on the profile form. And a cron that reported success after a failed
+read, in a function that already handles a different failed read correctly ten
+lines above.
+
+**One latent hazard, now gated.** The two role-token resolvers agree on every
+reachable input and disagree about what to do when a token cannot resolve. The
+reason nothing reaches that was a property nobody was checking.
+
+**Three clean**, and one of those only counts because the harness was fixed
+first: the payload-field sweep matched `name:` only, so it could not see
+`return { groups, buckets }`, which is how most of this codebase builds an
+object. Every one of its seven "findings" was that blindness.
+
+**New gates:** check-nested-components. Widened: check-role-tokens (each couple
+type only uses tokens for an axis its two people differ on), check-card-tints
+(TILE_GREY has no second value to compare any more, so it checks that neither
+surface has gone back to its own).
+
+**The ratio held.** Three of eight sweeps were measuring something other than
+what they claimed, and finding that out was most of the work. When one reports
+something surprising, print one case end to end before believing the column.

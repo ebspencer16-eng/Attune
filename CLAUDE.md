@@ -1241,6 +1241,44 @@ entirely. Every file read correctly and nothing threw. Loading the page and
 asking for the function is what showed it, which is the argument for a gate
 that drives rather than one that reads.
 
+**One function can treat a failed read as a hard stop in one place and as a
+result in another.** `api/cron-survey-nudge.js` answers 503 with "could not
+read who to leave alone, so nothing was sent" when one of its reads fails, and
+ten lines later had `catch {}` with `users = []` after it, so the same kind of
+failure became "nobody is due": nothing sent, `ok: true`, nobody any the wiser.
+Worse than a silent failure elsewhere, because the nudge is time-windowed, so a
+missed run is not retried, it is skipped for those people for ever.
+
+The tell is two reads in one function handled two ways. Worth looking for
+whenever a handler already has a careful guard: the careful one shows what the
+author thought mattered, and the careless one is usually later.
+
+Sweeping for this is cheap and mostly noise: 410 catch blocks across the three
+surfaces, 175 silent. The signal is the 22 that sit round a database or network
+call, because a catch round `localStorage` or `JSON.parse` is a different
+question and there are over a hundred of those.
+
+**A component declared inside another is latent until something makes the
+parent render often.** CLAUDE.md records one of these costing the Side by Side
+panel. Sweeping for the shape found fourteen more on the website, thirteen
+presentational and one that mattered: `PronounPicker` inside App's own JSX,
+holding the chosen pronoun in `useState` and writing it to the hidden input the
+profile form submits. Any re-render of App put it back to whatever the account
+already said.
+
+The thing worth keeping is how to triage them. The nesting is not the bug; what
+the remount DESTROYS is. Hook state, a ref, an open `<details>`, a half-typed
+field, a scroll position. A stateless one remounts invisibly and costs only
+work, so `check-nested-components` forbids only the ones that hold something
+and says in writing that it allows the rest. A check that said "no nested
+components" would be a large edit to a 19,000 line file for no behaviour
+change, and would get switched off.
+
+Two measurement traps in finding them. Indentation says nothing about scope, so
+it has to be parsed. And a component's extent cannot be found by counting
+braces from its first line: that gave Sidebar two lines and Entry two lines
+where both are over forty. Read the extent off the parsed node.
+
 **A sweep that cannot see the common spelling is a sweep that found nothing
 because it looked at nothing.** A sweep for a payload field the app reads and
 the server never sets matched `name:` and reported seven findings. All seven
