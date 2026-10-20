@@ -26,7 +26,9 @@ a question in it I want to get right before building, and it is under the table.
 
 | # | What I am doing |
 |--|--|
-| W88 | **Buying a standalone exercise.** The server half is built and the rest is a change to what the cart will sell, which I have not made yet. Read the note below before I go further. |
+| W89 | **What Comes Next on the site carries two sections the app does not.** Removing Keep growing and Continue living attuned so the page is the four rows. |
+| W90 | **The dashboard's address says what-comes-next.** Finding what writes it and why it survives leaving the page. |
+| W88 | **Standalone exercise purchase, approved, at the price already on the page.** Opening the cart to an add-on with no package, pricing it, and gating it on the email check that is already built. |
 
 ---
 
@@ -876,31 +878,26 @@ carried the old day arithmetic, the one that turned over at 5pm and gave your
 phone and the simulator different words on the same day. That is gone, along
 with three comments that pointed at it or described it as live.
 
-### W88 — what I found, and the decision that is yours
+### W88 — approved, and the price is settled
 
-The server half is built and working: `/api/verify-core` takes an email and
-answers whether that account already owns the core exercises. It reads the
-orders, counts an invited partner who never paid, counts somebody who bought
-and has not made an account yet, and answers the same for "no account" as for
-"account with no package" so it cannot be used to find out who is registered.
+You: "I want users to be able to buy a standalone exercise but only if they
+already own the base exercises. Confirmed that the exercise exercises are the
+same price as listed on the website for those users."
 
-Then I found something that changes the job. **Today you cannot buy a
-standalone exercise at all.** The add-on tiles on the packages page refuse it:
-with an empty cart they flash "Pick a package first" and scroll you up to the
-packages. Add-ons are not line items, they are flags attached to a package
-already in the cart.
+So no new price list. A standalone exercise costs what the packages page
+already says it costs, which is the add-on price in `api/_catalogue.js`, and
+there is one number for each rather than a second standalone one.
 
-So this is not a guard to add. It is opening a door that is currently shut, and
-the door is the money path: the cart has to allow an add-on-only line, checkout
-has to price a cart with no package in it, and create-payment-intent has to
-build the Stripe lines for one. That file is where the $198 against $295 bug
-lived, and where a missing line once left an order forty dollars short of its
-own quote.
+What that takes, in order:
 
-I did not want to make that change at the end of a long round and hand you
-something I could not test against a real card. It is the next thing I pick up.
+1. The cart will sell an add-on with no package in it. Today it refuses:
+   `addAddonToCart` flashes "Pick a package first" on an empty cart.
+2. Checkout prices a cart with no package. The subtotal, the tax lines and the
+   Stripe lines all start from a package today.
+3. The email box, which only appears for such a cart, and `/api/verify-core`,
+   which is built and answers whether that address already owns the core.
+4. The order that results has to grant the add-on and nothing else.
 
-One question, because it changes the build. When somebody who already owns the
-core buys Conflict Patterns on its own, is that **$40, the add-on price**, or a
-different standalone price? The catalogue has one number for it today and I do
-not want to invent a second.
+The invariant I am holding it to is the one this codebase already paid for:
+the lines sent to Stripe add up to what the cart says is owed. That is what
+catches a missing line, a double-counted one and a mispriced one at once.
