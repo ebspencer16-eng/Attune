@@ -72,9 +72,30 @@ const missingColumn = (text) => /convos_data/.test(String(text || '')) && /colum
 export default async function handler(req) {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || serviceKey;
   if (!supabaseUrl || !serviceKey) return json({ ok: false, error: 'not configured' }, 500);
 
-  const me = await userForRequest(req);
+  /**
+   * ── THE TOKEN, NOT THE REQUEST ──────────────────────────────────────────
+   * This read `userForRequest(req)`, and that function takes
+   * `{ token, supabaseUrl, anonKey }`. A Request has none of those keys, so
+   * `token` was undefined on every call and the endpoint answered 401 to
+   * everybody, signed in or not, from the day it shipped. The boxes on both
+   * surfaces drew, took the tap, and reverted a moment later.
+   *
+   * Nothing could see it. The 401 is also the right answer to a request with
+   * no token, so the endpoint looked correct from outside, and the surfaces
+   * put the tick back because that is what they do when a save is refused.
+   *
+   * CLAUDE.md already says this about `resultsGate` being handed the whole
+   * capabilities object rather than its `caps` half: the object with the
+   * right name is not always the object with the right keys. Same mistake,
+   * nine lines into a new endpoint. check-auth-shape.mjs now fails the build
+   * on a caller that hands this function anything but those three keys.
+   */
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization') || '';
+  const token = auth.replace(/^Bearer\s+/i, '').trim();
+  const me = token ? await userForRequest({ token, supabaseUrl, anonKey }) : null;
   if (!me?.id) return json({ ok: false, error: 'unauthorized' }, 401);
 
   const svc = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };

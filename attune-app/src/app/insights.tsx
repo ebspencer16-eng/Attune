@@ -34,6 +34,7 @@ import ConflictExercise from '@/components/conflict-exercise';
 import ReflectionExercise from '@/components/reflection-exercise';
 import IntimacyExercise from '@/components/intimacy-exercise';
 import SignIn from '@/components/sign-in';
+import MoreExercises from '@/components/more-exercises';
 import {
   Colors, MaxContentWidth, OrangeGround, Palette, Radius, Spacing, StatusColor, Type,
 } from '@/constants/attune-theme';
@@ -314,6 +315,21 @@ export default function InsightsScreen() {
   const exercises = Object.values(home?.exercises ?? {})
     .filter((e) => e.owned)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  /**
+   * And the ones they do not own, for the section at the foot of this tab.
+   *
+   * Ellie: "additional exercise add-on section exists on insights page below
+   * exercise status table and below insights menu (the two stages of that
+   * page)." Both stages are in this function, so the list is worked out once
+   * here and handed to each of them.
+   *
+   * `owned` is the server's answer, `!e.capability || !!caps[e.capability]`,
+   * which is the same rule the website's AdditionalExercises reads off the
+   * same registry. Nothing here names an exercise.
+   */
+  const unowned = Object.values(home?.exercises ?? {})
+    .filter((e) => !e.owned)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   const you = home?.firstName || 'You';
   const partner = home?.partnerName || 'Your partner';
@@ -367,6 +383,10 @@ export default function InsightsScreen() {
            * for a payload written before it sent one.
            */
           owned={ownedForResults}
+          /* Below the insights menu, which is the second of the two stages
+             she named. The menu scrolls, so this goes inside its scroll
+             rather than under it. */
+          menuFooter={<MoreExercises exercises={unowned} />}
           /* The section's colour, which the wash behind it takes. See the
              note on onAccent: the tab paints one wash, so the page has to
              say what colour it is rather than painting its own. */
@@ -435,6 +455,8 @@ export default function InsightsScreen() {
         </Text>
 
         <StatusTable exercises={exercises} you={you} partner={partner} onOpen={setOpenExercise} />
+        {/* The first of the two stages: below the exercise status table. */}
+        <MoreExercises exercises={unowned} />
       </ScrollView>
     </Shell>
   );
@@ -717,10 +739,12 @@ function StatusCell({
  * The individual section screens are the next piece of work. This renders the
  * couple type and what is available, which is what the payload supports today.
  */
-function Results({ results, owned, onAccent }: {
+function Results({ results, owned, onAccent, menuFooter }: {
   results: ResultsResponse | null; owned: string[];
   /** Passed straight through: the section's colour, for the wash. */
   onAccent?: (color: string | null) => void;
+  /** Passed straight through: what sits under the landing menu's tiles. */
+  menuFooter?: React.ReactNode;
 }) {
   if (!results) {
     return (
@@ -777,6 +801,7 @@ function Results({ results, owned, onAccent }: {
       pageTitles={results.pageTitles ?? null}
       pageCopy={results.pageCopy ?? null}
       onAccent={onAccent}
+      menuFooter={menuFooter}
     />
   );
 }

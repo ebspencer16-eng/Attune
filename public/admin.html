@@ -886,7 +886,7 @@
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Couple type distribution</div><div class="chart-subtitle">Across all typed couples</div></div><select class="tile-slicer" id="slz-rcouple" title="Cut this tile by a segment" aria-label="Slz rcouple"><option value="">Everyone</option></select></div>
           <div class="chart-body">
-            <div class="insight-list" id="comm-type-bars" style="margin-top:.5rem;"></div>
+            <canvas id="comm-type-bars"></canvas>
           </div>
         </div>
       </div>
@@ -957,7 +957,7 @@
       <div class="chart-grid full">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Risk patterns</div><div class="chart-subtitle">How often each one shows up &middot; share of people answering Often or Sometimes</div></div><select class="tile-slicer" id="slz-conf" title="Cut this tile by a segment" aria-label="Slz conf"><option value="">Everyone</option></select></div>
-          <div class="chart-body"><canvas id="chart-conflict-risk"></canvas></div>
+          <div class="chart-body"><div style="height:200px"><canvas id="chart-conflict-risk"></canvas></div></div>
         </div>
       </div>
       <div class="qx-section" id="qx-conflict" style="margin-top:1.25rem"></div>
@@ -1611,30 +1611,31 @@ window.adminAuthHeaders = function(extra){
       </div>
     </div>
 
-    <!-- Data quality -->
-    <div class="chart-card" style="margin-bottom:1.25rem;padding:.8rem 1.1rem;">
-      <div style="display:flex;gap:1.75rem;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;">Data quality</span>
-        <span style="font-size:.76rem;color:var(--muted);">Profiles <strong id="dq-total" style="color:#1B2547;">—</strong></span>
-        <span style="font-size:.76rem;color:var(--muted);">With answers <strong id="dq-answers" style="color:#1B2547;">—</strong></span>
-        <span style="font-size:.76rem;color:var(--muted);">Complete <strong id="dq-complete" style="color:#34D399;">—</strong></span>
-        <span style="font-size:.76rem;color:var(--muted);">Partial <strong id="dq-partial" style="color:#FBBF24;">—</strong></span>
-        <span style="font-size:.76rem;color:var(--muted);">Unpaired <strong id="dq-unpaired" style="color:#FBBF24;">—</strong></span>
-        <span style="font-size:.68rem;color:var(--dim);margin-left:auto;">Unfiltered totals</span>
-      </div>
-    </div>
-
     <!-- Couple type distribution -->
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type distribution</div><div class="chart-card-sub">All 10 pairings, computed from both partners' answers</div></div><select class="tile-slicer" id="slz-tcouple" title="Cut this tile by a segment" aria-label="Slz tcouple"><option value="">Everyone</option></select></div>
-        <div id="types-ct-bars" style="display:flex;flex-direction:column;gap:.55rem;padding:.25rem 1.4rem 1rem;">
-          <div style="color:var(--muted);font-size:.78rem;">Loading…</div>
-        </div>
+        <!-- A canvas, because this is the same doughnut as the tile beside it
+             now. It was a div of HTML bars, and handing a div to Chart.js
+             throws: the tile sat on "Loading" for ever and nothing said why. -->
+        <!-- The BOX is the size, not the canvas. A max-width on the canvas lets
+             Chart.js size its bitmap to the full container and then CSS scales
+             that image down: measured 260x260 of drawing squeezed into a
+             quarter of it, which reads as a chart that failed rather than one
+             that was shrunk. -->
+        <div style="padding:.25rem 1.4rem 1rem;"><div style="height:280px;width:280px;margin:0 auto;"><canvas id="types-ct-bars"></canvas></div></div>
       </div>
       <div class="chart-card">
         <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment" aria-label="Slz tindiv"><option value="">Everyone</option></select></div>
-        <canvas id="types-indiv-chart" height="220"></canvas>
+        <!-- In a box with a height, like the tile above it. A responsive chart
+             with no height to fill collapses: this drew a sliver a few pixels
+             tall and read as a tile that had failed to load. -->
+        <!-- The BOX is the size, not the canvas. A max-width on the canvas lets
+             Chart.js size its bitmap to the full container and then CSS scales
+             that image down: measured 260x260 of drawing squeezed into a
+             quarter of it, which reads as a chart that failed rather than one
+             that was shrunk. -->
+        <div style="padding:.25rem 1.4rem 1rem;"><div style="height:280px;width:280px;margin:0 auto;"><canvas id="types-indiv-chart"></canvas></div></div>
       </div>
     </div>
 
@@ -1661,6 +1662,23 @@ window.adminAuthHeaders = function(extra){
       <div class="chart-card">
         <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Couple type &times; outcomes</div><div class="chart-card-sub">Survey answers grouped by couple type. Rating and accuracy are 1&ndash;5 averages. Conversation is the share who said it led to a new one.</div></div><select class="tile-slicer" id="slz-tout" title="Filter the population before grouping" aria-label="Slz tout"><option value="">Everyone</option></select></div>
         <div id="types-outcomes" style="padding:.7rem 1.4rem 1.4rem;"></div>
+      </div>
+    </div>
+
+    <!-- Data quality, moved down to sit directly above Formula diagnostics.
+         Ellie: "Not sure what data quality section means, move that down to be
+         above formula diagnostics tile." It was under the four headline tiles,
+         where a row of counts with no explanation reads as a claim about the
+         product rather than as a note about the data behind it. -->
+    <div class="chart-card" style="margin-bottom:1.25rem;padding:.8rem 1.1rem;">
+      <div style="display:flex;gap:1.75rem;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700;">Data quality</span>
+        <span style="font-size:.76rem;color:var(--muted);">Profiles <strong id="dq-total" style="color:#1B2547;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">With answers <strong id="dq-answers" style="color:#1B2547;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Complete <strong id="dq-complete" style="color:#34D399;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Partial <strong id="dq-partial" style="color:#FBBF24;">—</strong></span>
+        <span style="font-size:.76rem;color:var(--muted);">Unpaired <strong id="dq-unpaired" style="color:#FBBF24;">—</strong></span>
+        <span style="font-size:.68rem;color:var(--dim);margin-left:auto;">Unfiltered totals</span>
       </div>
     </div>
 
@@ -4235,9 +4253,9 @@ async function renderResponseTile(opts){
        dimension, responsibilities, views in responses." On a radar those are
        the web, the spokes and the names round the edge. The shape and the
        hover carry it, which is what she asked for on the type charts too. */
-    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#5C6DDA',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#5C6DDA'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{display:false},angleLines:{display:false},ticks:{display:false},pointLabels:{display:false}}}}});
+    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#5C6DDA',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#5C6DDA'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},pointLabels:{font:{size:10}}}}}});
   } else if(opts.kind==='expalign'){
-    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#C55329',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C55329'}]},options:{scales:{r:{grid:{display:false},angleLines:{display:false},ticks:{display:false},pointLabels:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#C55329',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C55329'}]},options:{scales:{r:{beginAtZero:true,max:100,grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},pointLabels:{font:{size:10}}}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
     mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
@@ -4253,15 +4271,19 @@ async function renderResponseTile(opts){
     const sorted=gaps.slice().sort((x,y)=>y.v-x.v);
     const host=document.getElementById(opts.target);
     if(host){
-      host.innerHTML='<canvas id="'+opts.target+'-canvas"></canvas>';
+      /* 170 points tall, which is what the self versus partner gap uses. */
+      host.innerHTML='<div style="height:170px"><canvas id="'+opts.target+'-canvas"></canvas></div>';
       mkChart(document.getElementById(opts.target+'-canvas'),{
         type:'bar',
         data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),
           backgroundColor:'#F87171',borderRadius:4,maxBarThickness:34}]},
         options:{responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.y+'%'}}},
-          scales:{y:{beginAtZero:true,ticks:{display:false},grid:{display:false},border:{display:false}},
-                  x:{ticks:{display:false},grid:{display:false},border:{display:false}}}}});
+          /* The same axes as the self versus partner gap, at her word: "I want
+             this to be the same size as the other, with the x and y axes
+             labels." Same height too, set on the box below. */
+          scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+                  x:{ticks:{font:{size:9},maxRotation:45,minRotation:45},grid:{display:false}}}}});
     }
   } else if(opts.kind==='respagree'){
     const items=(a.respAgreement||[]).slice().sort((x,y)=>x.v-y.v);
@@ -4667,13 +4689,21 @@ async function renderConflictResponses(){
   const host=el.parentElement;
   if(!stats.length){ if(host) host.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">No conflict responses aggregated yet.</div>'; return; }
   const sorted=stats.sort((a,b)=>b.v-a.v);
+  /* ── NAME THE BARS ────────────────────────────────────────────────────
+     Ellie: "fix the data views, make this page impactful and readable."
+
+     This drew four unlabelled columns, so the one thing it is for, which of
+     the four patterns is the common one, could not be read off it at all. The
+     names are back, the scale is a percentage, and each column carries its own
+     number the way every other column in the admin does now. Same height as
+     the gap charts, so the tab reads as one page. */
   mkChart(el,{
     type:'bar',
     data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),backgroundColor:'#1B5FE8',borderRadius:4,maxBarThickness:46}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.y+'% (n='+sorted[c.dataIndex].n+')'}}},
-      scales:{y:{beginAtZero:true,max:100,ticks:{display:false},grid:{display:false},border:{display:false}},
-              x:{ticks:{display:false},grid:{display:false},border:{display:false}}}}});
+      scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+              x:{ticks:{font:{size:10}},grid:{display:false}}}}});
 }
 
 // Physical Intimacy: per-dimension alignment vs gap, computed from the cube.
@@ -4715,7 +4745,7 @@ async function renderIntimacyResponses(){
         borderColor:'#B5546E',backgroundColor:'rgba(181,84,110,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#B5546E'}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>' '+c.parsed.r+'% aligned'}}},
-        scales:{r:{beginAtZero:true,max:100,grid:{display:false},angleLines:{display:false},ticks:{display:false},pointLabels:{display:false}}}}});
+        scales:{r:{beginAtZero:true,max:100,grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},pointLabels:{font:{size:10}}}}}});
   }
 }
 
@@ -4936,7 +4966,7 @@ async function renderCubeDist(opts){
     /* Ellie, of the two type distributions: "Neither of those should have
        gridlines, axes labels, or a legend, just the hover over to see the
        detail." A doughnut has no axes; the legend is the part it had. */
-    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
+    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
   } else if(opts.mode==='hbar'){
     /* Columns, like everything else. Ellie: "I want column charts." This one
        drew its bars sideways, which is the only tile on the page that did. */
@@ -5216,11 +5246,18 @@ async function renderSelfPartnerGap(containerId){
         // Max follows the data rather than the scale's theoretical 4 points.
         // Real gaps sit under 1, so a fixed axis left the bars as slivers.
         // Rounded up to a clean step so the top gridline is a round number.
-        /* No grid and no tick labels, at her word, on this one as well as the
-           two radars. Each column carries its own number now, drawn by
-           mkChart, and the tooltip names the dimension. */
-        y: { beginAtZero: true, max: yMax, ticks: { display: false }, grid: { display: false }, border: { display: false } },
-        x: { ticks: { display: false }, grid: { display: false }, border: { display: false } },
+        /* ── AXIS LABELS STAY ON THE GAP CHARTS ───────────────────────
+           They were taken off with the radars' furniture, and that was the
+           wrong reading of "no x axis labels": Ellie meant the alignment
+           charts, the two radars, where an x axis is a thing that should not
+           exist at all. Of these columns she said the opposite, asking for
+           Life & Values to match this one "with the x and y axes labels".
+
+           So the names stay, the scale stays, and the gridlines go: each
+           column already carries its own number. */
+        y: { beginAtZero: true, max: yMax, ticks: { stepSize: yMax / 2, font: { size: 10 } },
+             grid: { display: false } },
+        x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
       },
     },
   });
@@ -5731,6 +5768,18 @@ function exportFulfillmentCSV() {
 // details" is expected to do.
 function mkChart(el, cfg) {
   if (!el) return null;
+  /* ── IT HAS TO BE A CANVAS ──────────────────────────────────────────────
+     Chart.js throws on anything else, and the throw lands inside whatever
+     async renderer called this, so the tile keeps its "Loading" placeholder
+     and nothing anywhere says why. That is what happened when the couple type
+     tiles were pointed here while still being divs of HTML bars: Ellie,
+     minutes later, "couple type distribution pie chart still says loading".
+     Saying it out loud costs two lines. */
+  if (!(el instanceof HTMLCanvasElement)) {
+    console.error('[admin] mkChart needs a <canvas>, got <' + (el.tagName || '?').toLowerCase() + ' id="' + (el.id || '') + '">');
+    el.innerHTML = '<div style="color:var(--dim);font-size:.75rem;padding:.6rem 0">This tile could not draw: its container is not a canvas.</div>';
+    return null;
+  }
   try { const ex = Chart.getChart(el); if (ex) ex.destroy(); } catch (e) {}
   const o = cfg.options = cfg.options || {};
   o.animation = o.animation === false ? false : Object.assign({ duration: 300 }, o.animation);
@@ -5812,6 +5861,23 @@ function mkChart(el, cfg) {
  */
 function flatTicks(cfg) {
   try {
+    /* ── ONLY CHARTS THAT HAVE AN X AXIS ──────────────────────────────────
+       This created `options.scales.x` on every chart it was handed, and
+       Chart.js draws a cartesian axis wherever it finds one: a doughnut came
+       out with vertical gridlines behind it and the slice names strung along
+       the bottom, and a radar got the same outside its web.
+
+       Ellie, of the two type distributions: "Still seeing gridlines and x axis
+       labels on the type distribution pie charts, I shouldn't." And of the
+       alignment charts: "at some point we added gridlines outside of the
+       visual and labels along the x axis and I don't want that." One cause,
+       both complaints.
+
+       A doughnut, a pie, a radar and a polar area have no x axis to flatten,
+       so there is nothing here for them to want. */
+    const CARTESIAN = cfg.type !== 'doughnut' && cfg.type !== 'pie'
+      && cfg.type !== 'radar' && cfg.type !== 'polarArea';
+    if (!CARTESIAN) return;
     const o = cfg.options = cfg.options || {};
     const horizontal = o.indexAxis === 'y';
     o.scales = o.scales || {};
@@ -6086,7 +6152,13 @@ async function loadTypesData(force) {
     if (TYPES_DATA.error) throw new Error(TYPES_DATA.error);
   } catch (e) {
     if (stamp) stamp.textContent = 'Error';
-    document.getElementById('types-ct-bars').innerHTML =
+    /* Into the canvas's container, not the canvas. This wrote innerHTML
+       straight onto #types-ct-bars, which was a div and is a canvas now that
+       the tile is a doughnut: innerHTML on a canvas is dropped silently, so
+       the one message explaining a failed load would never have appeared. */
+    const _ctHost = document.getElementById('types-ct-bars');
+    const _ctBox = (_ctHost && _ctHost.tagName === 'CANVAS') ? _ctHost.parentElement : _ctHost;
+    if (_ctBox) _ctBox.innerHTML =
       `<div style="color:#F87171;font-size:.78rem;">Could not load typing data: ${e.message}</div>`;
     return;
   }

@@ -34,7 +34,7 @@ import {
 // cannot alter which values reach the maths.
 const computeOverallExpectationsPctClient = (ex2, partnerEx2, userName, partnerName) =>
   overallExpectationsPct({ mine: ex2, theirs: partnerEx2, youName: userName, themName: partnerName });
-import { normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL, respDistance, lifeDistance } from "../api/_lib/expectations.js";
+import { normRespValue, respDisplay, mirrorRespKey, mirrorLifeId, LIFE_CATEGORY_LABEL, respDistance, lifeDistance, expectationsSummary } from "../api/_lib/expectations.js";
 // How close two answers are, and what that means. One module for the whole
 // product; see api/_lib/alignment.js. Ellie: "One source of truth for every
 // alignment score, wherever it appears."
@@ -151,7 +151,7 @@ import { pairingLabel, pairingTier } from "../api/_lib/pairing.js";
 import { INDIVIDUAL_TYPE_DISPLAY } from "../api/_individual-types.js";
 import { AXES, MAP_CAPTION, ENGAGE_AXIS, OPEN_AXIS } from "../api/_axes.js";
 import { commAlignmentPct } from "../api/_lib/comm-alignment.js";
-import { EXERCISES, ownedExercises } from "../api/_exercises.js";
+import { EXERCISES, MORE_EXERCISES_LABEL, ownedExercises, unownedExercises } from "../api/_exercises.js";
 import { sarahEx1, sarahEx2, jamesEx1, jamesEx2 } from "../api/_lib/demo-couple.js";
 /* The demo's four archetypes, which are what the demo path actually types
    from. See that file: Sarah and James supply the names and the other
@@ -3891,12 +3891,12 @@ export function AdditionalExercises({ pkg }) {
      makes it additional. So an exercise added to the registry appears here
      without anyone remembering to, and one renamed cannot be renamed in only
      one place. */
-  const extras = EXERCISES.filter((e) => e.capability && !pkg[e.capability]);
+  const extras = unownedExercises(pkg);
   if (!extras.length) return null;
   return (
     <div style={{ marginTop: "2rem" }}>
       <div style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.85rem" }}>
-        Additional exercises
+        {MORE_EXERCISES_LABEL}
       </div>
       {/* ── ALWAYS THREE COLUMNS, HOWEVER MANY TILES ────────────────────
           Ellie: "3 rounded square tiles, one for each additional exercise. If
@@ -3916,20 +3916,39 @@ export function AdditionalExercises({ pkg }) {
           <a
             key={e.key}
             href="/offerings#add-ons"
-            aria-label={`${e.label}. Add it from the packages page.`}
+            aria-label={`${e.label}, not yours yet. Add it from the packages page.`}
             style={{
               display: "flex", flexDirection: "column", alignItems: "center",
               justifyContent: "center", gap: "0.5rem",
               aspectRatio: "1", borderRadius: 16, textDecoration: "none",
-              background: `${e.color}0F`, border: `1px solid ${e.color}33`,
+              background: C.warm, border: `1px solid ${C.stone}`,
               padding: "0.75rem", textAlign: "center", fontFamily: BFONT,
+              /* ── GREYED, WITH A LOCK ──────────────────────────────────
+                 Ellie: "just do the greyed out thing with the lock icon over
+                 it if users haven't purchased. That's what we do for the
+                 resources on learn too, right?"
+
+                 Learn dims an unowned tile to half and mutes its icon; it has
+                 no lock. The dimming is the same number here so the two
+                 surfaces read alike, and the lock is the half she asked for
+                 that Learn does not have yet. */
+              opacity: 0.5,
             }}>
             <span aria-hidden="true" style={{
               width: 30, height: 30, borderRadius: "50%", display: "flex",
               alignItems: "center", justifyContent: "center",
-              background: `${e.color}1F`, color: e.color,
-              fontSize: "1.05rem", lineHeight: 1, fontWeight: 600,
-            }}>+</span>
+              background: C.stone, color: C.muted,
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="10.5" width="16" height="10.5" rx="2" />
+                <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+              </svg>
+            </span>
+            {/* The dimming is the opacity on the tile, once. Muting the ink as
+                well took the label to about two to one against the cream,
+                which is a name you cannot read rather than a name that is
+                not yours yet. Learn does the same: half opacity, full-strength
+                label, muted icon. */}
             <span style={{ fontSize: "0.72rem", lineHeight: 1.3, color: C.ink, fontWeight: 600 }}>
               {e.label}
             </span>
@@ -8303,9 +8322,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
      disclosure, so it is state. Null is all four closed, which is how the
      page opens. */
   const [openBucket, setOpenBucket] = useState(null);
-  /* The couple's ticks, for What Comes Next's topic rows. Written by the
-     Expectations page's boxes; see the provider in UnifiedResultsRoot. */
-  const { ticks: convoTicks } = useContext(ConvoTicksCtx);
+  /* The couple's ticks, for What Comes Next's topic rows, and the toggle that
+     writes one. Both halves: this took `ticks` alone while the topic rows
+     below call `toggleConvo`, which nothing in this scope declared. esbuild
+     treats an unresolved identifier as a global and the build stayed green, so
+     every box on What Comes Next threw on click and the tick never happened.
+     Same provider as the Expectations page's boxes, so a tick made on either
+     is the same tick. See UnifiedResultsRoot. */
+  const { ticks: convoTicks, toggle: toggleConvo } = useContext(ConvoTicksCtx);
 
   /* Which expectations row inside a bucket has its topics open. One at a time,
      like the buckets above them. Ellie asked for each of those rows to be "a
@@ -10706,26 +10730,27 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 }),
                 protocols: buildCommsProtocols(byDim, userName, partnerName),
               },
-              expectations: (() => {
-                /* ── THE CONVERSATIONS, NOT JUST HOW MANY ─────────────
-                   This passed a count and nothing else, which was enough while
-                   What Comes Next drew a sentence per category. It now draws a
-                   dropdown of the conversations themselves, so the rows have
-                   to come across: without them every category row appeared with
-                   no topics under it, which is this surface's half of the same
-                   bug Ellie reported on the other one. */
-                const byCat = {};
-                allRows.filter(r => r.bothAnswered && !r.aligned)
-                  .forEach(r => { (byCat[r.category] = byCat[r.category] || []).push(r); });
-                return {
-                  categories: FIXED_CATS.map(c => ({
-                    label: c.label,
-                    section: c.section,
-                    conversations: byCat[c.label] || [],
-                    differences: (byCat[c.label] || []).length,
-                  })),
-                };
-              })(),
+              /* ── THE SERVER'S OWN SUMMARY, NOT A THIRD BUILD OF IT ───────
+                 This grouped THIS component's rows by category label, and this
+                 component's rows are the responsibility categories only. So
+                 Life & Values, which has more conversations in it than any
+                 other category, was absent from What Comes Next on the website
+                 and present on the Expectations overview three clicks away.
+                 Ellie asked for exactly those rows: "the same rows as the
+                 expectations overview page".
+
+                 It also dropped the row keys, which is what a tick is stored
+                 against, so the boxes here could not have been ticked at all.
+
+                 expectationsSummary is the function the app is served. Calling
+                 it is one line and it carries the life rows, the keys, the
+                 section ids and the conversations list, all computed by the
+                 same rule the overview page uses. */
+              expectations: expectationsSummary({
+                mine: ex2Answers, theirs: partnerEx2,
+                youName: userName, themName: partnerName,
+                coupleTypeId: coupleType?.id || null,
+              }),
               intimacy: (intimacyBothDone && intimacySummary)
                 ? { actionPlan: intimacyActionPlan(intimacySummary.dimSummary || []) }
                 : null,
@@ -10812,6 +10837,11 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                           {sec.label}
                         </div>
                       ) : null}
+                      {/* ── ONE RUN OF NUMBERS DOWN THE BUCKET ──────────
+                          Ellie: "I want the numbering list to continue into
+                          the next section not start over." So the count is
+                          taken from how many rows the sections above held,
+                          not from this section's own index. */}
                       {sec.rows.map((it, i) => (
                         /* B107: the bucket's colour down the left edge, which
                            is also what says which bucket a row belongs to. */
@@ -10820,7 +10850,7 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                               Counted within the bucket that is open, which is
                               the list in front of the reader. */}
                           <div style={{ fontSize: "0.72rem", color: C.muted, fontFamily: BFONT, lineHeight: 1.65, width: "1.1rem", textAlign: "right", flexShrink: 0 }}>
-                            {`${i + 1}.`}
+                            {`${g.sections.slice(0, si).reduce((n, s2) => n + s2.rows.length, 0) + i + 1}.`}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: "0.82rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.45 }}>
@@ -10868,12 +10898,28 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                                     {it.topics.map((t) => {
                                       const done = !!convoTicks[t.key];
                                       return (
-                                        <div key={t.key} style={{ display: "flex", alignItems: "flex-start", gap: "0.4rem", fontSize: "0.78rem", fontFamily: BFONT, lineHeight: 1.45 }}>
-                                          <span aria-hidden="true" style={{ width: "0.8rem", flexShrink: 0, color: done ? g.color : C.muted, fontWeight: done ? 800 : 400 }}>
-                                            {done ? "\u2713" : "\u00B7"}
-                                          </span>
+                                        /* ── TICKABLE HERE TOO ──────────────
+                                           Ellie: "Need checkboxes in the what
+                                           comes next discussions to have
+                                           rows." The same box, the same key
+                                           and the same toggle as the
+                                           Expectations page, so a tick made on
+                                           either one is the same tick. */
+                                        <button
+                                          key={t.key}
+                                          onClick={() => toggleConvo(t.key)}
+                                          aria-pressed={done}
+                                          aria-label={`${t.item}. ${done ? "Talked about. Click to undo." : "Click when you have talked about it."}`}
+                                          style={{ display: "flex", alignItems: "flex-start", gap: "0.45rem", fontSize: "0.78rem", fontFamily: BFONT, lineHeight: 1.45, background: "transparent", border: "none", padding: "0.1rem 0", cursor: "pointer", textAlign: "left", width: "100%" }}>
+                                          <span style={{
+                                            width: 14, height: 14, borderRadius: 3, flexShrink: 0, marginTop: 2,
+                                            border: `1.5px solid ${done ? g.color : C.stone}`,
+                                            background: done ? g.color : "white",
+                                            color: "white", fontSize: "0.6rem", fontWeight: 800, lineHeight: 1,
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                          }}>{done ? "\u2713" : ""}</span>
                                           <span style={{ color: done ? C.muted : C.text }}>{t.item}</span>
-                                        </div>
+                                        </button>
                                       );
                                     })}
                                   </div>

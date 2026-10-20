@@ -360,7 +360,7 @@ export default function Results({
   expectations = null, intimacy = null, reflection = null, whatComesNext = null,
   commsPlan = null, commDomains = [], commResponses = [], storycardStyle = null,
   reflectionPlan = null, pageTitles = null, pageCopy: serverCopy = null,
-  onAccent,
+  onAccent, menuFooter = null,
 }: {
   /**
    * The colour of the section being read, handed up as it changes.
@@ -375,6 +375,16 @@ export default function Results({
    * which colour it is in and the tab paints it.
    */
   onAccent?: (color: string | null) => void;
+  /**
+   * What sits under the landing menu's four tiles.
+   *
+   * The Insights tab owns it, because the thing that goes there is the
+   * exercises this couple does not own and that list comes from /api/home,
+   * which this screen is not given. Threading it through is one prop; reading
+   * home from in here would be a second request for an answer the tab already
+   * has.
+   */
+  menuFooter?: React.ReactNode;
   results: CoupleResults;
   owned?: string[];
   sections?: ResultsSection[];
@@ -937,6 +947,7 @@ export default function Results({
             current={null}
             onOpenSection={rememberSection}
             exerciseResultsLabel={pageCopy('exerciseResults', 'Exercise results')}
+            footer={menuFooter}
           />
         </View>
       </View>
@@ -3832,7 +3843,10 @@ function WhatComesNext({
                   {sec.items.map((item, i) => (
                     <NextRow
                       key={`${b.id}-${i}`}
-                      n={i + 1}
+                      /* One run of numbers down the bucket, not one per
+                         section. Ellie: "I want the numbering list to continue
+                         into the next section not start over." */
+                      n={(b.sections || []).slice(0, si).reduce((n2, s2) => n2 + s2.items.length, 0) + i + 1}
                       title={item.title}
                       quote={item.quote || null}
                       say={item.say || null}
@@ -4123,7 +4137,7 @@ function NextRow({ n, title, quote, say, color, topics, onOpen, onKeep }: {
    */
   const [open, setOpen] = useState(false);
   useClosesOnLeave(useCallback(() => setOpen(false), []));
-  const { ticks } = useContext(ConvoTicksContext);
+  const { ticks, toggle } = useContext(ConvoTicksContext);
   const body = (
     <View style={{ flex: 1 }}>
       {title ? <Prose style={{ ...Type.body, color: c.textStrong }}>{title}</Prose> : null}
@@ -4166,21 +4180,34 @@ function NextRow({ n, title, quote, say, color, topics, onOpen, onKeep }: {
                   Ellie: "The progress/checks should update the what comes next
                   dropdown rows as well." Read from the same context the
                   Expectations drawer writes, so there is no second idea of
-                  what has been talked about. Not tappable here: this page
-                  reports, the other page is where the boxes are. */}
+                  what has been talked about. */}
               {topics.map((t) => {
                 const done = !!ticks[t.key];
                 return (
-                  <View key={t.key} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs }}>
-                    {/* not markable: the state of a conversation. */}
-                    <Text style={{ ...Type.small, color: done ? c.accent : c.textMuted, width: 14 }}>
-                      {done ? '\u2713' : '\u00B7'}
-                    </Text>
+                  /* ── TICKABLE HERE TOO ────────────────────────────────
+                     Ellie: "Need checkboxes in the what comes next
+                     discussions to have rows." The same key and the same
+                     toggle the Expectations drawer uses, so a tick made on
+                     either page is one tick. */
+                  <RowTap
+                    key={t.key}
+                    onPress={() => toggle(t.key)}
+                    accessibilityLabel={`${t.item}. ${done ? 'Talked about. Tap to undo.' : 'Tap when you have talked about it.'}`}
+                    style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xs, paddingVertical: 2 }}>
+                    <View style={{
+                      width: 15, height: 15, borderRadius: 3, marginTop: 2,
+                      borderWidth: 1.5, borderColor: done ? (color || c.accent) : c.border,
+                      backgroundColor: done ? (color || c.accent) : 'transparent',
+                      alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {/* not markable: the state of a checkbox. */}
+                      {done ? <Text style={{ color: '#FFFFFF', fontSize: 10, lineHeight: 12, fontWeight: '700' }}>{'\u2713'}</Text> : null}
+                    </View>
                     <Prose style={{
                       ...Type.small, flex: 1,
                       color: done ? c.textMuted : c.text,
                     }}>{t.item}</Prose>
-                  </View>
+                  </RowTap>
                 );
               })}
             </View>

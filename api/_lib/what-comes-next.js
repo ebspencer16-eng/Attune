@@ -229,6 +229,18 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
           body: null,
           say: null,
           section: domain ? `comm-${domain.id}` : 'comm-overview',
+          /**
+           * Whose row this is, from the tile's own `audience`, which
+           * comms-plan.js has always set: 'you', 'them' or 'both'. Read rather
+           * than re-derived from the words, because the shift that decided it
+           * is a comparison of two scores and the sentence is only a
+           * description of that.
+           *
+           * The filter above already drops 'them'; this is what puts the rest
+           * under the right eyebrow. Ellie: "I'm not seeing the for ellie
+           * section and some of these should be there."
+           */
+          forWhom: tile.audience === 'you' ? 'you' : tile.audience === 'them' ? 'them' : 'both',
         };
       }),
     });
@@ -377,7 +389,16 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
      * said, and wrong for one that lists what to do.
      */
     const items = [];
-    if (commitment.you) items.push({ title: 'When asked to reflect, you said', quote: commitment.you, body: null, say: null, section: 'reflection-overview' });
+    /* ── AND IT IS ADDRESSED TO ONE PERSON ──────────────────────────────
+       Ellie: "I'm not seeing the for ellie section and some of these should be
+       there." This row is the reader's own sentence, quoted back to them, so
+       it belongs under For <name> rather than under For both of you.
+
+       Set here rather than left to the audience pass below, because that pass
+       reads the words for a role phrase and there is no role phrase in
+       somebody's own commitment. Where a row comes from is better evidence
+       than what it says. */
+    if (commitment.you) items.push({ title: 'When asked to reflect, you said', quote: commitment.you, body: null, say: null, section: 'reflection-overview', forWhom: 'you' });
     groups.push({
       id: 'reflection',
       color: '#10B981',
@@ -470,6 +491,11 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
       body: null,
       say: null,
       section: 'conflict-overview',
+      /* The reader's own patterns, from the reader's own answers, which is
+         what makes this list private to them. So these rows are For <name>,
+         not For both of you. Same argument as the reflection row above: the
+         source says who it is for more reliably than the sentence does. */
+      forWhom: 'you',
     }));
 
   if (conflictReady) {
@@ -486,6 +512,7 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
         body: null,
         say: null,
         section: 'conflict-overview',
+        forWhom: 'you',
       }],
     });
   }
@@ -565,6 +592,29 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     discuss: 'For the two of you to discuss together',
   };
   const youName = names?.you || sides?.you?.name || 'you';
+
+  /**
+   * ── WHO EVERY ROW IS FOR, NOT JUST THE PHRASES ─────────────────────────
+   * Ellie: "This doesn't look right, I'm not seeing the for ellie section and
+   * some of these should be there."
+   *
+   * She was right, and it was an omission rather than a judgement: only the
+   * couple-type rows were given an audience, so every row in Things to
+   * consider fell to 'both' and that section could never appear.
+   *
+   * In one pass over every group, so a group added later gets it without
+   * anyone remembering, and BEFORE the buckets are built: the sections are cut
+   * by this field, so setting it afterwards would change the rows and not the
+   * page. A row that already worked its own out keeps it, because the phrases
+   * read a title they then discard and this pass cannot see it.
+   */
+  for (const g of groups) {
+    for (const item of g.items || []) {
+      if (item.forWhom == null) {
+        item.forWhom = audience([item.title, item.body, item.say].filter(Boolean).join(' '));
+      }
+    }
+  }
 
   const buckets = BUCKETS.map((b) => {
     const items = b.from

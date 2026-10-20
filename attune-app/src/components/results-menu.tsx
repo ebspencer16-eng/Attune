@@ -43,8 +43,8 @@ import { ScrollView, Text, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
 
-import type { ResultsNavGroup } from '@/api/client';
-import { AccentFallback, Colors, Fonts, Spacing, Type } from '@/constants/attune-theme';
+import type { ResultsNavEntry, ResultsNavGroup } from '@/api/client';
+import { AccentFallback, Colors, Fonts, Radius, Spacing, Type } from '@/constants/attune-theme';
 import { withAlpha } from '@/components/page-wash';
 
 const c = Colors.light;
@@ -117,7 +117,7 @@ const ICON_FALLBACK = 'circle';
  */
 
 export default function ResultsMenu({
-  groups, current, onOpenSection, density = 'page', exerciseResultsLabel,
+  groups, current, onOpenSection, density = 'page', exerciseResultsLabel, footer,
 }: {
   groups: ResultsNavGroup[];
   /**
@@ -139,6 +139,18 @@ export default function ResultsMenu({
    * cover all of it.
    */
   density?: 'page' | 'sheet';
+  /**
+   * What sits under the four tiles on the landing page.
+   *
+   * Ellie: "additional exercise add-on section exists on insights page below
+   * exercise status table and below insights menu (the two stages of that
+   * page)." Below the menu means inside the menu's own scroll, or it is a
+   * block pinned under a list that scrolls past it.
+   *
+   * The dropdown under the hamburger passes nothing: it is a sheet over a page
+   * someone is reading, and an offer to buy something is not what it is for.
+   */
+  footer?: React.ReactNode;
 }) {
   /** Which group this menu has open. One, or none. */
   const groupHolding = (id: string | null | undefined) =>
@@ -187,17 +199,21 @@ export default function ResultsMenu({
   /** Their pages line up under their name. */
   const CHILD_LEFT = EXERCISE_LEFT + ICON_COL + Spacing.lg;
 
-  return (
-    <ScrollView
-      /* No bottom inset of its own: on the landing page the tile provides the
-         clearance, and in the dropdown the sheet does. */
-      contentContainerStyle={{ paddingBottom: 0 }}
-      showsVerticalScrollIndicator={false}>
-      {groups.map((g, i) => {
+  /**
+   * One group's row, and its children when open.
+   *
+   * Lifted out of the map so the four tiles below can each call it. Ellie, of
+   * the website's version: "Separate the insights nav into separate tiles (so
+   * that users know they can click into each section)." And of this one: "Not
+   * seeing this in the app, please confirm that all changes have been and will
+   * be pushed to both app and site." The rows exist on both surfaces, so the
+   * tiles do too.
+   */
+  const renderGroup = (g: ResultsNavGroup, i: number) => {
         const color = g.color || AccentFallback;
         const isOpen = open === g.id;
         const kids = g.children || [];
-        const holdsCurrent = g.id === current || kids.some((ch) => ch.id === current);
+        const holdsCurrent = g.id === current || kids.some((ch: ResultsNavEntry) => ch.id === current);
         const icon = GROUP_ICON[g.id];
         const isExercise = !!icon;
         /**
@@ -490,7 +506,43 @@ export default function ResultsMenu({
             ) : null}
           </View>
         );
-      })}
+  };
+
+  /**
+   * Her four. A tile with nothing in it is not drawn, so a couple without
+   * results does not get an empty bordered box.
+   */
+  const isExerciseGroup = (g: ResultsNavGroup) => !!GROUP_ICON[g.id];
+  const TILES = [
+    { id: 'highlights', groups: groups.filter((g) => g.id === 'highlights') },
+    { id: 'couple-type', groups: groups.filter((g) => g.id === 'couple-type') },
+    { id: 'exercises', groups: groups.filter(isExerciseGroup) },
+    { id: 'what-comes-next', groups: groups.filter((g) => g.id === 'what-comes-next') },
+  ].filter((t) => t.groups.length);
+
+  return (
+    <ScrollView
+      /* No bottom inset of its own: on the landing page the tile provides the
+         clearance, and in the dropdown the sheet does. */
+      contentContainerStyle={{ paddingBottom: 0 }}
+      showsVerticalScrollIndicator={false}>
+      {TILES.map((tile) => (
+        /* ── A TILE, WITH ROOM INSIDE IT ──────────────────────────────────
+           Ellie: "On the app, the text needs a buffer before the left edge of
+           the tile." So the tile carries its own horizontal padding and the
+           rows sit inside it rather than against the border. */
+        <View
+          key={tile.id}
+          style={{
+            borderWidth: 1, borderColor: c.border, borderRadius: Radius.lg,
+            backgroundColor: c.surface,
+            paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm,
+            marginBottom: Spacing.sm,
+          }}>
+          {tile.groups.map((g) => renderGroup(g, groups.indexOf(g)))}
+        </View>
+      ))}
+      {big ? footer : null}
     </ScrollView>
   );
 }

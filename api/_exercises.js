@@ -132,6 +132,31 @@ export const PARTNER_SESSION_FIELDS = EXERCISES.map(e => e.partnerField);
 
 
 /**
+ * What the section offering the exercises a couple does not own is called.
+ *
+ * Ellie: "Let's call the section 'More Attune Exercises' and just do the
+ * greyed out thing with the lock icon over it if users haven't purchased."
+ *
+ * Here rather than on either surface because both of them draw that section
+ * and a heading typed twice is how this codebase has twice ended up with one
+ * section under two names. The website imports it. The app cannot import from
+ * api/, so it carries the same string and check-more-exercises.mjs holds the
+ * two together by value.
+ */
+export const MORE_EXERCISES_LABEL = 'More Attune Exercises';
+
+/**
+ * The exercises a couple does not own, in display order.
+ *
+ * The complement of ownedExercises, and written as one so neither surface has
+ * to restate what makes an exercise additional: having a capability that this
+ * package does not grant.
+ */
+export function unownedExercises(pkg) {
+  return EXERCISES.filter(e => e.capability && !pkg?.[e.capability]);
+}
+
+/**
  * The exercises a couple owns, in display order, numbered positionally.
  *
  * Numbering is by position rather than by the exercise's own order, so a core

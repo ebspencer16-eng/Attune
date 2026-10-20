@@ -340,10 +340,28 @@ export async function launch({ width = 1280, height = 1200, userAgent = null } =
         const { w, h } = JSON.parse(size.result.value);
         clip = { x: 0, y: 0, width: w, height: Math.min(h, 20000), scale: 1 };
       }
+      /**
+       * ── A VIEWPORT SHOT IS THE VIEWPORT ──────────────────────────────────
+       * Without this flag Chrome captures the whole document anyway: a 1500 by
+       * 1100 window came back 1485 by 1898. That is not cosmetic. Capturing
+       * beyond the viewport resizes the page, and a responsive chart
+       * re-lays-out while the shot is being taken, so the bars are painted for
+       * a box a fifth of the width while the axis is painted at full width.
+       *
+       * It cost two hours twice. The first time the picture showed a doughnut
+       * with a bar chart's gridlines behind it, which read as a fix that had
+       * not landed. The second time the conflict chart's four columns were
+       * huddled against the y axis with their names spread across the width,
+       * which reads as a broken chart; the chart's own model said the bars sat
+       * at 136 and 952 of a 1088 point area the whole time.
+       *
+       * So the flag is on only when a caller asked for the whole page or named
+       * a box, which are the two cases where the resize is the point.
+       */
       const shot = await send('Page.captureScreenshot', {
         format: 'png',
-        ...(transparent ? { captureBeyondViewport: false } : {}),
-        ...(clip ? { clip, captureBeyondViewport: true } : {}),
+        captureBeyondViewport: !!clip && !transparent,
+        ...(clip ? { clip } : {}),
       });
       if (transparent) await send('Emulation.setDefaultBackgroundColorOverride', {});
       return shot.data;

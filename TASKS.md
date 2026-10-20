@@ -8,6 +8,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| W113 | **Should the locked resources on Learn get a lock icon too?** You said the greyed-out lock is "what we do for the resources on learn". It is not: Learn dims them and mutes the icon, with no lock. Say the word and I add it there. |
+| W114 | **Tick a discussion on your phone and tell me it stays ticked.** It never saved for anybody, and I cannot sign in as you to prove the fix. One tap. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -21,21 +23,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W110 | **The couple type pie says Loading and never stops.** A break I introduced. First. |
-| W111 | **An admin render harness**, so I stop telling you a chart works without having looked at one. |
-| W103b | **Column labels are not appearing.** Written, never rendered. |
-| W104b | **Keep the spider web and the line labels**, drop the gridlines and x labels outside the visual. |
-| W106b | **Life & Values the same size as the other, with both axis labels.** |
-| W107b | **Make the conflict tab readable**: fix the data views. |
-| W94b | **What Comes Next category dropdowns, verified on both surfaces.** |
-| W95b | **Checkboxes in the What Comes Next discussion rows.** |
-| W96b | **Numbering continues across sections** instead of restarting. |
-| W97b | **The For Ellie section is missing** from Things to consider when it should not be. |
-| W100b | **The four tiles on the APP's insights nav**, text inset from the left edge, sized to one screen with no scroll. |
-| W109 | **More Attune Exercises**, greyed with a lock, the way Learn does it. Checking that is what Learn does. |
-| W112 | **Move the data quality section above the formula diagnostics tile.** |
+**Nothing open.** Everything from your last message is in section 3.
 
 ---
 
@@ -43,24 +31,75 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
-| W93 | **The Additional exercises tiles, rendered for you** at all three ownership levels. The picture is on your Desktop. Tell me if the tiles want to be smaller. |
-| W94 | **Discussions to have now holds one row per expectations category**, each a dropdown with that category's own conversations. |
-| W95 | **The checkboxes work.** Tick stays, row greys and drops below the unticked ones, and What Comes Next shows the same progress. Needs M088 first. |
-| W96 | **Phrases to try are now only the ones you should say.** Preston's are on his page, not yours. |
-| W97 | **Things to consider is split into For both of you and For [name].** |
-| W98 | **Discussions to have carries one eyebrow**, For the two of you to discuss together. |
-| W99 | **Phrases to try is split the same way**, each section only when it has something in it. |
-| W100 | **The insights nav is four stacked tiles.** Highlights, Couple Type, Exercise results, What Comes Next. |
+| W95 | **The checkboxes save now. They never did.** `/api/convos` refused every request, signed in or not, so every tick went back a moment later on both surfaces. Site and app. |
+| W94 | **Discussions to have is six category rows, not five.** Life & Values was missing on the website and it is the biggest one: seven topics. Site and app. |
+| W96 | **The numbering runs 1 to 8 straight through** the Discussions list instead of restarting in each half. Site and app. |
+| W97 | **Things to consider is split into For both of you and For [name]**, and every row knows who it is for, not only the couple-type ones. Site and app. |
+| W100 | **The app's insights nav is four stacked tiles.** Text inset from the tile edge, whole menu on one screen, no scroll bar. |
+| W109 | **More Attune Exercises**: greyed to half with a lock over it, on both surfaces. Same dimming as Learn. See W113 about the lock. |
+| W93 | **The tiles, rendered at all three ownership levels.** Still three columns whatever the count. Tell me if they want to be smaller. |
 | W101 | **Physical Intimacy page titles are capitalised** like every other section. |
-| W102 | **The zero topics bug is fixed on both surfaces**, and it was mine. |
-| W103 | **Every column in the admin carries its own number.** |
-| W104 | **No gridlines and no axis labels** on the three charts you named. |
-| W105 | **Physical intimacy alignment is a radar**, like the comms one. |
-| W106 | **Life & Values is a column chart**, like the self versus partner gap. |
-| W107 | **The admin has a Conflict Patterns responses tab.** |
-| W108 | **Couple type distribution is a doughnut**, and neither type chart has a legend. |
+| W103 | **Every column in the admin carries its own number**, and the self versus partner gap has both axis labels. |
+| W104 | **The alignment radars keep the web and the line labels**, with nothing outside the visual. |
+| W105 | **Physical intimacy alignment is a radar**, in the format you outlined. |
+| W106 | **Life & Values is a column chart** the same size as the self versus partner gap, with both axes. |
+| W107 | **The Conflict Patterns tab reads**: four named columns on a percentage scale, each carrying its number. |
+| W108 | **Both type distributions are doughnuts** with no gridlines, no axis labels and no legend. |
+| W110 | **The couple type pie was stuck on Loading** because the tile was a div and the chart library was handed it. It is a canvas. |
+| W112 | **Data quality sits directly above Formula diagnostics.** |
+| W115 | **Type Analytics was drawing nothing below the four top tiles.** Moving the data quality block left a stray closing tag behind, so the rest of the page fell outside it. |
+| W111 | **An admin render harness**, so every admin row above is a picture I looked at rather than a claim. |
+| W116 | **Every screenshot this repo takes was a full-page capture wearing a viewport's name.** It made two correct charts look broken. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### W95 — why a drawn checkbox saved nothing
+
+`api/convos.js` asked `userForRequest(req)`. That function takes
+`{ token, supabaseUrl, anonKey }`, and a request object has none of those
+names, so the token was always undefined and the endpoint answered
+"unauthorized" to everybody from the day it shipped. 401 is also the right
+answer to a request with no token, so sweeping the live site from outside read
+as working, and both surfaces put a tick back when a save is refused, which is
+what they are supposed to do. The symptom was a box that filled and emptied
+again, which looks like a design decision.
+
+Found by putting the server's reply on the screen in the simulator and tapping
+a box. `check-auth-shape.mjs` fails the build on any endpoint that hands that
+function the wrong shape.
+
+### W94 — what was missing, and why
+
+What Comes Next built its own expectations summary on the website from the
+responsibility categories only, so Life & Values never appeared. The
+Expectations overview three clicks away listed it with seven topics. It calls
+the server's own summary now, which is the same function the app is served, so
+the two lists cannot differ again. That also brought the row keys across, which
+is what a tick is stored against: without them the boxes could not have worked
+even once the endpoint was fixed.
+
+### W109 — and what Learn actually does
+
+Learn dims an unowned resource to half and mutes its icon. It has no lock. The
+exercises tiles are dimmed by the same amount so the two tabs read alike, and
+the lock is the part you asked for that Learn has not got. W113 is whether to
+add it there.
+
+### W116 — the harness, and two hours twice
+
+Every browser screenshot in this repo was captured with Chrome's
+"beyond the viewport" flag on, which resizes the page mid-capture. A
+responsive chart re-lays-out while the shot is being taken, so the picture
+shows the bars painted for a box a fifth of the width and the axis painted at
+full width. Twice I read one of those pictures as a fix that had not landed:
+once as gridlines still on the type pies, once as the conflict columns huddled
+against the axis. Both charts were correct the whole time, and their own models
+said so.
+
+Fixed in `scripts/_lib/browser.mjs`, so every gate and probe here takes an
+honest picture now.
+
+---
 
 ## 4. Done and verified
 
@@ -70,6 +109,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | Verified by you | What it was |
 |--|--|
+| W98 | Discussions to have carries one eyebrow, For the two of you to discuss together. |
+| W99 | Phrases to try is split into both-of-you and each-of-you, and a section only appears when it has something in it. |
+| W102 | The zero-topics bug on the expectations drawer, which was mine: the drawer moved to a payload field while the category list still read the old one. |
 | W91 | The Additional exercises section was only under the results menu. It is on both stages of the Insights page now, from one component rather than the markup twice. |
 | W92 | Asked for the arrow on top, then reversed: the notes icon is back on top. It had only ever moved on the website, which is why the app looked unchanged. |
 | S37 | My own price gate read the add-on price from the module it was checking, so a changed price moved both sides and it passed. The four numbers are typed in now and a price change fails it. |
