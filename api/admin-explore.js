@@ -33,6 +33,7 @@ function typeFromEx1(ans){
 import { PERSONALITY_QUESTIONS, PARTNER_VIEW_TEXT, LIFE_QUESTIONS, RESPONSIBILITY_CATEGORIES } from './_questions.js';
 import { REFLECTION_QUESTIONS } from './_anniversary-questions.js';
 import { INTIMACY_QUESTIONS, INTIMACY_DIMENSIONS } from './_intimacy-questions.js';
+import { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } from './_conflict-questions.js';
 
 // Runs on the edge runtime (Web-style (req)=>Response handler), matching the
 // other admin endpoints. Without this, Vercel's Node runtime can't invoke it
@@ -214,6 +215,42 @@ function ownFields(p) {
     const raw = intim[q.id];
     r['iq_' + q.id] = (typeof raw === 'string' && raw) ? raw : null;
   }
+  /**
+   * ── CONFLICT PATTERNS ───────────────────────────────────────────────────
+   * Ellie: "Need a responses page in admin for conflict exercise."
+   *
+   * The same treatment Physical Intimacy already gets: every answer that is a
+   * choice becomes a category you can slice by, and the two open-text
+   * questions do not, because a paragraph is not a category. The ranking is
+   * skipped for the same reason the intimacy multi-selects are: an ordering is
+   * not one answer.
+   *
+   * ── AND WHAT IS NOT HERE ────────────────────────────────────────────────
+   * Nothing that identifies anybody. This cube is anonymous by construction
+   * and the admin reads it that way. The rule these answers are under
+   * elsewhere, SCREENS.md's "this screen must never render the partner's
+   * patterns", is about one partner seeing the other's: the person, not the
+   * aggregate. check-conflict-privacy holds that, over the partner view, and
+   * is untouched by this.
+   */
+  const conf = (p.conflict_data && p.conflict_data.answers) || {};
+  for (const q of CONFLICT_QUESTIONS) {
+    const raw = conf[q.id];
+    if (q.kind === 'scale') {
+      const opt = (q.options || []).find((o) => o.value === raw);
+      r['cq_' + q.id] = opt ? opt.label : null;
+    } else if (q.kind === 'frequency') {
+      const opt = FREQUENCY_OPTIONS.find((o) => o.value === raw);
+      r['cq_' + q.id] = opt ? opt.label : null;
+    } else if (q.kind === 'forcedAB') {
+      /* Stored as the chosen side. The label is the sentence they picked,
+         which is what makes a distribution readable without the question
+         beside it. */
+      r['cq_' + q.id] = raw === 'a' ? q.a : raw === 'b' ? q.b : null;
+    } else if (q.kind === 'pickOne') {
+      r['cq_' + q.id] = (typeof raw === 'string' && raw) ? raw : null;
+    }
+  }
   return r;
 }
 
@@ -226,6 +263,7 @@ const PARTNERABLE = [
   ...RESPONSIBILITY_CATEGORIES.flatMap((c) => c.items.map((_, i) => 'resp_' + c.id + '_' + i)),
   ...REFLECTION_QUESTIONS.map((q) => 'ref_' + q.id),
   ...INTIMACY_QUESTIONS.filter((q) => q.kind !== 'multi').map((q) => 'iq_' + q.id),
+  ...CONFLICT_QUESTIONS.filter((q) => ['scale', 'frequency', 'forcedAB', 'pickOne'].includes(q.kind)).map((q) => 'cq_' + q.id),
   ...PERSONALITY_QUESTIONS.map((q) => 'pv_' + q.id),
   ...Object.keys(DIM_KEYS).map((d) => 'pvdim_' + d),
   ...Object.keys(DIM_KEYS).map((d) => 'readerr_' + d),
@@ -309,6 +347,37 @@ function buildCatalog(fbCatOptions) {
     if (q.kind === 'multi') continue;
     const valid = (q.options || []).filter((o) => o.value != null);
     const fld = { key: 'iq_' + q.id, label: (q.topic ? q.topic + ' · ' : '') + (q.premarital || q.married || q.id), group: 'Physical Intimacy', kind: 'cat', options: valid.map((o) => ({ v: o.label, label: o.label, val: o.value })), partnerable: true, dim: q.dimension, dimLabel: IDIM_LABEL[q.dimension] || q.dimension };
+
+  /**
+   * ── CONFLICT PATTERNS, AS EXPLORABLE FIELDS ────────────────────────────
+   * Ellie: "Need a responses page in admin for conflict exercise."
+   *
+   * One field per answerable question, grouped so the page can find them, and
+   * `partnerable` so a cut by one partner's answer against the other's works
+   * the way it does for every other exercise. The two open-text questions and
+   * the ranking are not here: a paragraph is not a category and an ordering is
+   * not one answer, which is the same line this file already draws around the
+   * reflection and intimacy questions.
+   */
+  const CSECTION_LABEL = { start: 'How it goes', openings: 'Openings', risk: 'Risk patterns', works: 'What works', repair: 'Repair', closing: 'Closing' };
+  for (const q of CONFLICT_QUESTIONS) {
+    let options = null;
+    if (q.kind === 'scale') options = (q.options || []).map((o) => ({ v: o.label, label: o.label, val: o.value }));
+    else if (q.kind === 'frequency') options = FREQUENCY_OPTIONS.map((o) => ({ v: o.label, label: o.label, val: o.value }));
+    else if (q.kind === 'forcedAB') options = [{ v: q.a, label: q.a }, { v: q.b, label: q.b }];
+    else if (q.kind === 'pickOne') options = (q.options || []).map((o) => ({ v: o.label || o, label: o.label || o }));
+    if (!options) continue;
+    f.push({
+      key: 'cq_' + q.id,
+      label: (q.riskLabel ? q.riskLabel + ' \u00B7 ' : '') + q.text,
+      group: 'Conflict Patterns',
+      kind: 'cat',
+      options,
+      partnerable: true,
+      section: q.section,
+      sectionLabel: CSECTION_LABEL[q.section] || q.section,
+    });
+  }
     if (valid.length >= 2) {
       const lo = valid.reduce((a, b) => (b.value < a.value ? b : a));
       const hi = valid.reduce((a, b) => (b.value > a.value ? b : a));

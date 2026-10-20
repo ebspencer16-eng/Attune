@@ -49,12 +49,12 @@ import { bandFor } from './_lib/alignment.js';
 export const INTIMACY_DOMAINS = [
   {
     id: 'how',
-    label: 'How it happens',
+    label: 'How It Happens',
     dims: ['frequency', 'initiating', 'adventure'],
   },
   {
     id: 'works',
-    label: 'What makes it work',
+    label: 'What Makes It Work',
     dims: ['comfort', 'communication', 'meaning'],
   },
 ];

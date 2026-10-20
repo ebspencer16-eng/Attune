@@ -1623,7 +1623,30 @@ function ExpectationsOverview({
    * 'exp-convo-5', which is the id the nav and notes both use.
    */
   const categories = summary.categories.filter((cat) => cat.answered > 0);
-  const conversations = categories.filter((cat) => cat.rows.some((r) => !r.aligned));
+  /**
+   * The conversations in one category.
+   *
+   * ── WHY THE FALLBACK ────────────────────────────────────────────────────
+   * Ellie: "My expectations overview page says zero topics in each convo to
+   * have row."
+   *
+   * The server sends `conversations` now, and the drawer draws it. But the
+   * LIST of categories was still worked out from `rows`, so a payload without
+   * the new field listed every category and gave each one nothing: a row
+   * saying 0 topics, which is the worst of both answers.
+   *
+   * The app holds the last payload it was sent, so this happens to anybody
+   * whose cached results predate the field, which is everybody the first time
+   * they open it. Falling back to the same filter the server now does means
+   * the page is right either way, and one function decides, so the count on
+   * the header and the rows under it cannot disagree again.
+   */
+  const convosOf = useCallback(
+    (cat: { conversations?: ExpectationRow[]; rows: ExpectationRow[] }) =>
+      cat.conversations || cat.rows.filter((r) => !r.aligned),
+    [],
+  );
+  const conversations = categories.filter((cat) => convosOf(cat).length > 0);
   const gaps = categories.flatMap((cat) => cat.rows.filter((r) => !r.aligned));
 
   return (
@@ -1744,11 +1767,10 @@ function ExpectationsOverview({
                   <CategoryDrawer
                     key={cat.section}
                     label={cat.label}
-                    /* The list the payload carries, rather than this screen
-                       filtering the rows again. See `conversations` in
-                       api/_lib/expectations.js, which What Comes Next reads
-                       too so the two pages cannot disagree. */
-                    items={cat.conversations || []}
+                    /* The list the payload carries, falling back to the
+                       same filter for a cached payload that predates it. See
+                       convosOf above. */
+                    items={convosOf(cat)}
                     /* The page this category's conversations live on. Its own
                        section id from the server, the same one the row above
                        is keyed by. */
@@ -3791,7 +3813,23 @@ function WhatComesNext({
               {openGroup === b.id ? (
                 <View style={{ marginTop: Spacing.sm, gap: Spacing.xs }}>
                   {/* block: what-comes-next/groups */}
-                  {b.items.map((item, i) => (
+                  {/* ── HER EYEBROWS ──────────────────────────────────────
+                      Ellie: "let's use eyebrows to create two sections 'For
+                      both of you'... and 'For [name]'", and for the middle
+                      bucket "one section 'For the two of you to discuss
+                      together'".
+
+                      The sections are the server's, per reader, so the two
+                      surfaces cannot disagree about who a row is for. A
+                      payload without them, which is any cached one, falls back
+                      to the flat list it already had. */}
+                  {(b.sections?.length ? b.sections : [{ id: 'all', label: '', items: b.items }]).map((sec, si) => (
+                    <View key={sec.id} style={{ gap: Spacing.xs, marginTop: si ? Spacing.md : 0 }}>
+                      {sec.label ? (
+                        /* not markable: a heading the page builds, not words about the couple. */
+                        <Text style={{ ...Type.eyebrow, color: c.textMuted }}>{sec.label}</Text>
+                      ) : null}
+                  {sec.items.map((item, i) => (
                     <NextRow
                       key={`${b.id}-${i}`}
                       n={i + 1}
@@ -3804,6 +3842,8 @@ function WhatComesNext({
                       onKeep={() => setKeeping([item.title, item.quote, item.say]
                         .filter(Boolean).join(' '))}
                     />
+                  ))}
+                    </View>
                   ))}
                 </View>
               ) : null}

@@ -20,7 +20,7 @@ import { COUPLE_TYPES } from '../_couple-types.js';
 import { summarizeConflict } from './conflict-results.js';
 import { PATTERN_ACTIONS } from '../_conflict-results-prose.js';
 import { COMM_DOMAINS } from './comm-domains.js';
-import { resolveRoleTokens } from './role-tokens.js';
+import { audienceOf, resolveRoleTokens } from './role-tokens.js';
 import { currentSection } from './results-sections.js';
 
 export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, reflectionPlan, conflictReady, conflictAnswers, names, sides }) {
@@ -43,6 +43,33 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
   const named = (text) => (text
     ? resolveRoleTokens(String(text), sides?.you || null, sides?.them || null)
     : text);
+
+  /**
+   * ── WHO A ROW IS FOR ──────────────────────────────────────────────────
+   * Ellie, of Phrases to try: "only show the phrases to the partner who should
+   * be saying them. You'll have to back into this based on which phrases are
+   * for which type of individual and which partner is which type." And of
+   * Things to consider: "'For both of you' (the rows that go to both
+   * partners) and 'For [name]' (the things that are just for that user)."
+   *
+   * Both answers are already in the content. A couple type's tip says who it
+   * is for in its own title, "Guarded partner: share the half-formed version",
+   * and which of them is the guarded one is the axis comparison role-tokens.js
+   * has always made. `audienceOf` reads the first with the same table that
+   * resolves the second, so there is no second list of role phrases to drift.
+   *
+   * 'both' is the answer for a row that names nobody, and also for a row that
+   * names a role this couple does not split on: if neither of them is the more
+   * guarded one, advice for the guarded partner is advice for the pair.
+   *
+   * The viewer is `sides.you`, so this is answered per reader. The same couple
+   * gets two different pages, which is the point.
+   */
+  const audience = (text) => {
+    const who = audienceOf(text, sides?.you || null, sides?.them || null);
+    if (!who) return 'both';
+    return who.name === (sides?.you?.name || names?.you) ? 'you' : 'them';
+  };
   const groups = [];
   const you = names?.you || 'You';
   const them = names?.them || 'your partner';
@@ -86,6 +113,11 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
           body: null,
           say: null,
           section: 'couple-type',
+          /* Worked out from the tip's own title, which says who it is for and
+             is not itself drawn here. Read before it is dropped: the row keeps
+             the phrase and nothing else, so this is the last moment the
+             audience is knowable. */
+          forWhom: audience(t.title),
         })),
     });
   }
@@ -508,15 +540,54 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
     },
   ];
 
-  const buckets = BUCKETS.map((b) => ({
-    id: b.id,
-    label: b.label,
-    color: b.color,
-    items: b.from
+  /**
+   * ── THE SECTIONS INSIDE A BUCKET ────────────────────────────────────────
+   * Ellie, for Things to consider and for Phrases to try: "one section for
+   * both of you (if there are any) and one section for only ellie (if there's
+   * anything)". And for Discussions to have: "there should be one section 'For
+   * the two of you to discuss together'".
+   *
+   * So a bucket is sections rather than a flat list, every surface draws the
+   * eyebrows the same, and "if there are any" is honoured by a section with
+   * nothing in it not existing.
+   *
+   * A row addressed to the PARTNER is not drawn at all. That is the whole of
+   * her first instruction about the phrases: "only show the phrases to the
+   * partner who should be saying them." Things to consider is treated the
+   * same, because she asked for its sections to be the same two and a
+   * partner-only row would have nowhere to sit.
+   *
+   * Discussions to have is a list of things to do together by construction, so
+   * it gets her one eyebrow and no audience filter.
+   */
+  const SECTION_LABEL = {
+    both: 'For both of you',
+    discuss: 'For the two of you to discuss together',
+  };
+  const youName = names?.you || sides?.you?.name || 'you';
+
+  const buckets = BUCKETS.map((b) => {
+    const items = b.from
       .map((id) => groups.find((g) => g.id === id))
       .filter(Boolean)
-      .flatMap((g) => g.items || []),
-  })).filter((b) => b.items.length);
+      .flatMap((g) => g.items || []);
+
+    if (b.id === 'discuss') {
+      return {
+        id: b.id, label: b.label, color: b.color, items,
+        sections: items.length ? [{ id: 'together', label: SECTION_LABEL.discuss, items }] : [],
+      };
+    }
+
+    const mine = items.filter((it) => (it.forWhom || 'both') === 'you');
+    const both = items.filter((it) => (it.forWhom || 'both') === 'both');
+    const sections = [];
+    if (both.length) sections.push({ id: 'both', label: SECTION_LABEL.both, items: both });
+    if (mine.length) sections.push({ id: 'you', label: `For ${youName}`, items: mine });
+    /* `items` stays the flat list a section holds, so the tile's count is what
+       the reader will actually find under it and not what was built. */
+    return { id: b.id, label: b.label, color: b.color, items: [...both, ...mine], sections };
+  }).filter((b) => b.items.length);
 
   /**
    * ── EVERY ARROW HAS TO LAND ON A PAGE THAT EXISTS ───────────────────────

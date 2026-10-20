@@ -874,6 +874,7 @@
       <div class="tab" onclick="setTab(this,'resp-exp')">Expectations</div>
       <div class="tab" onclick="setTab(this,'resp-story')">Relationship Reflection</div>
       <div class="tab" onclick="setTab(this,'resp-intimacy')">Physical Intimacy</div>
+      <div class="tab" onclick="setTab(this,'resp-conflict')">Conflict Patterns</div>
     </div>
 
     <div id="resp-comm">
@@ -939,6 +940,27 @@
         </div>
       </div>
       <div class="qx-section" id="qx-intimacy" style="margin-top:1.25rem"></div>
+    </div>
+
+    <!-- ── CONFLICT PATTERNS ─────────────────────────────────────────────
+         Ellie: "Need a responses page in admin for conflict exercise."
+
+         The fifth exercise was the only one with no responses tab. It is the
+         same two parts every other tab has: a tile for the thing worth seeing
+         at a glance, and the question explorer underneath, which needs nothing
+         but the group name because admin-explore now publishes a field per
+         conflict question.
+
+         The tile is the four risk patterns, because those are the four the
+         exercise is built around and the only ones scored the same way. -->
+    <div id="resp-conflict" style="display:none">
+      <div class="chart-grid full">
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">Risk patterns</div><div class="chart-subtitle">How often each one shows up &middot; share of people answering Often or Sometimes</div></div><select class="tile-slicer" id="slz-conf" title="Cut this tile by a segment" aria-label="Slz conf"><option value="">Everyone</option></select></div>
+          <div class="chart-body"><canvas id="chart-conflict-risk"></canvas></div>
+        </div>
+      </div>
+      <div class="qx-section" id="qx-conflict" style="margin-top:1.25rem"></div>
     </div>
   </div>
 
@@ -4209,13 +4231,38 @@ async function renderResponseTile(opts){
   const a=seg[sel?sel.value:'']||seg['']||null; if(!a) return;
   setTileN(el, a.pairs);
   if(opts.kind==='radar'){
-    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#5C6DDA',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#5C6DDA'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{display:false},pointLabels:{font:{size:10}}}}}});
+    /* Ellie: "No gridlines or x axis labels on the avg alignment score by
+       dimension, responsibilities, views in responses." On a radar those are
+       the web, the spokes and the names round the edge. The shape and the
+       hover carry it, which is what she asked for on the type charts too. */
+    mkChart(el,{type:'radar',data:{labels:a.dimScores.labels,datasets:[{label:'Avg alignment',data:a.dimScores.data,borderColor:'#5C6DDA',backgroundColor:'rgba(108,127,255,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#5C6DDA'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:100,grid:{display:false},angleLines:{display:false},ticks:{display:false},pointLabels:{display:false}}}}});
   } else if(opts.kind==='expalign'){
-    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#C55329',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C55329'}]},options:{scales:{r:{grid:{color:'#E6ECF6'},angleLines:{color:'#E6ECF6'},ticks:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
+    mkChart(el,{type:'radar',data:{labels:a.expAlign.labels,datasets:[{label:'% aligned',data:a.expAlign.data,borderColor:'#C55329',backgroundColor:'rgba(255,107,53,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C55329'}]},options:{scales:{r:{grid:{display:false},angleLines:{display:false},ticks:{display:false},pointLabels:{display:false},min:0,max:100}},plugins:{legend:{display:false}}}});
   } else if(opts.kind==='relfeel'){
     mkChart(el,{type:'bar',data:{labels:['Needs work (0)','Rough patch (1)','Solid (2)','Really good (3)','Better than ever (4)'],datasets:[{data:a.relFeel,backgroundColor:hexRamp('#E5578C',5),borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#E6ECF6'}}}}});
   } else if(opts.kind==='expgaps'){
-    renderBars(opts.target, a.expGaps.length?a.expGaps:[{l:'—',v:0}], '#F87171');
+    /* ── THE SAME SHAPE AS THE SELF VS PARTNER GAP ─────────────────────
+       Ellie: "I want life and values gap visual on expectations responses page
+       to be the same format as the self v partner view gap visual on comms
+       response page."
+
+       That one is a column chart with no grid and no tick labels, each column
+       carrying its own number. This was a stack of HTML rows, which is the
+       same measurement drawn a second way on a neighbouring page. */
+    const gaps=(a.expGaps||[]).length?a.expGaps:[{l:'\u2014',v:0}];
+    const sorted=gaps.slice().sort((x,y)=>y.v-x.v);
+    const host=document.getElementById(opts.target);
+    if(host){
+      host.innerHTML='<canvas id="'+opts.target+'-canvas"></canvas>';
+      mkChart(document.getElementById(opts.target+'-canvas'),{
+        type:'bar',
+        data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),
+          backgroundColor:'#F87171',borderRadius:4,maxBarThickness:34}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.y+'%'}}},
+          scales:{y:{beginAtZero:true,ticks:{display:false},grid:{display:false},border:{display:false}},
+                  x:{ticks:{display:false},grid:{display:false},border:{display:false}}}}});
+    }
   } else if(opts.kind==='respagree'){
     const items=(a.respAgreement||[]).slice().sort((x,y)=>x.v-y.v);
     renderBars(opts.target, items.length?items:[{l:'No paired answers yet',v:0}], '#34D399');
@@ -4591,6 +4638,44 @@ async function renderRelReflTiles(){
   renderBars('story-gap-bars', storyGaps, '#FBBF24');
 }
 
+/**
+ * Conflict Patterns: how often each of the four risk patterns shows up.
+ *
+ * Ellie: "Need a responses page in admin for conflict exercise."
+ *
+ * The four frequency questions are the only ones in that exercise measured the
+ * same way, so they are the one thing worth a tile; everything else on the tab
+ * is the question explorer, which needs no code here because admin-explore
+ * publishes a field per question. A column each, bare axes and the number on
+ * the column, which is the treatment she asked for across the admin.
+ */
+async function renderConflictResponses(){
+  const el=document.getElementById('chart-conflict-risk'); if(!el) return;
+  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
+  const sel=document.getElementById('slz-conf');
+  if(sel && !sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=renderConflictResponses; }
+  if(sel) sel.classList.toggle('on', !!sel.value);
+  const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
+  /* The four, named by the field catalogue rather than typed here, so a
+     renamed pattern cannot leave this tile showing a stale word. */
+  const risks=(cube.fields||[]).filter(f=>f.key.indexOf('cq_')===0 && f.section==='risk');
+  const stats=risks.map(f=>{
+    let n=0, hit=0;
+    rows.forEach(r=>{ const v=r[f.key]; if(v==null||v==='') return; n++; if(v==='Often'||v==='Sometimes') hit++; });
+    return n? { l:(f.label||'').split(' \u00B7 ')[0], v:Math.round(100*hit/n), n } : null;
+  }).filter(Boolean);
+  const host=el.parentElement;
+  if(!stats.length){ if(host) host.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">No conflict responses aggregated yet.</div>'; return; }
+  const sorted=stats.sort((a,b)=>b.v-a.v);
+  mkChart(el,{
+    type:'bar',
+    data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),backgroundColor:'#1B5FE8',borderRadius:4,maxBarThickness:46}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.y+'% (n='+sorted[c.dataIndex].n+')'}}},
+      scales:{y:{beginAtZero:true,max:100,ticks:{display:false},grid:{display:false},border:{display:false}},
+              x:{ticks:{display:false},grid:{display:false},border:{display:false}}}}});
+}
+
 // Physical Intimacy: per-dimension alignment vs gap, computed from the cube.
 async function renderIntimacyResponses(){
   const dimEl=document.getElementById('intimacy-dim-bars');
@@ -4612,7 +4697,26 @@ async function renderIntimacyResponses(){
     return qN? {l:info.label, align:Math.round(alignSum/qN), gap:Math.round(gapSum/qN)} : null;
   }).filter(Boolean);
   const emptyHtml='<div style="color:var(--dim);font-size:.78rem;padding:.75rem 0;line-height:1.6">'+empty+'</div>';
-  if(dimEl){ if(!stats.length) dimEl.innerHTML=emptyHtml; else renderBars('intimacy-dim-bars', stats.slice().sort((a,b)=>b.align-a.align).map(d=>({l:d.l,v:d.align})), '#10B981'); }
+  /* ── THE SAME SHAPE AS THE COMMS ONE ─────────────────────────────────
+     Ellie: "I want average alignment by dimension for physical intimacy to be
+     set up the same way as the comms visual."
+
+     That one is a radar with no web, no spokes and no names, read by hovering.
+     This was a stack of HTML bars, which is a different drawing of the same
+     measurement on the same page. Same chart type, same bare axes, same
+     colour role: the section's own. */
+  if(dimEl){
+    if(!stats.length){ dimEl.innerHTML=emptyHtml; return; }
+    const sorted=stats.slice().sort((a,b)=>b.align-a.align);
+    dimEl.innerHTML='<canvas id="intimacy-dim-canvas"></canvas>';
+    mkChart(document.getElementById('intimacy-dim-canvas'),{
+      type:'radar',
+      data:{labels:sorted.map(d=>d.l),datasets:[{label:'% aligned',data:sorted.map(d=>d.align),
+        borderColor:'#B5546E',backgroundColor:'rgba(181,84,110,.15)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#B5546E'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>' '+c.parsed.r+'% aligned'}}},
+        scales:{r:{beginAtZero:true,max:100,grid:{display:false},angleLines:{display:false},ticks:{display:false},pointLabels:{display:false}}}}});
+  }
 }
 
 
@@ -4670,7 +4774,7 @@ function _hexToRgb(h){ h=String(h).replace('#',''); return { r:parseInt(h.slice(
 function _rgbToHex(r,g,b){ const c=x=>('0'+Math.max(0,Math.min(255,Math.round(x))).toString(16)).slice(-2); return '#'+c(r)+c(g)+c(b); }
 function hexShade(base, frac){ const {r,g,b}=_hexToRgb(base); const t=0.22+0.78*frac; return _rgbToHex(255+(r-255)*t,255+(g-255)*t,255+(b-255)*t); }
 function hexRamp(base, n){ n=n||5; const out=[]; for(let i=0;i<n;i++) out.push(hexShade(base, n===1?1:i/(n-1))); return out; }
-const QX_THEME = { 'qx-comm':'#5C6DDA', 'qx-exp':'#C55329', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E' };
+const QX_THEME = { 'qx-comm':'#5C6DDA', 'qx-exp':'#C55329', 'qx-story':'#E5578C', 'qx-intimacy':'#B5546E', 'qx-conflict':'#1B5FE8' };
 const QX_MODE = {}; const QX_REPAINT = {};  // per-section 'mean'|'breakdown' + repaint fn (mean/breakdown toggle)
 // Numeric position of a cube answer: scale -> 1..5; intimacy -> option value 0..1; reflection Likert -> option index 0..n.
 function qxPosOf(f, raw){
@@ -4808,9 +4912,19 @@ async function renderCubeDist(opts){
   if(sel){ populateSlicer(sel, opts.field, cube.rows||[]); sel.classList.toggle('on', !!sel.value); }
   const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
   const cats=orderedCats(opts.field, rows);
-  const counts={}; let n=0;
-  rows.forEach(r=>{ const v=r[opts.field]; if(v==null||v==='') return; counts[v]=(counts[v]||0)+1; n++; });
-  const labels=cats.map(v=>sliceLabel(opts.field,v));
+  /* ── ONE ROW PER PERSON, SOMETIMES ONE PER COUPLE ──────────────────────
+     A cube row is a person. For a field that describes the COUPLE, counting
+     rows counts both partners and doubles every figure, so a caller can name
+     the column that says which couple a row belongs to and each one is
+     counted once. renderTypeCouple did this with its own `seen` map; it is
+     here now so the shared renderer can do that tile's job. */
+  const counts={}; let n=0; const seenKey={};
+  rows.forEach(r=>{ const v=r[opts.field]; if(v==null||v==='') return;
+    if(opts.unique){ const k=r[opts.unique]; if(!k||seenKey[k]) return; seenKey[k]=1; }
+    counts[v]=(counts[v]||0)+1; n++; });
+  /* A caller may name the slices itself. Couple types read as "The jumpstart
+     (WX)", which sliceLabel has no way to know. */
+  const labels=cats.map(v=>(opts.label?opts.label(v):sliceLabel(opts.field,v)));
   const dataCounts=cats.map(v=>counts[v]||0);
   const dataPct=dataCounts.map(c=> n?Math.round(c/n*100):0);
   const tipLabel=(ctx)=>' '+dataCounts[ctx.dataIndex]+' ('+dataPct[ctx.dataIndex]+'%)';
@@ -4819,7 +4933,10 @@ async function renderCubeDist(opts){
   if(!n){ mkChart(el,{type:'bar',data:{labels:['No data'],datasets:[{data:[0],backgroundColor:'#E6ECF6'}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{display:false}}}}); return; }
   const pal=opts.palette||['#5C6DDA','#C55329','#34D399','#FBBF24','#F87171','#9B5DE5','#22A5C4'];
   if(opts.mode==='doughnut'){
-    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3}]},options:{plugins:{legend:{position:'bottom',labels:{padding:14,boxWidth:11}},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
+    /* Ellie, of the two type distributions: "Neither of those should have
+       gridlines, axes labels, or a legend, just the hover over to see the
+       detail." A doughnut has no axes; the legend is the part it had. */
+    mkChart(el,{type:'doughnut',data:{labels,datasets:[{data:dataCounts,backgroundColor:pal,borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:tipLabel}}},cutout:'60%'}});
   } else if(opts.mode==='hbar'){
     /* Columns, like everything else. Ellie: "I want column charts." This one
        drew its bars sideways, which is the only tile on the page that did. */
@@ -4928,23 +5045,12 @@ async function renderPromoDiscount(selId){
   mkChart(el,{type:'bar',data:{labels:labels.length?labels:['No code redemptions in this cut'],datasets:[{data:data.length?data:[0],backgroundColor:'#C55329',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#E6ECF6'},ticks:{precision:0}},x:{grid:{display:false}}}}});
 }
 // ── Type Analytics tiles, cube-backed + per-tile sliceable ───────────────────
-async function renderTypeCouple(containerId, selId){
-  const el=document.getElementById(containerId); if(!el) return;
-  let cube; try{ cube=await ensureCube(); }catch(e){ return; }
-  const sel=document.getElementById(selId);
-  if(sel){ populateSlicer(sel,'couple_type',cube.rows||[]); sel.classList.toggle('on',!!sel.value);
-    if(!sel.dataset.wired){ sel.dataset.wired='1'; sel.onchange=()=>renderTypeCouple(containerId, selId); } }
-  const rows=sliceFilter(cube.rows||[], sel?sel.value:'');
-  const seen={}, cnt={}; let nc=0;
-  rows.forEach(r=>{ if(!r.couple_id||!r.couple_type||seen[r.couple_id]) return; seen[r.couple_id]=1; cnt[r.couple_type]=(cnt[r.couple_type]||0)+1; nc++; });
-  setTileN(el, nc);
-  const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
-  if(!sorted.length){ el.innerHTML='<div style="color:var(--muted);font-size:.78rem;">No couples in this cut.</div>'; return; }
-  const max=sorted[0][1]||1;
-  el.innerHTML=sorted.map(([id,c])=>{ const pct=Math.round(100*c/nc), bw=Math.round(100*c/max);
-    return '<div><div style="display:flex;justify-content:space-between;margin-bottom:.2rem;"><span style="font-size:.75rem;color:#1B2547;">'+((typeof CT_NAMES!=='undefined'&&CT_NAMES[id])||id)+' <span style="color:#6B7280;">'+id+'</span></span><span style="font-size:.72rem;color:#6B7280;">'+c+' couple'+(c===1?'':'s')+' <span style="color:#C7CBD3;">·</span> <span style="color:#4B5563;">'+pct+'%</span></span></div><div style="background:#E6ECF6;border-radius:999px;height:6px;"><div style="background:var(--orange);width:'+bw+'%;height:100%;border-radius:999px;transition:width .4s;"></div></div></div>';
-  }).join('');
-}
+/* renderTypeCouple was here: ten HTML rows with their own bar and their own
+   percentage, which is the doughnut beside it drawn a second way. Ellie asked
+   for that tile to be a pie "same as the ind type distribution", so it is
+   wireCubeTile now and this had no caller left. Its one idea, counting a
+   couple once rather than counting both partners, moved into renderCubeDist
+   as `unique`. */
 async function renderTypeCoupleMap(opts){
   const el=document.getElementById(opts.containerId); if(!el) return;
   let cube; try{ cube=await ensureCube(); }catch(e){ return; }
@@ -5110,9 +5216,11 @@ async function renderSelfPartnerGap(containerId){
         // Max follows the data rather than the scale's theoretical 4 points.
         // Real gaps sit under 1, so a fixed axis left the bars as slivers.
         // Rounded up to a clean step so the top gridline is a round number.
-        y: { beginAtZero: true, max: yMax, ticks: { stepSize: yMax / 2, font: { size: 10 } },
-             grid: { color: 'rgba(0,0,0,.06)' } },
-        x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
+        /* No grid and no tick labels, at her word, on this one as well as the
+           two radars. Each column carries its own number now, drawn by
+           mkChart, and the tooltip names the dimension. */
+        y: { beginAtZero: true, max: yMax, ticks: { display: false }, grid: { display: false }, border: { display: false } },
+        x: { ticks: { display: false }, grid: { display: false }, border: { display: false } },
       },
     },
   });
@@ -5633,6 +5741,53 @@ function mkChart(el, cfg) {
   o.plugins = o.plugins || {};
   o.plugins.tooltip = Object.assign({ animation: false, position: 'nearest' }, o.plugins.tooltip);
   flatTicks(cfg);
+  /* ── EVERY COLUMN SAYS ITS OWN NUMBER ────────────────────────────────────
+     Ellie: "I want all of the columns to be labeled in the self vs partner
+     view gap on responses page - on all columns throughout admin I want that."
+
+     Here rather than on each chart, because "throughout admin" is thirty-odd
+     charts and a per-chart option is thirty chances to miss one. Every chart
+     in this file is built through mkChart, so this is the one place that can
+     promise it.
+
+     Bars only: a line or a radar with a number at every point is unreadable,
+     and she asked about columns. A chart can opt out with
+     `options.plugins.valueLabels = false`, which nothing does today. */
+  if (cfg.type === 'bar' && o.plugins.valueLabels !== false) {
+    cfg.plugins = (cfg.plugins || []).concat([{
+      id: 'valueLabels',
+      afterDatasetsDraw(c) {
+        const { ctx } = c;
+        ctx.save();
+        ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+        ctx.fillStyle = '#5A6472';
+        ctx.textAlign = 'center';
+        c.data.datasets.forEach((ds, di) => {
+          const meta = c.getDatasetMeta(di);
+          if (meta.hidden) return;
+          meta.data.forEach((bar, i) => {
+            const v = ds.data[i];
+            if (v == null || v === 0) return;
+            /* Horizontal bars put their label at the end of the bar, vertical
+               ones just above the top. A stacked chart labels each segment in
+               the middle, where the only room is. */
+            const stacked = !!(c.options.scales?.y?.stacked || c.options.scales?.x?.stacked);
+            if (c.options.indexAxis === 'y') {
+              ctx.textAlign = 'left';
+              ctx.fillText(String(v), bar.x + 4, bar.y + 3);
+            } else if (stacked) {
+              ctx.textAlign = 'center';
+              ctx.fillText(String(v), bar.x, bar.y + (bar.base - bar.y) / 2 + 3);
+            } else {
+              ctx.textAlign = 'center';
+              ctx.fillText(String(v), bar.x, bar.y - 4);
+            }
+          });
+        });
+        ctx.restore();
+      },
+    }]);
+  }
   const chart = new Chart(el, cfg);
   return chart;
 }
@@ -5882,7 +6037,13 @@ function initCharts(page) {
   }
   else if (page==='responses') {
     wireResponseTile({target:'chart-dim-scores',kind:'radar',selId:'slz-rdim'});
-    renderTypeCouple('comm-type-bars','slz-rcouple');
+    /* The same tile on the Responses page, and the same renderer. It was the
+       second caller of renderTypeCouple, which is how deleting that function
+       nearly took this page's couple-type chart with it. Two tiles showing one
+       distribution should not be two drawings of it. */
+    wireCubeTile({ target: 'comm-type-bars', field: 'couple_type', mode: 'doughnut',
+      selId: 'slz-rcouple', unique: 'couple_id',
+      label: (id) => ((typeof CT_NAMES !== 'undefined' && CT_NAMES[id]) || id) + ' (' + id + ')' });
     wireResponseTile({target:'chart-exp-align',kind:'expalign',selId:'slz-rexp'});
     wireResponseTile({target:'exp-gap-bars',kind:'expgaps',selId:'slz-rgap'});
     wireResponseTile({target:'resp-agree-bars',kind:'respagree',selId:'slz-ragree'});
@@ -5894,7 +6055,9 @@ function initCharts(page) {
     renderQuestionExplorer('qx-exp', ['Ex2 · Life & values', 'Ex2 · Who does what'], undefined, true);
     renderQuestionExplorer('qx-story', ['Ex3 · Relationship Reflection'], undefined, true);
     renderQuestionExplorer('qx-intimacy', ['Physical Intimacy'], undefined, true);
-    ['qx-comm','qx-exp','qx-story','qx-intimacy'].forEach(id => { QX_MODE[id] = 'mean'; const t = document.getElementById(id + '-distmode'); if (t) { t.value = 'mean'; t.classList.remove('on'); } if (QX_REPAINT[id]) QX_REPAINT[id](); });
+    renderQuestionExplorer('qx-conflict', ['Conflict Patterns'], undefined, true);
+    renderConflictResponses();
+    ['qx-comm','qx-exp','qx-story','qx-intimacy','qx-conflict'].forEach(id => { QX_MODE[id] = 'mean'; const t = document.getElementById(id + '-distmode'); if (t) { t.value = 'mean'; t.classList.remove('on'); } if (QX_REPAINT[id]) QX_REPAINT[id](); });
   }
 }
 
@@ -6018,7 +6181,17 @@ function renderTypes() {
   document.getElementById('types-maxshare-sub').textContent = ctSorted.length ? `${maxShare}% of couples` : 'Concentration check';
 
   // Couple type distribution (cube-backed + sliceable)
-  renderTypeCouple('types-ct-bars','slz-tcouple');
+  /* ── A PIE, LIKE THE ONE BESIDE IT ─────────────────────────────────────
+     Ellie: "Couple type distribution on type analytics should be a pie chart
+     same as the ind type distribution."
+
+     It was ten HTML rows with their own bar, their own percentage and their
+     own markup: the same information as the doughnut next to it, drawn a
+     second way. One renderer now, so the two tiles cannot drift, and it is
+     the one that already had the hover she wants to read the detail from. */
+  wireCubeTile({ target: 'types-ct-bars', field: 'couple_type', mode: 'doughnut',
+    selId: 'slz-tcouple', unique: 'couple_id',
+    label: (id) => ((typeof CT_NAMES !== 'undefined' && CT_NAMES[id]) || id) + ' (' + id + ')' });
 
   // Individual doughnut
   wireCubeTile({target:'types-indiv-chart',field:'type',mode:'doughnut',selId:'slz-tindiv',palette:['W','X','Y','Z'].map(t=>TYPE_COLORS[t])});

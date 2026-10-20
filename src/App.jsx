@@ -2897,7 +2897,7 @@ function IntimacyDomainPage({
       <NavButtons
         onBack={() => onGo("intimacy-overview")}
         onNext={() => onGo(domain.id === "how" ? "intimacy-works" : "what-comes-next")}
-        nextLabel={(domain.id === "how" ? "What makes it work" : "What Comes Next") + " →"}
+        nextLabel={(domain.id === "how" ? "What Makes It Work" : "What Comes Next") + " →"}
       />
     </div>
   );
@@ -3940,7 +3940,7 @@ export function AdditionalExercises({ pkg }) {
   );
 }
 
-function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
+export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
   /**
    * Which group is open, if any.
    *
@@ -3976,12 +3976,14 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
    * that is not drawn is the indent she then has to ask me to remove.
    */
 
-  return (
-    <div style={{
-      flex: 1, minHeight: 0, display: "flex", flexDirection: "column",
-      justifyContent: "space-between",
-    }}>
-      {groups.map((g, i) => {
+  /**
+   * One nav group's row, and its children when it is open.
+   *
+   * Lifted out of the map so the four tiles below can each call it. Ellie:
+   * "Separate the insights nav into separate tiles (so that users know they
+   * can click into each section)."
+   */
+  const renderGroup = (g, i) => {
         const kids = g.children || [];
         const icon = NAV_ICONS[g.id];
         const isExercise = Boolean(icon);
@@ -4093,7 +4095,58 @@ function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
             ) : null}
           </div>
         );
-      })}
+  };
+
+  /**
+   * Her four, in her order. A tile with no groups in it is not drawn: a couple
+   * without results has no exercise groups, and an empty bordered box reads as
+   * something that failed to load.
+   */
+  const isExerciseGroup = (g) => Boolean(NAV_ICONS[g.id]);
+  const TILES = [
+    { id: 'highlights', groups: groups.filter((g) => g.id === 'highlights') },
+    { id: 'couple-type', groups: groups.filter((g) => g.id === 'couple-type') },
+    { id: 'exercises', groups: groups.filter(isExerciseGroup) },
+    { id: 'what-comes-next', groups: groups.filter((g) => g.id === 'what-comes-next') },
+  ].filter((t) => t.groups.length);
+
+  return (
+    <div style={{
+      flex: 1, minHeight: 0, display: "flex", flexDirection: "column",
+      /* ── STACKED, NOT SPREAD ──────────────────────────────────────────
+         This was `space-between`, which was right for a column of plain rows
+         filling the height. Four tiles spread by that rule sit in four corners
+         of the page with a hand's width of nothing between them, which is the
+         gap this codebase already has a lesson about: space-between hands back
+         any room you carve out. They stack from the top now and the tile's own
+         margin is the gap. */
+      justifyContent: "flex-start",
+      overflowY: "auto",
+    }}>
+      {TILES.map((tile) => (
+        /* ── FOUR TILES, STACKED ──────────────────────────────────────────
+           Ellie: "I want one tile for highlights, another for couple type,
+           another for exercise results, and another for what comes next. They
+           should be the same width as they currently are, the same shape, just
+           vertically stacked tiles."
+
+           Same width and the same corner as everything else in this column;
+           what is new is the edge, which is what says a tile is a thing to
+           click into. The exercise groups share one tile because that is one
+           of her four, and the eyebrow that used to float above them is the
+           tile's own heading now. */
+        <div
+          key={tile.id}
+          style={{
+            border: `1px solid ${C.stone}`,
+            borderRadius: 14,
+            background: "rgba(255,255,255,0.55)",
+            padding: "0.35rem 0",
+            marginBottom: "0.5rem",
+          }}>
+          {tile.groups.map((g) => renderGroup(g, groups.indexOf(g)))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -10654,14 +10707,22 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                 protocols: buildCommsProtocols(byDim, userName, partnerName),
               },
               expectations: (() => {
-                const counts = {};
+                /* ── THE CONVERSATIONS, NOT JUST HOW MANY ─────────────
+                   This passed a count and nothing else, which was enough while
+                   What Comes Next drew a sentence per category. It now draws a
+                   dropdown of the conversations themselves, so the rows have
+                   to come across: without them every category row appeared with
+                   no topics under it, which is this surface's half of the same
+                   bug Ellie reported on the other one. */
+                const byCat = {};
                 allRows.filter(r => r.bothAnswered && !r.aligned)
-                  .forEach(r => { counts[r.category] = (counts[r.category] || 0) + 1; });
+                  .forEach(r => { (byCat[r.category] = byCat[r.category] || []).push(r); });
                 return {
                   categories: FIXED_CATS.map(c => ({
                     label: c.label,
                     section: c.section,
-                    differences: counts[c.label] || 0,
+                    conversations: byCat[c.label] || [],
+                    differences: (byCat[c.label] || []).length,
                   })),
                 };
               })(),
@@ -10699,11 +10760,30 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                buckets existed carries only `groups`, and results are frozen,
                so that falls back to one bucket per group. */
             const source = (wcn.buckets?.length ? wcn.buckets : wcn.groups) || [];
+            /* The rows of one section, shaped the way this page's renderer
+               has always spoken: tip, quote, phrase. */
+            const asRows = (list) => (list || []).map(it => ({
+              tip: it.title,
+              quote: it.quote || null,
+              phrase: it.say || it.body || "",
+              section: it.section || null,
+              topics: it.topics || null,
+            }));
             const groups = source.map(g => ({
               id: g.id,
               label: g.label,
               color: g.color || "#E8673A",
               section: g.section,
+              /* ── HER EYEBROWS ────────────────────────────────────────
+                 Ellie: "let's use eyebrows to create two sections 'For both of
+                 you'... and 'For [name]'", and one for the middle bucket.
+                 Built by the server per reader, so this surface and the app
+                 cannot disagree about who a row is for. A payload without them
+                 falls back to one unlabelled section, which is the flat list
+                 this page drew before. */
+              sections: (g.sections?.length
+                ? g.sections.map(sec => ({ id: sec.id, label: sec.label, rows: asRows(sec.items) }))
+                : [{ id: "all", label: "", rows: asRows(g.items) }]),
               items: (g.items || []).map(it => ({
                 tip: it.title,
                 quote: it.quote || null,
@@ -10725,7 +10805,14 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
             const ITEMS = (g) => (
                     <div style={{ marginTop: "0.9rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
                       {/* block: what-comes-next/groups */}
-                      {g.items.map((it, i) => (
+                      {g.sections.map((sec, si) => (
+                      <div key={sec.id} style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: si ? "0.9rem" : 0 }}>
+                      {sec.label ? (
+                        <div style={{ fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: BFONT, fontWeight: 700, marginBottom: "0.15rem" }}>
+                          {sec.label}
+                        </div>
+                      ) : null}
+                      {sec.rows.map((it, i) => (
                         /* B107: the bucket's colour down the left edge, which
                            is also what says which bucket a row belongs to. */
                         <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", background: "white", border: `1.5px solid ${C.stone}`, borderLeft: `4px solid ${g.color}`, borderRadius: 12, padding: "0.8rem 0.5rem 0.8rem 0.85rem" }}>
@@ -10851,6 +10938,8 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
                             ) : null}
                           </div>
                         </div>
+                      ))}
+                      </div>
                       ))}
                     </div>
                   );

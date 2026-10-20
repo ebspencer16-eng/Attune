@@ -269,15 +269,46 @@ if (got.join(' | ') !== want.join(' | ')) {
  * So this adds up rather than looking for a name. The inputs above produce one
  * row in every group on purpose.
  */
+/*
+ * ── EXCEPT A ROW THAT IS NOT THIS READER'S ───────────────────────────────
+ * Ellie: "only show the phrases to the partner who should be saying them."
+ *
+ * So one item may legitimately be in no bucket, and exactly one thing makes
+ * that legitimate: it is addressed to the other partner. Counted rather than
+ * excused, because "some items are allowed to vanish" is how this check would
+ * stop meaning anything. Every item still has to be accounted for: drawn, or
+ * withheld for that one stated reason.
+ */
 const inGroups = built.groups.flatMap((g) => g.items || []);
 const inBuckets = (built.buckets || []).flatMap((b) => b.items || []);
-if (inBuckets.length !== inGroups.length) {
-  const bucketed = new Set(inBuckets);
-  const lost = built.groups.filter((g) => (g.items || []).some((i) => !bucketed.has(i)));
+const bucketed = new Set(inBuckets);
+const withheld = inGroups.filter((i) => !bucketed.has(i));
+const notMine = withheld.filter((i) => i.forWhom === 'them');
+if (withheld.length !== notMine.length) {
+  const lost = built.groups.filter((g) => (g.items || []).some((i) => !bucketed.has(i) && i.forWhom !== 'them'));
   fails.push(`${inGroups.length} action items across the groups and ${inBuckets.length} in the`
-    + ' buckets. Every item has to land in exactly one bucket, because the buckets are what\n'
-    + '      the page draws.'
-    + (lost.length ? `\n      Not in any bucket: ${lost.map((g) => g.label).join(', ')}.` : ''));
+    + ' buckets, and the difference is not accounted for. An item may only be left out when it\n'
+    + '      is addressed to the other partner, which is what forWhom says.'
+    + (lost.length ? `\n      Not in any bucket and not the partner's: ${lost.map((g) => g.label).join(', ')}.` : ''));
+}
+
+/*
+ * ── AND THE SECTIONS HOLD EVERY ROW THE BUCKET CLAIMS ────────────────────
+ * The page draws sections now, not the bucket's flat list, so a row in
+ * `items` and in no section is a row the reader never sees while the tile
+ * above still counts it. That is the same failure one level down.
+ */
+for (const b of built.buckets || []) {
+  const inSections = (b.sections || []).flatMap((sec) => sec.items || []);
+  if (!b.sections?.length) {
+    fails.push(`the ${String(b.label).replace(/\n/g, ' ')} bucket has rows and no sections, so the page has nothing to draw.`);
+  } else if (inSections.length !== (b.items || []).length) {
+    fails.push(`the ${String(b.label).replace(/\n/g, ' ')} bucket counts ${(b.items || []).length} rows and its sections hold ${inSections.length}.`);
+  }
+  for (const sec of b.sections || []) {
+    if (!sec.items?.length) fails.push(`an empty section, "${sec.label}", in ${String(b.label).replace(/\n/g, ' ')}: a heading with nothing under it.`);
+    if (!sec.label) fails.push(`a section with no eyebrow in ${String(b.label).replace(/\n/g, ' ')}.`);
+  }
 }
 
 /* And in exactly one. A group named by two buckets double-counts its rows,
@@ -391,5 +422,6 @@ if (fails.length) {
 
 console.log(`[check-next-steps-mirror] one builder for both surfaces, ${labels.length} groups in`
   + ` the order she asked for, every row carrying the page it opens, and all`
-  + ` ${inGroups.length} of their action items landing in exactly one of her three buckets,`
-  + ' which both surfaces draw.');
+  + ` ${inBuckets.length} of their ${inGroups.length} action items landing in exactly one of her`
+  + ` three buckets and ${notMine.length} withheld as the partner's to say, every row of every`
+  + ' bucket under an eyebrow, and both surfaces drawing them.');

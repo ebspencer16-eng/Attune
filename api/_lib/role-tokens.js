@@ -130,6 +130,65 @@ const ROLE_PHRASES = [
   ['WDR', ['withdrawing partner', 'quieter partner']],
 ];
 
+/**
+ * Whose advice is this, if it is addressed to one of them?
+ *
+ * ── WHY IT IS HERE ────────────────────────────────────────────────────────
+ * Ellie, of Phrases to try: "only show the phrases to the partner who should
+ * be saying them. You'll have to back into this based on which phrases are for
+ * which type of individual and which partner is which type."
+ *
+ * Both halves of that already exist in this file. A couple type's tip says who
+ * it is for in its own title, "Guarded partner: share the half-formed
+ * version", and ROLE_PHRASES above is the list of ways a role is named.
+ * Which of the two people holds a role is the axis comparison that every other
+ * function here makes.
+ *
+ * So this reads the role out of the text with the same table rather than a
+ * second list of phrases, which would be the copy that drifts the first time a
+ * tip is reworded. A tip naming no role is for both of them, and so is a tip
+ * naming a role this couple does not split on: if neither of them is the more
+ * guarded one, advice for the guarded partner is advice for the pair.
+ *
+ * @param {string} text the tip's title, or any line that might name a role
+ * @param {{name, axes}} a the person stored first
+ * @param {{name, axes}} b
+ * @returns {{role: string, name: string} | null} null means both of them
+ */
+export function audienceOf(text, a, b) {
+  if (!text || !a?.name || !b?.name) return null;
+  const lower = String(text).toLowerCase();
+  const aOpen = (a?.axes?.open ?? 3) >= 3.0;
+  const bOpen = (b?.axes?.open ?? 3) >= 3.0;
+  const aEngage = (a?.axes?.withdraw ?? 3) <= 3.0;
+  const bEngage = (b?.axes?.withdraw ?? 3) <= 3.0;
+
+  /* Only a couple who sit on opposite sides of an axis have these roles. Two
+     expressive people have no more guarded one, and a phrase written for one
+     is for whichever of them is speaking. */
+  const holder = {
+    EXP: aOpen !== bOpen ? (aOpen ? a : b) : null,
+    GRD: aOpen !== bOpen ? (aOpen ? b : a) : null,
+    RCH: aEngage !== bEngage ? (aEngage ? a : b) : null,
+    WDR: aEngage !== bEngage ? (aEngage ? b : a) : null,
+  };
+
+  for (const [role, phrases] of ROLE_PHRASES) {
+    for (const phrase of phrases) {
+      if (!lower.includes(phrase)) continue;
+      const side = holder[role];
+      return side ? { role, name: side.name } : null;
+    }
+  }
+  /* And the resolved form, for a tip whose role was already swapped for a
+     name before it got here. Whole words, so "Sam" does not match "Sample". */
+  for (const side of [a, b]) {
+    const re = new RegExp(`(^|[^A-Za-z])${side.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^A-Za-z]|$)`, 'i');
+    if (re.test(String(text))) return { role: null, name: side.name };
+  }
+  return null;
+}
+
 function swapRolePhrases(text, a, b) {
   if (!text || !a?.name || !b?.name) return text;
   const aOpen = (a?.axes?.open ?? 3) >= 3.0;

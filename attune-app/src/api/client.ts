@@ -597,6 +597,8 @@ export type NextStepBucket = {
   items: {
     title: string; quote?: string | null; body: string | null; say: string | null;
     section?: string | null;
+    /** 'both' | 'you' | 'them'. See audienceOf in api/_lib/role-tokens.js. */
+    forWhom?: 'both' | 'you' | 'them';
     /**
      * The rows inside this one, when it is a category of conversations.
      *
@@ -608,6 +610,26 @@ export type NextStepBucket = {
      */
     topics?: { key: string; item: string }[] | null;
   }[];
+  /** The eyebrow'd sections this bucket draws. Empty for a bucket with
+   *  nothing in it; a section with no rows is not built. */
+  sections?: NextStepSection[];
+};
+
+/**
+ * One eyebrow'd section inside a bucket on What Comes Next.
+ *
+ * Ellie: "let's use eyebrows to create two sections 'For both of you' (the
+ * rows that go to both partners) and 'For [name]' (the things that are just
+ * for that user)", and for the middle bucket "one section 'For the two of you
+ * to discuss together'".
+ *
+ * Built per reader in api/_lib/what-comes-next.js: a row addressed to the
+ * partner is not in any section, because it is not this reader's to say.
+ */
+export type NextStepSection = {
+  id: string;
+  label: string;
+  items: NextStepBucket['items'];
 };
 
 export type NextStepGroup = {
@@ -677,7 +699,10 @@ export type ExpectationsSummary = {
      * the same list and a second `rows.filter((r) => !r.aligned)` is how the
      * two pages would come to disagree. See api/_lib/expectations.js.
      */
-    conversations: ExpectationRow[];
+    /* Optional, because the app holds the last payload it was sent and a
+       cached one predates this field. See convosOf in results.tsx, which falls
+       back to the same filter rather than drawing a row with nothing in it. */
+    conversations?: ExpectationRow[];
     differences: number;
     /**
      * The number on the bar: the mean closeness of this category's rows.

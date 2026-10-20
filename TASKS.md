@@ -21,24 +21,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-Thirteen from your list, plus two I found checking that nothing else dropped.
-
 | # | What I am doing |
 |--|--|
-| W102 | **Expectations overview says zero topics in every conversation row.** A live bug, so first. |
-| W96 | **Phrases to try, shown only to the partner who should say them.** Working back from which phrase belongs to which type, and which of you is which. |
-| W97 | **Things to consider split by eyebrow:** For both of you, and For [name]. |
-| W98 | **Discussions to have gets one eyebrow:** For the two of you to discuss together. |
-| W99 | **Phrases to try split the same way as Things to consider**, each section only when it has something in it. |
-| W100 | **The insights nav becomes four stacked tiles:** Highlights, Couple Type, exercise results, What Comes Next. Same width and shape, so it reads as four things to click. |
-| W101 | **Physical Intimacy page titles are the only lowercase ones in the insights nav.** |
-| W103 | **Every column labelled on the self versus partner gap**, and on every column chart in the admin. |
-| W104 | **No gridlines and no x axis labels** on average alignment by dimension, responsibilities and views. |
-| W105 | **Physical intimacy average alignment by dimension** laid out like the comms one. |
-| W106 | **Life and values gap** drawn like the self versus partner gap on the comms page. |
-| W107 | **A responses page in the admin for the conflict exercise.** |
-| W108 | **Couple type distribution as a pie**, like individual types, and neither with gridlines, axis labels or a legend. |
-| W109 | **Additional exercises is only on the website.** Found checking what else dropped; the app's Insights tab never got it. |
+| W109 | **Additional exercises on the app's Insights tab.** A question for you first, under the table: it may be the thing Apple rejects for. |
 
 ---
 
@@ -49,6 +34,19 @@ Thirteen from your list, plus two I found checking that nothing else dropped.
 | W93 | **The Additional exercises tiles, rendered for you** at all three ownership levels. The picture is on your Desktop. Tell me if the tiles want to be smaller. |
 | W94 | **Discussions to have now holds one row per expectations category**, each a dropdown with that category's own conversations. |
 | W95 | **The checkboxes work.** Tick stays, row greys and drops below the unticked ones, and What Comes Next shows the same progress. Needs M088 first. |
+| W96 | **Phrases to try are now only the ones you should say.** Preston's are on his page, not yours. |
+| W97 | **Things to consider is split into For both of you and For [name].** |
+| W98 | **Discussions to have carries one eyebrow**, For the two of you to discuss together. |
+| W99 | **Phrases to try is split the same way**, each section only when it has something in it. |
+| W100 | **The insights nav is four stacked tiles.** Highlights, Couple Type, Exercise results, What Comes Next. |
+| W101 | **Physical Intimacy page titles are capitalised** like every other section. |
+| W102 | **The zero topics bug is fixed on both surfaces**, and it was mine. |
+| W103 | **Every column in the admin carries its own number.** |
+| W104 | **No gridlines and no axis labels** on the three charts you named. |
+| W105 | **Physical intimacy alignment is a radar**, like the comms one. |
+| W106 | **Life & Values is a column chart**, like the self versus partner gap. |
+| W107 | **The admin has a Conflict Patterns responses tab.** |
+| W108 | **Couple type distribution is a doughnut**, and neither type chart has a legend. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -944,39 +942,37 @@ Physical Intimacy $20. Relationship Reflection $40. Conflict Patterns $40.
 Those are the three exercises. The two resources, the budget tool and the
 checklist, are $20 each, and the workbook is $19 digital or $39 printed.
 
-### M088 — the one thing you need to run
+### W109 — a question before I build it
 
-Open the Supabase SQL Editor and paste this, then tell me it is done.
+The audit turned up that Additional exercises went onto the website only. The
+obvious fix is to put it on the app's Insights tab too, and I have not, because
+I do not think I should decide this one.
 
-```sql
-alter table public.couple_tools
-  add column if not exists convos_data jsonb;
+CLAUDE.md's rule is "the app does not sell", and the gate that enforces it says
+in writing that sending somebody from a tile they tapped to a page that sells
+is "the line that fails review". Tiles on the app saying "add Conflict
+Patterns" are closer to that line than anything in the app today. Opening
+/offerings in the browser is explicitly allowed, so it is buildable; whether it
+is worth the review risk is yours.
 
-comment on column public.couple_tools.convos_data is
-  'Which expectations conversations this couple have had, keyed by question id.';
-```
+Three ways to go, and I will do whichever you say: leave the app without it;
+add the tiles opening /offerings in the browser; or add them only as a line of
+text with no price and no call to action.
 
-Until it runs, every tick is refused and the box goes back to unticked. That is
-the same behaviour the boxes have had since they were drawn, so nothing breaks
-in the meantime and no error reaches a results page.
+### What I checked after the arrow
 
-### W94 and W95 — the three things I settled first
+You were right to be suspicious, and about the wrong thing: the swap did ship,
+on the website, where I made it. The app's rows have always had the notes icon
+on top. Those rows exist on both surfaces and I changed one, which is why it
+looked to you as though nothing happened.
 
-**Where a tick lives.** There was already a home for it. Migration 076 made a
-`couple_tools` row per couple for the Shared Budget and the checklist, for
-exactly the reason you gave about those: one partner checking something off
-should show for both. The ticks are a column on that row rather than a third
-place that knows how to name a couple.
+I then went back over every item from the last few rounds and checked each one
+against both surfaces rather than the one I edited. One other had landed on a
+single surface: Additional exercises, above. Everything else was either on both
+or site-only because you asked for the site.
 
-**Whose tick it is.** The couple's. Either of you ticking "we have talked about
-who cooks" makes it true for both, which is what a conversation is. Say if you
-would rather each of you had your own and I will change it.
+### A near miss worth knowing about
 
-**What it is keyed by.** The question's id, never the sentence. You edit that
-copy, and a tick tied to the wording would come loose the first time a word
-changed.
-
-One thing I found on the way. "The rows the two of you answered differently"
-was written out in six places across the app, the website and the server. What
-Comes Next needed the same list, and a seventh copy is the one that would have
-drifted, so it is computed once now and everything reads it.
+Deleting the old couple-type bar renderer, I checked for callers and found a
+second one: the same tile on the Responses page. Had I not looked, that chart
+would have gone blank and nothing would have said so.
