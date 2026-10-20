@@ -20,6 +20,7 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-her-edits.mjs` | prose shapes Ellie has already rewritten once | eleven, in TASKS.md under W79 |
 | `sweep-nested-components.mjs` | a React component declared inside another | one holding state, fixed and now gated |
 | `sweep-swallowed-errors.mjs` | a catch that discards the error and says nothing | one cron reporting success after a failed read |
+| `sweep-alignment-change.mjs` | both alignment rules over every real couple's stored answers | 19 rows the old rule called aligned that are not; every score that fell had been a 100 |
 
 Two of them were wrong before they were right, which is the usual ratio:
 
