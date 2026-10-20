@@ -74,6 +74,11 @@ COPY scripts/_lib/doc-out.mjs      /app/scripts/_lib/doc-out.mjs
 COPY api/_workbook-content.js      /app/api/_workbook-content.js
 COPY api/_workbook-prose.js        /app/api/_workbook-prose.js
 COPY api/_type-engine.js           /app/api/_type-engine.js
+# How far apart two Expectations answers are. _workbook-content.js reads it so
+# the workbook scores the mirror the same way the rest of the product does.
+# Its own module precisely so this line is one file rather than five: see the
+# note at the top of it.
+COPY api/_lib/resp-distance.js     /app/api/_lib/resp-distance.js
 
 # Bake the Git commit into the image at build time so the /version
 # endpoint can return it. Render exposes the deployed commit via the

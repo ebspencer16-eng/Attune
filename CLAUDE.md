@@ -1241,6 +1241,36 @@ entirely. Every file read correctly and nothing threw. Loading the page and
 asking for the function is what showed it, which is the argument for a gate
 that drives rather than one that reads.
 
+**Overlapping is not covering, and the check for one passes the other.** The
+app's thought-bubble cloud is a union of circles with a smaller copy of each
+subtracted, so the ring between them paints. Three arrangements in a row came
+back with a coloured blob in the middle, and each time the test said they were
+fine: every pair of shrunk circles overlapped, and the shrunk set was connected.
+Neither is the constraint. The constraint is that the SHRUNK circles cover the
+whole interior, and five evenly spaced ones never do: the middle is a hole, and
+a hole in a mask is ink. One big central lobe with smaller ones round it is
+what fixes it, because its shrunk radius reaches the middle.
+
+The audit was wrong in the same way. It measured a painted point's distance to
+the nearest circle EDGE and called anything close enough a rim. Every interior
+gap passes that: a gap is bounded by edges. The question is whether you can
+walk OUT of the shape from there within a stroke width. With the right question
+the bad arrangement scores eleven per cent of its ink as interior and the good
+one scores zero.
+
+**Pointing one module at another can change what a CONTAINER needs.** The
+workbook renders in its own image, and Dockerfile.workbook copies three files
+out of `api/`. Making `_workbook-content.js` read the shared distance rule
+pulled in `_lib/expectations.js`, which imports the question set and three copy
+modules, so the service would have started, taken a request, and crashed on the
+first line that needed one of them. check-workbook-image caught it.
+
+Five COPY lines and a redeploy was the obvious fix and the wrong one. The rule
+moved into `_lib/resp-distance.js`, which has no imports at all, and
+expectations.js re-exports it: one small file in the image, every caller
+unchanged, still one implementation. When a shared module is about to be read
+by something deployed separately, look at what it drags along before sharing it.
+
 **One function can treat a failed read as a hard stop in one place and as a
 result in another.** `api/cron-survey-nudge.js` answers 503 with "could not
 read who to leave alone, so nothing was sent" when one of its reads fails, and

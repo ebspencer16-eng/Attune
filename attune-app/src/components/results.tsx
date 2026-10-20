@@ -1756,6 +1756,15 @@ function ExpectationsOverview({
  * topic. Collapsed by default so the page stays scannable.
  */
 /**
+ * Her words for the row at the foot of an open conversations list.
+ *
+ * Ellie: "there should be one row at the bottom without a checkbox, with
+ * italic text, that says 'See how these expectations differ', with an arrow on
+ * the right side."
+ */
+const SEE_HOW_THEY_DIFFER = 'See how these expectations differ';
+
+/**
  * One category's conversations, with a way to its page.
  *
  * ── THE ARROW ─────────────────────────────────────────────────────────────
@@ -1804,25 +1813,31 @@ function CategoryDrawer({ label, items, color, section }: {
         <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.75)' }}>
           {`${items.length} topic${items.length !== 1 ? 's' : ''}`}
         </Text>
-        <Text style={{ ...Type.small, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Show</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13 }}>{open ? '\u25B4' : '\u25BE'}</Text>
-        {section ? (
-          /* Her little arrow. A box round it rather than the glyph alone: a
-             13 point character is not a tap target, and hitSlop on a nested
-             Pressable would overlap the header it sits inside. */
-          <Pressable
-            onPress={() => showSection(section)}
-            accessibilityRole="link"
-            accessibilityLabel={`Open ${label}`}
-            style={({ pressed }) => ({
-              paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm,
-              marginLeft: Spacing.xs, marginVertical: -Spacing.xs,
-              borderRadius: Radius.sm,
-              backgroundColor: pressed ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.10)',
-            })}>
-            <Text style={{ color: Palette.white, fontSize: 13, lineHeight: 15 }}>{'\u2192'}</Text>
-          </Pressable>
-        ) : null}
+        {/* ── ONE CONTROL ON THIS ROW, AND IT IS VISIBLE ──────────────
+            Ellie: "I don't want the rows to have 'show' with the dropdown
+            arrow and an arrow to the page. I only want a dropdown arrow, but I
+            want it more visible than the current one."
+
+            Three things competed here: the word "Show", a thin chevron, and a
+            boxed arrow to the page. The row does one thing now and says so
+            once. The way to the page moved to the foot of the open list, where
+            it is a row rather than a second control on a header.
+
+            A filled disc rather than a bare glyph: a 13 point character on a
+            translucent panel is the "more visible" she asked for, and it is
+            a real target rather than a mark. */}
+        <View
+          style={{
+            width: 24, height: 24, borderRadius: 12,
+            backgroundColor: 'rgba(255,255,255,0.18)',
+            borderColor: 'rgba(255,255,255,0.28)', borderWidth: 1,
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+          {/* not markable: a disclosure arrow. */}
+          <Text style={{ color: Palette.white, fontSize: 13, lineHeight: 15, fontWeight: '700' }}>
+            {open ? '\u25B4' : '\u25BE'}
+          </Text>
+        </View>
       </Pressable>
       {open ? (
         <View style={{ borderTopColor: 'rgba(255,255,255,0.16)', borderTopWidth: 1 }}>
@@ -1844,6 +1859,38 @@ function CategoryDrawer({ label, items, color, section }: {
               <Prose style={{ ...Type.small, color: 'rgba(255,255,255,0.88)', flex: 1, lineHeight: 19 }}>{it}</Prose>
             </View>
           ))}
+          {/* ── THE WAY TO THE PAGE, AT THE FOOT OF THE LIST ────────────
+              Ellie: "once the dropdown rows appear, there should be one row at
+              the bottom without a checkbox, with italic text, that says 'See
+              how these expectations differ', with an arrow on the right side."
+
+              Her words, and no checkbox: every row above is a thing to talk
+              about and this one is a way out, so it must not look like one
+              more of them. Italic and no box is what tells them apart.
+
+              A category the server has given no section is not drawn at all
+              rather than drawn and inert. */}
+          {section ? (
+            <Pressable
+              onPress={() => showSection(section)}
+              accessibilityRole="link"
+              accessibilityLabel={SEE_HOW_THEY_DIFFER}
+              style={({ pressed }) => ({
+                flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
+                paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+                backgroundColor: pressed ? 'rgba(255,255,255,0.10)' : 'transparent',
+              })}>
+              {/* not markable: a link to another page, not words about the couple. */}
+              <Text
+                style={{
+                  ...Type.small, flex: 1, lineHeight: 19,
+                  fontFamily: Fonts.bodyItalic, color: 'rgba(255,255,255,0.88)',
+                }}>
+                {SEE_HOW_THEY_DIFFER}
+              </Text>
+              <Text style={{ color: Palette.white, fontSize: 14, lineHeight: 16 }}>{'\u2192'}</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
     </View>

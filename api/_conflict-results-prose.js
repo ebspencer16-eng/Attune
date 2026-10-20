@@ -68,7 +68,7 @@ export const PATTERN_COPY = {
   contempt: {
     label: 'Contempt',
     definition: 'Sarcasm, dismissiveness, eye-rolling. Talking down rather than across.',
-    0: { note: 'Not showing up at all. This is the pattern that matters most, so this is genuinely worth knowing.' },
+    0: { note: 'You do not show contempt. This is the pattern that matters most, so this is genuinely worth knowing.' },
     1: { note: 'Rare. Sarcasm under pressure is common, and a quick check-in ("was that sharper than I meant?") keeps it from settling in.' },
     2: { note: 'Worth taking seriously, more than the others at the same rate. Contempt tends to grow quietly. Naming it out loud to {partner} once, outside an argument, does more than trying to catch it mid-conflict.' },
     3: { note: 'This is the one to work on first. Not because you are doing something unforgivable, but because it is the pattern that does the most damage over time and the one that responds best to being named.' },
@@ -76,17 +76,17 @@ export const PATTERN_COPY = {
   defensiveness: {
     label: 'Defensiveness',
     definition: 'Meeting a concern with a counter-concern rather than hearing it.',
-    0: { note: 'Not showing up. Taking a complaint without returning one is harder than it sounds.' },
+    0: { note: 'You do not get defensive. Taking a complaint without returning one is a difficult skill.' },
     1: { note: 'Rare. You are already handling this well. Keep noticing what lets you stay open.' },
-    2: { note: 'Showing up regularly. Before responding, try reflecting back what you heard first. Even one sentence changes the pace, and it costs nothing to be wrong about it.' },
+    2: { note: 'Defensiveness appears occasionally. Before responding, try reflecting back what you heard first. Even one sentence changes the pace, and it costs nothing to be wrong about it.' },
     3: { note: 'Worth attention. Defensiveness usually means the complaint landed as an attack. Saying "give me a second, I want to hear that properly" buys the pause where the reflex would have gone.' },
   },
   stonewalling: {
     label: 'Stonewalling',
     definition: 'Shutting down or checking out instead of staying in the conversation.',
-    0: { note: 'Not showing up. Staying present when things get tense is genuinely difficult.' },
+    0: { note: 'You do not shut down. Staying present when things get tense is impactful in a relationship.' },
     1: { note: 'Rare. When you feel the pull to check out, naming it ("I need five minutes") keeps it from feeling like an exit.' },
-    2: { note: 'Showing up regularly. A stated pause protects the relationship more than a silent one. "I need twenty minutes, I am not leaving" is the whole move.' },
+    2: { note: 'Shutting down happens sometimes. A stated pause protects the relationship more than a silent one. "I need twenty minutes, I am not leaving" is the whole move.' },
     3: { note: 'Worth attention, and usually a sign of being overwhelmed rather than uninterested. Agreeing a pause signal with {partner} in advance means shutting down does not have to be the only exit.' },
   },
 };
@@ -158,7 +158,7 @@ export const BAND_COLORS = ['#2E7D5B', '#D4A017', '#E07A1F', '#C2410C'];  // gre
 /** Shown on the glance page when no pattern crosses the line. */
 export const NO_ACTION_NEEDED = {
   title: 'Nothing here needs work',
-  body: 'None of the four patterns are showing up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.',
+  body: 'None of the four patterns come up often for you. That is worth saying out loud to {partner}, because it is the kind of thing couples rarely tell each other.',
 };
 
 /**
@@ -267,7 +267,7 @@ export const CONFLICT_RESULTS_COPY = {
    */
   selfScoreLabel: 'Self-assigned score: ',
 
-  allClear: 'None of the four patterns are showing up often for you. That is worth knowing, and worth saying to {partner}.',
+  allClear: 'None of the four patterns come up often for you. That is worth knowing, and worth saying to {partner}.',
 };
 
 /**

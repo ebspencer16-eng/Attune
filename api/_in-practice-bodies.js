@@ -43,7 +43,7 @@ export const IN_PRACTICE_BODIES = {
       {
         "id": "how-to-review-your-results-together-6",
         "type": "paragraph",
-        "text": "This matters because it establishes shared reality before you get to the harder stuff. It's easier to engage with a difference when you both already trust the framework."
+        "text": "This matters because it establishes shared reality before you get to the harder stuff. It is easier to talk about a difference when you understand each other's mindsets."
       },
       {
         "id": "how-to-review-your-results-together-7",
@@ -342,7 +342,7 @@ export const IN_PRACTICE_BODIES = {
       {
         "id": "when-a-conversation-turns-heated-13",
         "type": "paragraph",
-        "text": "The simple fix: before you pause, name when you'll come back. \"Let's pick this up tonight after dinner\" creates a container that the pause doesn't feel like avoidance."
+        "text": "The simple fix: before you pause, name when you'll come back. \"Let's pick this up tonight after dinner\" so the pause does not feel like avoidance."
       }
     ]
   },

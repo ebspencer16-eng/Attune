@@ -517,17 +517,23 @@ function Snapshot({ data, accent, ground = null, groundStops = null, step = null
             <Prose style={{ ...Type.small, color: INK_QUIET, marginBottom: Spacing.md }}>
               {content.resetQuestion}
             </Prose>
-            {/* The same two columns as the snapshot table above, because it
-                is the same question asked of the two of them. It used to be
-                the pills the table has just lost, and leaving them here would
-                have made this the only pair of pills on the page. */}
-            <TableHead you={names.you} partner={partner?.strength ? names.partner : null} />
-            <TableRow
-              label=""
-              mine={you.strength || '\u2014'}
-              theirs={partner?.strength || null}
-              first
-            />
+            {/* ── NOT A TABLE ──────────────────────────────────────────
+                Ellie: "To help reset mid conflict doesn't need to be a table
+                like the conflict section, the Ellie and Preston columns can
+                take up the full width and can be tiles or something."
+
+                It borrowed the snapshot table's three columns, which meant an
+                empty first column holding a label that does not exist: a third
+                of the width spent on nothing, and two answers squeezed into
+                what was left. There is one question here and it is written
+                above, so the two answers get the whole width. */}
+            {/* Either side may be the only one who has answered, and the
+                block above is reached when EITHER has. One tile then takes the
+                whole width, which is what flex: 1 with one child does. */}
+            <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+              {you.strength ? <ResetTile name={names.you} text={you.strength} own /> : null}
+              {partner?.strength ? <ResetTile name={names.partner} text={partner.strength} /> : null}
+            </View>
           </View>
         ) : null}
       </View>
@@ -630,18 +636,33 @@ function Patterns({
 
           return (
             <View key={p.key} style={card}>
-              {/* Her first line: the name and what it means, as one sentence.
-                  One Prose rather than a heading and a line under it, because
-                  that is how she wrote it and because a reader marking this
-                  marks the whole thought rather than half of it. */}
-              {/* Ellie: "make the horseman title larger". Type.title rather
-                  than body, which is the same step the page's own heading
-                  takes, so a tile reads as a thing rather than as a paragraph.
-                  One Prose still, because the name and what it means are one
-                  sentence and a reader marking it marks the whole thought. */}
-              <Prose style={{ ...Type.title, fontSize: 19, lineHeight: 26, color: Palette.white }}>
-                {definition ? `${titleFor(p.key)}: ${definition}` : titleFor(p.key)}
-              </Prose>
+              {/* ── THE NAME LARGE, THE SENTENCE SMALL ──────────────────
+                  Ellie: "Only the word criticism: (for example) should be
+                  large, the other text in that line should be small."
+
+                  Two sizes in one flow means nested Text, and that costs this
+                  line its marking. `Prose` takes a plain string and, once
+                  marking is on, renders a wrapping row of per-word Views so
+                  each word can report its own frame; a View cannot sit inside
+                  a Text, so there is no way to have both.
+
+                  So these four sentences are the one place on this page a
+                  reader cannot highlight. The advice under them still is.
+                  Said out loud rather than left to be found, because it is a
+                  trade she can reverse: the name on its own line above the
+                  definition keeps both. */}
+              {/* not markable: two type sizes in one flow need nested Text,
+                  and the marking layer needs a View per word. */}
+              <Text style={{ color: Palette.white }}>
+                <Text style={{ ...Type.title, fontSize: 19, lineHeight: 26, color: Palette.white }}>
+                  {titleFor(p.key)}:
+                </Text>
+                {definition ? (
+                  /* not markable: see the note above. Two type sizes in one
+                     flow need nested Text, and a markable word needs a View. */
+                  <Text style={{ ...Type.small, lineHeight: 26, color: INK }}>{` ${definition}`}</Text>
+                ) : null}
+              </Text>
 
               {/* Her second line. The score keeps the band's own colour rather
                   than being painted orange whatever it says: orange is what
@@ -795,6 +816,36 @@ function Wrote({ data, ground = null, groundStops = null, step = null }: {
  * any phone.
  */
 const SNAPSHOT_COLS = { label: 1.25, cell: 1 };
+
+/**
+ * One person's answer to "To help reset mid-conflict", as a tile.
+ *
+ * Half the width each, the name small above the answer, on a panel a shade
+ * lighter than the card it sits in. Not the snapshot table's columns: there is
+ * one question here rather than three, and it is written above both answers,
+ * so a label column would be an empty third of the row.
+ */
+function ResetTile({ name, text, own = false }: { name: string; text: string; own?: boolean }) {
+  return (
+    <View
+      style={{
+        flex: 1, backgroundColor: PANEL_BAND, borderColor: PANEL_EDGE, borderWidth: 1,
+        borderRadius: Radius.md, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg,
+      }}>
+      {/* not markable: a column heading. */}
+      <Text
+        style={{
+          ...Type.eyebrow, fontSize: 9, marginBottom: Spacing.xs,
+          color: own ? '#BFD4FF' : 'rgba(255,255,255,0.72)',
+        }}>
+        {name}
+      </Text>
+      <Prose style={{ ...Type.small, fontFamily: Fonts.bodyItalic, color: Palette.white, lineHeight: 18 }}>
+        {text}
+      </Prose>
+    </View>
+  );
+}
 
 /** The two names, once, across the top of a table. */
 function TableHead({ you, partner }: { you: string; partner: string | null }) {

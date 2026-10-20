@@ -30,10 +30,10 @@ of them to a name before anyone reads them.
 | WW | 1 | Emotional availability is a strong suit for you two |
 | WW | 2 | You are both readable and willing to be read |
 | WW | 3 | Hard conversations aren't avoided as often |
-| XX | 1 | Efficient decision making as a unit |
+| XX | 1 | As a unit, you are efficient decision makers |
 | XX | 2 | Arguments tend to be structured and reasonable |
 | XX | 3 | You often understand where the other is coming from |
-| YY | 1 | Shared instinct to step back before getting too heated |
+| YY | 1 | You share an instinct to step back before getting too heated |
 | YY | 2 | Though delayed, discussions are calm and productive |
 | YY | 3 | Neither of you takes the other's need for space personally |
 | ZZ | 1 | When either of you shares something, it is respected |
@@ -43,7 +43,7 @@ of them to a name before anyone reads them.
 | WX | 2 | You are complementary processors, thoughtful and eager |
 | WX | 3 | Your relationship has warmth and steadiness |
 | WY | 1 | Friction can be easily removed for this pairing |
-| WY | 2 | Complementary instincts, attentive and stabilizing |
+| WY | 2 | You have complementary instincts, attentive and stabilizing |
 | WY | 3 | Genuinely beneficial repair systems are attainable here |
 | WZ | 1 | Together, you encourage emotional safety and depth |
 | WZ | 2 | Genuine feelings are received well between you |

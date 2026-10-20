@@ -59,14 +59,14 @@ export const COUPLE_TYPES = [
     name: "The collaboration",
     tagline: "Resolution is the shared instinct. Privacy is the shared method of processing.",
     description: "{U} and {P} both move toward resolving things and both handle the feeling internally before it comes out. Decisions get made and disagreements get worked through. The practical machinery of the relationship runs efficiently, and quietly.",
-    nuance: "Efficient repair can mean closing the loop before it's actually through. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
+    nuance: "Efficient repair can mean ending the conversation before it is actually settled. Two people who both move fast toward resolution can sometimes resolve the surface without fully addressing what's underneath. The same thing comes back because the real conversation happened too quickly.",
     color: "#1B5FE8", shade: "#EFF1FF",
     famousDuos: [
       { names: "Sherlock & Watson (as partners)", show: "Sherlock", note: "Two people who processed through logic and action rather than feeling. The understanding between them was real; it just ran quiet." },
       { names: "Ben Wyatt & April Ludgate", show: "Parks & Recreation", note: "Both efficient, both internally contained, both effective. They got things done without a lot of emotional weather." },
     ],
     strengths: [
-      "Efficient decision making as a unit",
+      "As a unit, you are efficient decision makers",
       "Arguments tend to be structured and reasonable",
       "You often understand where the other is coming from",
     ],
@@ -98,7 +98,7 @@ export const COUPLE_TYPES = [
       { names: "April & Andy", show: "Parks & Recreation", note: "Both withdrew into themselves when things got hard. When they did come back, it was always real, just slow." },
     ],
     strengths: [
-      "Shared instinct to step back before getting too heated",
+      "You share an instinct to step back before getting too heated",
       "Though delayed, discussions are calm and productive",
       "Neither of you takes the other's need for space personally",
     ],
@@ -197,7 +197,7 @@ export const COUPLE_TYPES = [
     ],
     strengths: [
       "Friction can be easily removed for this pairing",
-      "Complementary instincts, attentive and stabilizing",
+      "You have complementary instincts, attentive and stabilizing",
       "Genuinely beneficial repair systems are attainable here",
     ],
     stickingPoints: [

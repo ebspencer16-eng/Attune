@@ -10074,8 +10074,12 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
          orange would leave the colour meaning nothing. */
       return (
         <div key={p.key} style={{ background: "white", border: `1.5px solid ${C.stone}`, borderRadius: 14, padding: "1rem 1.1rem", marginBottom: "0.75rem" }}>
-          <p style={{ fontSize: "0.88rem", color: C.ink, fontFamily: BFONT, lineHeight: 1.55, margin: 0 }}>
-            <strong style={{ fontWeight: 700 }}>{copy.label}</strong>{copy.definition ? `: ${copy.definition}` : ""}
+          {/* Ellie: "Only the word criticism: (for example) should be large,
+              the other text in that line should be small." The name steps up
+              and the sentence after it steps down, in one flow. */}
+          <p style={{ margin: 0, lineHeight: 1.5 }}>
+            <strong style={{ fontSize: "1.05rem", fontWeight: 700, color: C.ink, fontFamily: BFONT }}>{copy.label}:</strong>
+            {copy.definition ? <span style={{ fontSize: "0.8rem", color: C.muted, fontFamily: BFONT }}>{` ${copy.definition}`}</span> : null}
           </p>
           <div style={{ fontSize: "0.74rem", color: C.muted, fontFamily: BFONT, marginTop: "0.45rem" }}>
             {CONFLICT_RESULTS_COPY.selfScoreLabel}<span style={{ color: tone, fontWeight: 700 }}>{FREQUENCY_LABELS[v]}</span>

@@ -21,12 +21,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-Sweeps, which is what you asked for next. W59 is still waiting on three
-sentences from you.
-
-| # | What I am doing |
-|--|--|
-| W59 | **Two of them start with "You are" now. Three need your words**, under this table: they cannot take the phrase without being rewritten, and rewriting them is writing copy. |
+**Nothing open.** Everything from your last message is built and sitting in
+section 3 for your eye.
 
 ---
 
@@ -34,97 +30,15 @@ sentences from you.
 
 | # | Built, needs your eye |
 |--|--|
-| W57 | **The map is a subtraction now, not a share of the screen.** An iPhone 17 still draws 227, which you approved; a Pro Max goes from 249 to 309. The thing below the map is a fixed number of points on every phone, so a fraction was handing a bigger screen a smaller share of its own spare room. |
-| W77 | **The snapshot answers are italic.** |
-| W78 | **Bigger horseman title, smaller One thing to try.** |
-| W52 | **The thought dots rise from the crown.** They were level with the shoulder, so the thought looked like it was leaving somewhere around the ear. |
-| W64 | **METHODOLOGY.md**, in the repo root. Every weight, threshold and list is read out of the code that serves customers, so it cannot describe a version of the scoring that is not live. Notes under this table, including what it deliberately leaves out. |
-| W79 | **The third prose list**, under this table. Built from your edits rather than from my taste, and the first five findings are your own Criticism rewrite applied to the three horsemen nobody showed you. |
-| W68 | **Remove the description sentence** under the Side by Side hero, in Relationship Reflection. |
+| W79 | **Your eleven rewrites, word for word.** The In Practice two went into the pages themselves, which is where that copy lives; the generated copy follows. |
+| W59 | **Your three bullets, word for word.** |
+| W78 | **"Criticism:" large, the sentence after it small.** It costs those four lines their highlighting; one line under this table says why and how to get it back. |
+| W80 | **The reset answers are two tiles, full width.** The empty label column is gone. |
+| W81 | **One round dropdown arrow per row, and nothing else**, with "See how these expectations differ" at the foot of each open list. |
+| W52 | **One dot from three quarters up the head, and the cloud again.** The note under this table is about why the last three clouds had something wrong inside them. |
+| B148 | **The workbook scorer is fixed**, and it reads the same rule as everything else rather than a corrected fourth copy. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
-
-### W49, the second pass on AI tone
-
-**What I read for.** The complaints people make are less about vocabulary than
-about construction. The ones that come up again and again: the em dash used as
-a comma, "it's not X, it's Y", a tidy list of three to close a sentence,
-"here's the thing", "that said", "in today's world", heavy signposting, and a
-set of brochure verbs: foster, cultivate, facilitate, leverage, unlock, embark,
-empower. Plus the vocabulary everybody names: delve, tapestry, testament,
-realm, myriad, holistic, robust, navigate the complexities.
-
-**What I did with it.** Thirty tests, phrases and shapes, run over every copy
-module by importing it and reading the finished sentences rather than grepping
-the source. 175 modules, 46 sentences flagged.
-
-**Two tests I threw away, and why that matters.** A list of three flagged eight
-sentences and every one was a real list: "credit cards, loans, and retirement
-accounts" is the three things, not a flourish. And "what's going on" flagged
-seventeen, most of them inside a phrase somebody is meant to SAY out loud,
-where it is exactly right. A tell in a sentence we wrote is a problem; the same
-words in a line we are suggesting you say are not.
-
-**The ones worth changing.** Nothing is live. Pick a column.
-
-| Where | What it says now | Suggested |
-|--|--|--|
-| Workbook, bids | "Build a small daily ritual to **foster meaningful** connection." | "Build a small daily ritual that you both look forward to." |
-| Repair, love and feedback (three places) | "a **meaningful** gap" | "a wide gap" |
-| Couple type: both inward | "Feelings are **meaningful** even if not expressive" | "Feelings run deep even when they are not spoken" |
-| Couple type: both expressive | "Together, you **facilitate** emotional safety and depth" | "Together, you make it safe to go deep" |
-| Couple type: both expressive | "**Meaningful** feelings are received well between you" | "What one of you feels, the other takes seriously" |
-| Couple type: famous pair | "Without a **framework** for it, they kept colliding at exactly the wrong moment." | "With no way to name it, they kept colliding at exactly the wrong moment." |
-| Workbook, energy | "**Without a framework**, the inward partner's need for quiet can read as withdrawal" | "Unnamed, the inward partner's need for quiet can read as withdrawal" |
-| Workbook, conflict | "**Without a framework**, the person who needs resolution reads the other's silence as avoidance." | "Unnamed, the person who needs resolution reads the other's silence as avoidance." |
-| Conflict, both slow | "**The thing to name**: when both of you are **holding space**, who comes back first?" | "Worth naming: when you are both giving each other room, who comes back first?" |
-| Couple type: both expressive | "it's **the thing that** makes real closeness possible" | "it is what makes real closeness possible" |
-| Workbook, after conflict | "it is **the thing that** accumulates" | "it is what accumulates" |
-| Bids, one reserved one attuned | "**Low effort, high return.**" | "It costs little and it lands." |
-| Workbook, energy | "Recharge how you need, but **make space for** connection, too." | "Recharge how you need, and keep some time for each other." |
-| Conflict, both fast | "**Make space for** 'here's what I felt' before jumping to fix it." | "Leave room for 'here's what I felt' before jumping to fix it." |
-| Bids, one reserved one attuned | "Bids don't need to be **meaningful** to matter." | "A bid does not have to be a big one to count." |
-| Conflict patterns, criticism, none | "This is not **showing up** for you." | "This one does not appear for you." |
-| Conflict patterns, criticism, some | "**Showing up** enough to matter." | "Appearing enough to matter." |
-
-The last two go together: "showing up" is being used there to mean "appearing
-in your results", and it reads at a glance as "they are not showing up for
-you", which is close to the opposite.
-
-**One thing I did not touch.** The word "unlock", which is in the waiting
-copy and three emails: "Results unlock when both of you complete exercises."
-It is product language rather than AI language and it is in your voice. Say
-the word if you want it gone and I will bring you options.
-
-**And one of yours that the sweep still flags.** Your own rewrite of the Needs
-line uses "The thing to watch for is tone rather than clarity." The sweep
-reports it because "the thing to" is on the list. You wrote it, so it stays.
-
-### W57, how big the map is on each phone
-
-You were right about the shape of it. It was a quarter of the screen height,
-and everything below the map is a fixed number of points: an eyebrow, the type
-tile, the tab bar. Those do not get taller on a bigger phone, so a taller phone
-has more spare room and a fraction was handing the map a smaller share of it.
-
-It is a subtraction now, screen height minus what the rest of the page needs.
-
-| | Screen | Map was | Map is |
-|--|--|--|--|
-| iPhone SE | 375 x 667 | 173 | 200, the floor |
-| iPhone 17 | 402 x 874 | 227 | **227**, unchanged |
-| iPhone 17 Pro Max | 440 x 956 | 249 | **309** |
-| iPad mini | 744 x 1133 | 295 | 320, the cap |
-
-The 227 you approved is untouched, because the reserve is derived from it. The
-check runs this arithmetic over all four and fails if a taller phone ever gets
-a smaller map again.
-
-**What I could not see.** The Simulator lost its window part way through, which
-stops synthetic taps while screenshots keep working, so I verified the map
-arithmetic and not the map on screen. The other three I did see: the snapshot
-table, the horseman tiles and the new icon. The italic and the two type sizes
-are built and typechecked but unlooked at.
 
 ### The bug sweeps
 
@@ -231,44 +145,6 @@ It is scoring, and changing it changes documents people already have, so it
 stays your decision. SECURITY.md now points at the right function to move it to
 and carries the measurement.
 
-### W64, the methodology document
-
-**Where it is.** `METHODOLOGY.md`, at the top level of the repo. Six sections:
-Communication, how aligned is decided, Expectations, Physical Intimacy,
-Conflict Patterns, and what happens to a couple whose results were written
-before a scoring change.
-
-**Why it is generated rather than written.** "Kept current" was the whole
-requirement, and a hand-written methodology document is the most reliable way
-to be wrong about a product. We have had two of exactly this shape already: the
-copy review that listed ten action items nothing renders, and the email preview
-page that showed six mock-ups while the product sent nineteen. Both were built
-to describe the product and quietly became a second draft of it.
-
-So every weight, every threshold and every list is read out of the module the
-running product reads. Change a weight and the document changes with it, or the
-build fails and tells you it has fallen behind.
-
-**What is in it that you cannot get anywhere else.** The per-question weights,
-which have never been written down outside the code. The two axis tables, with
-which dimensions are inverted and why that matters. Which figure is the
-self-report and which is blended with your partner's view of you, dimension by
-dimension, and which of the two every screen shows. And the three different
-thresholds that answer three different questions about alignment.
-
-**What it deliberately leaves out.** The copy. What a result SAYS is yours and
-is reviewed in WORDS-REVIEW.md and COUPLE-TYPE-COPY-REVIEW.md. This is the
-arithmetic, which is the half Carolina can check and I cannot write.
-
-**One thing in it is an honest caveat rather than a boast.** Three or four of
-the life questions have options that are categorical rather than ordered, so
-the distance between two of them is an approximation. It has always been one.
-It is now written down where somebody can disagree with it.
-
-**It is shareable as it stands.** Markdown, no secrets, no customer data, and
-nothing in it names a person. If you would rather have it as a page with a link
-you can send, say so and I will build that from the same generator.
-
 ### W79, the third list, built from your own edits
 
 **What is different about this one.** The first two lists were my reading of
@@ -332,58 +208,36 @@ space" the only two of those, "low-drama" the only two, and "the thing that"
 the only two. You got all of them. That is four tests that found nothing, which
 is worth one sentence because it turns "probably fine" into a number.
 
-### W59, the three bullets that need your words
+### W52, why the last three clouds were wrong
 
-Two took the change as it stands: "You are complementary processors,
-thoughtful and eager" and "You are emotionally complementary, logical and
-feeling".
+The cloud is drawn as a union of overlapping circles with the inside cut out,
+so what you see is the rim. Three attempts had something wrong inside them and
+I kept checking the wrong thing.
 
-Three more have the same shape and cannot take the words mechanically. "You
-are complementary instincts" and "You are efficient decision making" are not
-sentences. A suggestion for each, and the suggestion is mine, so change it:
+The rule is not that the circles overlap. The cut-out circles are each smaller
+by the width of the line, and what has to hold is that **those** cover the
+whole inside. Five circles in an even ring pass every overlap test and leave
+the middle uncovered, so the middle gets painted: a coloured blob inside the
+cloud.
 
-| Couple type | What it says now | Suggested |
-|--|--|--|
-| One fast, one steady | "Complementary instincts, attentive and stabilizing" | "You are complementary, attentive and stabilizing" |
-| Both inward | "Efficient decision making as a unit" | "You are efficient at making decisions together" |
-| Both step back | "Shared instinct to step back before getting too heated" | "You are both inclined to step back before things get heated" |
+It now has one big circle in the centre with five smaller ones around it, three
+of them along the underside so the bottom is bumpy rather than flat.
 
-### C12, the long and the short of it
+**And the check I wrote for it was wrong first.** It measured how far a painted
+point was from the nearest circle edge, which every inside gap also passes,
+because a gap is bounded by edges. The question is whether you can walk OUT of
+the shape from there. The old arrangement scores eleven per cent of its ink as
+inside-blob; this one scores none.
 
-**Where it is.** `COUPLE-TYPE-COPY-REVIEW.md`, one table for What comes
-naturally and one for What's worth being aware of. Left column what ships
-today, right column a proposal. 128 characters now, 51 proposed.
+### W78, what the two sizes cost
 
-**Why sixty and not four.** Each of the ten couple types has three of each.
-You see your own six, which is why it reads as a handful. A decision about the
-shape of this copy is a decision about all sixty, so they are all there.
+"Criticism:" large and the sentence after it small, on one line, needs the two
+to be one piece of text. The highlighting layer needs each word to be its own
+box so it can report where it is. You cannot have both.
 
-**Nothing is live.** The proposals are in a file the product does not read.
-Tell me which column you want, per row or in bulk, and it goes into the module.
-
-**One thing it does that the insights review did not.** Each proposal records
-the sentence it was written against. If you rewrite one in the module, the
-table marks that row STALE instead of showing my shorter version beside a
-sentence it was never about. That is the failure that nearly lost your 74
-insights, caught by a check this time rather than by me.
-
-### S27, the three I left alone
-
-Each is a number rather than a fix, because fixing it would change how
-something looks and that is yours to decide.
-
-**459 controls under 44 points on a phone.** Mostly footer links at 16 points
-tall. Apple asks for 44 by 44. Making them that would change the footer's
-shape, so I measured them and left them.
-
-**110 pieces of text between 3.0 and 3.5 contrast.** Muted grey on cream:
-legible, and under the 4.5 the standard asks for. That is the palette rather
-than a mistake. The three that were genuinely unreadable are fixed.
-
-**The app shell is 1.4MB of JavaScript.** It is the website's dashboard, not
-the phone app, and it is the one page where that matters least because people
-arrive at it signed in and stay. Splitting it is a day's work and would change
-nothing you can see.
+So those four lines are the one place on that page you cannot highlight. The
+advice under them still is. If you would rather keep the highlighting, the name
+on its own line above the sentence gets both, and it is one line to change.
 
 ## 4. Done and verified
 
@@ -393,6 +247,11 @@ nothing you can see.
 
 | Verified by you | What it was |
 |--|--|
+| W57 | The couple map was a share of the screen height. It is a subtraction now, so a bigger phone gets a bigger map: 227 on a 17, 309 on a Pro Max. |
+| W77 | The conflict snapshot is a real table, names across the top once, no pills. |
+| W68 | The description sentence under the Side by Side hero is gone. |
+| W64 | METHODOLOGY.md, generated from the modules the product reads, so it cannot describe scoring that is not live. |
+| W49 | The second pass on AI tone. Your seventeen rewrites went in as W54; the working notes are retired. |
 | W11b | Who the admin still counts. You ran 087 and sent back seventeen real people with no they/them among them, which closes the figure you did not recognise. |
 | W63 | The Expectations bars were all or nothing. They show degrees now, and your Emotional Labour answer reads 88 per cent where it read a flat miss. |
 | W70 | The same for Physical Intimacy, which already had the distance and was throwing it away to count states. |

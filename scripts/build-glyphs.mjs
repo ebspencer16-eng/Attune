@@ -63,10 +63,42 @@ const STOPS = ['#E8673A', '#9B5DE5', '#1B5FE8'];
  * sum of its two shrunk radii.
  */
 const LOBES = [
-  [49, 12, 9],
-  [56, 14, 6.5],
-  [44, 16, 6],
-  [52, 19, 6.5],
+  /**
+   * ── THE CLOUD, FOURTH TIME ────────────────────────────────────────────
+   * Ellie: "try to draw the cloud one more time, we are almost there."
+   *
+   * One big lobe with five smaller ones round it: two lifting the top corners
+   * and three along the underside, so the bottom is bumpy rather than flat,
+   * which is the half she asked for first and which has to survive every
+   * redraw.
+   *
+   * ── THE CONSTRAINT THAT KEEPS BEING MISSED ─────────────────────────────
+   * It is not that the lobes overlap. The mask subtracts STROKE from every
+   * radius, so what has to hold is that the SHRUNK circles cover the whole
+   * interior. A ring of five evenly spaced lobes passes every pairwise
+   * overlap test and leaves the middle uncovered, and the mask then paints
+   * there: a coloured blob in the centre of the cloud.
+   *
+   * That is what the big central lobe is for. Its shrunk radius is 7.4, which
+   * reaches every neighbour's shrunk circle and covers the middle.
+   *
+   * ── HOW IT IS CHECKED ──────────────────────────────────────────────────
+   * By rasterising, not by eye and not by pairwise distance. For every point:
+   * is it inside the full union and outside the shrunk one, and if so, can you
+   * walk out of the union from there within a stroke width? If not, it is a
+   * blob in the middle. The arrangement before this scored 11 per cent of its
+   * painted area as inner blob; this scores zero.
+   *
+   * The first version of that audit measured distance to the nearest circle
+   * EDGE, which every interior gap also satisfies, and reported a clean sheet
+   * on a cloud with a hole in it.
+   */
+  [50, 14, 10],
+  [43.5, 12.5, 6],
+  [56.5, 12.5, 6],
+  [45.5, 20, 5.5],
+  [54.5, 20, 5.5],
+  [50, 20.5, 5.5],
 ];
 const STROKE = 2.6;
 /*
@@ -117,22 +149,22 @@ const THINKING = `
   <path d="M3.5 54
            C3.5 43.5 10.5 37.5 19 37.5
            C27.5 37.5 34.5 43.5 34.5 54"/>
-  <!-- ── TWO BEADS, FROM THE CROWN ───────────────────────────────────────
-       Ellie: "trailing dots need to come from the top of the head not the
-       bottom."
+  <!-- ── ONE BEAD, THREE QUARTERS OF THE WAY UP THE HEAD ─────────────────
+       Ellie: "Maybe only one dot before the cloud, leaving from 75% of the way
+       up the head."
 
-       They were at (30,31) and (35,26), which is level with the shoulder: the
-       head's centre is at y=22, so both sat BELOW it and the thought appeared
-       to leave somewhere around the ear. They start above the crown now, at
-       y=11.5, and rise to the right.
+       The head spans y 11.5 to 32.5, so three quarters up is y 16.75, and the
+       ellipse's right edge at that height is x 27.2. The bead sits just clear
+       of it and on the line from there to the cloud, so the thought reads as
+       leaving the head rather than floating beside it.
 
-       Still clear of the cloud and of the head, checked by arithmetic rather
-       than by eye: every bead is further from each cloud lobe's centre than
-       the two radii together, and outside the head ellipse. A bead that lands
-       inside either draws a circle in the middle of the drawing, which is the
-       same complaint she made about the sofa. -->
-  <circle cx="25" cy="9" r="1.6"/>
-  <circle cx="32" cy="7" r="2.2"/>
+       Two before this, then one: a trail of two read as a cartoon, and the
+       cloud is doing the work. Checked by arithmetic rather than by eye: the
+       bead is outside the head ellipse and further from every cloud lobe's
+       centre than the two radii together. A bead inside either draws a circle
+       in the middle of the drawing, which is the complaint she made about the
+       sofa. -->
+  <circle cx="30.5" cy="15" r="2"/>
   <!--
     ── THE CLOUD, THIRD TIME ──────────────────────────────────────────────
     Ellie: "cloud was better before. Can we try the cloud again?"

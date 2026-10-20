@@ -1,4 +1,16 @@
 import { MOMENTS_W, MOMENTS_X, MOMENTS_Y, MOMENTS_Z } from './_workbook-prose.js';
+/**
+ * The one rule for how far apart two expectations answers are. See
+ * scoreResponsibilityPair below for why this file no longer has its own.
+ *
+ * From _lib/resp-distance.js rather than _lib/expectations.js, which is the
+ * same rule re-exported. expectations.js also builds the results rows, so it
+ * imports the question set and three copy modules, and this file runs inside
+ * the workbook's own container: Dockerfile.workbook copies three files out of
+ * api/ and check-workbook-image fails the build on a fourth the service
+ * reaches. The rule's own module has no imports at all.
+ */
+import { respDistance } from './_lib/resp-distance.js';
 
 // api/_workbook-content.js
 // Shared content for the personalized workbook generator.
@@ -181,30 +193,41 @@ export const RESPONSIBILITY_OPTION_SHAPES = {
 // userName / partnerName: the live names this couple sees
 // Returns: number in [0, 1] or null if the values can't be parsed.
 export function scoreResponsibilityPair(userValue, partnerValue, userName, partnerName) {
-  const rankOf = (val) => {
-    if (val == null || val === '') return { rank: null, offscale: null };
-    // Career-set
-    if (val === RESPONSIBILITY_OPTION_SHAPES.career.userPole)    return { rank: 0, offscale: false };
-    if (val === RESPONSIBILITY_OPTION_SHAPES.career.middle)      return { rank: 1, offscale: false };
-    if (val === RESPONSIBILITY_OPTION_SHAPES.career.partnerPole) return { rank: 2, offscale: false };
-    if (val === RESPONSIBILITY_OPTION_SHAPES.career.offscale)    return { rank: null, offscale: true };
-    // Future-set (name-based)
-    if (val === userName)    return { rank: 0, offscale: false };
-    if (val === RESPONSIBILITY_OPTION_SHAPES.future.middle)   return { rank: 1, offscale: false };
-    if (val === partnerName) return { rank: 2, offscale: false };
-    if (val === RESPONSIBILITY_OPTION_SHAPES.future.offscale) return { rank: null, offscale: true };
-    return { rank: null, offscale: null }; // unrecognized
-  };
-  const a = rankOf(userValue);
-  const b = rankOf(partnerValue);
-  if (a.rank === null && a.offscale === null) return null;
-  if (b.rank === null && b.offscale === null) return null;
-  // Off-scale handling: both off-scale → match (1.0); mismatched → 0.0.
-  if (a.offscale && b.offscale) return 1.0;
-  if (a.offscale || b.offscale) return 0.0;
-  // Both ranked: linear distance on 3-point scale.
-  const dist = Math.abs(a.rank - b.rank);
-  return (2 - dist) / 2; // 0 → 1.0, 1 → 0.5, 2 → 0.0
+  /**
+   * ── THIS USED TO GET THE MIRROR BACKWARDS ───────────────────────────────
+   * It had one `rankOf` used for both sides, so "Primarily mine" became rank 0
+   * whoever stored it. Those answers are relative to whoever gave them: two
+   * people who both say a job is primarily theirs have CLAIMED THE SAME JOB
+   * and disagree, and two who answer oppositely agree. So the workbook scored
+   * a disagreement as a perfect match and a match as a total mismatch:
+   *
+   *   both "Primarily mine"      correct 0.0    this scorer 1.0
+   *   opposite answers           correct 1.0    this scorer 0.0
+   *
+   * It was written up in SECURITY.md and left alone because changing it
+   * changes generated documents. Ellie: "No one has purchased the workbook,
+   * demo users will redo the experience anyways, so no worries as long as this
+   * is fixed now."
+   *
+   * ── AND IT DELEGATES RATHER THAN BEING FIXED IN PLACE ───────────────────
+   * There is one rule for how far apart two expectations answers are, in
+   * api/_lib/expectations.js, and every other surface reads it. A fourth
+   * implementation of the mirror, corrected, would be a fourth thing to keep
+   * in step. A similarity is one minus the distance.
+   *
+   * Two things come with the shared rule, both deliberate. It knows the
+   * five-point scale, so the refinement somebody gives after answering "Both
+   * of us" counts here too. And an answer it does not recognise is compared as
+   * stored rather than dropped, where this used to return null: better than
+   * silently losing a row nobody has taught the function about.
+   */
+  const d = respDistance({
+    yourValue: userValue,
+    theirValue: partnerValue,
+    youName: userName,
+    themName: partnerName,
+  });
+  return d === null ? null : 1 - d;
 }
 
 // Score a single life-question answer pair.
