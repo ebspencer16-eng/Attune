@@ -21,9 +21,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| S36 | **Deleting api/_research.js, approved.** Checking what imports it before anything goes. |
+**Nothing open.**
 
 ---
 
@@ -45,6 +43,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | Verified by you | What it was |
 |--|--|
+| S36 | I was wrong that the whole research module was dead. The array is what a gate holds the Our Purpose page to, so it stays; the dead function went, and with it the last copy of the old day rule. |
 | W52 | The thinking glyph: the trailing dot comes off the top of the head and clears its ink, and the cloud is a nine-lobe shape with no gap showing through. |
 | B148 | The workbook scored the responsibility mirror backwards with its own fourth copy of the rule. It reads the shared one now. |
 | W81 | The right end of a row turned the page instead of opening its list. Four rows had it, not one; a row now takes the touch as the finger lands. |
