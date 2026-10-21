@@ -21,11 +21,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| C20 | **Four category folders inside In Practice**, matching the four the site files articles under: Getting Started, Conflict & Repair, Understanding Each Other, Couple Types. |
-| C21 | **A doc per article, twelve of them**, each in its category folder: my pass at the rewrite, a short note on what I changed, and the current live words underneath so nothing is lost. |
-| C22 | **Nothing on the site changes.** The articles stay exactly as they are until you have rewritten them in the docs and told me to put them back. |
+**Nothing open.**
 
 ---
 
@@ -33,6 +29,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| C20 | **Twelve docs in Drive, one per In Practice article**, filed in four new category folders under Product / Active / In Practice. |
+| C21 | **Each doc holds my pass at the rewrite, a note on what I changed, and the current words underneath.** Nothing on the site changed. |
+| C22 | **One typo fixed on the live site**: a heading read "Why unnamedpatterns compound". That is a missing space, not a copy decision, so I fixed it rather than wait. |
 | W117 | **Nothing behind the insights menu tiles now**, just the orange. The card that was around all four is gone; the tiles keep their own. |
 | W113 | **Learn's unowned resources have the lock**, in the icon's place, dimmed the same amount as the exercises tiles. The two tabs draw the same thing. |
 | S38 | **Your home screen said "Your results are ready" for ever**, however many times you had opened them. The column that records "opened" has existed since July and nothing ever wrote it. |
@@ -59,6 +58,38 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W116 | **Every screenshot this repo takes was a full-page capture wearing a viewport's name.** It made two correct charts look broken. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### C20 and C21 — where the docs are, and what is in them
+
+Product / Active / In Practice, then four folders matching the four the site
+files articles under:
+
+| Folder | Articles |
+|--|--|
+| Getting Started | 3 |
+| Conflict & Repair | 4 |
+| Understanding Each Other | 2 |
+| Couple Types | 3 |
+
+Each doc has three parts. My pass at the rewrite. A short note saying what I
+changed and why. Then the current live words, in full, so you can take a line
+back if you want one.
+
+What I was going for, from your rules: short declarative sentences, no em
+dashes, no hedging, nothing that reads as written by a machine. Warmer in the
+second person and more direct about what the reader should do. Across the
+twelve, the changes are mostly the same four: comma splices broken into full
+stops, hedges cut, the strongest sentence given its own line, and anything that
+read as judging one partner reworded so the gap is the subject.
+
+Two things I deliberately did not touch. Every research block with a named
+source is word for word unchanged, because restating a cited finding in my own
+words is how a claim drifts from what the study said. And your section names
+and structure are unchanged, so these map straight back into the site if you
+want them to.
+
+I ran your own rules over my drafts before uploading and it caught two of my
+own hedges. Those are fixed.
 
 ### W113 — what Learn looked like before, and why the lock replaces the icon
 

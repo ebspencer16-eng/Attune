@@ -1051,7 +1051,7 @@ export const IN_PRACTICE_BODIES = {
       {
         "id": "why-naming-the-pattern-changes-everything-4",
         "type": "heading",
-        "text": "Why unnamedpatterns compound"
+        "text": "Why unnamed patterns compound"
       },
       {
         "id": "why-naming-the-pattern-changes-everything-5",
