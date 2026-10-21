@@ -3758,3 +3758,41 @@ writes to `OUT`, which defaults to the working directory, not to `SHOT_DIR`.
 **Open for Ellie:** W113, whether the locked tiles on Learn should get the lock
 icon the exercises tiles now have (Learn only dims). W114, tick one discussion
 on her phone and confirm it stays.
+
+## 2026-10-20, later — six sweeps, run because she could not engage
+
+Tree clean, pushed at b85e7ffd, EAS update published, `npm run check` and
+`npm run smoke` both exit 0.
+
+**One real break.** `profiles.results_last_opened_at`, added in migration 050
+with a comment saying it "drives results ready and never opened", written by
+nothing. Three home prompts read it, so "Your results are ready" and "Revisit
+X" were both permanently on and the beta feedback prompt could never appear.
+`/api/results` stamps it now, once an hour per reader, which covers both
+surfaces because both open results through that endpoint.
+
+The lesson under it is the one about fixtures. `next-action-test.mjs` exercises
+all three rules and passes either way, because it supplies
+`resultsLastOpenedAt` itself. A test that invents a field proves the rule and
+says nothing about whether the product ever sets it. `check-prompt-state-written`
+closes that: it reads the mapping out of home.js, the readers out of
+next-action.js, and fails on a column no writing file names.
+
+**And a page nothing had ever looked at.** check-render calls a results page
+empty under 600 characters. What Comes Next is three collapsed tiles and comes
+to 591 with everything on it, so it reported "no demo data" on every run since
+it shipped. Judged by what it must carry now. 29 of 29 sections.
+
+**Four side effects inside React state updaters**, two of them mine from the
+same morning. Held by `check-updater-purity`.
+
+**The ratio was five in six.** Five of the six sweeps were measuring something
+other than what they claimed before they were fixed, and the detail is in
+`scripts/_sweeps/README.md`. Every one of the five was the same mistake wearing
+a different hat: a scanner looking for a literal name where this codebase uses
+an indirection. An admin rule reached through `checkAdminAuth`. A column list
+built as an array. A column written through `updates[\`${x}_completed_at\`]`.
+A column assigned with `patch.col = `. `setTimeout` matching /^set[A-Z]/.
+
+**Still open for Ellie:** W113, the lock on Learn's locked resources. W114,
+one tap on her phone to confirm a ticked discussion stays ticked.
