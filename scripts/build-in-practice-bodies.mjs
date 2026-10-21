@@ -192,14 +192,27 @@ function blocksFor(slug, html) {
     }
   }
 
-  const intro = /<p class="article-intro"[^>]*>([\s\S]*?)<\/p>/i.exec(html);
+  /**
+   * ── ALL OF THE STANDFIRST, NOT THE FIRST PARAGRAPH OF IT ───────────────
+   * This took the first `p.article-intro` and stopped. Ellie's rewrite of
+   * "How to review your results together" opens with two of them, and the
+   * second one carries the point of the whole article: "what matters most
+   * for all of these discussions is the mindset the two of you have". It was
+   * on the website and absent from the app, and nothing said so, because
+   * check-in-practice-bodies compares the app against whatever this script
+   * extracted rather than against the page.
+   *
+   * A standfirst of two paragraphs is one standfirst. They are joined with a
+   * blank line so a reader on either surface sees the break she wrote.
+   */
+  const intro = [...html.matchAll(/<p class="article-intro"[^>]*>([\s\S]*?)<\/p>/gi)];
   const title = /<h1 class="article-title"[^>]*>([\s\S]*?)<\/h1>/i.exec(html);
   return {
     // The page's own h1, with its line break and its emphasis flattened. The
     // index has a title too and they are not always the same string; the
     // reader prints the index's, and this is kept so the gate can see the two.
     pageTitle: title ? plain(title[1]).replace(/\n/g, ' ') : '',
-    intro: intro ? plain(intro[1]) : '',
+    intro: intro.map((m) => plain(m[1])).join('\n\n'),
     blocks,
   };
 }

@@ -21,13 +21,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
+**Nothing open.** Everything from your last message is in section 3.
+
 | # | What I am doing |
 |--|--|
-| C27 | **Your version of How to review your results together, onto the site**, word for word. |
-| C28 | **Thirteen articles written to your structure and your tone**, in Drive. Four sections: The Attune Experience, Understanding Each Other, Conflict and Repair, Attune Methodology. |
-| C29 | **Citations from the 119 quotations this product already verifies**, plus the eight academic sources already in the live articles. Nothing invented. |
-| C30 | **An Archive folder in Drive**, with everything currently there moved into it. |
-| C31 | **A suggestions doc at the top of In Practice**: what to write next in each section. |
 
 ---
 
@@ -66,6 +63,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W115 | **Type Analytics was drawing nothing below the four top tiles.** Moving the data quality block left a stray closing tag behind, so the rest of the page fell outside it. |
 | W111 | **An admin render harness**, so every admin row above is a picture I looked at rather than a claim. |
 | W116 | **Every screenshot this repo takes was a full-page capture wearing a viewport's name.** It made two correct charts look broken. |
+| C27 | **Your article is on the site, word for word.** Both of your opening paragraphs reach the app now. A builder was taking only the first, so the app had been showing a shorter version than the site. |
+| C28 | **Thirteen drafts in Drive**, in your four sections, numbered so they read in order. Nothing is on the site. |
+| C29 | **Every citation is one a check opens and compares**: the 119 verified quotations, plus the eight academic sources already in live articles. Each draft lists its own at the foot. |
+| C30 | **Archive holds the four old folders** and every article that was in them. In Practice now has only your four sections and the suggestions doc. |
+| C31 | **Suggested future articles**, at the top of In Practice. Sixteen candidates, what each one is for, and the three I would write first. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
@@ -145,6 +147,43 @@ want them to.
 
 I ran your own rules over my drafts before uploading and it caught two of my
 own hedges. Those are fixed.
+
+### C27 to C31 — the thirteen, and where they are
+
+Product / Active / In Practice. The folders are numbered so Drive keeps them in
+your order rather than alphabetically.
+
+| Folder | Docs |
+|--|--|
+| 1. The Attune Experience | 3 |
+| 2. Understanding Each Other | 3 |
+| 3. Conflict and Repair | 4 |
+| 4. Attune Methodology | 3 |
+| Archive | the four old folders, with everything that was in them |
+
+Your version of How to review your results together is the live page now, and
+it is the only one of the thirteen that is on the site. The other twelve are
+drafts for you to rewrite, in the same shape as the last set: my pass, then the
+sources it leans on.
+
+Finding your two opening paragraphs missing from the app was the useful part of
+this round. The site had both. The thing that turns a page into what the app
+reads took the first one and stopped, so the app has been opening that article
+on half of your introduction. It takes all of them now, and a check fails the
+build if the two surfaces disagree about an article's opening.
+
+On citations. Nothing in any draft was written from memory. Every quotation is
+one of the 119 this repo opens and compares word for word on every build, and
+every research block is one of the eight already carried by a live article,
+copied rather than reworded, because restating a finding is how a claim drifts
+from what the study said. Where a suggested future article would need a source
+we do not hold, the suggestions doc says so instead of promising it.
+
+One thing to decide, not a gap. Your four section names are what Drive uses.
+The product still says Getting Started, Conflict and Repair, Understanding Each
+Other and Methodology. Renaming is one edit in one place, and I have left it
+alone because the names and the articles should move together when you approve
+them. Say the word and both surfaces change at once.
 
 ### W113 — what Learn looked like before, and why the lock replaces the icon
 

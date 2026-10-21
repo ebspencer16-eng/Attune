@@ -30,8 +30,14 @@ const page = readFileSync(new URL('../public/practice.html', import.meta.url), '
 function plain(s) {
   return s
     .replace(/&amp;/g, '&')
-    .replace(/&rsquo;|&#8217;/g, '’')
-    .replace(/&#39;|&lsquo;/g, "'")
+    .replace(/&rsquo;|&#8217;/g, '\u2019')
+    /* &lsquo; is a LEFT single quote, U+2018. It was grouped with &#39;, which
+       is a straight apostrophe, so a page written with &lsquo;best way&rsquo;
+       compared as 'best way’ against the module's ‘best way’ and reported a
+       difference that was the harness's. Entity in, the character it names
+       out, one per line. */
+    .replace(/&lsquo;|&#8216;/g, '\u2018')
+    .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();

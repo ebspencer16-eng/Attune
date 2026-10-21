@@ -12,22 +12,22 @@
 export const IN_PRACTICE_BODIES = {
   "how-to-review-your-results-together": {
     "pageTitle": "How to review your results together",
-    "intro": "Some couples open their results immediately. Others wait for a quiet evening. Either works. What matters more is how you approach the conversation once you're in it. Here's a structure that keeps things open.",
+    "intro": "After completing their Attune experience, some couples dive into their results right away, while others wait for a quiet evening; Some sit down together and others review individually; Some click through quickly, get the highlights, and do explore in depth later, while others block time to read thoughtfully on their first pass. Though there is no prescribed method or ‘best way’ to approach your Attune insights, we compiled the following outline to guide anyone trying to thoughtfully approach this experience.\n\nThe bottom line is that the timing, format, length, or depth of the conversation will vary dramatically for each couple, but what matters most for all of these discussions is the mindset the two of you have surrounding your relationship and why you are exploring these insights.",
     "blocks": [
       {
         "id": "how-to-review-your-results-together-1",
         "type": "heading",
-        "text": "Before you sit down"
+        "text": "Before you discuss"
       },
       {
         "id": "how-to-review-your-results-together-2",
         "type": "paragraph",
-        "text": "Pick a time when neither of you is under pressure. Not between errands. Not as a pre-dinner conversation starter. The results are worth real attention, and real attention requires actual space."
+        "text": "Pick a time when neither of you is under pressure. Ideally not between errands or squeezed in before dinner. What you will review are insights tailored for you based on honest and sometimes vulnerable exercise responses, and those feelings deserve to be respected and not rushed."
       },
       {
         "id": "how-to-review-your-results-together-3",
         "type": "prompt",
-        "text": "Read your results separately first, before you discuss them together. Coming in with your own initial reaction means the conversation is two perspectives meeting, not one person reacting to the other.",
+        "text": "You may choose to review your results on your own first, or you may choose to spend the time reading and interpreting together. Either way, try to encourage a discussion where you both are able to share your perspectives, not only your reactions.",
         "label": "One practical note"
       },
       {
@@ -38,62 +38,62 @@ export const IN_PRACTICE_BODIES = {
       {
         "id": "how-to-review-your-results-together-5",
         "type": "paragraph",
-        "text": "Before going to the gaps or differences, spend a few minutes on what lands as true. Not just the things you expected, the things that feel accurate even if you've never put them into words."
+        "text": "Before you discuss gaps or opportunities, spend a few minutes addressing those things that resonate with you, feel most accurate about your dynamic, or help you put into words something that you hadn’t vocalized before."
       },
       {
         "id": "how-to-review-your-results-together-6",
         "type": "paragraph",
-        "text": "This matters because it establishes shared reality before you get to the harder stuff. It is easier to talk about a difference when you understand each other's mindsets."
+        "text": "Starting with this focus helps you establish that you both are aware of intricacies in your relationship and that you see each other clearly."
       },
       {
         "id": "how-to-review-your-results-together-7",
         "type": "heading",
-        "text": "Approach differences as data, not verdicts"
+        "text": "Different responses help you understand each other"
       },
       {
         "id": "how-to-review-your-results-together-8",
         "type": "paragraph",
-        "text": "A gap in how you each answered isn't a judgment. It's a description. Two people can have opposite orientations on something and still work beautifully together, what makes the difference is whether they understand each other's orientation, or whether it stays invisible."
+        "text": "These exercises are not a compatibility test, two people who sit at opposite ends of a dimension may very well have a completely healthy relationship dynamic. This depends on the extent to which each person in the relationship understands their own feelings as well as their partners, and approaches the relationship thoughtfully."
       },
       {
         "id": "how-to-review-your-results-together-9",
         "type": "paragraph",
-        "text": "When you hit a difference: get curious before you get defensive. \"I hadn't realized I leaned that way\" is a more useful response than \"I don't think that's really true.\""
+        "text": "That’s the core of why we built Attune, not to point out differences but to point out opportunities to understand each other better."
       },
       {
         "id": "how-to-review-your-results-together-10",
-        "type": "quote",
-        "text": "The couples who work through differences well aren't the ones without them. They're the ones who can see the difference clearly and work with it instead of around it."
+        "type": "paragraph",
+        "text": "So when you review a difference, be curious and focus on understanding your partner. “I hadn’t realized I leaned that way” opens a door for more conversation, but “I don’t really think that’s true” can close it."
       },
       {
         "id": "how-to-review-your-results-together-11",
-        "type": "heading",
-        "text": "Pick two or three things to actually do"
+        "type": "quote",
+        "text": "The couples who do well with their differences are not the ones who have fewer. They are the ones who can see a difference clearly and work with it instead of around it."
       },
       {
         "id": "how-to-review-your-results-together-12",
-        "type": "paragraph",
-        "text": "The most useful thing you can do at the end of a results conversation is identify a small number of specific things to carry forward. Not a complete overhaul. Just two or three concrete threads."
+        "type": "heading",
+        "text": "Focused next steps"
       },
       {
         "id": "how-to-review-your-results-together-13",
         "type": "paragraph",
-        "text": "It might be a conversation you want to have. A topic from the expectations section you want to revisit. A pattern from the communication results you want to watch for. Specificity is what turns insight into change."
+        "text": "At the end of your discussion, focus on a small number of things that you can do individually or together. This doesn’t need to be an overhaul of your behaviors, just two or three realistic things."
       },
       {
         "id": "how-to-review-your-results-together-14",
         "type": "heading",
-        "text": "You can always come back"
+        "text": "Return to your results"
       },
       {
         "id": "how-to-review-your-results-together-15",
         "type": "paragraph",
-        "text": "You don't have to work through everything in one sitting. The results are yours to revisit at any time. Some things will land differently after a week. Some things you'll want to come back to after a specific moment in your relationship surfaces them."
+        "text": "You and your partner should not feel like you need to discuss everything in one sitting. You can step away from this conversation so long as you both agree to revisit again if and when the other person wants to. Some aspects of your results might even mean more or be easier to approach differently after you take individual time to consider them."
       },
       {
         "id": "how-to-review-your-results-together-16",
         "type": "paragraph",
-        "text": "The exercises are designed to be the start of something, not a complete picture of it."
+        "text": "View these insights as the start of intentional growth both individually and together, not a one-and-done stop in your relationship journey."
       }
     ]
   },
