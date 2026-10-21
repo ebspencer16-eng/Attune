@@ -96,8 +96,11 @@ export default async function handler(req) {
 
   try {
     /* Demo accounts are not people: see api/_lib/demo-accounts.js. */
-    const { data: profiles = [], demoFilterApplied } = await selectProfiles(admin, (q) => q
+    const { data: profiles = [], demoFilterApplied, error: pErr } = await selectProfiles(admin, (q) => q
       .select('id, invite_code, partner_profile_id, joined_via_invite, pronouns, partner_pronouns, relationship_status, relationship_length, ex1_answers, created_at'));
+    /* A failed read defaults to [], which is what nobody-has-answered looks
+       like. The catch below already answers 500; this is what reaches it. */
+    if (pErr) throw pErr;
 
     // Partner lookup shared by individual and couple typing below.
     const byId = Object.fromEntries(profiles.map(p => [p.id, p]));

@@ -500,8 +500,13 @@ export default async function handler(req) {
     const surveyByRespondent = {};
     const fbCatOptions = Object.fromEntries(Object.keys(FB_CAT_SRC).map((k) => [k, new Set()]));
     try {
-      const { data: svRows = [] } = await admin.from('survey_responses')
+      const { data: svRows = [], error: svErr } = await admin.from('survey_responses')
         .select('id, respondent_id, answers, updated_at, completed_at, featured_at');
+      /* supabase-js RETURNS its error rather than throwing it, so the try
+         around this read catches nothing on a failed query: the default fires
+         and every respondent reads as unsegmented. Throwing is what reaches
+         the catch below. */
+      if (svErr) throw svErr;
       for (const r of (svRows || [])) {
         if (!r.respondent_id) continue;
         const payload = { ...(r.answers || {}) };
@@ -646,7 +651,10 @@ export default async function handler(req) {
     let orderRows = [];
     try {
       /* A demo's test order was a row in the cube, unsegmented but counted. */
-      const { data: _ords = [] } = await admin.from('orders').select('*').limit(2000);
+      const { data: _ords = [], error: oErr } = await admin.from('orders').select('*').limit(2000);
+      /* Same as the survey read above: without this, a failed orders query and
+         a shop that has sold nothing are the same empty cube. */
+      if (oErr) throw oErr;
       const ords = withoutDemoOrders(_ords, await demoOwners(admin));
       const monthOf = (d) => { const t = new Date(d); return isNaN(t) ? null : t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
       orderRows = (ords || []).map((o) => {

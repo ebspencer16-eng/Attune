@@ -138,9 +138,12 @@ export default async function handler(req) {
     const ids = [...new Set((resQ.data || []).map((r) => r.respondent_id).filter(Boolean))];
     const demo = {};
     if (ids.length) {
-      const { data: profs } = await selectProfiles(admin, (q) => q
+      const { data: profs, error: profErr } = await selectProfiles(admin, (q) => q
         .select('id, age_range, pronouns, relationship_status, relationship_length, children, signup_source, pkg')
         .in('id', ids));
+      /* Without this, a failed read leaves every respondent unsegmented and
+         the page says so as though it were the answer. */
+      if (profErr) throw profErr;
       for (const p of (profs || [])) {
         const { id, ...rest } = p;
         demo[id] = rest;

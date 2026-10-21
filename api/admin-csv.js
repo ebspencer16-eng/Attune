@@ -161,15 +161,18 @@ async function buildCombinedData(admin) {
 
      Where it actually lives is the order: store-workbook-pdf.js writes
      workbook_url and sets workbook_status to 'ready'. */
-  const [
-    { data: profiles = [] },
-    { data: _orders = [] },
-    _demo,
-  ] = await Promise.all([
+  const [profQ, ordersQ, _demo] = await Promise.all([
     selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, name, pronouns, relationship_status, relationship_length, budget_data, created_at, ex1_answers, ex2_answers, ex3_answers, ex3_completed, couple_type')),
     admin.from('orders').select('*'),
     demoOwners(admin),
   ]);
+  /* Both reads defaulted to an empty list and nothing looked at either error,
+     so a failed query produced a CSV saying there are no customers. That is
+     the same shape as the workbook column reading N for everybody. */
+  const readErr = [profQ, ordersQ].find((q) => q && q.error);
+  if (readErr) return errResponse(500, 'Could not read the data for this export');
+  const profiles = profQ.data || [];
+  const _orders = ordersQ.data || [];
 
   // Two lookups — one by id (for joining Partner A→B), one filtered to Partner A
   const byId = Object.fromEntries(profiles.map(p => [p.id, p]));
@@ -454,7 +457,9 @@ async function exportCombinedXlsx(admin) {
 // pre-results upsells separately yet — flagged as TODO below.
 async function exportOrders(admin) {
   /* A demo's test order is not a sale. The same rule as the admin pages. */
-  const { data: _orders } = await admin.from('orders').select('*').order('created_at', { ascending: false });
+  const { data: _orders, error: oErr } = await admin.from('orders').select('*').order('created_at', { ascending: false });
+  /* Without this, a failed read exports a file saying no orders exist. */
+  if (oErr) return errResponse(500, 'Could not read the orders table');
   const orders = withoutDemoOrders(_orders, await demoOwners(admin));
 
   const headers = [
@@ -529,7 +534,8 @@ async function exportOrders(admin) {
 // invite_code and link to Partner B via partner_profile_id. Both
 // partners' data lives on their respective profile rows.
 async function exportDemographics(admin) {
-  const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, joined_via_invite, pronouns, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type'));
+  const { data: profiles, error: pErr } = await selectProfiles(admin, (q) => q.select('id, partner_profile_id, invite_code, joined_via_invite, pronouns, relationship_length, relationship_status, ex1_answers, ex2_answers, couple_type'));
+  if (pErr) return errResponse(500, 'Could not read the profiles table');
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
@@ -649,10 +655,12 @@ function workbookReady(order) {
 }
 
 async function exportEngagement(admin) {
-  const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, budget_data, ex1_answers, ex2_answers, ex3_answers'));
+  const { data: profiles, error: pErr } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, pkg, budget_data, ex1_answers, ex2_answers, ex3_answers'));
+  if (pErr) return errResponse(500, 'Could not read the profiles table');
   /* No workbooks table: see the note in the research export above. The order
      carries it. */
-  const { data: orders } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, workbook_url, card_status');
+  const { data: orders, error: oErr } = await admin.from('orders').select('user_id, addon_workbook, is_physical, workbook_status, workbook_url, card_status');
+  if (oErr) return errResponse(500, 'Could not read the orders table');
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
@@ -693,7 +701,8 @@ async function exportEngagement(admin) {
 // Full scored results. Per-partner axis scores + 10 dim scores +
 // ex3 satisfaction scale questions.
 async function exportResults(admin) {
-  const { data: profiles } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, couple_type, ex1_answers, ex3_answers'));
+  const { data: profiles, error: pErr } = await selectProfiles(admin, (q) => q.select('id, invite_code, partner_profile_id, joined_via_invite, couple_type, ex1_answers, ex3_answers'));
+  if (pErr) return errResponse(500, 'Could not read the profiles table');
 
   const byId = Object.fromEntries((profiles || []).map(p => [p.id, p]));
   const partnerAList = (profiles || []).filter(p => p.invite_code && !p.joined_via_invite);
@@ -747,8 +756,9 @@ async function exportResults(admin) {
 // low-confidence flag, and demographics. For offline factor/correlation work.
 // Anonymized: an 8-char id slice, no name/email.
 async function exportTyping(admin) {
-  const { data: profiles } = await selectProfiles(admin, (q) => q
+  const { data: profiles, error: pErr } = await selectProfiles(admin, (q) => q
     .select('id, pronouns, relationship_status, relationship_length, ex1_answers, partner_profile_id'));
+  if (pErr) return errResponse(500, 'Could not read the profiles table');
   const _byIdScored = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
   const dimCols = Object.keys(DIM_KEYS).map(d => `comms_${d}`);

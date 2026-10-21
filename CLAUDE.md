@@ -1498,6 +1498,31 @@ reaches into the previous handler, which has its own confirmation: scope to
 the enclosing declaration, or the gate passes a plant that removed the
 question entirely.
 
+**A try does not catch a query that fails, because supabase-js returns its
+error.** CLAUDE.md already says an empty table answers like a working one. The
+sharper version, found by sweeping every database read on the server: wrapping
+the read in `try` does nothing at all, since no exception is thrown. Two reads
+in `api/admin-explore.js` sat inside a try whose catch could never fire, with
+`= []` on the destructure, so a broken query and an empty table produced the
+same cube. Nine such reads across six admin endpoints, including both CSV
+exports, which would have handed over a file saying there are no customers.
+
+Three endings are acceptable and `check-admin-read-errors.mjs` accepts all
+three: test the error and leave, throw so the handler's own catch answers, or
+put the list of failed reads IN the reply so the page says which measures are
+missing rather than drawing a zero. The third is what `api/admin-engagement.js`
+already did and is the best of them.
+
+The gate took six versions and eight plants, and every wrong version is a
+lesson this file already states, pointed at new code. A four-line window called
+a `parseInt` guarded because an unrelated property two lines below contained
+the word it was looking for. The exemption for "no default, so a failure is
+visibly absent" had to be deleted outright, because `exportOrders` hands its
+rows to `withoutDemoOrders` and that helper opens with `(orders || [])`: the
+default had moved one call away. `Array.from(` satisfies `.from(`. And a lazy
+`[\s\S]{0,140}` after `.find(` ran past the statement's semicolon and found
+the word `error` inside the very guard it was meant to be verifying.
+
 **An empty table answers like a working one.** Both admin CSV exports read a
 `workbooks` table for whether a couple's workbook had been made, and reported
 no for every couple since the day it shipped. The table exists and nothing has

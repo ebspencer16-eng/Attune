@@ -21,14 +21,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
+**Nothing open.** The six sweeps are in section 3.
+
 | # | What I am doing |
 |--|--|
-| S45 | **Every `&&` guard in JSX whose left side is a number.** In React Native a zero renders as bare text and throws; on the site it prints a 0. The Learn fix was one character away from this shape. |
-| S46 | **Every hand-typed list of keys that looks something up in another list.** The rule is not that the list is right, it is that every key in it resolves. One of these had five of six wrong for months. |
-| S47 | **Every piece of arithmetic the app does on a number the server sent.** The app never scores anything, and that promise has one gate covering one case. |
-| S48 | **Every figure the product prints as a percentage**, swept over the whole input space rather than a tidy fixture, checked for staying inside its own range. |
-| S49 | **Every `Number()` and `parseInt`**, asked whether a NaN can reach a person's screen. |
-| S50 | **Every default that stands in for a failed read.** `= []` cannot tell an empty table from a broken query, and both admin exports once reported N for everybody because of it. |
 
 ---
 
@@ -36,6 +32,12 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| S51 | **Nine admin figures could be built from a failed query.** A broken read and an empty table gave the same answer, so a CSV would have said you have no customers. Fixed in six endpoints, and gated. |
+| S45 | **Nothing**: 170 JSX guards, none testing a count. Planted five ways, caught five. |
+| S46 | **Nothing**, and only 2 of 20 key lists can be checked at all. The sweep now prints the other 18 by name instead of counting them as passed. |
+| S47 | **Nothing**: no arithmetic in the app touches a figure the server computes. 604 expressions read. |
+| S48 | **Nothing**: 6 percentage producers, 93 inputs either side of every threshold, every answer a whole number in 0 to 100. |
+| S49 | **Nothing**: 161 conversions to a number, and every unguarded one takes a value that cannot be non-numeric. |
 | S42 | **Nothing slipped.** Every change from the last two rounds checked on both surfaces, one at a time. Two things I expected to find were not there; the detail says what I checked and how. |
 | S43 | **Your phone was already current.** The bundle on the production channel had the same JS, byte for byte, as one built from the newest commit. Hash comparison, not a guess. |
 | S44 | **Published anyway**, so there is no five-second question hanging over it. Two launches to pick it up: the first downloads, the second runs. |
@@ -77,6 +79,55 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | C31 | **Suggested future articles**, at the top of In Practice. Sixteen candidates, what each one is for, and the three I would write first. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### S45 to S51 — six sweeps, and the one that found something
+
+Each of these measures one property over every instance of it. Five found
+nothing, which is still worth having: it turns "probably fine" into a figure.
+One found a real class of bug.
+
+**S51, the one that matters.** A database query here can fail by RETURNING its
+error rather than throwing it. So this, which is everywhere:
+
+    const { data: rows = [] } = await admin.from('orders').select('*');
+
+gives an empty list when the table is empty AND when the query is broken, and
+nothing anywhere says which. Nine reads across six admin endpoints did that,
+including both CSV exports and the Type Analytics page. A failed read would
+have produced a file saying you have no customers and no orders, and it would
+have looked exactly like the truth.
+
+This is the same bug as the workbook column that read N for every couple since
+the day it shipped. You found that one by not recognising a number.
+
+All nine now say so and stop, or hand the page the list of what failed so it
+can report it instead of drawing a zero. `check-admin-read-errors` holds the
+rule and I planted eight ways round it, including the three that a tidy-up
+would produce: the guard deleted, the guard left in place but comparing
+`false`, and a new unguarded read inserted above a guarded one.
+
+**What the other five say, with the method beside the number.** The honest part
+of a sweep is what it could not see.
+
+| Sweep | Measured | Found |
+|--|--|--|
+| A number in a JSX guard | 170 guards, parsed not grepped | nothing |
+| A key list against the list it indexes | 2 of 20 lists; 18 cannot be checked and are named | nothing |
+| The app doing arithmetic on a server figure | 604 expressions in 79 app files | nothing |
+| Every percentage, over its whole input range | 6 producers, 93 inputs | nothing |
+| A NaN reaching a screen | 161 conversions | nothing |
+
+**And the ratio, because it is the useful part.** Those six sweeps were wrong
+eleven times between them before they were right, every time about the
+measurement rather than the product. A four-line window called a read guarded
+because an unrelated line below it contained the right word. A sweep called
+`null` a failure four times, when `null` is the designed answer for "there is
+no figure here" and you asked for it by name. And the sweep that found the real
+bug was blind to three instances of it in the one file the bug came from,
+because those reads go through a shared helper and never name a table.
+
+So a clean sweep means nothing until something has been planted and caught.
+Every one of these was.
 
 ### S42 to S44 — what I checked on both surfaces, and how
 
