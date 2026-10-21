@@ -21,7 +21,13 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| W118 | **The Learn list that looked empty.** The posts are kept on your phone and the shelf names are not, so the list has nothing to group by until the request lands. One line, plus a gate so the next half-cached payload fails the build. |
+| C23 | **One set of section names.** The product has two: the shelves you already named, and a second list that still says Couple Types and Conflict & Repair. The second one reads from the first now. |
+| C24 | **The Bridge article comes off the site**, with every link and card that points at it. |
+| C25 | **Two new drafts in Drive**, one on the Communication exercise and one on Expectations. Drafts only, not published, because the words are yours. |
+| C26 | **Drive updated to match**: the folder renamed to Methodology, the Bridge doc removed, and the six docs whose header carried an old section name rewritten. |
 
 ---
 
