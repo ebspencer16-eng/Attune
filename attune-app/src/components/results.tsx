@@ -180,16 +180,6 @@ const ARROW = 46;
 const COMMS_PROTOCOL_LIMIT = 3;
 
 /**
- * The Insights menu's ground.
- *
- * Ellie: "Remove orange outline behind insights menu, and replace with orange
- * shading." Ten per cent of Palette.orange over white, written out rather than
- * mixed at runtime so it can be read here and checked against the ground it
- * sits on.
- */
-const MENU_TINT = '#FDF0EB';
-
-/**
  * What a column shows when that partner chose nothing.
  *
  * An element rather than a branch in the JSX, because a JSX comment cannot sit
@@ -894,36 +884,26 @@ export default function Results({
             lower on the page." The ground's colour is at the top, so the menu
             starting under it is what lets the colour be seen. */}
         <View style={{ height: Spacing.xxxl + Spacing.xl }} />
-        {/* ── IN A TILE, LIKE EVERY OTHER PAGE ─────────────────────────
-            Ellie: "Please make the insights nav landing in a tile like the
-            other insights pages." The bands ran edge to edge, which made the
-            one screen that is pure navigation the only screen in the section
-            with a different shape. Same inset and radius as the pages it
-            leads to, and the bands keep their full width inside it. */}
-        {/* ── THE MENU FLOATS ──────────────────────────────────────────
-            A white card with the radius the four redesigned tabs share, on
-            the tab's orange. PageTile's hairline is right for a page being
-            read side by side, which is the argument in page-tile.tsx, and
-            this is not one of those: it is the way in, on a coloured ground,
-            and every reference Ellie sent puts that on a card that floats. */}
-        <View
-          style={{
-            marginHorizontal: Spacing.lg,
-            /* Ellie: "Outline insights menu in orange", and then "Remove
-               orange outline behind insights menu, and replace with orange
-               shading."
+        {/* ── NOTHING BEHIND THE TILES BUT THE TAB'S OWN ORANGE ────────
+            Ellie: "No tile behind all the tiles on insights menu, just the
+            orange bg behind the tiles."
 
-               So the accent moved from the edge into the fill. A hairline
-               draws a box around the menu; a wash puts the menu on the brand's
-               own colour, which is what the rest of this page is doing. It is
-               ten per cent of the accent over white, which is light enough
-               that the section names keep their contrast and dark enough to
-               read as orange against the cream half of the ground. */
-            backgroundColor: MENU_TINT,
-            borderRadius: Radius.card,
-            overflow: 'hidden',
-            ...Lift,
-          }}>
+            This was a card: a tinted ground, a card radius and a shadow,
+            wrapping four tiles that already have a ground, a radius and a
+            border of their own. Two cards deep, and the outer one was the
+            only thing between the tiles and the colour the tab is painted in.
+
+            The history, because it is a round trip rather than a reversal.
+            The menu first ran edge to edge, and she asked for it "in a tile
+            like the other insights pages"; then for the outline behind it to
+            become "orange shading". Both of those were about a menu that was
+            a list of bands. It is four separate tiles now, which is the shape
+            she asked for next, and once each one is its own card the card
+            around all of them is a frame with nothing to frame.
+
+            What stays is the inset, so the tiles line up with every page they
+            lead to. */}
+        <View style={{ marginHorizontal: Spacing.lg }}>
           {/* ── HIGHLIGHTS IS NOT OFFERED THE FIRST TIME ─────────────────
               Ellie: "When a user clicks explore full results and sees the
               menu, the menu should exclude highlights (it makes it look like

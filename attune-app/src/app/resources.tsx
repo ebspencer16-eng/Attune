@@ -6,10 +6,12 @@
  *   Explore more   everything else, scrolling sideways with faded edges
  *   In Practice    the reading, newest first
  *
- * Owned things are full-colour and tappable. Unowned things are visible and
- * priced but never sold here: buying happens on the web, and an app that
- * builds a cart and hands it to an external payment page is the pattern Apple
- * rejects for. Tapping one opens the site in the browser.
+ * Owned things are full-colour and tappable. Unowned things are dimmed to half
+ * with a lock where their icon goes, the same treatment the More Attune
+ * Exercises tiles on Insights get, and they are never sold here: buying happens
+ * on the web, and an app that builds a cart and hands it to an external payment
+ * page is the pattern Apple rejects for. Tapping one opens the site in the
+ * browser.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -1865,7 +1867,10 @@ function OwnedTile({ item, owned, busy = false, onOpen, onLocked }: {
       <View
         style={{
           width: 40, height: 40, borderRadius: Radius.lg,
-          backgroundColor: color + '1A',
+          /* An unowned tile loses the tool's colour as well as its icon. A
+             tinted circle with a lock in it reads as a thing that is nearly
+             yours; a neutral one reads as a thing that is not. */
+          backgroundColor: owned ? color + '1A' : c.border,
           alignItems: 'center', justifyContent: 'center',
         }}>
         {/* A spinner in the icon's own place, so the tile does not change
@@ -1873,8 +1878,22 @@ function OwnedTile({ item, owned, busy = false, onOpen, onLocked }: {
         {busy ? (
           <ActivityIndicator color={color} />
         ) : (
+          /* ── A LOCK, WHEN IT IS NOT THEIRS ──────────────────────────────
+             Ellie, of the exercises tiles: "just do the greyed out thing with
+             the lock icon over it if users haven't purchased. That's what we
+             do for the resources on learn too, right?"
+
+             It was not: this tab dimmed the tile and muted the icon and drew
+             no lock at all. Told that, she said "yes add the lock". So the
+             two tabs draw the same thing now, which is the whole reason she
+             expected them to match.
+
+             In the icon's place rather than over it. A badge on a 40 point
+             circle is eleven points of lock on top of a muted glyph, which
+             reads as a smudge; the tool's name is directly underneath either
+             way, so nothing is lost by replacing it. */
           <SymbolView
-            name={(ICON[item.key] || 'square.grid.2x2') as never}
+            name={(owned ? (ICON[item.key] || 'square.grid.2x2') : 'lock') as never}
             size={22}
             tintColor={owned ? color : c.textMuted}
             style={{ width: 24, height: 24 }}

@@ -21,10 +21,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W113 | **The lock on Learn's unowned resources**, since you said yes. Same lock and the same dimming the exercise tiles got, so the two tabs read alike. |
-| W117 | **No card behind the insights menu tiles.** The four tiles sit straight on the orange, with nothing drawn between them and it. |
+**Nothing open.**
 
 ---
 
@@ -32,6 +29,8 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| W117 | **Nothing behind the insights menu tiles now**, just the orange. The card that was around all four is gone; the tiles keep their own. |
+| W113 | **Learn's unowned resources have the lock**, in the icon's place, dimmed the same amount as the exercises tiles. The two tabs draw the same thing. |
 | S38 | **Your home screen said "Your results are ready" for ever**, however many times you had opened them. The column that records "opened" has existed since July and nothing ever wrote it. |
 | S39 | **Six sweeps for breaks**, after you said you could not engage. One real break, three smaller ones, four new gates, and a page that had never once been checked. |
 | S40 | **What Comes Next had never been checked by the render gate.** It judged the page by how much text it drew, and the page is three collapsed tiles. |
@@ -56,6 +55,29 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W116 | **Every screenshot this repo takes was a full-page capture wearing a viewport's name.** It made two correct charts look broken. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### W113 — what Learn looked like before, and why the lock replaces the icon
+
+An unowned tool was dimmed to half with its own icon muted, and no lock. That
+is why the two tabs did not match. The lock goes where the icon was rather than
+on top of it: a badge on a forty point circle is eleven points of lock over a
+grey glyph, which reads as a smudge, and the tool's name is directly underneath
+either way.
+
+Rendered on the simulator with one tile forced unowned, so the locked one and
+two owned ones are side by side in the same row. `check-more-exercises` holds
+both tabs to the same dim and the same lock.
+
+### W117 — the history, because it is a round trip
+
+The menu first ran edge to edge, and you asked for it "in a tile like the other
+insights pages". Then for the outline behind it to become orange shading. Both
+of those were about a menu that was one list of bands.
+
+It is four separate tiles now, which is what you asked for next, and once each
+one is its own card the card around all of them is a frame with nothing to
+frame. What is left is the inset, so the tiles line up with the pages they lead
+to.
 
 ### S38 — the card that could never clear
 

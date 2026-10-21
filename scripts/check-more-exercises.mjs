@@ -32,12 +32,15 @@
  *      declared and never passed. "A constant that exists is not a thing that
  *      is drawn."
  *
- * ── WHAT THIS DELIBERATELY DOES NOT COVER ─────────────────────────────────
- * Whether Learn draws a lock. It does not: an unowned tool there is dimmed to
- * half with a muted icon and no lock at all. Ellie believes the two match and
- * they do not, which is a question for her rather than a thing to gate, and it
- * is a row in TASKS.md. This check holds the dim to the same number so that
- * when she answers, only one of the two has to change.
+ * ── AND LEARN, WHICH NOW MATCHES ──────────────────────────────────────────
+ * Ellie asked for the lock here because "that's what we do for the resources
+ * on learn". It was not: an unowned tool there was dimmed to half with a muted
+ * icon and no lock. Told that, she said "yes add the lock", so both tabs draw
+ * the same thing and this holds both halves: the same dimming, and a lock on
+ * each.
+ *
+ * Two surfaces drawing one treatment is the thing this file exists to stop
+ * drifting, and the reason to gate it is that they agree today.
  */
 
 import { readFileSync } from 'node:fs';
@@ -142,6 +145,11 @@ const learn = code(read('attune-app/src/app/resources.tsx'));
 if (!new RegExp(`owned \\? 1 : ${DIM}`).test(learn)) {
   fails.push(`Learn no longer dims an unowned tile to ${DIM}. These two are meant to read alike; pick one number.`);
 }
+/* The lock, drawn rather than declared, on Learn too. Ellie: "yes add the
+   lock." A name in a ternary is the only way this file draws one. */
+if (!/name=\{\(owned \? \(ICON\[item\.key\][^)]*\) : 'lock'\) as never\}/.test(learn)) {
+  fails.push("Learn's unowned tile draws no lock. She asked for the same treatment on both tabs.");
+}
 if (!new RegExp(`const DIMMED = ${DIM};`).test(appTileCode)) {
   fails.push(`The app's More Attune Exercises tile does not dim to ${DIM}.`);
 }
@@ -165,4 +173,6 @@ if (fails.length) {
   process.exit(1);
 }
 
-console.log(`[check-more-exercises] "${home}" on both surfaces, both stages, derived from ${KEYS.length} registered exercises, dimmed to ${DIM} with a lock.`);
+console.log(`[check-more-exercises] "${home}" on both surfaces, both stages, derived from`
+  + ` ${KEYS.length} registered exercises, dimmed to ${DIM} with a lock, and Learn's unowned`
+  + ' tiles draw the same dim and the same lock.');
