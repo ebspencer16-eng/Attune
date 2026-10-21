@@ -24,6 +24,7 @@ import { readFileSync } from 'fs';
 import { launch } from './_lib/browser.mjs';
 import { RESULTS_SECTIONS, COVER_SECTIONS, RESULTS_SECTION_LABELS } from '../api/_lib/results-sections.js';
 import { conflictDemo } from '../api/_lib/conflict-demo.js';
+import { BUCKETS as WCN_BUCKETS } from '../api/_lib/what-comes-next.js';
 import { PKG_CAPS } from '../api/_lib/entitlements.js';
 
 const BASE = process.env.BASE || 'http://localhost:4173';
@@ -226,7 +227,33 @@ for (const section of SECTIONS) {
       return missing.length ? `no contents list: ${missing.join(', ')} not on the page` : null;
     }, { want: RESULTS_SECTION_LABELS[section] || '' })
     : null;
-  const empty = !isCover && text.trim().length < 600;
+  /**
+   * ── AND WHAT COMES NEXT IS SHORT ON PURPOSE TOO ─────────────────────────
+   * This page is three collapsed tiles and a row to the journal. Everything
+   * on it comes to 591 characters, which is under the 600 that separates a
+   * real section from an empty shell, so it was reported as "no demo data" on
+   * every run and had never once been checked. The page Ellie has reported on
+   * more than any other, skipped with a reason that was not true.
+   *
+   * Same answer as the covers: judge it by what it has to carry. The three
+   * tile names come from api/_lib/what-comes-next.js, which is the module the
+   * app is served from, so this also fails if the two surfaces stop agreeing
+   * about them.
+   *
+   * The newline in each label is hers and the page honours it, so the
+   * comparison is on the words rather than on the break.
+   */
+  const isNext = section === 'what-comes-next';
+  const nextMissing = isNext
+    ? await page.evaluate(({ want }) => {
+      const el = document.querySelector('[data-results-scroll]');
+      if (!el) return 'no results column at all';
+      const words = (el.textContent || '').replace(/\s+/g, ' ');
+      const missing = want.filter((label) => !words.includes(label));
+      return missing.length ? `tiles missing: ${missing.join(' / ')}` : null;
+    }, { want: WCN_BUCKETS.map((b) => b.label.replace(/\s+/g, ' ')) })
+    : null;
+  const empty = !isCover && !isNext && text.trim().length < 600;
   // A section this couple cannot reach now redirects to highlights rather than
   // rendering blank, so a length check alone would call it clean. Ask where we
   // actually landed.
@@ -239,6 +266,7 @@ for (const section of SECTIONS) {
     ...errors,
     ...(leaks.length ? ['leaked: ' + leaks.slice(0, 4).join(', ')] : []),
     ...(coverMissing ? [`cover page: ${coverMissing}`] : []),
+    ...(nextMissing ? [`what comes next: ${nextMissing}`] : []),
   ];
   if (problems.length) {
     failed++;

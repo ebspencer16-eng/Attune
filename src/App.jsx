@@ -8024,22 +8024,35 @@ function UnifiedResultsRoot(props) {
    * already here for the same reason.
    */
   const [convoTicks, setConvoTicks] = useState({});
+  /**
+   * ── THE LATEST SET, OUTSIDE THE UPDATER ─────────────────────────────────
+   * The save used to be started INSIDE `setConvoTicks((cur) => ...)`. An
+   * updater is a pure function of the previous state and React is allowed to
+   * run it more than once: this website renders inside StrictMode, which runs
+   * every updater twice in development, and a discarded render can do it at
+   * any time. A request in there is a request sent twice.
+   *
+   * It needs the previous value to know whether this click ticks or unticks,
+   * which is why it was written that way. A ref holds that instead, written
+   * before the state so two clicks in the same moment still compose.
+   */
+  const convoLatest = useRef({});
+  const putConvos = useCallback((next) => { convoLatest.current = next; setConvoTicks(next); }, []);
   useEffect(() => {
     let alive = true;
-    fetchConvoTicks().then((t) => { if (alive) setConvoTicks(t); });
+    fetchConvoTicks().then((t) => { if (alive) putConvos(t); });
     return () => { alive = false; };
-  }, []);
+  }, [putConvos]);
   const toggleConvo = useCallback((key) => {
-    setConvoTicks((cur) => {
-      const next = { ...cur };
-      const done = !next[key];
-      if (done) next[key] = new Date().toISOString(); else delete next[key];
-      /* Optimistic: a checkbox that waits for a round trip reads as broken.
-         The server's answer wins, and a refusal puts it back where it was. */
-      saveConvoTick(key, done).then((saved) => setConvoTicks(saved || cur));
-      return next;
-    });
-  }, []);
+    const cur = convoLatest.current;
+    const next = { ...cur };
+    const done = !next[key];
+    if (done) next[key] = new Date().toISOString(); else delete next[key];
+    /* Optimistic: a checkbox that waits for a round trip reads as broken.
+       The server's answer wins, and a refusal puts it back where it was. */
+    putConvos(next);
+    saveConvoTick(key, done).then((saved) => putConvos(saved || cur));
+  }, [putConvos]);
   const convoCtx = useMemo(() => ({ ticks: convoTicks, toggle: toggleConvo }), [convoTicks, toggleConvo]);
   return (
     <ContentContext.Provider value={props.contentVersion ?? null}>
@@ -8369,15 +8382,18 @@ function UnifiedResults({ ex1Answers, partnerEx1, ex2Answers, partnerEx2, ex3Ans
   useEffect(() => {
     if (!initialSection) return;
     const mapped = safeSection(initialSection);
-    setSection(cur => {
-      if (mapped === cur) return cur;
-      setCommExpanded(mapped.startsWith("comm"));
-      setExpExpanded(mapped.startsWith("exp"));
-      setReflExpanded(mapped.startsWith("reflection"));
-      setIntimExpanded(mapped.startsWith("intimacy"));
-      setConflictExpanded(mapped.startsWith("conflict"));
-      return mapped;
-    });
+    /* Five setters used to be called inside setSection's updater, which runs
+       twice under StrictMode and may run again whenever React discards a
+       render. The comparison that guarded them is the same one, done here:
+       this effect only fires when initialSection changes, so `section` is the
+       value on screen at that moment. */
+    if (mapped === section) return;
+    setSection(mapped);
+    setCommExpanded(mapped.startsWith("comm"));
+    setExpExpanded(mapped.startsWith("exp"));
+    setReflExpanded(mapped.startsWith("reflection"));
+    setIntimExpanded(mapped.startsWith("intimacy"));
+    setConflictExpanded(mapped.startsWith("conflict"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSection]);
   // Intimacy results: only present when the couple owns the add-on AND both

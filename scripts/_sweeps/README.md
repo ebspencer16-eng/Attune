@@ -28,8 +28,35 @@ a build. When a sweep turns up a rule worth holding, the rule goes into a
 | `sweep-missing-assets.mjs` | every referenced image, icon and font | nothing, after it learned the `@/` path alias |
 | `sweep-unlabelled-controls.mjs` | every control with an onPress and no name a screen reader can read | nothing, after it learned `accessible={false}` is a deliberate exemption |
 | `sweep-cents-and-dollars.mjs` | a cents value printed as dollars, or a dollars value sent to a processor | nothing, after it learned the conversion sits on the definition, not the use |
+| `sweep-valid-requests.mjs` | every endpoint given a token the stub vouches for | nothing, after it learned that seven admin endpoints reach the rule through `checkAdminAuth` and never name ADMIN_SECRET |
+| `sweep-argument-shape.mjs` | every function that unpacks its argument, against every call site | nothing live, after it stopped treating `ctx` as a request; it does catch both of the day's bugs when they are planted back |
+| `sweep-updater-effects.mjs` | a request or a second setter started inside a React state updater | four sites, all fixed and now held by check-updater-purity |
+| `sweep-unwritten-columns.mjs` | a column the code reads that nothing ever writes | `results_last_opened_at`, read by three home prompts and written by nothing since migration 050 |
 
-Two of them were wrong before they were right, which is the usual ratio:
+The 20 October four were wrong five times between them before they were right,
+which is worse than the usual ratio and worth the detail:
+
+- `sweep-valid-requests` reported thirteen endpoints refusing a good token and
+  seven were admin endpoints it could not see: they reach the rule through
+  `checkAdminAuth` and the literal ADMIN_SECRET appears in none of them.
+- `sweep-argument-shape` reported `orderConfirmationHtml(ctx)`. That `ctx` is
+  `{ ...body, setupUrl, giftUrl }`, a bag built for exactly that call, and
+  `ctx` is the conventional name for the thing the sweep was looking for the
+  absence of.
+- `sweep-updater-effects` matched `/^set[A-Z]/`, which `setTimeout` satisfies:
+  eight of its nineteen findings were timeout callbacks clearing a flash
+  message, and a ninth was the one real finding reported twice. A setter is
+  the second half of a `useState` destructure, and that is readable.
+- `sweep-unwritten-columns` was wrong three times in a row. It could not see a
+  column list built as a JavaScript array, could not see a computed key
+  (`updates[\`${exercise}_completed_at\`]`), and could not see a member
+  assignment (`patch.tz_offset_minutes = ...`). Twenty findings became one.
+
+Each of those is the same lesson in a new costume: when a scanner looks for a
+string, ask what the indirection for that string is, and match on both.
+
+Two of the earlier ones were wrong before they were right, which is the usual
+ratio:
 
 - `sweep-payload-fields` matched `name:` only, so it could not see
   `return { groups, buckets }`. Every one of its seven findings was that

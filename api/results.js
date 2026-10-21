@@ -504,6 +504,9 @@ export default async function handler(req) {
       // ends up read as never started: it is simply not in the select.
       ...EXERCISE_COLUMNS, 'ex3_completed',
       ...OWNERSHIP_COLUMNS,
+      /* When they last opened these. Read so the stamp below can be skipped
+         when it is recent; see the note where it is written. */
+      'results_last_opened_at',
     ].join(',');
     const meRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=${cols}`, { headers: svc });
@@ -652,6 +655,43 @@ export default async function handler(req) {
       aName: me.name || null, bName: partner.name || null,
     });
     if (!results) return json({ ok: true, ready: false, reason: 'neither_complete' });
+
+    /**
+     * ── WHEN THEY LAST OPENED THESE ──────────────────────────────────────
+     * `profiles.results_last_opened_at` has existed since migration 050, which
+     * says in its own comment that it "drives results ready and never opened".
+     * Nothing has ever written it, and three live rules read it:
+     *
+     *   the home screen's top card fires on `resultsReady && !lastOpened`, so
+     *     "Your results are ready" was shown to every couple for ever, however
+     *     many times they had read them;
+     *   the Revisit card fires on `ago(lastOpened) > 30`, and `ago(null)` is
+     *     Infinity, so that one was permanently on as well;
+     *   the beta feedback prompt is gated on it being set, so it could never
+     *     appear at all.
+     *
+     * Found by sweeping every column in every migration for one that is read
+     * and never written, which is the same sweep that would have caught
+     * `feedback_given_at` sitting unwritten for months.
+     *
+     * Here rather than on either surface, because this is the endpoint both of
+     * them call to open results, so one write covers both. At most once an
+     * hour per reader: the column means "last opened", not "how many times",
+     * and a stamp on every poll would be a write per page load.
+     *
+     * Best effort. A failed stamp is a stale prompt, never a failed read, so it
+     * must not be able to take the results down with it.
+     */
+    const lastOpened = me.results_last_opened_at ? Date.parse(me.results_last_opened_at) : 0;
+    if (!Number.isFinite(lastOpened) || Date.now() - lastOpened > 60 * 60 * 1000) {
+      try {
+        await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(me.id)}`, {
+          method: 'PATCH',
+          headers: { ...svc, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ results_last_opened_at: new Date().toISOString() }),
+        });
+      } catch { /* a stale prompt is better than a results page that failed */ }
+    }
 
     // What this couple owns, and which exercises both of them have finished.
     // Ownership sits on the buyer's profile and is inherited by the partner,

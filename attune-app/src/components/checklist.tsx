@@ -21,7 +21,7 @@
  * and leaves the tick where the person put it: the next tap retries the lot.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { SymbolView } from 'expo-symbols';
@@ -68,15 +68,29 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
   const [openAreas, setOpenAreas] = useState<Record<string, boolean>>({});
   const [open, setOpen] = useState<string | null>(null);
 
+  /**
+   * ── THE LATEST LIST, OUTSIDE THE UPDATER ────────────────────────────────
+   * `toggle` used to start the save inside `setState((prev) => ...)`. An
+   * updater is a pure function of the previous state and React is allowed to
+   * run it more than once; StrictMode does so on every call. A request in
+   * there is a request sent twice, and this one writes the whole checklist.
+   *
+   * It needs the previous list to work out the next value in the cycle, which
+   * is why it was written that way. A ref holds that instead, written before
+   * the state so two taps in the same moment still compose.
+   */
+  const latest = useRef<State>({});
+  const put = useCallback((next: State) => { latest.current = next; setState(next); }, []);
+
   const load = useCallback(async () => {
     const res = await fetchToolData();
     if (!res.ok) { setFailed(res.error); setLoading(false); return; }
     setAreas(res.data.areas);
     setCopy(res.data.copy);
-    setState((res.data.checklist || {}) as State);
+    put((res.data.checklist || {}) as State);
     setFailed(null);
     setLoading(false);
-  }, []);
+  }, [put]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -87,17 +101,16 @@ export default function Checklist({ onClose }: { onClose: () => void }) {
    * breath, so the request always carries the whole list rather than a patch.
    */
   const toggle = useCallback((key: string) => {
-    setState((prev) => {
-      const cur = prev[key];
-      const next: State = { ...prev };
-      if (!cur) next[key] = true;
-      else if (cur === true) next[key] = 'na';
-      else delete next[key];
+    const prev = latest.current;
+    const cur = prev[key];
+    const next: State = { ...prev };
+    if (!cur) next[key] = true;
+    else if (cur === true) next[key] = 'na';
+    else delete next[key];
 
-      saveToolData('checklist', next).then((r) => setSaveFailed(!r.ok));
-      return next;
-    });
-  }, []);
+    put(next);
+    saveToolData('checklist', next).then((r) => setSaveFailed(!r.ok));
+  }, [put]);
 
   if (loading) return <ScreenFrame onBack={onClose} backLabel="Learn"><ScreenLoading label={LOADING.checklist} /></ScreenFrame>;
   if (failed || !areas || !copy) {

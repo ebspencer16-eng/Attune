@@ -23,14 +23,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| S38 | **A valid request to every endpoint.** Today's bug was an endpoint refusing a good body; every gate here only ever sends bad ones, so a refusal is what they look for. |
-| S39 | **Every function that unpacks its argument, against every caller.** Both of today's bugs were a value with the right name and the wrong keys. That is a shape I can count. |
-| S40 | **Every side effect started inside a React state update.** The convos provider fires its save from inside the updater, which React is allowed to run twice. |
-| S41 | **Every column the code reads that nothing ever writes.** `feedback_given_at` was one of these for months: a prompt that could never stop. |
-| S42 | **Every field the app reads that the server never sends**, and the other way round. The last run of this was blind to the common spelling. |
-| S43 | **Every screenshot gate, re-measured after the camera fix.** A harness change that quietly moved what every other gate sees is the thing to check next. |
+**Nothing open.** The sweeps are done; what they found is in section 3.
 
 ---
 
@@ -38,6 +31,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| S38 | **Your home screen said "Your results are ready" for ever**, however many times you had opened them. The column that records "opened" has existed since July and nothing ever wrote it. |
+| S39 | **Six sweeps for breaks**, after you said you could not engage. One real break, three smaller ones, four new gates, and a page that had never once been checked. |
+| S40 | **What Comes Next had never been checked by the render gate.** It judged the page by how much text it drew, and the page is three collapsed tiles. |
+| S41 | **Four places sent a request from inside a React state update**, which React is allowed to run twice. Two of them were mine from this morning. |
 | W95 | **The checkboxes save now. They never did.** Two bugs in `/api/convos`, one on top of the other. Ticked, reloaded and unticked on my simulator against your live account. Site and app. |
 | W94 | **Discussions to have is six category rows, not five.** Life & Values was missing on the website and it is the biggest one: seven topics. Site and app. |
 | W96 | **The numbering runs 1 to 8 straight through** the Discussions list instead of restarting in each half. Site and app. |
@@ -59,6 +56,71 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W116 | **Every screenshot this repo takes was a full-page capture wearing a viewport's name.** It made two correct charts look broken. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### S38 — the card that could never clear
+
+`profiles.results_last_opened_at` was added in migration 050, whose own comment
+says it "drives results ready and never opened". Nothing has ever written it.
+Three live rules read it:
+
+- "Your results are ready", the top card, fires when it is empty. It was on for
+  every couple for ever.
+- "Revisit [something]" fires when it is more than thirty days old, and an
+  empty one counts as infinitely old, so that was permanently on too.
+- The beta feedback prompt is gated on it being SET, so it could never appear
+  at all.
+
+`/api/results` stamps it now, at most once an hour per reader, which covers the
+app and the site because both of them open results through that one endpoint.
+`check-prompt-state-written.mjs` fails the build on any home prompt that reads
+a column nothing writes; three plants, three caught.
+
+The same bug as `feedback_given_at` a few months ago. What is new is that the
+test for these rules passes either way: it hands the field in as a fixture
+value, so it can prove the rule works and say nothing about whether the product
+ever sets it.
+
+### S39 — the six sweeps, and the ratio
+
+| What was measured | What it found |
+|--|--|
+| every endpoint given a token the stub vouches for | nothing: 62 endpoints, 122 calls, none refusing a good caller |
+| every function that unpacks its argument, against every call site | nothing live, and it catches both of this morning's bugs when they are put back |
+| a request started inside a React state update | four, all fixed |
+| a column read that nothing writes | one, S38 above |
+| every field the app reads that the server never sends | nothing |
+| every page, every view, every exercise driven in a browser | one page the gate had never checked, S40 below |
+
+Five of the six were wrong before they were right. One could not see seven
+admin endpoints because they reach the rule through a helper and never name the
+secret. One treated `setTimeout` as a React setter. One could not see a column
+written through a computed name, which is how most of them are written here.
+That ratio is the usual one and it is why a clean sweep is only worth something
+after the harness has been proved on a planted bug.
+
+### S40 — the page that was never checked
+
+The render gate judges a results page by how much text it draws: under 600
+characters means the demo has no data for it. What Comes Next is three
+collapsed tiles and a row to the journal, and everything on it comes to 591.
+So the page you have reported on more than any other was reported as "no demo
+data" on every run and had never once been rendered by a check.
+
+It is judged by what it has to carry now, the way the chapter covers already
+were: the three tile names, read from the module the app is served from. 29 of
+29 sections are checked where it was 28.
+
+### S41 — a request sent from inside a state update
+
+React treats the function you pass to a setter as a pure function of the
+previous value and is allowed to run it twice; in development it always does.
+Four places started a request or set another value in there: the conversation
+ticks on both surfaces, which are mine from this morning, the Learn checklist,
+which posts the whole list on every tap, and the results nav.
+
+Nothing visible on the live site today. It costs a duplicate write in
+development, and everything on the day one of those wraps something that is not
+safe to repeat. `check-updater-purity.mjs` holds it; four plants, four caught.
 
 ### W95 — why a drawn checkbox saved nothing, twice
 

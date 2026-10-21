@@ -1963,28 +1963,41 @@ const ConvoTicksContext = createContext<{
  */
 export function ConvoTicksProvider({ children }: { children: React.ReactNode }) {
   const [ticks, setTicks] = useState<ConvoTicks>({});
+  /**
+   * ── THE LATEST SET, OUTSIDE THE UPDATER ─────────────────────────────────
+   * The save used to be started INSIDE `setTicks((cur) => ...)`. An updater is
+   * supposed to be a pure function of the previous state and React is allowed
+   * to run it more than once: StrictMode does so on every call, and a
+   * discarded render can do it at any time. A request in there is a request
+   * sent twice.
+   *
+   * It needs the previous value to work out whether this tap ticks or unticks,
+   * which is why it was written that way. A ref holds that value instead, and
+   * is written before the state so two taps in the same moment still compose.
+   */
+  const latest = useRef<ConvoTicks>({});
+  const put = useCallback((next: ConvoTicks) => { latest.current = next; setTicks(next); }, []);
+
   useEffect(() => {
     let alive = true;
     fetchConvos().then((r) => {
-      if (alive && r.ok && r.data?.convos) setTicks(r.data.convos);
+      if (alive && r.ok && r.data?.convos) put(r.data.convos);
     }).catch(() => {});
     return () => { alive = false; };
-  }, []);
+  }, [put]);
 
   const toggle = useCallback((key: string) => {
-    setTicks((cur) => {
-      const next = { ...cur };
-      const done = !next[key];
-      if (done) next[key] = new Date().toISOString(); else delete next[key];
-      setConvoDone(key, done).then((r) => {
-        if (r.ok && r.data?.convos) setTicks(r.data.convos);
-        /* A refusal puts it back. Until migration 088 is run every write is a
-           refusal, so the boxes behave exactly as they did before. */
-        else setTicks(cur);
-      }).catch(() => setTicks(cur));
-      return next;
-    });
-  }, []);
+    const cur = latest.current;
+    const next = { ...cur };
+    const done = !next[key];
+    if (done) next[key] = new Date().toISOString(); else delete next[key];
+    put(next);
+    setConvoDone(key, done).then((r) => {
+      if (r.ok && r.data?.convos) put(r.data.convos);
+      /* A refusal puts it back where it was. */
+      else put(cur);
+    }).catch(() => put(cur));
+  }, [put]);
 
   const value = useMemo(() => ({ ticks, toggle }), [ticks, toggle]);
   return <ConvoTicksContext.Provider value={value}>{children}</ConvoTicksContext.Provider>;

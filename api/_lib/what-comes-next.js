@@ -23,6 +23,51 @@ import { COMM_DOMAINS } from './comm-domains.js';
 import { audienceOf, resolveRoleTokens } from './role-tokens.js';
 import { currentSection } from './results-sections.js';
 
+/**
+ * The three tiles What Comes Next is built from, at module scope so a check
+ * can read their names.
+ *
+ * They were declared inside the function, which meant the only way to find out
+ * what the page must carry was to run the whole builder with a couple's
+ * answers. check-render judged this page by how many characters it drew, and
+ * the page is three collapsed tiles: 591 characters with everything on it.
+ * So the one results page Ellie has reported on most was reported as "no demo
+ * data" on every run and had never once been checked.
+ *
+ * Nothing about the values changed. They are literals and were always
+ * literals; only where they are declared moved.
+ */
+export const BUCKETS = [
+  /* ── B108: HER NAMES, AND HER LINE BREAKS ────────────────────────────
+     Ellie: "Change titles and make each split to 2 lines: Things to
+     consider, Discussions to have, Phrases to try."
+
+     The break is in the string because it is hers: a tile that wraps where
+     the width happens to run out breaks "Discussions to have" after
+     "Discussions to", which is not where she put it. Both surfaces honour
+     the newline, so the two tiles read the same. */
+  {
+    id: 'keep-in-mind',
+    label: 'Things to\nconsider',
+    /* The three that describe how you already are with each other. */
+    from: ['comm', 'conflict', 'reflection'],
+    color: '#E8673A',
+  },
+  {
+    id: 'discuss',
+    label: 'Discussions\nto have',
+    /* The two that are lists of conversations to have. */
+    from: ['exp', 'intimacy'],
+    color: '#1B5FE8',
+  },
+  {
+    id: 'phrases',
+    label: 'Phrases\nto try',
+    from: ['couple-type'],
+    color: '#9B5DE5',
+  },
+];
+
 export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy, reflection, reflectionPlan, conflictReady, conflictAnswers, names, sides }) {
   /**
    * ── THE PEOPLE, NAMED ───────────────────────────────────────────────────
@@ -536,36 +581,6 @@ export function whatComesNext({ coupleTypeId, commsPlan, expectations, intimacy,
    * the email read, and those are not this page; a bucket is a decision about
    * one screen rather than about what the results contain.
    */
-  const BUCKETS = [
-    /* ── B108: HER NAMES, AND HER LINE BREAKS ────────────────────────────
-       Ellie: "Change titles and make each split to 2 lines: Things to
-       consider, Discussions to have, Phrases to try."
-
-       The break is in the string because it is hers: a tile that wraps where
-       the width happens to run out breaks "Discussions to have" after
-       "Discussions to", which is not where she put it. Both surfaces honour
-       the newline, so the two tiles read the same. */
-    {
-      id: 'keep-in-mind',
-      label: 'Things to\nconsider',
-      /* The three that describe how you already are with each other. */
-      from: ['comm', 'conflict', 'reflection'],
-      color: '#E8673A',
-    },
-    {
-      id: 'discuss',
-      label: 'Discussions\nto have',
-      /* The two that are lists of conversations to have. */
-      from: ['exp', 'intimacy'],
-      color: '#1B5FE8',
-    },
-    {
-      id: 'phrases',
-      label: 'Phrases\nto try',
-      from: ['couple-type'],
-      color: '#9B5DE5',
-    },
-  ];
 
   /**
    * ── THE SECTIONS INSIDE A BUCKET ────────────────────────────────────────
