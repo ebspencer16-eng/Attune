@@ -344,9 +344,46 @@ if (problems.length) {
   process.exit(1);
 }
 
+/**
+ * ── ONE NAME PER SECTION, INCLUDING THE ONE THE APP DRAWS ────────────────
+ * Everything above holds the SITE's labels to the shelf. It said nothing
+ * about `categoryLabel` on the payload, which is what the app prints on an
+ * article card and what the Drive drafts were built from, and that was the
+ * half that had drifted: the site said Methodology on every surface a reader
+ * could see while the payload said Couple Types.
+ *
+ * Ellie: "The sections should match what we have on the app and site, right
+ * now the site one is called methodology."
+ *
+ * So the label an article carries has to BE its shelf. Planting a literal
+ * back into the module walked straight through the checks above, which is
+ * why this one runs the code rather than reading the file.
+ */
+{
+  const named = [];
+  for (const a of IN_PRACTICE) {
+    const shelf = shelfFor(a);
+    if (a.categoryLabel !== shelf) {
+      named.push(`${a.slug} is filed on "${shelf}" and labelled "${a.categoryLabel}".`);
+    }
+    if (!POST_CATEGORIES.includes(a.categoryLabel)) {
+      named.push(`${a.slug} is labelled "${a.categoryLabel}", which is not one of the shelves`
+        + ` (${POST_CATEGORIES.join(', ')}).`);
+    }
+  }
+  if (named.length) {
+    console.error('[check-in-practice] a section is wearing two names:\n');
+    for (const n of named) console.error('  ' + n);
+    console.error('');
+    console.error('api/_lib/post-categories.js is where Ellie named the shelves. An article\'s');
+    console.error('label is that shelf, read through shelfFor, and nothing else.');
+    process.exit(1);
+  }
+}
+
 console.log(
   `[check-in-practice] ${articles.length} articles on the site; `
   + `all ${IN_PRACTICE.length} in the app, `
   + `${IN_PRACTICE.filter((a) => a.excerpt).length} of them with an excerpt; `
   + `${labelCount} category labels and ${cardCount} article cards, each naming the shelf`
-  + ' the server files that article under.');
+  + ' the server files that article under, and every article\'s own label is that same shelf.');

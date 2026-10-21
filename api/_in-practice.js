@@ -72,28 +72,32 @@ export function shelfFor(a) {
  * is the usual way: a list of a thing is where the thing's inconsistencies show
  * up.
  *
- * ── THERE ARE STILL TWO NAMING SYSTEMS, AND THAT IS ELLIE'S ───────────────
- * These are not the shelf names. `SHELF` above maps the same categories onto
- * POST_CATEGORIES, where `conflict` is "When It's Difficult" rather than
- * "Conflict & Repair". Both appear in the product. Making them one name is a
- * copy decision and it is in TASKS.md for her; what is fixed here is a section
- * disagreeing with itself, which is nobody's decision.
+ * ── AND THERE IS ONE NAMING SYSTEM NOW, WHICH IS HERS ─────────────────────
+ * There were two. This map had its own strings and `SHELF` above mapped the
+ * same categories onto POST_CATEGORIES, so an article's label and the shelf it
+ * sat on could disagree, and two of them did: "Conflict & Repair" against
+ * "Conflict and Repair", and "Couple Types" against "Methodology".
+ *
+ * Ellie: "The sections should match what we have on the app and site, right
+ * now the site one is called methodology." She is right, and the site already
+ * said Methodology everywhere a reader could see it: the pill, the cards and
+ * the page's own address. The only thing still saying Couple Types was this
+ * map, which is what the app draws on an article card and what the Drive docs
+ * were built from.
+ *
+ * So there is nothing typed here any more. The label IS the shelf, read
+ * through `shelfFor`, which reads POST_CATEGORIES, which is where she named
+ * them. Renaming a shelf renames it on every surface in one edit.
  */
-const CATEGORY_LABEL = {
-  'getting-started': 'Getting Started',
-  conflict: 'Conflict & Repair',
-  understanding: 'Understanding Each Other',
-  'couple-types': 'Couple Types',
-  methodology: 'Methodology',
-};
+const labelFor = (category) => SHELF[category] || POST_CATEGORIES[0];
 
 const IN_PRACTICE_ROWS = [
-  {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "getting-started", "categoryLabel": "Getting Started", "title": "How to review your results together", "excerpt": "Some couples open their results immediately; others wait for a quiet moment. Either approach works. What matters is how you do it.", "readMinutes": 6},
-  {"slug": "how-to-start-a-hard-conversation", "path": "/practice/how-to-start-a-hard-conversation", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "How to start a hard conversation", "excerpt": "When you find a gap in your results that feels significant, here's a structure that opens things up rather than putting either person on the defensive.", "readMinutes": 7},
-  {"slug": "conflict-vs-repair", "path": "/practice/conflict-vs-repair", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "The difference between conflict and repair", "excerpt": "Two people can have compatible conflict styles and completely incompatible repair needs. Most couples have never distinguished these.", "readMinutes": 5},
-  {"slug": "when-a-conversation-turns-heated", "path": "/practice/when-a-conversation-turns-heated", "category": "conflict", "categoryLabel": "Conflict & Repair", "title": "When a conversation turns heated", "excerpt": "Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.", "readMinutes": 5},
-  {"slug": "staying-current-with-each-other", "path": "/practice/staying-current-with-each-other", "category": "getting-started", "categoryLabel": "Getting Started", "title": "Staying current with each other over time", "excerpt": "People change. What you need, value, and envision shifts. The couples who stay genuinely close over decades check in.", "readMinutes": 5},
-  {"slug": "five-books-that-change-how-couples-think", "path": "/practice/five-books-that-change-how-couples-think", "category": "understanding", "categoryLabel": "Understanding", "title": "Five books that change how couples think", "excerpt": "Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other, curated because they earn their place.", "readMinutes": 4},
+  {"slug": "how-to-review-your-results-together", "path": "/practice/how-to-review-your-results-together", "category": "getting-started", "title": "How to review your results together", "excerpt": "Some couples open their results immediately; others wait for a quiet moment. Either approach works. What matters is how you do it.", "readMinutes": 6},
+  {"slug": "how-to-start-a-hard-conversation", "path": "/practice/how-to-start-a-hard-conversation", "category": "conflict", "title": "How to start a hard conversation", "excerpt": "When you find a gap in your results that feels significant, here's a structure that opens things up rather than putting either person on the defensive.", "readMinutes": 7},
+  {"slug": "conflict-vs-repair", "path": "/practice/conflict-vs-repair", "category": "conflict", "title": "The difference between conflict and repair", "excerpt": "Two people can have compatible conflict styles and completely incompatible repair needs. Most couples have never distinguished these.", "readMinutes": 5},
+  {"slug": "when-a-conversation-turns-heated", "path": "/practice/when-a-conversation-turns-heated", "category": "conflict", "title": "When a conversation turns heated", "excerpt": "Understanding each other deeply doesn't mean you'll stop having hard moments. It means you have better tools when you do.", "readMinutes": 5},
+  {"slug": "staying-current-with-each-other", "path": "/practice/staying-current-with-each-other", "category": "getting-started", "title": "Staying current with each other over time", "excerpt": "People change. What you need, value, and envision shifts. The couples who stay genuinely close over decades check in.", "readMinutes": 5},
+  {"slug": "five-books-that-change-how-couples-think", "path": "/practice/five-books-that-change-how-couples-think", "category": "understanding", "title": "Five books that change how couples think", "excerpt": "Not a comprehensive bibliography. A short list of books that genuinely shift how people see each other, curated because they earn their place.", "readMinutes": 4},
 
   // The six the website has and the app did not. Added without an excerpt:
   // Ellie, 12 Sep, "we need the 12 articles written as placeholders ... but we
@@ -103,12 +107,11 @@ const IN_PRACTICE_ROWS = [
   // under, and shelfFor uses that, so why-couples-fight lands on "When It's
   // Difficult" rather than the "Getting Started" its label claims. That
   // mismatch is on the website, not here, and is worth a look.
-  {"slug": "how-to-use-your-results", "path": "/practice/how-to-use-your-results", "category": "getting-started", "categoryLabel": "Getting Started", "title": "How to use your results", "readMinutes": 8},
-  {"slug": "why-couples-fight-about-the-same-things", "path": "/practice/why-couples-fight-about-the-same-things", "category": "conflict", "categoryLabel": "Getting Started", "title": "Why couples fight about the same things", "readMinutes": 6},
-  {"slug": "what-your-communication-style-reveals", "path": "/practice/what-your-communication-style-reveals", "category": "understanding", "categoryLabel": "Understanding Each Other", "title": "What your communication style reveals", "readMinutes": 7},
-  {"slug": "what-your-couple-type-tells-you", "path": "/practice/what-your-couple-type-tells-you", "category": "couple-types", "categoryLabel": "Couple Types", "title": "What your couple type tells you", "readMinutes": 6},
-  {"slug": "for-the-bridge-the-conversation-you-need", "path": "/practice/for-the-bridge-the-conversation-you-need", "category": "couple-types", "categoryLabel": "Couple Types", "title": "For the Bridge: the conversation you need", "readMinutes": 5},
-  {"slug": "why-naming-the-pattern-changes-everything", "path": "/practice/why-naming-the-pattern-changes-everything", "category": "couple-types", "categoryLabel": "Couple Types", "title": "Why naming the pattern changes everything", "readMinutes": 4}
+  {"slug": "how-to-use-your-results", "path": "/practice/how-to-use-your-results", "category": "getting-started", "title": "How to use your results", "readMinutes": 8},
+  {"slug": "why-couples-fight-about-the-same-things", "path": "/practice/why-couples-fight-about-the-same-things", "category": "conflict", "title": "Why couples fight about the same things", "readMinutes": 6},
+  {"slug": "what-your-communication-style-reveals", "path": "/practice/what-your-communication-style-reveals", "category": "understanding", "title": "What your communication style reveals", "readMinutes": 7},
+  {"slug": "what-your-couple-type-tells-you", "path": "/practice/what-your-couple-type-tells-you", "category": "couple-types", "title": "What your couple type tells you", "readMinutes": 6},
+  {"slug": "why-naming-the-pattern-changes-everything", "path": "/practice/why-naming-the-pattern-changes-everything", "category": "couple-types", "title": "Why naming the pattern changes everything", "readMinutes": 4}
 ];
 
 /**
@@ -118,7 +121,7 @@ const IN_PRACTICE_ROWS = [
  */
 export const IN_PRACTICE = IN_PRACTICE_ROWS.map(({ categoryLabel: _ignored, ...row }) => ({
   ...row,
-  categoryLabel: CATEGORY_LABEL[row.category] || CATEGORY_LABEL['getting-started'],
+  categoryLabel: labelFor(row.category),
 }));
 
 /** Newest first is the order practice.html lists them in. */

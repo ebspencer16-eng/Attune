@@ -130,7 +130,26 @@ export default function ResourcesScreen() {
   const scroller = useRef<ScrollView>(null);
   /** Which shelf is open as a page of its own, if any. */
   const [openShelf, setOpenShelf] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
+  /**
+   * ── THE SHELVES ARE HALF THE ANSWER, AND WERE NOT KEPT ──────────────────
+   * Ellie: "when I swiped up on learn, the article list took a few seconds to
+   * load, long enough that I thought it was empty and I swiped out."
+   *
+   * The posts above are kept on the phone and seeded straight back, so they
+   * are in hand the moment the tab draws. The shelf names were not. The list
+   * under the peek is `categories.map(...)`, so with no shelves it renders
+   * nothing at all: the filter pills appear, and under them an empty space,
+   * until a cold /api/posts answers. Everything needed to draw that list was
+   * already on the phone.
+   *
+   * CLAUDE.md records this exact shape on the Insights tab: keeping a payload
+   * and drawing it are two different things. Here it is half a payload kept.
+   * check-cache-seeds.mjs now fails the build on a screen that takes a field
+   * out of a cached answer and does not seed it from the cache.
+   */
+  const [categories, setCategories] = useState<string[]>(
+    () => recall<{ categories?: string[] }>('posts')?.categories || [],
+  );
   /* B129. Same as the other tabs: a spinner only when there is nothing
      kept to draw. */
   const [loading, setLoading] = useState(() => !recall<{ posts: unknown[] }>('posts'));
@@ -1460,7 +1479,14 @@ export default function ResourcesScreen() {
           ) : null}
 
           {/* block: app-learn/reading */}
-          {posts.length ? (
+          {/* ── THERE HAS TO BE SOMETHING TO GROUP BY ────────────────────
+              `posts.length` was the whole test, and it is only half of what
+              the list below needs: the shelves are the other half, and the
+              rows are drawn by mapping over them. So a reader with posts in
+              hand and no shelf names got the pills and then nothing, with
+              nothing saying why. Both halves now, and the not-answered
+              spinner covers either one being missing. */}
+          {posts.length && categories.length ? (
             <>
               {narrowing ? (
                 /* One list, because this is an answer to a question. */
