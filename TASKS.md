@@ -21,7 +21,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| C20 | **Four category folders inside In Practice**, matching the four the site files articles under: Getting Started, Conflict & Repair, Understanding Each Other, Couple Types. |
+| C21 | **A doc per article, twelve of them**, each in its category folder: my pass at the rewrite, a short note on what I changed, and the current live words underneath so nothing is lost. |
+| C22 | **Nothing on the site changes.** The articles stay exactly as they are until you have rewritten them in the docs and told me to put them back. |
 
 ---
 
