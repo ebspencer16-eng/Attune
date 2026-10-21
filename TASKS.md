@@ -35,9 +35,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W118 | **The Learn list draws instantly now.** The articles were on your phone the whole time; the shelf names were not, and the list is grouped by shelf. |
 | C23 | **One set of section names.** Methodology and Conflict and Repair, everywhere. The app said Couple Types on a card while the site said Methodology. |
 | C24 | **The Bridge article is off the site**, with its page, its route and all three places that linked to it. |
-| C25 | **Two new drafts in Drive**: the Communication exercise and Expectations, both under Methodology. Not published. |
-| C20 | **Twelve docs in Drive, one per In Practice article**, filed in four new category folders under Product / Active / In Practice. |
-| C21 | **Each doc holds my pass at the rewrite, a note on what I changed, and the current words underneath.** Nothing on the site changed. |
+| C25 | **Those two drafts are in Archive now, and the exercises are one article in the new set.** You asked for two by name last round; your thirteen-article list has one Methodology piece covering all five exercises. Say if you want them split back out. |
+| C20 | **Those twelve docs are in Archive**, in the four folders they were in. Superseded by the thirteen in C28, which are written to your example rather than edited from the live words. |
+| C21 | **Take a line back from Archive if you want one.** Each archived doc still holds the live words in full underneath my pass at them. |
 | C22 | **One typo fixed on the live site**: a heading read "Why unnamedpatterns compound". That is a missing space, not a copy decision, so I fixed it rather than wait. |
 | W117 | **Nothing behind the insights menu tiles now**, just the orange. The card that was around all four is gone; the tiles keep their own. |
 | W113 | **Learn's unowned resources have the lock**, in the icon's place, dimmed the same amount as the exercises tiles. The two tabs draw the same thing. |
@@ -121,7 +121,7 @@ the build until the words catch up.
 Product / Active / In Practice, then four folders matching the four the site
 files articles under:
 
-| Folder | Docs |
+| Folder, now inside Archive | Docs |
 |--|--|
 | Getting Started | 3 |
 | Conflict and Repair | 4 |
