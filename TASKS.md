@@ -21,10 +21,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** Everything from your last message is in section 3.
-
 | # | What I am doing |
 |--|--|
+| S42 | **Every change from this round, checked on both surfaces.** One row per change: on the site, in the app's source, on your phone. Not from memory, from the files and from Expo. |
+| S43 | **What bundle your phone is actually running**, asked of Expo rather than reasoned about, and the count of app commits it does not have. |
+| S44 | **An EAS update published** for anything app-side that is not on your phone. |
 
 ---
 
