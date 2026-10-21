@@ -21,11 +21,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
+**Nothing open.** Everything from your last two messages is in section 3.
+
 | # | What I am doing |
 |--|--|
-| S42 | **Every change from this round, checked on both surfaces.** One row per change: on the site, in the app's source, on your phone. Not from memory, from the files and from Expo. |
-| S43 | **What bundle your phone is actually running**, asked of Expo rather than reasoned about, and the count of app commits it does not have. |
-| S44 | **An EAS update published** for anything app-side that is not on your phone. |
 
 ---
 
@@ -33,6 +32,9 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| S42 | **Nothing slipped.** Every change from the last two rounds checked on both surfaces, one at a time. Two things I expected to find were not there; the detail says what I checked and how. |
+| S43 | **Your phone was already current.** The bundle on the production channel had the same JS, byte for byte, as one built from the newest commit. Hash comparison, not a guess. |
+| S44 | **Published anyway**, so there is no five-second question hanging over it. Two launches to pick it up: the first downloads, the second runs. |
 | W118 | **The Learn list draws instantly now.** The articles were on your phone the whole time; the shelf names were not, and the list is grouped by shelf. |
 | C23 | **One set of section names.** Methodology and Conflict and Repair, everywhere. The app said Couple Types on a card while the site said Methodology. |
 | C24 | **The Bridge article is off the site**, with its page, its route and all three places that linked to it. |
@@ -71,6 +73,50 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | C31 | **Suggested future articles**, at the top of In Practice. Sixteen candidates, what each one is for, and the three I would write first. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### S42 to S44 — what I checked on both surfaces, and how
+
+You asked me to confirm it rather than claim it, so here is the method beside
+each answer.
+
+**Your phone.** The update server is public and answers in one request. The
+bundle it was serving was published at 13:05 today, and the newest commit that
+touches app code landed at 13:05:31, five seconds later. That is too close to
+reason about, so I did not: I published again from the newest commit and
+compared the two updates' bundle hashes. They are identical,
+`yIwDTdqg5LBf2ENv...`, which means the bundle already on your phone was built
+from the same app source. Nothing app-side was waiting. Settings, at the bottom
+of the app, shows the date of what you are running.
+
+**Every change, by where it has to live.** Four kinds, and the kind decides what
+"both surfaces" even means.
+
+| Kind | Changes | Reaches the app how |
+|--|--|--|
+| Server copy and rules | your article, the section names, the Bridge removal, the Discussions rows, Things to consider, the capitalised titles | The app asks the server. No publish needed. |
+| App screens | the Learn list, the insights nav, the lock on Learn, nothing behind the tiles | In the bundle. Published. |
+| Both, by hand | More Attune Exercises, the budget arithmetic | Gated: both copies run over the same inputs and a difference fails the build. |
+| Admin only | every chart and layout fix from W103 to W116 | The app has no admin. Correctly site-only. |
+
+**The two things I went looking for and did not find.** Your article is new
+content, which is where something silently vanishes. The server sends four kinds
+of block for it, and the app draws all four; of the fields on those blocks, the
+app draws every one, including a research block's own source line. And the
+article the server hands the app carries your five headings, both of your
+opening paragraphs, your excerpt and the right address.
+
+**What the build already proves, with its own numbers.** Twenty gates exist to
+stop one surface knowing something the other does not. Their own counts, from
+this morning's run: 44 payload fields the app names every one of; all 29 results
+sections with a screen; 11 articles and 185 blocks word for word the same as the
+pages; 23 sidebar rows taking every name and colour from the nav the app draws;
+6 budgets with every figure identical; one builder for What Comes Next feeding
+both. None of that is my reading of the code. Each is the gate's own report.
+
+**The one thing I found that is not a slip but is a decision.** The articles on
+the product are still filed under Getting Started and Methodology. Your four new
+section names are in Drive. That is C23 and C28 waiting on each other, not
+something that fell through.
 
 ### W118 — why it looked empty
 
