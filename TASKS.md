@@ -8,8 +8,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
-| W113 | **Should the locked resources on Learn get a lock icon too?** You said the greyed-out lock is "what we do for the resources on learn". It is not: Learn dims them and mutes the icon, with no lock. Say the word and I add it there. |
-| W114 | **Tick a discussion on your phone and tell me it stays ticked.** It never saved for anybody, and I cannot sign in as you to prove the fix. One tap. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -23,7 +21,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** The sweeps are done; what they found is in section 3.
+| # | What I am doing |
+|--|--|
+| W113 | **The lock on Learn's unowned resources**, since you said yes. Same lock and the same dimming the exercise tiles got, so the two tabs read alike. |
+| W117 | **No card behind the insights menu tiles.** The four tiles sit straight on the orange, with nothing drawn between them and it. |
 
 ---
 
@@ -35,7 +36,6 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | S39 | **Six sweeps for breaks**, after you said you could not engage. One real break, three smaller ones, four new gates, and a page that had never once been checked. |
 | S40 | **What Comes Next had never been checked by the render gate.** It judged the page by how much text it drew, and the page is three collapsed tiles. |
 | S41 | **Four places sent a request from inside a React state update**, which React is allowed to run twice. Two of them were mine from this morning. |
-| W95 | **The checkboxes save now. They never did.** Two bugs in `/api/convos`, one on top of the other. Ticked, reloaded and unticked on my simulator against your live account. Site and app. |
 | W94 | **Discussions to have is six category rows, not five.** Life & Values was missing on the website and it is the biggest one: seven topics. Site and app. |
 | W96 | **The numbering runs 1 to 8 straight through** the Discussions list instead of restarting in each half. Site and app. |
 | W97 | **Things to consider is split into For both of you and For [name]**, and every row knows who it is for, not only the couple-type ones. Site and app. |
@@ -188,6 +188,8 @@ honest picture now.
 
 | Verified by you | What it was |
 |--|--|
+| W95 | A tapped checkbox had never once saved, on either surface. Two bugs in /api/convos, one behind the other: the token handed over as the wrong shape, then the body read off its wrapper. |
+| W114 | You ticked a discussion on your phone and it stayed. That is the end of W95, confirmed on a real account rather than on my simulator. |
 | W98 | Discussions to have carries one eyebrow, For the two of you to discuss together. |
 | W99 | Phrases to try is split into both-of-you and each-of-you, and a section only appears when it has something in it. |
 | W102 | The zero-topics bug on the expectations drawer, which was mine: the drawer moved to a payload field while the category list still read the old one. |
