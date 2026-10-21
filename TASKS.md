@@ -21,13 +21,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-| # | What I am doing |
-|--|--|
-| W118 | **The Learn list that looked empty.** The posts are kept on your phone and the shelf names are not, so the list has nothing to group by until the request lands. One line, plus a gate so the next half-cached payload fails the build. |
-| C23 | **One set of section names.** The product has two: the shelves you already named, and a second list that still says Couple Types and Conflict & Repair. The second one reads from the first now. |
-| C24 | **The Bridge article comes off the site**, with every link and card that points at it. |
-| C25 | **Two new drafts in Drive**, one on the Communication exercise and one on Expectations. Drafts only, not published, because the words are yours. |
-| C26 | **Drive updated to match**: the folder renamed to Methodology, the Bridge doc removed, and the six docs whose header carried an old section name rewritten. |
+**Nothing open.**
 
 ---
 
@@ -35,6 +29,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| W118 | **The Learn list draws instantly now.** The articles were on your phone the whole time; the shelf names were not, and the list is grouped by shelf. |
+| C23 | **One set of section names.** Methodology and Conflict and Repair, everywhere. The app said Couple Types on a card while the site said Methodology. |
+| C24 | **The Bridge article is off the site**, with its page, its route and all three places that linked to it. |
+| C25 | **Two new drafts in Drive**: the Communication exercise and Expectations, both under Methodology. Not published. |
 | C20 | **Twelve docs in Drive, one per In Practice article**, filed in four new category folders under Product / Active / In Practice. |
 | C21 | **Each doc holds my pass at the rewrite, a note on what I changed, and the current words underneath.** Nothing on the site changed. |
 | C22 | **One typo fixed on the live site**: a heading read "Why unnamedpatterns compound". That is a missing space, not a copy decision, so I fixed it rather than wait. |
@@ -65,17 +63,62 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
+### W118 — why it looked empty
+
+/api/posts answers with two things, the articles and the shelf names. The
+articles were being kept on your phone and handed straight back. The shelf
+names were not, and the list under the peek is built by going through the
+shelves. So with no shelves it drew nothing: the filter pills, then a space,
+until a cold server answered. Everything it needed was already on the phone,
+in the same kept answer, one field along.
+
+A gate fails the build now on any screen that keeps half of an answer. Its own
+first version was wrong twice, which is in the commit.
+
+The fix only shows from the second launch onward, because the first one is
+what fills the cache. I tested it that way: launch, open Learn, force quit,
+relaunch, swipe up. The list was there in under a second.
+
+### C23 — the two names, and which one won
+
+The product had two lists of section names. The shelves you named, and a
+second list inside the article index with its own strings. They disagreed
+twice: Couple Types against Methodology, and Conflict & Repair against
+Conflict and Repair.
+
+The site already said Methodology on every surface a reader could see. The
+only thing still saying Couple Types was the payload the app draws its cards
+from, which is also what I built the Drive docs from, which is why you saw it.
+
+Nothing is typed in the second list any more. A section's name is its shelf.
+Renaming one renames it on the site, in the app and in the next set of docs,
+in one edit.
+
+### C24 and C25 — the Bridge, and what replaces it
+
+The Bridge article is gone from the site: the page, the route, the card on the
+index, the row on the Methodology page and the line on /practice.
+
+Its two replacements are drafts in Drive, both in the Methodology folder,
+named with "(new)" so they are easy to find. They are not on the site and will
+not be until you have rewritten them and said so.
+
+Every number in both comes from the questions and the scoring rather than from
+memory, and each doc lists where each number came from at the foot. If you
+publish them, say so and I will gate them, so a change to the scoring fails
+the build until the words catch up.
+
 ### C20 and C21 — where the docs are, and what is in them
 
 Product / Active / In Practice, then four folders matching the four the site
 files articles under:
 
-| Folder | Articles |
+| Folder | Docs |
 |--|--|
 | Getting Started | 3 |
-| Conflict & Repair | 4 |
+| Conflict and Repair | 4 |
 | Understanding Each Other | 2 |
-| Couple Types | 3 |
+| Methodology | 4, two of them the new ones |
 
 Each doc has three parts. My pass at the rewrite. A short note saying what I
 changed and why. Then the current live words, in full, so you can take a line

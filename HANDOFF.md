@@ -3796,3 +3796,37 @@ A column assigned with `patch.col = `. `setTimeout` matching /^set[A-Z]/.
 
 **Still open for Ellie:** W113, the lock on Learn's locked resources. W114,
 one tap on her phone to confirm a ticked discussion stays ticked.
+
+## 2026-10-21 — In Practice into Drive, and the Learn list that looked empty
+
+Tree clean, pushed at f0b289c1, EAS update published, `npm run check` green.
+
+**Twelve In Practice drafts into her Drive**, then eleven after she dropped the
+Bridge article, plus two new ones. Product / Active / In Practice, four folders
+by section. Each doc is the rewrite, a note on what changed, and the current
+live words underneath. Nothing customer-facing shipped; the builder runs her
+own voice rules over MY prose before upload and failed twice on my own hedges.
+
+**The Learn list.** /api/posts answers with `posts` and `categories`. The
+screen seeded `posts` from the cache and left `categories` empty, and the list
+is `categories.map(...)`, so it drew the filter pills and then nothing until a
+cold function answered. Everything it needed was already on the phone, one
+field along in the same cached payload. `check-cache-seeds.mjs` holds it.
+
+That gate was wrong twice before it was right, both worth knowing. It held one
+endpoint's fields against another endpoint's cache, which is what happens when
+a scan attributes assignments by file rather than by the request they came
+from. Then it treated `!recall('posts')` as "uses the whole payload" and
+exempted the one file it existed for, reporting "all 0 fields" and exiting 0.
+A presence test is not a payload read.
+
+**Two naming systems collapsed into one.** `post-categories.js` holds the names
+Ellie chose; `_in-practice.js` had a second map with its own strings, and they
+disagreed on two of four. The site said Methodology everywhere visible while
+the payload said Couple Types, which is what the app prints on a card. The
+label is now the shelf, derived. check-in-practice holds each article's own
+label to its shelf, which is what it did not cover: planting a literal back
+walked straight through every other check in that file.
+
+**Open for Ellie:** the twelve rewrites, and whether to publish the two new
+Methodology drafts. Nothing is blocked on me.
