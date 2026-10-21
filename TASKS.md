@@ -21,10 +21,14 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** Everything from your last two messages is in section 3.
-
 | # | What I am doing |
 |--|--|
+| S45 | **Every `&&` guard in JSX whose left side is a number.** In React Native a zero renders as bare text and throws; on the site it prints a 0. The Learn fix was one character away from this shape. |
+| S46 | **Every hand-typed list of keys that looks something up in another list.** The rule is not that the list is right, it is that every key in it resolves. One of these had five of six wrong for months. |
+| S47 | **Every piece of arithmetic the app does on a number the server sent.** The app never scores anything, and that promise has one gate covering one case. |
+| S48 | **Every figure the product prints as a percentage**, swept over the whole input space rather than a tidy fixture, checked for staying inside its own range. |
+| S49 | **Every `Number()` and `parseInt`**, asked whether a NaN can reach a person's screen. |
+| S50 | **Every default that stands in for a failed read.** `= []` cannot tell an empty table from a broken query, and both admin exports once reported N for everybody because of it. |
 
 ---
 
