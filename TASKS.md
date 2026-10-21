@@ -21,7 +21,13 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.**
+| # | What I am doing |
+|--|--|
+| C27 | **Your version of How to review your results together, onto the site**, word for word. |
+| C28 | **Thirteen articles written to your structure and your tone**, in Drive. Four sections: The Attune Experience, Understanding Each Other, Conflict and Repair, Attune Methodology. |
+| C29 | **Citations from the 119 quotations this product already verifies**, plus the eight academic sources already in the live articles. Nothing invented. |
+| C30 | **An Archive folder in Drive**, with everything currently there moved into it. |
+| C31 | **A suggestions doc at the top of In Practice**: what to write next in each section. |
 
 ---
 
