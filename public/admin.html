@@ -184,6 +184,15 @@
      rather than scrollable, because the page hides horizontal overflow. */
   .chart-body canvas, .chart-card canvas{max-width:100%}
   .chart-body canvas{max-height:220px}
+  /* ── A DOUGHNUT FILLS ITS TILE ──────────────────────────────────────
+     Ellie: "The doughnuts don't fit in the visual, go clean this up."
+     They were pinned at 280 by 280 whatever the window, inside a card that
+     grows past 570, so each one floated in the middle of its tile with a
+     wide empty margin either side, and at some widths the two tiles started
+     at different heights. Measured at 1500, 1280 and 1100: the canvas read
+     280x280 at all three. A square box that tracks its card fixes both. */
+  .doughnut-box{width:100%;max-width:340px;aspect-ratio:1/1;margin:0 auto}
+  .doughnut-box canvas{max-height:none}
   /* Unless the tile has been given a height of its own. A survey question with
      eleven answers needs a taller box than a doughnut, and this cap was
      silently winning: the tile grew to 582 points and the chart stayed at 220,
@@ -895,12 +904,17 @@
     </div>
 
     <div id="resp-exp" style="display:none">
-      <div class="chart-grid">
+      <!-- Ellie, of Life & Values: "I want this to be a full-width chart like
+           self v partner gap." It was the right-hand half of a two-column
+           grid, 539 points wide against that chart's 1127. Both cards are
+           full width and stacked now, which is also what makes the five
+           column names readable. -->
+      <div>
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Responsibilities</div><div class="chart-subtitle">Who handles what · % of couples aligned per area</div></div><select class="tile-slicer" id="slz-rexp" title="Cut this tile by a couple-level segment" aria-label="Slz rexp"><option value="">Everyone</option></select></div>
           <div class="chart-body"><canvas id="chart-exp-align"></canvas></div>
         </div>
-        <div class="chart-card">
+        <div class="chart-card" style="margin-top:1.25rem">
           <div class="chart-head"><div><div class="chart-title">Life &amp; Values</div><div class="chart-subtitle">The big questions · where couples most often differ</div></div><select class="tile-slicer" id="slz-rgap" title="Cut this tile by a couple-level segment" aria-label="Slz rgap"><option value="">Everyone</option></select></div>
           <div class="chart-body">
             <div class="insight-list" id="exp-gap-bars" style="margin-top:.5rem;"></div>
@@ -957,7 +971,7 @@
       <div class="chart-grid full">
         <div class="chart-card">
           <div class="chart-head"><div><div class="chart-title">Risk patterns</div><div class="chart-subtitle">How often each one shows up &middot; share of people answering Often or Sometimes</div></div><select class="tile-slicer" id="slz-conf" title="Cut this tile by a segment" aria-label="Slz conf"><option value="">Everyone</option></select></div>
-          <div class="chart-body"><div style="height:200px"><canvas id="chart-conflict-risk"></canvas></div></div>
+          <div class="chart-body"><div style="height:210px"><canvas id="chart-conflict-risk"></canvas></div></div>
         </div>
       </div>
       <div class="qx-section" id="qx-conflict" style="margin-top:1.25rem"></div>
@@ -1623,7 +1637,7 @@ window.adminAuthHeaders = function(extra){
              that image down: measured 260x260 of drawing squeezed into a
              quarter of it, which reads as a chart that failed rather than one
              that was shrunk. -->
-        <div style="padding:.25rem 1.4rem 1rem;"><div style="height:280px;width:280px;margin:0 auto;"><canvas id="types-ct-bars"></canvas></div></div>
+        <div style="padding:.25rem 1.4rem 1rem;"><div class="doughnut-box"><canvas id="types-ct-bars"></canvas></div></div>
       </div>
       <div class="chart-card">
         <div class="chart-card-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem"><div><div class="chart-card-title">Individual type distribution</div><div class="chart-card-sub">W / X / Y / Z across all typed individuals</div></div><select class="tile-slicer" id="slz-tindiv" title="Cut this tile by a segment" aria-label="Slz tindiv"><option value="">Everyone</option></select></div>
@@ -1635,7 +1649,7 @@ window.adminAuthHeaders = function(extra){
              that image down: measured 260x260 of drawing squeezed into a
              quarter of it, which reads as a chart that failed rather than one
              that was shrunk. -->
-        <div style="padding:.25rem 1.4rem 1rem;"><div style="height:280px;width:280px;margin:0 auto;"><canvas id="types-indiv-chart"></canvas></div></div>
+        <div style="padding:.25rem 1.4rem 1rem;"><div class="doughnut-box"><canvas id="types-indiv-chart"></canvas></div></div>
       </div>
     </div>
 
@@ -3866,9 +3880,20 @@ let funnelData = [0,0,0,0];
 
 // ── Bar renderer ──────────────────────────────────────
 function renderBars(containerId, items, color='#5C6DDA') {
-  const max = Math.max(...items.map(i=>i.v)) || 1;
   const el = document.getElementById(containerId);
   if (!el) return;
+  /* ── AN EMPTY TILE SAYS SO ────────────────────────────────────────────
+     Ellie: "there's no data in some spots where we have data."
+     "Who-does-what agreement by question" was a heading over nothing: no
+     rows, no message, no error, which reads as a broken page rather than as
+     a measure nobody has answered yet. Every other empty tile on this page
+     says it is empty, and this one is the reason the page looked wrong. */
+  if (!items || !items.length) {
+    el.innerHTML = '<div style="color:var(--dim);font-size:.78rem;padding:1rem 0;text-align:center;">'
+      + 'Nothing to show yet. No couple has answered enough of these for a figure.</div>';
+    return;
+  }
+  const max = Math.max(...items.map(i=>i.v)) || 1;
   el.innerHTML = '';
   items.forEach(item => {
     const pct = Math.round((item.v/max)*100);
@@ -4697,13 +4722,27 @@ async function renderConflictResponses(){
      names are back, the scale is a percentage, and each column carries its own
      number the way every other column in the admin does now. Same height as
      the gap charts, so the tab reads as one page. */
+  /* ── REBUILT, NOT ADJUSTED ────────────────────────────────────────────
+     Ellie: "Something is wrong with this chart. Try again."
+
+     She was right and the fault was the form, not a setting. Four columns
+     spread across eleven hundred points left four thin bars marooned in a
+     field of white, each one further from its own name than from its
+     neighbours, and the number on top read "50" while the axis beside it read
+     "50%", so the one figure on the tile disagreed with its own scale.
+
+     Four named things with one percentage each is a horizontal bar chart. The
+     name sits against its bar, the bars are long enough to compare by eye,
+     and the percentage reads as a percentage. Ordered worst first, which is
+     the question the tile is for. */
   mkChart(el,{
     type:'bar',
-    data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),backgroundColor:'#1B5FE8',borderRadius:4,maxBarThickness:46}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.y+'% (n='+sorted[c.dataIndex].n+')'}}},
-      scales:{y:{beginAtZero:true,max:100,ticks:{stepSize:50,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
-              x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+    data:{labels:sorted.map(x=>x.l),datasets:[{data:sorted.map(x=>x.v),backgroundColor:'#1B5FE8',borderRadius:4,maxBarThickness:28}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      layout:{padding:{right:34}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+sorted[c.dataIndex].l+': '+c.parsed.x+'% (n='+sorted[c.dataIndex].n+')'}}},
+      scales:{x:{beginAtZero:true,max:100,ticks:{stepSize:25,font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+              y:{ticks:{font:{size:11},autoSkip:false},grid:{display:false}}}}});
 }
 
 // Physical Intimacy: per-dimension alignment vs gap, computed from the cube.
@@ -5257,7 +5296,14 @@ async function renderSelfPartnerGap(containerId){
            column already carries its own number. */
         y: { beginAtZero: true, max: yMax, ticks: { stepSize: yMax / 2, font: { size: 10 } },
              grid: { display: false } },
-        x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
+        /* ── EVERY COLUMN KEEPS ITS NAME ───────────────────────────────
+           Ellie, three times: "Still not seeing labels on all columns on self
+           v partner view gap." All ten draw at 1500, 1280 and 1100 points,
+           which is only a contradiction until you remember Chart.js drops
+           ticks it thinks would collide and says nothing. autoSkip is on by
+           default, so the chart decides; off, the chart has to find room, and
+           a label can never quietly go missing at a width nobody tested. */
+        x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45, autoSkip: false }, grid: { display: false } },
       },
     },
   });
@@ -5814,6 +5860,19 @@ function mkChart(el, cfg) {
         c.data.datasets.forEach((ds, di) => {
           const meta = c.getDatasetMeta(di);
           if (meta.hidden) return;
+          /* ── THE NUMBER AGREES WITH ITS OWN AXIS ──────────────────────
+             The risk chart drew "50" on the bar while the scale beside it
+             read "50%", so the one figure on the tile contradicted the one
+             scale on the tile. Rather than typing a suffix here, ask the
+             value axis how it formats a number: it already knows, and a
+             chart that changes its units cannot leave this behind. */
+          const valueAxis = c.options.indexAxis === 'y' ? 'x' : 'y';
+          const fmtTick = c.scales?.[valueAxis]?.options?.ticks?.callback;
+          const fmt = (v) => {
+            if (typeof fmtTick !== 'function') return String(v);
+            try { const out = fmtTick.call(c.scales[valueAxis], v, 0, []); return out == null ? String(v) : String(out); }
+            catch (e) { return String(v); }
+          };
           meta.data.forEach((bar, i) => {
             const v = ds.data[i];
             if (v == null || v === 0) return;
@@ -5823,13 +5882,13 @@ function mkChart(el, cfg) {
             const stacked = !!(c.options.scales?.y?.stacked || c.options.scales?.x?.stacked);
             if (c.options.indexAxis === 'y') {
               ctx.textAlign = 'left';
-              ctx.fillText(String(v), bar.x + 4, bar.y + 3);
+              ctx.fillText(fmt(v), bar.x + 4, bar.y + 3);
             } else if (stacked) {
               ctx.textAlign = 'center';
-              ctx.fillText(String(v), bar.x, bar.y + (bar.base - bar.y) / 2 + 3);
+              ctx.fillText(fmt(v), bar.x, bar.y + (bar.base - bar.y) / 2 + 3);
             } else {
               ctx.textAlign = 'center';
-              ctx.fillText(String(v), bar.x, bar.y - 4);
+              ctx.fillText(fmt(v), bar.x, bar.y - 4);
             }
           });
         });

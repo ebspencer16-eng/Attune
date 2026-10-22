@@ -44,6 +44,16 @@ const OUT = process.env.OUT || `admin-${PAGE}.png`;
    Built from the product's own question sets so a renamed question or a new
    option shows up here rather than being invented. */
 const { CONFLICT_QUESTIONS, FREQUENCY_OPTIONS } = await import(`${ROOT}api/_conflict-questions.js`);
+/* The derived fields are computed the way the server computes them, not typed
+   out here. CLAUDE.md: a hand-typed answer set is a guess about what the
+   product stores. The first version of this stub guessed, and it never once
+   drew the two axis tiles or the gender tile, because it had no axis_w, no
+   axis_o and no pronouns. Seven tiles said "Loading" or "No data yet" and the
+   probe reported no error, which is a harness saying nothing about a third of
+   the page. */
+const { calcDimScores, axisScores, typeCodeFromAxes, DIM_KEYS } = await import(`${ROOT}api/_type-engine.js`);
+const { PERSONALITY_QUESTIONS } = await import(`${ROOT}api/_questions.js`);
+const { pronounLabel } = await import(`${ROOT}api/_lib/pronouns.js`);
 const { INTIMACY_QUESTIONS } = await import(`${ROOT}api/_intimacy-questions.js`);
 
 const DIMS = ['energy', 'expression', 'reassurance', 'love', 'needs', 'bids', 'listening', 'conflict', 'repair', 'feedback'];
@@ -72,13 +82,46 @@ const fields = [
 ];
 
 const rows = [];
+const PRONOUNS = ['she/her', 'he/him', 'they/them', 'she/they'];
+const AGES = ['25-34', '35-44', '45-54', '18-24'];
+const STATUS = ['Engaged', 'Married', 'Dating', 'Partnered'];
+const LENGTH = ['1-2 years', '3-5 years', '6-10 years', 'Over 10 years'];
+const SOURCE = ['Instagram', 'A friend', 'Search', 'Therapist'];
+
 for (let i = 0; i < 40; i++) {
+  /* A real answer set, run through the server's own scorer, so every derived
+     field the page reads exists and agrees with how it is really produced. */
+  const ex1 = {};
+  PERSONALITY_QUESTIONS.forEach((q, k) => { ex1[q.id] = 1 + ((i + k * 3) % 5); });
+  const scores = calcDimScores(ex1);
+  const { withdrawScore, openScore } = axisScores(scores);
+  const type = typeCodeFromAxes(withdrawScore, openScore);
+
   const r = {
     couple_id: 'c' + Math.floor(i / 2),
-    type: pick(TYPES, i),
+    type,
     couple_type: pick(COUPLE_TYPES, Math.floor(i / 2)),
+    axisEngage: type == null ? null : (type === 'W' || type === 'X' ? 'Engage' : 'Withdraw'),
+    axisOpen: type == null ? null : (type === 'W' || type === 'Y' ? 'Open' : 'Guarded'),
+    axis_w: Number.isFinite(withdrawScore) ? Number(withdrawScore.toFixed(3)) : null,
+    axis_o: Number.isFinite(openScore) ? Number(openScore.toFixed(3)) : null,
+    pkg: pick(['core', 'newlywed', 'anniversary', 'premium'], i),
+    has_ex1: true,
+    has_ex2: i % 3 !== 0,
+    has_ex3: i % 4 === 0,
+    has_intimacy: i % 5 === 0,
+    pronouns: pronounLabel(pick(PRONOUNS, i)),
+    age_range: pick(AGES, i),
+    relationship_status: pick(STATUS, i),
+    relationship_length: pick(LENGTH, i),
+    children: i % 3 === 0 ? 'No' : 'Yes',
+    signup_source: pick(SOURCE, i),
   };
-  DIMS.forEach((d, k) => { r[`dim_${d}`] = 2 + ((i + k) % 3); r[`p_pvdim_${d}`] = 2 + ((i + k + 1) % 3); });
+  for (const dim of Object.keys(DIM_KEYS)) {
+    r['dim_' + dim] = scores[dim] != null ? Number(Number(scores[dim]).toFixed(3)) : null;
+  }
+  for (const q of PERSONALITY_QUESTIONS) r['q_' + q.id] = ex1[q.id];
+  DIMS.forEach((d, k) => { r[`p_pvdim_${d}`] = 2 + ((i + k + 1) % 3); });
   for (const f of fields) {
     if (!f.options || !f.options.length) continue;
     if (f.key.startsWith('cq_') || f.key.startsWith('iq_')) {
@@ -172,7 +215,12 @@ const server = createServer((req, res) => {
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const PORT = server.address().port;
 
-const page = await launch({ width: 1500, height: 1100 });
+/* The width is the whole question for a chart whose labels auto-skip. Ellie
+   reported missing column labels three times on a chart that has all ten at
+   1500 points, which is only a contradiction until you ask what width she is
+   looking at. WIDTH=1280 node scripts/probe-admin.mjs responses */
+const WIDTH = Number(process.env.WIDTH || 1500);
+const page = await launch({ width: WIDTH, height: Number(process.env.HEIGHT || 1100) });
 const errors = [];
 page.on('console', (m) => { if (/error/i.test(m.type || '')) errors.push(m.text); });
 
@@ -231,7 +279,23 @@ console.log('cube: ' + JSON.stringify(cubeState));
 const report = await page.evaluate(() => ({
   errors: window.__probeErrors || [],
   gated: !document.getElementById('admin-login-gate')?.classList.contains('hidden'),
-  loading: [...document.querySelectorAll('*')].filter((e) => e.children.length === 0 && /^loading/i.test((e.textContent || '').trim())).length,
+  /* Only inside the page on screen. Counting the whole document included the
+     thirteen tabs that are not open, whose tiles correctly say Loading until
+     somebody visits them, so the figure read 7 whatever was fixed. A count is
+     a question about what was counted. */
+  loading: (() => {
+    const page = document.querySelector('.page:not(.hidden)') || document.body;
+    const stuck = [...page.querySelectorAll('*')]
+      .filter((e) => e.children.length === 0 && /^loading/i.test((e.textContent || '').trim()));
+    return { n: stuck.length, where: stuck.map((e) => e.id || e.className || e.tagName).slice(0, 10) };
+  })(),
+  /* And the tiles that drew nothing, which look finished and are not. */
+  empty: (() => {
+    const page = document.querySelector('.page:not(.hidden)') || document.body;
+    return [...page.querySelectorAll('.chart-card')]
+      .filter((c) => /no data yet|nobody in this slice|not enough/i.test(c.textContent || ''))
+      .map((c) => (c.querySelector('.chart-card-title') || {}).textContent || '(untitled)');
+  })(),
   canvases: [...document.querySelectorAll('canvas')].filter((c) => c.offsetParent !== null).length,
   /* Computed display, not the inline attribute. The first version of this
      matched on `[style*="display: none"]` and reported the overview as visible
@@ -246,6 +310,44 @@ const report = await page.evaluate(() => ({
   boxes: [...document.querySelectorAll('canvas')].filter((c) => c.offsetParent !== null)
     .map((c) => { const r = c.getBoundingClientRect(); const p = c.parentElement.getBoundingClientRect();
       return c.id + ' css ' + Math.round(r.width) + 'x' + Math.round(r.height) + '  bitmap ' + c.width + 'x' + c.height + '  in ' + Math.round(p.width) + 'x' + Math.round(p.height) + ' @top ' + Math.round(r.top); }),
+  /* A chart with an instance attached but NOTHING IN IT looks exactly like a
+     working one from outside, and `Chart.getChart(c) ? 'drawn' : 'EMPTY'` says
+     drawn for both. The Responses radar had an instance and no series, and the
+     couple-type doughnut there had an instance and sat on a spinner, and this
+     probe reported both as drawn. Count the points. */
+  series: [...document.querySelectorAll('canvas')]
+    .filter((c) => c.offsetParent !== null)
+    .map((c) => {
+      const ch = window.Chart && Chart.getChart(c);
+      if (!ch) return { id: c.id, state: 'no chart instance' };
+      const ds = (ch.data && ch.data.datasets) || [];
+      const pts = ds.reduce((n, d) => n + ((d.data || []).filter((v) => v != null).length), 0);
+      const labels = ((ch.data && ch.data.labels) || []).length;
+      const vals = (ds[0] && ds[0].data || []).slice(0, 12).map((v) => (typeof v === 'number' ? Number(v.toFixed(2)) : v));
+      const r = c.getBoundingClientRect();
+      const box = c.parentElement ? c.parentElement.getBoundingClientRect() : r;
+      /* The labels Chart.js DREW, not the ones it was given. autoSkip silently
+         drops them when they would collide, which is exactly what a narrower
+         window does and exactly what a reader reports as "missing labels". */
+      let drawn = null;
+      try {
+        /* The CATEGORY axis, which is y on a horizontal bar. Reading x
+           regardless printed "5 of 4" for the rebuilt risk chart: that was
+           the 0/25/50/75/100 value ticks counted against four category
+           labels. A count is a question about what was counted. */
+        const catAxis = (ch.options && ch.options.indexAxis === 'y') ? 'y' : 'x';
+        const sc = ch.scales && ch.scales[catAxis];
+        if (sc && sc.ticks) drawn = sc.ticks.filter((t) => t.label !== undefined && t.label !== '').length;
+      } catch (e) {}
+      return { id: c.id, state: pts ? 'ok' : 'NO DATA POINTS', datasets: ds.length, points: pts, labels, drawn,
+               type: ch.config && ch.config.type, vals,
+               css: Math.round(r.width) + 'x' + Math.round(r.height),
+               box: Math.round(box.width) + 'x' + Math.round(box.height) };
+    }),
+  /* A spinner that never stops is a tile nobody can read, and it carries no
+     text at all, so a Loading count cannot see it. */
+  spinners: [...document.querySelectorAll('.page:not(.hidden) .spinner, .page:not(.hidden) [class*="spin"], .page:not(.hidden) [class*="load"]')]
+    .filter((e) => e.offsetParent !== null).map((e) => e.id || e.className).slice(0, 8),
   charts: [...document.querySelectorAll('canvas')]
     .filter((c) => c.offsetParent !== null)
     .map((c) => c.id + ':' + (window.Chart && Chart.getChart(c) ? 'drawn' : 'EMPTY')),
@@ -351,11 +453,19 @@ console.log('responsesBySeg keys: ' + JSON.stringify(report.seg) + '  dimScores:
 for (const g of report.geom) console.log('  geom ' + g);
 console.log('svp bars: ' + JSON.stringify(report.bars));
 console.log('charts: ' + report.charts.join('  '));
+for (const s of report.series) {
+  console.log(`  series ${s.id}: ${s.state}` + (s.state === 'ok'
+    ? ` ${s.type} ${s.points}pts css ${s.css}` + (s.drawn == null ? '' : `  x-labels drawn ${s.drawn} of ${s.labels}${s.drawn < s.labels ? '  <- AUTOSKIP DROPPED ' + (s.labels - s.drawn) : ''}`)
+    : ` <- a tile that looks finished and is not`));
+}
+if (report.spinners.length) console.log('spinners still turning: ' + report.spinners.join(', '));
 for (const k of report.kinds) console.log('  kind ' + k);
 for (const b of report.boxes) console.log('  ' + b);
 for (const b of report.blocks) console.log('  block ' + b);
 console.log('  where ' + JSON.stringify(report.where));
-console.log(`canvases on screen: ${report.canvases}   elements still saying "Loading": ${report.loading}`);
+console.log(`canvases on screen: ${report.canvases}   stuck on "Loading" in the open page: ${report.loading.n}${report.loading.n ? ' -> ' + report.loading.where.join(', ') : ''}`);
+if (report.empty.length) console.log(`tiles that drew nothing: ${report.empty.length} -> ${report.empty.join(' | ')}`);
+else console.log('tiles that drew nothing: none');
 if (report.errors.length) {
   console.log(`\nconsole.error (${report.errors.length}):`);
   for (const e of report.errors.slice(0, 8)) console.log('  ' + String(e).slice(0, 160));

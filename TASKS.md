@@ -10,7 +10,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I need from you |
 |--|--|
-| S58 | **Has anybody ever paid you?** All ten order rows are promo codes at $0.00 and one test row. Nothing the card path writes has ever appeared, which is either true or a broken webhook, and only you know which. |
+| S58 | **Has anybody ever paid you by card?** Your ten rows are nine promo codes at $0.00 plus one test row. No order has ever been written by the payment path, so either nobody has paid or it has never worked, and only you know which. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -30,7 +30,7 @@ Every code block says which window it goes in, above the block.
 | W106 | **Life & Values made full width**, the same as the self versus partner gap. |
 | W107 | **The Conflict Patterns chart rebuilt.** You said something is wrong with it. Starting over rather than adjusting it. |
 | W108 | **The doughnuts made to fit inside their tile**, and a full pass over the admin for charts drawn wrong and tiles showing nothing where there is data. |
-| S59 | **Why ten order rows all read "pending"**, and whether that makes the admin under-report. A promo order has no card, so pending forever is a figure that cannot come true. |
+| S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never run in production, so nothing has ever shown it works. The "pending" on all ten rows is not payment: that column is physical card shipping, and pending is correct. |
 | C32 | **The thirteen articles published to the site and the app**, replacing what is live, as the placeholders you asked for. Your four section names go live with them. |
 
 ## 3. For you to review
