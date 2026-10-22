@@ -26,12 +26,7 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| W103 | **Labels on every column of the self versus partner gap chart**, not just some. Your third report on this chart, so I will drive it and look at a picture rather than read the code. |
-| W106 | **Life & Values made full width**, the same as the self versus partner gap. |
-| W107 | **The Conflict Patterns chart rebuilt.** You said something is wrong with it. Starting over rather than adjusting it. |
-| W108 | **The doughnuts made to fit inside their tile**, and a full pass over the admin for charts drawn wrong and tiles showing nothing where there is data. |
-| S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never run in production, so nothing has ever shown it works. The "pending" on all ten rows is not payment: that column is physical card shipping, and pending is correct. |
-| C32 | **The thirteen articles published to the site and the app**, replacing what is live, as the placeholders you asked for. Your four section names go live with them. |
+| S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
 
@@ -40,6 +35,12 @@ section 3 explaining things, just include the context I need in section 3."
 
 | # | Built, needs your eye |
 |--|--|
+| C32 | **The thirteen are live, replacing the eleven that were there.** Your four section names with them. Twelve are my placeholders for you to rewrite; the thirteenth is your article, untouched. Seven old ones retired. |
+| W106 | **Life & Values is full width**, the same as the self versus partner gap. It was the right half of a two-column grid, 539 points against 1127. |
+| W107 | **Risk patterns rebuilt as a horizontal bar chart.** Four thin columns across eleven hundred points, with "50" on the bar and "50%" on the axis. The bar label now asks the axis how to format a number. |
+| W108 | **The doughnuts fill their tiles.** They were pinned at 280 by 280 whatever the window, inside cards that grow past 570. Measured at three widths. |
+| W103 | **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. Tell me if you still see it and what size your window is. |
+| S60 | **The admin had a tile that was a heading over nothing**, and two that had never been drawn by my test at all. That was your "no data in some spots where we have data". |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
