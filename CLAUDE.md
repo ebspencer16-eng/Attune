@@ -1970,6 +1970,25 @@ and check-tasks-doc fails the build if it does.
 The general form: when an instruction crosses an application boundary, the
 boundary is the thing to design away, and failing that, to name.
 
+**And the context goes in the row, not under it.** Ellie, 22 October: "I don't
+need the paragraphs under section 3 explaining things, just include the context
+I need in section 3."
+
+That reverses the shape in the paragraph below, which was her earlier ask and is
+kept because the round trip is the instruction. What she wanted was the context
+without having to open another file; what she got was a row plus a long section
+under the table, which is the same navigation problem one file further in. So
+the row carries what she needs to decide, section 4 is a list you read down, and
+nothing below a table explains anything. The reasoning belongs in the commit,
+next to the code it is about.
+
+The same round, she pasted a JavaScript snippet out of one of those paragraphs
+into the Supabase SQL editor and got `42601: syntax error at or near "const"`.
+That is this file's own rule about naming the window, broken by me in the
+document the rule is about. Any block in TASKS.md says where it goes, on the
+line above it, and a block that is not for her to run does not belong there at
+all.
+
 **TASKS.md is the only document she should have to open.** Ellie: "I'm tired
 of navigating to all the different md files. You need to build instructions,
 suggestions, commentary into tasks.md when I ask for it. I want that doc to be

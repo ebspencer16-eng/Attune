@@ -2,13 +2,15 @@
 
 Everything you need is in this file. Commands are written to be copied whole,
 including the part that moves to the right folder, so you never have to know
-where you are. Anything longer than a row lives under the table it belongs to.
+where you are. The context you need is in the row, not in a paragraph under it.
+
+Every code block says which window it goes in, above the block.
 
 ## 1. Needs you
 
 | # | What I need from you |
 |--|--|
-| S56 | **Paste one query into Supabase to see whether anybody has ordered.** I cannot read your data from here; the query and where it goes are under the table in section 3. |
+| S58 | **Has anybody ever paid you?** All ten order rows are promo codes at $0.00 and one test row. Nothing the card path writes has ever appeared, which is either true or a broken webhook, and only you know which. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -22,16 +24,32 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** The order check is in section 3, and the one thing I need from you is S56 in section 1.
-
 | # | What I am doing |
 |--|--|
-
----
+| W103 | **Labels on every column of the self versus partner gap chart**, not just some. Your third report on this chart, so I will drive it and look at a picture rather than read the code. |
+| W106 | **Life & Values made full width**, the same as the self versus partner gap. |
+| W107 | **The Conflict Patterns chart rebuilt.** You said something is wrong with it. Starting over rather than adjusting it. |
+| W108 | **The doughnuts made to fit inside their tile**, and a full pass over the admin for charts drawn wrong and tiles showing nothing where there is data. |
+| S59 | **Why ten order rows all read "pending"**, and whether that makes the admin under-report. A promo order has no card, so pending forever is a figure that cannot come true. |
+| C32 | **The thirteen articles published to the site and the app**, replacing what is live, as the placeholders you asked for. Your four section names go live with them. |
 
 ## 3. For you to review
 
+Context lives in the row. Ellie, 22 October: "I don't need the paragraphs under
+section 3 explaining things, just include the context I need in section 3."
+
 | # | Built, needs your eye |
+|--|--|
+| R10 | Privacy policy. |
+| R11 | Terms of service. |
+
+## 4. Done and verified
+
+<!-- One line per row: what the task was, in enough words to recognise it.
+     Ellie: "row should list what the task was, concisely but with the context
+     necessary to understand what it was. All rows should be 1 line." -->
+
+| Verified by you | What it was |
 |--|--|
 | S52 | **All thirteen admin endpoints are alive and refusing properly.** No 500s. Asked from outside, which is the only way a broken endpoint and a locked one look different. |
 | S53 | **The Stripe webhook is configured and checking signatures**, proved by what it answers rather than by reading it. A missing secret answers differently. |
@@ -50,7 +68,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W118 | **The Learn list draws instantly now.** The articles were on your phone the whole time; the shelf names were not, and the list is grouped by shelf. |
 | C23 | **One set of section names.** Methodology and Conflict and Repair, everywhere. The app said Couple Types on a card while the site said Methodology. |
 | C24 | **The Bridge article is off the site**, with its page, its route and all three places that linked to it. |
-| C25 | **Those two drafts are in Archive now, and the exercises are one article in the new set.** You asked for two by name last round; your thirteen-article list has one Methodology piece covering all five exercises. Say if you want them split back out. |
+| C25 | **Those two drafts are in Archive; the exercises are one article now.** You asked for two by name; your new list has one Methodology piece covering all five. |
 | C20 | **Those twelve docs are in Archive**, in the four folders they were in. Superseded by the thirteen in C28, which are written to your example rather than edited from the live words. |
 | C21 | **Take a line back from Archive if you want one.** Each archived doc still holds the live words in full underneath my pass at them. |
 | C22 | **One typo fixed on the live site**: a heading read "Why unnamedpatterns compound". That is a missing space, not a copy decision, so I fixed it rather than wait. |
@@ -67,462 +85,18 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | W109 | **More Attune Exercises**: greyed to half with a lock over it, on both surfaces. Same dimming as Learn. See W113 about the lock. |
 | W93 | **The tiles, rendered at all three ownership levels.** Still three columns whatever the count. Tell me if they want to be smaller. |
 | W101 | **Physical Intimacy page titles are capitalised** like every other section. |
-| W103 | **Every column in the admin carries its own number**, and the self versus partner gap has both axis labels. |
 | W104 | **The alignment radars keep the web and the line labels**, with nothing outside the visual. |
 | W105 | **Physical intimacy alignment is a radar**, in the format you outlined. |
-| W106 | **Life & Values is a column chart** the same size as the self versus partner gap, with both axes. |
-| W107 | **The Conflict Patterns tab reads**: four named columns on a percentage scale, each carrying its number. |
-| W108 | **Both type distributions are doughnuts** with no gridlines, no axis labels and no legend. |
 | W110 | **The couple type pie was stuck on Loading** because the tile was a div and the chart library was handed it. It is a canvas. |
+| W111 | **An admin render harness**, so every admin row above is a picture I looked at rather than a claim. |
 | W112 | **Data quality sits directly above Formula diagnostics.** |
 | W115 | **Type Analytics was drawing nothing below the four top tiles.** Moving the data quality block left a stray closing tag behind, so the rest of the page fell outside it. |
-| W111 | **An admin render harness**, so every admin row above is a picture I looked at rather than a claim. |
 | W116 | **Every screenshot this repo takes was a full-page capture wearing a viewport's name.** It made two correct charts look broken. |
-| C27 | **Your article is on the site, word for word.** Both of your opening paragraphs reach the app now. A builder was taking only the first, so the app had been showing a shorter version than the site. |
-| C28 | **Thirteen drafts in Drive**, in your four sections, numbered so they read in order. Nothing is on the site. |
+| C27 | **Your article is live, word for word**, both opening paragraphs. A builder took only the first, so the app had been showing a shorter version. Approved, and C32 replaces what is live. |
+| C28 | **Thirteen drafts in Drive**, in your four sections, numbered so they read in order. Nothing is on the site. Approved, and you asked for these to replace what is live: that is C32. |
 | C29 | **Every citation is one a check opens and compares**: the 119 verified quotations, plus the eight academic sources already in live articles. Each draft lists its own at the foot. |
 | C30 | **Archive holds the four old folders** and every article that was in them. In Practice now has only your four sections and the suggestions doc. |
 | C31 | **Suggested future articles**, at the top of In Practice. Sixteen candidates, what each one is for, and the three I would write first. |
-| R10 | Privacy policy. |
-| R11 | Terms of service. |
-
-### S52 to S57 — is the admin tracking orders, and has anybody ordered
-
-Two different questions. I can answer the first with evidence and I cannot
-answer the second from here.
-
-**The admin is working.** All thirteen endpoints answered from outside: eleven
-refuse with a 401 and two refuse the wrong method. No 500s. That matters
-because a crashed endpoint and a locked one are the same thing to anyone
-reading the code, and this exact sweep once found two admin endpoints that had
-never worked at all.
-
-**The webhook is configured.** Every real sale's order row is written by the
-Stripe webhook, not by the checkout page, so if that were misconfigured you
-would see nothing no matter who ordered. It is not: the handler answers 500
-"Webhook not configured" when its secret is missing, and production answers
-400 "Invalid signature" to a forged request. So the secret is set and
-signatures are being checked.
-
-**S57, what I found.** A failed order write was a log line and nothing else.
-The promo path beside it reported the same failure to an alarm; the paid path,
-which is every real sale, did not, and the handler then told Stripe everything
-was fine, so Stripe never retried. If a write had failed, the card was charged
-and nothing anywhere recorded the sale.
-
-This has happened before. The comment above that code says a missing column
-dropped every order insert "for weeks".
-
-Both paths now raise an alarm, and the webhook answers Stripe a failure so the
-delivery is retried and the endpoint shows as failing in Stripe's own
-dashboard, which is somewhere you can see without reading logs. The writes are
-idempotent, so a retry writes the missing row and nothing twice.
-`check-order-write-reported` holds it. Six plants, and the last one took three
-attempts because renaming the table to `orders_v2` still contained the word
-`orders` and the check carried on reporting success about a file it had
-stopped reading.
-
-**S55, what I cannot see, stated plainly.** Reading the orders table needs a
-credential. The public key answers `count: 0`, and that is NOT an answer about
-your orders: it is the row-level security working, hiding every row from an
-anonymous caller. Reading with the service key on this machine was blocked by
-a permission rule in this session, and I did not work around it.
-
-So the honest position is that I have confirmed the machinery and not the
-contents.
-
-**S56, the two ways you can see it.** Either one answers "has my designer
-ordered".
-
-The first is the admin itself. Orders and revenue are on the main page.
-
-The second names the person, which the admin deliberately cannot.
-
-**This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, choose
-SQL Editor, paste this, press Run. It only reads.
-
-```sql
-select order_num,
-       created_at::date as ordered_on,
-       pkg_key,
-       total,
-       card_status,
-       buyer_email,
-       case when user_id is null then 'guest checkout' else 'has an account' end as account
-from orders
-order by created_at desc
-limit 25;
-```
-
-No rows back means nobody has ordered, and that is now a trustworthy answer
-rather than an ambiguous one.
-
-If you would rather I could just look, run `/mcp` in this window and connect
-Stripe. That lets me read your payments directly, which answers the question
-from the money rather than from our database, and it is the better check of
-the two because it is independent of anything we wrote.
-
-### S45 to S51 — six sweeps, and the one that found something
-
-Each of these measures one property over every instance of it. Five found
-nothing, which is still worth having: it turns "probably fine" into a figure.
-One found a real class of bug.
-
-**S51, the one that matters.** A database query here can fail by RETURNING its
-error rather than throwing it. So this, which is everywhere:
-
-    const { data: rows = [] } = await admin.from('orders').select('*');
-
-gives an empty list when the table is empty AND when the query is broken, and
-nothing anywhere says which. Nine reads across six admin endpoints did that,
-including both CSV exports and the Type Analytics page. A failed read would
-have produced a file saying you have no customers and no orders, and it would
-have looked exactly like the truth.
-
-This is the same bug as the workbook column that read N for every couple since
-the day it shipped. You found that one by not recognising a number.
-
-All nine now say so and stop, or hand the page the list of what failed so it
-can report it instead of drawing a zero. `check-admin-read-errors` holds the
-rule and I planted eight ways round it, including the three that a tidy-up
-would produce: the guard deleted, the guard left in place but comparing
-`false`, and a new unguarded read inserted above a guarded one.
-
-**What the other five say, with the method beside the number.** The honest part
-of a sweep is what it could not see.
-
-| Sweep | Measured | Found |
-|--|--|--|
-| A number in a JSX guard | 170 guards, parsed not grepped | nothing |
-| A key list against the list it indexes | 2 of 20 lists; 18 cannot be checked and are named | nothing |
-| The app doing arithmetic on a server figure | 604 expressions in 79 app files | nothing |
-| Every percentage, over its whole input range | 6 producers, 93 inputs | nothing |
-| A NaN reaching a screen | 161 conversions | nothing |
-
-**And the ratio, because it is the useful part.** Those six sweeps were wrong
-eleven times between them before they were right, every time about the
-measurement rather than the product. A four-line window called a read guarded
-because an unrelated line below it contained the right word. A sweep called
-`null` a failure four times, when `null` is the designed answer for "there is
-no figure here" and you asked for it by name. And the sweep that found the real
-bug was blind to three instances of it in the one file the bug came from,
-because those reads go through a shared helper and never name a table.
-
-So a clean sweep means nothing until something has been planted and caught.
-Every one of these was.
-
-### S42 to S44 — what I checked on both surfaces, and how
-
-You asked me to confirm it rather than claim it, so here is the method beside
-each answer.
-
-**Your phone.** The update server is public and answers in one request. The
-bundle it was serving was published at 13:05 today, and the newest commit that
-touches app code landed at 13:05:31, five seconds later. That is too close to
-reason about, so I did not: I published again from the newest commit and
-compared the two updates' bundle hashes. They are identical,
-`yIwDTdqg5LBf2ENv...`, which means the bundle already on your phone was built
-from the same app source. Nothing app-side was waiting. Settings, at the bottom
-of the app, shows the date of what you are running.
-
-**Every change, by where it has to live.** Four kinds, and the kind decides what
-"both surfaces" even means.
-
-| Kind | Changes | Reaches the app how |
-|--|--|--|
-| Server copy and rules | your article, the section names, the Bridge removal, the Discussions rows, Things to consider, the capitalised titles | The app asks the server. No publish needed. |
-| App screens | the Learn list, the insights nav, the lock on Learn, nothing behind the tiles | In the bundle. Published. |
-| Both, by hand | More Attune Exercises, the budget arithmetic | Gated: both copies run over the same inputs and a difference fails the build. |
-| Admin only | every chart and layout fix from W103 to W116 | The app has no admin. Correctly site-only. |
-
-**The two things I went looking for and did not find.** Your article is new
-content, which is where something silently vanishes. The server sends four kinds
-of block for it, and the app draws all four; of the fields on those blocks, the
-app draws every one, including a research block's own source line. And the
-article the server hands the app carries your five headings, both of your
-opening paragraphs, your excerpt and the right address.
-
-**What the build already proves, with its own numbers.** Twenty gates exist to
-stop one surface knowing something the other does not. Their own counts, from
-this morning's run: 44 payload fields the app names every one of; all 29 results
-sections with a screen; 11 articles and 185 blocks word for word the same as the
-pages; 23 sidebar rows taking every name and colour from the nav the app draws;
-6 budgets with every figure identical; one builder for What Comes Next feeding
-both. None of that is my reading of the code. Each is the gate's own report.
-
-**The one thing I found that is not a slip but is a decision.** The articles on
-the product are still filed under Getting Started and Methodology. Your four new
-section names are in Drive. That is C23 and C28 waiting on each other, not
-something that fell through.
-
-### W118 — why it looked empty
-
-/api/posts answers with two things, the articles and the shelf names. The
-articles were being kept on your phone and handed straight back. The shelf
-names were not, and the list under the peek is built by going through the
-shelves. So with no shelves it drew nothing: the filter pills, then a space,
-until a cold server answered. Everything it needed was already on the phone,
-in the same kept answer, one field along.
-
-A gate fails the build now on any screen that keeps half of an answer. Its own
-first version was wrong twice, which is in the commit.
-
-The fix only shows from the second launch onward, because the first one is
-what fills the cache. I tested it that way: launch, open Learn, force quit,
-relaunch, swipe up. The list was there in under a second.
-
-### C23 — the two names, and which one won
-
-The product had two lists of section names. The shelves you named, and a
-second list inside the article index with its own strings. They disagreed
-twice: Couple Types against Methodology, and Conflict & Repair against
-Conflict and Repair.
-
-The site already said Methodology on every surface a reader could see. The
-only thing still saying Couple Types was the payload the app draws its cards
-from, which is also what I built the Drive docs from, which is why you saw it.
-
-Nothing is typed in the second list any more. A section's name is its shelf.
-Renaming one renames it on the site, in the app and in the next set of docs,
-in one edit.
-
-### C24 and C25 — the Bridge, and what replaces it
-
-The Bridge article is gone from the site: the page, the route, the card on the
-index, the row on the Methodology page and the line on /practice.
-
-Its two replacements are drafts in Drive, both in the Methodology folder,
-named with "(new)" so they are easy to find. They are not on the site and will
-not be until you have rewritten them and said so.
-
-Every number in both comes from the questions and the scoring rather than from
-memory, and each doc lists where each number came from at the foot. If you
-publish them, say so and I will gate them, so a change to the scoring fails
-the build until the words catch up.
-
-### C20 and C21 — where the docs are, and what is in them
-
-Product / Active / In Practice, then four folders matching the four the site
-files articles under:
-
-| Folder, now inside Archive | Docs |
-|--|--|
-| Getting Started | 3 |
-| Conflict and Repair | 4 |
-| Understanding Each Other | 2 |
-| Methodology | 4, two of them the new ones |
-
-Each doc has three parts. My pass at the rewrite. A short note saying what I
-changed and why. Then the current live words, in full, so you can take a line
-back if you want one.
-
-What I was going for, from your rules: short declarative sentences, no em
-dashes, no hedging, nothing that reads as written by a machine. Warmer in the
-second person and more direct about what the reader should do. Across the
-twelve, the changes are mostly the same four: comma splices broken into full
-stops, hedges cut, the strongest sentence given its own line, and anything that
-read as judging one partner reworded so the gap is the subject.
-
-Two things I deliberately did not touch. Every research block with a named
-source is word for word unchanged, because restating a cited finding in my own
-words is how a claim drifts from what the study said. And your section names
-and structure are unchanged, so these map straight back into the site if you
-want them to.
-
-I ran your own rules over my drafts before uploading and it caught two of my
-own hedges. Those are fixed.
-
-### C27 to C31 — the thirteen, and where they are
-
-Product / Active / In Practice. The folders are numbered so Drive keeps them in
-your order rather than alphabetically.
-
-| Folder | Docs |
-|--|--|
-| 1. The Attune Experience | 3 |
-| 2. Understanding Each Other | 3 |
-| 3. Conflict and Repair | 4 |
-| 4. Attune Methodology | 3 |
-| Archive | the four old folders, with everything that was in them |
-
-Your version of How to review your results together is the live page now, and
-it is the only one of the thirteen that is on the site. The other twelve are
-drafts for you to rewrite, in the same shape as the last set: my pass, then the
-sources it leans on.
-
-Finding your two opening paragraphs missing from the app was the useful part of
-this round. The site had both. The thing that turns a page into what the app
-reads took the first one and stopped, so the app has been opening that article
-on half of your introduction. It takes all of them now, and a check fails the
-build if the two surfaces disagree about an article's opening.
-
-On citations. Nothing in any draft was written from memory. Every quotation is
-one of the 119 this repo opens and compares word for word on every build, and
-every research block is one of the eight already carried by a live article,
-copied rather than reworded, because restating a finding is how a claim drifts
-from what the study said. Where a suggested future article would need a source
-we do not hold, the suggestions doc says so instead of promising it.
-
-One thing to decide, not a gap. Your four section names are what Drive uses.
-The product still says Getting Started, Conflict and Repair, Understanding Each
-Other and Methodology. Renaming is one edit in one place, and I have left it
-alone because the names and the articles should move together when you approve
-them. Say the word and both surfaces change at once.
-
-### W113 — what Learn looked like before, and why the lock replaces the icon
-
-An unowned tool was dimmed to half with its own icon muted, and no lock. That
-is why the two tabs did not match. The lock goes where the icon was rather than
-on top of it: a badge on a forty point circle is eleven points of lock over a
-grey glyph, which reads as a smudge, and the tool's name is directly underneath
-either way.
-
-Rendered on the simulator with one tile forced unowned, so the locked one and
-two owned ones are side by side in the same row. `check-more-exercises` holds
-both tabs to the same dim and the same lock.
-
-### W117 — the history, because it is a round trip
-
-The menu first ran edge to edge, and you asked for it "in a tile like the other
-insights pages". Then for the outline behind it to become orange shading. Both
-of those were about a menu that was one list of bands.
-
-It is four separate tiles now, which is what you asked for next, and once each
-one is its own card the card around all of them is a frame with nothing to
-frame. What is left is the inset, so the tiles line up with the pages they lead
-to.
-
-### S38 — the card that could never clear
-
-`profiles.results_last_opened_at` was added in migration 050, whose own comment
-says it "drives results ready and never opened". Nothing has ever written it.
-Three live rules read it:
-
-- "Your results are ready", the top card, fires when it is empty. It was on for
-  every couple for ever.
-- "Revisit [something]" fires when it is more than thirty days old, and an
-  empty one counts as infinitely old, so that was permanently on too.
-- The beta feedback prompt is gated on it being SET, so it could never appear
-  at all.
-
-`/api/results` stamps it now, at most once an hour per reader, which covers the
-app and the site because both of them open results through that one endpoint.
-`check-prompt-state-written.mjs` fails the build on any home prompt that reads
-a column nothing writes; three plants, three caught.
-
-The same bug as `feedback_given_at` a few months ago. What is new is that the
-test for these rules passes either way: it hands the field in as a fixture
-value, so it can prove the rule works and say nothing about whether the product
-ever sets it.
-
-### S39 — the six sweeps, and the ratio
-
-| What was measured | What it found |
-|--|--|
-| every endpoint given a token the stub vouches for | nothing: 62 endpoints, 122 calls, none refusing a good caller |
-| every function that unpacks its argument, against every call site | nothing live, and it catches both of this morning's bugs when they are put back |
-| a request started inside a React state update | four, all fixed |
-| a column read that nothing writes | one, S38 above |
-| every field the app reads that the server never sends | nothing |
-| every page, every view, every exercise driven in a browser | one page the gate had never checked, S40 below |
-
-Five of the six were wrong before they were right. One could not see seven
-admin endpoints because they reach the rule through a helper and never name the
-secret. One treated `setTimeout` as a React setter. One could not see a column
-written through a computed name, which is how most of them are written here.
-That ratio is the usual one and it is why a clean sweep is only worth something
-after the harness has been proved on a planted bug.
-
-### S40 — the page that was never checked
-
-The render gate judges a results page by how much text it draws: under 600
-characters means the demo has no data for it. What Comes Next is three
-collapsed tiles and a row to the journal, and everything on it comes to 591.
-So the page you have reported on more than any other was reported as "no demo
-data" on every run and had never once been rendered by a check.
-
-It is judged by what it has to carry now, the way the chapter covers already
-were: the three tile names, read from the module the app is served from. 29 of
-29 sections are checked where it was 28.
-
-### S41 — a request sent from inside a state update
-
-React treats the function you pass to a setter as a pure function of the
-previous value and is allowed to run it twice; in development it always does.
-Four places started a request or set another value in there: the conversation
-ticks on both surfaces, which are mine from this morning, the Learn checklist,
-which posts the whole list on every tap, and the results nav.
-
-Nothing visible on the live site today. It costs a duplicate write in
-development, and everything on the day one of those wraps something that is not
-safe to repeat. `check-updater-purity.mjs` holds it; four plants, four caught.
-
-### W95 — why a drawn checkbox saved nothing, twice
-
-Two bugs, the same shape, one behind the other.
-
-The endpoint asked `userForRequest(req)`. That function takes
-`{ token, supabaseUrl, anonKey }` and a request object has none of those names,
-so the token was undefined on every call and it answered "unauthorized" to
-everybody from the day it shipped. Fixing that turned up the second: the body
-parser answers `{ body }` or `{ error }`, and the handler read the key off the
-wrapper, so it answered "bad conversation" to a perfectly good one.
-
-Neither was visible from outside. A 401 is also the right answer to a request
-with no token, and a 400 is the right answer to a genuinely bad key, so a sweep
-of the live site reads as working. Both surfaces put a tick back when a save is
-refused, which is what they are supposed to do, so the symptom was a box that
-filled and emptied again: that reads as a design decision, not a failure.
-
-Found by putting the server's own reply on the screen in the simulator and
-tapping a box, twice. Two new gates: `check-auth-shape.mjs` on the first,
-and `check-body-parsing.mjs` widened for the second. Seven plants between them,
-seven caught.
-
-Then ticked, reloaded and unticked on your real account, so the row below the
-box greys and the tick survives a restart. I left nothing ticked.
-
-### W94 — what was missing, and why
-
-What Comes Next built its own expectations summary on the website from the
-responsibility categories only, so Life & Values never appeared. The
-Expectations overview three clicks away listed it with seven topics. It calls
-the server's own summary now, which is the same function the app is served, so
-the two lists cannot differ again. That also brought the row keys across, which
-is what a tick is stored against: without them the boxes could not have worked
-even once the endpoint was fixed.
-
-### W109 — and what Learn actually does
-
-Learn dims an unowned resource to half and mutes its icon. It has no lock. The
-exercises tiles are dimmed by the same amount so the two tabs read alike, and
-the lock is the part you asked for that Learn has not got. W113 is whether to
-add it there.
-
-### W116 — the harness, and two hours twice
-
-Every browser screenshot in this repo was captured with Chrome's
-"beyond the viewport" flag on, which resizes the page mid-capture. A
-responsive chart re-lays-out while the shot is being taken, so the picture
-shows the bars painted for a box a fifth of the width and the axis painted at
-full width. Twice I read one of those pictures as a fix that had not landed:
-once as gridlines still on the type pies, once as the conflict columns huddled
-against the axis. Both charts were correct the whole time, and their own models
-said so.
-
-Fixed in `scripts/_lib/browser.mjs`, so every gate and probe here takes an
-honest picture now.
-
----
-
-## 4. Done and verified
-
-<!-- One line per row: what the task was, in enough words to recognise it.
-     Ellie: "row should list what the task was, concisely but with the context
-     necessary to understand what it was. All rows should be 1 line." -->
-
-| Verified by you | What it was |
-|--|--|
 | W95 | A tapped checkbox had never once saved, on either surface. Two bugs in /api/convos, one behind the other: the token handed over as the wrong shape, then the body read off its wrapper. |
 | W114 | You ticked a discussion on your phone and it stayed. That is the end of W95, confirmed on a real account rather than on my simulator. |
 | W98 | Discussions to have carries one eyebrow, For the two of you to discuss together. |
@@ -1324,106 +898,3 @@ honest picture now.
 | R19 | The founders note rewrite you sent, as it reads on the page. |
 | R21 | Scrolling on the insights and results pages, top to bottom, on a phone rather than a simulator window. |
 
-### S35 — what the six sweeps measured
-
-Timers and listeners started in an effect; a method that throws on a missing
-field, on data that crossed a boundary; every stored timestamp turned into a
-calendar day; every referenced image, icon and font; every control with no name
-a screen reader can read; and a cents value printed as dollars or a dollars
-value sent to Stripe.
-
-All six came back clean. Every one of them was wrong first: eight separate bugs
-in the measuring, not in the product. The sharpest was the throwing-reads sweep,
-which flagged 68 of 99 cases on its first run, which is not a finding, it is a
-description of how the code is written. They are in `scripts/_sweeps/` with what
-each one got wrong written beside it.
-
-### W83 — why the insight was cutting off
-
-The quotation is sized from four separate measurements of the page. If any one
-of them has not landed, or the block is over its budget, the room comes out at
-zero and the fitting function answers "one line". On a phone that is survivable
-because iOS shrinks text to fit. A browser has no such backstop, so it was a
-hard cut with an ellipsis.
-
-It now sets the whole quotation at the smallest readable size instead. That is
-the honest answer to "I do not know how much room there is"; showing one line
-of it is not. Tell me if it reads too small.
-
-### S36 — what I got wrong, and what was actually deleted
-
-I told you the module was dead and nothing shipped it. That was from a search
-that looked in the app, the website and the server, and missed the scripts
-folder. Two things there import it, and one is the check that holds
-public/purpose.html to those three citations. Deleting it would have taken away
-the thing that stops a citation being edited on the page and quietly
-misattributing a claim to a researcher.
-
-So the array stays and the page keeps its guard. What was actually dead was one
-function next to it, which nothing has called since September and which still
-carried the old day arithmetic, the one that turned over at 5pm and gave your
-phone and the simulator different words on the same day. That is gone, along
-with three comments that pointed at it or described it as live.
-
-### W88 — built, and what I would test first
-
-A lone exercise is $40, the price the packages page already lists. I checked
-that by running the pricing rather than reading it: an item with no package
-bases at nought and the add-on is the whole of it.
-
-The rule is asked twice, on purpose. The checkout page asks before it takes a
-card, so somebody finds out early. The server asks again inside
-create-payment-intent and refuses the order, because the page's question can be
-skipped by anyone posting straight to the endpoint. A check that only exists in
-a browser is not a check.
-
-Three answers, not two. Owns it, does not own it, and could not be checked. The
-last one refuses the sale and says so, because treating "we could not check" as
-"they have not paid" accuses a customer, and treating it as "they have" is the
-guard not being there.
-
-**What I have not done is put a real card through it.** The money path is the
-one place I will not call something verified from a test harness. When you are
-ready, the thing to try is: buy Conflict Patterns on its own with the email you
-bought your assessment with, and check the charge is $40 and the confirmation
-lists one line.
-
-### W91, and the thing I got wrong
-
-You asked for the section "below the menu, at the bottom of the insights
-page". I read that as one state and built it only in the branch that draws the
-menu, which is the page after both of you have finished. Before that the page
-draws the exercise status table instead, and the section was not there at all.
-Your "the two stages of that page" is the correction. It is on both now, from
-one component rather than the same markup written twice.
-
-### W93 — what the picture shows, and one thing I changed
-
-Rendering it turned up a fault you could not have seen from my description.
-The tiles took their column count from how many there were, and because a tile
-is square, two tiles were each half again as tall as three and a single tile
-was a 500 point square filling most of the page. It is three columns always
-now, with the spare cells empty, so a tile is the same tile whether you are
-missing one exercise or all three.
-
-### Add-on prices, confirmed
-
-Physical Intimacy $20. Relationship Reflection $40. Conflict Patterns $40.
-Those are the three exercises. The two resources, the budget tool and the
-checklist, are $20 each, and the workbook is $19 digital or $39 printed.
-
-### What went wrong, and what I am changing
-
-Four of the things I handed you were not working, and one of those was a
-regression I caused. The common cause is that I checked builders, payloads and
-gates and did not render the surface a person looks at. A gate passing is not a
-page working.
-
-So before the fixes: a harness that serves the admin with stubbed data and
-screenshots it, the way there is already one for the app's results and the
-website's menu. Every admin claim after this is a picture I looked at.
-
-And the surfaces rule, which I have now broken twice: these rows, this nav and
-the exercise tiles all exist on BOTH the app and the website. Every item below
-gets checked on both before I call it done, and TASKS.md says which surfaces an
-item touched.
