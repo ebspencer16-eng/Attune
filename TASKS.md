@@ -26,13 +26,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| W131 | **Q5 comes out of the experience survey.** |
-| W132 | **Insight of the day opens as a storycard on the site**, from the quick access tile, the way it does on the phone. |
-| W133 | **Article titles get three lines** on the In Practice page. |
-| W134 | **The back arrow in an article is almost invisible.** |
-| W135 | **Conflict and Repair on the dashboard's In Practice page sends you to Learn.** A routing bug, so I will drive it rather than read it. |
-| W136 | **The word of the day definition becomes "Thinking well of someone and acknowledging it."** |
-| W137 | **Expectations part two, approved**: two pickers instead of eight structures, a one-adult path, and the answer stored as a slot rather than the column's word. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -60,6 +53,13 @@ section 3 explaining things, just include the context I need in section 3."
 | W128 | **Q6 reads "How do you envision your joint social life?"** |
 | W129 | **Sign out answers the click now.** It waited on two network calls before anything moved on screen, and had no catch on two of its three copies, so a slow or refused call meant nothing happened at all. It clears this device first, asks the server to revoke in the background with a ceiling of a second and a half, then leaves. One function instead of three. |
 | W130 | **Part two when the answer is not Mom and Dad: my thinking is in the message, and it needs your call.** The short version is that the column headings are stored as the answer itself, so "Adult 1" is what a reader sees in their results a month later. |
+| W137 | **Expectations part two, all three.** Two pickers over eleven roles plus your own word, a one-adult path that asks whether it happened rather than who did it, and the answer stored as a slot so the same letter means Mom in one house and Grandma in the other. Nothing already answered breaks. Both surfaces, app update published. |
+| W135 | **Conflict and Repair on the dashboard was not navigating anywhere.** The shelf filters the list, and the four tiles across the top are a peek taken off the front: that shelf has exactly four articles, so the list below was empty and it read as a reset. |
+| W132 | **The insight of the day opens as a card on the site**, from the quick access tile. |
+| W131 | **Q5 is out of the experience survey.** Nine questions now. |
+| W133 | **In Practice cards are one height.** Three lines reserved for every title; they were 150, 192 and 213 points in one grid. |
+| W134 | **The back control in an article has an arrow and the accent colour.** It was the same size, weight and colour as the words beside it. |
+| W136 | **The word of the day definition is yours.** |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
