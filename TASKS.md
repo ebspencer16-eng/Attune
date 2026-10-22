@@ -21,10 +21,13 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
-**Nothing open.** The six sweeps are in section 3.
-
 | # | What I am doing |
 |--|--|
+| S52 | **Every admin endpoint asked from outside**, before reasoning about any of it from inside. A 500 and a refusal look the same in the code and not in a reply. |
+| S53 | **The order path traced from the card to the row**: Stripe, the webhook, the orders table, and what grants the package. Looking for a place a paid order leaves no row. |
+| S54 | **What the admin counts an order from**, and whether a sale with no profile attached to it is counted at all. A guest checkout has no user_id. |
+| S55 | **Whether I can see your data at all without a credential**, said plainly either way, rather than implying I checked something I could not. |
+| S56 | **One SELECT you can paste into Supabase** to answer "has anybody ordered", since the admin anonymises by design and cannot name a person. |
 
 ---
 
