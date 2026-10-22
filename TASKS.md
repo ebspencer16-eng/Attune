@@ -26,8 +26,12 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| W119 | **The Communication cover page, your six edits.** New title, first sentence out, "This exercise looks", and the two tiles become Part one "How you process and communicate" and Part two "How you view your partner as a communicator", eyebrow and heading only. The tiles are typed into the website and the app has none, so they move to the server and both surfaces draw them. |
-| W120 | **Every exercise cover fits one screen, on any device and any window.** All five, both surfaces, sized to the viewport rather than to a fixed number. Measured at phone, tablet and desktop heights, not eyeballed. |
+| W121 | **The Expectations cover in the same shape as Communication**: your names, "Exercise 2: Expectations", your new description, and two tiles, Life and Values then Responsibilities. |
+| W122 | **One orange eyebrow that tracks where you are**: "Exercise 2: Expectations · Life and Values", then "· Responsibilities · Household (1 of 5)". The FAMILY eyebrow goes. |
+| W123 | **Your twelve Expectations rewrites**, questions and answer choices. |
+| W124 | **Whose family does the question mean.** You asked me to confirm it, so I am reading the stored answers and the mirroring rather than the question text. |
+| W125 | **The heading stays put while you scroll Responsibilities**: progress bar, hero and description frozen at the top. |
+| W126 | **The site's insights menu**: the tile behind the tiles, no left buffer on the words, and the exercises tiles that flashed up stacked and far too big. Three side-by-side rounded squares under What Comes Next. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -43,6 +47,8 @@ section 3 explaining things, just include the context I need in section 3."
 | W108 | **The doughnuts fill their tiles.** They were pinned at 280 by 280 whatever the window, inside cards that grow past 570. Measured at three widths. |
 | W103 | **Every column keeps its name**, at any width. I could not reproduce the missing labels: all ten draw at 1500, 1280 and 1100. Chart.js drops ticks it thinks would collide and says nothing, so that is switched off. Tell me if you still see it and what size your window is. |
 | S60 | **The admin had a tile that was a heading over nothing**, and two that had never been drawn by my test at all. That was your "no data in some spots where we have data". |
+| W119 | **The Communication cover is your words.** Title, the first sentence cut, "This exercise looks", and two tiles reading Part one and Part two with no description. The tiles were typed into the website, so the app had never shown them; both surfaces draw them now. |
+| W120 | **Every cover fits its window.** At 1280x620 the Communication cover needed 925 points in a 620 point window. The glow, the paddings and the gaps scale with the window now; the type does not. Measured at four sizes on the site and three phone sizes in the app. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
