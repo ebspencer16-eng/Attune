@@ -26,12 +26,6 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
-| W121 | **The Expectations cover in the same shape as Communication**: your names, "Exercise 2: Expectations", your new description, and two tiles, Life and Values then Responsibilities. |
-| W122 | **One orange eyebrow that tracks where you are**: "Exercise 2: Expectations · Life and Values", then "· Responsibilities · Household (1 of 5)". The FAMILY eyebrow goes. |
-| W123 | **Your twelve Expectations rewrites**, questions and answer choices. |
-| W124 | **Whose family does the question mean.** You asked me to confirm it, so I am reading the stored answers and the mirroring rather than the question text. |
-| W125 | **The heading stays put while you scroll Responsibilities**: progress bar, hero and description frozen at the top. |
-| W126 | **The site's insights menu**: the tile behind the tiles, no left buffer on the words, and the exercises tiles that flashed up stacked and far too big. Three side-by-side rounded squares under What Comes Next. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
@@ -49,6 +43,12 @@ section 3 explaining things, just include the context I need in section 3."
 | S60 | **The admin had a tile that was a heading over nothing**, and two that had never been drawn by my test at all. That was your "no data in some spots where we have data". |
 | W119 | **The Communication cover is your words.** Title, the first sentence cut, "This exercise looks", and two tiles reading Part one and Part two with no description. The tiles were typed into the website, so the app had never shown them; both surfaces draw them now. |
 | W120 | **Every cover fits its window.** At 1280x620 the Communication cover needed 925 points in a 620 point window. The glow, the paddings and the gaps scale with the window now; the type does not. Measured at four sizes on the site and three phone sizes in the app. |
+| W121 | **The Expectations cover matches Communication**: your names, "Exercise 2: Expectations", your description, and two tiles. Its title was two sizes bigger than Communication's; they match now. |
+| W122 | **The eyebrow tracks where you are.** "Exercise 2: Expectations · Life and Values", then "· Responsibilities · Household (1 of 5)". FAMILY is gone. |
+| W123 | **Your twelve rewrites are in.** One thing they exposed: the page glued the topic to the front of the question, so Q1 read "Children, when you think of your future, are children a priority?". The question stands alone now with the topic as a small label. |
+| W124 | **Confirmed: it reads correctly.** You each see your OWN name first. The comparison swaps the two ids before matching, so your answer about your family is read against his answer about your family, in all seven places they are compared. |
+| W125 | **The progress bar, the category and its sentence stay at the top** while you scroll Responsibilities. |
+| W126 | **The insights menu on the site**: the tile behind the rows is gone, the labels have a left buffer, the exercises tiles are capped and no longer flash. They were drawn from your package before it had loaded, when everything reads as unowned. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
 
