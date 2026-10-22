@@ -125,6 +125,19 @@ async function handleWebhook(req) {
     return { state: t, zip: null };
   };
 
+  /* Set when a row could not be written, which is NOT the same as
+     orderCreated being false: that is also what an idempotent retry of an
+     order we already have looks like. A comment below used to say false meant
+     duplicate, full stop, and that sentence is the reason nobody noticed a
+     lost order had no alarm on it.
+
+     Declared at handler scope on purpose, because the reply that tells Stripe
+     to retry is written at the end of the handler, outside the succeeded
+     branch. The first version of this edit declared it inside that branch and
+     read it at the end; `node --check` passed, because an unresolved name is
+     not a syntax error, and check-server-undefined is what caught it. */
+  let orderInsertFailed = null;
+
   // ── payment_intent.succeeded ───────────────────────────────────────────────
   if (event.type === 'payment_intent.succeeded') {
     console.log(`Payment succeeded: ${intent.id} — ${intent.amount / 100} ${intent.currency.toUpperCase()} — ${meta.pkgKey || '?'} — itemCount: ${meta.itemCount || 1}`);
@@ -137,6 +150,7 @@ async function handleWebhook(req) {
     // If Supabase isn't configured (dev/test), default to true so emails still
     // fire — the de-dup is purely an idempotency guard for retried webhooks.
     let orderCreated = !(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY));
+
 
     // Country of the billing address, hoisted to the handler so the consent
     // record below can read it. billingCountry itself is declared inside the
@@ -297,6 +311,19 @@ async function handleWebhook(req) {
             } else {
               const txt = await insertRes.text().catch(() => '');
               console.error(`[webhook] order ${i+1}/${items.length} insert failed:`, insertRes.status, txt);
+              /* A paying customer with no order row. This used to be a line in
+                 the Vercel log and nothing else, while the promo path beside it
+                 reported the same failure to Sentry: the careful branch shows
+                 what the author thought mattered and the careless one is the
+                 money path. Reported, and the handler answers non-2xx below so
+                 Stripe retries and shows the endpoint as failing somewhere
+                 Ellie can see. The insert is idempotent on order_num, so a
+                 retry cannot double-charge or double-send. */
+              orderInsertFailed = `${insertRes.status} ${txt.slice(0, 200)}`;
+              await reportToSentry(
+                new Error(`order insert failed ${insertRes.status}: ${txt.slice(0, 300)}`),
+                { route: '/api/stripe-webhook', order_num: orderNum },
+              ).catch(() => {});
             }
           }
         } else {
@@ -344,10 +371,18 @@ async function handleWebhook(req) {
           } else {
             const txt = await insertRes.text().catch(() => '');
             console.error('[webhook] order insert failed:', insertRes.status, txt);
+            /* See the note on the multi-item branch above. */
+            orderInsertFailed = `${insertRes.status} ${txt.slice(0, 200)}`;
+            await reportToSentry(
+              new Error(`order insert failed ${insertRes.status}: ${txt.slice(0, 300)}`),
+              { route: '/api/stripe-webhook', order_num: baseOrderNum },
+            ).catch(() => {});
           }
         }
       } catch(e) {
         console.error('[webhook] order creation failed:', e);
+        orderInsertFailed = String(e && e.message || e);
+        await reportToSentry(e, { route: '/api/stripe-webhook', stage: 'order insert' }).catch(() => {});
       }
     }
 
@@ -393,7 +428,8 @@ async function handleWebhook(req) {
     }
 
     // Fire confirmation email if Resend is configured. Skip on webhook retry
-    // (orderCreated=false means the order row already existed — duplicate
+    // (orderCreated=false means either an idempotent duplicate OR a failed
+    //  insert; orderInsertFailed tells those apart
     // delivery — and the customer was emailed on the first delivery).
     const apiKey    = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL || 'hello@attune-relationships.com';
@@ -464,6 +500,15 @@ async function handleWebhook(req) {
     // showing error messages to the user via the Stripe Elements error state.
   }
 
+  /* Stripe retries a non-2xx with backoff and shows the endpoint as failing
+     in its dashboard. That is the only place a lost order becomes visible
+     without reading Vercel logs, and the inserts above are idempotent on
+     order_num, so a retry writes the missing row and nothing twice. */
+  if (orderInsertFailed) {
+    return new Response(JSON.stringify({ received: false, error: 'order row not written' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
+  }
   return new Response(JSON.stringify({ received: true }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },

@@ -8,6 +8,7 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | What I need from you |
 |--|--|
+| S56 | **Paste one query into Supabase to see whether anybody has ordered.** I cannot read your data from here; the query and where it goes are under the table in section 3. |
 | W17 | **The share banner's words, once the app is live.** `Download Attune Relationships in the App Store: [link]`. Approved as a placeholder and parked here so it is not lost. |
 | R12 | **Privacy and Terms: still the lawyer, and the document is ready.** Nothing waiting on me. |
 | O7 | SEO: pages name the apex as canonical while the site runs on www. Harmless. Your call. |
@@ -21,13 +22,10 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 ## 2. Open
 
+**Nothing open.** The order check is in section 3, and the one thing I need from you is S56 in section 1.
+
 | # | What I am doing |
 |--|--|
-| S52 | **Every admin endpoint asked from outside**, before reasoning about any of it from inside. A 500 and a refusal look the same in the code and not in a reply. |
-| S53 | **The order path traced from the card to the row**: Stripe, the webhook, the orders table, and what grants the package. Looking for a place a paid order leaves no row. |
-| S54 | **What the admin counts an order from**, and whether a sale with no profile attached to it is counted at all. A guest checkout has no user_id. |
-| S55 | **Whether I can see your data at all without a credential**, said plainly either way, rather than implying I checked something I could not. |
-| S56 | **One SELECT you can paste into Supabase** to answer "has anybody ordered", since the admin anonymises by design and cannot name a person. |
 
 ---
 
@@ -35,6 +33,11 @@ where you are. Anything longer than a row lives under the table it belongs to.
 
 | # | Built, needs your eye |
 |--|--|
+| S52 | **All thirteen admin endpoints are alive and refusing properly.** No 500s. Asked from outside, which is the only way a broken endpoint and a locked one look different. |
+| S53 | **The Stripe webhook is configured and checking signatures**, proved by what it answers rather than by reading it. A missing secret answers differently. |
+| S57 | **A lost order used to be a log line and nothing else.** Every real sale's row is written by the webhook, and a failed write only printed to a log nobody reads. Now reported, and Stripe is told to retry. |
+| S54 | **A sale with no account attached to it is still counted.** Guest checkout leaves no user_id and the order figures read the whole table. |
+| S55 | **I cannot see your data from this machine**, and the thing that looks like an answer is not one. Detail below. |
 | S51 | **Nine admin figures could be built from a failed query.** A broken read and an empty table gave the same answer, so a CSV would have said you have no customers. Fixed in six endpoints, and gated. |
 | S45 | **Nothing**: 170 JSX guards, none testing a count. Planted five ways, caught five. |
 | S46 | **Nothing**, and only 2 of 20 key lists can be checked at all. The sweep now prints the other 18 by name instead of counting them as passed. |
@@ -82,6 +85,82 @@ where you are. Anything longer than a row lives under the table it belongs to.
 | C31 | **Suggested future articles**, at the top of In Practice. Sixteen candidates, what each one is for, and the three I would write first. |
 | R10 | Privacy policy. |
 | R11 | Terms of service. |
+
+### S52 to S57 — is the admin tracking orders, and has anybody ordered
+
+Two different questions. I can answer the first with evidence and I cannot
+answer the second from here.
+
+**The admin is working.** All thirteen endpoints answered from outside: eleven
+refuse with a 401 and two refuse the wrong method. No 500s. That matters
+because a crashed endpoint and a locked one are the same thing to anyone
+reading the code, and this exact sweep once found two admin endpoints that had
+never worked at all.
+
+**The webhook is configured.** Every real sale's order row is written by the
+Stripe webhook, not by the checkout page, so if that were misconfigured you
+would see nothing no matter who ordered. It is not: the handler answers 500
+"Webhook not configured" when its secret is missing, and production answers
+400 "Invalid signature" to a forged request. So the secret is set and
+signatures are being checked.
+
+**S57, what I found.** A failed order write was a log line and nothing else.
+The promo path beside it reported the same failure to an alarm; the paid path,
+which is every real sale, did not, and the handler then told Stripe everything
+was fine, so Stripe never retried. If a write had failed, the card was charged
+and nothing anywhere recorded the sale.
+
+This has happened before. The comment above that code says a missing column
+dropped every order insert "for weeks".
+
+Both paths now raise an alarm, and the webhook answers Stripe a failure so the
+delivery is retried and the endpoint shows as failing in Stripe's own
+dashboard, which is somewhere you can see without reading logs. The writes are
+idempotent, so a retry writes the missing row and nothing twice.
+`check-order-write-reported` holds it. Six plants, and the last one took three
+attempts because renaming the table to `orders_v2` still contained the word
+`orders` and the check carried on reporting success about a file it had
+stopped reading.
+
+**S55, what I cannot see, stated plainly.** Reading the orders table needs a
+credential. The public key answers `count: 0`, and that is NOT an answer about
+your orders: it is the row-level security working, hiding every row from an
+anonymous caller. Reading with the service key on this machine was blocked by
+a permission rule in this session, and I did not work around it.
+
+So the honest position is that I have confirmed the machinery and not the
+contents.
+
+**S56, the two ways you can see it.** Either one answers "has my designer
+ordered".
+
+The first is the admin itself. Orders and revenue are on the main page.
+
+The second names the person, which the admin deliberately cannot.
+
+**This goes in the Supabase SQL Editor, not Terminal.** Open Supabase, choose
+SQL Editor, paste this, press Run. It only reads.
+
+```sql
+select order_num,
+       created_at::date as ordered_on,
+       pkg_key,
+       total,
+       card_status,
+       buyer_email,
+       case when user_id is null then 'guest checkout' else 'has an account' end as account
+from orders
+order by created_at desc
+limit 25;
+```
+
+No rows back means nobody has ordered, and that is now a trustworthy answer
+rather than an ambiguous one.
+
+If you would rather I could just look, run `/mcp` in this window and connect
+Stripe. That lets me read your payments directly, which answers the question
+from the money rather than from our database, and it is the better check of
+the two because it is independent of anything we wrote.
 
 ### S45 to S51 — six sweeps, and the one that found something
 
