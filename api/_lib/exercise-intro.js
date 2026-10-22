@@ -81,9 +81,15 @@ export function exerciseIntro(key, { partner = 'your partner' } = {}) {
 
     case 'ex2':
       return {
-        title: 'What you each expect',
+        /* Ellie, 22 October: "Should match the format of the comms styles
+           one." Her title, her description, and a tile per part. */
+        title: 'Exercise 2: Expectations',
         body: [
-          'Frustration in relationships often traces back to unmet expectations, whether conscious or not. This exercise consists of two parts. First, life and values, and second, responsibilities.',
+          'Frustrations can be traced back to unmet expectations. This exercise covers different areas of life and identifies expectations then organizes insights in a way that promotes transparent discussions for you as a couple.',
+        ],
+        parts: [
+          { eyebrow: 'Part one', title: 'Life and Values' },
+          { eyebrow: 'Part two', title: 'Responsibilities' },
         ],
         note: null,
         cta: 'Start',

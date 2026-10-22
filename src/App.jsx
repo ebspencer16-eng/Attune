@@ -1292,8 +1292,12 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           variants keep their own wording and the timing line stays: both are
           things this page says that the others do not. */}
       <CoverCard accent="#1B5FE8" minHeight="auto">
-      <p style={{ fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontFamily: font.body }}>Exercise 02 . What You Expect</p>
-      <h2 style={{ fontFamily: font.display, fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>
+      {/* The names, matching the Communication cover. Ellie: "Eyebrow should
+          say ellie and preston, hero should say Exercise 2: Expectations". */}
+      <p style={{ fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1B5FE8", marginBottom: "1.25rem", fontWeight: 700, fontFamily: font.body }}>
+        {userName} &amp; {partnerName}
+      </p>
+      <h2 style={{ fontFamily: font.display, /* The same size as the Communication cover: she asked for the two to match. */ fontSize: "clamp(1.6rem, 5vw, 2.2rem)", fontWeight: 700, color: C.ink, lineHeight: 1.1, marginBottom: "1.5rem" }}>
         {ex2Intro.title}
       </h2>
       {/* The core reading comes from api/_lib/exercise-intro.js, which is what
@@ -1308,7 +1312,7 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
           }
         </p>
       ) : ex2Intro.body.map(para => (
-        <p key={para.slice(0, 24)} style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
+        <p key={para.slice(0, 24)} className="cover-body" style={{ fontSize: "0.95rem", color: C.muted, lineHeight: 1.85, fontFamily: font.body, fontWeight: 300, marginBottom: "1.75rem" }}>
           {para}
         </p>
       ))}
@@ -1319,6 +1323,19 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
             : "Answer honestly, not how you think you should feel, but how you actually do. You'll see your answers alongside your partner's only after you've both finished."
           }
         </p>
+      ) : null}
+      {/* The two parts, from api/_lib/exercise-intro.js, drawn the same way
+          the Communication cover draws its two. Not shown on the revisited
+          reading, which has one part. */}
+      {!isRevisited && (ex2Intro.parts || []).length ? (
+        <div style={{ display: "flex", gap: "0.85rem", marginTop: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap", width: "100%" }}>
+          {ex2Intro.parts.map((part, i) => (
+            <div key={part.eyebrow} className="cover-part" style={{ /* 1 1 0 rather than a 180 point basis: on a 390 point phone two tiles with that basis wrap onto two rows and the cover runs past the fold. */ flex: "1 1 0", minWidth: 0, background: C.warm, border: `1.5px solid ${(i === 0 ? '#1B5FE8' : '#E8673A')}33`, borderRadius: 12, padding: "0.9rem 1rem", textAlign: "left" }}>
+              <div style={{ fontSize: "0.56rem", letterSpacing: "0.18em", color: i === 0 ? '#1B5FE8' : '#E8673A', fontWeight: 700, fontFamily: font.body, textTransform: "uppercase", marginBottom: "0.3rem" }}>{part.eyebrow}</div>
+              <div style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: C.ink }}>{part.title}</div>
+            </div>
+          ))}
+        </div>
       ) : null}
       <p style={{ fontSize: "0.72rem", color: C.muted, fontFamily: font.body, marginTop: "1.5rem", marginBottom: 0 }}>{isRevisited ? "~10 minutes · life questions only" : "~15 minutes · 2 parts"}</p>
       <button onClick={() => setPhase("life")}
@@ -1469,10 +1486,26 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       <div>
         <link href={FONT_LINK} rel="stylesheet" />
 
-        {/* Gradient progress bar — same treatment as Exercise 1 */}
-        <div style={{ marginBottom: "1.25rem" }}>
+        {/* ── THE HEADING STAYS WHILE YOU SCROLL ──────────────────────────
+            Ellie: "I want a frozen pane for the heading on the expectations
+            responsibilities exercise pages, as I scroll through
+            responsibilities I want the progress bar, hero, and description to
+            stay visible at the top of the page."
+
+            All three are in this one sticky block: the bar, the category name
+            and its sentence. The cream ground is opaque so the item cards pass
+            underneath rather than through it, and the top offset clears the
+            site's fixed nav. */}
+        <div style={{
+          position: "sticky", top: 58, zIndex: 20,
+          background: C.cream,
+          paddingTop: "0.85rem", paddingBottom: "0.75rem",
+          marginBottom: "0.5rem",
+          borderBottom: `1px solid ${C.stone}`,
+        }}>
+        <div style={{ marginBottom: "0.9rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-            <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, margin: 0 }}>Your Expectations · {cat.label} ({catIndex + 1} of {numCats})</p>
+            <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, fontFamily: font.body, margin: 0 }}>Exercise 2: Expectations &middot; Responsibilities &middot; {cat.label} ({catIndex + 1} of {numCats})</p>
             <span style={{ fontSize: "0.65rem", color: allAnswered ? "#10b981" : C.muted, fontFamily: font.body, fontWeight: allAnswered ? 600 : 400, whiteSpace: "nowrap" }}>
               {allAnswered ? "✓ All answered" : (answeredItems + " / " + totalItems)}
             </span>
@@ -1483,9 +1516,10 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
         </div>
 
         <h2 style={{ fontFamily: font.display, fontSize: "1.45rem", fontWeight: 700, color: C.ink, marginBottom: "0.2rem", lineHeight: 1.1 }}>{cat.label}</h2>
-        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "0.78rem", color: C.muted, fontFamily: font.body, fontWeight: 300, marginBottom: 0 }}>
           {respCategoryIntro(cat.id, { anniversary: isAnniversary })}
         </p>
+        </div>
 
         {/* Item cards */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", maxWidth: 640 }}>
@@ -1627,10 +1661,22 @@ export function ExpectationsExercise({ partnerName, userName = "Partner A", onCo
       </div>
 
       {/* Category + question */}
-      <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, marginBottom: "0.25rem", fontFamily: font.body }}>Your Expectations, Part 1 of 2</p>
-      <p style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.muted, marginBottom: "0.85rem", fontFamily: font.body }}>{lq.category}</p>
+      {/* Ellie: the eyebrow reads "Exercise 2: Expectations - Life and Values",
+          then switches to the Responsibilities form on the next part. */}
+      <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.clay, marginBottom: "0.85rem", fontFamily: font.body }}>Exercise 2: Expectations &middot; Life and Values</p>
+      {/* The category eyebrow is gone at her word: "The eyebrow that reads
+          FAMILY should be removed". The TOPIC stays, small, above the
+          question, because it is what names the subject now that the question
+          is a sentence of its own. */}
+      <p style={{ fontSize: "0.6rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted, marginBottom: "0.6rem", fontFamily: font.body, fontWeight: 600 }}>{subst(lq.topic || lq.text)}</p>
       <p style={{ fontFamily: font.display, fontSize: "1.25rem", fontWeight: 400, color: C.ink, lineHeight: 1.5, marginBottom: "1.75rem" }}>
-        {subst(lq.topic || lq.text)}{lqFraming ? (() => { const f = subst(lqFraming); return ", " + f.charAt(0).toLowerCase() + f.slice(1); })() : ""}
+        {/* ── THE TOPIC IS A LABEL, NOT THE START OF THE SENTENCE ────────
+            This read "Children, when you think of your future, are children a
+            priority?": the topic was glued to the front of the question and
+            lower-cased, which doubled the subject the moment Ellie's rewrites
+            made each question a full sentence of its own. The question stands
+            on its own now and the topic is the eyebrow above it. */}
+        {lqFraming ? subst(lqFraming) : subst(lq.topic || lq.text)}
       </p>
 
       {/* Options */}
@@ -3657,6 +3703,10 @@ function generatePersonalityFeedback(myS, partS, userName, partnerName, content)
 const COVER_FIT_CSS = `
 @media (max-height: 860px) {
   .cover-card > * { margin-top: clamp(0.2rem, 1.5vh, 2.2rem) !important; margin-bottom: clamp(0.2rem, 1.5vh, 1.75rem) !important; }
+  /* A phone is short AND narrow, so the copy wraps to more lines than the
+     same cover takes on a laptop. The tiles tighten here too, not only in the
+     700 point case. */
+  .cover-card .cover-part { padding: 0.65rem 0.75rem !important; }
   .cover-card > :first-child { margin-top: 0 !important; }
   .cover-card > :last-child { margin-bottom: 0 !important; }
 }
@@ -3668,6 +3718,15 @@ const COVER_FIT_CSS = `
   .cover-card { padding-top: clamp(0.6rem, 1.8vh, 1rem) !important; padding-bottom: clamp(0.6rem, 1.8vh, 1rem) !important; }
   .cover-card > :first-child { width: clamp(42px, 7.6vh, 72px) !important; height: clamp(42px, 7.6vh, 72px) !important; }
   .cover-card > :first-child > span { font-size: clamp(1rem, 3.4vh, 1.8rem) !important; }
+  /* The last thing to give, and the only place the type moves at all. A cover
+     with two preview tiles and four lines of description does not fit a 620
+     point window on furniture alone. 0.86rem with a 1.55 line height is still
+     comfortably above the size this site sets its own small print in, and it
+     only happens in a window this short. */
+  .cover-card p.cover-body { font-size: 0.86rem !important; line-height: 1.55 !important; }
+  /* The preview tiles, which only the two exercises with parts carry, and
+     which are what took the Expectations cover over on its own. */
+  .cover-card .cover-part { padding: 0.55rem 0.7rem !important; }
 }
 `;
 
@@ -3950,6 +4009,15 @@ export function AdditionalExercises({ pkg }) {
      makes it additional. So an exercise added to the registry appears here
      without anyone remembering to, and one renamed cannot be renamed in only
      one place. */
+  /* ── NOT BEFORE THE PACKAGE IS KNOWN ──────────────────────────────────
+     Ellie: "it also flashed with the additional exercises and locked icons...
+     The page is now loaded and those tiles are gone."
+
+     Both are the same moment. Before the package has loaded, `pkg` is the
+     empty shape, every exercise reads as unowned, and three locked tiles are
+     drawn and then taken away. A tile that appears and leaves is worse than
+     one that arrives late. */
+  if (!pkg || !pkg.key) return null;
   const extras = unownedExercises(pkg);
   if (!extras.length) return null;
   return (
@@ -3970,7 +4038,12 @@ export function AdditionalExercises({ pkg }) {
 
           Three columns always, with the spare cells empty, so a tile is the
           same tile whether you are missing one exercise or all of them. */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "0.6rem" }}>
+      {/* Ellie: "they were huge - way too big, I want them to be 3 side-by-side
+          rounded squares... Not near as big as they were when I saw them".
+          Three columns is already right; what made them huge is a square cell
+          in a panel that can be 900 points wide. Capped, and left-aligned so
+          they do not drift to the middle of the row. */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "0.6rem", maxWidth: 420 }}>
         {extras.map((e) => (
           <a
             key={e.key}
@@ -4036,7 +4109,9 @@ export function AppInsightsMenu({ groups, isMobile, onOpen, eyebrow }) {
    */
   const [openGroup, setOpenGroup] = useState(null);
   /* Shared out over whatever height the panel has. See the panel's own note. */
-  const LABEL_LEFT = 0;
+  /* Ellie: "the words don't have any buffer on the left side of the tile."
+     They were flush to it: this was zero. */
+  const LABEL_LEFT = NAV_GAP;
   /**
    * Ellie: "further indent the exercise results rows (with their icon and
    * title)". The icon moves with the title rather than staying in a column of
@@ -5453,7 +5528,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
           {ex1Intro.title}
         </p>
         {ex1Intro.body.map(para => (
-          <p key={para.slice(0, 24)} style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
+          <p key={para.slice(0, 24)} className="cover-body" style={{ fontSize: "0.92rem", color: C.muted, fontFamily: font.body, lineHeight: 1.75, marginBottom: "1.75rem" }}>
             {para}
           </p>
         ))}
@@ -5462,7 +5537,7 @@ function Exercise01Flow({ userName, partnerName, onComplete, skipIntro = false, 
               which is why the app showed none of them: an Expo project cannot
               import this file. Ellie's words, and no description line. */}
           {(ex1Intro.parts || []).map((part, i) => (
-            <div key={part.eyebrow} style={{ flex: "1 1 180px", background: C.warm, border: `1.5px solid ${(i === 0 ? '#E8673A' : '#1B5FE8')}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
+            <div key={part.eyebrow} className="cover-part" style={{ /* 1 1 0 rather than a 180 point basis: on a 390 point phone two tiles with that basis wrap onto two rows and the cover runs past the fold. */ flex: "1 1 0", minWidth: 0, background: C.warm, border: `1.5px solid ${(i === 0 ? '#E8673A' : '#1B5FE8')}33`, borderRadius: 12, padding: "0.9rem 1rem" }}>
               <div style={{ fontSize: "0.56rem", letterSpacing: "0.18em", color: i === 0 ? '#E8673A' : '#1B5FE8', fontWeight: 700, fontFamily: font.body, textTransform: "uppercase", marginBottom: "0.3rem" }}>{part.eyebrow}</div>
               <div style={{ fontFamily: font.display, fontSize: "0.95rem", fontWeight: 700, color: C.ink }}>{part.title}</div>
             </div>
@@ -17397,8 +17472,15 @@ export default function App() {
                       read as a flat orange field is that the app puts its
                       content on a large cream panel with a generous radius, so
                       the orange is a border around it rather than the page. */}
+                  {/* ── NO TILE BEHIND THE TILES ─────────────────────────
+                      Ellie asked for this in the app and it was done there;
+                      the website kept its cream panel, and she is reading the
+                      website: "the menu still has the tile behind the nav
+                      tiles". The rows sit on the orange ground now, as they do
+                      on the phone. The padding stays, because without it the
+                      rows run to the edge of the screen. */}
                   <div style={{
-                    background: "#FDF4EF", borderRadius: 26,
+                    background: "transparent", borderRadius: 26,
                     padding: isMobile ? "1.25rem 1.1rem" : "1.75rem 1.6rem",
                     /* ── IT FITS, IT DOES NOT SCROLL ──────────────────────
                        Ellie: "Menu should resize so that it doesn't need to
