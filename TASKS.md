@@ -26,6 +26,8 @@ Every code block says which window it goes in, above the block.
 
 | # | What I am doing |
 |--|--|
+| W119 | **The Communication cover page, your six edits.** New title, first sentence out, "This exercise looks", and the two tiles become Part one "How you process and communicate" and Part two "How you view your partner as a communicator", eyebrow and heading only. The tiles are typed into the website and the app has none, so they move to the server and both surfaces draw them. |
+| W120 | **Every exercise cover fits one screen, on any device and any window.** All five, both surfaces, sized to the viewport rather than to a fixed number. Measured at phone, tablet and desktop heights, not eyeballed. |
 | S59 | **Proving the payment path writes a row**, by driving the webhook with a signed test event against a stubbed database. It has never once run in production. |
 
 ## 3. For you to review
